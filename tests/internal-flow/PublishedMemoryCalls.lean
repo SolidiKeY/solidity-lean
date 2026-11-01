@@ -1,3 +1,5 @@
+import tests.«internal-flow».AxiomReports
+import Solidity.Backend.InternalFlow.TargetObservation
 import Solidity.Backend.InternalFlow.PublishedDirectCalls
 import Solidity.Evm.Compiler
 import Solidity.Syntax.Splice
@@ -120,10 +122,36 @@ theorem source_identities :
 theorem caller_frame_insufficient : ¬ 1 + producer.need ≤ 5 := by decide +kernel
 
 theorem wrong_alias : words (Evm.run producer.code machine) [2,3,6] ≠
-    some [77,260,256,256] := by decide +kernel
+    some [77,260,256,256] := by
+  have full := ordered_target
+  generalize execution : Evm.run producer.code machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 6, 256, 257, 258, 259, 260, 261, 262, 263, 264] [77] [265, 99, 42, 256, 256, 256, 260, 260, 2, 7, 11, 0, 2, 33, 0, 1, 44] rfl full
+    have selected := congrArg (fun xs => [ xs[3]!, xs[4]!, xs[7]! ]) snapshot.2
+    change [m.mem 2,m.mem 3,m.mem 6] = [observedWord 256,observedWord 256,observedWord 260] at selected
+    change (m.stack ++ [m.mem 2,m.mem 3,m.mem 6]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
 theorem wrong_scalar : words (Evm.run producer.code machine) [1] ≠
-    some [77,33] := by decide +kernel
+    some [77,33] := by
+  have full := ordered_target
+  generalize execution : Evm.run producer.code machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 6, 256, 257, 258, 259, 260, 261, 262, 263, 264] [77] [265, 99, 42, 256, 256, 256, 260, 260, 2, 7, 11, 0, 2, 33, 0, 1, 44] rfl full
+    have selected := congrArg (fun xs => [ xs[2]! ]) snapshot.2
+    change [m.mem 1] = [observedWord 42] at selected
+    change (m.stack ++ [m.mem 1]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
 def failed : Prog C [] [.val .uint] := (sol{ uint marker = 42; fail(); } : Prog C [] _)
 def failedProducer : Calls.Program 1 (Frag.init []) failed :=
@@ -233,31 +261,31 @@ theorem payload_source : bytesFailure.run initial = .error (.revertWith [7]) := 
 theorem memory_path : compiled.isMemoryCalls = true ∧ compiled.usesMemory = true ∧
     compiled.isMemory = false := by decide +kernel
 
-#print axioms noRef
-#print axioms initial_repr
-#print axioms actual_execution
-#print axioms exact_cost
-#print axioms target_endpoint
-#print axioms unified_input
-#print axioms unified_agreement
-#print axioms ordered_target
-#print axioms source_identities
-#print axioms caller_frame_insufficient
-#print axioms wrong_alias
-#print axioms wrong_scalar
-#print axioms actual_failure
-#print axioms failure_target
-#print axioms payload_refused
-#print axioms nonempty_caller
-#print axioms evaluated_alias
-#print axioms composed_cost
-#print axioms nonempty_call_endpoint
-#print axioms boundary_ordered_target
-#print axioms boundary_export
-#print axioms payload_source
-#print axioms memory_path
-#print axioms statement_endpoint
-#print axioms call_endpoint
-#print axioms statement_revert
-#print axioms program_endpoint
+#print_checked_axioms noRef,
+  initial_repr,
+  actual_execution,
+  exact_cost,
+  target_endpoint,
+  unified_input,
+  unified_agreement,
+  ordered_target,
+  source_identities,
+  caller_frame_insufficient,
+  wrong_alias,
+  wrong_scalar,
+  actual_failure,
+  failure_target,
+  payload_refused,
+  nonempty_caller,
+  evaluated_alias,
+  composed_cost,
+  nonempty_call_endpoint,
+  boundary_ordered_target,
+  boundary_export,
+  payload_source,
+  memory_path,
+  statement_endpoint,
+  call_endpoint,
+  statement_revert,
+  program_endpoint
 end Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks

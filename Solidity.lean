@@ -987,3 +987,5 @@ import Solidity.Backend.InternalFlow.CompletedLoopFrame
 import Solidity.Backend.InternalFlow.FiniteDispatch
 
 import Solidity.Backend.InternalFlow.StructuredFrame
+
+import Solidity.Backend.InternalFlow.TargetObservation

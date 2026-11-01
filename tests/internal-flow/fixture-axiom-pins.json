@@ -2718,5 +2718,9 @@
         "propext"
       ]
     }
+  },
+  "AxiomReports": {
+    "guard": "tests/internal-flow/check-axiom-reporter.py",
+    "pins": {}
   }
 }

@@ -213,4 +213,19 @@ def compileTuple (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (s : Stmt C Γ Δ) :
     pure (tupleReturn f args bs body hq)
   | _ => none
 
+/-- Expose the actual returned certificate from a successful published body
+compilation, without normalizing that compiler result again. This is not a
+simulation premise and does not change selector admission. -/
+theorem compileTuple_success {b : Nat} {Γ ps rs Γf : Ctx} (F : Evm.Frag Γ)
+    (f : Name) (args : Args C Γ ps) (bs : Binders rs) (body : Prog C (rs ++ ps) Γf)
+    (compiled : Evm.Memory.Calls.Program b F (expand args bs body))
+    (built : Evm.Memory.Calls.compile b F (expand args bs body) = some compiled) :
+    compileTuple b F (.call f args (.rets bs) body) = some (tupleReturn f args bs body compiled) := by
+  simp only [compileTuple,built]
+  rfl
+/-- info: 'Solidity.Backend.InternalFlow.TupleCalls.compileTuple_success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms compileTuple_success
+
 end Solidity.Backend.InternalFlow.TupleCalls

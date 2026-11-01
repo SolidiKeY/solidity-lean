@@ -1,3 +1,5 @@
+import tests.«internal-flow».AxiomReports
+import Solidity.Backend.InternalFlow.TargetObservation
 import Solidity.Backend.InternalFlow.TuplePrograms
 import Solidity.Evm.Compiler
 import Solidity.Calculus.RunFrameMem
@@ -103,7 +105,7 @@ def expanded : Calls.Program 1 prefixProducer.frag (expand arguments binders bod
   (Calls.compile 1 prefixProducer.frag (expand arguments binders body)).get (by decide +kernel)
 attribute [irreducible] expanded
 def callProducer : Calls.Statement 1 prefixProducer.frag (.call "triple" arguments ret body) :=
-  (compileTuple 1 prefixProducer.frag (.call "triple" arguments ret body)).get (by decide +kernel)
+  tupleReturn "triple" arguments binders body expanded
 attribute [irreducible] callProducer
 def entry : Solidity.Out C caller.st.H Input := ret.enterT (caller.st.withEnv values)
 def bodyOutput : Solidity.Out C entry.st.H BodyCtx := (body.runR entry.st).toOption.get (by decide +kernel)
@@ -141,6 +143,10 @@ def checked : Compiler.Compilation 1 prefixProducer.frag (.cons (.call "triple" 
   .memoryCalls ownedProgram (by decide +kernel)
 attribute [irreducible] checked
 
+theorem exact_frame_cost : [prefixProducer.need,expanded.need,callProducer.need,nextProducer.need,
+    checked.requiredFrame,prefixProducer.cost initial,callProducer.cost caller.st,nextProducer.cost exported.st,
+    checked.allocationCost caller.st] = [4,10,10,7,10,7,3,0,3] := by decide +kernel
+
 /-- Prefix execution actually produces the tuple-call input representation. -/
 theorem represented_stages : ∃ m₁ base₁ m₂ base₂ m₃ base₃,
     Evm.run prefixProducer.code machine = .ok m₁ 0 ∧
@@ -151,30 +157,41 @@ theorem represented_stages : ∃ m₁ base₁ m₂ base₂ m₃ base₃,
     m₁.stack = machine.stack ∧ m₂.stack = m₁.stack ∧ m₃.stack = m₂.stack ∧
     BaseExtends caller.st.H base₁ base₂ ∧ BaseExtends exported.st.H base₂ base₃ ∧
     checked.Input 1 128 base₁ caller.st m₁ ∧ checked.Agrees 1 128 base₁ caller.st m₁ := by
+  have prefixCost : prefixProducer.cost initial = 7 := congrArg (fun xs => xs[5]!) exact_frame_cost
+  have callCost : callProducer.cost caller.st = 3 := congrArg (fun xs => xs[6]!) exact_frame_cost
+  have wholeCost : ownedProgram.cost caller.st = 3 := by
+    have h : checked.allocationCost caller.st = 3 := congrArg (fun xs => xs[8]!) exact_frame_cost
+    delta checked at h
+    exact h
+  have prefixNeed : prefixProducer.need = 4 := congrArg (fun xs => xs[0]!) exact_frame_cost
+  have callNeed : callProducer.need = 10 := congrArg (fun xs => xs[2]!) exact_frame_cost
+  have nextNeed : nextProducer.need = 7 := congrArg (fun xs => xs[3]!) exact_frame_cost
+  have nextCost : nextProducer.cost exported.st = 0 := congrArg (fun xs => xs[7]!) exact_frame_cost
+  have checkedNeed : checked.requiredFrame = 10 := congrArg (fun xs => xs[4]!) exact_frame_cost
   have whole : AllocationInput 1 128
       (prefixProducer.cost initial + ownedProgram.cost caller.st) initial bases machine :=
-    .inr ⟨by decide, wmod 256, initial_repr.2, by decide +kernel⟩
+    .inr ⟨by decide, wmod 256, initial_repr.2, by rw [prefixCost,wholeCost]; decide +kernel⟩
   obtain ⟨m₁,base₁,ht₁,hr₁,hk₁,he₁,ha₁⟩ := program_endpoint prefixProducer initial_repr.1
-    (by decide +kernel) (whole.of_le (Nat.le_add_right _ _)) caller actual_prefix
+    (by rw [prefixNeed]; decide) (whole.of_le (Nat.le_add_right _ _)) caller actual_prefix
   have ownedSpace : AllocationInput 1 128 (ownedProgram.cost caller.st) caller.st base₁ m₁ :=
     GrowsAllocator.nextInput (C := C) (Γ := []) (Δ := Caller) (b := 1) (frame := 128)
       (head := prefixProducer.cost initial) (tail := ownedProgram.cost caller.st)
       (σ := initial) (τ := caller.st) (base := bases) (base' := base₁) (m := machine) (m' := m₁) ha₁ whole
   have callSpace : AllocationInput 1 128 (callProducer.cost caller.st) caller.st base₁ m₁ :=
-    ownedSpace.of_le (by decide +kernel)
-  have room : 1 + callProducer.need ≤ 128 := by decide +kernel
+    ownedSpace.of_le (by rw [callCost,wholeCost]; exact Nat.le_refl _)
+  have room : 1 + callProducer.need ≤ 128 := by rw [callNeed]; decide
   obtain ⟨m₂,base₂,ht₂,hr₂,hk₂,he₂,ha₂⟩ := statement_endpoint
     (L := 1) (frame := 128) (σ := caller.st) (base := base₁) (m := m₁)
     callProducer hr₁ room callSpace exported actual_call
-  have nextRoom : 1 + nextProducer.need ≤ 128 := by decide +kernel
-  have nextSpace : AllocationInput 1 128 (nextProducer.cost exported.st) exported.st base₂ m₂ := .inl (by decide +kernel)
+  have nextRoom : 1 + nextProducer.need ≤ 128 := by rw [nextNeed]; decide
+  have nextSpace : AllocationInput 1 128 (nextProducer.cost exported.st) exported.st base₂ m₂ := .inl nextCost
   obtain ⟨m₃,base₃,ht₃,hr₃,hk₃,he₃,ha₃⟩ := program_endpoint
     (L := 1) (frame := 128) (σ := exported.st) (base := base₂) (m := m₂)
     nextProducer hr₂ nextRoom nextSpace finalOutput actual_next
   have hi : checked.Input 1 128 base₁ caller.st m₁ := by
     apply (checked.memoryCalls_input (by decide +kernel) 1 128 base₁ caller.st m₁).mpr
-    refine ⟨hr₁, by decide +kernel, ?_⟩
-    have hc : checked.allocationCost caller.st = ownedProgram.cost caller.st := by decide +kernel
+    refine ⟨hr₁, by rw [checkedNeed]; decide, ?_⟩
+    have hc : checked.allocationCost caller.st = ownedProgram.cost caller.st := by delta checked; rfl
     rw [hc]
     exact ownedSpace
   exact ⟨m₁,base₁,m₂,base₂,m₃,base₃,ht₁,ht₂,ht₃,hr₁,hr₂,hr₃,hk₁,hk₂,hk₃,he₂,he₃,hi,checked.correct hi⟩
@@ -239,9 +256,110 @@ theorem target_body : words (Evm.run (prefixProducer.code ++ expanded.code) mach
     [0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262,263,264,265] =
     some [77,266,99,42,256,256,259,263,42,17,29,1,263,2,19,11,3,23,29,31,2,99,101] := by decide +kernel
 
+/-- The same complete certificate, now shared rather than recompiling its body. -/
+theorem actualCallConstruction : callProducer = TupleCalls.tupleReturn "triple" arguments binders body expanded := by
+  delta callProducer
+  rfl
+
+theorem actualSelectorResult :
+    compileTuple 1 prefixProducer.frag (.call "triple" arguments ret body) = some callProducer := by
+  have compiled : Calls.compile 1 prefixProducer.frag (TupleCalls.expand arguments binders body) = some expanded := by
+    delta expanded
+    exact (Option.some_get _).symm
+  delta callProducer
+  exact TupleCalls.compileTuple_success prefixProducer.frag "triple" arguments binders body expanded compiled
+
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualSelectorResult' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms actualSelectorResult
+
+theorem actualExpandedTarget : ∃ m : Evm.Machine,
+    Evm.run (prefixProducer.code ++ expanded.code) machine = .ok m 0 := by
+  obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,hn,r₁,r₂,r₃,k₁,k₂,k₃,e₂,e₃,hi,agrees⟩ := represented_stages
+  have input := (checked.memoryCalls_input (by decide +kernel) 1 128 base₁ caller.st m₁).mp hi
+  have copiedNeed : callProducer.need = expanded.need := congrArg (fun p => p.need) actualCallConstruction
+  have need : expanded.need = 10 := copiedNeed.symm.trans (congrArg (fun xs => xs[2]!) exact_frame_cost)
+  have room : 1 + expanded.need ≤ 128 := by rw [need]; decide
+  have copiedCost : callProducer.cost caller.st = expanded.cost caller.st :=
+    congrArg (fun p => p.cost caller.st) actualCallConstruction
+  have small : callProducer.cost caller.st = 3 := congrArg (fun xs => xs[6]!) exact_frame_cost
+  have large : checked.allocationCost caller.st = 3 := congrArg (fun xs => xs[8]!) exact_frame_cost
+  have fits : expanded.cost caller.st ≤ checked.allocationCost caller.st := by
+    rw [← copiedCost,small,large]
+    exact Nat.le_refl _
+  have capacity := input.2.2.of_le fits
+  rcases expanded.sound r₁ room capacity with ⟨out,m,base,hs,ht,repr,stack,bases,allocator⟩ | ⟨hs,ht⟩
+  · exact ⟨m,(Evm.run_append_ok hp).trans ht⟩
+  · have observed := target_body
+    rw [Evm.run_append_ok hp,ht] at observed
+    cases observed
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualCallConstruction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms actualCallConstruction
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualExpandedTarget' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms actualExpandedTarget
+
 theorem target_export : words (Evm.run (prefixProducer.code ++ callProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262,263,264,265] =
-    some [77,266,99,42,256,256,259,17,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101] := by decide +kernel
+    some [77,266,99,42,256,256,259,17,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101] := by
+  obtain ⟨m,executed⟩ := actualExpandedTarget
+  have full := target_body
+  rw [executed] at full
+  have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265] [77] [266, 99, 42, 256, 256, 259, 263, 42, 17, 29, 1, 263, 2, 19, 11, 3, 23, 29, 31, 2, 99, 101] rfl full
+  have h0 := congrArg (fun xs => xs[0]!) snapshot.2
+  change m.mem 0 = observedWord 266 at h0
+  have h1 := congrArg (fun xs => xs[1]!) snapshot.2
+  change m.mem 127 = observedWord 99 at h1
+  have h2 := congrArg (fun xs => xs[2]!) snapshot.2
+  change m.mem 1 = observedWord 42 at h2
+  have h3 := congrArg (fun xs => xs[3]!) snapshot.2
+  change m.mem 2 = observedWord 256 at h3
+  have h4 := congrArg (fun xs => xs[4]!) snapshot.2
+  change m.mem 3 = observedWord 256 at h4
+  have h5 := congrArg (fun xs => xs[5]!) snapshot.2
+  change m.mem 4 = observedWord 259 at h5
+  have h8 := congrArg (fun xs => xs[8]!) snapshot.2
+  change m.mem 7 = observedWord 17 at h8
+  have h9 := congrArg (fun xs => xs[9]!) snapshot.2
+  change m.mem 8 = observedWord 29 at h9
+  have h10 := congrArg (fun xs => xs[10]!) snapshot.2
+  change m.mem 9 = observedWord 1 at h10
+  have h11 := congrArg (fun xs => xs[11]!) snapshot.2
+  change m.mem 10 = observedWord 263 at h11
+  have h12 := congrArg (fun xs => xs[12]!) snapshot.2
+  change m.mem 256 = observedWord 2 at h12
+  have h13 := congrArg (fun xs => xs[13]!) snapshot.2
+  change m.mem 257 = observedWord 19 at h13
+  have h14 := congrArg (fun xs => xs[14]!) snapshot.2
+  change m.mem 258 = observedWord 11 at h14
+  have h15 := congrArg (fun xs => xs[15]!) snapshot.2
+  change m.mem 259 = observedWord 3 at h15
+  have h16 := congrArg (fun xs => xs[16]!) snapshot.2
+  change m.mem 260 = observedWord 23 at h16
+  have h17 := congrArg (fun xs => xs[17]!) snapshot.2
+  change m.mem 261 = observedWord 29 at h17
+  have h18 := congrArg (fun xs => xs[18]!) snapshot.2
+  change m.mem 262 = observedWord 31 at h18
+  have h19 := congrArg (fun xs => xs[19]!) snapshot.2
+  change m.mem 263 = observedWord 2 at h19
+  have h20 := congrArg (fun xs => xs[20]!) snapshot.2
+  change m.mem 264 = observedWord 99 at h20
+  have h21 := congrArg (fun xs => xs[21]!) snapshot.2
+  change m.mem 265 = observedWord 101 at h21
+  have code : callProducer.code = expanded.code ++ TupleCalls.exportCode 1 Caller Params binders :=
+    congrArg (fun p => p.code) actualCallConstruction
+  rw [code,← List.append_assoc,Evm.run_append_ok executed]
+  simp only [words, run, Caller, Params, binders, TupleCalls.exportCode, cell, List.length_cons,
+      List.length_nil, Nat.zero_add, Nat.reduceAdd, Nat.add_zero, List.nil_append, List.cons_append,
+      exec_cons_zero, Out.bind, Instr.step, Machine.next, h8, snapshot.1, List.map_cons, List.map_nil,
+      exec, upd, Nat.reduceEqDiff, ↓reduceIte, h9, h10, reduceCtorEq, h0, h1, h2, h3, h4, h5,
+      Nat.succ_ne_self, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, List.mapM_cons,
+      List.mapM_nil, Option.pure_def, Option.bind_eq_bind, Option.bind_some]
+  decide +kernel
 
 theorem target_next : words (Evm.run (prefixProducer.code ++ callProducer.code ++ nextProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265] =
@@ -256,16 +374,27 @@ theorem checked_target_next : words (Evm.run (prefixProducer.code ++ checked.cod
   rw [code, ← List.append_assoc]
   exact target_next
 
-theorem exact_frame_cost : [prefixProducer.need,expanded.need,callProducer.need,nextProducer.need,
-    checked.requiredFrame,prefixProducer.cost initial,callProducer.cost caller.st,nextProducer.cost exported.st,
-    checked.allocationCost caller.st] = [4,10,10,7,10,7,3,0,3] := by decide +kernel
 
 theorem wrong_same_typed_order : resultValues exported.st ≠ [1,17,29,42] := by
   rw [show resultValues exported.st = [1,29,17,42] from congrArg (fun x => x.2.1) source_export]
   decide
 
 theorem wrong_destination : words (Evm.run (prefixProducer.code ++ callProducer.code) machine) [1,5,6,7] ≠
-    some [77,17,42,29,1] := by decide +kernel
+    some [77,17,42,29,1] := by
+  have full := target_export
+  generalize execution : Evm.run (prefixProducer.code ++ callProducer.code) machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m
+      [0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262,263,264,265] [77] [266,99,42,256,256,259,17,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101] rfl full
+    have selected := congrArg (fun xs => [xs[2]!,xs[6]!,xs[7]!,xs[8]!]) snapshot.2
+    change [m.mem 1,m.mem 5,m.mem 6,m.mem 7] = [observedWord 42,observedWord 17,observedWord 29,observedWord 1] at selected
+    change (m.stack ++ [m.mem 1,m.mem 5,m.mem 6,m.mem 7]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
 theorem wrong_private_escape : callerAliases exported.st ≠ [some 1,some 2,some 2] := by
   rw [show callerAliases exported.st = [some 1,some 0,some 0] from congrArg (fun x => x.2.2) source_export]
@@ -287,13 +416,40 @@ theorem wrong_cost : prefixProducer.cost initial + checked.allocationCost caller
   rw [h]
   decide
 
-theorem wrong_cursor : words (Evm.run (prefixProducer.code ++ checked.code) machine) [0] ≠ some [77,267] := by decide +kernel
+theorem wrong_cursor : words (Evm.run (prefixProducer.code ++ checked.code) machine) [0] ≠ some [77,267] := by
+  have full := checked_target_next
+  generalize execution : Evm.run (prefixProducer.code ++ checked.code) machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m
+      [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265] [77] [266,99,1729,256,256,259,17,29,1,2,19,17,3,23,29,31,2,99,101] rfl full
+    have selected := congrArg (fun xs => xs[0]!) snapshot.2
+    change m.mem 0 = observedWord 266 at selected
+    change (m.stack ++ [m.mem 0]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
 /-- A real successful wrong-order execution, not a failed Input premise. -/
 def badHighFirst : List Instr := [.mload 9,.mstore 7,.mload 8,.mstore 6,.mload 7,.mstore 5]
 theorem overlapping_order_countercontrol : words
     (Evm.run (prefixProducer.code ++ expanded.code ++ badHighFirst) machine) [5,6,7] =
-    some [77,1,29,1] := by decide +kernel
+    some [77,1,29,1] := by
+  obtain ⟨m,executed⟩ := actualExpandedTarget
+  have full := target_body
+  rw [executed] at full
+  have snapshot := numeric_stack_cells m
+    [0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262,263,264,265]
+    [77] [266,99,42,256,256,259,263,42,17,29,1,263,2,19,11,3,23,29,31,2,99,101] rfl full
+  have high : m.mem 8 = observedWord 29 := congrArg (fun xs => xs[9]!) snapshot.2
+  have flag : m.mem 9 = observedWord 1 := congrArg (fun xs => xs[10]!) snapshot.2
+  rw [Evm.run_append_ok executed]
+  simp only [words,badHighFirst,Evm.run,Evm.exec,Evm.Instr.step,Evm.Out.bind,
+    Evm.Machine.next,Evm.upd,snapshot.1,high,flag,List.map_cons,List.map_nil,
+    Nat.reduceEqDiff,reduceIte]
+  decide +kernel
 
 theorem mutator_not_withinM : Prog.withinM .view body = false := rfl
 
@@ -331,7 +487,9 @@ theorem tuple_failure_target : ∃ m₁ base₁,
     (base := base₁) (m := m₁) failedProducer hr room noCost tuple_failure_source⟩
 
 theorem owned_selector_admits : (compileTuple 1 prefixProducer.frag
-    (.call "triple" arguments ret body)).isSome = true := by decide +kernel
+    (.call "triple" arguments ret body)).isSome = true := by
+  rw [actualSelectorResult]
+  rfl
 
 def refusedBody : Prog C Input Input := .cons (.revertData [.bytes [7]]) .nil
 
@@ -349,54 +507,54 @@ theorem zero_parameter_copy_control : words
 
 theorem empty_tuple_selector : (compileTuple 1 prefixProducer.frag
     (.call "emptyTuple" arguments (.rets .nil) (Prog.nil : Prog C Params Params))).isSome = true := by decide +kernel
-#print axioms noRef
-#print axioms initial_repr
-#print axioms actual_prefix
-#print axioms actual_arguments
-#print axioms actual_body
-#print axioms actual_call
-#print axioms actual_next
-#print axioms public_refusal
-#print axioms represented_stages
-#print axioms argument_order
-#print axioms source_prefix
-#print axioms source_entry
-#print axioms source_body
-#print axioms source_export
-#print axioms source_next
-#print axioms heap_sizes
-#print axioms target_prefix
-#print axioms target_body
-#print axioms target_export
-#print axioms target_next
-#print axioms checked_target_next
-#print axioms exact_frame_cost
-#print axioms wrong_same_typed_order
-#print axioms wrong_destination
-#print axioms wrong_private_escape
-#print axioms wrong_old_contents
-#print axioms wrong_unrelated_contents
-#print axioms wrong_cost
-#print axioms wrong_cursor
-#print axioms overlapping_order_countercontrol
-#print axioms mutator_not_withinM
-#print axioms public_refusal_unchanged
-#print axioms tuple_failure_source
-#print axioms unreachable_allocation_cost
-#print axioms tuple_failure_target
-#print axioms owned_selector_admits
-#print axioms owned_selector_refuses_data
-#print axioms refused_source_class
-#print axioms zero_parameter_copy_control
-#print axioms empty_tuple_selector
-#print axioms TupleCalls.expand_runSt
-#print axioms TupleCalls.expand_runR
-#print axioms TupleCalls.tuple_entry
-#print axioms TupleCalls.compact
-#print axioms TupleCalls.tupleReturn
-#print axioms TupleCalls.compileTuple
-#print axioms TupleCalls.no_memory_binder
-#print axioms TupleCalls.no_storage_binder
+#print_checked_axioms noRef,
+  initial_repr,
+  actual_prefix,
+  actual_arguments,
+  actual_body,
+  actual_call,
+  actual_next,
+  public_refusal,
+  represented_stages,
+  argument_order,
+  source_prefix,
+  source_entry,
+  source_body,
+  source_export,
+  source_next,
+  heap_sizes,
+  target_prefix,
+  target_body,
+  target_export,
+  target_next,
+  checked_target_next,
+  exact_frame_cost,
+  wrong_same_typed_order,
+  wrong_destination,
+  wrong_private_escape,
+  wrong_old_contents,
+  wrong_unrelated_contents,
+  wrong_cost,
+  wrong_cursor,
+  overlapping_order_countercontrol,
+  mutator_not_withinM,
+  public_refusal_unchanged,
+  tuple_failure_source,
+  unreachable_allocation_cost,
+  tuple_failure_target,
+  owned_selector_admits,
+  owned_selector_refuses_data,
+  refused_source_class,
+  zero_parameter_copy_control,
+  empty_tuple_selector,
+  TupleCalls.expand_runSt,
+  TupleCalls.expand_runR,
+  TupleCalls.tuple_entry,
+  TupleCalls.compact,
+  TupleCalls.tupleReturn,
+  TupleCalls.compileTuple,
+  TupleCalls.no_memory_binder,
+  TupleCalls.no_storage_binder
 end Solidity.Backend.InternalFlow.TupleCallChecks
 
 
@@ -609,7 +767,21 @@ theorem wrong_frame_cost : (producer.need,producer.cost caller.st) ≠ (10,3) :=
   rw [hn,hc]
   decide +kernel
 theorem wrong_cursor : words (Evm.run (prefixProducer.code ++ producer.code) machine) [0] ≠
-    some [77,266] := by decide +kernel
+    some [77,266] := by
+  have full := target_final
+  generalize execution : Evm.run (prefixProducer.code ++ producer.code) machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m
+      [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265,266,267] [77] [268,99,1735,256,256,259,17,30,1,2,19,1735,3,23,29,31,2,99,101,1,55] rfl full
+    have selected := congrArg (fun xs => xs[0]!) snapshot.2
+    change m.mem 0 = observedWord 268 at selected
+    change (m.stack ++ [m.mem 0]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 theorem wrong_overlap : words (Evm.run
     (prefixProducer.code ++ expandedProducer.code ++ badHighFirst) machine) [5,6,7] =
     some [77,1,30,1] := by decide +kernel
@@ -658,42 +830,42 @@ def recursive : Stmt C Caller Final :=
 theorem recursion_refusal : (TuplePrograms.compile 1 prefixProducer.frag
     (.cons recursive .nil)).isSome = false := by decide +kernel
 
-#print axioms source_outer
-#print axioms source_used
-#print axioms source_scoped
-#print axioms source_suffix
-#print axioms source_program
-#print axioms ordered_export
-#print axioms ordered_used
-#print axioms ordered_unwind
-#print axioms ordered_final
-#print axioms traversal_and_refusal
-#print axioms represented
-#print axioms nested_entry_order
-#print axioms nested_body_order
-#print axioms nested_export_order
-#print axioms nested_transfer_order
-#print axioms nested_heap_sizes
-#print axioms target_body
-#print axioms target_export
-#print axioms target_unwind
-#print axioms target_final
-#print axioms exact_cost_frame
-#print axioms checked_input_endpoint
-#print axioms wrong_order
-#print axioms wrong_private_alias
-#print axioms wrong_old_contents
-#print axioms wrong_unrelated
-#print axioms wrong_frame_cost
-#print axioms wrong_cursor
-#print axioms wrong_overlap
-#print axioms nested_failure_source
-#print axioms unreachable_cost
-#print axioms nested_failure_target
-#print axioms data_refusal
-#print axioms storage_refusal
-#print axioms recursion_refusal
-#print axioms TuplePrograms.compile
-#print axioms TuplePrograms.program_revert
+#print_checked_axioms source_outer,
+  source_used,
+  source_scoped,
+  source_suffix,
+  source_program,
+  ordered_export,
+  ordered_used,
+  ordered_unwind,
+  ordered_final,
+  traversal_and_refusal,
+  represented,
+  nested_entry_order,
+  nested_body_order,
+  nested_export_order,
+  nested_transfer_order,
+  nested_heap_sizes,
+  target_body,
+  target_export,
+  target_unwind,
+  target_final,
+  exact_cost_frame,
+  checked_input_endpoint,
+  wrong_order,
+  wrong_private_alias,
+  wrong_old_contents,
+  wrong_unrelated,
+  wrong_frame_cost,
+  wrong_cursor,
+  wrong_overlap,
+  nested_failure_source,
+  unreachable_cost,
+  nested_failure_target,
+  data_refusal,
+  storage_refusal,
+  recursion_refusal,
+  TuplePrograms.compile,
+  TuplePrograms.program_revert
 
 end Solidity.Backend.InternalFlow.TupleCallChecks.Composed

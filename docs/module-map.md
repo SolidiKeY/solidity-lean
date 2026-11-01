@@ -1324,3 +1324,7 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/FiniteDispatch.lean` | Actual finite intrinsic dispatch chain composition, checked arm/frame transport, scoped result drop and exact fallback; frontend links required per consumer. |
 
 | `Backend/InternalFlow/StructuredFrame.lean` | Structural successful branch/block/sequence/completed-loop heap frames and protected typed local transport; existing guards retained. |
+
+| `Backend/InternalFlow/TargetObservation.lean` | Structural full-stack/numeric-memory observation reconstruction; checked target subselection without execution replay. |
+
+| `tests/internal-flow/AxiomReports.lean` | Test-only checked-kernel dependency reports; independent builtin audit retained, not proof coverage. |

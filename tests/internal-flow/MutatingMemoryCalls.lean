@@ -1,3 +1,5 @@
+import tests.«internal-flow».AxiomReports
+import Solidity.Backend.InternalFlow.TargetObservation
 import Solidity.Backend.InternalFlow.PublishedDirectCalls
 import Solidity.Evm.Compiler
 import Solidity.Calculus.RunFrameMem
@@ -230,17 +232,27 @@ theorem exact_frame_cost :
       prefixProducer.cost initial, callProducer.cost caller.st, nextProducer.cost exported.st,
       compiled.allocationCost initial] = [4,6,5,6,7,4,0,11] := by decide +kernel
 
-theorem wrong_same_typed_identity : identity exported.st.env.1 ≠ some 1 := by decide +kernel
+theorem wrong_same_typed_identity : identity exported.st.env.1 ≠ some 1 := by
+  rw [show identity exported.st.env.1 = some 0 from congrArg (fun x => x.2.1) source_export]
+  decide
 
 theorem missing_callee_mutation : contents exported.st ≠
-    some [[2,7,11],[3,23,29,31],[0],[2,99,101]] := by decide +kernel
+    some [[2,7,11],[3,23,29,31],[0],[2,99,101]] := by
+  rw [show contents exported.st = some [[2,19,11],[3,23,29,31],[0],[2,99,101]] from congrArg Prod.fst source_export]
+  decide
 
 theorem unrelated_object_mutation : contents finalOutput.st ≠
-    some [[2,19,37],[3,19,29,31],[0],[2,99,101]] := by decide +kernel
+    some [[2,19,37],[3,19,29,31],[0],[2,99,101]] := by
+  rw [show contents finalOutput.st = some [[2,19,37],[3,23,29,31],[0],[2,99,101]] from congrArg Prod.fst source_next]
+  decide
 
-theorem private_rebind_escape : identity exported.st.env.1 ≠ some 3 := by decide +kernel
+theorem private_rebind_escape : identity exported.st.env.1 ≠ some 3 := by
+  rw [show identity exported.st.env.1 = some 0 from congrArg (fun x => x.2.1) source_export]
+  decide
 
-theorem wrong_composed_cost : compiled.allocationCost initial ≠ 12 := by decide +kernel
+theorem wrong_composed_cost : compiled.allocationCost initial ≠ 12 := by
+  rw [show compiled.allocationCost initial = 11 from congrArg (fun xs => xs[7]!) exact_frame_cost]
+  decide
 
 theorem mutator_not_withinM : Prog.withinM .view body = false := rfl
 
@@ -293,15 +305,80 @@ theorem complete_source_identities : (complete.run initial).toOption.map (fun o 
 
 theorem complete_success : (complete.run initial).halt? = none := by decide +kernel
 
-theorem wrong_target_return : words (Evm.run compiled.code machine) [5] ≠ some [77,259] := by decide +kernel
+theorem wrong_target_return : words (Evm.run compiled.code machine) [5] ≠ some [77,259] := by
+  have full := public_target_next
+  generalize execution : Evm.run compiled.code machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266] [77] [267, 99, 42, 256, 256, 259, 256, 2, 19, 37, 3, 23, 29, 31, 0, 2, 99, 101] rfl full
+    have selected := congrArg (fun xs => [ xs[6]! ]) snapshot.2
+    change [m.mem 5] = [observedWord 256] at selected
+    change (m.stack ++ [m.mem 5]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
-theorem missing_target_mutation : words (Evm.run compiled.code machine) [257] ≠ some [77,7] := by decide +kernel
+theorem missing_target_mutation : words (Evm.run compiled.code machine) [257] ≠ some [77,7] := by
+  have full := public_target_next
+  generalize execution : Evm.run compiled.code machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266] [77] [267, 99, 42, 256, 256, 259, 256, 2, 19, 37, 3, 23, 29, 31, 0, 2, 99, 101] rfl full
+    have selected := congrArg (fun xs => [ xs[8]! ]) snapshot.2
+    change [m.mem 257] = [observedWord 19] at selected
+    change (m.stack ++ [m.mem 257]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
-theorem unrelated_target_mutation : words (Evm.run compiled.code machine) [260] ≠ some [77,19] := by decide +kernel
+theorem unrelated_target_mutation : words (Evm.run compiled.code machine) [260] ≠ some [77,19] := by
+  have full := public_target_next
+  generalize execution : Evm.run compiled.code machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266] [77] [267, 99, 42, 256, 256, 259, 256, 2, 19, 37, 3, 23, 29, 31, 0, 2, 99, 101] rfl full
+    have selected := congrArg (fun xs => [ xs[11]! ]) snapshot.2
+    change [m.mem 260] = [observedWord 23] at selected
+    change (m.stack ++ [m.mem 260]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
-theorem private_target_escape : words (Evm.run compiled.code machine) [5] ≠ some [77,264] := by decide +kernel
+theorem private_target_escape : words (Evm.run compiled.code machine) [5] ≠ some [77,264] := by
+  have full := public_target_next
+  generalize execution : Evm.run compiled.code machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266] [77] [267, 99, 42, 256, 256, 259, 256, 2, 19, 37, 3, 23, 29, 31, 0, 2, 99, 101] rfl full
+    have selected := congrArg (fun xs => [ xs[6]! ]) snapshot.2
+    change [m.mem 5] = [observedWord 256] at selected
+    change (m.stack ++ [m.mem 5]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
-theorem wrong_target_cursor : words (Evm.run compiled.code machine) [0] ≠ some [77,268] := by decide +kernel
+theorem wrong_target_cursor : words (Evm.run compiled.code machine) [0] ≠ some [77,268] := by
+  have full := public_target_next
+  generalize execution : Evm.run compiled.code machine = out at full ⊢
+  cases out with
+  | revert => cases full
+  | fault => cases full
+  | ok m skip =>
+    have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266] [77] [267, 99, 42, 256, 256, 259, 256, 2, 19, 37, 3, 23, 29, 31, 0, 2, 99, 101] rfl full
+    have selected := congrArg (fun xs => [ xs[0]! ]) snapshot.2
+    change [m.mem 0] = [observedWord 267] at selected
+    change (m.stack ++ [m.mem 0]).mapM
+      (fun w => match w with | Evm.Word.val v => some v.val | .slot _ => none) ≠ _
+    rw [snapshot.1,selected]
+    decide
 
 
 /-- Observation through the actual published typed value evaluation. -/
@@ -332,46 +409,46 @@ theorem next_alias_reads :
      observeRead finalOutput.st (.there (.there .here)) (.lit 1 rfl),
      observeRead finalOutput.st (.there (.there (.there .here))) (.lit 1 rfl)] =
     [some 37,some 29,some 37,some 37] := by decide +kernel
-#print axioms noRef
-#print axioms initial_repr
-#print axioms actual_prefix
-#print axioms actual_arguments
-#print axioms actual_body
-#print axioms actual_call
-#print axioms actual_next
-#print axioms represented_stages
-#print axioms unified_input
-#print axioms unified_agreement
-#print axioms source_prefix
-#print axioms source_entry
-#print axioms source_body
-#print axioms source_export
-#print axioms source_next
-#print axioms target_prefix
-#print axioms target_private_body
-#print axioms target_export
-#print axioms target_next
-#print axioms exact_frame_cost
-#print axioms wrong_same_typed_identity
-#print axioms missing_callee_mutation
-#print axioms unrelated_object_mutation
-#print axioms private_rebind_escape
-#print axioms wrong_composed_cost
-#print axioms mutator_not_withinM
-#print axioms represented_old_objects
-#print axioms public_target_next
-#print axioms complete_source_observations
-#print axioms complete_source_identities
-#print axioms complete_success
-#print axioms wrong_target_return
-#print axioms missing_target_mutation
-#print axioms unrelated_target_mutation
-#print axioms private_target_escape
-#print axioms wrong_target_cursor
-#print axioms prefix_alias_reads
-#print axioms private_body_reads
-#print axioms exported_alias_reads
-#print axioms next_alias_reads
-#print axioms old_alias_at_entry_address
-#print axioms old_array_at_entry_address
+#print_checked_axioms noRef,
+  initial_repr,
+  actual_prefix,
+  actual_arguments,
+  actual_body,
+  actual_call,
+  actual_next,
+  represented_stages,
+  unified_input,
+  unified_agreement,
+  source_prefix,
+  source_entry,
+  source_body,
+  source_export,
+  source_next,
+  target_prefix,
+  target_private_body,
+  target_export,
+  target_next,
+  exact_frame_cost,
+  wrong_same_typed_identity,
+  missing_callee_mutation,
+  unrelated_object_mutation,
+  private_rebind_escape,
+  wrong_composed_cost,
+  mutator_not_withinM,
+  represented_old_objects,
+  public_target_next,
+  complete_source_observations,
+  complete_source_identities,
+  complete_success,
+  wrong_target_return,
+  missing_target_mutation,
+  unrelated_target_mutation,
+  private_target_escape,
+  wrong_target_cursor,
+  prefix_alias_reads,
+  private_body_reads,
+  exported_alias_reads,
+  next_alias_reads,
+  old_alias_at_entry_address,
+  old_array_at_entry_address
 end Solidity.Backend.InternalFlow.MutatingCallChecks

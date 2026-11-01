@@ -23,7 +23,12 @@ for fixture in fixtures:
 assert owned and fixtures and imports
 registry = json.loads(Path("tests/internal-flow/fixture-axiom-pins.json").read_text())
 assert set(registry) == {p.stem for p in fixtures}, "fixture registry coverage"
-for entry in registry.values():
+for name, entry in registry.items():
+    if name == "AxiomReports":
+        # The added metadata tool has no mathematical report inventory. Its
+        # strict empty-report guard is independently exercised with negatives.
+        assert entry == {"guard": "tests/internal-flow/check-axiom-reporter.py", "pins": {}}
+        continue
     source = Path(entry["guard"]).read_text()
     scope = {}
     # Existing owned guards define literal PINS plus explicit updates before IO.

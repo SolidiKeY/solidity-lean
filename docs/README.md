@@ -114,3 +114,5 @@ history is in git.
 | Completed successful loop framing and writer countercontrol (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
 | Finite source-dispatch checked target/frame and memory-export consumers (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
 | Structural branch/block/loop local framing and fresh-source investigation (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
+
+| Structural target observation projections (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |

@@ -1600,3 +1600,103 @@ original full300s retry follows. Raw normal/strict docs remain exit1; complete
 output equals consumed publication, with two incoming reserved missing paths
 and ambiguity relative to frozen base. None of these distinctions waives a
 mandatory original source gate or establishes integration eligibility.
+
+## Continuation23 — exact target observations and source-report traversal
+
+Partial original Work1/BackfillA engineering and validation; no parent closure.
+The original blocked goal and all prior seals remain unchanged. No new upstream
+publication, reserved implementation edit or source-profile change is included.
+
+[TargetObservation](../../Solidity/Backend/InternalFlow/TargetObservation.lean)
+reconstructs the actual word list from a successful complete numeric observation.
+Explicit cell/address lengths determine the ENTIRE protected stack, so its
+subselection does not guess a stack prefix. Original wrong destination/cursor
+controls in all three call fixtures now project the same complete observations.
+All original theorem statements, ordered vectors, aliases, frame/cost/cursor,
+private-object and failure/refusal controls are retained.
+
+TupleCalls.compileTuple_success exposes the actual checked construction from a
+real successful body compilation. The fixture closes that premise with the
+existing compiled witness; actualSelectorResult links the shared certificate
+back to the unchanged selector. The original certificate's full equality was
+kernel-checked before replacing its duplicate construction. Actual prefix/Input,
+need and cost facts derive the expanded body's real zero-skip endpoint. The same
+full target export and wrong-order-copy control then execute their six actual
+instructions via run_append_ok. The unchanged exact_frame_cost declaration is
+earlier only to permit opaque proof reuse; its type, proof and report position
+are unchanged. No new evaluator or assumed target simulation is used.
+
+Whole-fixture timings did not establish a substantial improvement from these
+proof changes alone. Isolated suffix arithmetic simplification hit the existing
+recursion limit, and symbolic chunk probes hit the actual12GiB cap/exit137.
+Separate direct certificate projection probes hit200000 heartbeats. These raw
+failures remain under unique names; no limit was raised or failed probe shipped
+as a passing proof. They do not establish a unique resource-retention cause.
+
+A separate actual standard Lean collectAxioms run took92.362s for542 theorem
+roots. The first conservative metadata memo comparison timed out at120s and is
+retained FAIL. A distinct reverse-dependency implementation matches all542
+actual standard sets and10 fresh cycle/duplicate/query-isolation controls in a
+5.077s whole diagnostic. Its reported internal0ms is NOT a reliable CPU timer.
+
+[AxiomReports](../../tests/internal-flow/AxiomReports.lean) is TEST-ONLY metadata
+tooling, not a proof checker or a kernel theorem of equivalence. It forces the
+same checked kernel environment, resolves actual root names with the builtin
+resolver, discovers the standard collector's exact dependency edges once, and
+propagates each actual axiom along reverse edges. Visited sets handle cycles;
+each requested root is emitted in order, including duplicates/empty sets. It
+uses no expected-pin allowlist, unchecked environment, Expr-node manipulation,
+proof shortcut or builtin-command override. The independent cached gate keeps
+UNMODIFIED standard #print axioms for every original542 root. Core guards are
+unchanged. All mathematical proofs still undergo ordinary fresh Lean checking.
+
+The three original source fixtures batch reporting only; their original27/42/85
+reports exactly match the prior actual builtin reports and order. Fresh source
+checks pass9.798s/11.909s/31.738s. The tool is an added18th registry module with
+zero headline proof reports, explicit source/selftest/provenance coverage; it is
+not counted as mathematical coverage. The raw driver retains every original
+source/fixture and adds a fresh check of this metadata tool, under the SAME120s
+aggregate bound. Original full/raw/root/docs failures remain recorded until an
+actual justified repaired gate passes. No cached import is a raw-source pass.
+
+Independent read-only finder/skeptic reviews confirm the structural observation
+and metadata reachability arguments, subject to final source/artifact audits;
+neither review runs Lean/server/builds. Exact command exits, full independent
+builtin audit, type preservation, resources, driver controls and final reviews
+are in the immutable C23 handoff. All Work1–6 and BackfillA–B remain partial:
+unbounded runtime recursion/dependent dispatch, early-control/general mixed-loop
+certificates, word-frame/live-byte-journal and transient/callback-world producers
+remain open. No independent-work exhaustion or integration eligibility is claimed.
+
+Actual final C23 gates: the COMPLETE fresh-source driver checks all35 sources
+(31 owned core modules, added metadata tool, all three original call fixtures)
+and passes119.502s/120s, exit0. Every original invocation/stack flag remains;
+this is fresh elaboration, not a cached-import substitute or split timer. The
+margin is narrow; no stable performance guarantee follows. All542 original
+kernel-imported theorem types (including85 tuple types) are byte-identical to
+the authenticated pre-change query. All original17 fixture pin maps/report
+orders remain exact. Independent UNMODIFIED builtin542 cached audit passes
+116.200s/120s with18 registered modules; helper0 is metadata coverage only.
+Separate7 retained and6 new actual builtin axiom sets pass. All72 exact guard
+corruption controls, real unknown-name/format/order reporter controls,
+cache/dependency corruption and both drivers' coverage/fail-fast controls pass.
+
+Runtime: Lean4.24.0, Lake5.0.0-src+797c613, actual KeySort successful2jobs.
+All heavy checks stay serial explicit-j1/LEAN_NUM_THREADS1, hard12884901888B
+aggregate and swap.max0, canonical writer/compiler locks. Raw sweep sampled
+peak aggregateRSS1874012KiB and cgroup peak1251454976B are distinct measurements.
+Verified stopped task-owned C23 containers alone were removed for disk headroom;
+all caches, probes, raw failures and23 previous manifests remain unchanged.
+
+The old full ./run-lean.sh124/300s, prior raw120 failures, broad-root124/120.609,
+prerequisite124 and137 probes remain preserved FAIL. C23 raw pass repairs that
+specific workload; it does not pass the full pipeline/TestSuite/sort. The last
+broad-root failure still built only126/825 jobs; its unrelated uncached core
+prerequisites and default executables are not repaired by a fixture-only
+metadata change, so no unchanged broad/full rerun is claimed. Raw normal/strict
+documentation exits remain1; complete current findings equal publication/C21,
+while frozen base has46missing versus48current plus incoming Arms ambiguity.
+Independent final source and exact helper0 driver reviews find no confirmed
+semantic/trust/control flaw. Final committed-artifact reviews are recorded in
+the handoff; no reviewer runs Lean/builds. All eight original queue items remain
+partial and the original blocked goal remains unchanged.
