@@ -204,6 +204,9 @@ import Solidity.Calculus.DecisionGivenHeapExtension
 import Solidity.Calculus.DecisionGivenHeapBoundary
 import Solidity.Examples.DecisionGivenHeapReason
 import Solidity.Calculus.DecisionCompoundFieldReason
+import Solidity.Calculus.DecisionUIntConstant
+import Solidity.Calculus.DecisionCompoundCertificate
+import Solidity.Examples.DecisionCompoundCertificate
 import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FixedArrayRoot
 import Solidity.Calculus.HashWritten

@@ -1251,6 +1251,17 @@ optional-denotation/countermodel proof and actual compound pipeline integration
 remain open; this prerequisite alone is not broader memory completion.
 
 
+VA1 compound countermodel certificate (2026-11-01): optional Theory denotation
+of the existing UIntLinear grammar is now proved state-independent in a
+memory-only context, including partial expressions. Every closed nonliteral-UInt
+fresh-field source member has a typed refuted Answer at the existing producer
+child heap before parent allocation, handling both some RHS and none without
+halting/default premises. Concrete some1/some5/none readings, exact state reuse,
+ordinary/hash countermodels and targets pass kernel checks. Global verdicts
+remain unknown until the actual pipeline consumes this Answer. No broader
+memory or full Residue/theorem completion is claimed.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

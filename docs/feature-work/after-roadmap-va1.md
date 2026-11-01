@@ -2624,3 +2624,67 @@ separate treatment; no all-context countermodel or global memory completion is
 claimed. All original Residue/theorem/hash bridge, arrays, memory/OR/M4/fuel,
 performance/backfill/full gates and held VA1-Q2 remain incomplete. No publication
 or goal reset/completion.
+
+
+## Closed compound-field countermodel certificate (2026-11-01)
+
+After sealed23ba6991, Calculus/DecisionUIntConstant.lean proves, explicitly for
+all C:Contract/R:RefTy/t:Tm C [mem R] (val uint), evidence h:t.UIntLinear and
+arbitrary σ/τ:State C [mem R], equality t.denote σ=t.denote τ. This is equality
+of full Option readings across different heaps, not only agreement on successful
+evaluation. Impossible scalar locals are eliminated structurally; literals and
+pure arithmetic use existing actual denotations. No halting/default premise,
+evaluator change or fresh arithmetic implementation is introduced.
+
+Calculus/DecisionCompoundCertificate.lean reuses the existing map-free field
+realization and defines the exact producer child heap before parent allocation.
+For every C, closed φ:Fml C [], NonliteralUIntFreshField witness w and arbitrary
+initial σ, it constructs ¬holds(w.counterState σ)φ. Evaluate the constant RHS
+option at the child state with unset memory local. In some v, existing
+fieldEq_refutes selects a differing parent field; optional-denotation independence
+transports the RHS at each parent. In none, a parent with field0 has defined
+some0 reading, contradicting RHS none. Thus partial arithmetic is retained;
+no value is substituted for an undefined expression. Same-state holdsH refutation
+uses the unchanged hashFree/holdsH_iff route, and .answer is a real typed
+MemoryWitness.Answer.refuted. CounterState can be formed contextually; refutation/
+Answer are deliberately restricted to closed leaves. Outer scalar contexts
+require separate invariance arguments and are not claimed here.
+
+Examples/DecisionCompoundCertificate.lean obtains actual parser witnesses for
+original buried0+1, another2+3 and partial0-1. All three counterstates kernel-equal
+existing gapMemStruct_state before parent allocation. Actual optional Theory
+readings are pinned some1/some5/none, alongside ordinary/holdsH countermodels,
+inhabited typed Answers and target admission (including partial RHS). All three
+global verdicts remain unknown; no producer fixture or expected global verdict
+changed. Existing literal/reversed refutations and mapping unknown remain.
+Decision and source-class files are whole-file unchanged from23ba; four frozen
+direct predicates/statement, hash/validity premises and all budgets remain.
+
+Raw evidence /workspace/va1-evidence/compound-certificate-next. All8 gates pass:
+constant MCP4.283/build3.095s, generic certificate MCP5.263/build3.108s,
+controls MCP5.210/build4.120s, public13-declaration actual type/axiom audit6.314s,
+runtime-only profile3.098s. Only existing standard axioms; no sorry/new axioms or
+native trust shortcut. Profile confirms original/another/partial class=true,
+Covered=false,unknown; direct/reversed controls class=false,Covered=true,refuted;
+mapping class=false,Covered=false,unknown. Timings including printing
+2.907/.375/.280/1.113/.455/.556ms. This is not EVM evidence or pipeline integration.
+All use pinned4.24.0/5.0.0, original writer lock, threads1/Lean-j1, hard12GiB/
+no-swap container and12GiB host reserve; raw metadata/resources.json retains
+measured aggregate RSS1444280KiB (shared pages included), cgroup peak612163584bytes,
+host available minimum17211600896bytes and16 unsuccessful measurement samples.
+
+Reachability1109/layers180core/strict automatic491/61budgets/11refuted/trust1124
+sources/248sites and whitespace pass. Same85 docs/404 inventory findings remain
+FAIL, unchanged against frozen-base analysis. Three root imports/three module-map
+rows are additive. Independent read-only finder/skeptic reviews find no issues,
+including genuine optional-none handling, closed scope, exact producer state and
+remaining unknowns; neither used Lean/server/builds or edits. Final documentation/
+export review and committed seal remain pending; old seals are preserved.
+
+Ready next owned work: lazily compose this actual Answer after existing struct
+answers and prove actual source-to-Covered/returned-refutation routing, then
+update only assigned pins with matching certificates. All original global
+Residue/DecisionTheorem-prime/hash bridge, arrays, wider memory, halting OR,
+broader revised M4 boundary, formula-derived runtime fuel, performance/backfill
+and final/full gates remain incomplete. Held VA1-Q2/producer TypeExamples repair
+is untouched. No goal reset/completion or publication.
