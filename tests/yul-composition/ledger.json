@@ -414,5 +414,6 @@
   "physicalComponentEvidence": "tests/yul-composition/physical-component-ledger.json",
   "localComponentEvidence": "tests/yul-composition/local-component-ledger.json",
   "loopComponentEvidence": "tests/yul-composition/loop-component-ledger.json",
-  "localTrustRegistration": "tests/yul-composition/local-trust-registration.json"
+  "localTrustRegistration": "tests/yul-composition/local-trust-registration.json",
+  "functionComponentEvidence": "tests/yul-composition/function-component-ledger.json"
 }

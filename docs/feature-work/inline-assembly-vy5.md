@@ -1123,3 +1123,130 @@ No new semantic question is pending. Fresh committed patch/private bundle/interf
 handoff/evidence/checksums are versioned under
 `/workspace/vy5-composition/dirty-source-20261101/final/`; all eight earlier sealed
 manifests, raw failures and caches are preserved.
+
+
+## Scoped function/loop composition — 2026-11-01
+
+This reviewed component continues the entire frozen assignment from
+5bf18485d33c88495a140134d1f49f0dfcb7aec0 on the assigned branch, base
+0b078cefaf7daad79007b87b72df64eb6936420f. It uses ONLY already-staged producer
+inputs. No new VY1 retrieval, active-source snapshot, producer turn, goal/status
+change or compiler-expectation answer was attempted. The existing two VY1
+compiler-expectation questions remain unanswered. Earlier YQ1–YQ7 decisions and
+the parallel-work amendment remain authoritative.
+
+[FunctionPhysical](../../Solidity/Yul/Composition/FunctionPhysical.lean) adds26
+named kernel laws using actual intrinsic Stmt.functions, Bodies, Expr.call,
+Policy, WordAdapter.functions and runLocalBlock. It does not introduce another
+interpreter or assume a compiler/source simulation. The two signatures are
+both1argument/1return; their bodies have only two own local slots (argument0,
+return1) and EMPTY external context. Caller source locals cannot be captured.
+The loop passes the actual raw uint8 word explicitly and assigns the return.
+
+The first function returns normally with x+256. The second calls that actual
+first function on x+256, executes leave, then has a poison return assignment0.
+Leave must prevent the poison. After the existing dirty prefix sets small257,
+three nested calls produce1793. The wrong same-arity callee produces1025;
+omitting leave produces0. These are actual closed runner results at the
+UNCHANGED horizon32, not an external result oracle. Intrinsic Member proofs
+exclude wrong argument/result signatures2/1 and1/2; the caller flow is normal.
+All-completed-horizon equality preserves the full raw result, source and control.
+Horizon0/4 exhaustion and static no-call at every fuel remain distinct from
+completion. Full seven-cell raw snapshots retain bool2 and the two distinct
+same-type external-function fields, including their dirty high bits.
+
+The joint adapter is the existing actual physical-first boundary. Its ENTIRE
+physical result, source step and BOTH real complement/owned-byte journals are
+retained at every fuel. Full Source.St and the backed nonword memory alias are
+preserved; complete raw slot0xab000002 reconstruction and the actual AABB heap
+window/BB target copy are proved with the existing placement/reserved/bounds
+premises. Actual child-source/outer rollback restores all three journals. The
+transport law rebases Source.St between actual function runs from identical
+initial clean locals; it does NOT execute old Source after raw writeback or prove
+raw-local frame rollback. The clean bridge refuses every Unit-returning old
+Source.EM action on the raw result. No cleanup/resumption theorem is invented.
+
+Initial direct rfl/projection reductions exceeded the existing200000heartbeat
+limit. The failure logs remain raw. Variable-fuel source/nonword/raw lemmas and
+a structural control lemma avoid re-evaluating the closed function loop during
+elaboration; the statements and actual program are preserved. No heartbeat,
+fuel, node, gas, test or resource limit was raised. An initial diagnostic helper
+named mcp.py shadowed its Python package and exited1 before Lean started; its
+source/cache/error are preserved and the renamed helper passes. The commit
+whitespace check also caught indentation on a blank no-leave fixture line; only
+that whitespace was trimmed. Its failure/original source are preserved and
+final byte-bound compiler receipts/script checks were refreshed successfully.
+
+[FunctionDriver](../../tests/yul-composition/FunctionDriver.lean) executes the
+actual interpreter and producer states. It records ordered horizons, raw results,
+function arities, wrong-callee/missing-leave outputs, static halts, raw-resume
+refusal, nonword/heap/source-log sentinels and both physical journal lengths.
+[Independent expectations](../../tests/yul-composition/function-expectations.json)
+were frozen before native execution. The
+[finite Solidity fixture](../../tests/yul-composition/FunctionPhysicalControls.sol)
+uses the same uncustomized B/C bases and explicit storage layout42 as the earlier
+control, without modifying any earlier fixture. Its compose/composeWrong/
+composeNoLeave methods match1793/1025/0. All4 pinned solc0.8.38+1835d247/Osaka
+legacy/viaIR optimizer off/on profiles pass28orderedcalls: peek; all three
+function variants; peek; successful-child/outer-revert; peek.
+
+[Runner](../../scripts/yul-composition/function-source.mjs) reuses existing
+compiler/capture primitives and the older provenance validators. It validates
+actual current producer/consumer bodies, frozen source/oracle/ledger bytes,
+retained Lean stdout/stderr/command/exit metadata, exact profiles/call identity,
+deployment/runtime, finite pre/post accounts/slot42–48 maps, ordered results/logs,
+relative RETURN/REVERT windows and the external self-child rollback trace.
+Internal Yul function calls are not EVM message frames. Source logical account1
+and log55 are separate preservation witnesses, not silently identified with
+native addresses/logs. Allocation pointers are not compared across pipelines.
+This is finite compiler/EVM evidence, not a Source/compiler/world theorem.
+
+The [26-fact catalog](../../tests/yul-composition/function-component-ledger.json)
+is required by the active ledger selector. Missing/stale catalog/body/source/
+receipt/profile/call/return evidence, wrong arity/leave/timeout/static state,
+dirty-bit loss, function aliasing, journal drift, equal-return wrong storage/
+world/memory, and false proof closure fail closed. All410JS+2Python tests pass.
+Original328tests, all earlier source fixtures/expectations,227working upstream
+profiles/21fork blocks and eight intended mutant mismatches remain intact and
+attributed to their sealed tested reports. No unchanged full reference command
+was rerun as fresh correspondence evidence.
+
+The existing private tree c6c529aaa6075488ff84b8606af508432dd50053 is preserved as
+ancestor of cb325c26a3c9be45f41506d23fe60555369ace92 at
+`/workspace/vy5-dependencies-20261101`. Its root adds only the new consumer import;
+producer definitions and the earlier exact trust registration are unchanged.
+Final registered joint gate exits0: actual Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613; KeySort2jobs; library1222jobs; TestSuite262jobs;
+377taclets/131read annotations;189core/0elaborator;1237reachable/0orphans;
+strict491automatic/61budgeted/0manual/11refuted/0pending;
+trust1252sources/252sites/0findings. All26 scoped signatures/axiom reports show
+only standard axioms or none. Final MCP diagnostics pass the consumer, driver
+and private root with success=true/partial=false/no errors; nonfatal shutdown
+warnings remain raw. Standalone main-source import support is not claimed.
+Historical docs/G03 exit1 and earlier joint exit126/trust-wrapper exit1 remain
+failures; exact-base zero-regression comparisons are reported separately.
+
+Separate independent read-only finder/skeptic reviews used no Lean/server/build.
+Both accepted the actual scoped function semantics, arity/leave controls,
+physical/source/raw boundaries, driver, finite fixture, provenance reader and
+mutation controls with no remaining concrete finding. Exact signatures and raw
+evidence are under `/workspace/vy5-composition/function-source-20261101/`.
+Heavy checks use the unchanged writer lock and bounded runner, serial Lean-j1/
+LEAN_NUM_THREADS=1, enforced12GiB/no swap and unchanged1GiB OS-headroom guard.
+Disk/RAM were monitored; only new stopped VFS metadata-only copies were retired
+after preserving/validating inspect metadata and logs, immutable image and ALL
+mounted caches. No earlier cache/evidence/container was deleted and no hidden
+resource stop occurred. Existing guard files/floors were not reduced.
+
+Work1/Work3 remain partial despite this concrete function+loop component and
+validated imports. Work2/BackfillA/B remain partial despite28new ordered native
+calls and strict finite coverage/provenance controls. All24full Y01–Y09/Y10/
+G48–G51 obligations and six FULL Source combinations remain pending. Actual
+Source.RStmt/JSON/raw ordinary operators/function/session hooks, physical-world
+journal/log integration, G01 contracts and actual compiler/world/V16 assembly
+certificates are still missing. Source-only local/scoped-function components
+and finite EVM tests do not discharge them. No goal was reset/recreated/
+reactivated/status-changed; get_goal remains unavailable and the original
+blocked identity is preserved. No new semantic question is introduced.
+Fresh reviewed patch/bundles/interface/handoff/evidence/checksums are versioned
+under `/workspace/vy5-composition/function-source-20261101/final/`.

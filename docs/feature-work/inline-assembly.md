@@ -292,3 +292,19 @@ combinations remain open: no raw ordinary-Source resume, full loop/compiler/worl
 adequacy, log conversion or G01 refinement is inferred. See the
 [lane handoff](inline-assembly-vy5.md#actual-raw-local--physical--scoped-loop-consumer--2026-11-01).
 Fresh sealed artifacts: `/workspace/vy5-composition/dirty-source-20261101/final/`.
+
+
+### VY5 scoped function/loop component — 2026-11-01
+
+Using only already-staged inputs, FunctionPhysical adds26actual kernel laws for
+normal return, nested calls/leave from a scoped Yul loop, arity/refusal controls,
+full physical result/two-journal retention and heap/nonword/raw/source agreement.
+Raw uint8 results1793/1025/0 distinguish normal/wrong-callee/missing-leave cases.
+Four pinned compiler profiles pass28orderedcalls;410JS+2Python, full private
+1222-job library/262-job TestSuite/KeySort and scoped axiom/trust gates pass.
+Private validated head cb325c26a3c9be45f41506d23fe60555369ace92 preserves all
+previous checkpoints. All24full obligations/six Source combinations, full
+Source/compiler/world/G01 closure and the two VY1 compiler-expectation questions
+remain open. No new producer retrieval or goal change occurred. See
+[lane handoff](inline-assembly-vy5.md#scoped-functionloop-composition--2026-11-01).
+Artifacts: `/workspace/vy5-composition/function-source-20261101/final/`.
