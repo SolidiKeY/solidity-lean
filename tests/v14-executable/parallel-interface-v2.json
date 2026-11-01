@@ -1,0 +1,64 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "producer_source_head": "04aa23d5ea4d0c396488d74f1a1f252eb1874795",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "modules": [
+    {
+      "module": "Solidity.Backend.Executable.PaymentReceipt",
+      "path": "Solidity/Backend/Executable/PaymentReceipt.lean",
+      "blob": "d80f1cf02468c194e74edbf9cbdcdf1369f77607",
+      "sha256": "3a18e6618d184b102292bbe295f8ae4e3c8678207aaf62c5bf00c94d24811633"
+    },
+    {
+      "module": "Solidity.Backend.Executable.PaymentReceiptChecks",
+      "path": "Solidity/Backend/Executable/PaymentReceiptChecks.lean",
+      "blob": "2383b3d0ee213ceaf49e4a2ca62ac59d0bbbfb82",
+      "sha256": "0fdeda3ed8ba1d2013da510cdccea2243f6307182df353056f04aa88d9f857a5"
+    },
+    {
+      "module": "Solidity.Backend.Executable.PaymentHistory",
+      "path": "Solidity/Backend/Executable/PaymentHistory.lean",
+      "blob": "d31cf27b2a8562abadea60dab55f471a3701c2c9",
+      "sha256": "0bc83e45ea507159b1d74ca3bdac0ab325193a6bfa7a21f4e3b7bd7369508520"
+    },
+    {
+      "module": "Solidity.Backend.Executable.CreationFrame",
+      "path": "Solidity/Backend/Executable/CreationFrame.lean",
+      "blob": "8f4bdaa2c32eefff3c43aace1f0caa3a5e5796d7",
+      "sha256": "63b0e7b4a02ff7acd2f7f8806f9a488041663f7a25dc00253d62128e5f0662c1"
+    },
+    {
+      "module": "Solidity.Backend.Executable.CreationArguments",
+      "path": "Solidity/Backend/Executable/CreationArguments.lean",
+      "blob": "36d9abb61c1094dfccd38c6bd9c76d8f0bdbd87f",
+      "sha256": "919f7fcc24511840f0bc8cbb4c8e27d87ba3df65afac65b3ba208613b824df45"
+    },
+    {
+      "module": "Solidity.Backend.Executable.ScalarSequence",
+      "path": "Solidity/Backend/Executable/ScalarSequence.lean",
+      "blob": "713363563762f376936ddecdd00854e958aca374",
+      "sha256": "0efedc1fdb709e02f1ce05a9000ba150ffeb1f76765775d29c361211bfae8631"
+    },
+    {
+      "module": "Solidity.Backend.Executable.ScalarArtifact",
+      "path": "Solidity/Backend/Executable/ScalarArtifact.lean",
+      "blob": "133aa0bb65a041a5fb5bb5bb66a33633ce26d72a",
+      "sha256": "66dc7f17b828239155dc561264643efd511287035f0a2113d506faf8e0f28b92"
+    }
+  ],
+  "checked_private_combined_head": "f4932cdfa66661409d4ee24ec295f901a7e9e383",
+  "checked_private_tree": "51b6d954efe1753446bc856e2734da37a7263d77",
+  "peer_head": "66c08fdefbbb53c0eee111b09d1baa6277fedff5",
+  "exact_types_evidence": "/workspace/v14-history-evidence/interface-types.log",
+  "world_observation_premise": "Explicit typed w/recipient/Entry/sender/amount/caller; caller.selfBalance.val = (w.funds sender).val. Derived funding from actual receiver entry. Bool/None only, not general post-world relation.",
+  "prepare_refused_iff_premise": "No balance premise; actual full stipend send errors characterized. None does not encode exact halt identity.",
+  "history_scope": "Fixed inhabited intrinsic fixture, ordered prefix local observations; explicit ExtResult quantification. Actual sourceProgram, unchanged/default table and failed deferred settlement. No Fml.inTarget, chain reachability, final-Bool-only, independent Source/compiler or EVM counterexample.",
+  "required_open": [
+    "General source declaration/entry lowering and caller/world journal invariant",
+    "Immutable whole-program transaction-table/history correspondence",
+    "Stipend.Obligation for actual compiled gasUsed/failsUnderStipend, both Fitted and Enforced",
+    "General source constructor/runtime/reference-frame relation",
+    "Actual fetched-byte/state/control/resource/decoder correspondence"
+  ],
+  "limits": "Private combined checking is development evidence, not master publication or full lane closure."
+}

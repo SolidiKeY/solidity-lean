@@ -1260,3 +1260,28 @@ KeySort runtime gate is retained with checkpoint15. A final skeptic wording
 finding was fixed: Stmt.send's final false is full=false ordinary-send mode,
 not a general callback-disable flag. Final independent source reviews accept
 with no remaining finding; exact logs/commands in /workspace/v14-history-evidence.
+
+
+## Updated private combined validation and parallel handoff
+
+The refreshed private combined commit is
+f4932cdfa66661409d4ee24ec295f901a7e9e383, tree
+51b6d954efe1753446bc856e2734da37a7263d77. Its source is committed main
+04aa23d5ea4d0c396488d74f1a1f252eb1874795 plus exactly the three unchanged
+V13 Error modules, the byte-identical canonical staged client and its append-only
+root import. Git comparison confirms only those five dependency/registration
+paths differ. The actual combined ./run-lean.sh passed1048default+262TestSuite
+and pinned377/131/131 in2.34s. Aggregate Lean/LakeRSS1713008KiB, one worker,
+hostminimum17287980KiB, cgrouppeak387563520bytes, noOOM/no swap under12GiB.
+This is a concrete private checked tree, not master integration or lane adequacy.
+
+The updated test-lane parallel-interface-v2.json records exact source head,
+module hashes, actual private head/tree and each open producer premise. Exact
+Lean #check signatures are retained in interface-types.log. Original published
+Stipend.Obligation still requires both Fitted and Enforced for actual compiled
+gas/resource execution; no such premise has been silently discharged. Final
+documentation/interface metadata changes do not change the checked Lean blobs.
+All original Work/Backfill rows remain open/partial as recorded in the handoff.
+The same original goal remains ACTIVE. No get_goal or Lean MCP diagnostic tool
+is exposed in this runtime; supplied goal context is preserved and bounded
+per-file CLI diagnostics are used. No goal administration was attempted.
