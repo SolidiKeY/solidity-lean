@@ -1228,5 +1228,20 @@
     "file": "Solidity/Tools/PaymentReplay.lean",
     "kind": "unsafe",
     "code": "unsafe evalExpr Json (mkConst ``Json) e"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by valueStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by localStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by returnStoragePathsM]"
   }
 ]

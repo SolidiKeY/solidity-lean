@@ -3586,3 +3586,79 @@ Repository `/workspace/solidity-lean`, branch
 `0b078cefaf7daad79007b87b72df64eb6936420f`, starting reviewed HEAD
 `06f1aece06fb62e9654698a51e301c493610aa1f`; final committed full SHA is bound
 in the exported handoff. No push/merge/PR, unpublished imports or owner rewrite.
+
+### VY2 computed entry and return capture (2026-11-01)
+
+Additive `RetainedEntryPaths/Run/Image/Ownership/Frame/Controls` construct collection
+from actual typed `Source.Val`, `Locals` and returned `Vals`. Structural recursors
+have executable structural twins and proved equality. UDVT payloads are traversed.
+Exact root/first-index filtering retains descendants, tags scopes with their
+contextual frame account, and deduplicates before the existing typed child packer.
+No observed reference is relabeled a historically successful index event. Actual
+`LocalsOK.get` supplies `pathTy` for an actual local `storRef`, without requiring
+current ancestor bounds. Arbitrary `Layout.underlying`/UDVT payload collection is
+syntactic and does not automatically inherit recursive RefOK.
+
+`captureValueRun` observes actual entry/final locals and successful typed returns;
+`captureValueBindRun` preserves earlier return observations across later halt and
+proves exact owner bind-run equality. `captureSubValueRun` includes saved caller
+locals before substitution and callee results after the actual owner sub run,
+including restoration on halt. The supplied frame is contextual interpretation:
+these generic observers cannot prove an arbitrary computation ran in that frame.
+They do not scan all intermediate `evalE`, heap/RVal/continuation values, arbitrary
+external/internal calls or all escaping producers. Full initial/global/reachable
+producer coverage and automatic arbitrary source instrumentation remain OPEN.
+
+`CapturedArrayImage` computes the observed/live/history union via the existing
+child packing, metadata, Fixed preimages, bounds and canonical codecs. Its selected
+image agreement, whole administrative-store unchanged identity and exact raw map
+reconstruction are proved. `CapturedOwnershipPlan` checks actual current source
+length, old source inventory/encoding and new raw-header image, invokes real
+`Source.applyOp`, updates the same complement only after source success, and derives
+whole-map reencoding, every-original-H MemOK, static failure and source/residual
+rollback/committed-child outer rollback. Fixed-scope rollback laws retain the
+supplied caller scope; arbitrary observation-history rollback/escape capture is
+not inferred. Standalone selected-image coverage does not imply universal heap or
+storage coverage. Dirty owned bits, general mappings/storage bytes/transient and
+other original representation obligations remain open; preparation None is not a
+language refusal, no-op, cleanup or deallocation.
+
+Inhabited controls start with actual dormant entry aliases and NO index events,
+return a reference from empty child locals, use it after the same raw header write,
+retain a first return across late halt, and discriminate erased entries, foreign
+accounts, wrong roots, duplicate aliases and current-locals-only capture. Existing
+seeded source/raw prefix, padding, unknown-slot, static/frame and alias controls
+are reused. Kernel source seeds/Fixed functions are separate from real compiler
+constructor/Keccak observations. Existing RetainedStorage.sol already observes the
+same finite alias/sub/shrink/write behavior, so no expected fixture changes are
+needed; cumulative 732 ordered calls and 18 compiler classifications stay exact.
+No frontend admission, manifest, owner semantics or expected verdict changes.
+
+Validation commands/results and raw failed attempts are recorded in
+`/workspace/vy2-evidence/retained-entry`; final tested-tree attribution and handoff
+accompany its patch/bundle/checksums. Independent read-only finder and skeptic
+implementation reviews found no defect; no reviewer ran Lean/build/tests.
+Gate G0/history was read before edits; additions use constant-motive recursors and
+linked executable twins, preserving owner representations and all budgets.
+
+Entire original accounting: Y04/Y05/Y06 and Backfill A/B remain PARTIAL; concrete
+Y09.02/producer/source/compiler/calculus/joint closure remains BLOCKED. Universal
+memory/writeback/shared-zero/interior/pointer forms, reachable allocation provenance
+and nondeterministic refinement, concrete V10/V11 instances, Y06 source/Yul bindings,
+full physical calculus/notation/printers/Lean-only rule rows remain mandatory. The
+original persistent goal remains BLOCKED unchanged; getter is unavailable and no
+mutator was called. YQ1-YQ7 remain the approved directions in
+[scope](../solidity-scope.md#inline-assembly-decisions-2026-10-31), not implemented
+admission evidence. Historical global docs exit1 is distinct from zero new debt.
+
+Trust inventory adds exactly the three linked executable recursor twins above; the initial unregistered-site exit1 is retained. This is site accounting, with no new axiom or changed trust rule.
+
+
+Continued producer connection: `RetainedExpressionCapture` composes ACTUAL owner
+`evalE/getV` and `evalLoc/readLoc`, proves exact source-result preservation, and
+constructs endpoint coverage for EVERY actual local index at EVERY positive owner
+horizon; horizon zero retains the actual timeout and no returned reference.
+This adds no evaluator/AST/fuel/profile or fragment predicate. Tuple-contained
+RVal/intermediate reference capture and arbitrary calls remain open. Per-file
+validation and independent read-only reviews cover the additions; final gates
+are attributed by exact commands and tested-tree hashes in the evidence.

@@ -959,3 +959,7 @@ import Solidity.Yul.Views.RecursiveDynamicSiblingControls
 import Solidity.Yul.Views.AggregateStorageAliasControls
 
 import Solidity.Yul.Views.RetainedChildEventControls
+
+import Solidity.Yul.Views.RetainedEntryControls
+
+import Solidity.Yul.Views.RetainedExpressionCapture

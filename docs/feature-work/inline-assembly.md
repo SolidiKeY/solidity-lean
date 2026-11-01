@@ -602,3 +602,5 @@ implemented for a supported persistent component. This is not universal
 producer/alias capture, whole storage/heap semantics or full-lane completion.
 Exact committed SHA, theorem premises, final gates/reviews/resources and artifacts:
 `/workspace/vy2-evidence/retained-storage/HANDOFF.md`.
+
+- VY2 computed entry/return capture: [lane checkpoint](inline-assembly-vy2.md#vy2-computed-entry-and-return-capture-2026-11-01); partial, final source/compiler closure open.
