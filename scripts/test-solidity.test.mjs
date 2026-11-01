@@ -690,7 +690,8 @@ test("quantified consequents parse and omitted specification bodies stay local",
   assert.equal(rows.renamedSpec.status, "proved");
   assert.equal(rows.omittedCaller.status, "pending");
   assert.equal(rows.omittedBody.status, "unsupported");
-  assert.equal(rows.omittedModifier.status, "unsupported");
+  assert.equal(rows.omittedModifier.status, "excluded");
+  assert.match(rows.omittedModifier.reason ?? "", /solidity\.inlineAssembly/);
   assert.equal(rows.stillChecked.status, "pending");
   const ctor = Object.fromEntries(report.results.filter(r => r.contract === "SpecCtorGap")
     .map(r => [r.function, r]));
