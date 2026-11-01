@@ -5810,3 +5810,114 @@ tree evidence only. Final full02 warm sampleRSS79752KiB/processcount1/diskgrowth
 newOOMdelta0,13proof failures plus stagedFAIL2/editor failures retained. Refined
 strict/trust/layers/orphans/133corruptiontests/stageddiff PASS; rawdocs/inventory
 failures and exact public/frozen comparisons remain unchanged and separate.
+
+
+## C72: fixed declaration, OLD-local rebinding and reached compound pair (partial)
+
+Original G33/G34 and Backfill B application. New owned modules are
+[SourceUintFixedDeclareCompound](../../Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompound.lean),
+[SourceUintFixedDeclareCompoundOverflow](../../Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompoundOverflow.lean),
+and [SourceUintFixedDeclareCompoundControls](../../Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompoundControls.lean).
+No reserved Source/Evm/Bridge producers, global inventories or old fixtures changed.
+The frozen base remains fb379ae20f10e2c92113453ddd9d40d8f2efbe09; consumed public
+prerequisite remains 2fe1f8932f96be15b00df03ba2cde46f64a87758; parent C71 is
+30fdffac2907933eb7057383c04a0505c1b9ae74. The persistent goal stays BLOCKED unchanged.
+
+`source_uint_fixed_declare_compound_word` derives one actual Source RItems program:
+positive fixed uint declaration, OLD-local rebinding to the NEW root, then two
+reached compound additions. The matching existing intrinsic Prog and whole
+published constructor/pointer/read/binary/write word append are proved. Genuine
+Source STy some n and intrinsic RefTy.fixed n are retained. The Source cons and
+typed weakening/push contexts remain separate. ORIGINAL Source parameter count
+Gamma.length is used throughout; the complete program has sufficient horizon n+8,
+not a minimal-fuel or public admission claim. The two expression horizons are n+4
+and n+3; default construction and alias statement use n+7 and n+6 respectively.
+
+INITIAL premises: positive n, scalar local/index/RHS alignment, actual k<n,
+canonical uint RHS, inRange(value+value), Source MemOK, full Objects.StateRepr and
+AllocatorRepr, positive base, cursor+max(1,n)<W and b+(Delta.length+1)<=frame.
+The actual allocator proves fresh OLD0 at the selected cell; no caller-supplied
+OLD value, desired reached observer or preservation equality is assumed. Existing
+Source/typed alias producers derive operand framing and strong reached representation;
+the C71 pair derives its second OLD from the first real write. OLD destination
+pointer alignment is unnecessary because actual rebinding overwrites that local.
+All other Source/typed locals, every old typed object, occupied old Source address,
+stack, allocator cursor and Source ex/events/logs/fnLocals are derived as frames.
+No global address injectivity is added. The success theorem covers checked or
+unchecked IN-RANGE arithmetic only; unchecked overflow agreement is not claimed.
+
+`source_uint_fixed_declare_compound_overflow_word` uses checked=true and INITIAL
+out-of-range double(value), deriving actual fresh0->value success then second
+arithmetic panic from that changed prefix. Source Items retains its real prefix
+globals; intrinsic Prog errors and whole symbolic word code reverts. Only the
+legitimate successful target prefix has StateRepr/AllocatorRepr/stack/contents.
+No suffix machine or transaction rollback/panic-payload equivalence is invented.
+`source_uint_fixed_declare_compound_timeout` proves actual entire-program timeout
+before allocation/rebinding for fuel<=n+4, with initial globals retained.
+
+Controls independently inhabit old LEFT=[7,8,7], RIGHT=[9,10,9], neighbor=[11,12]
+and Source/Objects/MemOK/allocator representations. BOTH original pipelines execute
+the combined declaration/rebind/fresh0->42->84 program for every runtime k<3.
+Complete Source object tables, all payload cells, reached full locals, typed old/
+fresh identities, world frames and strong word allocator/stack evidence are kept.
+OLD retained LEFT and the neighbor stay unchanged while the rebound old local
+and new declaration local point to fresh ID3/Source address3. Complete20word
+constructor/alias/first/second vectors include all prior16 cells plus local7 and
+fresh40/41/42. WORD-only skipped alias changes LEFT7->49->91 and leaves fresh0;
+WORD-only delayed alias leaves LEFT49 and fresh42 instead of the correct fresh84.
+These negatives are not falsely labeled Source whole-program executions.
+The actual checked max case gives fresh0->MAX then panic, old contents retained;
+frozen initial fresh0 would incorrectly succeed again.
+
+`boundary33` first executes a separate certified real length33 constructor,
+then applies the actual combined program at that REACHED state: the old declared
+ID3 is redirected to second fresh ID4, old ID3 stays all-zero, fresh index32 goes
+42->84. Every33 payload word, typed/Source reads and endpoint33 panic are proved.
+Its statement includes the actual first constructor run, actual combined target
+run and entire two-prefix word append, not just an existential representing
+machine. The first Source declaration and subsequent Source RItems are explicitly
+separate executions; no larger two-declaration Source Items theorem is claimed.
+A separately inhabited initial frame9 is necessary for two new locals; this is an
+actual ownership capacity premise, not a changed proof/resource budget. Logical
+element32 is not a physical-byte encoding claim. Generic laws quantify runtime n;
+no public payload/depth cutoff or zero-length Source admission is introduced.
+
+Independent read-only finder preliminary mathematical/control/script PASS found no
+defect. Skeptic found boundary33 dropped its already-derived Evm.run clauses from
+the conclusion; these exact first/combined/whole runs were added while preserving
+every existing observation. Final source/artifact reviews and gates are recorded
+in additive /workspace/v11-memory-operations-evidence/checkpoint72 evidence.
+Automatic approval rejected an unexecuted test-generation command as potentially
+dropping C71 cases; the safe NEW script retains all C71 cases and appends C72 cases,
+leaving the original script byte-unchanged. No permission/policy change or bypass.
+Earlier focused failures and the preflight identity assertion remain evidence;
+none is reclassified as a pass. All new guards require exact standard axiom sets.
+
+ALL original G32/G33/G34/G35.01/.03/.04/.05 and both Backfills remain PARTIAL;
+G35.02 and G35.06 remain BLOCKED on reserved copy/final composition prerequisites.
+Physical bytes, all-profile constructors/target allocation failures, general paths/
+reference graphs, ABI/storage/deep-copy/recursive liveness and final Source/V10/
+target correctness remain unfinished. These are kernel and symbolic-word proofs,
+not external solc/EVM validation or original-lane completion. Global docs and axiom
+inventory debt remain raw failures, distinct from complete public-byte equality
+and exact owned pin proposals. No exhaustion of independent work is asserted.
+
+C72 final validation: focused03 PASS244jobs; literal full01 PASS1144default/262Suite,
+SolKey377parsed/131covered/OK and exit0. Actual Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613 plus KeySort2job PASS observed with cacheOFF/thread1.
+Full sampled aggregate RSS 1587628KiB, disk growth
+274432bytes, newOOMdelta0; cumulative
+session peak12GiB and historical5OOM kills remain qualified failure history.
+All19C72exec receipts retain 12failed proof gates;
+none is reclassified green. First preflight assertion and unexecuted approval
+rejection remain separately retained. No resource/proof/time budget was increased.
+Structural/trust/lane/completefixtures PASS;165script/corruption tests PASS.
+Seven new exact standard-trio guards give1142owned pins/163modules, with all1135
+C71owned sets byte/exact-row unchanged. Raw inventoryFAIL1/1501unregistered=
+359published+1142owned/0unsafe; coordinator additive registration remains proposed,
+not a global pass. Raw docsFAIL1/83finding rows; complete consumed-public bytes
+match separately, frozen72rows+11incoming comparison remains FAIL1. Warmstrict
+times0newSuite modules; all262source/fixture/toolchain hashes match retained C31
+cold26/max160seconds<300 only, not newcoldcoverage. Both independent read-only
+final source/control/script/doc reviews PASS after boundary-run fix; artifact
+reviews follow actual commit/export. No external compiler/EVM execution inferred.

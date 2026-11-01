@@ -1022,3 +1022,6 @@ import Solidity.Backend.MemoryOps.SourceUintFixedCompound
 import Solidity.Backend.MemoryOps.SourceUintFixedCompoundSequence
 import Solidity.Backend.MemoryOps.SourceUintFixedCompoundBounds
 import Solidity.Backend.MemoryOps.SourceUintFixedCompoundControls
+import Solidity.Backend.MemoryOps.SourceUintFixedDeclareCompound
+import Solidity.Backend.MemoryOps.SourceUintFixedDeclareCompoundOverflow
+import Solidity.Backend.MemoryOps.SourceUintFixedDeclareCompoundControls

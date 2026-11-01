@@ -1398,3 +1398,7 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintFixedCompoundSequence.lean` | Actual reached two fixed compound updates and late checked overflow in Source Items/typed Prog/full word append with original parameter count and derived second cell/bounds. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedCompoundBounds.lean` | Exact fixed compound Source index panic versus intrinsic/wholeword revert, no posterror target state. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedCompoundControls.lean` | Both-pipeline populated alias/fresh-declaration applications, full20word vectors, all33 target payload cells, old/fresh Source reads and actual max/zero/bounds/timeout/nonadmission controls. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompound.lean` | Actual positive fixed declaration, OLD-local rebind to NEW root and two reached compound updates in Source Items/intrinsic Prog/whole Objects word code; constructor timeout. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompoundOverflow.lean` | Same actual combined pipeline with a changed successful first update and checked second overflow, preserving only legitimate Source/word prefixes. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompoundControls.lean` | Both-pipeline populated old/fresh aliases, complete20word skipped/delayed-rebind contrasts, retained max prefix, actual length33 two-constructor application with every target payload word and exact endpoint. |
