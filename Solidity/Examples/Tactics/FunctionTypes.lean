@@ -384,20 +384,20 @@ def MemArgs : Contract := contract!{
   function pair(uint[] memory xs, uint k) returns (uint r) { r = xs[0] * 100 + k; }
   function setFirst() returns (uint) { values[0] = 9; return 1; }
   function setOp(bool b) { op = b ? bump : sum2; }
-  function viaParam(function (uint[] memory) returns (uint) h, uint[] memory xs)
-      returns (uint r) { r = h(xs); }
   Token tok;
   function tokPlus(Token memory t) returns (uint r) { t.value = t.value + 1; r = t.value; }
   function tokStored(Token storage t) returns (uint r) { t.value = t.value + 7; r = t.value; }
   function tokOther(Account memory a) returns (uint r) { r = a.balance; }
+  function viaParam(function (uint[] memory) returns (uint) h, uint[] memory xs)
+      returns (uint r) { r = h(xs); }
 }
 
 local instance : InContract := ⟨MemArgs⟩
 
-/-- The signatures: the location is kept, so storage, `bytes` and scalar
-parameters are not memory-array candidates; a narrow element is not spelled
-(its width rows are not carried by a capture), so it is no candidate. -/
-example : (MemArgs.funs.map fun (n, d) => (n, FunDecl.sigTy? MemArgs d)) =
+-- The signatures: the location is kept, so storage, `bytes` and scalar
+-- parameters are not memory-array candidates; a narrow element is not spelled
+-- (its width rows are not carried by a capture), so it is no candidate.
+#guard (MemArgs.funs.map fun (n, d) => (n, FunDecl.sigTy? MemArgs d)) ==
     [("sum2", some "function(uint[]memory)returns(uint)"),
      ("bump", some "function(uint[]memory)returns(uint)"),
      ("scalar", some "function(uint)returns(uint)"),
@@ -406,16 +406,18 @@ example : (MemArgs.funs.map fun (n, d) => (n, FunDecl.sigTy? MemArgs d)) =
      ("pair", some "function(uint[]memory,uint)returns(uint)"),
      ("setFirst", some "function()returns(uint)"),
      ("setOp", some "function(bool)"),
-     ("viaParam", some "function(function(uint[]memory)returns(uint),uint[]memory)returns(uint)"),
      ("tokPlus", some "function(Tokenmemory)returns(uint)"),
      ("tokStored", some "function(Tokenstorage)returns(uint)"),
-     ("tokOther", some "function(Accountmemory)returns(uint)")] := rfl
+     ("tokOther", some "function(Accountmemory)returns(uint)"),
+     ("viaParam", some "function(function(uint[]memory)returns(uint),uint[]memory)returns(uint)")]
 
 /-- The dispatch of `h(xs)` as the elaborator writes it: the argument is
 captured as a memory local, then each candidate of the exact signature is a
 branch, `bump` and `sum2` (not `scalar` nor `narrow`); an unassigned tag reverts. -/
 example : Prog.toStr [] (sol[MemArgs]{ uint[] memory xs = new uint[](2);
-    function (uint[] memory) returns (uint) h = bump; uint r = h(xs); }) = "" := rfl
+    function (uint[] memory) returns (uint) h = bump; uint r = h(xs); }) =
+    "uint[] memory xs = new uint[](2); uint h = 2; uint r; uint[] memory se1 = xs; \
+     if (h == 1) { r = sum2(se1); } else { if (h == 2) { r = bump(se1); } else { revert(); } }" := rfl
 
 /-- Aliasing: `bump` writes through the caller's array. -/
 private def memAlias := sol[MemArgs]{
@@ -515,18 +517,18 @@ theorem structArgs_run :
 /-- Model-only behaviour on a program solc rejects (`h = tokOther` is a
 type error there): an `Account` function's tag has no arm in a
 `function (Token memory)` dispatch, so the call reverts. -/
-theorem structWrongNominal : ¬ (⊨ᶠ dl{ ⟨ Token memory t;
+theorem structWrongNominal : ¬ (⊨ᶠ dl!{ ⟨ Token memory t;
     function (Token memory) returns (uint) h = tokOther; uint r = h(t); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
 /-- A never-assigned storage function value reverts. solc's IR pipeline
 raises `Panic(0x51)`; its legacy pipeline jumps to an invalid destination
 (finite-dispatch.md, "Recorded deviations"): both are failures. -/
-theorem memUnassigned : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1); uint r = op(xs); ⟩ true }) :=
+theorem memUnassigned : ¬ (⊨ᶠ dl!{ ⟨ uint[] memory xs = new uint[](1); uint r = op(xs); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
 /-- The false observation that the callee's write is not visible fails. -/
-theorem memNoCopy : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1);
+theorem memNoCopy : ¬ (⊨ᶠ dl!{ ⟨ uint[] memory xs = new uint[](1);
     function (uint[] memory) returns (uint) h = bump; uint r = h(xs); assert(xs[0] == 0); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
@@ -534,15 +536,21 @@ theorem memNoCopy : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1);
 error there): the elaborator does not type-check a function value's
 assignment, and the dispatch has no arm for a scalar function's tag, so the
 call reverts. -/
-theorem memWrongCandidate : ¬ (⊨ᶠ dl{ ⟨ uint[] memory xs = new uint[](1);
+theorem memWrongCandidate : ¬ (⊨ᶠ dl!{ ⟨ uint[] memory xs = new uint[](1);
     function (uint[] memory) returns (uint) h = scalar; uint r = h(xs); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
-/-- In every typed state where `bump` returns (its counter may overflow),
-the callee's write reaches the caller's array. -/
-theorem memAlias_valid : ⊨ᶠ dl{ [ uint[] memory xs = new uint[](1);
-    function (uint[] memory) returns (uint) h = bump; uint r = h(xs); ] xs[0] == 10 && r == 10 } := by
+/-- One candidate, `add10`, so the symbolic run stays small. -/
+def MemAlias : Contract := contract!{
+  function add10(uint[] memory xs) returns (uint r) { xs[0] = xs[0] + 10; r = xs[0]; }
+}
+
+/-- In every typed state, `h(xs)` with `h = add10` writes the caller's
+array: `uint[] memory xs = new uint[](1); xs[0] = 1; uint r = h(xs);` leaves
+`xs[0] == 11` and `r == 11`. -/
+theorem memAlias_valid : ⊨ᶠ dl[MemAlias]{ ⟨ uint[] memory xs = new uint[](1); xs[0] = 1;
+    function (uint[] memory) returns (uint) h = add10; uint r = h(xs); ⟩ xs[0] == 11 && r == 11 } := by
   sol_symex
-  sol_close
+  sol_decide
 
 end Solidity.Examples.Tactics.FunctionTypes
