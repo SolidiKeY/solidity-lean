@@ -1317,3 +1317,6 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/PacketEmission.lean` | Value-specialized published typed codec to actual checked RETURN/custom-error byte emission; exact whole packet, selector, Fits/stack and memory interval premises. |
 | `Backend/AbiWorld/EnumEntry.lean` | Actual nominal enum cardinality failure before arbitrary tail parameters, coupled to selected existing empty REVERT emitter; truncated-head and fuel boundaries retained. |
 | `Backend/AbiWorld/EnumControls.lean` | Actual enum-before-dynamic-memory/calldata clients, complete ordered packet/selector/offset observations, wrong-range/truncation/refusal controls and post-enum eager/lazy reference. |
+
+| `Backend/AbiWorld/WordArrayPacket.lean` | Actual represented full-uint word arrays to published typed ABI values/complete offset-length-word observations and post-execution literal packets; exact compiler/frame/cost premises and separate memory units retained. |
+| `Backend/AbiWorld/WordArrayControls.lean` | Actual compiled alias/private-escape applications after populated caller setup; whole word300, old object/marker/store/sentinel, pointer/header/refusal/order diagnostics and literal packet endpoints. |

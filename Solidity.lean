@@ -972,3 +972,6 @@ import Solidity.Backend.AbiWorld.EntryControls
 import Solidity.Backend.AbiWorld.PacketEmission
 import Solidity.Backend.AbiWorld.EnumEntry
 import Solidity.Backend.AbiWorld.EnumControls
+
+import Solidity.Backend.AbiWorld.WordArrayPacket
+import Solidity.Backend.AbiWorld.WordArrayControls

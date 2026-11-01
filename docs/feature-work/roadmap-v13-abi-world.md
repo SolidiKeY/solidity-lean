@@ -1058,3 +1058,69 @@ exact focused-checked commit with full import/default/root/composite gates PENDI
 peer staging cannot count as final integration. Every original Work/Backfill remains
 partial/blocked; original goal unchanged. Broad checks follow this early committed
 handoff so peer development need not wait for the whole preceding lane/gate.
+
+
+### G41/BackfillA/B full-word array observation and packet transport
+Continued ready owned work after the early f103b7c6 parallel checkpoint. That
+exact immutable delta/source package remains unchanged for peer staging; default
+1063jobs PASS3989.158s and rootMCP PASS at that head are separate later evidence.
+New once-only changed-publication Suite180 attempt FAILED124/181.061s; no retry
+for the following owned observers, which do not affect TestSuite. Composite remains
+unresolved, all earlier raw failures remain failures. Pinned full-container sort
+PASS377/131 separately repairs the MCP-container reference-mount skip, not its log.
+
+WordArrayPacket reuses published Scalar.encode_uint_toNat and ArrayRepr/StateRepr,
+constructs existing indexed AbiEntry.Word/Seq/Vals, and observes EVERY actual numeric
+word. No ByteRange premise, silent uint8 truncation or new decoder/machine semantics.
+compiled_observation consumes actual Compilation.correct, isMemoryCalls/Input/
+noPay/hrun/hget and retains full StateRepr/BaseExtends/GrowsAllocator. Values are
+explicitly modeled as uint256[]; Core normalized types alone do NOT establish an
+admitted Source declaration/result signature. encoded_values is an unconditional
+raw-codec formula (offset32, encoded length, complete32-byte words); exact length
+needs length<W, supplied for real Core arrays by heap_length. Source ABI64-bit lim/
+allocation/admission conditions stay separate and unchanged. observedPacket reads
+an ALREADY EXECUTED symbolic word-machine result, then emits a value-specialized
+literal through the real Failure byte-slice. This is not a static runtime encoder,
+not one machine identifying word and byte addresses, and not Source/world simulation.
+
+Two actual compiler applications start from the published real nonempty setup:
+old object0 [161,178], caller marker42, saved9, stack77 and sentinel99. Callee aliases
+or privately allocates a3-word return, writes300, drops a private bool local; caller
+writes11. Actual fields show result pointer259/264, argument pointer259, header3,
+complete old object header2/contents161/178; frame6, reached cost5/9 retained. The
+complete160-byte ABI packets encode [11,300,255] or [11,300,0], including01,2c for300;
+the old BYTE observer still refuses300. Wrong pointer yields a different well-typed
+empty observer value, wrong header/order/offset claims fail, symbolic slots are outside the
+numeric observer. Successful target_run comes from actual compiler completion;
+target is only a finite diagnostic projection, never a fallback execution oracle.
+The raw200k heartbeat failures in symbolic interpreter rewriting are preserved;
+using an abstract result projection/kernel finite diagnostics repairs them without
+raising limits or changing theorem premises. Singleton enum controls additionally
+isolate complete36-byte acceptance from4/35-byte missing/truncated-word rejection,
+with actual entry/body values and emitted RETURN/empty REVERT endpoints.
+
+Independent read-only finder/skeptic initial reviews found no soundness/G0/ownership
+issue. Confirmed clarifications/strengthening applied: raw-list versus Core/source
+length bounds, explicit successful target, complete older-object/argument-pointer
+observations, separate post-execution packet scope. New guarded17axiom outputs use
+standard sets; prior13guards/Panic controls remain unchanged. Every original Work/
+Backfill stays partial/blocked; runtime ABI memory reading/emission, Source-native/
+declaration agreement, arbitrary external CALL/RETURNDATA/world/callback/library/
+function-value/resource chains remain genuine unresolved producers. No source-only
+interface or conditional theorem closes those premises; no generated ledger/pins.
+
+
+Word-array checkpoint validation: newfiles and amended singleton controls per-file
+MCP PASS, all24ownedmodules225jobs focused PASS. Actual17additional scoped axioms/
+guards standardsets only; combined30headlineguards. Raw HB200000/recursion failures
+remain archived; no budget change. Finalstatic:24imports/0forbidden,184core/0layer,
+1102reachable/0orphan,1117sources/258trustsites/0findings. Complete rawdoc finding
+comparison remains86current/86publication/83frozen, rawFAIL1 and frozenno-newFAIL;
+publication equalityPASS is separate. No reserved document edit or placeholder.
+Both independent read-only final staged reviews PASS actual7path diff, premises,
+nonvacuity and G0. Minor empty-observer wording clarified without allocated-object
+admission claim. Old19pre-enum ownedmodules/approvedPanic remain unchanged; early
+f103parallelpackage seal unchanged. New cached import/default and rootconfirmation
+follow this exact committed source. Suite/composite prior failures are not retried
+for these observers; they do not reach the Suite dependency graph. Originalfullgoal
+unchanged/blocked; no push,defaultmerge,PR,peerunmergedinput or globalpin/ledger edit.

@@ -205,6 +205,48 @@ theorem accepted_emission (copy : Bool) :
   simpa only [encoded] using h
 
 
+/-- Isolate enum-word bounds from the mixed signature's larger tuple head. -/
+def scalarParams : List Param := [param 3]
+def scalarInput : Input := cd [2]
+def scalarValue : Vals (scalarParams.map Param.shape) :=
+  (bodyObservation scalarInput 64 scalarParams id).get (by decide +kernel)
+attribute [irreducible] scalarValue
+
+theorem scalar_verdict : verdict scalarInput 64 scalarParams = .run scalarValue := by
+  apply verdict_of_values
+  unfold scalarValue
+  exact EntryControls.option_get _ _
+
+theorem scalar_encoded : encodeArgs scalarValue = wordBytes 2 := by decide +kernel
+
+/-- One complete enum word has actual entry/body witnesses and actual emitted
+RETURN; no dynamic tail is needed to make its positive baseline inhabited. -/
+theorem scalar_emission :
+    (∃ es, entry scalarInput 64 scalarParams = .ok es ∧
+      bodyValues scalarInput 64 scalarParams es 0 = .ok scalarValue ∧
+      bodyObservation scalarInput 64 scalarParams encodeArgs = some (wordBytes 2)) ∧
+    Backend.Failure.Slice.checkedRun (emitResult 17 scalarValue ++ suffix) machine =
+      some ({machine with memory := Backend.Failure.Slice.putBytes machine.memory 17 (wordBytes 2)},
+        some (.success (wordBytes 2))) := by
+  have h := accepted_packet scalarValue scalar_verdict 17 suffix machine
+    (by rw [scalar_encoded]; unfold Backend.Failure.Fits; decide +kernel) (by decide +kernel)
+  simpa only [scalar_encoded] using h
+
+/-- A full zero word is accepted; the missing/31-byte zero word is refused
+by the singleton36-byte head check, despite calldataload returningzero. -/
+theorem scalar_head_bounds :
+    bodyObservation (cd [0]) 64 scalarParams encodeArgs = some (wordBytes 0) ∧
+    (cd [0]).size = 36 ∧ missing.size = 4 ∧ truncated.size = 35 := by decide +kernel
+
+theorem scalar_truncated :
+    runRejection missing 64 scalarParams 17 suffix machine = some (machine,some (.revert [])) ∧
+    runRejection truncated 64 scalarParams 17 suffix machine = some (machine,some (.revert [])) := by
+  constructor
+  · exact truncated_revert missing 64 3 [] (by decide +kernel) 17 suffix machine
+      (by unfold Backend.Failure.Fits; decide +kernel) (by decide +kernel)
+  · exact truncated_revert truncated 64 3 [] (by decide +kernel) 17 suffix machine
+      (by unfold Backend.Failure.Fits; decide +kernel) (by decide +kernel)
+
 /-- info: 'Solidity.Backend.AbiWorld.EnumControls.actual_body' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms actual_body
 /-- info: 'Solidity.Backend.AbiWorld.EnumControls.accepted_emission' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -217,5 +259,11 @@ theorem accepted_emission (copy : Bool) :
 #guard_msgs (whitespace := lax) in #print axioms mixed_negatives
 /-- info: 'Solidity.Backend.AbiWorld.EnumControls.one_past_revert' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms one_past_revert
+
+
+/-- info: 'Solidity.Backend.AbiWorld.EnumControls.scalar_emission' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms scalar_emission
+/-- info: 'Solidity.Backend.AbiWorld.EnumControls.scalar_truncated' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms scalar_truncated
 
 end Solidity.Backend.AbiWorld.EnumControls
