@@ -1122,6 +1122,13 @@ coverage/certificate bridge. Rejection denotes only absence of that grammar;
 it is neither a verdict test nor a Residue or unknown classification. The global
 Residue census and target/hash completeness bridge remain open.
 
+`Calculus/DecisionFixedArrayPair.lean` reconstructs two arrays at diverging
+intrinsic prefixes, deriving both actual saves and both indexed read equations
+plus a disjoint frame. Each array retains its own typed elements, length and
+breakpoints. Missing-prefix and overlapping-prefix controls preserve the precise
+boundary. Arbitrary families, overlapping nested prefixes and decision-pipeline
+integration remain open; no source predicate or verdict is changed.
+
 `Calculus/DecisionFixedArrayPath.lean` reconstructs one fixed array below
 an arbitrary intrinsic path, with save existence from actual prefix presence,
 optional indexed lookup agreement (explicit length breakpoint), and a frame for

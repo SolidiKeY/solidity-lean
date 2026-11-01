@@ -1790,3 +1790,65 @@ All global AU01 obligations, broader revised program-free boundary, AU02 array
 pipeline/memory/halting-OR/general-fuel/normalizer obligations, remaining baseline/
 performance/backfill and final gates remain incomplete. Q1 answered; Q2 held
 only for frontend repair/full gates. No goal/VM reset, push/merge/PR/tag.
+
+## AU02 independent simultaneous fixed-array pair — 2026-11-01
+
+`Calculus/DecisionFixedArrayPair.lean` proves typed path divergence symmetry
+and extension through every typed continuation, then composes two actual
+fixedFloorAtPath saves. `fixedFloorPair_exists` derives both saves from actual
+prefix presence plus divergence; it assumes no future save theorem.
+`fixedFloorPair_reconstruction` constructs both original-floored lookup
+equations and the complete frame for queries diverging from both prefixes.
+Element types E/F, lengths n/m, breakpoint lists and every result type remain
+intrinsic and independent. Each indexed equation retains its own length
+membership premise; existence itself requires no breakpoint-membership premise.
+`fixedFloorPair_second_absent` preserves refusal of a missing second prefix.
+
+`Examples/DecisionFixedArrayPair.lean` inhabits the generic API with actual
+mapping-key values and saves. Both selected observations change (11→9 and
+9→7), a third key retains9, and an absent fixed-array sibling refuses. An
+overlapping-prefix counterexample breaks the first lookup equation even with
+both length breakpoints retained. Thus length membership cannot replace the
+explicit divergence premise. These are kernel value/path facts, not EVM tests,
+arbitrary-family reconstruction, overlapping nested composition, collector
+integration or decision/Residue closure. No source predicate, model, default,
+observation, verdict, refusal or budget is changed.
+
+Raw gates at /workspace/va1-evidence/fixed-pair-next: core MCP 5.388s, core
+build 4.172s, controls MCP 6.322s, controls build 3.179s,18 public axiom reports
+4.207s, all pass. Complete diagnostics have zero errors/warnings/dependency
+failures; axioms standard propext/Classical.choice/Quot.sound only. Original
+writer lock, thread1/-j1, verified hard12GiB aggregate/no-swap and12GiB host
+reserve apply to each check. Actual Lean4.24.0/Lake5.0.0-src+797c613 retained.
+Maximum sampled aggregate RSS1211216 KiB; minimum host available17203998720 bytes. Initial
+escaped-constructor and dependent-induction failures are retained.
+
+Independent finder and skeptic source/control reviews found no issues, read-only
+without edits/Lean/server/build. Static gates pass:1090 reachable/zero orphans,
+180 core/zero elaborator reach,491 automatic/61 budget/11 refuted/zero manual or
+pending, trust1105 sources/248 sites/zero findings. Inventory FAIL1 remains
+byte-identical prior1206 pins/zero errors/404 unrecorded changes; strict docs
+FAIL1 retains same85 frozen findings. Original Decision is byte-exact to base.
+Prior full TypeExamples resource failure remains retained, latest full gate
+pending; no unchanged stopped heavy build was repeated as an endpoint.
+
+The numeric logical source-traversal checkpoint is committed/sealed at
+0a773e1130eb75c073cb129431343de7532be541. Its new immutable PARALLEL-INTERFACE
+bundle and370-file complete local import-closure source archive are under
+/workspace/va1-evidence/numeric-traversal-next. Bundle SHA256:
+14d4d92f0a3564b4fac68ff042d616d439cecdd6374c67f65093fb463c83d7e7;
+archive SHA256:
+0f53bc6039428dc21a5ef3a1c48aae2f0099d0517c4cd8e84cccbb96767e425e.
+Both independent reviewers verified every file against exact committed blobs,
+bundle/base/head and checksums; no findings. Source-only/combined-final-gatefalse
+limits and unresolved normalizer identity are explicit, never assumed. Finder's
+first relative checksum invocation used the wrong directory; its corrected
+export-directory invocation passed. Neither reviewer ran Lean/server/build.
+
+All global Residue/theorem/bridge, broader revised program-free boundary,
+AU02 actual fixed/nested-array pipeline, broader memory/halting-OR/general-fuel/
+normalizer proofs, remaining baseline/performance/backfill and final gates
+remain incomplete. Q1 answered; Q2 remains only frontend repair/full-gate hold.
+Next array pipeline work must reuse these checked components and audit existing
+bounded/boolean preparations before implementing any additional expansion.
+Goal/VM/branch unchanged; no push, merge, PR or tag.
