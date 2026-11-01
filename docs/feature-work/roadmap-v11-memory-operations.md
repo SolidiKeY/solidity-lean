@@ -4521,3 +4521,118 @@ Physical-byte target transport/general Source graph/default/failure producers,
 reserved memory-to-storage and final V10/Source/target remain genuinely missing
 from this component. All original queue statuses remain partial/blocked; no
 new admission/profile restriction, semantic answer or goal status change follows.
+
+
+## C59: independent Source uint256 array observations and real snapshot provenance
+
+After sealing C58, the original G32/G34/Backfill B reassessment found no existing
+numeric Source heap observer. The next independent application is implemented in
+[SourceUintMemory.lean](../../Solidity/Backend/MemoryOps/SourceUintMemory.lean),
+with inhabited controls in
+[SourceUintMemoryControls.lean](../../Solidity/Backend/MemoryOps/SourceUintMemoryControls.lean).
+This is a typed INITIAL one-object correspondence over the EXISTING Source.Data
+array/Source heap and intrinsic Heap/HRef/ArrTy. It reuses sourceUint and its
+already proved calldataUint_sourceUint inverse exactly; no new conversion,
+decoder, AST, heap or copy evaluator is introduced. Source array type is dynamic
+uint256. Intrinsic dynamic/fixed ArrTy may observe its contents, which does not
+establish Source fixed-array syntax/lowering or eliminate any other source shape.
+
+Actual Source.memElem/readLoc bounds and exact value iff follow from initial
+contents and the existing inverse, without a supplied result/conversion proof or
+truncation. Natural indices and runtime list/schedule lengths have no added cap.
+Actual published allocRef produces independent Source tables and MemOK with
+structural conditions discharged. This is kernel allocation evidence, not new-
+expression/declaration/emitted allocator correctness. Actual .indexArray syntax
+from aligned root/index locals executes at n+2, deriving its location/read from
+the initial observer, with unchanged Source state. Both declared pipelines are
+instantiated for these pure-local operands; no general side-effect order claim.
+
+The arbitrary existing runCaptures is executed at REACHED intrinsic heaps;
+its captureOrigin read maps to actual INITIAL Source memory. This is explicitly
+not a Source copy loop or a final unchanged-index Source observer. Heap.Keeps
+transports primitive contents/old typed identities, and the published recursive
+SVal.copyStToM builder plus arbitrary successful old-root recaptures yields BOTH
+the actual copied recursive mirror and independent numeric Source read provenance.
+mapFree and actual Some execution remain explicit in the generic law; concrete
+controls discharge them with a real nonempty nested numeric tree and actual
+schedule. No fresh Source entries or global address injection are manufactured.
+
+Controls quantify runtime tail n and copy counts; n+3<2^256 is only the existing
+intrinsic dynamic-object validity. Actual two Source allocations independently
+establish [7,max,max] plus zero tail and separate [max,0] table/Source MemOK. Root
+and retained local alias read the same object through actual resolved syntax at
+EVERY valid runtime index in both pipelines. Initial numeric target arrays and
+nonprimitive parent [root,neighbor,root] are explicitly populated. A real first
+snapshot changes [7,max,max] to [7,7,max], breaks old-index Source correspondence,
+and still matches computed origin0 read7 while Source index1 reads max. Arbitrary
+many REAL existing break/repair cycles restore contents from INITIAL provenance,
+with no desired final agreement premise. A published fixed reference-array copy
+contains a nonempty numeric child [max,7]; after old-root schedules the copied
+root/child contents and recursive mirrors, fresh logical lower bounds/old-root
+non-aliasing, numeric neighbor and repeated old IDs[0,1,0] all derive. This is not
+physical-address injectivity, recursive Source graph construction or emitted copy.
+
+Additional actual controls cover logical elements31/32 in length33 with values
+7/max, exact end33 Source read/indexLoc panic, horizon1 syntax timeout, zero/max
+nontruncation and complete boundary values30/31/32/33=[0,7,max,none]. These are
+ELEMENT indices, not byte-word encoding. An intrinsic fixed2 observation executes
+[max,0]→[max,max] and refutes old-index Source agreement while retaining computed
+Source provenance; the Source object remains dynamic. Empty Source arrays,
+raw wrong-type/missing-object stuck results and an actual successful changed
+snapshot followed by invalid reversed bounds remain distinct. Raw mismatched
+readLoc controls are outside typed Source syntax, not source-profile exclusions.
+Every prior fixture/body/vector/guard and every earlier seal stays unchanged.
+
+Thirteen new production laws and eight control families have exact standard-only
+axiom guards; focused closure passed154jobs after retained distinct proof failures.
+Per-file Lean MCP/goal read-update RPCs remain unavailable; the same serial capped
+runner is used without goal mutation. Safe96MiB growth envelope above536870912byte
+reserve was measured before writes; the SAME12GiB/no-swap session under16GiBparent,
+CPU0/threads1/Lean-j1/cacheOFF/proof/fuel/node/test/time limits and keyed warm caches
+are retained. C58's restarted cgroup epoch remains distinct from historical peaks.
+Independent read-only finder/skeptic source/artifact reviews and actual final
+commands/resources are required and recorded in the C59 handoff. No public profile,
+refusal/predicate/invariant/expected observation, budget or registry baseline changes.
+
+Original queue remains unfinished: this advances numeric Source observations,
+not numeric Source mutation or target compilation, all-profile construction/
+allocation failures, physical bytes, general references/paths/graphs/delete,
+ABI/calldata-storage/fresh deep-copy/emitted loops, reserved memory-to-storage or
+final V10/Source/target composition. No independent queue exhaustion is asserted.
+Raw docs/inventory failures stay failures; exact-public zero-new and additive scoped
+pins are separate. The existing persistent BLOCKED goal remains unchanged.
+
+
+C59 refined-tree final gates: focused154/full default1102/TestSuite262/final
+SolKey377parsed131read-bearing covered, wrapper exit0. Fresh Lean4.24.0
+(797c613)/Lake5.0.0-src+797c613/KeySort2jobs pass. Strict/trust/layers/orphans/
+lane/complete fixtures/script-corruption/diff pass. Exact959standard pins across
+121owned modules have zero unsafe sets. Raw global inventory remains **exit1**,
+1318unrecorded=359public inherited+959owned, with0errors. The initial piped Node
+output exited1 but truncated its final summary; that raw1084-line prefix is kept.
+A justified capture repair reran the UNCHANGED checker directly into a new real
+file, preserving the complete1319-line failure and final counts, not changing a
+registry/baseline/policy or relabeling failure as success. Additive959pin proposals
+remain coordinator reconciliation. Raw strict docs remains **exit1**,83complete
+findings exactly public-byte-identical SHA2561905b6529ffff68bf2ee9256f84952fd8a19e0df94a434b3b052c11638142f2a;
+separate publiczero-new passes; frozenno-new stays **exit1** with11incoming.
+Warm strict timed0Suite modules; independently exact262-file Suite/fixture/
+toolchain bytes and actual matching versions retain C31 cold26/max160s under
+unchanged300s budget, not new cold timing. Full aggregate Lean/Lake RSS1663716KiB,
+disk growth274432bytes, new max/OOM/kill0; current restart-epoch peak/cache and
+older historical resource events remain separately preserved. All3284 C58 seals
+reverify unchanged. Both independent finder/skeptic final SOURCE/docs reviews
+PASS; committed-artifact reviews follow compact additive export. Every distinct
+failed proof attempt remains retained, with no sorryAx in the passing tree.
+A final metadata helper had a retained pre-execution Python syntax error before
+any suffix ran; its corrected helper preserves all actual command outcomes.
+
+Reassessment: numeric Source indexed reads now have a real producer; numeric
+indexed write/delete/default-expression/target program composition remains a
+further concrete G34 application requiring inspection of actual Source.memSet,
+published primitive-write/delete and existing StateRepr interfaces. This is
+identified as available investigation, not implemented or an exhaustion claim.
+Full original G32-G35 and Backfill A/B remain partial/blocked, including real
+reserved memory-storage/final Source-V10-target producers, physical bytes,
+all-profile construction/failure/general-reference/graph/ABI/deep-copy obligations.
+The existing BLOCKED goal is unchanged; no worker goal status mutation occurred.

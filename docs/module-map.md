@@ -1344,3 +1344,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceStructTag.lean` | Actual Source uint256 named-tag member write, intrinsic assignment and whole published primitive-word program; derives named observer/child and alias frames, then applies at actual declaration/reference-binding outputs. |
 
 | `Solidity/Backend/MemoryOps/SourceStructTagDelete.lean` | Actual named uint256 tag deletion: Source zero/default and unit, intrinsic delete and whole published primitive word program, framing selected references and old Boolean contents; actual reached declaration/rebinding/tag/delete controls. |
+
+| `Solidity/Backend/MemoryOps/SourceUintMemory.lean` | INITIAL Source uint256 array observer with exact existing value conversion; actual Source allocation/MemOK/index reads, bounds, typed heap extension and recursive-builder/snapshot read provenance. No Source copy loop or word compiler. |
+| `Solidity/Backend/MemoryOps/SourceUintMemoryControls.lean` | Runtime nonuniform/max uint Source reads in both pipelines, real break/restore schedules, copied numeric child/fresh identity, neighbors/repeated refs, logical31/32/end33 and intrinsic-fixed observation controls. |
