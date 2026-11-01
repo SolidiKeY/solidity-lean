@@ -21,8 +21,21 @@ def validate_shape(result,hash_source):
  if total>300 or total>result['seconds']+0.1:raise ValueError('cumulative member budget exceeded/inconsistent')
  return {'members':24,'sumMemberSeconds':total,'cumulativeSeconds':result['seconds'],'semanticPremisesDischarged':False,'releaseClosed':False}
 
+def setup_protocol():
+ s=importlib.util.spec_from_file_location('timing_setups',ROOT/'scripts/roadmap-v17-setups.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
+
+def validate_preparation(producer,directory,current,live=True):
+ if producer.get('kind')=='actual-Lake-original24-setups':return setup_protocol().validate(producer,directory,current,live)
+ return load_loop().creation().load_memory().load_kernel().p.validate(producer,directory,current,'warm-derived17-prerequisites',live_outputs=live)
+
+
 def verify(record,directory,current,producer,producer_directory):
- l=load_loop();m=l.creation().load_memory();k=m.load_kernel();m.verify_stage(k,record,directory,current,producer,producer_directory,None,'warm-derived17-prerequisites','fresh-derived17')
+ l=load_loop();m=l.creation().load_memory();k=m.load_kernel()
+ if producer.get('kind')=='actual-Lake-original24-setups':
+  validate_preparation(producer,producer_directory,current,False)
+  if k.p.validate(record,directory,current,'fresh-derived17') is not True:raise ValueError('failed fresh workload')
+  if producer['finalBuild']!=record['buildStart'] or producer['finalCache']!=record['cacheStart'] or producer['installedInputs']!=record['installedBefore']:raise ValueError('preparation/fresh source-object-tool continuity mismatch')
+ else:m.verify_stage(k,record,directory,current,producer,producer_directory,None,'warm-derived17-prerequisites','fresh-derived17')
  for name in ['scripts/check-memory-loop-timing.py','scripts/check-memory-loop-timing.mjs']:
   if (ROOT/name).read_bytes()!=subprocess.check_output(['git','show',l.PUBLICATION+':'+name],cwd=ROOT):raise ValueError('changed published timing driver/validator')
  manifest=k.p.validate_timing_outputs(record,directory)
@@ -56,7 +69,10 @@ if __name__=='__main__':
    pre=prerequisites()
    if pre['missingSetups']:raise ValueError('missing published workload setups: '+','.join(pre['missingSetups']))
    current=k.e.snapshot(ROOT);producer=k.e.load(a.producer)
-   if k.p.validate(producer,a.producer.parent,current,'warm-derived17-prerequisites',live_outputs=True) is not True:raise ValueError('failed/missing current prerequisite gate')
+   if validate_preparation(producer,a.producer.parent,current,True) is not True:raise ValueError('failed/missing current setup preparation')
    if k.p.collect(SimpleNamespace(gate='fresh-derived17',out=a.out))!=0:raise ValueError('fresh cumulative workload failed')
    result=verify(k.e.load(a.out/'provenance.json'),a.out,k.e.snapshot(ROOT),producer,a.producer.parent);a.verified.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result['summary']))
- except (ValueError,KeyError,TypeError,OSError) as e:print(json.dumps({'error':str(e),'releaseClosed':False}));raise SystemExit(2)
+ except (ValueError,KeyError,TypeError,OSError) as e:
+  failure={'error':str(e),'releaseClosed':False}
+  if 'k' in locals() and isinstance(e,k.p.resources.ResourceObservationError):failure['resourceObservations']=e.observations
+  (a.out.parent/(a.out.name+'-failure.json')).write_text(json.dumps(failure,indent=2)+'\n');print(json.dumps(failure));raise SystemExit(2)

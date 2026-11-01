@@ -49,6 +49,48 @@ for family in ('direct','scoped'):
 
 TARGETS['fresh-derived17']=([],[])
 
+def setup_modules():
+    return ['Solidity.Calculus.MemoryLoopReplay']+['Solidity.TestSuite.MemoryLoopReplay.'+kind+f'{i:02}' for kind in ['Discover','Assemble'] for i in range(10)]+['Solidity.TestSuite.Derived17MemoryLoop','Solidity.TestSuite.MemoryLoopReplay.Refusals','Solidity.TestSuite.Derived17']
+
+for i,module in enumerate(setup_modules()):
+    TARGETS[f'derived17-setup-{i:02}']=([],['ir/'+module.replace('.','/')+'.setup.json'])
+
+def is_setup_gate(gate):return gate in {f'derived17-setup-{i:02}' for i in range(24)}
+def is_python_gate(gate):return gate=='fresh-derived17' or is_setup_gate(gate)
+
+def setup_bindings(raw,current,gate):
+    module=setup_modules()[int(gate.rsplit('-',1)[1])]
+    value=e.loads(raw)
+    e.require(value['name']==module and type(value['isModule']) is bool,'wrong Lake setup identity')
+    source=ROOT/(module.replace('.','/')+'.lean');target=ROOT/'.lake/build/ir'/(module.replace('.','/')+'.setup.json')
+    roots=[ROOT/'.lake/build',ROOT/'.lake/roadmap-v17-cache'/current['sourceToolchainKey'],Path(current['runtime']['lean']['path']).parent.parent]
+    artifacts={}
+    paths=[p for xs in value['importArts'].values() for p in xs]+value.get('dynlibs',[])+value.get('plugins',[])
+    for name in paths:
+        path=Path(name)
+        if path.is_relative_to('/opt/v17-toolchain'):path=roots[-1]/path.relative_to('/opt/v17-toolchain')
+        path=path.resolve();e.require(any(path.is_relative_to(root.resolve()) for root in roots),'unbound setup input path')
+        artifacts[str(path)]=resources.hash_file(path)
+    return {'module':module,'sourceSha256':resources.hash_file(source),'stdout':{'path':'lake-setup.stdout','sha256':e.digest(raw)},'generatedSetup':str(target),'generatedSha256':e.digest(raw),'importArtifacts':artifacts}
+
+def validate_setup_output(record,evidence_root,current,gate):
+    observed=record['setupOutput']
+    e.require(observed['module']==setup_modules()[int(gate.rsplit('-',1)[1])],'wrong setup request')
+    raw=read_bound(evidence_root,observed['stdout']['path'],observed['stdout']['sha256'])
+    e.require(observed['stderr']['path']=='lake-setup.stderr','wrong Lake stderr attachment')
+    read_bound(evidence_root,observed['stderr']['path'],observed['stderr']['sha256'])
+    expected=setup_bindings(raw,current,gate);expected['stderr']=observed['stderr']
+    e.require(observed==expected,'forged or stale actual setup bindings')
+    e.require(record['buildEnd']['files']['ir/'+observed['module'].replace('.','/')+'.setup.json']==observed['generatedSha256'],'setup not in captured build end')
+    return True
+
+def setup_output(out,current,gate):
+    raw=e.local_file(out,'lake-setup.stdout').read_bytes();observed=setup_bindings(raw,current,gate)
+    e.require(Path(observed['generatedSetup']).read_bytes()==raw,'generated setup differs from actual Lake stdout')
+    observed['stderr']={'path':'lake-setup.stderr','sha256':resources.hash_file(out/'lake-setup.stderr')}
+    return observed
+
+
 def timing_inputs():
     import sys
     binary=Path(sys.executable).resolve();prefix=Path(sys.base_prefix).resolve()
@@ -81,6 +123,9 @@ def memory_query_bytes():
 
 def gate_command(gate,out):
     prefix=['lake','-f','roadmap-v17-runtime.lakefile.toml']
+    if is_setup_gate(gate):
+        import sys
+        return [str(Path(sys.executable).resolve()),'-I','-S','-B',str(ROOT/'scripts/roadmap-v17-setups.py'),'capture','--module',setup_modules()[int(gate.rsplit('-',1)[1])],'--directory',str(out)]
     if gate=='fresh-derived17':
         import sys
         return [str(Path(sys.executable).resolve()),'-I','-S','-B',str(ROOT/'scripts/check-memory-loop-timing.py'),'--output',str(out/'fresh-group'),'--results',str(out/'workload.json')]
@@ -139,8 +184,11 @@ def validate(record, evidence_root, current, gate, gate_row=None, live_outputs=T
     argv = e.loads(read_bound(evidence_root, record['dockerArgv'], record['dockerArgvSha256']))
     e.require(argv == docker_create_argv(evidence_root.resolve(), current, record['containerName'], record['command']), 'changed Docker spawn configuration')
     e.require(record['command'] == gate_command(gate,evidence_root.resolve()), 'wrong build command')
-    if gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17','warm-loop-direct-producer','warm-loop-scoped-producer'):
+    if is_setup_gate(gate) or gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17','warm-loop-direct-producer','warm-loop-scoped-producer'):
         e.require(record['installedBefore']==record['installedAfter']==resources.tool_inputs(current),'changed installed observation inputs')
+    if is_setup_gate(gate):
+        validate_setup_output(record,evidence_root,current,gate)
+        e.require(record['pythonInputsBefore']==record['pythonInputsAfter']==timing_inputs(),'changed setup Python inputs')
     if gate=='fresh-derived17':
         validate_timing_outputs(record,evidence_root)
         e.require(record['pythonInputsBefore']==record['pythonInputsAfter']==timing_inputs(),'changed Python driver inputs')
@@ -275,7 +323,7 @@ def docker_create_argv(out, current, container_name, command):
     argv = ['create', '--name', container_name, '--network', 'none', '--memory', '12g', '--memory-swap', '12g', '--cpus', '1',
             '--mount', 'type=bind,src=/workspace,dst=/workspace',
             '--mount', f'type=bind,src={lean.parent.parent},dst=/opt/v17-toolchain,readonly']
-    if str(ROOT/'scripts/check-memory-loop-timing.py') in command:
+    if any(str(ROOT/name) in command for name in ['scripts/check-memory-loop-timing.py','scripts/roadmap-v17-setups.py']):
         import sys
         prefix=Path(sys.base_prefix).resolve()
         argv += ['--mount',f'type=bind,src={prefix},dst={prefix},readonly','-e','PYTHONDONTWRITEBYTECODE=1','-e','PYTHONNOUSERSITE=1']
@@ -391,8 +439,8 @@ def collect(args):
     start_build, start_cache = inventory(build), inventory(cache)
     mode = 'clean' if args.gate.startswith('clean-') else 'warm'
     if mode == 'clean': e.require(not start_build['files'] and not start_cache['files'], 'refusing nonempty clean start; no cache/build deletion performed')
-    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17','warm-loop-direct-producer','warm-loop-scoped-producer') else None
-    python_before = timing_inputs() if args.gate=='fresh-derived17' else None
+    installed_before = resources.tool_inputs(before) if is_setup_gate(args.gate) or args.gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17','warm-loop-direct-producer','warm-loop-scoped-producer') else None
+    python_before = timing_inputs() if is_python_gate(args.gate) else None
     resource_fields = resource_snapshot(); check_headroom(resource_fields)
     disk = os.statvfs(ROOT); free = disk.f_bavail * disk.f_frsize
     e.require(free >= 1024**3, 'disk guard')
@@ -509,6 +557,12 @@ def collect(args):
         post_input_observation(record,'pythonInputs',python_before,timing_inputs,'Python inputs after',out)
     if installed_before is not None:
         post_input_observation(record,'installed',installed_before,lambda:resources.tool_inputs(before),'installed inputs after',out)
+    if is_setup_gate(args.gate):
+        try: record['setupOutput']=setup_output(out,before,args.gate)
+        except (ValueError,OSError,KeyError,TypeError) as error:
+            record['setupOutput']=None;record['validationExit']=125;errors.append({'phase':'Lake setup output','error':str(error)})
+            record['exit']=final_exit(execution_exit,cleanup_exit,125)
+            path=out/'execution-errors.json';path.write_text(json.dumps(errors,indent=2));record['errorsSha256']=e.digest(path.read_bytes())
     if args.gate=='fresh-derived17':
         try:
             manifest=capture_timing_outputs(out)
