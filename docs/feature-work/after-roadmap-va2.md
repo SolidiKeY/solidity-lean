@@ -574,3 +574,32 @@ Neither found a defect, added premise, exclusion, observation change or budget
 increase. See `work/reviews-join-capture.md`. Dispatcher/query/rule/fragment
 integration, actual walk/leaf measurements and all remaining AU03/AU04 work
 listed above remain unfinished. Full persistent goal remains incomplete.
+
+
+## AU03 weakening prerequisite checkpoint (2026-11-01)
+
+`Prog.localWrites?_wk_isSome` proves exact equality of acceptance/refusal
+before and after any intrinsic Thin. It does not claim decoded lists are
+literally unchanged or substitute for semantic transport. The proof uses the
+intrinsic mutual program recursor with a trivial statement motive, rejecting
+nonassignment heads by reduction and propagating the assignment-tail result
+through Option.map. The earlier direct recursive attempt failed termination;
+raw `mcp-join-wk-attempt.log` remains failed. No budget was raised.
+
+Per-file MCP diagnostics pass with no messages, partial result or timeout
+(`mcp-join-wk-final.log`). MCP lean_run_code checks the source with explicit
+`#print axioms`; the legal question-mark name is unsupported by lean_verify's
+validator. The axiom set is only propext. `bounded.py join-wk-prebuild build
+Solidity.Calculus.JoinSequence` passes 40 jobs, 4.23 seconds inside / 5.44
+runner seconds; sampled visible-process RSS peak 827920 KiB, cgroup peak
+293044224 bytes. Memory cap 12884901888 bytes and swap 0 remain enforced,
+with LEAN_NUM_THREADS=1 and explicit Lean -j1. This focused prebuild is not
+a new full-root or final run-lean pass.
+
+Independent read-only finder and skeptic found no defect or added premise,
+exclusion or budget change; neither used Lean/server/builds/writes. Evidence:
+`work/reviews-join-weakening.md`. Trust and diff checks pass; the doc-path
+checker still has the same 48 byte-identical frozen-base failures. All actual
+dispatcher, rule correspondence/fragment integration, walk/leaf measurements,
+closer, chain and AU04 work listed above remains required. Full persistent
+goal remains incomplete.

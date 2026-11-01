@@ -124,4 +124,15 @@ theorem Prog.localWrites?_reconstruct {Γ Δ : Ctx} (P : Prog C Γ Δ) (writes :
       rcases ih tail ht with ⟨rfl, rfl⟩
       exact ⟨rfl, HEq.rfl⟩
 
+/-- Solidity straight-write recognition is unchanged by intrinsic weakening. -/
+theorem Prog.localWrites?_wk_isSome {Γ Δ Ε : Ctx} (h : Thin Γ Δ) (P : Prog C Γ Ε) :
+    ((P.wk h).2.2.localWrites?).isSome = P.localWrites?.isSome := by
+  revert Δ
+  induction P using Prog.rec (motive_1 := fun _ _ _ => True) <;> try trivial
+  case nil => intros; rfl
+  case cons s tail hs ih =>
+    intro Δ h
+    cases s <;> try rfl
+    simpa only [Prog.wk, Stmt.wk, Prog.localWrites?_cons_assign, Option.isSome_map] using ih h
+
 end Solidity
