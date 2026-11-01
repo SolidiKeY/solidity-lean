@@ -1484,3 +1484,76 @@ attach the named canonical G40/G41/BackfillA consequences; close no parent.
 
 NEW evidence: `/workspace/scratch/v13-canonical-cc281c12-evidence`.
 NEW artifacts: `/workspace/scratch/v13-canonical-cc281c12-artifacts`.
+
+
+## Full canonical nested readback checkpoint (parent64e37675, 2026-11-01)
+
+Owned `Solidity/Backend/AbiWorld/NestedReadback.lean` discharges the preceding
+checkpoint's unproved generic uint[][] outer-sequence/allocation and indexed
+entry/body identity obligation. It consumes the REAL codec, byte loader and
+mdec/melem/mseq, not an assumed successful decoder or new allocator. All old
+modules, semantics, observations, controls and9private producer inputs stay
+unchanged; no profile/admission/default change.
+
+outer_sequence keeps one actual I, processed-prefix head index and remaining
+indexed Seq. Each step reads the actual relative offset from the real head table,
+decodes one inner array, advances the head index and threads its exact resulting
+allocation cursor. Offset≤lim/<W follows from actual canonical bytes and
+I.size≤lim, not len<W. innerBytes measures actual inner payload lengths and
+allocationBytes includes outer32*N+32 plus every inner allocation. The exact
+sum is32+64*N+32*totalUInts; codec length is that sum+32. Every original rounded
+alloc check is discharged by the global free+cursor+sum≤lim bound.
+
+Original sufficient fuel is remainingN+remainingUInts+4 for mseq, N+UInts+5 for
+outer mdec and N+UInts+6 for top-level melem/eager/entry. These are auxiliary
+sufficient bounds, not raised budgets or necessary admission predicates.
+roundtrip proves full actual indexed values in memory/calldata verdicts, complete
+body observations and published cval with its original one-step decrement.
+Selector/trailing bytes, actual input-size≤lim and allocator bounds remain explicit.
+Calldata allocation conditions suffice for this canonical eager/body route;
+other noncanonical/lazy/readsOnly behavior is unchanged, not excluded.
+
+canonical_layout consumes NestedUintPacket.accepted_layout GENERICALLY from
+these proven actual verdicts. New `tests/v13-abi-world/NestedOuterControls.lean`
+also preserves the old mixedInput/free/fuel64/locations before proving its
+canonical verdict, original actualValues typed identity by Verdict.run injection
+and the old exact entry/body layout premise. No codec injectivity or expected
+simulation is assumed. This strengthens the old witness with new proofs;
+its previous observations and source remain untouched.
+
+Nontrivial mixed/full300maxzero/emptyouter/emptyinner/multipleempty/repeated equal
+values and accepted swapped/stale inputs instantiate the generic proof. Equal
+values are not runtime nested-reference alias evidence. One actual input carries
+allocation128→224→288→320 through processed heads. Exact lim allocation accepts;
+one-byte over-limit remains blocked possible Panic. Truncated inner length checks
+precede allocation, while allocation precedes a later payload-region failure.
+Memory wrong-base reverts and real checked empty REVERT emission stay distinct
+from calldata access-time blocking and fuel refusals. Wrong-base/order/truncation
+byte inequalities follow positive baselines, never new admission restrictions.
+
+36headline axiom guards and strict per-file/core/control/root diagnostics PASS;
+focused and registered import closure PASS1067jobs.70complete ordered vectors
+retain all43prior vectors byte-identical. Actual cursor and failure-kind exports
+are retained separately; remaining-sequence reencodings are observations of actual
+values, not raw input slices or an unknown-memory runtime encoder. No external
+native/compiler/EVM agreement added. Initial control syntax/definitional-depth
+failure remains raw; repair uses proved cursor measurements, not depth/heartbeat/
+fuel/node/time increases. Independent source finder/skeptic found no proof defect;
+final artifact reviews/checksums are recorded with the export.
+
+Every original queue remains G40/G41partial; G42.01/.02/.03/.05blocked;
+G42.04/.06partial; BackfillA/Bpartial. Canonical uint[][] readback is proved;
+all-profile native/runtime ABI emission/decoding/dispatch, CALL/RETURNDATA,
+arbitrary callee/callback/library/world/physical resource composition and mandatory
+whole-lane validation remain open. No full source-lowering/native/byte-memory
+relation, runtime nested heap or parent closure follows. Mainalone lacks9private
+V12 inputs7881cb3a; checks use the exact combined tree. Original goal blocked and
+untouched, not reactivated/completed. Prior178entries/15seals remain immutable.
+Raw docs1/frozen86versus83 comparison1 and Suite124/181.061s, full1/5038.87s,
+cold124/5400.579s stay failed; no unchanged failed heavy retry. Complete prior/
+publication finding equality is separate. No reserved producer/pin/profile/
+fixture/Panic-control change, push/merge/PR or new peer transfer. G03 proposal:
+attach these named canonical nested G40/G41/BackfillA consequences, close no parent.
+
+NEW evidence: `/workspace/scratch/v13-outer-64e37675-evidence`.
+NEW artifacts: `/workspace/scratch/v13-outer-64e37675-artifacts`.

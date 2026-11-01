@@ -1330,3 +1330,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/NestedUintPacket.lean` | Arbitrary nested uint-array intrinsic codec layout, post-length relative offsets, complete ordered full-word payloads, length and scoped prefix noninterference; no nested runtime representation. |
 
 | `Backend/AbiWorld/CanonicalReadback.lean` | Actual embedded full-word loader readback; generic canonical uint-array eager/entry/body typed roundtrip with original fuel/allocation bounds, plus actual selected nested-inner decoding. |
+
+| `Backend/AbiWorld/NestedReadback.lean` | Actual generic canonical nested uint-array mseq/allocator, indexed eager/memory/calldata/body/lazy readback and discharged canonical layout; preserves original size/fuel/allocation conditions. |
