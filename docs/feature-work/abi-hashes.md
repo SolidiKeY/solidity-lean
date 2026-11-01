@@ -1439,3 +1439,64 @@ refusals (constructor, `canonicalOnly`, element ranges) since the
 words" rationale is recorded from the EVM run but was not rechecked here (v1
 stays refused either way); `cf1-abi-entry-results.json` was generated before
 CF2 and was not regenerated on the combined tree.
+
+### Lane FU1 (followup-20261101): enum decoding and the raw-path controls
+
+* **`abi.decode` of a top-level enum** (`enum_with_256_members.sol`'s
+  frontend gap, lane-soundness checkpoint 4): `abiDecodeWith`
+  (`Syntax/Elab/Lower.lean`) reads the word as a `uint8` (31 zero high bytes)
+  and `require`s it below the member count, then converts (`E(w)`): ABI coder
+  v2's `validator_revert_t_enum_*`, an empty revert for every other word
+  (including `256`). The import (`SolcJson/Body.lean`) admits an `Identifier`
+  or member access naming an enum definition as a component, at its native
+  enum name; an enum inside an array or a struct keeps "ABI decoding of enum
+  values requires nominal cardinality checks", and ABI v1 `abi.decode` is
+  refused at admission (`solidity.abiCoderV1`). Pins: `EnumDecode` in
+  `Examples/Tactics/AbiFeatures.lean` (`2` decodes, `3` and `256` revert, an
+  `(E, uint)` tuple). Inside `sol{}` (not the import) `AbiTy.of` still ignores
+  `#enum` rows for nested enums (pre-existing; recorded).
+* **Top-level enums at the replay** (`ImportRow.retEnums`,
+  `ImportRow.paramEnums`: positions of the source declaration's enum-typed
+  returns and parameters, since a return may be unnamed): a v2 entry's enum
+  return is read at its ABI type `uint8` even when no parameter carries a
+  nominal range (the case CF1 recorded as "a function whose only enum is a
+  return still meets the refusal"), and a declared enum parameter is nominal
+  even when its range is a byte range: an enum of 256 members (`0..255`)
+  previously counted as a plain `uint8` and would have taken the legacy
+  path, which reads the word without validating it (`256` decoded, where
+  solc reverts; found by the rerun below before it was fixed). It now goes
+  through the typed entry decoder (`enumBelow 256`). Constructors and
+  `canonicalOnly` vectors keep the refusal (now also for 256-member enums).
+  Result: `enums/enum_with_256_members.sol` is **working** in both
+  pipelines (`getMinMax`, `intToEnum`, `enumToInt` with `256` failing,
+  `decodeEnum` with `256` failing).
+* **Raw-path controls** (`tests/upstream/EnumAbiRanges.lean`, integration
+  review round 2): a constructor's nominal range and a `canonicalOnly`
+  vector keep "nominal enum ABI range needs a declaration adapter" in both
+  pipelines. An element range is not pinned: no fixture has an enum-array
+  parameter beside only admitted functions (`EnumInputRefusal` stops at its
+  other functions' import gaps).
+* **`calldata_nested_array_static_reencode_v2.sol`** stays blocked: its
+  failing vectors fail inside `abi.encode(a)` on a calldata element, which
+  needs access-time calldata reads in the elaborated model (not started).
+
+Fixtures (`tests/upstream/cf1-abi-entry-results.json`, all 42 rerun on lane
+FU1 with `scripts/abi-entry-fixtures.sh SOLJSON fu1final`, collected with
+`abi-entry-collect.py --keep-before`, which keeps CF1's before column):
+**22 working / 20 blocked / 0 broken** (CF1: 21 / 20 / 1). The only change
+is `enum_with_256_members.sol`, broken (frontend gap) → working; every other
+fixture keeps its status and reason.
+
+Review (lane FU1; read-only finder and skeptic on the enum decode and the
+raw-path controls, a second skeptic on the replay change, no Lean worker):
+confirmed and fixed: the control comment called `canonicalOnly` "ABI coder
+v1" on v2 fixtures (reworded); the element-range control used a fixture that
+stops at other import gaps (dropped, recorded above); a declared enum
+parameter whose position could not be matched (import and model parameter
+lists of different lengths, not reachable today) would have decoded as a
+plain word: now refused. Recorded, not changed: a 256-member enum carried in
+a struct (`uint8` carrier) beside a parameter the typed entry plan cannot
+shape (an external function type) is now refused where the legacy path
+accepted it (fail-closed); enum returns of `canonicalOnly` vectors stay
+refused although v1 encodes them alike; public enum getters keep
+`retEnums = []` and stay refused.

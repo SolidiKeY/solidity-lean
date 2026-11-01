@@ -193,10 +193,11 @@ def needsCanonical (d : FunDecl) : Bool :=
   d.params.any fun (x,T) => !(T matches .prim _) || (fnRow? d.widths x).isSome
 
 /-- `topEnums`: top-level primitive parameters and returns with a declared
-enum cardinality, read at their ABI type `uint8` (the replay passes them only
-when the entry has a nominal parameter range; otherwise an enum return keeps
-the refusal); its range is the typed entry
-decoder's (`UpstreamEntry.params`). Every nested enum keeps the refusal. -/
+enum cardinality, read at their ABI type `uint8` (the replay passes the
+parameters when the entry has a nominal parameter range, and a v2 entry's
+top-level enum returns, `ImportRow.retEnums`, always); a parameter's range is
+the typed entry decoder's (`UpstreamEntry.params`). Every nested enum keeps
+the refusal. -/
 def validate (d : FunDecl) (inputs outputs : List String) (topEnums : List String := []) :
     Except String Unit := do
   let top (x : String) (T : Ty) : Except String String :=
@@ -378,7 +379,11 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
             let bits := 8 * (k + 1)
             (lo == 0 && hi == (2^bits : Int) - 1) ||
               (lo == -(2^(bits - 1) : Int) && hi == (2^(bits - 1) : Int) - 1)
-      let nominal := row.any fun (r : ImportRow) => (r.paramRanges ++ r.elemRanges.map (fun (entry : String × Int × Int × Option Nat) => (entry.1, entry.2.1, entry.2.2.1))).any fun (_, lo, hi) =>
+      -- a declared enum parameter (`paramEnums`) is nominal even when its
+      -- range is a byte range (an enum of 256 members): its word is
+      -- validated by the typed entry decoder, never truncated
+      let nominal := row.any fun (r : ImportRow) => !r.paramEnums.isEmpty ||
+        (r.paramRanges ++ r.elemRanges.map (fun (entry : String × Int × Int × Option Nat) => (entry.1, entry.2.1, entry.2.2.1))).any fun (_, lo, hi) =>
           !byteRange (lo, hi)
       -- Only parameter ranges (never element ranges) can be top-level enums
       -- for the typed entry decoder; any other nominal range is refused.
@@ -402,12 +407,24 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
         guard (r.params.length == d.params.length)
         let (x, _) ← r.params[i]?
         let (_, lo, hi) ← r.paramRanges.find? (·.1 == x)
-        guard (lo == 0 && 0 ≤ hi && !byteRange (lo, hi))
+        guard (lo == 0 && 0 ≤ hi && (!byteRange (lo, hi) || r.paramEnums.contains i))
         pure hi.toNat
+      -- a declared enum parameter whose position cannot be matched would
+      -- decode as a plain word: refuse rather than drop its bound
+      if row.any (fun r => !r.paramEnums.isEmpty && r.params.length != d.params.length) then
+        throw "nominal enum ABI range needs a declaration adapter"
       let enumNames := (d.params.zipIdx.filter fun (_, i) => (enums i).isSome).map (·.1.1) ++
         (d.params ++ d.rets).filterMap fun (x, _) =>
           if (Semantics.lookupBy (x ++ "#enum") d.widths).isSome then some x else none
-      ABI.validate d inputs outputs (if nominal then enumNames else [])
+      -- a top-level enum return is read at its ABI type `uint8` whenever
+      -- the import names it (`retEnums`): encoding a member is its value
+      let retEnums : List String := if ctor || canonicalOnly then [] else
+        match row with
+        | some r =>
+          if r.retEnums.any (· ≥ d.rets.length) then []
+          else r.retEnums.filterMap (fun i => d.rets[i]?.map (·.1))
+        | none => []
+      ABI.validate d inputs outputs ((if nominal then enumNames else []) ++ retEnums)
       -- ABI coder v2 entries with typed parameter shapes use the typed
       -- entry decoder (`Semantics/AbiEntry.lean`); v1, constructors and
       -- function/nested-enum parameters keep the byte-identical gate.

@@ -1630,6 +1630,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       writingCall := writingCall f || (dispatchOf f).external || (modifierInvocations f).any fun m =>
         ((modifierId m).bind fun id => modifierDefs.find? (J.id? · == some id)).all fun root =>
           writingCall root || (dispatchOf root).external,
+      retEnums := (((J.opt f "returnParameters").bind (J.arr? · "parameters")).getD #[]).toList.zipIdx
+          |>.filterMap fun (p, i) => do
+            guard (((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds)).isSome
+            pure i,
+      paramEnums := sourceParams.toList.zipIdx |>.filterMap fun (p, i) => do
+        guard (((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds)).isSome
+        pure i,
       paramRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, t), p) => do
         if let some n := ((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds) then
           return (x, 0, n)

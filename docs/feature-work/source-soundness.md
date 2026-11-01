@@ -830,7 +830,8 @@ core change costs a 45–70 min rebuild on the lane's VM).
 **Done in the elaborated model** (the layer the upstream replay runs): a
 top-level enum in `abi.decode` (`enum_with_256_members`' frontend gap) is
 decoded at its member count (`abiDecodeWith`, `Syntax/Elab/Lower.lean`; the
-import admits it in `SolcJson/Body.lean`); see
+import admits it in `SolcJson/Body.lean`), and with the replay's enum
+parameter/return positions the fixture is working in both pipelines; see
 [abi-hashes.md](abi-hashes.md), "Lane FU1". `calldata_nested_array_static_reencode_v2`
 (an element that fails only when read inside `abi.encode`) needs
 access-time calldata reads in the elaborated model and stays blocked.

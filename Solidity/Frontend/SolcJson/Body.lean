@@ -117,6 +117,12 @@ structure SolcFun where
   /-- The memory array parameters whose elements the ABI decoder bounds so:
   name, least and greatest value, and a fixed array's length. -/
   elemRanges : List (String × Int × Int × Option Nat) := []
+  /-- The returns of a top-level enum type, by position (a return may be
+  unnamed): the ABI spells them `uint8`, the model a `uint` (the replay's
+  `ABI.validate`). -/
+  retEnums : List Nat := []
+  /-- The parameters of a top-level enum type, by position (as `retEnums`). -/
+  paramEnums : List Nat := []
   /-- Specification members, retained only for the testing import mode. -/
   specMembers : String := ""
   /-- Raw directive/text pairs, for validating one clause at a time before
