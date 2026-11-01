@@ -624,3 +624,5 @@ VY2 [actual allocation physical-view bridge](inline-assembly-vy2.md#actual-alloc
 VY2 [generic ordinary object allocation](inline-assembly-vy2.md#generic-ordinary-object-allocation-2026-11-01) constructs typed struct/array physical/source allocation under actual operand and initial-view premises; full closure stays open.
 
 VY2 [actual struct constructor producer](inline-assembly-vy2.md#actual-struct-constructor-producer-2026-11-01) derives constructor execution and physical allocation reuse; full source/compiler closure remains open.
+
+VY2 [actual calldata array allocation](inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) connects the real memory decoder, retained allocation and whole-map writeback; final adequacy remains open.

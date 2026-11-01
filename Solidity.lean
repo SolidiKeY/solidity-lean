@@ -983,3 +983,5 @@ import Solidity.Yul.Views.AllocationPhysicalControls
 import Solidity.Yul.Views.ObjectAllocationRetainedControls
 
 import Solidity.Yul.Views.StructConstructorControls
+
+import Solidity.Yul.Views.AbiUintArrayBoundaryControls

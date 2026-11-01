@@ -187,3 +187,5 @@ VY2 [actual allocation physical-view bridge](feature-work/inline-assembly-vy2.md
 VY2 [generic ordinary object allocation](feature-work/inline-assembly-vy2.md#generic-ordinary-object-allocation-2026-11-01) adds checked struct/array allocation and exact source/physical composition.
 
 VY2 [actual struct constructor producer](feature-work/inline-assembly-vy2.md#actual-struct-constructor-producer-2026-11-01) connects checked actual owner operands to physical allocation; full lane remains partial.
+
+VY2 [actual calldata array allocation](feature-work/inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) derives source/physical calldata agreement and supported array allocation; full lane partial.
