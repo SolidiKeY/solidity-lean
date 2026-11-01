@@ -1124,3 +1124,82 @@ f103parallelpackage seal unchanged. New cached import/default and rootconfirmati
 follow this exact committed source. Suite/composite prior failures are not retried
 for these observers; they do not reach the Suite dependency graph. Originalfullgoal
 unchanged/blocked; no push,defaultmerge,PR,peerunmergedinput or globalpin/ledger edit.
+
+
+## Recovery8229a81e: selected compiled caller alias to current packet
+
+Checkpoint parent `6ca8356729861c0d34b14a12abef9e9ef406b678`; frozen base remains
+`2fe1f8932f96be15b00df03ba2cde46f64a87758`. This is G41/BackfillB preparation,
+not full G40–G42 delivery. The existing persistent goal remains blocked and untouched.
+
+The human-authorized private dependency input is exact V12 commit
+`7881cb3aa87b7b01ae557d12de19b8eeeed7ba3b`, with published prerequisite099bfbe1.
+All90 archive sources were matched against both original SHA256 manifest and
+actual committed Git blobs. Only the six required InternalFlow modules and
+three producer fixture modules are overlaid read-only in the private dependency
+tree. The other81 task-owned copies and original sealed package remain intact.
+No producer was merged into this branch or represented as published. Reconstruct
+this checkpoint with that exact nine-source overlay to validate the combined tree;
+the assigned checkout alone does not contain those unmerged producer imports.
+
+[`CallerPacket.lean`](../../Solidity/Backend/AbiWorld/CallerPacket.lean) proves
+`captured` and `selected`: actual CallerTail.selected_target yields the reached
+dropped StateRepr, actual target run, stack, BaseExtends, GrowsAllocator and typed
+caller capture. CallerView.reference/represented then connect the old alias to
+WordArrayPacket.local_complete/encoded_values. The complete CURRENT array is
+observed, including mutation. Exact header/space and independent base addresses
+remain; no byte-range restriction or unchanged-heap premise is introduced.
+All producer miss/hit, Disjoint, withinM, writesAt exclusion, actual source run,
+representation, frame and reached capacity premises remain explicit.
+
+[`CallerPacketControls.lean`](../../tests/v13-abi-world/CallerPacketControls.lean)
+reuses the exact producer fixture rather than defining another evaluator.
+`selected_client` literally applies the new selected theorem; `prefix_client`
+discharges input through actual compiled nonempty setup. `application` observes
+the captured old array after mutation `[7,11]` to `[12,11]`; the same actual result
+has entry-address identity and complete128byte codec packet: words32,2,12,11.
+`resource_client` proves prefix/selected word-cell costs7/4, total11 and cursor
+135→139 with stack77. `scalar_fields`/`scalar_packet` retain marker42 and actual
+callee storage mutation9→11. `alias_negatives` excludes distinct older, private
+and default objects through reached representation separation. `ordered_bytes`
+rejects stale, reversed, other `[23,29]` and private `[99,101]` payload claims.
+The prefix heap has3objects and reached heap5; the whole caller environment is
+correctly not framed because the tail writes its unprotected destination.
+
+Both new files have per-file strict MCP diagnostics PASS; all13 headline axiom
+guards PASS (standard propext/Classical.choice/Quot.sound only; ordered_bytes
+axiom-free). Source preparation of the three exact producer fixtures PASS within
+120seconds. Final explicit-j1 serial-wrapper import gate PASS1062jobs; root MCP
+PASS; focused closure, complete ordered byte/signature export, owned-import25,
+layer184, orphan1109 and trust1124/258 checks PASS. Hard12GiB/no-swap/CPU1 and a
+single shared keyed cache were enforced. Early preliminary Lake checks selected
+the direct sysroot; final Lake checks corrected that with the existing wrapper
+and task-only -j1 weak arguments. No tracked build configuration or budget changed.
+
+Finder and skeptic independently reviewed actual source/premises/non-vacuity and
+ownership without Lean/server/builds. Finder's confirmed core-to-elaborator issue
+was fixed by moving the inhabited client into lane tests. Proof decomposition
+fixed the raw200000-heartbeat failure without raising the budget. All failures,
+including the initial signature-export path failure, are retained in NEW evidence.
+
+Raw docs remain FAIL1:86findings (48missing/38ambiguous), frozen83; three inherited
+published regressions remain. Exact complete finding-class/multiplicity equality
+to publication457130f3 and prior6ca is a separate PASS, not a frozen-gate waiver.
+No reserved document was repaired. Original Suite124/181.061seconds, oldfull5400,
+fullcomposite1/5038.87seconds, OOM/heartbeat and other sealed failures stay unchanged;
+no unchanged failed Suite/composite command was rerun.
+
+Every original queue remains accounted for: G40partial, G41partial;
+G42.01/.02/.03/.05blocked; G42.04/.06partial; BackfillsA/Bpartial.
+This discharges a narrow selected INTERNAL call-plus-tail caller-array observation,
+not general ABI admission/decoding/emission or external/self/library/callback/world
+compilation. Missing Source-type/entry agreement, uniform runtime aggregate codec,
+CALL/RETURNDATA, arbitrary callee/callback world relations, physical resource
+composition and required whole-lane gates remain explicit. No byte-slice machine
+is identified with word cells; no post-execution literal packet is claimed here.
+No new semantic choice or producer repair is requested. G03 reconciliation proposal
+only: attach these named G41/BackfillB local facts; close no parent feature ID.
+
+NEW evidence: `/workspace/scratch/v13-caller-tail-8229a81e-evidence`.
+NEW exact-head artifacts: `/workspace/scratch/v13-caller-tail-8229a81e-artifacts`.
+Original sealed exports/manifests are preserved and referenced by the new handoff.
