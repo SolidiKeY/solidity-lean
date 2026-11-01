@@ -271,9 +271,9 @@ An optional aggregate probe of `reasonOfBranch`, `reasonPastCustom` and
 those additional cases. The standalone repaired-row probe is separate; the
 coordinator must still run the complete original source gate.
 
-There is a separate unresolved decision for the unpinned
+The human has authorized a readonly/static model correction for the unpinned
 `SolcPaymentsOpen.tryArgumentSideEffect` expectation at
-`scripts/test-solidity.test.mjs:939`. Its exact current probe remains pending
+`scripts/test-solidity.test.mjs:939`. Its retained completed probe reported pending
 with an external-success `{havoc}` before the read of `ix`
 (`.lake/entrypoints-repair/payments-current.log`). Under the documented callback
 reading, even pure external calls permit arbitrary invariant-preserving storage:
@@ -283,8 +283,13 @@ protect the later storage read. The independent skeptic found no sound proof
 path for this expectation under the current assumptions. This is source-level
 counterexample reasoning, not a kernel-checked refutation or an EVM failure.
 No assertion, source fixture, invariant, call predicate, observation or budget
-was changed; this decision is separate from the two earlier pending assertion
-proposals.
+was changed. The correction remains unfinished: the current interfaces erase
+static invocation provenance and supply no adequacy bridge for unknown code.
+The fresh probe did not finish; no new passing validation is claimed.
+The bounded interface/ownership proposal and current check limits are recorded
+in [the static-boundary handoff](feature-work/entrypoints-static-boundary.md).
+The modifier-only assertion correction was separately approved and applied;
+it does not resolve this semantic gap.
 
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
