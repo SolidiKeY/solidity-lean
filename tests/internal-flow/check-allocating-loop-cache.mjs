@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
+import {splitBatchReports} from "./fixture-cache.mjs";
 import {readFileSync,writeFileSync,existsSync,unlinkSync,mkdirSync} from "node:fs";
 import {spawnSync} from "node:child_process";
 const out=process.argv[2];assert(out?.startsWith("/"));
@@ -16,4 +17,16 @@ for(const [tag,bad] of [["missing",files.slice(1)],["duplicate",[files[0],...fil
  assert.notEqual(result.status,0);assert.match(result.stderr,/EVERY registered fixture exactly once/);assert(!existsSync(marker));
  cases.push({case:tag,exit:result.status,rejected_before_Lean:true});
 }
-console.log(JSON.stringify({status:"pass",no_Lean:true,fixtures:files,cases},null,2));
+const groups=files.map(file=>({names:Object.keys(registry[file.split("/").at(-1).slice(0,-5)].pins).sort()}));
+const reports=groups.flatMap(group=>group.names.map(name=>`'${name}' depends on axioms: [propext]`));
+const positive=splitBatchReports(reports.join("\n"),groups);
+assert.equal(positive.length,files.length);
+assert.equal(positive.reduce((n,s)=>n+[...s.matchAll(/depends on axioms:/g)].length,0),reports.length);
+const splitControls=[];
+for(const [tag,bad] of [["missing",reports.slice(1).join("\n")],["duplicate",[reports[0],...reports].join("\n")],
+ ["reordered",[reports[1],reports[0],...reports.slice(2)].join("\n")],["extra",[...reports,"'Unexpected.extra' depends on axioms: []"].join("\n")],
+ ["error",reports.join("\n")+"\nerror: synthetic batch control"],
+ ["wrong-name",["'Unexpected.wrong' depends on axioms: []",...reports.slice(1)].join("\n")]]) {
+ assert.throws(()=>splitBatchReports(bad,groups));splitControls.push({case:tag,rejected:true,synthetic_no_Lean:true});
+}
+console.log(JSON.stringify({status:"pass",no_Lean:true,fixtures:files,cases,complete_report_count:reports.length,splitControls},null,2));

@@ -1,0 +1,339 @@
+import tests.«internal-flow».FiniteDispatchFacts
+import tests.«internal-flow».MemoryDispatchFacts
+namespace Solidity.Backend.InternalFlow.DispatchChecks
+open Evm Evm.Memory FiniteDispatch PublishedDirectCalls
+
+theorem capacity : AllocationInput 1 64 (seed.cost (State.init C) + checked.cost mid.st)
+    (State.init C) bases machine := by
+  refine .inr ⟨by decide,wmod 128,(initial_repr C).2,?_⟩
+  rw [seed_cost,reached_cost]
+  decide +kernel
+
+/-- Closed prefix-to-selected-arm target: every midpoint/input is derived. -/
+theorem endpoint : ∃ m₁ base₁ m₂ base₂,
+    run seed.code machine = .ok m₁ 0 ∧ run checked.code m₁ = .ok m₂ 0 ∧
+    run (seed.code ++ checked.code) machine = .ok m₂ 0 ∧
+    StateRepr 1 1 64 seed.frag mid.st base₁ m₁ ∧
+    StateRepr 1 1 64 checked.frag chosen.st base₂ m₂ ∧
+    BaseExtends mid.st.H base₁ base₂ ∧
+    GrowsAllocator 1 64 9 (State.init C) bases machine chosen.st base₂ m₂ ∧
+    m₂.stack = [w[77]] ∧ m₂.mem 0 = w[137] := by
+  obtain ⟨m₁,base₁,hp,hr₁,stack₁,he₁,hg₁⟩ := program_endpoint seed (initial_repr C).1 seed_frame
+    (capacity.of_le (Nat.le_add_right _ _)) mid seed_run
+  have hi := hg₁.nextInput capacity
+  obtain ⟨m₂,base₂,hc,hr₂,stack₂,he₂,hg₂⟩ := selected_endpoint [actualFirst] actualSecond []
+    .revert checked mid.st (by
+      intro a h; have ha := List.mem_singleton.mp h; subst a; exact first_miss)
+    second_hit armOut body_run hr₁ room hi
+  have whole : run (seed.code ++ checked.code) machine = .ok m₂ 0 := by rw [run_append_ok hp,hc]
+  have grows := hg₁.comp hg₂
+  rw [seed_cost,reached_cost] at grows
+  have cursor := (grows (wmod 128) (by decide) (initial_repr C).2 (by decide +kernel)).arrays.free.cell
+  change m₂.mem 0 = w[137] at cursor
+  exact ⟨m₁,base₁,m₂,base₂,hp,hc,whole,hr₁,hr₂,he₂,grows,stack₂.trans stack₁,cursor⟩
+
+private theorem uint_word {v : PrimTy.uint.Denote} {w : Word} {n : Fin W}
+    (repr : ReprV .uint v w) (value : v.1 = (n.val : Int)) : w = .val n := by
+  obtain ⟨a,hw,ha⟩ := repr
+  have he : a = n := Fin.ext (Int.ofNat_inj.mp (ha.symm.trans value))
+  exact hw.trans (congrArg Word.val he)
+
+def afterCells (base : Nat → Fin W) (m : Machine) : List Word :=
+ [m.mem 1,m.mem 2,m.mem 3,m.mem 4,m.mem 5,m.mem 6,m.mem 7,m.mem 8,
+  m.mem (base 0).val,m.mem ((base 0).val+1),m.mem ((base 0).val+2),
+  m.mem (base 1).val,m.mem ((base 1).val+1),m.mem ((base 1).val+2),
+  m.mem (base 2).val,m.mem ((base 2).val+1),m.mem ((base 2).val+2),
+  .val (m.store.cells (.root 0)),m.mem 0]
+
+theorem observe_after {base₁ base₂ : Nat → Fin W} {m : Machine}
+ (hr : StateRepr 1 1 64 checked.frag chosen.st base₂ m)
+ (he : BaseExtends mid.st.H base₁ base₂) (cursor : m.mem 0 = w[137]) :
+ afterCells base₂ m = [w[42],.val (base₁ 0),.val (base₁ 0),.val (base₁ 1),w[2],w[16],
+  .val (base₁ 0),w[5],w[2],w[7],w[16],w[2],w[23],w[29],w[2],w[70],w[71],w[10],w[137]] := by
+ obtain ⟨ac,asame,axs,ao⟩ := aliases
+ have c := old_alias_at_entry_address (σ := mid.st) chosen hr he old (.there .here) ac
+ have same := old_alias_at_entry_address (σ := mid.st) chosen hr he old _ asame
+ have xs := old_alias_at_entry_address (σ := mid.st) chosen hr he old _ axs
+ have otherCell := old_alias_at_entry_address (σ := mid.st) chosen hr he other _ ao
+ change m.mem 7 = .val (base₁ 0) at c
+ change m.mem 3 = .val (base₁ 0) at same
+ change m.mem 2 = .val (base₁ 0) at xs
+ change m.mem 4 = .val (base₁ 1) at otherCell
+ have cap := uint_word (n := wmod 5) (hr.core.vals (.here : Idx Caller (.val .uint))) (by decide +kernel)
+ have result := uint_word (n := wmod 16) (hr.core.vals (.there (.there .here) : Idx Caller (.val .uint))) (by decide +kernel)
+ have tag := uint_word (n := wmod 2) (hr.core.vals (.there (.there (.there .here)) : Idx Caller (.val .uint))) (by decide +kernel)
+ have marker := uint_word (n := wmod 42) (hr.core.vals (.there (.there (.there (.there (.there (.there (.there .here)))))) : Idx Caller (.val .uint))) (by decide +kernel)
+ change m.mem 8 = w[5] at cap
+ change m.mem 6 = w[16] at result
+ change m.mem 5 = w[2] at tag
+ change m.mem 1 = w[42] at marker
+ obtain ⟨l0,l1,l2,e00,e01,e10,e11,e20,e21⟩ := heap_values
+ have h0 := (hr.heap.arrays (old.wk chosen.ext)).length
+ have h1 := (hr.heap.arrays (other.wk chosen.ext)).length
+ have h2 := (hr.heap.arrays fresh).length
+ rw [l0] at h0; rw [l1] at h1; rw [l2] at h2
+ change m.mem (base₂ 0).val = w[2] at h0
+ change m.mem (base₂ 1).val = w[2] at h1
+ change m.mem (base₂ 2).val = w[2] at h2
+ have a := uint_word ((hr.heap.arrays (old.wk chosen.ext)).elements 0 _ e00) rfl
+ have b := uint_word ((hr.heap.arrays (old.wk chosen.ext)).elements 1 _ e01) rfl
+ have d := uint_word ((hr.heap.arrays (other.wk chosen.ext)).elements 0 _ e10) rfl
+ have e := uint_word ((hr.heap.arrays (other.wk chosen.ext)).elements 1 _ e11) rfl
+ have f := uint_word ((hr.heap.arrays fresh).elements 0 _ e20) rfl
+ have g := uint_word ((hr.heap.arrays fresh).elements 1 _ e21) rfl
+ change m.mem ((base₂ 0).val+1) = w[7] at a
+ change m.mem ((base₂ 0).val+2) = w[16] at b
+ change m.mem ((base₂ 1).val+1) = w[23] at d
+ change m.mem ((base₂ 1).val+2) = w[29] at e
+ change m.mem ((base₂ 2).val+1) = w[70] at f
+ change m.mem ((base₂ 2).val+2) = w[71] at g
+ have storage := hr.core.store "count" (.prim .uint) rfl
+ change ReprAt m.store 1 (.prim .uint) (rootSlot C "count")
+   (chosen.st.storage.get (rfl : C.rootType "count" = some (.prim .uint))) at storage
+ have sv : chosen.st.storage.get (rfl : C.rootType "count" = some (.prim .uint)) = .prim (indexValue (wmod 10)) := by decide +kernel
+ rw [sv] at storage
+ have rootCell : (.val (m.store.cells (.root 0)) : Word) = w[10] := by
+   cases storage with | prim h => exact uint_word h rfl
+ simp only [afterCells,marker,xs,same,otherCell,tag,result,c,cap,h0,h1,h2,a,b,d,e,f,g,rootCell,cursor]
+
+theorem complete_endpoint : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ : Machine) (base₂ : Nat → Fin W),
+ run seed.code machine = .ok m₁ 0 ∧ run checked.code m₁ = .ok m₂ 0 ∧
+ run (seed.code ++ checked.code) machine = .ok m₂ 0 ∧
+ StateRepr 1 1 64 checked.frag chosen.st base₂ m₂ ∧
+ GrowsAllocator 1 64 9 (State.init C) bases machine chosen.st base₂ m₂ ∧ m₂.stack = [w[77]] ∧
+ afterCells base₂ m₂ = [w[42],.val (base₁ 0),.val (base₁ 0),.val (base₁ 1),w[2],w[16],.val (base₁ 0),w[5],
+  w[2],w[7],w[16],w[2],w[23],w[29],w[2],w[70],w[71],w[10],w[137]] := by
+ obtain ⟨m₁,base₁,m₂,base₂,hp,hc,whole,hr₁,hr₂,he,hg,stack,cursor⟩ := endpoint
+ exact ⟨m₁,base₁,m₂,base₂,hp,hc,whole,hr₂,hg,stack,observe_after hr₂ he cursor⟩
+
+theorem exact_fallback : run (seed.code ++ clearCert.code ++ checked.code) machine = .revert := by
+ obtain ⟨m₁,base₁,m₂,base₂,hp,hc,whole,hr₁,rest⟩ := endpoint
+ obtain ⟨mf,bf,hclear,hrf,hsf,hef,hgf⟩ := statement_endpoint clearCert hr₁ clear_room
+   (.inl clear_cost) cleared clear_run
+ rw [clear_frag] at hrf
+ have failed := fallback_revert [actualFirst,actualSecond] (.revert : Stmt C Caller Caller)
+   checked cleared.st all_miss rfl hrf room (.inl no_match_cost)
+ rw [List.append_assoc,run_append_ok hp,run_append_ok hclear,failed]
+
+theorem negative_controls : ∃ (m : Machine) (base : Nat → Fin W),
+ run (seed.code ++ checked.code) machine = .ok m 0 ∧
+ m.mem 6 ≠ w[42] ∧ m.mem 1 ≠ w[16] ∧ m.mem 0 ≠ w[142] ∧
+ m.mem ((base 0).val+2) ≠ w[11] ∧ (.val (m.store.cells (.root 0)) : Word) ≠ w[1000] ∧
+ m.mem 2 ≠ .val (base fresh.id) := by
+ obtain ⟨m₁,base₁,m₂,base₂,hp,hc,whole,hr,hg,stack,obs⟩ := complete_endpoint
+ have r := congrArg (fun xs : List Word => xs[5]?) obs
+ have mark := congrArg (fun xs : List Word => xs[0]?) obs
+ have free := congrArg (fun xs : List Word => xs[18]?) obs
+ have elem := congrArg (fun xs : List Word => xs[10]?) obs
+ have root := congrArg (fun xs : List Word => xs[17]?) obs
+ change some (m₂.mem 6) = some w[16] at r
+ change some (m₂.mem 1) = some w[42] at mark
+ change some (m₂.mem 0) = some w[137] at free
+ change some (m₂.mem ((base₂ 0).val+2)) = some w[16] at elem
+ change some (.val (m₂.store.cells (.root 0))) = some w[10] at root
+ have gap := hr.heap.separated (old.wk chosen.ext) fresh (by decide +kernel)
+ have different : base₂ old.id ≠ base₂ fresh.id := by
+   intro eq
+   change (base₂ old.id).val + 1 + _ ≤ (base₂ fresh.id).val ∨
+     (base₂ fresh.id).val + 1 + _ ≤ (base₂ old.id).val at gap
+   rw [eq] at gap
+   rcases gap with h | h <;> omega
+ have ptr := old_alias_at_entry_address (σ := mid.st) chosen hr (BaseExtends.refl base₂) old _ aliases.2.2.1
+ change m₂.mem 2 = .val (base₂ old.id) at ptr
+ refine ⟨m₂,base₂,whole,?_,?_,?_,?_,?_,?_⟩
+ · rw [Option.some.inj r]; decide +kernel
+ · rw [Option.some.inj mark]; decide +kernel
+ · rw [Option.some.inj free]; decide +kernel
+ · rw [Option.some.inj elem]; decide +kernel
+ · rw [Option.some.inj root]; decide +kernel
+ · rw [ptr]; exact fun h => different (Word.val.inj h)
+
+theorem fallback_not_fault : run (seed.code ++ clearCert.code ++ checked.code) machine ≠ .fault := by
+ rw [exact_fallback]; intro h; cases h
+#print axioms negative_controls
+#print axioms fallback_not_fault
+#print axioms observe_after
+#print axioms complete_endpoint
+#print axioms exact_fallback
+#print axioms capacity
+#print axioms endpoint
+end Solidity.Backend.InternalFlow.DispatchChecks
+
+namespace Solidity.Backend.InternalFlow.MemoryDispatchChecks
+open Evm Evm.Memory FiniteDispatch PublishedDirectCalls
+
+theorem capacity : AllocationInput 1 64 (seed.cost (State.init C) + checked.cost mid.st)
+ (State.init C) bases machine := by
+ refine .inr ⟨by decide,wmod 128,initial_repr.2,?_⟩
+ rw [seed_cost,reached_cost]
+ decide +kernel
+
+theorem endpoint : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ : Machine) (base₂ : Nat → Fin W)
+ (m₃ : Machine) (base₃ : Nat → Fin W),
+ run seed.code machine = .ok m₁ 0 ∧ run checked.code m₁ = .ok m₂ 0 ∧
+ run postCert.code m₂ = .ok m₃ 0 ∧ run (seed.code ++ checked.code ++ postCert.code) machine = .ok m₃ 0 ∧
+ StateRepr 1 1 64 seed.frag mid.st base₁ m₁ ∧ StateRepr 1 1 64 checked.frag chosen.st base₂ m₂ ∧
+ StateRepr 1 1 64 postCert.frag finished.st base₃ m₃ ∧
+ BaseExtends mid.st.H base₁ base₂ ∧ BaseExtends chosen.st.H base₂ base₃ ∧
+ GrowsAllocator 1 64 11 (State.init C) bases machine finished.st base₃ m₃ ∧
+ m₃.stack = [w[77]] ∧ m₃.mem 0 = w[139] := by
+ obtain ⟨m₁,base₁,hp,hr₁,stack₁,he₁,hg₁⟩ := program_endpoint seed initial_repr.1 seed_frame
+   (capacity.of_le (Nat.le_add_right _ _)) mid seed_run
+ obtain ⟨m₂,base₂,hc,hr₂,stack₂,he₂,hg₂⟩ := selected_endpoint [actualFirst] actualSecond []
+   .revert checked mid.st (by intro a h; have ha := List.mem_singleton.mp h; subst a; exact first_miss)
+   second_hit armOut body_run hr₁ room (hg₁.nextInput capacity)
+ obtain ⟨m₃,base₃,ht,hr₃,stack₃,he₃,hg₃⟩ := program_endpoint postCert hr₂ post_room
+   (.inl post_cost) finished post_run
+ have whole : run (seed.code ++ checked.code ++ postCert.code) machine = .ok m₃ 0 := by
+   rw [List.append_assoc,run_append_ok hp,run_append_ok hc,ht]
+ have grow := (hg₁.comp hg₂).comp hg₃
+ change GrowsAllocator 1 64 (seed.cost (State.init C) + checked.cost mid.st + postCert.cost chosen.st)
+   (State.init C) bases machine finished.st base₃ m₃ at grow
+ rw [seed_cost,reached_cost,post_cost] at grow
+ have cursor := (grow (wmod 128) (by decide) initial_repr.2 (by decide +kernel)).arrays.free.cell
+ change m₃.mem 0 = w[139] at cursor
+ exact ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,ht,whole,hr₁,hr₂,hr₃,he₂,he₃,grow,
+   stack₃.trans (stack₂.trans stack₁),cursor⟩
+
+private theorem uint_word {v : PrimTy.uint.Denote} {w : Word} {n : Fin W}
+ (repr : ReprV .uint v w) (value : v.1 = (n.val : Int)) : w = .val n := by
+ obtain ⟨a,hw,ha⟩ := repr
+ have he : a = n := Fin.ext (Int.ofNat_inj.mp (ha.symm.trans value))
+ exact hw.trans (congrArg Word.val he)
+def total : Solidity.Out C mid.st.H Final := ⟨finished.st,chosen.ext.trans finished.ext⟩
+def afterCells (base : Nat → Fin W) (m : Machine) : List Word :=
+ [m.mem 1,m.mem 2,m.mem 3,m.mem 4,m.mem 5,m.mem 6,m.mem 7,m.mem 8,m.mem 9,
+  m.mem (base 0).val,m.mem ((base 0).val+1),m.mem ((base 0).val+2),
+  m.mem (base 1).val,m.mem ((base 1).val+1),m.mem ((base 1).val+2),
+  m.mem (base 2).val,m.mem (base 3).val,m.mem (base 4).val,
+  m.mem ((base 4).val+1),m.mem ((base 4).val+2),.val (m.store.cells (.root 0)),m.mem 0]
+
+theorem observe_after {base₁ base₃ : Nat → Fin W} {m : Machine}
+ (hr : StateRepr 1 1 64 postCert.frag finished.st base₃ m)
+ (he : BaseExtends mid.st.H base₁ base₃) (cursor : m.mem 0 = w[139]) :
+ afterCells base₃ m = [w[42],.val (base₁ 0),.val (base₁ 0),.val (base₁ 1),w[2],
+  .val (base₁ 0),w[5],.val (base₁ 0),.val (base₁ 0),w[2],w[12],w[11],w[2],w[23],w[29],
+  w[0],w[0],w[2],w[99],w[101],w[11],w[139]] := by
+ obtain ⟨ar,ad,ac,asame,axs,ao⟩ := final_aliases
+ have ret := old_alias_at_entry_address (σ := mid.st) total hr he old (.here : Idx Final (.mem A)) ar
+ have dest := old_alias_at_entry_address (σ := mid.st) total hr he old _ ad
+ have capref := old_alias_at_entry_address (σ := mid.st) total hr he old _ ac
+ have same := old_alias_at_entry_address (σ := mid.st) total hr he old _ asame
+ have xs := old_alias_at_entry_address (σ := mid.st) total hr he old _ axs
+ have otherCell := old_alias_at_entry_address (σ := mid.st) total hr he other _ ao
+ change m.mem 9 = .val (base₁ 0) at ret
+ change m.mem 8 = .val (base₁ 0) at dest
+ change m.mem 6 = .val (base₁ 0) at capref
+ change m.mem 3 = .val (base₁ 0) at same
+ change m.mem 2 = .val (base₁ 0) at xs
+ change m.mem 4 = .val (base₁ 1) at otherCell
+ have cap := uint_word (n := wmod 5) (hr.core.vals (.there (.there .here) : Idx Final (.val .uint))) (by decide +kernel)
+ have tag := uint_word (n := wmod 2) (hr.core.vals (.there (.there (.there (.there .here))) : Idx Final (.val .uint))) (by decide +kernel)
+ have marker := uint_word (n := wmod 42) (hr.core.vals (.there (.there (.there (.there (.there (.there (.there (.there .here))))))) : Idx Final (.val .uint))) (by decide +kernel)
+ change m.mem 7 = w[5] at cap
+ change m.mem 5 = w[2] at tag
+ change m.mem 1 = w[42] at marker
+ obtain ⟨l0,l1,ld,lc,lp,e00,e01,e10,e11,ep0,ep1⟩ := heap_values
+ have h0 := (hr.heap.arrays exported).length
+ have h1 := (hr.heap.arrays ((other.wk chosen.ext).wk finished.ext)).length
+ have hd := (hr.heap.arrays ((sharedDefault.wk chosen.ext).wk finished.ext)).length
+ have hc := (hr.heap.arrays (callDefault.wk finished.ext)).length
+ have hp := (hr.heap.arrays (privateNew.wk finished.ext)).length
+ rw [l0] at h0; rw [l1] at h1; rw [ld] at hd; rw [lc] at hc; rw [lp] at hp
+ change m.mem (base₃ 0).val = w[2] at h0
+ change m.mem (base₃ 1).val = w[2] at h1
+ change m.mem (base₃ 2).val = w[0] at hd
+ change m.mem (base₃ 3).val = w[0] at hc
+ change m.mem (base₃ 4).val = w[2] at hp
+ have a := uint_word ((hr.heap.arrays exported).elements 0 _ e00) rfl
+ have b := uint_word ((hr.heap.arrays exported).elements 1 _ e01) rfl
+ have c := uint_word ((hr.heap.arrays ((other.wk chosen.ext).wk finished.ext)).elements 0 _ e10) rfl
+ have d := uint_word ((hr.heap.arrays ((other.wk chosen.ext).wk finished.ext)).elements 1 _ e11) rfl
+ have e := uint_word ((hr.heap.arrays (privateNew.wk finished.ext)).elements 0 _ ep0) rfl
+ have f := uint_word ((hr.heap.arrays (privateNew.wk finished.ext)).elements 1 _ ep1) rfl
+ change m.mem ((base₃ 0).val+1) = w[12] at a
+ change m.mem ((base₃ 0).val+2) = w[11] at b
+ change m.mem ((base₃ 1).val+1) = w[23] at c
+ change m.mem ((base₃ 1).val+2) = w[29] at d
+ change m.mem ((base₃ 4).val+1) = w[99] at e
+ change m.mem ((base₃ 4).val+2) = w[101] at f
+ have storage := hr.core.store "count" (.prim .uint) rfl
+ change ReprAt m.store 1 (.prim .uint) (rootSlot C "count")
+   (finished.st.storage.get (rfl : C.rootType "count" = some (.prim .uint))) at storage
+ have sv : finished.st.storage.get (rfl : C.rootType "count" = some (.prim .uint)) = .prim (indexValue (wmod 11)) := by decide +kernel
+ rw [sv] at storage
+ have rootCell : (.val (m.store.cells (.root 0)) : Word) = w[11] := by
+   cases storage with | prim h => exact uint_word h rfl
+ simp only [afterCells,marker,xs,same,otherCell,tag,capref,cap,dest,ret,h0,h1,hd,hc,hp,a,b,c,d,e,f,rootCell,cursor]
+
+theorem complete_endpoint : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ : Machine) (base₂ : Nat → Fin W)
+ (m₃ : Machine) (base₃ : Nat → Fin W),
+ run seed.code machine = .ok m₁ 0 ∧ run checked.code m₁ = .ok m₂ 0 ∧ run postCert.code m₂ = .ok m₃ 0 ∧
+ run (seed.code ++ checked.code ++ postCert.code) machine = .ok m₃ 0 ∧
+ StateRepr 1 1 64 postCert.frag finished.st base₃ m₃ ∧
+ GrowsAllocator 1 64 11 (State.init C) bases machine finished.st base₃ m₃ ∧ m₃.stack = [w[77]] ∧
+ afterCells base₃ m₃ = [w[42],.val (base₁ 0),.val (base₁ 0),.val (base₁ 1),w[2],.val (base₁ 0),w[5],
+  .val (base₁ 0),.val (base₁ 0),w[2],w[12],w[11],w[2],w[23],w[29],w[0],w[0],w[2],w[99],w[101],w[11],w[139]] := by
+ obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,ht,whole,hr₁,hr₂,hr₃,he₂,he₃,hg,stack,cursor⟩ := endpoint
+ exact ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,ht,whole,hr₃,hg,stack,observe_after hr₃ (he₂.trans chosen.ext he₃) cursor⟩
+
+private theorem distinct_pointer {m : Machine} {base : Nat → Fin W}
+ (hr : StateRepr 1 1 64 postCert.frag finished.st base m) (r : HRef finished.st.H A)
+ (different : exported.id ≠ r.id) : m.mem 9 ≠ .val (base r.id) := by
+ have gap := hr.heap.separated exported r different
+ have addr : base exported.id ≠ base r.id := by
+   intro eq
+   change (base exported.id).val + 1 + _ ≤ (base r.id).val ∨
+     (base r.id).val + 1 + _ ≤ (base exported.id).val at gap
+   rw [eq] at gap
+   rcases gap with h | h <;> omega
+ obtain ⟨q,hq,ptr⟩ := hr.pointers (.here : Idx Final (.mem A))
+ have eq : q = exported := Option.some.inj (hq.symm.trans final_aliases.1)
+ subst q
+ change m.mem 9 = .val (base exported.id) at ptr
+ rw [ptr]
+ exact fun h => addr (Word.val.inj h)
+
+theorem negative_escape : ∃ (m : Machine) (base : Nat → Fin W),
+ run (seed.code ++ checked.code ++ postCert.code) machine = .ok m 0 ∧
+ m.mem 9 ≠ .val (base other.id) ∧ m.mem 9 ≠ .val (base sharedDefault.id) ∧
+ m.mem 9 ≠ .val (base callDefault.id) ∧ m.mem 9 ≠ .val (base privateNew.id) ∧
+ m.mem 0 ≠ w[137] ∧ m.mem ((base 0).val+1) ≠ w[7] := by
+ obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,ht,whole,hr,hg,stack,obs⟩ := complete_endpoint
+ have cursor := congrArg (fun xs : List Word => xs[21]?) obs
+ have elem := congrArg (fun xs : List Word => xs[10]?) obs
+ change some (m₃.mem 0) = some w[139] at cursor
+ change some (m₃.mem ((base₃ 0).val+1)) = some w[12] at elem
+ refine ⟨m₃,base₃,whole,
+  distinct_pointer hr ((other.wk chosen.ext).wk finished.ext) (by decide +kernel),
+  distinct_pointer hr ((sharedDefault.wk chosen.ext).wk finished.ext) (by decide +kernel),
+  distinct_pointer hr (callDefault.wk finished.ext) (by decide +kernel),
+  distinct_pointer hr (privateNew.wk finished.ext) (by decide +kernel),?_,?_⟩
+ · rw [Option.some.inj cursor]; decide +kernel
+ · rw [Option.some.inj elem]; decide +kernel
+
+#print axioms negative_escape
+#print axioms observe_after
+#print axioms complete_endpoint
+#print axioms capacity
+#print axioms endpoint
+end Solidity.Backend.InternalFlow.MemoryDispatchChecks
+
+namespace Solidity.Backend.InternalFlow.DispatchRuntimeChecks
+open Evm Evm.Memory
+private def trace (code : List Instr) (addresses : List Nat) : Option (List Word × List Word × Nat) :=
+ match Evm.run code DispatchChecks.machine with
+ | .ok m _ => some (m.stack,addresses.map m.mem,(m.store.cells (.root 0)).val)
+ | _ => none
+/-- info: true -/
+#guard_msgs in #eval decide (trace (DispatchChecks.seed.code ++ DispatchChecks.checked.code)
+ [0,1,2,3,4,5,6,7,8,63,128,129,130,131,132,133,134,135,136] =
+ some ([w[77]],[w[137],w[42],w[128],w[128],w[131],w[2],w[16],w[128],w[5],w[99],
+  w[2],w[7],w[16],w[2],w[23],w[29],w[2],w[70],w[71]],10))
+/-- info: true -/
+#guard_msgs in #eval decide (trace
+ (MemoryDispatchChecks.seed.code ++ MemoryDispatchChecks.checked.code ++ MemoryDispatchChecks.postCert.code)
+ [0,1,2,3,4,5,6,7,8,9,63,128,129,130,131,132,133,134,135,136,137,138] =
+ some ([w[77]],[w[139],w[42],w[128],w[128],w[131],w[2],w[128],w[5],w[128],w[128],w[99],
+  w[2],w[12],w[11],w[2],w[23],w[29],w[0],w[0],w[2],w[99],w[101]],11))
+end Solidity.Backend.InternalFlow.DispatchRuntimeChecks

@@ -69,7 +69,15 @@ export function visitFixtures(files,check) {
 export function requireSameToolchain(before,after) {
   if(JSON.stringify(before)!==JSON.stringify(after)) throw new Error("toolchain changed during complete fixture batch");
 }
-function fixture(mode,file,out,sharedToolchain=null) {
+function run(args,log) {
+  const child=spawnSync("lake",args,{encoding:"utf8",maxBuffer:64*1024*1024});
+  writeFileSync(log,(child.stdout??"")+(child.stderr??""));
+  if(child.error) throw child.error;
+  if(child.status!==0) process.exit(child.status??1);
+  return (child.stdout??"")+(child.stderr??"");
+}
+
+function fixture(mode,file,out,sharedToolchain=null,batchItems=null) {
   if(!["prepare","check"].includes(mode) || !/^tests\/internal-flow\/[A-Za-z][A-Za-z0-9]*\.lean$/.test(file ?? "") || !out?.startsWith("/"))
     throw new Error("usage: fixture-cache.mjs prepare|check tests/internal-flow/Name.lean /absolute/evidence");
   const name=basename(file,".lean"),dir=".lake/build/lib/lean/tests/internal-flow";
@@ -123,13 +131,6 @@ function key() {
   }
   return {inputs,key:createHash("sha256").update(JSON.stringify(inputs)).digest("hex")};
 }
-function run(args,log) {
-  const child=spawnSync("lake",args,{encoding:"utf8",maxBuffer:64*1024*1024});
-  writeFileSync(log,(child.stdout??"")+(child.stderr??""));
-  if(child.error) throw child.error;
-  if(child.status!==0) process.exit(child.status??1);
-  return (child.stdout??"")+(child.stderr??"");
-}
 function guard(log) {
   if(/\berror(?:\(|:)/.test(log)) throw new Error("Lean error in actual report");
   const actual={}, reports=[...log.matchAll(/\x27([^\x27]+)\x27 (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)/g)];
@@ -158,24 +159,54 @@ if(mode==="prepare") {
   const harness=`import tests.«internal-flow».${name}\n`+Object.keys(expected.pins).sort().map(n=>`#print axioms ${n}\n`).join("");
   const harnessFile=`.lake/build/${name}-v12-import.lean`;
   writeFileSync(harnessFile,harness);writeFileSync(`${out}/cached-${name}-import.lean`,harness);
-  const log=run(["env","lean","-j1","--tstack=131072",harnessFile],`${out}/cached-${name}-diagnostics.log`);
+  const finish=log=>{
   const reports=guard(log);
   // Recheck keys after execution, including the exact consumed fixture object.
   if(key().key!==saved.key || hash(object)!==saved.object_sha256) throw new Error("inputs changed while importing fixture");
   writeFileSync(`${out}/cached-${name}-key.json`,JSON.stringify({...saved,fixture:file,reports,toolchain_verification:sharedToolchain?"complete-batch-boundary":"complete-per-file-boundary"},null,2)+"\n");
   const result={fixture:file,mode,key:saved.key,reports,object}; console.log(JSON.stringify(result)); return result;
+  };
+  if(batchItems) { batchItems.push({file,harness,names:Object.keys(expected.pins).sort(),finish}); return; }
+  return finish(run(["env","lean","-j1","--tstack=131072",harnessFile],`${out}/cached-${name}-diagnostics.log`));
 }
 
 }
+// Split ONLY actual Lean reports, retaining count/order and failing on any
+// diagnostic error. Per-fixture exact-set guards still validate every slice.
+export function splitBatchReports(log,groups) {
+  if(/\berror(?:\(|:)/.test(log)) throw new Error("Lean error in actual batch report");
+  const matches=[...log.matchAll(/\x27([^\x27]+)\x27 (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)/g)];
+  const names=groups.flatMap(group=>group.names);
+  if(matches.length!==names.length || matches.some((m,i)=>m[1]!==names[i]))
+    throw new Error("missing/extra/duplicate/reordered actual batch axiom report");
+  let offset=0;
+  return groups.map(group=>{const slice=matches.slice(offset,offset+group.names.length);offset+=group.names.length;
+    return slice.map(m=>m[0]).join("\n")+"\n";});
+}
+
 function batch(out,files) {
   if(!out?.startsWith("/")) throw new Error("absolute batch evidence directory required");
   const all=Object.keys(registry).map(name=>`tests/internal-flow/${name}.lean`).sort();
   if(JSON.stringify(files)!==JSON.stringify(all)) throw new Error("batch must contain EVERY registered fixture exactly once in sorted order");
   const before=Object.freeze(toolchainInputs());
-  const results=visitFixtures(files,file=>fixture("check",file,out,before));
+  const items=[];
+  visitFixtures(files,file=>fixture("check",file,out,before,items));
+  // Every fixture source/object/dependency key is freshly checked before the
+  // actual combined Lean import. No fixture, report or freshness check is cut.
+  const combined=items.map(item=>item.harness.split("\n")[0]).join("\n")+"\n"+
+    items.map(item=>item.harness.split("\n").slice(1).join("\n")).join("\n");
+  const harness=".lake/build/v12-all-fixtures-import.lean";
+  writeFileSync(harness,combined);writeFileSync(`${out}/cached-all-fixtures-import.lean`,combined);
+  const log=run(["env","lean","-j1","--tstack=131072",harness],`${out}/cached-all-fixtures-diagnostics.log`);
+  const slices=splitBatchReports(log,items);
+  const results=visitFixtures(items,(item)=>{
+    const index=items.indexOf(item),slice=slices[index];
+    writeFileSync(`${out}/cached-${basename(item.file,".lean")}-diagnostics.log`,slice);
+    return item.finish(slice); // Exact guard AND fresh post-import key/object.
+  });
   const after=toolchainInputs();
   requireSameToolchain(before,after);
-  const record={status:"pass",toolchain_verification:"complete-before-and-after-batch",toolchain_entries:Object.keys(before).length,
+  const record={status:"pass",execution:"one-actual-Lean-process-all-imports-and-all-axiom-reports",toolchain_verification:"complete-before-and-after-batch",toolchain_entries:Object.keys(before).length,
     before_sha256:createHash("sha256").update(JSON.stringify(before)).digest("hex"),
     after_sha256:createHash("sha256").update(JSON.stringify(after)).digest("hex"),
     fixtures:results,reports:results.reduce((n,result)=>n+result.reports,0)};
