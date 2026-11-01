@@ -750,9 +750,8 @@ test("constant specifications preserve units, lexical visibility and unsigned ty
   const rows = Object.fromEntries(base.results.map(r => [r.function, r]));
   assert.equal(rows.exactUnits.status, "proved");
   assert.equal(rows.falseConstant.status, "pending");
-  for (const fn of ["boundedLoop", "quantifiedShadow"]) {
-    assert.equal(rows[fn].status, "unsupported", fn);
-  }
+  assert.equal(rows.boundedLoop.status, "unsupported");
+  assert.equal(rows.quantifiedShadow.status, "pending");
   assert.match(rows.boundedLoop.reason, /loop's invariant needs a statement/);
   assert.equal(rows.parameterShadow.status, "pending");
   const other = run("OtherConstants");
