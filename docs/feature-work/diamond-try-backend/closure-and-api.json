@@ -1,0 +1,43 @@
+{
+  "snapshotCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "snapshotArchiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "manifestTopLevelComponents": [
+    "LICENSE.txt",
+    "test"
+  ],
+  "recordedSubmodules": [
+    {
+      "path": "test/ethdebugSchemaTests/ethdebug-format",
+      "repository": "https://github.com/ethdebug/format",
+      "commit": "937e3484cb4cf408a4e808d62f34285a71fece80"
+    }
+  ],
+  "soltestLinkTargets": [
+    "solcli",
+    "libsolc",
+    "yul",
+    "solidity",
+    "smtutil",
+    "solutil",
+    "phaser",
+    "Boost::boost",
+    "yulInterpreter",
+    "evmasm",
+    "Boost::filesystem",
+    "Boost::program_options",
+    "Boost::unit_test_framework",
+    "evmc"
+  ],
+  "vendoredEVMCReadmeVersion": "12.0.0",
+  "actualHeaderABI": 13,
+  "evmoneSuggestion": "0.22.0 URL in test/Common.h; not binary/source commit pin",
+  "vmStruct": "struct evmc_vm\n{\n    /**\n     * EVMC ABI version implemented by the VM instance.\n     *\n     * Can be used to detect ABI incompatibilities.\n     * The EVMC ABI version represented by this file is in ::EVMC_ABI_VERSION.\n     */\n    const int abi_version;\n\n    /**\n     * The name of the EVMC VM implementation.\n     *\n     * It MUST be a NULL-terminated not empty string.\n     * The content MUST be UTF-8 encoded (this implies ASCII encoding is also allowed).\n     */\n    const char* name;\n\n    /**\n     * The version of the EVMC VM implementation, e.g. \"1.2.3b4\".\n     *\n     * It MUST be a NULL-terminated not empty string.\n     * The content MUST be UTF-8 encoded (this implies ASCII encoding is also allowed).\n     */\n    const char* version;\n\n    /**\n     * Pointer to function destroying the VM instance.\n     *\n     * This is a mandatory method and MUST NOT be set to NULL.\n     */\n    evmc_destroy_fn destroy;\n\n    /**\n     * Pointer to function executing a code by the VM instance.\n     *\n     * This is a mandatory method and MUST NOT be set to NULL.\n     */\n    evmc_execute_fn execute;\n\n    /**\n     * A method returning capabilities supported by the VM instance.\n     *\n     * The value returned MAY change when different options are set via the set_option() method.\n     *\n     * A Client SHOULD only rely on the value returned if it has queried it after\n     * it has called the set_option().\n     *\n     * This is a mandatory method and MUST NOT be set to NULL.\n     */\n    evmc_get_capabilities_fn get_capabilities;\n\n    /**\n     * Optional pointer to function modifying VM's options.\n     *\n     * If the VM does not support this feature the pointer can be NULL.\n     */\n    evmc_set_option_fn set_option;\n};\n\n",
+  "executeSignature": "typedef struct evmc_result (*evmc_execute_fn)(struct evmc_vm* vm,\n                                              const struct evmc_host_interface* host,\n                                              struct evmc_host_context* context,\n                                              enum evmc_revision rev,\n                                              const struct evmc_message* msg,\n                                              uint8_t const* code,\n                                              size_t code_size);",
+  "capabilities": "enum evmc_capabilities\n{\n    /**\n     * The VM is capable of executing EVM1 bytecode.\n     */\n    EVMC_CAPABILITY_EVM1 = (1u << 0),\n\n    /**\n     * The VM is capable of executing ewasm bytecode.\n     */\n    EVMC_CAPABILITY_EWASM = (1u << 1),\n\n    /**\n     * The VM is capable of executing the precompiled contracts\n     * defined for the range of code addresses.\n     *\n     * The EIP-1352 (https://eips.ethereum.org/EIPS/eip-1352) specifies\n     * the range 0x000...0000 - 0x000...ffff of addresses\n     * reserved for precompiled and system contracts.\n     *\n     * This capability is **experimental** and MAY be removed without notice.\n     */\n    EVMC_CAPABILITY_PRECOMPILES = (1u << 2)\n};",
+  "declaredRevisions": "enum evmc_revision\n{\n    /**\n     * The Frontier revision.\n     *\n     * The one Ethereum launched with.\n     */\n    EVMC_FRONTIER = 0,\n\n    /**\n     * The Homestead revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-606\n     */\n    EVMC_HOMESTEAD = 1,\n\n    /**\n     * The Tangerine Whistle revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-608\n     */\n    EVMC_TANGERINE_WHISTLE = 2,\n\n    /**\n     * The Spurious Dragon revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-607\n     */\n    EVMC_SPURIOUS_DRAGON = 3,\n\n    /**\n     * The Byzantium revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-609\n     */\n    EVMC_BYZANTIUM = 4,\n\n    /**\n     * The Constantinople revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-1013\n     */\n    EVMC_CONSTANTINOPLE = 5,\n\n    /**\n     * The Petersburg revision.\n     *\n     * Other names: Constantinople2, ConstantinopleFix.\n     *\n     * https://eips.ethereum.org/EIPS/eip-1716\n     */\n    EVMC_PETERSBURG = 6,\n\n    /**\n     * The Istanbul revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-1679\n     */\n    EVMC_ISTANBUL = 7,\n\n    /**\n     * The Berlin revision.\n     *\n     * https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/berlin.md\n     */\n    EVMC_BERLIN = 8,\n\n    /**\n     * The London revision.\n     *\n     * https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/london.md\n     */\n    EVMC_LONDON = 9,\n\n    /**\n     * The Paris revision (aka The Merge).\n     *\n     * https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md\n     */\n    EVMC_PARIS = 10,\n\n    /**\n     * The Shanghai revision.\n     *\n     * https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md\n     */\n    EVMC_SHANGHAI = 11,\n\n    /**\n     * The Cancun revision.\n     *\n     * https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md\n     */\n    EVMC_CANCUN = 12,\n\n    /**\n     * The Prague / Pectra revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-7600\n     */\n    EVMC_PRAGUE = 13,\n\n    /**\n     * The Osaka / Fusaka revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-7607\n     */\n    EVMC_OSAKA = 14,\n\n    /**\n     * The Amsterdam / Glamsterdam revision.\n     *\n     * https://eips.ethereum.org/EIPS/eip-7773\n     */\n    EVMC_AMSTERDAM = 15,\n\n    /**\n     * The unspecified EVM revision used for EVM implementations to expose\n     * experimental features.\n     */\n    EVMC_EXPERIMENTAL = 16,\n\n    /** The maximum EVM revision supported. */\n    EVMC_MAX_REVISION = EVMC_EXPERIMENTAL,\n\n    /**\n     * The latest known EVM revision with finalized specification.\n     *\n     * This is handy for EVM tools to always use the latest revision available.\n     */\n    EVMC_LATEST_STABLE_REVISION = EVMC_OSAKA\n};",
+  "revisionMeaning": "header enum requests, not established supported runtime revisions",
+  "exactBackendSourceCommit": null,
+  "backendBinaryHash": null,
+  "rootBuildAndDependencyLockAvailable": false,
+  "stepHookVerified": false
+}

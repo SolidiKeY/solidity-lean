@@ -1,0 +1,103 @@
+[
+  {
+    "file": "Solidity/Tools/Upstream.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "e2bf1cb24dad79528d87d258cd3433cf93dab6f3",
+    "sha256": "26e68e8b83886a2fa83e72fec3519e8852a48b2d7555ca6ba9d21cb447120d6b",
+    "localSha256": "9331ecb1c00c481c426b33b46a324d035c87730b9c6d7905f9a73e57a0683beb",
+    "sameAsLocal": false
+  },
+  {
+    "file": "Solidity/Syntax/Scoped.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "d853908512e7cdfe7a600379661e77204963f41b",
+    "sha256": "b1fa2db12fc79ad445a32658f9231b0e09ce4b34c717bc00e46d0470d9c1e098",
+    "localSha256": "b1fa2db12fc79ad445a32658f9231b0e09ce4b34c717bc00e46d0470d9c1e098",
+    "sameAsLocal": true
+  },
+  {
+    "file": "Solidity/Semantics.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "a5d8e8ebecb5c9461fa97e53efa5c4e8255b3e87",
+    "sha256": "588c96429a3d91ef043d5ae731a1f98f3a12a8a394a601e287550828db32497d",
+    "localSha256": "588c96429a3d91ef043d5ae731a1f98f3a12a8a394a601e287550828db32497d",
+    "sameAsLocal": true
+  },
+  {
+    "file": "Solidity/Semantics/Heap.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "817d5e5b641471d60df538817c2d494d1d74af25",
+    "sha256": "82bbdc0c5bb712e3cbfaedb258d0fb3cb439d784fb4d79c23c7f9ec1399be24a",
+    "localSha256": "82bbdc0c5bb712e3cbfaedb258d0fb3cb439d784fb4d79c23c7f9ec1399be24a",
+    "sameAsLocal": true
+  },
+  {
+    "file": "Solidity/Semantics/RevertMemory.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "de59a637ea1d6f70dc8515ec5338f57fa86d6b4f",
+    "sha256": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "localSha256": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "sameAsLocal": true
+  },
+  {
+    "file": "Solidity/Semantics/RevertData.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "6db13b6659960993d4092585144ef37a9a4f51eb",
+    "sha256": "76737627eefbbff4c90d529286ed61b1c5ea08f51549fc7885262281f268bff1",
+    "localSha256": "73f37ee7b44cb603d6768e652965fb7066275c8b078d3fa8519fee135e0a00f7",
+    "sameAsLocal": false
+  },
+  {
+    "file": "Solidity/Semantics/Run.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "330d8cb7aa1414d0824248c0d87ec291db08f600",
+    "sha256": "3e97c693c2bea3ea2578cda59bc9e259a3950ded6c6dd6dea8d1b0c718cab3b9",
+    "localSha256": "3e97c693c2bea3ea2578cda59bc9e259a3950ded6c6dd6dea8d1b0c718cab3b9",
+    "sameAsLocal": true
+  },
+  {
+    "file": "Solidity/Frontend/SolcJson/Body.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "dcfd0f1ca0ceffac54db47bb16bc37733b734b07",
+    "sha256": "e35ded0dc707043c7e4db126fac448925fe5aa81a3de0632cf959791cdbeab69",
+    "localSha256": "21a74641830168789cae16d776f0b83234d8b74f16cda1706b6559b53ed8f1e1",
+    "sameAsLocal": false
+  },
+  {
+    "file": "Solidity/Frontend/SolcJson/Contract.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "21e9610feb3d9a5749b95f543c187c3825af717c",
+    "sha256": "831cbdb0ad12704a0baa3fc4d390da2377be8cf5899b9317004ae964252f5638",
+    "localSha256": "4b5e92145c62adbefdbda757d04ac6fc6b85921d51de52ef3647a0d9adb2955e",
+    "sameAsLocal": false
+  },
+  {
+    "file": "Solidity/Syntax/Elab/Arms.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "cbe59fa36afc765f9158fcc1ae10f7129c0abdad",
+    "sha256": "b5eba194b0c1448fc44da2e115d858ae3fc4c781a1a35c2e7c03eabb458185f5",
+    "localSha256": "248a9f3b8acfa42bb7d763bf9734c271f6fb05fc969935cc98c89ccc89c70a73",
+    "sameAsLocal": false
+  },
+  {
+    "file": "Solidity/Syntax/Elab/Lower.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "de3a73bf6e93e830153d365350cf6301ffa8b7a9",
+    "sha256": "bef38769296f500457a9984abd6f62ad5f7eb2c622d85058e158f9960f0f7054",
+    "localSha256": "c615f6586c4be1be4302130b26564dce32b453ab011c34cce142462306f5e57d",
+    "sameAsLocal": false
+  },
+  {
+    "file": "scripts/self-try-adapter.mjs",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "absent": true
+  },
+  {
+    "file": "Solidity/Evm/MemoryCapture.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "blob": "304aaa468cf4ccefec8088a8f42897d86f057d66",
+    "sha256": "d455818799b70c0b0f41dc30f4ce12dec1e20f319d8610d5e7b143e896937002",
+    "localSha256": "d455818799b70c0b0f41dc30f4ce12dec1e20f319d8610d5e7b143e896937002",
+    "sameAsLocal": true
+  }
+]

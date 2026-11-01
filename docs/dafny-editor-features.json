@@ -491,14 +491,22 @@
         "configuration": "./dafny-language-configuration.json"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -518,14 +526,22 @@
         "path": "./syntaxes/Dafny.tmLanguage"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -1223,14 +1239,22 @@
         "title": "Dafny: Restart server"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "server-restart"
+        ],
         "testEvidence": []
       }
     },
@@ -1254,7 +1278,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1286,7 +1310,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1318,7 +1342,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1348,7 +1372,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1378,7 +1402,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1405,7 +1429,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1430,7 +1454,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1455,7 +1479,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1485,7 +1509,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1517,7 +1541,7 @@
       },
       "assessment": {
         "status": "missing",
-        "reason": "Local extension uses CLI JSON and does not implement this Dafny LSP method. Related editor observations are listed separately.",
+        "reason": "Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -1570,14 +1594,22 @@
         "handler": "DafnyDocumentSymbolHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1622,14 +1654,22 @@
         "handler": "DafnyDefinitionHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1647,14 +1687,22 @@
         "handler": "DafnyReferencesHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1672,14 +1720,22 @@
         "handler": "DafnyRenameHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1697,14 +1753,22 @@
         "handler": "DafnyCompletionHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1722,14 +1786,22 @@
         "handler": "DafnySignatureHelpHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1772,14 +1844,22 @@
         "handler": "DafnyCodeActionHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1797,14 +1877,22 @@
         "handler": "DafnyFormattingHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1847,14 +1935,22 @@
         "handler": "DafnyWorkspaceSymbolHandler"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -1870,14 +1966,22 @@
       ],
       "detail": {},
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -1942,13 +2046,20 @@
       "detail": {},
       "assessment": {
         "status": "partial",
-        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
+          "initial-verification",
           "initial-verification"
         ],
         "testEvidence": []
@@ -2012,14 +2123,22 @@
       ],
       "detail": {},
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -2082,14 +2201,21 @@
       "detail": {},
       "assessment": {
         "status": "partial",
-        "reason": "Related local behavior exists, but protocol, granularity or configuration differs. Runtime evidence is required.",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "concurrent-files-and-requests"
+          "concurrent-files-and-requests",
+          "initial-verification"
         ],
         "testEvidence": []
       }
@@ -2134,14 +2260,22 @@
         "scope": "comments, brackets, auto-closing and surrounding pairs"
       },
       "assessment": {
-        "status": "missing",
-        "reason": "No corresponding provider, contribution or UI component in the local verification extension.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -2164,14 +2298,22 @@
         "scope": "project-discovery-and-ownership"
       },
       "assessment": {
-        "status": "unexamined",
-        "reason": "Source discovery only; exact behavior has not been tested.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -2199,14 +2341,22 @@
         "scope": "project-includes-and-solver-options"
       },
       "assessment": {
-        "status": "unexamined",
-        "reason": "Source discovery only; exact behavior has not been tested.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -2224,14 +2374,22 @@
         "scope": "parse-resolution-verification-diagnostics"
       },
       "assessment": {
-        "status": "unexamined",
-        "reason": "Source discovery only; exact behavior has not been tested.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "initial-verification"
+        ],
         "testEvidence": []
       }
     },
@@ -2254,14 +2412,22 @@
         "scope": "member-and-attribute-completion"
       },
       "assessment": {
-        "status": "unexamined",
-        "reason": "Source discovery only; exact behavior has not been tested.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "language-services-callsite"
+        ],
         "testEvidence": []
       }
     },
@@ -2304,14 +2470,22 @@
         "scope": "cache-invalidation-and-migration"
       },
       "assessment": {
-        "status": "unexamined",
-        "reason": "Source discovery only; exact behavior has not been tested.",
+        "status": "partial",
+        "reason": "Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
-          "vscode/src/model.cjs"
+          "vscode/src/model.cjs",
+          "vscode/src/lsp-server.cjs",
+          "vscode/src/language-services.cjs",
+          "vscode/src/editor-services.cjs",
+          "vscode/src/worker-pool.cjs",
+          "vscode/src/project.cjs",
+          "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [],
+        "scenarioIds": [
+          "warm-snapshot-cache"
+        ],
         "testEvidence": []
       }
     },

@@ -1,0 +1,37 @@
+[
+  {
+    "path": "/workspace/solidity-lean/scripts/check-source-admission.mjs",
+    "sha256": "e9449a22ef45b337fa38ecdaec70f58e9f03a00076368cc5a98bf94ae177a7cb",
+    "approvedExpected": "e9449a22ef45b337fa38ecdaec70f58e9f03a00076368cc5a98bf94ae177a7cb",
+    "changed": false
+  },
+  {
+    "path": "/workspace/solidity-lean/scripts/check-call-exception-vectors.mjs",
+    "sha256": "a83aafb32811730547752e6e2832318d480c9d0e085fef497018c275230353ef",
+    "approvedExpected": "a83aafb32811730547752e6e2832318d480c9d0e085fef497018c275230353ef",
+    "changed": false
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/solc/SourceLiterals.sol",
+    "sha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
+    "approvedExpected": null,
+    "changed": false
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/solc/SourceIdentifiers.sol",
+    "sha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
+    "approvedExpected": null,
+    "changed": false
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/solc/CallExceptions.sol",
+    "sha256": "25f860c97fe9d929993bbcfb17fee77d6feeffabc80f5fd10ea0dc322b4afa18",
+    "approvedExpected": null,
+    "changed": false
+  },
+  {
+    "path": "/workspace/next10-diamond-try-evidence/compiler/soljson.js",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "loaded": false
+  }
+]

@@ -705,9 +705,9 @@ theorem Pat.notPanic_decode {p : Pat} {d : List UInt8} (hp : p.notPanic = true)
     exfalso
     obtain ⟨h4, h36⟩ := h
     simp only [Pat.notPanic, bne_iff_ne, ne_eq, Bool.or_eq_true,
-      List.any_eq_true, List.mem_range] at hp
+      List.any_eq_true, List.mem_range, decide_eq_true_eq] at hp
     rcases hp with hl | ⟨i, hi, hb⟩
-    · exact hl (hm.1 ▸ h36)
+    · exact Nat.not_lt_of_ge (hm.1.symm ▸ h36) hl
     · split at hb
       · rename_i b hpi
         have hd := hm.2 i b hpi

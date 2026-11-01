@@ -1,0 +1,22 @@
+[
+  {
+    "pipeline": "legacy",
+    "fullRuntimeBytes": 1673,
+    "runtimeSha256": "e335ea9f2867baaaf40c876fa250ffd2bece75a4b833be111d97f9d2c1b799cc",
+    "sourceSha256": "522bfa3512517476f4f06cef823b176afe52978eb52393b25783e30d10ccc311",
+    "outputSha256": "d8dd80611bbc54581b3d9e6a1471c75045b01701439f39e6080a1098ff35e03a",
+    "allChunksInOrderExactlyOnce": true,
+    "entireArrayMatchesCompilerOutput": true,
+    "referenceOutputBytesInjected": false
+  },
+  {
+    "pipeline": "viaIR",
+    "fullRuntimeBytes": 1965,
+    "runtimeSha256": "faf0d96218acbf1285125e35959e2ab4babebd7f6e64446c25445aa203c90d52",
+    "sourceSha256": "522bfa3512517476f4f06cef823b176afe52978eb52393b25783e30d10ccc311",
+    "outputSha256": "94f13db8438b5026fb5b6902565ef3759f807b769a84d9bbadb5a332f12f904f",
+    "allChunksInOrderExactlyOnce": true,
+    "entireArrayMatchesCompilerOutput": true,
+    "referenceOutputBytesInjected": false
+  }
+]

@@ -1,0 +1,118 @@
+{
+  "kind": "fixture-local comparison design/artifact integrity, not implemented relation or historical execution",
+  "rows": [
+    {
+      "label": "check",
+      "command": [
+        "python3",
+        "/workspace/next10-diamond-try-evidence/comparison-design/check.py"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 16728,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 19132416,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17600,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 10645504,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "doc-paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1,
+      "seconds": 3,
+      "peakAggregateRssKiB": 24804,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 9023488,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 15676,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4661248,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "invocation",
+      "command": [
+        "bash",
+        "-c",
+        "test \"$LEAN_NUM_THREADS\" = 1 && ! flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock true && printf \"threads1 writer_lock_held=true historical_execution=false\n\" && df -h /workspace && free -m"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 14056,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 5861376,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "census",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17468,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 14671872,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    }
+  ],
+  "docPaths": {
+    "baselineCommit": "eef9fc8a28d09c8a24b1e45c7b2ceba59409c99a",
+    "baselineExit": 1,
+    "currentExit": 1,
+    "baselineFindings": 20,
+    "currentFindings": 20,
+    "newFindings": 0
+  },
+  "newLeanAudits": 0,
+  "retainedLeanAudits": 217,
+  "historicalEngines": 0,
+  "historicalFixtures": 0,
+  "newCompilations": 0,
+  "newMaps": 0,
+  "repeatedGasArithmetic": 0,
+  "relationImplemented": false,
+  "relationApproved": false
+}

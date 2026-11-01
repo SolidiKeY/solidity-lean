@@ -1,0 +1,21 @@
+{
+  "kernelAxiomAudits": 310,
+  "newStandardOnlyAudits": 20,
+  "cleanOwningDiagnostics": 3,
+  "budgetControlsPassed": 12,
+  "sourceAdmissionCalls": 22,
+  "exceptionVectors": 88,
+  "maxSourceAttempts": 2590,
+  "maxExceptionAttempts": 3650,
+  "orderedStateControls": 14,
+  "nativeWorking": 12,
+  "nativeBlocked": 8,
+  "nativeStrictExit": 1,
+  "freshNativeVsRetainedReferenceFrozenFullOrdered": 66,
+  "historicalNeverCompiledOrExecutedThisIncrement": true,
+  "priorChecksumsVerified": 2600,
+  "originalDependencyTreeUnchanged": true,
+  "patchedFilesOnly": 4,
+  "P4P5bP8Implemented": false,
+  "originalAssignmentComplete": false
+}
