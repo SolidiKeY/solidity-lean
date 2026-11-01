@@ -2561,3 +2561,101 @@ Both separate final read-only finder/skeptic reviews CLEAR, no checks/edits.
 Raw audit parser/missing-file failure retained, repaired namespace+mutual handling;
 no proof/budget change. Global docs ACTUAL exit1, exact-base byte equality/delta0
 separate. Full assignment/goal remains PARTIAL/BLOCKED, all original queue open.
+
+
+### Computed active layout origin (2026-11-01)
+
+Original Y04/Backfill A/B progress, full lane PARTIAL and original goal BLOCKED
+unchanged. Earlier origin-open statements are superseded ONLY for this supported
+ordinary current literal-base profile. General expression/global/source/compiler
+adequacy remains open. YQ1–YQ7, existing exclusions/guards/owner states unchanged.
+
+LayoutOrigin uses ACTUAL Source.Syn.const and Q.FitsInt uint256, retaining the
+exact rational, integral/nonnegative/range facts and Word-to-integer equality.
+No modulo256 conversion, fractional truncation, second constant evaluator,
+artificial expression/root/depth cap or assumed desired origin law. Numeric,
+scientific and integral fractional-spelling literals retain exact owner values;
+invalid fractions/out-of-range constants fail preparation. Source.isLiteralBase
+is the EXISTING profile guard, and successful active-clause preparation is proved
+to preserve actual Source.Syn.excl=none. Compiler accepts40+2 while this existing
+Source profile excludes it: both observations preserved, no profile promotion.
+
+prepareActiveOrigin checks actual owner hierarchy/global identity and resolves
+ACTUAL Env.declOf contract with qualified file-level active name. Found declaration
+membership/kind/scope/name are derived; malformed top/node/name shapes diagnosed.
+Only MOST-DERIVED ACTIVE contract's clause is evaluated, not any summed/inherited
+base clause. Missing layout defaults0. Transient uses independent0 regardless of
+computed persistent origin, after validating the active declaration/clause.
+No fabricated interpretation of preparation errors as language refusal/no-op.
+
+ComputedSourceLayout/prepareComputedLayout compose this computed origin with the
+existing CheckedInheritedDeclarations/RootDeclarations and ONE scalar packer;
+entry signature has NO arbitrary origin Word. Existing explicit-origin APIs and
+codec/guard signatures unchanged. Exact metadata/packing/bank/extent/coverage,
+nonwrap and raw whole-store reconstruction laws reused. ComputedLayoutPreparation
+states only REAL actual hierarchy/metadata/pack equations. Concrete origin_entry_exact
+instantiates them and proves the PUBLIC preparation returns the actual checked
+layout; it is not a list of assumed inverse/read/safety/final-view obligations.
+
+Actual diamond D:B,C with both inheriting A, D layout at42, yields persistent
+leaves at42..48 with adjacent private-base uint8+uint248 sharing42, bool43,
+struct array44/45, uint24846, spilled uint1647, marker55 at48; end1568.
+The separately declared transient uint16 remains0. All actual typed Source.Storage
+snapshot decode/encode, pure unchanged administrative none/default identity,
+selected/unselected paths/accounts/banks, actual Source.applyOp/current-frame
+sequence, EVERY-original-H MemOK and inhabited initial/postwrite/alias states,
+whole residual function equality/full raw reconstruction, caller prefix/child
+rollback, committed child/outer rollback, static empty revert, transient logical+
+residual reset and alias/readCell/index error controls connect to this computed
+origin. Supplied kernel residuals outside observed42–49 are arbitrary0xee;
+constructor observations do not imply entire EVM store/reachability/correspondence.
+
+Adversarial controls: absent/duplicate/mismatched active metadata, owner range and
+integrality, maxWord exact conversion vs actual full-entry physical-span failure,
+profile-preserving arithmetic boundary, standalone base default0, padding and dirty
+owned bool43. Finder caught a copied dirty test still at unowned1; fixed to43,
+leaving unowned1 fully residual. None remains unsupported preparation, not assembly
+refusal/cleanup/deallocation. Dirty owned payload transport remains unfinished.
+
+Pinned OriginSequence.sol independently specifies seven ordered calls per legacy/
+viaIR pipeline, complete20word ABI/raw/logical storage/alias/transient observations,
+AST numeric42 provenance, independent base-alone0 layouts, full100byte Error("origin"),
+postfailure reads/padding/sentinel49.409strict negative controls include240coherent
+ABI word corruptions, wrong origin/profile/base/owner/bank/order/revert/limits.
+Additional18actual compiler classifications cover defaults, literal42/42.0/0.42e2,
+accepted40+2, and fraction/negative/numeric-overflow/span-overflow errors. These are
+finite external checks, separate from universal kernel/source/compiler adequacy.
+Compiler0.8.38/Osaka/source/archive pins,100m gas/5m steps/all original budgets
+unchanged; all older report fields and observations retained.
+
+G0/history reviewed; no owner representation refactor. Direct whole-record
+normalization exceeded existing200000 heartbeats; retained raw exits and repaired
+with generic staged monadic/dependent-if computation equations, concretely supplied
+by actual metadata and already-proved pack result (about6s), no budget change.
+All prior failed attempts/caches/evidence preserved. get_goal read/Lean MCP absent;
+no goal mutation. Required gates/reviews/full head/artifacts in
+/workspace/vy2-evidence/layout-origin/HANDOFF.md. Global docs remains ACTUAL exit1
+with exact-base48missing/37ambiguous and zero delta separately.
+
+Whole path/hash/dynamic/dirty ownership, remaining memory/shared-zero/interior
+forms, reachable allocation/refinement, whole actual memory/store source closure,
+V10/V11 agreement instances, Y06 bindings and actual VY1/source/assembly MemOK,
+Y09.02 rules/notation/printers/compiler/joint closure remain ORIGINAL unfinished
+work. Owner MemOK/World/ContractWorld/Bridge available, not Yul adequacy. No worker
+imports/push/merge/PR, new semantic decision or exclusion. Questions=[].
+
+
+Computed-origin final gates: actual Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort2jobs exit0; focused134jobs/full1181default+262TestSuite/131annotations
+exit0. Complete3243signatures/1837theorem reports:1773standard-only/64axiom-free,
+no missing/unexpected. Strict491automatic/61budgeted/11refuted/0pending;
+trust1211sources/246sites/0findings; layers372core/0elaborator reach;
+imports1196reachable/0orphans; markdown base1/head1/new0.24cumulative negative
+families pass.436ordered external calls and18separate compiler classifications;
+all422preceding report fields IDENTICAL. Report SHA256
+60ede568e49694225e7781974e0e2836f3c3f8e30c91dc71b0ac8eb40bf3e93e.
+Independent final finder/skeptic reviews CLEAR after dirty-owned negative test
+moved1→43; neither used Lean/server/build/tests or edited. Actual global docs
+exit1 byte-identical pinned-base48missing/37ambiguous, zero delta SEPARATE.
+Raw normalization/dependent-if/typing/free-variable proof attempts retained.
+No budget increase, axioms or changed expected results. Full lane unfinished.

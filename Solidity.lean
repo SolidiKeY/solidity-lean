@@ -931,3 +931,6 @@ import Solidity.Yul.Views.FixedDeclarationTypingControls
 import Solidity.Yul.Views.RootDeclarationInitial
 
 import Solidity.Yul.Views.InheritedDeclarationReads
+
+import Solidity.Yul.Views.LayoutOriginReads
+import Solidity.Yul.Views.LayoutOriginNegativeControls

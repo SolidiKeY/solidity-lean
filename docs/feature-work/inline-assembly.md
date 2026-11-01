@@ -494,3 +494,14 @@ and reset controls, pinned diamond pipelines and actual frontend lineage-validat
 controls. Full lane PARTIAL, source/compiler/calculus dependencies and origin
 agreement still OPEN; YQ1–YQ7 unchanged. See lane inherited-active-contract section
 and /workspace/vy2-evidence/inherited-roots/HANDOFF.md for committed head/gates.
+
+
+VY2 computed-origin handoff (2026-11-01): actual active Source contract clause,
+existing rational/literal profile/range checks now compute default0/nonzero Word
+and independent transient0; no caller origin in new preparation entry. Actual
+inherited packed source/store/residual/frame/reset/MemOK and shifted42 diamond
+controls, pinned pipelines and compiler expression-boundary controls are in lane
+computed-active-layout-origin section. Full assignment PARTIAL, original goal
+BLOCKED unchanged; general expressions/dynamic/dirty/whole source/compiler/calculus
+closure remain open. Exact committed head/gates/artifacts:
+/workspace/vy2-evidence/layout-origin/HANDOFF.md.
