@@ -2963,3 +2963,94 @@ adequacy. Independent work is NOT exhausted; new checks require safe disk headro
 Existing blocked goal untouched; get_goal/LeanMCP unavailable. Exact commit,
 commands/exits, remaining queue, resources/reviews and indexed evidence appear
 in the compact additive handoff; no whole-lane completion is claimed.
+
+
+## G21 actual selector/signature prefix applications (2026-11-01)
+
+The approved exact20 stopped-container maintenance returned20 nonforced204
+removal responses, each reconciled404; all other objects, runtime, source and
+seals remain. Actual free bytes rose540082176→4050046976, a measured3509964800
+increase, not the logical VFS estimate. Source2963/seals26/member344 checks
+passed before/after. The human approval and restored immutable baseline are
+indexed in the additive approved-cleanup-20261101 artifact directory. The old
+missing-baseline stop and all old receipts remain untouched. No goal change.
+
+SourceAbi.selector_execute and signature_execute follow the actual published
+evalE branches: all arguments, then selector conversion or signature-byte read,
+then tail encoding, then result allocation at the final reached heap.next.
+Every individual reached locals/St and actual exact bytes remain explicit.
+SourceAbi.prefixed_arguments_failure retains the actual reached failure and
+complete machine. The literal laws introduce no encoder/decoder or length cap.
+The signature prefix observation consumes the existing fixed.Keccak pin.
+These are source execution/component observation laws, not canonical SourceSpec,
+V07, compiler-body/ABI/layout/runtime-frame/bytecode/linkage adequacy.
+
+SourceAbiControls instantiates the laws on the existing populated machine and
+actual local write/read/hash-allocation tail. Binary selector[0,255,128,1] and
+empty signature hash prefix[197,210,70,1] produce324-byte payloads with complete
+existing320-byte tail, all offset words and old heap0 retained. Mixed output
+pointer2/next3 and localfalse are exact. The signature-memory variant allocates
+an actual STRING object1, executes the tail/hash object2, reads string1 after
+the tail at the reached heap, and returns a separate bytes object3/next4. Its
+complete balances/code/nonce/persistent/transient/journal/heap/events/logs/
+function-locals vector retains every old observation. Both pipelines/static
+modes execute. Wrong prefix/pointer/skipped effects and actual reversed-order
+runs discriminate; low horizon preserves localfalse before timeout, not revert.
+No collision or hash-injectivity premise is used: the empty-prefix discriminator
+uses the already checked Keccak vector.
+
+Finder requested precise admission evidence: the published resolved ABI
+constructor does not carry Typed.argsOK. The concrete selector/signature/string
+memory fixtures now prove the existing argsOK predicate, and an overlong33-byte
+selector retains its published typing rejection. The generic arbitrary-byte
+resolved execution law is not an all-input source-admission theorem. Skeptic
+confirmed the actual reached-state/allocation boundaries. Prefix list helpers
+avoid accidental cryptographic reduction under the unchanged200000heartbeats;
+no reduction, fuel, node, test, wall, CPU or memory budget is increased.
+
+Focused bounded10390-96c6cb08 PASS139jobs/60.386816534s; actual Lean4.24.0 and
+Lake5.0.0-src+797c613; KeySort PASS2jobs. Cgroup peak681512960 and sampled aggregate
+RSS1240809472 bytes. Same checked runtime0fe0539b reused, cacheoff, CPU1,
+Lean-j1/threads1,12GiB/no-swap under16GiB parent; no runtime/cache duplication.
+All780 old exact standard axiom sets unchanged;33 checked additions make813.
+Raw intermediate proof failures are retained. Production checker/corruption and
+static validation results are in this checkpoint's additive handoff.
+
+Proposed coordinator ledger localEvidence ONLY for existing feature IDs
+abiEncodeWithSelector and abiEncodeWithSignature: these owned source component
+laws/controls. No generated ledger, manifest status, global pins or other-owner
+source is edited. All G20,G21,G22.01-.05,G23/BackfillA-B parents remain PARTIAL.
+Canonical Source/V07/type/layout/ABI/body/linkage/runtime-frame/bytecode/admission,
+nested aggregate/calldata/slice/catch/reserved-owner applications remain open.
+Mandatory Decision/default/full/literal/executable-refresh holds and raw docs/
+global-pin failures are not waived. No unchanged heavy retry or compiler/EVM
+adequacy claim. Ready independent work is not claimed exhausted.
+
+
+Validation follow-up: production813pins/73coremodules and ALL48 unchanged
+production evidence cases pass. Runtime profile plus published/Keccak/emit/
+callable/dispatch/custom-error/failure/ABI wrapper tests pass. Historical prefix
+unit test initially FAIL1 because its old pinned-worktree positive was checked
+under the current published-worktree root. Fixed UNIT ONLY: bind immutable
+841312 before-record SHA e14ab26a13ede5931950da81dbd030dfde39ef536b115d3c5a9ddc6ee6fbd730,
+use its original seed.repository context, explicitly reject the current context,
+and retain all14 original corruptions. Production strict inspector is unchanged;
+the raw failure is retained and the fixed16 mocked-call test passes. Independent
+finder/skeptic confirmed this is fixture binding, not a guard relaxation.
+
+Fresh trust/strict/layers/orphans/owned-whitespace PASS. Raw global docs FAIL1:
+complete current/public83findings byte-identical (46missing plus37ambiguous),
+frozen72findings adds11ambiguities. Raw global axiom inventory FAIL1:
+current/public359notes identical, frozen14notes adds345. Separate public NEW0
+comparisons pass; neither raw gate is green and frozen increases persist. Whole
+raw outputs and complete lists/hashes are retained. Suite139309 remains the
+prior actual262jobs PASS: all260dependency sources/config/log bindings refreshed
+unchanged, no new Suite execution claimed. Fully warm Decision78278 remains
+FAIL125:321dependency sources unchanged, no supported repair or unchanged retry.
+Final/default/full/literal/executable-refresh boundaries remain unresolved.
+
+All780prior exact sets and every old fixture remain. New source dependencies
+stay within the already published closure. No Source/backend/global-manifest/
+TrustAudit edits, hashes-as-injective premise, native shortcut or increased
+budget. Proof/script reviews are read-only and do not start Lean. This checked
+component does not finish any original parent or claim independent work exhausted.

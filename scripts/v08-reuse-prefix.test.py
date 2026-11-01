@@ -9,7 +9,12 @@ fmt_node=next(n for n in tree.body if isinstance(n,ast.Assign) and any(isinstanc
 fmt=ast.literal_eval(fmt_node.value)
 seed=Path('/workspace/v08-world-lowering-evidence/v08-gate-718396-d77b835d.json')
 previous=json.loads(seed.read_text())
-record=max(seed.parent.glob('prefix-reuse-*-before.json'),key=lambda p:p.stat().st_mtime)
+# The guard's positive fixture belongs to the historical pinned worktree.
+# Bind immutable bytes explicitly; never pick a fixture by mutable mtime.
+record=seed.parent/'prefix-reuse-v08-gate-841312-91187aee-before.json'
+assert hashlib.sha256(record.read_bytes()).hexdigest()=='e14ab26a13ede5931950da81dbd030dfde39ef536b115d3c5a9ddc6ee6fbd730'
+fixture_root=Path(previous['repository'])
+assert str(fixture_root)=='/workspace/v08-world-lowering-pinned'
 baseline=json.loads(record.read_text())['inspection']
 current=[baseline]
 calls=[]
@@ -18,11 +23,20 @@ def fake(args,**kwargs):
  calls.append(args)
  return json.dumps(current[0])
 ns=dict(json=json,subprocess=types.SimpleNamespace(check_output=fake),previous=previous,
- root=root,os=os,seed=seed,seed_hash=hashlib.sha256(seed.read_bytes()).hexdigest(),
+ root=fixture_root,os=os,seed=seed,seed_hash=hashlib.sha256(seed.read_bytes()).hexdigest(),
  hashlib=hashlib,Path=Path,fmt=fmt)
 exec(compile(ast.Module(body=[function],type_ignores=[]),'inspector-test','exec'),ns)
 check=ns['inspect_reuse']
 check(['docker'],{'SAFE':'1'})
+# The historical record must not be accepted under the present worktree context.
+ns['root']=root
+try:
+ check(['docker'],{'SAFE':'1'})
+except AssertionError:
+ pass
+else:
+ raise AssertionError('accepted historical profile under current worktree context')
+ns['root']=fixture_root
 cases=[('active','running',True),('foreign-token','token','wrong'),
  ('raised-memory','memory',13*1024**3),('swap','swap_total',13*1024**3),
  ('cpu','cpu_nano',2000000000),('network','network','host'),
@@ -40,5 +54,5 @@ for name,key,value in cases:
   pass
  else:
   raise AssertionError('accepted '+name)
-assert len(calls)==15
-print('PASS: positive profile accepted;14 corrupt/foreign/unbounded profiles rejected;15 mocked inspect-only calls;no Docker start/build/write')
+assert len(calls)==16
+print('PASS: SHA-bound historical positive accepted;current-context mismatch and14 original corrupt/foreign/unbounded profiles rejected;16 mocked inspect-only calls;no Docker start/build/write')

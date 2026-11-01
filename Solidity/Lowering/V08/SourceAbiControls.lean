@@ -1,5 +1,6 @@
 import Solidity.Lowering.V08.SourceAbi
 import Solidity.Lowering.V08.SourceCustomErrorControls
+import Solidity.Lowering.V08.CryptoControls
 namespace Solidity.Lowering.V08.SourceAbiControls
 open Solidity Source
 open SourceCustomErrorControls
@@ -277,4 +278,324 @@ theorem mixed_lengths (pipeline : Roadmap.Pipeline) :
 #print axioms mixed_lengths
 #print axioms digest_word
 #print axioms digestWord_eq
+
+/-- Binary selector and an empty signature are valid ABI-prefix inputs; neither
+is treated as source declaration metadata or callable admission. -/
+def selectorBytes : Roadmap.Bytes := [0,255,128,1]
+def selectorArgs : RArgs E [.bool]
+    [.stringLit selectorBytes,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] :=
+  .cons (.str selectorBytes) arguments
+def signatureArgs : RArgs E [.bool]
+    [.stringLit [],.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] :=
+  .cons (.str []) arguments
+
+
+theorem selector_value_bytes :
+    (Source.mkBytes (n:=4) (h:=by decide +kernel) selectorBytes :
+      Source.Val E.layout (.fixedBytes 4 (by decide +kernel))).bytesOf = selectorBytes := rfl
+
+theorem selector_drop (tail : Roadmap.Bytes) (index : Nat) :
+    (selectorBytes ++ tail).drop (4+index) = tail.drop index := by
+  simpa only [show selectorBytes.length = 4 from rfl] using
+    (List.drop_length_add_append (l₁:=selectorBytes) (l₂:=tail) index)
+
+theorem selector_byte_at (tail : Roadmap.Bytes) (index : Nat) :
+    allocatedByteAt (SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+      (selectorBytes ++ tail)) 2 (4+index) = tail[index]? := by
+  change (selectorBytes ++ tail)[4+index]? = tail[index]?
+  have drop : (selectorBytes ++ tail).drop 4 = tail := rfl
+  simpa only [List.getElem?_drop] using congrArg (fun bytes : Roadmap.Bytes => bytes[index]?) drop
+
+theorem selector_arguments_execute (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalArgs (global pipeline) {frame with static:=static} 17 selectorArgs).run (locals,populated) =
+      (.ok (.cons (.strLit selectorBytes) (values pipeline)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) := rfl
+
+theorem signature_arguments_execute (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalArgs (global pipeline) {frame with static:=static} 17 signatureArgs).run (locals,populated) =
+      (.ok (.cons (.strLit []) (values pipeline)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) := rfl
+
+theorem selector_mixed_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSelector selectorArgs)).run (locals,populated) =
+      (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+          (selectorBytes ++ data false pipeline))) := by
+  have conversion : (Source.convRV {frame with static:=static} 17 (.fixedBytes 4 (by decide +kernel))
+      (.strLit selectorBytes) : Source.EM E [.bool] _).run
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary) =
+      (.ok (.val (Source.mkBytes (n:=4) (h:=by decide +kernel) selectorBytes)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) := rfl
+  have result := SourceAbi.selector_execute (global pipeline) {frame with static:=static} 17 selectorArgs
+    locals (.cons (.bool false) .nil) (.cons (.bool false) .nil) (.cons (.bool false) .nil)
+    populated (SourceKeccak.afterLiteral populated binary) (SourceKeccak.afterLiteral populated binary)
+    (SourceKeccak.afterLiteral populated binary) (.strLit selectorBytes) (values pipeline)
+    (Source.mkBytes (n:=4) (h:=by decide +kernel) selectorBytes) (data false pipeline)
+    (selector_arguments_execute pipeline static) conversion (encoding_execute pipeline static false)
+  simpa only [selector_value_bytes] using result
+
+theorem signature_mixed_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSignature signatureArgs)).run (locals,populated) =
+      (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+          ((Source.wordBytes ((global pipeline).fixed.hash [])).take 4 ++ data false pipeline))) := by
+  apply SourceAbi.signature_execute (global pipeline) {frame with static:=static} 17 signatureArgs
+    locals (.cons (.bool false) .nil) (.cons (.bool false) .nil) (.cons (.bool false) .nil)
+    populated (SourceKeccak.afterLiteral populated binary) (SourceKeccak.afterLiteral populated binary)
+    (SourceKeccak.afterLiteral populated binary) (.strLit []) (values pipeline) [] (data false pipeline)
+  · exact signature_arguments_execute pipeline static
+  · rfl
+  · exact encoding_execute pipeline static false
+
+/-- Independent checked empty-Keccak vector, not a collision/injectivity premise. -/
+theorem empty_signature_prefix (pipeline : Roadmap.Pipeline) :
+    (Source.wordBytes ((global pipeline).fixed.hash [])).take 4 = [197,210,70,1] := by
+  rw [SourceAbi.signature_prefix_transport (global pipeline) Roadmap.Controls.toyFixed_keccak []]
+  simp only [List.map_nil]
+  rw [CryptoControls.empty_hash]
+  rfl
+
+/-- The entire old ordered vector is retained, with the prefixed output object.
+Both successful return values and caller locals are in the execution theorems. -/
+theorem prefixed_complete_vector (prefixData : Roadmap.Bytes) (pipeline : Roadmap.Pipeline) :
+    let final := SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+      (prefixData ++ data false pipeline)
+    (final.ex.world.accounts sender).balance.val = 93 ∧
+    (final.ex.world.accounts self).balance.val = 7 ∧
+    (final.ex.world.accounts self).code = some 0 ∧
+    (final.ex.world.accounts self).nonce = 1 ∧
+    (final.ex.world.accounts self).storage.read saved = some (.bool true) ∧
+    (final.ex.transient.cells self).read scratch = some (.bool true) ∧
+    final.ex.journal.length = 3 ∧ final.heap.next = 3 ∧
+    final.heap.get 0 = some ⟨.bytes .memory,.bytes [0,255]⟩ ∧
+    final.heap.get 1 = some ⟨.bytes .memory,.bytes binary⟩ ∧
+    final.heap.get 2 = some ⟨.bytes .memory,.bytes (prefixData ++ data false pipeline)⟩ ∧
+    final.events = populated.events ∧ final.logs = populated.logs ∧ final.fnLocals = populated.fnLocals :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+theorem prefixed_offsets_and_length (pipeline : Roadmap.Pipeline) :
+    (selectorBytes ++ data false pipeline).length = 324 ∧
+    ((selectorBytes ++ data false pipeline).drop 4).take 32 = Source.wordBytes (Source.toWord 160) ∧
+    ((selectorBytes ++ data false pipeline).drop 100).take 32 = Source.wordBytes (Source.toWord 224) := by
+  constructor
+  · rw [List.length_append,(mixed_lengths pipeline).1]
+    rfl
+  · constructor
+    · rw [show (4:Nat) = 4+0 from rfl,selector_drop,List.drop_zero]
+      exact (complete_offset_words pipeline).1
+    · rw [show (100:Nat) = 4+96 from rfl,selector_drop]
+      exact (complete_offset_words pipeline).2.1
+
+/-- Reached local effects remain, but the later hash and output allocation have
+not occurred. Timeout is distinct from revert/divergence. -/
+theorem prefixed_timeout_after_effects (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 7
+      (.abiEncode .encodeWithSelector selectorArgs)).run (locals,populated) =
+      (.error .timeout,(.cons (.bool false) .nil,populated)) := by
+  apply SourceAbi.prefixed_arguments_failure (global pipeline) {frame with static:=static} 6
+    .encodeWithSelector selectorArgs locals (.cons (.bool false) .nil) populated populated .timeout
+  rfl
+
+theorem prefixed_zero_horizon (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 0
+      (.abiEncode .encodeWithSignature signatureArgs)).run (locals,populated) =
+      (.error .timeout,(locals,populated)) := rfl
+
+theorem wrong_selector_bytes (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSelector selectorArgs)).run (locals,populated) ≠
+      (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+          ([1,255,128,1] ++ data false pipeline))) := by
+  rw [selector_mixed_complete]
+  intro same
+  have byte := congrArg (fun result => allocatedByteAt result.2.2 2 0) same
+  exact (by decide +kernel : (some 0 : Option UInt8) ≠ some 1) byte
+
+theorem wrong_signature_prefix (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSignature signatureArgs)).run (locals,populated) ≠
+      (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+          ([0,0,0,0] ++ data false pipeline))) := by
+  rw [signature_mixed_complete,empty_signature_prefix]
+  intro same
+  have byte := congrArg (fun result => allocatedByteAt result.2.2 2 0) same
+  exact (by decide +kernel : (some 197 : Option UInt8) ≠ some 0) byte
+
+theorem prefixed_wrong_pointer (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSelector selectorArgs)).run (locals,populated) ≠
+      (.ok (.val (.memRef rfl 1)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+          (selectorBytes ++ data false pipeline))) := by
+  rw [selector_mixed_complete]
+  intro same
+  have pointer := congrArg (fun result => match result.1 with
+    | .ok (.val (.memRef _ address)) => some address
+    | _ => none) same
+  exact (by decide +kernel : (some 2 : Option Nat) ≠ some 1) pointer
+
+theorem prefixed_skipped_effects (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSignature signatureArgs)).run (locals,populated) ≠
+      (.ok (.val (.memRef rfl 1)),(locals,
+        SourceKeccak.afterLiteral populated
+          ((Source.wordBytes ((global pipeline).fixed.hash [])).take 4 ++ data false pipeline))) := by
+  rw [signature_mixed_complete]
+  intro same
+  have next := congrArg (fun result => result.2.2.heap.next) same
+  exact (by decide +kernel : (3 : Nat) ≠ 2) next
+
+#print axioms selector_arguments_execute
+#print axioms signature_arguments_execute
+#print axioms selector_mixed_complete
+#print axioms signature_mixed_complete
+#print axioms empty_signature_prefix
+#print axioms prefixed_complete_vector
+#print axioms prefixed_offsets_and_length
+#print axioms prefixed_timeout_after_effects
+#print axioms prefixed_zero_horizon
+#print axioms wrong_selector_bytes
+#print axioms wrong_signature_prefix
+#print axioms prefixed_wrong_pointer
+#print axioms prefixed_skipped_effects
+
+/-- Existing primitive argument values encode without reading or changing the
+machine; this permits application at a genuinely different reached heap. -/
+theorem prefixed_values_encoding (pipeline : Roadmap.Pipeline) (static : Bool) (horizon : Nat) :
+    (Source.encodeVals {frame with static:=static} horizon false (values pipeline) : Source.EM E [.bool] _) =
+      pure (data false pipeline) := by
+  have wordRead : (digest pipeline).word = some (digestWord pipeline) := by
+    rw [digestWord_eq]
+    exact digest_word pipeline
+  have wordEncoded := SourceAbi.encode_fixed_bytes32 (E:=E) (Γ:=[.bool])
+    {frame with static:=static} horizon false (digest pipeline) (digestWord pipeline) wordRead
+  have literalEncoded (bytes : Roadmap.Bytes) :
+      (Source.encodeOne {frame with static:=static} horizon false (.strLit bytes) : Source.EM E [.bool] _) =
+        pure (true,bytes) := rfl
+  have falseEncoded :
+      (Source.encodeOne {frame with static:=static} horizon false (.val (.bool false)) : Source.EM E [.bool] _) =
+        pure (false,zeroWord) := rfl
+  simp only [values,Source.encodeVals,Source.encodeParts]
+  rw [literalEncoded binary,falseEncoded,literalEncoded long33,wordEncoded]
+  rfl
+
+/-- The first argument really allocates a string-memory reference; its contents
+are read after the successful effecting tail at the new reached heap. -/
+def afterSignature (state : Source.St E) : Source.St E :=
+  {state with heap:=(state.heap.alloc ⟨.string .memory,.string []⟩).1}
+
+def memorySignature : RExpr E [.bool] (.string .memory) := .conv (.str []) (Or.inl rfl)
+def memorySignatureArgs : RArgs E [.bool]
+    [.string .memory,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] :=
+  .cons memorySignature arguments
+
+theorem memory_signature_arguments (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalArgs (global pipeline) {frame with static:=static} 17 memorySignatureArgs).run (locals,populated) =
+      (.ok (.cons (.val (.memRef rfl 1)) (values pipeline)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral (afterSignature populated) binary)) := rfl
+
+theorem memory_signature_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSignature memorySignatureArgs)).run (locals,populated) =
+      (.ok (.val (.memRef rfl 3)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral (afterSignature populated) binary)
+          ((Source.wordBytes ((global pipeline).fixed.hash [])).take 4 ++ data false pipeline))) := by
+  let reached := SourceKeccak.afterLiteral (afterSignature populated) binary
+  apply SourceAbi.signature_execute (global pipeline) {frame with static:=static} 17 memorySignatureArgs
+    locals (.cons (.bool false) .nil) (.cons (.bool false) .nil) (.cons (.bool false) .nil)
+    populated reached reached reached (.val (.memRef rfl 1)) (values pipeline) [] (data false pipeline)
+  · exact memory_signature_arguments pipeline static
+  · rfl
+  · rw [prefixed_values_encoding]
+    rfl
+
+theorem memory_signature_vector (pipeline : Roadmap.Pipeline) :
+    let payload := (Source.wordBytes ((global pipeline).fixed.hash [])).take 4 ++ data false pipeline
+    let final := SourceKeccak.afterLiteral (SourceKeccak.afterLiteral (afterSignature populated) binary) payload
+    (final.ex.world.accounts sender).balance.val = 93 ∧
+    (final.ex.world.accounts self).balance.val = 7 ∧
+    (final.ex.world.accounts self).code = some 0 ∧
+    (final.ex.world.accounts self).nonce = 1 ∧
+    (final.ex.world.accounts self).storage.read saved = some (.bool true) ∧
+    (final.ex.transient.cells self).read scratch = some (.bool true) ∧
+    final.ex.journal.length = 3 ∧ final.heap.next = 4 ∧
+    final.heap.get 0 = some ⟨.bytes .memory,.bytes [0,255]⟩ ∧
+    final.heap.get 1 = some ⟨.string .memory,.string []⟩ ∧
+    final.heap.get 2 = some ⟨.bytes .memory,.bytes binary⟩ ∧
+    final.heap.get 3 = some ⟨.bytes .memory,.bytes payload⟩ ∧
+    final.events = populated.events ∧ final.logs = populated.logs ∧ final.fnLocals = populated.fnLocals :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+def selectorReversedArgs : RArgs E [.bool]
+    [.stringLit selectorBytes,.stringLit long33,.bool,.bool,.stringLit binary,STy.bytes32] :=
+  .cons (.str selectorBytes) reversedArguments
+
+theorem selector_reversed_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSelector selectorReversedArgs)).run (locals,populated) =
+      (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+          (selectorBytes ++ reversedData pipeline))) := rfl
+
+theorem actual_prefixed_different_order (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSelector selectorArgs)).run (locals,populated) ≠
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSelector selectorReversedArgs)).run (locals,populated) := by
+  rw [selector_mixed_complete,selector_reversed_complete]
+  intro same
+  have offset := congrArg (fun result => allocatedByteAt result.2.2 2 131) same
+  dsimp only at offset
+  rw [selector_byte_at (data false pipeline) 127,selector_byte_at (reversedData pipeline) 127] at offset
+  rw [(mixed_standard_offsets pipeline).2,(reversed_standard_offsets pipeline).2] at offset
+  exact (by decide +kernel : (some 224 : Option UInt8) ≠ some 0) offset
+
+theorem memory_signature_wrong_pointer (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSignature memorySignatureArgs)).run (locals,populated) ≠
+      (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+        SourceKeccak.afterLiteral (SourceKeccak.afterLiteral (afterSignature populated) binary)
+          ((Source.wordBytes ((global pipeline).fixed.hash [])).take 4 ++ data false pipeline))) := by
+  rw [memory_signature_complete]
+  intro same
+  have pointer := congrArg (fun result => match result.1 with
+    | .ok (.val (.memRef _ address)) => some address
+    | _ => none) same
+  exact (by decide +kernel : (some 3 : Option Nat) ≠ some 2) pointer
+
+#print axioms prefixed_values_encoding
+#print axioms memory_signature_arguments
+#print axioms memory_signature_complete
+#print axioms memory_signature_vector
+#print axioms selector_reversed_complete
+#print axioms actual_prefixed_different_order
+#print axioms memory_signature_wrong_pointer
+
+#print axioms selector_value_bytes
+#print axioms selector_drop
+#print axioms selector_byte_at
+
+/-- These are the published ABI argument predicates, not full source-unit admission. -/
+theorem selector_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase
+    [.stringLit selectorBytes,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
+
+theorem signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase
+    [.stringLit [],.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
+
+theorem memory_signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase
+    [.string .memory,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
+
+/-- Generic resolved evaluation is broader than admitted typing: this published
+rejection is preserved, with no new profile rule or restriction. -/
+theorem overlong_selector_not_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase
+    [.stringLit long33,.stringLit binary] = false := rfl
+
+#print axioms selector_argsOK
+#print axioms signature_argsOK
+#print axioms memory_signature_argsOK
+#print axioms overlong_selector_not_argsOK
 end Solidity.Lowering.V08.SourceAbiControls
