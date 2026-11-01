@@ -1412,3 +1412,75 @@ prior complete finding equality is separate. G03 proposal: attach these named
 G41/BackfillA facts, close no parent. Exact new gates/reviews/artifacts are in
 `/workspace/scratch/v13-nested-784ac610-evidence` and
 `/workspace/scratch/v13-nested-784ac610-artifacts`.
+
+
+## Canonical readback checkpoint (parent cc281c12, 2026-11-01)
+
+Owned `Solidity/Backend/AbiWorld/CanonicalReadback.lean` proves the EXISTING
+AbiEntry.load reads a full word n<W embedded after arbitrary bytes and before
+arbitrary bytes. It reuses ErrorRoundtrip.read_word and proves the actual
+bytesAt/fold relation; no second loader, codec or machine. Values300/max/zero
+remain whole uint256 words. Natural offsets, modulo serialization and actual
+source admission are distinct; no ByteRange restriction.
+
+Generic mseq_words/mdec_array consume real canonical bytes and construct the
+actual indexed WordArrayPacket.sequence. Sufficient original fuel relations
+are length+2 for the static-word sequence, length+3 for array mdec, and length+4
+for top-level melem/eager/entry. These are sufficient lemma hypotheses, not new
+decoder budgets or a necessary admission predicate. mdec_array uses the ORIGINAL
+alloc check free+(cursor+(32*length+32))≤lim and returns that exact cursor.
+Word length representability is derived from this bound, not assumed to follow
+from heap length. Canonical input_size measures actual selector+codec+suffix.
+
+roundtrip proves actual canonical memory/calldata verdicts with exact typed
+WordArrayPacket.values xs, both complete encoded body observations and the
+published cval read with the original one-step fuel difference. Arbitrary
+four-byte selectors/trailing bytes are preserved; selector dispatch is NOT
+proved. Its real input-size≤lim premise supports published eager_cref/lazy
+agreement. Helpers without that size premise are scoped facts about the existing
+intrinsic decoder/reference checks, not universal Source admission. The allocation premise on canonical calldata helpers
+is sufficient for their eager-copy/body route, never a necessary restriction
+on all calldata/lazy/readsOnly inputs. Original noncanonical cases are unchanged.
+
+mdec_tail/nested_tail/nested_inner additionally derive actual selected-inner
+array decoding from the real nested layout and its POST-length base. The
+inhabited selectorless fragment decodes byte160 at cursor128→224. This is NOT
+whole nested outer-sequence/entry readback. The generic dynamic mseq allocation
+composition and full nested indexed entry identity remain unproved owned work;
+no absent producer or assumed desired verdict is substituted for that proof.
+Prior NestedEntryControls.actualValues still establishes its original encoded
+byte equality; no new identity for those old witnesses is claimed.
+
+New `tests/v13-abi-world/CanonicalControls.lean` instantiates generic results
+for[300,max,0], empty arrays, arbitrary selector/trailing bytes and exact lim
+allocation. Swapped/stale arrays are positively accepted with changed values.
+Actual wrong-offset/missing-length/truncated entries revert; truncation consumes
+the checked existing empty REVERT emitter with real Fits/stack conditions.
+One-byte over-allocation and insufficient fuel stay BLOCKED, and a truncated
+packet with over-allocation preserves panic-before-region order. Wrong-load
+position/low-byte/truncated/swapped/stale byte inequalities are distinct from
+actual classified decoder failures. No native/compiler/EVM agreement is added.
+
+34headline scoped axiom guards and per-file diagnostics PASS; focused and
+registered import closure PASS1066jobs. Raw dependent-match, syntax/name,
+recursion-depth and unavailable equality-instance failures are retained. The
+proof repair exposed the existing mdec dependent recursor and factored actual
+error observation into a proof lemma; no decoder edits, raised proof/fuel/node/
+time limits, axioms or trust shortcuts. Separate independent finder/skeptic
+source reviews found no proof defect. Skeptic wording fix labels allocation
+Panic as possible/blocked rather than a completed panic. Neither ran Lean.
+
+Every original queue remains G40/G41partial; G42.01/.02/.03/.05blocked;
+G42.04/.06partial; BackfillA/Bpartial. Full native/runtime decoding/dispatch,
+unknown-memory encoding, CALL/RETURNDATA, arbitrary callee/callback/library/
+world/resource composition and mandatory whole-lane validation remain open.
+Private validation retains the exact9V12 inputs7881cb3a; mainalone still lacks
+those imports. Goal blocked and untouched, no automatic reactivation. All
+prior157entries/14seals remain immutable. Raw docs1/frozen86versus83 comparison1,
+Suite124/181.061s, full1/5038.87s, cold124/5400.579s remain failures, not retried.
+Complete publication/prior finding equality is separate. No reserved edit,
+profile/pin/fixture/Panic-control change or push/merge/PR. G03 proposal only:
+attach the named canonical G40/G41/BackfillA consequences; close no parent.
+
+NEW evidence: `/workspace/scratch/v13-canonical-cc281c12-evidence`.
+NEW artifacts: `/workspace/scratch/v13-canonical-cc281c12-artifacts`.
