@@ -1,0 +1,1139 @@
+{
+  "version": 1,
+  "source_commit": "20bbb1071e12d6e0765c885434df3defc7477b92",
+  "base_commit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "branch": "codex/next10-diamond-payments",
+  "repository": "/workspace/solidity-lean",
+  "artifacts": [
+    {
+      "role": "patch",
+      "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/committed.patch",
+      "size": 332341,
+      "sha256": "1810e50cb44f264a330e53a9bb2b1497021e78cf251683645f2ba5b245b89776",
+      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/0-committed.patch"
+    },
+    {
+      "role": "bundle",
+      "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/committed.bundle",
+      "size": 93638,
+      "sha256": "221baeaa0103292f0a974b07239c656a649c7c3bc140a298230c2c4069464b96",
+      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/1-committed.bundle"
+    },
+    {
+      "role": "original_patch",
+      "path": "/workspace/next10-diamond-payments.patch",
+      "size": 332341,
+      "sha256": "1810e50cb44f264a330e53a9bb2b1497021e78cf251683645f2ba5b245b89776",
+      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/2-next10-diamond-payments.patch"
+    },
+    {
+      "role": "handoff",
+      "path": "/workspace/next10-diamond-payments-handoff.md",
+      "size": 47435,
+      "sha256": "50a46831a954d894d7bbc00d1e207c2ec5426084d3d3372eb4303c52ef0ec35b",
+      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/3-next10-diamond-payments-handoff.md"
+    },
+    {
+      "role": "evidence",
+      "path": "/workspace/next10-diamond-payments-evidence.json",
+      "size": 104661,
+      "sha256": "5279a82ead6ce4ae48a4fc1e702e5527511b3084b5e455ed95cd4b0fc49ea428",
+      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/4-next10-diamond-payments-evidence.json"
+    },
+    {
+      "role": "evidence",
+      "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/evidence-3.tar.gz",
+      "size": 4522554,
+      "sha256": "e8bc40d0aa74edb65d0a99f76891102d0c0ea4ed8d43260e70a096c616fb68b1",
+      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/5-evidence-3.tar.gz"
+    },
+    {
+      "role": "checksums",
+      "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-checksums.sha256",
+      "size": 48630,
+      "sha256": "afa36935f4829589eaef3ed51114081c1c7ab413f44b2f17d286616029157f5e",
+      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/6-verified-original-checksums.sha256"
+    }
+  ],
+  "original_checksums_verified": [
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/original-175-checksums.sha256",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/FundingProfile.lean",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/PaymentSource-before-kernel-factor.lean",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/STATE.md",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/SourceBridge.md",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/add-composition.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/add-interface.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/add-laws.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/apply-docs.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/ast-generate.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/ast-generate2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/composition-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/composition-mcp2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-mcp2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-mcp3.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/decoder-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/disk-before-full.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/doc-paths-final.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/doc-paths-reviewed.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/evidence.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-canonical-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-decoder-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-empty-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-kernel-factor-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-kernel-final-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-mcp2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-mcp3.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-profile-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/export.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-send.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-send.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-transfer.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-transfer.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-uncalled.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-uncalled.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-core-plan-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-fixtures.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-original.toml",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/blocked.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/broken.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/file-coverage.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/results.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/summary.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/working.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/blocked.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/broken.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/file-coverage.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/results.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/summary.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/working.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/blocked.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/broken.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/file-coverage.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/results.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/summary.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/working.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/fix-gas.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/fixtures-final.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/fixtures-reproduce.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-build.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-final.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-resources.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-run.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/funding-profile.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-automatic.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-corpus.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-diff.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-doc-paths.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-inventory.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-layers.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-orphans.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-script-tests.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-source-fixtures-reproduce.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-trust-audit.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-trust.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gates.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-build2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp3.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp4.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-verify-original.toml",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-build2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-mcp2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-mcp3.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/inventory-generate.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/lake-shim.sh",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/lakefile.original.toml",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/lakefile.payments.toml",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/laws-import-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/laws-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-final.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-final.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-imported-axioms.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-verify-imports.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-warm-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp.sh",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp3.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp4.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/post-gates.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/prerequisite-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/prerequisite-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/probe-original.toml",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/proof-probe.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/proof-probe.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/proof-probe.sh",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/record-evidence.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/register-validation.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-build2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-controls-build.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-errors-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-examples-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-factor-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-final-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/review-fixes-mcp.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/run-final-mcp.sh",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/run-import-verify.sh",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/run.sh",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-controls-final.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-controls.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/blocked.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/broken.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/file-coverage.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/results.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/summary.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/working.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/blocked.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/broken.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/file-coverage.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/results.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/summary.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/working.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/blocked.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/broken.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/file-coverage.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/results.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/summary.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/working.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/blocked.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/broken.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/file-coverage.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/results.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/summary.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/working.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer.log",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-core.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-examples.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-generator.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-import.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-plan.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-prepare.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-replay.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-tests.py",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/next10-diamond-payments-evidence.json",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/next10-diamond-payments-handoff.md",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/next10-diamond-payments.commit",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/next10-diamond-payments.patch",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/records/next10-diamond-payments.patch.sha256",
+    "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-0ae506f378730c2a/snapshot-provenance.json",
+    "/workspace/next10-diamond-payments.patch",
+    "/workspace/next10-diamond-payments-handoff.md",
+    "/workspace/next10-diamond-payments-evidence.json"
+  ],
+  "slug": "diamond-payments",
+  "threadId": "01a18298-b467-7720-ae4b-3a6c2d1c5068",
+  "environmentId": "ccarenv_b64_Y2NhcmVudl80YTIwNzJmZTFkNjQ4MTkxYjNlNWU3NzU5NmVmZDg0NQ",
+  "archive_index": {
+    "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/4-next10-diamond-payments-evidence.json": [],
+    "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/5-evidence-3.tar.gz": [
+      {
+        "name": "verified-original-0ae506f378730c2a/original-175-checksums.sha256",
+        "size": 22969,
+        "sha256": "0ae506f378730c2a813f4c12de0acd859a924f3dc4e56508a2b92ef07291a8b3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/FundingProfile.lean",
+        "size": 3383,
+        "sha256": "893fe332a273085833574541d3a0e021b2e45236d17fbb9362b96f40eb49210f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/PaymentSource-before-kernel-factor.lean",
+        "size": 5850,
+        "sha256": "95a0172f9cceaed711559f7807405bb794f61a96919f16a7e28f8eb53db0dd2e"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/STATE.md",
+        "size": 1341,
+        "sha256": "0d9ffea35bb30c0c3de5d144e32b77cb8eb49a82b941dc36631f7a8b3218896d"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/SourceBridge.md",
+        "size": 7088,
+        "sha256": "3075e7be39eae04a5cbb4549ab3516ce93d461740a410273c275196a53d05d15"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/add-composition.py",
+        "size": 3272,
+        "sha256": "5e6a94fad5a62f92cc8683c63cb3ecff5f2b6e2508d31357bb2a1b6001230999"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/add-interface.py",
+        "size": 2742,
+        "sha256": "3aa3dc9c13edc71eda110bc23d2f83c7990103f3106831c25e128291f9925ce4"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/add-laws.py",
+        "size": 1868,
+        "sha256": "f3d2946da6e1f7e228f8c6b338b49ce602ec710b5602e8cb699b52c189bfbf3d"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/apply-docs.py",
+        "size": 6579,
+        "sha256": "da92ea64ea1d27fa1145a9c3c1c41d23d29fee5842e6bed441c5e22d671b5e1e"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/ast-generate.log",
+        "size": 62,
+        "sha256": "3a406915c0cbdbe44202070985d3e1b3ce46325b47fad934b161d44372f4af1c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/ast-generate2.log",
+        "size": 61,
+        "sha256": "4d28c646f78c3838836ecf3898292d675cfbbcccb8b1da4b1d40ff12864274c5"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/composition-mcp.log",
+        "size": 10963,
+        "sha256": "b83a8173cf618a77fcc6fffa551cd046c01634f96f241450982c0c7a75f3f9e1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/composition-mcp2.log",
+        "size": 9102,
+        "sha256": "45a4dc903aa7afe96a584a683ddef1b0e4a94e05b199a4f613cca6780c2aa12a"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-build.log",
+        "size": 6768,
+        "sha256": "066428866525b308c5d60dc698fa2fc4118249f0463a9723816d79b7041c07d2"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-mcp.log",
+        "size": 13540,
+        "sha256": "7f0f580619dc4b3d314ae2b030c4ece028136891b97a543a3d0764107b0144df"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-mcp2.log",
+        "size": 13613,
+        "sha256": "2b1cd9bffbaa608cfbd6c16b0085aed8bc9c84be59766516fb4da1806c9cca1b"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/core-mcp3.log",
+        "size": 5831,
+        "sha256": "fa5f85aeafcdf1bbc384f81c7b8f5520641db62550bf7c42e7661dca6c9decdf"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/decoder-mcp.log",
+        "size": 4952,
+        "sha256": "d507af21126de5858158fefbf09fc33563bb764a0ca3aed07dfae27b2bb037e6"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/disk-before-full.log",
+        "size": 89,
+        "sha256": "2eadbcd922c135f6893b1c81e581edbbb4f21af17c513fae838fee61fa599084"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/doc-paths-final.log",
+        "size": 2265,
+        "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/doc-paths-reviewed.log",
+        "size": 2265,
+        "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/evidence.json",
+        "size": 104661,
+        "sha256": "5279a82ead6ce4ae48a4fc1e702e5527511b3084b5e455ed95cd4b0fc49ea428"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-canonical-mcp.log",
+        "size": 11935,
+        "sha256": "891d680cb161efe74b1861cd9403d17df3db4e68c0138c4d2a2566c456a8c2b8"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-decoder-mcp.log",
+        "size": 12009,
+        "sha256": "6df21b515795e579abd8f6e8177706c3628c1cd7167fdf39122943d4b4fe3653"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-empty-mcp.log",
+        "size": 8923,
+        "sha256": "00a453908937e1d4d9e04f757215cdca6d98436881cf919c3674242c0aa8eec3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-kernel-factor-mcp.log",
+        "size": 6340,
+        "sha256": "315cda6a5b88b32dd4bd0f1b970ff629c2a786c1a23ae074fbc7346edcaeb6cb"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-kernel-final-mcp.log",
+        "size": 6019,
+        "sha256": "a53593602d3aeb4f5601a7de211ebfdce864b8e8c89c7913b36553e40c5c6d2a"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-mcp.log",
+        "size": 19191,
+        "sha256": "6e2cbf1ec1037ab8658e2849d803db2d674ab968de6fb23fd8a5ab08aed0c892"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-mcp2.log",
+        "size": 17244,
+        "sha256": "4d1ae87aba7ee1c84ae328f7d86d054df6d856dbc1e407e3e8c4eb0e338118d9"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-mcp3.log",
+        "size": 9451,
+        "sha256": "3443eb86e777dc6eb49ca06c37e966aa352fbb272a286f123e2b72b2a588b563"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/examples-profile-mcp.log",
+        "size": 9927,
+        "sha256": "2ec9e46114406da3eb8b44732fca7f49047b11e3a62d81e9e6790fdfac65ebc5"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/export.py",
+        "size": 4139,
+        "sha256": "d5e18d8e300c38439ee319b4c6c4f51e26994eddd6b9e94294668ce8fb0c49c3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-send.json",
+        "size": 30670,
+        "sha256": "cfe2f11c83c55f0b6fd16df737ce75558cb540ef7762e23e0b797914ac5de944"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-send.log",
+        "size": 354,
+        "sha256": "40e2cdad0b918af7353dcae34f30e485cc68637fb1e635a9c56a390924f917e6"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-transfer.json",
+        "size": 33601,
+        "sha256": "eaf82fc3a1ff59a9053b2939c45a577ac1ccaea96a5df339ab9b6588a82284d3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-transfer.log",
+        "size": 346,
+        "sha256": "63bc526e87e1dc785acb8abdcfd05fe3bb910fd8ecf55b328c90c142a5db0278"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-uncalled.json",
+        "size": 9420,
+        "sha256": "9f329fcab6e94d1ddd4e86025f030ddc14bebb30e93719ac6cca271bf8f4f6fe"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-bytecode-uncalled.log",
+        "size": 386,
+        "sha256": "7b3b25774c1788250b92053f180f07ed58349a4b9cce276cf5c6b026543458f0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-core-plan-mcp.log",
+        "size": 8531,
+        "sha256": "d792a743075fc7ed90ab53001ee22b46ca0d225d3cb7f919e5dee1e5676549be"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-fixtures.py",
+        "size": 1155,
+        "sha256": "7743ae31df3e4abc46ad20d2d5356dd9274647ceba9e4a74f5a3dbcdbe108516"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-original.toml",
+        "size": 1420,
+        "sha256": "1bddf1539441b58cbf0a36ae793b54278847d53135b3ca0bc4ab9e6b57c3a1c0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-build.log",
+        "size": 13040,
+        "sha256": "c5c34f0a21970c09067362d46ffd4f98fa0ece8356cb6c22c53823ec3da5d378"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-mcp.log",
+        "size": 8755,
+        "sha256": "68652466a9d93ef6cd72149296e55f10e4c99b7d169820ad9c9f99cf9c5632ea"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/blocked.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/broken.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/file-coverage.json",
+        "size": 4050020,
+        "sha256": "112fbee6ecf96ba43db1d85e3a24ddd5c7b6bc21610fa57de932e6fe8c81a20b"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/results.json",
+        "size": 44375,
+        "sha256": "481ec76f265e98bb44e714dcf9c2b89dde4a00da893a8a82cf153ace80583b94"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/summary.json",
+        "size": 1809,
+        "sha256": "5b6a7e2a39152f2dcac6feb9b42f2728834ded75e4fabe3e54545acbb793c961"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send/working.json",
+        "size": 40758,
+        "sha256": "3effa7b76f567851bf054c2fab8a5fe782d55ec9bfd767c9019a87c683638e8f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-send.log",
+        "size": 2127,
+        "sha256": "e261959b23f58772ff19f54956b82536774da1c464ea0bb1e7aa6e45a2d8372c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/blocked.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/broken.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/file-coverage.json",
+        "size": 4050020,
+        "sha256": "1d82c3d9e33e711dd7880ab07ee4cec3e788441f26f4c14419daa7085f9ed30a"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/results.json",
+        "size": 49010,
+        "sha256": "31e08bc313d0a170d08db197c3d3f6d395eaa8838c59e778e08e4fda6e38ae04"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/summary.json",
+        "size": 1803,
+        "sha256": "f0d7ca53d7bf0dbf11eee79b94dd1054a68bdd79ecd885e67948bb9c356c67bf"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer/working.json",
+        "size": 45481,
+        "sha256": "aa3d273d3120e22d3fc4390a6c232f9fd1899ce0162d4c716aa101eac67972e2"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-transfer.log",
+        "size": 2119,
+        "sha256": "ba60590fc99e9178aa775909fc4b6a7a3cc3f7e541c4300887ad778af8a3e944"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/blocked.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/broken.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/file-coverage.json",
+        "size": 4050017,
+        "sha256": "1f84e4ed0a7dc639dd6a9ff68213f181a34297ff7045abe4b3187c267071cb52"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/results.json",
+        "size": 2933,
+        "sha256": "927e5025e136c8ff64864a5f3dd29907880a83846e7bbfb3bacadabbab93cc1e"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/summary.json",
+        "size": 1823,
+        "sha256": "65e7ce813e3633776b7a645e04525e20e286b257b9808da5e4eb050a2bdee15c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled/working.json",
+        "size": 1204,
+        "sha256": "a9eb3285c54b9f71be0d411ff0f8da8a19ee7259536cb4b7da84788884c3822a"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/final-source-uncalled.log",
+        "size": 2159,
+        "sha256": "17475492f66cdb54fd1ee804e67d6418d2d61511b70369ed07d54f425a93ced2"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/fix-gas.py",
+        "size": 4622,
+        "sha256": "6efa7e782b35caa63b547466f7736ec55aeafa28a194085f2725d5465d41a2c9"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/fixtures-final.json",
+        "size": 2500,
+        "sha256": "b778741a34bc3af5cf4cdd1a2677657f8a90317df42eadb8d892955b4cfd4eb9"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/fixtures-reproduce.log",
+        "size": 203,
+        "sha256": "7cbf51f108c0d9a238a0fc502192c4c1befca560dfcc6cb6866efe2ccae17496"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-build.py",
+        "size": 1578,
+        "sha256": "db2922357d4c2a5cd3cc77347efacd2acec79e312b34d37f5c69118811afb086"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-final.log",
+        "size": 148449,
+        "sha256": "3871fd800fe7700558affee8fe9b1b3ab223bd52b22f265071e9aa849fc12f15"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-resources.json",
+        "size": 85337,
+        "sha256": "9b6e7219752cfdcc71ecdb6e4cbcd11172e7c542efcae460a6ce86366c6e0792"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/full-run.log",
+        "size": 152604,
+        "sha256": "b6ae9afb37ba4c11a865057c28146d905a75630566d08f9b9756fbed18209f93"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/funding-profile.log",
+        "size": 2680,
+        "sha256": "76b1fde3f95d75c7b1b441b4caedd3f3f38635fdf37ba193ddd3786cf632414f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-automatic.log",
+        "size": 269,
+        "sha256": "c8af053038861d8ec4fa1d5fe100683b1ff032ea1801991678734d0482cf30c5"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-corpus.log",
+        "size": 200,
+        "sha256": "f06a3d99d325314ff14da60a1d8c76117d496cf818443327be99218c9172d83a"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-diff.log",
+        "size": 25,
+        "sha256": "31204788484122e1754b90787601bbdee88e55462ad1ded53b8818cb90a4b967"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-doc-paths.log",
+        "size": 2305,
+        "sha256": "89dadaa699f8c53045207830acfdf46283a7af51508f30932fd551ceb765ff0f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-inventory.log",
+        "size": 199,
+        "sha256": "f1a55079f9011362a7b3033e3a50cb65206783bbcbbc782a27e6a8afeb3bb57f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-layers.log",
+        "size": 79,
+        "sha256": "e7190134899cb4f07713d29ab71c849be19f27938aa0c1827e40410be0acc63d"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-orphans.log",
+        "size": 80,
+        "sha256": "0d3867fc0b7b337f8567ac65d7f55127bb2f3889e055cdd54a8c2fcf385fe692"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-script-tests.log",
+        "size": 5764,
+        "sha256": "5a9bcd53ed150ccfb8deec92acfd1514a16396ad524de84476ed7a582256bfe8"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-source-fixtures-reproduce.log",
+        "size": 331,
+        "sha256": "cfaa8c80aa83ebe6c080ad44167bab48435f00ecdd0d8a800bd8702f706e1b02"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-trust-audit.log",
+        "size": 116,
+        "sha256": "9633bde5f667aefcb952f0e34afc465c9af926d066b0ea432ea748ce6f333659"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gate-trust.log",
+        "size": 114,
+        "sha256": "7d7d795b89543b0611d0049fa909613dc4e61060873bf569a00957877d71aaed"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/gates.json",
+        "size": 1841,
+        "sha256": "d70b37bfe955be2769c822213dbc1c33af65cba3aeca5d6392784b09e8d081a3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-build.log",
+        "size": 12176,
+        "sha256": "bbc7d0b2714a26a86201ff6276e1f526471faceda14e41fd3c192e5fac591296"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-build2.log",
+        "size": 12176,
+        "sha256": "9d3daada70251945712523afb01609dcae0e475bdf3fc2940c8b2412a938a01f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp.log",
+        "size": 11647,
+        "sha256": "63e4466b3926773c99e4402fb7ee7406f6bf5337b3719e29478da159a79df1bc"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp2.log",
+        "size": 4789,
+        "sha256": "b0d15394c988602b2bff5ee8262bc09b3974a81c09acaf024a8047b92df21688"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp3.log",
+        "size": 4239,
+        "sha256": "69e62155a79897da4df379d92a7c318dcfac4716706f83764da04d9e6cb4d8c1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-mcp4.log",
+        "size": 4239,
+        "sha256": "3f095742c9582933ed63e561f7b69872620586510617a15260337ea5c02b59fa"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/import-verify-original.toml",
+        "size": 1420,
+        "sha256": "1bddf1539441b58cbf0a36ae793b54278847d53135b3ca0bc4ab9e6b57c3a1c0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-build.log",
+        "size": 13133,
+        "sha256": "f0ec6ca9f2c11b8a961315cdcd84d4e3535d4b14aafe8212fd335ee04a0e7fea"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-build2.log",
+        "size": 12176,
+        "sha256": "afc59461ce69167369263dc3b61250bf5feaa9efab1c44b1f9ca1f324208e5d4"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-mcp.log",
+        "size": 5143,
+        "sha256": "b3e1cf60918adbabfd454eb699dad5925a53ed648d48aa8b6652897b39f5cbed"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-mcp2.log",
+        "size": 4693,
+        "sha256": "a8e41b851fd23284775be114c823acbdbe26c2241adbbf8305910603754026f6"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/interface-mcp3.log",
+        "size": 4239,
+        "sha256": "eb270fafc66dcf2f9e1d10f6ab36393c0a7004b2beb997935414b2499299f435"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/inventory-generate.log",
+        "size": 132,
+        "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/lake-shim.sh",
+        "size": 354,
+        "sha256": "c25094e161186bc3c5a11930de4a1f4dc62374c8ef64bb93372da20919e8c306"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/lakefile.original.toml",
+        "size": 1420,
+        "sha256": "1bddf1539441b58cbf0a36ae793b54278847d53135b3ca0bc4ab9e6b57c3a1c0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/lakefile.payments.toml",
+        "size": 1510,
+        "sha256": "aa7918f123a298c7e04488a2954185a3ccd4f8059aee5097a5fa59683b4bf5ec"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/laws-import-build.log",
+        "size": 12495,
+        "sha256": "3772b41a5ff2fb7f4aa8b647e56c4bdabd8d7dc448ab7d4bfec2d587c5d75c89"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/laws-mcp.log",
+        "size": 6687,
+        "sha256": "6aac787617541338a1d0c21f89801d73d8b6d09fea9c7925bf2785d7ffc45163"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-final.log",
+        "size": 37638,
+        "sha256": "40480c4e67bee892f2dced5b4580ba7c2fb81ea483021da51bd1c4f28169fbe3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-final.py",
+        "size": 2157,
+        "sha256": "1aee6da2f6c3d46253bf7cc3fef0f24930f0b005200e4dc1778094a1ec02218b"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-imported-axioms.log",
+        "size": 6739,
+        "sha256": "764bb290a703006b5dcc41268264b14413ca7e320a5bf9d73388973d51a350c0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-verify-imports.py",
+        "size": 1074,
+        "sha256": "3395b27935de56b634f5bc651c6c40594277e9ad45af77a47f4dcae4eb0f9d36"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp-warm-build.log",
+        "size": 104827,
+        "sha256": "e7d4c4d823a20b95e65e810de4f594a067a3b3ce2fc9670512a8cf949a463cbc"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/mcp.sh",
+        "size": 323,
+        "sha256": "4da1360ce404e92d7cf5c8a2755dd121b421575b4fd7834acb4434bef6a01db1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-build.log",
+        "size": 264,
+        "sha256": "9aaa38a7956ce05e8d115a39ac7389f0802d09c54b3ede4baa350439ef51538c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp.log",
+        "size": 6819,
+        "sha256": "aaa606a1d57b2bc61def6045b3984cf6a0c230451b08b8fe1c8354973596897d"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp2.log",
+        "size": 4530,
+        "sha256": "aeaa5838adad4f92547a2aa1e963f75bef1bf802d61e6bb82cfe98212af614d9"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp3.log",
+        "size": 4530,
+        "sha256": "8dd563319dd78accb3f4dd01b7b1409c1aaf3851dfdf35178b15572a381cf8e9"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/plan-mcp4.log",
+        "size": 4237,
+        "sha256": "5b2e045d478b4039c87640bcfe36e0251195d71869c88274dfb6507d806d8ab0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/post-gates.py",
+        "size": 1662,
+        "sha256": "1edb3dc27390c3dde85e4b5471f16687fdc7fcb82a31d377e2b27aad22f989c6"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/prerequisite-build.log",
+        "size": 6150,
+        "sha256": "996cbe7094be2848f9e2ecff70027d6fcd89adc1b74c83f9613216a800710b6c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/prerequisite-mcp.log",
+        "size": 18918,
+        "sha256": "c8e35eea814c63e8008f4bca93e06f84b58b81bb6f174bf72a24f858dc7ecf1d"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/probe-original.toml",
+        "size": 1420,
+        "sha256": "1bddf1539441b58cbf0a36ae793b54278847d53135b3ca0bc4ab9e6b57c3a1c0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/proof-probe.log",
+        "size": 46151,
+        "sha256": "7b80e5983986b8dac17d5d1ae7cbe4b9177de1cc97475aff6cf4ba329cbfb3f1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/proof-probe.py",
+        "size": 670,
+        "sha256": "d071e10982b7ad491becacb22ec0f2782629007f0529104601d4dcc44f632fe2"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/proof-probe.sh",
+        "size": 308,
+        "sha256": "7cfa448388b5fcdd77703f27549a7a896538d62e1bad1baade14cb3a263b8704"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/record-evidence.py",
+        "size": 4995,
+        "sha256": "9e119a98df2f1816971fb3f6270dbc22587122435a78a421185742f30829736b"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/register-validation.py",
+        "size": 2486,
+        "sha256": "f7ff6a110396a14d635396743931d5d4fa30b74384f12dc11bb0f091d169ff95"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-build.log",
+        "size": 12173,
+        "sha256": "e3e09d28990c59e0c1b461e04843bf73fa6a908d184c87ffec60d4915164921d"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-build2.log",
+        "size": 12173,
+        "sha256": "48e40f3eaa33d5eb0c614f66b1d798cd435756cc63edbb0eead86a32acbdade1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-controls-build.log",
+        "size": 12488,
+        "sha256": "544b06fa504cc91f403c767049c8b7335a668fd7895d5a52a3e352801bb25dd2"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-errors-mcp.log",
+        "size": 4236,
+        "sha256": "cd95d49dfac9e43bf068e222b9af243aa309ff82aeb16399441be4b78bd6f284"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-examples-mcp.log",
+        "size": 11859,
+        "sha256": "6d189893bbe9779441db93b610f2ed3e1cdadbf615e656e7284f16d44ff128b0"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-factor-mcp.log",
+        "size": 9832,
+        "sha256": "7b1eb7090737272695e8328258c705c0a7ce1215f1440ec44dd552ea52d4a1c7"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/replay-final-mcp.log",
+        "size": 6135,
+        "sha256": "39e0452edb60c00586063953937308bf968dcf8df72552b361fd977699264aa3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/review-fixes-mcp.log",
+        "size": 5666,
+        "sha256": "af67f7605a9e68b9c21af512d8c6705334384aad6bcdb86a4fdc35ca364f1729"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/run-final-mcp.sh",
+        "size": 442,
+        "sha256": "a2789e60814aa3b8b86fa1e1aad1e7558c5132939b023d0baca84eee9b960c8f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/run-import-verify.sh",
+        "size": 331,
+        "sha256": "73eff9c31085a64848e7a48c7388c09403cf593725aa7e0abe6510f4210a4ef5"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/run.sh",
+        "size": 957,
+        "sha256": "b1e05856f2c59c5f59178dc4b2b5b212214d0fe51744304275f9167a537e418a"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-controls-final.log",
+        "size": 726,
+        "sha256": "e745d46c729c03b51062394ff999fd6ed4ce961a39a80881bc356f077b0a495f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-controls.log",
+        "size": 516,
+        "sha256": "b3c92d878ac33f0241a6334af4b0aae5bf8a995b9274527ad13af5f78dbdbae1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/blocked.json",
+        "size": 7490,
+        "sha256": "1988b1265dc11c47fec4b1ca558e6aaf306caaa0d5964d2ec7b33562896a7d74"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/broken.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/file-coverage.json",
+        "size": 4052222,
+        "sha256": "cb790b46b186b832aafca63e54d85bd16ac8de2e4e9bf4e52a693f5b116821b5"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/results.json",
+        "size": 8648,
+        "sha256": "be91147baac90862925be714e702093fd36d97fc804346c2cc4498e729ae987e"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/summary.json",
+        "size": 1292,
+        "sha256": "7a108ab2ed26dc1549720408cf523b105422ae1cc0ec07e3a73b6f5b3f3e139f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send/working.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send.log",
+        "size": 1372,
+        "sha256": "0df16447eb24135bb053e6cee39b5f59c7d2dca7075990a71cceb5e6cfdb8845"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/blocked.json",
+        "size": 34898,
+        "sha256": "26641111f3bd44821d5a9f50e45897a4eb79f1105a5b74501afa4142e6230b3c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/broken.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/file-coverage.json",
+        "size": 4050097,
+        "sha256": "387d04e2cf5846076cae6dfce12df0c3577f386120998d5f7cf18360e8413fe8"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/results.json",
+        "size": 38113,
+        "sha256": "818db35aa9342cebf6e93cbafd26eae889857dab73053ae31b5a2f7f28358517"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/summary.json",
+        "size": 1809,
+        "sha256": "02d7b955fe778628a9e94dfd99cccef90fe66ed7f680359da172c051c55452b1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2/working.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send2.log",
+        "size": 1889,
+        "sha256": "2e6ebda80069f76aec653b6533f85a3cf6b2423dd0146dd2710e838ce2d0ad95"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/blocked.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/broken.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/file-coverage.json",
+        "size": 4050035,
+        "sha256": "0a190880e684e655b0b85dafbfda9cefc690f11cb70ab191e51aca7ee04315e3"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/results.json",
+        "size": 43271,
+        "sha256": "e891610960b0c79737dcafcce44e114f8d95bd8b6fb8cd457566c15af85762a2"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/summary.json",
+        "size": 1809,
+        "sha256": "21be34d0a41ed6d82032ae659a3b055baba24c703ecec47bb62b03de023bba1b"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3/working.json",
+        "size": 39710,
+        "sha256": "a103b06a1ed70b653e56c62ac654bd8356a7e80008f2a313648618b18695e786"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-send3.log",
+        "size": 1889,
+        "sha256": "31d36e157e90e016e002481c63d818a3566f58c04ce19a10bcdc56b82a60958f"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/blocked.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/broken.json",
+        "size": 3,
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/file-coverage.json",
+        "size": 4050017,
+        "sha256": "457876387bc9509db4c61517f1544740e48a521b2a6e2c3206a10f10678ef0b1"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/results.json",
+        "size": 9761,
+        "sha256": "41342a1cde48ae0144ba61e1dc38b0ae972f621d19d5a518734f28ebf264ebcc"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/summary.json",
+        "size": 1803,
+        "sha256": "2d63053761ae95bef82e0ff634128dac8c28c2a22225f04ea22caa08c6ff88da"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer/working.json",
+        "size": 7460,
+        "sha256": "e8de08203da9193225b7224cb9c003d0f033955d78ecd8fecdbe874a783928cf"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/source-transfer.log",
+        "size": 1883,
+        "sha256": "0fcc7831edb4882856845c9f66160e82b227be556eb37e1a1d93ea3e7a7e6694"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-core.py",
+        "size": 5995,
+        "sha256": "5fdfade2737914a7b125f1dbd4635b95e19239dd9798f1f33b8b885888d9f61b"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-examples.py",
+        "size": 4558,
+        "sha256": "8b8c3484b3e7d6292d5f6bba1533772b9e5e7ddcafb39ef9de0ce6b3f32fd727"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-generator.py",
+        "size": 2227,
+        "sha256": "f882e4f423ab6905a7d1f778b5a8992b651259e20ecfbba3e8a116ed9ccc7118"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-import.py",
+        "size": 8933,
+        "sha256": "9d84f7387171dcb2283c1fec7f7ab3a843c0a9eaaa08f247fd71efc445bcddbf"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-plan.py",
+        "size": 9556,
+        "sha256": "079e6d04f1e86df4adb5686d90fd1d38d9e7837e1f9223b3d259aa23f07e896e"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-prepare.py",
+        "size": 5289,
+        "sha256": "e2b76af152c4aa80b5342d0c7479962da418c4f755fcf96c32b2674283435616"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-replay.py",
+        "size": 7048,
+        "sha256": "21c3ac2dc2670d032ed1ef1aed125967fc11a9945bb97228fe7aa25ea238807a"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/diamond-payments-source-evidence/write-tests.py",
+        "size": 5404,
+        "sha256": "c2daae436bd5aacda821f670ae6a626cb920ef93e22f6cb18bf58def099536eb"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/next10-diamond-payments-evidence.json",
+        "size": 104661,
+        "sha256": "5279a82ead6ce4ae48a4fc1e702e5527511b3084b5e455ed95cd4b0fc49ea428"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/next10-diamond-payments-handoff.md",
+        "size": 47435,
+        "sha256": "50a46831a954d894d7bbc00d1e207c2ec5426084d3d3372eb4303c52ef0ec35b"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/next10-diamond-payments.commit",
+        "size": 41,
+        "sha256": "f4dc4fe7cc08bf4072b3d5b6a8b33f6de9ac73548b81afb892984e242eed373c"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/next10-diamond-payments.patch",
+        "size": 332341,
+        "sha256": "1810e50cb44f264a330e53a9bb2b1497021e78cf251683645f2ba5b245b89776"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/records/next10-diamond-payments.patch.sha256",
+        "size": 107,
+        "sha256": "96bd126d71e610327b6018222399440cf0e9bcd8d0699e16489e8624077bfabb"
+      },
+      {
+        "name": "verified-original-0ae506f378730c2a/snapshot-provenance.json",
+        "size": 46366,
+        "sha256": "ff9dada581c4f0a797157c49621e502fe55a4021dd64bb190c828502312bc2b0"
+      }
+    ]
+  },
+  "readability_snapshot": {
+    "original_manifest_sha256": "0ae506f378730c2a813f4c12de0acd859a924f3dc4e56508a2b92ef07291a8b3",
+    "original_files_verified": 175,
+    "originals_unchanged": true,
+    "unlisted_historical_checkpoint": "retained untouched remotely; not included or represented as original175manifest coverage"
+  }
+}

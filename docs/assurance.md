@@ -159,7 +159,7 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 
 | Area | Still due |
 |---|---|
-| Memory compiler | Copies outside the nonrecursive primitive fragment below (reference-element arrays, reference-bearing structs and recursive layouts), construction/default and array/path cases beyond their published owning APIs, general memory-source loops, mixed construction/copy blocks or branches, and remaining mixed operations. The core path compiles loops (`Instr.loop`, `loop_sim`). |
+| Memory compiler | Copies outside the nonrecursive primitive fragment below, reference-bearing construction/layouts and mixed operations beyond their owning APIs. Published finite-body loops and enclosing scopes retain their reached-prefix certificates; copy/producer integration remains separately checked. The core path compiles loops (`Instr.loop`, `loop_sim`). |
 | Loop automation | Two `SolcLoopsOpen` functions (`docs/semantic-gaps.md`, `docs/loops.md`). Support sound invariant use where missing; keep a missing invariant distinct from a false specification. |
 | Quantifier instantiation | Broaden ground terms and larger loops only with bounded, checked instances. |
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
@@ -204,3 +204,11 @@ checks lack prerequisites from the unfinished full build. Corpus probes and
 comparisons pass separately from its blocked kernel target. Source gates pass
 with the unchanged repository pin; earlier failed attempts stay failed. See the
 owning recovery record and machine-readable handoff for exact evidence.
+Memory-loop compiler follow-up: the full original 24-module Derived17 workload
+now passes its unchanged cumulative 300-second gate (262.03 s in the original
+worktree; all group outputs fresh). Scoped compiler simulations, inhabited
+allocation/divergence/drop controls and actual four-mode upstream executions
+pass their dedicated checks. The final full-repository `./run-lean.sh` confirmation passed (377.01 s),
+including the pinned TestSuite and SolKey annotation checks.
+Historical timing/resource failures and the unchanged documentation-path debt
+remain explicit; sampled EVM observations do not promote source coverage.

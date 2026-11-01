@@ -508,9 +508,22 @@ def inspect (declarations : List Json) (candidates : List Candidate)
 
 end FiniteDispatch
 
+/-- Native payment heads through the same callee arms as dispatch. Arguments
+and receiver subexpressions are visited independently, not mistaken for callees. -/
+partial def nativePaymentCallee (e : Json) : Bool := (calleeArms e).any fun callee =>
+  if J.kind callee == "FunctionCallOptions" then
+    (J.opt callee "expression").any nativePaymentCallee
+  else
+    (J.tyId callee).startsWith "t_function_send_" ||
+    (J.tyId callee).startsWith "t_function_transfer_" ||
+    (J.kind callee == "MemberAccess" && nativeMember callee &&
+      ["send", "transfer"].contains ((J.str? callee "memberName").getD ""))
+
+/-- Payment dispatch depends on invocation, not an unused member reference.
+Receiver effects are retained separately by the statement reader. -/
 def nativePayment (root : Json) : Bool := (J.nodes root).any fun node =>
-  (valueCall? node).isSome || (J.kind node == "MemberAccess" && nativeMember node &&
-    ["send", "transfer"].contains ((J.str? node "memberName").getD ""))
+  (valueCall? node).isSome || (J.kind node == "FunctionCall" &&
+    (J.opt node "expression").any nativePaymentCallee)
 
 def callees (ids : List Int) (f : Json) (freeFunctions : List Int := [])
     (aliases : List (Int × Int) := []) (contracts : List Int := [])
@@ -1341,6 +1354,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
     { declarations, renderedErrors, storageTuples, compilerCode, namedErrorSourceOrder,
+      retainUncaughtTryData := entrypoints,
       returnStorageIndex := ((J.id? d).bind (lookupBy · storageTuples)).map (·.index),
       selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
       funParams, constants, enumValues, enumBounds, enumNativeNames, enumCarriers, enumDecodeTypes, valueTypes, freeFunctions, libraries,

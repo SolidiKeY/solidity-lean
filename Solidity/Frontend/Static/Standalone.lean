@@ -65,9 +65,10 @@ def _root_.Solidity.Source.STy.standalone : STy → STy
 def StandaloneTyped (Γ : Ctx) (e : Syn .expr) (τ : STy) : Prop :=
   ∃ σ, HasType Γ e σ ∧ σ.standalone = τ
 
-/-- Whether a type is a constant's own type, which no value has. -/
-def _root_.Solidity.Source.STy.isConstTy : STy → Bool
-  | .rational _ | .stringLit _ => true
+/-- Whether a type is a constant's own type, which no value has (numeric
+constants, `STy.isConstTy`, and string literals). -/
+def _root_.Solidity.Source.STy.isConstOnly : STy → Bool
+  | .rational _ | .hexConst _ _ | .stringLit _ => true
   | _ => false
 
 /-- **The constant-type restriction on ABI arguments**: the standalone type
@@ -76,7 +77,7 @@ or an integral one beyond 256 bits, has none).  solc's other restrictions
 on `abi.encode` arguments (mappings, internal function types, storage
 references, tuples) are not part of this relation. -/
 def AbiArgTyped (Γ : Ctx) (e : Syn .expr) (τ : STy) : Prop :=
-  StandaloneTyped Γ e τ ∧ τ.isConstTy = false
+  StandaloneTyped Γ e τ ∧ τ.isConstOnly = false
 
 /-- **The checker**: G13's inferred types, standing alone. -/
 def standaloneTys (Γ : Ctx) (e : Syn .expr) : List STy := (inferTys Γ e).map STy.standalone
@@ -93,7 +94,7 @@ theorem standalone_iff {Γ : Ctx} {e : Syn .expr} {τ : STy} :
 
 /-- The ABI argument types of `e`. -/
 def abiArgTys (Γ : Ctx) (e : Syn .expr) : List STy :=
-  (standaloneTys Γ e).filter fun τ => !τ.isConstTy
+  (standaloneTys Γ e).filter fun τ => !τ.isConstOnly
 
 theorem abiArg_iff {Γ : Ctx} {e : Syn .expr} {τ : STy} :
     AbiArgTyped Γ e τ ↔ τ ∈ abiArgTys Γ e := by

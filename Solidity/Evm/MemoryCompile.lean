@@ -1,4 +1,3 @@
-import Solidity.Evm.MemoryCopyBound
 import Solidity.Evm.MemoryLocals
 import Solidity.Evm.MemoryStructSource
 import Solidity.Evm.MemoryStructDefault
@@ -348,16 +347,6 @@ inductive StmtFrag (b : Nat) : {Γ Δ : Ctx} → Frag Γ → Frag Δ → Stmt C 
   | storageWrite {Γ : Ctx} (F : Frag Γ) {p : PrimTy} (l : Loc C Γ (.prim p))
       (v : Val C Γ p) (code : List Instr) (hl : locIn F false l = true) (hv : ValFrag b F v code) :
       StmtFrag b F F (.assign l (.val v)) (storageAssignCode b l code)
-  | copyArrayToStorage {Γ : Ctx} (F : Frag Γ) {p : PrimTy}
-      (dst : Loc C Γ (.ref (.array (.prim p)))) (src : MPath C Γ (.ref (.array (.prim p))))
-      (pointer : List Instr) (hp : PtrFrag b src pointer) (hl : locIn F false dst = true) :
-      StmtFrag b F F.dropFragile (.assignFromMem dst src) (assignMemoryArrayCode b dst pointer)
-  | copyStructToStorage {Γ : Ctx} (F : Frag Γ) {s : Name}
-      (dst : Loc C Γ (.ref (.struct s))) (src : MPath C Γ (.ref (.struct s)))
-      (pointer : List Instr) (hp : PtrFrag b src pointer) (hl : locIn F false dst = true)
-      (hprim : primitiveMembers (Semantics.structDef s) = true)
-      (hst : static (.ref (.struct s)) = true) (hfit : (Semantics.structDef s).length < W) :
-      StmtFrag b F F (.assignFromMem dst src) (assignMemoryStructCode b dst pointer)
   | require {Γ : Ctx} (F : Frag Γ) (c : Val C Γ .bool) (code : List Instr) (hc : ValFrag b F c code) :
       StmtFrag b F F (.require c) (code ++ assertTop)
   | revert {Γ : Ctx} (F : Frag Γ) : StmtFrag b F F .revert [.revert]
@@ -611,22 +600,6 @@ def compileStmt (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
       let value ← compileVal b F v
       pure ⟨F, _, .storageWrite F l v value.code hl value.cert⟩
     else none
-  | @Solidity.Stmt.assignFromMem _ _ (.array (.prim _p)) dst src => do
-    if hl : locIn F false dst = true then
-      let pointer ← compilePtr b src
-      pure ⟨F.dropFragile, _, .copyArrayToStorage F dst src pointer.code pointer.cert hl⟩
-    else none
-  | @Solidity.Stmt.assignFromMem _ _ (.struct s) dst src => do
-    if hl : locIn F false dst = true then
-      if hprim : primitiveMembers (Semantics.structDef s) = true then
-        if hst : static (.ref (.struct s)) = true then
-          if hfit : (Semantics.structDef s).length < W then
-            let pointer ← compilePtr b src
-            pure ⟨F, _, .copyStructToStorage F dst src pointer.code pointer.cert hl hprim hst hfit⟩
-          else none
-        else none
-      else none
-    else none
   | .require c => do
     let cond ← compileVal b F c
     pure ⟨F, _, .require F c cond.code cond.cert⟩
@@ -866,13 +839,13 @@ private theorem run_cons_revert {Γ Δ Ξ : Ctx} {σ : State C Γ}
 private def StmtSound (L b frame : Nat) {Γ Δ : Ctx} (F : Frag Γ) (G : Frag Δ)
     (s : Stmt C Γ Δ) (code : List Instr) : Prop :=
   ∀ {σ : State C Γ} {base : Nat → Fin W} {m : Machine}, StateRepr L b frame F σ base m →
-    b + frameNeedStmt s ≤ frame → AllocationInput b frame (allocationCostStmt s σ) σ base m → copyBoundStmt s σ ≤ L →
+    b + frameNeedStmt s ≤ frame → AllocationInput b frame (allocationCostStmt s σ) σ base m →
       GrowingResult L b frame (allocationCostStmt s σ) G σ base m (s.run σ) (run code m)
 
 private def ProgSound (L b frame : Nat) {Γ Δ : Ctx} (F : Frag Γ) (G : Frag Δ)
     (P : Prog C Γ Δ) (code : List Instr) : Prop :=
   ∀ {σ : State C Γ} {base : Nat → Fin W} {m : Machine}, StateRepr L b frame F σ base m →
-    b + frameNeedProg P ≤ frame → AllocationInput b frame (allocationCostProg P σ) σ base m → copyBoundProg P σ ≤ L →
+    b + frameNeedProg P ≤ frame → AllocationInput b frame (allocationCostProg P σ) σ base m →
       GrowingResult L b frame (allocationCostProg P σ) G σ base m (P.run σ) (run code m)
 
 private theorem statementEndCap {Γ Δ : Ctx} {s : Stmt C Γ Δ} {b frame : Nat}
@@ -881,7 +854,7 @@ private theorem statementEndCap {Γ Δ : Ctx} {s : Stmt C Γ Δ} {b frame : Nat}
 
 private theorem nil_sound {L b frame : Nat} {Γ : Ctx} (F : Frag Γ) :
     ProgSound (C := C) L b frame F F .nil [] :=
-  fun h _ _ _ => .inl ⟨⟨_, List.prefix_refl _⟩, _, _, rfl, rfl, h, rfl,
+  fun h _ _ => .inl ⟨⟨_, List.prefix_refl _⟩, _, _, rfl, rfl, h, rfl,
     BaseExtends.refl _, fun _ _ ha _ => ha⟩
 
 private theorem cons_sound {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Γ} {G : Frag Δ} {K : Frag Ξ}
@@ -889,7 +862,7 @@ private theorem cons_sound {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Γ} {G :
     (hs : StmtFrag b F G s head) (hp : ProgFrag b G K P tail)
     (ihs : StmtSound L b frame F G s head) (ihp : ProgSound L b frame G K P tail) :
     ProgSound L b frame F K (.cons s P) (head ++ tail) := by
-  intro σ base m h hcap ha hcopy
+  intro σ base m h hcap ha
   have hcaps : b + frameNeedStmt s ≤ frame := by
     change b + max (frameNeedStmt s) (frameNeedProg P) ≤ frame at hcap
     omega
@@ -898,17 +871,12 @@ private theorem cons_sound {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Γ} {G :
     omega
   have hah : AllocationInput b frame (hs.cost σ) σ base m :=
     ha.of_le (by rw [allocationCostProg_cons]; exact Nat.le_add_right _ _)
-  have hcopies := hcopy
-  rw [copyBoundProg_cons] at hcopies
-  rcases ihs h hcaps hah (Nat.le_trans (Nat.le_max_left _ _) hcopies) with ⟨o, m₁, base₁, ho, hc, hm, hst, hex, hal⟩ | ⟨ho, hc⟩
+  rcases ihs h hcaps hah with ⟨o, m₁, base₁, ho, hc, hm, hst, hex, hal⟩ | ⟨ho, hc⟩
   · rw [Solidity.Prog.run_cons_ok ho, run_append_ok hc]
     have hcost : allocationCostProg (.cons s P) σ = hs.cost σ + hp.cost o.st := by
       rw [allocationCostProg_cons, ho]
     have hat : AllocationInput b frame (hp.cost o.st) o.st base₁ m₁ := hal.nextInput (hcost ▸ ha)
-    have hcopyp : copyBoundProg P o.st ≤ L := by
-      rw [ho] at hcopies
-      exact Nat.le_trans (Nat.le_max_right _ _) hcopies
-    rcases ihp hm hcapp hat hcopyp with ⟨o', m₂, base₂, ho', hc', hm', hst', hex', hal'⟩ | ⟨ho', hc'⟩
+    rcases ihp hm hcapp hat with ⟨o', m₂, base₂, ho', hc', hm', hst', hex', hal'⟩ | ⟨ho', hc'⟩
     · refine .inl ⟨⟨o'.st, o.ext.trans o'.ext⟩, m₂, base₂,
         by rw [ho']; rfl, hc', hm', hst'.trans hst, hex.trans o.ext hex', ?_⟩
       rw [hcost]
@@ -919,13 +887,13 @@ private theorem cons_sound {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Γ} {G :
 private theorem block_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     {body : Prog C Γ Δ} {code : List Instr} (ih : ProgSound L b frame F G body code) :
     StmtSound L b frame F (G.restrict Γ) (.block body) code := by
-  intro σ base m h hcap ha hcopy
+  intro σ base m h hcap ha
   have hb : b + frameNeedProg body ≤ frame := by
     simp only [frameNeedStmt, nestedFramesStmt] at hcap
     omega
   have ha' : AllocationInput b frame (allocationCostProg body σ) σ base m :=
     allocationCostStmt_block body σ ▸ ha
-  rcases ih h hb ha' (copyBoundStmt_block body σ ▸ hcopy) with ⟨o, m', base', ho, hc, hm, hk, he, hal⟩ | ⟨ho, hc⟩
+  rcases ih h hb ha' with ⟨o, m', base', ho, hc, hm, hk, he, hal⟩ | ⟨ho, hc⟩
   · refine .inl ⟨⟨o.st.drop body.ext, o.ext⟩, m', base', ?_, hc,
       hm.drop body.ext, hk, he, ?_⟩
     · change (body.run σ).map (fun o => (⟨o.st.drop body.ext, o.ext⟩ : Solidity.Out C σ.H Γ)) = _
@@ -945,7 +913,7 @@ private theorem ite_sound {L b frame : Nat} {Γ Δ Ξ : Ctx}
     (iht : ProgSound L b frame F G thn left) (ihe : ProgSound L b frame F K els right) :
     StmtSound L b frame F ((G.restrict Γ).meet (K.restrict Γ)) (.ite c thn els)
       (conditionalCode cond left right) := by
-  intro σ base m h hcap ha hcopy
+  intro σ base m h hcap ha
   have hbt : b + frameNeedStmt (.block thn) ≤ frame := by
     simp only [frameNeedStmt, nestedFramesStmt] at hcap ⊢
     omega
@@ -966,11 +934,7 @@ private theorem ite_sound {L b frame : Nat} {Γ Δ Ξ : Ctx}
       rw [run_append_skip (m' := m) (k := left.length + 1) rfl,
         show left.length + 1 = left.length + 1 from rfl, exec_append, exec_skip]
       simp only [Out.ok_bind, Bool.false_eq_true, ↓reduceIte]
-      have hcblock : copyBoundStmt (.block els) σ ≤ L := by
-        rw [copyBoundStmt_block]
-        rw [copyBoundStmt_ite, hvc] at hcopy
-        exact hcopy
-      rcases block_sound ihe h hbe ha hcblock with ⟨o, m', base', ho, ht, hm, hk, he, hal⟩ | ⟨ho, ht⟩
+      rcases block_sound ihe h hbe ha with ⟨o, m', base', ho, ht, hm, hk, he, hal⟩ | ⟨ho, ht⟩
       · exact .inl ⟨o, m', base', ho, ht, hm.meetRight _, hk, he, hal⟩
       · exact .inr ⟨ho, ht⟩
     · have hcost : allocationCostStmt (.ite c thn els) σ = allocationCostStmt (.block thn) σ := by
@@ -979,11 +943,7 @@ private theorem ite_sound {L b frame : Nat} {Γ Δ Ξ : Ctx}
       rw [hcost] at ha ⊢
       rw [run_append_skip (m' := m) (k := 0) rfl]
       simp only [↓reduceIte]
-      have hcblock : copyBoundStmt (.block thn) σ ≤ L := by
-        rw [copyBoundStmt_block]
-        rw [copyBoundStmt_ite, hvc] at hcopy
-        exact hcopy
-      rcases block_sound iht h hbt ha hcblock with ⟨o, m', base', ho, ht, hm, hk, he, hal⟩ | ⟨ho, ht⟩
+      rcases block_sound iht h hbt ha with ⟨o, m', base', ho, ht, hm, hk, he, hal⟩ | ⟨ho, ht⟩
       · refine .inl ⟨o, m', base', ho, ?_, hm.meet _, hk, he, hal⟩
         change run _ m = _
         rw [run_append_ok ht]
@@ -997,28 +957,28 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
   induction hs using StmtFrag.rec
     (motive_2 := fun F G P code _ => ProgSound L b frame F G P code) with
   | assign F dst e code he =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (assignValue_correct h dst e code (he.correct h)).growing
   | declare F x e code he =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (declareValue_correct h e code (he.correct h) (statementEndCap hcap)).growing
   | declareDefault F p x =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (declareDefault_correct h p (statementEndCap hcap)).growing
   | rebind F dst src hm =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (aliasLocal_correct h dst src hm).growing
   | declareAlias F x src hm =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (declareAlias_correct h src hm (statementEndCap hcap)).growing
   | rebindPath F dst src code hp =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (hp.rebind h dst).growing
   | declarePathAlias F x src hm code hp =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (hp.declareAlias h hm (statementEndCap hcap)).growing
   | allocate F p x n hb hn =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · change (n.evalT σ).word.val + 1 = 0 at hz
       omega
@@ -1036,13 +996,13 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
         subst c
         simpa only [Nat.add_assoc] using hn'.2.2.2.1
   | defaultArray F p x code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 1 (F.push (.mem (.array (.prim p))) .ok) σ base m
       (TRun.declMem (.array (.prim p)) none rfl σ) (run code m)
     rw [defaultArray_eq_allocate]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | allocateStruct F s x hd hm hb hp =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · change structAllocationSize s = 0 at hz
       have hs : 1 ≤ structAllocationSize s := Nat.le_max_left _ _
@@ -1056,7 +1016,7 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
         subst c
         exact hn.2.2.2.1
   | copyStruct F s x root hr hm hb hp loads plan =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · change structAllocationSize s = 0 at hz
       have hs : 1 ≤ structAllocationSize s := Nat.le_max_left _ _
@@ -1073,7 +1033,7 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
           subst c
           exact halloc
   | rebindCopyStruct F s dst root hr hm hb hp loads plan =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · change structAllocationSize s = 0 at hz
       have hs : 1 ≤ structAllocationSize s := Nat.le_max_left _ _
@@ -1090,33 +1050,33 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
           subst c
           exact halloc
   | write F dst hm i v index value hi hv =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (writeLocalValue_correct h dst i v index value (fun h' => hi.correct h') (hv.correct h)).growing
   | writeField F dst hm hf v value hv =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (writeLocalField_correct h dst hm hf v value (hv.correct h)).growing
   | writePathArray F src pointer hp i v index value hi hv =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (hp.writeArray h i v index value (fun h' => hi.correct h') (hv.correct h)).growing
   | writePathField F src pointer hp hf v value hv =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (hp.writePrimitive h hf v value (hv.correct h)).growing
   | writeReference F dst src hf pointer value hd hs =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (writeReference_correct h hd hs hf).growing
   | deleteElement F dst hm i index hi =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (deleteLocalValue_correct h dst i index (fun h' => hi.correct h')).growing
   | deletePathElement F src i code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.deleteMem (.loc (.index .dyn src i)) σ) (run code m)
     rw [deleteMem_primitive_eq_assign]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | deleteArray F dst code hs ih =>
     exact ih
   | deleteStruct F dst hd hm hb hp =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · change structAllocationSize _ = 0 at hz
       unfold structAllocationSize at hz
@@ -1130,7 +1090,7 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
         subst c
         exact hn.2.2.2.1
   | deleteArrayField F src hf pointer hs hb =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     obtain ⟨r, hr, _⟩ := hs.correct h
     have hcost : allocationCostStmt (.deleteMem (.loc (.field src _ hf)) rfl) σ = 1 := by
       simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, hr, if_true]
@@ -1147,7 +1107,7 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
         exact hn.2.2.2.1
   | deleteStructField F src hf hd hm pointer hs hb hp =>
     rename_i parent child member
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     obtain ⟨r, hr, _⟩ := hs.correct h
     have hcost : allocationCostStmt (.deleteMem (.loc (.field src _ hf)) hd) σ = structAllocationSize child := by
       simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, hr, if_true]
@@ -1164,67 +1124,67 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
         subst c
         exact hn.2.2.2.1
   | deleteField F src hf code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m (TRun.deleteMem (.loc (.field src _ hf)) σ) (run code m)
     rw [deleteMem_primitive_eq_assign]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | compoundMemory F op hop hp a src i r code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.opAssign op (.mindex a src i) r σ) (run code m)
     rw [compoundAssign_eq_write σ op hop hp a src i r]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | compoundLocal F op hop hp dst r code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.opAssign op (.local dst) r σ) (run code m)
     rw [compoundLocal_eq_assign σ op hop hp dst r]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | compoundField F op hop hp src f hf r code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m (TRun.opAssign op (.mfield src f hf) r σ) (run code m)
     rw [compoundField_eq_write σ op hop hp src hf r]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | incrementMemory F op hp a src i code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.incDec op (.mindex a src i) σ) (run code m)
     rw [incrementMemory_eq_compound σ op hp a src i]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | incrementLocal F op hp dst code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.incDec op (.local dst) σ) (run code m)
     rw [incrementLocal_eq_compound σ op hp dst]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | incrementField F op hp src f hf code hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m (TRun.incDec op (.mfield src f hf) σ) (run code m)
     rw [incrementField_eq_compound σ op hp src hf]
-    exact ih h hcap ha (by change 0 ≤ L; exact Nat.zero_le _)
+    exact ih h hcap ha
   | captureMemory F dst op hp a src i hrecv value step hv hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.assignIncDec dst op (.mindex a src i) σ) (run _ m)
     rw [captureMemory_eq σ dst op hp a src i]
     exact captureStep_correct h dst _ _ value step (hv.correct h)
-      (fun h' => ih h' hcap (.inl rfl) (by change 0 ≤ L; exact Nat.zero_le _))
+      (fun h' => ih h' hcap (.inl rfl))
   | captureLocal F dst op hp src hrecv value step hv hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.assignIncDec dst op (.local src) σ) (run _ m)
     rw [captureLocal_eq σ dst op hp src]
     exact captureStep_correct h dst _ _ value step (hv.correct h)
-      (fun h' => ih h' hcap (.inl rfl) (by change 0 ≤ L; exact Nat.zero_le _))
+      (fun h' => ih h' hcap (.inl rfl))
   | captureField F dst op hp src f hf hrecv value step hv hs ih =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m
       (TRun.assignIncDec dst op (.mfield src f hf) σ) (run _ m)
     rw [captureField_eq σ dst op hp src hf]
     exact captureStep_correct h dst _ _ value step (hv.correct h)
-      (fun h' => ih h' hcap (.inl rfl) (by change 0 ≤ L; exact Nat.zero_le _))
+      (fun h' => ih h' hcap (.inl rfl))
   | reallocate F p dst n hb hn =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · change (n.evalT σ).word.val + 1 = 0 at hz
       omega
@@ -1243,20 +1203,13 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
         subst c
         simpa only [Nat.add_assoc] using hn'.2.2.2.1
   | storageWrite F l v code hl hv =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (storageAssign_correct h l v code hl (hv.correct h)).growing
-  | copyArrayToStorage F dst src pointer hp hl =>
-    intro σ base m h hcap ha hcopy
-    exact (assignMemoryArray_correct h dst src pointer hp hl
-      (copyBoundStmt_array dst src σ L hcopy)).growing
-  | copyStructToStorage F dst src pointer hp hl hprim hst hfit =>
-    intro σ base m h hcap ha hcopy
-    exact (assignMemoryStruct_correct h dst src pointer hp hl hprim hst hfit).growing
   | require F c code hc =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact (requireValue_correct h c code (hc.correct h)).growing
   | revert F =>
-    intro σ base m h hcap ha hcopy
+    intro σ base m h hcap ha
     exact .inr ⟨rfl, rfl⟩
   | block body code hp ih =>
     exact block_sound ih
@@ -1269,24 +1222,24 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
     {s : Stmt C Γ Δ} {code : List Instr} (hs : StmtFrag b F G s code)
     {σ : State C Γ} {base : Nat → Fin W} {m : Machine} (h : StateRepr L b frame F σ base m)
     (hcap : b + frameNeedStmt s ≤ frame)
-    (ha : AllocationInput b frame (hs.cost σ) σ base m) (hcopy : copyBoundStmt s σ ≤ L) :
+    (ha : AllocationInput b frame (hs.cost σ) σ base m) :
     GrowingResult L b frame (hs.cost σ) G σ base m (s.run σ) (run code m) :=
-  stmt_sound hs h hcap ha hcopy
+  stmt_sound hs h hcap ha
 
 /-- Composition preserves heap growth and reserves locals inside scoped bodies. -/
 theorem ProgFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     {P : Prog C Γ Δ} {code : List Instr} (hp : ProgFrag b F G P code)
     {σ : State C Γ} {base : Nat → Fin W} {m : Machine} (h : StateRepr L b frame F σ base m)
     (hcap : b + frameNeedProg P ≤ frame)
-    (ha : AllocationInput b frame (hp.cost σ) σ base m) (hcopy : copyBoundProg P σ ≤ L) :
+    (ha : AllocationInput b frame (hp.cost σ) σ base m) :
     GrowingResult L b frame (hp.cost σ) G σ base m (P.run σ) (run code m) := by
   have ih : ProgSound L b frame F G P code := by
-    clear h hcap ha hcopy σ base m
+    clear h hcap ha σ base m
     induction hp using ProgFrag.rec (motive_1 := fun _ _ _ _ _ => True)
     case nil F => exact nil_sound F
     case cons hs hp _ ihp => exact cons_sound hs hp (stmt_sound hs) ihp
     all_goals exact True.intro
-  exact ih h hcap ha hcopy
+  exact ih h hcap ha
 
 /-- Every successful compilation carries a kernel-checked source simulation. -/
 theorem compile_correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ}
@@ -1294,8 +1247,8 @@ theorem compile_correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ}
     (_hc : compileProg b F P = some result)
     {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
     (h : StateRepr L b frame F σ base m) (hcap : b + frameNeedProg P ≤ frame)
-    (ha : AllocationInput b frame (result.cert.cost σ) σ base m) (hcopy : copyBoundProg P σ ≤ L) :
+    (ha : AllocationInput b frame (result.cert.cost σ) σ base m) :
     GrowingResult L b frame (result.cert.cost σ) result.frag σ base m (P.run σ) (run result.code m) :=
-  result.cert.correct h hcap ha hcopy
+  result.cert.correct h hcap ha
 
 end Solidity.Evm.Memory

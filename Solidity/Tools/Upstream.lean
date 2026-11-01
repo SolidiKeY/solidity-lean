@@ -2,6 +2,9 @@ import Solidity.Frontend.Import
 import Solidity.Tools.Run
 import Solidity.Semantics.RunFuel
 import Solidity.Semantics.RevertMemory
+import Solidity.Tools.EntryReturn
+import Solidity.Tools.CreationTryReplay
+import Solidity.Tools.LibraryTryReplay
 
 /-!
 # Replay upstream typed ABI semantic vectors
@@ -85,17 +88,30 @@ indexed guards generate concrete bytes before execution; no outcome is used
 to choose a panic code. Call arguments here are ABI-decoded locals or checked
 scalar literals; arbitrary effectful top-level argument expressions are outside
 this adapter. Ordinary calculus entry points remain unchanged. -/
-def entryProgParts (C : Contract) (pre body post : List RawStmt) : Except String (Blk C []) := do
+def entryProgParts (C : Contract) (pre body post : List RawStmt)
+    (encoded : Option (String × EntryReturn.Plan) := none) : Except String (Blk C []) := do
   let all := pre ++ body ++ post
   let k := RawStmt.maxIdxs all + 1
   let ss ← freshenBlocks (C.vars.map (·.1)) [] all
   unless ss.length == all.length do throw "entry statement boundaries changed during freshening"
   let action : ElabM (SProg C) := do
-    let P ← elabStmtsP C (ss.take pre.length)
-    let Q ← withReader (fun sc => { sc with retainFailureData := true })
-      (elabStmtsP C ((ss.drop pre.length).take body.length))
-    let R ← elabStmtsP C (ss.drop (pre.length + body.length))
-    pure (P ++ Q ++ R)
+    let funs ← match encoded with
+      | none => pure C.funs
+      | some (f, plan) => EntryReturn.scope C f plan
+    withReader (fun sc => { sc with funs }) do
+      let P ← elabStmtsP C (ss.take pre.length)
+      let Q ← withReader (fun sc => { sc with retainFailureData := true }) do
+        let source := (ss.drop pre.length).take body.length
+        match encoded, source with
+        | some _, [.declMemory T x (some e)] =>
+          -- The synthetic name lives only in this elaboration scope. Hoisting
+          -- resolves it there and supplies the actual typed memory result;
+          -- the ordinary declaration then checks that result's exact shape.
+          let (P, value) ← hoist C e
+          pure (P ++ (← elabStmtsP C [.declMemory T x (some value)]))
+        | _, _ => elabStmtsP C source
+      let R ← elabStmtsP C (ss.drop (pre.length + body.length))
+      pure (P ++ Q ++ R)
   let P ← action.runFrom' { funs := C.funs } ([], k)
   SProg.chain [] [] P
 
@@ -202,6 +218,19 @@ def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
       pure (RawStmt.declMemory raw (argName i) (some (decode i)))
   let args := (List.range d.params.length).map fun i => RawExpr.name (argName i)
   let call := RawExpr.call f args
+  -- Serialize the actual source return frame inside a single-memory-result
+  -- call. The observer takes these bytes directly: no outer ABI envelope.
+  if !probe && !ctor && d.rets.length > 1 && d.rets.any (fun (_, T) => T matches .ref _) then
+    return ← entryProgParts C
+      ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
+      [.declMemory (.named "bytes") outputName
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .memory))
+  if !probe && !ctor && d.rets.length > 1 &&
+      d.rets.any (fun (n, _) => (fnRow? d.widths n).isSome) then
+    return ← entryProgParts C
+      ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
+      [.declMemory (.named "bytes") outputName
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .functionTuple))
   let captures ← if probe then pure [] else if ctor then pure (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [RawStmt.call (.name "constructor") args])
     else if d.rets.length == 1 then do
       let [(x,T)] := d.rets | throw "single return shape mismatch"
@@ -260,6 +289,11 @@ def canonical (C : Contract) (d : FunDecl) (f : String) (bytes : List Nat)
 
 end ABI
 
+/-- Typed host-context validation, separate from runtime JSON/decimal parsing.
+No value outside the nonzero 160-bit deployment domain can reach the cast. -/
+def selfTryContextValid (kind : String) (address : Nat) : Bool :=
+  kind == "direct-self-try" && decide (address ≠ 0 ∧ address < 2^160)
+
 /-- Replay complete supported vector sequences. Fuel exhaustion is inconclusive. -/
 def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run do
   let bad := rows.filter fun r => r.status != .elaborated && r.status != .skipped
@@ -272,14 +306,29 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
   let .ok vectors := data.getObjValAs? (Array Json) "vectors"
     | return result "blocked" "missing execution vectors"
   if vectors.isEmpty then return result "blocked" "no execution vectors"
-  let tx : TTx := { msgSender := PrimTy.ofIntD .uint 103164821458651970696730694074090566015747358738 }
+  if (data.getObjValAs? Bool "requiresSelfContext").toOption == some true &&
+      !(data.getObjVal? "hostContext").isOk then
+    return result "blocked" "missing self-try deployment context"
+  let selfContext : Option Nat := if (data.getObjVal? "hostContext").isOk then do
+    let host ← (data.getObjVal? "hostContext").toOption
+    let kind ← (host.getObjValAs? String "kind").toOption
+    let address ← (host.getObjValAs? String "selfAddress").toOption
+    let n ← address.toNat?
+    if selfTryContextValid kind n then some n else none
+  else some 0
+  let some selfAddress := selfContext | return result "blocked" "invalid self-try deployment context"
+  let tx : TTx :=
+    { msgSender := PrimTy.ofIntD .uint 103164821458651970696730694074090566015747358738
+      selfAddress := PrimTy.ofIntD .uint (Int.ofNat selfAddress) }
   let mut state := State.deploy C tx
   let mut deployed := false
   let mut deploymentFailed := false
   let mut observed : Array Json := #[]
+  let contextEvidence : List (String × Json) := if (data.getObjVal? "hostContext").isOk then
+    [("selfAddress", toJson (toString selfAddress))] else []
   for vector in vectors do
     let stopped (status reason : String) (extra : List (String × Json) := []) :=
-      result status reason (("observed", toJson observed) :: extra)
+      result status reason (contextEvidence ++ (("observed", toJson observed) :: extra))
     if deploymentFailed then return stopped "blocked" "calls after failed deployment need the upstream empty-code host"
     let .ok signature := vector.getObjValAs? String "signature"
       | return stopped "blocked" "missing signature"
@@ -379,7 +428,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       ("failed", toJson failed), ("values", toJson values), ("revertBytes", toJson bytes), ("returnBytes", toJson returned)] ++
       if raw then [("calldataBytes", (vector.getObjVal? "calldata").toOption.getD Json.null)] else []))
     let stopped (status reason : String) (extra : List (String × Json) := []) :=
-      result status reason (("observed", toJson observed) :: extra)
+      result status reason (contextEvidence ++ (("observed", toJson observed) :: extra))
     let .ok expectedFailure := vector.getObjValAs? Bool "failure"
       | return stopped "blocked" "missing expected outcome"
     let .ok expectedValues := if raw then .ok [] else vector.getObjValAs? (List String) "expected"
@@ -405,7 +454,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
     if ctor then
       deployed := true
       deploymentFailed := failed
-  return result "working" "all supported runtime vectors match" [("observed", toJson observed)]
+  return result "working" "all supported runtime vectors match" (contextEvidence ++ [("observed", toJson observed)])
 
 syntax (name := upstreamBatch) "#upstream_batch " str " to " str : command
 
@@ -420,6 +469,10 @@ def elabUpstreamBatch : CommandElab := fun stx => do
     let path ← ofExcept (entry.getObjValAs? String "path")
     let outcome ← (do
       try
+      if ((entry.getObjVal? "hostContext").toOption.bind (fun h => (h.getObjValAs? String "kind").toOption)) == some "creation-try-source" then
+        return ← CreationTryReplay.elaborate entry
+      if ((entry.getObjVal? "hostContext").toOption.bind (fun h => (h.getObjValAs? String "kind").toOption)) == some "linked-library-try-source" then
+        return ← LibraryTryReplay.elaborate entry
       let fixture ← ofExcept (entry.getObjValAs? String "fixture")
       let contract ← ofExcept (entry.getObjValAs? String "contract")
       let name := Lean.Name.str `Upstream contract

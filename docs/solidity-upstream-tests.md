@@ -69,10 +69,50 @@ all adapted scalar observations, machine exceptions and provenance; they never
 merge into Lean coverage or convert model exhaustion into an expected failure.
 The Group 03 continuation records both methods' per-fixture results.
 
+A narrow direct-self-try adapter now supplies a checked concrete deployment
+address for primitive-ABI `this` try calls and preserves uncaught failure bytes
+in entrypoint testing. It refuses constructors/effectful initializers and other
+host observations. This is bounded runtime evidence, not a stronger global
+source profile. The optional bytecode runner has a distinct reference-only
+memory-Yul admission; that context cannot enter native replay. The
+[try/catch conditional account](feature-work/diamond-try.md#human-approved-conditional-account-and-native-adapter-repair)
+records exact guards, original fixture before/after results, native versus EVM
+limits and retained strict failures. Existing broad baseline descriptions above
+are historical; these narrow adapter results do not imply whole-corpus support.
+
+The native entry observer also has a bounded return-frame serializer for a
+primitive tuple ending in bytes/string memory, and a separate return-only tuple
+containing one nullary external-void function value. It reuses existing typed
+CallRet capture, exact source declaration/prefix scope and actual ABI encoding.
+Function/reference inputs, general function dispatch, physical Yul memory and
+world composition remain refused. The [current return bridge account](feature-work/diamond-try.md#native-entry-return-bridge-after-checkpoint-99d0049a)
+records kernel controls, conditional correspondence, all ordered replay bytes
+and the native family’s retained strict failure (10 working, 10 blocked).
+
 ## Reproduce
 
 Use Lean 4.24.0 from `lean-toolchain`, Node, Python 3 and `tar`.
 No dependency is added to the core Lake package.
+
+Focused payment regressions use `scripts/test-compiler.mjs` to locate compilers
+in `.lake/soljson/`, relative to the repository. Populate it with these files
+from `ethereum/solc-bin`'s `gh-pages/bin/`:
+
+| Filename | Required SHA-256 |
+| --- | --- |
+| `soljson-v0.8.34+commit.80d5c536.js` | `c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8` |
+| `soljson-v0.8.38+commit.1835d247.js` | `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390` |
+
+The payment member-reference tests use the verified frozen SolKey snapshot in
+`tests/migration/solkey`, including its 0.8.34 Gradle pin; no sibling checkout
+is needed. Source-world and bytecode tests use the existing 0.8.38 pin.
+`SOLJSON_DIR` overrides the compiler directory; `SOLC_REFERENCE` takes precedence
+for the 0.8.38 file only. Overrides retain the exact hashes and versions above.
+Install the optional bytecode package with
+`npm ci --ignore-scripts --prefix scripts/evm-reference` before those tests.
+The source tests require built Lean artifacts; the resume test invokes the
+runner's prerequisite build. Keep such checks serial with Lean `-j1` under
+the repository's resource bounds.
 
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
@@ -423,6 +463,12 @@ decoder metadata gaps. New results and validation use separate
 export is preserved. Selected fresh replay never certifies retained unrun
 import/profile/host/configuration/resource cases against a changed model.
 
+
+The narrow creation-try continuation and its source/kernel/reference evidence are
+recorded in [the owning feature account](feature-work/diamond-try.md#creation-try-source-continuation-after-e7921de5). It admits the complete original create.sol only through the checked unpaid, stateless shape; unsupported creation, linking and callback judgments are unchanged.
+
+
+The exact linked-library try source continuation is recorded in [the owning account](feature-work/diamond-try.md#linked-library-try-source-continuation-after-ca314a5b). It executes installed caller-typed scalar/storage library entries and real Error tails; general library/world/ABI source support remains partial.
 ## Coverage step 2: source-unit replay (2026-10-28)
 
 The current-master reproduction and compilation-unit increment are recorded in

@@ -111,6 +111,52 @@ Each with the number of `rfl`s its own side conditions take. -/
 def captureLemmas : Array (Lean.Name × Nat) :=
   #[(`ite, 0), (`loopAnnotation, 0), (`loop, 1), (`transferAmt, 1), (`transferRecv, 1), (`sendAmt, 1), (`sendRecv, 1)]
 
+/-- Only an existing normality antecedent for the same simple transfer
+bypasses the generic negative-modality fallback. No antecedent is inserted. -/
+def isTransferNormality (φ : Expr) : MetaM Bool := do
+  let φ ← whnf φ
+  unless φ.isAppOf ``Fml.imp do return false
+  let a ← whnf (φ.getArg! 2)
+  let b ← whnf φ.appArg!
+  unless a.isAppOf ``Fml.not && b.isAppOf ``Fml.modal do return false
+  let n ← whnf a.appArg!
+  unless n.isAppOf ``Fml.modal do return false
+  let na := n.getAppArgs
+  let ba := b.getAppArgs
+  unless na[na.size - 4]!.isConstOf ``Modality.box &&
+      ba[ba.size - 4]!.isConstOf ``Modality.diamond do return false
+  let np ← whnf na[na.size - 3]!
+  let bp ← whnf ba[ba.size - 3]!
+  unless np.isAppOf ``Prog.cons && bp.isAppOf ``Prog.cons do return false
+  let tail ← whnf np.appArg!
+  let frames ← whnf na[na.size - 2]!
+  let post ← whnf na.back!
+  unless tail.isAppOf ``Prog.nil && frames.isAppOf ``Frames.nil &&
+      post.isAppOf ``Fml.not do return false
+  unless (← whnf post.appArg!).isAppOf ``Fml.tt do return false
+  let ns ← whnf (np.getArg! (np.getAppNumArgs - 2))
+  let bs ← whnf (bp.getArg! (bp.getAppNumArgs - 2))
+  unless ns.isAppOf ``Stmt.transfer && bs.isAppOf ``Stmt.transfer do return false
+  unless (ns.getArg! (ns.getAppNumArgs - 2)).isAppOf ``Val.simple &&
+      ns.appArg!.isAppOf ``Val.simple do return false
+  isDefEq ns bs
+
+/-- The exact guarded transfer at the current callback sequent. -/
+def hasTransferNormality (g : MVarId) : MetaM Bool := g.withContext do
+  let ty ← instantiateMVars (← g.getType)
+  let_expr ProvesC _ _ _ _ _ _ φ := ty | return false
+  isTransferNormality φ
+
+/-- Keep the callback judgement through structural prefixes leading to a
+normality guard; the ordinary transfer diamond has no unconditional rule. -/
+partial def containsTransferNormality (φ : Expr) : MetaM Bool := do
+  let φ ← whnf φ
+  if ← isTransferNormality φ then return true
+  if [``Fml.imp, ``Fml.all, ``Fml.bind, ``Fml.upd, ``Fml.havoc,
+      ``Fml.grow, ``Fml.anon, ``Fml.allocAll].any φ.isAppOf then
+    containsTransferNormality φ.appArg!
+  else return false
+
 /-- The steps that may apply at the `ProvesC` goal `g`, in the order tried. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do
   let ty ← instantiateMVars (← g.getType)
@@ -123,13 +169,17 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   -- it). An explicit try calls back too, so avoid an ordinary-proof
   -- attempt on every capture before it: the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
   let φi ← instantiateMVars φ0
-  let noPlain := (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Stmt.tryCall || e.isConstOf ``Fml.havoc ||
+  let containsGuard ← containsTransferNormality φi
+  let noPlain := containsGuard || (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Stmt.tryCall || e.isConstOf ``Fml.havoc ||
     e.isConstOf ``Fml.grow).isSome
   let φ ← whnf φ0
   let rest : Array (Array (TSyntax `tactic)) ← match φ.getAppFn.constName? with
     | some ``Fml.havoc => pure #[#[← ap ``ProvesC.havocIntro]]
     | some ``Fml.grow => pure #[#[← ap ``ProvesC.growIntro]]
-    | some ``Fml.imp => pure #[#[← ap ``ProvesC.intro]]
+    | some ``Fml.imp => pure #[
+        #[← `(tactic| apply $(← ProofTree.short ``ProvesC.transferDetD) $(mkIdent `rfl):ident)],
+        #[← `(tactic| apply $(← ProofTree.short ``ProvesC.transferD) $(mkIdent `rfl):ident)],
+        #[← ap ``ProvesC.intro]]
     | some ``Fml.all => pure #[#[← ap ``ProvesC.allIntro]]
     | some ``Fml.upd => pure #[#[← ap ``ProvesC.updIntro]]
     | some ``Fml.bind => pure #[#[← ap ``ProvesC.bindIntro]]
@@ -210,7 +260,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
           | _ => pure #[]
         pure (own ++ ordinary ++ after)
     | _ => pure #[]
-  return (if noPlain then #[] else #[#[plain]]) ++ rest
+  let ordinary := if noPlain then #[] else #[#[plain]]
+  return if ← hasTransferNormality g then rest ++ ordinary else ordinary ++ rest
 
 /-- A `Proves` leaf closed as `sol_prove` closes one: `sol_leaf` and
 `sol_decide`, else `sol_close` (`sol_spec_close` for a specification's), as
@@ -461,7 +512,8 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   -- `¬X → ψ`, `X` a program's, where something calls back: `X` proved
   -- instead where the walk closes it (`notLeft`), else the premise hidden
   -- (`hideLeft`), as `Walk.walk` does
-  if ← tryCatchRuntimeEx (withCurrHeartbeats (Walk.negModalGoal? g)) fun _ => pure false then
+  let guarded ← tryCatchRuntimeEx (withCurrHeartbeats (hasTransferNormality g)) fun _ => pure false
+  if !guarded && (← tryCatchRuntimeEx (withCurrHeartbeats (Walk.negModalGoal? g)) fun _ => pure false) then
     -- Ordinary call syntax lowers unhandled catches to revert. Proving the
     -- failed-self-call premise by its diamond duplicates the getter's proof
     -- without helping this branch; hide it by the existing structural rule.

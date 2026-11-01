@@ -1,0 +1,12 @@
+{
+  "base": "79eaf89143318665c03743f94994d0caabcb8992",
+  "canonicalReceipt": "4e20b800",
+  "resolution": "reconciled_not_accepted117pages5804items,currentuserauthority",
+  "delivery": "direct combined new user queue, same active thread, no redispatch",
+  "receiptDeferral": "worker has no coordinator journal helper/turnID; no fabricated receipt or state mutation",
+  "mechanicalApproval": "call_8fd0594a249440a4ae6b4375a89b805b item0 scope triage",
+  "runnerApproval": "call_0f9867a06fbb4d3b9eea8999fb34e047 item0",
+  "laterRunnerApprovalSupersedesOnlyEarlierRunnerHold": true,
+  "priorAcceptedTurnsNotReplayed": true,
+  "P4P5bP8Authorized": false
+}

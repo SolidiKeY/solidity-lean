@@ -1,0 +1,37 @@
+[
+  {
+    "url": "https://github.com/ipsilon/evmone/releases/download/v0.22.0/evmone-0.22.0-darwin-arm64.tar.gz",
+    "displayedSHA256": "3ff5633e49ae3726dc094c7c9819440c11d04c8036bc27f45a4385120951599c",
+    "downloaded": false
+  },
+  {
+    "url": "https://github.com/ipsilon/evmone/releases/download/v0.22.0/evmone-0.22.0-darwin-arm64.tar.gz.sha256",
+    "displayedSHA256": "1faf7f699b4b0e19018e732095f58d7f3e97c32b73c29440fb8d966ab7a7c842",
+    "downloaded": false
+  },
+  {
+    "url": "https://github.com/ipsilon/evmone/releases/download/v0.22.0/evmone-0.22.0-linux-x86_64.tar.gz",
+    "displayedSHA256": "ce1ee67f55f3c856aec00d8b0d0b878c47f10ccb6c7cbc74bf8e4829969983b6",
+    "downloaded": false
+  },
+  {
+    "url": "https://github.com/ipsilon/evmone/releases/download/v0.22.0/evmone-0.22.0-linux-x86_64.tar.gz.sha256",
+    "displayedSHA256": "e613e8c337a20f2de80dc2d2377d2cf88a52dc901f2a7eb83b00ce11ab47654c",
+    "downloaded": false
+  },
+  {
+    "url": "https://github.com/ipsilon/evmone/releases/download/v0.22.0/evmone-0.22.0-windows-amd64.zip",
+    "displayedSHA256": "6109ed60493f2b7740ead615db2f648e82567f32ca94868fb6ec8f5c042ec898",
+    "downloaded": false
+  },
+  {
+    "url": "https://github.com/ipsilon/evmone/releases/download/v0.22.0/evmone-0.22.0-windows-amd64.zip.sha256",
+    "displayedSHA256": "0fac6ae9a26c59b01bbee26dcfd13693646180ae13b1e38e227c398c0a74c1bd",
+    "downloaded": false
+  },
+  {
+    "url": "https://github.com/ipsilon/evmone/releases/download/v0.22.0/evmone-tests.tar.gz",
+    "displayedSHA256": "f80a357c24fb67b27431892af29d55ba31d2e479d522097f4ebf4a340409685f",
+    "downloaded": false
+  }
+]

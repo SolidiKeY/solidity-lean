@@ -1,0 +1,9 @@
+{
+  "removedOnlyTaskCreatedByteIdenticalTemporaryConfigs": [
+    "/workspace/solidity-lean/Bridge/lakefile.evm-step.toml",
+    "/workspace/solidity-lean/lakefile.next10.toml"
+  ],
+  "trackedConfigsPreserved": true,
+  "cachesPreserved": true,
+  "unrelatedProcessesStopped": false
+}

@@ -1,5 +1,6 @@
 import Solidity.Evm.MemoryFixedMixedCopy
 import Solidity.Evm.MemoryCompile
+import Solidity.Evm.MemoryCopyBound
 
 /-!
 # A typed, memory-preserving fixed-copy compiler fragment

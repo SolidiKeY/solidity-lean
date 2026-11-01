@@ -49,7 +49,7 @@ def ty_count : Typed Γ (.ident "count") (.int IntTy.u256) := .state rfl rfl
 def ty_flag : Typed Γ (.ident "flag") .bool := .state rfl rfl
 def ty_arr : Typed Γ (.ident "arr") (.array .storage (.int IntTy.u256) none) := .state rfl rfl
 def ty_m : Typed Γ (.ident "m") (.mapping (.address false) (.int IntTy.u256)) := .state rfl rfl
-def ty_one : Typed Γ one (.rational (Q.ofInt 1)) := .const rfl rfl
+def ty_one : Typed Γ one (.rational (Q.ofInt 1)) := .const rfl rfl rfl
 
 /-! ## One derivation per typed expression constructor -/
 
@@ -57,7 +57,7 @@ def w_ident : Typed Γ (.ident "a") (.int IntTy.u256) := ty_a
 def w_lit : Typed Γ (.lit (.bool true)) .bool := .bool true
 def w_litUnit : Typed Γ (.litUnit (.dec 1 0 0) .ether)
     (.rational ((NumLit.dec 1 0 0).value.mul (Q.ofInt (Denom.factor .ether)))) :=
-  .const rfl rfl
+  .const rfl rfl rfl
 def w_tuple : Typed Γ (.tuple (.some a) (.cons (.some (.ident "b")) .nil))
     (.tuple [.int IntTy.u256, .bool]) :=
   .tuple ty_a (.cons ty_b .nil) (by simp only [ne_eq, reduceCtorEq, not_false_eq_true])
@@ -99,7 +99,7 @@ def w_msgSender : Typed Γ (.member (.ident "msg") "sender") (.address false) :=
 /-- `require(b, "no");` -/
 def w_require : StmtD (k := .body) Γ Γ.locals (.simpleStmt (.exprStmt (.call (.ident "require")
     (.positional (.cons (.ident "b") (.cons (.lit (.str [110, 111])) .nil)))))) Γ.locals :=
-  .expr (.builtinCall rfl rfl (.cons ty_b (.cons (.str _) .nil)) rfl)
+  .expr (.builtinCall rfl rfl (.cons ty_b (.cons (.str _) .nil)) rfl) rfl
 
 /-- `gasleft()` has no typing rule: an excluded builtin. -/
 theorem gasleft_untyped (τ : STy) (h : HasType Γ (.call (.ident "gasleft") (.positional .nil)) τ) : False := by
@@ -111,6 +111,28 @@ theorem gasleft_untyped (τ : STy) (h : HasType Γ (.call (.ident "gasleft") (.p
     cases hr
     cases hs
   | callInternal _ hd _ => cases hd
+  | structNew hs =>
+    have e : Γ.structOf "gasleft" = none := rfl
+    rw [e] at hs
+    cases hs
+  | const hq => nomatch hq
+  | arith hb => nomatch hb
+  | bit hb => nomatch hb
+  | shift hb => nomatch hb
+  | exp hb => nomatch hb
+  | order hb => nomatch hb
+  | eq hb => nomatch hb
+  | compareConst hb => nomatch hb
+  | logic hb => nomatch hb
+
+/-- A name that denotes a builtin is no struct value. -/
+theorem Typed.ident_builtin_not_struct {Γ : Ctx} {x : String} {b : Builtin} {l : DataLoc} {dn : DeclName}
+    (hr : Γ.resolve x = some (.builtin b)) (d : Typed Γ (.ident x) (.struct l dn)) : False := by
+  generalize ht : STy.struct l dn = τ at d
+  cases d with
+  | loc h _ => rw [hr] at h; cases h
+  | state h _ => rw [hr] at h; cases h
+  | this => cases ht
   | const hq => nomatch hq
   | arith hb => nomatch hb
   | bit hb => nomatch hb
@@ -139,6 +161,9 @@ theorem msgValue_refused (τ : STy) (h : HasType Γv (.member (.ident "msg") "va
     subst hm
     revert hv
     decide
+  | member ha _ =>
+    have e : Γv.resolve "msg" = some (.builtin .msg) := rfl
+    exact Typed.ident_builtin_not_struct e ha
   | const hq => nomatch hq
   | arith hb => nomatch hb
   | bit hb => nomatch hb
@@ -277,17 +302,16 @@ theorem local_shadows :
 
 /-! ## Typing controls -/
 
-/-- A number literal has its exact rational type, a `bytesN` type or the
-`address` type. -/
-theorem Typed.lit_num {Γ : Ctx} {n : NumLit} {σ : STy} (h : Typed Γ (.lit (.num n)) σ) : σ = .rational n.value ∨ (∃ len h, σ = .fixedBytes len h) ∨
-      σ = .address false := by
+/-- A number literal has its exact rational type, the type of a hexadecimal
+literal of its digits (a constant convertible to `bytesN`) or the `address`
+type; never a `bytesN` type itself (solc). -/
+theorem Typed.lit_num {Γ : Ctx} {n : NumLit} {σ : STy} (h : Typed Γ (.lit (.num n)) σ) :
+    σ = .rational n.value ∨ (∃ len, σ = .hexConst n.value len) ∨ σ = .address false := by
   cases h with
   | const hq =>
-    have hv : (Syn.lit (.num n) : Syn .expr).const = some n.value := rfl
-    rw [hv] at hq
-    cases hq
+    rw [Syn.const_lit_eq hq]
     exact Or.inl rfl
-  | litBytes _ => exact Or.inr (Or.inl ⟨_, _, rfl⟩)
+  | litBytes _ => exact Or.inr (Or.inl ⟨_, rfl⟩)
   | litAddress _ => exact Or.inr (Or.inr rfl)
   | arith hb => nomatch hb
   | bit hb => nomatch hb
@@ -311,8 +335,12 @@ theorem tooBig_illTyped (C : Ctx) (L L' : List (String × STy)) : ¬ StmtOK C L 
   | declInit ht _ he hc =>
     simp only [Syn.ty, Syn.tys, Elem.ty] at ht
     cases ht
-    rcases Typed.lit_num he with rfl | ⟨_, _, rfl⟩ | rfl <;>
-      simp only [STy.implicit] at hc <;> revert hc <;> decide
+    rcases Typed.lit_num he with rfl | ⟨_, rfl⟩ | rfl
+    · rw [STy.implicit_rational_int] at hc
+      exact absurd (of_decide_eq_true hc) (by decide)
+    · rw [STy.implicit_hexConst_int] at hc
+      exact absurd (of_decide_eq_true hc) (by decide)
+    · cases hc
 
 /-- `1 << 8`. -/
 def shl18 : Syn .expr := .shift .shl one (.lit (.num (.dec 8 0 0)))
@@ -350,9 +378,8 @@ theorem shlTooBig_illTyped (C : Ctx) (L L' : List (String × STy)) :
     simp only [Syn.ty, Syn.tys, Elem.ty] at ht
     cases ht
     rw [shl18_folded he] at hc
-    simp only [STy.implicit] at hc
-    revert hc
-    decide
+    rw [STy.implicit_rational_int] at hc
+    exact absurd (of_decide_eq_true hc) (by decide)
 
 /-- **`return;` needs a function without returns** (solc error 6777):
 refused in `f`'s body, which returns `uint256`. -/
@@ -365,7 +392,7 @@ theorem bareReturn_refused (L L' : List (String × STy)) :
 /-- `uint8 x = 255;` is well typed. -/
 def fits_wellTyped : StmtD (k := .body) Γ Γ.locals (.simpleStmt (.declVar (.varDecl (.elem (.int false 8 (by decide)))
     none "x") (.some (.lit (.num (.dec 255 0 0)))))) (("x", .int IntTy.u8) :: Γ.locals) :=
-  .declInit rfl rfl (.const rfl rfl) rfl
+  .declInit rfl rfl (.const rfl rfl rfl) rfl
 
 /-- `break;` outside a loop has no statement context to live in: a
 `breakStmt` is a statement only of a loop body (`Syn (.stmt ⟨true, u⟩)`), so
@@ -393,7 +420,7 @@ theorem counter_decls_eq : counter.decls =
 def incBody : ItemsD (k := .body)
     ({ env := counter.env, scope := some "Counter", locals := [], rets := [], msgValue := false } : Ctx)
     [] (.cons incStmt .nil) [] :=
-  .stmt (.expr (.incDecSuffix (.state rfl rfl rfl) rfl)) .nil
+  .stmt (.expr (.incDecSuffix (.state rfl rfl rfl) rfl) rfl) .nil
 
 /-- **The counter is well formed** (and inside the profile's syntax). -/
 theorem counter_wellFormed : WellFormed counterRes ∧ InProfileSyntax counterRes := by

@@ -10,6 +10,12 @@
  * `Derive.leafTacs`' closers (`Calculus/Derive.lean`), under `case leafN =>`
  * bare for a single leaf, or under `all_goals` for every leaf alike.  Anything else in the body (a rewrite, an
  * `intro`, an `omega`), and any `set_option` on the theorem, is manual.
+ * The single `finish_memory_replay` body is the same 1024-step walk,
+ * decomposed into kernel-checked equations (Calculus/MemoryLoopReplay.lean);
+ * no extra closer or changed bound is accepted. Its stage modules are timed
+ * cumulatively by the original 300-second workload gate. A timed build
+ * requires --replay-group-results from the fresh 24-module runner; cached
+ * partial stage logs cannot establish the original effective timing bound.
  * A refutation (`N.f.refuted : ¬ (⊢ N.f.problem)`) is automatic when it
  * is in `Refuted.lean` and is `sol_refute` alone, which proves it from
  * `¬ ⊨ᶠ N.f.problem` (a certified counterexample).  The counts read here
@@ -17,7 +23,7 @@
  * Pending obligations are read off the `#solkey_obligations` pin in
  * `Solidity/TestSuite/Report.lean`.
  *
- * Usage: node scripts/check-automatic.mjs [--strict] [--build-log <file>] [--budget-s <n>]
+ * Usage: node scripts/check-automatic.mjs [--strict] [--build-log <file>] [--budget-s <n>] [--replay-group-results <file>]
  *   --strict     exit 1 on a manual proof or a pending obligation (the
  *                gate); without it only manual proofs fail.  A step budget
  *                is the stage `sol_prove` found by itself (`Seq.prove`'s
@@ -29,6 +35,7 @@
  *                laptop).  A module the cache replayed is not timed.
  */
 import { readdirSync, readFileSync } from "node:fs";
+import {readTiming} from "./check-memory-loop-timing.mjs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -41,6 +48,7 @@ const optionOf = (name, dflt) => {
 };
 const buildLog = optionOf("--build-log", null);
 const budget = Number(optionOf("--budget-s", "300"));
+const replayResults = optionOf("--replay-group-results", null);
 
 /** Lake's duration, `476ms`, `8.8s`, `2m 3s` or `1.5m`, in seconds. */
 export function seconds(d) {
@@ -63,6 +71,8 @@ const proveLine = /^sol_prove(?: \(steps := (\d+)\))?$/;
 export function classify(lines) {
   const [head, ...rest] = lines;
   if (head === "sol_auto" && rest.length === 0) return { kind: "auto", steps: null };
+  if (head === "finish_memory_replay" && rest.length === 0)
+    return { kind: "budget", steps: 1024 };
   const m = head?.match(proveLine);
   if (!m) return { kind: "manual", why: `starts with \`${head ?? ""}\`` };
   const leaf = (ls) => ls.length === 2 && ["sol_leaf", "sol_leaf_keep"].includes(ls[0]) &&
@@ -140,7 +150,7 @@ function main() {
   const counts = { auto: 0, budget: 0, manual: 0 };
   const findings = [];
   let refuted = 0;
-  const modules = readdirSync(DIR).filter((f) => /^(Derived\d+|Refuted)\.lean$/.test(f)).sort();
+  const modules = readdirSync(DIR).filter((f) => /^(Derived\d+|Derived17MemoryLoop|Refuted)\.lean$/.test(f)).sort();
   for (const f of modules) {
     for (const p of proofs(readFileSync(join(DIR, f), "utf8"))) {
       if (p.kind === "refuted") {
@@ -172,6 +182,12 @@ function main() {
     counts.manual++;
   }
   let over = 0;
+  if (!buildLog && !replayResults) console.log("check-automatic: classification only; cumulative timing NOT checked");
+  if (buildLog || replayResults) {
+    const errors = replayResults ? readTiming(replayResults) : ["missing complete fresh replay workload evidence (--replay-group-results)"];
+    for (const e of errors) findings.push(`replay-group: ${e}`);
+    over += errors.length;
+  }
   if (buildLog) {
     const ts = timings(readFileSync(buildLog, "utf8"));
     for (const [m, t] of ts) {

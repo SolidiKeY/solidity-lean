@@ -1,0 +1,9 @@
+{
+  "currentExit": 1,
+  "baselineExit": 1,
+  "baseline": "c36-path-design/doc-paths.log",
+  "current": "cancun-envelope/doc-paths.log",
+  "completePreFooterOutputIdentical": true,
+  "missing": 20,
+  "newFindings": 0
+}

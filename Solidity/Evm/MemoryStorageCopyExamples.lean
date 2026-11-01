@@ -146,7 +146,7 @@ private def badCompiled : Compiler.Compilation 1 (Frag.init []) badDestination :
 attribute [irreducible] badCompiled
 
 theorem bad_input : badCompiled.Input 4 64 bases initial machine := by
-  apply (badCompiled.memory_input (by decide +kernel) 4 64 bases initial machine).mpr
+  apply (badCompiled.memory_copy_free_input (by decide +kernel) 4 64 bases initial machine).mpr
   exact ⟨initial_repr.1, by decide +kernel,
     .inr ⟨by decide, wmod 128, initial_repr.2, by decide +kernel⟩⟩
 theorem bad_agrees : badCompiled.Agrees 4 64 bases initial machine := badCompiled.correct bad_input
