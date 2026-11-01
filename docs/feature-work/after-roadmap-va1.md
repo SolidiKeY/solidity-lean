@@ -849,3 +849,60 @@ the affected import closure; the whole-project cold gate remains failed.
 Final independent read-only documentation/evidence reviews found no remaining
 issues. Frozen Decision source is byte-identical, as are both predicates.
 No whole-goal completion or publication is claimed.
+
+
+## Fixed storage-root agreement backfill (2026-11-01)
+
+`Calculus/FixedArrayRoot.lean` lifts the checked vector reconstruction to
+actual `Storage.set` and `State.withStorage`. For every contract `C`, root
+name `a`, intrinsic element type `E`, length `n`, root-type witness
+`h : C.rootType a = some (.ref (.fixed E n))`, storage and breakpoints
+containing `(n : Int)`, `fixedFloorRoot_find` proves optional path equality
+through `.atF i q` for every uint `i` and typed continuation `q : Path E U`.
+`fixedFloorValue` uses the intrinsic value view, not an indexed runtime
+match. `fixedFloorRoot_word`/`fixedFloorRoot_has` derive actual storage
+observations. `fixedFloorIndex_fix` and `fixedFloorRoot_retained` separately
+prove unchanged reads when the natural uint index is a retained breakpoint.
+
+`fixedFloorRoot_get_ne` preserves every other typed root without requiring
+a length breakpoint; `fixedFloorRoot_other_word`/`_other_has` specialize
+this to observations. `fixedFloorState_frame` quantifies over every context
+and retains the actual heap typing, heap, environment, ledger, self balance
+and transaction. Only the selected storage root is rebuilt. These are
+construction/agreement proofs, not arbitrary formula or alias agreement,
+APF recognition or pipeline completeness. A future integration still needs
+its scoped source/reconstruction relation and index-set proof.
+
+`Examples/FixedArrayRoot.lean` reuses existing Probe/vector fixtures. It
+checks changed/retained/halted root reads and a non-default mapping entry
+at a different root, plus general retained-path agreement. The original
+state satisfies `fixedArr[1] = 9`; the rebuilt state refutes that same
+formula. This kernel countercontrol prevents extending the preservation
+claim to unretained observations. No existing input or verdict is changed.
+
+Core per-file MCP/build passed in 4.19/3.10 s; controls MCP/build passed in
+5.25/3.12 s. All 18 public theorem axiom reports passed in 3.21 s with only
+standard axioms. Exact commands, source hashes, versions, cgroup/pre-build
+measurements and aggregate RSS/headroom samples are retained in
+`/workspace/va1-evidence/fixed-root-next/verified-gates.json` and raw logs.
+The unchanged 300 s/proof limits, aggregate 12 GiB/no swap, 12 GiB host
+reserve, serial one-thread/explicit `-j1` checks and writer lock remain.
+
+Independent read-only finder and skeptic found no issues in the typed root
+update, precise length/retention premises, optional continuation reads,
+other-root frame or concrete negative control. Neither edited or used
+Lean/server/build. Final docs/static review and sealing follow when checked.
+This completes the storage-root agreement backfill stage, not AU02
+integration or a Residue shrink. AU01 theorem/Residue/bridge and all
+remaining original AU02/full gates stay open. Q1 is answered; Q2 remains
+pending for frontend repair ownership only.
+
+Fixed-root final static gates pass: 1064 reachable/zero orphans, 180 core/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, trust 1079 sources/248 inventoried sites/zero
+findings. Axiom inventory still fails with the identical 1206 pins/zero
+errors/404 unrecorded changes; doc paths still fail with exactly 85 frozen
+findings and zero added/removed. Neither is a pass or waived. Decision and
+retained counterexample byte identities pass. Both final independent
+read-only documentation/evidence reviews found no issues. Post-commit export
+verification follows; original goal/branch/base and all previous seals remain.
