@@ -2460,3 +2460,17 @@ scope wording (observed0–7 versus arbitrary residual8+). Neither reviewer ran
 Lean/server/build/tests or edited. All raw recursion/heartbeat/simp/type/monad
 failures retained; no budget increase or new axiom. Original full lane/goal
 remains PARTIAL/BLOCKED and all remaining obligations above stay mandatory.
+
+
+### Precise inheritance and origin inputs
+
+Post-checkpoint owner inspection confirms these are AVAILABLE metadata, not
+absent whole lanes: Source.Env.linearize returns Option(List String) using
+owner declaration-count-derived fuel; Source.Syn.contract carries optional
+layout-at expression/inheritance syntax; frontend Contract reads actual
+linearizedBaseContracts metadata. The present adapter does not prove the
+flattened inherited/active-contract root-order bridge or evaluate that expression
+to an agreed Word origin. Those ORIGINAL integration/derivation obligations
+remain open; no generic assumed order/origin adequacy witness was substituted.
+No producer/owner branch import or source-definition rewrite occurred. Exact
+symbols/boundaries in root-sequence/owner-order-origin-inspection.json.
