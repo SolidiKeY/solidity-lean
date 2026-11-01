@@ -1223,6 +1223,19 @@ and warm MCP pass unchanged limits; full Residue/bridge/AU02/full gates remain
 open. Raw failures, resources and precise limits are in the VA1 handoff.
 
 
+VA1 given-heap reason component (2026-11-01): an exact constructive classifier
+for one box-bound dynamic uint array with repeated direct literal reads now
+proves validity over every heap/binder value, hash-premised validity and an
+independently usable proved Answer. Source equality, full-term reconstruction,
+nonvacuity and syntax refusals are kernel checked; target admission holds under
+all existing waivers. The global pipeline remains unchanged: the original and
+another-index controls stay unknown, while old parameter/alias negative controls
+retain their exact candidate states and returned refutation certificates.
+Actual defined/out-of-bounds/unset reads are pinned. No global Residue or broader
+memory completion is claimed; pipeline consumption and final/full gates remain
+open. See the VA1 handoff for exact signatures, failures and resource evidence.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

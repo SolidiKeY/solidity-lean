@@ -2378,3 +2378,96 @@ Held VA1-Q2/producer TypeExamples repair is not resumed. Next independent child:
 given-heap literal-read reflexive source family using existing MxObs syntax and
 extractor, with validity over every heap/binder value. No whole-goal completion,
 goal mutation, publication, push/merge/PR/tag.
+
+
+## Given-heap literal-read source certificate (2026-11-01)
+
+Independent owned AU01 reason-census/AU02 broader-memory progress. Low-level
+Calculus/DecisionGivenHeapReason.lean imports only existing MemObserve,
+MemStructCut and HashPremise. For every contract C/context Γ, its intrinsic
+GivenHeapLiteralReadReflexive witness retains the complete equation for one
+box-bound dynamic uint array, with the same direct literal-index read on both
+sides. Parser reuses producer eqView and mxObsReadKey?, checking both entire
+terms against MxObs.read reconstruction. Exact soundness/completeness/iff and
+computable Decidable membership are proved without target/Covered/verdict tests.
+One-line reason: the existing finite given-heap fallback searches countermodels
+at one heap, which cannot establish validity over every heap and binder value.
+Generic validity explicitly quantifies over every State C Γ and optional binder
+value, including unset; Theory equality reflexivity needs no evaluation-definedness
+premise. hashFree and validH preserve the existing interpretation, and .answer
+provides MemoryWitness.Answer.proved from that universal proof. No one-state
+checker result is promoted to validity.
+
+Proof-layer Calculus/DecisionGivenHeapBoundary.lean separately imports Decision,
+keeping the low-level Answer acyclic and ready for later pipeline consumption.
+Its target theorem proves closed-family admission for every waiver setting.
+Additional candidate_answer and candidate_route certify existing negative-state
+selection: the actual checkMemoryAt negative branch returns exactly the producer
+candidate; hashfalse/LeafAunknown/noalloc/checker-isNo premises explicitly select
+that existing global route. Both old parameter and alias clients discharge every
+premise by rfl/kernel decide and retain exact candidate-state equality plus
+returned holdsH refutations. No coverage/pipeline extension is claimed here.
+Decision, Covered/inTarget/DecisionTheorem/Waivers, producer implementations,
+semantics/defaults and all old observations are unchanged since2e992aaf.
+
+Examples/DecisionGivenHeapReason.lean supplies original/another-index inhabited
+source decisions, universal validity and actual targets; the original remains
+unknown/notCovered and the second remains unknown. Generic actual fixed-array,
+diamond and fresh-allocation refusal theorems cover every body. Clients refuse
+unequal keys, computed index, direct literal reflexivity, fresh source and old
+negative parameter/alias forms. Valid computed/literal refusals distinguish
+classification from validity. Actual read observations pin a defined value1,
+out-of-bounds none and unset none, over the unchanged producer candidate heap
+and initial heap. Both empty/nonempty root states satisfy the proved family.
+
+Actual new fixture correction: dl![.diamond] on a leaf-only hidden declaration
+elaborates to exactly memParamSame (box source), kernel rfl equality checked;
+it is therefore a positive classification. The initial combined negative claim
+was kernel-disproved and retained with exact failing source/hash. The correction
+records actual source identity, not a changed default or notation; the genuine
+intrinsic diamond refusal remains universally proved. Initial generic refusal
+signatures also required explicit Fml constructor receivers. Completeness needed
+one final Option.pure reduction; MCP blank-line/multiline replacement probes had
+syntax errors, which are not counted as proof passes. Raw diagnostics and exact
+hash-verified failing snapshots are in /workspace/va1-evidence/given-heap-reason-next.
+
+Both optional exact old returned-state rfl proofs failed. They were not treated
+as passing observations or weakened: candidate_answer now normalizes the producer
+let and splits the real checker; candidate_route establishes the memory verdict
+before collapsing outer fallback matches. An intermediate rewrite had already
+been discharged by cases; its failed raw/source is retained. Final client proofs
+preserve the original exact-state statements and certify actual returned holdsH.
+Reviewers explicitly distinguished earlier source targets from kernel validation.
+
+Final gates: core MCP5.250s, boundary MCP5.274s, clients MCP5.332s, emitted affected
+client/import closure3.095s pass. Core/boundary emissions4.125/3.096s passed at
+the corresponding stages. All use pinned Lean4.24.0 commit797c613/Lake5.0.0,
+original writer lock, threads1/Lean-j1, one task container, no LSP/build overlap,
+actual memory.max12884901888/swap.max0 and host reserve12884901888bytes. Exact
+sampled resource extrema: RSS1463088KiB (shared pages included), charged peak
+630624256bytes, minimum host available17068548096bytes; resources.json retains
+10 failed measurement samples, which are and excluded only from numeric extrema, never from raw evidence.
+Public36-declaration axiom audit PASS16.948s contains only existing standard
+propext/Classical.choice/Quot.sound subsets; no new axioms/sorry/trust shortcuts.
+Runtime profile PASS3.163s: original/another-index true+unknown; computed-index
+false+unknown; diamond-notation true+unknown; parameter/alias negatives false+
+refuted. Timings including printing2.996/.355/.250/.310/.613/.217ms respectively.
+Kernel proofs and runtime-only profiling are distinguished; no EVM result claimed.
+
+Static reachability1103, layers180core, strict automatic491/61budgets/11refuted,
+trust1118sources/248sites and whitespace pass. Same85 docs and404 inventory
+findings remain FAIL, identical to prior exact-frozen-base analysis. Three root
+imports and three module-map rows are narrow additions, no Rules changes.
+Independent read-only finder/skeptic final source reviews report no findings;
+real syntax identity, universal certificate, explicit routing premises, exact
+old counterstates and remaining unknowns all reviewed without Lean/server/builds
+or edits. reviews.txt retains results. Immutable checked committed export/seal
+remains pending until this checkpoint commits; existing2e992aaf artifacts stay.
+
+Original full queue remains incomplete: global Residue/DecisionTheorem-prime and
+exhaustive target/Covered/hash bridge, general/nested arrays, wider memory beyond
+these exact families, halting OR, broader revised M4 boundary, formula-derived
+runtime fuel, remaining performance/backfill and final/full gates. The new valid
+Answer is not yet consumed by decideMem; that integration is ready owned work,
+not blocked by held producer TypeExamples/VA1-Q2. No goal/status reset, whole-lane
+completion or publication authorization is inferred.
