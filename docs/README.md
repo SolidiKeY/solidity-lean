@@ -183,3 +183,5 @@ VY2 retained source-reference preparation and original unfinished queues:
 VY2 [computed inventory after allocation](feature-work/inline-assembly-vy2.md#computed-inventory-after-allocation-2026-11-01) connects actual supported heap enumeration and allocation history.
 
 VY2 [actual allocation physical-view bridge](feature-work/inline-assembly-vy2.md#actual-allocation-physical-view-bridge-2026-11-01) proves computed raw-map/source agreement for the supported ordinary heap.
+
+VY2 [generic ordinary object allocation](feature-work/inline-assembly-vy2.md#generic-ordinary-object-allocation-2026-11-01) adds checked struct/array allocation and exact source/physical composition.
