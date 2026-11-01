@@ -5467,3 +5467,105 @@ Prog application are not implemented here; consume those existing interfaces
 read-only, without duplicating a producer or asserting queue exhaustion. General
 Source graphs/physical bytes/all-profile construction/failure and all previously
 named reserved/final composition obligations remain genuinely open.
+
+
+## C69: genuine fixed-reference local rebinding and reached mutation (partial)
+
+Owned modules `Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean`,
+`Solidity/Backend/MemoryOps/SourceUintFixedAliasProgram.lean`,
+`Solidity/Backend/MemoryOps/SourceUintFixedAliasFailure.lean` and
+`Solidity/Backend/MemoryOps/SourceUintFixedAliasControls.lean` close the specific
+C68 fixed-local bridge gap. Published Source local assignment and Objects pointer
+rebind producers remain read-only. INITIAL genuine Source some-n observer, same
+represented source/typed local pointer, Source MemOK, Objects StateRepr and
+AllocatorRepr plus positive local base derive the SAME reached reference, actual
+Source expression/statement, intrinsic rebindMem and existing pointer load/store
+word execution. Typed scalar/local frames are derived, no caller global address
+injectivity or final-agreement premise. Both heaps, world/events/logs/function
+locals, old addresses/objects, stack and allocator are framed across rebinding.
+
+`source_uint_fixed_alias_program_word` feeds those actual reached states into
+existing fixed assignment then primitive deletion, deriving ONE Source RItems,
+intrinsic Prog and whole existing word append, fixed correspondence, MemOK,
+allocator and all other local/object/address/world frames. Caller horizon h
+executes statements h+6/h+5/h+4 inside Items h+7 with ORIGINAL parameter count.
+Unrelated source-address and logical typed-ID frames are separate local facts;
+no global map injection, pairwise disjointness or every-stage desired relation
+is assumed. The kernel statements quantify runtime fixed n and indices; they
+never admit zero-length Source merely because low-level syntax is expressible.
+
+Controls independently construct three existing source objects/typed heap and
+Objects word representation: LEFT=[7,8,7], RIGHT=[9,10,9], neighbour=[11,12],
+retained LEFT alias and saved [77,88] stack. Both actual Source pipeline configurations execute the forward
+Source Items and typed Prog; arbitrary valid index/value instances derive full
+source tables, all object contents/identities and final representation. Concrete
+index2/value42 complete16word vectors expose pointer replacement, material RIGHT
+write then zero deletion, stable old aliases/neighbor/cursor40 and saved stack.
+The word-only reordered run writes LEFT42, then redirects and clears RIGHT0;
+the retained LEFT content discriminates it. Its stale first write independently
+executes in Source/intrinsic/word and writes LEFT42, rather than merely stipulating
+corrupted contents. No complete reversed Source Items/Prog theorem is claimed.
+Same-pointer and self-alias Source execution, shared-alias word mutation and
+actual selected/retained Source reads9 versus7 are proved. No fresh allocation,
+deep copy, alternate evaluator or Source admission restriction is introduced.
+
+`source_uint_fixed_alias_reject` derives actual successful rebinding then bounds
+rejection from INITIAL index>=n. Whole Source error exposes unchanged globals
+and empty caller locals; rebound local is observed only in the successful prefix.
+Intrinsic/word reverts expose no final heap/machine and no payload equivalence or
+rollback claim. The horizon6 control REALLY rebinds, writes RIGHT42, then times
+out at deletion; Source error retains changed globals. Source success requires
+horizon7 here, an execution observation, not an increased fuel/proof/test budget.
+
+C69 focused final closure PASS220jobs, exact guards13 (one axiom-free local helper,
+others standard trio), zero new OOM. Earlier syntax/canonical-word/opaque typed
+projection/append matching/solved-goal diagnostics are retained as failed exits;
+one controls01 prerequisite replay occurred before inspection and is retained,
+not counted as a proof pass. New lane script tests exact pins and dropped/unsafe/
+renamed guard corruption. No old fixture/control/vector or expected observation
+was edited. Final full/static gates and independent SOURCE/artifact reviews are
+pending at this writing; exact final outcomes are appended below before commit.
+
+Original G32/G33/G34/G35.01/.03/.04/.05 and Backfill A/B remain PARTIAL; G35.02 and
+G35.06 remain BLOCKED on reserved memory-to-storage/final V10/Source/target
+composition. This advances fixed-reference path/rebinding/identity transport,
+not physical-byte/all-profile construction/checked target allocation failure,
+general reference graphs/ABI/storage/deep-copy/emitted loops or whole compiler.
+Kernel independent Source plus symbolic-word proofs are not external solc/EVM
+execution. Existing persistent goal BLOCKED unchanged; get/update APIs and Lean
+MCP diagnostics are unavailable, no goal status mutation, no queue exhaustion.
+
+C69 final full01 PASS0 covers the registered final Lean tree:1134default/262Suite,
+SolKey377parsed/131read-bearing covered. Actual Lean4.24.0 commit797c613/Lake5.0.0-
+src+797c613/KeySort2jobs PASS, selected exec vars show threads1 and optional cache
+OFF. Focused01 PASS220jobs/exact13new guards (one empty+12standardtrio), scoped
+owned1109pins/153modules standard-only. Strict/trust/layer/orphan/lane/complete
+fixtures PASS,105combined admission/corruption tests PASS including16newfixedalias
+tests. Warmstrict times0newSuite modules; independently every262current/C31source,
+fixture/toolchain bytes and actual69versions match retained26/max160sunder300,
+which is retained keyed cold evidence only, not new cold coverage.
+
+Rawdocs FAIL1/83 completefindings remains byte-identical to consumed public C31;
+complete zero-owned-new separatelyPASS. Frozen no-new remainsFAIL1/11incoming.
+Rawinventory FAIL1/1468unrecorded=359published+1109owned/0unsafe. Additive owned
+pin proposals only, reserved registries/ledger unchanged. Both independent
+read-only finder/skeptic source/control/script/doc reviews PASS after fixing the
+finder's wording ambiguity: complete reordered execution is word-only, not a
+reversed Source Items theorem. Artifact reviews are separately required after
+commit. All failed diagnostics/receipts remain, no unsafe elaboration artifact is
+accepted: final exact pins have no sorryAx. C69 has zero new OOM on EVERY observed
+exec. C60/C67 cumulative OOM5/peak12GiB history is retained separately. Finalfull
+aggregateRSS1586720KiB/diskgrowth270336bytes; finalresource812756992available bytes
+preserves512MiBreserve+96MiBforecast. Same container/image/mount/caps/cache identity,
+no worker besides idle sleep after gates; no new runtime or cleanup.
+
+Queue reassessment: the fixed alias bridge and reached operation application are
+now supplied for arbitrary intrinsic fixed n/valid indices under explicit initial
+Source/Objects assumptions. The next independently supported context application
+to investigate is declaration of a fresh fixed local then assigning an OLD local
+to that new root, followed by reached index mutation; C66/C68 establish Source
+cons versus intrinsic append and constructor output, C69 consumes initial pointer
+alignment. That exact context-changing rebind application is not established by
+this checkpoint. Broader general shape/path/graph/default/copy/target prerequisites
+remain as above; no independent-queue exhaustion, integration, goal reactivation
+or whole-assignment completion is asserted.

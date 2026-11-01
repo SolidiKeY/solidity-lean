@@ -1384,3 +1384,8 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintFixedProgram.lean` | One existing Source RItems and intrinsic Prog declaration/write/delete execution from initial alignment/ownership, consistent horizons and whole published word append. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedProgramFailure.lean` | Actual changed declaration/write prefix then distinct-index rejection; Source globals retained, intrinsic/word error exposes no suffix state. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedProgramControls.lean` | Both-pipeline populated runtime success/rejection, complete16word frames/old aliases/logical32, rawzero/nonadmission and materially changed timeout prefix controls. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean` | Genuine fixed Source local reference rebinding from initial aligned correspondence, using published Objects pointer load/store with full heap/local/allocator frames. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedAliasProgram.lean` | Actual reached fixed-reference rebind/write/delete in one existing Source RItems, intrinsic Prog and full existing word append. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedAliasFailure.lean` | Bounds rejection after actual fixed-reference rebinding; successful prefix separated from Source/word error boundaries. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedAliasControls.lean` | Both-pipeline populated fixed identities/old aliases, runtime reached mutation, complete16word order/shared-alias vectors, actual bounds and changed-prefix timeout controls. |
