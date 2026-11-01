@@ -556,9 +556,10 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       if let .name g := h then
         if (← read).funs.any (·.1 == g) then return ← hoist (.call g rest)
       let some ty := fnTyOfExpr C (← ctx) h | throw s!"{h.toStr}(…): the callee is not a function value"
-      let (P, rest) ← hoistArgs rest
+      -- the dispatch captures the callee, then its arguments (`dispatchCaptures`)
+      let P : SProg C := []
       let some (_, [r], _) := fnParts? ty | throw s!"{h.toStr}(…) returns one value where a value stands"
-      if r == "bytesmemory" then
+      if fnMemRet C r then
         let (Q, result) ← rc.fnMemoryDispatch h ty rest
         return (P ++ Q, result)
       let some (p, n) := fnCompTy? C r | throw s!"{h.toStr}(…) returns a {r}, not a value type"
@@ -571,9 +572,10 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- a call through a function value, into a fresh local (`fnDispatch`)
     if (← read).funs.all (·.1 != f) then
       if let some ty := fnTyOf? C (← ctx) f then
-        let (P, args) ← hoistArgs args
+        -- the dispatch captures its arguments in order (`dispatchCaptures`)
+        let P : SProg C := []
         let some (_, [r], _) := fnParts? ty | throw s!"{f}(…) returns one value where a value stands"
-        if r == "bytesmemory" then
+        if fnMemRet C r then
           let (Q, result) ← rc.fnMemoryDispatch (.name f) ty args
           return (P ++ Q, result)
         let some (p, n) := fnCompTy? C r | throw s!"{f}(…) returns a {r}, not a value type"
@@ -839,7 +841,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
     let h :: args := args | throw "internal: a call through a value with no callee"
     if targets then throw s!"{h.toStr}(…): a call through a function value in a tuple assignment"
     if res.isNone && ((fnTyOfExpr C (← ctx) h).bind fnParts?).any (fun (_, rs, ext) =>
-        !ext && rs == ["bytesmemory"]) then
+        !ext && (match rs with | [r] => fnMemRet C r | _ => false)) then
       let some ty := fnTyOfExpr C (← ctx) h | throw "missing memory function type"
       return ((← rc.fnMemoryDispatch h ty args).1, none, [])
     return (← callValue h args res resW resNew, none, [])
@@ -847,7 +849,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
   if !ctor && funs.all (·.1 != f) then
     if let some ty := fnTyOf? C (← ctx) f then
       if targets then throw s!"{f}(…): a call through a function value in a tuple assignment"
-      if res.isNone && (fnParts? ty).any (fun (_, rs, ext) => !ext && rs == ["bytesmemory"]) then
+      if res.isNone && (fnParts? ty).any (fun (_, rs, ext) => !ext && (match rs with | [r] => fnMemRet C r | _ => false)) then
         return ((← rc.fnMemoryDispatch (.name f) ty args).1, none, [])
       return (← fnDispatch f ty args res resW resNew, none, [])
   let selfFrame := selfFrame || (← read).selfFrame
@@ -867,7 +869,14 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
       let partners := recPartnersC C f
       pure (d, C.funs.take j ++ (C.funs.drop j).filter (partners.contains ·.1))
     else pure (d, funs.take i)
-  ElabM.lift (calldataCheck scope 8 d.calldataParams d.refRets d.body)
+  -- the names of function type a call may go through (`calldataCheck`)
+  let fnValues : List (String × String) :=
+    d.params.filterMap (fun (n, _) => (fnRow? d.widths n).map (n, ·)) ++
+    d.body.flatMap (RawStmt.flatMapDeep fun s => match s with
+      | .decl (.named t) x _ => if fnTy? t then [(x, t)] else []
+      | _ => []) ++
+    C.vars.filterMap (fun (n, _) => (fnRow? C.widths n).map (n, ·))
+  ElabM.lift (calldataCheck scope 8 d.calldataParams d.refRets d.body fnValues)
   -- a recursive function's frame is one context, `rs ++ ps`, at every call:
   -- a call of several returns returns to its targets (`CallRet.rets`)
   if recursive && d.rets.length > 1 && !targets then

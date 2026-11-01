@@ -406,12 +406,22 @@ The plain `holds` reading ignores callbacks, as solkey's `noCallback` does.
 
 ## Calls
 
-solc evaluates every argument of an internal call, left to right, before the
-callee runs. `Stmt.run` does the same: it evaluates the arguments in the
+The default legacy model evaluates supported positional internal-call arguments
+from left to right before entering the callee. `Stmt.run` evaluates them in the
 caller's context (`Args.evalT`) and runs the body in a frame of its own, its
 returns on its parameters (`Stmt.call`, `Syntax/Scoped.lean`), which sees
 no caller's local; KeY's function-body expansion declares the parameters one
 after another, and the two agree because no argument can read a parameter.
+
+The unchanged `tests/solc/ReferenceParameters.sol` function
+`copiesBeforeEffects` exposes a remaining compiler-pipeline limit. With pinned
+solc 0.8.34 (`80d5c536`), Osaka, and the optimizer both disabled and enabled,
+the native legacy executions return normally; both viaIR executions revert
+with assertion `Panic(0x01)`. The model's ordinary-call capture remains left to
+right under `EvalOrder.viaIR`, so this implicit-copy/side-effect interaction is
+an open viaIR alignment gap. These observations identify neither the failing
+assertion nor the precise compiler mechanism. A default legacy API proof does
+not establish viaIR agreement for this fixture.
 
 ### Returns and tuples
 

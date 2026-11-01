@@ -812,7 +812,15 @@ def elabSolcImport : CommandElab := fun stx => do
     let cd := f.params.filterMap fun (x, t) => if t.endsWith " calldata" then some x else none
     let refRets := (retNames f).filterMap fun (x, t) =>
       if t.endsWith " memory" || t.endsWith " storage" then some x else none
-    let scope := (calldataCheck C.funs 8 cd refRets raw).bind fun _ => paramCtx C params
+    -- the names of function type a call may go through, spelled as `fnTyStr`
+    let fnValues : List (String × String) :=
+      f.params.filterMap (fun (x, t) => if t.startsWith "function" then
+          some (x, String.mk (t.toList.filter (!Char.isWhitespace ·))) else none) ++
+      raw.flatMap (RawStmt.flatMapDeep fun s => match s with
+        | .decl (.named t) x _ => if fnTy? t then [(x, t)] else []
+        | _ => []) ++
+      C.vars.filterMap (fun (n, _) => (fnRow? C.widths n).map (n, ·))
+    let scope := (calldataCheck C.funs 8 cd refRets raw fnValues).bind fun _ => paramCtx C params
     if let .ok Γ := scope then rows := rows.set! k { rows[k]! with paramTypes := (ECtx.toNCtx Γ).ctx }
     match scope >>= lowered with
     | .error m => rows := fail (at_ f 0 m)

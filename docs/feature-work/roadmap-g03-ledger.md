@@ -491,9 +491,9 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Internal function markers are refused. Struct enum members lose nominal identity, so recursive coverage is partial.
 
 - **`abiEncodeCall`** (model/partial)
-  - lowering: `Solidity.Frontend.abiCallComponents?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1447`) — target/tuple components checked vs declaration
-  - lowering: `Solidity.encodeCallTypes?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1010`) — exact parameter typing
-  - lowering: `Solidity.encodeCallArg` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1316`) — contextual argument conversions
+  - lowering: `Solidity.Frontend.abiCallComponents?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1464`) — target/tuple components checked vs declaration
+  - lowering: `Solidity.encodeCallTypes?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1106`) — exact parameter typing
+  - lowering: `Solidity.encodeCallArg` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1412`) — contextual argument conversions
   - regression: `Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid` (Solidity.Examples.Tactics.AbiHexCall, `Solidity/Examples/Tactics/AbiHexCall.lean:108`) — exact-width hex encodeCall assertion
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: Implicit fixed-byte narrowing is refused. ABI identity of inherited renamed function values is left.
@@ -502,7 +502,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`abiEncodePacked`** (model/partial)
   - admission: `Solidity.Frontend.Admission.magicMember` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:27`) — abi.encodePacked tagged
   - lowering: `Solidity.AbiKind.packedWidth` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:814`) — packed widths per kind
-  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:639`) — packed assembly, struct refused
+  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:641`) — packed assembly, struct refused
   - no existing anchor: source, backend, evm, theorem
   - missing: Packed arrays and hex-literal aggregates have only partial contextual coercions.
   - missing: No backend/EVM stage (R04). Packed collisions are only kept, never proved.
@@ -510,7 +510,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`abiEncodeWithSelector`** (model/partial)
   - admission: `Solidity.Frontend.Admission.magicMember` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:27`) — encodeWithSelector tagged
   - lowering: `Solidity.encodeSelector?` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1556`) — selector-prefix lowering
-  - lowering: `Solidity.fnSelector?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:967`) — function selector computation
+  - lowering: `Solidity.fnSelector?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1063`) — function selector computation
   - no existing anchor: source, backend, evm, theorem
   - missing: Selector-prefix lowering supports restricted argument shapes only. Full recursive ABI is unestablished.
   - missing: No backend/EVM stage (R04).
@@ -544,10 +544,10 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: assert is a core-only construct, refused in memory programs (R29, R01).
 
 - **`bytesConcat`** (model/partial)
-  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1801`) — bytes.concat rendered
-  - lowering: `Solidity.abiEncode` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:201`) — concat as packed byte write
-  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:639`) — argument-order byte assembly
-  - lowering: `Solidity.bytesPure` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1507`) — bytesN argument kinds
+  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1818`) — bytes.concat rendered
+  - lowering: `Solidity.abiEncode` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:202`) — concat as packed byte write
+  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:641`) — argument-order byte assembly
+  - lowering: `Solidity.bytesPure` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1603`) — bytesN argument kinds
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: No distinct admission tag (memberAccess only).
   - missing: No backend: dynamic bytes memory objects are outside both compilers (R10 readMem, R28, word memory R31).
@@ -621,16 +621,16 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Proofs are concrete reductions only, with no precompile-equivalence theorem.
 
 - **`stringConcat`** (model/partial)
-  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1801`) — string.concat rendered
-  - lowering: `Solidity.stringReason?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:862`) — string-only argument check
-  - lowering: `Solidity.abiEncode` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:201`) — fresh concatenated bytes
+  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1818`) — string.concat rendered
+  - lowering: `Solidity.stringReason?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:958`) — string-only argument check
+  - lowering: `Solidity.abiEncode` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:202`) — fresh concatenated bytes
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: No distinct admission tag. Function-value arguments are refused.
   - missing: No backend/EVM coverage for dynamic string memory (R28, R31).
 
 - **`wrapUnwrap`** (model/partial)
-  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1801`) — wrap/unwrap rendered as underlying cast
-  - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:748`) — UDVT expression typing
+  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1818`) — wrap/unwrap rendered as underlying cast
+  - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:765`) — UDVT expression typing
   - lowering: `Solidity.valueRows?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:554`) — UDVT range rows
   - regression: `Solidity.Corpus.TestSuite.valueTypeWrapUnwrap` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2380`) — wrap/unwrap corpus case
   - no existing anchor: source, admission, backend, evm, theorem
@@ -659,8 +659,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Divergence/exhaustion not caught; no compiler/EVM stage
 
 - **`emptyDataValueCall`** (abstract/partial)
-  - lowering: `Solidity.Frontend.valueCall?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2034`) — matches only (bool ok,)=r.call{value:v}("")
-  - lowering: `Solidity.elabValueCall` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:617`) — send full-gas / self receive try
+  - lowering: `Solidity.Frontend.valueCall?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2051`) — matches only (bool ok,)=r.call{value:v}("")
+  - lowering: `Solidity.elabValueCall` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:671`) — send full-gas / self receive try
   - source: `Solidity.TRun.send` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:723`) — bool result, ledger effect
   - theorem: `Solidity.sendStep_sound` (Solidity.Calculus.SoundControl, `Solidity/Calculus/SoundControl.lean:90`) — covers full-gas send
   - no existing anchor: admission, backend, evm
@@ -669,7 +669,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`extensionCalls`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — UsingForDirective tagged usingFor
-  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1801`) — attached free function: receiver as first arg
+  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1818`) — attached free function: receiver as first arg
   - regression: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — corpus regression
   - no existing anchor: source, backend, evm, theorem
   - missing: Receiver-bound-once is not proved; only internal/free attached functions lowered
@@ -684,7 +684,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Pure/view library calls and nested external execution refused; no backend/EVM
 
 - **`externalSelfCalls`** (model/partial)
-  - lowering: `Solidity.trySelfBody` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:557`) — self callee inlined in own frame
+  - lowering: `Solidity.trySelfBody` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:611`) — self callee inlined in own frame
   - lowering: `Solidity.selfReturnAbiCompatible` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1676`) — self-return ABI kind check
   - source: `Solidity.TRun.tryCall` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:877`) — self flag: sender=this, value 0
   - regression: `Solidity.Examples.Tactics.TryCatch.selfCall_noCallback` (Solidity.Examples.Tactics.TryCatch, `Solidity/Examples/Tactics/TryCatch.lean:288`) — self-call example proof
@@ -704,15 +704,15 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`functionValues`** (model/partial)
   - lowering: `Solidity.fnTag` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:114`) — tag encoding of internal function values
-  - lowering: `Solidity.fnDispatch` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:271`) — dispatch; unset value gives Panic(0x51)
-  - lowering: `Solidity.extDispatch` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:361`) — external function value: address/selector dispatch
+  - lowering: `Solidity.fnDispatch` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:309`) — dispatch; unset value gives Panic(0x51)
+  - lowering: `Solidity.extDispatch` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:409`) — external function value: address/selector dispatch
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: No source-level function type; identity rules rest on the tag encoding with no theorem
   - missing: Reference-valued function types and functions declared after the caller refused
   - missing: No backend or EVM support
 
 - **`internalCalls`** (model/partial)
-  - lowering: `Solidity.elabCall` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:444`) — resolved internal call to Stmt.call
+  - lowering: `Solidity.elabCall` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:492`) — resolved internal call to Stmt.call
   - source: `Solidity.TRun.call` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:810`) — fresh frame; returns via CallRet
   - backend: `Solidity.Evm.callVal_sim` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:517`) — inlined value-arg call simulation
   - theorem: `Solidity.Premise.sound_callVal` (Solidity.Calculus.SoundCalls, `Solidity/Calculus/SoundCalls.lean:432`) — internal call rule sound
@@ -752,7 +752,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`valueOption`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — FunctionCallOptions value tagged valueOption
-  - lowering: `Solidity.elabValueCall` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:617`) — call{value:v}("") to send/self receive try
+  - lowering: `Solidity.elabValueCall` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:671`) — call{value:v}("") to send/self receive try
   - source: `Solidity.State.canPay` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:164`) — funding + oracle acceptance
   - source: `Solidity.State.pay` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:172`) — ledger update on success
   - no existing anchor: backend, evm, theorem
@@ -763,7 +763,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 #### declarations
 
 - **`constants`** (model/partial)
-  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:958`) — evaluates constant initializers
+  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:975`) — evaluates constant initializers
   - lowering: `Solidity.RawExpr.foldConst` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:474`) — folds constants in sol{}
   - regression: `Solidity.Corpus.TestSuite.constantInlined` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2355`) — constant inlined by identity
   - regression: `Solidity.Corpus.TestSuite.contractQualifiedConstantAndEnum` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2360`) — qualified constant resolved
@@ -772,8 +772,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: No theorem that folding preserves contextual width
 
 - **`constructors`** (model/partial)
-  - lowering: `Solidity.elabCtor` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:664`) — runs initializers then constructor body
-  - lowering: `Solidity.Frontend.renderInitializers` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:741`) — state initializers in declaration order
+  - lowering: `Solidity.elabCtor` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:718`) — runs initializers then constructor body
+  - lowering: `Solidity.Frontend.renderInitializers` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:807`) — state initializers in declaration order
   - theorem: `Solidity.Problem.deploy_of_valid` (Solidity.Calculus.Deploy, `Solidity/Calculus/Deploy.lean:60`) — deployment obligation soundness
   - regression: `Solidity.Examples.Tactics.ContractWorld.failed_constructor_payment_rollback` (Solidity.Examples.Tactics.ContractWorld, `Solidity/Examples/Tactics/ContractWorld.lean:157`) — failed constructor rolls back payment
   - no existing anchor: source, admission, backend, evm
@@ -782,7 +782,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Pipeline-specific init ordering is an integration dependency
 
 - **`contracts`** (model/partial)
-  - lowering: `Solidity.Frontend.readContract` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:818`) — solc ContractDefinition into intrinsic Contract
+  - lowering: `Solidity.Frontend.readContract` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:884`) — solc ContractDefinition into intrinsic Contract
   - source: `Solidity.Contract` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:404`) — intrinsic contract: roots, funs, ctor, inits, errors
   - source: `Solidity.State.deploy` (Solidity.Semantics.Deploy, `Solidity/Semantics/Deploy.lean:20`) — deployment state
   - regression: `Solidity.Examples.Tactics.Contracts.callAddOne` (Solidity.Examples.Tactics.Contracts, `Solidity/Examples/Tactics/Contracts.lean:52`) — contract function call obligation
@@ -802,7 +802,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Enum conversions need identity-safe enum model names
 
 - **`errorDeclarations`** (model/partial)
-  - lowering: `Solidity.Frontend.selectErrorDeclarations` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:790`) — selects errors by declaration ID
+  - lowering: `Solidity.Frontend.selectErrorDeclarations` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:856`) — selects errors by declaration ID
   - lowering: `Solidity.revertErrParts` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:998`) — encodes custom error revert data
   - regression: `Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:105`) — qualified error signatures kept
   - no existing anchor: source, admission, backend, evm, theorem
@@ -812,7 +812,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`eventDeclarations`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — EventDefinition/EmitStatement classified
-  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2205`) — emit checked against resolved event
+  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2222`) — emit checked against resolved event
   - regression: `Solidity.Examples.Tactics.CallExceptions.event_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:49`) — event argument evaluation can panic
   - no existing anchor: source, backend, evm, theorem
   - missing: Logs dropped: no log observation (by design)
@@ -829,7 +829,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`freeFunctions`** (model/partial)
   - source: `Solidity.SourceLocalVisibility` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:281`) — freeFn visibility without receiver
-  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1801`) — resolves free/imported functions by ID
+  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1818`) — resolves free/imported functions by ID
   - regression: `Solidity.Corpus.TestSuite.fileLevelConstantEnumAndFunction` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2365`) — file-level function call proved
   - no existing anchor: admission, backend, evm, theorem
   - missing: Same inline-call backend limits as functions (R08/R09)
@@ -837,7 +837,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`functions`** (model/partial)
   - source: `Solidity.FunDecl` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:345`) — params, named returns, modifiers, payable
-  - lowering: `Solidity.Frontend.SolcFun.member` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:625`) — solc function into model member
+  - lowering: `Solidity.Frontend.SolcFun.member` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:691`) — solc function into model member
   - backend: `Solidity.Evm.call_family` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:857`) — inlined internal calls compile correctly
   - regression: `Solidity.Corpus.TestSuite.overloadedInternalCall` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2275`) — overload resolution by solc identity
   - no existing anchor: admission, evm, theorem
@@ -846,8 +846,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: No external entry/ABI dispatch in compiler theorems (R04)
 
 - **`immutables`** (model/partial)
-  - lowering: `Solidity.Frontend.renderInitializers` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:741`) — folds literal immutables, others keep root
-  - lowering: `Solidity.Frontend.readContract` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:818`) — refuses unwritten or early-read immutables
+  - lowering: `Solidity.Frontend.renderInitializers` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:807`) — folds literal immutables, others keep root
+  - lowering: `Solidity.Frontend.readContract` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:884`) — refuses unwritten or early-read immutables
   - source: `Solidity.Contract.deployT` (Solidity.Semantics.Deploy, `Solidity/Semantics/Deploy.lean:28`) — deployment writes roots
   - no existing anchor: admission, backend, evm, theorem
   - missing: A logical root does not forbid later writes; no write-once theorem
@@ -856,8 +856,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`imports`** (model/partial)
   - admission: `Solidity.Frontend.Source.checkTree` (Solidity.Frontend.SourceUnits, `Solidity/Frontend/SourceUnits.lean:31`) — validates resolved import path/source-ID pairs
-  - lowering: `Solidity.Frontend.errorAliasScope?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1240`) — resolves import alias scope for errors
-  - lowering: `Solidity.Frontend.errorNamespace` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1225`) — module/contract namespace of a declaration
+  - lowering: `Solidity.Frontend.errorAliasScope?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1257`) — resolves import alias scope for errors
+  - lowering: `Solidity.Frontend.errorNamespace` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1242`) — module/contract namespace of a declaration
   - regression: `Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors` (Solidity.Examples.Tactics.SourceUnitsImport, `Solidity/Examples/Tactics/SourceUnitsImport.lean:124`) — aliased imported errors keep signature
   - no existing anchor: source, backend, theorem
   - missing: Remapping and resolution are delegated to solc; no Lean model
@@ -865,8 +865,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Conflicting short-named custom errors across imports refused
 
 - **`inheritance`** (model/partial)
-  - lowering: `Solidity.Frontend.mergeC3` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:610`) — C3 merge for linearization
-  - lowering: `Solidity.Frontend.contractLineage` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:639`) — uses solc linearizedBaseContracts
+  - lowering: `Solidity.Frontend.mergeC3` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:676`) — C3 merge for linearization
+  - lowering: `Solidity.Frontend.contractLineage` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:705`) — uses solc linearizedBaseContracts
   - regression: `Solidity.Examples.Tactics.Inheritance.diamond_initialization` (Solidity.Examples.Tactics.Inheritance, `Solidity/Examples/Tactics/Inheritance.lean:21`) — diamond base init order
   - regression: `Solidity.Examples.Tactics.Inheritance.base_constructors` (Solidity.Examples.Tactics.Inheritance, `Solidity/Examples/Tactics/Inheritance.lean:49`) — base constructors run once
   - no existing anchor: source, admission, backend, evm, theorem
@@ -875,7 +875,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Virtual dispatch resolved statically at import; no backend dispatch (R04)
 
 - **`interfaces`** (model/partial)
-  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1062`) — interface metadata (own external selectors)
+  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1079`) — interface metadata (own external selectors)
   - regression: `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:23`) — interfaceId excludes inherited members
   - regression: `Solidity.Examples.Tactics.PublicGetters.interfaceOverride` (Solidity.Examples.Tactics.PublicGetters, `Solidity/Examples/Tactics/PublicGetters.lean:28`) — getter overriding interface function
   - no existing anchor: source, admission, backend, evm, theorem
@@ -912,7 +912,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: No general theorem that wrapMods preserves semantics
 
 - **`operatorAliases`** (model/partial)
-  - lowering: `Solidity.Frontend.operatorAlias?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:765`) — resolves UDVT operator to pure free function
+  - lowering: `Solidity.Frontend.operatorAlias?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:782`) — resolves UDVT operator to pure free function
   - regression: `Solidity.Examples.Tactics.OperatorAliasesImport.legacy_numeric` (Solidity.Examples.Tactics.OperatorAliasesImport, `Solidity/Examples/Tactics/OperatorAliasesImport.lean:39`) — aliased numeric ops (legacy)
   - regression: `Solidity.Examples.Tactics.OperatorAliasesImport.viaIR_order` (Solidity.Examples.Tactics.OperatorAliasesImport, `Solidity/Examples/Tactics/OperatorAliasesImport.lean:133`) — evaluation order (viaIR)
   - no existing anchor: source, admission, backend, evm, theorem
@@ -920,9 +920,9 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Failure order outside argument lists unchanged
 
 - **`overrideDeclarations`** (model/partial)
-  - lowering: `Solidity.Frontend.overrideAliases` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:596`) — maps overridden declarations to their selected body
+  - lowering: `Solidity.Frontend.overrideAliases` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:662`) — maps overridden declarations to their selected body
   - source: `Solidity.SourceSelection` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:291`) — selected vs retained base bodies
-  - lowering: `Solidity.Frontend.isSuperMember` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1314`) — super calls reach retained base body
+  - lowering: `Solidity.Frontend.isSuperMember` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1331`) — super calls reach retained base body
   - no existing anchor: admission, backend, evm, theorem
   - missing: Override validity is solc's; no Lean check
   - missing: Renamed inherited external function values refused (model-name hashing)
@@ -941,7 +941,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`receiveFunction`** (model/partial)
   - lowering: `Solidity.Frontend.tagOf` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:135`) — receive/fallback classified as internal entries
   - source: `Solidity.SourceCallable` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:301`) — receive callable role
-  - lowering: `Solidity.receiveSelfBody` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:590`) — self-payment runs receive body
+  - lowering: `Solidity.receiveSelfBody` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:644`) — self-payment runs receive body
   - regression: `Solidity.Examples.Tactics.SelfCall.receiveRuns` (Solidity.Examples.Tactics.SelfCall, `Solidity/Examples/Tactics/SelfCall.lean:185`) — receive body runs on self-payment
   - no existing anchor: admission, backend, evm, theorem
   - missing: Inherited receive and receive modifiers refused
@@ -979,7 +979,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Initializers run only via the source constructor, not compiled
 
 - **`structDeclarations`** (model/partial)
-  - lowering: `Solidity.Frontend.readStructs` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:493`) — imports struct members in order
+  - lowering: `Solidity.Frontend.readStructs` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:510`) — imports struct members in order
   - source: `Solidity.TypeGraph.Schema.no_inline_cycle` (Solidity.TypeGraph, `Solidity/TypeGraph.lean:143`) — no inline recursive struct cycle
   - backend: `Solidity.Evm.size_struct` (Solidity.Evm.Layout, `Solidity/Evm/Layout.lean:130`) — storage struct layout size
   - backend: `Solidity.Evm.Memory.readField_correct` (Solidity.Evm.MemoryStruct, `Solidity/Evm/MemoryStruct.lean:75`) — memory field read correct
@@ -989,7 +989,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: UDVT struct fields and aggregate shapes Left
 
 - **`usingFor`** (model/partial)
-  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1801`) — attached calls bind receiver once
+  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1818`) — attached calls bind receiver once
   - regression: `Solidity.Corpus.TestSuite.libraryCallAndUsingFor` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2375`) — using-for call proved
   - regression: `Solidity.Corpus.TestSuite.fileLevelStructThroughLibrary` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2370`) — file struct through library
   - no existing anchor: source, admission, backend, evm, theorem
@@ -998,7 +998,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Ambiguous same-scope overloads rejected
 
 - **`valueTypeDeclarations`** (model/partial)
-  - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:748`) — UDVT wrap/unwrap lowering
+  - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:765`) — UDVT wrap/unwrap lowering
   - source: `Solidity.valueRows?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:554`) — underlying width/sign rows
   - regression: `Solidity.Corpus.TestSuite.valueTypeWrapUnwrap` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2380`) — wrap/unwrap proved
   - no existing anchor: admission, backend, evm, theorem
@@ -1074,7 +1074,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Target is the word-level macro Machine, not EVM bytecode (R05). Panic codes are erased (R37).
 
 - **`assignment`** (model/partial)
-  - lowering: `Solidity.hoistAssign` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:126`) — rhs/lhs capture scheduling
+  - lowering: `Solidity.hoistAssign` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:127`) — rhs/lhs capture scheduling
   - source: `Solidity.TRun.assign` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:640`) — typed assignment semantics
   - backend: `Solidity.Evm.assign_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:191`) — storage assignment simulation
   - regression: `Solidity.Corpus.TestSuite.storageAssignmentValueRhsBeforeIndex` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:300`) — rhs before index order
@@ -1093,7 +1093,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`callOptions`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — splits gas/salt/value options
-  - lowering: `Solidity.Frontend.valueCall?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2034`) — R.call{value:V}("") recognized
+  - lowering: `Solidity.Frontend.valueCall?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2051`) — R.call{value:V}("") recognized
   - source: `Solidity.TRun.send` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:723`) — value transfer semantics
   - no existing anchor: backend, evm, theorem
   - missing: The compiler refuses send and value calls (R06).
@@ -1110,7 +1110,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`compoundAssignment`** (model/partial)
   - source: `Solidity.compoundT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:225`) — old value read, declared width
-  - lowering: `Solidity.elabOpTarget` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:661`) — target captured once
+  - lowering: `Solidity.elabOpTarget` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:757`) — target captured once
   - backend: `Solidity.Evm.opStore_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:364`) — storage op-assign simulation
   - backend: `Solidity.Evm.Memory.compoundAssign_eq_write` (Solidity.Evm.MemoryCompound, `Solidity/Evm/MemoryCompound.lean:75`) — memory compound as write
   - no existing anchor: admission, evm, theorem
@@ -1119,7 +1119,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`conditional`** (model/partial)
   - source: `Solidity.Val` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:77`) — Val.ternary evaluates one arm
-  - lowering: `Solidity.mobileTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1145`) — inferred mobile type of arms
+  - lowering: `Solidity.mobileTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1241`) — inferred mobile type of arms
   - backend: `Solidity.Evm.Memory.conditionalValue_correct` (Solidity.Evm.MemoryExpr, `Solidity/Evm/MemoryExpr.lean:167`) — conditional code correct
   - regression: `Solidity.Corpus.TestSuite.mappingPointerTernary` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1560`) — reference-valued arms
   - no existing anchor: admission, evm, theorem
@@ -1138,14 +1138,14 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`explicitConversions`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — typeConversion tagged explicitConversions
   - lowering: `Solidity.Frontend.sourceCast` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:282`) — renders solc casts
-  - lowering: `Solidity.castCapture` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1823`) — truncation/sign-extension capture
+  - lowering: `Solidity.castCapture` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1919`) — truncation/sign-extension capture
   - lowering: `Solidity.Bridge.Arith.castCapture_typed` (SolidityBridge.Arith.Lowering, `Bridge/SolidityBridge/Arith/Lowering.lean:87`) — cast lowering typed/correct
   - no existing anchor: source, backend, evm, theorem
   - missing: Enum conversions without validated native declaration identity are refused.
   - missing: bytesN alignment differs from solc (R13). Addresses are not truncated to 160 bits (R27).
 
 - **`functionCalls`** (model/partial)
-  - lowering: `Solidity.hoistCallArgs` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:209`) — arguments evaluated once, left to right
+  - lowering: `Solidity.hoistCallArgs` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:210`) — arguments evaluated once, left to right
   - source: `Solidity.TRun.call` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:810`) — fresh call frame semantics
   - backend: `Solidity.Evm.compileStmt` (Solidity.Evm.Compile, `Solidity/Evm/Compile.lean:433`) — inline-call compilation
   - regression: `Solidity.Corpus.TestSuite.internalCallInExpression` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2150`) — call in expression proved
@@ -1154,9 +1154,9 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: External calls/try (R07) and whole-contract dispatch (R04) have no backend theorem.
 
 - **`implicitConversions`** (model/partial)
-  - lowering: `Solidity.Frontend.tyOf` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:417`) — reads solc resolved types
-  - lowering: `Solidity.intTyOf` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1157`) — operand width inference
-  - lowering: `Solidity.widenBytes` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1457`) — fixed-bytes widening
+  - lowering: `Solidity.Frontend.tyOf` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:434`) — reads solc resolved types
+  - lowering: `Solidity.intTyOf` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1253`) — operand width inference
+  - lowering: `Solidity.widenBytes` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1553`) — fixed-bytes widening
   - source: `Solidity.Bridge.Arith.Widths.unsigned_widen` (SolidityBridge.Arith.Widths, `Bridge/SolidityBridge/Arith/Widths.lean:580`) — unsigned widening preserved
   - no existing anchor: admission, backend, evm, theorem
   - missing: No theorem that elaborated widths equal solc's resolved type before enclosing operations. Correctness rests on lowering (R13).
@@ -1164,7 +1164,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`increments`** (model/partial)
   - source: `Solidity.OpLoc.bumpT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:430`) — old/new value bump at lvalue
-  - lowering: `Solidity.elabIncTarget` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:688`) — target captured once
+  - lowering: `Solidity.elabIncTarget` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:784`) — target captured once
   - backend: `Solidity.Evm.bumpStore_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:447`) — storage increment simulation
   - backend: `Solidity.Evm.Memory.incrementMemory_eq_compound` (Solidity.Evm.MemoryCompound, `Solidity/Evm/MemoryCompound.lean:117`) — memory increment as compound write
   - no existing anchor: admission, evm, theorem
@@ -1172,7 +1172,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Mixed storage/memory programs are refused (R29). Loops with pushes are refused (R21).
 
 - **`indexAccess`** (model/partial)
-  - source: `Solidity.IndexTy` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:758`) — mapping/array index typing
+  - source: `Solidity.IndexTy` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:767`) — mapping/array index typing
   - source: `Solidity.Loc.resolveT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:271`) — index resolution with bounds failure
   - backend: `Solidity.Evm.Memory.readArray_correct` (Solidity.Evm.Memory, `Solidity/Evm/Memory.lean:102`) — memory array index read correct
   - regression: `Solidity.Corpus.TestSuite.storageIndexArrayReadOutOfBoundsReverts` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:70`) — out-of-bounds read reverts
@@ -1191,7 +1191,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`memberAccess`** (model/partial)
   - admission: `Solidity.Frontend.Admission.magicMember` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:27`) — classifies block/msg/tx/abi/address/type members
-  - lowering: `Solidity.extMember?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:779`) — external member r.g classification
+  - lowering: `Solidity.extMember?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:875`) — external member r.g classification
   - source: `Solidity.Heap.field` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:220`) — memory struct field read
   - backend: `Solidity.Evm.Memory.readField_correct` (Solidity.Evm.MemoryStruct, `Solidity/Evm/MemoryStruct.lean:75`) — memory field read code correct
   - no existing anchor: evm, theorem
@@ -1201,7 +1201,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`metaTypeExpression`** (model/partial)
   - admission: `Solidity.Frontend.Admission.builtinFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:87`) — type builtin tagged metaTypeExpression
-  - lowering: `Solidity.Frontend.typeBound?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1121`) — integer type(T).max/min folded
+  - lowering: `Solidity.Frontend.typeBound?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1138`) — integer type(T).max/min folded
   - lowering: `Solidity.typeBoundExpr` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:576`) — only max/min modelled
   - regression: `Solidity.Corpus.TestSuite.typeBounds` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2385`) — type bounds proved
   - no existing anchor: source, backend, evm, theorem
@@ -1210,7 +1210,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`namedArguments`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — names on FunctionCall tagged
-  - lowering: `Solidity.Frontend.isNamedCall` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2024`) — detects named calls
+  - lowering: `Solidity.Frontend.isNamedCall` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2041`) — detects named calls
   - lowering: `Solidity.RawExpr.orderNamed` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:380`) — binds by formal name
   - regression: `Solidity.Corpus.TestSuite.namedArgumentsBindByName` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2415`) — name binding proved
   - no existing anchor: source, backend, evm, theorem
@@ -1219,7 +1219,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`names`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — Identifier/IdentifierPath nodes tagged identifiers+names
-  - lowering: `Solidity.Frontend.mergeC3` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:610`) — C3 order picks retained base implementations
+  - lowering: `Solidity.Frontend.mergeC3` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:676`) — C3 order picks retained base implementations
   - source: `Solidity.Loc` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:56`) — typed state roots vs locals resolved intrinsically
   - backend: `Solidity.Evm.loc_sim` (Solidity.Evm.Expr, `Solidity/Evm/Expr.lean:106`) — compiled storage-location simulation
   - no existing anchor: evm, theorem
@@ -1228,7 +1228,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`newMemory`** (model/partial)
   - source: `Solidity.newArrT` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:242`) — fresh defaulted array allocation
-  - lowering: `Solidity.elabNewTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1053`) — new T\[\](n) typing
+  - lowering: `Solidity.elabNewTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1149`) — new T\[\](n) typing
   - backend: `Solidity.Evm.Memory.newArray_correct` (Solidity.Evm.MemoryAllocSource, `Solidity/Evm/MemoryAllocSource.lean:122`) — allocation code correct
   - backend: `Solidity.Evm.Memory.compile_correct` (Solidity.Evm.MemoryCompile, `Solidity/Evm/MemoryCompile.lean:1245`) — memory compiler GrowingResult
   - no existing anchor: admission, evm, theorem
@@ -1236,8 +1236,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Nested/reference-element arrays (new uint\[\]\[\](n)) are outside the memory path (R28). Memory loops are out (R22).
 
 - **`parentheses`** (model/present)
-  - lowering: `Solidity.Frontend.unparen` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1190`) — strips grouping from solc nodes
-  - lowering: `Solidity.Frontend.operand` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1797`) — re-parenthesises operator operands when rendering
+  - lowering: `Solidity.Frontend.unparen` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1207`) — strips grouping from solc nodes
+  - lowering: `Solidity.Frontend.operand` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1814`) — re-parenthesises operator operands when rendering
   - regression: `Solidity.Corpus.TestSuite.parenthesizedRightOperand` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1805`) — grouping preserved in proof corpus
   - regression: `Solidity.Corpus.TestSuite.parenthesizedCondition` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1815`) — parenthesised condition corpus case
   - no existing anchor: source, admission, backend, evm, theorem
@@ -1245,7 +1245,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Telling a parenthesised single value apart from a 1-tuple depends on the solc AST alone.
 
 - **`rangeAccess`** (model/partial)
-  - lowering: `Solidity.sliceViewOf?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1002`) — calldata slice view construction
+  - lowering: `Solidity.sliceViewOf?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1021`) — calldata slice view construction
   - lowering: `Solidity.sliceElementCopy` (Solidity.Syntax.Elab.SliceCopy, `Solidity/Syntax/Elab/SliceCopy.lean:13`) — slice element copies
   - regression: `Solidity.Examples.Tactics.AggregateSlices.successful_run` (Solidity.Examples.Tactics.AggregateSlices, `Solidity/Examples/Tactics/AggregateSlices.lean:67`) — successful slice run
   - regression: `Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run` (Solidity.Examples.Tactics.SliceReferenceCopies, `Solidity/Examples/Tactics/SliceReferenceCopies.lean:153`) — invalid endpoints fail
@@ -1273,7 +1273,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`structConstruction`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — structConstructorCall tagged
-  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1801`) — struct constructor rendered by declaration
+  - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1818`) — struct constructor rendered by declaration
   - lowering: `Solidity.expandStmt` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:686`) — T memory t = T(a,b) desugaring
   - backend: `Solidity.Evm.Memory.allocateStructCode` (Solidity.Evm.MemoryStructGrow, `Solidity/Evm/MemoryStructGrow.lean:131`) — memory struct allocation code
   - no existing anchor: source, evm, theorem
@@ -1282,8 +1282,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`tupleExpressions`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — non-inline TupleExpression tagged tupleExpressions
-  - lowering: `Solidity.Frontend.explicitTupleAssignment` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2112`) — tuple assignment leaves with empty targets
-  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:747`) — elaborates tuple assignment/declaration
+  - lowering: `Solidity.Frontend.explicitTupleAssignment` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2129`) — tuple assignment leaves with empty targets
+  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:801`) — elaborates tuple assignment/declaration
   - regression: `Solidity.Corpus.TestSuite.tupleAssignmentRotates` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2185`) — commit-order rotation proved
   - no existing anchor: source, backend, evm, theorem
   - missing: Tuple/reference returns of internal calls are outside the compiler (R09: CallRetIn only .none/.val).
@@ -1309,7 +1309,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: address reaches backend as uint (R13); no proved 160-bit bound at the compiler
 
 - **`booleanLiterals`** (model/present)
-  - lowering: `Solidity.Frontend.expr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1525`) — renders bool Literal nodes
+  - lowering: `Solidity.Frontend.expr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1542`) — renders bool Literal nodes
   - backend: `Solidity.Evm.compileVal` (Solidity.Evm.Compile, `Solidity/Evm/Compile.lean:351`) — compiles bool values as words
   - evm: `Solidity.Evm.External.decode_bool` (SolidityBridge.ExternalEvm.WordOps, `Bridge/SolidityBridge/ExternalEvm/WordOps.lean:6`) — bool word decoding agrees with EVM
   - regression: `Solidity.Corpus.TestSuite.requireTrueLiteral` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:165`) — require(true) obligation proved
@@ -1327,15 +1327,15 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`etherUnits`** (model/present)
   - source: `Solidity.unitFactor?` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:416`) — wei/gwei/ether factors
-  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:958`) — multiplies subdenomination before range check
+  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:975`) — multiplies subdenomination before range check
   - regression: `Solidity.Corpus.TestSuite.numberLiteralForms` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1585`) — 1 gwei and other literal forms proved
   - no existing anchor: admission, backend, evm, theorem
   - missing: No theorem that the folded factor matches solc for every unit and rational case
 
 - **`hexLiterals`** (model/partial)
-  - lowering: `Solidity.Frontend.validHexBytes` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1372`) — checks hex digits of solc hexValue
+  - lowering: `Solidity.Frontend.validHexBytes` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1389`) — checks hex digits of solc hexValue
   - source: `Solidity.hexBytes?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:608`) — decodes hex literal into bytes
-  - lowering: `Solidity.Frontend.abiHexLiteral?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1433`) — hex literals as ABI call payloads
+  - lowering: `Solidity.Frontend.abiHexLiteral?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1450`) — hex literals as ABI call payloads
   - regression: `Solidity.Examples.Tactics.AbiHexCall.exact_hex_valid` (Solidity.Examples.Tactics.AbiHexCall, `Solidity/Examples/Tactics/AbiHexCall.lean:108`) — exact hex payload property holds
   - no existing anchor: admission, backend, evm, theorem
   - missing: A hex literal without solc bytes is refused (Body.lean:1390)
@@ -1344,15 +1344,15 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`identifiers`** (model/partial)
   - admission: `Solidity.Frontend.Admission.scan` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:425`) — admission walk; declarations keyed by compiler IDs
   - lowering: `Solidity.Frontend.identText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:22`) — quotes raw source names, including $ names and keywords
-  - lowering: `Solidity.freshenStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1229`) — renames locals so shadowed names stay apart
+  - lowering: `Solidity.freshenStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1248`) — renames locals so shadowed names stay apart
   - regression: `Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:12`) — imported shadowing runs correctly
   - no existing anchor: source, backend, theorem
   - missing: No general theorem that lowering keeps declaration identity or scope; only regressions
   - missing: Qualified names across modules rely on import adapters with no proof (see sourceUnits)
 
 - **`numericLiterals`** (model/partial)
-  - lowering: `Solidity.Frontend.parseRational` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:903`) — exact rational parse of solc literal
-  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:958`) — folds rational constant expressions before typing
+  - lowering: `Solidity.Frontend.parseRational` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:920`) — exact rational parse of solc literal
+  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:975`) — folds rational constant expressions before typing
   - backend: `Solidity.Evm.val_sim` (Solidity.Evm.Expr, `Solidity/Evm/Expr.lean:255`) — compiled values, literals included, simulate source
   - evm: `Solidity.Evm.External.push_agrees` (SolidityBridge.ExternalEvm.Dispatch, `Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:195`) — PUSH constant agrees with upstream EVM
   - no existing anchor: source, admission, theorem
@@ -1389,7 +1389,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: No theorem linking the version range to the semantics used
 
 - **`stringLiterals`** (model/partial)
-  - lowering: `Solidity.Frontend.byteLiteralText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1378`) — renders exact string/unicode/hex bytes from solc
+  - lowering: `Solidity.Frontend.byteLiteralText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1395`) — renders exact string/unicode/hex bytes from solc
   - lowering: `Solidity.strLit` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:436`) — sol{} string literal expansion
   - source: `Solidity.litBytes` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:1215`) — intrinsic byte literal
   - regression: `Solidity.Examples.Tactics.ComputedRevert.unicode_hex_reason_exact` (Solidity.Examples.Tactics.ComputedRevert, `Solidity/Examples/Tactics/ComputedRevert.lean:159`) — exact revert-reason bytes from literals
@@ -1400,14 +1400,14 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`timeUnits`** (model/present)
   - source: `Solidity.unitFactor?` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:416`) — seconds..weeks factors
-  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:958`) — folds time subdenomination
+  - lowering: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:975`) — folds time subdenomination
   - regression: `Solidity.Corpus.TestSuite.numberLiteralForms` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:1585`) — 2 days folded and proved
   - no existing anchor: admission, backend, evm, theorem
   - missing: Only literal factor folding; no general folding theorem
 
 - **`unicodeLiterals`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — unicodeString literal maps to unicodeLiterals
-  - lowering: `Solidity.Frontend.byteLiteralText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1378`) — unicode literal keeps solc-validated UTF-8 bytes
+  - lowering: `Solidity.Frontend.byteLiteralText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1395`) — unicode literal keeps solc-validated UTF-8 bytes
   - regression: `Solidity.Examples.Tactics.AbiFeatures.utf8_namespace` (Solidity.Examples.Tactics.AbiFeatures, `Solidity/Examples/Tactics/AbiFeatures.lean:35`) — UTF-8 namespace bytes exact
   - no existing anchor: source, backend, evm, theorem
   - missing: UTF-8 validity is checked only by solc and the input helper; no Lean check or proof
@@ -1418,14 +1418,14 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`creationCode`** (model/partial)
   - admission: `Solidity.Frontend.Source.readCompilerCode` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:360`) — reads bound, linked code artifacts with provenance
   - admission: `Solidity.Frontend.Source.ScopeScan.requireCompilerCode` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:287`) — requires matching artifact
-  - lowering: `Solidity.Frontend.staticCompilerBytes?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1206`) — static creationCode bytes
-  - lowering: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1200`) — folded length matches emitted bytes
+  - lowering: `Solidity.Frontend.staticCompilerBytes?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1223`) — static creationCode bytes
+  - lowering: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1217`) — folded length matches emitted bytes
   - no existing anchor: source, backend, evm, theorem
   - missing: Deployed account code, unresolved linking, oversized materialization unsupported
   - missing: Schema-2 artifact inputs unfinished; no compiler-correctness link (R05)
 
 - **`errorEventSelector`** (model/present)
-  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1062`) — error bytes4 / event bytes32; anonymous refused
+  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1079`) — error bytes4 / event bytes32; anonymous refused
   - regression: `Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:27`) — error selectors
   - regression: `Solidity.Examples.Tactics.DeclarationMetadata.eventSelector` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:31`) — event selector
   - no existing anchor: source, admission, backend, evm, theorem
@@ -1441,8 +1441,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Not all declaration contexts validated
 
 - **`functionSelector`** (model/partial)
-  - lowering: `Solidity.fnSelector?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:967`) — selector of external function value
-  - lowering: `Solidity.Frontend.declarationSelector` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1034`) — static declaration selectors fold
+  - lowering: `Solidity.fnSelector?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1063`) — selector of external function value
+  - lowering: `Solidity.Frontend.declarationSelector` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1051`) — static declaration selectors fold
   - lowering: `Solidity.Frontend.storedFunctionMemberType?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:312`) — .selector typed bytes4
   - regression: `Solidity.Examples.Tactics.FunctionTypes.selectorOfValue` (Solidity.Examples.Tactics.FunctionTypes, `Solidity/Examples/Tactics/FunctionTypes.lean:236`) — selector of function value
   - no existing anchor: source, admission, backend, evm, theorem
@@ -1450,7 +1450,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Not all declaration contexts validated; no uniqueness (by design)
 
 - **`interfaceId`** (model/present)
-  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1062`) — XOR of own external selectors
+  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1079`) — XOR of own external selectors
   - source: `Solidity.Keccak.selector` (Solidity.Keccak, `Solidity/Keccak.lean:109`) — 4-byte selector
   - regression: `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (Solidity.Examples.Tactics.DeclarationMetadata, `Solidity/Examples/Tactics/DeclarationMetadata.lean:23`) — interfaceId value
   - no existing anchor: admission, backend, evm, theorem
@@ -1459,14 +1459,14 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`runtimeCode`** (model/partial)
   - admission: `Solidity.Frontend.Source.readCompilerCode` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:360`) — runtime artifact with provenance
-  - lowering: `Solidity.Frontend.staticCompilerBytes?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1206`) — static runtimeCode bytes
-  - lowering: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1200`) — length agreement
+  - lowering: `Solidity.Frontend.staticCompilerBytes?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1223`) — static runtimeCode bytes
+  - lowering: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1217`) — length agreement
   - no existing anchor: source, backend, evm, theorem
   - missing: Same gaps as creationCode; immutables are not reflected in runtime bytes
   - missing: No link between the artifact and the verified machine (R05)
 
 - **`typeBounds`** (model/partial)
-  - lowering: `Solidity.Frontend.typeBound?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1121`) — type(T).min/max incl. signed minimum
+  - lowering: `Solidity.Frontend.typeBound?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1138`) — type(T).min/max incl. signed minimum
   - source: `Solidity.typeBoundExpr` (Solidity.Syntax.Grammar, `Solidity/Syntax/Grammar.lean:576`) — sol{} type bounds
   - regression: `Solidity.Corpus.TestSuite.typeBounds` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2385`) — type bounds proved
   - no existing anchor: admission, backend, evm, theorem
@@ -1475,7 +1475,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`typeName`** (model/present)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — type(C).name maps to typeName
-  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1062`) — folds name to UTF-8 literal
+  - lowering: `Solidity.Frontend.declarationMetadata` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1079`) — folds name to UTF-8 literal
   - no existing anchor: source, backend, evm, theorem
   - missing: No dedicated theorem; resulting bytes hit bytes/string backend limits (R10/R17)
 
@@ -1512,7 +1512,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - source: `Solidity.SVal.defaultOf` (Solidity.Semantics.Storage.Ops, `Solidity/Semantics/Storage/Ops.lean:233`) — type-directed storage defaults
   - source: `Solidity.Heap.allocDefault` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:389`) — default memory objects
   - backend: `Solidity.Evm.initStorage_repr` (Solidity.Evm.Repr, `Solidity/Evm/Repr.lean:1016`) — zero storage represents defaults
-  - admission: `Solidity.Frontend.defaultLiteral` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1026`) — default literals for imported declarations
+  - admission: `Solidity.Frontend.defaultLiteral` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1043`) — default literals for imported declarations
   - no existing anchor: lowering, evm, theorem
   - missing: Unset storage pointers are dead/unreadable, not modelled (R16)
   - missing: Reference-member struct defaults absent on memory path (R28)
@@ -1527,10 +1527,10 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Reference sources not right-hand-side first remains a known divergence
 
 - **`exactConstants`** (model/partial)
-  - admission: `Solidity.Frontend.Q` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:861`) — exact rational constant values
-  - admission: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:958`) — constant folding at import
+  - admission: `Solidity.Frontend.Q` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:878`) — exact rational constant values
+  - admission: `Solidity.Frontend.constVal` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:975`) — constant folding at import
   - lowering: `Solidity.RawExpr.constRat?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:457`) — exact rational folding in the elaborator
-  - lowering: `Solidity.mobileTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1145`) — mobile literal type selection
+  - lowering: `Solidity.mobileTy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1241`) — mobile literal type selection
   - no existing anchor: source, backend, evm, theorem
   - missing: Rational remainder, signed bit ops, arithmetic >> on literals refused
   - missing: No theorem relating folding to solc's rational semantics
@@ -1565,7 +1565,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`referenceCopyRules`** (model/partial)
   - source: `Solidity.FixedCopy` (Solidity.AST, `Solidity/AST.lean:89`) — fixed-array copy compatibility evidence
-  - lowering: `Solidity.checkStorageCopy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:397`) — checks allowed storage copy location pairs
+  - lowering: `Solidity.checkStorageCopy` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:493`) — checks allowed storage copy location pairs
   - source: `Solidity.MVal.copyMToSt` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:446`) — memory-to-storage deep copy
   - theorem: `Solidity.assignFromMemStep_sound` (Solidity.Calculus.SoundStore, `Solidity/Calculus/SoundStore.lean:360`) — memory-to-storage assignment rule sound
   - no existing anchor: admission, backend, evm
@@ -1656,7 +1656,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: No native break at source, backend or EVM; exactness rests on lowering
 
 - **`canonicalRethrow`** (abstract/partial)
-  - lowering: `Solidity.Frontend.memoryRethrow?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2150`) — only whole-buffer revert(add(p,32),mload(p))
+  - lowering: `Solidity.Frontend.memoryRethrow?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2167`) — only whole-buffer revert(add(p,32),mload(p))
   - source: `Solidity.RevPart` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:315`) — RevPart.mem raw buffer payload
   - source: `Solidity.RevPart.evalT_mem` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:17`) — memory payload evaluation
   - source: `Solidity.TRun.catchBytes_self_data` (Solidity.Semantics.RevertMemory, `Solidity/Semantics/RevertMemory.lean:67`) — bytes transported to catch
@@ -1691,8 +1691,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Inherits R21/R22/R38 loop restrictions
 
 - **`emitStatement`** (model/partial)
-  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2205`) — resolved positional emit; named args refused
-  - lowering: `Solidity.eagerArgsWith` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1958`) — operands evaluated in order, log dropped
+  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2222`) — resolved positional emit; named args refused
+  - lowering: `Solidity.eagerArgsWith` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:2054`) — operands evaluated in order, log dropped
   - regression: `Solidity.Examples.Tactics.CallExceptions.event_argument_panics` (Solidity.Examples.Tactics.CallExceptions, `Solidity/Examples/Tactics/CallExceptions.lean:49`) — erased event argument still panics
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: Logs not observable anywhere (no LOG at source or Machine); erasure valid only for log-blind properties
@@ -1701,8 +1701,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`expressionStatements`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — ExpressionStatement tagged
-  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2205`) — ExpressionStatement printed; prefix captures hoisted
-  - lowering: `Solidity.elabStmt1With` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:1537`) — statement elaboration incl. discarded calls
+  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2222`) — ExpressionStatement printed; prefix captures hoisted
+  - lowering: `Solidity.elabStmt1With` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:1546`) — statement elaboration incl. discarded calls
   - backend: `Solidity.Evm.stmt_sim` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:985`) — per-statement simulation for admitted forms
   - no existing anchor: source, evm, theorem
   - missing: Bare `r.send(a);` with result discarded is not read (RawStmt.send docstring)
@@ -1710,7 +1710,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Call or memory effects in expression statements often fall outside the compiler fragment (R09, R29)
 
 - **`forStatement`** (model/partial)
-  - lowering: `Solidity.Frontend.loopSpec` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2573`) — ForStatement with loop spec import
+  - lowering: `Solidity.Frontend.loopSpec` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2590`) — ForStatement with loop spec import
   - lowering: `Solidity.lowerLoop` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:481`) — for to while; continue runs post
   - backend: `Solidity.Evm.loop_sim` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:296`) — after lowering, compiled as core loop
   - theorem: `Solidity.Stmt.sound_loop` (Solidity.Calculus.SoundLoops, `Solidity/Calculus/SoundLoops.lean:555`) — applies to lowered while
@@ -1719,7 +1719,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Same R21/R22 restrictions: memory or paying for-loops (e.g. transfer in body) not compiled
 
 - **`ifStatement`** (model/present)
-  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2205`) — IfStatement to sol ite
+  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2222`) — IfStatement to sol ite
   - source: `Solidity.TRun.ite` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:793`) — evaluates condition once, runs one branch
   - backend: `Solidity.Evm.ite_sim` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:127`) — branch simulation
   - theorem: `Solidity.iteStep_sound` (Solidity.Calculus.SoundControl, `Solidity/Calculus/SoundControl.lean:332`) — if rule soundness
@@ -1746,7 +1746,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Exact bytes retained only in self frames or with retainFailureData; otherwise a plain revert
 
 - **`tryStatement`** (abstract/partial)
-  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2205`) — TryStatement import
+  - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2222`) — TryStatement import
   - source: `Solidity.TRun.tryCall` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:877`) — outcome table; self frame variant
   - theorem: `Solidity.Stmt.sound_tryCall` (Solidity.Calculus.SoundCalls, `Solidity/Calculus/SoundCalls.lean:1357`) — try rule soundness
   - backend: `Solidity.Evm.inFrag_tryCall` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:945`) — compiler refuses tryCall (R07)
@@ -1765,7 +1765,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Signed unchecked goes through uint wrapping and casts; signed bitwise ops refused by compiler (R12)
 
 - **`variableDeclarations`** (model/partial)
-  - lowering: `Solidity.Frontend.declText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2122`) — solc VariableDeclaration to sol text
+  - lowering: `Solidity.Frontend.declText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2139`) — solc VariableDeclaration to sol text
   - source: `Solidity.TRun.declLocal` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:653`) — declLocal with default/initializer
   - backend: `Solidity.Evm.declLocal_sim` (Solidity.Evm.Stmt, `Solidity/Evm/Stmt.lean:229`) — core local declaration simulation
   - theorem: `Solidity.sound_localValueDeclInitDrop` (Solidity.Calculus.SoundControl, `Solidity/Calculus/SoundControl.lean:420`) — declaration-with-initializer rule sound
@@ -1902,9 +1902,9 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`calldataLocation`** (model/partial)
   - lowering: `Solidity.calldataCheck` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:743`) — enforces immutability of calldata parameters
-  - lowering: `Solidity.SliceView` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:863`) — typed calldata slice views with bounds
+  - lowering: `Solidity.SliceView` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:882`) — typed calldata slice views with bounds
   - lowering: `Solidity.FunDecl.calldataParams` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:660`) — identifies calldata parameters
-  - lowering: `Solidity.RawExpr.calldataPlace` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:899`) — calldata place resolution
+  - lowering: `Solidity.RawExpr.calldataPlace` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:918`) — calldata place resolution
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: No intrinsic calldata location in Scoped/State; views are lowered away
   - missing: Calldata→memory copies out of memory compiler (R20)
@@ -1924,7 +1924,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - lowering: `Solidity.dynBytesTy` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:541`) — bytes/string mapped to a byte-element array
   - source: `Solidity.bytesR` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:309`) — intrinsic byte-array reference type
   - source: `Solidity.TRun.litBytesT_alloc` (Solidity.Semantics.AllocBytes, `Solidity/Semantics/AllocBytes.lean:254`) — byte-literal allocation run lemma
-  - lowering: `Solidity.dynamicBytesExpr` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:875`) — elaborates dynamic bytes expressions
+  - lowering: `Solidity.dynamicBytesExpr` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:971`) — elaborates dynamic bytes expressions
   - no existing anchor: admission, backend, evm, theorem
   - missing: Storage copies of dynamic bytes are refused by the compiler (R17)
   - missing: No byte-addressed memory or calldata representation (R31)
@@ -1932,8 +1932,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`enumTypes`** (model/partial)
   - lowering: `Solidity.enumRows` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:548`) — enum members as bounded uint rows
-  - lowering: `Solidity.enumCapture` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1860`) — conversion range check, Panic 0x21 data in self frames
-  - admission: `Solidity.Frontend.resolveSpecEnums` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:654`) — enum values resolved in specifications
+  - lowering: `Solidity.enumCapture` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1956`) — conversion range check, Panic 0x21 data in self frames
+  - admission: `Solidity.Frontend.resolveSpecEnums` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:671`) — enum values resolved in specifications
   - no existing anchor: source, backend, evm, theorem
   - missing: Composite ABI inputs containing enums remain refused (source-admission.md)
   - missing: Outside self-call frames enum failure is plain revert, not Panic 0x21
@@ -1949,7 +1949,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`fixedArrays`** (model/partial)
   - source: `Solidity.FixedCopy` (Solidity.AST, `Solidity/AST.lean:89`) — fixed-to-dynamic/fixed copy compatibility evidence
-  - admission: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1200`) — constant length evaluation agrees with solc metadata
+  - admission: `Solidity.Frontend.staticCompilerLength_agrees` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1217`) — constant length evaluation agrees with solc metadata
   - backend: `Solidity.Evm.size_fixed` (Solidity.Evm.Layout, `Solidity/Evm/Layout.lean:145`) — fixed-array layout size
   - backend: `Solidity.Evm.Sto.checkIndex_fixed` (Solidity.Evm.StorageLemmas, `Solidity/Evm/StorageLemmas.lean:179`) — compiled fixed bounds check agrees
   - no existing anchor: lowering, evm, theorem
@@ -1959,7 +1959,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`fixedBytesTypes`** (model/partial)
   - lowering: `Solidity.bytesTy?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:533`) — bytesN recognized and erased to a uint width
   - lowering: `Solidity.valueRows?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:554`) — primitive-shape rows for value-like types
-  - admission: `Solidity.Frontend.tyOf` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:417`) — solc type strings mapped to model types
+  - admission: `Solidity.Frontend.tyOf` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:434`) — solc type strings mapped to model types
   - no existing anchor: source, backend, evm, theorem
   - missing: bytesN is right-aligned, unlike solc's left alignment (R13, semantic-gaps)
   - missing: No semantics or theorem for bytesN indexing, padding or bitwise ops at bytesN
@@ -1972,7 +1972,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: manifest scope is still `upstream`
 
 - **`integerTypes`** (model/partial)
-  - admission: `Solidity.Frontend.narrowShape` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:459`) — imports nested narrow-width shapes from solc types
+  - admission: `Solidity.Frontend.narrowShape` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:476`) — imports nested narrow-width shapes from solc types
   - lowering: `Solidity.narrowTy?` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:498`) — narrow widths carried by the elaborator, erased to uint/int
   - theorem: `Solidity.Bridge.Arith.narrowCheck_full` (SolidityBridge.Arith.Lowering, `Bridge/SolidityBridge/Arith/Lowering.lean:176`) — checked narrow-width guard lowering is correct
   - evm: `Solidity.Evm.External.slt_step` (SolidityBridge.ExternalEvm.SignedOps, `Bridge/SolidityBridge/ExternalEvm/SignedOps.lean:42`) — signed comparison agrees with the external EVM
@@ -1982,8 +1982,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`internalFunctionTypes`** (model/partial)
   - lowering: `Solidity.fnTag` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:114`) — declaration-identity tags for function values
-  - lowering: `Solidity.fnDispatch` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:271`) — finite dispatch table; unset value yields Panic 0x51
-  - admission: `Solidity.Frontend.FiniteDispatch.inspect` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:504`) — finite callee candidates for function values
+  - lowering: `Solidity.fnDispatch` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:309`) — finite dispatch table; unset value yields Panic 0x51
+  - admission: `Solidity.Frontend.FiniteDispatch.inspect` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:570`) — finite callee candidates for function values
   - admission: `Solidity.Frontend.storedFunctionMemberType?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:312`) — stored function member types
   - no existing anchor: source, backend, evm, theorem
   - missing: Effectful receivers of stored function members refused (source-admission.md)
@@ -2002,7 +2002,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - source: `Solidity.Heap.Keeps` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:154`) — heap extension preserves existing object identity
   - source: `Solidity.Heap.alloc` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:144`) — fresh typed heap allocation
   - backend: `Solidity.Evm.Memory.compile_correct` (Solidity.Evm.MemoryCompile, `Solidity/Evm/MemoryCompile.lean:1245`) — memory-path compiler correctness
-  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:274`) — unified compiler correctness, either path
+  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:402`) — unified compiler correctness, either path
   - no existing anchor: admission, lowering, evm, theorem
   - missing: Core and memory paths cannot mix in one program (R01/R02)
   - missing: Memory capacity is a premise; no 0x41 panic (R25)
@@ -2027,7 +2027,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Slot representation symbolic, not numeric (R34)
 
 - **`stringType`** (model/partial)
-  - lowering: `Solidity.stringReason?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:862`) — refuses string indexing/length with a reason
+  - lowering: `Solidity.stringReason?` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:958`) — refuses string indexing/length with a reason
   - lowering: `Solidity.dynBytesTy` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:541`) — string shares the byte-array representation
   - admission: `Solidity.Frontend.sourceType` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:269`) — imports string-typed source declarations
   - no existing anchor: source, backend, evm, theorem
@@ -2036,7 +2036,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`structTypes`** (model/partial)
   - source: `Solidity.Semantics.structDef_rank_lt` (Solidity.AST, `Solidity/AST.lean:734`) — struct graph well-founded via rank, non-recursive
-  - admission: `Solidity.Frontend.readStructs` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:493`) — imports struct declarations with identity
+  - admission: `Solidity.Frontend.readStructs` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:510`) — imports struct declarations with identity
   - lowering: `Solidity.Contract.root_okDeep` (Solidity.Syntax.Raw, `Solidity/Syntax/Raw.lean:468`) — contract root types deeply valid
   - backend: `Solidity.Evm.offsetIn_disjoint` (Solidity.Evm.Layout, `Solidity/Evm/Layout.lean:172`) — struct field layout offsets disjoint
   - no existing anchor: evm, theorem
@@ -2044,8 +2044,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Memory→storage struct copies excluded from core compiler (R19/R20)
 
 - **`tupleTypes`** (model/partial)
-  - admission: `Solidity.Frontend.explicitTupleAssignment` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2112`) — imports simultaneous tuple assignment
-  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:747`) — tuple capture order lowered to sequential stores
+  - admission: `Solidity.Frontend.explicitTupleAssignment` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2129`) — imports simultaneous tuple assignment
+  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:801`) — tuple capture order lowered to sequential stores
   - source: `Solidity.CallRet` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:224`) — multi-value call return binders
   - backend: `Solidity.Evm.CallRetIn` (Solidity.Evm.Compile, `Solidity/Evm/Compile.lean:153`) — compiler admits only none/val return shapes
   - no existing anchor: evm, theorem
@@ -2054,9 +2054,9 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Heterogeneous reference-return tuples left
 
 - **`valueTypes`** (model/partial)
-  - admission: `Solidity.Frontend.valueTypeSupported` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:742`) — UDVT admission after solc nominal checks
-  - admission: `Solidity.Frontend.operatorAlias?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:765`) — resolves user-defined operators before erasure
-  - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:748`) — wrap/unwrap erased to primitive shape
+  - admission: `Solidity.Frontend.valueTypeSupported` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:759`) — UDVT admission after solc nominal checks
+  - admission: `Solidity.Frontend.operatorAlias?` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:782`) — resolves user-defined operators before erasure
+  - lowering: `Solidity.Frontend.valueTypeExpr` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:765`) — wrap/unwrap erased to primitive shape
   - no existing anchor: source, backend, evm, theorem
   - missing: Nominal UDVT element identities in aggregates left (aggregates.md)
   - missing: No theorem that erasure preserves the primitive width
@@ -2162,7 +2162,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: the library call is itself a DELEGATECALL in the bytecode: the bridge must admit exactly the compiler-emitted linked form
 - **mixed core/memory programs**
   - through its rows: source: S01 S02 S03.01 S03.03 S04.01 S04.02 S04.03; lowering: G18.02 G18.03 G19 G20 G21 G22.02 G22.05; evm: G46.01 G46.02 G46.03 G46.06 G47
-  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:274`) — unified entry, one path per program
+  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:402`) — unified entry, one path per program
   - missing: one compiler per whole program; a core prefix cannot feed a memory suffix
 - **whole contracts: dispatch, ABI entry, deployment and sessions**
   - through its rows: source: S00 S01 S03.01 S03.02 S03.03 S04.02 S04.04; lowering: G19 G20 G21 G22.03
@@ -2659,11 +2659,11 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G12 | V06 | 7 | `Solidity.Frontend.SourceUnits` | 173 | — | — |
 | G13 | V06 | 116 | new | 0 | 116 owned cells > 60 | (a) elementary types, literals, units and exact constants; (b) conversions and implicit widening; (c) aggregate and data-location typing; (d) overload selection and UDVT operators; (e) function/ABI metadata typing; then the static-semantics certificate |
 | G14 | V06 | 21 | new | 0 | — | — |
-| G15 | V06 | 221 | `Solidity.Frontend.SolcJson.Admission`, `Solidity.Frontend.Source`, `Solidity.Frontend.SolcJson.Body` | 3470 | 221 owned cells > 60; modules over 2500 lines: Solidity.Frontend.SolcJson.Body | one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts |
-| G16 | V07 | 39 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Checked`, `Solidity.Semantics.NumericLowering` | 2950 | — | — |
-| G17 | V07 | 17 | `Solidity.Syntax.Elab.Stmt`, `Solidity.Syntax.Elab.Lower` | 2525 | — | — |
+| G15 | V06 | 221 | `Solidity.Frontend.SolcJson.Admission`, `Solidity.Frontend.Source`, `Solidity.Frontend.SolcJson.Body` | 3487 | 221 owned cells > 60; modules over 2500 lines: Solidity.Frontend.SolcJson.Body | one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts |
+| G16 | V07 | 39 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Checked`, `Solidity.Semantics.NumericLowering` | 3046 | — | — |
+| G17 | V07 | 17 | `Solidity.Syntax.Elab.Stmt`, `Solidity.Syntax.Elab.Lower` | 2579 | — | — |
 | G19 | V07 | 19 | `Solidity.Syntax.Elab.Lower` | 1698 | — | — |
-| G20 | V08 | 26 | `Solidity.Frontend.SolcJson.Getters`, `Solidity.Frontend.SolcJson.Contract` | 2282 | — | — |
+| G20 | V08 | 26 | `Solidity.Frontend.SolcJson.Getters`, `Solidity.Frontend.SolcJson.Contract` | 2348 | — | — |
 | G21 | V08 | 28 | `Solidity.Semantics.RevertData`, `Solidity.RevertBytes` | 100 | — | — |
 | G23 | V08 | 31 | `Solidity.Semantics.Transient`, `Solidity.Semantics.TransientWorld` | 485 | — | — |
 | G25 | V09 | 35 | `Solidity.Evm.Layout`, `Solidity.Evm.Signed`, `Solidity.Evm.Exp` | 1163 | — | — |
@@ -2695,7 +2695,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G18.01 | V07 | 6 | `Solidity.TypeGraph`, `Solidity.Semantics.RecursiveStorage.Admission` | 234 | — | — |
 | G18.02 | V07 | 19 | `Solidity.Semantics.Storage`, `Solidity.Semantics.RecursiveStorage.Paths` | 184 | — | — |
 | G18.03 | V07 | 21 | `Solidity.Semantics.Heap` | 537 | — | — |
-| G18.04 | V07 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1552 | — | — |
+| G18.04 | V07 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1571 | — | — |
 | G18.05 | V07 | 18 | `Solidity.Semantics.RecursiveStorage.Copy` | 187 | — | — |
 | G18.06 | V07 | 4 | new | 0 | — | — |
 | G22.01 | V08 | 13 | `Solidity.Semantics.ContractWorld` | 461 | — | — |
@@ -2757,7 +2757,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G24.01 | V09 | 4 | `Solidity.Evm.Machine` | 685 | — | — |
 | G24.02 | V09 | 5 | `Solidity.Evm.Sim`, `Solidity.Evm.SimLemmas`, `Solidity.Evm.Repr`, `Solidity.Evm.StorageLemmas`, `Solidity.Evm.MemorySource`, `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 4032 | — | — |
 | G24.03 | V09 | 4 | `Solidity.Evm.Stmt`, `Solidity.Evm.Compile`, `Solidity.Evm.Correct`, `Solidity.Evm.Expr`, `Solidity.Evm.Layout`, `Solidity.Evm.Exp`, `Solidity.Evm.Signed`, `Solidity.Evm.MemoryCompile`, `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite`, `Solidity.Evm.MemoryStructCopy` | 6134 | — | — |
-| G24.04 | V09 | 6 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 785 | — | — |
+| G24.04 | V09 | 6 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 928 | — | — |
 
 No feature cell, by reason: G00: scope freeze (integrated, wave 0); G02: build measurement, no feature obligation; G03: this ledger; G04: restriction audit (integrated, wave 0); G52: differential tests supplement every row; they discharge no stage; G54.03: trust/axiom audit of the composed theorems, not of a row; G55: final audit of the whole ledger.
 <!-- END generated by scripts/roadmap-g03-ledger.py -->
