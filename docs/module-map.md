@@ -1366,3 +1366,6 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceUintDeclarationSequence.lean` | Actual numeric default declaration then reached old-object indexed assignment in Source RItems, intrinsic Prog and whole existing word append, deriving extended-context alignment and fresh/other-object frames. |
 | `Solidity/Backend/MemoryOps/SourceUintDeclarationSequenceControls.lean` | Both-pipeline declaration-to-material-old-alias-write controls with complete ordered Source/intrinsic/word frames, fresh-empty rejection and skipped-write/wrong-root negatives. |
+
+| `Solidity/Backend/MemoryOps/SourceUintDeclarationFailure.lean` | Actual empty numeric declaration then reached fresh-root bounds rejection in Source RItems, intrinsic Prog and whole existing word append; derived prefix frames and complete low-horizon distinction. |
+| `Solidity/Backend/MemoryOps/SourceUintDeclarationFailureControls.lean` | Both-pipeline populated late-rejection controls, complete exposed prefix tables/locals/wordframes, exact Source panic bytes, old-root/skipped-declaration contrasts and all runtime horizons. |

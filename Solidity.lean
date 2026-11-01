@@ -997,3 +997,5 @@ import Solidity.Backend.MemoryOps.SourceUintDeclaration
 import Solidity.Backend.MemoryOps.SourceUintDeclarationControls
 import Solidity.Backend.MemoryOps.SourceUintDeclarationSequence
 import Solidity.Backend.MemoryOps.SourceUintDeclarationSequenceControls
+import Solidity.Backend.MemoryOps.SourceUintDeclarationFailure
+import Solidity.Backend.MemoryOps.SourceUintDeclarationFailureControls

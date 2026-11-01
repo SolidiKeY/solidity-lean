@@ -5041,3 +5041,104 @@ old-root sequence separately, not that combined rejecting program. Existing
 source_items_context_pair_error and resolved_uint_assign_word_bounds are public
 owned interfaces to investigate. This is unfinished supported work, not a new
 admission rule, established result or an assertion of independent-queue exhaustion.
+
+
+## C65 — actual declaration then fresh-root late rejection (partial)
+
+At C64 parent20579e116d33a7020bcd8ab93cbda3c9251f6e07 the successful old-alias
+sequence and separate fresh Source.memElem rejection were proved, but not one
+combined rejecting program. New owned SourceUintDeclarationFailure consumes
+source_uint_declaration_word, resolved_uint_assign_word_bounds and
+source_items_context_pair_error. sourceUintDeclareFreshAssign is ordinary existing
+RItems composition, not an AST, evaluator, allocator or alternate copy semantics.
+
+source_uint_declare_fresh_reject_word derives actual successful declaration,
+fresh empty contents/length/identity, extended Source/intrinsic local alignment,
+MemOK/StateRepr/allocator and every runtime uint index bounds failure from INITIAL
+scalar alignment and existing constructor/frame/space premises. It proves reached
+Source expression/statement/Items index panic, intrinsic writeAddr=None/Stmt/Prog
+revert and the WHOLE existing constructor+indexed-write word append reverting.
+No failed suffix, desired reached relation or final preservation is assumed.
+Original Source parameter count Γ.length is preserved independently of the new
+local context. Old represented numeric roots survive with derived logical/source
+fresh separation, not a global injectivity premise or admitted shape exclusion.
+
+Source evalE failure exposes the reached EMState; Items failure exposes reached
+globals and caller nil locals. Fresh locals are known from the actual successful
+prefix, not fabricated as an Items error return. Intrinsic/word revert outcomes
+erase suffix states; all target frames/allocator/stack/content observations attach
+ONLY to the real successful constructor boundary. No rollback or Source panic-byte
+identity with symbolic word revert is claimed. Source index panic bytes are
+4e487b71 followed by31zero bytes and 0x32; the symbolic `.revert` has no payload.
+
+Generic low-horizon laws distinguish Items0..3 timeout with INITIAL globals from
+Items4..5 timeout after successful allocation. The populated all_horizons control
+classifies every runtime natural fuel, with index panic at6+ and the corresponding
+actual global state. These evaluator fuel observations impose no new public cap.
+
+SourceUintDeclarationFailureControls executes BOTH pipelines with old[7,0,max],
+neighbor[8,9] and retained/shared old aliases. Actual rejecting Items/Prog/word
+append, all6initial/reached Source cells, intrinsic old/neighbor/fresh content
+vectors, allSource scalar/reference local observations, both FULL16wordframes and
+all oldcontent words, fresh/old typed IDs, savedstack and allocator are proved.
+Source next2→3 and reachedglobals≠initial distinguish retained allocation from an
+invented rollback. Oldalias actual read returns0 while freshwrite rejects. Actual
+skipped-declaration oldwrite succeeds; the actual C64old-root Items program succeeds
+from the SAME initial state where the fresh-root program rejects. Exact panicbyte
+and early/reached/allhorizon controls are separate kernel theorems. No inaccessible
+final intrinsic/word machine or new all-profile allocator failure is asserted.
+
+Focused controls05 passes196jobs, aggregate961416KiB/no newOOM. All13 new public
+laws/controls have exact standard-only guards: panic bytes use no axioms, others
+the standard trio. Earlier recursion/type/sequence projection/concrete conversion
+failures are retained; the simplifier loop was repaired with actual fresh-local
+alignment, not a recursion/proof budget increase. New script tests guard admission
+and applied missing/unsafe/renamed mutants only, not runtime execution.
+
+Preflight reverified all3708 C64sealed hashes and exact same running container/
+image/mounts/toolchain/cache identity with idle workers. Available933736448 bytes
+admitted96MiB changed-output/log/compact-export forecast above512MiB reserve.
+Same12GiB/no-swap child,16GiBparent/OSheadroom/CPU0/serialLean-j1/threads1/cacheOFF
+and all proof/fuel/node/TestSuite/time guards are unchanged; no deletion/newruntime.
+Goal remains BLOCKED unchanged; goal get/update and per-file MCP unavailable.
+
+All original Work G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B remain PARTIAL;
+G35.02 and G35.06 remain BLOCKED on reserved/final composition dependencies.
+Physical bytes, all-profile/reference constructors/target allocation failures,
+general graphs/paths, ABI/storage/deepcopy/liveness/reserved copying and final
+Source/V10/target closure are not proved by this supported application. No queue
+exhaustion, compiler/EVM adequacy or whole-assignment completion is claimed.
+
+C65 final unchanged wrapper PASS0:1118default/262Suite/SolKey377parsed/131read-bearing
+covered. Fresh Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs PASS. Full aggregate
+RSS1593884KiB/diskgrowth274432bytes/newOOMdelta0; currentexec counters remain
+unchanged from historicalC60max10719/oom3/kill3/cumulative12GiBpeak. Both independent
+SOURCE/control/doc/script reviewers PASS, no confirmed remaining proof defect.
+All-fuel classification is proved by actual finite low cases and high n+6 runs,
+not an assumed monotonicity principle. Old fixtures/prefixes remain untouched.
+
+Further original G33 investigation found published DefaultBuilder.fixedPrimitive
+and defaultFixed_copy/AllocatorRepr.allocateFixedPrimitive, with a headerless
+max1n target footprint, and actual Source.zeroVal/zeroData/zeroElems for fixed
+arrays in Source.Machine. Existing SourceUintMemoryAt always describes a dynamic
+Source type; its intrinsic_fixed control explicitly disclaims fixed Source lowering.
+A genuine fixed-uint Source default/observer/context bridge remains independently
+unimplemented, requiring typed Source length evidence, actual zeroElems fuel and
+conversion agreement, and the published fixed-builder output. No fixed/reference
+constructor producer is missing or duplicated here; reserved producers remain
+read-only. This is a concrete remaining application, not an exhaustion assertion.
+
+C65 final strict/trust/layer/orphan/lane/completefixture/script syntax/diff gates
+PASS;41combined script tests PASS (8new failure-guard admission mutations).
+Scoped1033exactstandard-only pins/137modules PASS; rawglobalinventory remains
+FAIL1,1392unrecorded=359public+1033owned/0unsafe errors. Rawdocs remains FAIL1,
+83complete findings byte-identical to publicbaseline (separate publiczero-new
+PASS), while exactfrozenbase comparison FAIL1 retains11incoming. No unrelated
+baseline/vendor/global registry was edited. Warmstrict timed0Suite modules;
+all262currentSuite/fixture/toolchain bytes independently equal retainedC31source
+and fresh65versions match, so cold26/max160s<300 is retained evidence only, not
+newtiming. All3708 C64sealed entries reverified unchanged. Finalresource sample
+930586624available bytes above unchanged96MiBforecast+512MiBreserve; allC65exec
+OOMdeltas0, historicalC60failures/cumulativepeak retained separately. Both independent
+SOURCE/control/doc/script reviews PASS with no confirmed remaining defect;
+committed-artifact reviews follow compact additive export. Goal remains unchanged.
