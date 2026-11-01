@@ -1439,3 +1439,24 @@ Independent harness finder required identical bodies across all five ordinary
 cases (including zero/nonzero) and identical reverting receiver bytes across
 funded/unfunded cases. These checks plus exact STOP receiver bytes were added;
 the skeptic found no remaining runtime-observation defect.
+
+
+Checkpoint18 checked source988c8c28f3186bec36b365a984a9a08c006ebab7;
+private concrete head db3443f6a1181decc45802e0db0020131a028e94/tree
+fd96449b638eb728369b54fe5d19fe06938a5a20 retains exact V13 inputs. Five paths
+differ (three peer producers, canonical PeerFailure and its root import).
+Main full gate1048default+262TestSuite and combined1052+262 pass; both pinned
+SolKey377/131/131. Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs precede
+the runtime gate. Main/private aggregateRSS1710288/1714384KiB, one worker,
+hostminimum17323368/17299864KiB; cgrouppeaks393314304/388120576bytes, OOM0,
+12GiB/no swap and writer lease. Scope/trust/layers/orphans/automatic/guard
+regressions pass. Raw docs exit1 remains48missing37ambiguous in both trees;
+complete finding multisets equal published4165 (0new), strict frozen2fe gate
+still FAILS+2 inherited missing versus46/37. No reserved-doc repair or waiver.
+
+parallel-interface-v4.json binds actual committed payment/constructor/frame/
+artifact/ordinary-gas module blobs, real checked signatures, nontrivial client,
+source-only/external limits and all narrow open producer facts for V15–V17.
+Final metadata changes no checked Lean/test code blob. Immutable checkpoint18
+patch/bundles/source/evidence/checksum paths and separate final artifact reviews
+are recorded in the handoff; all prior sealed exports remain intact.
