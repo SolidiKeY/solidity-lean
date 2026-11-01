@@ -5,6 +5,11 @@
     "code": "@[implemented_by subtermsM]"
   },
   {
+    "file": "Solidity/Calculus/CallFunctionTransform.lean",
+    "kind": "override",
+    "code": "@[implemented_by transformM]"
+  },
+  {
     "file": "Solidity/Calculus/ChainGen.lean",
     "kind": "recovery",
     "code": "g.admit"

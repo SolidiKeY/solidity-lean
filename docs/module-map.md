@@ -442,6 +442,8 @@ commands; it never enters the core import graph.
 | `Examples/Tactics/CallFunctionSearch.lean` | Automatic multi-level selections/metadata/witness, input versus coefficient and target aliasing, literal/conditional/near-match and proposal-cap refusals. |
 | `Calculus/CallFunctionEmit.lean` | Actual smaller/capped complete shared-leaf emission, exact indexed semantics, identical formula on refusal and non-enlarging replacement. |
 | `Examples/Tactics/CallFunctionEmit.lean` | Real k6 emission/return/countermodel witnesses, box/diamond full sizes/contexts, small-family refusals and exact 512/513 output-cap boundary. |
+| `Calculus/CallFunctionTransform.lean` | Actual-update-indexed recognition, context-correct complete formula traversal, executable twin equality, exact all-state/validity transport and whole-formula nonincrease. |
+| `Examples/Tactics/CallFunctionTransform.lean` | Actual shrinking under polarity/binders, true/false antecedents, program-modal and declaration contexts, parallel/signed refusals and nonvacuous contextual countermodels. |
 | `Calculus/CallFunctionTable.lean` | Full-domain finite typed UInt table existence, failure/zero distinction and exact partial-function composition invariants; logical witnesses stay private and noncomputable. |
 | `Calculus/CallFunctionGraph.lean` | Actual intrinsic composition definition clause with universal argument/result positions, exact state semantics and complete 31-node clause size; source-call bridge and whole-family leaf bounds pending. |
 | `Examples/Tactics/CallFunctionTable.lean` | Checked non-offset/partial term functions, noncommuting order, zero/failure/overflow controls, inhabited intrinsic graph and false-observation model, caller frame, malformed-predecessor control and clause size. |
