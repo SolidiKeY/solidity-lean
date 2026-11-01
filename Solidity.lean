@@ -279,6 +279,7 @@ import Solidity.Examples.Tactics.Bytes
 import Solidity.Examples.Tactics.Hashing
 import Solidity.Examples.Tactics.AbiFeatures
 import Solidity.Examples.Tactics.AbiFeaturesImport
+import Solidity.Examples.Tactics.InheritedSelectorsImport
 import Solidity.Examples.Tactics.AbiHexCall
 import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.FunctionTypes

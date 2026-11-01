@@ -24,6 +24,15 @@ Inventory status: partial. Regressions: `Examples/Tactics/AbiFeatures.lean`,
 - **External function values** keep their ABI `bytes24` type before address
   and selector become arithmetic: standard encoding right-pads to 32 bytes,
   packed takes 24.
+- **Inherited and renamed function values** keep their source ABI identity:
+  `Base.f.selector`, `this.f.selector` of an override, `this.h.selector` and
+  `abi.encodeCall(this.h, …)` of an inherited function the importer renames,
+  an external function value of either, and `abi.encode` of that value all
+  carry the source declaration's selector
+  (`Examples/Tactics/InheritedSelectorsImport.lean`, checked against pinned
+  solc by `scripts/abi-entry-probe.mjs --inherited`). Calling through an
+  external function value is refused by name for inherited and own functions
+  alike (function-value dispatch).
 - **`abi.encodeCall`** reads parameter spellings before dispatch
   canonicalization erases widths, then checks arity, primitive kinds, integer
   widths, fixed-byte widening and function components, and applies contextual
@@ -72,7 +81,6 @@ Inventory status: partial. Regressions: `Examples/Tactics/AbiFeatures.lean`,
   function markers are absent, so exact legality and enum decoding wait on
   the declaration metadata ([declarations-metadata.md](declarations-metadata.md)).
 - Arrays of hex literals and other aggregate contextual coercions.
-- ABI identity of inherited renamed function values.
 - ABI traversal of recursive graphs ([recursive-types.md](recursive-types.md)).
 - External reference-valued returns: `ExtResult` carries only primitive words.
 - Dynamic recursive round-trip proofs; the recovery/precompile equivalence.
@@ -1311,4 +1319,26 @@ Read-only, without Lean workers.
 * `Panic(0x41)` is never certified; gas is not modelled (the 4× bound).
 * No theorem connects `entry`/`cval` to solc's bytecode: that is the
   evidence above, and the specification for the compiled-decoder lanes.
+
+### Backfill: ABI identity of inherited renamed function values (2026-11-01)
+
+Taken after the CF1 + CF2 integration (`099bfbe1`, merged into this branch
+without rebase). Reproduction first: `tests/abi-0.8.38/InheritedSelectors.sol`
+covers an overridden `f`/`g`, an inherited `h` (which the importer renames to
+`solcFunction31`), inherited overloads `k(uint256)`/`k(bool)` (both renamed),
+`Base.f.selector`, `this.f.selector`, `this.h.selector`, `abi.encodeCall` of
+`this.g` and `this.h`, external function values of `f` and `h` (their
+`.selector`, and `abi.encode` of the value), `super.f` and calls through
+external function values. On the merged master every admitted case already
+returns the source declaration's selector and encoding; pinned solc agrees in
+all four configurations (`--inherited` asserts each word). The "Left" entry
+was stale: it predates source-identity selectors (`declarationSelector`,
+`solcMetadataSelector*`). The only refusal is the call through an external
+function value (`solidity.functionDispatch: this call needs a finite set of
+typed dispatch targets`), and it refuses the derived `this.f` the same way,
+so it is the function-value dispatch boundary (lane CF2's area), not an
+identity gap. Nothing in `Syntax/Elab/{Values,Stmt,Arms,Context}.lean` or any
+other shared file was edited for this item; the change is the fixture, its
+pinned regression module (registered in `Solidity.lean`, one module-map row)
+and the probe option.
 
