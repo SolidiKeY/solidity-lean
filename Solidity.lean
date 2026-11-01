@@ -231,6 +231,7 @@ import Solidity.Examples.MemoryNegativeCountermodel
 import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.DecisionArrays
+import Solidity.Examples.DecisionArrayGaps
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
 import Solidity.Tools.Verify

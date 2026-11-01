@@ -594,3 +594,94 @@ confirmed the ordinary semantic and outside-family proofs, original byte
 identities, source-hash/gate matches, exact class limitation and open queue.
 Neither used Lean/server/build or wrote files. Packaging remains post-commit,
 with actual verification required before claiming a seal.
+
+
+## Array reproduction and full-gate checkpoint (2026-11-01)
+
+`Examples/DecisionArrayGaps.lean` distinguishes seven current AU02 shapes:
+fixed-array bounded blocks (positive and false), arrays below mapping keys,
+fixed arrays below keys, arrays below fields, arrays of structures, and arrays
+of arrays. Each has separate kernel proofs of `inTarget {} = true`,
+`Covered = false`, and actual `decideGoal = .unknown`. These are new named
+reproduction inputs, not edits to existing verdict expectations. Fixed-array
+reads already have an existing covered route; the reproduced blocks do not.
+
+Six positive inputs have ordinary `Fml.Valid` proofs by their index-one
+instance. The seventh constructs an intrinsic `[0,0,1]` root, proves its exact
+storage shape, proves `¬ holds fixedBadState fixedBad`, and hence proves
+`¬ Fml.Valid fixedBad`. This separates semantic truth/falsehood from the
+current incomplete pipeline. No hash premise is needed for these hash-free
+inputs. The observer output is external execution; all 21 classifications,
+six validity claims and three negative-state claims are kernel theorems.
+This census is not a Residue definition, completeness bridge or AU02 fix.
+
+Exact-source per-file MCP passed in 15.96 s, the affected module build in
+13.78 s, and all 30 public axiom reports in 20.12 s. The reports contain only
+subsets of `[propext, Classical.choice, Quot.sound]`. Evidence, source hashes,
+commands, actual versions, cgroup/pre-build measurements and sampled aggregate
+RSS are retained in `/workspace/va1-evidence/array-next`; `verified-gates.json`
+checks the final source against all three runs. The runner enforces aggregate
+12 GiB/no swap and the 12 GiB host reserve, one Lean check at a time, thread
+one and explicit `-j1`. The unchanged 300 s guard and all proof budgets remain.
+Earlier failed `rfl`/countermodel probes are retained, not counted as passes.
+Scratch probes were preserved outside the library before static gates.
+
+Independent read-only finder and skeptic reviews found no issues in the
+seven classifications, six semantic proofs or intrinsic countermodel. Both
+confirmed that this is reproduction, not pipeline completion, and neither
+used Lean/server/build or wrote files. Final documentation/static review and
+post-commit packaging are recorded separately below when complete.
+
+### Actual full validation failure and VA1-Q2
+
+The stock `./run-lean.sh` was attempted at head
+`3b07ff8e08be6f7564abf3d9cce6ec330617f97d` through the owned bounded
+runner. `.va1-full-lakefile.toml` adds only weak `-j1` options to each existing
+library/executable; its normalized configuration is otherwise identical.
+No installed wrapper, guard or tracked lakefile was changed.
+The full run stopped after 366.51 s when host MemAvailable fell below the
+required 12 GiB reserve: actual Docker exit 137, wrapper exit 75, no OOM kill,
+maximum observed Lean processes one. Sampled aggregate RSS peaked at
+3,973,344 kB; minimum host available was 12,862,623,744 bytes. The active
+TypeExamples job was inferred from the newest setup timestamp. A separate
+fresh focused `Solidity.Frontend.Checked.TypeExamples` check confirmed that
+module independently crosses the reserve: 53.59 s, actual exit 143/wrapper 75,
+peak sampled aggregate RSS 4,190,480 kB, minimum host available
+12,766,621,696 bytes. Both gates FAILED; neither is a timeout/resource pass.
+Raw commands/output/measurements are in `/workspace/va1-evidence/full-next`,
+especially `failure-summary.json`. No unchanged stopped build was repeated.
+
+Fetched published master `099bfbe185731c354b12a40f28ccf5d98534c779` remains
+a descendant of the frozen base and contains no TypeExamples repair. The
+assigned branch was not rebased or reset. TypeExamples is byte-identical to
+the frozen base and belongs to the frontend source lane. No other lane file
+was edited and no foreign host performance is credited as a local pass.
+
+**VA1-Q2 — pending**, sources: full-validation gate, frontend ownership,
+12 GiB host reserve. Should the source lane repair TypeExamples, or may VA1
+perform a narrow exact-preservation performance split?
+
+1. Keep source-lane ownership: full validation waits for a published repair;
+   independent VA1 proof work continues. Recommended because the launch
+   explicitly reserves frontend work to other producers.
+2. Authorize VA1 only TypeExamples/split modules/necessary registrations:
+   preserve every input, observation and budget, with gates and reviews.
+
+This is an ownership question, not a request to weaken the reserve, theorem
+or any exclusion/premise. No answer is inferred. VA1-Q1 is already answered
+by the direct human approval recorded above; it is not this blocker. All
+remaining original queue and backfill obligations remain incomplete.
+
+Array checkpoint static gates: 1058 reachable/zero orphans, 180 core modules/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, and trust 1073 sources/248 inventoried sites/zero
+findings all pass. A direct trust-script invocation initially failed because
+it lacked the required NUL-delimited file list; that raw failure is retained
+and the sanctioned `bash scripts/check-trust.sh` passed. Axiom inventory
+continues to fail with 1206 pins/zero errors/404 unrecorded changes, identical
+to the prior checkpoint. Doc paths continue to fail with the exact 85
+frozen-base findings, with zero added/removed. The entire Decision source and
+original 8bbd5606 counterexample remain byte-identical. Independent final
+finder and skeptic documentation/evidence reviews found no issues; neither
+used Lean/server/build or wrote files. All original open obligations and Q2
+remain. Export verification follows the commit; no full-goal pass is claimed.

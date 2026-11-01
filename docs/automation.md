@@ -987,6 +987,12 @@ separate coverage, admission and proved/refuted semantics, and the retained
 counterexample is linked by exact equality. This is not the unrestricted
 program-free inclusion; other shapes and the broader M4 source characterization
 remain open, as do Residue/DecisionTheorem-prime/AU02/full gates.
+The separate `Examples/DecisionArrayGaps.lean` census reproduces seven
+admitted, noncovered unknown array shapes, with six semantic validity proofs
+and one explicit false fixed-array countermodel. It changes no decision
+pipeline. The full gate currently stops at the required host reserve in the
+unchanged frontend TypeExamples module; ownership question VA1-Q2 is pending,
+while independent VA1 proof work continues.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
