@@ -179,6 +179,8 @@ import Solidity.Calculus.KIntTwoAnchors
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
 import Solidity.Calculus.DecisionCoefficientBoundary
+import Solidity.Calculus.DecisionUIntSyntax
+import Solidity.Calculus.DecisionUIntRecognizer
 import Solidity.Calculus.DecisionUIntGrammar
 import Solidity.Calculus.DecisionUIntFormula
 import Solidity.Calculus.DecisionUIntPrefix

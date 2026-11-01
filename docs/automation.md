@@ -1239,6 +1239,18 @@ Exact commands, actual failures, source hashes/resources and reviews are in the
 VA1 handoff.
 
 
+VA1 compound dependency prerequisite (2026-11-01): the existing UIntLinear
+predicate/hash fact and typed recognizer now live in DecisionUIntSyntax and
+DecisionUIntRecognizer below Decision. The three blocks move verbatim once;
+public names/types and the generated Decidable instance remain. Original
+Grammar/Shape modules retain translation/coverage compatibility APIs. The
+compound source reason now imports the lower recognizer, removing its Decision
+cycle without duplicating arithmetic or changing classifications/budgets.
+Compatibility/affected gates and27 public type/axiom checks pass. A generic
+optional-denotation/countermodel proof and actual compound pipeline integration
+remain open; this prerequisite alone is not broader memory completion.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

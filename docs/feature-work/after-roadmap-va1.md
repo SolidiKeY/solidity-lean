@@ -2571,3 +2571,56 @@ are open. Ready next owned children: minimal UInt syntax/recognizer de-layering
 for the compound-field certificate (warn/inspect history before refactor), and
 exact formula-work consumption proof without raising runtime2048/511 budgets.
 No AU05/AU06, VA2/compiler/decoder takeover, scope/goal reset or publication.
+
+
+## Acyclic UInt syntax/recognizer prerequisite (2026-11-01)
+
+Owned compound-field dependency repair after sealedb14b8c77. Warned before
+possible cache invalidation and inspected f31bd931/c5952b99 speed history.
+Calculus/DecisionUIntSyntax.lean now contains the existing intrinsic
+Tm.UIntLinear inductive and Decide.uintLinear_hashFree proof. Lower
+Calculus/DecisionUIntRecognizer.lean contains the entire existing typed evidence
+parser, shape soundness/completeness/iff and constructive instance. All three
+blocks move byte-for-byte exactly once (moved-block-identities.json); no new
+arithmetic/decoder or untyped representation. Original Grammar imports Syntax
+and retains translations/agreement/admission; original Shape imports Recognizer
+and retains the existing coverage/certification wrappers. Public names/types
+remain, including generated Solidity.instDecidableUIntLinear, confirmed in both
+ilean records. Generalized casesOn/structural recursion layout is unchanged.
+CompoundFieldReason now imports Recognizer instead of the high Shape facade.
+Its actual69-module local closure no longer reaches Decision; no source imports
+are missing (acyclic-low-closure.json). This removes the documented integration
+cycle; it does not yet supply the generic compound countermodel or pipeline hook.
+
+All gates pass under pinned4.24.0/5.0.0, original writer lock, serial threads1/
+Lean-j1, one child and actual memory.max12884901888/swap.max0 plus12GiB host
+reserve: Syntax MCP7.397/build6.298s, Recognizer MCP4.156/build3.089s,
+Compound MCP5.263s, Grammar compatibility MCP10.604/build8.440s, complete listed
+affected consumers39.522s, Shape compatibility MCP4.167s. Public27 actual type/
+axiom declarations checked through original imports pass6.320s, only existing
+standard axiom subsets. No budget, verdict, source classification or semantic
+observation changes. Every command/source hash/raw output and sampled resource
+extremum/failed measurement is retained in /workspace/va1-evidence/uint-layer-next.
+Measured sampled RSS2062040KiB, cgroup peak1147629568bytes, host available
+minimum16535592960bytes;18 unsuccessful measurement samples remain retained.
+No separate runtime speedup claim or EVM evidence is made for a verbatim move.
+
+Reachability1106, layers180core, strict automatic491/61budgets/11refuted,
+trust1121sources/248sites and whitespace pass. Same85 documentation/404 inventory
+findings remain FAIL and match frozen-base analysis. Decision whole file is
+unchanged fromb14; the four frozen direct definitions, hash/validity premises,
+producer implementations and all previous controls remain. Shared registrations
+are two additive root imports/two module-map rows, no Rules edits.
+Independent read-only finder/skeptic source reviews report no findings and verify
+actual blocks/names/graph; neither used Lean/server/builds or edits. Final docs/
+export review and committed sealing remain pending. Previous seals retained.
+
+Next concrete missing theorem is optional-denotation independence for a UIntLinear
+term in a memory-only context, including partial expressions. That proof can
+then certify a closed compound fresh-field equation at the producer child heap
+before parent allocation, choosing a differing field for some RHS or a defined
+field against none. No such theorem is assumed here. Outer scalar contexts need
+separate treatment; no all-context countermodel or global memory completion is
+claimed. All original Residue/theorem/hash bridge, arrays, memory/OR/M4/fuel,
+performance/backfill/full gates and held VA1-Q2 remain incomplete. No publication
+or goal reset/completion.

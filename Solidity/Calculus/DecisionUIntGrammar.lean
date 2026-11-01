@@ -1,3 +1,4 @@
+import Solidity.Calculus.DecisionUIntSyntax
 import Solidity.Calculus.Decision
 
 /-!
@@ -9,18 +10,6 @@ final Residue or formula-completeness theorem.
 -/
 namespace Solidity
 
-/-- UInt locals/literals, addition/subtraction, and a literal multiplication operand. -/
-inductive Tm.UIntLinear {C : Contract} {Γ : Ctx} : Tm C Γ (.val .uint) → Prop where
-  | local (i : Idx Γ (.val .uint)) : Tm.UIntLinear (.pvV i)
-  | lit (v : PrimTy.uint.Denote) : Tm.UIntLinear (.app0 (.lit v))
-  | add {a b : Tm C Γ (.val .uint)} : Tm.UIntLinear a → Tm.UIntLinear b →
-      Tm.UIntLinear (.app2 (.binop .add rfl) a b)
-  | sub {a b : Tm C Γ (.val .uint)} : Tm.UIntLinear a → Tm.UIntLinear b →
-      Tm.UIntLinear (.app2 (.binop .sub rfl) a b)
-  | mulL (v : PrimTy.uint.Denote) {b : Tm C Γ (.val .uint)} : Tm.UIntLinear b →
-      Tm.UIntLinear (.app2 (.binop .mul rfl) (.app0 (.lit v)) b)
-  | mulR {a : Tm C Γ (.val .uint)} (v : PrimTy.uint.Denote) : Tm.UIntLinear a →
-      Tm.UIntLinear (.app2 (.binop .mul rfl) a (.app0 (.lit v)))
 
 namespace Decide
 
@@ -119,11 +108,6 @@ theorem uintLinear_agrees {C : Contract} {Γ : Ctx} {t : Tm C Γ (.val .uint)}
     (h : t.UIntLinear) : t.agreeB = true := by
   induction h <;> simp_all only [Tm.agreeB, Op0.agreesB, Op2.agreesB,
     Bool.true_and, Bool.true_or]
-
-/-- The grammar contains no hash terms. -/
-theorem uintLinear_hashFree {C : Contract} {Γ : Ctx} {t : Tm C Γ (.val .uint)}
-    (h : t.UIntLinear) : t.hasHash = false := by
-  induction h <;> simp_all only [Tm.hasHash, Op2.isHash, Bool.false_or]
 
 /-- The exact Theory translator agrees with the ordinary source translator here. -/
 theorem toLT_eq_toL_of_agree {C : Contract} {Γ : Ctx} {s : Srt}

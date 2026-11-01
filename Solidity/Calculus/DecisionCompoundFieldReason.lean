@@ -1,5 +1,5 @@
 import Solidity.Calculus.DecisionResidueReasons
-import Solidity.Calculus.DecisionUIntShape
+import Solidity.Calculus.DecisionUIntRecognizer
 
 /-! # Nonliteral uint-linear right-hand sides in fresh-field equations
 A second exact source reason, independent of coverage/verdicts and separately
