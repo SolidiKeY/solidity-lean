@@ -989,3 +989,5 @@ import Solidity.Backend.AbiWorld.CanonicalReadback
 import Solidity.Backend.AbiWorld.NestedReadback
 
 import Solidity.Backend.AbiWorld.BytesReadback
+
+import Solidity.Backend.AbiWorld.TupleReadback

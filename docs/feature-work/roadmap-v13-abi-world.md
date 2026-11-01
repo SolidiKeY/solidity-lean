@@ -1631,3 +1631,73 @@ G03 proposal only attaches named canonical bytes G40/G41/BackfillA facts, closes
 no parent/global ledger. NEW evidence/artifacts:
 `/workspace/scratch/v13-bytes-d8523c15-evidence` and
 `/workspace/scratch/v13-bytes-d8523c15-artifacts`.
+
+
+## 2026-11-01 canonical heterogeneous and two-array entry recovery (c498a0f6)
+
+NEW `Solidity/Backend/AbiWorld/TupleReadback.lean` consumes the EXISTING indexed
+AbiEntry codec, array mdec_tail, full-word loader and actual enter/bodyValues.
+array_window/scalar_window/reference_window have real byte/load/range premises;
+mixed_reads/pair_reads discharge these from actual encodeArgs, never a desired
+decoder/verdict premise. mixed_entry and mixed_locations prove actual [uint[],uint]
+entry/body identity; reverse_entry proves actual [uint,uint[]] identity. pair_entry
+proves actual [uint[],uint[]] entry/body identity for all FOUR memory/calldata
+combinations. Dependent Vals and Entries preserve exact order/full unsigned words.
+
+The complete second offset is the real first payload length plus64, not a fixed
+constant. pair_reads bounds it from full input size≤lim, not len<W. Selector is
+arbitrary with length4; suffix is arbitrary. Allocation is explicitly original
+free+cost(xs)+cost(ys)≤lim, cost=32+32*length. Exact entry cursor is spent(left,xs)+
+spent(right,ys), with calldata spending0. Original fuel max(lengths)+4 suffices:
+enter REUSES that fuel for each parameter, not a new sum or CPU/gas bound. Mixed
+fuel length+4 suffices. Scalar consumes no allocation. Neither theorem changes
+admission, defaults, noncanonical/lazy behavior, decoder semantics or budgets.
+
+IMPORTANT: actual bodyValues copies each calldata parameter eagerly from cursor0;
+this is NOT a new sequential body allocator. The summed allocation premise is
+sufficient, not necessary for all lazy combinations. A real calldata-only run at
+free=lim-96 for two length2 arrays discriminates this from memory entry needing192.
+Actual entry cursors MM192,MC96,CM96,CC0 are retained. Body identity is actual indexed
+value identity, not merely encoded equality. No assertion that decoder allocations
+alias; equal-value inputs need no disjointness premise. Existing compiled shared/
+distinct-reference observations and all prior packets remain intact in the exports.
+
+NEW `tests/v13-abi-world/TupleEntryControls.lean` applies the generic proofs to
+empty, distinct/equal, reversed,300/max/zero full-word values, different selectors/
+suffixes and exact-limit cases. Stale/swapped packets have positive accepted
+baselines for THEIR values before negative byte equalities. One-over allocation
+is Panic blocked, insufficient fuel is fuel blocked, malformed second offset/head/
+tail reverts. Actual first allocation precedes the invalid second offset; actual
+second allocation precedes its truncated payload. No wrong-byte equality is
+misreported as a decoder failure. Complete ordered observations are exported.
+
+Independent preliminary read-only finder and skeptic source reviews found no
+mathematical issue and highlighted the entry-versus-body allocation distinction;
+it is documented here and checked by lazy_capacity. Final source/artifact reviews,
+actual command exits, axiom sets and exact dependency bindings are in the NEW seal.
+No source/native/compiler/EVM agreement or runtime memory-reading byte encoder is
+claimed by this canonical intrinsic roundtrip. Mainalone still lacks the exact9
+private V12 sources7881cb3a; combined-tree validation is development evidence only.
+
+ALL original queues remain: G40partial,G41partial,G42.01/.02/.03/.05blocked,
+G42.04/.06partial,BackfillA/Bpartial. Unknown-memory encoding, full native/runtime
+ABI decoding/dispatch, CALL/RETURNDATA, O1 declared-demand/raw same-invocation/static
+Frame, arbitrary callees/callback/library/world/physical resources and final
+mandatory whole-lane gates remain OPEN. O1 sealed proposal is not adopted or a
+passing premise. Goal remains blocked unchanged; this recovery does not reactivate
+it. All earlier seals,117ordered vectors and22scalar observations are preserved.
+Raw docs1/frozen86vs83,Suite124/181.061s,full1/5038.87s,cold124/5400.579s remain
+FAILURES, not retried unchanged. Complete prior/publication finding equality is
+separate. No reserved edits, pushes/merges/PRs, new peer inputs, profile/pin/fixture/
+Panic-control changes, axioms or budget increases. G03 feature reconciliation is
+proposed only: G40/G41 canonical multi-parameter readback preparation, not closure.
+
+Final recovery evidence: strict core/control/root per-file diagnostics PASS;
+registered import closure PASS1069jobs; scoped26standard-only axiom guards PASS;
+134FULL ordered byte vectors preserve all117prior,29scalar observations preserve
+all22prior. Lean4.24.0/Lake5.0.0-src+797c613; actual KeySort output “Build completed
+successfully (2 jobs).” RUNTIME_GATE_PASS applies to this measured runtime only.
+Hard12GiB/swap0, cgroup peak1973567488bytes, no OOM events. Independent final
+finder/skeptic SOURCE reviews PASS/no findings; final committed-artifact reviews
+remain separately recorded in the export. Early proof/parser errors and a writer-
+lock refusal are retained, with corrected final diagnostics; no budgets changed.

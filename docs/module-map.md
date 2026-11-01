@@ -1334,3 +1334,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/NestedReadback.lean` | Actual generic canonical nested uint-array mseq/allocator, indexed eager/memory/calldata/body/lazy readback and discharged canonical layout; preserves original size/fuel/allocation conditions. |
 
 | `Backend/AbiWorld/BytesReadback.lean` | Actual generic byte-string mdec/eager/memory/calldata/body/lazy identity, exact padding and original rounded allocation/fuel bounds; no runtime encoder or native/world agreement. |
+
+| `Backend/AbiWorld/TupleReadback.lean` | Actual canonical heterogeneous and two-dynamic-array entry/body typed identity, all memory/calldata array locations, reversed mixed order, exact sequential cursor and original sufficient fuel/allocation bounds. |
