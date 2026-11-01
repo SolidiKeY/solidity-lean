@@ -2200,5 +2200,43 @@
         "propext"
       ]
     }
+  },
+  "CompletedLoopFrameChecks": {
+    "guard": "tests/internal-flow/check-completed-loop-frame-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.scoped_loop_completed_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.CompletedLoopChecks.actual_loop": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.CompletedLoopChecks.completed_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.CompletedLoopChecks.all_old_contents": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.CompletedLoopChecks.roots_and_transaction": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.CompletedLoopChecks.writer_guard_refused": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.CompletedLoopChecks.writer_not_kept": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }

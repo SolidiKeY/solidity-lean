@@ -976,3 +976,4 @@ import Solidity.Backend.InternalFlow.FragilePrograms
 import Solidity.Backend.InternalFlow.StoragePrefixFrame
 
 import Solidity.Backend.InternalFlow.PublishedLoops
+import Solidity.Backend.InternalFlow.CompletedLoopFrame

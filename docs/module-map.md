@@ -1313,3 +1313,4 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/StoragePrefixFrame.lean` | Actual storage-prefix heap and target-memory frame consequences, separate from within admission. |
 
 | `Backend/InternalFlow/PublishedLoops.lean` | Published direct/scoped memory-loop Room/Cost consumers, exact prefix allocator transport, local unwind and alias addresses; distinct revert/divergence. |
+| `Backend/InternalFlow/CompletedLoopFrame.lean` | Actual successful scoped-loop completion to existing finite-prefix heap/local frames; body guard retained, no target or whole-world simulation. |

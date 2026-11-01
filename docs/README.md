@@ -111,3 +111,4 @@ history is in git.
 |---|---|
 | Internal runtime calls, flow and transient execution (partial; prerequisites open) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
 | Published ordinary memory-call consumer and remaining V12 obligations | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
+| Completed successful loop framing and writer countercontrol (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
