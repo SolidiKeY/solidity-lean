@@ -415,20 +415,17 @@ with a memory one, narrow array elements, storage struct returns, calldata
 arguments to function values, and every reference in an external
 signature.
 
-Gates run (the last `lake build` after the tuple dispatch; the
-SolkeyTestSuite step and `check-solkey` from the run before it, since that
-step rebuilds every Derived module): `./run-lean.sh` (`lake build`: 1019 jobs, success; the
-SolkeyTestSuite step OOM-kills `Derived17`, the baseline; `Derived21`, also
-killed once under parallel load, builds on the retry in 166s;
-`check-solkey`: 37 mismatches, the baseline); `TrustAudit.lean` through
-the Lean server ("trust: 9 dispatch theorems use only the standard
-axioms"); `node --test` of `finite-dispatch` (30/30; the FunctionTypes.sol
-suite timed out once under load and passes alone), `dispatch-signatures`
-(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (132
-executions, cancun and osaka); `check-layers`, `check-orphans`,
-`check-trust`, `check-automatic --strict` (0 pending), `check-doc-paths`
-(48, as on the base) and `check-g07` (the base's two failures; three new
-pinned theorems).
+Gates run after the merge of master (`099bfbe1`) and the post-integration
+work (SolkeyTestSuite and `check-solkey` from the earlier full run, since
+that step rebuilds every Derived module): `./run-lean.sh` `lake build` (result in the final CLOUD-RESULT marker; up to `FunctionTypes` without errors)
+; earlier SolkeyTestSuite run: only `Derived17` OOM-killed
+(the baseline), `check-solkey` 37 mismatches (the baseline); `TrustAudit.lean`
+through the Lean server; `node --test` of `finite-dispatch` (31/31),
+`dispatch-signatures` (1/1) and `getter-dispatch` (9/9);
+`check-function-value-references.mjs` (132 executions, cancun and osaka);
+`check-layers` (184 core modules, 0 reach the elaborator), `check-orphans`
+(0 orphaned), `check-trust` (0 findings), `check-automatic --strict`
+(0 pending), `check-doc-paths` (48, as on the base).
 
 Elaboration time of `Syntax/Elab/*.lean` on the base, from an otherwise idle
 `lake build`: Context 19s, Values 29s, Lower 26s, Arms 179s, Stmt 14s
@@ -436,7 +433,10 @@ Elaboration time of `Syntax/Elab/*.lean` on the base, from an otherwise idle
 modules were elaborated by the Lean server or under a parallel build, so no
 like-for-like figure was taken; the change adds `DispatchChain` (small) to
 `Stmt`'s imports and a `fnTyOf?` lookup per call to an undeclared name in
-`hoistCallArgs`. `Examples/Tactics/FunctionTypes.lean` builds in 85s.
+`hoistCallArgs`. `Examples/Tactics/FunctionTypes.lean` builds in 84s.
+
+### Later reviews
+
 - Tuple-dispatch review (read-only): no bug found; non-name callees in
   tuple assignments, the uncovered raw chain, untested forms
   (`tupleAssign`, several candidates, the unassigned value, `return h(x)`)
