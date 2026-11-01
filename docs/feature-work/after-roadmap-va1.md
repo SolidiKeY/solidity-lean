@@ -1353,3 +1353,79 @@ no issues; neither edited or used Lean/server/build. Latest-head full gate
 remains pending; earlier source-matched resource failures remain failures.
 Q2 and all remaining original obligations stay open. This is a reviewed
 source-bound checkpoint, not milestone eligibility or full-goal completion.
+
+
+### Actual source-to-coverage bridge checkpoint (2026-11-01)
+
+`DecisionNumericCoverage` proves the actual existing parser accepts numeric
+terms at either conditional flag and that cutting them introduces no definition
+or fresh atom. Strict and optional equality preserve these facts, including the
+existing optional equality's nested definedness implications. Actual preparation
+also has zero conditionals; existing conditional-lift identities then preserve
+the full prefix. These are proofs about the original functions, not added
+recognizers, axioms, premises on success, or a second calculus.
+
+`uintPrefix_Covered` has explicit quantifiers over every contract C, binder name,
+and a,b : Tm C [.val .uint] (.val .uint), with a.UIntLinear, b.UIntLinear and
+**a.size + b.size ≤ 71**. It proves (primitivePrefixEq name a b).Covered=true by
+constructing actual leafOf? output, both parser modes, bound parameters, the
+original lifting-weight check, body bound and cut bound. The raw size condition
+implies the existing 511-node conditions by the previously checked exact copy
+count; it is sufficient only. It is not a new limit, exclusion, general fuel
+bound, Residue definition or necessity assertion. Larger sources that fold small
+and the uncovered-but-proved 517-node example remain outside this theorem's
+premise without being classified as unknown.
+
+`uintPrefix_decided` discharges original hasHash=false structurally and invokes
+existing completeness. `uintPrefix_certified` proves the actual returned verdict
+is proved with **Fml.ValidH**, or refuted with an explicit State C [] and
+**¬Fml.holdsH** at that state. No hash or validity premise is weakened. The
+existing `uintPrefix_inTarget` theorem supplies target admission for all Waivers;
+this checkpoint establishes a constructive target-to-coverage subfamily, not the
+exhaustive target/Residue theorem or unconditional reverse inclusion. The Q1
+human-controlled revision, both frozen predicates and original counterexample
+remain unchanged.
+
+Controls apply the generic theorem to the inhabited symbolic 70-node/503-body
+case, strict literal equality with an unused binder, partial subtraction equality,
+both failed operands, and a genuinely false failed/returned pair. Actual positive
+and refuted certificates and the both-halt/one-halt semantic distinction are
+retained. Countercontrols reuse the 72-node/517-body uncovered-but-proved result,
+82-node source folding to covered, and an existing admitted memory unknown.
+No previous pin or expected observation changes.
+
+Exact-source per-file MCP is clean in 8.45 s (core) and 5.18 s (controls), focused
+builds pass in 6.32/3.10 s, and all **30 public axiom reports** pass in 25.48 s
+with only propext/Classical.choice/Quot.sound or none. Commands, source hashes,
+actual Lean 4.24.0/Lake 5.0.0-src+797c613 output, cgroup memory.max=12884901888,
+memory.swap.max=0, prebuild resources and aggregate measurements are retained in
+`/workspace/va1-evidence/numeric-coverage-next/verified-gates.json` and raw logs.
+Maximum sampled aggregate RSS across these checks is 1971140 KiB; minimum host
+available is 16623378432 bytes, above the required 12 GiB reserve. All use the
+original writer lock, thread one, explicit Lean -j1 and unchanged 300 s budget;
+there is no LSP/build overlap. Intermediate dependent-transport, optional-form
+shape and Boolean-interface failures are retained. No proof-budget increase,
+sorry, new axiom, dependency, default or predicate change occurs.
+
+Independent read-only finder and skeptic final source/control reviews both found
+no issues; neither edited or used Lean/server/build. Static gates pass: 1078
+reachable/zero orphans, 180 core/zero elaborator reachability, 491 automatic/61
+budget/11 refuted/zero manual or pending, and trust 1093 sources/248 inventoried
+sites/zero findings. Axiom inventory remains FAIL1 with byte-identical 1206 pins,
+zero errors/404 unrecorded changes. Strict docs remain FAIL1 with the same 85
+frozen findings and zero added/removed. The entire original Decision source and
+8bbd5606 counterexample pass byte-identity checks. Raw failures are preserved.
+Final independent finder and skeptic documentation/evidence reviews found no
+discrepancies; exact source hashes match the passing records and all unfinished
+obligations/failures remain explicit. Neither edited or used Lean/server/build.
+
+The original full queue remains incomplete: meaningful global Residue and
+DecisionTheorem-prime/exhaustive target/hash bridge, broader revised program-free
+M4 boundary, full baseline/performance validation, fixed/nested array pipeline
+integration, broader memory blocks, actual halting-OR guard-floor repair, general
+formula-derived fuel, and affected/full final gates remain open. Existing checked
+vector/root reconstruction, source subfamily bridges, module splits and controls
+are completed backfill, not substitutes for those children. Q1 is answered; Q2
+holds only frontend repair/full validation. Latest-source full ./run-lean.sh is
+pending; earlier source-matched resource failures remain failures. No milestone
+eligibility, publication or full-goal completion is claimed.
