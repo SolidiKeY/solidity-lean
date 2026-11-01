@@ -5921,3 +5921,103 @@ times0newSuite modules; all262source/fixture/toolchain hashes match retained C31
 cold26/max160seconds<300 only, not newcoldcoverage. Both independent read-only
 final source/control/script/doc reviews PASS after boundary-run fix; artifact
 reviews follow actual commit/export. No external compiler/EVM execution inferred.
+
+
+## C73: actual fixed prefix/postfix increment and reached MAX overflow (partial)
+
+Continued original G34/Backfill B after sealing C72. Owned modules
+[SourceUintFixedIncrement](../../Solidity/Backend/MemoryOps/SourceUintFixedIncrement.lean)
+and [SourceUintFixedIncrementControls](../../Solidity/Backend/MemoryOps/SourceUintFixedIncrementControls.lean)
+consume published Source RExpr.incDec and MemoryCompound.incrementMemory_eq_compound,
+Objects.ValFrag read/binary and PtrFrag.write read-only. No new evaluator, arithmetic
+producer, heap, AST, source profile exclusion or reserved-owner edit. Frozen base
+fb379ae20f10e2c92113453ddd9d40d8f2efbe09 and published prerequisite
+2fe1f8932f96be15b00df03ba2cde46f64a87758 remain ancestors; parent C72 is
+695d24a4a58f8fb81026950302ac3f167124a898. Existing goal stays BLOCKED unchanged.
+
+`fixed_uint_increment_certificate` proves the whole EXISTING indexed read,
+checked binary add-one and indexed write code against actual intrinsic preInc or
+postInc, keeping FULL Objects.ResultRepr, not a weaker legacy postrepresentation.
+`resolved_uint_fixed_increment_word` derives actual independent Source
+location->OLDread->incDecVal->write execution. Source prefix returns NEW, postfix
+returns OLD; the matching intrinsic/word STATEMENT discards expression value and
+performs the same write. This is not an emitted-expression return-value theorem.
+Actual operation order is preserved; no side-effectful operand reorder claim.
+
+INITIAL premises are genuine fixed SourceUintFixedAt, aligned Source/typed root
+and index locals, runtime valid index, inRange(actual INITIAL cell+1), Source
+MemOK and full Objects.StateRepr. The actual old value comes from the represented
+heap, never a desired reached-value premise. Existing source_uint_add supplies
+arithmetic; the actual existing fixed write derives reached observer/locals,
+MemOK, every other typed object/Source address and ex/events/logs/fnLocals frame,
+stack and Objects.KeepsAllocator. Any actual initial AllocatorRepr/positive base
+therefore transports; no fresh allocation or global injection is invented.
+Source expression/statement sufficient horizons are n+3/n+4, not minimum-fuel or
+admission bounds. Generic runtime length/index are unrestricted beyond existing
+intrinsic validity. Unchecked Source agrees only for the stated IN-RANGE case.
+
+`resolved_uint_fixed_increment_overflow_word` requires checked=true and initial
+actualcell+1 out of range. It derives exact Source arithmetic panic before write,
+Source statement globals retained, intrinsic revert and whole symbolic word
+revert. No target posterror machine, panic bytes, transaction rollback or unchecked
+wrapping correspondence is claimed. Decrement, general increment-expression
+compiler correctness and all-profile bounds/failure composition remain open.
+
+Both-pipeline controls independently inhabit LEFT=[7,8,7], RIGHT=[9,10,9],
+neighbor=[11,12] and all Source/typed/Objects/MemOK/allocator premises. Actual
+prefix returns8 and postfix returns7 while both write LEFT index0 to8. Full old/
+new typed vectors, Source tables, complete Source locals, alias identities,
+world frames, cursor40, savedstack77/88 and strong ownership are proved.
+The MAX rejection control consumes C72's ACTUAL constructor->rebind->firstwrite
+prefix fresh0->MAX, including its concrete constructor/alias/write Evm.run
+witnesses, strong prefix StateRepr/AllocatorRepr, Source observer and old frames.
+New increment rejects at this genuinely reached MAX rather than frozen initial0;
+old objects/aliases/neighbor and Source world remain represented. No post-revert
+target is returned. The C72 failure's already-proved successful prefix is used,
+not an assumed successful suffix or a fabricated heap.
+
+Complete20word initial/first/second increment vectors execute the actual word
+statement code: LEFT7->8->9, all prior16cells plus local7/fresh40/41/42, aliases,
+RIGHT/neighbor, freepointer and savedstack retained. These double-increment word
+vectors are not falsely called a new two-statement Source Items theorem. Prior
+C71/C72 source/typed/word vectors and every exact guard remain byte-unchanged.
+The NEW script retains every C71/C72 admission case and appends C73 cases; applied
+missing-guard/unsafe-axiom/renamed-target mutations test evidence admission only.
+Kernel execution theorems, symbolic word observations and external compiler/EVM
+validation remain distinct. No external solc/EVM run or physical-byte claim.
+
+Initial proof attempts exposed actual constructor naming, Source lifted-result,
+canonical literal-one and opaque fixed-index reductions. A word-control reduction
+hit the unchanged200000heartbeat limit; splitting through existing run_append_ok
+resolved it. No budget was raised and no old source refactored. Every failure log
+is retained; successful repairs do not relabel them. Final gates/reviews are in
+additive checkpoint73 evidence; raw docs/global inventory failures remain failed
+versus separate complete public-byte parity/scoped-pin validation.
+
+ALL original G32/G33/G34/G35.01/.03/.04/.05 and Backfills A/B remain PARTIAL;
+G35.02/.06 remain BLOCKED reserved-copy/final composition. Physical bytes,
+all-profile construction/target allocation failures, general paths/reference
+loops/graphs, ABI/storage/deep-copy/recursive liveness, reserved memory-to-storage
+and final Source/V10/target composition remain unfinished. Fixed decrement and
+further eligible operation compositions are not declared exhausted or unavailable.
+This component does not complete the original lane or reactivate the goal.
+
+C73 independent skeptic found reached_max_overflow dropped its actual Source
+prefix executions from the conclusion; fixed ADDITIVELY with first SourceevalE7
+returningMAX,z and SourceItems11 retainingz.2, alongside existing actual target
+run chain and all frames. Final source finder/skeptic PASS after this repair.
+Final focused01 PASS246jobs and final full02 PASS1146default/262Suite,
+SolKey377parsed/131covered/OK/exit0. Earlier full01 PASS before Source-prefix
+conclusion fix remains earlier-tree evidence only. Actual Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613 and KeySort2jobs PASS/cacheOFF/thread1 observed. Final full
+sampled aggregateRSS1592704KiB/diskgrowth274432bytes/newOOM0.
+All12C73exec receipts retain6failedproof gates; unchangedheartbeat
+stop in controls02 is a real failed gate, not newOOM or a pass. Historical5OOM
+kills/cumulative12GiBsessionpeak remain separate. Structural/trust/lane/complete
+fixtures/strict PASS;205script/corruptiontests PASS. Sixnew exactstandard guards
+give1148owned pins/165modules, all1142C72rows unchanged. Raw inventoryFAIL1/
+1507unregistered=359published+1148owned/0unsafe; additive proposals are not a
+global pass. Raw docsFAIL1/83rows, exact consumed-public bytes match separately;
+frozen72rows+11incoming remainsFAIL1. Warmstrict0newtimedSuite; independently
+all262current/C31source-fixture-toolchainhashes+runtime versions match retained
+cold26/max160s<300 only, not new timing coverage. Artifactreviews follow commit.

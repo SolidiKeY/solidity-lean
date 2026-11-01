@@ -1402,3 +1402,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompound.lean` | Actual positive fixed declaration, OLD-local rebind to NEW root and two reached compound updates in Source Items/intrinsic Prog/whole Objects word code; constructor timeout. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompoundOverflow.lean` | Same actual combined pipeline with a changed successful first update and checked second overflow, preserving only legitimate Source/word prefixes. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedDeclareCompoundControls.lean` | Both-pipeline populated old/fresh aliases, complete20word skipped/delayed-rebind contrasts, retained max prefix, actual length33 two-constructor application with every target payload word and exact endpoint. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedIncrement.lean` | Actual genuine fixed Source prefix/postfix increment results, existing intrinsic statement and full Objects word/allocator/frame certificate, plus checked overflow before write. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedIncrementControls.lean` | Both-pipeline pre/post result difference with identical write, actual C72 changed MAX-prefix increment rejection, all old/fresh Source/typed frames and complete20word repeated-increment vectors. |
