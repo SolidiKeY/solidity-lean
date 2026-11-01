@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Fixed supplemental full metadata consumer; never fresh/cold/release closure."""
-import argparse,copy,fcntl,importlib.util,json,os,shlex,subprocess,uuid
+import argparse,copy,fcntl,importlib.util,json,os,re,shlex,subprocess,uuid
 from pathlib import Path
 from types import SimpleNamespace
 ROOT=Path(__file__).resolve().parents[1]
@@ -101,6 +101,49 @@ def validate_files(out,request,before):
 def failure_outcome(phase,returned,code,record):
  return {'phase':phase,'collectorExit':code if returned else None,'validationExit':125 if phase=='validation' and returned and code==0 else None,'collectionExceptionExit':2 if phase=='collection' and not returned else None,'driverExceptionExit':2,'rawRecordOutcomes':None if record is None else {key:record[key] for key in ['exit','commandExit','executionExit','cleanupExit','validationExit']},'fullDeclarationMetadata':False,'replayVerified':False,'semanticPremisesDischarged':False,'releaseClosed':False}
 
+def observe_after(producer,out,before):
+ try:
+  after=inputs(producer,e.snapshot(ROOT));save(out/'inputs-after.json',after);validate_files(out,e.load(out/'request.json'),before);e.require(before==after,'operation input bindings changed')
+  value={'postInputExit':0}
+ except (ValueError,OSError,KeyError,TypeError,subprocess.SubprocessError) as error:
+  value={'postInputExit':125,'error':str(error)}
+  if isinstance(error,p.resources.ResourceObservationError):value['resourceObservations']=error.observations
+ save(out/'post-input-observation.json',value);return value
+
+def collect_observed(args,producer,out,before):
+ global COLLECTOR_RETURNED,COLLECTOR_CODE,PHASE
+ PHASE='collection'
+ try:
+  code=p.collect(args);COLLECTOR_RETURNED=True;COLLECTOR_CODE=code;return code
+ finally:observe_after(producer,out,before)
+
+def incomplete_catalog(raw):
+ identities=frame(raw,'V17_DERIVED_IDENTITIES_BEGIN','V17_DERIVED_IDENTITIES_END');e.require(identities==REQUESTS,'wrong actual checked identities')
+ e.require(k.BEGIN not in raw.decode() and k.END not in raw.decode(),'full batch frame unexpectedly present')
+ errors=[line for line in raw.decode().splitlines() if ': error: ' in line]
+ expected='Solkey.TestSuite.invariantForCountsArrayLength.proved value: expression node limit reached'
+ e.require(len(errors)==1 and errors[0].endswith('error: '+expected),'not the retained bounded failure')
+ lines=raw.decode().splitlines();e.require(lines[0]=='V17_DERIVED_IDENTITIES_BEGIN' and lines[2]=='V17_DERIVED_IDENTITIES_END' and lines[3]==errors[0],'unexpected failed output prefix')
+ suffix=('\n'.join(lines[4:])+'\n').encode();k.check_axiom_text(suffix,[dict(name=row['name'],axioms=PINS) for row in REQUESTS]);pins={row['name']:PINS for row in REQUESTS}
+ return {'checkedIdentities':identities,'printedAxioms':pins,'rows':[dict(row,structuralStatus='INCOMPLETE',typeValueDependenciesAvailable=False) for row in identities],'boundedFailure':expected,'loadedEnvironmentModuleSetVerified':False,'fullDeclarationMetadata':False,'replayVerified':False,'semanticPremisesDischarged':False,'releaseClosed':False}
+
+def account_failed(producer,failed,out):
+ e.require(not out.exists() and out.is_absolute() and out.resolve()==out and not out.is_relative_to(ROOT),'new external accounting directory required');out.mkdir(parents=True)
+ current=e.snapshot(ROOT);bound=inputs(producer,current);record=e.load(failed/'receipt/provenance.json');request=e.load(failed/'request.json');previous=e.load(failed/'inputs-before.json')
+ e.require(record['before']==record['after']==previous['consumerSnapshot']==request['consumerSnapshot'],'wrong failed consumer provenance')
+ gate='supplemental-derived17-full';p.TARGETS[gate]=([],[]);original=p.gate_command;p.gate_command=lambda name,d:['sh',str(failed/'run.sh')] if name==gate else original(name,d)
+ e.require(record['exit']==record['commandExit']==record['executionExit']==1 and record['cleanupExit']==record['validationExit']==0,'not the actual retained exit1 failure')
+ e.require(p.validate(record,failed/'receipt',record['before'],gate,live_outputs=False) is False,'failed operation relabeled pass')
+ e.require(request['budgets']=={'nodes':100000,'depth':512,'seconds':300} and request['request']=={'schema':1,'declarations':REQUESTS},'changed extraction contract')
+ script=subprocess.check_output(['git','show',record['before']['revision']+':scripts/roadmap-v17-derived17.py'],cwd=ROOT)
+ e.require(e.digest(script)==request['scriptSha256'],'wrong historical consumer code')
+ e.require((failed/'Derived17Axioms.lean').read_bytes()==query_bytes() and e.digest(query_bytes())==request['querySha256'] and (failed/'run.sh').read_bytes()==shell_bytes(failed) and e.digest(shell_bytes(failed))==request['shellSha256'],'changed failed query/command')
+ e.require((failed/'actual-lake-setup.json').read_bytes()==Path(bound['actualSetupPath']).read_bytes() and e.digest((failed/'actual-lake-setup.json').read_bytes())==request['setupSha256'],'changed failed setup')
+ first=copy.deepcopy(previous);second=copy.deepcopy(bound);first.pop('consumerSnapshot');second.pop('consumerSnapshot');e.require(first==second,'failed input source/tool/objects no longer match')
+ raw=p.read_bound(failed/'receipt',record['log'],record['logSha256']);catalog=incomplete_catalog(raw)
+ catalog.update({'accountingSnapshot':current,'nativeConsumerSnapshot':record['before'],'historicalProofProducer':PRODUCER_HEAD,'actualInputBindingsAfter':bound,'bindingObservation':'Later post-failure accounting snapshot, not an invented immediate historical after-command observation; original failed collector lacked that per-object postcheck.','nativeRecordSha256':p.resources.hash_file(failed/'receipt/provenance.json'),'boundary':'Independent failure/input/identity accounting only. All ten structural records remain incomplete; no failed batch/replay or current fresh proof promoted. Formula guards/invariant/decreases remain unchanged.'})
+ save(out/'incomplete-catalog.json',catalog);e.require(inputs(producer,e.snapshot(ROOT))==bound,'accounting inputs changed');print('AUTHENTIC_FAILED_BATCH_ACCOUNTED_ALL_TEN_STRUCTURAL_ROWS_INCOMPLETE');return 0
+
 def save(path,value):path.write_text(json.dumps(value,indent=2)+'\n')
 def run(producer,out):
  global ACTIVE_OUT,PHASE,COLLECTOR_RETURNED,COLLECTOR_CODE
@@ -111,16 +154,19 @@ def run(producer,out):
  gate='supplemental-derived17-full';p.TARGETS[gate]=([],[]);original=p.gate_command;p.gate_command=lambda name,d:['sh',str(shell)] if name==gate else original(name,d)
  request={'schema':1,'declarations':REQUESTS};fixed_request(request);save(out/'request.json',{'request':request,'querySha256':e.digest(query.read_bytes()),'shellSha256':e.digest(shell.read_bytes()),'setupSha256':e.digest(setup.read_bytes()),'scriptSha256':p.resources.hash_file(Path(__file__)),'budgets':{'nodes':100000,'depth':512,'seconds':300},'consumerSnapshot':current,'supplementalHistoricalInputOnly':True,'semanticPremisesDischarged':False,'releaseClosed':False})
  validate_files(out,e.load(out/'request.json'),before)
- PHASE='collection';code=p.collect(SimpleNamespace(gate=gate,out=out/'receipt'));COLLECTOR_RETURNED=True;COLLECTOR_CODE=code;PHASE='validation';save(out/'outcome.json',{'collectorExit':code,'validationExit':None,'replayVerified':False,'semanticPremisesDischarged':False,'releaseClosed':False})
+ code=collect_observed(SimpleNamespace(gate=gate,out=out/'receipt'),producer,out,before);PHASE='validation';post=e.load(out/'post-input-observation.json');save(out/'outcome.json',{'collectorExit':code,'postInputExit':post['postInputExit'],'validationExit':None,'replayVerified':False,'semanticPremisesDischarged':False,'releaseClosed':False})
+ if post['postInputExit']!=0:return code or 125
+ record=e.load(out/'receipt/provenance.json');valid=p.validate(record,out/'receipt',current,gate)
  if code:return code
- record=e.load(out/'receipt/provenance.json');e.require(p.validate(record,out/'receipt',current,gate),'failed native extraction');raw=p.read_bound(out/'receipt',record['log'],record['logSha256']);meta=metadata(raw);imports(meta,before)
- after=inputs(producer,e.snapshot(ROOT));validate_files(out,e.load(out/'request.json'),before);e.require(before==after and query.read_bytes()==query_bytes() and setup.read_bytes()==Path(before['actualSetupPath']).read_bytes(),'source/query/setup/object/tool changed');save(out/'inputs-after.json',after)
+ e.require(valid,'failed native extraction');raw=p.read_bound(out/'receipt',record['log'],record['logSha256']);meta=metadata(raw);imports(meta,before)
  save(out/'metadata.json',meta);save(out/'outcome.json',{'collectorExit':0,'validationExit':0,'fullDeclarationMetadata':True,'replayVerified':False,'supplementalHistoricalInputOnly':True,'semanticPremisesDischarged':False,'releaseClosed':False});return 0
 
 def main():
- a=argparse.ArgumentParser(description=__doc__);a.add_argument('--producer',type=Path,required=True);a.add_argument('--out',type=Path,required=True);args=a.parse_args()
+ a=argparse.ArgumentParser(description=__doc__);a.add_argument('--producer',type=Path,required=True);a.add_argument('--out',type=Path,required=True);a.add_argument('--account-failed',type=Path);args=a.parse_args()
  with open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','a+') as lock:
-  fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB);p.ensure_no_unresolved();code=run(args.producer,args.out)
+  fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB);p.ensure_no_unresolved()
+  if args.account_failed is not None:return account_failed(args.producer,args.account_failed,args.out)
+  code=run(args.producer,args.out)
   if code:return code
   replay=args.out.parent/(args.out.name+'-replay');code=run(args.producer,replay)
   if code:return code

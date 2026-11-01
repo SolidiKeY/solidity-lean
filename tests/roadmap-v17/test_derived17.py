@@ -80,3 +80,40 @@ class SupplementalInputControls(unittest.TestCase):
   value=d.failure_outcome('validation',True,0,raw)
   self.assertEqual(value['collectorExit'],0);self.assertEqual(value['validationExit'],125);self.assertIsNone(value['collectionExceptionExit']);self.assertEqual(value['rawRecordOutcomes']['commandExit'],0)
   value=d.failure_outcome('collection',False,None,None);self.assertEqual(value['collectionExceptionExit'],2);self.assertIsNone(value['collectorExit']);self.assertIsNone(value['validationExit'])
+
+class ActualFailureControls(unittest.TestCase):
+ """Actual checked discovery/raw failure data; never full metadata acceptance."""
+ @classmethod
+ def setUpClass(cls):
+  cls.raw=Path('/workspace/scratch/v17-derived17-structural/full-query/receipt/build.log').read_bytes()
+ def test_actual_failure_is_incomplete(self):
+  catalog=d.incomplete_catalog(self.raw);self.assertEqual(len(catalog['rows']),10);self.assertTrue(all(row['structuralStatus']=='INCOMPLETE' for row in catalog['rows']));self.assertFalse(catalog['fullDeclarationMetadata']);self.assertFalse(catalog['replayVerified'])
+  with self.assertRaises(ValueError):d.metadata(self.raw)
+ def test_actual_identity_axiom_and_failure_corruption(self):
+  lines=self.raw.decode().splitlines();identities=json.loads(lines[1])
+  for field,value in [('name','Solkey.TestSuite.fake.proved'),('module','Solidity.TestSuite.Derived17'),('kind','definition')]:
+   bad=copy.deepcopy(identities);bad[0][field]=value;changed=lines.copy();changed[1]=json.dumps(bad)
+   with self.subTest(field=field),self.assertRaises(ValueError):d.incomplete_catalog(('\n'.join(changed)+'\n').encode())
+  for bad in [self.raw.replace(b'Quot.sound',b'Fake.axiom'),self.raw.replace(b'expression node limit reached',b'other error'),self.raw+b'V17_KERNEL_BEGIN\n{}\nV17_KERNEL_END\n',self.raw+b"'Solkey.TestSuite.whileCountsUp.proved' does not depend on any axioms\n",self.raw+b"'Unrequested.theorem' depends on axioms: []\n",self.raw+b'garbage\n',self.raw.split(b"'Solkey.TestSuite.invariantForCountsArrayLength.proved'")[0]]:
+   with self.assertRaises(ValueError):d.incomplete_catalog(bad)
+
+ def test_after_observations_on_collection_exception(self):
+  import tempfile
+  from types import SimpleNamespace
+  from unittest.mock import patch
+  with tempfile.TemporaryDirectory() as tmp:
+   out=Path(tmp)
+   with patch.object(d.p,'collect',side_effect=OSError('transport failure')),patch.object(d,'observe_after',return_value={'postInputExit':0}) as observer:
+    with self.assertRaises(OSError):d.collect_observed(SimpleNamespace(),Path('/unused'),out,{})
+    observer.assert_called_once()
+ def test_postcheck_saved_before_invalid_receipt_validation(self):
+  import tempfile
+  from unittest.mock import patch
+  with tempfile.TemporaryDirectory() as tmp:
+   root=Path(tmp);setup=root/'original.json';setup.write_text('{}');out=root/'out';bound={'actualSetupPath':str(setup)}
+   def collect(args):
+    args.out.mkdir();(args.out/'provenance.json').write_text('{}');return 124
+   def reject(*args,**kwargs):
+    self.assertTrue((out/'inputs-after.json').is_file());self.assertEqual(json.loads((out/'post-input-observation.json').read_text())['postInputExit'],0);raise ValueError('missing runtime peak')
+   with patch.object(d.e,'snapshot',return_value={}),patch.object(d,'inputs',return_value=bound),patch.object(d.p,'collect',side_effect=collect),patch.object(d.p,'validate',side_effect=reject):
+    with self.assertRaises(ValueError):d.run(Path('/unused'),out)
