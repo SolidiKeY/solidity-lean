@@ -10,6 +10,7 @@ import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.MemNegPrep
 import Solidity.Calculus.MemStructCut
+import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
@@ -358,7 +359,7 @@ def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
 /-- Decide the certified fresh-struct field schema. Refutations carry the
 realized child heap, rather than reusing the arithmetic pipeline's state. -/
 def decideStruct (φ : Fml C []) : LeafVerdict C :=
-  match MemoryWitness.structAnswer φ with
+  match structAnswerWithReversed φ with
   | some (.proved _) => .proved
   | some (.refuted state _) => .refuted (state (State.init C))
   | none => .unknown
@@ -383,13 +384,18 @@ theorem decideStruct_refutes {φ : Fml C []} {σ : State C []}
     exact refutes (State.init C)
   · cases h
 
-/-- Recognition produces a proved or a refuted verdict, never unknown. -/
-theorem decideStruct_complete {φ : Fml C []}
-    (h : (MemoryWitness.structAnswer φ).isSome = true) : decideStruct φ ≠ .unknown := by
+/-- Every recognized certified answer produces an actual verdict. -/
+theorem decideStruct_complete_merged {φ : Fml C []}
+    (h : (structAnswerWithReversed φ).isSome = true) : decideStruct φ ≠ .unknown := by
   unfold decideStruct
-  cases ha : MemoryWitness.structAnswer φ with
+  cases ha : structAnswerWithReversed φ with
   | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
   | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
+
+/-- The original public completeness signature is retained. -/
+theorem decideStruct_complete {φ : Fml C []}
+    (h : (MemoryWitness.structAnswer φ).isSome = true) : decideStruct φ ≠ .unknown :=
+  decideStruct_complete_merged (structAnswerWithReversed_original h)
 
 /-- Exact negative-block preparation and fresh-array cutting, with a certified
 fresh-struct fallback or a concrete given-heap countermodel. Truth at one
@@ -588,7 +594,7 @@ or the cut is unavailable and the fresh-struct schema is certified. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
   φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
-    | none => (MemoryWitness.structAnswer φ).isSome
+    | none => (structAnswerWithReversed φ).isSome
 
 /-- **The fragment with binders of KeY's `int`**: the leaf binds one where
 `Fml.zT` reads it, is in `Fml.zOK`, and its rewriting is in `Fml.CoveredA`. -/
@@ -618,7 +624,7 @@ theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMe
   rw [if_pos ha]
   split at h
   · exact decideLeafA_complete h
-  · exact decideStruct_complete h
+  · exact decideStruct_complete_merged h
 
 theorem decideKInt_complete {φ : Fml C []} (h : φ.kintCovered = true) :
     decideKInt φ ≠ .unknown := by

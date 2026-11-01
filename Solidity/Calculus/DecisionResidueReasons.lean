@@ -139,8 +139,8 @@ theorem ReversedFreshField.counterState_refutes {C : Contract} {Γ : Ctx} {φ : 
   intro o
   exact (hb o).symm
 
-/-- An independently usable constructive answer for this source family. The
-global pipeline is unchanged in this reason-component checkpoint. -/
+/-- An independently usable constructive answer for this source family, consumed
+by the certified reversed-field fallback when the original producer misses. -/
 def ReversedFreshField.answer {C : Contract} {Γ : Ctx} {φ : Fml C Γ}
     (w : ReversedFreshField φ) : MemoryWitness.Answer φ :=
   .refuted w.counterState w.counterState_refutes

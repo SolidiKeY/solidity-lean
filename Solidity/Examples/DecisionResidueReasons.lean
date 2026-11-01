@@ -3,7 +3,7 @@ import Solidity.Examples.DecisionGapCensus
 
 /-! # Inhabited structural reasons, separate from decision observations
 The source classifier does not call the decider. Its exact typed witness gives
-a constructive refutation component; the global route remains unchanged here.
+a constructive refutation component consumed by the certified global fallback.
 -/
 namespace Solidity.Examples.DecisionResidueReasons
 open Solidity.Decide Solidity.Decide.ResidueReason
@@ -63,16 +63,37 @@ theorem original_notValid : ¬ Fml.Valid memStructReversed := by
   intro h
   exact original_refuted_at_state (h originalState)
 
-/-- A certificate component exists even while the old global route misses it. -/
+/-- The certificate component is also consumed by the global fallback. -/
 theorem original_answer_component : Nonempty (MemoryWitness.Answer memStructReversed) :=
   ⟨originalWitness.answer⟩
 
 theorem original_target : memStructReversed.inTarget {} = true := DecisionGapCensus.reversedStruct_target
 
-theorem original_global_unknown : decideGoal memStructReversed = .unknown :=
-  DecisionGapCensus.reversedStruct_unknown
+theorem original_global_refuted : decideGoal memStructReversed = .refuted originalState := by
+  rw [producer_state_reused]
+  exact DecisionGapCensus.reversedStruct_exact_state
 
-theorem original_notCovered : memStructReversed.Covered = false := DecisionGapCensus.reversedStruct_notCovered
+theorem original_covered : memStructReversed.Covered = true := DecisionGapCensus.reversedStruct_covered
+
+/-- Both new UInt and Bool sources reach the actual certified coverage route. -/
+theorem new_sources_covered : reversedFive.Covered = true ∧ reversedBool.Covered = true := by
+  exact ⟨((reversedFreshField? reversedFive).get (by decide +kernel)).covered,
+    ((reversedFreshField? reversedBool).get (by decide +kernel)).covered⟩
+
+/-- The returned countermodels, rather than separately supplied states, are certified. -/
+theorem new_sources_refuted :
+    (∃ σ : State StandardExample [], decideGoal reversedFive = .refuted σ ∧ ¬ Fml.holdsH σ reversedFive) ∧
+    (∃ σ : State StandardExample [], decideGoal reversedBool = .refuted σ ∧ ¬ Fml.holdsH σ reversedBool) := by
+  exact ⟨((reversedFreshField? reversedFive).get (by decide +kernel)).refuted,
+    ((reversedFreshField? reversedBool).get (by decide +kernel)).refuted⟩
+
+/-- Mapping-bearing sources remain outside this map-free fallback. -/
+theorem mapping_global_unknown : decideGoal mappingReversed = .unknown := by rfl
+
+/-- The separate compound-field and given-heap gaps remain unknown. -/
+theorem remaining_gap_controls : decideGoal memStructBuried = .unknown ∧
+    decideGoal memParamSame = .unknown := by
+  exact ⟨DecisionGapCensus.buriedStruct_unknown, DecisionGapCensus.hiddenParameter_unknown⟩
 
 /-- Existing supported syntax is not reclassified as this gap reason. -/
 theorem covered_control : memStructSame.Covered = true ∧

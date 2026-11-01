@@ -2291,3 +2291,90 @@ unrecorded changes; strictdocs FAIL1 same85 frozen findings. All26 actual axiom
 sets audited standard-only. Both final docs reviews clean; finder independently
 recomputed all-six resource extrema. Frozen decision/hash/program/memory producer
 bytes unchanged. No full-gate or whole-goal completion claim.
+
+
+## Checked reversed-field global route (2026-11-01)
+
+This closes the assigned orientation gap, not AU01/AU02 as a whole.
+Calculus/DecisionMemoryExtension preserves every successful original producer
+Answer, including its state transformer, and lazily consults the exact reversed
+source witness only on none. Decision changes only the shared helper in
+decideStruct/memCovered and matching completeness proof; the original public
+decideStruct_complete signature and array-cut-first route remain. No producer
+implementation or heap-observation graph is rewritten.
+
+Calculus/DecisionMemoryCoverage proves for every C, closed φ:Fml C [], and
+w:ReversedFreshField φ: actual preparation/hoist identities, cut_none,
+hasAllocAll, memCovered, Covered, inTarget under every waiver setting,
+answeredness and an actual returned refutation under the unchanged holdsH
+reading. No coverage/route/verdict premise is supplied. The generic existential
+does not identify a chosen countermodel. Separately, the original fixture
+kernel-proves decideGoal memStructReversed = .refuted gapMemStruct_state by rfl;
+decideGoal_refutes certifies that exact before-parent child-heap state. UInt-five
+and Bool clients prove actual Covered/returned refutation. Mapping, buried and
+given-heap unknowns, and all old normal/signed/fixed/heap observations remain.
+Only the assigned guarded tuple changes [unknown,unknown,refuted] to
+[refuted,unknown,refuted], after actual improved output and matching certificates.
+Earlier unknown seals remain historical evidence superseded for this one pin.
+
+Exact-name Covered/inTarget/Waivers/DecisionTheorem declaration slices are
+byte-identical frozen base. Covered behavior intentionally expands through
+memCovered; no unchanged-extension or false reverse-inclusion claim is made.
+An initial prefix selector matched CoveredA: preservation-selector-failure.json
+records the evidence bug and the corrected exact-name check. HashPremise,
+ProgramReduction, MemStructCut, MemStructWitness and MemoryWitness whole files
+remain byte-identical frozen base. Shared registrations are two additive root
+imports and two module-map rows; no Rules edit.
+
+Evidence: /workspace/va1-evidence/reversed-integration-next. Initial affected
+build FAIL1 after891.866s only on the observed improved tuple; raw output kept.
+Its certified update passed memory MCP/build69.261/68.193s. Review found a stale
+comment; its fix invalidated dependencies. Refreshed MCP auto-setup overlapped
+LSP and dependency compilation and stopped at host reserve: FAIL137/wrapper75,
+102.066s, resource_stop=true, max sampled RSS6100448KiB, minimum host available
+12852588544bytes. Repair: sanctioned explicit-j1 affected build without LSP
+first, then warm diagnostics; no guard or proof budget changed.
+Affected376-job build PASS953.647s; largest reported file110s (ledger),
+arithmetic95/operators106/memory67/array replay36s, all below300s. This is an
+affected cache invalidation, not a claimed fresh/full project gate. Each raw
+metadata JSON retains actual command, source hashes, toolchain and cache context.
+Final warm MCP helper4.240/coverage4.177/Decision33.250/Memory69.149/census5.247/
+controls5.246s pass; low-level reason MCP5.215s passes. Public24-theorem axiom
+report PASS22.300s, only existing propext/Classical.choice/Quot.sound, no new axioms.
+
+Runtime-only profile PASS3.095s: original/literal-five/Bool refuted and
+buried/mapping/given-heap unknown. Observation timings include printing:
+3.988/.291/.262ms and .394/.156/1.335ms respectively. Initial harness FAIL1
+mixed StandardExample/Gaps in one typed list; exact failing source/output kept,
+repaired only in that external harness. Kernel certificates are separate;
+no compiler/EVM check or other-VM timing is claimed.
+
+Final checks hold original writer lock, threads1/Lean-j1, one task child,
+actual memory.max12884901888/swap.max0, host reserve12884901888bytes. Passing
+sampled aggregate RSS max5313100KiB (shared pages included), charged cgroup peak
+4470992896bytes, host available min13200699392bytes. resources.json retains
+all extrema and failed measurement samples. Initial metrics aggregation failed
+parsing OCI error text as an integer; fixed to use only successful numeric
+samples and retained failed samples/error description. The failed LSP auto-setup
+overlap above is not hidden; final diagnostics used already emitted dependencies.
+Strict automatic491/61budgets/11refuted, layers180core, reachability1100 and
+trust1115sources/248sites pass. Same85 docs and404 inventory findings remain
+FAIL, identical to retained frozen-base analysis; no findings/pins deleted.
+
+Independent read-only finder: no source findings; suggested UInt/Bool clients
+implemented and checked. Skeptic: stale comment confirmed/fixed, final no
+findings; independently verified exact-name frozen declarations, nonvacuity,
+old Answer/state preservation and retained controls. Neither used Lean/server,
+builds or edits. reviews.txt retains results. PARALLEL-INTERFACE export remains pending until commit; it must use
+only the checked committed tree: actual modules/signatures, exact producer
+hashes/premises, nontrivial clients, complete import closure and immutable
+bundle/archive/checksums. Source-only handoff; final combined/full closure open.
+
+Every original open queue remains accounted for: global meaningful Residue,
+DecisionTheorem-prime/exhaustive target/hash bridge, nested/general arrays,
+compound/given-heap broader memory, halting OR, broader revised M4 boundary,
+formula-derived runtime fuel, remaining profiling/backfill and final/full gates.
+Held VA1-Q2/producer TypeExamples repair is not resumed. Next independent child:
+given-heap literal-read reflexive source family using existing MxObs syntax and
+extractor, with validity over every heap/binder value. No whole-goal completion,
+goal mutation, publication, push/merge/PR/tag.

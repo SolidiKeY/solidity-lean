@@ -195,6 +195,8 @@ import Solidity.Calculus.DecisionNumericLogic
 import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericNormalization
 import Solidity.Calculus.DecisionResidueReasons
+import Solidity.Calculus.DecisionMemoryExtension
+import Solidity.Calculus.DecisionMemoryCoverage
 import Solidity.Calculus.DecisionCompoundFieldReason
 import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FixedArrayRoot

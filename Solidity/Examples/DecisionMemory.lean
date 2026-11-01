@@ -286,7 +286,7 @@ example : memStructMapping =
 #guard_msgs in #eval [verdict memStructSame, verdict memStructFive, verdict memStructBool,
   verdict memStructFixed, verdict memStructMapping]
 
-/-- A reversed equation is a classifier near miss, not a recognized field/literal schema. -/
+/-- A reversed equation misses the original producer schema and reaches the certified fallback. -/
 def memStructReversed : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Person p; 0 = p.age }
 
 example : memStructReversed =
@@ -310,7 +310,7 @@ example : memStructSigned =
   (.eq (MemoryWitness.fieldRead (p := .int) (f := "b") (by decide))
     (.app0 (.lit (p := .int) ⟨-7, by decide⟩))) := rfl
 
-/-- info: ["unknown", "unknown", "refuted"] -/
+/-- info: ["refuted", "unknown", "refuted"] -/
 #guard_msgs in #eval [verdict memStructReversed, verdict memStructBuried, verdict memStructSigned]
 
 /-- Every recognized control has a kernel-checked coverage certificate. -/

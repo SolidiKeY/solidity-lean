@@ -974,9 +974,10 @@ remain unchanged, with the original requirement/counterexample retained. This is
 `milestone-m7-next` eligibility or permission to publish.
 
 The kernel gap census in `Examples/DecisionGapCensus.lean` reuses three
-inhabited existing memory fixtures: each is in target, unknown and not Covered.
-The given-heap parameter is already proved globally valid; the other two
-miss the exact struct classifier by orientation or a nonliteral RHS. This
+inhabited existing memory fixtures: each is in target. The given-heap parameter
+is globally valid but remains unknown/noncovered; the nonliteral RHS remains
+unknown/noncovered. The reversed equation now has certified coverage and an
+exact returned-state refutation described below. This
 census is not a Residue definition or bridge proof. Integrated memory,
 ledger-quantifier and written-memory sources replayed successfully on the VA1 VM.
 A first precise supported-family boundary is now kernel-proved in
@@ -1203,8 +1204,23 @@ fixture has an ordinary/hash-premised countermodel at the unchanged producer
 child heap; original globalunknown remains. Partial-RHS controls preserve halting
 semantics. This proof-layer component reaches Decision through arithmetic modules,
 so direct production import would cycle; no integration or global Residue claim.
-The lower-level reversed-field Answer remains independently ready. Exact limits
+The lower-level reversed-field Answer is now consumed by the certified fallback. Exact limits
 and passing bounded checks are in the VA1 handoff.
+
+
+VA1 reversed-field pipeline (2026-11-01): DecisionMemoryExtension preserves the
+original producer's complete Answer/state transformer on success, lazily using
+the exact reversed source witness on its miss; the array cut stays first.
+DecisionMemoryCoverage proves actual routing, all-waiver target admission,
+Covered and certified returned refutation for every closed member of this exact
+source family. The original fixture separately proves exact returned-state
+equality with its existing child heap before parent allocation. UInt/Bool clients
+pass; buried, given-heap and mapping unknowns remain. Only the assigned reversed
+verdict changes after observed improvement and matching certificates. Covered,
+inTarget, Waivers and DecisionTheorem declarations are byte-identical; Covered
+behavior intentionally expands through memCovered. The affected376-job closure
+and warm MCP pass unchanged limits; full Residue/bridge/AU02/full gates remain
+open. Raw failures, resources and precise limits are in the VA1 handoff.
 
 
 ## Guarded symmetric cancellation
