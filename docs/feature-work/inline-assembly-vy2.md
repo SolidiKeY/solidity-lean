@@ -3793,3 +3793,57 @@ bindings remain original obligations. Human YQ1-YQ7 remain authoritative (see
 [scope decisions](../solidity-scope.md#inline-assembly-decisions-2026-10-31)). Ready
 independent work continues under the parallel amendment; no goal mutation,
 producer replacement, push or merge is performed.
+
+## Owned bool changing dynamic inventory (2026-11-01)
+
+`OwnedBoolHeaders` proves that real uint256 header codecs are unchanged by the
+owned bool representation extension. Actual `Source.readLen` and combined primitive
+source inventories therefore agree with the same raw map without assuming a
+canonical view of dirty bool roots. `RepresentedOwnershipPlan` computes old live
+paths from the actual source, encodes them with their retained representations,
+computes new paths and true-byte choices from ONE nextRaw, then validates the real
+source operation. Its fields contain only these computation equations, no assumed
+inverse/read/view/safety result. Existing integer/canonical APIs remain unchanged.
+
+The coupled source/complement/owned-code step runs actual `Source.applyOp` and
+advances both physical journals ONLY after success. Whole-map reencoding uses the
+REPRESENTED old inventory with its actual encoding premise in the existing
+ownership-transport theorem. Shrink transfers complete formerly owned bytes to
+the complement; regrowth chooses their representations from those exact retained
+bytes. Nothing is zeroed or relabeled as residual while still owned. Derived
+source-header refresh, efficient-following=fresh preparation, finite request
+success/error/None prefix laws, every-original-H owner MemOK, unchanged whole
+administrative store/encoding, static refusal, account/bank isolation, nested
+rollback and persistent endTx equations are kernel proofs. No extra length/domain/
+fuel/depth cap or stronger hash premise is introduced.
+
+Concrete pcEnv witnesses use actual mixed declarations and typed source values:
+length0->4->0->4 exposes owned byte2 as true, moves its complete data word into
+residual on shrink and restores exact raw data on regrowth. Actual two local
+references form/read live element locations, get the real index Panic at length0,
+and read true again after regrowth. They do not fabricate historical index success
+or reject a pre-existing reference on current ancestor bounds. This LIVE inventory
+component does not establish completeness for retained element locations, dynamic
+aggregate descendants or arbitrary escaped/suspended producer histories. Original
+canonical dirty-growth None controls remain untouched; the additive API supports
+that owned representation and never turns preparation failure into language refusal,
+no-op, cleaning or deallocation.
+
+Raw proof failures (default recursion/heartbeat limits) are retained. Factoring
+actual input checks/maps and universal bool inversion repairs them under unchanged
+budgets; the concrete declaration witness elaborates in about36seconds. No Source
+representation/owner is modified. Independent design/final finder and skeptic
+reviews found no confirmed semantic defect. Full gate/signature/resource attribution
+is retained in `/workspace/vy2-evidence/dirty-bool-dynamic` when completed.
+
+Separate `OwnedBoolDynamic.sol` observes real Keccak and constructor state with
+length0/34/0/34, two aliases, dirty high/tail bytes, payload changes2->3/2->255,
+sibling padding, full dynamic ABI/Error/Panic, static failure, child/enclosing
+rollback and fresh calls under both pinned pipelines. The finite kernel length4/
+synthetic Fixed seed is explicitly distinct from external length34/real Keccak;
+no constructor-source identity, reachability, local-YQ4 or compiler adequacy follows.
+Every prior report field and compiler classification remains binding. Original
+Y04/Y05/Y06/Y09.02/BackfillA/B, broad ownership/dirty/retained-source adequacy,
+universal memory/allocation/refinement, V10/V11, Y06 source bindings and actual
+Yul/calculus/notation/printers/compiler/joint closure remain unfinished. Ready work
+continues under the parallel amendment; no goal mutation, push or merge occurs.
