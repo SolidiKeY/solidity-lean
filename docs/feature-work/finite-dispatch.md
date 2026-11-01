@@ -417,10 +417,11 @@ signature.
 
 Gates run after the merge of master (`099bfbe1`) and the post-integration
 work (SolkeyTestSuite and `check-solkey` from the earlier full run, since
-that step rebuilds every Derived module): `./run-lean.sh` `lake build` (result in the final CLOUD-RESULT marker; up to `FunctionTypes` without errors)
-; earlier SolkeyTestSuite run: only `Derived17` OOM-killed
+that step rebuilds every Derived module): `./run-lean.sh` `lake build`
+(1040 jobs, success); earlier SolkeyTestSuite run: only `Derived17` OOM-killed
 (the baseline), `check-solkey` 37 mismatches (the baseline); `TrustAudit.lean`
-through the Lean server; `node --test` of `finite-dispatch` (31/31),
+through the Lean server ("trust: 13 dispatch theorems use only the standard
+axioms"); `node --test` of `finite-dispatch` (31/31),
 `dispatch-signatures` (1/1) and `getter-dispatch` (9/9);
 `check-function-value-references.mjs` (132 executions, cancun and osaka);
 `check-layers` (184 core modules, 0 reach the elaborator), `check-orphans`
