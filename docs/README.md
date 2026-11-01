@@ -143,3 +143,7 @@ connect computed dynamic snapshots to actual source/residual execution; full lan
 
 VY2 [packed dynamic unsigned ownership](feature-work/inline-assembly-vy2.md#packed-dynamic-unsigned-ownership-2026-11-01)
 adds computed partial-slot source/residual preparation; full original lane remains open.
+
+
+VY2 [signed dynamic integer ownership](feature-work/inline-assembly-vy2.md#signed-dynamic-integer-ownership-2026-11-01)
+adds canonical signed source/residual preparation; full original lane stays open.

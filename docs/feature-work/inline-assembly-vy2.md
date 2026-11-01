@@ -3021,3 +3021,90 @@ server/build/tests/edits. Exact remaining gate/resource results and committed
 identity are retained in the versioned handoff. Global documentation retains its
 ACTUAL exit1; exact-base zero delta remains separate, never a global pass.
 Entire original assignment/goal remains unfinished/BLOCKED unchanged.
+
+
+## Signed dynamic integer ownership (2026-11-01)
+
+Original Y04 / Backfill A–B continuation from clean accepted
+`135d4ab69ff98421b805e68ffd940a97327c030e`, same pinned base/branch/repository.
+YQ1–YQ7 remain approved implementation directions, not admission evidence.
+Full original Y04/Y05/Y06 and backfills PARTIAL, Y09.02 and goal BLOCKED unchanged.
+No Source/owner AST/state/compiler rewrite, unpublished import or admission change.
+
+StorageDeclaration adds a disjoint signedArray(t,signed=true) certificate,
+including int256. Actual rootTy/cellTy/order/active-origin/bank and the SAME
+uint256 length-header pack/cursor determine coordinates. Old unsigned/u256
+selectors, guards and theorem premises remain unchanged; signed cases are
+explicitly skipped by those profiles. NEW integerTrace/integerSnapshot covers
+all supported old unsigned and new signed integer constructors. IntDynamicHeader
+is a NEW actual-declaration-indexed construction, not an alias of the old
+conditional unsigned API. Full PackedDynamicHeader->IntDynamicHeader ScalarPath
+compatibility INCLUDING codec is proved, then composed with existing uint256
+compatibility. Constant-motive eliminators preserve G0 representation discipline.
+
+Physical width/quotient-slot/remainder-byte geometry, field fits, same-slot /
+distinct-quotient separation and exact live byte ownership derive from real
+IntTy and declaration metadata. Signedness changes ONLY the existing codec's
+payload interpretation, not coordinates. The header is always UNSIGNED uint256.
+Actual Fixed BE32-header provenance and genuine per-run region/quotient-offset /
+nonwrapping facts remain explicit; no global hash injectivity or new arbitrary
+length/root/node/fuel cap. Integer trace is not nested/mapping/bytes coverage.
+
+IntPayloadInverse uses EXISTING intPayload/readIntPayload/intCodec. It proves
+readIntPayload range, intPayload(readIntPayload n)=n for n<2^bits, and the actual
+concrete codec.decode result. Existing read_intPayload supplies the opposite
+direction. IntDynamicValues reconstructs actual typed Source.Val.int negatives
+with that decoder and proves exact field reencoding/readLoc. It never uses
+unsignedStorageValue or a new signed policy. Minima/MAX/-1/zero/sign-threshold
+payloads retain all low-width two's-complement bits. Canonical FIELD decoding is
+not dirty source-local/high-owned-bit transport, cleaning policy or YQ4 closure.
+All unowned/padding bytes remain in complete residual words.
+
+IntOwnership computes old inventory from ACTUAL Source.readLen, new inventory
+from actual updated raw headers, then uses existing scalar/source/complement
+algebra. Whole old/new raw-map reencoding and pure/effectful store+complement
+connection derive from actual preparations. Source.applyOp succeeds BEFORE any
+residual updates; static failure preserves both prior states. Real source/frame
+rollback, committed-child/enclosing rollback, endTx persistent reconstruction,
+other account/bank/unselected-cell/locals and every-original-H owner MemOK laws
+remain actual operations. None is unsupported preparation, not a language
+refusal/no-op/deallocation. Pure unchanged store preserves none vs explicit
+zero; effectful account no-op still journals. Transient-array support is NOT
+inferred. New actual source writes cross int16 MIN->MAX and MAX->MIN in place,
+with complete mixed snapshots and MemOK, beyond static decoder vectors.
+
+Inhabited signed16/24 controls use real Source metadata and run0->17->1->0->18,
+partial final slots and nonzero0xcccc/0xaabb/0xdddd padding/tails. Two actual
+local aliases read negative -1 and -32768 after regrowth; source0/1/2/3 reads
+prove MIN/MAX/-1/zero and signed24 counterparts/tail. Index18 gives actual
+Panic0x32. Shrink/zero retain exact full raw words; regrowth and mixed-root
+preparation preserve padding. Source static-after-prefix, child/outer rollback,
+accounts/banks, actual every-H/inhabited MemOK and full persistent endTx are
+checked. Synthetic kernel hashes1000/2000 and explicit seed maps are distinct
+from EVM real Keccak, constructor execution and whole-program reachability.
+
+SignedDynamic.sol adds independently specified complete legacy/viaIR finite
+controls using pinned solc0.8.38+1835d247/Osaka, unchanged100m gas/5m steps.
+Full dynamic ABI is31words: offset32/length29 plus29specified values, including
+signed values sign-extended to uint256, raw slot/padding/header/alias/hash roots,
+MIN/MAX/-1/zero and sign-crossing member writes. Full Error("signed"), Panic0x32,
+static-probe failure and postfailure/fresh reads remain exact. All increment
+mutants are bounded modulo2^256;1073new negatives include808complete coherent
+ABI-word corruptions and discriminating padding/sign/order/error mutations.
+Final fresh replay preserves ALL prior492 fields/18classifications exactly;
+total524 ordered calls, all28 negative suites pass. Full wrapper1274default /
+262TestSuite /131annotations and strict/trust/import gates pass. Complete scoped
+audit:4106declarations,2435theorems,2362standard-only/73axiom-free, no missing or
+unexpected axioms. Global docs remains rawEXIT1 with byte-identical base findings;
+finite EVM observations are not source/compiler/target or Yul adequacy.
+
+Full original nested/mapping/bytes/other/transient/dirty ownership, universal
+memory/shared-zero/interior/pointer writeback, reachable allocation refinement,
+V10/V11 agreement instances, Y06 source/Yul input bindings and Y09.02 calculus /
+notation/printers/rule-map/compiler/joint closure remain OPEN. Existing owner
+MemOK/World/ContractWorld/memory-call/Bridge components are available, not Yul
+adequacy. No original invariant, guard, expected observation or budget is weakened.
+Raw failed attempts and all old artifacts/caches remain preserved. Exact final
+source identity, complete signatures/axioms, gates/reviews/resources and original
+patch/bundle/checksums: `/workspace/vy2-evidence/signed-dynamic/HANDOFF.md`.
+Original goal BLOCKED unchanged; get_goal read absent; questions=[].

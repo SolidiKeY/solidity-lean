@@ -533,3 +533,12 @@ observations are separate from kernel/source/compiler correspondence. See
 [lane handoff](inline-assembly-vy2.md#packed-dynamic-unsigned-ownership-2026-11-01).
 Full lane PARTIAL/BLOCKED, no admission promotion. Exact committed identity,
 gates/reviews/exports: `/workspace/vy2-evidence/packed-dynamic/HANDOFF.md`.
+
+
+VY2 signed dynamic integer checkpoint (2026-11-01): additive actual-declaration
+integer inventories, existing signed-codec inversion, negative source/alias
+reads and actual source-success-only complement/frame transport. See
+[lane scope](inline-assembly-vy2.md#signed-dynamic-integer-ownership-2026-11-01).
+Full lane remains PARTIAL/BLOCKED; kernel source laws and finite pinned pipeline
+controls are separate from full Yul/compiler adequacy. Exact committed tree /
+gates/exports: `/workspace/vy2-evidence/signed-dynamic/HANDOFF.md`.

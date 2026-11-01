@@ -4,7 +4,7 @@ namespace Solidity.Yul.Views
 
 def StorageDeclaration.unsignedType? {E τ} (d : StorageDeclaration E τ) : Option Source.IntTy :=
   StorageDeclaration.casesOn (motive := fun _ _ => Option Source.IntTy) d
-    (fun _ => none) (some .u256) (fun t _ _ => some t)
+    (fun _ => none) (some .u256) (fun t _ _ => some t) (fun _ _ => none)
 
 /-- Typed header metadata from the ONE original ordered packing cursor. -/
 def StorageDeclarations.unsignedHeaders {E ds} (d : StorageDeclarations E ds) :
@@ -39,6 +39,11 @@ theorem StorageDeclarations.unsignedHeaders_sound {E ds} (d : StorageDeclaration
           | fixed fixed =>
             change (root,t,incoming) ∈ tail.unsignedHeaders (fixed.endByte cursor) at member
             change middle = fixed.endByte cursor at next
+            rw [← next] at member
+            obtain ⟨h,hm⟩ := ih _ _ _ second member
+            exact ⟨h,List.mem_append.mpr (Or.inr hm)⟩
+          | signedArray int signed =>
+            change (root,t,incoming) ∈ tail.unsignedHeaders ((StorageDeclaration.signedArray (E := E) int signed).endByte cursor) at member
             rw [← next] at member
             obtain ⟨h,hm⟩ := ih _ _ _ second member
             exact ⟨h,List.mem_append.mpr (Or.inr hm)⟩
