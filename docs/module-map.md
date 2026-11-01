@@ -1336,3 +1336,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceStructSequence.lean` | Actual Source RItems member-child write/then-reached-delete with intrinsic Prog and whole word append; derives second identity/length/operands/representation and allocator composition. |
 
 | `Solidity/Backend/MemoryOps/SourceStructRedirect.lean` | Actual named reference-field replacement then NEW-child deletion in Source RItems/intrinsic Prog/whole word append; derives selection/capacity/frames and reached-prefix rejection without a suffix heap. |
+
+| `Solidity/Backend/MemoryOps/SourceStructGrowth.lean` | Actual paired Source/intrinsic Boolean allocation preserves the finite named struct observer, extends only the fresh identity, derives old-alias frames through reached deletion, and applies the published empty-default word allocator. |

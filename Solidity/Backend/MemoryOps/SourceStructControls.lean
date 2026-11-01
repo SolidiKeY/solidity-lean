@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructGrowth
 import Solidity.Backend.MemoryOps.SourceStructRedirect
 import Solidity.Backend.MemoryOps.SourceStructSequence
 import Solidity.Backend.MemoryOps.SourceStructDelete
@@ -1747,5 +1748,235 @@ theorem reference_delete_exact_end (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms reference_delete_exact_end
+
+private def growthObject (xs : List Bool) (hx : xs.length<2^256) : MObj H B := ⟨xs,hx⟩
+private def growthHeap (xs : List Bool) (hx : xs.length<2^256) := (hp.alloc (growthObject xs hx)).1
+private def growthRef (xs : List Bool) (hx : xs.length<2^256) := (hp.alloc (growthObject xs hx)).2
+private def growthRoot : HRef (H++[B]) (.struct S) := parent.wk (List.prefix_append H [B])
+private def growthAddress := allocatedSourceAddress addresses H.length sy.2.heap.next
+private def growthSource (xs : List Bool) : Source.EMState E SΓ :=
+  (sy.1,{sy.2 with heap := (sy.2.heap.alloc ⟨SB,sourceBoolMemory xs⟩).1})
+
+/-- Arbitrary valid runtime payload: real paired allocation preserves the named
+parent, all represented old aliases and exact source tables; fresh reads derive. -/
+theorem named_struct_alloc_views (p : Roadmap.Pipeline) (xs : List Bool) (hx : xs.length<2^256) :
+    (Source.allocRef (E := E) (Γ := SΓ) (sourceBoolMemory xs)).run sy=
+      (.ok (.memRef rfl 3),growthSource xs) ∧
+    SourceBoolStructAt (growthSource xs) 2 (growthHeap xs hx) growthRoot growthAddress layout ∧
+    SourceBoolMemoryAt (growthSource xs) 3 (growthHeap xs hx) (growthRef xs hx) .dyn ∧
+    Source.MemOK E SH (growthSource xs) ∧
+    (growthRef xs hx).id=3 ∧
+    [growthAddress 0,growthAddress 1,growthAddress 2,growthAddress 3]=[0,1,2,3] ∧
+    [MObj.elems .dyn ((growthHeap xs hx).get (left.wk (List.prefix_append H [B]))),
+      MObj.elems .dyn ((growthHeap xs hx).get (right.wk (List.prefix_append H [B]))),
+      MObj.elems .dyn ((growthHeap xs hx).get (growthRef xs hx))]=
+      [[true,false,false],[false,true,false],xs] ∧
+    [(growthSource xs).2.heap.get 0,(growthSource xs).2.heap.get 1,(growthSource xs).2.heap.get 2,(growthSource xs).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+        some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory xs⟩] ∧
+    (Source.evalE (G p) F0 2 (.member (.local sroot) 0 layout.source_tag_type)).run (growthSource xs)=
+      (.ok (.val (sourceUint u7)),growthSource xs) ∧
+    (Source.evalE (G p) F0 2 (.member (.local sroot) 1 layout.source_child_type)).run (growthSource xs)=
+      (.ok (.val (.memRef rfl 0)),growthSource xs) ∧
+    (∀ (k : PrimTy.uint.Denote) (v : Bool),(Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 3 k.1.toNat)).run (growthSource xs)=
+      (.ok (.bool v),growthSource xs) ↔ (growthHeap xs hx).index (growthRef xs hx) .dyn k=some v) := by
+  obtain ⟨ha,hkeep,hr,hf,hm,hid,haddr,hold,hne,hpa,hca,halias,hlocal,heffects⟩ :=
+    initial_at.alloc_bool (growthObject xs hx) SH source_memOK
+  simp only [MObj.elems_dyn,growthObject] at ha hr hf hm
+  have htag := hr.eval_member_tag (G p) F0 0 sroot (by rfl)
+  have hchild := hr.eval_member_child (G p) F0 0 sroot (by rfl)
+  refine ⟨ha,hr,hf,hm,rfl,rfl,?_,rfl,htag,hchild,?_⟩
+  · change [MObj.elems .dyn ((hp.alloc (growthObject xs hx)).1.get (left.wk _)),
+      MObj.elems .dyn ((hp.alloc (growthObject xs hx)).1.get (right.wk _)),
+      MObj.elems .dyn ((hp.alloc (growthObject xs hx)).1.get (hp.alloc (growthObject xs hx)).2)]=_
+    rw [hkeep left,hkeep right,hp.get_alloc (growthObject xs hx)]
+    simp only [MObj.elems_wk,List.map_id'' (f := MVal.wk (List.prefix_append H [B]) (.prim .bool)) (fun _ => rfl),
+      MObj.elems_dyn,growthObject,Heap.get,Objs.get,hp,left,right]
+  · intro k v
+    exact hf.read_iff F0 k v
+
+private def growthInput := withArgs sy k1 true
+private def allocatedInput : Source.EMState E XΓ :=
+  (growthInput.1,(growthSource [false,true,true,true]).2)
+private def allocatedSelectedHeap := (growthHeap [false,true,true,true] (by decide)).setField growthRoot layout.child_type (growthRef [false,true,true,true] (by decide))
+private def allocatedSelectedSource : Source.EMState E XΓ :=
+  (growthInput.1,{allocatedInput.2 with heap := allocatedInput.2.heap.write 2 (data 3) (by rfl)})
+private def allocatedDeletedHeap := allocatedSelectedHeap.set (growthRef [false,true,true,true] (by decide)) ⟨[false,false,true,true],by decide⟩
+private def allocatedDeletedSource : Source.EMState E XΓ :=
+  (growthInput.1,{allocatedSelectedSource.2 with heap := allocatedSelectedSource.2.heap.write 3 (sourceBoolMemory [false,false,true,true]) (by rfl)})
+
+/-- Real allocation then field replacement and reached member DELETE; fresh
+length4 differs from old length3, and old aliases retain their independent data. -/
+theorem allocated_reference_delete (p : Roadmap.Pipeline) :
+    (Source.allocRef (E := E) (Γ := XΓ) (sourceBoolMemory [false,true,true,true])).run growthInput=
+      (.ok (.memRef rfl 3),allocatedInput) ∧
+    (Source.writeLoc (E := E) (Γ := XΓ) F0 0 (.mem (τ := SB) 2 1) (.memRef rfl 3)).run allocatedInput=
+      (.ok (),allocatedSelectedSource) ∧
+    (Source.evalE (G p) F0 4 (sourceStructChildDelete layout xroot xi)).run allocatedSelectedSource=
+      (.ok Source.RVal.unit,allocatedDeletedSource) ∧
+    allocatedSelectedHeap.writeAddr (.index (growthRef [false,true,true,true] (by decide)) .dyn k1) false=some allocatedDeletedHeap ∧
+    SourceBoolStructAt allocatedInput 2 (growthHeap [false,true,true,true] (by decide)) growthRoot growthAddress layout ∧
+    SourceBoolStructAt allocatedSelectedSource 2 allocatedSelectedHeap growthRoot growthAddress layout ∧
+    SourceBoolStructAt allocatedDeletedSource 2 allocatedDeletedHeap growthRoot growthAddress layout ∧
+    Source.MemOK E SH allocatedDeletedSource ∧
+    [allocatedInput.2.heap.get 0,allocatedInput.2.heap.get 1,allocatedInput.2.heap.get 2,allocatedInput.2.heap.get 3,
+      allocatedSelectedSource.2.heap.get 0,allocatedSelectedSource.2.heap.get 1,allocatedSelectedSource.2.heap.get 2,allocatedSelectedSource.2.heap.get 3,
+      allocatedDeletedSource.2.heap.get 0,allocatedDeletedSource.2.heap.get 1,allocatedDeletedSource.2.heap.get 2,allocatedDeletedSource.2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory [false,true,true,true]⟩,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 3⟩,some ⟨SB,sourceBoolMemory [false,true,true,true]⟩,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 3⟩,some ⟨SB,sourceBoolMemory [false,false,true,true]⟩] ∧
+    [MObj.elems .dyn ((growthHeap [false,true,true,true] (by decide)).get (growthRef [false,true,true,true] (by decide))),
+      MObj.elems .dyn (allocatedSelectedHeap.get (growthRef [false,true,true,true] (by decide))),
+      MObj.elems .dyn (allocatedDeletedHeap.get (growthRef [false,true,true,true] (by decide))),
+      MObj.elems .dyn (allocatedDeletedHeap.get (left.wk (List.prefix_append H [B]))),
+      MObj.elems .dyn (allocatedDeletedHeap.get (right.wk (List.prefix_append H [B])))]=
+      [[false,true,true,true],[false,true,true,true],[false,false,true,true],[true,false,false],[false,true,false]] ∧
+    (Source.evalE (G p) F0 3 (sourceStructChildRead layout xroot xi)).run allocatedSelectedSource=
+      (.ok (.val (.bool true)),allocatedSelectedSource) ∧
+    (Source.evalE (G p) F0 3 (sourceStructChildRead layout xroot xi)).run allocatedDeletedSource=
+      (.ok (.val (.bool false)),allocatedDeletedSource) ∧
+    allocatedDeletedSource.1.get (.there (.there soldAlias))=.memRef rfl 0 ∧
+    allocatedDeletedHeap.field growthRoot layout.tag_type=u7 ∧
+    (allocatedDeletedHeap.field growthRoot layout.child_type).id=3 := by
+  have hr : SourceBoolStructAt growthInput 2 hp parent addresses layout := ⟨initial_at.parent,initial_at.leaf⟩
+  have hmem : Source.MemOK E SH growthInput := (withArgs_memOK _ _ _ source_memOK)
+  obtain ⟨z,w,v,out,ha,hw,hd,hwrite,hrz,hrw,hrv,hmz,hmw,hmv,hlw,hlv,hsel,hlen,hparent,halias⟩ :=
+    hr.alloc_select_delete (growthObject [false,true,true,true] (by decide)) SH hmem (G p) F0 0 xroot xi k1 rfl rfl (by simp only [MObj.elems_dyn,growthObject,k1,indexValue,Int.toNat_natCast];decide)
+  simp only [MObj.elems_dyn,growthObject] at ha hrz hrw hrv hmz hmw hmv
+  have haz : (Source.allocRef (E := E) (Γ := XΓ) (sourceBoolMemory [false,true,true,true])).run growthInput=(.ok (.memRef rfl 3),allocatedInput) := rfl
+  have hez : z=allocatedInput := congrArg Prod.snd (ha.symm.trans haz)
+  subst z
+  have hwc : (Source.writeLoc (E := E) (Γ := XΓ) F0 0 (.mem (τ := SB) 2 1) (.memRef rfl 3)).run allocatedInput=(.ok (),allocatedSelectedSource) := by
+    obtain ⟨ht,hs⟩ := source_struct_write allocatedInput 2 dn layout.source_types u7 0 3 hrz.parent
+    exact hs
+  have hew : w=allocatedSelectedSource := congrArg Prod.snd (hw.symm.trans hwc)
+  subst w
+  have hg : allocatedSelectedHeap.get (growthRef [false,true,true,true] (by decide))=growthObject [false,true,true,true] (by decide) := by
+    unfold allocatedSelectedHeap Heap.setField
+    rw [Heap.get_set_ne _ _ _ (by decide)]
+    change (hp.alloc (growthObject [false,true,true,true] (by decide))).1.get (hp.alloc (growthObject [false,true,true,true] (by decide))).2=_
+    rw [hp.get_alloc]
+    rfl
+  have hwtarget : allocatedSelectedHeap.writeAddr (.index (growthRef [false,true,true,true] (by decide)) .dyn k1) false=some allocatedDeletedHeap := by
+    simp only [Heap.writeAddr,Heap.setIndex,hg,MObj.elems_dyn,MObj.setElem_dyn,growthObject,k1,indexValue,Int.toNat_natCast]
+    rfl
+  have ho : out=allocatedDeletedHeap := Option.some.inj (hwrite.symm.trans hwtarget)
+  subst out
+  have hdc : (Source.evalE (G p) F0 4 (sourceStructChildDelete layout xroot xi)).run allocatedSelectedSource=(.ok Source.RVal.unit,allocatedDeletedSource) := by
+    have hrw' : SourceBoolStructAt allocatedSelectedSource 2 allocatedSelectedHeap growthRoot growthAddress layout := hrw
+    rw [sourceStructChildDelete,Source.evalE,Source.Hoare.run_bind,hrw'.eval_child_loc (G p) F0 0 xroot xi k1 rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide)]
+    change (Source.deleteLoc F0 3 (τ := .bool) (.mem 3 k1.1.toNat) >>= fun _ => pure Source.RVal.unit).run allocatedSelectedSource=_
+    obtain ⟨ht,hb⟩ := source_bool_write allocatedSelectedSource 3 [false,true,true,true] (by rfl) k1.1.toNat (by decide) false
+    have hdel : (Source.deleteLoc (E := E) (Γ := XΓ) F0 3 (τ := .bool) (.mem 3 k1.1.toNat)).run allocatedSelectedSource=(.ok (),allocatedDeletedSource) := hb
+    rw [Source.Hoare.run_bind,hdel]
+    rfl
+  have hev : v=allocatedDeletedSource := congrArg Prod.snd (hd.symm.trans hdc)
+  subst v
+  refine ⟨ha,hw,hd,hwrite,hrz,hrw,hrv,hmv,rfl,?_,?_,?_,rfl,rfl,rfl⟩
+  · simp only [MObj.elems_dyn]
+    rfl
+  · exact hrw.eval_child_read (G p) F0 0 xroot xi k1 true rfl rfl (by simp only [Heap.index,MObj.elems_dyn];rfl)
+  · exact hrv.eval_child_read (G p) F0 0 xroot xi k1 false rfl rfl (by simp only [Heap.index,MObj.elems_dyn];rfl)
+
+/-- Empty allocation is inhabited, not a successful element read. Element32
+is a logical element boundary only; exact-end33 rejects at the fresh Source cell. -/
+theorem named_struct_alloc_boundaries (p : Roadmap.Pipeline) :
+    SourceBoolStructAt (growthSource []) 2 (growthHeap [] (by decide)) growthRoot growthAddress layout ∧
+    (Source.allocRef (E := E) (Γ := SΓ) (sourceBoolMemory [])).run sy=(.ok (.memRef rfl 3),growthSource []) ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 3 0)).run (growthSource [])=
+      (.error (.revert (Source.panicData .index)),growthSource []) ∧
+    (growthHeap [] (by decide)).index (growthRef [] (by decide)) .dyn k0=none ∧
+    SourceBoolStructAt (growthSource (List.replicate 32 false++[true])) 2
+      (growthHeap (List.replicate 32 false++[true]) (by decide)) growthRoot growthAddress layout ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 3 32)).run (growthSource (List.replicate 32 false++[true]))=
+      (.ok (.bool true),growthSource (List.replicate 32 false++[true])) ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 3 33)).run (growthSource (List.replicate 32 false++[true]))=
+      (.error (.revert (Source.panicData .index)),growthSource (List.replicate 32 false++[true])) ∧
+    [growthAddress 0,growthAddress 1,growthAddress 2,growthAddress 3]=[0,1,2,3] := by
+  have he := named_struct_alloc_views p [] (by decide)
+  have hb := named_struct_alloc_views p (List.replicate 32 false++[true]) (by decide)
+  refine ⟨he.2.1,he.1,?_,?_,hb.2.1,?_,?_,rfl⟩
+  · exact source_bool_bounds (growthSource []) 3 [] (by rfl) 0 (by decide)
+  · simp only [Heap.index,MObj.elems_dyn]
+    rfl
+  · exact source_bool_read (growthSource (List.replicate 32 false++[true])) 3 _ (by rfl) 32 (by decide)
+  · exact source_bool_bounds (growthSource (List.replicate 32 false++[true])) 3 _ (by rfl) 33 (by decide)
+
+/-- Mapping the fresh ID onto occupied LEFT is false for the actual new data.
+Allocation alone still selects LEFT; stale selection disagrees with fresh reads. -/
+theorem named_struct_alloc_negatives (p : Roadmap.Pipeline) :
+    growthAddress 3≠0 ∧
+    ¬SourceBoolMemoryAt (growthSource [false,true,true,true]) 0
+      (growthHeap [false,true,true,true] (by decide)) (growthRef [false,true,true,true] (by decide)) .dyn ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run (growthSource [false,true,true,true])=
+      (.ok (.bool true),growthSource [false,true,true,true]) ∧
+    (Source.readLoc (E := E) (Γ := SΓ) F0 (τ := .bool) (.mem 3 0)).run (growthSource [false,true,true,true])=
+      (.ok (.bool false),growthSource [false,true,true,true]) ∧
+    (Source.evalE (G p) F0 2 (.member (.local sroot) 1 layout.source_child_type)).run (growthSource [false,true,true,true])=
+      (.ok (.val (.memRef rfl 0)),growthSource [false,true,true,true]) ∧
+    [parent.id,left.id,right.id,(growthRef [false,true,true,true] (by decide)).id]=[2,0,1,3] := by
+  have h := named_struct_alloc_views p [false,true,true,true] (by decide)
+  refine ⟨by decide,?_,?_,?_,h.2.2.2.2.2.2.2.2.2.1,rfl⟩
+  · intro hbad
+    have hb : (growthSource [false,true,true,true]).2.heap.get 0=some ⟨SB,sourceBoolMemory [false,true,true,true]⟩ := by
+      unfold SourceBoolMemoryAt at hbad
+      rw [MObj.elems_dyn] at hbad
+      exact hbad
+    have hf := source_bool_read (growthSource [false,true,true,true]) 0 [false,true,true,true] hb 0 (by decide)
+    have ht := source_bool_read (growthSource [false,true,true,true]) 0 [true,false,false] (by rfl) 0 (by decide)
+    rw [ht] at hf
+    cases hf
+  · exact source_bool_read (growthSource [false,true,true,true]) 0 [true,false,false] (by rfl) 0 (by decide)
+  · exact source_bool_read (growthSource [false,true,true,true]) 3 [false,true,true,true] (by rfl) 0 (by decide)
+
+
+private def grownDefaultState := σ.allocPush (defaultArray (H := H) .bool ⟨0,W_pos⟩)
+private def grownDefaultBase := upd base H.length (⟨48,by decide⟩ : Fin W)
+private def grownDefaultMachine := writeMachine (allocateMachine machine ⟨48,by decide⟩ ⟨0,W_pos⟩) (cell 5) w[48]
+
+/-- Existing EMPTY-default allocator/compiler is actually applied in the
+populated struct context, preserving the old observer and all16 old word cells
+except the free pointer; new local/header, stack and allocator are explicit. -/
+theorem named_struct_default_word (p : Roadmap.Pipeline) :
+    ∃ z : Source.EMState E SΓ,
+      (Source.zeroVal (E := E) (Γ := SΓ) 2 SB).run sy=(.ok (.memRef rfl 3),z) ∧
+      (Source.allocRef (E := E) (Γ := SΓ) (sourceBoolMemory [])).run sy=(.ok (.memRef rfl 3),z) ∧
+      TRun.declMem B none rfl σ=.ok ⟨grownDefaultState,List.prefix_append _ _⟩ ∧
+      run (declareNewCode 1 (.lit 0 rfl : Simple C Γ .uint)) machine=.ok grownDefaultMachine 0 ∧
+      SourceBoolStructAt z 2 grownDefaultState.heap growthRoot growthAddress layout ∧
+      SourceBoolMemoryAt z 3 grownDefaultState.heap (σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2 .dyn ∧
+      Source.MemOK E SH z ∧
+      StateRepr 1 1 8 ((Frag.init Γ).push (.mem B) .ok) grownDefaultState grownDefaultBase grownDefaultMachine ∧
+      StructAllocatorRepr grownDefaultState.heap grownDefaultBase 8 ⟨49,by decide⟩ grownDefaultMachine ∧
+      grownDefaultMachine.stack=machine.stack ∧
+      [cells machine,cells grownDefaultMachine]=
+        [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+         [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]]] ∧
+      [grownDefaultMachine.mem 5,grownDefaultMachine.mem 48,grownDefaultMachine.mem 49]=[w[48],w[0],w[0]] ∧
+      [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3]=
+        [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+      (Source.evalE (G p) F0 2 (.member (.local sroot) 1 layout.source_child_type)).run z=(.ok (.val (.memRef rfl 0)),z) ∧
+      grownDefaultState.heap.field growthRoot layout.tag_type=u7 := by
+  obtain ⟨z,hz,ha,hd,hc,hr,hfresh,hm,hword,halloc,hstack,hid⟩ := initial_at.default_word_growth σ parent addresses layout 0 SH source_memOK
+    initial_repr initial_allocator (by decide) (by decide) (by decide)
+  have hknown : z=growthSource [] := congrArg Prod.snd (ha.symm.trans (by rfl))
+  subst z
+  refine ⟨growthSource [],hz,ha,hd,hc,hr,hfresh,hm,hword,halloc,hstack,rfl,rfl,rfl,?_,rfl⟩
+  exact hr.eval_member_child (G p) F0 0 sroot rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_struct_alloc_views' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_struct_alloc_views
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.allocated_reference_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms allocated_reference_delete
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_struct_alloc_boundaries' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_struct_alloc_boundaries
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_struct_alloc_negatives' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_struct_alloc_negatives
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_struct_default_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_struct_default_word
 
 end Solidity.Backend.MemoryOps.SourceStructControls

@@ -4085,3 +4085,114 @@ struct observer/fresh-root application. Derive old-reference weakening and
 actual fresh Bool identity/content without assuming global address injection
 or implementing reserved constructors. General allocation failure/physical
 byte/full-profile/final-composition obligations remain open.
+
+
+## Checkpoint 55: named observer across actual paired allocation (partial)
+
+Concrete gap: the C54 finite named struct observer had no allocation transport.
+[SourceStructGrowth.lean](../../Solidity/Backend/MemoryOps/SourceStructGrowth.lean)
+now consumes the existing independent Source heap, intrinsic Heap/HRef/MObj,
+Keeps and allocator interfaces. It introduces no allocator, value/state layer,
+Source syntax/interpreter, profile restriction or global address injection.
+
+- `SourceBoolMemoryAt.transport` and `SourceBoolStructAt.transport` require honest
+  preservation of actual occupied Source cells plus intrinsic `Heap.Keeps`.
+  Address-map agreement is needed only on valid old intrinsic IDs. Source locals
+  and unrelated addresses need no additional constraint for these observers.
+- `allocatedSourceAddress` changes only the genuinely fresh intrinsic identity.
+  `allocatedSourceAddress_old` derives old-ID agreement with **no axioms**.
+- `SourceBoolStructAt.alloc_bool` executes actual `Source.allocRef` and
+  `Heap.alloc` on the supplied intrinsically valid Boolean array object. The
+  Source payload is extracted from that object. Actual `alloc_fresh/get/other`
+  and `Heap.keeps_alloc` derive old-cell preservation, exact fresh Source address
+  and intrinsic identity, new contents, old named tag/child observations and
+  `MemOK`. Every represented old alias differs from fresh Source `next` because
+  its initial get is occupied; no map injection is assumed. Unused map entries
+  remain unconstrained, except the one new-ID entry updated by the adapter.
+- `SourceBoolStructAt.alloc_select_delete` uses that actual output for a real
+  named reference-field `Source.writeLoc` and existing intrinsic setField,
+  then resolved member-child Source deletion and the matching intrinsic address
+  clear. Initial root/index locals and fresh-element bounds derive all reached
+  operands, selection, capacity, `MemOK` and final correspondence. The generic
+  theorem also frames every initially represented old Boolean alias through
+  **both** replacement and final deletion using derived identity/address
+  separation and actual write frames. There is no desired final relation,
+  assumed second initial run or stagewise-agreement premise.
+- `SourceBoolStructAt.default_word_growth` additionally applies the **existing**
+  `source_bool_default_word` empty-default compiler certificate. Initial word
+  StateRepr, StructAllocatorRepr, positive local base, fresh space and frame
+  capacity remain explicit. Actual Source zeroVal/allocRef, intrinsic declaration,
+  whole declareNewCode, old struct/new child observations, MemOK, word StateRepr,
+  allocator and stack preservation all follow. This supported empty default
+  does not imply nonempty/all-profile target allocation compilation.
+
+The append-only [controls](../../Solidity/Backend/MemoryOps/SourceStructControls.lean)
+retain all previous bodies and full vectors verbatim. Both pipelines exercise
+arbitrary intrinsically valid runtime payloads, complete four-object Source
+allocation tables, all typed fresh reads, old-ID agreement, occupied-parent and
+alias preservation. A material fresh length-four FTTT child replaces old length-three
+TFF; actual deletion at fresh index1 yields FFTT while old TFF/FTF aliases remain.
+Complete allocation/replacement/deletion Source tables and intrinsic vectors
+show every stage. Empty allocation is inhabited, not a successful element read;
+logical element32 succeeds in a length33 payload and exact-end33 panics.
+A wrong fresh map to occupied LEFT contradicts actual independent reads;
+allocation alone still selects LEFT until the actual field replacement.
+The empty-default word control supplies real initial representation/allocator,
+full initial/final 16-word vectors, new local5/header48/free49, old tag7/children,
+neighbour99, stack42 and final allocator certificate. No physical-byte meaning
+is assigned to element32 or symbolic word cells.
+
+The focused guarded closure passed 184 jobs. Six new public laws and five new
+controls have exact standard-only guards; the old-map agreement law has an empty
+axiom set, the other ten use propext/Classical.choice/Quot.sound. Failed proof and
+control attempts remain in distinct checkpoint55 logs; no sorryAx survives the
+passing guards. Per-file Lean MCP and goal read/update RPC are unavailable;
+existing bounded serial checks are used and the BLOCKED goal is unchanged.
+
+Independent finder/skeptic reviews confirmed the original generic old-alias clause
+stopped at the replacement intermediate. It was strengthened to the final deletion
+output using actual fresh separation and write frames, with no new premise.
+Final documentation/artifact reviews and final gates are recorded in the handoff.
+
+G32/G33/G34/Backfill B gain this finite independent Source allocation application;
+all original G32-G35 and Backfill parents remain partial/blocked. Nonempty target
+allocation, all-profile construction/checked allocation failures, physical bytes,
+general graphs/paths/ABI/storage/deep-copy, reserved memory-to-storage and final
+V10/Source/target composition remain open. Source.allocRef evidence is not a
+Source new-expression/typing or whole Source-program theorem. Kernel and symbolic
+word checks are not external solc/EVM validation. Global docs/inventory failures
+are preserved separately from scoped/no-new comparisons; no reserved registry edits.
+
+
+C55 final checks on this refined tree: guarded closure184, full default1097,
+TestSuite262, SolKey377 parsed/131 read-bearing covered, final wrapper exit0.
+Fresh runtime records Lean4.24.0 (797c613)/Lake5.0.0-src+797c613 and KeySort2jobs.
+Strict/trust/layers/orphans/lane/complete fixtures/script corruption/diff checks
+pass. Scoped917pins/116modules have zero unsafe sets; raw global inventory still
+**exit1**,1276unrecorded=359published inherited+917owned (14original+345incoming
+inside inherited). Proposed additions remain owned handoff evidence only.
+Raw strict docs still **exit1**,83complete findings byte-identical to published
+baseline (SHA2561905b6529ffff68bf2ee9256f84952fd8a19e0df94a434b3b052c11638142f2a);
+separate publiczero-new passes, while frozen no-new remains **exit1**,11incoming.
+No global failed gate is relabelled passed.
+
+Current warm strict timed **zero** TestSuite modules. A fresh comment-aware
+complete262-file Suite/fixture/toolchain key and actual matching Lean/Lake versions
+verify retained C31 cold26timings/max160seconds under unchanged300seconds each;
+this is retained evidence, not new cold timing coverage. C55 full aggregate
+Lean/Lake peak RSS1650440KiB, disk growth266240bytes, new max/OOM/kill events0.
+Historical cumulative12GiB peak/1051maxevents remain separately recorded. Child
+12GiB/no-swap under parent16GiB, hostSwapTotal0 and OS headroom are preserved;
+CPU0/threads1/Lean-j1/cacheOFF and every proof/test/time guard are unchanged.
+All3014 C54 sealed records are verified unchanged before the C55 commit.
+
+Both independent read-only finder and skeptic source/doc reviews passed; neither
+ran Lean/server/builds. Artifact review is separately required after commit/export.
+No whole-lane/goal completion or independent queue exhaustion is claimed. A next
+supported original G32/G33/G34/BackfillB investigation is carrying the old named
+observer through the ACTUAL Source default declaration's new local context, then
+binding the new typed reference to the field via the reached resolved assignment.
+Existing source_bool_declaration_word/source_decl_statement_run provide the
+producer, but shifted Source/intrinsic locals and named observer context transport
+must still be derived. C55 zeroVal/allocRef and reached delete do not prove that
+Source RItems context-changing declaration/rebind program.
