@@ -574,3 +574,12 @@ controls and compatibility are constructive canonical preparation, not full Y04
 or Yul adequacy. [Exact premises and entire queue](inline-assembly-vy2.md#vy2-nested-primitive-members-2026-11-01),
 versioned handoff `/workspace/vy2-evidence/nested-dynamic/HANDOFF.md`. Original full
 lane remains unfinished; YQ1-YQ7 and whole obligations unchanged.
+
+
+VY2 recursive dynamic structs: additive intrinsic finite certificates derive full
+nested paths/headers/packing from actual metadata, with exact one-level/old-root
+compatibility and coupled actual source/complement/frame reconstruction. Three
+struct levels and both-pipeline observations are inhabited; canonical preparation
+is not Yul/compiler adequacy. [Full original queue/premises](inline-assembly-vy2.md#vy2-recursive-dynamic-structs-2026-11-01).
+Versioned handoff `/workspace/vy2-evidence/recursive-dynamic/HANDOFF.md`. Original
+lane remains partial; YQ1-YQ7 and full original closure obligations unchanged.

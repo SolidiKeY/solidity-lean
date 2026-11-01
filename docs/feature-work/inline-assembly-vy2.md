@@ -3346,3 +3346,82 @@ Identity: repository `/workspace/solidity-lean`, branch
 `bedad5225f2481e5821e7b1b30a487ed7d1bf2ae`. Final committed SHA and complete exact
 theorem signatures/premises/axioms, patch/bundle and cumulative checksums are
 recorded in the versioned handoff/evidence. No push/merge/PR or goal mutation.
+
+
+### VY2 recursive dynamic structs (2026-11-01)
+
+`RecursiveStorageDeclaration`/`RecursiveStorageFields` are ADDITIVE finite
+certificates indexed by actual Source type/member lists AND derived Bool dynamic
+presence. Expanded structs require true, so all-fixed subtrees retain old leaf
+certificates. Actual `E.structFields`/full `E.pathTy` bind metadata and field
+order. Hot pack/end/path/header traversals use constant-motive mutual recursors
+generalizing both indices and the ONE old scalar packing cursor. Every nested
+struct aligns entry/exit; no recursion-depth, root, length or fuel cap is added.
+Finite certificates do not claim cyclic metadata or dynamic aggregate elements.
+
+Generic proofs derive complete ordered leaves, exact end, bounds, path/byte
+separation and full-path header trace soundness. Bool-only cast invariance and
+exact old one-level pack/path/end/header ordering/cursors/kinds/snapshot equality
+are proved; actual source inventory agreement retains its real input-view premise.
+Every original root certificate embeds with identical packing/paths. Existing
+APIs/guards/source representations remain unchanged. New recursive layout traces
+feed actual same-state `Source.readLen` at arbitrary finite .field prefixes, then
+reuse concrete finiteAccountWrite/Source.applyOp/complement operations. General
+whole-map `reencode`, `pure_connection`, old/new ownership and sequential refresh,
+static/source-error/None prefix, account/bank/fixed-sibling/alias, paired frame
+rollback/commit/endTx and EVERY original-H owner MemOK laws are constructive.
+No inverse/read/safety/output-view/adequacy law is a certificate input.
+
+A three-struct O->M->I actual environment derives xs/ys/bs headers2/3/5, nested
+uint16/int24/bool primitive leaves, stamp/guard/tag/address siblings, marker7 and
+exact root end256. Controls prove 17/11->0/0->18/12, recovered77 and32768/-8388608,
+signed-1, actual nested aliases/index Panic, nonzero padding, malformed/truncated
+paths, missing/duplicate metadata/coverage, overflow and synthetic hash overlap.
+Whole unchanged preparation preserves the ENTIRE administrative Source.Storage,
+not just projections. Dirty bool2 remains residual at length3; canonical growth4
+is unsupported preparation None with exact successful prefix. External growth
+still succeeds. No cleaning/refusal/no-op/deallocation/profile change is inferred.
+
+G0/design finder/skeptic reviews preceded edits and warned of checking cost.
+The first monolithic concrete get-of-prepare witness exceeded unchanged200k
+heartbeats; ALL raw failures remain. Repaired using named ACTUAL leaf computation
+outputs and proved constructor composition, then exact public checked-preparation
+equality (`rc_prepared`). No coordinates/result law are supplied as assumptions.
+Factored initial controls pass8.6s; no proof/fuel/node/test budget was raised.
+
+Separate pinned solc0.8.38+1835d247/Osaka legacy/viaIR fixture adds34 ordered calls
+with COMPLETE40word ABI, all nested header/hash/layout/raw/padding/min-signed/alias
+observations, successful dirty growth, full Error(recursive)/Panic0x32, static
+failure and fresh postfailure reads. 1405 negatives include1122 coherent bounded
+word mutations. The saved final comparison verifies all preceding648 call fields and18
+classifications exactly unchanged; the combined total is682 calls. These are FINITE external tests, not source/compiler adequacy,
+constructor reachability/store equality, dirty representation or allocation proofs.
+Kernel synthetic hashes/seed states remain explicitly distinct from compiler ones.
+
+Final actual versions/KeySort/full/focused/TestSuite/strict/trust/signatures/axioms,
+reviews/resource/tested-tree/commit details and patch/bundle/checksums:
+`/workspace/vy2-evidence/recursive-dynamic/HANDOFF.md`. Global docs remains ACTUAL
+exit1/48missing/37ambiguous, exact-base identical; zero delta is a SEPARATE pass.
+No repeated historical failure is relabelled successful. Every previous receipt,
+including the earlier false dirty-seed explanation, is retained.
+
+Entire ORIGINAL queue: Y04 and Backfill A/B partial (recursive finite structs
+with supported primitive dynamic leaves now constructive; arrays OF dynamic
+structs, nested dynamic arrays/mapping/storage-bytes/transient/dirty/general
+whole-store/path/hash adequacy remain); Y05 partial (universal memory/writeback,
+shared-zero/interior/pointer forms, reachable allocation provenance/refinement,
+actual full assembly MemOK); Y06 partial (actual source/Yul input/environment
+bindings); Y09.02 blocked (actual VY1 execution/physical calculus/notation/printers/
+Lean-only rows/final source/compiler/joint closure). Concrete V10/V11 agreements
+remain open. No whole-lane completion or independent-backfill exhaustion claim.
+Existing owner MemOK/World/ContractWorld/Bridge exist, not Yul adequacy. Public
+master099bfbe185731c354b12a40f28ccf5d98534c779 lacks Yul exports per auditor immutable
+tree evidence; the old local object128 is retained and NOT absence evidence.
+YQ1-YQ7 unchanged. Original goal BLOCKED unchanged; get_goal absent/no calls;
+questions=[]. No push/merge/PR, unpublished imports, owner/admission changes.
+
+Repository `/workspace/solidity-lean`, branch
+`codex/solidity-inline-assembly5-20261031/vy2-physical`, pinned base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, prior reviewed full HEAD
+`9b0b5b4cfa1b2bbe0e79b175ebe6c3b57cebabe2`. Final committed full SHA and exact
+public theorem signatures/premises/axioms are checksum-bound in the handoff.

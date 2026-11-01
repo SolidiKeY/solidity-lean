@@ -154,3 +154,6 @@ VY2 combined primitive storage inventory: [lane record](feature-work/inline-asse
 
 VY2 nested primitive-member storage preparation and original unfinished queue:
 [inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-nested-primitive-members-2026-11-01).
+
+VY2 recursive dynamic struct preparation and unfinished original work:
+[inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-recursive-dynamic-structs-2026-11-01).

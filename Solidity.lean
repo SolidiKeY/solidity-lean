@@ -953,3 +953,5 @@ import Solidity.Yul.Views.PrimitiveDynamicBoundaryControls
 
 import Solidity.Yul.Views.MemberDynamicBoundaryControls
 import Solidity.Yul.Views.MemberStorageCompatibility
+
+import Solidity.Yul.Views.RecursiveDynamicSiblingControls
