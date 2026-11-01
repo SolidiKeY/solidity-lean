@@ -138,7 +138,7 @@ def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
     | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
 
 /-- A function type's array parameter component at a location
-(`uint[]memory`, `uint8[]memory`, `bytes1[]storage`; `FunDecl.sigTy?`): its
+(`uint[]memory`, `uint8[]memory`, `bytes2[]storage`; `FunDecl.sigTy?`): its
 element's spelling, a value type (a word of any width, a `bytesN`, `bool`,
 `address`), and whether it is a storage reference. A narrow or `bytesN`
 element is a `uint` whose width rows the capture declares from this
@@ -198,9 +198,9 @@ def fnRefStruct? (c : String) : Option (String × Bool) := do
 (`canonFnTy`), retaining the supported memory-byte return location and the
 location of a memory or storage array parameter of a plain value element
 (`uint[] memory`, spelled `uint[]memory`; `uint[]storage`). Other reference
-parameters (calldata, nested, nominal), and an
-element with a marker row (`bytesN`, an enum, a string, a function), have no
-spelling, so no dispatch lists the function. -/
+parameters (calldata, nested, nominal), an element with a marker row (`bytes1`,
+an enum, a string, a function), and a narrow or `bytesN` element of a memory
+array return have no spelling, so no dispatch lists the function. -/
 def FunDecl.sigTy? (d : FunDecl) : Option String := do
   let comp (k : String) : Ty → Option String
     | .prim p => some ((fnRow? d.widths k).getD (declTyName d.widths k p))
@@ -216,14 +216,17 @@ def FunDecl.sigTy? (d : FunDecl) : Option String := do
         guard ((fnRefStruct? C c).isSome && C.structName? (Semantics.structDisplay st) == some st)
         pure c
       else
-        -- a memory array of a plain value element (`fnRefElem?`)
+        -- a memory array of a plain value element (`fnRefElem?`). A return's
+        -- element stays a full word: the call site does not compare the
+        -- element width (`exprShape`), so a narrow or `bytesN` return could
+        -- alias a narrow object at width 256 (integration review, FU1)
         let .array (.prim p) := R | none
         let e := k ++ "[]"
         guard (!(d.widths.any fun (w, _) =>
           w.startsWith (k ++ "#") || (w.startsWith (e ++ "#") && w != e ++ "#address" &&
             w != e ++ "#bytes")))
         let c := declTyName d.widths e p ++ "[]memory"
-        guard ((fnRefElem? C c).isSome)
+        guard ((fnRefElem? C c).any fun (el, _) => (narrowTy? el).isNone && (bytesTy? el).isNone)
         pure c
   let ps ← d.params.mapM fun (n, T) => do
     match T with
@@ -300,7 +303,9 @@ dispatch binds (`fnMemoryDispatch`): `bytes memory`, a memory array of a
 plain value element (`fnRefElem?`) or a nonrecursive struct in memory
 (`fnRefStruct?`). -/
 def fnMemRet (r : String) : Bool :=
-  r == "bytesmemory" || (fnRefElem? C r).any (!·.2) || (fnRefStruct? C r).any (!·.2)
+  r == "bytesmemory" ||
+    (fnRefElem? C r).any (fun (el, st) => !st && (narrowTy? el).isNone && (bytesTy? el).isNone) ||
+    (fnRefStruct? C r).any (!·.2)
 
 /-- A function type's component as a value: its primitive type and width. -/
 def fnCompTy? (c : String) : Option (PrimTy × Nat) :=
