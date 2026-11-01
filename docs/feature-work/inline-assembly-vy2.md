@@ -3187,3 +3187,86 @@ MemOK/Y09.02 calculus/notation/printers/rule-map/source/compiler/joint closure.
 Existing owner MemOK/World/ContractWorld/Bridge components are available, not Yul
 adequacy. Producer prerequisites not assumed. Original goal BLOCKED unchanged;
 get_goal read unavailable, no goal calls; questions=[]. Independent backfill remains.
+
+
+## Combined primitive dynamic inventory (2026-11-01)
+
+Original Y04/Backfill A-B progress; full assignment remains partial. Accepted parent
+`57afdc4c9647c92cebed547c05b80d69beddf125`, same branch/pinned base. Gate G0/history
+reviewed; no Source/state/type, owner implementation, old family API, codec, guard,
+profile, expected observation or budget changed. Additive typed adapters reuse the
+existing packing cursor, header/element registrations, actual Source.readLen,
+source operations and complement/journal algebra. Kernel witnesses cost90seconds
+initial preparation and115seconds final controls, inside unchanged limits; no
+representation refactor or new fuel/node/root/length/address cap.
+
+primitiveSnapshot = registrations ONCE ++ (integer live ++ scalar-family live).
+Both live lists use the existing actual declaration traces and raw header words.
+primitiveSourceInventory? reads both traces from the SAME actual source state,
+with exactly that ordering and no duplicated fixed/header registrations. Actual
+StorageDeclaration constructors prove selector coverage/disjointness; conflicting
+integer versus bool/address/bytesN root types are impossible. Component membership
+is exact, every live field is retained, and the executable combined check derives
+path uniqueness and physical byte/slot separation. Per-run hash regions/offset and
+nonwrapping premises remain real; no global hash injectivity/coverage axiom.
+
+PrimitiveOwnershipPlan recovers the old combined inventory from source, encodes
+its entire raw map, derives the new combined inventory after the supplied slot
+write, performs actual Source.applyOp, and only on source success journals the
+combined complementary update. Whole reencode and pure_connection identify the
+SAME actual source/store plus complementary map, not equal projections or a
+product of separate runs. Both family views follow from the complete combined
+view. Other-family retained reads follow from actual live membership and untouched
+header/data coordinates plus codec injectivity. Unselected paths/accounts/banks,
+locals, full unchanged administrative store and None versus explicit default,
+static errors, successful caller prefix, child rollback/committed-child outer
+rollback, persistent endTx and every original H MemOK are proved. Unsupported
+canonical preparation remains None with its exact prefix, not a source/Yul refusal,
+cleaning, deallocation or successful no-op.
+
+Inhabited single-environment controls include int16[],uint24[],uint256[],bool[],
+bytes3[],address[] and a marker. All six length/data families share ONE source/map;
+signed17->1->0->18 and bool3->0->3 ownership changes retain signed tail77 and all
+other-family data. Repeated bool and signed payload writes preserve other families;
+actual Source.readLoc observes -1/MIN,77,MAX,uint24,bool,bytes3 and address values.
+Two actual local aliases observe the updated bool through indexLoc/readLoc; index
+bounds give actual Panic0x32. Concrete source/residual marks restore caller prefixes
+and enclosing states. Nonzero partial-slot/dirty-unowned bytes are checked, including
+0xcc signed tail,0xcd uint24 padding,bool2,0xf4 bytes3 padding and0xaa address padding.
+Missing/wrong metadata, duplicated inventory and dirty canonical bool inputs fail
+checked preparation. Raw bool2 remains unrepresentable INSIDE an owned bool byte;
+its external growth succeeds while canonical preparation returns None. YQ4 and
+broader dirty representation/source adequacy remain OPEN.
+
+PrimitiveDynamic.sol independently specifies six-family finite compiler/EVM
+controls for solc0.8.38+1835d247/Osaka, legacy/viaIR, unchanged100m gas/5m steps.
+New48 ordered calls include complete54word dynamic ABI (offset32/length52/payload),
+4word typed ABI (including signed extension/bytes3 left alignment), all six headers/
+hash roots,10 raw data words, aliases, unknown slot7, cross-family writes, shrink/
+zero/regrow, dirty growth, full Error("combined")/Panic0x32/static failure and fresh
+postfailure reads. 2537new negative controls include2170bounded coherent word
+mutations, dropped/reordered calls, lost families/stale masks/erased padding and
+wrong type/hash/ABI/error observations. First fixture parse failure and all proof
+attempts are preserved; no expected verdict changed to fit output. Kernel synthetic
+hashes1000..6000 and explicitly constructed source/residual seeds are NOT real
+Keccak, a proved reachable Source constructor, source/EVM store equality or compiler
+adequacy. Final fresh replay preserves every field, all prior566fields and18
+classifications unchanged; total614calls. All30negative suites pass. Final full
+wrapper1317default/262TestSuite/131annotations and focused252jobs pass; scoped
+audit4626declarations/2780theorems:2705standard-only,75axiom-free, no missing or
+unexpected axioms. A synthetic collision control proves each component check can
+pass while the actual combined int16/bool byte-overlapping union fails; it does
+not assert a real Keccak collision or a language refusal.
+
+Independent read-only finder/skeptic reviews clear; final gate/scoped signature/
+axiom/resource/source-commit results and exact artifact paths are retained in
+`/workspace/vy2-evidence/combined-dynamic/HANDOFF.md`. Global docs remains rawEXIT1,
+48missing/37ambiguous exact-base findings; zero delta is a separate comparison.
+Original Y04/Y05/Y06 and Backfill A/B stay partial; Y09.02 stays dependency-blocked.
+Broader nested/mapping/storage-bytes/transient/dirty ownership, universal memory/
+writeback/shared-zero/interior/pointer forms, reachable allocation/refinement,
+concrete V10/V11 agreements, Y06 bindings and actual VY1/assembly MemOK/calculus/
+notation/printers/Lean-only rows/source/compiler/joint closure remain mandatory.
+Existing owner MemOK/World/ContractWorld/Bridge are available, not Yul adequacy.
+YQ1-YQ7 unchanged; original goal BLOCKED unchanged, get_goal read absent; no goal
+calls or unpublished producer imports; questions=[]. Independent backfill remains.

@@ -948,3 +948,5 @@ import Solidity.Yul.Views.PackedDynamicMixedControls
 import Solidity.Yul.Views.SignedDynamicCrossControls
 
 import Solidity.Yul.Views.ScalarFamilyWriteControls
+
+import Solidity.Yul.Views.PrimitiveDynamicBoundaryControls

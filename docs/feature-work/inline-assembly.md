@@ -554,3 +554,13 @@ succeeds; storage bytesN low alignment is distinct from ABI/memory left alignmen
 Full queue, premises, reviews and versioned handoff:
 [inline-assembly-vy2.md](inline-assembly-vy2.md),
 `/workspace/vy2-evidence/scalar-dynamic/HANDOFF.md`.
+
+### VY2 combined primitive dynamic ownership checkpoint (2026-11-01)
+
+One declaration-derived inventory includes registered fields once plus all live
+integer and bool/address/bytesN elements, using actual Source.readLen and existing
+typed selectors/codecs. One source-success-only account/complement execution proves
+whole supplied-map reconstruction and frame/reset laws; no separate-family masked
+runs are substituted. Original full-lane source/compiler/calculus closure remains
+open. [Lane premises/queue](inline-assembly-vy2.md) and versioned evidence:
+`/workspace/vy2-evidence/combined-dynamic/HANDOFF.md`.
