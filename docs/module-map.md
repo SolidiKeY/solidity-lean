@@ -1342,3 +1342,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceStructDeclaration.lean` | Actual context-changing Source empty default declaration then reached named reference assignment; derives shifted locals, preserves the original parameter count, and proves intrinsic Prog/whole word append with final frames and allocator. |
 
 | `Solidity/Backend/MemoryOps/SourceStructTag.lean` | Actual Source uint256 named-tag member write, intrinsic assignment and whole published primitive-word program; derives named observer/child and alias frames, then applies at actual declaration/reference-binding outputs. |
+
+| `Solidity/Backend/MemoryOps/SourceStructTagDelete.lean` | Actual named uint256 tag deletion: Source zero/default and unit, intrinsic delete and whole published primitive word program, framing selected references and old Boolean contents; actual reached declaration/rebinding/tag/delete controls. |

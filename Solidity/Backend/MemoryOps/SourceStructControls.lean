@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructTagDelete
 import Solidity.Backend.MemoryOps.SourceStructTag
 import Solidity.Backend.MemoryOps.SourceStructDeclaration
 import Solidity.Backend.MemoryOps.SourceStructGrowth
@@ -2425,5 +2426,198 @@ theorem named_tag_extremes_and_negatives (p : Roadmap.Pipeline) :
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_tag_extremes_and_negatives' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms named_tag_extremes_and_negatives
+
+
+
+/-- Exact reached prefix stages at the horizons needed by the following delete.
+Source parameter count remains the ORIGINAL context, independently of target locals. -/
+theorem named_tag_prefix_stages (p : Roadmap.Pipeline) (v : PrimTy.uint.Denote) (n : Nat) :
+    (Source.execS (G p) F0 (n+6) XΓ.length none (.declVar SB : Source.RStmt E [] false .body XΓ DTΓ) (withArgs sy v true).1).run (.nil,sy.2)=
+      (.ok (.normal (tagDeclaredSource v).1),(.nil,(tagDeclaredSource v).2)) ∧
+    (Source.execS (G p) F0 (n+5) XΓ.length none (.expr (sourceStructAssign layout (.there xroot) .here) : Source.RStmt E [] false .body DTΓ DTΓ) (tagDeclaredSource v).1).run (.nil,(tagDeclaredSource v).2)=
+      (.ok (.normal (tagBoundSource v).1),(.nil,(tagBoundSource v).2)) ∧
+    (Source.execS (G p) F0 (n+4) XΓ.length none (.expr (sourceStructTagAssign layout (.there xroot) (.there xi)) : Source.RStmt E [] false .body DTΓ DTΓ) (tagBoundSource v).1).run (.nil,(tagBoundSource v).2)=
+      (.ok (.normal (tagAfterSource v).1),(.nil,(tagAfterSource v).2)) ∧
+    Stmt.run σ (.declMem B (.user "freshBool") none rfl rfl)=.ok ⟨grownDefaultState,List.prefix_append _ _⟩ ∧
+    Stmt.run grownDefaultState (.assignMem (.field (.var (.there root) (by decide)) "items" layout.child_type) (.ref (.var .here rfl)))=
+      .ok ⟨grownDefaultState.withHeap boundHeap,List.prefix_refl _⟩ ∧
+    Stmt.run (grownDefaultState.withHeap boundHeap) (.assignMem (.field (.var (.there root) (by decide)) "tag" layout.tag_type) (.val (tagLiteral (.mem B::Γ) v)))=
+      .ok ⟨grownDefaultState.withHeap (afterTagHeap v),List.prefix_refl _⟩ := by
+  have hr0 : SourceBoolStructAt (withArgs sy v true) 2 hp parent addresses layout := initial_at.recontext rfl
+  obtain ⟨mid,z0,mm,hd,hw0,he0,hs0,hitems0,hdi,hiprefix,hcode0,hcode1,hprefix,hrmid,hrbound,hmmid,hmem0,hmword,ha,hsfresh,hsroot,hl0,htr,htf,htag0,hsel0,hlen0,halias0,hstack0,htarget0,heffects0⟩ :=
+    SourceBoolStructAt.declare_assign_word layout (G p) F0 (n+1) σ parent addresses hr0 xroot root rfl rfl (by decide) SH
+      (withArgs_memOK _ _ _ source_memOK) initial_repr initial_allocator (by decide) (by decide) (by decide)
+  have hdknown : (Source.execS (G p) F0 (n+6) XΓ.length none (.declVar SB : Source.RStmt E [] false .body XΓ DTΓ) (withArgs sy v true).1).run (.nil,sy.2)=
+      (.ok (.normal (tagDeclaredSource v).1),(.nil,(tagDeclaredSource v).2)) :=
+    source_decl_statement_run (G p) F0 (n+5) XΓ.length (withArgs sy v true) (.cons (sourceUint v) (.cons (.bool true) sy.1),(growthSource []).2)
+      (.memRef rfl 3) (source_bool_default_run (withArgs sy v true) (n+3))
+  have hmid : mid=tagDeclaredSource v := Prod.ext
+    (Source.Out.normal.inj (Except.ok.inj (congrArg Prod.fst (hd.symm.trans hdknown))))
+    (congrArg (fun a => a.2.2) (hd.symm.trans hdknown))
+  subst mid
+  have hwknown : (Source.writeLoc (E := E) (Γ := DTΓ) F0 (n+3) (.mem (τ := SB) 2 1) (.memRef rfl 3)).run (tagDeclaredSource v)=(.ok (),tagBoundSource v) := by
+    obtain ⟨ht,hs⟩ := source_struct_write (tagDeclaredSource v) 2 dn layout.source_types u7 0 3 hrmid.parent
+    exact hs
+  have hz0 : z0=tagBoundSource v := congrArg Prod.snd (hw0.symm.trans hwknown)
+  subst z0
+  change mm=boundMachine at htarget0
+  subst mm
+  obtain ⟨z,m',hw,he,hs,hi,hc,hr,hm,hword,hl,hstack,halloc,htag,hchild,halias,hframe,heffects⟩ :=
+    SourceBoolStructAt.assign_tag_word layout (G p) F0 n (grownDefaultState.withHeap boundHeap) growthRoot growthAddress hrbound
+      (.there xroot) (.there xi) (.there root) (tagLiteral (.mem B::Γ) v) v rfl rfl rfl rfl (by decide) SH hmem0 hmword rfl
+  have hwknown2 : (Source.writeLoc (E := E) (Γ := DTΓ) F0 (n+2) (.mem (τ := .int .u256) 2 0) (sourceUint v)).run (tagBoundSource v)=(.ok (),tagAfterSource v) := by
+    obtain ⟨ht,hs⟩ := source_struct_tag_write (tagBoundSource v) 2 dn layout.source_types u7 v 3 hrbound.parent
+    exact hs
+  have hz : z=tagAfterSource v := congrArg Prod.snd (hw.symm.trans hwknown2)
+  subst z
+  have hptr := (PtrFrag.local (b := 1) (.there root : Idx (.mem B::Γ) (.mem (.struct S))) (by decide)).run_of_eval
+    (hmword.push (tagWord v)) (r := growthRoot) (by simp only [MPath.mvalT];rfl)
+  have hcode : run (structTagWriteCode 1 (.there root) "tag" (tagLiteral (.mem B::Γ) v)) boundMachine=.ok (afterTagMachine v) 0 := by
+    rw [structTagWriteCode,List.append_assoc,run_append_ok (tagLiteral_run v boundMachine),run_append_ok hptr]
+    exact writeFieldWord_run boundMachine ⟨32,by decide⟩ 0 (tagWord v) (by decide)
+  have hmt : m'=afterTagMachine v := (Out.ok.inj (hc.symm.trans hcode)).1
+  subst m'
+  have htagstmt := source_expr_statement_run (G p) F0 (n+3) XΓ.length _ (tagBoundSource v) (tagAfterSource v) _ he
+  have hi0 : Stmt.run σ (.declMem B (.user "freshBool") none rfl rfl)=.ok ⟨grownDefaultState,List.prefix_append _ _⟩ := hdi
+  have hir : Stmt.run grownDefaultState (.assignMem (.field (.var (.there root) (by decide)) "items" layout.child_type) (.ref (.var .here rfl)))=
+      .ok ⟨grownDefaultState.withHeap boundHeap,List.prefix_refl _⟩ := by
+    change TRun.assignMem _ _ grownDefaultState=_
+    have htr' : TEnv.get (.there root) grownDefaultState.env=some growthRoot := rfl
+    have htf' : TEnv.get (.here : Idx (.mem B::Γ) (.mem B)) grownDefaultState.env=some (σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2 := rfl
+    simp only [TRun.assignMem,MSrc.mvalT,MLoc.addrT,MPath.mvalT,htr',htf',Heap.writeAddr,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    rfl
+  exact ⟨hdknown,hs0,htagstmt,hi0,hir,hi⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_tag_prefix_stages' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_tag_prefix_stages
+
+private def clearedTagSource (v : PrimTy.uint.Denote) : Source.EMState E DTΓ :=
+  ((tagAfterSource v).1,{(tagAfterSource v).2 with heap := (tagAfterSource v).2.heap.write 2 (tagData k0 3) (by rfl)})
+private def clearedTagHeap (v : PrimTy.uint.Denote) := (afterTagHeap v).setField growthRoot layout.tag_type (PrimTy.dflt .uint)
+private def clearedTagMachine (v : PrimTy.uint.Denote) := writeMachine (afterTagMachine v) 32 w[0]
+private def declaredBoundTaggedDeletedItems : Source.RItems E [] false .body XΓ DTΓ :=
+  .stmt (.declVar SB) (.stmt (.expr (sourceStructAssign layout (.there xroot) .here))
+    (.stmt (.expr (sourceStructTagAssign layout (.there xroot) (.there xi)))
+      (.stmt (.expr (sourceStructTagDelete layout (.there xroot))) .nil)))
+private def declaredBoundTaggedDeletedProg (v : PrimTy.uint.Denote) : Prog C Γ (.mem B::Γ) :=
+  .cons (.declMem B (.user "freshBool") none rfl rfl)
+    (.cons (.assignMem (.field (.var (.there root) (by decide)) "items" layout.child_type) (.ref (.var .here rfl)))
+      (.cons (.assignMem (.field (.var (.there root) (by decide)) "tag" layout.tag_type) (.val (tagLiteral (.mem B::Γ) v)))
+        (.cons (.deleteMem (.loc (.field (.var (.there root) (by decide)) "tag" layout.tag_type)) rfl) .nil)))
+
+/-- The actual reached C57 three-operation output feeds deletion. Both pipelines,
+all canonical words (including zero/max), exact four-statement execution and full
+word append; no supplied final relation or independent second initial state. -/
+theorem named_declared_tag_delete (p : Roadmap.Pipeline) (v : PrimTy.uint.Denote) :
+    (Source.execItems (G p) F0 8 XΓ.length none declaredBoundTaggedDeletedItems (withArgs sy v true).1).run (.nil,sy.2)=
+      (.ok (.normal (clearedTagSource v).1),(.nil,(clearedTagSource v).2)) ∧
+    (Source.evalE (G p) F0 3 (sourceStructTagDelete layout (.there xroot))).run (tagAfterSource v)=
+      (.ok Source.RVal.unit,clearedTagSource v) ∧
+    Prog.run σ (declaredBoundTaggedDeletedProg v)=.ok ⟨grownDefaultState.withHeap (clearedTagHeap v),List.prefix_append _ _⟩ ∧
+    run (((declaredCode++boundCode)++structTagWriteCode 1 (.there root) "tag" (tagLiteral (.mem B::Γ) v))++structTagDeleteCode (C := C) (Δ := .mem B::Γ) 1 (.there root) "tag") machine=
+      .ok (clearedTagMachine v) 0 ∧
+    SourceBoolStructAt (clearedTagSource v) 2 (clearedTagHeap v) growthRoot growthAddress layout ∧
+    Source.MemOK E SH (clearedTagSource v) ∧
+    StateRepr 1 1 8 ((Frag.init Γ).push (.mem B) .ok) (grownDefaultState.withHeap (clearedTagHeap v)) grownDefaultBase (clearedTagMachine v) ∧
+    StructAllocatorRepr (clearedTagHeap v) grownDefaultBase 8 ⟨49,by decide⟩ (clearedTagMachine v) ∧
+    [(tagAfterSource v).2.heap.get 0,(tagAfterSource v).2.heap.get 1,(tagAfterSource v).2.heap.get 2,(tagAfterSource v).2.heap.get 3,
+     (clearedTagSource v).2.heap.get 0,(clearedTagSource v).2.heap.get 1,(clearedTagSource v).2.heap.get 2,(clearedTagSource v).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,tagData v 3⟩,some ⟨SB,sourceBoolMemory []⟩,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,tagData k0 3⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    [cells machine,cells grownDefaultMachine,cells boundMachine,cells (afterTagMachine v),cells (clearedTagMachine v)]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[48]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],tagWord v,w[48]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[0],w[48]]] ∧
+    (clearedTagHeap v).field growthRoot layout.tag_type=PrimTy.dflt .uint ∧
+    ((clearedTagHeap v).field growthRoot layout.child_type).id=3 ∧
+    SourceBoolMemoryAt (clearedTagSource v) 0 (clearedTagHeap v) (left.wk (List.prefix_append H [B])) .dyn ∧
+    SourceBoolMemoryAt (clearedTagSource v) 1 (clearedTagHeap v) (right.wk (List.prefix_append H [B])) .dyn ∧
+    [(clearedTagMachine v).mem 5,(clearedTagMachine v).mem 48,(clearedTagMachine v).mem 49]=[w[48],w[0],w[0]] ∧
+    (clearedTagSource v).1.get .here=.memRef rfl 3 ∧
+    (clearedTagSource v).1.get (.there (.there (.there soldAlias)))=.memRef rfl 0 ∧
+    (clearedTagMachine v).stack=[w[42]] := by
+  obtain ⟨hitems,hprog,hprefix,hr,hm,hword,ha,hrest⟩ := named_declared_tag_program p v
+  obtain ⟨_,_,_,_,_,_,_,hleft,hright,rest⟩ := hrest
+  obtain ⟨z,m',hd,he,hs,hi,hc,hr',hm',hw',hl,hstack,halloc,htag,hchild,halias,hframe,heffects⟩ :=
+    SourceBoolStructAt.delete_tag_word layout (G p) F0 0 (grownDefaultState.withHeap (afterTagHeap v)) growthRoot growthAddress hr
+      (.there xroot) (.there root) rfl rfl (by decide) SH hm hword
+  have hdknown : (Source.deleteLoc (E := E) (Γ := DTΓ) F0 2 (τ := .int .u256) (.mem 2 0)).run (tagAfterSource v)=(.ok (),clearedTagSource v) := by
+    obtain ⟨ht,hw⟩ := source_struct_tag_write (tagAfterSource v) 2 dn layout.source_types v (PrimTy.dflt .uint) 3 hr.parent
+    exact hw
+  have hz : z=clearedTagSource v := congrArg Prod.snd (hd.symm.trans hdknown)
+  subst z
+  have hptr := (PtrFrag.local (b := 1) (.there root : Idx (.mem B::Γ) (.mem (.struct S))) (by decide)).run_of_eval
+    (hword.push w[0]) (r := growthRoot) (by simp only [MPath.mvalT];rfl)
+  have hzero : run (compileVal 1 (Memory.deleteDefaultValue (C := C) (Γ := .mem B::Γ) .uint)) (afterTagMachine v)=
+      .ok ((afterTagMachine v).push w[0]) 0 := by
+    exact tagLiteral_run k0 (afterTagMachine v)
+  have hcode : run (structTagDeleteCode (C := C) (Δ := .mem B::Γ) 1 (.there root) "tag") (afterTagMachine v)=.ok (clearedTagMachine v) 0 := by
+    rw [structTagDeleteCode,structTagWriteCode,List.append_assoc,run_append_ok hzero,run_append_ok hptr]
+    exact writeFieldWord_run (afterTagMachine v) ⟨32,by decide⟩ 0 w[0] (by decide)
+  have ht : m'=clearedTagMachine v := (Out.ok.inj (hc.symm.trans hcode)).1
+  subst m'
+  refine ⟨?_,he,?_,?_,hr',hm',hw',halloc _ (by decide) ha,rfl,rfl,htag,?_,?_,?_,rfl,rfl,rfl,hstack⟩
+  · obtain ⟨hd₀,hr₀,ht₀,tail⟩ := named_tag_prefix_stages p v 1
+    have hs₀ := source_expr_statement_run (G p) F0 3 XΓ.length _ (tagAfterSource v) (clearedTagSource v) _ he
+    have ht₁ := source_items_pair_run (G p) F0 0 XΓ.length _ _ (tagBoundSource v) (tagAfterSource v) (clearedTagSource v) ht₀ hs₀
+    have ht₂ := source_items_cons_run (G p) F0 6 XΓ.length _ _ (tagDeclaredSource v) (tagBoundSource v) (clearedTagSource v) hr₀ ht₁
+    rw [declaredBoundTaggedDeletedItems,Source.execItems,Source.Hoare.run_bind,hd₀]
+    change (Source.execItems (G p) F0 7 XΓ.length none _ (tagDeclaredSource v).1 >>= fun o => Source.EM.lift (o.up XΓ)).run (.nil,(tagDeclaredSource v).2)=_
+    rw [Source.Hoare.run_bind,ht₂]
+    rfl
+  · obtain ⟨_,_,_,hi₀,hi₁,hi₂⟩ := named_tag_prefix_stages p v 0
+    rw [declaredBoundTaggedDeletedProg,Prog.run_cons_ok hi₀,Prog.run_cons_ok hi₁,Prog.run_cons_ok hi₂,Prog.run_cons_ok hi,Prog.run_nil]
+    rfl
+  · rw [run_append_ok hprefix];exact hc
+  · change (clearedTagHeap v).field growthRoot layout.child_type=(afterTagHeap v).field growthRoot layout.child_type at hchild
+    rw [hchild]
+    rfl
+  · exact halias (left.wk (List.prefix_append H [B])) hleft
+  · exact halias (right.wk (List.prefix_append H [B])) hright
+
+/-- Nonzero/max deletion materially differs from skipping it. Low Source horizon
+retains the ACTUAL changed declaration/rebinding/tag prefix, not rollback. -/
+theorem named_tag_delete_negatives (p : Roadmap.Pipeline) :
+    (afterTagMachine tagMax).mem 32≠(clearedTagMachine tagMax).mem 32 ∧
+    (afterTagMachine tagNine).mem 32≠(clearedTagMachine tagNine).mem 32 ∧
+    (Source.execItems (G p) F0 7 XΓ.length none declaredBoundTaggedDeletedItems (withArgs sy tagNine true).1).run (.nil,sy.2)=
+      (.error .timeout,(.nil,(tagAfterSource tagNine).2)) ∧
+    (Source.evalE (G p) F0 2 (sourceStructTagDelete layout (.there xroot))).run (tagAfterSource tagNine)=
+      (.error .timeout,tagAfterSource tagNine) ∧
+    (Source.execItems (G p) F0 8 XΓ.length none declaredBoundTaggedDeletedItems (withArgs sy k0 true).1).run (.nil,sy.2)=
+      (.ok (.normal (clearedTagSource k0).1),(.nil,(clearedTagSource k0).2)) ∧
+    (Source.execItems (G p) F0 8 XΓ.length none declaredBoundTaggedDeletedItems (withArgs sy tagMax true).1).run (.nil,sy.2)=
+      (.ok (.normal (clearedTagSource tagMax).1),(.nil,(clearedTagSource tagMax).2)) := by
+  refine ⟨?_,by decide,?_,source_struct_tag_delete_low_horizon layout (G p) F0 _ (.there xroot) 2 (by decide),
+    (named_declared_tag_delete p k0).1,(named_declared_tag_delete p tagMax).1⟩
+  · change tagWord tagMax≠w[0]
+    rw [tagWord_max]
+    decide
+  · obtain ⟨hd₀,hr₀,ht₀,tail⟩ := named_tag_prefix_stages p tagNine 0
+    have he₀ := source_struct_tag_delete_low_horizon layout (G p) F0 (tagAfterSource tagNine) (.there xroot) 2 (by decide)
+    have hs₀ := source_expr_statement_error (G p) F0 2 XΓ.length _ (tagAfterSource tagNine) (tagAfterSource tagNine) .timeout he₀
+    have ht₁ : (Source.execItems (R := []) (M := false) (k := .body) (G p) F0 5 XΓ.length none (.stmt (.expr (sourceStructTagAssign layout (.there xroot) (.there xi))) (.stmt (.expr (sourceStructTagDelete layout (.there xroot))) .nil)) (tagBoundSource tagNine).1).run (.nil,(tagBoundSource tagNine).2)=
+      (.error .timeout,(.nil,(tagAfterSource tagNine).2)) := by
+      rw [Source.execItems,Source.Hoare.run_bind,ht₀]
+      change (Source.execItems (G p) F0 4 XΓ.length none _ (tagAfterSource tagNine).1 >>= fun o => Source.EM.lift (o.up DTΓ)).run (.nil,(tagAfterSource tagNine).2)=_
+      rw [Source.Hoare.run_bind,Source.execItems,Source.Hoare.run_bind,hs₀]
+    have ht₂ : (Source.execItems (R := []) (M := false) (k := .body) (G p) F0 6 XΓ.length none
+        (.stmt (.expr (sourceStructAssign layout (.there xroot) .here))
+          (.stmt (.expr (sourceStructTagAssign layout (.there xroot) (.there xi))) (.stmt (.expr (sourceStructTagDelete layout (.there xroot))) .nil)))
+        (tagDeclaredSource tagNine).1).run (.nil,(tagDeclaredSource tagNine).2)=
+        (.error .timeout,(.nil,(tagAfterSource tagNine).2)) := by
+      rw [Source.execItems,Source.Hoare.run_bind,hr₀]
+      change (Source.execItems (G p) F0 5 XΓ.length none _ (tagBoundSource tagNine).1 >>= fun o => Source.EM.lift (o.up DTΓ)).run (.nil,(tagBoundSource tagNine).2)=_
+      rw [Source.Hoare.run_bind,ht₁]
+    rw [declaredBoundTaggedDeletedItems,Source.execItems,Source.Hoare.run_bind,hd₀]
+    change (Source.execItems (G p) F0 6 XΓ.length none _ (tagDeclaredSource tagNine).1 >>= fun o => Source.EM.lift (o.up XΓ)).run (.nil,(tagDeclaredSource tagNine).2)=_
+    rw [Source.Hoare.run_bind,ht₂]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_declared_tag_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_declared_tag_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_tag_delete_negatives' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_tag_delete_negatives
 
 end Solidity.Backend.MemoryOps.SourceStructControls

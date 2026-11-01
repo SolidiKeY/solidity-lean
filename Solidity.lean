@@ -980,3 +980,4 @@ import Solidity.Backend.MemoryOps.SourceStructGrowth
 import Solidity.Backend.MemoryOps.SourceStructDeclaration
 
 import Solidity.Backend.MemoryOps.SourceStructTag
+import Solidity.Backend.MemoryOps.SourceStructTagDelete

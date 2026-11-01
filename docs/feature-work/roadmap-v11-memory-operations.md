@@ -4420,3 +4420,104 @@ application remains unimplemented. Full physical bytes/general paths/graphs/
 ABI/storage/deep-copy/all-profile target allocation failures and final Source/V10/
 target obligations stay open. Existing independently BLOCKED goal is unchanged;
 no worker goal read/update RPC or authorization to mutate/reset it exists.
+
+
+## C58: actual named uint256-tag deletion after reached construction/binding/write
+
+This partial G34/Backfill B application implements the distinct deletion gap
+identified in C57, in
+[SourceStructTagDelete.lean](../../Solidity/Backend/MemoryOps/SourceStructTagDelete.lean).
+SourceBoolStructAt.delete_tag_word starts with the independent INITIAL named
+observer, aligned root locals, struct mapFree, MemOK and existing StateRepr.
+Actual Source.deleteLoc consumes the positive-horizon uint256 zeroVal; its
+Val.default agrees with intrinsic PrimTy.dflt.uint. The actual .delete member
+expression returns unit, unlike assignment's value result. The theorem derives
+expression n+3, statement n+4, intrinsic deleteMem and the WHOLE existing
+compile-default/load-root/write-field program via the published primitive delete
+agreement and PtrFrag.writePrimitive. No desired postrelation or assumed delete
+execution is supplied. Tag zero, unchanged selected reference and all represented
+old Boolean arrays, other Source addresses, locals/world, stack and allocator
+frames follow. No address injectivity premise or new allocator/compiler exists.
+
+The appended SourceStructControls bodies consume the ACTUAL C57 declaration,
+reference assignment and tag-write output, including MemOK/StateRepr/allocator49.
+The fresh local's Source cons context and target context are kept separate;
+original Source parameter count XΓ.length remains fixed. named_tag_prefix_stages
+reuses the producers at horizons n+6/n+5/n+4, deriving each actual reached stage
+and intrinsic step. named_declared_tag_delete executes FOUR Source RItems
+statements (horizon8, declaration7/reference6/tag5/delete4), intrinsic Prog and
+WHOLE four-operation word append. Every canonical uint is quantified, including
+zero and maximum, without a new admission cap. The selected fresh child is the
+supported EMPTY default; old nonempty left/right children and aliases are framed.
+Five complete16-word vectors expose all old cells, tag7→value→zero, parent child
+pointer16→48, saved stack42/free49/local5/header48/neighbour99. The final two
+complete four-object Source tables extend C57's retained four complete Source
+stages; these are combined evidence, not a claim C58 repeats all five tables.
+Fresh/retained Source identities3/0 and old TFF/FTF contents remain exact.
+
+Nonzero9 and maximum distinguish skipped deletion. Actual SourceItems7 times
+out only after the REAL declaration/reference/tag prefix, retaining that tagged
+heap; expression horizon≤2 times out before tag deletion. These are Source
+observations, not word timeout/rollback or panic-returndata equivalence. All C57
+and earlier control bodies, vectors and guards remain verbatim. Two production
+laws and three control/stage laws have exact standard-only axiom guards.
+Focused closure passed189jobs after retained distinct failed proof attempts.
+No sorryAx survives the passing refined tree. Lean MCP/goal read-update RPCs are
+unavailable; neither limitation authorizes goal recreation or status mutation.
+
+Runtime recovery was operational, not a proof pass: the same existing session
+was stopped with retained exit255/OOMfalse and its transient /tmp lock directory
+was absent (first lock command exit66). State/mount/diff metadata were preserved,
+the absent lock directory restored and the SAME container started without a new
+runtime/image, deletion or capacity change. Fresh Lean4.24.0/Lake5.0.0-src+797c613
+and KeySort2jobs passed. The same child12GiB/no-swap under16GiBparent, CPU0,
+threads1/Lean-j1/cacheOFF and proof/fuel/node/test/time guards remain enforced.
+Restart resets the current cgroup counter epoch: current receipts must not be
+conflated with separately preserved historical12GiBpeak/1051maxevents. Preflight
+forecast96MiB above536870912-byte reserve was safe; sources/caches/seals retained.
+Final gate commands/resources and independent read-only finder/skeptic source
+and committed-artifact reviews are recorded in the C58 handoff.
+
+All original Work/Backfill parents remain partial or blocked. This finite
+uint256-tag/Boolean-reference Source/intrinsic/symbolic-word application does not
+prove physical bytes, arbitrary layouts/graphs, all-profile constructors/target
+allocation failure, ABI/storage/fresh deep-copy/emitted loops, reserved memory-to-
+storage copying or final Source/V10/target composition. General tag operation
+sequence applications and further primitive-array Source observations remain
+possible investigations; no independent queue exhaustion is asserted. Existing
+BLOCKED goal remains unchanged, independently of this productive manual turn.
+Raw docs/inventory remain failed; complete-public zero-new and scoped axiom
+proposals are separate checks, not global passes or reserved-registry edits.
+
+
+C58 final reviewed Lean tree: focused189/full default1100/TestSuite262/
+SolKey377parsed131read-bearing covered, wrapper exit0. Fresh versions and
+KeySort2jobs pass. Strict/trust/layers/orphans/lane/complete fixtures/script
+corruption/diff pass; exact938standard pins across119owned modules, zero unsafe
+sets. Raw global inventory stays **exit1**,1297unrecorded=359published inherited+
+938owned (14original+345incoming within inherited). Additive owned pin/localEvidence
+proposals require coordinator reconciliation, with no reserved registry rewrite.
+Raw strict docs stays **exit1**,83complete findings byte-identical to published
+baseline SHA2561905b6529ffff68bf2ee9256f84952fd8a19e0df94a434b3b052c11638142f2a;
+separate publiczero-new passes, frozenno-new **exit1** with11incoming retained.
+Warm strict timed zero TestSuite modules; independently exact262file Suite/
+fixture/toolchain bytes and matching actual versions retain C31 cold26/max160s
+under unchanged300s budget, with no new cold timing coverage. Full aggregate
+Lean/Lake RSS1564200KiB, disk growth266240bytes, new cgroup max/OOM/kill events0.
+Current restarted-epoch session peak is separately retained; historical peaks/
+resource stops are not erased or counted as new exec events. All3224 C57 seal
+entries reverified unchanged. Both independent finder/skeptic SOURCE/docs reviews
+PASS with no remaining findings; final committed-artifact reviews occur after
+new additive export and are recorded in the sealed handoff. Source proof repairs
+and all failed focused exits stay retained; no observation/budget weakening.
+
+Queue reassessment against actual owned Source interfaces: uint256 tag deletion
+now exists; no SourceUintMemoryAt/uint-array Source observation adapter was found
+in the owned Source modules (immutable decoded uint transfers remain distinct).
+Published Source primitive values, Data arrays, readLoc/memSet and intrinsic
+uint-array paths are possible next independent G32/G34 producers to inspect,
+not an implemented claim or evidence that all independent work is exhausted.
+Physical-byte target transport/general Source graph/default/failure producers,
+reserved memory-to-storage and final V10/Source/target remain genuinely missing
+from this component. All original queue statuses remain partial/blocked; no
+new admission/profile restriction, semantic answer or goal status change follows.
