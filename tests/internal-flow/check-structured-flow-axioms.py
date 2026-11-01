@@ -35,6 +35,26 @@ PINS = {'Solidity.Backend.InternalFlow.FrameProg.sound': ['Classical.choice',
  'Solidity.Backend.InternalFlow.StructuredChecks.wrong_observations': ['Classical.choice',
                                                                        'Quot.sound',
                                                                        'propext']}
+# Additive C22 consumers; every earlier exact set remains unchanged.
+PINS.update({'Solidity.Backend.InternalFlow.StructuredChecks.call_arguments': ['Classical.choice',
+                                                                   'Quot.sound',
+                                                                   'propext'],
+ 'Solidity.Backend.InternalFlow.structured_call_frame': ['Classical.choice',
+                                                         'Quot.sound',
+                                                         'propext'],
+ 'Solidity.Backend.InternalFlow.StructuredChecks.actual_call': ['Classical.choice',
+                                                                'Quot.sound',
+                                                                'propext'],
+ 'Solidity.Backend.InternalFlow.StructuredChecks.call_framed': ['Classical.choice',
+                                                                'Quot.sound',
+                                                                'propext'],
+ 'Solidity.Backend.InternalFlow.StructuredChecks.call_observations': ['Classical.choice',
+                                                                      'Quot.sound',
+                                                                      'propext'],
+ 'Solidity.Backend.InternalFlow.StructuredChecks.wrong_call_unwind': ['Classical.choice',
+                                                                      'Quot.sound',
+                                                                      'propext']})
+
 log = Path(sys.argv[1]).read_text()
 reports = re.findall(r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)", log)
 actual = {n: sorted(a.strip() for a in names.split(',') if a.strip()) for n, names in reports}

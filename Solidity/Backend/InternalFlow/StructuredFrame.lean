@@ -1,4 +1,5 @@
 import Solidity.Backend.InternalFlow.CompletedLoopFrame
+import Solidity.Backend.InternalFlow.FrameLaws
 
 /-! Structural successful-flow consumers of existing intrinsic runs. These
 proof derivations do not change withinM, compiler admission or execution.
@@ -78,6 +79,37 @@ mutual
     · cases executed
 end
 
+/-- Compose an actual structurally framed body with call entry and result export.
+The plan is a derivation over the existing syntax, not a supplied preservation
+conclusion. This does not alter withinM or target compiler admission. -/
+theorem structured_call_frame {Γ Δ rs ps Γf : Ctx} {μ : Mutability} {t : LTy}
+    (args : Args C Γ ps) (ret : CallRet Γ rs Δ) (body : Prog C (rs ++ ps) Γf)
+    (i : Idx (rs ++ ps) t) (plan : FrameProg μ t body i)
+    (caller : State C Γ) (arguments : TEnv C caller.H ps)
+    (ha : args.evalT caller = .ok arguments)
+    (out : Out C (ret.enterT (caller.withEnv arguments)).st.H Γf)
+    (hb : body.runR (ret.enterT (caller.withEnv arguments)).st = .ok out) :
+    let entry := ret.enterT (caller.withEnv arguments)
+    let extension := entry.ext.trans out.ext
+    let final : Out C caller.H Δ := ⟨out.st.withEnv
+      (ret.leaveT (TEnv.wk extension Γ caller.env)
+        (TEnv.take rs (TEnv.drop body.ext out.st.env))), extension⟩
+    TRun.call args ret body.ext body.runR caller = .ok final ∧
+      TGFrameM μ caller final.st final.ext ∧
+      Heap.Keeps final.ext caller.heap final.st.heap := by
+  have entered : TGFrameM μ caller (ret.enterT (caller.withEnv arguments)).st
+      (ret.enterT (caller.withEnv arguments)).ext :=
+    (TGFrameM.env caller arguments (List.prefix_refl _)).trans
+      (CallRet.enterT_frameM (μ := μ) ret (caller.withEnv arguments)) _
+  have bodyFrame : TGFrameM μ (ret.enterT (caller.withEnv arguments)).st out.st out.ext :=
+    (FrameProg.sound plan hb).1
+  have composed : TGFrameM μ caller out.st
+      ((ret.enterT (caller.withEnv arguments)).ext.trans out.ext) := entered.trans bodyFrame _
+  exact ⟨call_return args ret body.ext body.runR caller arguments ha out hb,
+    composed.withEnv _,composed.keeps⟩
+
+/-- info: 'Solidity.Backend.InternalFlow.structured_call_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms structured_call_frame
 /-- info: 'Solidity.Backend.InternalFlow.FrameStmt.sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms FrameStmt.sound
 /-- info: 'Solidity.Backend.InternalFlow.FrameProg.sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/

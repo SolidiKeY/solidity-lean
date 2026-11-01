@@ -209,7 +209,12 @@ theorem source_prefix : (contents caller.st,
 theorem source_entry : (contents entry.st,
     [cond (entry.st.env.1 : Bool) (1:Int) 0, entry.st.env.2.1.1, entry.st.env.2.2.1.1, entry.st.env.2.2.2.1.1],
     identity entry.st.env.2.2.2.2.1) =
-    (some [[2,7,11],[3,23,29,31]], [0,0,0,42], some 0) := by decide +kernel
+    (some [[2,7,11],[3,23,29,31]], [0,0,0,42], some 0) := by
+  have heap : contents caller.st = some [[2,7,11],[3,23,29,31]] := congrArg Prod.fst source_prefix
+  have seed : values.1.1 = 42 := congrArg Prod.fst argument_order
+  have alias : identity values.2.1 = some 0 := congrArg Prod.snd argument_order
+  change (contents caller.st,[0,0,0,values.1.1],identity values.2.1) = _
+  rw [heap,seed,alias]
 
 theorem source_body : (contents bodyOutput.st,
     [identity bodyOutput.st.env.1, identity bodyOutput.st.env.2.2.2.2.2.1],
@@ -244,26 +249,43 @@ theorem target_next : words (Evm.run (prefixProducer.code ++ callProducer.code +
 
 theorem checked_target_next : words (Evm.run (prefixProducer.code ++ checked.code) machine)
     [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265] =
-    some [77,266,99,1729,256,256,259,17,29,1,2,19,17,3,23,29,31,2,99,101] := by decide +kernel
+    some [77,266,99,1729,256,256,259,17,29,1,2,19,17,3,23,29,31,2,99,101] := by
+  have code : checked.code = callProducer.code ++ nextProducer.code := by
+    unfold checked ownedProgram
+    rfl
+  rw [code, ← List.append_assoc]
+  exact target_next
 
 theorem exact_frame_cost : [prefixProducer.need,expanded.need,callProducer.need,nextProducer.need,
     checked.requiredFrame,prefixProducer.cost initial,callProducer.cost caller.st,nextProducer.cost exported.st,
     checked.allocationCost caller.st] = [4,10,10,7,10,7,3,0,3] := by decide +kernel
 
-theorem wrong_same_typed_order : resultValues exported.st ≠ [1,17,29,42] := by decide +kernel
+theorem wrong_same_typed_order : resultValues exported.st ≠ [1,17,29,42] := by
+  rw [show resultValues exported.st = [1,29,17,42] from congrArg (fun x => x.2.1) source_export]
+  decide
 
 theorem wrong_destination : words (Evm.run (prefixProducer.code ++ callProducer.code) machine) [1,5,6,7] ≠
     some [77,17,42,29,1] := by decide +kernel
 
-theorem wrong_private_escape : callerAliases exported.st ≠ [some 1,some 2,some 2] := by decide +kernel
+theorem wrong_private_escape : callerAliases exported.st ≠ [some 1,some 2,some 2] := by
+  rw [show callerAliases exported.st = [some 1,some 0,some 0] from congrArg (fun x => x.2.2) source_export]
+  decide
 
 theorem wrong_old_contents : contents exported.st ≠
-    some [[2,7,11],[3,23,29,31],[2,99,101]] := by decide +kernel
+    some [[2,7,11],[3,23,29,31],[2,99,101]] := by
+  rw [show contents exported.st = some [[2,19,11],[3,23,29,31],[2,99,101]] from congrArg Prod.fst source_export]
+  decide
 
 theorem wrong_unrelated_contents : contents finalOutput.st ≠
-    some [[2,19,17],[3,19,29,31],[2,99,101]] := by decide +kernel
+    some [[2,19,17],[3,19,29,31],[2,99,101]] := by
+  rw [show contents finalOutput.st = some [[2,19,17],[3,23,29,31],[2,99,101]] from congrArg Prod.fst source_next]
+  decide
 
-theorem wrong_cost : prefixProducer.cost initial + checked.allocationCost caller.st ≠ 11 := by decide +kernel
+theorem wrong_cost : prefixProducer.cost initial + checked.allocationCost caller.st ≠ 11 := by
+  have h : prefixProducer.cost initial + checked.allocationCost caller.st = 10 :=
+    congrArg (fun xs => xs[5]! + xs[8]!) exact_frame_cost
+  rw [h]
+  decide
 
 theorem wrong_cursor : words (Evm.run (prefixProducer.code ++ checked.code) machine) [0] ≠ some [77,267] := by decide +kernel
 

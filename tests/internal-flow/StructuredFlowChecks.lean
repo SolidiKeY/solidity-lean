@@ -98,6 +98,55 @@ theorem changed_marker_not_protected : ¬ FrameProg .view (.val .uint) (program 
         (TEnv.get (.there (.there .here) : Idx Caller (.val .uint)) callMid.st.env) := by decide +kernel
   exact wrong h
 
+/-- Capture the populated caller as evaluated parameters of an intrinsic void
+call. Its body's local marker changes must not escape back to the caller. -/
+def callArgs : Args C Caller Caller :=
+  .snocMemory (.snocMemory (.snoc .nil .uint (.user "marker")
+    (.simple (.local (.there (.there .here))))) A (.user "first")
+    (.var (.there .here) rfl)) A (.user "second") (.var .here rfl)
+def returned : Solidity.Out C callMid.st.H Caller :=
+  ⟨reached.st.withEnv (TEnv.wk reached.ext Caller callMid.st.env),reached.ext⟩
+
+theorem call_arguments : callArgs.evalT callMid.st = .ok callMid.st.env := by
+  have first : callMid.st.env.1.isSome = true := by decide +kernel
+  have second : callMid.st.env.2.1.isSome = true := by decide +kernel
+  cases hfirst : callMid.st.env.1 with
+  | none => rw [hfirst] at first; cases first
+  | some a =>
+    cases hsecond : callMid.st.env.2.1 with
+    | none => rw [hsecond] at second; cases second
+    | some b =>
+      simp only [callArgs,Args.evalT,Val.evalT,Simple.evalT,MPath.mvalT,TEnv.get,
+        ok_bind,hfirst,hsecond]
+      change Except.ok (some a,(some b,(callMid.st.env.2.2.1,()))) = _
+      rw [← hfirst,← hsecond]
+      exact congrArg Except.ok (Prod.ext rfl (Prod.ext rfl (Prod.ext rfl (Subsingleton.elim _ _))))
+
+theorem actual_call :
+    TRun.call callArgs .none (program true).ext (program true).runR callMid.st = .ok returned := by
+  exact call_return callArgs .none (program true).ext (program true).runR
+    callMid.st callMid.st.env call_arguments reached actual_run
+
+theorem call_framed : TGFrameM .view callMid.st returned.st returned.ext ∧
+    Heap.Keeps returned.ext callMid.st.heap returned.st.heap := by
+  exact (structured_call_frame callArgs (.none : CallRet Caller [] Caller)
+    (program true) (.here : Idx Caller (.mem A)) (proofFor true .here)
+    callMid.st callMid.st.env call_arguments reached actual_run).2
+
+theorem call_observations :
+    (returned.st.H.length,
+      [callArray returned.st 0,callArray returned.st 1,callArray returned.st 2,callArray returned.st 3],
+      caller returned.st,count returned.st) =
+    (4,[some [0],some [2,7,11],some [2,0,0],some [2,0,0]],
+      [some 1,some 1,some 42],some 9) := by decide +kernel
+
+theorem wrong_call_unwind : caller returned.st ≠ [some 1,some 1,some 0] ∧
+    caller returned.st ≠ [some 3,some 1,some 42] := by
+  have observed : caller returned.st = [some 1,some 1,some 42] :=
+    congrArg (fun x => x.2.2.1) call_observations
+  rw [observed]
+  decide
+
 #print axioms changed_marker_not_protected
 #print axioms FrameStmt.sound
 #print axioms FrameProg.sound
@@ -109,4 +158,10 @@ theorem changed_marker_not_protected : ¬ FrameProg .view (.val .uint) (program 
 #print axioms false_branch
 #print axioms wrong_observations
 #print axioms actual_writer_excluded
+#print axioms call_arguments
+#print axioms structured_call_frame
+#print axioms actual_call
+#print axioms call_framed
+#print axioms call_observations
+#print axioms wrong_call_unwind
 end Solidity.Backend.InternalFlow.StructuredChecks

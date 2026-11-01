@@ -1535,3 +1535,68 @@ C21 rejected validation experiments (superseding any pending-tool wording): the 
 C21 scoped validation completed: actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs PASS1.109s (RUNTIME_GATE_PASS only); complete focused closure PASS1.511s. All17fixture sources freshly prepared with actual source/toolchain/dependency/object/guard binding. Complete registered cache gate PASS114.630s/120s:30owned/allactualimports/17fixtures/536reports, full11575toolchain hashes before/after equal617fd68210c0b46750ab92f863878665875839568f23d99320f79053956360f1. Actual cgrouppeak1088430080B/sampledaggregateRSS1249600KiB, hard12884901888B/swap0, serial-j1/LEAN_NUM_THREADS1 and writer/compiler locks. All525oldpins/16fixtures unchanged;11new additive. Separate7report audit, cache/dependency tamper controls, all17exactguards/68negative controls and post-tamper12033content integrity audit PASS; integrity is not proof. Extra-audit wrapper48.630s includes serial lock waiting behind the47.240s profiler; one compiler executes at a time, no time budget raised. Cached validation is not raw/full validation.
 
 Further original validation work continued after the structural proof: actual CLI TupleMemoryCalls source profiling PASS47.240s/120s, with reported type checking28.1s, elaboration14.9s and import728ms. It preserves every original85report and source body; profiling flags are diagnostics, not raised proof limits. This identifies concrete remaining OWNED proof-elaboration work rather than an absent producer, and is not an equivalent raw-source repair. Full/raw gates remain FAILED. Current default-cache object presence is inventoried separately and proves neither freshness nor readiness; it does not justify an unchanged full300s retry. No independent-work-exhaustion claim.
+
+## Continuation22 — shared tuple observations and structured call unwind
+
+Partial original Work1/Work4 and BackfillA/B evidence only. The existing blocked
+goal, full queue, source profile and mandatory gates remain unchanged. No new
+publication or reserved implementation is incorporated in this checkpoint.
+
+The owned TupleMemoryCalls fixture now derives result-entry observations from
+its already checked prefix/argument observations, checked_target_next from the
+actual checked-code equation and target_next, and five negative controls from
+complete source snapshots/cost observations. All old theorem statements,
+ordered vectors, 85 axiom reports and report order are unchanged. The named
+profile passes in49.782s; the changed fixture passes in46.645s. These are separate
+runs with different profiler flags, not an isolated causal speedup measurement.
+Asynchronous named kernel trace spans overlap; their sum is not CPU cost.
+The attempted shared caller-export simplification hit the existing recursion
+limit and was reverted; the limit was not increased. Both original failures
+are retained under unique C22 evidence names.
+
+A materially changed complete raw-source attempt still exits124 at120.851s,
+after reaching TupleMemoryCalls. Proof sharing is insufficient to pass that
+mandatory gate. The original full300s timeout, raw-source timeout and all prior
+resource failures remain failures; no unchanged full gate was repeated.
+Repeated target-stage reductions remain concrete owned engineering work.
+
+[StructuredFrame](../../Solidity/Backend/InternalFlow/StructuredFrame.lean)
+adds structured_call_frame over actual Args.evalT, CallRet.enterT, a genuine
+FrameProg derivation at a protected typed index and actual body.runR success.
+It derives the real TRun.call return equation, exact composed entry/body heap
+extension, TGFrameM and Heap.Keeps through actual result export. A FrameProg
+plan is a restricted syntax derivation, not an assumed preservation equation.
+This theorem does not assert arbitrary caller-local protection or change
+withinM/compiler admission.
+
+The inhabited StructuredFlowChecks void call evaluates the populated caller's
+two non-null aliases and scalar as actual parameters, executes the existing
+nested block/selected branch/completed allocating loop plus local allocation,
+and drops the private body environment. Complete ordered objects remain
+[0], [2,7,11], [2,0,0], [2,0,0]; caller aliases remain1/1, caller marker42 is
+restored after the callee's marker0, and persistent count9 remains. Actual
+argument evaluation derives non-nullness and its typed Unit tail; no desired
+midpoint, simulation or heap-preservation premise is supplied. Wrong marker0
+and fresh alias3 controls are rejected from the complete successful snapshot.
+Six new exact standard-axiom pins are additive; all old536 reports remain.
+
+Independent read-only finder and skeptic source reviews found no issue. Neither
+review ran Lean/server/builds. Final command/resource, provenance, guard and
+committed-artifact results are recorded in the new immutable C22 handoff.
+All Work1–6/BackfillA–B remain partial: no unbounded target runtime/dependent
+signature lowering, early-return/break/continue producer, general mixed-loop
+body certificate, word-frame/live-byte-journal representation or target
+transient/callback-world composition is added. No independent-work-exhaustion,
+full validation or integration eligibility claim follows.
+
+C22 scoped final gates: all30 owned import targets PASS2.079s; all17fixture
+sources freshly prepared, then the COMPLETE registered cached gate
+PASS112.706s/120s with542 ordered reports, plus the separate7-report audit,
+all17actual guards/68 corruption controls and post-tamper input integrity.
+The actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2-job runtime gate passes.
+The attempted broader root import check separately exits124/120.609s while
+building uncached prerequisites; it remains FAILED, not a focused pass. No
+original full300s retry follows. Raw normal/strict docs remain exit1; complete
+output equals consumed publication, with two incoming reserved missing paths
+and ambiguity relative to frozen base. None of these distinctions waives a
+mandatory original source gate or establishes integration eligibility.
