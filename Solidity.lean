@@ -1007,3 +1007,7 @@ import Solidity.Backend.MemoryOps.SourceUintFixedAssignment
 import Solidity.Backend.MemoryOps.SourceUintFixedDelete
 import Solidity.Backend.MemoryOps.SourceUintFixedMutationSequence
 import Solidity.Backend.MemoryOps.SourceUintFixedMutationControls
+import Solidity.Backend.MemoryOps.SourceUintFixedFuel
+import Solidity.Backend.MemoryOps.SourceUintFixedProgram
+import Solidity.Backend.MemoryOps.SourceUintFixedProgramFailure
+import Solidity.Backend.MemoryOps.SourceUintFixedProgramControls

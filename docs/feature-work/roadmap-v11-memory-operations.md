@@ -5355,3 +5355,115 @@ fixture/toolchain bytes and fresh67versions match, retaining26cold/max160sunder
 Final idle resource sample874676224availablebytes retains512MiBreserve plus
 96MiBforecast; old and newOOM/cumulativepeak history remains explicitly separate.
 No guard, expected observation, admission decision or source ownership changed.
+
+
+### C68 — actual fixed declaration/write/delete programs (PARTIAL)
+
+Current C67 source inspection reproduced separate Source statement horizons and
+word append, with no combined Source RItems/intrinsic Prog. Existing Source
+execItems consumes fuel at each statement, so the length1 case cannot use the
+minimal constructor horizon followed by two minimal mutations. SourceUintFixedFuel
+proves actual zeroElems(n+extra+1)/zeroVal(n+extra+3) execution by induction on the
+DECLARED length, retaining exact n elements and existing Data.array some n.
+Caller extra fuel is execution input, not a proof budget increase, monotonicity
+axiom, source admission cutoff or new evaluator/allocator. These kernel facts
+include0 but grant no zero-length Source admission.
+
+source_uint_fixed_program_word now executes ONE existing Source.RItems at n+7:
+actual declaration n+6, reached RHS-first indexed assignment n+5, then reached
+primitive default/unit delete n+4. All stages use ORIGINAL Γ.length parameter
+count despite Source local cons; intrinsic heap extension/local push and word
+local offsets are derived separately. Actual Source default/decl producers and
+C67 resolved operation certificates derive the mid/write/delete states, typed
+fixed observers, MemOK, complete word StateRepr/AllocatorRepr, old object/world/
+local/stack frames and whole word append from INITIAL alignment/ownership/space.
+Existing typed Prog executes the matching declaration/assign/delete on those
+same intrinsic heaps. No desired final relation, supplied suffix run, arbitrary
+conversion certificate, global address injection, new AST/IR/state/interpreter
+or reserved constructor/copy implementation is introduced. Program definitions
+are ordinary values of EXISTING Source.RItems and Prog, not alternate semantics.
+
+source_uint_fixed_program_reject uses a separately aligned later index, initially
+at or beyond n. Actual constructor and valid first write derive the reached
+Source observer, locals, intrinsic heap, StateRepr and allocator. The next real
+Source expression panics with index bytes, its statement/whole RItems retain
+EXACT first-write globals and empty caller locals. Intrinsic Prog and whole word
+append revert; those outcome types expose no failing final heap/machine. No
+suffix object/state, Source/word panic-payload equivalence or transaction rollback
+is asserted. Source zeroVal is not a general new-expression/compiler theorem.
+
+Independently inhabited controls have old fixed[7]/neighbor[9], repeated old
+aliases, TWO numeric locals, Source allocation/MemOK and complete object-word
+ownership. Runtime program_runs/late_rejection apply actual general producers;
+selected_cases directly observes successful Source RItems/intrinsic Prog and
+final last-element0 at1/3/33. Complete fresh lists, old Source tables/typed IDs,
+all retained Source locals/alias/root identities, both full16wordframes, caller99,
+stack77, numeric slots4/5, new pointer slot6, allocator/freepointer and logical32
+are exposed. Length3/index2 materialwrite2 then clear0, reverse WORD order leaves2;
+length33/index32 writes32. No Source reverse program is claimed. Previous C67
+vectors/guards and ALL earlier fixture source remain unchanged.
+
+changed_prefix_panic executes actual Source10/typed Prog error after writing
+[0,0,2], with a real Source read2 of that prefix plus old7/9 frames. Thus skipped
+first-write/rollback/cleared-suffix observations disagree. changed_prefix_timeout
+uses length1 with separate index0/RHS7: Source6 allocates and actually writes7,
+then deletion times out. It retains that represented child/read7 and old objects;
+this is an actual low-horizon outcome, not a new depth/fuel restriction. raw_zero
+executes existing zero-length KERNEL syntax at Source7: allocation succeeds, first
+index rejects and no delete suffix runs. Raw headerless target reservation uses
+one padding cell/free33, then rejects. It is explicitly NOT zero-length Source
+admission or an all-profile allocation theorem. Positive headlines retain0<n.
+
+Focused checks use only the same supported capped runner; per-file MCP and goal
+get/update remain unavailable. Exact public axiom guards and gate outcomes below
+record final validation. Syntax/normalization failures remain raw failures. One
+dependent controls attempt replayed a still-failing prerequisite; its failed log
+is retained and does not establish a control pass. No source/statement/premise/
+observation/proof/fuel/node/stack/test/time budget was weakened. All3953C67sealed
+hashes preflight verified; same runtime/image/mounts/cache/toolchain/writer lock,
+852463616available admitted96MiB above512MiBreserve. CPU0/Lean-j1/threads1,
+aggregate12GiBnoswap/16GiBparent/OS headroom and cacheOFF remain unchanged. C60
+and C67OOM history remains failed history; no old seal/cache/source is deleted.
+
+All original G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B remain PARTIAL;
+G35.02/.06 remain BLOCKED. Fixed supported programs do not close general
+physical-byte/graph/path/effect representation, all-profile/reference constructors
+or target allocation failures, ABI/storage/deep-copy/liveness, reserved copying
+or final Source/V10/target composition. Kernel/symbolic-word checks are distinct
+from external compiler/EVM tests. The existing goal remains BLOCKED unchanged;
+no goal mutation/integration or independent-queue exhaustion is claimed.
+
+C68 final refined controls08 PASS238jobs/RSS1041992KiB/newOOMdelta0, with12exact
+standardtrio public guards and no sorryAx. Final success/rejection/controls also
+explicitly derive unchanged Source ex/events/logs/fnLocals from the actual write/
+delete frame chains; no added premise. Both independent read-only finder and
+skeptic SOURCE/control/document/script reviews PASS, including these four frames.
+Initial full01 PASS is retained for its earlier tree only. FINAL full02 PASS0
+covers refined source:1130default/262Suite/SolKey377parsed/131read-bearingcovered,
+aggregateRSS1667100KiB/diskgrowth266240bytes/newOOMdelta0. Fresh actualLean4.24.0
+commit797c613/Lake5.0.0-src+797c613/KeySort2jobs and actualcacheOFF/threads1 PASS.
+
+C68 strict/trust/layer/orphan/lane/complete-fixture/script checks PASS,89combined
+admission/corruption tests including16newfixed-program admission tests. Scoped
+exactstandard-only pins PASS1096/149ownedmodules; raw globalinventory FAIL1,
+1455unrecorded=359published+1096owned/0unsafe. Additiveproposals are evidence for
+coordinator reconciliation, no reserved inventory/ledger modification. Rawdocs
+FAIL1/83completefindings, COMPLETE current/public byte equality and zero-owned-new
+separatelyPASS. Frozen no-new remainsFAIL1/11incoming. Warmstrict times0newSuite
+modules; independently all262current/C31source/fixture/toolchain bytes and actual
+68versions match, retaining26cold/max160sunder300 only, not new timing coverage.
+All3953C67sealed entries reverified. Finalidle843120640availablebytes retains
+512MiBreserve+96MiBforecast; samecaps/cache/sourceoutputs preserved. ALLC68execs
+havezeroOOMdelta; historical C60/C67 max15158/oom5/kill5/cumulative12GiBpeak and
+DockerOOMKilled remain failed history, not current run RSS or new resource stops.
+
+Original-queue reassessment: fixed local alias/rebinding followed by reached
+mutation is another concrete G34/BackfillB application to investigate. Existing
+source_local_alias_run/memOK execute Source locals.set without heap changes;
+source_alias_word uses the older RefArrayStateRepr, whereas fixed C68 uses Objects
+StateRepr. Published Objects.PtrFrag.rebind supplies the compatible wholeword
+producer. An owned SourceUintFixedAt/Objects alias bridge and reached SourceItems/
+Prog application are not implemented here; consume those existing interfaces
+read-only, without duplicating a producer or asserting queue exhaustion. General
+Source graphs/physical bytes/all-profile construction/failure and all previously
+named reserved/final composition obligations remain genuinely open.

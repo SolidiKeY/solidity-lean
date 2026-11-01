@@ -1379,3 +1379,8 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintFixedDelete.lean` | Genuine fixed Source some-n actual primitive default deletion, indexed Source syntax and intrinsic/word bounds outcomes. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedMutationSequence.lean` | Genuine fixed Source some-n actual declaration then reached fixed write/delete, separate Source statements and whole existing word append; no Source Items/Prog claim. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedMutationControls.lean` | Genuine fixed Source some-n populated runtime reached controls, complete word vectors, logical32 and endpoint/order/stale-type observations. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedFuel.lean` | Actual fixed uint Source default execution with arbitrary caller-fuel slack, retaining exact typed length. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedProgram.lean` | One existing Source RItems and intrinsic Prog declaration/write/delete execution from initial alignment/ownership, consistent horizons and whole published word append. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedProgramFailure.lean` | Actual changed declaration/write prefix then distinct-index rejection; Source globals retained, intrinsic/word error exposes no suffix state. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedProgramControls.lean` | Both-pipeline populated runtime success/rejection, complete16word frames/old aliases/logical32, rawzero/nonadmission and materially changed timeout prefix controls. |
