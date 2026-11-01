@@ -1307,3 +1307,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Backend/Executable/PaymentReceiptChecks.lean` | Populated stale/other receipt controls, receiver failure/overflow/funding/admission ordering, actual assumeFalse model stop and unchanged transfer-byte boundary |
 
 | `Backend/Executable/PaymentHistory.lean` | Actual two-payment same-key world prefix, ordered Bool discrimination from fixed intrinsic receipt tables, paid-world retention and failed deferred settlement; no target-profile/compiler/loop simulation claim |
+
+| `Backend/Executable/ValueCall.lean` | Real empty-data CALL byte emitters with literal or relocated DUP6 local amount; actual numeric operand frames, derived capacity, full PUSH payload order; CALL/gas/world/frame-producer adequacy open |
+| `Backend/Executable/ValueCallChecks.lean` | Distinct literal inputs, uniform two-caller typed local reads, protected signed/uint/spill frame, wrong-index/order, exact capacity,160-bit address and unsupported-CALL controls |

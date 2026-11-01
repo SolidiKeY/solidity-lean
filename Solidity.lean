@@ -965,3 +965,6 @@ import Solidity.Backend.Executable.PaymentReceipt
 import Solidity.Backend.Executable.PaymentReceiptChecks
 
 import Solidity.Backend.Executable.PaymentHistory
+
+import Solidity.Backend.Executable.ValueCall
+import Solidity.Backend.Executable.ValueCallChecks

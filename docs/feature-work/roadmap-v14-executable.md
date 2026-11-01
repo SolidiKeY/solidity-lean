@@ -1285,3 +1285,89 @@ All original Work/Backfill rows remain open/partial as recorded in the handoff.
 The same original goal remains ACTIVE. No get_goal or Lean MCP diagnostic tool
 is exposed in this runtime; supplied goal context is preserved and bounded
 per-file CLI diagnostics are used. No goal administration was attempted.
+
+
+## Checkpoint 17 — actual CALL operand selection and byte emission
+
+ValueCall emits existing Backend.Program instructions and real CALL0xf1 bytes,
+with empty input/output buffers. A selected PUSH1zero and three actual DUP1s
+produce four buffer operands; selected typed PUSH32s then place amount,
+recipient and supplied gas in reverse push order. Literal code is105bytes.
+complete_bytes exposes every PUSH payload via the existing toBytesBE encoder.
+No new AST, numeric evaluator, ABI codec or CALL/world semantics is introduced.
+
+localOperands uniformly loads the actual uint local in the existing constructed
+two-cell signed/uint frame. Four buffers relocate index1 to index5, selecting
+DUP6 rather than the old DUP2. local_source consumes the existing source local
+read; local_amount_stage/local_recipient_stage/local_correct execute actual
+instructions and preserve both typed cells and every spill word. The code is
+independent of sigma; distinct runtime callers99/13 produce the respective
+CALL value words with identical emitted code. Local code is73bytes and
+complete_local_bytes pins DUP6 plus both actual PUSH payloads and CALL.
+
+capacity_iff derives the literal operand-prefix+7 peak from its actual opcode
+choices. local_heights transports that actual height trace; frame_length derives
+the exact spill≤1015 bound from two caller cells plus seven operand words.
+local_correct proves DUP6's operand exists; height-only checks do not assume
+that. Existing prefix_capacity supplies each intermediate bound. Populated
+signed−7/uint99/spill17/29, wrong DUP2 (reads zero), swapped gas/address,
+physical1017/1018 edges and full160-bit address controls are inhabited kernel
+checks. Thirty-five new axiom reports are guarded with standard axioms only.
+
+Explicit limits: supplied gas2300 is bits, not proof of forwarded gas or an
+ordinary-send policy; EIP150/value stipend behavior and Fitted/Enforced remain
+OPEN. The old Evm CALL takes two symbolic operands, so it is not used to justify
+this actual seven-operand opcode. Scalar.run of full code is None because CALL
+is unsupported; that is neither an EVM revert nor a failed source payment.
+Decoder evidence is encode/decode roundtrip. frameTail is a supplied constructed
+representation, not a general runtime-frame producer. Actual CALL execution,
+post-call stack/world/memory, gas and failure-byte behavior, general source
+lowering and fetched-byte/pinned decoder agreement remain OPEN. No source
+profile/Fml.inTarget/observations or budget is changed; no G43/G45 parent closes.
+
+Separate read-only finder/skeptic reviews found no proof or nonvacuity defect.
+Finder requested full emitted payload order and explicit open frame-producer
+wording; both were added. All focused raw syntax/normalization failures remain
+in evidence, including the early untracked LiteralCall prototype (not a checked
+dependency or deliverable). Numeric range normalization was fixed by kernel
+reduction without changing values, recursion/heartbeat limits or test budgets.
+The same original full goal remains ACTIVE; all original queues stay binding.
+
+
+Checkpoint17 focused76jobs and required main ./run-lean.sh1046default+
+262TestSuite passed, pinned377/131/131. Actual Lean4.24.0/Lake5.0.0-src+797c613
+and KeySort2jobs precede RUNTIME_GATE_PASS. Aggregate Lean/LakeRSS1712644KiB,
+one worker, hostminimum17264424KiB, cgrouppeak392884224bytes, noOOM/no swap.
+Independent final emitter/frame finder/skeptic reviews accept all fixes.
+
+The existing pinned EthereumJS10.1.3 Osaka package was absent after VM recovery.
+The cloud runtime skill confirmed current enforced registry allowance. Exact
+existing evm-vectors package/lock were copied to a single lock-hash/Node24 cache
+outside the repository; strict TLS/inherited proxy, ignore-scripts and original
+pins were preserved. No shared generated engine, package pin or core dependency
+was edited. Runtime modules/caches are excluded from exported artifacts.
+
+New lane-only export-value-call.lean exports actual Backend.encode bytes.
+check-value-call-evm.mjs runs seven bounded cases at the existing1M gas/180s
+limits. STOP and real published Failure.emit dead REVERT callees are installed
+in independent worlds. Actual fetched CALL execution preserves the entire
+signed/uint/spill stack and caller memory55; value1/99/13 debit/credit and nested
+failure rollback/exact dead return data pass. Full160-bit destination passes.
+Wrong unshifted DUP2 transfers0 rather than desired99 and is a negative control.
+Entry gas observations distinguish supplied0/nonzero-value→2300,
+supplied2300/zero-value→2300 and supplied2300/nonzero-value→4600. These are
+bounded external observations, not universal stipend policy/Fitted/Enforced or
+kernel CALL/world/fetched-decoder correspondence. Ordinary send/transfer
+compilation and general resource/failure-ordering relations remain OPEN.
+Raw export/install/execution logs and exact lock SHA are in v14-call-evidence.
+
+
+Independent test-harness finder/skeptic reviews required exact seven scenario
+identities and six-positive/one-negative roles, canonical required metadata
+(including observed entry gas), identical local99/local13 body bytes with
+distinct runtime locals, and the entire seeded32-byte memory word. These were
+implemented together with independent exact memory/frame preamble checks.
+The strengthened unchanged seven-case suite passes; no skipped/missing scan
+can succeed. This is payment-balance rollback evidence for those installed
+STOP/REVERT worlds, not general world/storage rollback or a transaction-level
+source/compiler proof. All raw earlier harness/kernel logs are retained.
