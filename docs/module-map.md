@@ -1311,3 +1311,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/FragilePop.lean` | Root-array pop consumer preserving actual storeDrop/dropFragile classification. |
 | `Backend/InternalFlow/FragilePrograms.lean` | Owned finite selector composing plain and fragile direct storage calls; dead/unset refusal unchanged. |
 | `Backend/InternalFlow/StoragePrefixFrame.lean` | Actual storage-prefix heap and target-memory frame consequences, separate from within admission. |
+
+| `Backend/InternalFlow/PublishedLoops.lean` | Published direct/scoped memory-loop Room/Cost consumers, exact prefix allocator transport, local unwind and alias addresses; distinct revert/divergence. |

@@ -974,3 +974,5 @@ import Solidity.Backend.InternalFlow.FragileCalls
 import Solidity.Backend.InternalFlow.FragilePop
 import Solidity.Backend.InternalFlow.FragilePrograms
 import Solidity.Backend.InternalFlow.StoragePrefixFrame
+
+import Solidity.Backend.InternalFlow.PublishedLoops
