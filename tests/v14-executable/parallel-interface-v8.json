@@ -1,0 +1,34 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "prior_committed_head": "3c49bd0549718357fe8476384a0a44cd0c5906e5",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "modules_and_tests": [
+    {
+      "path": "Solidity/Backend/Executable/WorldPrefixes.lean",
+      "blob": "3c288f284f5ccf092976a796cf4873e58dee977f",
+      "sha256": "82fff7951a727336e7cf50fe5f1f954c88a6f3190637214de575faf9a01992cb"
+    },
+    {
+      "path": "Solidity/Backend/Executable/WorldPrefixChecks.lean",
+      "blob": "dc5acb24c884674cfdc8adbb85613edb25f1245a",
+      "sha256": "997883866e4dad0c66e2cfe689f5f9e3231abd0126bdef007166a5d7727ada0f"
+    }
+  ],
+  "declarations": [
+    "Solidity.Backend.Executable.WorldPrefixes.failure_iff",
+    "Solidity.Backend.Executable.WorldPrefixChecks.funding_cut",
+    "Solidity.Backend.Executable.WorldPrefixChecks.extracted_cut",
+    "Solidity.Backend.Executable.WorldPrefixChecks.no_late_receiver_bytes",
+    "Solidity.Backend.Executable.WorldPrefixChecks.cut_rollback"
+  ],
+  "signature_evidence": "prefix-failure-interface.log in checkpoint22 evidence",
+  "producer_facts": [
+    "ContractWorld.Operation.run : World contracts -> TRes (World contracts)",
+    "List.foldlM over actual Operation contracts",
+    "WorldPrefixChecks.installed_paid_prefix: installation plus three actual paid calls returns paidThree",
+    "WorldPrefixChecks.unfunded_failure: failPaid.run paidThree = .error .revert"
+  ],
+  "nontrivial_client": "create :: replicate 3 pay, then failPaid, then an arbitrary suffix; exact funds exhausted before receiver body, installed world remains distinguishable from initial, atomic rollback restores initial",
+  "invariants": "Successful prefix ends at actual middle world; first failing operation retains exact original THalt; suffix is not evaluated by the fold after failure. No desired simulation premise.",
+  "limits": "Finite existing unmetered world operation algebra only. Not source/compiler loop simulation, divergence, EVM instruction execution, gas or final G36.03/G43 closure. Earlier payment/constructor/frame/byte interfaces remain sealed in checkpoint21."
+}

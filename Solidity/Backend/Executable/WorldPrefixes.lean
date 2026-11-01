@@ -49,6 +49,36 @@ theorem suffix_failure (first rest : List (Operation contracts)) (before middle 
   rw [List.foldlM_append, prefixRan]
   exact failed
 
+/-- A failed finite execution has an actual first failing operation after a
+successful prefix. Both directions retain the original halt, including bytes;
+the remaining suffix is arbitrary and is never used to explain the failure.
+This is decomposition of the existing fold, not a loop/divergence semantics. -/
+theorem failure_iff (ops : List (Operation contracts)) (before : World contracts) (e : THalt) :
+    ops.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) before = .error e ↔
+      ∃ first op rest middle,
+        ops = first ++ op :: rest ∧
+        first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) before = .ok middle ∧
+        op.run middle = .error e := by
+  constructor
+  · induction ops generalizing before with
+    | nil => intro bad; cases bad
+    | cons op rest ih =>
+      intro failed
+      cases ran : op.run before with
+      | error original =>
+        simp only [List.foldlM_cons, ran, bind, Except.bind] at failed
+        cases Except.error.inj failed
+        exact ⟨[], op, rest, before, rfl, rfl, ran⟩
+      | ok next =>
+        simp only [List.foldlM_cons, ran, bind, Except.bind] at failed
+        obtain ⟨first, bad, last, middle, shape, prefixRan, badRun⟩ := ih next failed
+        refine ⟨op :: first, bad, last, middle, ?_, ?_, badRun⟩
+        · rw [List.cons_append, shape]
+        · simp only [List.foldlM_cons, ran, bind, Except.bind, prefixRan]
+  · rintro ⟨first, op, rest, middle, rfl, prefixRan, badRun⟩
+    exact suffix_failure first (op :: rest) before middle e prefixRan (by
+      simp only [List.foldlM_cons, badRun, bind, Except.bind])
+
 /-- Exact cuts at every list position, including empty/whole prefixes. -/
 theorem cut_success_iff (ops : List (Operation contracts)) (n : Nat)
     (before after : World contracts) :
@@ -93,4 +123,6 @@ theorem atomic_prefix_success (first : List (Operation contracts)) (before middl
 #guard_msgs (whitespace := lax) in #print axioms iteration_split
 /-- info: 'Solidity.Backend.Executable.WorldPrefixes.atomic_suffix_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms atomic_suffix_failure
+/-- info: 'Solidity.Backend.Executable.WorldPrefixes.failure_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms failure_iff
 end Solidity.Backend.Executable.WorldPrefixes

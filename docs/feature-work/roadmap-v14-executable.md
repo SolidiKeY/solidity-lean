@@ -1703,3 +1703,41 @@ nontrivial clients and all open producer boundaries. Final docs/interface-only
 metadata changes no checked Lean/test code. Immutable checkpoint21 artifacts
 and separate final source/handoff/archive seal reviews record fullqueue status.
 All earlier seals preserved; same original goal ACTIVE and full lane partial.
+
+
+## Checkpoint22: reverse finite-prefix failure decomposition
+
+WorldPrefixes.failure_iff now extracts an actual successful prefix, its actual
+middle world and the first failing Operation from a failed existing List.foldlM.
+The reverse implication retains the same THalt, including bytes, for any suffix.
+The proof inducts on the existing list and actual operation result; it introduces
+no semantics, simulation certificate, receipt rewrite or future-producer premise.
+
+WorldPrefixChecks.funding_cut/extracted_cut witness both directions with actual
+installation, three funded calls and the next funding refusal. The protected
+prefix world is paidThree, with sender0/recipient3; no_late_receiver_bytes
+excludes nonempty receiver bytes even with a nonempty unreachable suffix.
+cut_rollback restores initial across that entire prefix and arbitrary suffix.
+Five new guarded axiom outputs retain standard Lean axioms.
+
+This is independent Backfill B/G36.03 finite-prefix preparation only. It does
+not discharge G43, divergence or source/compiler/EVM resource correspondence.
+All original Work/Backfill obligations remain open as recorded in checkpoint21;
+the same full goal remains ACTIVE. Published producer ownership is unchanged.
+Parallel-interface-v8 records exact source hashes and actual declarations.
+
+Separate independent read-only finder/skeptic reviews inspect the actual proof,
+inhabited controls and first-failure wording. Focused and full root/combined
+validation, documentation failures and immutable artifacts are recorded in the
+checkpoint22 handoff, without overwriting any earlier seal.
+
+Checkpoint22 finder and skeptic independently report no findings. First failure
+is at top-level Operation-list granularity, not an internal caught-frame failure.
+Focused35jobs and five new guarded standard-axiom reports pass. Root1054+262
+and exact private1058+262 pass, both SolKey377/131/131; actual Lean4.24.0 and
+Lake5.0.0-src+797c613 plus KeySort2jobs precede runtime confirmation. Aggregate
+Lean/Lake RSS1712624/1716224KiB, one worker, 12GiB/noSwap, OOM0.
+Scope/guard regressions/layers/orphans/trust/automatic/whitespace pass. Raw
+docs exit1 still48missing37ambiguous, complete findings equal checkpoint21;
+strict frozen comparison FAIL+2 inherited missing, published comparison PASS0.
+No semantic profile, resource budget, producer or reserved file changes.

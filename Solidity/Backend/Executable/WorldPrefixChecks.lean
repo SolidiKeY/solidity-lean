@@ -120,6 +120,44 @@ example : atomic initial (((create :: List.replicate 3 pay).foldlM (fun (w : Wor
 example : initial.accounts fresh = none ∧ (paidThree.accounts fresh).isSome = true := ⟨rfl, by decide +kernel⟩
 example : THalt.data (.revertWith [0xde,0xad]) ≠ THalt.data .revert := by decide +kernel
 
+/-- The exact successful prefix contains installation and three funded
+calls. No suffix, including another successful installation, can replace the
+fourth call's funding refusal with receiver bytes. -/
+theorem funding_cut (rest : List (Operation contracts)) :
+    ((create :: List.replicate 3 pay) ++ failPaid :: rest).foldlM
+      (fun (w : World contracts) (op : Operation contracts) => op.run w) initial = .error .revert := by
+  apply (failure_iff _ initial .revert).mpr
+  exact ⟨create :: List.replicate 3 pay, failPaid, rest, paidThree,
+    rfl, installed_paid_prefix, unfunded_failure⟩
+
+/-- Reverse extraction applies to an inhabited paid execution, preserving the
+exact original halt rather than merely asserting that some operation failed. -/
+theorem extracted_cut (rest : List (Operation contracts)) :
+    ∃ first op last middle,
+      ((create :: List.replicate 3 pay) ++ failPaid :: rest) = first ++ op :: last ∧
+      first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) initial = .ok middle ∧
+      op.run middle = .error .revert :=
+  (failure_iff _ initial .revert).mp (funding_cut rest)
+
+/-- Negative control: a nonempty unreachable suffix cannot expose the funded
+receiver's distinct error bytes after the sender has exhausted its funds. -/
+theorem no_late_receiver_bytes (rest : List (Operation contracts)) :
+    ((create :: List.replicate 3 pay) ++ failPaid :: pay :: rest).foldlM
+      (fun (w : World contracts) (op : Operation contracts) => op.run w) initial ≠
+        .error (.revertWith [0xde,0xad]) := by
+  rw [funding_cut]
+  intro bad
+  cases bad
+
+/-- Recovery of a failed cut does not turn its successful paid prefix into a
+committed final world: the outer atomic boundary restores the original world. -/
+theorem cut_rollback (rest : List (Operation contracts)) :
+    atomic initial ((((create :: List.replicate 3 pay) ++ failPaid :: rest).foldlM
+      (fun (w : World contracts) (op : Operation contracts) => op.run w) initial).map
+        (fun next => (next, ()))) = (initial, .error .revert) := by
+  rw [funding_cut]
+  rfl
+
 /-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.actual_iteration_cut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms actual_iteration_cut
 /-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.failed_prefix_stops_successful_tail' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -128,4 +166,12 @@ example : THalt.data (.revertWith [0xde,0xad]) ≠ THalt.data .revert := by deci
 #guard_msgs (whitespace := lax) in #print axioms three_payments
 /-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.rollback_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms rollback_prefix
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.funding_cut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms funding_cut
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.extracted_cut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms extracted_cut
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.no_late_receiver_bytes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms no_late_receiver_bytes
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.cut_rollback' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms cut_rollback
 end Solidity.Backend.Executable.WorldPrefixChecks
