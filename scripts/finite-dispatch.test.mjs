@@ -563,6 +563,19 @@ test('calldata in a tuple assignment through a function value is refused', () =>
   r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
 });
 
+test('calldata in a tuple assignment through a callee that is not a name is refused', () => {
+  // integration review: the tuple path's callee capture (`elabTuple`) keeps
+  // `calldataCheck`'s refusal for a conditional callee
+  productionCheck(`contract C {
+    function split(uint[] memory xs) internal pure returns(uint, uint) { xs[0] = 7; return (xs[0], 1); }
+    function other(uint[] memory xs) internal pure returns(uint, uint) { return (xs[0], 2); }
+    function e(uint[] calldata xs, bool c) external pure returns(uint) {
+      (uint a, uint b) = (c ? split : other)(xs); return a + b + xs[0];
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "e")).any fun r =>
+  r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
+});
+
 test('struct candidates are nominal: a same-shaped struct function is not scanned', () => {
   // With a structural key, poison (same shape as P, reading block.number)
   // would be a native-compatible candidate and its body would be refused.
@@ -595,6 +608,44 @@ test('reference-array dispatch admits exact candidates and keeps their locations
   }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
       r.sourceScope.diagnostic?.isNone) do
     throw (IO.userError "memory-array dispatch was not admitted")`);
+});
+
+test('narrow and byte array elements dispatch at their width', () => {
+  // The capture is declared at the parameter's narrow shape (`dispatchCaptures`);
+  // bytes1[] stays refused (below).
+  scopeCheck(`contract C {
+    function narrow(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function stored(int16[] storage xs) internal view returns(uint) { return xs.length; }
+    function bytes2s(bytes2[] memory xs) internal pure returns(uint) { return uint16(xs[0]); }
+    int16[] values;
+    function entry() public view {
+      uint8[] memory xs = new uint8[](1);
+      function(uint8[] memory) internal pure returns(uint) h = narrow;
+      assert(h(xs) == 0);
+      function(int16[] storage) internal view returns(uint) g = stored;
+      g(values);
+      bytes2[] memory cs = new bytes2[](1);
+      function(bytes2[] memory) internal pure returns(uint) b2 = bytes2s;
+      assert(b2(cs) == 0);
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "narrow or byte element dispatch was not admitted")`);
+});
+
+test('narrow element widths are part of the dispatch key', () => {
+  // uint8[] and uint16[] erase to the same model array but not the same key:
+  // a uint16[] function is no candidate of a uint8[] value
+  scopeCheck(`contract C {
+    function wide(uint16[] memory xs) internal view returns(uint) { return xs[0] + block.number; }
+    function narrow(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function entry() public pure {
+      uint8[] memory xs = new uint8[](1);
+      function(uint8[] memory) internal pure returns(uint) h = narrow; h(xs);
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "a uint16[] function was treated as a uint8[] candidate")`);
 });
 
 test('memory-array dispatch refuses an address/uint element collision', () => {
@@ -632,17 +683,19 @@ test('other reference signatures remain refused', () => {
       S[] memory xs = new S[](1);
       function(S[] memory) internal pure returns(uint) h = target; h(xs);
     }`,
-    // a narrow element (a capture carries no width rows)
-    `function target(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
-    function entry() public pure {
-      uint8[] memory xs = new uint8[](1);
-      function(uint8[] memory) internal pure returns(uint) h = target; h(xs);
-    }`,
-    // a byte element
+    // a bytes1 element: the model's bytes is a bytes1[], so the key could
+    // not tell it from a bytes parameter (fnRefElem?)
     `function target(bytes1[] memory xs) internal pure returns(uint) { return xs.length; }
     function entry() public pure {
       bytes1[] memory xs = new bytes1[](1);
       function(bytes1[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // an enum element
+    `enum E { A, B }
+    function target(E[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      E[] memory xs = new E[](1);
+      function(E[] memory) internal pure returns(uint) h = target; h(xs);
     }`,
     // a nested array
     `function target(uint[][] memory xs) internal pure returns(uint) { return xs.length; }

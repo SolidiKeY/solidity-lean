@@ -263,15 +263,17 @@ namespace FiniteDispatch
 
 /-- Dispatch components retain the source ABI kind. Word and byte widths
 are bounded in the representation; a word's width is eight times `width + 1`.
-Internal memory/storage arrays of a 256-bit word, `bool` or `address`, and
-structs by source name at a location, are the admitted references; calldata,
-nested, narrow, byte or nominal-element arrays have no case. -/
+Internal memory/storage arrays of a word of any width, a `bytesN` (`N ≥ 2`),
+`bool` or `address`, and structs by source name at a location, are the
+admitted references; calldata, nested, `bytes1`, enum, function or
+nominal-element arrays have no case. -/
 inductive Ty where
   | bool
   | word (signed : Bool) (width : Fin 32)
   | address
   | memoryBytes
-  /-- An internal memory-array parameter of a scalar element (`uint[] memory`):
+  /-- An internal memory-array parameter of a scalar element (`uint[] memory`,
+  `uint8[] memory`, `bytes2[] memory`):
   passed by reference, its location kept in the native key. -/
   | memoryArray (elem : Ty)
   /-- An internal storage-array parameter of a scalar element (`uint[] storage`). -/
@@ -331,19 +333,20 @@ def parseType : Nat → String → Option Ty
       let name := (source.drop 7).dropRight suffix.length
       guard (!name.isEmpty && name.all fun c => c.isAlphanum || c == '_' || c == '$' || c == '.')
       return .nominal name storage
-    -- a memory or storage array of a word, bool or address; never a byte,
+    -- a memory or storage array of a word, `bytesN`, bool or address; never a
     -- function, nominal or nested reference element. solc spells a storage
     -- parameter `storage pointer` (`storage ref` for a state variable).
     if let some (suffix, storage) := [("[]memory", false), ("[]storagepointer", true),
         ("[]storageref", true), ("[]storage", true)].find? (source.endsWith ·.1) then
       let elem ← parseType fuel (source.dropRight suffix.length)
       match elem with
-      | .bool | .address =>
+      -- a word of any width or a `bytesN`: the elaborator captures the
+      -- argument at the parameter's narrow shape (`dispatchCaptures`)
+      | .bool | .address | .word .. =>
         return if storage then .storageArray elem else .memoryArray elem
-      -- a 256-bit word only: the elaborator's capture carries no narrow width
-      | .word signed width =>
-        guard (width.val == 31)
-        let elem := Ty.word signed width
+      -- not `bytes1`: the model's `bytes` is a `bytes1[]` (`fnRefElem?`)
+      | .bytes width =>
+        guard (width.val != 0)
         return if storage then .storageArray elem else .memoryArray elem
       | _ => none
     if source == "bool" then return .bool

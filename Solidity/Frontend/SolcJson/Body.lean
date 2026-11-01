@@ -1866,12 +1866,26 @@ partial def call (j : Json) : PM String := do
       match args with
       | [b, ts] =>
         let forbidden := (← get).enumDecodeTypes
-        if (J.nodes ts).any (fun node => (J.ref? node).any forbidden.contains) then
+        let st ← get
+        -- A top-level enum component (`abi.decode(b, (E))`) decodes at its
+        -- member count (`abiDecodeWith`, solc's enum validator); an enum
+        -- inside an array or a struct keeps the refusal.
+        let topEnum (t : Json) : Option String := do
+          let t := unparen t
+          guard (J.kind t == "Identifier" || J.kind t == "MemberAccess")
+          let id ← J.ref? t
+          guard (lookupBy id st.enumBounds).isSome
+          lookupBy id st.enumNativeNames
+        let comps := match J.kind ts, J.arr? ts "components" with
+          | "TupleExpression", some cs => cs.toList
+          | _, _ => [ts]
+        if comps.any (fun c => (topEnum c).isNone &&
+            (J.nodes c).any (fun node => (J.ref? node).any forbidden.contains)) then
           unsupported "ABI decoding of enum values requires nominal cardinality checks"
-        let tyName (t : Json) : PM String := do PM.lift (abiTyText (← get).structs t)
-        let names ← match J.kind ts, J.arr? ts "components" with
-          | "TupleExpression", some cs => cs.toList.mapM tyName
-          | _, _ => do pure [← tyName ts]
+        let tyName (t : Json) : PM String := do
+          if let some e := topEnum t then return identText e
+          PM.lift (abiTyText (← get).structs t)
+        let names ← comps.mapM tyName
         return s!"abi.decode({← expr b}, ({", ".intercalate names}))"
       | _ => unsupported "abi.decode with other than two arguments"
     if member == "wrap" || member == "unwrap" then

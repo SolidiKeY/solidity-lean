@@ -11,7 +11,11 @@ behind `@[implemented_by]` memo helpers: `unsafeCast` and `unsafeBaseIO` are
 defined through `lcProof`, and putting `lcProof` on the global allow list would
 let a safe theorem use it.
 
-The audit, over every constant declared in a module `Solidity` or `Solidity.*`:
+The audit, over every constant declared in a module `Solidity` or
+`Solidity.*` that `import Solidity` reaches (the default library CI builds,
+as lean-action's `axiom-audit-root: Solidity` read it; the `SolidityCorpus`
+and `SolkeyTestSuite` libraries' `Solidity.Corpus.*`/`Solidity.TestSuite.*`
+modules are not imported, so not audited here):
 
 * a **safe** constant (theorem, definition, opaque, inductive, …) may reach
   only the `allowed` axioms, transitively through the kernel terms of its type

@@ -3131,7 +3131,7 @@ class D:
                        "until the manifest change lands, G15 must still refuse it as `upstream`",
                        "no reference semantics beyond solc 0.8.38's acceptance boundary",
                        "manifest scope is still `upstream`"],
-        'abiDecode': ["Enum decoding is refused ('requires nominal cardinality checks'). Lazy/noncanonical aggregate entry decoding is pending.", 'No backend/EVM stage. Calldata/ABI entry is outside the compiler theorems (R04, R20).'],
+        'abiDecode': ["A top-level enum decodes at its member count; an enum nested in an array or a struct is refused ('requires nominal cardinality checks'). Lazy/noncanonical aggregate entry decoding is pending.", 'No backend/EVM stage. Calldata/ABI entry is outside the compiler theorems (R04, R20).'],
         'abiEncode': ['ABI is absent from the compiler theorems (R04), with no backend/EVM stage.', 'Internal function markers are refused. Struct enum members lose nominal identity, so recursive coverage is partial.'],
         'abiEncodeCall': ['Implicit fixed-byte narrowing is refused.', 'No backend/EVM stage (R04).'],
         'abiEncodePacked': ['Packed arrays and hex-literal aggregates have only partial contextual coercions.', 'No backend/EVM stage (R04). Packed collisions are only kept, never proved.'],

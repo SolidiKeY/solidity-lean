@@ -1498,6 +1498,18 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
     if dynBytesTy T then
       let (R, x) ← abiDecodeBytes T d (32 * i) n
       return (P ++ Q ++ R, .name x)
+    -- an enum: its word read as a `uint8` (zero high bytes), then solc's
+    -- validator (`validator_revert_t_enum_*`): an empty revert unless it is
+    -- below the member count, so the conversion `E(w)` names a member
+    if let some ms := lookupBy T C.enums then
+      let w := toString (← freshCapture "se")
+      let x := toString (← freshCapture "se")
+      let some (reads, _) := abiDecodeAt "uint8" d w (.num (32 * i)) |
+        throw s!"abi.decode at {T}: internal: the enum's word"
+      let R ← elabStmtsP ([enough] ++ reads ++
+        [.require (.binop .lt (.name w) (.num ms.length)),
+         .decl (.named T) x (some (.call T [.name w]))])
+      return (P ++ Q ++ R, .name x)
     if (valueKind? T).isSome then
       let w := toString (← freshCapture "se")
       let x := toString (← freshCapture "se")

@@ -33,7 +33,9 @@ core stays dependency-free.
   are added to it.  CI runs both gates after the whole-library build.
 * **Whole-library axiom gate**: `lake env lean --tstack=131072
   scripts/AxiomAudit.lean` (CI, after the build) reads every constant
-  declared in a `Solidity` module: a safe one may reach only `propext`,
+  declared in a `Solidity` module that `import Solidity` reaches (the
+  default library; not the `SolidityCorpus`/`SolkeyTestSuite` modules): a
+  safe one may reach only `propext`,
   `Classical.choice`, `Quot.sound`; an `unsafe` (or `partial`) one may also
   reach `lcProof` only if listed by name in its `exemptUnsafe` (the six
   compiled memo/cache twins behind `@[implemented_by]`, through
