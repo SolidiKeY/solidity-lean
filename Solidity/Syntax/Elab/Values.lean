@@ -889,7 +889,13 @@ call's return's, a conditional's first branch's, `r.g`'s external type. -/
 partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
   let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
   match e with
-  | .name x => fnTyOf? C Γ x
+  | .name x =>
+    -- a local or state value of function type, else a function of `C` named
+    -- as a value (`fnTag`): its own signature
+    (fnTyOf? C Γ x).orElse fun _ =>
+      if (lookupBy x Γ).isNone && fnInternal C x then
+        (lookupBy x C.funs).bind (FunDecl.sigTy? C)
+      else none
   | .ternary _ a _ => fnTyOfExpr Γ a
   | .call g args => do
     if g == callValueName then
