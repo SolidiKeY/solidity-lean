@@ -193,3 +193,5 @@ VY2 [actual calldata array allocation](feature-work/inline-assembly-vy2.md#actua
 VY2 [actual memory hash binding](feature-work/inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) proves computed payload/source builtin/sharedFixed agreement; full lane partial.
 
 VY2 [actual source environment inputs](feature-work/inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) binds transaction timestamp/origin and actual source frame reads; full lane partial.
+
+VY2 [concrete packed World adapter](feature-work/inline-assembly-vy2.md#concrete-packed-world-adapter-2026-11-01) binds validated source writes and residual rollback to actual peer frame completion; full lane partial.

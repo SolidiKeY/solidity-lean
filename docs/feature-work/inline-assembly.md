@@ -630,3 +630,5 @@ VY2 [actual calldata array allocation](inline-assembly-vy2.md#actual-calldata-ar
 VY2 [actual memory hash binding](inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) connects exact source memory bytes and checked keccak expression to physical hash; final adequacy remains open.
 
 VY2 [actual source environment inputs](inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) derives supported source magic and physical context observations; full source/call/compiler closure remains open.
+
+VY2 [concrete packed World adapter](inline-assembly-vy2.md#concrete-packed-world-adapter-2026-11-01) commits actual same-plan source/residual/frame-completion agreement in the private peer-input tree; full lane partial.
