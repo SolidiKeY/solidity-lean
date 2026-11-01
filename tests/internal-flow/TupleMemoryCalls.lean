@@ -660,6 +660,15 @@ theorem traversal_and_refusal :
     (TuplePrograms.height program, (Calls.compile 1 prefixProducer.frag program).isSome,
       (TuplePrograms.compile 1 prefixProducer.frag program).isSome) = (2,false,true) := by decide +kernel
 
+def expandedProducer : Calls.Program 1 prefixProducer.frag (expand arguments binders nestedBody) :=
+  (TuplePrograms.compile 1 prefixProducer.frag (expand arguments binders nestedBody)).get (by decide +kernel)
+attribute [irreducible] expandedProducer
+
+theorem exact_cost_frame : [outerProducer.need,expandedProducer.need,scopedProducer.need,suffixProducer.need,
+    producer.need,outerProducer.cost caller.st,scopedProducer.cost caller.st,suffixProducer.cost unwound.st,
+    producer.cost caller.st] = [15,15,15,4,15,5,5,0,5] := by decide +kernel
+
+
 -- Actual protected source/target midpoint, obtained only by running the prefix.
 theorem represented : ∃ m₁ base₁ m₂ base₂ m₃ base₃,
     Evm.run prefixProducer.code machine = .ok m₁ 0 ∧
@@ -670,24 +679,30 @@ theorem represented : ∃ m₁ base₁ m₂ base₂ m₃ base₃,
     StateRepr 1 1 128 suffixProducer.frag final.st base₃ m₃ ∧
     m₁.stack = machine.stack ∧ m₂.stack = m₁.stack ∧ m₃.stack = m₂.stack ∧
     BaseExtends caller.st.H base₁ base₂ ∧ BaseExtends unwound.st.H base₂ base₃ := by
+  have pc : prefixProducer.cost initial = 7 := congrArg (fun xs => xs[5]!) exact_frame_cost
+  have pn : prefixProducer.need = 4 := congrArg (fun xs => xs[0]!) exact_frame_cost
+  have sc : scopedProducer.cost caller.st = 5 := congrArg (fun xs => xs[6]!) exact_cost_frame
+  have sn : scopedProducer.need = 15 := congrArg (fun xs => xs[2]!) exact_cost_frame
+  have tc : suffixProducer.cost unwound.st = 0 := congrArg (fun xs => xs[7]!) exact_cost_frame
+  have tn : suffixProducer.need = 4 := congrArg (fun xs => xs[3]!) exact_cost_frame
   have whole : AllocationInput 1 128
       (prefixProducer.cost initial + scopedProducer.cost caller.st) initial bases machine :=
-    .inr ⟨by decide, wmod 256, initial_repr.2, by decide +kernel⟩
+    .inr ⟨by decide, wmod 256, initial_repr.2, by rw [pc,sc]; decide⟩
   obtain ⟨m₁,base₁,ht₁,hr₁,hk₁,he₁,ha₁⟩ := program_endpoint prefixProducer initial_repr.1
-    (by decide +kernel) (whole.of_le (Nat.le_add_right _ _)) caller actual_prefix
+    (by rw [pn]; decide) (whole.of_le (Nat.le_add_right _ _)) caller actual_prefix
   have space : AllocationInput 1 128 (scopedProducer.cost caller.st) caller.st base₁ m₁ :=
     ha₁.nextInput whole
   obtain ⟨m₂,base₂,ht₂,hr₂,hk₂,he₂,ha₂⟩ := program_endpoint
     (L := 1) (frame := 128) (σ := caller.st) (base := base₁) (m := m₁)
-    scopedProducer hr₁ (by decide +kernel) space unwound source_scoped
+    scopedProducer hr₁ (by rw [sn]; decide) space unwound source_scoped
   have combined : AllocationInput 1 128
       (scopedProducer.cost caller.st + suffixProducer.cost unwound.st) caller.st base₁ m₁ := by
-    simpa only [show suffixProducer.cost unwound.st = 0 from by decide +kernel, Nat.add_zero] using space
+    simpa only [tc, Nat.add_zero] using space
   have nextSpace : AllocationInput 1 128 (suffixProducer.cost unwound.st) unwound.st base₂ m₂ :=
     ha₂.nextInput combined
   obtain ⟨m₃,base₃,ht₃,hr₃,hk₃,he₃,ha₃⟩ := program_endpoint
     (L := 1) (frame := 128) (σ := unwound.st) (base := base₂) (m := m₂)
-    suffixProducer hr₂ (by decide +kernel) nextSpace final source_suffix
+    suffixProducer hr₂ (by rw [tn]; decide) nextSpace final source_suffix
   exact ⟨m₁,base₁,m₂,base₂,m₃,base₃,ht₁,ht₂,ht₃,hr₁,hr₂,hr₃,hk₁,hk₂,hk₃,he₂,he₃⟩
 
 
@@ -722,14 +737,6 @@ theorem nested_heap_sizes :
     [caller.st.H.length,entry.st.H.length,innerEntry.st.H.length,innerBodyOutput.st.H.length,
      innerExport.st.H.length,outerBodyOutput.st.H.length,exported.st.H.length,unwound.st.H.length,final.st.H.length] =
     [2,2,2,3,3,4,4,4,4] := by decide +kernel
-
-def expandedProducer : Calls.Program 1 prefixProducer.frag (expand arguments binders nestedBody) :=
-  (TuplePrograms.compile 1 prefixProducer.frag (expand arguments binders nestedBody)).get (by decide +kernel)
-attribute [irreducible] expandedProducer
-
-theorem exact_cost_frame : [outerProducer.need,expandedProducer.need,scopedProducer.need,suffixProducer.need,
-    producer.need,outerProducer.cost caller.st,scopedProducer.cost caller.st,suffixProducer.cost unwound.st,
-    producer.cost caller.st] = [15,15,15,4,15,5,5,0,5] := by decide +kernel
 
 theorem actualExpandedSelection : TuplePrograms.compile 1 prefixProducer.frag (expand arguments binders nestedBody) = some expandedProducer := by
   delta expandedProducer
@@ -914,16 +921,21 @@ attribute [irreducible] checked
 theorem checked_input_endpoint : ∃ m₁ base₁,
     Evm.run prefixProducer.code machine = .ok m₁ 0 ∧
     checked.Input 1 128 base₁ caller.st m₁ ∧ checked.Agrees 1 128 base₁ caller.st m₁ := by
+  have pc : prefixProducer.cost initial = 7 := congrArg (fun xs => xs[5]!) exact_frame_cost
+  have pn : prefixProducer.need = 4 := congrArg (fun xs => xs[0]!) exact_frame_cost
+  have cc : producer.cost caller.st = 5 := congrArg (fun xs => xs[8]!) exact_cost_frame
+  have cn : producer.need = 15 := congrArg (fun xs => xs[4]!) exact_cost_frame
   have whole : AllocationInput 1 128
       (prefixProducer.cost initial + producer.cost caller.st) initial bases machine :=
-    .inr ⟨by decide, wmod 256, initial_repr.2, by decide +kernel⟩
+    .inr ⟨by decide, wmod 256, initial_repr.2, by rw [pc,cc]; decide⟩
   obtain ⟨m₁,base₁,ht,hr,hk,he,ha⟩ := program_endpoint prefixProducer initial_repr.1
-    (by decide +kernel) (whole.of_le (Nat.le_add_right _ _)) caller actual_prefix
+    (by rw [pn]; decide) (whole.of_le (Nat.le_add_right _ _)) caller actual_prefix
   have space : AllocationInput 1 128 (producer.cost caller.st) caller.st base₁ m₁ := ha.nextInput whole
   have hi : checked.Input 1 128 base₁ caller.st m₁ := by
-    apply (checked.memoryCalls_input (by decide +kernel) 1 128 base₁ caller.st m₁).mpr
-    refine ⟨hr, by decide +kernel, ?_⟩
-    have hc : checked.allocationCost caller.st = producer.cost caller.st := by decide +kernel
+    apply (checked.memoryCalls_input (by unfold checked; rfl) 1 128 base₁ caller.st m₁).mpr
+    have hn : checked.requiredFrame = producer.need := by unfold checked; rfl
+    refine ⟨hr, by rw [hn,cn]; decide, ?_⟩
+    have hc : checked.allocationCost caller.st = producer.cost caller.st := by unfold checked; rfl
     rw [hc]
     exact space
   exact ⟨m₁,base₁,ht,hi,checked.correct hi⟩

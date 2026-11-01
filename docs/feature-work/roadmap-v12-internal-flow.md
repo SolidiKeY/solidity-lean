@@ -2476,3 +2476,89 @@ f4dee4a29c2e208b36db4a4161a4723c735cd775,
 commits; an archive/bundle alone does not establish combined-tree validation.
 This correction changes documentation/artifacts only, preserving every checked
 Lean source/type/report/observation and the original review-set/interface seals.
+
+## Continuation30 — share actual tuple frame/cost proof inputs
+
+Owned validation/proof-engineering progress; all original Work1–6/Backfills A/B
+remain partial. The SAME tuple consumer programs, signatures, result order,
+old/private objects, physical cells, protected stack/cursor/sentinel, frame/cost
+values, refusal/negative cases and all85 mathematical types/reports remain.
+Only `TupleMemoryCalls.Composed.represented` and `checked_input_endpoint` proofs
+change: they project already kernel-proved `exact_frame_cost`/`exact_cost_frame`
+values instead of repeatedly deciding concrete producer fields. The unchanged
+`expandedProducer` definition and exact vector theorem move earlier, without
+circular dependency. Actual prefix execution and `GrowsAllocator.nextInput`
+still derive every reached representation/capacity; no desired midpoint or
+simulation premise is supplied. The checked compilation's actual memoryCalls
+constructor is unfolded for its isMemoryCalls/requiredFrame/allocationCost
+fields. No public selector/admission or intrinsic semantics changes.
+
+One valid same-flags profile pair (-j1,stack131072,profiler=true,threshold100)
+checks42.005→38.840s; represented2617→1300ms, checked-input2785→1298ms.
+Normal fresh fixture preparation separately checks45.528→41.819s with all85
+actual original axiom reports. These are single measured pairs, not timing
+or complete-gate guarantees. All542 imported kernel types remain exact.
+All old theorem statement headers and all three ordered actual report
+invocations are byte-identical; original pins and guards are unchanged.
+
+The measured repair justified ONE new complete38-source attempt at unchanged
+120s: FAIL124/120.796s, reached TupleMemoryCalls after all preceding targets.
+ONE complete registered cached attempt at unchanged120s also FAIL124/122.079s:
+all542 actual builtin reports were emitted, but only eight post-import fixture
+checks completed and no final full-toolchain receipt exists. Neither failure
+is green or inferred green from individual checks/report counts. Current-input
+integrity, guard slicing or later untimed checks cannot waive those failures.
+Original full300s, broad/default-root/prerequisite failures remain; this fixture
+repair does not repair held default-root producers, so no unchanged full retry.
+TestSuite/sort remain unreached. Existing raw normal/strict docs1 remains a
+separate failure with previous/publication equality and frozen incoming debt.
+
+Diagnostics retained: two broad marker copies failed parser/guard-docstring
+formatting (exit1); the valid focused profile leaves all guards untouched.
+Profiler stderr interleaves a builtin axiom report, so the strict85 parser
+correctly rejects that diagnostic stream; it is NOT axiom-gate evidence.
+Fresh normal preparation supplies the real85-report pass. An initial adoption
+preservation check expected run_elab rather than print_checked_axioms and failed
+before source write; the subsequent misleadingly named prepare checked the
+UNMODIFIED original fixture (45.528s baseline). Its source/object binding and
+clarification remain. Corrected adoption checks the actual three report commands
+and uses a distinct output directory, preserving every earlier raw log.
+
+Runtime Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs pass under the existing
+serial12GiB/no-swap cap/writer/compiler locks. No heartbeat/fuel/node/time/stack
+budget increased; only authenticated stopped own containers cleaned, no cache
+or prior evidence deletion. Both independent read-only source reviewers PASS,
+no findings and no Lean/server/builds. Final checks/reviews/actual committed
+artifact hashes are in the handoff; all30 preceding main seals are preserved.
+
+All general unbounded source/target recursion, dependent dispatch/lowering,
+early-control/general mixed-loop body certificates, byte-journal/world and
+independent target transient/callback producers remain open. The larger C29
+combined target theorem remains failed, not proved by this performance repair.
+Actual repeated import/dependency-key scanning in the OWNED cache driver is
+ready engineering work: the failed batch completed Lean's542 reports but timed
+out during fresh per-fixture post-key checks. Any repair must retain actual
+full source/object reads and complete before/after toolchain binding, all18
+fixtures/all542 reports and unchanged120s; inventory alone is not a gate.
+No independent-work exhaustion, full-lane completion, goal reset/reactivation,
+push/merge/PR or reserved-source edit. Published099bfbe185731c354b12a40f28ccf5d98534c779
+remains the consumed producer; no peer package supplied or silently imported.
+
+Continuation30 final scoped evidence: standalone UNCHANGED original542 builtin
+queries pass95.527s/120s; all names/order/sets and72corruption controls pass.
+This independent mathematical audit does NOT pass the complete cached gate.
+All542 imported kernel types pass2.983s. Prior separate7+6+5+15+3+11+16+14+8
+axiom reports rechecked exact; actual normal85tuple reports pass. Three cache
+source/producer-object/client-object corruption controls pass10.446s with exact
+restoration; complete input integrity inventory passes6.985s (inventory only).
+Structural/layer/import/orphan/trust and dynamic no-Lean raw/cached driver
+coverage/fail-fast controls pass. Actual dependent signature query1.411s passes
+after correcting two filename-as-namespace lookup errors; failed query retained.
+Initial audit-harness byte comparison failed only on blank separators, before
+execution; corrected comparison checks every original import/query line and
+copies the actual unchanged harness byte-for-byte, omitting no report.
+Independent finder/skeptic source reviews PASS, no findings; final committed
+artifact reviews/checksums and complete actual gate receipts are in handoff.
+No kernel proof, external compiler/EVM agreement or entire lane completion is
+inferred from profiling, metadata, inventory, report counts or these scoped
+passes. Every original failure/seal remains.
