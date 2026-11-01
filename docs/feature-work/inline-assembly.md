@@ -472,3 +472,5 @@ coverage/separation/nonwrapping and concrete whole-source/residual snapshot
 composition. New14pinned calls supplement the unchanged380observations.
 Whole storage/dirty/dynamic/allocation/Yul/compiler/calculus closure remains
 open; goal BLOCKED unchanged. Evidence:/workspace/vy2-evidence/recursive-fixed.
+The follow-up also derives actual owner pathTy presence for every enumerated
+leaf from root and field metadata; missing-path fallback is not assumed valid.

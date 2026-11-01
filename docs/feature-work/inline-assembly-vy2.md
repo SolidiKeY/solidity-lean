@@ -2272,3 +2272,38 @@ ran Lean/server/build/tests or edited. Final cumulative394call report preserves
 ALL380preceding fields; SHA256
 043cad397185d2d97bb423febfe43c89c130548933351902e873d3cd8a9464cb.
 Full original goal and queues remain unfinished/BLOCKED as stated above.
+
+
+### Actual metadata typing follow-up
+
+Reviewed recursive checkpoint committed atb9dc71b38fa597d7b38a0ee4f2f32ce4c6dcf9ea; immutable export under
+/workspace/vy2-evidence/recursive-fixed/checkpoint-1 preserves its patch/bundle,
+handoff and checksums before this follow-up. Continued original Backfill A/B:
+[FixedDeclarationTyping](../../Solidity/Yul/Views/FixedDeclarationTyping.lean)
+proves every generated leaf has actual E.pathTy.isSome from the checked root
+and recursive declaration metadata. The field induction's exact indexed type
+premise is DERIVED from actual E.structFields in the struct branch; no external
+read/inverse/final-safety premise is added. This is path EXISTENCE; exact actual
+bool/u16/u128 types are inhabited separately, not an overclaimed universal
+exact-type equality. Owner structural index typing remains unchanged, while
+registry bounds follow declared enumeration. Missing-field pathTy=None and
+cellTy tuple fallback cannot enter the computed leaf inventory. Wrong-root
+scalar-vs-struct guard is also retained. Old APIs/signatures unchanged; no new
+compiler behavior, so394external report fields remain unchanged. Independent
+finder/skeptic read-only follow-up reviews both clear; neither ran checks or
+edited. Final affected/import/signature gates recorded in versioned receipts.
+Full original obligations and blocked goal remain unchanged.
+
+
+Final metadata follow-up: per-file Typing/TypingControls and focused98jobs exit0;
+policy wrapper1144default/262TestSuite/131annotations exit0. Complete final
+signature/axiom audit2647declarations/1526theorems:
+1475standard-only/51axiom-free, none missing/unexpected. Final strict,
+trust1174sources/246sites/0findings, layers335core/0elaborator reach,
+orphans1159reachable/0orphans and markdown new0 pass. Final globaldocs ACTUAL
+exit1 byte-identical base48missing/37ambiguous, cmp exit0/delta0 separately.
+Unchanged394call reference and21negative-suite receipts retained; no new external
+behavior introduced by typing lemmas. Both independent follow-up reviews clear.
+No owner/representation/guard/whole obligation signature change, budget increase,
+new axiom or goal action. Final full HEAD/patch/bundle/checksums in absolute
+/workspace/vy2-evidence/recursive-fixed/HANDOFF.md and cumulative handoff.
