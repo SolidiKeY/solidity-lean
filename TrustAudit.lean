@@ -61,6 +61,7 @@ import Solidity.Source.Unique
 import Solidity.Source.Horizon
 import Solidity.Source.Session
 import Solidity.Source.SoundnessExamples
+import Solidity.Semantics.AbiEntryProofs
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -1752,3 +1753,18 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} storage-write theorems use only the standard axioms"
+
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.AbiEntry.mdec_cval,
+    ``Solidity.AbiEntry.eager_cref,
+    ``Solidity.AbiEntry.verdict_revert_iff,
+    ``Solidity.AbiEntry.verdict_run_entry]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} ABI entry-decoding theorems use only the standard axioms"
