@@ -10,7 +10,7 @@ import {keccak_256} from '../evm-reference/node_modules/@noble/hashes/sha3.js';
 import {predictedAliases,LOCAL_CALLER} from './oracles.mjs';
 import {capturedMachine,validateCapture,validateCallCapture} from './capture.mjs';
 import {hexToBytes,bytesToHex} from '../evm-reference/node_modules/@ethereumjs/util/dist/esm/index.js';
-const PRODUCER_SHA='1efabee718f8333e16eca69912f2caa73973cca2aa9c62be91d7984219681865';
+const PRODUCER_SHA='8ef05f37eee1ed003d13303bde83466330e9550cb2b423d80398be53f4c0733f';
 const V16_SHA='bb38a3c924178c670426c93ab4053d5b07c940b3d8fc6b50592a636b63d60b16';
 const SOURCE_SHA='d7a8103219a77a219500941d326ad8ace8f52cf150c78b4f91cfab279b4c1076';
 const SCOPE='Finite actual component/encoded-target/solc projections; no universal source, compiler, raw-memory or whole-world correspondence.';
@@ -37,7 +37,7 @@ export function validateComponentLedger(record) {
  const modules=['Interface','Concrete','Controls','TargetRepeat','ScopeTransport','WordBridge'].map(n=>'Solidity/Yul/Composition/'+n+'.lean');
  if(!equal(Object.keys(record.consumerModuleHashes??{}).sort(),modules.sort()))throw Error('missing component module');
  for(const f of modules)if(sha(readFileSync(join(ROOT,f)))!==record.consumerModuleHashes[f])throw Error('stale component proof body');
- if(!equal(record.producerHeads,['250555de2df2c16e2413cf329f43c77ce51ac8b6','9c631ecb07af62039348239763e049275fd78c1e','bea6e0e334f448aebb6f7c7a68321b4e419b43d2']))throw Error('wrong component producer heads');
+ if(!equal(record.producerHeads,['250555de2df2c16e2413cf329f43c77ce51ac8b6','9c631ecb07af62039348239763e049275fd78c1e','bea6e0e334f448aebb6f7c7a68321b4e419b43d2','2bb7bb20852e986f81a44aaaadfda104cac9c3f4']))throw Error('wrong component producer heads');
  for(const [key,source] of [['obligations',original.obligations],['combinations',original.combinations]]) {
   if(record[key]?.length!==source.length||!equal(record[key].map(x=>x.id),source.map(x=>x.id))||record[key].some(x=>x.fullStatus!=='pending'))throw Error('missing/closed original component obligation');
   for(let i=0;i<source.length;i++){if(!equal(record[key][i][key==='obligations'?'dependencies':'required'],source[i].dependencies)||key==='obligations'&&record[key][i].owner!==source[i].owner)throw Error('component dependency/owner drift');}

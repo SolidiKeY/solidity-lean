@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {validateLean,compareProjection,verifyInputs,verifyProducerReceipt,validateComponentLedger,validateComponentReport} from './component.mjs';
 import {predictedAliases} from './oracles.mjs';
-const ROOT='/workspace/vy5-composition/parallel-20261101/component-reference-final-reviewed';
+const ROOT=process.env.VY5_COMPONENT_REPORT_DIR??'/workspace/vy5-composition/physical-source-20261101/old-components';
 const report=JSON.parse(readFileSync(ROOT+'/report.json'));
 const lean=report.lean;
 test('actual component evidence matches independently stated finite outcomes',()=>{

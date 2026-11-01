@@ -258,3 +258,20 @@ mutants remain intact. Concrete source/world/compiler adequacy still needs
 specific producer inputs; neither generic V16 laws nor finite external tests
 replace those proofs. New artifacts are versioned under
 `/workspace/vy5-composition/parallel-20261101/final/`.
+
+
+### VY5 actual physical/source consumer — 2026-11-01
+
+Verified VY2 checkpoint2bb7bb20852e986f81a44aaaadfda104cac9c3f4 now feeds four
+consumer modules with26named kernel laws: actual represented source writes,
+three-journal child-success/outer rollback, physical/returndata/target byte
+copying and typed heap-byte image agreement over valid placements. Private
+validated tree a3b983b7abafbf299a0b2ac4452a55c849d6e37b passes KeySort/fullpolicy/
+TestSuite/import closure/scoped axiom checks; trust invocation failures are
+retained and the exact-inventory trust retry passes.247JS+2Python and32ordered
+calls across4pinned compiler profiles pass. Read-only finder/skeptic findings
+were fixed and rereviewed. All24full obligations/sixsource combinations remain
+pending; physical-world journals/logs, dirty locals, allocation/G01 and actual
+compiler/world/V16 assembly certificates still need concrete producer facts.
+See [lane handoff](inline-assembly-vy5.md#actual-physicalsource-consumer-checkpoint--2026-11-01).
+New artifacts: `/workspace/vy5-composition/physical-source-20261101/final/`.

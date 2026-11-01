@@ -844,3 +844,126 @@ is created. New reviewed patch/bundle/handoff/evidence/checksums are under
 `/workspace/vy5-composition/parallel-20261101/final/`; the early immutable package
 and all six earlier checksum manifests are preserved. Historical docs/G03 exit1
 failures remain failures with exact-base equality, checked separately.
+
+
+## Actual physical/source consumer checkpoint — 2026-11-01
+
+Continuation of the original frozen assignment, based on reviewed checkpoint
+0a3d13bc70bbf076eeab9a553c347e9e4dcccd25 and pinned base
+0b078cefaf7daad79007b87b72df64eb6936420f. The earlier missing-VY2-package
+condition is resolved by verified physical checkpoint
+2bb7bb20852e986f81a44aaaadfda104cac9c3f4. Bundle SHA256
+fd2a31455a32aa05f1ff64853c5c3bc950d36b436df91c6045c7bec99c00d711 and
+archive SHA256 a3c0d4258ebf35e2a69107236f381f1497512ca7dedb38df12f5eb4a9e1c5b2b
+match the delivered immutable input. All455 archived files match its committed
+Git tree. The union of151 required source files was checked against that tree;
+128 new producer files were staged with no conflicting existing bodies. These
+are private dependency inputs, not producer completion or master publication.
+
+The private tree `/workspace/vy5-dependencies-20261101` extends prior validated
+3d25df6a6a74d8df936b112aba880cae2d751faa through physical stage
+527be7e1b529ec31c1269a8b215296f8034b6ddc to reviewed consumer tree
+a3b983b7abafbf299a0b2ac4452a55c849d6e37b. Producer definitions are unchanged.
+Only this private root imports the new physical consumer closure; the assigned
+branch does not pretend its unsupplied producer imports build standalone.
+[Physical producer receipt](../../tests/yul-composition/physical-producer-input.json)
+records exact paths/hashes and remaining facts.
+
+Four new intrinsic consumer modules add26 named kernel laws:
+
+| Module | Concrete result and real premises |
+|---|---|
+| [PhysicalFrames](../../Solidity/Yul/Composition/PhysicalFrames.lean) | Successful represented preparation and exact request/account equality link the public physical write to the actual Source.applyOp action. Persistent full-word/MemOK additionally requires nonstatic context, persistent bank, source MemOK and finite separation. The same source action projects into actual VY4 completion/target copying; child success then outer rollback restores source, complement journal and owned-byte journal together. |
+| [PhysicalBytes](../../Solidity/Yul/Composition/PhysicalBytes.lean) | Strict actual returndata window agrees with physical byte reads/copy and actual VY3 materialization, given valid physical source range and bounded target extent. Empty physical copy beyond a word is distinguished from an invalid strict returndata window. |
+| [PhysicalControls](../../Solidity/Yul/Composition/PhysicalControls.lean) | Uses the producer's ownedOriginPlan/Run unchanged: raw0xab000002 makes logical bool true while preserving the original owned byte2 and padding. Real child raw0xcd000003, static refusal, complete source/journal rollback, memory sentinels, wrong owner/slot and stale owned-byte/padding controls are inhabited. |
+| [PhysicalMemory](../../Solidity/Yul/Composition/PhysicalMemory.lean) | Actual typed heap lookup and MemoryImage encoder, concrete Placement, byte bound, reserved-word invariant, strict window and target bound imply reserved-word preservation and target/physical byte agreement. All65 producer placements, including different/unaligned addresses, supply the same payload byte. This is read/encode agreement, not an allocator or G01 refinement theorem. |
+
+Exact dependent indices/signatures/premises and scoped axiom reports are in
+`/workspace/vy5-composition/physical-source-20261101/Signatures.lean` and raw
+`/workspace/vy5-composition/evidence/physical-source-joint-policy.log`.
+All26 new laws have only standard propext/Classical.choice/Quot.sound where
+needed, or no axioms. No new axiom/sorry, admission change or raised budget.
+
+The precise physical/world gap remains explicit: VY4 Effects carries execution,
+full-topic logs and returndata, but not VY2 complement/owned-byte journals or
+Source.EMState locals/heap. The consumer projects execution and supplies the
+world log prefix/buffer explicitly; Source.St.logs has a different encoding and
+is not silently converted. Same-frame algebra is not an actual Yul call theorem.
+No new replacement world semantics, allocator refinement, dirty-local cleanup,
+full memory-safe-block preservation or Y07/compiler adequacy is certified.
+
+[PhysicalDriver](../../tests/yul-composition/PhysicalDriver.lean) executes the
+actual source/physical and target definitions. A separately source-derived
+[Solidity control](../../tests/yul-composition/PhysicalControls.sol) preserves the
+same diamond storage layout at42, bool slot43 and both raw writes. Pinned
+solc0.8.38+1835d247/Osaka, legacy/viaIR with optimizer off/on, each executes the
+same ordered8-call plan: peek; outer child-success/revert; peek; first write;
+static child refusal; peek; successful child; peek. All4profiles/32calls match
+independently specified logical/raw results, ordered empty logs, finite pre/post
+slot42–48 maps, deployed/caller accounts, semantic RETURN/REVERT byte windows,
+child identity, and raw rollback writes. Return windows use relative offsets,
+not equality of arbitrary compiler-final memory or allocation pointers. Native
+runCall nonce changes are retained as engine host behavior; it is not runTx.
+Source static revert[] and native static-state-change exceptions are retained
+separately; no halt-class correspondence is inferred.
+
+The [runner](../../scripts/yul-composition/physical-source.mjs) binds all151
+producer bodies, current consumer bodies, retained actual Lean stdout/stderr,
+command/exit metadata, exact source/settings/profile/call identities and raw
+compiler receipts. Missing evidence is an error; no empty-state fallback or
+mismatch-to-blocked downgrade. The frozen
+[physical ledger](../../tests/yul-composition/physical-component-ledger.json)
+registers26 facts and keeps24 full obligations/six combinations pending. The
+existing13-fact registry is extended only with delivered producer provenance;
+its earlier actual component controls and exact emitted ADD replay still pass.
+
+Focused per-file MCP diagnostics pass all4new modules and driver with
+success=true, partial=false and no errors; nonfatal server shutdown warnings
+remain raw. Explicit KeySort passes2jobs on Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613. Required `./run-lean.sh` passes1137library jobs,
+262TestSuite jobs and SolKey377taclets/131read annotations. Layer check184core/
+0elaborator and orphan check1152reachable/0orphan pass. Strict check retains
+491automatic/61budgeted/0manual/11refuted/0pending. Scoped signatures/axioms pass.
+The encompassing shell command exits126 only after these gates when direct
+trust-wrapper invocation lacks execute permission. A bash retry exits1 because
+the minimal image lacks Git; both failures remain raw. Feeding the host's exact
+NUL-delimited private-tree file inventory to the unchanged trust checker passes:
+1167sources/246inventoried sites/0findings, exit0. No successful build was rerun
+to conceal these invocation failures.
+
+All247JS+2Python tests pass serially, including missing/reordered profiles/calls,
+wrong owner/slot/owned byte/padding, rollback, child caller, static flag, semantic
+memory, retained Lean execution, stale producer/source/runner/oracle/ledger
+hashes and false closure. Prior component4profiles/encoded ADD match after the
+intentional producer receipt extension. Prior227working upstream byte/log
+profiles with finite assertions/458calls,21older-fork blocks and eight intended
+mutants are unchanged and remain attributed to their sealed reports; the
+unmodified full upstream command is not rerun as new evidence.
+
+Independent read-only finder and skeptic reviews used no Lean/server/build.
+Both accepted the typed heap theorem and found evidence-reader gaps: deployment
+identity/install code, missing physical-ledger validation, retained actual Lean
+execution, pre-state and nested child request binding. All confirmed findings
+were fixed and mutation-tested; separate final rereviews accepted the fixes
+with no remaining concrete finding. Raw reports are exported with this handoff.
+
+All heavy checks are serial under the existing writer lock, LEAN_NUM_THREADS=1,
+Lean-j1, enforced aggregate12GiB/equal memory+swap (no swap), with OS headroom,
+RSS/disk monitoring and persistent disk cache. Resource command/exit/sample
+records are retained; no OOM/resource stop or increased proof/gas/step/test limit.
+Historical docs/G03 exit1 remain failures with exact-base zero-regression checks,
+not global passes. Seven prior sealed checksum manifests and all original
+artifacts/caches/failures are preserved.
+
+Work1/Work3 remain partial: actual physical/source/kernel progress is now ready,
+but all24 full Y01–Y09/Y10/G48–G51 obligations and six entire source combinations
+remain open. Work2/BackfillA/B remain partial for universal correspondence,
+complete semantic observation contracts and actual compiler/source/world wiring.
+VY2 delivery is no longer a blocker. Remaining concrete producer facts are VY1
+Yul/dirty-local execution, physical-world journal/log integration, G01 amendments,
+and real compiler/world/V16 assembly Lang/pass/Cert/guards. Generic certificate
+laws and finite external tests do not supply them. The pre-existing full goal
+remains blocked and untouched; get_goal is not exposed, and no new/reset/
+reactivated goal or competing continuation was created in this manual recovery.
+No semantic question is pending. Fresh patch/bundles/handoff/evidence/checksums
+are versioned under `/workspace/vy5-composition/physical-source-20261101/final/`.

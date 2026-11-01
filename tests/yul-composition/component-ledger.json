@@ -15,7 +15,8 @@
   "producerHeads": [
     "250555de2df2c16e2413cf329f43c77ce51ac8b6",
     "9c631ecb07af62039348239763e049275fd78c1e",
-    "bea6e0e334f448aebb6f7c7a68321b4e419b43d2"
+    "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+    "2bb7bb20852e986f81a44aaaadfda104cac9c3f4"
   ],
   "facts": [
     {
@@ -225,9 +226,9 @@
       "id": "Y04",
       "owner": "VY2",
       "fullStatus": "pending",
-      "peerHead": null,
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
       "readyComponentFacts": [],
-      "availability": "specific producer package not delivered",
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
       "unresolved": "Packing/residual persistent/transient views, decode/encode, rollback and reset",
       "dependencies": [
         "Y03",
@@ -243,9 +244,9 @@
       "id": "Y05",
       "owner": "VY2",
       "fullStatus": "pending",
-      "peerHead": null,
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
       "readyComponentFacts": [],
-      "availability": "specific producer package not delivered",
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
       "unresolved": "Byte memory, MemOK preservation and allocation refinement; G01 YQ3 amendment",
       "dependencies": [
         "Y03",
@@ -258,9 +259,9 @@
       "id": "Y06",
       "owner": "VY2",
       "fullStatus": "pending",
-      "peerHead": null,
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
       "readyComponentFacts": [],
-      "availability": "specific producer package not delivered",
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
       "unresolved": "Calldata copy/load/hash and universally quantified environment inputs",
       "dependencies": [
         "Y05",
@@ -357,9 +358,9 @@
       "id": "Y09.02",
       "owner": "VY2",
       "fullStatus": "pending",
-      "peerHead": null,
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
       "readyComponentFacts": [],
-      "availability": "specific producer package not delivered",
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
       "unresolved": "Sound physical/input calculus; update laws and printed rules",
       "dependencies": [
         "Y04",
@@ -531,5 +532,6 @@
         "Y07.02"
       ]
     }
-  ]
+  ],
+  "physicalEvidence": "tests/yul-composition/physical-component-ledger.json"
 }
