@@ -1420,3 +1420,96 @@ reactivation/status change, push/merge/PR or service occurred; get_goal is absen
 The original blocked goal is untouched. Reviewed patch/bundles/interface/handoff/
 evidence/checksums are versioned at
 `/workspace/vy5-composition/raw-catch-20261101/final/`.
+
+### Scoped functions after raw catch — 2026-11-01
+
+[CatchFunctionPhysical](../../Solidity/Yul/Composition/CatchFunctionPhysical.lean)
+starts directly from `RawCatchPhysical.completed.state`: raw small1281, bool2,
+full dirty function fields, memoryRef0 and the complete retained Source.St. The
+real code is ONLY `.functions FunctionPhysical.F (FunctionPhysical.definitions
+withLeave)` followed by the indexed call/assignment. It does not prepend dirtyCode,
+ofClean or another interpreter; producer bodies are unchanged. Existing nestedBody
+adds256 then calls existing incrementBody for another256; its actual leave skips
+poison0. The inhabited32horizon therefore yields1793. Wrong callee yields1537;
+missing leave yields0. Separate explicit WRONG input-reset control starts from
+old clean initial locals and yields513 plus flag1/address4660/selector16909060.
+It is never used on the real path or inferred as solc cleanup. Both arity-error
+references remain uninhabited using the actual Member group.
+
+The24 new component laws are distinct from ALL24 original full obligations,
+which remain pending. `all_horizon_rebase` covers arbitrary typed LocalValues,
+both Source.St values, both boolean controls and every horizon, including
+exhaustion. `source_preserved`, `nonword_preserved`, `completed_from_unique` and
+`raw_from` cover arbitrary typed inputs with actual completed-run premises, not
+an execution-agreement oracle. The concrete witness proves complete output/flow,
+source/heap/log55/nonword preservation and all-completed-horizon uniqueness.
+runClean still refuses the raw output. Real coupled physical residual/owned-byte
+journals, reconstructed restored0 and exact supplied VY4 failure/window relations
+remain tied to the same actual restored Source.St; no extra physical step or
+raw Source function/session semantics is invented. Native-to-Lean fuel equality,
+Source try/catch selection/byte binding and physical-world/G01/compiler/V16
+adequacy are not consequences of these laws.
+
+The [actual driver](../../tests/yul-composition/CatchFunctionDriver.lean) records
+input1281 separately from output1793, wrong1537/poison0/reset513, arities, all raw
+cells/control, every selected horizon, clean refusal, nonword/heap/source/world
+logs, real journals and failure/window data. Horizon0/1/2/4/8 exhausts and16/32
+completes, as independently predicted from staged evaluator/body depth BEFORE
+execution; original32fuel budget is unchanged. No missing field becomes zero.
+
+The new [native fixture](../../tests/yul-composition/CatchFunctionPhysicalControls.sol)
+retains the prior raw-prefix and actual try/catch operations in a new source and
+continues with scoped Yul functions inside catch. Independently frozen
+[expectations](../../tests/yul-composition/catch-function-expectations.json)
+cover normal/wrong-callee/missing-leave/explicit-reset and empty-data variants,
+follow-up reads and direct nonempty/empty outer failures:4 pinned solc0.8.38
++1835d247/Osaka legacy/viaIR optimizer off/on profiles pass40orderedcalls. All
+original fixture/oracle files remain unchanged. Caller marker7/log55 survives;
+outerAB/childCD and transient22/33/logs66/77 revert. Exact DE/AD or empty catch
+bytes, AABB alias, full function fields and relative frame memory remain observed.
+This is finite runCall/touched-world evidence, not total-world/runTx, pointer
+identity, Source/compiler correspondence or an answer to LIB1/unchecked-add.
+
+The [reader](../../scripts/yul-composition/catch-function-source.mjs) validates
+actual parent RawCatch→Recursive→Function→local/physical/peer closure, frozen
+parent and selected own catalogs, current source/body/oracle/settings hashes,
+retained Lean command/exit/stdout/stderr, required profile/call order, touched
+accounts/storage/transient maps, all relevant frame identities/write indices,
+ordered logs/buffers and RETURN/REVERT/LOG windows. Raw input reset, callee/leave/
+arity confusion, equal-return wrong owner/slot/journal/world/memory, missing or
+stale source/private bodies/receipts/catalog/evidence fail closed. All690JS+2Python
+pass, including previous586JS controls; prior native evidence remains attributed
+to sealed tested trees. No unchanged full reference command was rerun as fresh
+correspondence. Separate independent finder/skeptic read-only reviews accepted
+source and mutations, no findings or Lean/server/build/edits.
+
+Private587371709d6f37c753d41c4bc7cf53c7371df15a is preserved as ancestor of
+9cc86ee418a700936b30595a38734705a32a6bac; only this owned consumer, driver and one
+private root import were added. Main standalone import support is not claimed.
+Joint gate exits0: actual Lean4.24.0 commit797c613; Lake5.0.0-src+797c613;
+KeySort2jobs; library1225/TestSuite262jobs;377taclets/131annotations;192core/
+0elaborator;1240reachable/0orphan; strict491automatic/61budgeted/0manual/
+11refuted/0pending; trust1255sources/252sites/0findings. All24 scoped signatures/
+transitive axiom reports show standard axioms or subsets, no axiom/sorry. Final
+MCP consumer/driver/root success=true/partial=false/no errors; raw nonfatal async
+shutdown warnings remain. Initial MCP exit1 from ambiguous `initial.2` is retained;
+qualified actual LocalPhysicalControls.initial without changing outcome/budget.
+Historical docs/G03 exit1 and exact-base comparison remain failure/zero regression,
+not passing global gates. Supported writer lock/bounded runner, serial-j1/
+LEAN_NUM_THREADS=1,12GiB/no swap/OS-headroom guards and all proof/test limits are
+unchanged. Disk was measured throughout; no protected cache/evidence was deleted
+or guard reduced. Only this turn's stopped metadata-only VFS copies were retired
+after preserving/verifying inspect/logs/directory metadata and retaining image/
+mounted data. No hidden resource stop occurred.
+
+Work1/Work3 and Work2/BackfillA/B remain PARTIAL. All24 original Y01–Y09/Y10/
+G48–G51 full obligations and six full Source combinations remain pending. Exact
+remaining boundaries: Source.applyOp/representedSourceStep still accept old
+Source.EMState/Source.Locals, while raw LocalState.runClean refuses raw values;
+general Source dispatch/try selection/catch-byte binding/raw ordinary operators/
+function/session hooks, physical-world journal/log/G01 and actual compiler/world/
+V16 adequacy remain absent. The two VY1 LIB1/unchecked-add questions remain
+unanswered. No producer retrieval, goal creation/reset/reactivation/status change,
+push/merge/PR or service occurred; get_goal is unavailable. Original blocked goal
+identity stays unchanged. Reviewed immutable patch/bundles/interface/handoff/raw
+evidence/checksums are at `/workspace/vy5-composition/catch-function-20261101/final/`.

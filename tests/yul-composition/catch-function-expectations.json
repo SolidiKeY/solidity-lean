@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "derivation": "Frozen before execution: actual raw catch result1281 passed directly to existing nestedBody with leave: arg+256 then increment+256 gives1793; wrong callee increment gives1537; omittedleave reaches poison0. Wronginput-reset to initial clean view yields small1+512=513, flag1/firstaddr4660/secondselector16909060. All other raw fields preserved. Native prefix/catch state/log/transient/window expectations derived from unchanged original raw-catch operations in new extended source. Function bodies see arguments only. No raw Source resumption or native-to-Lean fuel equality.",
+  "cells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1793",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "flow": "normal",
+  "nonwordId": 0,
+  "heapBytes": [
+    170,
+    187
+  ],
+  "sourceLogs": [
+    [
+      "1",
+      [
+        85
+      ]
+    ]
+  ],
+  "horizons": [
+    0,
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "completedFrom": 16,
+  "journalLengths": {
+    "residual": 1,
+    "owned": 1,
+    "childResidual": 2,
+    "childOwned": 2,
+    "outerResidual": 0,
+    "outerOwned": 0
+  },
+  "targetBytes": [
+    238,
+    222,
+    173,
+    238
+  ],
+  "emptyTargetBytes": [
+    238,
+    238,
+    238
+  ],
+  "physical": {
+    "child": "3439329283",
+    "outer": "0"
+  },
+  "nativePlan": [
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "0",
+      "exception": null,
+      "frames": 1,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": false,
+      "logs": []
+    },
+    {
+      "signature": "caught()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1793",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "2",
+        "100719116927691798707895874029850069994745719541394658707722161504685790330880"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "caughtWrongCallee()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1537",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "2",
+        "100719116927691798707895874029850069994745719541394658707722161504685790330880"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "caughtNoLeave()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "0",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "2",
+        "100719116927691798707895874029850069994745719541394658707722161504685790330880"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "caughtReset()",
+      "words": [
+        "1",
+        "4660",
+        "2309737967",
+        "513",
+        "22136",
+        "16909060",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "2",
+        "100719116927691798707895874029850069994745719541394658707722161504685790330880"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "caughtEmpty()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1793",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": true,
+      "outer": "outerEmpty()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 1,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": []
+    },
+    {
+      "signature": "outer()",
+      "words": [],
+      "rawBytes": "0xdead",
+      "post": "0",
+      "marker": "7",
+      "exception": "revert",
+      "frames": 2,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": []
+    },
+    {
+      "signature": "outerEmpty()",
+      "words": [],
+      "rawBytes": "0x",
+      "post": "0",
+      "marker": "7",
+      "exception": "revert",
+      "frames": 2,
+      "catch": false,
+      "empty": true,
+      "outer": "outerEmpty()",
+      "transientTracked": true,
+      "logs": []
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 1,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": []
+    }
+  ],
+  "inputCells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1281",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "wrongCells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1537",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "poisonCells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "0",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "resetCells": [
+    "1",
+    "4660",
+    "2309737967",
+    "513",
+    "22136",
+    "16909060",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "arities": [
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      1
+    ]
+  ]
+}

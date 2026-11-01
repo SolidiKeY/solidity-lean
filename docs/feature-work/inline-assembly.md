@@ -333,3 +333,14 @@ is not general Source try/catch dispatch or full physical/world adequacy.
 All24full obligations/sixSource combinations stay pending; see
 [lane detail](inline-assembly-vy5.md#raw-local-catchrollback-transport--2026-11-01).
 Versioned evidence is at `/workspace/vy5-composition/raw-catch-20261101/final/`.
+
+### VY5 scoped functions after raw catch — 2026-11-01
+
+VY5 directly consumes actual raw catch state in existing scoped function bodies,
+without initialization/clean conversion.24new component laws include arbitrary
+input/all-horizon transport and actual1793/1537/poison0/reset513 controls.
+Four pinned native profiles pass40orderedcalls;690JS+2Python and joint
+KeySort/build/TestSuite/strict/trust/scoped-axiom gates pass. All24 ORIGINAL
+full obligations/sixSource combinations remain pending; no new source dispatch
+or final adequacy is inferred. See [lane details](inline-assembly-vy5.md#scoped-functions-after-raw-catch--2026-11-01)
+and versioned artifacts `/workspace/vy5-composition/catch-function-20261101/final/`.

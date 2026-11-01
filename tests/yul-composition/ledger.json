@@ -417,5 +417,6 @@
   "localTrustRegistration": "tests/yul-composition/local-trust-registration.json",
   "functionComponentEvidence": "tests/yul-composition/function-component-ledger.json",
   "recursiveComponentEvidence": "tests/yul-composition/recursive-component-ledger.json",
-  "rawCatchComponentEvidence": "tests/yul-composition/raw-catch-component-ledger.json"
+  "rawCatchComponentEvidence": "tests/yul-composition/raw-catch-component-ledger.json",
+  "catchFunctionComponentEvidence": "tests/yul-composition/catch-function-component-ledger.json"
 }
