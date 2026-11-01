@@ -178,6 +178,7 @@ import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntTwoAnchors
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
+import Solidity.Calculus.DecisionCoefficientBoundary
 import Solidity.Calculus.HashWritten
 import Solidity.Calculus.HashWrittenInput
 import Solidity.Calculus.HashWrittenRealize
@@ -222,6 +223,7 @@ import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionQuantLedger
 import Solidity.Examples.DecisionMemory
 import Solidity.Examples.DecisionGapCensus
+import Solidity.Examples.DecisionCoefficientBoundary
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation

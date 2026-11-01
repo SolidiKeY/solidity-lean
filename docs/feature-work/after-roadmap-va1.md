@@ -444,3 +444,153 @@ Independent final read-only finder and skeptic found no source, receipt or
 documentation issues. They independently confirmed the frozen producer and
 predicate file identities. Packaging follows commit; no artifact seal is
 claimed until its actual bundle/patch/checksum verification succeeds.
+
+## Human-authorized supported coefficient-family boundary
+
+Parent `d17f161d075cf74ff04ecc958eeed8a1bcc02a4a`. The exact human Q1 answer
+is recorded with the original requirement in `docs/solidity-scope.md`:
+**"Authorize the certified boundary revision"**. This checkpoint proves a
+sharp boundary for the explicit family below. It does **not** prove general
+program-free reverse inclusion or the broader M4 source characterization.
+Those classes and all other original obligations remain outside this result.
+
+### Exact supported class and public statement
+
+For every contract `C`, waiver setting `w` and locally closed typed uint term
+`c : Tm C [] (.val .uint)`, `coefficientLeaf c` is the intrinsic program-free
+formula `∀ uint x; c * x = x + x`, with `c` weakened under the binder so it
+cannot depend on `x`. Locally closed does not mean state-independent: `c` may
+read the state. No coverage, source-admission or successful-verdict assumption
+is imposed on `c` in the primary theorem.
+
+The public theorem `Solidity.Decide.CoefficientBoundary.coefficientLeaf_inTarget`
+in `Calculus/DecisionCoefficientBoundary.lean` has the explicit signature:
+
+```lean
+theorem coefficientLeaf_inTarget {C : Contract} (w : Waivers)
+    (c : Tm C [] (.val .uint)) :
+    (coefficientLeaf c).inTarget w = c.isLitV
+```
+
+Thus, **within this family**, source admission is equivalent to direct source
+literal shape. The existing `Tm.isLitV` test checks syntax, not whether
+preparation can compute a constant. The proof handles weakening, positive
+binder traversal, operator admission, mapping-key agreement and the negative
+hash-pair restriction separately. It does not call coverage to establish
+admission. `covered_boundary` explicitly restricts this stronger family
+identity to covered members; its coverage hypothesis is intentionally unused.
+That corollary is not the old false unconditional inclusion with a disguised
+premise, and arbitrary coefficients are not claimed covered or decidable.
+
+Other formula shapes, different right-hand sides, additional or negative/hidden
+binders and updates/programs are outside the supported family. The larger M4
+source characterization and all AU01/AU02 completeness claims stay open.
+`hiddenParameter_outside_family` certifies an actual separately checked
+program-free target/unknown control outside the family by constructor shape;
+its target/unknown/not-Covered certificates remain in the census module.
+
+### Inhabited, independently checked controls
+
+`Examples/DecisionCoefficientBoundary.lean` uses notation for the concrete
+formulas and named exact equalities to the family. The actual observed triples
+`(inTarget {}, Covered, verdict)` were reproduced before adding the new guard:
+
+| Source coefficient | Triple | Kernel semantic certificate |
+|---|---|---|
+| `2` | `(true, true, "proved")` | Exact proved verdict, `ValidH`, then ordinary `Valid` using the existing no-hash equivalence. |
+| `3` | `(true, true, "refuted")` | An inhabited returned state with exact refuted verdict and `¬ holdsH`; ordinary countermodel follows from the existing no-hash equivalence. |
+| `(1+1)` | `(false, true, "proved")` | Exact proved verdict and validity; retains the coverage/source-admission mismatch. |
+
+Coverage and all three target flags are independently kernel checked.
+Semantic certificates use exactly `decideGoal_sound`, `decideGoal_refutes`,
+`Fml.validH_iff` and `Fml.holdsH_iff`; the no-hash facts are kernel proved for
+these controls. No new validity/hash premise, default or source exclusion is
+introduced. Existing examples/expected observations, predicates, strategy,
+fuel/node/time/test/heartbeat/recursion budgets and unrelated profiles are
+unchanged. These are model/kernel and native Lean controls, not an external
+EVM/compiler agreement claim.
+
+The original `coverage-counterexample.lean` remains byte-identical to
+`8bbd5606e55f6ceadcbe611c2475370466d88ae9`. The public standalone
+[retained-source link](after-roadmap-va1/coefficient-boundary-link.lean) embeds
+that entire original file verbatim after one import and proves
+`retained_family_eq` plus `retained_family_boundary`. Its original false/true
+observations and both old certificates replay successfully. No earlier seal
+or failure was erased. The entire `Calculus/Decision.lean` file, including both
+predicate definitions, remains byte-identical to the frozen base; source hashes
+are retained in the evidence directory.
+
+### Actual gates, trust and failures
+
+All commands use the same task-owned local Docker runner, actual 12 GiB
+aggregate cgroup cap/no swap, explicit `-j1`, threads1, original writer lock and
+12 GiB host reserve, without LSP/build overlap. The evidence runner adds only
+source hashing for the new files; resource checks and policies are unchanged.
+Actual Lean 4.24.0/Lake 5.0.0-src+797c613 versions are recorded before each run.
+
+| Source | Complete MCP seconds | Build seconds |
+|---|---:|---:|
+| `Solidity/Calculus/DecisionCoefficientBoundary.lean` | 6.52 | 5.40 |
+| `Solidity/Examples/DecisionCoefficientBoundary.lean` | 8.68 | 6.34 |
+| `docs/feature-work/after-roadmap-va1/coefficient-boundary-link.lean` | 6.55 | standalone MCP |
+
+The public axiom audit checked all 27 boundary/control theorem names in 20.37 s,
+with only subsets of `[propext, Classical.choice, Quot.sound]`. The retained-source
+link separately prints the two old and two new public axiom reports. Selected
+passing runs peaked at sampled aggregate RSS 2,343,272 kB (including shared
+pages) and stayed above 15.5145 GiB host available. These are dependency-warm
+fresh-file checks, not a cold full project build.
+
+Raw failed probes remain retained: the first helper lacked explicit
+`Option.isSome` reduction; a broad unfolding probe hit the unchanged recursion
+limit and looping-simp warnings; a new ordinary-countermodel signature used the
+wrong `Fml.holds` namespace, then was corrected to the existing `holds`.
+No failed probe is counted as a passing theorem. The completed proofs use
+explicit signatures/typed intermediates and `simp only`; no `sorry`, new axiom,
+new dependency or native-trust shortcut was introduced. Diagnostic probes were
+preserved outside the library before static gates.
+
+Independent read-only finder and skeptic source reviews found no issues in
+the sharp family identity, substantive bridges, separate semantic controls or
+retained-source link. Both required and confirmed the family/general-M4
+limitation and the intentionally redundant covered corollary. Neither used
+Lean/server/build or wrote files. Final delta/docs/static reviews and packaging
+are recorded with this checkpoint; sealing follows commit and is not claimed
+until actual patch/bundle/checksum verification.
+
+Evidence and public reports: `/workspace/va1-evidence/boundary-next`.
+The exact-source passing gates are verified against the final file hashes.
+
+### Full assignment remains incomplete
+
+This supported-family result is useful checked progress under the approved
+revision, not completion of the broader M4 source boundary. AU01 Residue,
+DecisionTheorem-prime, structural target/coverage/hash bridge and exhaustive
+reason census are still open. AU02 fixed/nested array, broader memory,
+halting-OR and formula-derived fuel/511-node obligations, corresponding controls,
+remaining independent backfill and final affected/full gates remain open.
+Existing strict axiom/documentation inventory failures are not waived. No
+milestone eligibility, publication, push, merge, PR/tag or whole-goal completion
+is claimed. The original goal identity/objective was not reset or stopped.
+
+Boundary checkpoint final resource rechecks also explicitly print aggregate RSS,
+host MemAvailable and cgroup current/peak **before** Lean/LSP starts. They retain
+the same 12 GiB/no-swap cap and 12 GiB host reserve. All five warm rechecks
+passed: core MCP/build 6.56/2.23 s, controls MCP/build 9.80/2.08 s, retained link
+MCP 6.59 s. Pre-build RSS snapshots were 2960–3288 kB; host MemAvailable was
+17,240,320–17,261,308 kB. Raw output retains actual `memory.max=12884901888`,
+`memory.swap.max=0`, versions and measurements. This adds observability to the
+owned runner; no installed guard policy or resource/proof budget changed.
+
+Final boundary static gates: 1057 reachable/zero orphans; 180 core modules/zero
+elaborator paths; strict automatic 491 automatic/61 step-budget/11 refuted/
+zero manual or pending; trust 1072 sources/248 inventoried sites/zero findings.
+All four pass. Axiom inventory still exits 1 with 1206 pins, zero errors and
+404 unrecorded changes, byte-identical to the previous checkpoint output.
+Strict doc paths still exit 1 with the exact 85 frozen-base findings and no
+added/removed findings. Neither full failed gate is reported as passing.
+Independent final read-only finder and skeptic found no source/docs findings,
+confirmed the ordinary semantic and outside-family proofs, original byte
+identities, source-hash/gate matches, exact class limitation and open queue.
+Neither used Lean/server/build or wrote files. Packaging remains post-commit,
+with actual verification required before claiming a seal.

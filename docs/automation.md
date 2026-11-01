@@ -979,7 +979,14 @@ The given-heap parameter is already proved globally valid; the other two
 miss the exact struct classifier by orientation or a nonliteral RHS. This
 census is not a Residue definition or bridge proof. Integrated memory,
 ledger-quantifier and written-memory sources replayed successfully on the VA1 VM.
-The authorized precise reverse boundary remains to be formulated and proved.
+A first precise supported-family boundary is now kernel-proved in
+`Calculus/DecisionCoefficientBoundary.lean`: for every contract, waiver setting
+and closed typed uint coefficient `c`, the family `∀ uint x; c*x = x+x` is
+in target exactly when `c.isLitV` holds. Literal 2/3 and folded `(1+1)` controls
+separate coverage, admission and proved/refuted semantics, and the retained
+counterexample is linked by exact equality. This is not the unrestricted
+program-free inclusion; other shapes and the broader M4 source characterization
+remain open, as do Residue/DecisionTheorem-prime/AU02/full gates.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
