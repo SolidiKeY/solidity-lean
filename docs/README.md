@@ -161,3 +161,7 @@ VY2 recursive dynamic struct preparation and unfinished original work:
 
 VY2 aggregate dynamic-array preparation and retained-alias boundary:
 [original lane queue](feature-work/inline-assembly-vy2.md#vy2-aggregate-dynamic-array-preparation-2026-11-01).
+
+
+VY2 retained source-reference preparation and original unfinished queues:
+[inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-retained-source-references-2026-11-01).

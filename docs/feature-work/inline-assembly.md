@@ -593,3 +593,12 @@ shrink expose a concrete retained-path/history obligation, not a new exclusion.
 Full original queue and producer/compiler/calculus closure remain unfinished.
 Exact signatures, tested-tree/gates/reviews/resources and committed full SHA:
 `/workspace/vy2-evidence/aggregate-dynamic/HANDOFF.md`.
+
+
+VY2 retained-reference checkpoint: [original lane queue](inline-assembly-vy2.md#vy2-retained-source-references-2026-11-01).
+Actual source formation/bind/sub traces, current-or-retained child traversal,
+complete canonical source/complement writes and real prefix/frame controls are
+implemented for a supported persistent component. This is not universal
+producer/alias capture, whole storage/heap semantics or full-lane completion.
+Exact committed SHA, theorem premises, final gates/reviews/resources and artifacts:
+`/workspace/vy2-evidence/retained-storage/HANDOFF.md`.

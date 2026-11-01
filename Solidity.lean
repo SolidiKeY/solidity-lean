@@ -957,3 +957,5 @@ import Solidity.Yul.Views.MemberStorageCompatibility
 import Solidity.Yul.Views.RecursiveDynamicSiblingControls
 
 import Solidity.Yul.Views.AggregateStorageAliasControls
+
+import Solidity.Yul.Views.RetainedChildEventControls

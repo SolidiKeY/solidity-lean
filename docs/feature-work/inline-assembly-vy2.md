@@ -3489,3 +3489,100 @@ Repository `/workspace/solidity-lean`, branch
 `0b078cefaf7daad79007b87b72df64eb6936420f`, starting reviewed HEAD
 `2ad8438ad86d88e29a46188dfd45aa909bbaa165`. Final full committed SHA is bound in
 the exported handoff; source/compiler finite testing boundaries remain explicit.
+
+
+### VY2 retained source references (2026-11-01)
+
+`RetainedArrayLayout` derives a supported aggregate-array root from actual
+inherited root metadata and ACTIVE literal/default origin, then computes child
+positions using the approved Fixed preimage and existing recursive stride. The
+initial component has one eligible inherited persistent root and ordinary
+recursive-struct children with primitive dynamic leaves. This is an explicit
+preparation scope, not a source root/depth/length cap or new admission exclusion;
+existing broader root APIs remain unchanged. Arbitrary aggregate-root placement,
+deeper aggregate events and universal producer instrumentation remain open.
+
+`recordRetainedIndex` records an actual successful Source.indexLoc computation,
+not a desired cursor or final view. Such an existential event ALONE establishes
+possible formation, not chronology/reachability in the current run.
+`RetainedSourceTrace` separately supplies a proof-only judgment indexed by the
+ACTUAL Source.EM action, complete result/state and histories. Its actual_run law
+is derived from constructors for real operations/bind/sub success/halt; there is
+no opaque erasure law or alternate source interpreter/state. Closed controls
+create the actual alias VALUE through index/member reads, initialize two real
+caller locals from that value, shrink, suspend those locals under a callee with
+NONE, and observe updated length3 after the raw dormant-header write. Separate
+traces form distinct child index1, return its actual reference on success or halt
+without leaking it into caller locals; commit retains its event and scoped
+rollback restores the exact caller prefix. These exhibited traces do NOT prove
+universal initial-alias/escaped-reference/producer completeness. In particular,
+arbitrary reference-valued pure/readLoc actions are not an automatic capture law.
+
+Stable current-or-witnessed INDEX union is computed before ONE shared child
+traversal, so duplicate aliases never require comparing arbitrary codec
+functions or discarding conflicting registrations. Actual packing/metadata and
+final checked separation retain full path, offset, nonwrap and per-run collision
+boundaries. Every encountered child primitive header, including dormant ones,
+has a derived Source.readLen/raw oracle agreement from its real canonical view.
+`RetainedArrayLayout.source_snapshot` proves complete supported traversal equality;
+no desired inventory/readback/inverse/output law is an input field.
+
+`RetainedOwnershipPlan` checks actual source length/child preparation/encoding,
+recomputes new ownership, performs the real Source.applyOp and writes the
+complement ONLY on source success. It derives whole supplied-map reencoding,
+pure snapshot/source equality, unchanged administrative store, every-initial-H
+owner MemOK, account/bank isolation, fresh sequential preparation and exact
+static refusal. `relocalize` derives changed-local preparation from actual header
+views; Source.EM.sub restores caller locals and keeps the same history and
+source operation. Repeated same-slot writes preserve the logical store/raw map
+while adding real source journal administration; they are not whole effectful
+state identity. Actual rollback/commit/endTx laws preserve physical caller
+prefixes, persistent words and the existing supported transient reset contract;
+no transient aggregate declarations are admitted by that bank machinery.
+
+The closed example also derives the ordinary owner writeLen shrink prefix and
+its complementary residual transfer from the COMPLETE old map, not a fresh
+unrelated residual. A dropped child's full padded word becomes residual;
+nonzero unknown/padding/tail bytes survive. The subsequent raw write uses the
+SAME actual source operation over that real14-entry residual prefix, and the
+closed Source program's output store matches its complete map reconstruction.
+Nested child rollback, successful child followed by enclosing revert, distinct
+child-event history and static failure use actual source/residual frame marks,
+which are independent of history counts. Generic arbitrary trace/residual
+simulation and full Source.CallAddr/producer instrumentation remain OPEN.
+
+Separate pinned solc0.8.38/Osaka legacy/viaIR RetainedStorage fixture checks
+caller aliases across a no-reference helper and external child frames, complete
+ABI/return/revert/Panic bytes, empty logs, and direct reads of EIGHT physical
+storage slots after EVERY call. Its24 ordered calls and652 mutations are finite
+external controls, NOT kernel/source/compiler correspondence, constructor-store
+reachability, general dirty semantics or allocator refinement. All preceding708
+observation fields/classifications must remain exactly identical in the final
+saved comparison; no earlier pass infers that equality. Synthetic Fixed hashes
+and source seeds remain distinct from the real compiler fixture and Keccak.
+
+Raw initial recursion/heartbeat/dependent-proof failures are preserved, repaired
+by factoring under unchanged budgets. Independent read-only design/finder/skeptic
+reviews and exact final tested-tree/signatures/axioms/gates/resources/patch/bundle
+are recorded at `/workspace/vy2-evidence/retained-storage/HANDOFF.md`; only actual
+saved final exits establish passes. Global docs retains its actual failing exit
+with exact-base comparison recorded separately, never relabelled global success.
+
+ENTIRE ORIGINAL queue: Y04 and Backfill A/B PARTIAL (this supported retained
+component is constructive; whole nested/mapping/storage-bytes/transient/dirty
+ownership, arbitrary-root/deeper/initial/escaped-reference capture and universal
+trace/source adequacy remain); Y05 PARTIAL (universal memory/writeback,
+shared-zero/interior/pointer forms, reachable allocation provenance/refinement,
+actual full assembly MemOK); Y06 PARTIAL (actual source/Yul bindings); Y09.02
+BLOCKED (actual producer execution/physical calculus/notation/printers/Lean-only
+rows/final compiler/source/import/joint closure). Concrete V10/V11 agreement
+instances remain open. Existing owner World/MemOK/ContractWorld/Bridge are
+available, not Yul adequacy. Original goal BLOCKED unchanged; get_goal absent,
+no goal calls. YQ1-YQ7/admission/canonical rethrow unchanged, questions=[].
+No original completion or independent-backfill exhaustion claim.
+
+Repository `/workspace/solidity-lean`, branch
+`codex/solidity-inline-assembly5-20261031/vy2-physical`, base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, starting reviewed HEAD
+`06f1aece06fb62e9654698a51e301c493610aa1f`; final committed full SHA is bound
+in the exported handoff. No push/merge/PR, unpublished imports or owner rewrite.
