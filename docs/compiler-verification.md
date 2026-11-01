@@ -589,6 +589,73 @@ found no own-scope compatibility defect. Full original-assignment completion
 remains false; exact source hashes and current/baseline checks are retained in
 `compat1031-status.json` with the cumulative delivery.
 
+**Published prerequisite consumed (2026-11-01).** The same saved task VM and
+branch fast-forwarded to published master
+`22073f4445e7cab7560812a5ef4e081bf8ff5e87`, retaining all earlier task commits.
+The memory-loops source `5b3446c8` and Derived17 shared proof `2aa1e04b` are
+now published ancestors. Their availability blocker is resolved. This VM has
+not established a successful Derived17 replay. The original call implementation,
+inhabited controls, Solidity fixture and EVM observation script are byte-identical
+to the reviewed published task. Read-only finder and skeptic reviews found no
+call integration defect in the public compiler's added loop paths. Those paths
+retain separate premises: no memory-call/loop composition is claimed here.
+
+Actual checks in this VM, each attempted once under its unchanged 300-second
+whole-group limit, are:
+
+| Required gate | Exit / elapsed / peak aggregate RSS | Progress, not a pass |
+|---|---|---|
+| `./run-lean.sh` | 75 / 300.089 s / 4,413,267,968 bytes | Default build completed the frontend certificate; `TypeExamples` remained pending; TestSuite was not reached. |
+| `lake build SolkeyTestSuite` | 75 / 300.058 s / 1,244,430,336 bytes | Last completed `LowerRun` (6.1 s); no Derived17 execution established. A saved setup does not identify a stuck proof. |
+| `lake build Solidity.Evm.MemoryCallExamples` | 75 / 300.034 s / 1,800,327,168 bytes | Public compiler completed; inhabited call-control module reached its setup but did not complete. |
+| Expanded `TrustAudit.lean` | 75 / 300.030 s / 2,166,427,648 bytes | Last completed callback payment soundness; callback-call soundness setup pending; final audit body not reached. |
+
+The unfinished call-control gate remains an owned validation obligation. No
+unchanged retry, split continuation or prewarming was used to relabel any stopped
+group. A separate five-declaration audit of public correctness, returned-pointer
+compaction and the three exact call-expansion equations passed: exit 0,
+1.812 s, 910,643,200 bytes peak RSS, only `propext`, `Classical.choice`,
+`Quot.sound`. It imports the compiler rather than the unfinished example module;
+it does not replace inhabited controls or the expanded trust audit.
+
+A new no-artifact diagnostic tested whether repeated closed compiler selection
+through the two additional loop paths dominated the unfinished owned file.
+The exact current source and saved setup, with profiling enabled, checked all
+inhabited proofs, source/compiled observations and refusals successfully: exit 0,
+40.763 s, peak RSS 1,400,066,048 bytes. It requested no compiled outputs and
+created no reusable target cache. The 17 closed compilation-definition commands
+were each below 0.594 s; no dominant compiler-selection proof or concrete own
+performance repair was demonstrated. This is a passing isolated source check,
+not a passing cumulative Lake build or full gate. The failed build had written
+its example setup only 27.406 s before its resource receipt. File timestamps
+and rounded job totals are workload evidence, not individual proof timings.
+
+Runtime reconfirmation passed Lean 4.24.0, Lake 5.0.0-src+797c613 and the two-job
+KeySort build (0.304 s, 48,607,232 bytes peak RSS). Orphan/layer/strict automatic/
+trust-lint gates, all 28 affected script tests, all 60 Cancun plus 60 Osaka
+observations and the frozen 377-taclet/131-read-bearing SolKey comparison passed
+(19.343 s combined, 367,153,152 bytes peak RSS). Trust lint inspected 1,086
+sources and 258 sites with zero findings; it is separate from the stopped
+kernel audit. The unmodified published-base documentation gate still fails
+with 48 missing references. Sampled EVM success is not kernel simulation.
+
+The VM has no existing Docker image or verified inner scope. These operations
+used the previously authorized fallback: actual hard 16 GiB VM cgroup, swap
+disabled, inherited 12 GiB per-process address-space ceiling, sampled 10 GiB
+group-RSS and 12 GiB VM-current stops. No writable 12 GiB cgroup is claimed.
+All checks were serial, held the writer lock and used `LEAN_NUM_THREADS=1` and
+explicit Lean `-j1`; no Lean server ran. Proof/search/time/resource limits,
+expected observations and refusal boundaries were unchanged.
+
+Full assignment completion remains false. The next condition is a concrete
+measured repair or authoritative exact-input cache/procedure evidence accounting
+for cumulative prerequisites within the unchanged limits, followed by actual
+passes of all four stopped gates. The dependency is no longer publication of
+Derived17. Logs, import setups/hashes and current ownership are in the new
+`solidity-compiler10-20261028-memory-internal-calls-resume1101` delivery. Its
+`previous-delivery` preserves all 503 earlier sealed files and their manifest;
+earlier publication and failed-attempt evidence is retained unchanged.
+
 ### Checked memory loops and enclosing scopes
 
 `Evm/MemoryLoop.lean` proves an unbounded simulation of `Stmt.loop`
