@@ -1363,3 +1363,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintDefault.lean` | Actual empty uint256 Source default builder and existing intrinsic/word constructor, occupied-root framing and real low-fuel timeouts. |
 | `Solidity/Backend/MemoryOps/SourceUintDeclaration.lean` | Actual numeric declaration/context extension, independent Source MemOK and published intrinsic/word execution with old-root freshness and frames. |
 | `Solidity/Backend/MemoryOps/SourceUintDeclarationControls.lean` | Populated numeric declaration in both pipelines; runtime old payloads, shared aliases, fresh empty root, whole object tables/word frames and timeout/identity negatives. |
+
+| `Solidity/Backend/MemoryOps/SourceUintDeclarationSequence.lean` | Actual numeric default declaration then reached old-object indexed assignment in Source RItems, intrinsic Prog and whole existing word append, deriving extended-context alignment and fresh/other-object frames. |
+| `Solidity/Backend/MemoryOps/SourceUintDeclarationSequenceControls.lean` | Both-pipeline declaration-to-material-old-alias-write controls with complete ordered Source/intrinsic/word frames, fresh-empty rejection and skipped-write/wrong-root negatives. |

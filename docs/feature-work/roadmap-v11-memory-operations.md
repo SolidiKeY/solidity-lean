@@ -4961,3 +4961,83 @@ skeptic source/control/script reviews PASS with explicit added empty/fresh/conte
 observations; committed-artifact review follows export. Earlier failed focused
 checks/coretype/contextinfer/guardformat/dependentindex issues are retained in raw
 logs; controls09 and finalfull pass with no elaboration-generated sorryAx.
+
+
+## C64 — reached numeric mutation after context-changing declaration (partial)
+
+Following reviewed C63, the next distinct G33/G34/BackfillB application now derives
+actual numeric declaration followed by indexed OLD-alias assignment. New owned
+SourceUintDeclarationSequence consumes C63 source_uint_declaration_word and
+SourceUintMemoryAt.declaration_frame, existing source_items_context_pair_run and
+resolved_uint_assign_word. No allocator, evaluator, syntax representation or copy
+algorithm is added. INITIAL Source/intrinsic local alignment, old index bound,
+MemOK/StateRepr/allocator/positivebase/space/framecapacity derive the actual first
+Source statement and changed context; old locals/refs weaken separately and the
+second bound follows actual Keeps.len. The second operation executes at that
+reached heap, Source-cons context and target constructor output, never the initial
+state or an assumed second run. Source original parameter count is retained.
+
+SourceUintMemoryAt.declare_assign_word proves both actual statements and Source
+RItems, intrinsic Prog, existing declare+write word append, reached/final old
+observer, initial fresh observer and its structural frame after old write,
+other Source-object frames, MemOK/StateRepr/final allocator/stack, actual allocated
+Source globals and full local extension. Only supported empty new numeric object
+and pure-local old-root/index/RHS operands are covered. It does not claim that the
+fresh object accepts any index, nor all-profile constructors/allocation failures.
+
+SourceUintDeclarationSequenceControls applies the law in BOTH pipelines to
+nonempty [7,0,max] oldcontent and shared aliases: declaration leaves content
+unchanged, reached assignment writes3 at1, retained alias actually reads3 while
+fresharray2 rejects0 with Sourcepanic and stays intrinsically empty. All three
+initial/mid/final Source oldobject observations, neighbor/fresh tables, intrinsic
+content vectors, three FULL16wordframe vectors/all content words, local/root/fresh
+IDs, savedstack and allocator are derived. Wrong-root/skipped-write negatives
+distinguish freshptr96 from oldptr16 and unchanged0 from written3. C63 endpoint/
+lowhorizon/space-boundary scope remains retained; C64 supplies no new late timeout
+or target empty-read suffix. No physicalbytes/Source rollback/external EVM claim.
+
+Focused controls04 passes194jobs, exact3standard-only guards (one pair, two trio),
+aggregate955292KiB/newOOMdelta0. Earlier core/context-inference and mixed-generation
+primitive heap-parameter rewriting failures are retained. The latter were repaired
+by explicit intrinsic heap parameters, preserving every expected vector and bound.
+C64 forecast96MiB plus512MiB reserve is admitted by958881792available bytes after
+C63 seal; same existing runtime/caches/12GiBnoswap/16GiBparent/CPU0/serialLean-j1/
+threads1/cacheOFF and unchanged budgets. Prior C63seal remains immutable.
+
+Every original Work/Backfill parent remains partial/blocked. Full physical-byte,
+all-profile construction/targetallocationfailure, general path/graph/delete/rebind,
+ABI/reference/storage/deepcopy/liveness, reservedmemory-to-storage and final
+Source/V10/target obligations remain open. No original-lane completion or
+independent-queue exhaustion is asserted. Existing blocked goal is unchanged.
+
+C64 final wrapper exit0:1116default/262Suite/SolKey377parsed/131read-bearing
+covered. Fresh Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs pass. Full aggregate
+RSS1578740KiB/diskgrowth266240bytes/newOOMdelta0; original caps/cacheOFF remain.
+Both independent SOURCE reviewers PASS with no confirmed proof defect. The
+skeptic noted that wrong_root_and_skipped_write compares identity/pointers/values,
+while the actual fresh Source endpoint rejection is a separate conjunct; no whole
+wrong-target program execution is claimed. Exact3guards pin actual standardsets;
+the newscript admission mutants are distinct from kernel execution evidence.
+
+C64 strict/trust/layers/orphans/lane/completefixtures/script syntax/diff gates pass;
+33combined corruption tests pass, including8new sequence-guard admission cases.
+Scoped1020standard-only exactpins/135modules pass; rawglobalinventory remains
+exit1,1379unrecorded=359public+1020owned/0unsafe errors. Rawdocs remains exit1 with
+83complete findings byte-identical to publicbaseline (separate zero-new PASS),
+while frozenbase comparison still FAIL1/11incoming; no baseline/globaldebt edits.
+Warmstrict timed0Suite modules; independently all262currentsource/fixture/toolchain
+bytes and fresh64versions match retainedC31cold26/max160s<300, not newtiming.
+All3645 C63sealed entries reverified unchanged. Both independent SOURCE/control/
+doc/script reviews PASS, no remaining confirmed finding. Committed-artifact
+reviews follow additive export. Final resource sample955629568available bytes
+above unchanged96MiBforecast+512MiBreserve; original worker/goal identity retained.
+
+Next concrete original G34/BackfillB investigation: after this real numeric context
+extension, derive late rejection of an indexed operation on the FRESH empty root
+in Source RItems/intrinsic Prog/wholewordappend, retaining successful allocation
+prefix and distinguishing an old-root valid read from fresh-root endpoint panic.
+Current C63/C64 prove the actual fresh Source/intrinsic endpoint and successful
+old-root sequence separately, not that combined rejecting program. Existing
+source_items_context_pair_error and resolved_uint_assign_word_bounds are public
+owned interfaces to investigate. This is unfinished supported work, not a new
+admission rule, established result or an assertion of independent-queue exhaustion.

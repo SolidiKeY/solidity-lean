@@ -995,3 +995,5 @@ import Solidity.Backend.MemoryOps.SourceUintLateFailureControls
 import Solidity.Backend.MemoryOps.SourceUintDefault
 import Solidity.Backend.MemoryOps.SourceUintDeclaration
 import Solidity.Backend.MemoryOps.SourceUintDeclarationControls
+import Solidity.Backend.MemoryOps.SourceUintDeclarationSequence
+import Solidity.Backend.MemoryOps.SourceUintDeclarationSequenceControls
