@@ -55,7 +55,7 @@ def compiledArithmetic : Compiler.Compilation 0 (Frag.init Γ) (program sumProdu
   (Compiler.compile 0 (Frag.init Γ) (program sumProduct)).get (by decide +kernel)
 
 theorem arithmetic_simulates : compiledArithmetic.Agrees 1 6 base σ machine :=
-  compiledArithmetic.correct ⟨fixture_six_cells, by decide +kernel, .inl (by decide +kernel), by decide +kernel⟩
+  compiledArithmetic.correct ⟨fixture_six_cells, by decide +kernel, .inl (by decide +kernel)⟩
 
 example : sourceNumber sumProduct = some 32 := by decide +kernel
 example : targetNumber sumProduct = some 32 := by decide +kernel
@@ -113,7 +113,7 @@ def guarded : Prog C Γ Γ :=
 def checkedGuard : Compiler.Compilation 0 (Frag.init Γ) guarded :=
   (Compiler.compile 0 (Frag.init Γ) guarded).get (by decide +kernel)
 theorem guard_simulates : checkedGuard.Agrees 1 4 base σ machine :=
-  checkedGuard.correct ⟨fixture_repr, by decide +kernel, .inl (by decide +kernel), by decide +kernel⟩
+  checkedGuard.correct ⟨fixture_repr, by decide +kernel, .inl (by decide +kernel)⟩
 
 private def localResult (out : TRes (Solidity.Out C CompileExamples.H Γ)) : Option Int :=
   match out with | .ok o => some (TEnv.get (.here : Idx Γ (.val .uint)) o.st.env).1 | _ => none
@@ -196,7 +196,7 @@ private def compiledFailure (f : Failure) : Compiler.Compilation 0 (Frag.init Γ
 /-- Failed reads, range checks and zero divisors use inhabited public compiler inputs. -/
 theorem failure_simulates (f : Failure) : (compiledFailure f).Agrees 1 4 base σ machine := by
   apply (compiledFailure f).correct
-  rw [(compiledFailure f).memory_input (hcopy := by cases f <;> decide +kernel) (by cases f <;> decide +kernel)]
+  rw [(compiledFailure f).memory_input (by cases f <;> decide +kernel)]
   exact ⟨fixture_repr, by cases f <;> decide +kernel, .inl (by cases f <;> decide +kernel)⟩
 
 theorem failure_source (f : Failure) :
@@ -220,7 +220,7 @@ private def compiled (op : IncDec) : Compiler.Compilation 0 (Frag.init Γ) (sequ
 /-- All four bump spellings compose on an aliased element and a primitive local. -/
 theorem simulates (op : IncDec) : (compiled op).Agrees 1 4 base σ machine := by
   apply (compiled op).correct
-  rw [(compiled op).memory_input (hcopy := by cases op <;> decide +kernel) (by cases op <;> decide +kernel)]
+  rw [(compiled op).memory_input (by cases op <;> decide +kernel)]
   exact ⟨fixture_repr, by cases op <;> decide +kernel, .inl (by cases op <;> decide +kernel)⟩
 
 private def sourceValues (op : IncDec) : Option (List Int) := do
@@ -263,7 +263,7 @@ private def compiledFailure (f : Failure) : Compiler.Compilation 0 (Frag.init Γ
 
 theorem failure_simulates (f : Failure) : (compiledFailure f).Agrees 1 4 base σ machine := by
   apply (compiledFailure f).correct
-  rw [(compiledFailure f).memory_input (hcopy := by cases f <;> decide +kernel) (by cases f <;> decide +kernel)]
+  rw [(compiledFailure f).memory_input (by cases f <;> decide +kernel)]
   exact ⟨fixture_repr, by cases f <;> decide +kernel, .inl (by cases f <;> decide +kernel)⟩
 
 theorem failure_source (f : Failure) :
@@ -286,7 +286,7 @@ private def compiled (op : IncDec) : Compiler.Compilation 0 (Frag.init Γ) (sequ
 /-- Updating the destination index happens after the original array slot is bumped. -/
 theorem simulates (op : IncDec) : (compiled op).Agrees 1 4 base σ machine := by
   apply (compiled op).correct
-  rw [(compiled op).memory_input (hcopy := by cases op <;> decide +kernel) (by cases op <;> decide +kernel)]
+  rw [(compiled op).memory_input (by cases op <;> decide +kernel)]
   exact ⟨fixture_repr, by cases op <;> decide +kernel, .inl (by cases op <;> decide +kernel)⟩
 
 private def updated (op : IncDec) : Int := if op.isIncrement then 8 else 6
@@ -316,7 +316,7 @@ private def compiledSelf (op : IncDec) : Compiler.Compilation 0 (Frag.init Γ) (
 
 theorem self_simulates (op : IncDec) : (compiledSelf op).Agrees 1 4 base σ machine := by
   apply (compiledSelf op).correct
-  rw [(compiledSelf op).memory_input (hcopy := by cases op <;> decide +kernel) (by cases op <;> decide +kernel)]
+  rw [(compiledSelf op).memory_input (by cases op <;> decide +kernel)]
   exact ⟨fixture_repr, by cases op <;> decide +kernel, .inl (by cases op <;> decide +kernel)⟩
 
 private def selfValue (op : IncDec) : Nat :=
@@ -350,7 +350,7 @@ private def compiledFailure (f : IncrementCase.Failure) :
 theorem failure_simulates (f : IncrementCase.Failure) :
     (compiledFailure f).Agrees 1 4 base σ machine := by
   apply (compiledFailure f).correct
-  rw [(compiledFailure f).memory_input (hcopy := by cases f <;> decide +kernel) (by cases f <;> decide +kernel)]
+  rw [(compiledFailure f).memory_input (by cases f <;> decide +kernel)]
   exact ⟨fixture_repr, by cases f <;> decide +kernel, .inl (by cases f <;> decide +kernel)⟩
 
 theorem failure_source (f : IncrementCase.Failure) :
@@ -410,7 +410,7 @@ def compiled : Compiler.Compilation 0 (Frag.init Γ) sequence :=
   (Compiler.compile 0 (Frag.init Γ) sequence).get (by decide +kernel)
 
 theorem storage_memory_simulate : compiled.Agrees 1 6 base state machine :=
-  compiled.correct ⟨fixture, by decide +kernel, .inl (by decide +kernel), by decide +kernel⟩
+  compiled.correct ⟨fixture, by decide +kernel, .inl (by decide +kernel)⟩
 
 private def sourceRead (v : Val D Γ .uint) : Option Int :=
   match sequence.run state with

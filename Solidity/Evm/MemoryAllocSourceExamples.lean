@@ -92,7 +92,7 @@ private def compiled : Compiler.Compilation 1 (Frag.init Γ) program :=
 /-- The public compiler accepts the declarations and proves their common agreement. -/
 theorem compiled_simulates : compiled.Agrees 1 6 bases σ machine :=
   compiled.correct ⟨initial_repr.1, by decide,
-    .inr ⟨by decide, cursor, initial_repr.2, by decide +kernel⟩, by decide +kernel⟩
+    .inr ⟨by decide, cursor, initial_repr.2, by decide +kernel⟩⟩
 
 example : compiled.isMemory = true := by decide +kernel
 
@@ -191,7 +191,7 @@ private def compiledSkipped : Compiler.Compilation 1 (Frag.init Γ) skipped :=
 
 /-- A prior revert needs no allocator or space for the unreachable maximal allocation. -/
 theorem skipped_simulates : compiledSkipped.Agrees 1 6 bases σ machine :=
-  compiledSkipped.correct ⟨initial_repr.1, by decide, .inl (by decide +kernel), by decide +kernel⟩
+  compiledSkipped.correct ⟨initial_repr.1, by decide, .inl (by decide +kernel)⟩
 
 theorem skipped_target : reverted (run compiledSkipped.code machine) = true := by decide +kernel
 
@@ -208,7 +208,7 @@ private def compiledMaximal : Compiler.Compilation 1 (Frag.init Γ) maximal :=
 /-- The public capacity input rejects a reached maximal request without constructing its heap. -/
 theorem maximal_input_rejected : ¬ compiledMaximal.Input 1 6 bases σ machine := by
   intro h
-  have hi : AllocationInput 1 6 (allocationCostProg maximal σ) σ bases machine := h.2.2.1
+  have hi : AllocationInput 1 6 (allocationCostProg maximal σ) σ bases machine := h.2.2
   have hc : allocationCostProg maximal σ = W := by
     change wMax.val + 1 = W
     change W - 1 + 1 = W
@@ -300,7 +300,7 @@ private def compiledMaximalRebind : Compiler.Compilation 1 frag1 maximalRebind :
 /-- Allocating rebinding contributes its header and length to the public capacity input. -/
 theorem maximal_rebind_rejected : ¬ compiledMaximalRebind.Input 1 6 bases1 σ1 machine1 := by
   intro h
-  have hi : AllocationInput 1 6 (allocationCostProg maximalRebind σ1) σ1 bases1 machine1 := h.2.2.1
+  have hi : AllocationInput 1 6 (allocationCostProg maximalRebind σ1) σ1 bases1 machine1 := h.2.2
   have hc : allocationCostProg maximalRebind σ1 = W := by
     change W - 1 + 1 = W
     have hp : 0 < W := W_pos
@@ -459,7 +459,7 @@ private def compiledRevertBranches (v : Bool) : Compiler.Compilation 1 (Frag.ini
 theorem branch_revert_simulates (v : Bool) :
     (compiledRevertBranches v).Agrees 1 6 bases σ machine := by
   apply (compiledRevertBranches v).correct
-  rw [(compiledRevertBranches v).memory_input (hcopy := by cases v <;> decide +kernel) (by cases v <;> decide +kernel)]
+  rw [(compiledRevertBranches v).memory_input (by cases v <;> decide +kernel)]
   refine ⟨initial_repr.1, ?_, .inl ?_⟩
   · cases v <;> decide +kernel
   · cases v <;> decide +kernel
@@ -625,7 +625,7 @@ private def compiledBoundaryDeletion (empty : Bool) :
 theorem boundary_deletion_simulates (empty : Bool) :
     (compiledBoundaryDeletion empty).Agrees 1 6 bases (State.init C) machine := by
   apply (compiledBoundaryDeletion empty).correct
-  rw [(compiledBoundaryDeletion empty).memory_input (hcopy := by cases empty <;> decide +kernel) (by cases empty <;> decide +kernel)]
+  rw [(compiledBoundaryDeletion empty).memory_input (by cases empty <;> decide +kernel)]
   refine ⟨empty_repr, by cases empty <;> decide +kernel, ?_⟩
   have hc : allocationCostProg (boundaryDeletion empty) (State.init C) =
       if empty then 1 else 2 := by cases empty <;> decide +kernel
@@ -694,7 +694,7 @@ private def compiledSignedCompoundFailure (division : Bool) :
 theorem signed_compound_failure_simulates (division : Bool) :
     (compiledSignedCompoundFailure division).Agrees 1 6 bases (State.init C) machine := by
   apply (compiledSignedCompoundFailure division).correct
-  rw [(compiledSignedCompoundFailure division).memory_input (hcopy := by cases division <;> decide +kernel) (by cases division <;> decide +kernel)]
+  rw [(compiledSignedCompoundFailure division).memory_input (by cases division <;> decide +kernel)]
   refine ⟨empty_repr, by cases division <;> decide +kernel, ?_⟩
   have hc : allocationCostProg (signedCompoundFailure division) (State.init C) = 2 := by
     cases division <;> decide +kernel
@@ -762,7 +762,7 @@ private def compiledSignedIncrements (up : Bool) :
 theorem signed_increments_simulate (up : Bool) :
     (compiledSignedIncrements up).Agrees 1 6 bases (State.init C) machine := by
   apply (compiledSignedIncrements up).correct
-  rw [(compiledSignedIncrements up).memory_input (hcopy := by cases up <;> decide +kernel) (by cases up <;> decide +kernel)]
+  rw [(compiledSignedIncrements up).memory_input (by cases up <;> decide +kernel)]
   refine ⟨empty_repr, by cases up <;> decide +kernel, ?_⟩
   have hc : allocationCostProg (signedIncrements up) (State.init C) = 2 := by
     cases up <;> decide +kernel
@@ -801,7 +801,7 @@ private def compiledSignedBumpFailure (up localTarget : Bool) :
 theorem signed_bump_failure_simulates (up localTarget : Bool) :
     (compiledSignedBumpFailure up localTarget).Agrees 1 6 bases (State.init C) machine := by
   apply (compiledSignedBumpFailure up localTarget).correct
-  rw [(compiledSignedBumpFailure up localTarget).memory_input (hcopy := by cases up <;> cases localTarget <;> decide +kernel) (by cases up <;> cases localTarget <;> decide +kernel)]
+  rw [(compiledSignedBumpFailure up localTarget).memory_input (by cases up <;> cases localTarget <;> decide +kernel)]
   refine ⟨empty_repr, by cases up <;> cases localTarget <;> decide +kernel, ?_⟩
   have hc : allocationCostProg (signedBumpFailure up localTarget) (State.init C) = 2 := by
     cases up <;> cases localTarget <;> decide +kernel
@@ -864,7 +864,7 @@ private def compiledCapturedMemory (signed : Bool) :
 theorem captured_memory_simulates (signed : Bool) :
     (compiledCapturedMemory signed).Agrees 1 6 bases (State.init C) machine := by
   apply (compiledCapturedMemory signed).correct
-  rw [(compiledCapturedMemory signed).memory_input (hcopy := by cases signed <;> decide +kernel) (by cases signed <;> decide +kernel)]
+  rw [(compiledCapturedMemory signed).memory_input (by cases signed <;> decide +kernel)]
   refine ⟨empty_repr, by cases signed <;> decide +kernel, ?_⟩
   have hc : allocationCostProg (capturedMemory signed) (State.init C) = 2 := by
     cases signed <;> decide +kernel
@@ -918,7 +918,7 @@ theorem signed_capture_failure_simulates (up localTarget : Bool) :
     (compiledSignedCaptureFailure up localTarget).Agrees 1 6 bases (State.init C) machine := by
   apply (compiledSignedCaptureFailure up localTarget).correct
   rw [(compiledSignedCaptureFailure up localTarget).memory_input
-    (hcopy := by cases up <;> cases localTarget <;> decide +kernel) (by cases up <;> cases localTarget <;> decide +kernel)]
+    (by cases up <;> cases localTarget <;> decide +kernel)]
   refine ⟨empty_repr, by cases up <;> cases localTarget <;> decide +kernel, ?_⟩
   have hc : allocationCostProg (signedCaptureFailure up localTarget) (State.init C) = 2 := by
     cases up <;> cases localTarget <;> decide +kernel
