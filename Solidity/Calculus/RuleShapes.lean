@@ -627,7 +627,7 @@ def leanTaclets : List Lean.Name :=
     ``LeanTaclet.storageFixedCopySave, ``LeanTaclet.pushFixedCopySave,
     ``LeanTaclet.tryCallSelfBox, ``LeanTaclet.tryCallSelfDiamond, ``LeanTaclet.recursiveCallUnfold,
     ``LeanTaclet.revertDataBox, ``LeanTaclet.revertDataDiamond, ``LeanTaclet.catchDataBox,
-    ``LeanTaclet.catchDataDiamond, ``LeanTaclet.ifElseJoin, ``LeanTaclet.internalCallSummary]
+    ``LeanTaclet.catchDataDiamond, ``LeanTaclet.ifElseJoin, ``LeanTaclet.ifElseJoinSequence, ``LeanTaclet.internalCallSummary]
 
 #check_constructor_table LeanTaclet, leanTaclets
 

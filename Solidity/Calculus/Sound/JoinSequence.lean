@@ -115,4 +115,30 @@ theorem LocalWrites.captured_sound {m : Modality} (σ : State C Γ) (name : Var)
         (.block (thn.guarded true (els.guarded false)))) σ := by
   exact Premise.sound_unfold σ (LocalWrites.captured_drop_runSt σ name c thn els)
 
+/-- The sequence plan selected for Solidity `if (c) { x = a; y = x; }`
+is the captured ordered program, including all selected halts. -/
+theorem LocalWrites.joinPlan_sound {m : Modality} (σ : State C Γ) (name : Var)
+    (c : Simple C Γ .bool) {Δ Ε : Ctx} (thn : Prog C Γ Δ) (els : Prog C Γ Ε)
+    (body : Prog C (.val .bool :: Γ) (.val .bool :: Γ))
+    (h : Upd.ifJoin? c.lower thn els = some (.inr body)) :
+    Premise.Runs m (.ite (.simple c) thn els)
+      (.capture .bool name (.simple c) (.block body)) σ := by
+  cases hs : Upd.ifJoinSingle? c.lower thn els with
+  | some u => simp only [Upd.ifJoin?, hs] at h; cases h
+  | none =>
+    cases ht : thn.localWrites? with
+    | none => simp only [Upd.ifJoin?, hs, ht] at h; cases h
+    | some a =>
+      cases he : els.localWrites? with
+      | none => simp only [Upd.ifJoin?, hs, ht, he] at h; cases h
+      | some b =>
+        cases hp : JoinBoundary.boundary a b with
+        | true => simp only [Upd.ifJoin?, hs, ht, he, hp] at h; cases h
+        | false =>
+          simp only [Upd.ifJoin?, hs, ht, he, hp, Bool.false_eq_true, ↓reduceIte, Option.some.injEq, Sum.inr.injEq] at h
+          subst body
+          rcases Prog.localWrites?_reconstruct thn a ht with ⟨rfl, rfl⟩
+          rcases Prog.localWrites?_reconstruct els b he with ⟨rfl, rfl⟩
+          exact LocalWrites.captured_sound σ name c a b
+
 end Solidity

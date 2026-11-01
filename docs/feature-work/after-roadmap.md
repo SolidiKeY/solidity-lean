@@ -121,4 +121,4 @@ matching solc's optimizer needs VP2, VP3 and probably continuation lanes.
 
 ## Handoffs
 
-- [VA2 AU03/AU04](after-roadmap-va2.md): bounded runtime, loop warnings and supporting notation/measurement controls checked; joined walks, closer work and AU04 sharing still incomplete.
+- [VA2 AU03/AU04](after-roadmap-va2.md): bounded runtime, loop warnings, joined walks, notation/chains and bounded multi-base closer checkpoint checked; Boolean-key kernel closure, signed sequential repair, AU04 and full gates remain incomplete.

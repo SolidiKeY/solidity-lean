@@ -1152,6 +1152,8 @@ theorem Upd.ifJoin_elimOk {c : Tm C Γ (.val .bool)} (hc : c.ElimOk) (a b : Join
       · exact ⟨⟨trivial, .app3 rfl hc hra (.pvV i)⟩, .app3 rfl hc (.pvV j) hrb⟩
     · exact ⟨⟨trivial, .app3 rfl hc hra (.pvV i)⟩, .app3 rfl hc (.pvV j) hrb⟩
 
+/-- Solidity `if (c) { x = a; y = x; }` keeps eliminable immediate updates
+or formulas; a captured program is checked separately by fragment preservation. -/
 theorem iteStep_elimOk {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) (ht : thn.Frag = true) (he : els.Frag = true) :
     (iteStep k c thn els).ElimOk := by
@@ -1160,16 +1162,22 @@ theorem iteStep_elimOk {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ
     have hsplit : (Premise.split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false)
         thn els).ElimOk :=
       ⟨Fml.isBool_frag (Simple.lower_elimOk s) _, Fml.isBool_frag (Simple.lower_elimOk s) _⟩
-    cases ha : thn.joinArm? with
-    | none => simp only [iteStep, Upd.ifJoin?, ha]; exact hsplit
-    | some a =>
-      cases hb : els.joinArm? with
-      | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact hsplit
-      | some b =>
-        simp only [iteStep, Upd.ifJoin?, ha, hb]
+    cases hj : Upd.ifJoinSingle? s.lower thn els with
+    | some u =>
+      simp only [iteStep, Upd.ifJoin?, hj]
+      unfold Upd.ifJoinSingle? at hj
+      split at hj
+      next a b ha hb =>
+        cases hj
         refine Upd.ifJoin_elimOk (Simple.lower_elimOk s) a b ?_ ?_
         · intro p i r e; subst e; exact Prog.joinArm?_memFree thn ha ht
         · intro p i r e; subst e; exact Prog.joinArm?_memFree els hb he
+      next => cases hj
+    | none =>
+      simp only [iteStep, Upd.ifJoin?, hj]
+      cases thn.localWrites? <;> cases els.localWrites? <;> try first | trivial | exact hsplit
+      all_goals dsimp only
+      all_goals rename_i a b; cases JoinBoundary.boundary a b <;> first | trivial | exact hsplit
   | _ => trivial
 
 theorem requireStep_elimOk (c : Val C Γ .bool) : (requireStep k c).ElimOk := by

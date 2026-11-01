@@ -60,4 +60,36 @@ theorem LocalWrites.captured_size (name : Var) (c : Simple C Γ .bool)
   simp only [Prog.size, Stmt.size, Val.size, Simple.size, LocalWrites.guarded_size]
   omega
 
+/-- The actual selected Solidity dispatcher plan, including its snapshot and
+block, has linear emitted program size. This does not bound walked leaves. -/
+theorem LocalWrites.joinPlan_size_le (name : Var) (c : Simple C Γ .bool)
+    {Δ Ε : Ctx} (thn : Prog C Γ Δ) (els : Prog C Γ Ε)
+    (body : Prog C (.val .bool :: Γ) (.val .bool :: Γ))
+    (h : Upd.ifJoin? c.lower thn els = some (.inr body)) :
+    (Prog.cons (.declLocal .bool name (some (.simple c)))
+      (.cons (.block body) .nil)).size ≤
+      4 * (Stmt.ite (.simple c) thn els).size + 1 := by
+  cases hs : Upd.ifJoinSingle? c.lower thn els with
+  | some u => simp only [Upd.ifJoin?, hs] at h; cases h
+  | none =>
+    cases ht : thn.localWrites? with
+    | none => simp only [Upd.ifJoin?, hs, ht] at h; cases h
+    | some a =>
+      cases he : els.localWrites? with
+      | none => simp only [Upd.ifJoin?, hs, ht, he] at h; cases h
+      | some b =>
+        cases hp : JoinBoundary.boundary a b with
+        | true => simp only [Upd.ifJoin?, hs, ht, he, hp] at h; cases h
+        | false =>
+          simp only [Upd.ifJoin?, hs, ht, he, hp, Bool.false_eq_true, ↓reduceIte,
+            Option.some.injEq, Sum.inr.injEq] at h
+          subst body
+          rcases Prog.localWrites?_reconstruct thn a ht with ⟨rfl, rfl⟩
+          rcases Prog.localWrites?_reconstruct els b he with ⟨rfl, rfl⟩
+          rw [LocalWrites.captured_size]
+          have ha : a.length ≤ a.program.size := LocalWrites.length_le_program_size a
+          have hb : b.length ≤ b.program.size := LocalWrites.length_le_program_size b
+          simp only [Stmt.size, Val.size, Simple.size]
+          omega
+
 end Solidity

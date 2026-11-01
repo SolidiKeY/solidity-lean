@@ -1,6 +1,7 @@
 import Solidity.Tools.ProofTree
 import Solidity.Tools.Counterexample
 import Solidity.Calculus.Closers
+import Solidity.Calculus.Print
 
 /-!
 # Conditional notation and signed-offset controls
@@ -74,5 +75,58 @@ theorem signedOffsetsFalse : ¬ (⊨ᶠ dl!{ ∀ int a; ∀ bool c; ∀ bool d;
 /-- info: 'Solidity.Examples.Tactics.JoinControls.conditionalFailure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms conditionalFailure
+
+/-- Positive numerals in both arms are checked at the enclosing signed local. -/
+theorem conditionalExpectedInt : ⊨ᶠ dl!{ ∀ bool c; ∀ int x;
+    { x := (c ? 1 : 2) } x >= 1 } := by
+  sol_auto
+
+/-- A nested conditional propagates the signed sort through all its arms. -/
+theorem conditionalNestedInt : ⊨ᶠ dl!{ ∀ bool c; ∀ bool d; ∀ int x;
+    { x := (c ? (d ? 3 : 4) : (d ? -1 : 2)) } x >= -1 } := by
+  sol_auto
+
+/-- The accepted signed conditional still has an inhabited false-bound control. -/
+theorem conditionalExpectedIntFalse : ¬ (⊨ᶠ dl!{ ∀ bool c; ∀ int x;
+    { x := (c ? 1 : 2) } x <= 0 }) := by
+  sol_refute
+
+open Lean Meta in
+run_meta do
+  let t : NTerm StandardExample := NTerm.ite (NTerm.bool true) (NTerm.num 1) (NTerm.num 2)
+  let .ok _ := t.check (.val .int) [] | throwError "signed expected sort was not propagated"
+  let .ok ⟨.val .uint, _⟩ := t.resolve [] | throwError "conditional synthesis changed"
+  let .ok _ := t.check .kint [] | throwError "existing whole-term widening changed"
+  for c in [true, false] do
+    let left : NTerm StandardExample := NTerm.ite (NTerm.bool c) (NTerm.bool true) (NTerm.num 2)
+    let right : NTerm StandardExample := NTerm.ite (NTerm.bool c) (NTerm.num 2) (NTerm.bool true)
+    let .error _ := left.check (.val .int) [] | throwError "mismatched left branch accepted"
+    let .error _ := right.check (.val .int) [] | throwError "mismatched right branch accepted"
+
+/-- info: signed and nested conditionals preserve their AST through both formula printers -/
+#guard_msgs in
+run_meta do
+  let fixtures : List (Fml StandardExample []) := [
+    cdl[StandardExample]{ ∀ bool c; ∀ int x; { x := (c ? 1 : 2) } x >= 1 },
+    cdl[StandardExample]{ ∀ bool c; ∀ int x; { x := (c ? 1 : -2) } x = (c ? 1 : -2) },
+    cdl[StandardExample]{ ∀ bool c; ∀ bool d; ∀ int x;
+      { x := (c ? (d ? 3 : 4) : (d ? -1 : 2)) } x >= -1 },
+    cdl[StandardExample]{ ∀ bool c; ∀ bool d; ∀ int x;
+      { x := ((c ? true : d) ? 1 : -2) } x >= -2 }]
+  let c := Lean.mkConst ``StandardExample
+  for φ in fixtures do
+    let original := Fml.quote c φ
+    let printed ← Delab.withPrinter original false (Delab.ppFmlS [] original)
+    for text in [← fmtCat `dl_fml printed, ← φ.show c []] do
+      let .ok parsedSyntax := Lean.Parser.runParserCategory (← Lean.getEnv) `term
+          s!"cdl[StandardExample]\{ {text} }"
+        | throwError "conditional formula does not parse: {text}"
+      let parsed ← Lean.Elab.Term.TermElabM.run' do
+        let parsed ← Lean.Elab.Term.elabTermEnsuringType parsedSyntax (← Lean.Meta.inferType original)
+        Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+        pure parsed
+      unless ← Lean.Meta.isDefEq original parsed do
+        throwError "conditional formula roundtrip changed its AST: {text}"
+  Lean.logInfo "signed and nested conditionals preserve their AST through both formula printers"
 
 end Solidity.Examples.Tactics.JoinControls

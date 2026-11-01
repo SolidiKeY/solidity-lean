@@ -929,23 +929,53 @@ theorem Upd.ifJoin_saveLike (c : Tm C Γ (.val .bool)) (a b : JoinArm C Γ) :
   rcases a with _ | ⟨p, i, ra⟩ <;> rcases b with _ | ⟨q, j, rb⟩ <;> simp only [Upd.ifJoin]
   all_goals (repeat' split) <;> simp only [Upd.SaveLike, UpdElem.SaveLike, and_self]
 
+/-- Guarding Solidity writes `x = e; y = x;` preserves their exact fragment
+classification and combines it with the explicit continuation. -/
+theorem LocalWrites.guarded_frag (writes : LocalWrites C Γ) (positive : Bool)
+    (tail : Prog C (.val .bool :: Γ) (.val .bool :: Γ)) :
+    (writes.guarded positive tail).Frag = (writes.program.Frag && tail.Frag) := by
+  induction writes with
+  | nil => rfl
+  | cons w rest ih =>
+    cases positive <;> simp only [LocalWrites.guarded, LocalWrites.program, List.foldr_cons,
+      Prog.Frag, Stmt.Frag, Val.MemFree, Val.memFree_up, Bool.false_eq_true, ↓reduceIte,
+      Bool.true_and, Bool.and_true, Bool.and_assoc] at *
+    all_goals exact congrArg (fun b : Bool => w.2.2.MemFree && b) ih
+
+/-- Solidity `if (c) { x = a; y = x; }` emits either local updates or a
+captured guarded program in the original storage fragment. -/
 theorem iteStep_saveLike {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) (hc : c.MemFree = true) (ht : thn.Frag = true) (he : els.Frag = true) :
     (iteStep k c thn els).SaveLike := by
   cases c with
   | simple s =>
-    cases ha : thn.joinArm? with
-    | none => simp only [iteStep, Upd.ifJoin?, ha]; exact ⟨ht, he⟩
-    | some a =>
-      cases hb : els.joinArm? with
-      | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact ⟨ht, he⟩
-      | some b =>
-        simp only [iteStep, Upd.ifJoin?, ha, hb]
-        exact Upd.ifJoin_saveLike _ a b
+    cases hs : Upd.ifJoinSingle? s.lower thn els with
+    | some u =>
+      simp only [iteStep, Upd.ifJoin?, hs]
+      unfold Upd.ifJoinSingle? at hs
+      split at hs
+      next a b ha hb => cases hs; exact Upd.ifJoin_saveLike _ a b
+      next => cases hs
+    | none =>
+      cases hthn : thn.localWrites? with
+      | none => simp only [iteStep, Upd.ifJoin?, hs, hthn]; exact ⟨ht, he⟩
+      | some a =>
+        cases hels : els.localWrites? with
+        | none => simp only [iteStep, Upd.ifJoin?, hs, hthn, hels]; exact ⟨ht, he⟩
+        | some b =>
+          cases hp : JoinBoundary.boundary a b with
+          | true =>
+            simp only [iteStep, Upd.ifJoin?, hs, hthn, hels, hp]
+            exact ⟨ht, he⟩
+          | false =>
+            simp only [iteStep, Upd.ifJoin?, hs, hthn, hels, hp, Bool.false_eq_true, ↓reduceIte]
+            rcases Prog.localWrites?_reconstruct thn a hthn with ⟨rfl, rfl⟩
+            rcases Prog.localWrites?_reconstruct els b hels with ⟨rfl, rfl⟩
+            refine Premise.saveLike_capture _ hc ?_
+            simp only [Stmt.Frag, LocalWrites.guarded_frag, Prog.Frag, ht, he, Bool.and_self]
   | _ =>
     exact Premise.saveLike_capture _ hc
-      (by simp only [Stmt.Frag, Val.MemFree, Prog.frag_up thn ht, Prog.frag_up els he,
-        Bool.and_self])
+      (by simp only [Stmt.Frag, Val.MemFree, Prog.frag_up thn ht, Prog.frag_up els he, Bool.and_self])
 
 theorem requireStep_saveLike (c : Val C Γ .bool) (hc : c.MemFree = true) :
     (requireStep k c).SaveLike := by

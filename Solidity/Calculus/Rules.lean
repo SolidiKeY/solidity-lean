@@ -969,6 +969,14 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   | ifElseJoin {se : Simple C Γ .bool} {u : Upd C Γ Γ}
       (hj : Upd.ifJoin? se.lower thenStm elseStm = some u := by side_cond) :
       dl[LeanTaclet C k]{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝ ‹u› ⟨[ ]⟩ }
+  /-- Ordered local writes share a fresh condition snapshot and execute once.
+  This sequential join is Lean-only; each generated singleton guard retains
+  the existing update rule. The inner block introduces no further locals. -/
+  | ifElseJoinSequence {se : Simple C Γ .bool}
+      {body : Prog C (.val .bool :: Γ) (.val .bool :: Γ)}
+      (hj : Upd.ifJoin? se.lower thenStm elseStm = some (.inr body) := by side_cond) :
+      dl[LeanTaclet C k]{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
+        ⟨[ bool se = se; body; ]⟩ }
   /-- Native wide addition followed by reduction; the frozen upstream has no rule. -/
   | addmodAssignment :
       dl[LeanTaclet C k]{ ⟨[ v = addmod(e₁, e₂, e₃); ]⟩ ⇝

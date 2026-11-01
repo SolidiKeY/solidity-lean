@@ -553,11 +553,22 @@ def NTerm.read (m : NMTerm C) (a : NMAddr C) : NTerm C :=
     | ⟨.addr (.prim _), a'⟩ => pure ⟨_, .app2 .read m' a'⟩
     | ⟨σ, _⟩ => useError a.text σ "a memory location of a value"
 
+/-- A conditional synthesizes its common branch type, or checks both
+branches at the enclosing Solidity value type. Non-value checks retain the
+ordinary synthesis/widening path. -/
 def NTerm.ite (c a b : NTerm C) : NTerm C :=
-  syn s!"ite({c.key}, {a.key}, {b.key})" s!"{c.text} ? {a.text} : {b.text}" fun Γ => do
-    let c' ← c.check (.val .bool) Γ
-    let ⟨_, a', b'⟩ ← NTm.resolvePair a b Γ
-    pure ⟨_, .app3 .ite c' a' b'⟩
+  let t : NTerm C :=
+    syn s!"ite({c.key}, {a.key}, {b.key})" s!"{c.text} ? {a.text} : {b.text}" fun Γ => do
+      let c' ← c.check (.val .bool) Γ
+      let ⟨_, a', b'⟩ ← NTm.resolvePair a b Γ
+      pure ⟨_, .app3 .ite c' a' b'⟩
+  { t with checkAt? := some fun s Γ => match s with
+      | .val p => do
+        let c' ← c.check (.val .bool) Γ
+        pure (.app3 .ite c' (← a.check (.val p) Γ) (← b.check (.val p) Γ))
+      | s => do
+        let ⟨s', x⟩ ← t.resolve Γ
+        NTm.widen t.text s' s x }
 
 def NTerm.mlen (m : NMTerm C) (i : NITerm C) : NTerm C :=
   syn s!"mlen({m.key}, {i.key})" s!"{i.text}.length" fun Γ => do

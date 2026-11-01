@@ -1,6 +1,6 @@
 # VA2 AU03/AU04 handoff
 
-Status: runtime recovered; AU03 warning, supporting notation/measurement controls and joined-assignment foundation checked. Walker integration, broader closer work and AU04 sharing remain incomplete.
+Status: runtime recovered; AU03 warning, typed joined walks, conditional notation/chains and bounded multi-base closer checkpoint checked. Boolean mapping-key kernel closure, a still-failing forced signed sequential fixture, AU04 sharing/loop repair and full assignment gates remain incomplete.
 
 Repository: `/workspace/va2-sharing`. Branch:
 `codex/solidity-automation-20261031/va2-sharing`. Exact base:
@@ -153,7 +153,7 @@ shared pages more than once; it is a measurement, not the hard cap.
 | Offset doubling calls | 1,2,3 | 5,5,5 | 20,20,20 |
 | Non-offset `x*3+1` doubling calls | 1,2,3 | 5,5,5 | 26,34,50 |
 
-F2's largest leaf past anon took 1.137 s (raw 14,886,087 heartbeats) at k=1,
+F2's largest whole leaf after `sol_leaf` took 1.137 s (raw 14,886,087 heartbeats) at k=1,
 3.129 s (raw 44,305,622) at k=2; F3 k=1 took 4.830 s (raw 64,045,537).
 Usual displayed heartbeat units divide these raw counts by 1000.
 `baseline-fuel.log` retains F3 k=2's default-budget failure. No budget increased.
@@ -642,3 +642,74 @@ short-circuit programs retain their existing SolKey split path. Full walk
 and leaf measurements, chain restoration, broader closer work, AU04 sharing,
 final gates and checkpoint review/handoff remain required. The persistent
 full-assignment goal remains incomplete.
+
+
+## AU03 joined-walk checkpoint — production integration
+
+This checkpoint integrates typed multi-assignment joins and their closer support. It does not complete AU03's Boolean mapping-key kernel pipeline, AU04, the isolated post-`anon` measurement/repair, or final whole-assignment gates.
+
+The old singleton algorithm remains `Upd.ifJoinSingle?`; the public `Upd.ifJoin?` now returns a `JoinPlan` (old update or captured straight-write sequence). Its singleton premise expands to `some (.inl u)`. Decoder success reconstructs the original typed programs. The new Lean-only `ifElseJoinSequence` row captures the Boolean guard once, then executes ordered guarded assignments without substituting RHS terms into one another. Exact canonical generated short-circuit AND/OR shapes retain their existing split path; source semantics are not excluded. `Stmt.inSolkey` is textually unchanged, but its dependence on the generalized join eligibility changes membership for newly joined programs. Those programs use the Lean-only row.
+
+`LocalWrites.joinPlan_sound` preserves evaluation order, selected failures, unselected non-evaluation, state/frame transport and both modalities. `LocalWrites.joinPlan_size_le` counts the actual emitted snapshot/block/guarded program: at most `4 * originalStmt.size + 1`. The existing immediate-update/formula bound is not a program or leaf bound. No generic leaf-linearity or call-family bound follows from either theorem.
+
+The closer retains its already-proved normalized defining facts instead of normalizing the same equations again at the final post. Multi-base hulls use only current certified bounds, and inferred endpoints still require arithmetic proof from actual facts. Bounded Boolean cases retain `joinMaxCases = 64`; `splitMax = 6`, `wholeMax = 5`, `shareNodes = 20000`, the 100k step budget, 20k finish allowance and declaration budgets are unchanged. Lazy side-case normalization proves decision equivalences before arithmetic, filters stale certificate IDs and restores failed side-check state. A local Int-comparison negation may refuse a tactic goal inside the same 20k allowance; it never supplies a global refuted verdict. Actual negative results below have independent inhabited kernel countermodels.
+
+`NTerm.ite` now checks both arms at an enclosing primitive value sort. Its synthesis and non-value widening paths remain the old ones. Signed positive-literal, mixed/nested, both-branch mismatch, unsigned synthesis, KeY widening and exact AST roundtrips through both formula printers pass. The original singleton programs in StorageCoverage are restored, with actual join links and a separate genuine reverting-arm split control. Their final parallel conditional RHSs are exact state functions, retain captures and arbitrary postconditions, and pass `#last_line`; they are not weakened observations. ChainNotation.ifTrace now reaches the joined update and merged storage-read conditional.
+
+The new rule printer now handles the captured schema program through the existing program-piece path. Unsupported program-variable stems retain the raw typed fallback, with ten positive/negative name controls. The complete typed rule conclusion roundtrips through the scoped Schema reader with `isDefEq`; exact `#taclet` output and all 181/28/4 rule-printing coverage pins pass. This is the actual new Lean-only row, not a new SolKey rule.
+
+Precision correction to the earlier baseline section: its phrase “largest leaf past anon” meant the largest whole leaf after `sol_leaf`; those timings do not isolate repeated work after an anonymising frame. The exact post-`anon` measurement and repair remain pending. The older raw runs remain useful whole-leaf baseline data only.
+
+### Production walk/leaf pins
+
+| Family | Walk nodes | Leaves | Open | Largest leaf term nodes |
+|---|---:|---:|---:|---:|
+| Two dependent assignments per arm | 17 | 1 | 0 | 57 |
+| Four per arm | 21 | 1 | 0 | 89 |
+| Eight per arm | 29 | 1 | 0 | 153 |
+| Two sequential multi-assignment conditionals | 29 | 1 | 0 | 101 |
+| Three sequential conditionals | 41 | 1 | 0 | 145 |
+| Seven independent guards / two bases | 40 | 1 | 0 | 139 |
+| Twelve guards / two bases | 65 | 1 | 0 | 229 |
+
+These are pinned actual production `#proof_size` outputs. All corresponding complete source theorems use existing `sol_auto`, not a research closer override. The frozen-base two-write-per-arm source had 15 nodes, two leaves and largest leaf 36; joining need not reduce the largest single leaf. The frozen-base coupled seven-guard source remained open beyond the existing split limit. Existing reset-seven baseline already closed and is not claimed as a new delivery.
+
+### Cost and proof boundaries
+
+On identical pre-retention leaves, original/candidate step closers both kernel-closed under the same 100k budget. Raw heartbeats (millions): one join 4.462/4.464; two 8.045/8.038; six 25.559/25.510; sixteen unrelated local declarations plus two joins 24.876/24.805. Per-case elapsed times and suite RSS are in `join-retain-performance-results.json` and `mcp-join-retain-perf.log`; RSS was not isolated per case. The one-join wall sample increased from 0.357s to 0.467s, so this is not a blanket zero-regression claim. Retained-fact instrumentation measured 16/12 facts and 1524/1002 summed per-fact nodes for eight-write/three-sequential captured leaves. Their successful closure used the existing fast arithmetic path; an experimental sliced fallback was unnecessary and is not in production.
+
+The first strict false-correlation control really timed out at the existing 20k finish allowance. That run remains FAIL in `mcp-join-retain-negative-strict.log`. After the local comparison-negation repair, strict controls pass with ordinary refusal at 12.574m raw heartbeats instead of roughly 32m; global falsity is separately kernel-certified. Earlier recovery-generated success lines, incomplete proofs, stale imports and timeout attempts remain raw failures, never completion evidence. Thirteen owned research sources were archive/hash verified before removal from the production tree: `joined-research-probes-20261101.tar.gz` and its SHA256 JSON.
+
+Runtime remains the existing same-VM Docker runner: pinned Debian image, UID/GID 1000, network disabled, enforced `memory.max = 12884901888`, `memory.swap.max = 0`, `LEAN_NUM_THREADS=1`, explicit Lean `-j1`/bounded stack, at most two configured LSP files and no overlapping build/LSP. Sampled aggregate process RSS and actual cgroup peaks are distinct metrics. Lean 4.24.0 commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, Lake 5.0.0-src+797c613; passing KeySort and RUNTIME_GATE_PASS remain in the runtime-recovery evidence. No RSS watchdog or per-process address-space limit is claimed as the aggregate cap.
+
+### Gates and independent reviews
+
+Per-file production diagnostics passed for CloseScoped/Steps, NamedTerm, JoinSequence, JoinWalk, JoinIntervals, JoinControls and both chain files. Exact bounded commands, outcomes, RSS and raw diagnostics are under `/workspace/va2-sharing-artifacts/work`; final focused-build/axiom records are appended below after they finish. Static strict automation, trust, layers, orphans and diff checks pass. The documentation-path checker itself fails with byte-identical raw output against frozen base `8bd8742ad987d566f7ba7624372cec1c020be07c`; its exact-base comparison passes, not the checker.
+
+Independent read-only finder and skeptic reviewed the dispatcher/proofs, row registration, inhabited controls, closer, notation and chain endpoints without Lean/server/builds/writes. Confirmed findings fixed include a non-decisive false-guard observation, uninstantiated generated theorem type, stale bound IDs, incorrect case context, catch-all resource refusal reporting, missing metric pins/docstrings and the literal-condition documentation claim. Full reviews and retained findings are in the `reviews-join-*` and `reviews-hull-bool-prototype.md` evidence, with this checkpoint's final review record appended below. No reviewer approval substitutes for pending full gates.
+
+### Shared integration and remaining queue
+
+Shared registration hunks are narrow additive changes relative to the frozen base: the new Rules.lean Lean-only constructor; Solidity.lean module imports; the owned module-map entries. The exported shared-registration patch records exact hunks. The matching AQ1/AQ2 scope receipt remains the approved setup hunk; no additional approval is claimed.
+
+The earlier forced signed sequential range-closure failure (`mcp-context-fix-stub.log`, `mcp-signed-literal-detail.log`) was retested exactly with `sol_close_join_steps` after these changes and still FAILS (`sol_close_join_steps: the leaf did not close`, no timeout). Its repair remains pending; passing conditional expected-type and signed-offset controls do not settle that failure.
+
+Outstanding: resolve that exact still-failing signed sequential range fixture; the actual boolKeyMappingSymbolicKey split/substitution kernel pipeline and controls; exact frozen post-`anon` leaf timing; full AU04 fresh-result/call-family sharing, freshness/evaluation/validity laws, full payload sizes, unchanged observables and actual loop repeated-cost repair; final affected/full bounded run, timed strict automatic gate and final audits/reviews/package. Non-offset doubling-call leaves still have the earlier measured `18 + 4 * 2^k` growth until AU04 changes them. Existing SolKey rule shapes and intrinsic syntax constructors remain unchanged. No AU05/AU06, compiler/PC lane, options work, new axioms, weakened semantic premises or new exclusions are authorized or delivered here. The full goal remains incomplete.
+
+### Checkpoint gate commands and outcomes
+
+All Lean commands below use `python3 /workspace/va2-sharing-artifacts/work/bounded.py LABEL ...`, the same task-owned Docker runner, hard memory/no-swap cap, serial thread settings and repository writer lock described above. Wrapper JSON records the complete Docker command and mounted exact checkout; log footer records sampled aggregate RSS and cgroup peak. No raw bare Lean/Lake invocation is used.
+
+- `... bounded.py join-checkpoint-affected-build-final build Solidity.Examples.Tactics.PolySize Solidity.Examples.Tactics.JoinControls Solidity.Examples.Tactics.JoinSequence Solidity.Examples.Tactics.JoinWalk Solidity.Examples.Tactics.JoinIntervals Solidity.Examples.Tactics.CallSummary Solidity.Examples.Chains.StorageCoverage Solidity.Examples.ChainNotation Solidity.Examples.Tools`: PASS, `Build completed successfully (269 jobs)`, wrapper 308.64s, sampled aggregate RSS 1,984,492 KiB, cgroup peak 1,190,064,128 bytes. Exact log/JSON: `work/join-checkpoint-affected-build-final.{log,json}` in the evidence archive.
+- `... bounded.py mcp-join-rule-printer-safe-file2 /workspace/solidity-lean/.venv/bin/python .../mcp_probe.py .../requests/join-rule-printer-file.json`: PASS per-file diagnostics, 34.82s. The earlier String API correction failure remains retained.
+- `... bounded.py mcp-join-tools-printer-safe-roundtrip2 /workspace/solidity-lean/.venv/bin/python .../mcp_probe.py .../requests/join-tools-printer.json`: PASS per-file diagnostics, 8.62s, with exact output/typed roundtrip/name controls/complete census pins. Earlier stale imports, absent scoped reader and monadic list API failures remain retained.
+- `node scripts/check-automatic.mjs --strict`: PASS, 491 automatic plus 61 step-budget declarations, zero manual, 11 refuted, zero pending. This static gate is not the final timed build-log gate.
+- `bash scripts/check-trust.sh`, `node scripts/check-layers.mjs`, `node scripts/check-orphans.mjs`, `git diff --check`: PASS. Layers: 181 core modules, zero reach elaborator; orphans: 1042 reachable, zero orphaned, zero not allowed. The mistaken direct trust-script invocation rejected missing stdin and is separately retained, not a passing audit.
+- `bash scripts/check-doc-paths.sh`: FAIL, inherited 48 findings; byte-identical exact-frozen-base comparison PASS, SHA256 `01fd3beaa0d1694397f6231999418eea67e797d42150bf68d2d8a96bc4ea109a`. Raw candidate and exact-base logs retained; no path checker PASS claimed.
+
+Independent final source reviews: finder confirmed and guided the unsupported program-name fallback repair; skeptic required explicit signed sequential accounting and precise unchanged SolKey/intrinsic-constructor wording. Both fixes are included. Neither reviewer used Lean, a server, a build or writes. Evidence: `work/reviews-join-checkpoint-printer.md`, together with the earlier per-area review records.
+
+- `... bounded.py mcp-join-checkpoint-production-audits /workspace/solidity-lean/.venv/bin/python .../mcp_probe.py .../requests/join-checkpoint-production-audits.json`: headline `lean_verify` PASS for rootW8 (propext/Classical.choice/Quot.sound) and staleDecisionClosed (propext/Quot.sound); compiled-import audit PASS for all 27 production fixture theorems, each using only a subset of the standard three axioms. Exact extracted results: `work/join-checkpoint-production-audit-results.json`. Runtime wrapper 115.12s, sampled aggregate RSS 5,128,548 KiB, cgroup peak 3,147,763,712 bytes.
+- The same serial job's separate exact signed sequential retest is FAIL, not a timeout: `sol_close_join_steps: the leaf did not close`. The probe wrapper exit 0 does not turn this structured `success=false` into PASS. This known unfinished backfill remains in the queue and is not replaced by the passing signed-offset ordinary-closer controls.
+
+The committed handoff records this checkpoint's parent `2a437a434eeb084a4e4e68d06a11008b093f3d35`; its own resolved full committed head is bound in the exported `revision.json` and handoff. Whole-assignment status remains partial.

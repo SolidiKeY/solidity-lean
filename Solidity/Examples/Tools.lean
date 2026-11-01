@@ -261,6 +261,42 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 #guard_msgs in #taclet ifElseJoin
 
 /--
+info: Solidity.LeanTaclet.ifElseJoinSequence : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx}
+  {elseStm : Prog C Γ x_1} {m : Modality} {se : Simple C Γ PrimTy.bool}
+  {body : Prog C (LTy.val PrimTy.bool :: Γ) (LTy.val PrimTy.bool :: Γ)},
+  dl[LeanTaclet C k]{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝ ⟨[ bool se' = se; body; ]⟩ }
+solkey: none (a rule solkey does not have)
+printed: none (theory only Lean has)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
+-/
+#guard_msgs in #taclet ifElseJoinSequence
+
+open scoped Solidity.Schema in
+open Lean Meta in
+run_meta do
+  let emptyCtx ← mkListLit (mkConst ``Solidity.LTy) []
+  let progTy := mkApp3 (mkConst ``Solidity.Prog) (mkConst ``Solidity.StandardExample)
+    emptyCtx emptyCtx
+  for n in [`body, `body2, `body₂, `body', `P, `Q, `ω, `opaqueProg, `Pother, `bodyExtra] do
+    withLocalDeclD n progTy fun program => do
+      let printed ← (Solidity.Delab.progItemsS #[.var program]).run {}
+      let expected := !([`opaqueProg, `Pother, `bodyExtra].contains n)
+      unless printed.isSome == expected do
+        throwError "program schema name fallback failed: {n}"
+  let ty := (← getConstInfo ``Solidity.LeanTaclet.ifElseJoinSequence).type
+  forallTelescope ty fun _ original => do
+    let printed ← withOptions (fun o => (o.setBool `pp.sol.dl true).setBool `pp.fullNames true) do
+      pure (← Meta.ppExpr original).pretty
+    let .ok stx := Lean.Parser.runParserCategory (← getEnv) `term printed
+      | throwError "joined sequence rule line does not parse: {printed}"
+    let parsed ← Lean.Elab.Term.TermElabM.run' do
+      let parsed ← Lean.Elab.Term.elabTermEnsuringType stx (← Meta.inferType original)
+      Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+      pure parsed
+    unless ← isDefEq original parsed do
+      throwError "joined sequence rule line changed its typed conclusion: {printed}"
+
+/--
 info: solkey: ifTrue (concrete_solidity)
 no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 -/
@@ -271,7 +307,7 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /--
 info: all 181 rules of `Solidity.Taclet` print as rule lines
 ---
-info: all 27 rules of `Solidity.LeanTaclet` print as rule lines
+info: all 28 rules of `Solidity.LeanTaclet` print as rule lines
 ---
 info: all 4 rules of `Solidity.CallbackTaclet` print as rule lines
 -/

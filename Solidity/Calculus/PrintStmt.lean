@@ -910,6 +910,14 @@ def ppProgS (ns : List Expr) (P : Expr) : PrM (Option (Array (TSyntax `sol_stmt)
 /-- The statements of pieces with schema variables in them, a program
 variable as a statement (`body;`), the rest `ω` too. -/
 def progItemsS (ps : Array SPiece) : PrM (Option (Array (TSyntax `sol_stmt))) := do
+  -- Match RuleSyntax's program stems; other locals keep the typed fallback.
+  for piece in ps do
+    if let .var P := piece then
+      let some s ← fvarName? P | return none
+      let stripped := s.dropRightWhile fun c =>
+        c.isDigit || ('₀' ≤ c && c ≤ '₉') || c == '\''
+      let stem := if stripped.isEmpty then s else stripped
+      unless ["P", "Q", "ω", "body"].contains stem do return none
   let some (ss, t) ← ppPartsS ps | return none
   match t with
   | some x => return some (ss.push (← `(sol_stmt| $x:ident)))
@@ -1188,7 +1196,7 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
         $(nameIdent bn):ident; } ])
       return some (← `(dl_premise| $g1:dl_branch ; $g2:dl_branch))
   let unfold (ns : List Expr) (P : Expr) : PrM (Option (TSyntax `dl_premise)) := do
-    let some ss ← ppProgS ns P | return none
+    let some ss ← progItemsS (← progExprPieces ns P) | return none
     return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))
   match_expr (← whnf e) with
   | Premise.update _ _ _ U =>

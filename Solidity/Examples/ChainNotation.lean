@@ -435,14 +435,17 @@ example (φ : Post StandardExample [.val .uint]) : dl![m]{ ⟨[ uint8 x = 250; x
           ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) } := by
   sol_chain
 
-/-- The trace up to an `if` whose branches only assign locals, under `m`.
-The next step joins it (`ifElseJoin`): one update, `{ y := (se1 ? 1 : 2) }`,
-which `#derivation` prints and a chain's line cannot yet write (the surface
-notation has no conditional term, `docs/automation.md`, M8). -/
+/-- The captured mapping condition joins once, then the updates merge.
+The final conditional is written and reread by the ordinary chain notation. -/
 theorem ifTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { y = 2; }; ]⟩ φ }
     ~[ifElseUnfold]~> dl![m]{ ⟨[ bool se1 = flags[a]; if (se1) { y = 1; } else { y = 2; }; ]⟩ φ }
-    ~*> dl![m]{ { se1 := find(storage, flags[a]) } ⟨[ if (se1) { y = 1; } else { y = 2; }; ]⟩ φ } := by
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) } ⟨[ if (se1) { y = 1; } else { y = 2; }; ]⟩ φ }
+    ~[ifElseJoin]~> dl![m]{ ∀ uint y; ∀ uint a; { se1 := find(storage, flags[a]) }
+      { y := (se1 ? 1 : 2) } φ }
+    ~[sequentialToParallel]~> dl![m]{ ∀ uint y; ∀ uint a;
+      { se1 := find(storage, flags[a]) ‖ y := (find(storage, flags[a]) ? 1 : 2) } φ } := by
   sol_chain
+#last_line ifTrace
 
 /-- A revert in the `else` branch: the lines stop at it, the `then` goal done. -/
 def ifRevertTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { revert(); }; ]⟩ φ }

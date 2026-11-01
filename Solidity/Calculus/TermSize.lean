@@ -1218,15 +1218,21 @@ theorem iteStep_bounded {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C �
         thn els).Bounded (3 * (thn.size + els.size) + 8) := by
       apply Premise.Bounded.split <;>
         simp only [Fml.tmSize, Tm.size, Simple.lower_size] <;> omega
-    cases ha : thn.joinArm? with
-    | none => simp only [iteStep, Upd.ifJoin?, ha]; exact hsplit
-    | some a =>
-      cases hb : els.joinArm? with
-      | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact hsplit
-      | some b =>
-        simp only [iteStep, Upd.ifJoin?, ha, hb]
+    cases hj : Upd.ifJoinSingle? s.lower thn els with
+    | some u =>
+      simp only [iteStep, Upd.ifJoin?, hj]
+      unfold Upd.ifJoinSingle? at hj
+      split at hj
+      next a b ha hb =>
+        cases hj
         obtain ⟨hl, hs⟩ := Upd.ifJoin_bounded s ha hb
         exact Premise.Bounded.update hl hs
+      next => cases hj
+    | none =>
+      simp only [iteStep, Upd.ifJoin?, hj]
+      cases thn.localWrites? <;> cases els.localWrites? <;> try first | bnil | exact hsplit
+      all_goals dsimp only
+      all_goals rename_i a b; cases JoinBoundary.boundary a b <;> first | bnil | exact hsplit
   | _ => bnil
 
 theorem requireStep_bounded (c : Val C Γ .bool) : (requireStep k c).Bounded 3 := by

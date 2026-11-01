@@ -739,13 +739,66 @@ def valuesOf (a : Expr) (e : Expr) : Array Expr := Id.run do
       out := out.push (x.getArg! 1)
   return out
 
-/-- From a defining fact `hX : X = some a`, the interval its cases give
-when they are offsets of one base (KeY's join with the conditional's bounds
-in the antecedent): relative to the base (`hint`) and, where the base's own
-is known, absolute (`hintA`, recorded in `bounds`); when they are offsets of
-one base and literals (`c ? x + 1 : 0`), absolute only, where the base's is
-known.  Each by `omega` from
-the fact alone.  `none` where reading the fact closed the goal. -/
+-- A compact, bounded Boolean-case fallback, attempted only after omega refuses.
+private def omegaCasesIn (keep : Array FVarId) (p : Expr) : TacticM (Option Expr) := do
+  if let some e ← omegaIn keep p then return some e
+  let saved ← saveState
+  let attempt : TacticM (Option Expr) := do
+    let lctx ← getLCtx
+    let mut need : FVarIdSet := {}
+    let mut todo := keep ++ (collectFVars {} (← instantiateMVars p)).fvarIds
+    while !todo.isEmpty do
+      let f := todo.back!
+      todo := todo.pop
+      if need.contains f then continue
+      need := need.insert f
+      let some d := lctx.find? f | continue
+      todo := todo ++ (collectFVars {} (← instantiateMVars d.type)).fvarIds
+      if let some v := d.value? then
+        todo := todo ++ (collectFVars {} (← instantiateMVars v)).fvarIds
+    let lctx' := lctx.foldl (init := lctx) fun l d =>
+      if need.contains d.fvarId then l else l.erase d.fvarId
+    let mut bools := #[]
+    for d in lctx' do
+      if !d.isLet && (← whnfD d.type).isConstOf ``Bool then
+        bools := bools.push d.fvarId
+    if bools.isEmpty then return none
+    let mut branches := 1
+    for _ in bools do
+      if branches > joinMaxCases / 2 then return none
+      branches := branches * 2
+    let insts := (← getLocalInstances).filter fun i => need.contains i.fvar.fvarId!
+    let m ← mkFreshExprMVarAt lctx' insts p
+    try
+      let mut goals := [m.mvarId!]
+      for f in bools do
+        let mut next := []
+        for g in goals do
+          if !(← g.withContext <| pure ((← getLCtx).contains f)) then
+            next := next ++ [g]
+          else
+            let subgoals ← g.withContext <| g.cases f
+            next := next ++ subgoals.toList.map (·.mvarId)
+        goals := next
+      for g in goals do
+        let [] ← runOn g (← `(tactic| (simp_all only [Bool.false_eq_true,
+          Bool.true_eq_false, not_false_eq_true, not_true_eq_false,
+          true_implies, false_implies, and_true, true_and]; omega))) | return none
+      let e ← instantiateMVars m
+      if e.hasMVar || e.hasSorry then return none
+      return some e
+    catch _ => return none
+  let result ← tryCatchRuntimeEx attempt fun _ => pure none
+  if result.isNone then saved.restore
+  return result
+
+private theorem zeroUIntVal : (uintOfNat 0).val = (0 : Int) := by
+  exact uintOfNat_val (Nat.two_pow_pos 256)
+
+/-- Infer an interval from a defining fact, retaining its proved normalized
+copy so the final arithmetic check does not repeat that normalization.
+Existing one-base paths come first; a multi-base hull uses only current
+certified bounds, and every endpoint is proved from the actual fact. -/
 def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
     TacticM (Option (MVarId × Bounds)) := g.withContext do
   let ty ← instantiateMVars (← hX.getType)
@@ -754,17 +807,46 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
   unless rhs.isAppOfArity ``Option.some 2 && rhs.appArg!.isFVar do return some (g, bounds)
   let a := rhs.appArg!
   -- a copy of the fact, read as `omega` reads it
-  let (_, g₂) ← assertH g `hjoin ty (mkFVar hX)
-  let gs ← runOn g₂ (← `(tactic| sol_close_join_fact $(mkIdent `hjoin)))
+  let name ← mkFreshUserName `hjoin
+  let (_, g₂) ← assertH g name ty (mkFVar hX)
+  let gs ← runOn g₂ (← `(tactic| sol_close_join_fact $(mkIdent name)))
+  let gs ← gs.flatMapM fun g => g.withContext do
+    let some h := (← getLCtx).findFromUserName? name | return [g]
+    if (h.type.find? (·.isConstOf ``uintOfNat)).isNone then return [g]
+    runOn g (← `(tactic| try simp only [zeroUIntVal] at $(mkIdent name):ident))
   let [g₃] := gs | if gs.isEmpty then return none else throwError "sol_close_join_steps: a fact split"
   g₃.withContext do
-    let some hkD := (← getLCtx).findFromUserName? `hjoin | return some (g₃, bounds)
+    let some hkD := (← getLCtx).findFromUserName? name | return some (g₃, bounds)
     let hk := hkD.fvarId
     let done (g : MVarId) (b : Bounds) : MetaM (Option (MVarId × Bounds)) := do
-      return some (← g.tryClear hk, b)
+      return some (g, b)
     let vs := valuesOf a (← instantiateMVars hkD.type)
     if vs.isEmpty then return ← done g₃ bounds
     let ps := vs.map affine
+    -- Only already certified bounds of every distinct base are admitted.
+    -- The actual normalized defining fact and bound proofs certify the hull.
+    let absolute : TacticM (Option (MVarId × Bounds)) := do
+      let mut hull : Option (Int × Int) := none
+      let mut keep : Array FVarId := #[hk]
+      for q in ps do
+        let mut lo := q.2
+        let mut hi := q.2
+        if let some base := q.1 then
+          unless base.isAppOfArity ``Subtype.val 3 && base.appArg!.isFVar do
+            return ← done g₃ bounds
+          let some (L, H, hb) := bounds.get? base.appArg!.fvarId! | return ← done g₃ bounds
+          unless (← getLCtx).contains hb do return ← done g₃ bounds
+          lo := L + q.2
+          hi := H + q.2
+          keep := keep.push hb
+        hull := some (match hull with
+          | none => (lo, hi)
+          | some (L, H) => (min L lo, max H hi))
+      let some (lo, hi) := hull | return ← done g₃ bounds
+      let pA ← intervalP a (toExpr lo) (toExpr hi)
+      let some eA ← omegaCasesIn keep pA | return ← done g₃ bounds
+      let (hA, g₄) ← assertH g₃ `hintA pA eA
+      done g₄ (bounds.insert a.fvarId! (lo, hi, hA))
     -- one base with literal offsets and literals (`c ? x + 1 : 0`): the
     -- absolute interval from the base's, by `omega` from the fact and it
     let lits := ps.filter (·.1.isNone)
@@ -773,7 +855,7 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
       let some b := based[0]!.1 | return ← done g₃ bounds
       for q in based do
         let some x := q.1 | return ← done g₃ bounds
-        unless ← withReducible (isDefEq x b) do return ← done g₃ bounds
+        unless ← withReducible (isDefEq x b) do return ← absolute
       let some (L, H, hb) := (if b.isAppOfArity ``Subtype.val 3 && b.appArg!.isFVar then
           bounds.get? b.appArg!.fvarId! else none) | return ← done g₃ bounds
       let offs := based.map (·.2)
@@ -788,8 +870,8 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
     for q in ps do
       match q.1, base with
       | none, none => pure ()
-      | some x, some y => unless ← withReducible (isDefEq x y) do return ← done g₃ bounds
-      | _, _ => return ← done g₃ bounds
+      | some x, some y => unless ← withReducible (isDefEq x y) do return ← absolute
+      | _, _ => return ← absolute
     let (iLo, iHi) := Id.run do
       let mut lo := 0
       let mut hi := 0
@@ -814,11 +896,12 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
         let (hA, g₅) ← assertH g₄ `hintA pA eA
         done g₅ (bounds.insert a.fvarId! (L + cLo, H + cHi, hA))
 
+
 /-- A value that must return (`X.isSome = true`): a case per condition
 (`CloseS.isSome_cond`, `CloseS.isSome_ite`), a halting case refuted by
 `omega` from its conditions and the absolute intervals of the values they
 read. -/
-partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]) :
+partial def closeSideCore (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]) :
     TacticM Bool := g.withContext do
   let t ← instantiateMVars (← g.getType)
   unless t.isAppOfArity ``Eq 3 && (t.getArg! 1).isAppOfArity ``Option.isSome 2 do return false
@@ -827,7 +910,7 @@ partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]
     let gs ← try g.apply (← mkConstWithFreshMVarLevels lem) catch _ => return false
     for g' in gs do
       let (h, g'') ← g'.intro1P
-      unless ← closeSide g'' bounds (hyps.push h) do return false
+      unless ← closeSideCore g'' bounds (hyps.push h) do return false
     return true
   if X.isAppOfArity ``cond 4 then return ← cases ``CloseS.isSome_cond
   if X.isAppOfArity ``ite 5 then return ← cases ``CloseS.isSome_ite
@@ -840,10 +923,39 @@ partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]
     for h in hyps do
       for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
         if let some (_, _, hb) := bounds.get? f then keep := keep.push hb
-    let some e ← omegaIn keep (mkConst ``False) | return false
-    g.assign (← mkFalseElim t e)
-    return true
+    keep := keep.filter (← getLCtx).contains
+    if let some e ← omegaIn keep (mkConst ``False) then
+      g.assign (← mkFalseElim t e)
+      return true
+    -- Only a failed arithmetic check pays for Boolean-decision normalization.
+    let mut goal := g
+    let mut normalized : Array FVarId := #[]
+    for h in keep do
+      let result ← goal.withContext do
+        let ht ← instantiateMVars (← h.getType)
+        if (ht.find? (·.isConstOf ``decide)).isNone then return some (goal, h)
+        let name ← mkFreshUserName `hcase
+        let (_, gN) ← assertH goal name ht (mkFVar h)
+        let gs ← runOn gN (← `(tactic| try simp only [decide_eq_true_eq,
+          decide_eq_false_iff_not, Bool.not_eq_true] at $(mkIdent name):ident))
+        let [gN] := gs | if gs.isEmpty then return none else throwError "case normalization split"
+        let some d := (← gN.withContext getLCtx).findFromUserName? name | throwError "missing normalized case"
+        return some (gN, d.fvarId)
+      let some (gN, hN) := result | return true
+      goal := gN
+      normalized := normalized.push hN
+    return ← goal.withContext do
+      let some e ← omegaIn normalized (mkConst ``False) | return false
+      goal.assign (← mkFalseElim (← goal.getType) e)
+      return true
   return false
+
+def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]) : TacticM Bool := do
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (closeSideCore g bounds hyps) fun _ => pure false
+  unless result do saved.restore
+  return result
+
 
 /-- What one step of evaluation leaves in front, opened: binders, premises,
 landed states (`CloseS.LandedAll`), a checked value's two cases
@@ -1136,6 +1248,29 @@ partial def peelHead (g : MVarId) (t φ rest : Expr) (bounds : Bounds) (prems : 
 
 end
 
+-- A local arithmetic negation only refuses this tactic goal. A global
+-- refuted verdict still requires its own inhabited countermodel certificate.
+private def refuteIntComparison (g : MVarId) : TacticM Bool := g.withContext do
+  let p ← instantiateMVars (← g.getType)
+  let comparison := ((p.isAppOfArity ``LT.lt 4 || p.isAppOfArity ``LE.le 4) &&
+    (p.getArg! 0).isConstOf ``Int) || p.isAppOfArity ``Int.lt 2 || p.isAppOfArity ``Int.le 2
+  unless comparison do return false
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (do
+    let goal ← mkFreshExprSyntheticOpaqueMVar (mkNot p)
+    let [] ← runOn goal.mvarId! (← `(tactic| omega)) | return false
+    let proof ← instantiateMVars goal
+    return !proof.hasMVar && !proof.hasSorry) fun e => do
+      if e.isMaxHeartbeat || e.isMaxRecDepth then throw e
+      pure false
+  unless result do saved.restore
+  return result
+
+elab "sol_close_join_finish" : tactic => do
+  if ← refuteIntComparison (← getMainGoal) then
+    throwError "sol_close_join_steps: arithmetic comparison negated"
+  evalTactic (← `(tactic| sol_close_finish))
+
 /-- The leaf (`Fml.Valid ψ`) closed one update at a time (`peel`), the post
 read as the updates were, then `omega` on the intervals, the defining facts'
 cases only if it fails (`sol_close_finish`, within 20000 heartbeats of its
@@ -1150,7 +1285,7 @@ def closeSteps : TacticM Unit := do
     let (gs', hs, ps) ← introFront g
     if let some (g', _) ← settle gs' hs bounds (prems ++ ps.toArray) then rest := rest.push g'
   setGoals rest.toList
-  evalTactic (← `(tactic| all_goals first | omega | sol_skip_after 20000 sol_close_finish))
+  evalTactic (← `(tactic| all_goals first | omega | sol_skip_after 20000 sol_close_join_finish))
   unless (← getGoals).isEmpty do throwError "sol_close_join_steps: goals left"
 
 /-- `sol_close_join_steps`'s budget, in thousands of heartbeats, within the
