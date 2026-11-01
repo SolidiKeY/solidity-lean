@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructSequence
 import Solidity.Backend.MemoryOps.SourceStructDelete
 import Solidity.Backend.MemoryOps.SourceStructChild
 import Solidity.Backend.MemoryOps.SourceStructAlias
@@ -1192,5 +1193,187 @@ theorem member_delete_runtime_endpoint (p : Roadmap.Pipeline) (xs ys : List Bool
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms member_delete_runtime_endpoint
+
+
+private def cycleInitial := selectedState.withHeap deletedHp
+private def cycleMidHp := deletedHp.set right (MObj.setElem .dyn (deletedHp.get right) 0 true)
+private def cycleFinalHp := cycleMidHp.set right (MObj.setElem .dyn (cycleMidHp.get right) 0 false)
+private def cycleMidSource : Source.EMState E XΓ :=
+  (deletedSource.1,{deletedSource.2 with heap := deletedSource.2.heap.write 1 (sourceBoolMemory [true,true,false]) (by rfl)})
+private def cycleFinalSource : Source.EMState E XΓ :=
+  (cycleMidSource.1,{cycleMidSource.2 with heap := cycleMidSource.2.heap.write 1 (sourceBoolMemory [false,true,false]) (by rfl)})
+private def cycleMidMachine := writeMachine deletedMachine 25 w[1]
+private def cycleFinalMachine := writeMachine cycleMidMachine 25 w[0]
+private def cycleItems := sourceStructWriteDelete layout xroot xi xv
+private def cycleProg : Prog C Γ Γ := .cons (.assignMem (.index .dyn (fieldPath root) zeroWord) (.val trueWord))
+  (.cons (.deleteMem (.loc (.index .dyn (fieldPath root) zeroWord)) rfl) .nil)
+
+private theorem cycle_word_write {hp' : Heap H} {m : Machine}
+    (hm : StateRepr 1 1 8 (Frag.init Γ) (selectedState.withHeap hp') base m)
+    (hq : hp'.field parent layout.child_type=right) (hpos : 0<hp'.len right .dyn) (v : Bool) :
+    run (structChildWriteCode (C := C) 1 root "items" zeroWord (.simple (.bool v))) m=
+      .ok (writeMachine m 25 (.val (bword v))) 0 := by
+  let ptr := [.mload (cellOf 1 root)]++readFieldCode (fieldOffset (structDef S) "items")
+  have hp : PtrFrag 1 (fieldPath root) ptr := .field _ _ _ (.local root (by decide))
+  have hpath : (fieldPath root).mvalT (selectedState.withHeap hp')=.ok right := by
+    simp only [fieldPath,MPath.mvalT,MLoc.addrT,Heap.readAddr,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    exact congrArg Except.ok hq
+  have hptr := hp.run_of_eval (hm.push (.val (bword v))) hpath
+  have hraw : run (writeArrayCode (base right.id)) ((m.push (.val (bword v))).push w[0])=
+      .ok (writeMachine m 25 (.val (bword v))) 0 := by
+    obtain ⟨_,_,hc,_⟩ | ⟨hn,_⟩ := writeArray_correct (hm.heap.arrays right) ⟨0,by decide⟩ v (.val (bword v)) rfl
+    · exact hc
+    · have hw : hp'.writeAddr (.index right .dyn k0) v=some (hp'.set right (MObj.setElem .dyn (hp'.get right) 0 v)) := by
+        simp only [Heap.writeAddr,Heap.setIndex,k0,indexValue,Int.toNat_natCast]
+        exact if_pos hpos
+      change hp'.writeAddr (.index right .dyn k0) v=none at hn
+      rw [hw] at hn;cases hn
+  change run ((compileVal 1 (.simple (.bool v) : Val C Γ .bool))++ptr++compileVal 1 zeroWord++writeArrayStackCode) m=_
+  rw [List.append_assoc,List.append_assoc,
+    run_append_ok (show run (compileVal 1 (.simple (.bool v) : Val C Γ .bool)) m=.ok (m.push (.val (bword v))) 0 from rfl),
+    run_append_ok hptr,
+    run_append_ok (show run (compileVal 1 zeroWord) ((m.push (.val (bword v))).push (.val (base right.id)))=
+      .ok (((m.push (.val (bword v))).push (.val (base right.id))).push w[0]) 0 from rfl)]
+  rw [writeArrayStackCode,arrayStack_append_eq (m.push (.val (bword v))) (base right.id) ⟨0,by decide⟩ _
+    (hp'.len_dyn_lt right) (hm.heap.arrays right).length,←writeArrayCode]
+  exact hraw
+
+/-- ACTUAL two-statement Source program, not independent initial-state runs.
+The first write changes FTF to TTF; its reached output supplies deletion. -/
+theorem member_write_delete_program (p : Roadmap.Pipeline) :
+    (Source.execItems (G p) F0 7 XΓ.length none cycleItems deletedSource.1).run (.nil,deletedSource.2)=
+      (.ok (.normal cycleFinalSource.1),(.nil,cycleFinalSource.2)) ∧
+    Prog.run cycleInitial cycleProg=.ok ⟨cycleInitial.withHeap cycleFinalHp,List.prefix_refl _⟩ ∧
+    run (childCode++deleteCode) deletedMachine=.ok cycleFinalMachine 0 ∧
+    (Source.execS (G p) F0 6 XΓ.length none (.expr childTerm : Source.RStmt E [] false .body XΓ XΓ) deletedSource.1).run (.nil,deletedSource.2)=
+      (.ok (.normal cycleMidSource.1),(.nil,cycleMidSource.2)) ∧
+    (Source.execS (G p) F0 5 XΓ.length none (.expr deleteTerm : Source.RStmt E [] false .body XΓ XΓ) cycleMidSource.1).run (.nil,cycleMidSource.2)=
+      (.ok (.normal cycleFinalSource.1),(.nil,cycleFinalSource.2)) ∧
+    SourceBoolStructAt cycleFinalSource 2 cycleFinalHp parent addresses layout ∧ Source.MemOK E SH cycleFinalSource ∧
+    StateRepr 1 1 8 (Frag.init Γ) (cycleInitial.withHeap cycleFinalHp) base cycleFinalMachine ∧
+    [MObj.elems .dyn (deletedHp.get left),MObj.elems .dyn (deletedHp.get right),MObj.elems .dyn (cycleMidHp.get left),
+      MObj.elems .dyn (cycleMidHp.get right),MObj.elems .dyn (cycleFinalHp.get left),MObj.elems .dyn (cycleFinalHp.get right)]=
+      [[true,false,false],[false,true,false],[true,false,false],[true,true,false],[true,false,false],[false,true,false]] ∧
+    [cells deletedMachine,cells cycleMidMachine,cells cycleFinalMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[1],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]]] ∧
+    cycleMidSource.2.heap.get 1=some ⟨SB,sourceBoolMemory [true,true,false]⟩ ∧
+    cycleFinalSource.2.heap.get 1=some ⟨SB,sourceBoolMemory [false,true,false]⟩ ∧
+    cycleFinalSource.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ ∧
+    cycleFinalSource.2.heap.get 2=some ⟨SS,data 1⟩ ∧
+    cycleFinalSource.1.get (.there (.there soldAlias))=.memRef rfl 0 ∧
+    (TEnv.get oldAlias (cycleInitial.withHeap cycleFinalHp).env).map HRef.id=some 0 ∧
+    cycleFinalMachine.stack=[w[42]] ∧ StructAllocatorRepr cycleFinalHp base 8 ⟨48,by decide⟩ cycleFinalMachine := by
+  obtain ⟨he₀,he₁,hew,hed,hsd,hid,hprefix,hr,hm,hrepr,hvec,hcells,h0,h1,h2,hreadright,hreadleft,
+    hsalias,htalias,htag,hchildid,hex,hev,hlog,hstack,halloc⟩ := reached_member_child_delete p
+  have hq0 : cycleInitial.heap.field parent layout.child_type=right := by
+    simp only [cycleInitial,deletedHp,mutatedHp,Heap.field,Heap.get_set_ne mutatedHp right parent (by decide),Heap.get_set_ne out right parent (by decide)]
+    rfl
+  have hlenInitial : deletedHp.len right .dyn=3 := by
+    unfold deletedHp
+    simp only [Heap.len,Heap.get_set_same,MObj.elems_setElem,List.length_set]
+    change mutatedHp.len right .dyn=3
+    unfold mutatedHp
+    simp only [Heap.len,Heap.get_set_same,MObj.elems_setElem,List.length_set]
+    change out.len right .dyn=3
+    rw [out,arrayLen_setRefField]
+    simp only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn,List.length_cons,List.length_nil]
+  have hlen0 : cycleInitial.heap.len right .dyn=3 := hlenInitial
+  have hk : k0.1.toNat<cycleInitial.heap.len (cycleInitial.heap.field parent layout.child_type) .dyn := by
+    rw [hq0,hlen0];decide
+  obtain ⟨mid,out',ym,z,mm,target,hw₁,hw₂,hs₁,hs₂,hitems,hprog,hc₁,hc₂,hcode,hr₁,hr₂,hm₁,hm₂,hrepr₁,hrepr₂,hy₁,hy₂,hlen,hparent,hread,hstack',halloc'⟩ :=
+    hr.write_delete_program layout (G p) F0 0 cycleInitial parent addresses xroot xi xv root (.lit 0 rfl) (.bool true) k0 true
+      rfl rfl rfl rfl rfl rfl (by decide) hk SH hm hrepr rfl rfl
+  have hmid : mid=cycleMidHp := Option.some.inj (hw₁.symm.trans (show cycleInitial.heap.writeAddr (.index (cycleInitial.heap.field parent layout.child_type) .dyn k0) true=some cycleMidHp from by
+    rw [hq0];simp only [Heap.writeAddr,Heap.setIndex];rw [if_pos (by simpa only [hq0] using hk)];rfl))
+  subst mid
+  have hqmid : cycleMidHp.field parent layout.child_type=right := by
+    simp only [cycleMidHp,Heap.field,Heap.get_set_ne deletedHp right parent (by decide)]
+    exact hq0
+  have hmidLen : cycleMidHp.len right .dyn=3 := by
+    rw [cycleMidHp,Heap.len,Heap.get_set_same,MObj.elems_setElem,List.length_set]
+    exact hlenInitial
+  have hout : out'=cycleFinalHp := Option.some.inj (hw₂.symm.trans (show cycleMidHp.writeAddr (.index (cycleInitial.heap.field parent layout.child_type) .dyn k0) false=some cycleFinalHp from by
+    rw [hq0];simp only [Heap.writeAddr,Heap.setIndex];rw [if_pos (by change k0.1.toNat<cycleMidHp.len right .dyn;rw [hmidLen];decide)];rfl))
+  subst out'
+  obtain ⟨ht₁,hwrite₁⟩ := source_bool_write deletedSource 1 [false,true,false] h1 0 (by decide) true
+  have hraw₁ : (Source.writeLoc (E := E) (Γ := XΓ) F0 4 (τ := .bool) (.mem 1 0) (.bool true)).run deletedSource=(.ok (),cycleMidSource) := hwrite₁
+  have hSourceExpr₁ : (Source.evalE (G p) F0 5 childTerm).run deletedSource=(.ok (.val (.bool true)),cycleMidSource) := by
+    rw [childTerm,sourceStructChildAssign,Source.evalE,Source.Hoare.run_bind,source_local_value_run (G p) F0 3 deletedSource xv (.bool true) rfl]
+    change ((Source.evalLoc (G p) F0 4 (sourceStructChildLoc layout xroot xi)) >>= fun loc => Source.writeLoc F0 4 loc (.bool true) >>= fun _ => pure (Source.RVal.val (.bool true))).run deletedSource=_
+    rw [Source.Hoare.run_bind,hr.eval_child_loc (G p) F0 1 xroot xi k0 rfl rfl hk]
+    change (Source.writeLoc F0 4 (τ := .bool) (.mem 1 0) (.bool true) >>= fun _ => pure (Source.RVal.val (.bool true))).run deletedSource=_
+    rw [Source.Hoare.run_bind,hraw₁];rfl
+  have hKnownStmt₁ := source_expr_statement_run (G p) F0 5 XΓ.length childTerm deletedSource cycleMidSource (.val (.bool true)) hSourceExpr₁
+  have hym : ym=cycleMidSource := Prod.ext hy₁ (congrArg (fun x => x.2.2) (hs₁.symm.trans hKnownStmt₁))
+  subst ym
+  obtain ⟨ht₂,hwrite₂⟩ := source_bool_write cycleMidSource 1 [true,true,false] rfl 0 (by decide) false
+  have hSourceExpr₂ : (Source.evalE (G p) F0 4 deleteTerm).run cycleMidSource=(.ok Source.RVal.unit,cycleFinalSource) := by
+    rw [deleteTerm,sourceStructChildDelete,Source.evalE,Source.Hoare.run_bind,hr₁.eval_child_loc (G p) F0 0 xroot xi k0 rfl rfl (by rw [hqmid,hmidLen];decide)]
+    change (Source.deleteLoc F0 3 (τ := .bool) (.mem 1 0) >>= fun _ => pure Source.RVal.unit).run cycleMidSource=_
+    have hd : (Source.deleteLoc (E := E) (Γ := XΓ) F0 3 (τ := .bool) (.mem 1 0)).run cycleMidSource=(.ok (),cycleFinalSource) := hwrite₂
+    rw [Source.Hoare.run_bind,hd];rfl
+  have hKnownStmt₂ := source_expr_statement_run (G p) F0 4 XΓ.length deleteTerm cycleMidSource cycleFinalSource Source.RVal.unit hSourceExpr₂
+  have hz : z=cycleFinalSource := Prod.ext hy₂ (congrArg (fun x => x.2.2) (hs₂.symm.trans hKnownStmt₂))
+  subst z
+  have hcmid := cycle_word_write hrepr hq0 (by rw [hlenInitial];decide) true
+  have hmm : mm=cycleMidMachine := (Evm.Out.ok.inj (hc₁.symm.trans hcmid)).1
+  subst mm
+  have hcfinal := cycle_word_write hrepr₁ hqmid (by rw [hmidLen];decide) false
+  have ht : target=cycleFinalMachine := (Evm.Out.ok.inj (hc₂.symm.trans hcfinal)).1
+  subst target
+  refine ⟨hitems,hprog,hcode,hs₁,hs₂,hr₂,hm₂,hrepr₂,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,hstack',halloc' _ (by decide) halloc⟩
+  · simp only [cycleFinalHp,cycleMidHp,deletedHp,mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    rfl
+  · rfl
+
+
+/-- The same Source program at horizon6 executes a material first statement
+then times out before deletion, retaining the actual reached changed heap.
+No successful suffix or rollback state is invented. -/
+theorem member_write_delete_timeout (p : Roadmap.Pipeline) :
+    (Source.execItems (G p) F0 6 XΓ.length none cycleItems deletedSource.1).run (.nil,deletedSource.2)=
+      (.error .timeout,(.nil,cycleMidSource.2)) ∧
+    (Source.execItems (G p) F0 0 XΓ.length none cycleItems deletedSource.1).run (.nil,deletedSource.2)=
+      (.error .timeout,(.nil,deletedSource.2)) ∧
+    (Source.readLoc (E := E) (Γ := XΓ) F0 (τ := .bool) (.mem 1 0)).run cycleMidSource=(.ok (.bool true),cycleMidSource) ∧
+    (Source.readLoc (E := E) (Γ := XΓ) F0 (τ := .bool) (.mem 1 0)).run cycleFinalSource=(.ok (.bool false),cycleFinalSource) ∧
+    cycleMidMachine.mem 25=w[1] ∧ cycleFinalMachine.mem 25=w[0] ∧
+    MObj.elems .dyn (cycleMidHp.get right)≠MObj.elems .dyn (cycleFinalHp.get right) := by
+  obtain ⟨he₀,he₁,hew,hed,hsd,hid,hprefix,hr,hm,hrepr,hvec,hcells,h0,h1,h2,tail⟩ := reached_member_child_delete p
+  have hk : k0.1.toNat<deletedHp.len (deletedHp.field parent layout.child_type) .dyn := by
+    simp only [deletedHp,mutatedHp,out,Heap.setField,Heap.len,Heap.field,Heap.get,Heap.set,Objs.get,Objs.set,hp,parent,right,left,
+      MObj.elems_dyn,MObj.setElem,k0,indexValue,Int.toNat_natCast,List.length_set,List.length_cons,List.length_nil]
+    decide
+  obtain ⟨ht,hw⟩ := source_bool_write deletedSource 1 [false,true,false] h1 0 (by decide) true
+  have hraw : (Source.writeLoc (E := E) (Γ := XΓ) F0 3 (τ := .bool) (.mem 1 0) (.bool true)).run deletedSource=(.ok (),cycleMidSource) := hw
+  have he : (Source.evalE (G p) F0 4 childTerm).run deletedSource=(.ok (.val (.bool true)),cycleMidSource) := by
+    rw [childTerm,sourceStructChildAssign,Source.evalE,Source.Hoare.run_bind,source_local_value_run (G p) F0 2 deletedSource xv (.bool true) rfl]
+    change ((Source.evalLoc (G p) F0 3 (sourceStructChildLoc layout xroot xi)) >>= fun loc => Source.writeLoc F0 3 loc (.bool true) >>= fun _ => pure (Source.RVal.val (.bool true))).run deletedSource=_
+    rw [Source.Hoare.run_bind,hr.eval_child_loc (G p) F0 0 xroot xi k0 rfl rfl hk]
+    change (Source.writeLoc F0 3 (τ := .bool) (.mem 1 0) (.bool true) >>= fun _ => pure (Source.RVal.val (.bool true))).run deletedSource=_
+    rw [Source.Hoare.run_bind,hraw];rfl
+  have hs₁ := source_expr_statement_run (G p) F0 4 XΓ.length childTerm deletedSource cycleMidSource (.val (.bool true)) he
+  have hb := source_struct_delete_low_horizon layout (G p) F0 cycleMidSource xroot xi 3 (by decide)
+  have hs₂ := source_expr_statement_error (G p) F0 3 XΓ.length deleteTerm cycleMidSource cycleMidSource .timeout hb
+  have hseq := source_items_pair_error (G p) F0 0 XΓ.length (.expr childTerm) (.expr deleteTerm)
+    deletedSource cycleMidSource cycleMidSource .timeout hs₁ hs₂
+  refine ⟨hseq,rfl,source_bool_read cycleMidSource 1 [true,true,false] rfl 0 (by decide),
+    source_bool_read cycleFinalSource 1 [false,true,false] rfl 0 (by decide),rfl,rfl,?_⟩
+  simp only [cycleFinalHp,cycleMidHp,deletedHp,mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+  change ([true,true,false] : List Bool)≠[false,true,false]
+  decide
+
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_write_delete_program' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_write_delete_program
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_write_delete_timeout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_write_delete_timeout
 
 end Solidity.Backend.MemoryOps.SourceStructControls

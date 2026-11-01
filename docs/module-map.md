@@ -1332,3 +1332,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceStructChild.lean` | Actual Source named-member-selected Bool-child location/read/assignment and published whole pointer-path word certificates; initial finite observer derives mutation/frame and exact Source bounds. |
 
 | `Solidity/Backend/MemoryOps/SourceStructDelete.lean` | Actual Source delete through a named member-selected Bool child, typed default/intrinsic delete and whole published pointer/index word code, precise frames and general rejection; runtime Source application. |
+
+| `Solidity/Backend/MemoryOps/SourceStructSequence.lean` | Actual Source RItems member-child write/then-reached-delete with intrinsic Prog and whole word append; derives second identity/length/operands/representation and allocator composition. |

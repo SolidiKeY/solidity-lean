@@ -3941,3 +3941,64 @@ then DELETE on its reached heap, reusing source_items_pair_run and intrinsic
 heap-pair/word-append laws. C52 exposes linked expression calls but does not yet
 prove that combined Source program; deriving second bounds/root/locals/word
 representation from first output remains useful original G34/BackfillB work.
+
+
+### C53: actual reached member-child Source program composition
+
+SourceStructSequence closes a distinct supported G34/BackfillB application left
+open by C52's individual linked calls: an ACTUAL two-statement Source RItems
+member-child assignment then deletion, intrinsic Prog and whole word append.
+The first assignment consumes INITIAL SourceBoolStructAt/locals and existing
+word StateRepr. Its actual parent frame derives the same selected identity;
+actual setElem length preservation derives second capacity, unchanged Source
+locals derive root/index alignment, and target Simple operands retain their
+evaluation through the heap-only change. Second MemOK/word representation comes
+from the first certificate. No supplied desired intermediate/final relation or
+independent initial-state second run is assumed. Final false read, parent frame,
+stack and allocator composition derive from actual writes.
+
+Horizon accounting uses the existing Source recurrence: first stmt n+6, second
+stmt n+5, actual Items n+7. No prior fuel/test/proof budget is raised. Source pure
+local operands and target core Simple expressions, same named field/index and
+finite two-field existing-object observer remain explicit scope. This does not
+prove arbitrary side-effectful order, unrelated statements, recursive graphs or
+whole compiler/physical-byte adequacy.
+
+Inhabited controls consume C52's actual reached state under BOTH pipelines.
+The real Source Items7 and intrinsic Prog/word code materially execute RIGHT
+FTF->TTF->FTF while LEFT TFF/oldalias0 remain; complete ordered Source tables,
+three word vectors, parent/tag7/neighbour99/cursor48/stack42/allocator are kept.
+The same Source program at horizon6 executes first stmt5 successfully then
+actually times out in deletion, retaining the changed TTF intermediate heap;
+horizon0 retains initial state. Actual reached true versus successful final
+false reads discriminate skipped deletion. No successful suffix or rollback/
+target-timeout equivalence is fabricated. All earlier fixtures/guards unchanged
+apart from one import and appended families.
+
+Focused guarded179jobs passes three new exact standard-trio laws/controls.
+Initial length/state-wrapper/Sourcewrite witness/solved-goal proof failures are
+retained; no trust/resource/budget changes. Per-file Lean MCP unavailable;
+existing serial capped runtime/cacheOFF used. Every original G32-G35.01-.06
+and Backfill parent remains partial/blocked; remaining physical byte/
+all-profile construction/target failure/general reference/ABI/storage/deep-copy/
+recursive Source/reserved-copy/final V10-Source-target requirements stay open.
+Goal BLOCKED unchanged; no independent-exhaustion/completion claim.
+
+C53 final guarded179/full1095default/262Suite/SolKey377/131 exit0; fresh
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF pass. Strict/complete
+fixtures/trust/layer/orphan/lane/script corruption pass;900standardpins114modules,
+three new exact standard-trio laws/controls. Independent finder/skeptic source/
+control/guard/docs reviews PASS, no confirmed defect. Full aggregateRSS1572680KiB,
+new max/OOM/kill events0; cumulative historicalpeak separate. All2899 C52 seal
+records verified unchanged; entire C52 fixture prefix unchanged. Raw docs1
+retains83 complete public-identical findings, separate publiczero-new0; frozen
+no-newFAIL11incoming. Raw inventory1 retains1259unrecorded=359publicinherited+
+900owned,0unsafe; additive proposal is not a globalpass. All original queue
+parents remain partial/blocked, goal BLOCKED unchanged.
+
+Further concrete investigation: actual named struct reference-field replacement
+THEN a selected-child write/delete in one Source RItems program. C49 returns
+the changed field and all old Bool-child frames; C51/C52 execute the resulting
+selected child. Existing published statement-pair composition can be reused, but
+C53 same-child write/delete does not yet discharge changed-selected-identity
+program composition or general types/recursive graphs. No exhaustion assertion.
