@@ -33,7 +33,7 @@ for(const v of report.variants){
    x=>x.observed[i].failed=!x.observed[i].failed,x=>x.observed[i].exception='out of gas',
    x=>x.observed[i].steps=5000001,x=>x.observed[i].gasUsed='100000001');
   if(!v.observed[i].failed)for(let j=0;j<v.observed[i].values.length;j++){
-   mutations.push(x=>{const a=x.observed[i];a.values[j]=String(BigInt(a.values[j])+1n);a.returnData='0x'+a.values.map(y=>BigInt(y).toString(16).padStart(64,'0')).join('');});completeWordMutations++;
+   mutations.push(x=>{const a=x.observed[i];a.values[j]=String((BigInt(a.values[j])+1n)&((1n<<256n)-1n));a.returnData='0x'+a.values.map(y=>BigInt(y).toString(16).padStart(64,'0')).join('');});completeWordMutations++;
   }
  }
  for(const mutate of mutations){const bad=clone(v);mutate(bad);assert.throws(()=>assertPackedDynamicVariant(bad));negativeControls++;}
