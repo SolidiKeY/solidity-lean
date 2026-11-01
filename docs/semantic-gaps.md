@@ -61,7 +61,9 @@ proof uses it, never derived from a machine model.
   `Examples/Tactics/Nonlinear.lean`), not a decision procedure.
 - **Function types**: reference signatures outside the internal fragment in
   [finite-dispatch.md](feature-work/finite-dispatch.md) (memory/storage
-  arrays and nonrecursive structs as arguments, one memory return), and
+  arrays of a word of any width, a `bytesN`, `bool` or `address`, and
+  nonrecursive structs as arguments, one memory return; not several returns
+  with a memory one), and
   calldata passed to a function value's memory parameter; a value
   of an external function this contract does not declare (`I(a).g`), and
   `abi.encodeCall` of one: its signature is unknown to `sol{}`.
@@ -269,7 +271,12 @@ a fresh memory `bytes` with the array writes the model has:
 - `abi.decode` at value types, `bytes`/`string`, `T[]`, `T[k]`, structs and
   nested types: a word out of range, an offset or a length past the data
   reverts as solc's decoder does. A decoded calldata slice is read in place
-  (`ByteSrc`).
+  (`ByteSrc`). A top-level enum component (`abi.decode(b, (E, uint))`) is
+  read as a `uint8` and reverts unless below the member count, as solc's
+  `validator_revert_t_enum_*` (lane FU1; `EnumDecode` in
+  `Examples/Tactics/AbiFeatures.lean`); an enum inside an array or a struct
+  is still refused by the import ("ABI decoding of enum values requires
+  nominal cardinality checks").
 
 **`sha256`, `ripemd160`, `ecrecover`.** `Hashes.lean` computes SHA-256 and
 RIPEMD-160 as `Keccak.lean` does, checked against standard vectors.

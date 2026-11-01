@@ -138,16 +138,21 @@ def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
     | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
 
 /-- A function type's array parameter component at a location
-(`uint[]memory`, `uint[]storage`; `FunDecl.sigTy?`): its element's spelling,
-a plain value type, and whether it is a storage reference. -/
+(`uint[]memory`, `uint8[]memory`, `bytes1[]storage`; `FunDecl.sigTy?`): its
+element's spelling, a value type (a word of any width, a `bytesN`, `bool`,
+`address`), and whether it is a storage reference. A narrow or `bytesN`
+element is a `uint` whose width rows the capture declares from this
+spelling (`dispatchCaptures`, then `shapeCheck` against the operand). A
+`bytes1` element is refused: the model's `bytes` is a `bytes1[]` (the same
+rows), so the key could not tell a `bytes` parameter from a `bytes1[]` one,
+which solc keeps apart (and the source key, `FiniteDispatch.Ty.native`,
+spells differently). -/
 def fnRefElem? (c : String) : Option (String × Bool) := do
   let (loc, storage) ← if c.endsWith "[]memory" then some ("[]memory", false)
     else if c.endsWith "[]storage" then some ("[]storage", true) else none
   let e := c.dropRight loc.length
-  -- a 256-bit word, `bool` or `address` element; a narrow element's width
-  -- rows are not carried by the capture, so it is refused
-  guard (!fnTy? e && (lookupBy e C.enums).isNone && (bytesTy? e).isNone)
-  guard (PrimTy.ofName? e).isSome
+  guard (!fnTy? e && (lookupBy e C.enums).isNone)
+  guard ((PrimTy.ofName? e).isSome || (narrowTy? e).isSome || (bytesTy? e).any (· != 1))
   pure (e, storage)
 
 /-- The structs a type names, through arrays and mappings (`fuel` bounds the
@@ -215,7 +220,8 @@ def FunDecl.sigTy? (d : FunDecl) : Option String := do
         let .array (.prim p) := R | none
         let e := k ++ "[]"
         guard (!(d.widths.any fun (w, _) =>
-          w.startsWith (k ++ "#") || (w.startsWith (e ++ "#") && w != e ++ "#address")))
+          w.startsWith (k ++ "#") || (w.startsWith (e ++ "#") && w != e ++ "#address" &&
+            w != e ++ "#bytes")))
         let c := declTyName d.widths e p ++ "[]memory"
         guard ((fnRefElem? C c).isSome)
         pure c
@@ -229,7 +235,8 @@ def FunDecl.sigTy? (d : FunDecl) : Option String := do
         | _ => none
       let k := n ++ "[]"
       guard (!(d.widths.any fun (w, _) =>
-        w.startsWith (n ++ "#") || (w.startsWith (k ++ "#") && w != k ++ "#address")))
+        w.startsWith (n ++ "#") || (w.startsWith (k ++ "#") && w != k ++ "#address" &&
+          w != k ++ "#bytes")))
       let c := declTyName d.widths k p ++ loc
       guard ((fnRefElem? C c).isSome)
       pure c
@@ -1211,7 +1218,19 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
             as.all (fun a => dynamicBytesExpr C Γ a))) then
       as.findSome? (narrowBase? Γ)
     else
-    let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
+    -- a call through a function value (a name, or `callValueName` whose first
+    -- argument is the callee): a reference component (`fnRefElem?`,
+    -- `fnRefStruct?`) is captured at its declared shape (`dispatchCaptures`),
+    -- whose initializer `shapeCheck`s the argument
+    let valueRefs (ty : String) : List Bool :=
+      ((fnParts? ty).map fun (ps, _, _) =>
+        ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
+    let refs : List Bool := match lookupBy f C.funs with
+      | some d => d.params.map fun (_, T) => isRefTy T
+      | none =>
+        if f == callValueName then
+          false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
+        else ((fnTyOf? C Γ f).map valueRefs).getD []
     as.zipIdx.findSome? fun (a, i) =>
       if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
   | .assign a b =>

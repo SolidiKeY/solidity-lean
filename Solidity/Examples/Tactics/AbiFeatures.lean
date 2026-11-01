@@ -223,6 +223,32 @@ def BadDiscarded : Contract := contract!{
 #guard (fnPure Codec [("x", .val .uint 24 [("#bytes", 3)])]
   (.call "abi.encodeCall" [.field (.name "this") "g", .tuple [.name "x"]])).toOption.isNone
 
+/-- `abi.decode` of an enum (lane FU1): the word is read as a `uint8` and
+validated against the member count, as ABI coder v2's
+`validator_revert_t_enum_*` (an imported v1 `abi.decode` is refused at
+admission, `solidity.abiCoderV1`):
+an empty revert unless it is below it; nested in a tuple too. -/
+def EnumDecode : Contract := contract!{
+  enum E { A, B, C }
+  function decodeE(uint v) returns (uint r) { E e = abi.decode(abi.encode(v), (E)); r = uint(e); }
+  function decodePair(uint v) returns (uint r, uint w) {
+    (E e, uint x) = abi.decode(abi.encode(v, 7), (E, uint)); r = uint(e); w = x;
+  }
+}
+
+/-- info: ok
+returns 2 -/
+#guard_msgs in #run EnumDecode.decodeE(2)
+/-- info: revert -/
+#guard_msgs in #run EnumDecode.decodeE(3)
+/-- info: revert -/
+#guard_msgs in #run EnumDecode.decodeE(256)
+/-- info: ok
+returns (1, 7) -/
+#guard_msgs in #run EnumDecode.decodePair(1)
+/-- info: revert -/
+#guard_msgs in #run EnumDecode.decodePair(5)
+
 local instance : InContract := ⟨Codec⟩
 
 /-- `abi.decode(abi.encode(x), (uint8)) == x` for every in-range byte. -/

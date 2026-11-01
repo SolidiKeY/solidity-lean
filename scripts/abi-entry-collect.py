@@ -2,9 +2,12 @@
 """Lane CF1: collect before/after runner reports into one results JSON.
 
 Usage: scripts/abi-entry-collect.py BEFORE_DIR AFTER_DIR OUT.json META.json
+       scripts/abi-entry-collect.py --keep-before OLD.json AFTER_DIR OUT.json META.json
 Each DIR holds <n>/results.json written by scripts/abi-entry-fixtures.sh in
 the order of tests/upstream/cf1-abi-entry-fixtures.txt. Observations are kept
-in full (hex-encoded byte lists), in order.
+in full (hex-encoded byte lists), in order. With --keep-before, the `before`
+entries (and their counts) are copied from an earlier collected OLD.json,
+whose before-run directories no longer exist; only `after` is a new run.
 """
 import hashlib, json, os, sys
 
@@ -26,12 +29,28 @@ def load(d, n):
     rows = rep['results']
     return rep, (rows[0] if rows else None), hashlib.sha256(raw).hexdigest()
 
-before_dir, after_dir, out, meta = sys.argv[1:5]
+keep = None
+if len(sys.argv) < 5:
+    sys.exit(__doc__)
+if sys.argv[1] == '--keep-before':
+    keep = json.load(open(sys.argv[2]))
+    before_dir = None
+    after_dir, out, meta = sys.argv[3:6]
+else:
+    before_dir, after_dir, out, meta = sys.argv[1:5]
 paths = [l.strip() for l in open('tests/upstream/cf1-abi-entry-fixtures.txt') if l.strip() and not l.startswith('#')]
 fixtures, counts = [], {'before': {}, 'after': {}}
 for n, path in enumerate(paths, 1):
     entry = {'path': 'test/libsolidity/semanticTests/' + path}
     for phase, d in (('before', before_dir), ('after', after_dir)):
+        if phase == 'before' and keep is not None:
+            old = next((f for f in keep['fixtures'] if f['path'] == entry['path']), None)
+            entry[phase] = old and old.get('before')
+            if entry[phase] is None: continue  # as a missing report below
+            res = entry[phase].get('result')
+            st = res['status'] if res else 'missing'
+            counts[phase][st] = counts[phase].get(st, 0) + 1
+            continue
         got = load(d, n)
         if got[0] is None:
             entry[phase] = None; continue

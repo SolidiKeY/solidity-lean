@@ -160,9 +160,15 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   the table name before its members (`structDisplay`), so the key is
   nominal. A single return `T[] memory` is spelled `T[]memory`, beside the
   existing `bytesmemory`. `canonFnTy` reads an array element as a value
-  component does (`uint256`/`address` are `uint`). Calldata, `bytes`,
-  narrow, `bytesN`, enum, function, nested or struct elements and recursive
-  structs keep no spelling, so no dispatch lists them. The source side
+  component does (`uint256`/`address` are `uint`). Since lane FU1 a narrow
+  word or `bytesN` element is spelled at its width (`uint8[]memory`,
+  `int16[]storage`, `bytes2[]memory`), so `uint8[]` and `uint16[]` functions
+  are not each other's candidates. A `bytes1` element keeps no spelling: the
+  model's `bytes` is a `bytes1[]` with the same rows (`solc-alignment.md`,
+  "Byte types"), so the key could not tell a `bytes` parameter from a
+  `bytes1[]` one, which solc and the source key keep apart. Calldata,
+  `bytes1`, enum, function, nested or struct elements and recursive structs
+  keep no spelling, so no dispatch lists them. The source side
   (`FiniteDispatch.Ty.memoryArray`, `storageArray`, `nominal`) parses the
   same components and requires the exact source signature as before: an
   `address[]`/`uint[]` collision in the native key is refused. A struct's
@@ -218,6 +224,37 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
 - **Unassigned values.** A zero or deleted tag reaches the final branch:
   `Panic(0x51)` bytes in a self-call or failure-retaining frame, otherwise a
   revert.
+
+### Narrow and byte elements (lane FU1, CF2 blocker 2)
+
+`PrimTy` has no narrow integer: a `uint8[]` is a `uint` array whose width
+lives in shape rows (`elabTyW`). The capture `dispatchCaptures` already
+emits is a typed declaration, `uint8[] memory y = xs` at the component's
+spelling, whose initializer is `shapeCheck`ed against the operand like any
+reference local's (a storage operand copied, a memory one aliased); the
+refusal ("xs has a narrow element … not whole") came from the statement's
+pre-check, `narrowWholeUse?`, which knew the reference parameters of a
+declared function but not of a function value. It now reads them from the
+value's type (`fnTyOf?`, `fnTyOfExpr` for `callValueName`): a component
+`fnRefElem?`/`fnRefStruct?` accepts is a whole use whose shape the capture
+checks. `fnRefElem?` admits a word of any width and a `bytesN` element
+(`N ≥ 2`; `bytes1` is the model's `bytes`, see "Signature" above);
+`FunDecl.sigTy?` spells them at their width (an element `#bytes` row is
+allowed); the source side (`FiniteDispatch.parseType`) parses them, so the
+native key keeps the width (`uint8[]memory` ≠ `uint16[]memory`).
+
+Tests: `narrowAlias_run` (`uint8[]` by reference, the callee's write
+visible), `narrowOverflow` (the callee's `uint8` arithmetic: `6 + 250`
+reverts), the two wrong-width refusals (`uint8[]` to a `uint16[]` value and
+back: the capture's shape check), `byteArgs_run` (`bytes2[]`), the signature
+pin (`uint8[]memory`, `uint16[]memory`, `bytes2[]memory`; `bytes` unspelled);
+in
+`scripts/finite-dispatch.test.mjs` "narrow and byte array elements dispatch
+at their width" (memory and storage, `uint8`, `int16`, `bytes2`)
+and "narrow element widths are part of the dispatch key" (a `uint16[]`
+function is not scanned as a `uint8[]` candidate); in
+`scripts/dispatch-signatures.test.mjs` the parsed widths and native key.
+Enum and `bytes1` elements stay unspelled (refused in both scripts).
 
 ### Recorded deviations
 
@@ -287,13 +324,8 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   and `CallRet.rets` carry value binders only). Dispatching to it first needs
   a reference-capable `CallRet.rets`/`Binders` in `Syntax/Scoped.lean` and
   its run (`TRun.call`), a core change outside this lane.
-- **Narrow array elements.** `PrimTy` has no narrow integer: a `uint8[]`
-  is a `uint` array whose width lives in shape rows (`elabTyW`). A raw
-  capture `uint8[] memory y = xs` is a whole use of a narrow array, which the
-  elaborator refuses ("xs has a narrow element … not whole"); the direct
-  call avoids it through `hoistCallArgs`'s typed capture with `shapeCheck`.
-  Admitting it needs the dispatch to emit that typed capture (`captureRef`,
-  `Stmt.declMem` with the parameter's shape) instead of a raw declaration.
+- **Narrow array elements.** Resolved in lane FU1 (see "Narrow and byte
+  elements" under "Reference arguments").
 - **viaIR storage-to-memory copy order.** solc's IR pipeline copies a
   storage argument after every argument ran (`argumentOrder`: 901); the
   model copies at the argument's position for direct calls
@@ -485,3 +517,53 @@ several (`(bytes memory a, uint b) = h()`) or with calldata through a non-name
 callee; `tupleCallee_run` uses `true ? divmod : divmod`, so only the EVM
 vectors check which branch runs; non-tuple `(f)(x)` and `(b ? f : g)(x)` and
 the `lowerReturn` arm `ternary (call) (call)` are untested.
+
+## Lane FU1 (followup-20261101)
+
+**Done.** CF2 blocker 2 (narrow and `bytesN`, `N ≥ 2`, array elements; see
+"Narrow and byte elements" under "Reference arguments"). Integration-review
+test gaps (item 4), all in `Examples/Tactics/FunctionTypes.lean`:
+`tupleCalleeDyn_run` (a conditional callee on a condition read from memory,
+both branches, in a tuple assignment), `scalarCallee_run` (non-tuple `(sum2)(xs)`
+and `(b ? sum2 : bump)(xs)` both ways, `bump`'s write visible),
+`ternaryReturn_run` (`return b ? f(x) : g(x)` in a function of two returns,
+`lowerReturn`'s `ternary (call) (call)` arm; only the chosen branch runs,
+counted by `pickCounted`); and in `scripts/finite-dispatch.test.mjs`
+"calldata in a tuple assignment through a callee that is not a name is
+refused" (`(c ? split : other)(xs)` with `xs` calldata). These are DSL
+programs (no `pure`/`view`); no solc fixture pins the tuple ternary return.
+
+**Not done.** CF2 blocker 1 (several returns with a memory one) and, with
+it, the tuple test with a memory return among several: the ordinary call
+frame's `CallRet.rets` carries `Binders`, value binders only
+(`Scope.lean`), and admitting a memory binder means a new constructor (or a
+reference-capable binder type) matched in `CallRet.enterT`/`leaveT`
+(`Semantics/Run.lean`), `Binders.decodeT`/`defaultsT` (also used by
+`tryCall`/`catchData`), `RunWk`/`RunFrame`/`Callback*`, the call rules'
+soundness (`Calculus/SoundCalls.lean`, `SoundCatch.lean`,
+`RecursionCallback.lean`, `CallbackSound/Rules.lean`, `Closer/Leaf.lean`)
+and the elaborator (`elabCallRetCore`, 19 `Binders` match sites outside
+the examples, about 270 `.rets` mentions). Every edit there rebuilds the
+whole library (45–70 min on this lane's 4-core VM), so it did not fit
+beside the other items; no change was started. CF2 blocker 3 (viaIR copy
+order, backfill) was not reached.
+
+### Review (lane FU1)
+
+Read-only finder and skeptic (no Lean server) on the item 0 and item 2–4
+diffs. Confirmed and fixed: (1) `bytes1` elements: the model's `bytes` is a
+`bytes1[]` with the same rows, so admitting `bytes1[]` also spelled `bytes`
+parameters `bytes1[]memory` in the elaborator while the source key kept
+`bytesmemory`; a `function(bytes1[] memory)` dispatch could list a
+`bytes` function the source scan never checked. `bytes1` elements are now
+unspelled on both sides (refusal tests restored). (2) `narrowOverflow`'s
+docstring claimed it tests the capture's width; it tests the callee's
+arithmetic, and the capture's check is the two wrong-width refusals (the
+`uint16[]`→`uint8[]` direction added). (3) `ternaryReturn` used pure
+callees, so it could not tell one branch from both; `pickCounted` counts.
+(4) Wording: the audit's scope (the modules `import Solidity` reaches, not
+the corpus or TestSuite libraries), the `canonicalOnly` control comment, a
+section pointer, `abi-entry-collect.py` argument handling. Recorded, not
+changed: inside `sol{}` (not the import), `AbiTy.of` ignores `#enum` rows,
+so a DSL `abi.decode(b, (E[]))` decodes without the member-count check
+(pre-existing; the import refuses nested enums).
