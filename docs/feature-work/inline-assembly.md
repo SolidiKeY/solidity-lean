@@ -626,3 +626,5 @@ VY2 [generic ordinary object allocation](inline-assembly-vy2.md#generic-ordinary
 VY2 [actual struct constructor producer](inline-assembly-vy2.md#actual-struct-constructor-producer-2026-11-01) derives constructor execution and physical allocation reuse; full source/compiler closure remains open.
 
 VY2 [actual calldata array allocation](inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) connects the real memory decoder, retained allocation and whole-map writeback; final adequacy remains open.
+
+VY2 [actual memory hash binding](inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) connects exact source memory bytes and checked keccak expression to physical hash; final adequacy remains open.

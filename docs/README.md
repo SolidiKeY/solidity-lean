@@ -189,3 +189,5 @@ VY2 [generic ordinary object allocation](feature-work/inline-assembly-vy2.md#gen
 VY2 [actual struct constructor producer](feature-work/inline-assembly-vy2.md#actual-struct-constructor-producer-2026-11-01) connects checked actual owner operands to physical allocation; full lane remains partial.
 
 VY2 [actual calldata array allocation](feature-work/inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) derives source/physical calldata agreement and supported array allocation; full lane partial.
+
+VY2 [actual memory hash binding](feature-work/inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) proves computed payload/source builtin/sharedFixed agreement; full lane partial.
