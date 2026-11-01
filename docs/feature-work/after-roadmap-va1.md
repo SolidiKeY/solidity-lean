@@ -1526,3 +1526,55 @@ All original AU01/AU02 obligations, incomplete baseline/performance/general-fuel
 work and pending/failed full gates remain as previously listed. Q1 is answered;
 Q2/frontend repair remains held without blocking this independent work. No new
 goal, reset, stop/completion, push, merge or tag publication is performed.
+
+## AU02 independent fixed-array path reconstruction — 2026-11-01
+
+`Calculus/DecisionFixedArrayPath.lean` adds `fixedFloorAtPath` on the
+existing intrinsic `Path T (.ref (.fixed E n))` and actual optional lookup/save
+APIs. `fixedFloorAtPath_exists` discharges save success from actual prefix
+presence using the existing save theorem. `fixedFloorAtPath_reconstruction`
+quantifies every typed element continuation and every diverging path: with
+explicit `(n : Int) ∈ B`, successful indexed reads equal original reads at
+`fixedFloorIndex B i`; diverging reads are unchanged. Absent prefixes return
+none. No default object is installed. Existence itself needs no length premise.
+
+`Examples/DecisionFixedArrayPath.lean` has inhabited mapping-key and nested
+fixed-array clients, an actual changed 9-to-7 interior read, unchanged sibling
+key, absent outer index refusal and missing-length definedness countercontrol.
+These are kernel value/path facts, not EVM tests or an array pipeline certificate.
+Only one selected prefix is reconstructed; simultaneous prefixes, collector,
+source grammar, finite-instance equivalence and coverage integration remain open.
+No decision source, predicate, observation, refusal, expected verdict or budget
+changed. Registrations are exactly two additive imports and two module-map rows.
+
+Raw exact-source commands, outputs, versions and resources are retained in
+/workspace/va1-evidence/fixed-path-next. Per-file core MCP 4.316s and controls MCP
+4.202s pass with zero errors/warnings/dependency failures. Focused core build
+3.096s and controls build 3.098s pass. Fifteen public theorem/control axiom reports
+pass in 3.125s, using only propext/Classical.choice/Quot.sound. Every Lean command
+runs under the original writer lock, threads1/-j1, hard aggregate 12GiB/no-swap,
+verified cgroup values and prebuild OS reserve. Maximum sampled aggregate RSS
+1371352 KiB; minimum sampled host available 17150767104 bytes, above the 12GiB reserve.
+Initial bind-alias and reserved-identifier MCP failures remain retained.
+
+Static gates: 1082 reachable/zero orphans, 180 core/zero elaborator reachability,
+strict automatic 491 automatic/61 budget/11 refuted/zero manual or pending,
+trust 1097 sources/248 sites/zero findings. Inventory FAIL1 is byte-identical to
+prior checkpoint: 1206 pins, zero errors, 404 unrecorded changes. Strict docs
+FAIL1 retains existing missing/ambiguous references; no full-gate pass is claimed.
+Original Decision source remains byte-exact to the frozen base. Finder and skeptic
+read-only reviews found no confirmed issues; neither edited or ran Lean/server/
+builds. Skeptic's suspected existential elaboration issue was resolved by the
+actual clean diagnostics and standard-axiom reports.
+
+The immutable PARALLEL-INTERFACE export at 144a2a9d remains available unchanged;
+this later component will be exported separately after commit and bundle verification.
+AU01 meaningful Residue/global DecisionTheorem-prime and exhaustive target/hash
+bridge, broader revised program-free boundary, AU02 pipeline children/general
+formula-derived fuel, remaining baseline/performance and final full validation
+remain open. Q2 producer-owned TypeExamples repair is still held. Independent
+owned work continues; the full original goal remains incomplete.
+
+Final documentation review found the new module-map rows outside their table;
+both rows were moved beside the existing Decision modules before commit. No
+source/proof findings. Original raw failures and earlier seals are preserved.

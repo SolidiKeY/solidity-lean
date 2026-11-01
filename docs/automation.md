@@ -1100,6 +1100,14 @@ above and closes none of them. Timings:
 
 
 VA1 independent AU02 proof component (2026-11-01):
+`Calculus/DecisionFixedArrayPath.lean` reconstructs one fixed array below
+an arbitrary intrinsic path, with save existence from actual prefix presence,
+optional indexed lookup agreement (explicit length breakpoint), and a frame for
+diverging paths. Its controls exercise nested arrays and mapping keys, changed
+reads, absent prefixes and missing-length failure. This is an independent AU02
+proof component; simultaneous prefixes and decision-pipeline integration remain
+open, with source predicates and verdicts unchanged.
+
 `Calculus/DecisionNegativeInstantiation.lean` proves one-way negative-chain
 instantiation using existing guarded LFml.inst, with a concrete fixed-array
 client and an explicit counterexample to equivalence. It changes no decision
