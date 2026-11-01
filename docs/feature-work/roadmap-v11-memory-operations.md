@@ -5142,3 +5142,116 @@ newtiming. All3708 C64sealed entries reverified unchanged. Finalresource sample
 OOMdeltas0, historicalC60failures/cumulativepeak retained separately. Both independent
 SOURCE/control/doc/script reviews PASS with no confirmed remaining defect;
 committed-artifact reviews follow compact additive export. Goal remains unchanged.
+
+
+## C66 — genuine fixed uint Source default and declaration (partial G33)
+
+At parent23a425294919c94fed25d483f9eb54eba4593bfb existing SourceUintMemoryAt
+ALWAYS used dynamic Source STy none even for an intrinsic fixed ArrTy. The new
+sourceUintFixedObject/SourceUintFixedAt use EXISTING Data.array with actual n
+and dependent element evidence from MObj (.fixed (.prim .uint) n), recording
+Source STy some n. Dynamic observer/theorems/controls are untouched; fixed Source
+is never coerced to dynamic. No value/state/AST/interpreter/allocator is added.
+
+source_uint_zeroElems_run/fixed_zeroData/fixed_zeroVal prove actual independent
+Source evaluator execution at fuel n+1/n+2/n+3. Insufficient counterparts prove
+actual timeout with unchanged state at fuel≤n/n+1/n+2, including primitive work
+before timeout. These length-parametric evaluator laws do not increase proof/test
+budgets or impose public admission/fuel/length/depth caps. SourceUintFixedAt
+read/bounds/eval_index/keeps and typed conversion/wk transport preserve actual
+length and contents. source_uint_fixed_intrinsic derives actual fresh default
+correspondence/replicate contents/Keeps/freshID from published defaultFixed_copy,
+not an assumed successful run or desired relation. Occupied Source cells frame
+through actual allocation; old typed IDs are distinct by their real upper bound,
+with no global address-map injection premise. MemOK is the existing zeroOK law.
+
+source_uint_fixed_declaration_word consumes INITIAL Source MemOK and Objects
+StateRepr/AllocatorRepr/positivebase/framecapacity plus cursor+max1n<W. Published
+DefaultBuilder.fixedPrimitive/defaultDeclare_correct supply the actual intrinsic
+declaration and WHOLE headerless word declaration, indexed by the SAME real g
+as the independent Source fixed observer. Actual Source declaration at n+4 and
+local cons/MemOK, intrinsic adoption/local push/heap extension, full word state,
+base extension/allocator/stack and fresh/old Source/typed identity frames derive.
+No second-run, postcorrespondence or final-preservation oracle is an input.
+Existing constructor/word/Source producers remain read-only and are not duplicated.
+
+Supported Source/word constructor applications require 0<n; this is a theorem
+case, not a new profile exclusion or Source-admission theorem. Low-level kernels
+already have natural lengths including0. The zero_padding_kernel_only control
+asserts ONLY intrinsic/word max1n footprint for0, never a Source declaration or
+zero-length Source admission. Kernel evaluator facts at0 do not grant admission.
+General reference constructors/all-profile allocation failure remain open.
+
+Independently inhabited inputs have actual old fixed[7]/neighbor[9], repeated
+old aliases, Source allocations and MemOK, complete typed object-word ownership,
+stack77 and caller99. populated_declaration quantifies every positive runtime n
+with existing word space, deriving actual Source/intrinsic/word execution and
+all6initial/reached Source cells, old/fresh intrinsic contents, Source context and
+typed local identities, Source fresh0 versus oldalias7 resolved reads, exact-end
+panic, both FULL16wordframe vectors and every new elementword0, unchanged old
+bases/neighbor/aliases/caller/stack and final ownership/allocator. Fresh fixed words
+are headerless: word32 is element0, NOT a dynamic length header. New pointer32 is
+stored in the actual added local5; old locals remain below the owned object frame.
+
+positive_examples directly applies the general law at1/3/33 in BOTH pipelines;
+element_boundary reads32 and rejects33 after actual length33 declaration. Wrong
+dynamic type, fixed length and stale identity controls disagree with produced
+Source tables; same-type n=1 old7 versus fresh0 prevents a vacuous type-only test.
+All insufficient declaration horizons retain the populated initial Source state.
+Raw zero-padding still reserves one owned cell, separately scoped as above.
+Complete prior fixture vectors/guards/prefix failures remain unchanged.
+
+Focused controls07 PASS209jobs/exact28newstandard-only guards (two conversion/wk
+pairs,26trios), aggregate955616KiB/newOOMdelta0. Actual earlier type/tuple/recursor/
+read conversion/zero-padding normalization failures are retained, not waived.
+No sorry/newaxiom/native shortcut/heartbeat or recursion-limit increase was used.
+Per-file MCP and goal get/update unavailable; existing goal remains BLOCKED,
+unchanged. Preflight verified all3772C65sealed hashes and exact same idle capped
+runtime/image/mounts/cache/toolchain:908558336available admitted96MiB forecast
+above512MiB reserve. SerialCPU0/Lean-j1/threads1/cacheOFF/12GiBnoswap/16GiBparent
+and OS headroom/unchanged guards are preserved; no deletion or newruntime.
+
+All original G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B remain PARTIAL;
+G35.02/.06 remain BLOCKED. Physical bytes, all-profile/reference construction and
+checked allocation failure, general paths/graphs, ABI/storage/deep-copy/liveness,
+reserved copying and final Source/V10/target composition remain unfinished.
+Kernel/symbolic-word proof is not external compiler/EVM testing or whole-lane
+closure. No independent-queue exhaustion is claimed.
+
+C66 raw_space_wrap additionally checks the existing unchecked word boundary at
+cursor32+size(W-32)=W: execution returns a wrapped cursor0, incompatible with
+full allocator ownership above frame8. No enormous Source/intrinsic array is
+evaluated, no Source admission follows, and this is NOT checked allocation failure.
+
+C66 final unchanged full wrapper PASS0:1121default/262Suite/SolKey377parsed/
+131read-bearing covered. Fresh actualLean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs
+PASS. Full aggregateRSS1623504KiB/diskgrowth270336bytes/newOOMdelta0; prior C60
+max10719/oom3/kill3/cumulative12GiBpeak/DockerOOMKilled remain failed history,
+not currentexec evidence. Both independent read-only SOURCE/control/doc/script
+reviews PASS. They confirmed genuine fixed types and same actual default g,
+nonvacuous populated ownership, headerless/padding/wrap/typednegative scopes.
+An initially stale controls05/RSS doc label was corrected to actual07/955616
+before final full validation; no theorem/premise/vector change was required.
+
+Original-queue reassessment: SourceUintFixedAt now supports fixed reads, but
+SourceUintWrite/SourceUintDelete still consume the dynamic SourceUintMemoryAt.
+Published Source.memSet's typed array branch and Evm.Memory.Objects indexed
+assignment certificates support a next G34/BackfillB investigation: actual fixed
+Source element write/delete at the reached new local after C66 declaration, with
+preserved fixed length, old aliases and neighbors. That exact fixed update
+transport is not established by the present default/read theorem and remains
+unimplemented; no producer absence, whole-lane completion or independent queue
+exhaustion is asserted. Reserved constructors/Source/Evm implementations stay
+read-only. All previously named original obligations remain binding.
+
+C66 final structural/trust/layer/orphan/lane/complete-fixture checks PASS; combined
+script admission/corruption tests PASS53. Scoped exact standard-only guards
+PASS1061 across140owned modules. Raw global inventory remains FAIL1 with1420
+unrecorded=359published+1061owned and0unsafe; additive proposals are evidence,
+not reserved-registry edits or a global pass. Raw strict docs remains FAIL1/83
+findings; COMPLETE current/public bytes match, separately PASS zero-owned-new.
+Frozen comparison retains11incoming findings/FAIL1. Warm strict times0newSuite
+modules; independently all262current/C31source-fixture-toolchain keys and actual
+versions match, retaining26cold modules/max160seconds under300, not new timing.
+All3772C65sealed entries reverified. Final idle runtime available904626176bytes
+retains512MiBreserve+96MiBforecast; no newOOM events or resource guard changes.

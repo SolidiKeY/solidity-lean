@@ -1369,3 +1369,7 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceUintDeclarationFailure.lean` | Actual empty numeric declaration then reached fresh-root bounds rejection in Source RItems, intrinsic Prog and whole existing word append; derived prefix frames and complete low-horizon distinction. |
 | `Solidity/Backend/MemoryOps/SourceUintDeclarationFailureControls.lean` | Both-pipeline populated late-rejection controls, complete exposed prefix tables/locals/wordframes, exact Source panic bytes, old-root/skipped-declaration contrasts and all runtime horizons. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean` | Genuine fixed Source uint Data/length conversion and observer; actual recursive defaults/exact insufficient fuel, fixed reads/frames and published fixed builder application. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedDeclaration.lean` | Positive fixed Source declaration/MemOK/context linked to the same actual intrinsic default and existing full headerless word-declaration certificate from initial ownership/space. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedDefaultControls.lean` | Populated fixed old7/neighbor9/shared aliases; arbitrary positive new length and explicit1/3/33 executions, complete source/intrinsic/word/context observations, negative types/length/identity/fuel and raw zero-padding-only boundary. |
