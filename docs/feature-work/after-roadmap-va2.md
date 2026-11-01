@@ -1,6 +1,6 @@
 # VA2 AU03/AU04 handoff
 
-Status: runtime recovered; AU03 warning and supporting notation/measurement controls checked. Dependent joined walks, broader closer work and AU04 sharing remain incomplete.
+Status: runtime recovered; AU03 warning, supporting notation/measurement controls and joined-assignment foundation checked. Walker integration, broader closer work and AU04 sharing remain incomplete.
 
 Repository: `/workspace/va2-sharing`. Branch:
 `codex/solidity-automation-20261031/va2-sharing`. Exact base:
@@ -376,3 +376,145 @@ passed (491 automatic, 61 budgeted, 0 manual; 11 refuted; 0 pending).
 output is byte-identical to the exact frozen-base result. The comparison
 passed; the underlying checker was not relabeled pass. Full final gates and
 unimplemented AU03/AU04 items remain pending.
+
+
+## AU03 joined-assignment foundation checkpoint (2026-11-01)
+
+This supporting checkpoint proves the straight-write builder before changing
+strategy dispatch. It does not claim multi-assignment walker integration or
+completion of AU03/AU04. The singleton join path is unchanged in this checkpoint.
+
+`Calculus/JoinSequence.lean` decodes only intrinsic value-local assignments,
+with an explicit indexed motive and a delayed tail on rejected heads. The
+Gate G0 open-context/two-write reduction pin is by reflexivity. Successful
+decoding proves output-context equality and reconstructs the entire original
+program by heterogeneous equality. It neither substitutes RHS terms nor drops
+failing assignments whose results are later overwritten.
+
+The builder captures the original simple Boolean condition once in a fresh
+intrinsic head local. Every original target is shifted to `.there`; each RHS
+is shifted once. Guarded singleton assignments retain source order, and an
+untaken RHS is never evaluated. Names are supplied from the existing freshness
+budget; positional freshness supplies the semantic independence. No new core
+term/state/formula constructor, semantic premise or exclusion is introduced.
+
+`Calculus/Sound/JoinSequence.lean` proves exact ordered execution, preservation
+of the snapshot, guarded-list execution with an arbitrary continuation, the
+complete joined result, and exact state-and-halt equality after popping the
+snapshot. `LocalWrites.joined_sound` gives `Premise.Runs` for every typed state
+and either modality without arithmetic/validity hypotheses. These are kernel
+proofs of the standalone builder, not proof that a dispatcher already uses it.
+
+`Calculus/JoinSequenceSize.lean` counts emitted program syntax explicitly:
+joined size = original if-statement size + three nodes per original write;
+the generated size is at most four times original statement size. Both branches,
+the snapshot and all guards are counted. The pop is the existing Ext frame,
+not emitted program syntax. The first guessed two-node overhead failed because
+`Val.simple` adds its own wrapper node; raw failed attempts are retained and
+no budget was raised. Program linearity is not asserted to imply leaf linearity.
+
+`Examples/Tactics/JoinSequence.lean` has inhabited kernel controls: one branch
+changes its source guard, repeats a uint target and reads the predecessor's
+value, while the unselected branch divides by zero. The observed result is
+exactly `(false, 2)`. Selecting the zero-divisor branch fails; nested blocks
+and requirements are refused; the emitted syntax is pinned to 33 nodes.
+The concrete failure projection uses `toOption`; exact halt preservation is
+proved generally by the execution equality, not inferred from that projection.
+
+### Foundation gates and independent review
+
+All evidence below is under `/workspace/va2-sharing-artifacts/work/`.
+
+- Per-file MCP diagnostics passed for core (`mcp-join-reconstruct-checked.log`),
+  soundness (`mcp-join-sound-final.log`), size (`mcp-join-size-final.log`) and
+  controls (`mcp-join-examples-final.log`), with no errors/warnings, partial
+  results or timeouts. Intermediate proof failures remain in the raw logs.
+- `lean_verify` for `LocalWrites.joined_sound` and
+  `JoinSequence.changedGuardDependent` reports only `propext`,
+  `Classical.choice`, `Quot.sound`, with no warnings. Source scanning is the
+  separate trust gate; MCP scan_source was false.
+- `bounded.py join-foundation-build build Solidity.Calculus.JoinSequence
+  Solidity.Calculus.JoinSequenceSize Solidity.Calculus.Sound.JoinSequence
+  Solidity.Examples.Tactics.JoinSequence Solidity.Examples.Tactics.PolySize`
+  passed 224 jobs: 5.94 seconds inside / 6.94 seconds runner wall, sampled
+  visible-process RSS peak 1,913,812 KiB, cgroup memory peak 1,337,454,592 bytes.
+  Every run asserted memory.max=12,884,901,888 and memory.swap.max=0, serial
+  LEAN_NUM_THREADS=1 and explicit Lean -j1. Existing PolySize pins pass unchanged.
+- `node scripts/check-automatic.mjs --strict` passed: 491 automatic,
+  61 budgeted, zero manual, 11 refuted, zero pending.
+- `bash scripts/check-trust.sh` passed: 1055 sources, 248 inventoried sites,
+  zero findings. `git diff --check` passed.
+- `bash scripts/check-doc-paths.sh` failed with the same 48 references as the
+  exact frozen base; raw output compares byte-identical to base-doc-paths.log.
+  Only the comparison passes; the underlying checker remains failed.
+
+Independent finder and skeptic re-reviewed the four source modules read-only,
+neither using Lean/server/builds. Neither found a blocking source defect.
+Both require dispatcher correspondence/shape/fragment integration and actual
+walk-versus-leaf measurements before calling this a walker delivery. Finder's
+optional exact-concrete-halt strengthening is covered generally by the exact
+state/halt theorem; the concrete toOption boundary is explicit above.
+Their transcribed results are in `work/reviews-join-foundation.md`.
+
+Root imports and four module-map rows are narrow additive registrations;
+Rules.lean and all VA1-owned files remain untouched. The exact registration
+hunks are available in the cumulative patch. Final run-lean/TestSuite timing
+gates, query/rule/walker integration, chain restoration,
+Boolean mapping-key closure, broader joined values, signed sequential closer
+repair, AU04 call sharing and loop-leaf repair all remain outstanding as
+previously recorded. Full persistent goal remains incomplete. No push/merge/PR/tag.
+
+
+### Root closure and diagnostic compatibility follow-up
+
+`bounded.py join-foundation-root-build build Solidity` failed after 8077.07
+seconds inside the cap: sampled visible-process RSS peak 9,251,844 KiB,
+cgroup memory peak 12,573,798,400 bytes. This first cold root closure found
+13 message-pin mismatches in seven files caused by the approved loop warnings.
+The original failure is retained in `join-foundation-root-build.log` and
+`join-root-failure-summary.json`; it is not labeled a passing gate.
+
+Only message docstrings changed in `Evm/Examples`, `Examples/ProofTree`,
+`Examples/Tactics/{Branch,CheckedBlock,Loops,StorageSuite}` and `Examples/Verify`.
+All original printed programs, outcomes, step budgets, the rejected
+break-in-try error and the exact certified counterexample remain unchanged.
+Independent finder and skeptic reviewed the complete seven-file/thirteen-pin
+patch read-only without Lean/server/builds. Neither found a semantic or
+expectation weakening. See `work/reviews-warning-pins.md` and
+`work/warning-pins-fix-7files.diff` for exact hunks.
+
+All seven edited files then passed individual bounded MCP diagnostics,
+without partial results or timeouts (`mcp-warning-pin-final-1.log` through
+`mcp-warning-pin-final-7.log`, aggregate `warning-pin-checks.json`). Expected
+warnings outside guarded messages are retained. No budgets were raised.
+
+`bounded.py join-foundation-root-warm build Solidity` passed all 1015 jobs,
+216.24 seconds inside / 217.41 runner seconds; sampled visible-process RSS
+peak 2,699,500 KiB, cgroup memory peak 1,790,754,816 bytes. The actual enforced
+aggregate cap remained 12,884,901,888 bytes with zero swap, threads=1 and
+explicit Lean -j1. `mcp-join-root-final.log` reports successful root diagnostics,
+no messages, no failed dependencies, no partial results and no timeout.
+The client emits an asyncio shutdown traceback after its successful structured
+result; exit remains zero. This is not a Lean proof failure.
+
+The remaining axiom checks passed in `mcp-join-foundation-audits-final.log`:
+`Prog.localWrites?_reconstruct` uses only `propext`; `LocalWrites.joined_size_le`
+uses `propext` and `Quot.sound`. MCP lean_verify's identifier validator rejects
+legal names containing `?`; that raw failed tool call is retained separately.
+The reconstruction check therefore used MCP lean_run_code with an imported
+module and explicit `#print axioms`, not a renamed or weakened theorem.
+
+Static final checkpoint gates (`join-final-*.log`) pass strict automatic
+coverage (491 automatic, 61 budgeted, 0 manual, 11 refuted, 0 pending), trust
+(1055 sources, 248 inventoried sites, 0 findings), layers (181 core modules,
+0 elaborator dependencies), orphans (1040 reachable, 0 orphans) and diff
+whitespace. The doc-path failure remains byte-identical to the frozen base's
+48 failures. Canonical frozen SolKey snapshot hash verification passes at
+commit `473da8944ca7329e6b76819863591407db26e7ec`.
+`bash scripts/check-testsuite.sh --complete --solkey tests/migration/solkey/keyext.solidity.examples`
+passes: 552 derived + 11 refuted + 1 existing excluded, 0 pending/divergent,
+2 skipped. The earlier default invocation failed because `../solkey` is absent;
+its raw failure remains. This static certificate/parity check is not a timed
+TestSuite Lean build or final `./run-lean.sh` pass. Those full final gates and
+all unfinished AU03/AU04 items above remain required. No new exclusion or
+validity/hash premise was introduced. The persistent goal remains incomplete.

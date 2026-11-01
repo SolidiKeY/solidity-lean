@@ -186,7 +186,13 @@ iteration bound: the first iteration writes through `alice`, the second
 reverts.  A loop runs by well-founded recursion, which `rfl` does not unfold,
 so the run is printed. -/
 
-/-- info: ("ok", "revert") -/
+/--
+warning: unannotated literal-bounded loop `while (i < 1)`; keeping symbolic unrolling
+---
+warning: unannotated literal-bounded loop `while (i < 2)`; keeping symbolic unrolling
+---
+info: ("ok", "revert")
+-/
 #guard_msgs in
 #eval
   (Tools.fmtTRes (Prog.runT State.exampleStore

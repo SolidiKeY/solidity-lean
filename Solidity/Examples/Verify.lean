@@ -148,6 +148,8 @@ parameter, so the witness binds nothing. -/
 #guard_msgs in #counterexample dl!{ [ uint i = 0; while (i < a) { i++; }; ] i == a }
 
 /--
+warning: unannotated literal-bounded loop `while (i < 3)`; keeping symbolic unrolling
+---
 info: counterexample (certified):
   msg.sender = 1, msg.value = 0
   before: count = 0; total = 0

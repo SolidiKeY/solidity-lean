@@ -63,6 +63,7 @@ import Solidity.Calculus.Lower
 import Solidity.Calculus.LowerRun
 import Solidity.Calculus.Print
 import Solidity.Calculus.Shift
+import Solidity.Calculus.JoinSequence
 import Solidity.Calculus.Arms
 import Solidity.Calculus.SyntaxSize
 import Solidity.Calculus.CallSummary
@@ -70,6 +71,7 @@ import Solidity.Calculus.Blocks
 import Solidity.Calculus.WkOver
 import Solidity.Calculus.Step
 import Solidity.Calculus.TermSize
+import Solidity.Calculus.JoinSequenceSize
 import Solidity.Calculus.Quote
 import Solidity.Calculus.Rules
 import Solidity.Calculus.Taclet
@@ -101,6 +103,7 @@ import Solidity.Calculus.SoundCatch
 import Solidity.Calculus.SoundLoops
 import Solidity.Calculus.SoundCapture
 import Solidity.Calculus.SoundLocal
+import Solidity.Calculus.Sound.JoinSequence
 import Solidity.Calculus.SoundControl
 import Solidity.Calculus.SoundStore
 import Solidity.Calculus.SoundMem
@@ -262,6 +265,7 @@ import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch
 import Solidity.Examples.Tactics.Join
 import Solidity.Examples.Tactics.JoinControls
+import Solidity.Examples.Tactics.JoinSequence
 import Solidity.Examples.Tactics.LoopNotices
 import Solidity.Examples.Tactics.LongContext
 import Solidity.Examples.Tactics.PolySize

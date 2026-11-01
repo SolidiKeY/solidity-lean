@@ -1065,6 +1065,8 @@ namespace Rigid
 open scoped Solidity.Scoped
 
 /--
+warning: unannotated literal-bounded loop `while (i < 8)`; keeping symbolic unrolling
+---
 info: Try this:
   sol_prove (steps := 128)
 -/
