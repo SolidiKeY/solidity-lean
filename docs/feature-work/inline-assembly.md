@@ -419,3 +419,8 @@ and distinct-ID permutation laws; inhabited multi-root/alias/late-error/retained
 controls and separate pinned reference evidence. Original full lane/goal remains
 partial/blocked, no admission promotion. Exact SHAs/artifacts/commands at
 `/workspace/vy2-evidence/owned-inventory/HANDOFF.md`.
+
+
+### VY2 computed heap-inventory preparation handoff
+
+The [VY2 lane record](inline-assembly-vy2.md#computed-ordinary-heap-inventory-2026-11-01) now constructs intrinsic images and finite inventory directly from actual Heap.next/get and valid Placement, deriving complete coverage/unique IDs and exact sparse/unsupported accounting. Actual owner MemOK plus explicit canonical declared-family support derives preparation without supplied images or completeness laws. Generated inventories feed existing real source writeback, retained placement/history, raw reads, unchanged state and every-H preservation. Full lane, allocator refinement, broader representations and producer/compiler/calculus closure remain open; no admission promotion. Versioned evidence: `/workspace/vy2-evidence/heap-enumeration`.

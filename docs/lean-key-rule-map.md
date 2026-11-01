@@ -1135,3 +1135,16 @@ no actual Y09.02 calculus/notation/printer completeness claim):
 `Solidity/Yul/Views/InventoryView.lean`,
 `Solidity/Yul/Views/InventoryOrder.lean`.
 Premises/boundaries: [VY2 checkpoint](feature-work/inline-assembly-vy2.md#finite-owned-memory-inventory-2026-11-01).
+
+
+VY2 computed-inventory preparation (Lean-only, no SolKey taclet, no new Yul admission):
+`ownerMemOK_prepares_inventory`, `prepareHeapInventory_ok`, `prepareHeapInventory_error`,
+`generatedHeapEntries_nodup`, `ownerMemory_unchanged`,
+`enumeratedMemoryWriteback_MemOK`, `enumeratedMemoryWriteback_view`,
+`enumeratedMemoryWriteback_reads`, `enumeratedMemoryWriteback_reserved`,
+`enumeratedMemoryWriteback_sequential`. Modules:
+`Solidity/Yul/Views/HeapPreparationMemOK.lean`,
+`Solidity/Yul/Views/HeapEnumerationLaws.lean`,
+`Solidity/Yul/Views/EnumeratedMemory.lean`.
+These are constructive canonical preparation/source component theorems with real
+Placement/declared-family/retained-ownership premises, not concrete Y09.02 rules.

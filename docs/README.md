@@ -105,3 +105,5 @@ history is in git.
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
 
 - [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, finite storage/selected byte-heap writeback and retained-allocation resizing/supported byte/mixed aggregate heap views and selected word/dynamic uint256 retained-capacity/simultaneous heterogeneous struct and canonical bool/reference array writeback with retained-capacity resizing and canonical scalar-memory extension with exact legacy compatibility, real alias controls and joint ordinary-memory source/placement composition and arbitrary finite canonical owned-inventory writeback, registered residual journals, actual selected-step MemOK and outstanding concrete integration.
+
+VY2 [heap enumeration preparation](feature-work/inline-assembly-vy2.md#computed-ordinary-heap-inventory-2026-11-01) derives canonical typed inventories from actual heap cells; full assembly closure remains open.
