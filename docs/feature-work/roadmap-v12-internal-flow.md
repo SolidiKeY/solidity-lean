@@ -1783,3 +1783,33 @@ budget failures remain preserved. Raw normal/strict docs remain exit1; complete
 findings equal publication/C23, with frozen46missing versus48 plus incoming
 Arms ambiguity. No source delivery/integration eligibility, full-lane closure,
 new semantic choice or independent-work-exhaustion claim is made.
+
+C24 preparation milestone record:212 bounded parent commands,200 exit0 and12
+retained120s timeouts, plus separately recorded focused prerequisite checks.
+These are Lake preparation results (including cache reuse), NOT212 fresh-source
+checks. The actual remaining-object inventory is in the handoff and remains
+inventory only. No full/broad gate has been repeated or passed. Preparation is
+suspended at a completed-job checkpoint boundary, with its remaining frontier
+preserved for the next original-work phase; no active build is interrupted.
+
+Controller review found a warning-location classification error and two latent
+authentication/history gaps. Raw exits/progress snapshots remain preserved;
+warning locations were removed as false blockers. The corrected controller
+tracks all nested diagnostics, verifies sources/compiler before and after both
+parent and child, records successful child object hashes, preserves actual error
+lines on timeout and excludes mandatory roots from diagnostic retries. Both
+independent read-only reviews close these findings. Audits found no actual
+repeated diagnostic; retrospective bindings are explicitly not represented as
+hashes captured at original completion time. Two controller-only maintenance
+exits143 follow normally completed bounded children; neither is a hidden build
+stop or a passing proof gate. Their exact drain/recovery records are archived.
+
+Additional original BackfillB preparation closes an unconditional source-state
+identity for a scoped primitive-tuple call versus its published expanded body
+with exact typed local dropping. Its scratch check passes2.622s with standard
+axioms; initial metavariable-rewrite failure is retained. This is NOT yet an
+integrated loop/compiler consumer or delivered lane closure. Integration with
+inhabited controls remains ready assigned work. Published TryPanicProducer and
+TryPanicCarrier were reinspected: source-link provenance and a ghost literal
+carrier do not supply original carried-body construction, arbitrary word-frame
+to byte-journal/world coupling, or an inference from THalt.data=[] to REVERT.
