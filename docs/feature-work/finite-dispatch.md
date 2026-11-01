@@ -56,7 +56,7 @@ source/native simulation or of extractor completeness.
 
 - Reference signatures outside the internal memory returns and reference
   arguments above (calldata, `bytes`/`string`/`bytesN`/enum/function/nested
-  or nominal array elements, recursive structs, storage or struct returns,
+  or nominal array elements, recursive structs, storage arrays or structs as returns,
   several returns with a memory one, any reference in an external
   signature), unknown type metadata, and missing candidate or override
   identities.
@@ -197,13 +197,19 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   `tupleAssigned` over two candidates, `tupleForward`, `tupleUnassigned`).
   A callee that is not a name (`s.f(x)`, `fs[i](x)`, `(b ? f : g)(x)`,
   `(h)(x)`) is evaluated into a fresh local of its type first, as `callValue`
-  does, then dispatched (`tupleCallee`). Several returns with a memory one
-  stay refused (see "Blockers" below). The viaIR callee order on this path
-  is untested.
+  does, then dispatched (vectors `tupleCallee`, `tupleCalleeForward` through
+  `return`). Only the conditional form is tested; a parenthesised declared
+  function `(g)(x)` also goes through the dispatch here (not the direct-call
+  shortcut `callValue` takes), so it is refused where `g` is not reachable
+  as a value: fail-closed. Several returns with a memory one stay refused
+  (see "Blockers" below).
 - **Struct memory returns.** A single nonrecursive struct return in memory
   (`function(uint) returns (P memory)`) binds a shared memory destination of
   the struct's type in every branch (`fnMemoryDispatch`, `structReturn`);
-  storage struct returns stay refused.
+  storage struct returns stay refused. Tested by declaration, assignment to
+  an existing local and `return h(v)` (`structReturn`,
+  `structReturnAssign`, `structReturnForward`). A recursive struct return is
+  admitted by the reader and refused by the elaborator (`fnRefStruct?`).
 - **Callee order.** solc's legacy code reads the callee value after the
   arguments, its IR pipeline before them (EVM observations `calleeOrder`,
   `calleeOrderScalar`). Under `evalOrder .viaIR` a named callee's tag is
@@ -229,7 +235,8 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   viaIR replay leaves the two order vectors out, so the model's viaIR copy
   point is unpinned.
 - A callee that is not a name (`fs[i](…)`, `s.f(…)`, `choose(b)(…)`) is
-  evaluated before the arguments in both schedules (`callValue`,
+  evaluated before the arguments in both schedules (`callValue`, and the
+  tuple path's capture in `elabTuple`,
   pre-existing): under the legacy schedule solc evaluates it after them.
 - The elaborator does not type-check a function value's assignment
   (`h = scalar` for a `function(uint[] memory)` local); solc rejects such
@@ -252,7 +259,7 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   candidates and of a scalar argument beside a memory-byte return; nominal
   struct candidates; refusal (by the dispatch diagnostic or the reader's
   function-type refusal, checked by name) of address/uint element
-  collisions, external struct parameters, struct returns, struct, narrow,
+  collisions, external struct parameters, storage struct returns, struct, narrow,
   byte and nested array elements, calldata references, storage mappings,
   storage-array returns, several returns with a memory one and external
   memory-array parameters and returns; elaborator refusal of a recursive
@@ -262,14 +269,16 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   elements stay unparsed.
 - `scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]`:
   the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
-  off/on (100 executions per EVM version; cancun and osaka both pass), the
+  off/on (132 executions per EVM version; cancun and osaka both pass), the
   source of every expected observation above.
 
 ### Blockers (lane CF2, after integration)
 
 - **Several returns with a memory one.** The ordinary call frame refuses a
   reference return in any function of several returns, for direct calls too
-  (`elabCallRetCore`: "its return … has a reference type"; `RetKind.rets`
+  (`elabCallRetCore`: "`memory` on a return of a function of several
+  returns", or "its return … has a reference type" without a location;
+  `RetKind.rets`
   and `CallRet.rets` carry value binders only). Dispatching to it first needs
   a reference-capable `CallRet.rets`/`Binders` in `Syntax/Scoped.lean` and
   its run (`TRun.call`), a core change outside this lane.
@@ -402,7 +411,7 @@ beside arguments; several value returns; nonrecursive structs in memory and
 storage) and 4 (chain
 selection theorems, lane-soundness notes) are implemented on
 `cloud/relocated-20261031/function-values`. Still refused: several returns
-with a memory one, narrow array elements, struct returns, calldata
+with a memory one, narrow array elements, storage struct returns, calldata
 arguments to function values, and every reference in an external
 signature.
 
@@ -415,7 +424,7 @@ killed once under parallel load, builds on the retry in 166s;
 the Lean server ("trust: 9 dispatch theorems use only the standard
 axioms"); `node --test` of `finite-dispatch` (30/30; the FunctionTypes.sol
 suite timed out once under load and passes alone), `dispatch-signatures`
-(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (100
+(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (132
 executions, cancun and osaka); `check-layers`, `check-orphans`,
 `check-trust`, `check-automatic --strict` (0 pending), `check-doc-paths`
 (48, as on the base) and `check-g07` (the base's two failures; three new
@@ -443,4 +452,13 @@ like-for-like figure was taken; the change adds `DispatchChain` (small) to
   `memUnassigned_halt` pins the revert (the `Panic(0x51)` bytes are pinned
   by the import replay); several memory returns, narrow elements and the
   viaIR copy order recorded under "Blockers".
+- Post-integration review (read-only, 8 items, no soundness bug): the tuple
+  path's callee-first order is now listed with `callValue`'s deviation;
+  untested forms gained vectors (`tupleCalleeForward`,
+  `structReturnAssign`, `structReturnForward`); stale "struct returns
+  refused" lines and the first blocker's message were corrected. Not
+  changed (recorded): the tuple path's captures stay in the enclosing scope
+  (fresh names; as the named path's), the parenthesised-name shortcut, and
+  the `tyText` comment in `Body.lean`, which still names only arrays and
+  `bytes` among memory returns.
 

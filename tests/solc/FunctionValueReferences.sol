@@ -211,6 +211,29 @@ contract FunctionValueReferences {
         return (q, r);
     }
 
+    function tupleCalleeForward(bool b) public pure returns (uint, uint) {
+        uint[] memory xs = new uint[](1);
+        xs[0] = 22;
+        return (b ? divmod : divmod2)(xs, 5);
+    }
+
+    function structReturnAssign() public pure returns (uint, uint) {
+        function(uint) internal pure returns (P memory) h = makeP;
+        P memory p;
+        p.a = 99;
+        p = h(6);
+        return (p.a, p.b);
+    }
+
+    function structForward(uint v) internal pure returns (P memory) {
+        function(uint) internal pure returns (P memory) h = makeP2;
+        return h(v);
+    }
+
+    function structReturnForward() public pure returns (uint) {
+        return structForward(3).a;
+    }
+
     function falseObservation() public returns (uint) {
         uint[] memory xs = new uint[](2);
         xs[0] = 1;
