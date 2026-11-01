@@ -1168,6 +1168,20 @@ Residue/DecisionTheorem-prime, full AU02 or final runtime/full-gate completion.
 Exact premises, resource/timing and open queues are in the VA1 handoff.
 
 
+
+VA1 numeric normalization bridge (2026-11-01): the real program normalizer now
+has a proved separate depth/shared-budget invariant for QFUIntLinear bodies.
+It retains smart truth simplifications and returns an equivalent body with the
+same grammar and no larger source weight. A positive uint prefix of source body
+weight≤511 now derives actual Covered/nonunknown/certified results with no
+supplied leaf or normalizer equation, under unchanged2048 traversal/511-node
+budgets and exact hash interfaces. Positive/refuted, syntax-collapse and shared-
+budget refusal controls pass, as do27 public axiom reports and the bounded import
+closure. This is a supported-family bridge; global Residue/DecisionTheorem-prime,
+broader AU02 and full gates remain open. See the VA1 handoff for exact signatures,
+failures, resource evidence and concrete parallel-interface limits.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

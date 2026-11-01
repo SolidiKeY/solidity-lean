@@ -2024,3 +2024,91 @@ comparison confirms frozen Decision, HashPremise and ProgramReduction bytes,
 and replay/Core/facade unchanged from parent. Reviews caught automation text
 appended outside M7-next and list spacing; both routine doc issues fixed.
 All proof and full-goal limits above remain.
+
+
+## Actual numeric normalizer/coverage bridge (2026-11-01)
+
+Parent7092917807ce3918f5196028093fd210db36f069. New owned modules
+Calculus/DecisionNumericNormalization and Examples/DecisionNumericNormalization;
+shared edits are exactly two additive imports in Solidity.lean and two module-map
+rows. No producer source, frozen predicate, premise, observation or budget change.
+
+A proof-local actualNormalization captures the real private normalizeCore through
+its public ProgramNormalization.ofFormula? wrapper. Typed unification/change
+assigns the actual function; the saved probe prints that exact private function.
+Concrete constructor equations and public proofs kernel-check against it. This
+is not a copied algorithm, an oracle, or an assumed future producer API.
+
+The initial identity plan failed: DeclarationReduction.andFormula/impFormula
+remove tt operands. Raw errors/source retained. The public counterexample
+normalization_changes_syntax certifies a five-node tt conjunction collapses to tt.
+Rather than strengthen the input class or change the producer, the proved
+invariant keeps both depth and shared node state explicit. With original source
+weight≤each resource, the actual returned certificate has QFUIntLinear formula,
+weight≤original weight, and initial budget≤remaining+original weight. Sequential
+branches use the real remaining state from the first child. Original traversal
+weight, not smaller normalized output weight, bounds consumption.
+
+Public interfaces, for every contract/context and intrinsic source φ:
+qfUIntLinear_normalization budget h hw returns actual d with ofFormula? budget φ
+=some d, d.formula.QFUIntLinear and d.formula.weight≤φ.weight. For one positive
+uint binder with original body source weight≤511, qfUIntPrefix_normalization
+reserves one node/depth step of unchanged
+2048 and returns an actual normalized body χ with the same grammar/bound.
+leafOf_of_normalized_to composes through the possibly different normalized source.
+qfUIntPrefix_logic_Covered derives Covered directly from φ.QFUIntLinear and
+φ.uintQFWeight≤511, with no supplied leaf/normalizer equation. The source-derived
+bound feeds actual lowering/preparation node proofs. qfUIntPrefix_logic_boundary
+adds inTarget w=true under every frozen waiver setting and structural hash-freedom.
+qfUIntPrefix_logic_answered and qfUIntPrefix_logic_certified give an actual nonunknown
+answer with unchanged ValidH or returned-state ¬holdsH certificate. No reversed
+unconditional inclusion or global DecisionTheorem-prime is claimed.
+
+Inhabited positive/refuted clients use truth conjunction/implication around the
+existing partial-arithmetic logical bodies (source weights143/199), consume only
+the syntax/bound interface, and retain ordinary semantic proof/countermodel.
+Actual smart normalization equations are separate controls, not supplied bridge
+premises. Five-node collapse with depth4 but sharedbudget4 refuses;budget5 returns
+tt. A short implication succeeds at actual budget3 while source weight>3,
+showing the sufficient bound is not minimal. Zero-budget refusal and a retained
+keyed-array unknown are kernel checked. No expected existing verdict changes.
+
+Raw gates /workspace/va1-evidence/normalizer-next: core bridge MCP10.624s;
+core target9.496s (new file7.3s); final controls MCP7.394s; controls/import-closure
+build6.454s (367jobs,new file4.2s);27 public axiom reports19.155s; executable
+warm verdict observer3.118s: all pass under unchanged300s per-file limit.
+MCPs have zero items/dependency failures. Existing dependency warning replays are
+retained; no new module warnings. Axioms are subsets of standard
+propext/Classical.choice/Quot.sound only. Actual observations proved/refuted take
+6623234/6273696ns including output. These interpreted Lean observations are
+separate from kernel certificates, no EVM/full-cold/cache-clearing claim.
+
+Original writer lock, LEAN_NUM_THREADS=1/-j1, verified hard aggregate12GiB/no-swap
+and12GiB host reserve before every Lean process. Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613 observed; maximum sampled aggregate RSS2149556KiB,
+minimum host available16453763072bytes; no resource stops. Initial private-name probe,
+false identity attempt and Option bind/map equation failures remain raw failures;
+constructor equations were repaired against the actual computation. Both
+independent read-only source reviews found no logical/scope issues; no Lean/server/
+build or edits by reviewers. Exact producer ProgramReduction stays frozen.
+
+This removes the previous numeric PARALLEL-INTERFACE's normalizer premise for
+this bounded logical family. Old immutable packages/seals remain unchanged; new
+committed interface package will record exact new head/source closure, signatures,
+clients and remaining limits. Global meaningful Residue/DecisionTheorem-prime/
+exhaustive target/hash bridge, remaining array/memory/halting-OR/revised-M4/general
+fuel work, census/performance/backfill and final affected/full validation remain
+open. Source-derived sufficient traversal/node bounds are proved for this family;
+runtime fuels remain unchanged and full AU02 formula-derived-fuel work remains
+open. Earlier TypeExamples resource stops and pending Q2
+frontend ownership hold remain; no unchanged failed full build was repeated.
+Q1 only revises the false reverse inclusion. Original full goal stays incomplete,
+with independent work ready; no stop/reset/new goal, VM, push, merge, PR or tag.
+
+Static gates:1094 reachable/zero orphans,180 core/zero elaborator reach, strict
+automatic491/61 step budgets/11 refuted/zero manual or pending, trust1109 sources/
+248 sites/zero findings: pass. Inventory FAIL1 same1206 pins/zero errors/404
+unrecorded changes; strict docs FAIL1 same85 frozen findings, none added/removed.
+Frozen Decision/HashPremise/ProgramReduction bytes confirmed. Final skeptic asked
+for explicit≤511 on the prefix-interface description and precise fixed-fuel
+sufficiency wording; both clarified, with no source or semantic change.
