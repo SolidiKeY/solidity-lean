@@ -1,5 +1,6 @@
 import Solidity.Calculus.CloseScoped.Leaf
 import Solidity.Calculus.LeafShare
+import Solidity.Calculus.AnonLocalCapture
 import Solidity.Calculus.LeafSplit
 
 /-!
@@ -1100,6 +1101,85 @@ partial def termNodes (e : Expr) (cap : Nat) : Nat :=
 to hand it to the kernel. -/
 def shareNodes : Nat := 20000
 
+/-- Decode primitive anonymous positions without dropping repetitions.
+The existing kernel-input cap also bounds this optional leaf transformation. -/
+def primitivePositions? (Γ xs₀ : Expr) : MetaM (Option (Expr × Nat)) := do
+  unless termNodes xs₀ shareNodes < shareNodes do return none
+  let family ← withLocalDeclD `p (mkConst ``PrimTy) fun p =>
+    mkLambdaFVars #[p] (mkApp2 (mkConst ``Idx) Γ (mkApp (mkConst ``LTy.val) p))
+  let elemTy := mkApp2 (mkConst ``Sigma [.zero, .zero]) (mkConst ``PrimTy) family
+  let mut xs := xs₀
+  let mut items : Array Expr := #[]
+  for _ in [0:shareNodes] do
+    xs ← whnfR xs
+    if xs.isAppOfArity ``List.nil 1 then return some (← mkListLit elemTy items.toList, items.size)
+    unless xs.isAppOfArity ``List.cons 3 do return none
+    let key ← whnfR (xs.getArg! 1)
+    unless key.isAppOfArity ``Sigma.mk 4 do return none
+    let ty ← whnfR (key.getArg! 2)
+    unless ty.isAppOfArity ``LTy.val 1 do return none
+    items := items.push (mkApp4 (mkConst ``Sigma.mk [.zero, .zero])
+      (mkConst ``PrimTy) family ty.appArg! (key.getArg! 3))
+    xs := xs.getArg! 2
+  return none
+
+/-- A reachable nonempty primitive anonymous frame, through only the prefix
+constructors read by `peel`. Nonprimitive frames retain the old path. -/
+def hasPrimitiveAnon (φ₀ : Expr) : MetaM Bool := do
+  let mut φ := φ₀
+  for _ in [0:shareNodes] do
+    φ ← whnfR φ
+    if φ.isAppOfArity ``Fml.anon 4 then
+      let xs ← whnfR (φ.getArg! 2)
+      if !xs.isAppOfArity ``List.cons 3 then return false
+      return (← primitivePositions? (φ.getArg! 1) xs).isSome
+    if φ.isAppOfArity ``Fml.upd 6 || φ.isAppOfArity ``Fml.bind 6 then
+      φ := φ.getArg! 5
+    else if φ.isAppOfArity ``Fml.all 5 then φ := φ.getArg! 4
+    else if φ.isAppOfArity ``Fml.imp 4 then φ := φ.getArg! 3
+    else return false
+  return false
+
+/-- A bounded, conservative modal-free shape check for this leaf-only entry.
+Unknown formula heads refuse the optimization. Terms need no traversal. -/
+def modalFreeShape (φ₀ : Expr) : MetaM Bool := do
+  let mut todo := [φ₀]
+  let mut seen : Std.HashSet Expr := {}
+  for _ in [0:shareNodes] do
+    let φ₀ :: rest := todo | return true
+    todo := rest
+    let φ ← whnfD φ₀
+    if seen.contains φ then continue
+    seen := seen.insert φ
+    if φ.isAppOf ``Fml.modal then return false
+    if φ.isAppOf ``Fml.tt || φ.isAppOf ``Fml.eq || φ.isAppOf ``Fml.wellFormed then continue
+    if φ.isAppOf ``Fml.and || φ.isAppOf ``Fml.imp then
+      todo := φ.getArg! 2 :: φ.getArg! 3 :: todo
+    else if φ.isAppOf ``Fml.not || φ.isAppOf ``Fml.upd || φ.isAppOf ``Fml.havoc ||
+        φ.isAppOf ``Fml.all || φ.isAppOf ``Fml.bind || φ.isAppOf ``Fml.anon ||
+        φ.isAppOf ``Fml.allocAll || φ.isAppOf ``Fml.grow then
+      todo := φ.appArg! :: todo
+    else return false
+  return todo.isEmpty
+
+/-- Apply the kernel-proved fresh-local plan to the exact anon target. -/
+def anonStep (g : MVarId) (k : Nat) : TacticM (Option (MVarId × Nat)) := g.withContext do
+  let target ← instantiateMVars (← g.getType)
+  unless target.isAppOfArity ``Solidity.holds 4 do return none
+  let φ ← whnfR target.appArg!
+  unless φ.isAppOfArity ``Fml.anon 4 do return none
+  let some (positions, count) ← primitivePositions? (φ.getArg! 1) (φ.getArg! 2) | return none
+  let names := mkLambda `k .default (mkConst ``Nat)
+    (mkApp2 (mkConst ``Var.fresh) (toExpr "anon") (mkBVar 0))
+  let lemma ← mkAppM ``AnonLocalCapture.sound #[mkConst ``Modality.box,
+    names, toExpr k, positions, φ.getArg! 3, target.getArg! 2]
+  let [goal] ← g.apply lemma | throwError "anonymous capture changed leaf count"
+  let [goal] ← runOn goal (← `(tactic| dsimp only [AnonLocalCapture.plan, CallResultCapture.restore]))
+    | throwError "anonymous plan expansion changed leaf count"
+  unless termNodes (← goal.getType) shareNodes < shareNodes do
+    throwError "anonymous capture: expanded kernel-input cap"
+  return some (goal, count)
+
 /-- `t`'s innermost strict redex (`Tm.redex?`, by the kernel, `tmNF`): the
 redex, the term reading it from a fresh local, and the equation, which
 `rfl` proves; `none` where `t` is its own redex or has none. -/
@@ -1208,6 +1288,7 @@ partial def peel (g : MVarId) (bounds : Bounds) (prems : Array FVarId) (k : Nat)
     match ← shareStep g k with
     | some g' => g := g'; k := k + 1
     | none => break
+  if let some (next, count) ← anonStep g k then return ← peel next bounds prems (k+count)
   g.withContext do
   let t ← instantiateMVars (← g.getType)
   unless t.isAppOfArity ``Solidity.holds 4 do return some (g, bounds, prems)
@@ -1243,7 +1324,15 @@ partial def peelHead (g : MVarId) (t φ rest : Expr) (bounds : Bounds) (prems : 
     throwError "sol_close_join_steps: a step split the goal"
   let (gs, hs, ps) ← introFront g₂
   let prems := prems ++ ps.toArray
+  let mark ← match gs.getLast? with
+    | some main => main.withContext do pure (← getLCtx).numIndices
+    | none => pure 0
   let some (gM, bounds) ← settle gs hs bounds prems | return none
+  -- Keep the normalized defining facts even when no absolute interval exists.
+  -- Visit only declarations appended by this step, not the growing old context.
+  let prems ← gM.withContext do
+    (← getLCtx).foldlM (init := prems) (start := mark) fun keep d => do
+      if ← isProp d.type then pure (keep.push d.fvarId) else pure keep
   -- the rest back, by its equation
   let gM ← gM.withContext do
     let tgt ← whnfR (← instantiateMVars (← gM.getType))
@@ -1489,6 +1578,34 @@ def evalSolCloseFewJoins : Tactic := fun _ => withMainContext do
     throwError "sol_close_few_joins: more than {CloseJ.wholeMax} joined updates"
   if CloseJ.countShare ty (CloseJ.shareWholeMax + 1) > CloseJ.shareWholeMax then
     throwError "sol_close_few_joins: a summary of more than {CloseJ.shareWholeMax} operations"
+
+/-- Shared implementation; the automatic route targets joined leaves while
+an explicit caller can request the general primitive-anon transformation. -/
+private def closeAnonSteps (joinedOnly : Bool) : TacticM Unit := withMainContext do
+  let ty ← instantiateMVars (← getMainTarget)
+  unless ty.isAppOf ``Solidity.Fml.Valid do throwUnsupportedSyntax
+  let saved ← saveState
+  let failure ← tryCatchRuntimeEx (Budget.within CloseJ.budget do
+      if joinedOnly && CloseJ.countJoins ty 0 1 == 0 then
+        throwError "automatic anon sharing requires a joined update"
+      unless ← CloseJ.hasPrimitiveAnon ty.appArg! do
+        throwError "no reachable nonempty primitive anonymous frame"
+      unless ← CloseJ.modalFreeShape ty.appArg! do
+        throwError "expected a modal-free anonymous leaf"
+      Term.withoutErrToSorry <| withoutRecover CloseJ.closeSteps
+      pure (none : Option MessageData)) fun ex => do
+        if ex.isMaxHeartbeat then return some m!"heartbeat stop: {ex.toMessageData}"
+        if ex.isMaxRecDepth then return some m!"recursion stop: {ex.toMessageData}"
+        return some ex.toMessageData
+  if let some reason := failure then
+    saved.restore
+    throwError "sol_close_anon_steps: {reason}"
+
+@[tactic Solidity.tacticSol_close_anon_steps]
+def evalSolCloseAnonSteps : Tactic := fun _ => closeAnonSteps false
+
+@[tactic Solidity.tacticSol_close_joined_anon_steps]
+def evalSolCloseJoinedAnonSteps : Tactic := fun _ => closeAnonSteps true
 
 @[tactic Solidity.tacticSol_close_join_steps]
 def evalSolCloseJoinSteps : Tactic := fun _ => withMainContext do

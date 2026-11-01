@@ -314,6 +314,14 @@ of `sol_close`'s alternatives that evaluate a leaf whole, which on such a
 leaf run past the heartbeats rather than fail. -/
 syntax "sol_close_few_joins" : tactic
 
+/-- Read a primitive anonymous loop frame through proved fresh intrinsic locals,
+within the existing sequential closer budget. -/
+syntax "sol_close_anon_steps" : tactic
+
+/-- The automatic anon attempt, restricted to joined anonymous leaves.
+Zero-join leaves retain the previous closer order. -/
+syntax "sol_close_joined_anon_steps" : tactic
+
 /-- `sol_close`'s last pass, on goals with no state left: the arithmetic
 (`omega`, `grind`), with the witnesses' ranges, an `Option` read split once,
 and products. -/
@@ -364,6 +372,8 @@ syntax "sol_close" : tactic
 macro_rules
   | `(tactic| sol_close) => `(tactic|
   all_goals first
+  -- Joined primitive anonymous frames: bind/copy/pop before later reads.
+  | sol_close_joined_anon_steps
   -- a leaf of one or two joined values that are not accumulations: back
   -- into the cases the walk's split would have left, each closed as such a
   -- leaf
