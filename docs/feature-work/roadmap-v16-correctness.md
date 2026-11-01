@@ -1529,3 +1529,122 @@ Current full gate is still FAILED124, no unchanged heavy retry or budget raise.
 Exact committed head and every absolute artifact/gate/review/checksum are recorded
 by /workspace/scratch/v16-mixed-recovery/identity.json and handoff.md after export.
 Full original assignment stays partial/blocked and existing goal untouched.
+
+
+## Parallel interface: actual calculus/compiler consumer (2026-11-01)
+
+Preserved clean checkpoint bea6e0e334f448aebb6f7c7a68321b4e419b43d2 and all ten
+prior immutable seals. Human scheduling authorization now permits exact committed
+peer packages in a private dependency worktree; it changes no semantics/profile,
+premise, ownership or gate. Published master observed/fetched at
+457130f3da4bc474825bc8f3df6bf65e1c33f813, descending from consumed
+099bfbe185731c354b12a40f28ccf5d98534c779. Staged source-only at
+/workspace/v16-dependencies/published-457130f3, clean/detached; NOT integrated,
+imported or represented as a combined checked tree. Its changes are reserved
+ABI/function-value implementations and ledger updates, not concrete V09/V12–V15
+packages. No peer checkpoint bundles/source packages have been supplied locally;
+requested exact paths/heads/checksums while continuing ready owned proof work.
+
+New owned Solidity/Roadmap/V16/CalculusConsumer.lean proves six actual G51
+consumers over unchanged intrinsic Fml/holds/holdsC, Compiler.Compilation.Input,
+Compiler.correct and the published holds_of_holdsC_modal body. No new source,
+execution, compiler or specification semantics. The actual checked Input rules
+out exhausted source execution: a calculus diamond gives genuine source success
+without source-success/notExhausted/desired-target premises. Public success
+retains PC0, complete protected stack and Rep at L+Prog.pushes P. The general
+calculus_compiler_diamond preserves the distinct payment-refusal alternative
+and candidate Rep; calculus_compiler_nonpaying removes only that alternative
+with actual Prog.pays=false. Box consumers require an actual successful target.
+Callback consumers retain phi.callsBack pay=false and establish deterministic
+body/post consequences only, not adversarial callback bytecode execution. Empty
+residual Frames.nil is explicit; no rule/closer/Fml.inTarget/SolKey map change.
+
+Actual new theorem premises:
+
+| Theorem (Solidity.Roadmap.V16) | Prop premises |
+|---|---|
+| calculus_compiler_source | input, diamond |
+| calculus_compiler_diamond | input, diamond |
+| calculus_compiler_nonpaying | input, nonpaying, diamond |
+| calculus_compiler_box_target | input, box, target |
+| callback_compiler_nonpaying | input, nonpaying, postNoCallback, diamond |
+| callback_compiler_box_target | input, postNoCallback, box, target |
+
+All six consume the actual compiled certificate value as data. None constructs
+G01 Lowering/Admission/PublicCorrectness, a full-profile compiler, raw-byte EVM
+agreement or a missing stage. Each #print axioms is exactly the approved
+propext/Classical.choice/Quot.sound set. Full dependent types, producer module
+hashes, actual imports and closure pins are in tests/roadmap-v16/parallel-premises.json
+and the immutable PARALLEL-INTERFACE export; this supplements proofs.
+
+New tests/roadmap-v16/CalculusControls.lean reuses unchanged existing checked
+CoreConsumerControls and MixedMemoryControls modules via cached kernel-checked
+oleans, rather than duplicating their source/compiler fixtures. Build each old
+fixture with explicit -j1/--tstack=131072 and -o into the SINGLE existing
+.lake/build/lib/lean/tests/roadmap-v16 cache before importing the new test. The
+new 24 EMPTY-telescope semantic controls include populated core value8/stack77,
+actual callback-aware box/diamond clients, wrong value9/false post rejection,
+panic box refusal, mixed allocating memory frame6/cost5/cursor21/aliases and the
+complete existing named 11-observation vector, wrong alias/frame/stale-cost/error,
+real payment/source-success alternatives, exact source payment rejection,
+invalid-oracle Input, a callback-bearing postcondition guard, and actual recBase
+exhausted false diamond with NO possible checked Input. The named observations
+are not equality at every unobserved cell; the existing empty-heap BaseExtends
+vacuity and arithmetic-only near-limit control are not promoted. Failure payloads,
+divergence, capacity and branch-specific Room/Cost/GrowsAllocator remain unchanged.
+
+Owned scripts/roadmap-v16-parallel-interface.py checks exact dependent statement,
+premise, control, producer-body, dependency and axiom pins; requires real clients
+to transitively use each new consumer. Nineteen corruption controls reject absent
+or altered contracts/controls, premise-only witnesses, erased guards/Rep/payment
+alternatives, new source/target/exhaustion assumptions, hidden PublicCorrectness,
+wrong revisions/bodies, axiom/dependency drift and false coverage closure. All2290
+inherited constructor/stage/feature-combination obligations remain OPEN.
+
+PARALLEL-INTERFACE is intended for V17/Yul VY5 exchange. Existing concrete
+compiler/spec and relational/session adapters are usable now with their ACTUAL
+Input/Rep/Room/Cost/hash/Forward/Guard/resource premises. G01 source admission and
+lowering interfaces are exported as REQUIRED contracts, not concrete delivery.
+The exact canonical accepted-core-assert plus allocation refusal remains the
+reserved producer request documented above. SourceSpec/admission/progress/lowering,
+full constructor coverage, V12–V15 final frame/ABI/runtime/Osaka/resource bridges,
+deployment/rollback/adversarial sequence correspondence and final SolKey
+applications remain full-lane obligations. Missing peer packages are distinct
+from missing producer facts; no dependency was replaced by a simulation oracle.
+
+Focused checks and separate independent finder/skeptic reviews are recorded in
+/workspace/scratch/v16-parallel-interface. The old full5400s/prerequisite300s
+exit124, earlier exit137 and docs86vs83 failures stay failures; no unchanged
+heavy retry or time/proof-budget increase. Final exact-head gates, reviews,
+patch/bundle/source archive, full original queue, premise/interface manifest and
+checksums are exported after the reviewed commit. Goal completion remains open.
+
+
+Parallel delivery update: the human supplied immutable bundles during this
+checkpoint. All three hashes/advertised heads/frozen-base ancestry are verified:
+V13 66c08fdefbbb53c0eee111b09d1baa6277fedff5,
+V14 74225bbe317f0983ee0e781d446a2f97c1cb807f,
+V15 c97bcab75406cc4d22614948ef29d67b375dba3a.
+Original copies remain under /workspace/shared/parallel-roadmap-work-20261101;
+private refs/v16-staging only, no merge or active-checkout snapshot. V13's actual
+new namespace is Backend/AbiWorld, V14's Backend/Executable, V15's external
+RoadmapV15 bridge. Their narrow ready returned-byte/source-prefix/reference
+interfaces will be composed in a separate private combined tree AFTER this
+reviewed source checkpoint is committed. This delivery supersedes the earlier
+absence observation, not the missing semantic premises or full-profile status.
+
+
+Parallel calculus checkpoint gates: six-law per-file PASS after fixing two
+ordinary dependent-case/simp errors (raw calculus-first exit1 retained), new24
+semantic controls/#print axioms/G01 actual field signatures PASS, KeySort PASS2
+jobs, owned import closure PASS, complete accounting PASS2290OPEN/286statements,
+existing accounting26tests PASS and scoped audit PASS19negativecorruptions.
+Lean4.24.0 commit797c613 / Lake5.0.0-src+797c613. All Lean serial explicit-j1,
+LEAN_NUM_THREADS1, verified cgroup12GiB/swap0; no budget change. Layers/orphans/
+trust/noncircular/TestSuite static/whitespace PASS. Raw docs FAIL1/current86 vs
+frozen83 retained; full multiset parent86=current86, zero owned regressions.
+Separate independent finder/skeptic proof AND controls/accounting reviews PASS,
+no confirmed defect; neither used Lean/server/build/tests/writes. Final exact-head
+artifact checks occur after this reviewed commit. Original full124/prereq124/docs
+failures are not waived, old kernel/fresh timing evidence is only dependency-
+checked reuse as documented; this checkpoint is not full original completion.

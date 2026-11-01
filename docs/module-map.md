@@ -1326,3 +1326,6 @@ four-mode upstream EVM observations and refusal controls;
 
 | `Solidity/Roadmap/V16/FiniteMemoryCompilation.lean` | V16 actual finite-memory compilation-function inversion/canonical append and exact intrinsic source/box/diamond transport; full coverage OPEN |
 | `tests/roadmap-v16/MixedMemoryControls.lean` | Actual public core-to-memory canonical composition, reached rich Input and all-three Rep/observations/resource/payload/exhaustion rejection controls; scoped evidence only |
+
+| `Solidity/Roadmap/V16/CalculusConsumer.lean` | Actual Fml/callback-reading compiler consumers; checked Input excludes exhausted diamonds, exact payment alternatives and branch-specific Rep retained. |
+| `tests/roadmap-v16/CalculusControls.lean` | Reused populated core/allocating-memory compiler clients, exact ordered observations and panic/payment/input/exhaustion controls. |

@@ -108,3 +108,5 @@ history is in git.
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
 
 - [V16 correctness and transfer](feature-work/roadmap-v16-correctness.md): conditional transport backfill, controls and unresolved compiler-composition prerequisites.
+
+V16 parallel consumer interface: [scoped calculus/compiler handoff](feature-work/roadmap-v16-correctness.md#parallel-interface-actual-calculuscompiler-consumer-2026-11-01).
