@@ -1006,6 +1006,13 @@ source reduction and `leafOf?` success. The source fact describes the body
 before preparation. Prepared-body grammar, parameter closure, bounds, broader
 prefixes and the exhaustive Residue/target bridge remain open; this grammar's
 complement is not Residue.
+`Examples/DecisionHaltingOrGaps.lean` separates already-covered partial
+Boolean lowering from the actual open APF guard-floor case. A nested halting
+`||` guard in a negative two-key mapping block has certified target/unknown/
+noncoverage, with a valid positive claim and false companion countermodel.
+Its illustrative collapsed-key guard changes from true to halt; this is not
+an actual collector/Setting proof or a refutation of `GuardP.floors`. The
+AU02 guard-floor repair remains open.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is

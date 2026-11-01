@@ -1069,3 +1069,68 @@ was repeated. The owned stopped array-check containers were removed only
 after saving nonsecret state/bounds/mount metadata to recover disk; all
 mounted caches, artifacts, failures and other containers are preserved.
 The whole original goal and remaining queue are incomplete.
+
+
+## Halting-OR APF census checkpoint
+
+`Examples/DecisionHaltingOrGaps.lean` reproduces the actual remaining guard-
+floor gap, distinct from already-covered Boolean lowering. Intrinsic FloorProbe
+has a uint mapping and uint scalar. Its negative block quantifies uint i,j with
+guard `((i <= j && i < value - 1) || i <= i)` and conclusion `balances[i] = 0`.
+The block implying `balances[1] = 0`, the zero-index variant and the false
+companion implying `balances[1] = 1` each have public kernel target=true,
+Covered=false and actual decideGoal=unknown certificates. These new baseline
+pins change no previous expected observation or pipeline behavior.
+
+`floorClaim_one_valid` proves the positive claim at every intrinsic state by
+the (1,0) instance, which skips the partial subtraction. `floorBad_countermodel`
+proves that the inhabited default State satisfies the entire negative block
+and falsifies the false companion. Its arbitrary-key mapping read uses the
+existing typed total-path/default-storage theorem, not a postulated state or
+new premise. The zero-index pin receives no unsupported semantic claim.
+
+The default-state guard returns `some true` at keys (2,1) and `none` at collapsed
+keys (1,1); `floorIn 0 [0,1]` actually collapses them. This set is illustrative,
+not proved to be the collector's set or a complete reconstruction Setting.
+It does not refute GuardP.floors: its definedness premises exclude this shape.
+Unknown/noncoverage pins do not identify the sole failing stage. The AU02
+instantiation/floor repair and meaningful Residue shrink remain open.
+
+Separate closed/binder Boolean cases retain public kernel proved/refuted
+certificates through existing soundness/refutation interfaces, an inhabited
+countermodel and ordinary-false versus halt controls. A halted outer-OR left
+operand is not recovered by either right literal; optional reflexive equality
+retains both-halting equality. The finder rejected Boolean-only probes as
+sufficient APF reproduction, and this correction is retained. No arbitrary OR
+completeness, new exclusion or weakened premise is claimed.
+
+Final exact-source MCP passes in 23.59 s, focused affected build in 20.25 s,
+all 23 public axiom reports in 17.99 s, with only standard axioms or none.
+Commands, source hashes, actual versions, hard-cap verification, prebuild and
+sampled aggregate RSS/host headroom are in
+`/workspace/va1-evidence/halting-or-next/verified-gates.json` and raw logs.
+Hard 12 GiB/no-swap, host reserve 12 GiB, thread one/explicit -j1, writer lock
+and all original budgets remain unchanged. Failed missing-scratch, operator-
+spelling, type-inference, tactic-insertion and path-law attempts are retained.
+An evidence parser initially rejected the valid no-axioms report form and
+exited 1; corrected aggregation verifies all names/forms without altering the
+passing Lean audit. Scratch is preserved outside the library before gates.
+
+Independent final read-only finder and skeptic source reviews found no issues;
+neither edited or used Lean/server/build. No compiler, semantics/default,
+predicate, pipeline, premise or previous verdict changed. Q1 remains answered;
+Q2 remains pending only for frontend repair/full gates. Global Residue/theorem/
+bridge, broader revised boundary and AU02 pipeline/fuel work remain open. This
+census is not AU02 completion or milestone/full-goal eligibility. Final static
+and documentation reviews follow once actually checked.
+
+Final halting-OR static gates pass: 1070 reachable/zero orphans, 180 core/
+zero elaborator paths, 491 automatic/61 budget/11 refuted/zero manual or
+pending, trust 1085 sources/248 inventoried sites/zero findings. Axiom
+inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero added/removed. Entire frozen Decision source and retained counterexample
+identities pass. Final independent read-only finder/skeptic documentation/
+evidence reviews found no issues. Full validation's earlier actual source-
+matched resource failures remain failures; Q2 and all remaining original
+obligations stay open. This checked checkpoint is census progress only.

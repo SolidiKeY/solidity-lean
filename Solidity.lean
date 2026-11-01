@@ -231,6 +231,7 @@ import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionCoefficientBoundary
 import Solidity.Examples.DecisionUIntBridge
 import Solidity.Examples.DecisionUIntPrefix
+import Solidity.Examples.DecisionHaltingOrGaps
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
