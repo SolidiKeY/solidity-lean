@@ -48,7 +48,8 @@ producer-source replays and remaining gap census are recorded below.
   Exhaustive remaining shape/reason census and baseline reproduction are partial.
 - AU01 theorem: meaningful decidable Residue, exhaustive target-to-covered/hash
   bridge and DecisionTheorem-prime remain open. Existing census/nonvacuity and
-  countermodel controls are partial progress, not a theorem substitute.
+  countermodel controls and the constructive uint source-grammar bridge below
+  are partial progress, not a theorem substitute.
 - AU01 performance: hash/main splits and unchanged DecisionArrays replay checks
   pass below 300 s. Array split and replay interpretation profiles are now checked below;
   broader performance/full gates remain open; no milestone eligibility claimed.
@@ -906,3 +907,99 @@ findings and zero added/removed. Neither is a pass or waived. Decision and
 retained counterexample byte identities pass. Both final independent
 read-only documentation/evidence reviews found no issues. Post-commit export
 verification follows; original goal/branch/base and all previous seals remain.
+
+
+## AU01 constructive uint source bridge (2026-11-01)
+
+Independent read-only design reviews identified that the existing gap list
+is not exhaustive: admitted updates/local histories, formation/compound
+terms, additional binder sorts, nondefault waiver settings, KeY-int shapes,
+separate normalization/prefix/lifting/node/OR bounds and independent hash
+routes all need accounting. No complement-of-Covered/unknown test or
+'outside this first grammar' catch-all was introduced as Residue. The
+first constructive source-to-prepared-grammar increment follows those reviews.
+
+`Calculus/DecisionUIntGrammar.lean` defines `Tm.UIntLinear` as an intrinsic
+predicate on existing scoped uint terms: local/literal, checked addition/
+subtraction, multiplication with one direct literal operand. No new IR,
+operator or semantic model is introduced. Every member is admitted by the
+frozen term predicate for every waiver setting and hash-position flag.
+It is hash-free, contains no mapping keys and satisfies existing Theory/
+interpreter agreement. `fold2_preserves_num` handles actual literal
+folding, including failures retained as `.err`.
+
+`UIntSourceLocs ρ` states that each typed uint local binding is present and
+in the existing numeric source grammar. It is independent of any verdict
+or coverage test. Its empty-initialization and actual `pushQ .uint`
+preservation proofs supply inhabited environments, rather than assuming
+translation succeeds. For every contract/context/source term in this
+grammar and every such environment, `uintLinear_toL`/`uintLinear_toLT`
+construct an actual output `l` with `t.toL ρ = some l` (respectively `toLT`)
+and `l.Src false true .num`.
+
+`Calculus/DecisionUIntFormula.lean` defines the intrinsic quantifier-free
+logical source grammar over these equations (`tt`, equality, negation,
+conjunction, implication). `qfUIntLinear_toLS` constructs one actual `ψ`
+with **both** `φ.toLS true ρ = some ψ` and `φ.toLS false ρ = some ψ`, plus
+`ψ.Src false true`. The proof retains exact optional equality where both
+checked arithmetic operands may halt. Structural target, mapping-key and
+negative-hash checks establish `qfUIntLinear_inTarget` for closed members,
+for every waiver setting. Closed members are ground arithmetic; scoped
+local-variable results are exercised under a real pushed uint binder.
+
+This is a source-translation/admission bridge increment. It does not yet
+prove program/update normalization, quantified-prefix closure, parameter
+binding, source-derived resource bounds, `leafOf?` success, generic
+`Covered` or target-to-coverage completeness. It is not a Residue definition
+or replacement for DecisionTheorem-prime. Reads, state terms, comparisons,
+updates and binders remain outside this first grammar, without being
+new exclusions from the original assignment or frozen target.
+
+`Examples/DecisionUIntBridge.lean` verifies a pushed local and the actual
+translated output, missing-binding failure with a false environment
+invariant, nonlinear syntax outside the grammar, and logical combinations
+at both polarities. Two **different** checked subtractions (`x-1`, `x-2`)
+both halt at zero and their source equation holds; at one only the right
+term halts and the equation fails. The exact `LFml.optEq` output is pinned.
+The quantified negative leaf has a concrete State.init countermodel and a
+certified actual refuted verdict, derived using existing Covered completeness
+and that semantic countermodel; this is not an arithmetic-search timing.
+Positive controls reuse the existing exact direct-two source/certificate
+and kernel-compute the actual proved tag of a closed logical combination.
+Decision-result validity/refutation statements retain `Fml.ValidH`/
+`Fml.holdsH`; ordinary concrete countermodels are stated separately. The
+negative leaf explicitly checks hash-freedom before the no-hash completeness
+and ordinary-validity specialization. Existing unknown array/
+memory pins, observations and decision functions remain unchanged.
+
+Final exact-source MCP checks passed in 12.78 s (terms), 6.31 s (formulas)
+and 5.26 s (controls). Focused builds passed in 12.69/5.20/4.16 s. All
+52 public theorem axiom reports passed in 13.74 s with only standard axioms.
+Commands, source hashes, actual versions and aggregate RSS/headroom are in
+`/workspace/va1-evidence/uint-bridge-next/verified-gates.json` and raw logs.
+The same hard 12 GiB/no-swap cap, 12 GiB host reserve, serial thread one/
+explicit `-j1`, writer lock and unchanged 300 s/proof budgets remain.
+Failed constructor-spelling, tactic-probe, polarity reduction, refutation
+case-equality and unavailable verdict-equality-instance attempts are retained,
+not counted as passing checks. Scratch was preserved outside the library
+before static gates; final source has no unfinished proof or new axiom.
+
+Independent read-only finder and skeptic source/control reviews found no
+issues. Both explicitly confirmed that the local-binding invariant is
+substantive/noncircular and that normalization, prefix/atom closure, bounds,
+coverage and the exhaustive residue/bridge remain open. The added pushed-
+local and distinct both-halting controls address the skeptic's requested
+nonvacuity cases. Neither reviewer edited or used Lean/server/build. Final
+documentation/static review and sealing follow when actually checked.
+The full original goal remains incomplete; Q1 is answered and Q2 remains
+pending for frontend repair/full validation only.
+
+Uint-bridge final static gates pass: 1067 reachable/zero orphans, 180 core/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, trust 1082 sources/248 inventoried sites/zero
+findings. Axiom inventory still fails with identical 1206 pins/zero errors/
+404 unrecorded changes; strict doc paths still fail with exactly 85 frozen
+findings and zero added/removed. Neither is waived or passing. Entire
+Decision source and original counterexample byte identities pass. Final
+independent read-only handoff/evidence reviews found no issues. Cumulative
+post-commit patch/bundle/checksum export follows; full goal stays incomplete.

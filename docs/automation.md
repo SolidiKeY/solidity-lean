@@ -997,6 +997,11 @@ DecisionArrays is now also a compatibility facade over separate fixture/coverage
 and exact replay modules. All 26 declarations and the guarded output remain;
 the final replay profile passed in 37.18 s with interpretation about 50 ms.
 This preserves the earlier normalized replay speed repair and all budgets.
+An intrinsic uint source-grammar increment now constructs actual numeric
+`toL`/`toLT` and both-polarity `toLS` outputs without a coverage/verdict
+premise, with pushed-local, partial-arithmetic and certified verdict controls.
+Normalization, prefix/parameter closure, bounds and the exhaustive
+Residue/target bridge remain open; the first grammar's complement is not Residue.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
