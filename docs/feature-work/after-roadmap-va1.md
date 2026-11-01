@@ -38,24 +38,38 @@ Full commands, selected container inspection and raw logs are retained under
 `decideGoal_complete` requires no hash; `decideGoal_complete_hash` handles hashes.
 The integrated handoffs describe closed original pins for two-anchor KeY int,
 ledger quantifiers, negative memory block, parameter/struct witnesses and
-written-memory hashing. These must be reused, not reimplemented. Runtime
-reproduction of those pins remains pending.
+written-memory hashing. These are reused, not reimplemented. The checked
+producer-source replays and remaining gap census are recorded below.
 
-## Queue accounting
+## Queue accounting (current)
 
-- Baseline: approvals recorded; source audit and baseline timings incomplete.
-- AU01 theorem: meaningful reasoned decidable Residue, target bridge,
-  nonvacuity/negative controls and theorem axiom audit pending.
-- AU01 performance: checked hash/main-file splits are recorded below; overall
-  performance milestone and final import-closure gates remain open.
-- AU02: fixed arrays, arrays below keys/fields, arrays of structs/arrays, broader
-  memory blocks, halting OR operand, program-free coverage inclusion and
-  formula-derived fuel/511-node bound all pending reproduction and proofs.
-- Backfill: residue census/bridge controls, profiling/splits, independent fixed-array
-  and program-free coverage lemmas, negative/axiom controls all outstanding.
-- Per-file, affected/full run-lean, strict automatic, trust/axiom and docs-versus-base
-  gates pending. No timeout or failed check counted as a pass.
-- No AU05/AU06 or compiler work; no changed exclusions, hash premises or budgets.
+- Baseline/setup: exact approvals, frozen ancestry, runtime/KeySort, integrated
+  producer replays, memory/array gap census and measured checks recorded.
+  Exhaustive remaining shape/reason census and baseline reproduction are partial.
+- AU01 theorem: meaningful decidable Residue, exhaustive target-to-covered/hash
+  bridge and DecisionTheorem-prime remain open. Existing census/nonvacuity and
+  countermodel controls are partial progress, not a theorem substitute.
+- AU01 performance: hash/main splits and unchanged DecisionArrays replay checks
+  pass below 300 s. Further interpreted profiling, requested array split and
+  final import/full gates remain open; no milestone eligibility claimed.
+- AU02 fixed arrays: seven concrete array shapes reproduced; standalone fixed
+  storage-vector reconstruction/negative-block lemmas and controls checked.
+  Pipeline integration, fixed/nested array gap closure remain open.
+- AU02 broader memory and halting OR: integrated narrower deliveries reused;
+  remaining generalized implementation/proofs and controls open.
+- AU02 program-free boundary: original false requirement/counterexample retained;
+  direct human Q1 revision recorded. Exact coefficient-family boundary checked;
+  broader M4 source characterization remains open.
+- AU02 formula-derived fuel/511-node bound: open; no fixed budget raised/hidden.
+- Backfill: checked splits, independent fixed-vector lemmas, coefficient-family
+  boundary, negative/axiom controls delivered; Residue reason census/bridge and
+  remaining program-free/coverage work are partial/open.
+- Validation: owned per-file/focused gates, strict automatic, layers/orphans and
+  trust pass as recorded. Full run fails at host reserve in unchanged frontend
+  TypeExamples; ownership Q2 pending. Axiom inventory/docs strict failures remain
+  exact-base findings; they are not waived or claimed passing.
+- No AU05/AU06/compiler/VA2 work, changed exclusions/premises/budgets or
+  publication. Original full persistent goal remains incomplete and unmodified.
 
 ## Reviews and delivery
 
@@ -63,7 +77,8 @@ Approval setup: independent finder and skeptic found no issues. Docker recovery:
 independent read-only finder and skeptic verified actual limits, exit codes and
 formatting without Lean/server. Skeptic noted missing build peak RSS; the
 measurement rerun above supplies a sampled aggregate peak, distinct from charged memory.
-Implementation milestone reviews remain pending. No push, merge, PR or tag.
+Completed checkpoint reviews are recorded below; unimplemented milestones still
+require their own reviews. No push, merge, PR or tag.
 The persistent goal was not changed during recovery; get_goal is unavailable
 to this worker. Coordinator owns journaled status-only reactivation.
 
@@ -685,3 +700,85 @@ original 8bbd5606 counterexample remain byte-identical. Independent final
 finder and skeptic documentation/evidence reviews found no issues; neither
 used Lean/server/build or wrote files. All original open obligations and Q2
 remain. Export verification follows the commit; no full-goal pass is claimed.
+
+
+## Fixed storage-vector reconstruction backfill (2026-11-01)
+
+`Calculus/FixedArrayFloor.lean` reuses integrated `MemFloor` index laws and
+`ArrayCut.vecOf`; those deliveries are unchanged. For all types `E`, lengths
+`n`, vectors `v : SVec E n`, breakpoints `B` containing `(n : Int)` and natural
+indices `k`, `fixedFloorVec_slot` proves
+`(fixedFloorVec B v).toList[k]? = v.toList[mxFloorIndex B k]?`.
+This preserves optional reads even beyond length; the default used during
+construction is unreachable below length. `fixedFloorIndex_toNat` certifies
+the corresponding uint index; `fixedFloorVec_find` proves actual
+`SVal.findM` equality along `.atF i q` for every typed continuation
+`q : Path E U`, including nested array/struct elements.
+
+`fixedFloorVec_block_reads` realizes a finite block and exterior reads in one
+reconstructed vector. `fixedFloorVec_negative_iff` quantifies over all
+`v : SVec E n`, with vector-dependent breakpoint lists retaining length and
+every exterior read. The full universally quantified block implication is
+equivalent to its finite-instance counterpart. `P : Option (SVal E) → Prop`
+sees the optional element, not its index; `Q` sees only retained optional
+reads. The forward proof applies its full-block hypothesis to a potentially
+different vector, then transfers `Q` back by retained-read equality. No
+completion/decision premise is assumed. This vector-level boundary does not
+recognize arbitrary intrinsic formulas, establish whole-state/alias
+agreement, transfer arbitrary guards or change a closer verdict. It does
+not replace AU01 or present a stronger premise as the original theorem.
+
+`Examples/FixedArrayFloor.lean` proves inhabited changed/retained uint reads,
+reads at/past length, empty bool and nested-array controls. Omitting the
+length breakpoint demonstrably changes definedness and invalidates the read
+identity. The Boolean input `[true,false]` fails its full block; its different
+reconstruction satisfies it. `bool_finite_boundary` specializes the
+quantified iff to that inhabited type. These are kernel proofs, not
+source/EVM test evidence or pipeline coverage.
+
+Core per-file MCP passed in 3.15 s and fresh focused build in 2.08 s
+(final warm source-record recheck 1.02 s). Controls MCP/build passed in
+4.27/2.08 s. All 20 public theorem axiom reports passed in 3.21 s with only
+standard axioms. Exact commands, versions, source hashes, cgroup/pre-build
+measurements and sampled aggregate RSS are in
+`/workspace/va1-evidence/fixed-floor-next/verified-gates.json` and raw logs.
+The one-second warm recheck finished before an in-container RSS sample,
+recorded as null; its pre-build measurements remain. Other checks retain
+aggregate RSS samples. The unchanged 300 s/proof budgets, hard 12 GiB/no-swap
+cap, 12 GiB host reserve, serial thread-one/explicit `-j1` checks remain.
+Failed empty-vector `rfl` and open-lambda inference/decide probes are retained,
+not counted as passes. No predicate, pipeline, old pin, model, dependency or
+other-lane source changed.
+
+Independent read-only finder and skeptic found no logical issues, confirming
+the exact length/retention premises, index-independent `P`, read-only `Q` and
+vector-level scope. The skeptic suggested an inhabited specialization; the
+Boolean specialization and changing reconstruction address it. Neither
+reviewer edited or used Lean/server/build. Final delta/static review and
+packaging follow below when actually checked.
+
+This completes the standalone fixed-array backfill lemma/control increment,
+not AU02 implementation. AU01 Residue/DecisionTheorem-prime/structural bridge,
+broader M4 boundary, AU02 pipeline children including formula-derived fuel
+and final full validation remain incomplete. Q1 is answered; Q2 remains
+pending and blocks only frontend repair/full validation. Prior seals and
+failures remain.
+
+Fixed-vector final static gates pass: 1060 reachable/zero orphans, 180 core/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, trust 1075 sources/248 inventoried sites/zero findings.
+Axiom inventory still fails with 1206 pins/zero errors/404 unrecorded changes,
+byte-identical to the prior checkpoint; doc paths still fail with the exact
+85 frozen-base findings and no added/removed findings. Decision and retained
+counterexample byte identities pass. Final independent finder/skeptic delta
+and handoff reviews found no issues. The cumulative export includes prior
+raw evidence and seals, with actual post-commit verification required.
+
+The first commit attempt failed with actual Git exit 128: `No space left
+on device`. Root overlay was full (32 GiB); source/evidence survived.
+Saved non-secret state/cap/driver evidence for the eleven stopped
+`va1-ind-fixed-floor-*` containers, then removed only those task-owned
+temporary containers. All bind-mounted files, images/caches and other
+containers were preserved; free space recovered to 746 MiB. Exact commands
+and before/after `df` are retained in `fixed-floor-next/disk-recovery`.
+The failed commit is retained as a setup failure, not a passing gate.

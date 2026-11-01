@@ -179,6 +179,7 @@ import Solidity.Calculus.KIntTwoAnchors
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
 import Solidity.Calculus.DecisionCoefficientBoundary
+import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.HashWritten
 import Solidity.Calculus.HashWrittenInput
 import Solidity.Calculus.HashWrittenRealize
@@ -232,6 +233,7 @@ import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.DecisionArrays
 import Solidity.Examples.DecisionArrayGaps
+import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
 import Solidity.Tools.Verify
