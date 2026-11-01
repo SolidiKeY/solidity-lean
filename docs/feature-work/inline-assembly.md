@@ -242,3 +242,19 @@ pass affected kernel/MCP checks. These are supplied-completion and target-only
 laws, not source try/catch, RETURNDATACOPY lowering or full EVM adequacy.
 All24 obligations/six combinations stay pending; the early package permits
 parallel consumers without duplicating producer semantics.
+
+
+### VY5 parallel concrete components — 2026-11-01
+
+The [VY5 concrete handoff](inline-assembly-vy5.md#parallel-concrete-components--2026-11-01)
+adds actual target repetition, computed outer-slot transport and lossless
+world/target word adapters;13 component facts are registered without closing
+any of24full obligations/six source combinations. Actual peer VY3/VY4 modules
+and compatible V16 certificate interfaces are checked in a private joint tree.
+KeySort2jobs, library1005jobs, TestSuite262jobs, annotations, per-file MCP and
+strict/trust checks pass.192JS+2Python, four pinned component profiles and exact
+encoded target pass; original227byte/log matches,21fork blocks and eight intended
+mutants remain intact. Concrete source/world/compiler adequacy still needs
+specific producer inputs; neither generic V16 laws nor finite external tests
+replace those proofs. New artifacts are versioned under
+`/workspace/vy5-composition/parallel-20261101/final/`.

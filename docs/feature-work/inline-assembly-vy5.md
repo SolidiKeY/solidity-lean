@@ -738,3 +738,109 @@ laws do not relabel them complete. Final combined root/full policy gates remain
 required; no new RUNTIME_GATE_PASS is claimed. The prior finite controls and
 immutable artifacts are unchanged. New evidence/package paths are under
 `/workspace/vy5-composition/parallel-20261101/`.
+
+
+## Parallel concrete components — 2026-11-01
+
+Continued after the early interface checkpointe75bad809cfda97eedc97d694eaeeac3243ae353.
+[TargetRepeat](../../Solidity/Yul/Composition/TargetRepeat.lean) proves actual
+ADD execution for every finite repetition and arbitrary caller tail, including
+wraparound controls. It is not a source for/while or compiled-jump theorem.
+[ScopeTransport](../../Solidity/Yul/Composition/ScopeTransport.lean) transports
+the computed ADD result through the actual VY3 newer-prefix/SWAP/POP operations
+to an indexed outer local and reads it back. Both Fin bounds and depth<16 are
+explicit. This is not a source modifier/library calling convention or real-EVM
+stack-capacity theorem. [WordBridge](../../Solidity/Yul/Composition/WordBridge.lean)
+losslessly connects existing Roadmap Fin256 words to VY3 BitVec256, proves both
+round trips and actual modular ADD agreement, preserving511 rather than cleaning
+to255. It defines no new word semantics or dirty/narrow source-local policy.
+
+The [component ledger](../../tests/yul-composition/component-ledger.json)
+registers13 selected ready component facts, current module hashes, every original
+24obligation and all six combinations, with precise ready/pending producer facts.
+There are15 named checked component laws including helpers/negative discrimination;
+all scoped axiom reports contain only standard axioms (some round trips use none).
+No full obligation or source combination is relabeled complete. The original
+ledger only gains a narrow link to this record; source admission/manifest and
+all original expected verdicts remain unchanged. Core layer registration adds
+only the composition namespace; public-root producer integration stays private.
+
+The newly delivered immutable V16 checkpointbea6e0e334f448aebb6f7c7a68321b4e419b43d2
+was SHA256/bundle verified. Its compatible Transport/Relational modules were
+staged exactly in the private tree. [V16 input record](../../tests/yul-composition/v16-producer-input.json)
+and [checked signatures](../../tests/yul-composition/V16Signatures.lean) identify
+actual completion_at_need/composed_completion/composed_observation declarations.
+General interfaces are available; actual assembly Lang/pass/Cert, Forward,
+Guard, Allowed/Admissible and composition closure/completion inputs are still
+owed. No generic certificate law is presented as concrete assembly adequacy.
+Other producer files, shared engine/parser/lockfiles and active checkouts were
+not rewritten or imported into the assigned branch.
+
+[Component driver](../../tests/yul-composition/ComponentDriver.lean) executes
+actual checked world/word/target components and emits actual backend ADD bytes.
+[Runner](../../scripts/yul-composition/component.mjs) compares selected projections
+against exact encoded target execution and the independently saved
+[Solidity control](../../tests/yul-composition/ComponentControls.sol), pinned
+solc0.8.38/Osaka in legacy/viaIR with optimizer off/on. It retains constructor,
+pair and caught-call captures, success/failure/bytes/ordered logs and touched
+state, original compiler receipts, runtime installation hashes and identities.
+Compared projections are ADD259, returnedabcd, caller log11 and final slot7;
+the synthetic Lean nonce operation and arbitrary final compiler memory are
+not asserted equal to the Solidity run. Copying supplied outcome bytes remains
+PUSH/MSTORE8 materialization, not RETURNDATACOPY lowering or an EVM proof.
+
+Optimized solc removes the reverted SSTORE42. Original unoptimized captures
+show the write; all profiles retain slot7, ordered caller logs and exact bytes.
+An initial guard requiring this unobservable write in optimized traces failed
+and is retained; internal trace agreement is explicitly pending, not silently
+identified. Independent reviews found dropped pair failure/logs, weak producer
+registry identity and encoded deployment provenance/report gaps. Fixes bind
+actual results to every capture, fixed caller/zero value, independent selectors,
+exact ordered profiles, compiler input/output receipts, installed runtime and
+frozen producer identities. Missing/malformed/stale/reordered evidence,
+coordinated equal-byte revert/log/state/owner/request mutations and false proof
+closure all fail closed. Finder/skeptic reviews use no Lean server/build.
+
+Final private joint policy gate passed explicit KeySort build2jobs, library1005
+jobs, TestSuite262jobs and SolKey377taclets/131read annotations. Actual Lean4.24.0
+commit797c613 and Lake5.0.0-src+797c613 are recorded before the successful gates.
+Installed per-file MCP checks pass all six own modules, driver and V16 signature
+file with success=true, partial=false, no errors; nonfatal server shutdown
+warnings remain raw. After final report fixes,192JS+2Python pass; four component
+compiler profiles and exact encoded target match. Original reference227working/
+21fork-blocked and416compiler probes72match/8intendedmismatch/4diagnosticmatch/
+304pending/28blocked remain unchanged. Strict check491automatic/61budgeted/
+0manual/11refuted/0pending and source/TestSuite trust audits pass with zero
+findings. These legacy strict rows do not discharge the assembly ledger.
+
+Heavy checks remain serial, LEAN_NUM_THREADS=1/Lean-j1, aggregate12GiB/no swap,
+with OS/RSS monitoring and the writer lock. The combined kernel/script gate sampled
+RSS1,744,191,488 bytes with minimum OS availability16,871,350,272 bytes, no OOM or
+resource stop. The final complete-import policy gate sampled RSS1,743,634,432
+bytes and minimum OS availability17,568,440,320 bytes, also exit0. A targeted
+orphan audit initially found four unregistered supplied VY3 controls; all four
+were registered privately and the final closure has zero orphans. Exact
+transitive producer bodies match their commits (48VY3/16VY4/6V16 modules).
+Disk reached370MiB due duplicated stopped-container caches; every
+new cache file was hashed/preserved in independent disk objects before retiring
+only redundant new stopped containers. All earlier containers/caches/artifacts
+remain intact. Mutable input-index versions were all retained and latest chosen
+explicitly; future checks share a persistent disk cache. A final audit caught
+one5388-byte mutable index still sharing an old object inode. Its exact original
+bytes were recovered from another retained index version, verified against the
+original SHA256, and isolated atomically; all saved cache objects now verify.
+The cause/fix is retained in cache-index-recovery.json. More than6GiB headroom
+was restored. No proof/gas/step/node/test budget increased.
+
+Work1/Work3 now have concrete component/kernel progress and remain partial;
+Work2/BackfillA/B remain partial for universal correspondence and actual producer
+wiring. VY1/VY2 packages are not delivered in the inspected exchange index;
+physical ownership/writeback and dirty-local/source execution remain exact
+producer inputs, alongside specific compiler/world/V16 certificates and G01
+amendments. Concrete full Y01–Y09/Y10/G48–G51 closure is unfinished. New ready
+facts do not count as final coverage or solve all original queues. Existing
+get_goal read tool is unavailable; no new/reset goal or competing continuation
+is created. New reviewed patch/bundle/handoff/evidence/checksums are under
+`/workspace/vy5-composition/parallel-20261101/final/`; the early immutable package
+and all six earlier checksum manifests are preserved. Historical docs/G03 exit1
+failures remain failures with exact-base equality, checked separately.

@@ -409,5 +409,6 @@
       "proof": null,
       "fixture": "libraries"
     }
-  ]
+  ],
+  "componentEvidence": "tests/yul-composition/component-ledger.json"
 }
