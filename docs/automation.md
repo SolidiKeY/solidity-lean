@@ -946,13 +946,26 @@ the coverage theorem checks (see the aggregate milestone continuation).
 The completed managed-cloud Group 07 run checked the unchanged exact verdict
 pin in 2,262 s; this is not a controlled comparison with the historical timing.
 The 300 s budget of the gate covers TestSuite modules only.
-## M7-next · A checkpoint of the theorem (not started)
+## M7-next · A checkpoint of the theorem (in progress)
 
 The ledger-quantifier lane implements feature 33; repository-wide validation
 is recorded in its handoff. This does not
 execute the broader checkpoint proposal below, introduce a `Residue`, or
-change `inTarget`, exclusions, `Waivers` or `DecisionTheorem`. The remaining
-checkpoint work still needs its own authorization.
+change `inTarget`, exclusions, `Waivers` or `DecisionTheorem`. The broader checkpoint is authorized by the exact AQ1/AQ2 receipt in
+`docs/solidity-scope.md`; its theorem and remaining work are incomplete.
+
+**VA1 independent performance progress (2026-11-01):** the hash regression
+facade now imports coherent modules listed in `docs/module-map.md`. Every
+module passed bounded per-file MCP and its affected target under the unchanged
+300 s limit; the largest observed check was 54.88 s. The original public
+fixtures, all 15 guarded evaluations and expected messages, coverage conclusions
+and hash premises remain. The observer is `noinline`; exact family facts and
+existing coverage routes avoid repeated kernel computation. Full timing/resource
+evidence and failures are in [the VA1 handoff](feature-work/after-roadmap-va1.md).
+`Decision`/`DecisionArrays` profiling, the meaningful residue/forward bridge and
+remaining AU02 work are open. VA1-Q1 remains pending; neither predicate nor the
+false unconditional reverse-inclusion requirement was changed. This is not
+`milestone-m7-next` eligibility or permission to publish.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is

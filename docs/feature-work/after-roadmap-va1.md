@@ -1,6 +1,6 @@
 # VA1 decision lane: setup and open work
 
-Status: **blocked on VA1-Q1**, 2026-10-31. Base `8bd8742ad987d566f7ba7624372cec1c020be07c`,
+Status: **partial; VA1-Q1 pending; independent AU01 work active**, 2026-11-01. Base `8bd8742ad987d566f7ba7624372cec1c020be07c`,
 branch `codex/solidity-automation-20261031/va1-decision`, checkout
 `/workspace/solidity-lean`. Exact AQ1/AQ2 receipt is recorded in
 [solidity-scope.md](../solidity-scope.md), checkpoint
@@ -33,7 +33,7 @@ Full commands, selected container inspection and raw logs are retained under
 
 ## Source audit started
 
-`Decision.lean` already separates non-hash `Covered` completeness from
+`Calculus/Decision.lean` already separates non-hash `Covered` completeness from
 `hashCovered` completeness. The bridge must account for both routes:
 `decideGoal_complete` requires no hash; `decideGoal_complete_hash` handles hashes.
 The integrated handoffs describe closed original pins for two-anchor KeY int,
@@ -102,3 +102,109 @@ This is a scope correction, not approval to change a semantic premise.
 
 All remaining queue entries above remain open. This evidence checkpoint
 is not an AU01/AU02 implementation milestone or final gate pass.
+
+## Independent AU01 hash performance work (2026-11-01)
+
+VA1-Q1 is still pending. The false reverse inclusion, frozen predicates,
+committed witness and original requirements are unchanged. Other work does not
+depend on that decision. VA2 sharing/notation ownership was not touched.
+
+The original hash file failed before profiling due to stale Constructibility
+artifacts; the affected Hashing import closure rebuilt successfully (230 jobs,
+401.48 s total; its final module 117 s). No source repair was made there.
+Trace profiling polluted guard messages; dedicated profiling and an ordinary
+full-file check hit the 12 GiB host-reserve guard. All failures are retained.
+The first six original verdicts in an IO timing harness took 0.8764 s combined.
+Flushed command markers then located compilation/inlining and kernel coverage
+reductions. Scheduling alone was not established as a complete repair.
+
+`DecisionHashes` remains a facade; all public fixture names, definition bodies,
+theorem conclusions and 15 original guarded evaluations/expected messages are
+preserved. `noinline` changes only its verdict observer's compilation. New
+files use the existing serial-elaboration convention. Splitting may add import
+overhead; speed history and exact replays were reviewed before changes.
+
+The five-string family is checked per kind and composed; `famBound = 4`,
+algorithms, budgets and the original five-string inputs are unchanged. Coverage
+proofs select actual existing hash routes. Function-level projection equalities
+and structural list membership avoid an observed recursion-depth failure
+without increasing that limit. The mixed-kind coverage proof reuses its
+original `coveredK2` certificate. All nine printed axiom sets are standard.
+
+| Module | Per-file MCP seconds | Affected build seconds | Sampled peak RSS kB | Minimum available host GiB |
+|---|---:|---:|---:|---:|
+| DecisionHashCore | 45.91 | 41.46 | 5355456 | 12.63 |
+| DecisionHashUpdates | 27.63 | 24.37 | 5370996 | 12.76 |
+| DecisionHashFamilyCheck | 29.80 | 28.77 | 4214224 | 13.15 |
+| DecisionHashFamilies | 44.59 | 42.50 | 5628552 | 12.51 |
+| DecisionHashQuantifiers | 15.95 | 14.88 | 3368952 | 14.68 |
+| DecisionHashThreeKinds | 30.94 | 29.70 | 5993368 | 12.12 |
+| DecisionHashMixed | 28.77 | 27.61 | 5721100 | 12.40 |
+| DecisionHashKeys | 54.88 | 50.98 | 5446052 | 12.04 |
+| DecisionHashKinds | 3.18 | 2.07 | 1077032 | 16.28 |
+| DecisionHashes | 3.15 | 2.07 | 1220464 | 16.16 |
+
+These are fresh file checks with warm dependency artifacts, not a clean full
+build. Each run verifies cgroup `memory.max=12884901888`, `memory.swap.max=0`,
+uses one Lean thread and explicit `-j1`, holds the original writer lock and
+monitors aggregate RSS and the 12 GiB available-host reserve. No LSP/build
+overlap. Logs, exact commands, source hashes and measured samples are under
+`/workspace/va1-evidence/independent-20261101`. Stopped checks remain failures.
+Scratch probes were preserved outside the library tree for the orphan gate.
+
+Core/updates/family/quantifier/three-kind/mixed/key modules and both facades
+have complete passing MCP results and builds below 300 s. This verifies the
+hash-file subtask only. Downstream consumer/full gates and the entire AU01
+performance checkpoint remain open; no milestone or full assignment pass is
+claimed. The published memory-loop prerequisite was not needed or consumed;
+no other VM's performance is credited as this VM's result.
+
+Remaining independent work: Decision/DecisionArrays profiling and splits; the
+meaningful decidable Residue, forward target/coverage/hash bridge and nonvacuity
+controls; all AU02 array/memory/halting-OR/formula-fuel children; independent
+array/coverage backfill and final validation. Only the false unconditional
+reverse-inclusion obligation is held specifically for VA1-Q1.
+
+### Static and preservation checks for this partial checkpoint
+
+- Registration: 1041 reachable, zero orphaned. Layer gate: 180 core modules,
+  zero elaborator reachability. Strict automatic gate: 491 automatic, 61
+  step-budget proofs, 11 refuted, zero manual/pending. Trust: 1056 sources,
+  248 inventoried sites, zero findings. All four commands exited 0.
+- Source comparison against `8bbd5606`: all 82 original declarations, all
+  definition bodies, all theorem signatures and all 15 guarded observations
+  are preserved. Only the three documented coverage-proof bodies changed.
+- The nine printed axiom sets passed the automatic standard-axiom audit.
+  Full `check-axiom-pins.mjs` still exits 1: 404 unrecorded changes, zero
+  axiom errors, versus 403 at the frozen base. Tracked pins/sets are identical.
+  The extra untracked pin is `foo []` in the pre-existing optional
+  `Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean` cache. The cache
+  and inventory were preserved. This full gate is not reported as passing.
+- Strict documentation paths still exit 1 with 48 missing references and 37
+  ambiguous references, exactly the frozen-base findings after qualifying
+  this lane's ambiguous `Calculus/Decision.lean` citation. Differential result:
+  zero new findings. No unrelated references were rewritten.
+- KeySort passed again under the current container cap and 12 GiB host
+  reserve in 2.08 s, with actual Lean/Lake versions and `KEYSORT_PASS` retained.
+
+The baseline comparison uses the clean detached read-only worktree
+`/workspace/va1-doc-base-8bd8742a` at the exact frozen commit. Raw failed
+validation-driver attempts remain retained alongside the corrected comparisons.
+Downstream consumer/full builds, final strict inventories and the remaining
+original queues are still open; this is checked owned progress, not completion.
+
+### Downstream consumer and final review
+
+The unchanged direct consumer `Solidity.Examples.Decision` was checked with
+`timeout 300 lake -f .va1-lakefile.toml build Solidity.Examples.Decision`.
+It exited 124 after 300.68 s, without a host-reserve stop. This is a failed
+required affected check, not a pass. Main Decision profiling/splitting remains
+the next independent AU01 child; Hash/DecisionArrays/full-milestone completion
+is not claimed.
+
+Independent final read-only finder and skeptic reviews found no code or
+documentation issues in the checked hash split. They confirmed source/hash
+identity, the 82 original declarations and 15 guards, standard axiom sets,
+actual typed route membership and narrow acyclic registrations. They used no
+Lean server or build and wrote no files. The final consumer timeout is retained
+as an explicit open obligation.
