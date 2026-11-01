@@ -67,6 +67,7 @@ import Solidity.Calculus.JoinSequence
 import Solidity.Calculus.Arms
 import Solidity.Calculus.SyntaxSize
 import Solidity.Calculus.CallSummary
+import Solidity.Calculus.CallResultCapture
 import Solidity.Calculus.Blocks
 import Solidity.Calculus.WkOver
 import Solidity.Calculus.Step
@@ -272,6 +273,7 @@ import Solidity.Examples.Tactics.LoopNotices
 import Solidity.Examples.Tactics.LongContext
 import Solidity.Examples.Tactics.PolySize
 import Solidity.Examples.Tactics.CallSummary
+import Solidity.Examples.Tactics.CallResultCapture
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertData
 import Solidity.Examples.Tactics.Values

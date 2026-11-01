@@ -26,3 +26,8 @@ Existing per-file diagnostics, compiled axiom audits, affected builds and indepe
 Clients must use the intrinsic context indices, the concrete successful query equation when selecting a plan, and the existing typed run/modality semantics. Canonical short-circuit boundaries remain split. No VA1 whole-lane theorem is needed to use these ready declarations.
 
 AU04 fresh-local call-result sharing, function-family leaf bounds, post-anon loop cost repair, the forced signed sequential closer fixture, and final full combined-tree gates remain open. This package does not supply those missing facts and must not be used as a completion certificate. A staged consumer must record the exact producer head and module hashes and validate its concrete combined tree before integration.
+
+
+## Subsequent independent AU04 prerequisite
+
+The next VA2 checkpoint adds `Solidity.Calculus.CallResultCapture`: `capture_applyV`, `restore_locals`, `restore_state`, `target_fresh`, `restore_applyV`, `capture_exh`, `sound`, `complete`, `holds_iff`, and `leaf_size`. The generic equivalence covers all primitive result terms and both modalities with no extra premise. It is independently usable before VA1 Residue, but does not compress a recursively expanded term. Its exact committed producer head is resolved by the accompanying checkpoint revision manifest; consume that concrete commit, not this paragraph as an assumed theorem. The ready walk source checkpoint above remains immutable.
