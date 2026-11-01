@@ -2059,3 +2059,118 @@ header preservation and structural/ownership checks pass separately. Raw normal/
 strict docs remain1 with complete publication/C24 findings equality; no new owned
 finding and no global docs pass. There is no source eligibility, full-assignment
 completion, independent-work exhaustion, publication or goal-state change.
+
+
+## Continuation26 — actual constructor boundary and checked final suffix
+
+Starting clean checkpoint: edb467aa0830b681ce03c3f707e288957794fd6f.
+Frozen base/branch and publication099bfbe185731c354b12a40f28ccf5d98534c779
+are unchanged. The original blocked goal is untouched. All26 preceding sealed
+manifests and their seven payloads were verified; no publication intake,
+reserved edit, source/profile/admission change, push/merge/PR or new goal.
+
+The additive laws in `Solidity/Backend/InternalFlow/TuplePrograms.lean` expose
+its existing private traversal at the actual enclosing syntax height. The
+nil/cons/block/branch equations consume genuine compiler selections;
+`compile_construction` retains positive syntax height and ordinary compiler
+refusal; tuple construction retains actual expanded selection/refusal and
+height equalities. These are finite structural construction laws, not an
+execution oracle, new evaluator or uncapped recursive compiler.
+
+In `tests/internal-flow/TupleMemoryCalls.lean`, the actual Composed selector is
+proved equal to public block/cons certificates. The suffix is checked over an
+abstract typed fragment and instantiated at the actual block output fragment;
+no supplied midpoint or representation is introduced. Its exact instruction
+list follows from that real construction. The SAME `Composed.target_final`
+statement obtains a zero-skip prefix/scoped endpoint from `represented`,
+recovers the full protected stack and all ordered cells from `target_unwind`,
+then executes only the real suffix with `Evm.run_append_ok`. Physical private
+cells are retained, not scrubbed: stack77/sentinel99/cursor268, both caller
+aliases, scalar1735, old arrays and private arrays all retain the original full
+ordered observation. Original programs, producer selection,85 tuple report
+order,542 registry pins/types and every positive/negative/refusal are unchanged.
+Six new generic and five concrete actual builtin axiom sets are guarded at the
+standard `[propext, Classical.choice, Quot.sound]`; no trust shortcut.
+
+### Measured boundary, including unsuccessful routes
+
+Identical CLI flags and explicit checked-declaration timing give baseline
+40.451s versus final41.930s. Body/unwind/final stages were1077/1275/1392ms and
+1085/1284/1087ms respectively; the final construction interval costs1824ms.
+The first sharing variant was40.349s with a1506ms construction interval.
+The final stage avoids replay and checks faster locally, but NO net speedup is
+established; a new complete raw/full retry is not justified. All measurements,
+source copies and raw receipts are retained in the new continuation26 evidence.
+
+A separate scoped-constructor/true-branch/continuation probe ties actual
+export execution to local writes using public append/skip laws. Its first
+full source-result equality route exited137 at48.116s. Isolated continuation
+code projection passed6.407s; a changed soundness-based outer endpoint passed
+6.657s. The final abstract-continuation probe checks13.657s, substantially more
+than the original unwind stage, so it is NOT adopted as a performance repair.
+Syntax/type/simplification/guard failures and diagnostic sorryAx outputs remain
+failed evidence only. No unique unproved OOM cause is asserted. One new profile
+receipt name was accidentally reused: the initial missing-file exit1/0.906s
+survives in the tool transcript, while the overwritten receipt records Docker
+collision exit125. The explicit collision note distinguishes this evidence
+loss from original raw logs; no earlier seal was touched.
+
+### Gates and remaining assignment
+
+Runtime again reports Lean4.24.0, Lake5.0.0-src+797c613 and successful KeySort
+(two cached jobs). Serial explicit-j1/LEAN_NUM_THREADS1, canonical writer and
+compiler locks, hard12884901888-byte aggregate/swap0, OS/disk headroom and the
+single keyed cache remain enforced. Only receipt-authenticated stopped own
+containers were cleaned; no source/object cache or unrelated work was deleted.
+Owned import closure passes15.088s. Actual stale bindings identify precisely
+FragileReturnCalls, StorageReturnCalls and TupleMemoryCalls; fresh kernel cache
+preparation passes42.754/36.558/48.863s separately. All542 imported original
+types remain byte-identical to C25;11 new actual builtin sets and retained
+7+6+5+15+3 separate sets are checked. Metadata/report parsing is not raw checking.
+Final complete cached/host/control/review outcomes are recorded below and in
+the exact-head handoff; no pending gate is inferred passed.
+
+Original fresh35-source FAIL124/120.908, earlier raw failures, broad-root
+FAIL124/120.609, original full FAIL124/300s and three later complete full
+FAIL124/300.887,300.535,301.050 remain. TestSuite/sort were never reached.
+No unchanged raw/full/root/held retry or increased budget was run. Raw normal/
+strict documentation exits1 remain failures; complete current/publication/C25
+comparison and frozen46-versus48 incoming findings are separate observations.
+
+ALL original queues remain partial: Work1 general runtime/result/reference
+frames beyond finite consumers; Work2 unbounded recursive source/target
+transport; Work3 generic dependent/full-signature dispatch and lowering;
+Work4 early-control/general mixed/call loop certificates and V14 application;
+Work5 word-frame/live-byte-journal/world unwind; Work6 independent target
+transient/transaction/self-call/callback composition; Backfills A/B retain
+their general recursive/reference/mixed lifetime/reset/unwind obligations.
+Read-only reinspection confirms Stmt has no return/break/continue constructor;
+LoopCert requires actual ProgFrag plus restricted-fragment stability, not a
+Calls.Program soundness substitution; Failure.Local.execute needs a live byte
+Journal, not a word-cell Machine relation; Machine has no independent target
+transient/callback-world field. Missing producers cannot be inserted as desired
+simulation premises. Ready owned body/unwind sharing remains engineering work;
+no independent-work exhaustion, integration eligibility or lane completion.
+
+
+Final C26 bounded outcome: the complete registered cached command exits124 at
+120.700s. All18 fixture results and542 unmodified builtin reports were emitted,
+but the final complete post-toolchain binding receipt was NOT written. This is
+FAIL, not a cached pass or strictsub120 evidence. Actual imported542 types and
+per-fixture ordered reports/sets are separately verified. Original raw/full
+failures are retained without retry. The added structural proof has not repaired
+the validation budget. Ready owned body/unwind proof and audit-cost engineering
+remain; no source eligibility or independent-work exhaustion is claimed.
+
+
+Independent read-only finder and skeptic source/final-doc reviews both PASS,
+without Lean/server/builds/writes and with no findings. Layer/import/orphan/trust,
+complete no-Lean cached/raw driver coverage/fail-fast controls,72 original and
+12 separate scoped/construction guard countercontrols pass. Cache and transitive
+dependency corruption controls pass10.375/14.217s before Lean invocation.
+A separate complete12049-input/toolchain/object integrity inventory passes
+7.313s; it does NOT turn the timed incomplete cached command green. Its first
+Python attempt exits127 because the container lacks Python; actual Node
+implementation checks the same content hashes. Final committed-artifact review
+and exact full HEAD/bundle/checksum details belong to the immutable handoff.
+No source obligation, failed mandatory gate or original dependency is waived.

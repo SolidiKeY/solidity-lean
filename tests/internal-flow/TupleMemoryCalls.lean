@@ -825,9 +825,86 @@ theorem target_export : words (Evm.run (prefixProducer.code ++ outerProducer.cod
 theorem target_unwind : words (Evm.run (prefixProducer.code ++ scopedProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265,266,267] =
     some [77,268,99,1730,256,256,259,17,30,1,2,19,17,3,23,29,31,2,99,101,1,55] := by decide +kernel
+namespace FinalConstruction
+
+theorem scopeRefused (F : Frag Caller) : Calls.compile 1 F scopeProgram = none := rfl
+
+theorem programRefused : Calls.compile 1 prefixProducer.frag program = none :=
+  Option.isNone_iff_eq_none.mp (Option.isSome_eq_false_iff.mp
+    (congrArg (fun x => x.2.1) traversal_and_refusal))
+
+def tailAt (F : Frag Caller) : Calls.Program 1 F suffix :=
+  (TuplePrograms.construction 1 program F suffix).get (by rfl)
+
+def tailCert : Calls.Program 1 (Calls.block scopedProducer).frag suffix :=
+  tailAt (Calls.block scopedProducer).frag
+attribute [irreducible] tailCert
+
+theorem actualProgramConstruction : producer = Calls.cons (Calls.block scopedProducer) tailCert := by
+  have scopeSame : TuplePrograms.construction 1 program prefixProducer.frag scopeProgram =
+      TuplePrograms.construction 1 scopeProgram prefixProducer.frag scopeProgram := rfl
+  have scopeActual : TuplePrograms.construction 1 program prefixProducer.frag scopeProgram = some scopedProducer := by
+    rw [scopeSame,← TuplePrograms.compile_construction prefixProducer.frag scopeProgram
+      (by decide +kernel) (scopeRefused prefixProducer.frag)]
+    delta scopedProducer
+    exact (Option.some_get _).symm
+  have tailActual : TuplePrograms.construction 1 program (Calls.block scopedProducer).frag suffix = some tailCert := by
+    delta tailCert tailAt
+    exact (Option.some_get _).symm
+  have selected := TuplePrograms.construction_cons program prefixProducer.frag (.block scopeProgram) suffix
+    (Calls.block scopedProducer) tailCert
+    (TuplePrograms.construction_block program prefixProducer.frag scopeProgram scopedProducer scopeActual) tailActual
+  have actual : TuplePrograms.compile 1 prefixProducer.frag program = some producer := by
+    delta producer
+    exact (Option.some_get _).symm
+  rw [TuplePrograms.compile_construction prefixProducer.frag program (by decide +kernel)
+    programRefused] at actual
+  exact Option.some.inj (actual.symm.trans selected)
+
+theorem actualProgramCode : producer.code = scopedProducer.code ++ tailCert.code := by
+  rw [actualProgramConstruction]
+  rfl
+
+theorem tailCode : tailCert.code = [.mload 1,.push (.val (wmod 5)),.dup 2,.add,.dup 1,.dup 3,.gt,.iszero,.jumpi 1,.revert,.swap 1,.pop,.mstore 1,.mload 1,.mload 2,.push (.val (wmod 1)),.dup 2,.mloadAt,.dup 2,.lt,.jumpi 1,.revert,.add,.push (.val (wmod 1)),.add,.mstoreAt] := by
+  unfold tailCert tailAt
+  rfl
+
+end FinalConstruction
+
+open FinalConstruction in
 theorem target_final : words (Evm.run (prefixProducer.code ++ producer.code) machine)
     [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265,266,267] =
-    some [77,268,99,1735,256,256,259,17,30,1,2,19,1735,3,23,29,31,2,99,101,1,55] := by decide +kernel
+    some [77,268,99,1735,256,256,259,17,30,1,2,19,1735,3,23,29,31,2,99,101,1,55] := by
+  obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hs,rest⟩ := represented
+  have executed : Evm.run (prefixProducer.code ++ scopedProducer.code) machine = .ok m₂ 0 :=
+    (Evm.run_append_ok hp).trans hs
+  have full := target_unwind
+  rw [executed] at full
+  have snapshot := numeric_stack_cells m₂ [0, 127, 1, 2, 3, 4, 5, 6, 7, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267] [77] [268, 99, 1730, 256, 256, 259, 17, 30, 1, 2, 19, 17, 3, 23, 29, 31, 2, 99, 101, 1, 55] rfl full
+  have h0 : m₂.mem 0 = observedWord 268 := congrArg (fun xs => xs[0]!) snapshot.2
+  have h1 : m₂.mem 127 = observedWord 99 := congrArg (fun xs => xs[1]!) snapshot.2
+  have h2 : m₂.mem 1 = observedWord 1730 := congrArg (fun xs => xs[2]!) snapshot.2
+  have h3 : m₂.mem 2 = observedWord 256 := congrArg (fun xs => xs[3]!) snapshot.2
+  have h4 : m₂.mem 3 = observedWord 256 := congrArg (fun xs => xs[4]!) snapshot.2
+  have h5 : m₂.mem 4 = observedWord 259 := congrArg (fun xs => xs[5]!) snapshot.2
+  have h6 : m₂.mem 5 = observedWord 17 := congrArg (fun xs => xs[6]!) snapshot.2
+  have h7 : m₂.mem 6 = observedWord 30 := congrArg (fun xs => xs[7]!) snapshot.2
+  have h8 : m₂.mem 7 = observedWord 1 := congrArg (fun xs => xs[8]!) snapshot.2
+  have h9 : m₂.mem 256 = observedWord 2 := congrArg (fun xs => xs[9]!) snapshot.2
+  have h10 : m₂.mem 257 = observedWord 19 := congrArg (fun xs => xs[10]!) snapshot.2
+  have h11 : m₂.mem 258 = observedWord 17 := congrArg (fun xs => xs[11]!) snapshot.2
+  have h12 : m₂.mem 259 = observedWord 3 := congrArg (fun xs => xs[12]!) snapshot.2
+  have h13 : m₂.mem 260 = observedWord 23 := congrArg (fun xs => xs[13]!) snapshot.2
+  have h14 : m₂.mem 261 = observedWord 29 := congrArg (fun xs => xs[14]!) snapshot.2
+  have h15 : m₂.mem 262 = observedWord 31 := congrArg (fun xs => xs[15]!) snapshot.2
+  have h16 : m₂.mem 263 = observedWord 2 := congrArg (fun xs => xs[16]!) snapshot.2
+  have h17 : m₂.mem 264 = observedWord 99 := congrArg (fun xs => xs[17]!) snapshot.2
+  have h18 : m₂.mem 265 = observedWord 101 := congrArg (fun xs => xs[18]!) snapshot.2
+  have h19 : m₂.mem 266 = observedWord 1 := congrArg (fun xs => xs[19]!) snapshot.2
+  have h20 : m₂.mem 267 = observedWord 55 := congrArg (fun xs => xs[20]!) snapshot.2
+  rw [actualProgramCode,← List.append_assoc,Evm.run_append_ok executed,tailCode]
+  simp only [List.set_cons_zero,Nat.reduceLT,decide_false,decide_true,Bool.false_eq_true,observedWord,wmod,bword,W,Nat.reducePow,Nat.reduceMod,words,run,Nat.reduceSub,Nat.reduceAdd,List.getElem?_cons,Out.bind,Instr.step,Machine.next,snapshot.1,List.map_cons,List.map_nil,exec,upd,Nat.reduceEqDiff,↓reduceIte,reduceCtorEq,Nat.succ_ne_self,h0,h1,h2,h3,h4,h5,h6,h7,h8,h9,h10,h12,h13,h14,h15,h16,h17,h18,h19,h20]
+  decide +kernel
 
 
 def checked : Compiler.Compilation 1 prefixProducer.frag program :=
@@ -1164,3 +1241,31 @@ info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_state_drop' 
 -/
 #guard_msgs in
 #print_checked_axioms Solidity.Backend.InternalFlow.TupleCallChecks.actualSelectorResult, Solidity.Backend.InternalFlow.TupleCallChecks.actualCallConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedSelection, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualOuterConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedCost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.expanded_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.fields, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.actual_extension, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_caller, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.private_does_not_escape, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_contents, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_cost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.bare_failure, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_run_state, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_has_output, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.scope_state_drop
+
+namespace Solidity.Backend.InternalFlow.TupleCallChecks.Composed.FinalConstruction
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.FinalConstruction.scopeRefused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms scopeRefused
+
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.FinalConstruction.programRefused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms programRefused
+
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.FinalConstruction.actualProgramConstruction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms actualProgramConstruction
+
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.FinalConstruction.actualProgramCode' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms actualProgramCode
+
+/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.FinalConstruction.tailCode' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms tailCode
+
+end Solidity.Backend.InternalFlow.TupleCallChecks.Composed.FinalConstruction
