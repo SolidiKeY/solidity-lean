@@ -751,3 +751,8 @@ Independent finder and skeptic read-only reviews found no correctness defect. Co
 
 - Final `... bounded.py bool-checkpoint-controls-final-build build Solidity.Examples.Tactics.JoinControls Solidity.TestSuite.Derived5`: PASS, 242 jobs, wrapper 14.24s, sampled aggregate RSS 1,538,668 KiB, cgroup peak 430,653,440 bytes. This checks the exact final source-shadowing additions after the broader 283-job gate.
 - Final `... bounded.py mcp-bool-controls-shadow-final .../mcp_probe.py .../requests/bool-controls-shadow-final.json`: per-file diagnostics PASS and both actual source-shadowing `lean_verify` audits PASS, wrapper 34.24s. Final `... bounded.py mcp-bool-checkpoint-all-axioms .../mcp_probe.py .../requests/bool-all-axioms.json`: PASS, all 25 compiled actual theorem audits use only subsets of propext/Classical.choice/Quot.sound, wrapper 14.65s; extracted `work/bool-final-axiom-results.json`.
+
+
+## Parallel producer interface (2026-11-01)
+
+The ready concrete declarations and client obligations are indexed in [PARALLEL-INTERFACE](after-roadmap-va2-interface.md). This incremental export preserves source checkpoint `04da7063854f2bb719e2bed9ab52c306279da4ee`; it makes no AU04 leaf-linearity or full-assignment completion claim. Independent read-only finder and skeptic reviewed the interface against the concrete modules and witnessed clients, without Lean/server/builds; neither found a semantic or completion mismatch. The skeptic wording refinement separates kernel semantic proofs from diagnostic/measurement evidence. Packaging and checksum verification are required separately. Full AU04 and final gates remain open.
