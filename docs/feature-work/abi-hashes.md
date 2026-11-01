@@ -1186,7 +1186,9 @@ padding, a lazy-only layout for a read-only parameter) with the exact
 canonical bytes the body receives, negative (each entry check, eager element
 checks, the first failing parameter deciding) and the named refusals.
 `tests/upstream/AbiEntryReplay.lean` replays the same cases through the
-upstream `replay` (counters check once-only bodies and rollback); it and the
+upstream `replay` (counters check once-only bodies and rollback), including a
+struct with a dynamic member (out-of-order and head-overlapping member tails,
+calldata and memory); it and the
 changed `tests/upstream/Replay.lean` run from `scripts/test-solidity.test.mjs`.
 
 ### Admission (`Solidity/Tools/UpstreamEntry.lean`)

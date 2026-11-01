@@ -23,6 +23,14 @@ private def C : Contract := contract!{
   function bump() returns (uint) { counter++; return counter; }
 }
 
+private def D : Contract := contract!{
+  struct S { uint a; uint[] b; }
+  uint counter = 5;
+  function sc(S calldata s) returns (uint) { counter++; return s.a + s.b.length; }
+  function sm(S memory s) returns (uint) { counter++; return s.a + s.b.length; }
+  function bump() returns (uint) { counter++; return counter; }
+}
+
 private def rows : List ImportRow :=
   [("outer", "outer(uint256[][])"), ("inner", "inner(uint256[][],uint256)"),
    ("mem", "mem(uint256[][])"), ("cat", "cat(bytes,bytes)"), ("narrow", "narrow(uint8[])"),
@@ -87,5 +95,31 @@ private def arr := ["uint256[][]"]
   (some "calldata layout accepted by lazy access but rejected by an eager copy needs calldata references in the source semantics")
 #eval check [vector "mem(uint256[][])" arr (words [0x20, 2 ^ 64]) [] true] "blocked" 0
   (some "possible Panic(0x41) allocation failure in memory decoding")
+
+private def drows : List ImportRow :=
+  [("sc", "sc((uint256,uint256[]))"), ("sm", "sm((uint256,uint256[]))"), ("bump", "bump()")].map
+    fun (name, sig) =>
+    { name, sourceSignature := sig, tag := .diamond, params := [], status := .elaborated, reason := "" }
+
+private def dcheck (vectors : List Json) (status : String) (count : Nat) : IO Unit := do
+  let report := replay D drows (Json.mkObj [("vectors", toJson vectors)])
+  unless (report.getObjValAs? String "status").toOption == some status &&
+      ((report.getObjValAs? (Array Json) "observed").toOption.map Array.size) == some count do
+    throw (IO.userError report.pretty)
+
+private def st := ["(uint256,uint256[])"]
+
+-- Nested struct with a dynamic member: an out-of-order member tail and a member
+-- array overlapping the struct head are accepted (calldata and memory); a member
+-- offset past the data reverts at entry in memory and stays a named lazy
+-- refusal in calldata (solc: accepted until `s.b` is read).
+#eval dcheck [
+  vector "sc((uint256,uint256[]))" st (words [0x20, 5, 0x60, 9, 2, 3, 4]) (words [7]),
+  vector "sm((uint256,uint256[]))" st (words [0x20, 5, 0x60, 9, 2, 3, 4]) (words [7]),
+  vector "sc((uint256,uint256[]))" st (words [0x20, 1, 0]) (words [2]),
+  vector "sm((uint256,uint256[]))" st (words [0x20, 5, 0x1000]) [] true,
+  vector "sc((uint256,uint256[]))" st (words [0x20, 5]) [] true,
+  vector "bump()" [] [] (words [9])] "working" 6
+#eval dcheck [vector "sc((uint256,uint256[]))" st (words [0x20, 5, 0x1000]) (words [5])] "blocked" 0
 
 end AbiEntryReplay
