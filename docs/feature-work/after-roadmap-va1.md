@@ -1725,3 +1725,68 @@ remaining memory/halting-OR/general-fuel, baseline/performance/backfill and
 required final gates remain incomplete. Q1 is answered; Q2/frontend repair
 stays held without blocking independent work. Goal/VM/branch remain unchanged;
 no push, merge, PR or tag.
+
+## AU02 actual numeric logical source traversal — 2026-11-01
+
+`Calculus/DecisionNumericTraversal.lean` proves traversal of the existing
+public `ExactAt.ofFormula?`, without changing any reducer/normalizer API or
+budget. For every intrinsic QFUIntLinear body over the fresh uint context,
+`qfUIntLinear_exact_source` takes any fuel at least the original-source
+`uintQFWeight` and returns an actual ExactAt certificate, its exact leaf and
+both real toLS polarity equations. The proof is induction on the existing
+fuel and actual source constructors, not a simulation or assumed oracle.
+
+`qfUIntPrefix_sourceReduction` proves the actual public sourceReduction?
+route on the positive prefix at the unchanged2048 budget, assuming explicitly
+`φ.uintQFWeight ≤ 2047` and reserving one step for its binder.
+`qfUIntPrefix_source_coverageFacts` instead requires `φ.uintQFWeight ≤ 511`
+and joins that actual certificate to numeric logical shape, fixed preparation
+and the formula-derived511-node body bound.
+The general program-normalizer traversal that precedes leafOf? remains open;
+no complete source-to-leaf, global Residue/DecisionTheorem-prime or full fuel
+completion is claimed. This discharges one previously explicit conditional
+integration obligation, independently of VA2 sharing and held frontend work.
+
+`Examples/DecisionNumericTraversal.lean` has actual source certificates for
+the nontrivial positive/refuted logical clients and identifies the positive
+certificate leaf exactly. Source weight141 supplies a real certificate; fuel3
+actually refuses that nested body while fuel4 succeeds. Hence the structural
+bound is sufficient, not necessary/minimal and never an unknown classifier.
+Zero fuel refusal and the previous exact kernel proved/refuted certificates
+are retained. No native guard is presented as a kernel verdict proof.
+
+The normalizer implementation is unchanged and its concrete source identity
+recorded in producer-identity.json: ProgramReduction SHA256
+46fa4337ca525f3347eadab053c3458385b73a56bb7aef0d06d21e68a3c6f7e2.
+An inspection-only probe of its generated private numeric name failed exit1
+with identifier/parser errors; the actual public ofFormula? signature printed.
+The failure is retained. No private alias, producer replacement, frontend
+repair or source/API edit was introduced or assumed. Decision, ProgramReduction
+and ExactUpdates remain byte-exact to frozen base. General normalization is
+still an owned proof obligation, not a whole-lane wait or new semantic hold.
+
+Raw gates at /workspace/va1-evidence/numeric-traversal-next: core MCP 5.269s,
+focused core build 3.107s, controls MCP 4.232s, controls build 2.098s,14 public
+axiom reports 11.716s, all pass. Diagnostics contain zero errors/warnings/failed
+dependencies, axioms standard propext/Classical.choice/Quot.sound only. Actual
+Lean4.24.0/Lake5.0.0-src+797c613 observed in bounded task containers; every check
+holds original writer lock, thread1/-j1, verified12GiB aggregate/no-swap and
+12GiB host reserve before Lean. Maximum sampled aggregate RSS1538380 KiB, minimum
+host available17120419840 bytes. Initial parameter-index reduction failure retained.
+
+Independent read-only finder/skeptic source/control reviews found no issues;
+neither edited or used Lean/server/build. Static gates pass:1088 reachable/
+zero orphans,180 core/zero elaborator reach,491 automatic/61 budget/11 refuted/
+zero manual or pending, trust1103 sources/248 sites/zero findings. Inventory
+FAIL1 remains identical1206 pins/zero errors/404 unrecorded changes; strict docs
+FAIL1 retains same85 frozen findings. Original full TypeExamples resource failure
+remains a failure and latest concrete full validation remains pending. No
+unchanged failed heavy check was repeated as an endpoint.
+
+New exact interfaces and nontrivial clients will be exported after commit and
+verification, separately from immutable144a2a9d export. The planned exact-head
+PARALLEL-INTERFACE package is under /workspace/va1-evidence/numeric-traversal-next.
+All global AU01 obligations, broader revised program-free boundary, AU02 array
+pipeline/memory/halting-OR/general-fuel/normalizer obligations, remaining baseline/
+performance/backfill and final gates remain incomplete. Q1 answered; Q2 held
+only for frontend repair/full gates. No goal/VM reset, push/merge/PR/tag.

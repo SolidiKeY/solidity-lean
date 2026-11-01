@@ -190,6 +190,7 @@ import Solidity.Calculus.DecisionNegativeInstantiation
 import Solidity.Calculus.DecisionFixedArrayPath
 import Solidity.Calculus.DecisionUIntShape
 import Solidity.Calculus.DecisionNumericLogic
+import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FixedArrayRoot
 import Solidity.Calculus.HashWritten
@@ -248,6 +249,7 @@ import Solidity.Examples.DecisionNegativeInstantiation
 import Solidity.Examples.DecisionFixedArrayPath
 import Solidity.Examples.DecisionUIntShape
 import Solidity.Examples.DecisionNumericLogic
+import Solidity.Examples.DecisionNumericTraversal
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation

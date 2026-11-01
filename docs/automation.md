@@ -1100,6 +1100,13 @@ above and closes none of them. Timings:
 
 
 VA1 independent AU01/AU02 proof components (2026-11-01):
+`Calculus/DecisionNumericTraversal.lean` proves the actual public source
+reducer accepts bounded numeric logical bodies and returns their precise
+both-polarity leaf certificate. The existing 2048-step prefix route is unchanged;
+source weight supplies a sufficient traversal bound. Smaller-fuel success and
+insufficient-fuel refusal controls distinguish this bound from minimality or a
+verdict test. General program-normalizer traversal remains a separate obligation.
+
 `Calculus/DecisionNumericLogic.lean` extends numeric preparation facts to
 quantifier-free logical combinations. A compositional original-source weight
 counts optional equality copies and connectives, deriving the unchanged
