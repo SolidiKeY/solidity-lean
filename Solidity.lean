@@ -991,3 +991,5 @@ import Solidity.Yul.Views.SourceHashControls
 import Solidity.Yul.Views.SourceEnvironmentControls
 
 import Solidity.Yul.Views.SourceTargetInputControls
+
+import Solidity.Yul.Views.SourceBalanceControls

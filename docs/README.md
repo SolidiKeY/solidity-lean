@@ -197,3 +197,5 @@ VY2 [actual source environment inputs](feature-work/inline-assembly-vy2.md#actua
 VY2 [concrete packed World adapter](feature-work/inline-assembly-vy2.md#concrete-packed-world-adapter-2026-11-01) binds validated source writes and residual rollback to actual peer frame completion; full lane partial.
 
 VY2 [actual target input frame](feature-work/inline-assembly-vy2.md#actual-target-input-frame-2026-11-01) maps actual source inputs to existing target frame observations; full lane partial.
+
+VY2 [actual source balance inputs](feature-work/inline-assembly-vy2.md#actual-source-balance-inputs-2026-11-01) derives code/history-sensitive source balance observations and constructed target funds; full lane partial.
