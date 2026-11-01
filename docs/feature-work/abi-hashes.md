@@ -1276,6 +1276,31 @@ Read-only, without Lean workers.
   Recorded, not changed: calldata slices of dynamic elements copied to memory
   (`#sliceCopy`) predate this lane and are not re-probed here.
 
+### Validation
+
+* Lean: `lean_diagnostic_messages` clean on every touched Lean file; no
+  `sorry`, axiom, `native_decide`, `implemented_by` or heartbeat change. The
+  four headline theorems are pinned with `#guard_msgs in #print axioms`
+  (`mdec_cval`, `eager_cref`: `propext, Classical.choice, Quot.sound`;
+  `verdict_revert_iff`, `verdict_run_entry`: `propext`) and registered in
+  `TrustAudit.lean` ("trust: 4 ABI entry-decoding theorems use only the
+  standard axioms").
+* `./run-lean.sh`: the default target builds (1021 jobs, 17m49s wall for the
+  whole script on 4 cores, warm). `SolkeyTestSuite` stops on the known
+  `TestSuite.Derived17` OOM (exit 137, baseline); `check-solkey.sh` run
+  separately reports the baseline 37 mismatches. On the base, the same script
+  had the unchanged `Examples/Tactics/OpenLoops.lean` killed by OOM once
+  (65m52s); it built here.
+* Node: `solidity-upstream.test.mjs` 25/25, `check-abi-vectors.mjs` 31 vectors
+  and 5 rejections, `abi-entry-probe.mjs --fixtures --probes` pass, the new
+  `test-solidity.test.mjs` entry passes; `check-g07.mjs`: trust, layers
+  (183 core modules, 0 reach the elaborator), orphans (1036, 0 orphaned),
+  noncircular, grammar and control pins pass; its two "new" items are the
+  baseline axiom-pin drift (unchanged 1209 pins, 407 unrecorded) and
+  `check-doc-paths` 48 missing (46 baselined + 2), byte-identical to the base
+  checkout's output. `check-automatic --strict`: 491 / 61 / 11 refuted / 0
+  pending.
+
 ### Limitations
 
 * ABI coder v1 entries, constructor arguments, function-valued and
