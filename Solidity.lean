@@ -974,3 +974,6 @@ import Solidity.Backend.Executable.StipendCallChecks
 
 import Solidity.Backend.Executable.TransferCall
 import Solidity.Backend.Executable.TransferCallChecks
+
+import Solidity.Backend.Executable.SendResult
+import Solidity.Backend.Executable.SendResultChecks

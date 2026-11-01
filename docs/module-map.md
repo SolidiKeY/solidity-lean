@@ -1316,3 +1316,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/TransferCall.lean` | Actual transfer result branch expansion/whole-code assembly with preserved requested-gas CALL prefix, resolved targets and extracted empty-REVERT terminal suffix; general fetched execution open |
 | `Backend/Executable/TransferCallChecks.lean` | Inhabited full prelude/CALL assembly, concrete range discharge, selected-target relative-coordinate negative, actual terminal suffix/bytes and protected machine controls |
+
+| `Backend/Executable/SendResult.lean` | Actual SWAP1/POP send Bool-local store, intrinsic send/actual-world Bool-or-refusal transport with explicit balance checkpoint, exact unchanged-world settlement and derived operand/suffix capacity; general CALL/frame/world producers open |
+| `Backend/Executable/SendResultChecks.lean` | Inhabited full success/rejection settlement through physical typed-local store, real missing/exhausted refusals, wrong POP/SWAP2, populated uint/spill and capacity/byte controls |

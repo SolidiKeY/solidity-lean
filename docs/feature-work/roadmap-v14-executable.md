@@ -1537,3 +1537,63 @@ real signatures for concrete combined checking; final docs/interface metadata
 changes no checked Lean/test code. Artifact paths, complete original queue and
 independent final seal reviews are in the checkpoint19 handoff. Original goal
 remains ACTIVE and all earlier sealed artifacts remain intact.
+
+
+## Checkpoint20 — intrinsic send Bool result and physical caller-local store
+
+Owned SendResult emits actual SWAP1;POP after the existing literal CALL emitter.
+It replaces [newBool,oldBool,uint,spill] by [newBool,uint,spill]. frame is an
+explicit encoding of existing intrinsic bool/uint local values, not a new AST,
+semantics or general runtime-frame producer. store_correct is uniform over all
+typed states and Boolean values; it does not produce the canonical CALL flag.
+source_run is actual TRun.send with its original literal argument evaluations;
+source_store matches its actual sendT result frame after an installed receipt.
+
+world_store consumes actual PaymentReceipt.prepare/world_observation and
+transports both Bool values and None through actual physical store execution.
+Its explicit numerical caller/world balance equality is a checkpoint condition,
+not a pending-ledger/history producer or target CALL/world simulation premise.
+None remains preparation refusal, not false or permission to run with an absent
+accepting receipt. Existing missing-code and assumeFalse actual-world controls
+witness that distinction; no source-profile counterexample or new exclusion is
+claimed. Canonical CALL flag production and general source/frame/world alignment
+remain OPEN.
+
+finish_unchanged proves exact original-world identity from actual stored-account/
+storage identity, selfBalance identity and empty ledger fields. The actual
+rejected send discharges all fields and has the same full unchanged world as
+the real rejecting receiver. paid_client retains the existing actual intrinsic
+TRun.send and full successful world settlement, now with the complete encoded
+physical result frame. This is useful both-sided preparation, not final G43.
+The empty-ledger helper is not assumed for paid histories or the final profile.
+
+Populated protected uint99 and spills17/29, initial true/false transitions,
+wrong POP discarding the result and wrong SWAP2 corrupting the uint slot are
+constructive. Store capacity derives spill≤1021 from actual three-word entry;
+existing literal operand selection derives spill≤1015 from its seven-word peak.
+These are separate checked numeric boundaries, not a full CALL resource law.
+Actual107-byte code ends90/50; complete bytes and encoder roundtrip are exposed.
+18 guarded headline/control axiom reports retain standard Lean axiom sets.
+All failed syntax/normalization diagnostics remain raw evidence; budgets and
+all source types, pins, profile/Fml.inTarget/verdicts/observations stay unchanged.
+
+New lane-only export-send-result.lean positive cases consume actual SendResult
+code. check-send-result-evm.mjs independently fixes all8 scenarios, entire
+literal CALL/store/PUSH bytes, exact memory/frame preamble, same code across
+oldBool/callee changes and6positive/2negative roles. Pinned offline Osaka10.1.3
+fetched runCall tests observe actual full CALL operands and canonical flag plus
+balances immediately before store, final frame, nested exact dead bytes, all32
+caller memory bytes and caller peak11. Success flips false→true, rejection
+flips true→false, unfunded4 against3 never enters the same reverting receiver,
+zero-value enters2300, and wrong POP/SWAP2 reject the intended frame. Existing
+1Mgas/180s and runtime package pins remain unchanged.
+
+These finite independent EVM messages use a constructed local-value encoding;
+that encoding alone does not reconcile transaction/world identities with the
+separate intrinsic-world fixtures. No full source/world/CALL/frame/gas/profile
+simulation is inferred. General G43/G36.03/G44/G45 closure and BackfillA/B
+producer obligations stay OPEN. Separate independent read-only kernel/test
+finder and skeptic reviews accept actual code without remaining findings.
+Full/current combined gates, raw documentation failures, exact source-bound
+parallel interface and immutable artifact/seal reviews are in the checkpoint20
+handoff. The original full goal remains ACTIVE.
