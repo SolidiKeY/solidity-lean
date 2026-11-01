@@ -201,3 +201,5 @@ VY2 [actual target input frame](feature-work/inline-assembly-vy2.md#actual-targe
 VY2 [actual source balance inputs](feature-work/inline-assembly-vy2.md#actual-source-balance-inputs-2026-11-01) derives code/history-sensitive source balance observations and constructed target funds; full lane partial.
 
 VY2 storage/balance input stability: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 effectful balance input proofs: [lane checkpoint](feature-work/inline-assembly-vy2.md).

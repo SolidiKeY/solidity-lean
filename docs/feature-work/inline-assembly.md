@@ -638,3 +638,5 @@ VY2 [actual target input frame](inline-assembly-vy2.md#actual-target-input-frame
 VY2 [actual source balance inputs](inline-assembly-vy2.md#actual-source-balance-inputs-2026-11-01) derives the actual balance-read/constructed-funds boundary; independent target ledger and final adequacy remain open.
 
 VY2 storage-effect/input checkpoint: validator-derived persistent/transient packed writes preserve actual source code/balance/history observations and constructed target funds; actual static errors and complete resulting state retained. See [lane accounting](inline-assembly-vy2.md). Independent target-ledger/Yul/compiler/full-lane closure remains open.
+
+VY2 actual effectful balance operand equations and exact halt-prefix controls: [lane checkpoint](inline-assembly-vy2.md). Conditional actual-run premises remain explicit; no global producer or target-ledger adequacy claimed.
