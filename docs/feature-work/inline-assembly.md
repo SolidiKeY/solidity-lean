@@ -440,3 +440,14 @@ source/journal controls. Root0/layout inputs and real per-run region conditions
 remain explicit; no packed-layout or whole-source adequacy is claimed. Full lane
 and producer/compiler/calculus closure remain open. Evidence:
 /workspace/vy2-evidence/hashed-registrations.
+
+
+### VY2 declaration-derived packing handoff
+
+The [lane record](inline-assembly-vy2.md#declaration-derived-packed-registrations-2026-11-01)
+now derives canonical mixed scalar registrations from actual source declarations
+using existing packing arithmetic, proves disjoint ownership and connects the
+computed registry to source/frame/complement journaling. A declaration-derived
+fixed-array/struct boundary adapter and14new pinned ordered calls are included.
+Whole nested/source/layout/dirty/compiler/calculus obligations remain open;
+no admission promotion. Evidence: /workspace/vy2-evidence/declaration-packing.

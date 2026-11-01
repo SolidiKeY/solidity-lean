@@ -113,3 +113,7 @@ VY2 [packed-slot complements](feature-work/inline-assembly-vy2.md#packed-slot-co
 VY2 [computed word-layout registrations](feature-work/inline-assembly-vy2.md#computed-word-layout-registrations-2026-11-01)
 derive canonical path/slot/hash agreements under actual owner per-run conditions;
 packed/whole-store/source/compiler closure remains open.
+
+VY2 [declaration-derived packing](feature-work/inline-assembly-vy2.md#declaration-derived-packed-registrations-2026-11-01)
+computes canonical mixed-field registrations and source/journal controls;
+whole-store and assembly closure remain open.

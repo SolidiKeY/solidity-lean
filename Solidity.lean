@@ -919,3 +919,5 @@ import Solidity.Yul.Views.HeapEnumerationNegativeControls
 import Solidity.Yul.Views.PackedResidualTypedSourceControls
 
 import Solidity.Yul.Views.LocatedSource
+
+import Solidity.Yul.Views.DeclarationBoundaryControls

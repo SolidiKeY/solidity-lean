@@ -1934,3 +1934,93 @@ General-provenance final gates: focused78jobs/full wrapper1109default+262suite/
 reports,48axiom-free), no new axiom. Trust1139sources/0findings, strict/layers/
 orphans/markdown delta pass. Actual global docs remains the retained exit1;
 no unchanged failed gate rerun. Raw provenance elimination failures are retained.
+
+
+## Declaration-derived packed registrations (2026-11-01)
+
+Original Y04/Backfill A/B preparation, not lane completion. YQ1–YQ7 stay
+approved as recorded in solidity-scope.md; no admission/exclusion/owner contract
+change. Source checkpoint parent:00293e3a0d368d5ffa055385f4c7887a8e45b040.
+
+DeclarationScalars selects existing exact StorageWidth/ScalarCodec instances
+from ACTUAL source scalar types: bool, signed/unsigned integers, fixed-point,
+address/contract, bytesN, valid enum and external function. Unsupported UDVT/
+reference preparation is not a Yul refusal/cleaning/no-op. No assumed inverse
+is supplied: existing concrete codecs prove their own inverses. DeclarationPacking
+traverses actual E.rootTy/structFields in declaration order and checks E.cellTy
+at every generated Source.SPath. All widths, low-byte offsets and slot advances
+use the EXISTING packedStart planner; no duplicate packing algorithm or untyped
+IR/state. Each slot has its real nonwrapping word bound, derived by checked
+arithmetic. Root base is an explicit input, not inferred global contract layout.
+
+packDeclarationFields_spec universally derives start/end bounds, increasing
+actual field paths and finiteSeparated from successful computation, not caller
+slot/offset/default/inverse/readback/separation laws. Exact-full-slot and spill
+follow planner progression; rounding yields the struct end/next start boundary.
+No word-granular HashedLayout definition is changed or reinterpreted as packing.
+
+The actual nonempty struct/root control contains bool/u16/bytes3/address,
+u256, u8+bytes31 and a trailing u16. Computed coordinates are
+(0,0,1),(0,1,2),(0,3,3),(0,6,20),(1,0,32),(2,0,1),(2,1,31),(3,0,2).
+The first slot leaves six residual bytes; u256 spills; u8+bytes31 exactly fill
+a slot; final byte98 rounds to slot4. The computed registry feeds existing
+actual Source.applyOp/current-frame preparation, every-H actual owner MemOK,
+complete raw reencoding and paired source/complement journals. Controls cover
+unselected paths, separate accounts/banks, nonzero padding, actual static empty
+revert, caller-prefix rollback, committed child/enclosing rollback and endTx
+persistent survival/transient reset. Pure unchanged preparation preserves whole
+administrative storage, including empty versus explicit-default cells; it is
+not journaled execution. An initial new transient-cell control incorrectly
+expected explicit false: corrected to the actual retained None/default-read
+behavior, with the failing raw check retained. Existing observations unchanged.
+
+DeclarationBoundary derives a supported fixed scalar array plus inner scalar
+struct component directly from actual outer/inner declarations and automatically
+selected codecs. It reuses repeatedMembers/endByte/roundSlot and existing
+component disjoint/encode/decode laws. The inhabited uint24[12]/inner mixed
+struct at base4 has live array end166, next start192, inner live end218 and
+aggregate end224. Skipped array padding is preserved. IMPORTANT: these are
+Nat ByteView component laws with actual typed DataLists, not a whole nested
+Source.Data/Storage writeback instance, arbitrary root assignment or physical
+nonwrapping theorem. Physical serialization still needs its real range premises.
+Zero-length/other aggregate shapes remain original preparation work; this
+supported shape is not a language/profile limit or arbitrary traversal cap.
+
+New external DeclarationPacking.sol controls independently compare exact solc
+0.8.38/Osaka legacy/viaIR struct/array field offsets and complete eight-word
+observations, including spills, bytes31/storage alignment, array padding,
+distinct forward/reverse values, unrelated marker, full Error("packing") bytes
+and fresh read after revert. Fourteen new ordered calls bring the cumulative
+report to380. ALL preceding366 call fields remain byte-for-byte unchanged;
+reference-preservation.json proves the old field-byte prefix and values match.
+This is finite external evidence, separate from universal kernel/source/compiler
+adequacy. Gas100m/steps5m/optimizer disabled/runs200/fork/compiler/source/archive
+pins unchanged. The first new fixture checksum-literal compile failure is
+retained. No host errors/logs are silently accepted by the public reference APIs.
+
+Independent read-only finder and skeptic reviews found no source defect and
+both found missing mutation-count guards in the new external test. FIXED with
+108mutants per pipeline,96complete-word mutants and219total negatives, all
+asserted. Final reviews clear; no reviewer Lean/server/build/tests or edits.
+All old19negative suites remain required. Raw attempts, exact commands/exits,
+resources, signatures and cumulative artifacts: /workspace/vy2-evidence/declaration-packing.
+
+Full queue stays open: Y04 whole storage/path/hash/dynamic ownership and final
+packing/V10 agreement; Y05 universal memory/shared-zero/interior/dirty forms,
+reachable allocation refinement and actual assembly MemOK; Y06 actual source
+input/environment bindings; Y09.02 actual VY1/source calculus/notation/printers/
+compiler/joint closure; concrete V10/V11 agreements and both backfills. Existing
+owner MemOK/World/ContractWorld/memory-call/Bridge are available, not Yul adequacy.
+Original goal remains BLOCKED unchanged; get_goal read unavailable, no mutation.
+No new human semantic decision established. Full lane is not complete.
+
+
+Final declaration checkpoint gates: Lean4.24.0/Lake5.0.0-src+797c613;
+KeySort2jobs exit0; focused70jobs and full wrapper1116default/262TestSuite/
+131annotations exit0. Scoped2323declarations/1326theorems:1278 standard-only
+reports and48axiom-free. Strict/trust(1146sources,0findings)/layers/orphans/
+markdown delta exit0. All19old negative suites and the new219mutation suite
+pass; actual cumulative report380calls, old366field bytes unchanged. Global
+docs ACTUAL exit1,48missing/37ambiguous, byte-identical exact-base debt; zero
+delta is separate. Failed recursion/decidability/type and fixture checksum
+attempts remain saved; proofs repaired structurally without budget changes.
