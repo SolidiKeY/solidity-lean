@@ -1319,3 +1319,7 @@ four-mode upstream EVM observations and refusal controls;
 | `tests/roadmap-v16/CoreConsumerControls.lean` | Populated core, panic, real payment/oracle, admitted divergence and existing exhaustion controls. |
 | `scripts/roadmap-v16-heap-audit.py` | Revision/complete-statement/control/trust accounting and corruption controls for actual scoped finite/core consumers; no global coverage closure. |
 | `tests/roadmap-v16/heap-premises.json` | Actual checked14headlines and98control complete statements/premises, scoped only. |
+
+| `Solidity/Roadmap/V16/DispatchConsumer.lean` | Actual intrinsic first-match/no-match/guard-error, local-drop, box/diamond and finite-compiler consumers; no elaborator correspondence claim. |
+| `Solidity/Roadmap/V16/AbiEntryConsumer.lean` | Typed eager/lazy observation, exact entry verdict and uint-state/compiler/spec consumers with actual representation premises. |
+| `tests/roadmap-v16/PublishedConsumerControls.lean` | Inhabited published-decoder value/state/input and populated intrinsic dispatch/local-drop controls; exact named failure/refusal boundaries. |

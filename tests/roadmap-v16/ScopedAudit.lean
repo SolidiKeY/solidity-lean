@@ -1,3 +1,5 @@
+import Solidity.Roadmap.V16.DispatchConsumer
+import Solidity.Roadmap.V16.AbiEntryConsumer
 import Solidity.Roadmap.V16.FiniteHeapConsumer
 import Solidity.Roadmap.V16.CompilerConsumer
 import Solidity.Roadmap.V16.ConstructionCompilation
@@ -201,3 +203,14 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.finite_memory_rep_iff
 #print axioms Solidity.Roadmap.V16.compiler_nonpaying_diamond
 #print axioms Solidity.Roadmap.V16.compiler_source_error
+#print axioms Solidity.Roadmap.V16.dispatch_selected_stmt
+#print axioms Solidity.Roadmap.V16.dispatch_selected_run
+#print axioms Solidity.Roadmap.V16.dispatch_none_run
+#print axioms Solidity.Roadmap.V16.dispatch_guard_error
+#print axioms Solidity.Roadmap.V16.dispatch_box_iff
+#print axioms Solidity.Roadmap.V16.dispatch_diamond_iff
+#print axioms Solidity.Roadmap.V16.dispatch_finite_diamond
+#print axioms Solidity.Roadmap.V16.abi_eager_observation
+#print axioms Solidity.Roadmap.V16.abi_certified_revert
+#print axioms Solidity.Roadmap.V16.abi_run_prerequisites
+#print axioms Solidity.Roadmap.V16.abi_uint_finite_diamond

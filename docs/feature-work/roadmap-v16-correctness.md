@@ -1,7 +1,8 @@
 # V16 compiler correctness, transactions and specification transfer
 
 Status: independent backfill extended through recovery checkpoints; full lane
-blocked on remaining concrete prerequisites; published memory-call consumer added, final gates recorded below.
+blocked on remaining concrete prerequisites; actual eight-arm compiler and scoped
+source/specification consumers are recorded below. No full-lane completion.
 Base: `2fe1f8932f96be15b00df03ba2cde46f64a87758`.
 Branch: `codex/solidity-v12-v17-20261031/v16-correctness-transfer`.
 Repository: `/workspace/solidity-lean`.
@@ -18,13 +19,13 @@ The [G01 contracts](roadmap-g01-interfaces.md), [G03 ledger](roadmap-g03-ledger.
 | Item | State and remaining obligation |
 |---|---|
 | G48 | Blocked: actual independent SourceSpec/admission/lowering instances and full-profile progress are not published; source handoff explicitly leaves SourceSpec open. No new premise is counted as discharged. |
-| G49.01 | Partial: actual published memory-call result and populated-input specification/alias/allocator consumers are proved below. Total expression/statement/call/pass composition over the complete approved profile remains OPEN; no producer implementation is repaired here. |
+| G49.01 | Partial: scoped consumers of all eight actual published compiler arms, canonical construction composition, typed ABI-entry and intrinsic dispatch consequences are proved below. Total expression/statement/call/pass composition over the complete approved profile remains OPEN; no producer implementation is repaired here. |
 | G49.02 | Blocked: final source lowering and integrated V12–V15 runtime byte/pinned-EVM prerequisites are required. No Bridge application added. |
-| G49.03 | Open: full-profile coverage, failure preservation, resource progress, traces and non-vacuity. Toy controls below do not establish compiler coverage. |
+| G49.03 | Open: full-profile coverage, failure preservation, resource progress, traces and non-vacuity. Scoped controls below do not establish full compiler coverage. |
 | G50.01 | Blocked: actual V14/V15 constructor/creation/runtime-installation composition. |
 | G50.02 | Blocked: actual deployment, call, rollback and reachable adversarial transaction composition. The decoded invariant below is only a conditional consequence. |
 | G51.01 | Open: calculus rule consumers with exact SolKey correspondence and unchanged Fml.inTarget/verdicts. No reserved rule or closer repaired. |
-| G51.02 | Blocked: concrete box/diamond/callback/loop/spec consumers of G49/G50, with matching SolKey correspondence. |
+| G51.02 | Partial: actual scoped compiler/source box/diamond/call/loop consumers below; final runtime/deployment/transaction/callback/spec applications of G49/G50 and matching SolKey correspondence remain blocked. |
 | Backfill A | Independent transaction/reachability induction, exact finite-prefix/certificate composition, history-premise adequacy and actual event/outcome/local-divergence controls are now implemented. Full-profile source/runtime applications remain blocked; see recovery evidence. |
 | Backfill B | Actual constructor/G03/dependency/trust accounting and scoped box/diamond/spec consumers with success/exhaustion countercontrols are implemented. Concrete callback/loop/runtime/deployment specification transfer remains blocked. Accounting closes no compiler feature. |
 
@@ -1232,3 +1233,146 @@ Integration whitespace gate raw exit2:3new trailing blank lines in published
 abi-hashes/finite-dispatch/source-inputs docs. Exact incoming bytes verified
 and preserved; no reserved edits. Separate diff against099bf for owned changes
 passes exit0. This distinction does not waive the raw integration finding.
+
+The11new scoped consumer proofs and concrete controls now pass serial bounded
+CLI checks (Lean MCP remains unavailable). Dispatch retains runC/run equality,
+actual false/true guard premises, exact guard error and block local dropping;
+box/diamond equivalences preserve approved exhaustion behavior, and an actual
+finite compiler Input yields a success/post witness without new desired-run or
+notExhausted premises. Controls use published populated H2 bodies/representation,
+a guard reading a real aliased array length2, duplicate matching guards with
+first-match precedence, skipped and selected failures, no-match PROVIDED revert
+(not a Source function-value Panic0x51 claim), a failing guard, stack77, complete
+9source/9target observations. Scoped-local body declaration/rebinding drops2
+locals, needs frame6 rather than final-context4, and retains all9source/11target
+observations including dead temporary cells20/2.
+
+ABI consumers reuse actual eager_cref/verdict_revert_iff/verdict_run_entry and
+keep size/fuel, typed whole value, exact empty revert vs named blocked refusal.
+A byte-identical published cd[2] fixture is kernel-decoded to the actual typed
+uint256word2; its equality is derived from checked numeric observation and
+proof irrelevance, not assumed. Existing intrinsic setLocal constructs the
+state (identity on published initial2), then actual published representation/
+allocator proves the real body Input. Source allocation lengths0/2/post and all
+6source/10target observations are transported. Wrong decoded3/binding and actual
+Input mismatch against machine2, plus wrong target cursor, are rejected. Same
+bytes as bool2 are entry revert; valid outer calldata entry with failing lazy
+access is BLOCKED; potential allocation Panic0x41 and fuel0 are BLOCKED, not
+certified reverts. No lazy-readsOnly, selector, external entry, source function,
+bytecode or V13 packet/memory adapter theorem is claimed. Decoder free2^32 and
+body allocator16 are separate component resources, not an established bridge.
+
+Fixed diagnosed local elaboration issues with explicit contexts/indices and a
+constructive test-local equality on existing TRes PrimTy.bool.Denote; autoImplicit
+is disabled in controls. Original raw recursion/type/rewrite failures retained.
+No proof/fuel/node/heartbeat/recursion/timeout limit increased, no new semantics,
+axiom/sorry/native_decide/implemented_by. Both independent read-only finder and
+skeptic proof/control reviews PASS, no mathematical/ownership defect; neither
+used Lean/server/build/tests/writes. Exact source/statement/trust accounting and
+required changed-source gates/artifacts remain to be recorded. They independently
+identified the original G49.01 literal core-prefix→allocating-memory-suffix
+canonical composition as ready next; richer memory/allocator Input must be
+constructed, never inferred from core Sim alone. Reached n3cost5/cursor21 and
+stale n2cost4/cursor20 controls are the next assigned combination evidence.
+Full G48-G51 and every original obligation remain unclosed.
+
+
+### ABI/dispatch checkpoint handoff (original assignment unfinished)
+
+Parent b26bfc3c0cc4db368bc883f4b40212f500966716 incorporates published
+099bfbe185731c354b12a40f28ccf5d98534c779; frozen base remains
+2fe1f8932f96be15b00df03ba2cde46f64a87758. The checkpoint's full committed head
+and immutable artifacts are bound by identity.json, original.patch, handoff.md
+and SHA256SUMS in /workspace/scratch/v16-publication-099bf after export.
+The existing blocked goal is untouched; no new goal/continuation, default merge,
+push, PR, dependency/toolchain upgrade or reserved repair.
+
+Exact eleven headline contracts/dependent premise telescopes, source revision,
+producer hashes and observed axioms are machine checked by the new owned
+scripts/roadmap-v16-published-audit.py and tests/roadmap-v16/published-premises.json.
+72 named semantic control statements have EMPTY telescopes; 74 generated
+proof/simp/equation auxiliary contracts are counted separately and remain in
+trust/dependency closure (238 nodes). Exact observed axiom sets for all157
+headline/control/auxiliary statements are pinned; only existing standard
+propext/Classical.choice/Quot.sound occur. All2255 inherited obligation IDs are
+pinned and retained, plus35 actual ABI/Dispatch constructors: all2290 remain
+OPEN. Root metadata contains216 actual statements, including generated ones.
+This supplements kernel proofs and does not discharge Source/profile coverage.
+
+Both independent read-only finder/skeptic proof/control reviews passed.
+Finder's confirmed accounting issue (146 rows wrongly labelled semantic
+controls, including polymorphic generated helpers) is fixed by the split,
+empty-telescope requirement and separate helper contracts. Both independent
+actual-correction accounting reviews PASS.21 corruption controls PASS: absent
+or changed contracts, extra source-success/notExhausted/strengthened Input,
+premise-only/polymorphic alleged witness, missing auxiliary/helper/control,
+wrong producer/revision, hidden simulation oracle, unapproved or drifted
+allowed axiom, missing/closed global obligation and false lane closure.
+Neither reviewer ran Lean/server/build/tests or wrote files.
+
+Actual toolchain Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613. All Lean serialized with explicit-j1/LEAN_NUM_THREADS1,
+hard12884901888-byte/no-swap cgroup, writer lock, existing cache and unchanged
+proof/fuel/node/time limits. No per-file Lean MCP tool is available; direct
+bounded CLI consumers, controls, inventory and scoped #print axioms PASS.
+No new axiom/sorry/native_decide/implemented_by or limit increase.
+
+Current full ./run-lean.sh FAILED124 at5400s, last completed951/1060
+(RunnerAudit); kernel/SolKey stages were not reached by that command.
+Memory peak12884901888 bytes, max sampled aggregate RSS9495792KiB. This failure
+is not waived or relabelled inherited; exact-base/published/current source byte
+comparisons show OpenLoops unchanged but Syntax.Raw changed, while toolchain
+and lakefile are unchanged. No exact-base full-run result is asserted by that
+comparison. No unchanged full retry. Earlier raw124/137 failures, previous
+1052/285 and SolKey377/131 pass evidence and all eight prior seals remain.
+
+Current replay prerequisite build FAILED124 at300s after251/252
+Derived17MemoryLoop, retained without unchanged retry. Subsequent no-build
+current24setup query PASS (actual rebuilt prerequisites), and27 missing foreign
+cache paths map to existing canonical artifacts with identical Lake hashes.
+Independent ORIGINAL fresh24 workload PASS 262.128800926s <=300s, all24 exits0.
+The prerequisite/full timeouts remain separate failed gates.
+
+Read-only layer/orphan/trust/noncircular/TestSuite source checks PASS.
+Raw documentation checker FAIL1: frozen83 complete findings vs current86;
+previous85vs83 evidence remains sealed. Added since frozen base: reserved
+planned Yul missing paths2, plus published finite-dispatch bare Arms.lean
+ambiguity1. Raw current-vs-83aff comparator FAIL86vs85, not waived. Separate
+read-only published099bf resolver, validated against BOTH entire raw frozen
+and current arrays, proves published86=current86 with zero owned additions or
+removals. No reserved citations edited. Integration diff--check rawFAIL2 for
+three incoming published EOF blank lines remains; owned diff vs099bf PASS0.
+
+Source-model decoder/kernel results, symbolic word-machine proofs and external
+compiler/EVM tests remain distinct. No solc-bytecode/V13 packet/source dynamic
+function guard/body/Panic0x51/callback/deployment/transaction correspondence or
+G01 event stream is fabricated. Source decoder free2^32 and body allocator16
+are separate resources. Scope refuses lazy-only/access-time, Panic0x41, fuel0
+and the producer's other unsupported cases exactly as published. SourceSpec/
+admission/checker/progress/lowering, V12-V15 final composition, approved-profile
+coverage/resources/recursive/external behavior, pinned Osaka bytes, deployment/
+adversarial transactions and final SolKey applications remain unresolved.
+
+Proposed G03 reconciliation is evidence-only, not an owned ledger edit:
+abiEntryValidation/pragmaAbicoder/calldataLocation and structural preparation
+for internalFunctionTypes/externalFunctionTypes; all remain OPEN. Combination17
+(mixed core/memory programs; memoryLocation, storageLocation, whileStatement,
+internalCalls, sendTransfer, assertBuiltin; R01/R02/R03/R29) remains OPEN.
+The next independently ready original G49.01/G51 work is actual public core
+literal n:=3 prefix into the published allocation suffix: derive canonical
+whole code from actual compilation functions, independently construct reached
+rich Input, cost5/cursor21 vs stale4/20 and complete representation/observations.
+Drafts and pre-reviews are separate /workspace/scratch/v16-mixed-recovery;
+they are NOT checked checkpoint evidence yet. Initial heap there is empty
+(BaseExtends vacuous), and near-limit cost inequality is arithmetic only.
+Continue that original work after this committed/reviewed export; a checkpoint
+is not an endpoint. No scope question or semantic decision is required.
+
+Separate current confirmation gates PASS: explicit lake build Solidity.KeySort
+(2jobs), lake build SolkeyTestSuite (286jobs), strict automation (24modules
+timed;491automatic/61step-budgeted/0manual/11refuted/0pending), and actual
+repository SolKey conformance (377parsed/131read-bearing/131covered). These do
+NOT relabel the full5400s or prerequisite300s timeout green. Runtime environment
+gate only: RUNTIME_GATE_PASS. Current complete whole-repository gate remains
+FAILED124; full original G48-G51 remains incomplete. Exact-head metadata,
+final committed-diff/handoff reviews and immutable export follow this checkpoint.
