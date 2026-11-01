@@ -3,3 +3,15 @@
 .gen/
 .claude/settings.local.json
 .cache/
+# Local logs and tool caches
+Bridge/build.log
+error.log
+tests/migration/solkey/keyext.solidity.core/.gradle/
+# Codex cloud coordinator runtime (live monitor state and batch records)
+tests/cloud/monitor/
+tests/cloud/prompts/
+tests/cloud/archive-confirmation.json
+tests/cloud/groups.json
+tests/cloud/managed-launches.json
+tests/cloud/resumed-work-*.json
+tests/cloud/runtime-checks.json
