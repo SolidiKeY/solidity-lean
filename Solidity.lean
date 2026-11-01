@@ -14,6 +14,7 @@ import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Scope
 import Solidity.Syntax.Scoped
+import Solidity.Syntax.DispatchChain
 import Solidity.Syntax.Checked
 import Solidity.Syntax.CheckedExact
 import Solidity.Syntax.PushSource
@@ -46,6 +47,7 @@ import Solidity.Semantics.Lifetime
 import Solidity.Semantics.Transient
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
+import Solidity.Semantics.Dispatch
 import Solidity.Semantics.RunFrame
 import Solidity.Semantics.DeferredSource
 import Solidity.Semantics.DeferredCallback
@@ -155,6 +157,7 @@ import Solidity.Calculus.LeafDerive
 import Solidity.Calculus.AllLeft
 import Solidity.Calculus.Rigid
 import Solidity.Calculus.ProvesDerive
+import Solidity.Calculus.MemoryLoopReplay
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.Closers
 import Solidity.Calculus.ProveChunked
@@ -508,6 +511,18 @@ import Solidity.Precompiles.PointEval
 import Solidity.Precompiles.Osaka
 import Solidity.Stipend.Rule
 import Solidity.Evm.MemoryCompileExamples
+import Solidity.Evm.MemoryLoopSourceExamples
+import Solidity.Evm.MemoryLoopScope
+import Solidity.Evm.MemoryLoopScopeMeta
+import Solidity.Evm.MemoryLoopScopeSound
+import Solidity.Evm.MemoryLoopScopeRoom
+import Solidity.Evm.MemoryLoopScopeDemand
+import Solidity.Evm.MemoryLoopScopeBudget
+import Solidity.Evm.MemoryLoopScopeCompile
+import Solidity.Evm.MemoryLoopScopeExamples
+import Solidity.Evm.MemoryLoopScopeDivergenceExamples
+import Solidity.Evm.MemoryLoopScopeAllocExamples
+import Solidity.Evm.MemoryLoopScopeSourceExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
 import Solidity.Evm.Interpreter

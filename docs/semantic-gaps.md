@@ -59,7 +59,10 @@ proof uses it, never derived from a machine model.
   invariant for, so it proves no obligation over them; they are run.
 - **Nonlinear arithmetic** is instance-based (`Calculus/CloseNonlin.lean`,
   `Examples/Tactics/Nonlinear.lean`), not a decision procedure.
-- **Function types**: reference parameters or returns (`fnCompTy?`); a value
+- **Function types**: reference signatures outside the internal fragment in
+  [finite-dispatch.md](feature-work/finite-dispatch.md) (memory/storage
+  arrays and nonrecursive structs as arguments, one memory return), and
+  calldata passed to a function value's memory parameter; a value
   of an external function this contract does not declare (`I(a).g`), and
   `abi.encodeCall` of one: its signature is unknown to `sol{}`.
 - **Bytes**: `bytesN`/`bytes` in an external call's signature (`ExtKey`); an

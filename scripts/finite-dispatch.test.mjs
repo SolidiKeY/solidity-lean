@@ -36,14 +36,13 @@ partial def modifyTree (f : Json → Json) : Json → Json
   let row (name : String) : Option SolcFun := contract.funs.find? (·.name == name)
   ${body}
 `);
-    execFileSync('lake', ['--quiet', '--no-build', 'lean', check, '--', '--tstack=131072'],
-      {stdio:'pipe', encoding:'utf8', timeout:180000});
+    runLean(check);
   } finally { rmSync(dir, {recursive:true, force:true}); }
 }
 
 // Run the real import command for specification and native-model checks.
 // This deliberately uses Import's private production callbacks through solc_import.
-function productionCheck(source, body) {
+function productionCheck(source, body, viaIR = false) {
   const dir = mkdtempSync(join(tmpdir(), 'solidity-production-dispatch-'));
   try {
     const input = join(dir, 'FiniteDispatch.sol');
@@ -51,7 +50,7 @@ function productionCheck(source, body) {
     const check = join(dir, 'Check.lean');
     writeFileSync(input, '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n' + source);
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source', input,
-      '--out', fixture, '--no-wrapper'], {stdio:'pipe'});
+      '--out', fixture, '--no-wrapper', ...(viaIR ? ['--via-ir'] : [])], {stdio:'pipe'});
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
@@ -60,9 +59,23 @@ open Solidity Solidity.Frontend
 solc_import "FiniteDispatch.ast.json" hash 0x${hash.toString(16)} as Imported.C testing
 ${body}
 `);
+    runLean(check);
+  } finally { rmSync(dir, {recursive:true, force:true}); }
+}
+
+// Lean's own errors, not the warnings of replayed modules, in a failure.
+function runLean(check) {
+  try {
     execFileSync('lake', ['--quiet', '--no-build', 'lean', check, '--', '--tstack=131072'],
       {stdio:'pipe', encoding:'utf8', timeout:180000});
-  } finally { rmSync(dir, {recursive:true, force:true}); }
+  } catch (e) {
+    if (process.env.FINITE_DISPATCH_LOG)
+      writeFileSync(process.env.FINITE_DISPATCH_LOG, String(e.stdout ?? '') + String(e.stderr ?? ''));
+    const lines = (String(e.stdout ?? '') + String(e.stderr ?? '')).split('\n')
+      .filter(l => /error|mismatch|broken|userError/.test(l));
+    e.message = lines.join('\n').slice(0, 4000) || e.message;
+    throw e;
+  }
 }
 
 function diagnostic(name, code) {
@@ -181,14 +194,18 @@ test('missing candidate signature metadata cannot silently remove a possible tar
       put node "typeName" (Json.mkObj []) else node) ast`);
 });
 
-test('reference arguments remain explicitly refused by native dispatch', () => {
+test('memory reference arguments are admitted by native dispatch since lane CF2', () => {
+  // Before lane CF2 this was the explicit refusal; calldata and other
+  // reference shapes remain refused ('other reference signatures remain refused').
   scopeCheck(`contract C {
     function target(uint[] memory xs) internal pure returns(uint) { return xs.length; }
     function entry(uint[] memory xs) public pure {
       function(uint[] memory) internal pure returns(uint) h = target;
       h(xs);
     }
-  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "a memory-array argument was not admitted")`);
 });
 
 test('private candidates cannot become self external targets through native type erasure', () => {
@@ -376,12 +393,17 @@ test('abstract virtual reference identity resolves to its concrete body without 
 });
 
 test('memory-return admission refuses unsupported argument and external ABI paths', () => {
+  // A scalar argument beside the memory-byte return is admitted since lane
+  // CF2 (finite-dispatch.md, "Reference arguments"); a byte argument and an
+  // external memory return stay refused.
   scopeCheck(`contract C {
     function target(uint x) internal pure returns(bytes memory) { return new bytes(x); }
     function entry() public pure {
       function(uint) internal pure returns(bytes memory) h = target; h(1);
     }
-  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "a scalar argument beside a memory-byte return was not admitted")`);
   scopeCheck(`contract C {
     function target(bytes memory x) internal pure returns(bytes memory) { return x; }
     function entry() public pure {
@@ -412,4 +434,240 @@ test('a concrete base candidate with missing body metadata is not erased as abst
     if J.kind node == "FunctionDefinition" && J.str? node "name" == some "target" &&
         ((J.arr node "baseFunctions").toOption.getD []).isEmpty then
       put (put node "implemented" (.bool true)) "body" .null else node) ast`);
+});
+
+// Internal function values with a memory- or storage-array parameter. The observations are
+// the pinned compiler's (scripts/check-function-value-references.mjs, legacy
+// and viaIR, optimizer off and on); the legacy schedule is the default.
+const referenceSource = readFileSync('tests/solc/FunctionValueReferences.sol', 'utf8')
+  .replace(/^\/\/ SPDX[^\n]*\npragma[^\n]*\n/, '').replace(/FunctionValueReferences/g, 'C');
+const panic51 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x51];
+const panic01 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x01];
+function referenceVectors(viaIR) {
+  // viaIR copies a storage argument after every argument (901); the model
+  // copies at the argument's position for direct and dispatched calls alike
+  // (finite-dispatch.md, "Recorded deviations"), so only legacy replays it.
+  const order = viaIR ? [] : [['argumentOrder()', [], ['101', '9']],
+    ['argumentOrderDirect()', [], ['101', '9']]];
+  const callee = viaIR ? ['402'] : ['4002'];
+  const calleeScalar = viaIR ? ['11'] : ['12'];
+  const cases = [
+    ['aliasing()', [], ['11', '11', '1']],
+    ['storageCopy()', [], ['11', '1', '2']],
+    ...order,
+    ['calleeOrder()', [], callee],
+    ['calleeOrderScalar()', [], calleeScalar],
+    ['branches(bool)', ['true'], ['13']],
+    ['branches(bool)', ['false'], ['7']],
+    ['unassigned()', [], panic51],
+    // legacy halts without data here (finite-dispatch.md, "Recorded deviations")
+    ['unassignedStored()', [], panic51],
+    ['deleted()', [], panic51],
+    ['storageAlias()', [], ['6', '6']],
+    ['storageOrder()', [], ['901', '9']],
+    ['arrayReturn(bool)', ['true'], ['106', '106', '1']],
+    ['arrayReturn(bool)', ['false'], ['5', '110', '1']],
+    ['bytesReturn()', [], ['3', '65']],
+    ['structMemory()', [], ['2', '2', '43']],
+    ['structStorage()', [], ['8', '8']],
+    ['nominalQ()', [], ['9']],
+    ['falseObservation()', [], panic01],
+  ];
+  return cases.map(([signature, args, expected]) => {
+    const failure = typeof expected[0] === 'number';
+    return `Lean.Json.mkObj [("signature", Lean.toJson (${JSON.stringify(signature)} : String)),
+      ("args", Lean.toJson (${JSON.stringify(args)} : List String)),
+      ("failure", Lean.toJson ${failure}),
+      ("expected", Lean.toJson (${JSON.stringify(failure ? [] : expected)} : List String))` +
+      (failure ? `, ("revertBytes", Lean.toJson (${JSON.stringify(expected)} : List Nat))]` : ']');
+  }).join(',\n    ');
+}
+function referenceReplay(viaIR) {
+  return `#guard Imported.C.report.all fun r => r.status == .elaborated
+#eval (do
+  let data := Lean.Json.mkObj [("vectors", Lean.toJson [
+    ${referenceVectors(viaIR)}])]
+  let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report data
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)`;
+}
+
+test('memory-array arguments alias, copy and dispatch as the compiler does (legacy)', () => {
+  productionCheck(referenceSource, referenceReplay(false));
+});
+
+test('memory-array arguments under the viaIR schedule read the callee first', () => {
+  productionCheck(referenceSource, referenceReplay(true), true);
+});
+
+// A refusal for this reason: the dispatch diagnostic, or the declaration
+// reader's refusal of the function type itself; not an unrelated gap.
+function refused(name) {
+  return `unless (row ${JSON.stringify(name)}).any (fun (r : SolcFun) =>
+      (r.sourceScope.diagnostic?.map (fun (d : Source.Diagnostic) => d.name)) == some \`solidity.functionDispatch ||
+      (match r.body with
+        | .error g => (String.splitOn (Gap.msg g) "function type").length > 1 ||
+            (String.splitOn (Gap.msg g) "functionDispatch").length > 1
+        | .ok _ => false)) do
+    throw (IO.userError "the reference signature of ${name} was not refused by dispatch")`;
+}
+
+test('a recursive struct signature is refused by the elaborator', () => {
+  // The reader admits the nominal key; the elaborator's fnRefStruct? refuses
+  // the recursive struct, so the function stops elaborating (fails closed).
+  productionCheck(`contract C {
+    struct R { uint x; R[] kids; }
+    function target(R memory r) internal pure returns(uint) { return r.x; }
+    function entry() public pure returns(uint) {
+      R memory r;
+      function(R memory) internal pure returns(uint) h = target; return h(r);
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "entry")).any fun row =>
+  row.status != .elaborated`);
+});
+
+test('calldata passed to a memory parameter of a function value is refused', () => {
+  // solc copies the calldata array into memory; the dispatch passes memory
+  // by reference, so the model would share it.
+  productionCheck(`contract C {
+    function bump(uint[] memory xs) internal pure returns(uint) { xs[0] = 7; return xs[0]; }
+    function e(uint[] calldata xs) external pure returns(uint) {
+      function(uint[] memory) internal pure returns(uint) h = bump;
+      h(xs); return xs[0];
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "e")).any fun r =>
+  r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
+});
+
+test('struct candidates are nominal: a same-shaped struct function is not scanned', () => {
+  // With a structural key, poison (same shape as P, reading block.number)
+  // would be a native-compatible candidate and its body would be refused.
+  scopeCheck(`contract C {
+    struct P { uint a; }
+    struct Q { uint a; }
+    function target(P memory p) internal pure returns(uint) { return p.a; }
+    function poison(Q memory q) internal view returns(uint) { return q.a + block.number; }
+    function entry() public pure {
+      P memory p;
+      function(P memory) internal pure returns(uint) h = target; h(p);
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "a same-shaped struct's function was treated as a candidate")`);
+});
+
+test('reference-array dispatch admits exact candidates and keeps their locations', () => {
+  scopeCheck(`contract C {
+    function target(uint[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function stored(uint[] storage xs) internal view returns(uint) { return xs[0]; }
+    uint[] values;
+    function entry() public view {
+      uint[] memory xs = new uint[](1);
+      function(uint[] memory) internal pure returns(uint) h = target;
+      assert(h(xs) == 0);
+      function(uint[] storage) internal view returns(uint) g = stored;
+      g(values);
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "memory-array dispatch was not admitted")`);
+});
+
+test('memory-array dispatch refuses an address/uint element collision', () => {
+  scopeCheck(`contract C {
+    function addrs(address[] memory xs) internal pure returns(uint) { return xs.length; }
+    function uints(uint[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      uint[] memory xs = new uint[](1);
+      function(uint[] memory) internal pure returns(uint) h = uints;
+      h(xs);
+    }
+  }`, diagnostic('entry', 'solidity.functionDispatch'));
+});
+
+test('other reference signatures remain refused', () => {
+  const cases = [
+    // an external struct parameter
+    `struct S { uint a; }
+    function target(S memory s) public pure returns(uint) { return s.a; }
+    function entry() public view {
+      S memory s;
+      function(S memory) external view returns(uint) h = this.target; h(s);
+    }`,
+    // a struct return
+    `struct S { uint a; }
+    function target() internal pure returns(S memory s) { s.a = 1; }
+    function entry() public pure {
+      function() internal pure returns(S memory) h = target; h();
+    }`,
+    // a nominal element
+    `struct S { uint a; }
+    function target(S[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      S[] memory xs = new S[](1);
+      function(S[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a narrow element (a capture carries no width rows)
+    `function target(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function entry() public pure {
+      uint8[] memory xs = new uint8[](1);
+      function(uint8[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a byte element
+    `function target(bytes1[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      bytes1[] memory xs = new bytes1[](1);
+      function(bytes1[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a nested array
+    `function target(uint[][] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      uint[][] memory xs = new uint[][](1);
+      function(uint[][] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a calldata reference
+    `function target(uint[] calldata xs) internal pure returns(uint) { return xs.length; }
+    function entry(uint[] calldata xs) external pure {
+      function(uint[] calldata) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // a storage mapping
+    `mapping(uint => uint) m;
+    function target(mapping(uint => uint) storage xs) internal view returns(uint) { return xs[0]; }
+    function entry() public view {
+      function(mapping(uint => uint) storage) internal view returns(uint) h = target; h(m);
+    }`,
+    // a storage-array return
+    `uint[] values;
+    function target() internal view returns(uint[] storage) { return values; }
+    function entry() public view {
+      function() internal view returns(uint[] storage) h = target; h();
+    }`,
+    // several memory returns
+    `function target() internal pure returns(bytes memory, bytes memory) { return (hex"61", hex"62"); }
+    function entry() public pure {
+      function() internal pure returns(bytes memory, bytes memory) h = target; h();
+    }`,
+    // a memory return beside a scalar return
+    `function target() internal pure returns(bytes memory, uint) { return (hex"61", 1); }
+    function entry() public pure {
+      function() internal pure returns(bytes memory, uint) h = target; h();
+    }`,
+    // an external memory-array parameter
+    `function target(uint[] memory xs) public pure returns(uint) { return xs.length; }
+    function entry() public view {
+      uint[] memory xs = new uint[](1);
+      function(uint[] memory) external view returns(uint) h = this.target; h(xs);
+    }`,
+    // an external memory-array return
+    `function target() public pure returns(uint[] memory xs) { xs = new uint[](1); }
+    function entry() public view {
+      function() external view returns(uint[] memory) h = this.target; h();
+    }`,
+  ];
+  const failed = [];
+  cases.forEach((body, i) => {
+    try { scopeCheck(`contract C {\n${body}\n}`, refused('entry')); }
+    catch (e) { failed.push(`case ${i}: ${(String(e.stdout ?? "") + String(e.stderr ?? "") + String(e.message ?? "")).split("\n").filter(l => /error|userError|not refused/.test(l)).join(" | ").slice(0, 600)}`); }
+  });
+  assert.deepEqual(failed, []);
 });
