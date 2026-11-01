@@ -50,8 +50,8 @@ producer-source replays and remaining gap census are recorded below.
   bridge and DecisionTheorem-prime remain open. Existing census/nonvacuity and
   countermodel controls are partial progress, not a theorem substitute.
 - AU01 performance: hash/main splits and unchanged DecisionArrays replay checks
-  pass below 300 s. Further interpreted profiling, requested array split and
-  final import/full gates remain open; no milestone eligibility claimed.
+  pass below 300 s. Array split and replay interpretation profiles are now checked below;
+  broader performance/full gates remain open; no milestone eligibility claimed.
 - AU02 fixed arrays: seven concrete array shapes reproduced; standalone fixed
   storage-vector reconstruction/negative-block lemmas and controls checked.
   Pipeline integration, fixed/nested array gap closure remain open.
@@ -782,3 +782,70 @@ temporary containers. All bind-mounted files, images/caches and other
 containers were preserved; free space recovered to 746 MiB. Exact commands
 and before/after `df` are retained in `fixed-floor-next/disk-recovery`.
 The failed commit is retained as a setup failure, not a passing gate.
+
+
+## DecisionArrays split and interpreted replay profile (2026-11-01)
+
+Inspected speed history before the warned refactor, especially `12240168`
+(`Check array replay`): the exact normalized `normalized2 := .tt` certificate
+and closed `@[csimp]` replay intentionally avoid the expensive original
+arithmetic search. Both are preserved. A fresh-file baseline profile of the
+unchanged source passed in 38.42 s: tactic execution 15.9 s, kernel type
+checking 16.7 s, interpretation 73.8 ms. This is the existing certified
+closed regression, not a benchmark of unreplayed generic countermodel search.
+
+`Examples/DecisionArrayCore.lean` now owns the original fixtures and eight
+public coverage/answer certificates. `Examples/DecisionArrayReplay.lean` keeps all
+private arithmetic templates, reduction proofs, replay certificate and
+unchanged guarded `['proved','refuted','proved']` observation together.
+`DecisionArrays.lean` is the compatible import facade. All 26 declarations,
+their signatures/bodies/budgets and the csimp/guard suffix are preserved;
+`source-preservation.json` records exact block comparisons. Only wrappers,
+imports and the stale module-doc certificate location changed. No private
+identifier is used across modules, no other producer file was edited, and
+shared module-map registrations are narrow additions.
+
+Dependency-warm checks with initially fresh module files: Core MCP/build
+6.32/5.23 s, Replay MCP/build 40.58/36.14 s, facade MCP/build 4.19/3.13 s,
+array-gap consumer MCP/build 15.98/14.81 s. After the review doc correction,
+Core/facade MCP rechecks passed in 7.43/42.58 s; the latter also refreshed
+its changed import. The final combined facade/consumer closure build passed
+in 15.88 s. Final replay profiling passed in 37.18 s: tactic execution
+16.8 s, type checking 15.1 s, interpretation 49.8 ms. Each checked file is
+below the unchanged 300 s guard; the split adds import overhead, and no
+overall speedup or cold full-build time is claimed. These are measured
+cache/source identities, not another host's results.
+
+A public/private Lean axiom audit passed in 25.49 s, printing all eight
+public certificates and every original private proof, including the exact
+csimp theorem, plus generated theorem reports. All use only subsets of
+`[propext, Classical.choice, Quot.sound]`. Final source hashes and measured
+aggregate RSS/headroom are checked in
+`/workspace/va1-evidence/array-split-next/verified-gates.json`; raw stdout,
+stderr, profiler categories, commands and actual Lean/Lake versions remain.
+The hard aggregate 12 GiB/no-swap cap, 12 GiB host reserve, one thread,
+explicit `-j1`, writer lock and no LSP/build overlap remain. New containers
+are task-owned ephemeral checks so temporary layers do not refill the disk;
+all mounted caches, source and evidence remain. No proof/time/search budget,
+decision pipeline, frozen predicate, old expected verdict or premise changed.
+
+Independent read-only finder and skeptic confirmed exact code/replay
+preservation and acyclic imports. Finder caught a stale 'certificate below'
+reference; skeptic caught the facade's extra EOF blank line. Both were
+corrected before final gates. Neither edited or used Lean/server/build.
+Final documentation/static review and sealing follow when actually complete.
+The original AU01 theorem/Residue/bridge and AU02 integrations remain open;
+this finishes the requested array-example split increment, not the full lane.
+
+Array-split final static checks: 1062 reachable/zero orphans, 180 core/zero
+elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1077 sources/248 inventoried sites/zero findings
+pass. A new shorthand path reference was corrected; its raw failed output
+remains. Final doc paths fail only with the exact 85 frozen findings and
+zero added/removed; axiom inventory still fails with the identical 1206 pins/
+zero errors/404 unrecorded changes. Neither failure is waived or passing.
+`cache-identity.json` records source and retained build-artifact hashes for
+the affected import closure; the whole-project cold gate remains failed.
+Final independent read-only documentation/evidence reviews found no remaining
+issues. Frozen Decision source is byte-identical, as are both predicates.
+No whole-goal completion or publication is claimed.
