@@ -313,15 +313,35 @@ def aggregate(plan, stages):
         e.require(isinstance(spec['kernelRecords'],dict), 'invalid kernel record map')
         requested={d['name']:d for d in interface['declarationRequests']}
         e.require(len(requested)==len(interface['declarationRequests']), 'duplicate declaration request')
-        extracted={};missing_kernels=[]
+        extracted={};missing_kernels=[];kernel_failures=[]
         for module,ref in spec['kernelRecords'].items():
             e.require(module in interface['modules'], 'unmatched kernel record module')
             if ref is None:missing_kernels.append(module);continue
             e.require(module.startswith('Solidity.'),'Bridge kernel records require the existing Bridge consumer, not a relaxed core extractor')
             e.require(set(ref)=={'record','replay'},'both retained extraction and replay are required')
             _,record=attachment(ref['record']);_,replay=attachment(ref['replay'])
-            e.require(record['before']['repository']==str(root) and replay['before']['repository']==str(root),
+            expected_request={'schema':1,'module':module,'declarations':[{'name':d['name'],'kind':d['kind']} for d in interface['declarationRequests'] if d['module']==module]}
+            for item in (record,replay):
+                no_promotion(item)
+                e.require(type(item.get('schema')) is int and item['schema']==1 and k.request(item['request'])==expected_request,
+                          'wrong exact extraction/replay declaration request')
+                e.require(item.get('before') is None or item['before']==spec['snapshot'],'stale extraction/replay source identity')
+                e.require(item['exit']!=0 or item.get('before')==spec['snapshot'],'unbound successful extraction')
+                if item.get('before') is None:obligations.append('unbound-preflight-failure:'+module)
+            e.require(all(item.get('before') is None or item['before']['repository']==str(root) for item in (record,replay)),
                       'kernel records are not from exact private source tree')
+            e.require(all(type(item.get('exit')) is int for item in (record,replay)), 'invalid extraction/replay exit')
+            if record['exit']!=0 or replay['exit']!=0:
+                for label,item in [('extract',record),('replay',replay)]:
+                    if item['exit']==0:continue
+                    no_promotion(item)
+                    e.require(type(item.get('schema')) is int and item['schema']==1 and k.request(item['request'])['module']==module,
+                              'failed kernel record has wrong request/schema')
+                    e.require(item.get('before') is None or item['before']==spec['snapshot'],'stale failed kernel record')
+                    kernel_failures.append({'module':module,'phase':label,'exit':item['exit'],
+                        'commandExit':item.get('commandExit'),'launched':item.get('launched'),
+                        'error':item.get('error'),'preflight':item.get('preflight'),'recordRef':ref['record' if label=='extract' else 'replay']})
+                missing_kernels.append(module);obligations.append('failed-mandatory-extraction-or-replay:'+module);continue
             old_root,old_provenance_root,old_git=k.ROOT,p.ROOT,e.git
             try:
                 k.ROOT=root;p.ROOT=root;e.git=lambda directory,*args:git(directory,*args).decode().strip()
@@ -362,7 +382,7 @@ def aggregate(plan, stages):
         # Hash matching is attachment accounting, not an oracle for observations.
         if spec['observations']: obligations.append('observation-semantic-replay-not-established-by-aggregation')
         obligations += ['missing-gate:'+gate for gate in missing]+['failed-gate:'+gate for gate in failed]
-        results[name]={'sourceReady':True,'retainedEvidenceConsistent':not missing and not failed and not missing_observations and not missing_kernels, 'retainedDeclarationMetadata':extracted,
+        results[name]={'sourceReady':True,'retainedEvidenceConsistent':not missing and not failed and not missing_observations and not missing_kernels, 'retainedDeclarationMetadata':extracted, 'kernelFailures':kernel_failures,
                        'interfaceSha256':e.digest(canonical(interface).encode()), 'producerRevision':spec['snapshot']['revision'],
                        'matchesTargetSnapshot':identity(spec['snapshot'])==identity(plan['targetSnapshot']),
                        'orderedObservationIds':observed,'obligations':obligations}

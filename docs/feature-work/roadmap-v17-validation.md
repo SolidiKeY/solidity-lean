@@ -810,3 +810,16 @@ unsupported filesystem still falls back to ordinary reads, and only the actual
 unchanged headroom guard determines admission. Speed-related history
 `6405ce0b` was inspected before this I/O change; no Lean checking is refactored.
 Exact timing/resource observations and all earlier refusals are retained.
+
+
+The V14 byte-prefix leaf's first complete extraction passed in 22.19s, retaining
+four full conditional declaration records. Its mandatory replay and one
+never-launched replay continuation refused the unchanged effective-memory guard;
+raw command exits are null and no Lean query/build/container launched in those
+refusals; Lean/Lake version probes occurred before admission. This component is
+incomplete, not a replay pass. The original successful extraction was not repeated.
+V13's ready 13-file leaf remains queued while the same guard cannot admit it.
+Aggregation retains failed mandatory kernel/replay records as per-component
+pending obligations, including raw phases and numeric preflight observations;
+it does not promote a partial extraction or suppress unrelated ready components.
+No further unchanged replay attempt is scheduled.

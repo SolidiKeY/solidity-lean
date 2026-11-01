@@ -88,7 +88,7 @@ class ComponentControls(unittest.TestCase):
   item=self.plan['components'][0];item['mandatoryGates']={};self.snapshot['repository']=self.source['destination'];item['stage']=c.e.digest(c.canonical(self.source).encode())
   row={'name':'Solidity.Fixture.conditional','module':self.module,'kind':'theorem','typeSha256':'1'*64,'valueSha256':'2'*64,'axioms':['propext'],'propositionBinders':[0]}
   item['interface']['declarationRequests'][0]['metadataSha256']=c.e.digest(c.k.canonical(row))
-  record={'before':self.snapshot,'result':{'rows':[row]}}
+  record={'schema':1,'request':{'schema':1,'module':self.module,'declarations':[{'name':row['name'],'kind':row['kind']}]},'before':self.snapshot,'exit':0,'result':{'rows':[row]}}
   refs={}
   for label in ['record','replay']:
    path=self.base/(label+'.json');path.write_text(json.dumps(record));refs[label]={'path':str(path),'sha256':c.e.digest(path.read_bytes())}
@@ -100,6 +100,26 @@ class ComponentControls(unittest.TestCase):
   item['interface']['declarationRequests'][0]['metadataSha256']=good
   del refs['replay']
   with self.assertRaises(ValueError):self.call()
+ def test_failed_replay_is_component_pending_not_aggregate_promotion(self):
+  item=self.plan['components'][0];item['mandatoryGates']={};self.snapshot['repository']=self.source['destination'];item['stage']=c.e.digest(c.canonical(self.source).encode())
+  request={'schema':1,'module':self.module,'declarations':[{'name':'Solidity.Fixture.conditional','kind':'theorem'}]};records={'record':{'schema':1,'request':request,'exit':0,'before':self.snapshot},'replay':{'schema':1,'exit':2,'before':self.snapshot,'request':request,'commandExit':None,'launched':False,'phase':'preflight','error':'effective reserve','semanticPremisesDischarged':False,'releaseClosed':False}}
+  refs={}
+  for label,value in records.items():
+   path=self.base/(label+'.json');path.write_text(json.dumps(value));refs[label]={'path':str(path),'sha256':c.e.digest(path.read_bytes())}
+  item['kernelRecords']={self.module:refs}
+  result=self.call();row=result['components']['component'];self.assertFalse(row['retainedEvidenceConsistent']);self.assertEqual(row['retainedDeclarationMetadata'],{});self.assertEqual(row['kernelFailures'][0]['exit'],2);self.assertIsNone(row['kernelFailures'][0]['commandExit']);self.assertFalse(result['releaseClosed'])
+
+ def test_mixed_failed_pair_rejects_wrong_request_stale_success_and_promotion(self):
+  item=self.plan['components'][0];item['mandatoryGates']={};self.snapshot['repository']=self.source['destination'];item['stage']=c.e.digest(c.canonical(self.source).encode())
+  req={'schema':1,'module':self.module,'declarations':[{'name':'Solidity.Fixture.conditional','kind':'theorem'}]}
+  baseline={'record':{'schema':1,'request':req,'exit':0,'before':self.snapshot},'replay':{'schema':1,'request':req,'exit':2,'before':self.snapshot,'commandExit':None,'launched':False}}
+  for label,mutate in [('wrong-request',lambda rs:rs['replay']['request']['declarations'][0].__setitem__('name','Solidity.Fixture.wrong')),('stale-success',lambda rs:rs['record'].__setitem__('before',dict(self.snapshot,revision='9'*40))),('promoted-success',lambda rs:rs['record'].__setitem__('releaseClosed',True))]:
+   records=copy.deepcopy(baseline);mutate(records);refs={}
+   for key,value in records.items():
+    path=self.base/(label+key+'.json');path.write_text(json.dumps(value));refs[key]={'path':str(path),'sha256':c.e.digest(path.read_bytes())}
+   item['kernelRecords']={self.module:refs}
+   with self.subTest(label=label),self.assertRaises(ValueError):self.call()
+
  def test_shared_source_conflict_keeps_individual_results_open(self):
   other=copy.deepcopy(self.source);path=self.base/'other';path.mkdir();other['destination']=str(path);other['files']['Solidity/Fixture.lean']['sha256']='9'*64;other['moduleClosures'][self.module]['modules'][self.module]['sha256']='9'*64
   spec=copy.deepcopy(self.plan['components'][0]);spec['id']='other';spec['stage']=c.e.digest(c.canonical(other).encode());spec['interface']['modules'][self.module]='9'*64
