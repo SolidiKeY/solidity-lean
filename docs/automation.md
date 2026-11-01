@@ -1182,6 +1182,19 @@ broader AU02 and full gates remain open. See the VA1 handoff for exact signature
 failures, resource evidence and concrete parallel-interface limits.
 
 
+
+VA1 exact source-reason component (2026-11-01): a typed reversed fresh-struct
+field/literal class is now recognized soundly and completely, with a constructive
+Decidable instance and one-line causal reason. It queries no coverage/verdict
+function. A generic refutation reuses the existing child heap and exact hash-free
+interface; concrete literals/types, supported/other-gap refusals, producer-state
+equality and unchanged global unknown pins are checked. This is one reason
+component; global Residue/exhaustiveness and pipeline integration remain open.
+A map-bearing control is target-admitted despite the existing map-free guard;
+no target exclusion or premise was added. Exact limits/evidence are in the VA1
+handoff.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

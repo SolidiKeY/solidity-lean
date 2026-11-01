@@ -2112,3 +2112,93 @@ unrecorded changes; strict docs FAIL1 same85 frozen findings, none added/removed
 Frozen Decision/HashPremise/ProgramReduction bytes confirmed. Final skeptic asked
 for explicit≤511 on the prefix-interface description and precise fixed-fuel
 sufficiency wording; both clarified, with no source or semantic change.
+
+
+## Exact decidable reversed-field reason component (2026-11-01)
+
+Parentc2b5d00f7f05292a00f86c87de314807c4b05d7d. New owned modules
+Calculus/DecisionResidueReasons and Examples/DecisionResidueReasons; shared
+registration edits exactly two additive imports and two module-map rows.
+Audited integrated memory handoffs/APIs first. MemStructCut, MemStructWitness,
+MemoryWitness and original DecisionMemory fixtures/observations remain unchanged;
+no heap witness or parameter enumeration delivery is recreated. Decision,
+HashPremise, both frozen predicates, all budgets and global strategy unchanged.
+
+ReversedFreshField is an intrinsic source witness for every contract/context:
+exactly one map-free fresh struct, a direct primitive literal on the left, and
+a primitive field read on the right. It records x/s/f/p/value, actual field lookup,
+existing map-free admission and complete syntax equality. The parser reuses
+producer allocView/eqView/literalTerm and full typed-term equality, then enumerates
+actual struct fields. No target, coverage or verdict is queried. The one-line
+reason is that the existing fresh-struct schema requires the field on the left
+and a direct literal on the right.
+
+reversedFreshField_witness proves recognition soundness;
+reversedFreshField_complete proves every exact typed source witness is recognized,
+using successful lookup membership and finite field search. reversedFreshField_iff
+identifies the Boolean with Nonempty(ReversedFreshField φ); a computable Decidable
+instance decides that proposition without a coverage/unknown oracle. This is one
+precise named reason component, not the exhaustive Fml.Residue union or its bridge.
+Matching does not assert that every global decision must remain unknown.
+
+The same typed witness yields an independently usable MemoryWitness.Answer.
+counterState reuses exactly the producer children/adopted heap BEFORE parent
+allocation; counterState_refutes transports its existing field countermodel by
+equation symmetry at the SAME state. hashFree and counterState_refutesH expose
+structural hash-freedom and unchanged ¬holdsH, with no new validity/hash premise.
+The global pipeline is deliberately unchanged at this reason-component checkpoint.
+
+Inhabited controls: original reversed0, another literal5 and Boolean reversal
+all classify true. Supported normal/reflexive/fixed/Boolean equations, another
+real compound-RHS gap, given-heap parameters and map-bearing sources classify
+false. Exact Decidable positive/negative propositions execute under kernel decide.
+originalState = producer gapMemStruct_state by kernel equality, with ordinary and
+hash-premised refutation plus nonvalidity. Original target/notCovered/unknown
+certificates are reused unchanged. A covered reflexive source stays outside this
+class, so it is neither fixture equality nor all fresh memory.
+
+A new control initially guessed mappingReversed.inTarget=false; the kernel
+proved that assertion false. Saved failed source/raw retained. The actual control
+now proves inTarget=true, while the existing map-free class guard rejects it.
+This distinguishes target admission from producer recognition; no predicate,
+expected existing verdict, premise or exclusion changed. This map-bearing target
+shape remains unaccounted for in the eventual exhaustive reason census.
+
+Raw gates /workspace/va1-evidence/residue-reasons-next: final core MCP5.278s
+(clean, actual core source SHA retained); final core target4.125s (67jobs,newfile
+1.5s); final controls MCP5.258s; new import-closure target3.187s (350jobs,newfile
+1.3s);29 public theorem/decider/state/answer axiom reports8.423s; actual classifier
+observer3.102s: pass. All below unchanged300s; dependencies cached, no full-cold
+or cache-clearing claim. Axioms subsets of propext/Classical.choice/Quot.sound.
+Warm observer with output original/five/bool=true, supported/otherGap/mapping=false;
+per-call/output1761496/69455/105289/9454/2714/43746ns. These are source-class
+observations, not kernel or EVM evidence and not global verdict timings.
+
+Original writer lock/thread1/-j1, verified hard aggregate12GiB/no-swap and12GiB
+host reserve before Lean; Lean4.24.0 commit797c613/Lake5.0.0-src+797c613 observed.
+Maximum final sampled aggregate RSS1437456KiB/minimum host available17204912128bytes,
+no resource stops. Initial structure-field syntax, dependent-body rewrite,
+Option/true-guard completeness and new false mapping-admission assertion failures
+retained. Multi-attempt tool process exited0 but candidates had parser errors
+because replacement removed a constructor closing bracket: NOT proof passes.
+Final source uses explicit equality composition; all complete-file MCPs are clean.
+
+Both independent read-only source reviews found no remaining issues after adding
+completeness/Decidable; neither ran Lean/server/build or edited files. Exact source
+family, producer state/premises and limits retained. Global Residue/theorem/exhaustive
+target/hash bridge, other array/memory/OR/revised-M4/formula-dependent-fuel children,
+remaining census/performance/backfill and final affected/full validation remain
+open. Q2 frontend repair held, old TypeExamples resource failures retained; no
+unchanged full failure repeated. Original full goal incomplete with ready work;
+no stop/reset/new goal/VM, push, merge, PR or tag. Existing concrete numeric
+PARALLEL-INTERFACE atc2b5d00f remains immutable and independently audited.
+
+Static gates:1096 reachable/zero orphans,180 core/zero elaborator reach, strict
+automatic491/61 step budgets/11 refuted/zero manual or pending, trust1111 sources/
+248 sites/zero findings: pass. Inventory FAIL1 unchanged1206 pins/zero errors/404
+unrecorded changes; strict docs FAIL1 same85 frozen findings, none added/removed.
+All29 actual axiom sets independently parsed/audited as standard-only. Frozen
+Decision/HashPremise/ProgramReduction and all three memory producer modules
+byte-exact; original DecisionMemory unchanged from parent. Final finder caught
+resource aggregation missing the final source-matched core MCP; corrected to
+include all six final passing checks. Both source/docs reviews otherwise clean.
