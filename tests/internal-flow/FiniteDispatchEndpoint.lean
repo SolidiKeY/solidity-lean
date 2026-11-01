@@ -764,3 +764,54 @@ theorem final_target_observed :
     observe_after hr₃ addresses cursor,protected_final_frame,pointers⟩
 
 end Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
+
+namespace Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
+open Evm Evm.Memory
+/-- The SAME actual final witness carries every protected primitive caller
+value as well as every reference, complete observations and captured frame. -/
+theorem final_target_values :
+    ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₃ : Machine) (base₃ : Nat → Fin W),
+      run seed.code machine = .ok m₁ 0 ∧
+      run (seed.code ++ checked.code ++ postCert.code) machine = .ok m₃ 0 ∧
+      StateRepr 1 1 64 seed.frag mid.st base₁ m₁ ∧
+      StateRepr 1 1 64 postCert.frag total.st base₃ m₃ ∧
+      BaseExtends mid.st.H base₁ base₃ ∧
+      GrowsAllocator 1 64 11 (State.init C) bases machine total.st base₃ m₃ ∧
+      m₃.stack = [w[77]] ∧ m₃.mem 0 = w[139] ∧
+      afterCells base₃ m₃ = [w[42],.val (base₁ 0),.val (base₁ 0),.val (base₁ 1),w[2],
+        .val (base₁ 0),w[5],.val (base₁ 0),.val (base₁ 0),w[2],w[12],w[11],w[2],w[23],w[29],
+        w[0],w[0],w[2],w[99],w[101],w[11],w[139]] ∧
+      TEnv.thin projection (TEnv.drop post.ext total.st.env) =
+        TEnv.wk total.ext View (TEnv.thin projection mid.st.env) ∧
+      (∀ (R : RefTy) (i : Idx View (.mem R)) (r : HRef mid.st.H R),
+        TEnv.get (i.wk projection) mid.st.env = some r →
+          m₃.mem (cellOf 1 ((i.wk projection).ext post.ext)) = .val (base₁ r.id)) ∧
+      ∀ (p : PrimTy) (i : Idx View (.val p)),
+        ReprV p (TEnv.get (i.wk projection) mid.st.env)
+          (m₃.mem (cellOf 1 ((i.wk projection).ext post.ext))) := by
+  obtain ⟨m₁,base₁,m₃,base₃,hp,whole,hr₁,hr₃,addresses,grows,stack,cursor,
+    observed,captured,pointers⟩ := final_target_observed
+  refine ⟨m₁,base₁,m₃,base₃,hp,whole,hr₁,hr₃,addresses,grows,stack,cursor,
+    observed,captured,pointers,?_⟩
+  intro p i
+  exact CallerView.represented_value_drop (σ := mid.st) total post.ext projection captured hr₃ i
+
+/-- Two distinct protected uint destinations cannot be swapped. The positive
+baseline is the real complete final endpoint, not another execution. -/
+theorem final_wrong_scalar_destination : ∃ m₃,
+    run (seed.code ++ checked.code ++ postCert.code) machine = .ok m₃ 0 ∧
+    ReprV .uint (TEnv.get ((.here : Idx View (.val .uint)).wk projection) mid.st.env) (m₃.mem 7) ∧
+    m₃.mem 7 = w[5] ∧ m₃.mem 5 = w[2] ∧ m₃.mem 7 ≠ m₃.mem 5 := by
+  obtain ⟨m₁,base₁,m₃,base₃,hp,whole,hr₁,hr₃,addresses,grows,stack,cursor,
+    observed,captured,pointers,values⟩ := final_target_values
+  have encoded := values .uint .here
+  change ReprV .uint (TEnv.get ((.here : Idx View (.val .uint)).wk projection) mid.st.env)
+    (m₃.mem 7) at encoded
+  have capWord := congrArg (fun xs : List Word => xs[6]!) observed
+  have tagWord := congrArg (fun xs : List Word => xs[4]!) observed
+  change m₃.mem 7 = w[5] at capWord
+  change m₃.mem 5 = w[2] at tagWord
+  refine ⟨m₃,whole,encoded,capWord,tagWord,?_⟩
+  rw [capWord,tagWord]
+  decide +kernel
+end Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail

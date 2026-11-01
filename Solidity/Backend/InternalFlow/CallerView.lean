@@ -98,6 +98,34 @@ theorem represented_drop {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Δ}
   exact PublishedDirectCalls.old_alias_at_entry_address out repr addresses r
     ((i.wk h).ext extension) (reference_drop out extension h captured i r old)
 
+/-- Primitive caller values survive the same actual extended-context drop;
+heap mutation by the callee remains unrestricted. -/
+theorem value_drop {Γ Δ Ξ : Ctx} {σ : State C Γ} (out : Out C σ.H Δ)
+    (extension : Ext Γ Δ) (h : Thin Ξ Γ)
+    (captured : TEnv.thin h (TEnv.drop extension out.st.env) =
+      TEnv.wk out.ext Ξ (TEnv.thin h σ.env))
+    {p : PrimTy} (i : Idx Ξ (.val p)) :
+    TEnv.get ((i.wk h).ext extension) out.st.env = TEnv.get (i.wk h) σ.env := by
+  rw [TEnv.get_ext_drop]
+  have observed := congrArg (TEnv.get i) captured
+  rw [CallerFrame.read_thin,TEnv.get_wk,CallerFrame.read_thin] at observed
+  exact observed
+
+theorem represented_value_drop {L b frame : Nat} {Γ Δ Ξ : Ctx} {F : Frag Δ}
+    {σ : State C Γ} (out : Out C σ.H Δ) (extension : Ext Γ Δ) (h : Thin Ξ Γ)
+    (captured : TEnv.thin h (TEnv.drop extension out.st.env) =
+      TEnv.wk out.ext Ξ (TEnv.thin h σ.env))
+    {base : Nat → Fin W} {m : Machine}
+    (repr : StateRepr L b frame F out.st base m)
+    {p : PrimTy} (i : Idx Ξ (.val p)) :
+    ReprV p (TEnv.get (i.wk h) σ.env)
+      (m.mem (cellOf b ((i.wk h).ext extension))) := by
+  have encoded := repr.core.vals ((i.wk h).ext extension)
+  change ReprV p (TEnv.get ((i.wk h).ext extension) out.st.env)
+    (m.mem (cellOf b ((i.wk h).ext extension))) at encoded
+  rw [value_drop out extension h captured i] at encoded
+  exact encoded
+
 /-- info: 'Solidity.Backend.InternalFlow.CallerView.by_id' does not depend on any axioms -/
 #guard_msgs in #print axioms by_id
 /-- info: 'Solidity.Backend.InternalFlow.CallerView.reference' depends on axioms: [propext] -/

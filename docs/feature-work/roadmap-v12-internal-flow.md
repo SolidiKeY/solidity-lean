@@ -2718,3 +2718,53 @@ module hashes, dependent signatures, witnessed clients and incremental bundle
 prerequisites are exported in a new PARALLEL-INTERFACE checkpoint for private
 V13/V14/V16/Yul worktrees. No peer package was supplied or imported, no reserved
 edit or push/merge/PR occurred, and every previous seal remains immutable.
+
+
+## Continuation33 — protected primitive locals through the reached frame
+
+Continuing original Work1/Work4/BackfillA after C32, `CallerView.value_drop`
+projects every protected intrinsic primitive from the actual captured dropped
+caller environment. `represented_value_drop` consumes the real reached
+`StateRepr.core.vals` and derives the existing `ReprV` relation to that ENTRY
+caller value. No arithmetic uniqueness, new evaluator, simulation oracle or
+heap-content invariant is introduced; all primitive types stay intrinsic.
+
+`ProtectedTail.final_target_values` retains the SAME C32 actual prefix/final
+representations, complete ordered22 cells, composed `BaseExtends`, growth11,
+stack77/cursor139, captured final caller view and every protected reference,
+and adds every protected primitive encoding on that same reached machine.
+The inhabited `final_wrong_scalar_destination` uses that complete endpoint,
+not another replay: protected uint cells7=5 and5=2 are distinct and cannot be
+swapped. The original reference, allocation, private/default-object, mutation,
+refusal and other countercontrols and all542 original reports remain intact.
+This is typed finite local-frame transport, not full-signature admission or
+unbounded target recursion, early-control, world or transient correctness.
+
+Actual generic prototype passes2.713s; core build3.581s and complete changed
+fixture source preparation27.810s pass at the original120s per-process bound.
+Four actual new builtin axiom reports are pinned separately: source value law
+uses propext; represented value law uses propext/Quot.sound; the two inhabited
+clients use the existing propext/Classical.choice/Quot.sound set. All original
+542 imported kernel types (including85 tuple types), C32's seven types/axioms,
+and retained scoped sets are checked without changing pins or report order.
+Actual runtime/import/structural/guard evidence and independent read-only
+finder/skeptic source/artifact reviews are bound in the new handoff.
+
+No demonstrated performance repair or new upstream prerequisite justifies
+repeating a failed aggregate. Therefore raw/full/current-cached timing gates
+are NOT rerun or claimed passed. C32 complete cached command0/121.091 exceeds
+strict120 despite all18/542/11575-entry final binding; C32 raw124/121.214,
+original full124/300 and all earlier failures remain retained. Current complete
+aggregate validation remains unfinished; focused checks or input inventory
+cannot replace it. Normal/strict docs raw1 and separate publication/previous
+findings equality remain distinct from frozen/global success. No target, fixture,
+report, budget, profile, predicate, observation or source refusal was removed.
+
+All original Work1–6 and BackfillsA/B remain partial, with the same exact missing
+unbounded/dependent/early-control/general-loop/byte-world/target-transient
+producers and remaining stronger middle-plus-final assembly obligation. No
+independent-work exhaustion, full closure, goal reset/reactivation/completion,
+reserved edit, unmerged intake or push/merge/PR. C32 and every earlier seal stay
+immutable. A fresh exact-committed PARALLEL-INTERFACE exports these narrow typed
+contracts and populated clients for private peer staging; final combined-tree
+checks remain required and open.
