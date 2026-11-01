@@ -881,7 +881,9 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
       return (lo, hi)
     let (cLo, cHi) := (ps[iLo]!.2, ps[iHi]!.2)
     let p ← intervalP a vs[iLo]! vs[iHi]!
-    let some e ← omegaIn #[hk] p | return ← done g₃ bounds
+    -- Literal or same-base endpoints can be guarded by a bare Boolean local.
+    -- Keep omega first; only its refusal pays for the existing bounded cases.
+    let some e ← omegaCasesIn #[hk] p | return ← done g₃ bounds
     match base with
     | none =>
       let (h, g₄) ← assertH g₃ `hintA p e
@@ -1008,9 +1010,14 @@ def closeArith (g : MVarId) (bounds : Bounds) (prems : Array FVarId) : TacticM B
   g.withContext do
     let prems := prems.filter (← getLCtx).contains
     let mut keep := prems ++ hs
+    let mut reads := (collectFVars {} (← instantiateMVars (← g.getType))).fvarIds
     for h in hs do
-      for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
-        if let some (_, _, hb) := bounds.get? f then keep := keep.push hb
+      reads := reads ++ (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds
+    -- A conjunct can leave a comparison with no new hypotheses: its target
+    -- still reads the value whose interval was certified by an earlier update.
+    for f in reads do
+      if let some (_, _, hb) := bounds.get? f then
+        if (← getLCtx).contains hb then keep := keep.push hb
     let some e ← omegaIn keep (← g.getType) | return false
     g.assign e
     return true

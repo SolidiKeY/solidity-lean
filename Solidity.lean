@@ -269,6 +269,7 @@ import Solidity.Examples.Tactics.JoinControls
 import Solidity.Examples.Tactics.JoinSequence
 import Solidity.Examples.Tactics.JoinWalk
 import Solidity.Examples.Tactics.JoinIntervals
+import Solidity.Examples.Tactics.JoinSigned
 import Solidity.Examples.Tactics.LoopNotices
 import Solidity.Examples.Tactics.LongContext
 import Solidity.Examples.Tactics.PolySize

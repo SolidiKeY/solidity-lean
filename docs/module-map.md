@@ -287,6 +287,7 @@ commands; it never enters the core import graph.
 | `Calculus/JoinSequence.lean` | Intrinsic straight-write decoding/reconstruction and snapshot-guarded assignment programs (AU03; integrated dispatcher soundness in `Calculus/Sound/JoinSequence.lean`). |
 | `Calculus/JoinSequenceSize.lean` | Exact emitted program size and linear bound, separately from walked leaf costs. |
 | `Calculus/Sound/JoinSequence.lean` | Exact state/halt agreement after snapshot pop and soundness under both modalities. |
+| `Examples/Tactics/JoinSigned.lean` | Producer-certified negative literal and dependent signed intervals, forced sequential/conjunctive closure, scoped countermodels, unchanged 64-case cap and stale-target rejection. |
 | `Examples/Tactics/JoinSequence.lean` | Inhabited changed-guard, dependent-write, untaken/selected failure, refusal and emitted-size controls. |
 | `Examples/Tactics/JoinWalk.lean` | Production automatic source proofs and separate walk/leaf measurements for dependent assignment sequences and long two-base joins. |
 | `Examples/Tactics/JoinIntervals.lean` | Kernel interval certificates, fixed Boolean-case cap, current-context/stale-bound and inhabited countermodel controls. |
