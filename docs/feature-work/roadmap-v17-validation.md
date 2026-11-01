@@ -720,3 +720,70 @@ untracked filename with bytes reproduced from the original serial configuration
 rule, binds its hash before/after, and rejects all other checkout changes. Both
 raw failures remain failures. This is a collector compatibility repair, not a
 clean build claim or permission to ignore dirty source.
+
+## Parallel committed-component interface checkpoint
+
+The human authorized exact committed peer packages in private development trees.
+The task branch remains isolated; no peer refs, sources or reserved implementations
+are imported into this checkout. Four supplied bundles were checked against the
+coordinator's SHA256 index and staged with exact advertised head/tree, frozen-base
+ancestry, every committed blob/mode and trusted lexical import inventories:
+V13 `66c08fdefbbb53c0eee111b09d1baa6277fedff5`, V14
+`74225bbe317f0983ee0e781d446a2f97c1cb807f`, V15
+`c97bcab75406cc4d22614948ef29d67b375dba3a`, and V16
+`bea6e0e334f448aebb6f7c7a68321b4e419b43d2`.
+These are development inputs, not master publication or lane completion.
+
+`scripts/roadmap-v17-components.py` exports `stage(bundle, expected, destination)`
+and `aggregate(plan, stages)`. Staging requires a new canonical private directory,
+exact bundle identity and supported module roots; it uses private Git storage,
+executes no producer command/hook/filter, rejects symlinks/submodules and validates
+raw checked-out bytes. Git commands have 60-second bounds and staging has a
+300-second post-run acceptance bound; use the documented outer `timeout 300`
+command for a hard process deadline. Whole private source worktrees and build caches are never copied into
+an evidence export. Private source worktrees are reusable, cache-free development inputs.
+Bridge inventories remain separate; no Bridge import enters the core or public
+registration, and the existing core extraction request fence is unchanged.
+
+Aggregation emits results for each concrete component without waiting for entire
+lanes. It revalidates private ancestry, source/import identities, exact scope and
+decision-file fingerprints, ordered artifact contracts and transitive dependency
+readiness. It reuses the original provenance and complete kernel validators and
+replay matcher. Exact full-row metadata hashes bind type, value, dependency and
+axiom requirements; source-only declaration requests never become checked proofs.
+Missing or failed children, missing observations, changed source/tool/config,
+conditional premises, stale/corrupt attachments and joint source conflicts remain
+explicit. Clean/warm comparison reuses the owned original receipt checks; the
+extracted pure `pair_consistency` helper alone never reports gate accounting
+complete. These changes add no proof or process budget.
+
+The actual new client is [ParallelInterface.lean](../../tests/roadmap-v17/ParallelInterface.lean).
+It imports the exact private V16 `TransportControls`: `twoPass` and
+`combination_success` supply composed-certificate success, while `idPass`, `idCert`
+and `revert_at_need` supply the identity-certificate revert. The original G01/G07
+`Outcome` and execution semantics are reused unchanged. Its complete ordered
+result is `[some (.success [7]), some (.revert [9])]`; kernel negative controls
+reject swapping, erased revert bytes and a missing component. This inhabited
+instance emits no events and proves no real source/compiler/bytecode agreement.
+
+The clarified private candidate is
+`f7f9ad2d663b0fd3e98f93f05c85e0dfa395438d`, based directly on the supplied V16
+head, with one owned fixture added. Complete fresh eight-module extraction and
+independent live replay passed in 16.55s and 16.72s under the original 300s,
+12GiB/no-swap, `-j1`, 100000-node/depth512 limits. All five declaration types,
+values, dependencies and printed axiom sets were retained; every set is exactly
+`[propext]`. Scoped expectations are in
+[parallel-interface.json](../../tests/roadmap-v17/requests/parallel-interface.json).
+The earlier `52d693bf21bb19a18a9b0df6878f49ac91d294f2` candidate and its passing
+records remain historical and unchanged. A missing-schema request refusal,
+resource refusals and a private-worktree configuration compatibility failure are
+retained separately. No old failure is relabeled.
+
+Independent finder/skeptic review identified and fixed transitive readiness,
+strict ancestry/schema checks, unsafe private Git configuration, contradictory
+metadata status and the composed-success/identity-revert wording. Focused tests
+include real unrelated-commit and no-execution configuration controls, plus
+synthetic bookkeeping controls that are never counted as kernel proof. Final
+command, checksum and review evidence lives in the external PARALLEL-INTERFACE
+handoff. The original Derived17 representation hold, false-readiness human-review
+hold, all 457 OPEN rows and every G52–G55/backfill obligation remain binding.

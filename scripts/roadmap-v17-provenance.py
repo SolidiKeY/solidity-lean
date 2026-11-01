@@ -259,12 +259,19 @@ def validate_pair(report, evidence_root, current):
         e.require(directory.is_relative_to(evidence_root.resolve()), 'pair collection escapes evidence root')
         e.require(validate(run, directory, current, run['gate']), 'nonzero mandatory gate')
         runs[mode] = run
-    a, b = runs['clean'], runs['warm']
+    return dict(pair_consistency(runs['clean'], runs['warm']), accountingComplete=True)
+
+
+def pair_consistency(a, b):
+    """Pure retained-pair comparison; callers MUST validate both gate receipts first."""
+    e.require(a['mode']=='clean' and b['mode']=='warm', 'wrong pair mode')
+    e.require(a['before']==a['after']==b['before']==b['after'], 'pair source/tool/config differs')
+    e.require(type(a['exit']) is int and type(b['exit']) is int and a['exit']==b['exit']==0, 'nonzero/invalid mandatory pair gate')
     e.require(a['gate'].replace('clean-', '') == b['gate'].replace('warm-', ''), 'unmatched targets')
     for kind in ('build', 'cache'):
         e.require(a[kind + 'End'] == b[kind + 'Start'], 'unmatched cache/build continuity')
         e.require(a[kind + 'End']['files'] == b[kind + 'End']['files'], 'unmatched clean/warm artifacts')
-    return {'target': a['gate'][6:], 'accountingComplete': True, 'releaseClosed': False, 'boundary': 'Byte/provenance consistency only; independent kernel gates remain required.'}
+    return {'target': a['gate'][6:], 'pairIdentityMatched':True, 'accountingComplete': False, 'releaseClosed': False, 'boundary': 'Pair identity comparison only; both original gate validations and independent kernel gates remain required.'}
 
 
 def launcher_bytes(tool='lean'):
