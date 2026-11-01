@@ -4,7 +4,7 @@ Status: **partial; VA1-Q1 pending; independent AU01 work active**, 2026-11-01. B
 branch `codex/solidity-automation-20261031/va1-decision`, checkout
 `/workspace/solidity-lean`. Exact AQ1/AQ2 receipt is recorded in
 [solidity-scope.md](../solidity-scope.md), checkpoint
-`717069361a21755914e78caf13d1df2ca76a0284`. No implementation claim.
+`717069361a21755914e78caf13d1df2ca76a0284`. No full implementation/completion claim.
 
 ## Runtime recovery
 
@@ -46,7 +46,8 @@ reproduction of those pins remains pending.
 - Baseline: approvals recorded; source audit and baseline timings incomplete.
 - AU01 theorem: meaningful reasoned decidable Residue, target bridge,
   nonvacuity/negative controls and theorem axiom audit pending.
-- AU01 performance: interpreted profiling and coherent sub-300s module splits pending.
+- AU01 performance: checked hash/main-file splits are recorded below; overall
+  performance milestone and final import-closure gates remain open.
 - AU02: fixed arrays, arrays below keys/fields, arrays of structs/arrays, broader
   memory blocks, halting OR operand, program-free coverage inclusion and
   formula-derived fuel/511-node bound all pending reproduction and proofs.
@@ -208,3 +209,140 @@ identity, the 82 original declarations and 15 guards, standard axiom sets,
 actual typed route membership and narrow acyclic registrations. They used no
 Lean server or build and wrote no files. The final consumer timeout is retained
 as an explicit open obligation.
+
+## Independent main Decision performance checkpoint (2026-11-01)
+
+Parent `90572ad37459f12dc560e9f3b8fd646263da2d3f`; frozen base and prior
+approval/counterexample/sealed deliveries are preserved. VA1-Q1 remains pending.
+This checkpoint completes the main-file split subtask, not AU01/AU02 or the
+whole performance milestone. No other producer's source was changed.
+
+The unchanged main consumer timed out after 300.68 s. A marked copy of the
+exact frozen-base source also timed out (124, 301.64 s, no resource stop):
+markers measured about 50.54 s for the original lines 309–371 coverage block,
+112.71 s for ledger-payment controls and 66.13 s for the next APF controls.
+Those are section wall times including elaboration/compiled guards, not a
+clean arithmetic-search benchmark. Speed history `0cd7a473` and `12240168`
+was inspected; the existing exact sorted/array replay certificates remain.
+
+`Examples/Decision.lean` is now a compatibility facade over 13 serial sections.
+Every original public name, definition, theorem statement and all 56 guarded
+commands/expected messages remain. The only original proof body changed is
+`gapThreeKinds_covered`: exact `tk3`/`swPrefix` outputs are certified as `some`,
+and the eight unchanged `coveredK3` conjuncts are checked separately before
+selecting the existing RIPEMD-first `HashTry` list entry. Private `getD .tt`
+values have explicit `*_some` certificates, so their fallbacks cannot establish
+coverage on failure. No predicate, hash/validity premise, decision default,
+expected observation, algorithm budget or heartbeat/recursion limit changed.
+
+The first split mistakenly reused the existing `Examples/DecisionKInt.lean`
+filename. Independent finder and skeptic caught it before dependent checks;
+the original file was restored byte-identical and the new section renamed
+`DecisionGapKInt`. All new destination paths were checked against HEAD.
+The restored original consumer now builds successfully.
+
+### Actual bounded gates
+
+All checks use the original writer lock, one Lean thread, explicit `-j1`,
+`--tstack=131072`, the existing task container hard 12 GiB/no-swap bound and
+12 GiB available-host reserve; no LSP/build overlap. Per-file MCP results are
+complete, with no warnings/errors/dependency failures. Commands are
+`timeout 300 .venv/bin/python …/diagnostic.py Solidity/Examples/<module>.lean`
+and `timeout 300 lake -f .va1-lakefile.toml build Solidity.Examples.<module>`,
+inside the recorded runner. Each raw JSON retains the exact Docker/command
+argv, versions, source SHAs, elapsed time, actual exit and resource samples.
+
+| Module | Fresh-file MCP seconds | Subsequent module build seconds |
+|---|---:|---:|
+| `DecisionCore` | 5.33 | 4.25 |
+| `DecisionArithmetic` | 88.32 | 87.14 |
+| `DecisionMapping` | 26.60 | 24.33 |
+| `DecisionGapCore` | 6.34 | 5.29 |
+| `DecisionGapKInt` | 7.42 | 6.34 |
+| `DecisionLedger` | 109.00 | 108.44 |
+| `DecisionAPF` | 61.76 | 61.58 |
+| `DecisionBlocks` | 13.95 | 12.77 |
+| `DecisionRefutations` | 10.88 | 8.55 |
+| `DecisionOperators` | 105.92 | 103.17 |
+| `DecisionThreeKindCoverage` | 28.73 | 27.62 |
+| `DecisionGapHashes` | 50.27 | 45.67 |
+| `DecisionStorageArrays` | 47.77 | 46.74 |
+| `Decision` | 3.16 | 2.10 |
+
+These are dependency-warm fresh-file checks, not a clean full build. The warm
+same-source facade rebuild passed in 1.01 s. Actual versions remain Lean
+4.24.0 (`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`) and Lake 5.0.0-src+797c613.
+Across the selected passing module runs, peak sampled aggregate RSS was
+5,665,384 kB (sum of process RSS including shared pages); minimum sampled host
+available memory was 12.0115 GiB. Each run verified `memory.max=12884901888`
+and `memory.swap.max=0` before Lean. The previously passing bounded KeySort
+output remains retained; no new runtime pass is inferred from installation.
+
+The original `Examples/DecisionArrays.lean` consumer passed complete MCP in
+38.23 s and build in 36.11 s. Its existing 280-line coherent certificate and
+`@[csimp]` exact replay were reused without source edits; these timings do not
+benchmark or rerun its potentially enormous original arithmetic search.
+The unchanged `Examples/DecisionKInt.lean` consumer built in 23.33 s.
+A single bounded `lake env lean -j1 --tstack=131072 …/axioms.lean` audit passed
+in 116.72 s: all 141 moved public theorem names were checked, and every axiom
+set is a subset of `[propext, Classical.choice, Quot.sound]`.
+
+### Retained failed experiments and review
+
+The original and marked main-file 300 s timeouts remain failures. Hash-gap
+checks and isolated route attempts stopped on the host reserve (actual Docker
+143, wrapper 75); none is counted as a pass. Conjunction unfolding hit the
+unchanged recursion limit, and a composition initially left a literal true
+conjunction unsolved; the corrected proof uses explicit `Bool.true_and`.
+Lean's temporary recovery `sorryAx` in that failed probe is retained, and is
+absent from the final 141-theorem audit. The marked hash copy located the
+later whole-module stop after the first certificate, at the mixed-kind proof;
+a separate certificate module resolves the retained-heap accumulation.
+A two-instance partition also stopped; the verified shared-instance proof
+was retained. An initial native route timer did not force the value before
+the stop timestamp; its timings were discarded. Correct forced timing gives
+0.080–0.145 s per compiled route, all true; this is external profiling, not a
+kernel certificate. Two extracted family-word numeral candidates were not
+incorporated. A probe outside the Lean project returned a tool path error
+(despite process exit 0); it was not a passing diagnostic. All raw failures
+and owned probe sources are preserved outside the library tree.
+
+Independent read-only finder and skeptic reviews confirmed the repaired
+filename, exact original source/guard preservation, unreachable certified
+fallbacks, all eight unchanged conditions, existing route membership and
+absence of semantic/budget changes. Neither used Lean/server/build or wrote
+files. Final documentation/source review is recorded in the evidence directory.
+
+Evidence: `/workspace/va1-evidence/decision-next`, with actual runner logs under
+`/workspace/va1-evidence/independent-20261101/va1-ind-main-*`. The source audit
+binds every passing target to its final SHA; the original main file is verified
+byte-identical to the frozen base. Scratch probes were preserved outside the
+library before final static gates. Delivery staging after this checkpoint commit is
+`/workspace/va1-evidence/decision-next/delivery`; packaging and checksum
+verification must complete before the final report claims those artifacts.
+
+### Remaining obligations after this checkpoint
+
+AU01's meaningful decidable Residue/reason census, nonvacuity controls and
+forward target-to-coverage/hash bridge are still open and independent of Q1.
+The overall performance milestone, broader Decision consumers and final full
+affected import closure/run-lean gates are not complete. AU02 fixed/nested
+arrays, broader memory, halting OR, formula-derived fuel/511-node bound and
+all corresponding positive/refuted/unknown controls/proofs remain open or
+unreproduced. Backfill independent array/coverage lemmas and residue census
+remain open. Only the false unconditional program-free reverse inclusion is
+held for VA1-Q1. Neither frozen predicate nor that original requirement was
+changed. No milestone eligibility, publication, full goal completion or other
+VM's workload pass is claimed. The persistent goal was not reset or stopped.
+
+Final static checks for the main split: registration/layer/strict automatic/trust
+commands passed (1054 reachable, zero orphans; 180 core modules, zero elaborator
+reachability; 491 automatic, 61 step-budget, 11 refuted, zero manual/pending;
+1069 sources, 248 inventoried sites, zero trust findings). Axiom inventory still
+exits 1 with 1206 pins, zero errors and 404 unrecorded changes, byte-identical
+to the previous checkpoint output. Strict doc paths still exit 1 with the
+exact frozen-base 85 findings (48 missing, 37 ambiguous), zero added/removed.
+Neither failed full gate is reported as passing. The final finder and skeptic
+found only premature artifact-sealing wording; it was corrected to pending
+packaging before commit. Actual packaging verification belongs to the external
+identity/manifest after commit.

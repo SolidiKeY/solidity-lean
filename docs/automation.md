@@ -962,8 +962,12 @@ fixtures, all 15 guarded evaluations and expected messages, coverage conclusions
 and hash premises remain. The observer is `noinline`; exact family facts and
 existing coverage routes avoid repeated kernel computation. Full timing/resource
 evidence and failures are in [the VA1 handoff](feature-work/after-roadmap-va1.md).
-`Decision`/`DecisionArrays` profiling, the meaningful residue/forward bridge and
-remaining AU02 work are open. VA1-Q1 remains pending; neither predicate nor the
+The main Decision file now has 13 serial sections plus its compatibility facade;
+all passed per-file MCP/build below 300 s (largest 109.00 s). All 56 original
+guarded commands remain; one hash-coverage proof is factored through exact
+existing stages. The unchanged DecisionArrays replay consumer passed in
+38.23/36.11 s. The meaningful residue/forward bridge, overall milestone/full
+gates and remaining AU02 work are open. VA1-Q1 remains pending; neither predicate nor the
 false unconditional reverse-inclusion requirement was changed. This is not
 `milestone-m7-next` eligibility or permission to publish.
 
