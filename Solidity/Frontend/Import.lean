@@ -58,6 +58,25 @@ the reader refuses an unmangled function named `report` before any constant is m
 
 namespace Solidity.Frontend
 
+/-- `sol_raw!{…}` for an imported function's body, with its `calldata`
+parameters' names and their declarations (`ps`): the slice pass
+(`RawStmt.sliceViews`) takes the names as the calldata origins an ordinary
+alias may name (`uint[] calldata ys = xs;`), as `contract!{}` does for a
+declared function (`Syntax/Contract.lean`, `calldataRoots`). The parameter
+declarations stay outside the pass (a declaration there would shadow the
+origin); `sol_raw!` has no parameters, so it passes none. -/
+syntax "sol_raw_calldata![" str,* "]{" (sol_stmt Solidity.solSemi)* "}{" (sol_stmt Solidity.solSemi)* "}" : term
+
+macro_rules
+  | `(sol_raw_calldata![$rs,*]{ $[$ps:sol_stmt;]* }{ $[$ss:sol_stmt;]* }) => do
+      let params ← `([$(← ps.mapM Solidity.expandStmt),*])
+      let body ← `([$(← ss.mapM Solidity.expandStmt),*])
+      if ss.any (fun s => (s.raw.find? fun s =>
+          [``Solidity.solSlice, ``Solidity.solSliceFrom, ``Solidity.solSliceTo,
+            ``Solidity.solSliceAll, ``Solidity.solCalldataLocal].contains s.getKind).isSome) then
+        `($params ++ Solidity.RawStmt.sliceViews $body [$rs,*])
+      else `($params ++ $body)
+
 open Lean Elab Command Term Meta
 
 /-- What the import made of a function. -/
@@ -708,17 +727,32 @@ def elabSolcImport : CommandElab := fun stx => do
       { model with widths := $(quote markers) ++ model.widths })
   let ctStx ← if c.sourceDecls.isEmpty then pure ctStx else do
     let metadataName ← liftTermElabM do
-      let name ← mkFreshUserName (N ++ `_sourceDecls)
-      let value : Expr := toExpr c.sourceDecls
-      let valueTy : Expr ← inferType value
-      addAndCompile <| .defnDecl {
-        name
-        levelParams := []
-        type := valueTy
-        value
-        hints := .regular 0
-        safety := .safe }
-      pure name
+      -- A list literal nests as deep as it is long, and compiling one of a
+      -- large source (solkey's TestSuite) exceeds the default recursion
+      -- depth: the list is defined in chunks of 64, appended.
+      let define (value : Expr) : TermElabM Lean.Name := do
+        let name ← mkFreshUserName (N ++ `_sourceDecls)
+        let valueTy : Expr ← inferType value
+        addAndCompile <| .defnDecl {
+          name
+          levelParams := []
+          type := valueTy
+          value
+          hints := .regular 0
+          safety := .safe }
+        pure name
+      let rec chunks (xs : List (String × SourceFunction)) (fuel : Nat) : List (List (String × SourceFunction)) :=
+        match fuel, xs with
+        | 0, _ | _, [] => if xs.isEmpty then [] else [xs]
+        | f + 1, xs => xs.take 64 :: chunks (xs.drop 64) f
+      let parts ← (chunks c.sourceDecls c.sourceDecls.length).mapM fun part => define (toExpr part)
+      match parts with
+      | [name] => pure name
+      | _ =>
+        let ty ← inferType (toExpr c.sourceDecls)
+        let value ← parts.foldrM (fun part acc => mkAppM ``List.append #[mkConst part, acc])
+          (mkApp (mkConst ``List.nil [0]) ty.appArg!)
+        define value
     liftTermElabM <| `(attachSourceDeclarations $(⟨ctStx⟩) $(mkIdent metadataName))
   let ctStx ← if provenance.legacyFixture then
       match legacyOrderOverride with
@@ -758,7 +792,11 @@ def elabSolcImport : CommandElab := fun stx => do
       -- a `calldata` parameter a memory local (`calldataCheck`, below)
       let params := f.params.map fun (x, t) =>
         s!"{if t.endsWith " calldata" then t.dropRight 9 ++ " memory" else t} {identText x}; "
-      let text := "sol_raw!{ " ++ String.join params ++ String.join (ss.map fun (_, s) => s ++ "; ") ++ "}"
+      -- the `calldata` parameters are the slice pass's calldata origins
+      let roots := f.params.filterMap fun (x, t) =>
+        if t.endsWith " calldata" then some (toString (Json.str x)) else none
+      let text := s!"sol_raw_calldata![{", ".intercalate roots}]\{ " ++ String.join params ++ "}{ " ++
+        String.join (ss.map fun (_, s) => s ++ "; ") ++ "}"
       match parse `term text with
       | .error e => rows := rows.push (row .unsupported (at_ f 0 s!"the printed text does not parse: {e}"))
       | .ok s =>

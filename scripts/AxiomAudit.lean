@@ -84,6 +84,10 @@ def loose (ci : ConstantInfo) : Bool :=
   | .defnInfo _ | .opaqueInfo _ | .thmInfo _ => ci.isUnsafe || ci.isPartial
   | _ => false
 
+/-- The marker a constant missing from the environment is reported as (the
+audit fails closed: it never passes a constant it cannot read). -/
+def missing (c : Name) : Name := .str c "<missing from the environment>"
+
 /-- The constants an expression mentions. -/
 def refs (e : Expr) : Array Name := e.getUsedConstants
 
@@ -97,7 +101,8 @@ partial def reach (c : Name) : M (Array Name) := do
   modify fun s => { s with active := s.active.insert c }
   let env ← read
   let r ← match env.find? c with
-    | none => pure #[]
+    -- a constant missing from the environment cannot be audited: a finding
+    | none => pure #[missing c]
     | some ci@(.defnInfo _) | some ci@(.opaqueInfo _) | some ci@(.thmInfo _) =>
       if loose ci then outside c else do
         let mut acc ← reachAll (refs ci.type) []
@@ -141,7 +146,7 @@ partial def outside (c : Name) : M (Array Name) := do
         todo := todo ++ refs ci.type
         if let some v := ci.value? (allowOpaque := true) then todo := todo ++ refs v
       else acc := union acc (← reach d)
-    | none => pure ()
+    | none => acc := union acc #[missing d]
   return acc
 
 /-- A mutual inductive block: every type's type and constructors' types,

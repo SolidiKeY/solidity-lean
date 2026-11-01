@@ -207,7 +207,7 @@ the first failing row of each:
 | 30 | bytesN, bytes and string | `indexOutOfRange`: pending, expected proved | proof search |
 | 31 | calldata | `localAlias`: unsupported, "a calldata slice ordinary alias without a known calldata origin" (`Syntax/Elab/Context.lean`, `sliceStmts`, since `c31e76b6`) | the import prints `function «localAlias»(uint[] calldata «xs») { uint[] calldata «ys» = «xs»; … }`; the same text in `contract!{}` elaborates, so the import's path loses the calldata roots (`Syntax/Contract.lean` `calldataRoots`) — not the `roMentions` refusal of `099bfbe1` |
 | 40 | full frozen TestSuite function table | "maximum recursion depth has been reached", compiler IR check failures at `SolTests.TestSuite._list._lam_0`, then `(interpreter) unknown declaration 'SolTests.TestSuite.report'` | CI log only |
-| 42 | quantified consequents / omitted bodies | `omittedBody`: excluded, expected unsupported | `excluded` is a documented gap status (`docs/solidity-testing.md`); which change moved the row is not identified |
+| 42 | quantified consequents / omitted bodies | `omittedModifier`: excluded, expected unsupported | `excluded` is a documented gap status (`docs/solidity-testing.md`); which change moved the row is not identified |
 | 43 | specification parameter renaming | `tryScopeExit`: pending, expected proved | proof search |
 | 44 | unsupported ledger frames | `ledgerGap`: "solidity.specificationSyntax: <input>:1:14: expected ';'" instead of "ledger locations in assignable" | the specification parser now rejects the clause before the ledger check |
 | 45 | constant specifications | `quantifiedShadow`: pending, expected unsupported | admission changed: a refusal became an open obligation |
@@ -215,5 +215,52 @@ the first failing row of each:
 | 60 | revert data | `reasonBytes`: pending, expected proved | proof search |
 
 None is in the lane's files (the reproduction includes the lane's changes,
-and CI showed the same failures without them); none was fixed here, and no
-expectation was changed. Lane FU1 stops at this record.
+and CI showed the same failures without them).
+
+**Fixed afterwards (lane FU1, separate commits):**
+
+* **31** (`974dd1de`): the import elaborates each obligation body through
+  `sol_raw!`, whose slice pass had no calldata roots, while `contract!{}`
+  passes the function's `calldata` parameters (`calldataRoots`); since the
+  origin check of `c31e76b6` that refused `uint[] calldata ys = xs`.
+  `sol_raw_calldata!` (`Frontend/Import.lean`) passes the roots and keeps
+  the parameter declarations (`uint[] memory xs;`, which would shadow the
+  root) outside the pass. `localAlias` elaborates; the `roMentions` refusal
+  of `099bfbe1` is untouched. The test then stops at `sliceRead`,
+  `sliceOfSlice`, `slicePast`: pending, "open proof goals" (below).
+* **44** (`a48fd85f`): in the testing import a specification that does not
+  parse became a `solidity.specificationSyntax` scope rejection, raised
+  before the named refusal "ledger locations in assignable clauses are not
+  modelled"; a ledger `assignable` clause (`net(msg.sender)`) now keeps that
+  refusal.
+* **42, 45** (`5630c5fd`, stale expectations against documented
+  classifications): the first failing row of 42 is `omittedModifier` (its
+  modifier's general Yul, the S00 exclusion `solidity.inlineAssembly`,
+  reported as `excluded`, a gap like `unsupported` per
+  `docs/solidity-testing.md`); `quantifiedShadow` in 45 (`\forall uint COUNT;
+  COUNT == 2` beside a constant `COUNT = 2`) is read with the quantifier
+  binding `COUNT` (scoped specifications), so the false claim stays
+  `pending` and is never proved through the constant.
+* **40** (`9ff01fd7`): the testing import compiled a contract's
+  source-declaration table as one list literal, nesting as deep as it is
+  long; solkey's `TestSuite.sol` exceeded the default recursion depth. The
+  table is defined in chunks of 64. The test passes locally (3m46s); it was
+  not run locally without the change.
+
+Rerun of the nine on the lane head (`9ff01fd7` + this record, 22:40 UTC):
+40, 42, 44, 45 pass; 30, 31, 43, 57, 60 fail on their first `pending` row
+(`indexOutOfRange`, `sliceRead`, `tryScopeExit`, `tryArgumentSideEffect`,
+`reasonBytes`). The full gate after these fixes: default 1041 jobs and
+TestSuite 286 jobs built, solkeycheck at its baseline 37.
+
+**Open: proof automation** (30, 31's slice rows, 43, 57, 60), each "open
+proof goals" in a `box` obligation. For `sliceRead` (`t = xs[1:]; assert(t[k]
+== xs[1 + k])`) the CLI's goal dump (`action: inspect`, `show: goals`) leaves
+`read(memory, base[(k < len - 1 ? 1 + k : len)]) == read(memory, xs[1 + k])`
+without the bounds facts that would close it or make the read revert: a
+closer gap, not an admission change. For `indexOutOfRange` (`bytes4 b =
+"abcd"; bytes1 x = b[i];` with `i >= 4`, expected to revert) the leaf keeps
+`b[i]`'s lowering `((b >> 8 * (3 - i)) % 256) / (i < 4 ? 1 : 0)` as a plain
+update `se3 := se4 / se8` and ends at `false = true`: the zero divisor's
+revert branch is not taken by the search (the leaf also prints raw `‹Tm…›`
+escapes for `subW`/`mulW`, a printer gap). Not bisected (see above).
