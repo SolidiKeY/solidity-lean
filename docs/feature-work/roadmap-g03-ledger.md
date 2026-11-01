@@ -1283,7 +1283,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`tupleExpressions`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — non-inline TupleExpression tagged tupleExpressions
   - lowering: `Solidity.Frontend.explicitTupleAssignment` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2129`) — tuple assignment leaves with empty targets
-  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:801`) — elaborates tuple assignment/declaration
+  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:834`) — elaborates tuple assignment/declaration
   - regression: `Solidity.Corpus.TestSuite.tupleAssignmentRotates` (Solidity.Corpus.TestSuite, `Solidity/Corpus/TestSuite.lean:2185`) — commit-order rotation proved
   - no existing anchor: source, backend, evm, theorem
   - missing: Tuple/reference returns of internal calls are outside the compiler (R09: CallRetIn only .none/.val).
@@ -2045,7 +2045,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`tupleTypes`** (model/partial)
   - admission: `Solidity.Frontend.explicitTupleAssignment` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2129`) — imports simultaneous tuple assignment
-  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:801`) — tuple capture order lowered to sequential stores
+  - lowering: `Solidity.elabTuple` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:834`) — tuple capture order lowered to sequential stores
   - source: `Solidity.CallRet` (Solidity.Syntax.Scoped, `Solidity/Syntax/Scoped.lean:224`) — multi-value call return binders
   - backend: `Solidity.Evm.CallRetIn` (Solidity.Evm.Compile, `Solidity/Evm/Compile.lean:153`) — compiler admits only none/val return shapes
   - no existing anchor: evm, theorem
@@ -2661,7 +2661,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G14 | V06 | 21 | new | 0 | — | — |
 | G15 | V06 | 221 | `Solidity.Frontend.SolcJson.Admission`, `Solidity.Frontend.Source`, `Solidity.Frontend.SolcJson.Body` | 3487 | 221 owned cells > 60; modules over 2500 lines: Solidity.Frontend.SolcJson.Body | one admission lemma per manifest category (12), each proving exact classification of its rows; a combination lemma for the named and ledger-symbol combinations; an exclusion lemma refusing the 30 excluded IDs (D01); then extraction coverage over all execution roots; the `SolcJson.Body` adapter edit (2,586 lines) is split by AST node class (declarations, expressions, statements) before it starts |
 | G16 | V07 | 39 | `Solidity.Syntax.Elab.Values`, `Solidity.Syntax.Checked`, `Solidity.Semantics.NumericLowering` | 3046 | — | — |
-| G17 | V07 | 17 | `Solidity.Syntax.Elab.Stmt`, `Solidity.Syntax.Elab.Lower` | 2579 | — | — |
+| G17 | V07 | 17 | `Solidity.Syntax.Elab.Stmt`, `Solidity.Syntax.Elab.Lower` | 2616 | — | — |
 | G19 | V07 | 19 | `Solidity.Syntax.Elab.Lower` | 1698 | — | — |
 | G20 | V08 | 26 | `Solidity.Frontend.SolcJson.Getters`, `Solidity.Frontend.SolcJson.Contract` | 2348 | — | — |
 | G21 | V08 | 28 | `Solidity.Semantics.RevertData`, `Solidity.RevertBytes` | 100 | — | — |

@@ -381,7 +381,9 @@ with a memory one, narrow array elements, struct returns, calldata
 arguments to function values, and every reference in an external
 signature.
 
-Gates run: `./run-lean.sh` (`lake build`: 1019 jobs, success; the
+Gates run (the last `lake build` after the tuple dispatch; the
+SolkeyTestSuite step and `check-solkey` from the run before it, since that
+step rebuilds every Derived module): `./run-lean.sh` (`lake build`: 1019 jobs, success; the
 SolkeyTestSuite step OOM-kills `Derived17`, the baseline; `Derived21`, also
 killed once under parallel load, builds on the retry in 166s;
 `check-solkey`: 37 mismatches, the baseline); `TrustAudit.lean` through
