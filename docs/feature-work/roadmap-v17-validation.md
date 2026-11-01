@@ -677,3 +677,35 @@ Both independent read-only design reviews required fixed name/module/kind fences
 The first full supplemental batch at consumer `f98dbbff1fffb7a3166343751f317c59c1261c64` returned real native exit1: `Solkey.TestSuite.invariantForCountsArrayLength.proved value: expression node limit reached`. Checked identity discovery and ten standard axiom prints were emitted, but no full metadata frame. All ten structural rows remain incomplete; the unchanged failed batch is not rerun, split, or converted into type-only success. The original kernel proof workload at1f3278e7 remains distinct. The remaining budget blocker is the exact reserved theorem value in `Solidity/TestSuite/Derived17.lean`; its owner would need to publish a same-statement proof representation satisfying the existing encoder budget, without new premises/axioms or limit changes. No reserved proof edit is assigned here.
 
 Independent failure accounting validates the actual failed native receipt, committed historical query/script, all input bindings at a later accounting snapshot (not an invented immediate historical postcheck), exact checked name/module/kind catalog and actual axiom prints. Its pass means accounting succeeded, never structural metadata/replay success. Successful and failed future collections both retain post-command input checks; raw execution failure stays primary. Actual-input controls require this VM's immutable3077-file producer and cache.
+
+## Approved hidden-cache readiness correction
+
+The sealed structural checkpoint's workspace-only compiler scan was incomplete:
+its file search omitted the ignored `.lake/soljson` directory. That report remains
+unchanged. The approved `soljson-v0.8.38+commit.1835d247.js` is present there
+(10,798,266 bytes, SHA256
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`).
+The new owned runtime consumer checks this explicit path with the published
+checker, including its actual full version, and binds the complete installed
+Node dependency tree, lock, executable, source, revision and toolchain before
+and after execution. Internal runtime symlinks bind both target and link bytes.
+
+The consumer invokes the original generated runner with all 160 ordered seed-0
+records and all four original pipeline/settings variants, then authenticates
+the complete generator replay and existing observation comparator under the
+original 60-second/16-MiB replay bounds. Native stdout binds all output hashes;
+missing, corrupt, stale, partial or failed evidence cannot become agreement.
+The separate original capped collector still owns execution/resource evidence.
+Independent finder/skeptic review identified missing matrix checks, overwrite
+protection, producer-time report hashes and phase preservation; these were added
+with negative controls before the actual attempt. This is bounded external
+compiler/EVM evidence only. Callback combinations remain absent from the
+published grammar, and no whole-profile G52 or kernel closure follows.
+
+The earlier 640-agreement report at `04a9fe8540bbfcff8db426f35d67fd29aceb0c55`
+remains historical. The structural query's actual node-limit failure on
+`Solkey.TestSuite.invariantForCountsArrayLength.proved` remains unchanged; all
+ten full metadata rows are incomplete, selected pin `473da894` differs from
+historical `048a74de`, and all 457 closure rows and original G52–G55 obligations
+remain open. Current command/resource/review outcomes are recorded in the new
+external handoff rather than rewriting any sealed set.
