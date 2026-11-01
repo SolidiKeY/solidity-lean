@@ -1353,3 +1353,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintDelete.lean` | Actual numeric default-zero deletion/unit result, bounds and published intrinsic/word delete certificate. |
 | `Solidity/Backend/MemoryOps/SourceUintSequence.lean` | Reached-state numeric assignment/delete and reverse Source RItems, intrinsic Prog and full word append, including late rejection. |
 | `Solidity/Backend/MemoryOps/SourceUintMutationControls.lean` | Independent populated numeric Source/intrinsic/word controls in both pipelines with complete arrays/16-word frames, max/zero, aliases, order, late/empty/endpoint/timeout and raw stale-map negative. |
+
+| `Solidity/Backend/MemoryOps/SourceUintCompound.lean` | Independent exact uint addition/checked-overflow agreement, actual resolved Source compound update/panic, intrinsic opAssign and complete published read/binary/write word composition with reached correspondence/MemOK/allocator frames. Pure local operands only. |
+| `Solidity/Backend/MemoryOps/SourceUintCompoundControls.lean` | Actual assignment then reached compound update0-to3-to6 in both pipelines, complete three-state contents/tables/16wordframes/alias/neighbor/world/allocator observations, frozen-initial negative tied to real Source program, and max-plus1 actual Source panic versus word revert. |

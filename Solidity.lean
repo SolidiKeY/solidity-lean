@@ -988,3 +988,5 @@ import Solidity.Backend.MemoryOps.SourceUintAssignment
 import Solidity.Backend.MemoryOps.SourceUintDelete
 import Solidity.Backend.MemoryOps.SourceUintSequence
 import Solidity.Backend.MemoryOps.SourceUintMutationControls
+import Solidity.Backend.MemoryOps.SourceUintCompound
+import Solidity.Backend.MemoryOps.SourceUintCompoundControls

@@ -4707,3 +4707,79 @@ clause (including checked overflow), not an assumed desired arithmetic result.
 No claim that independent work is exhausted or that these premises are already
 supplied. General graph/physical-byte/all-profile/ABI/storage/deep-copy/reserved
 copy/final composition remains unfinished and the existing goal stays BLOCKED.
+
+
+C61 — actual numeric read/update/write after C60 (partial G34/Backfill B).
+SourceUintCompound derives exact existing Source.binVal/intRes addition and
+checked arithmetic overflow versus intrinsic compoundT, without taking a desired
+arithmetic result as a premise. In-range result reads the actual represented cell,
+then existing Source compound syntax evaluates RHS first, resolves the location
+once and writes; actual MemOK/observer/local/stack/allocator transport follows.
+The word program composes published readLocalCode/binaryCode/writeLocalValueCode
+certificates read-only. Its pure local operands permit the read/RHS ordering
+agreement; no arbitrary effectful RHS/lvalue order is claimed. Explicit range
+bounds describe this local successful case, never a profile exclusion. A separate
+actual resolved Source checked-overflow theorem returns arithmetic panic before
+the write; unchecked wrapping remains a separate unfinished application.
+
+SourceUintCompoundControls reuses C60's independent public initial witness over
+identical populated fixture definitions; it does not assume a reached relation.
+An actual Source RItems program, intrinsic Prog and complete word append assign3
+to the old0 cell, then read the REACHED3 and add3 to obtain6. Initial max/neighbor,
+shared alias, all root content words, complete Source object tables, explicit
+sixteen-word frames, stack42/free96 and an inhabited final StructAllocatorRepr
+are observed across every stage, in both pipelines. A frozen-initial negative is
+tied to that actual Source program and refutes final3. The same initial represented
+max cell plus1 executes real Source arithmetic panic and full word revert; no
+suffix machine/rollback/target panic-payload equivalence is invented. All C60 and
+older vectors remain byte-preserved. Generic laws quantify arbitrary intrinsic
+valid runtime lists/indices; finite fixture17+length<=80 is only word-region
+layout, not a source admission cap. C60 empty/end/31/32/timeout/late-failure/order
+controls remain in the checked import closure rather than being replaced.
+
+C61 focused controls08 passes166jobs with exact standard-only guards, aggregate
+RSS969792KiB and no new OOM event. Earlier distinct type/normalization/dependent
+lookup/heartbeat failures are retained, not passes. No proof/time/memory budget
+was increased. The independently checked C60 package remains immutable3439entries.
+Additional registry clarification: C60 metadata used descriptive label `delete`;
+the ACTUAL manifest feature ID is `deleteExpression`. Coordinator proposals must
+use `deleteExpression`, alongside `assignment`, `compoundAssignment`, `integerTypes`,
+`memoryLocation`, `dynamicArrays`, `indexAccess` and `memoryAliasing`. This is an
+additive correction, not an edit to any earlier seal or reserved global registry.
+
+Original-queue reassessment remains partial: supported numeric addition is not
+all arithmetic/compound/bump cases, arbitrary effectful operand order or broader
+Source reference paths. Physical byte representation, all-profile construction/
+target allocation failure, ABI/reference/storage/fresh deep-copy/recursive Source
+graph/liveness, reserved memory-storage and final V10/Source/target producers remain
+unfinished. Published bounded word execution is distinct from external solc/EVM.
+No independent-work exhaustion or goal recovery/completion is asserted. The
+existing BLOCKED goal remains untouched; per-file Lean MCP/get/update goal tools
+are unavailable, so permitted serial focused diagnostics are used.
+
+
+C61 refined-tree final wrapper exit0: default1109/TestSuite262/final SolKey377parsed,
+131read-bearing allcovered. Fresh Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs pass.
+Strict/trust/layers/orphans/lane/complete fixtures/script-corruption/diff pass.
+Scoped992exactstandard pins across128owned modules validate; raw global inventory
+remains **exit1**,1351unregistered=359public+992owned/0unsafeerrors. Raw strict docs
+stays **exit1**,83complete public-byte-identical findings; separate publiczero-new
+passes, frozenno-new fails with11incoming. Global registries/baselines untouched.
+Warm strict0timed modules; independently current262Suite/fixture/toolchain bytes
+and actual C61versions match retained C31cold26/max160s<300s, not new timing.
+Focused controls08 aggregate969792KiB/full1581668KiB, full diskgrowth266240bytes;
+all C61execs newOOMdelta0. C60cumulative12GiB/max10719/oom3/kill3 and all earlier
+failed attempts remain retained, never relabeled passing. All3439 C60sealed
+entries reverify unchanged. Both independent finder/skeptic SOURCE/control/docs
+reviews PASS with no confirmed remaining finding; committed-artifact review follows.
+
+Remaining concrete original G34 investigation: reached compound arithmetic panic
+as a late Source RItems/intrinsic/word failure after a materially changed first
+statement; C61 has actual in-range two-statement composition and actual initial
+max-overflow expression/word outcomes, but not that general late-overflow theorem.
+Other compound operators/unchecked wrapping/general effectful operands likewise
+remain unsupported here. This identifies future supported investigation, not an
+exhaustion claim or permission to duplicate reserved owners. Original upstream
+physical bytes/all-profile allocation-failure/general reference-graph/ABI-storage/
+fresh deep-copy/reserved copying/final Source-V10-target obligations remain open.
+The persistent BLOCKED goal is unchanged; no status operation occurred.
