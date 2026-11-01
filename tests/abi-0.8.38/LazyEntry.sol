@@ -43,3 +43,11 @@ contract CalldataStatic {
     function narrowFirst(uint8[2] calldata x) external pure returns (uint256) { return x.length; }
     function narrowAt(uint8[2] calldata x, uint256 i) external pure returns (uint8) { return x[i]; }
 }
+
+/// Enum parameters: validated against the declared cardinality at entry.
+contract EnumEntry {
+    enum E { A, B, C }
+    function value(E e) external pure returns (uint8) { return uint8(e); }
+    function withArray(E e, uint8[] calldata xs) external pure returns (uint256) { return uint8(e) + xs.length; }
+    function memoryArray(E e, uint8[] memory xs) public pure returns (uint256) { return uint8(e) + xs.length; }
+}

@@ -2101,6 +2101,14 @@ partial def tupleValue (v : Json) : PM String := do
       J.kind f == "MemberAccess" && J.str? f "memberName" == some "decode" &&
         (J.opt f "expression").any (builtinNamed · "abi"))
   then expr v
+  -- a call through an internal function value whose callee is not a name
+  -- (`(b ? f : g)(x)`, `fs[i](x)`): the elaborator's tuple dispatch. Only
+  -- `isValueCallee` shapes: a library or using-for call (`L.f(x)`, `x.f()`)
+  -- stays refused here.
+  else if J.kind v == "FunctionCall" && J.str? v "kind" == some "functionCall" &&
+      (J.opt v "expression").any (fun f => isValueCallee f &&
+        ((J.tyStr f).splitOn " external").length == 1)
+  then expr v
   else unsupported "a tuple assigned from neither a tuple, nor a call of a function of this \
     contract, nor `(bool ok, ) = a.call{value: v}(\"\")`"
 

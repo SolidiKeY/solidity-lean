@@ -276,17 +276,25 @@ function scalarSemanticVectors(fixture, abi) {
 export function abiType(p) {
   return p.type.startsWith('tuple') ? '('+(p.components ?? []).map(abiType).join(',')+')'+p.type.slice(5) : p.type;
 }
-function checkAbiMetadata(p) {
-  if (/^enum\s/.test(p.internalType ?? '')) throw new Error('nominal enum ABI range not adapted');
+function checkAbiMetadata(p, top = false) {
+  // A top-level enum parameter/return (ABI `uint8`) of an ABI coder v2 entry is
+  // replayed at its declared cardinality from the source declaration (Lean
+  // `paramRanges`, `Semantics/AbiEntry.lean` `Kind.enumBelow`); nested enums
+  // stay refused. Lean's raw path still refuses an enum return of a function
+  // without an enum parameter.
+  if (/^enum\s/.test(p.internalType ?? '') && !(top && p.type === 'uint8'))
+    throw new Error('nominal enum ABI range not adapted');
   for (const c of p.components ?? []) checkAbiMetadata(c);
 }
 export function semanticVectors(fixture, abi) {
-  // Validate nominal metadata before either path can erase it.
-  for (const p of abi.flatMap(d=>[...(d.inputs ?? []),...(d.outputs ?? [])])) checkAbiMetadata(p);
+  const sources=[...(fixture.sources?.values() ?? [])].join('\n');
+  const canonicalOnly = fixture.settings?.ABIEncoderV1Only === 'true' || fixture.abiCoderV1 === true ||
+    /pragma\s+abicoder\s+v1\s*;/.test(sources.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,' '));
+  // Validate nominal metadata before either path can erase it. ABI coder v1
+  // masks an enum word to uint8 at entry instead of checking its cardinality,
+  // so v1 keeps every enum refused.
+  for (const p of abi.flatMap(d=>[...(d.inputs ?? []),...(d.outputs ?? [])])) checkAbiMetadata(p, !canonicalOnly);
   try { return scalarSemanticVectors(fixture,abi); } catch (scalarError) {
-    const sources=[...(fixture.sources?.values() ?? [])].join('\n');
-    const canonicalOnly = fixture.settings?.ABIEncoderV1Only === 'true' || fixture.abiCoderV1 === true ||
-      /pragma\s+abicoder\s+v1\s*;/.test(sources.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,' '));
     const vectors=[];
     for (let line of fixture.expectations) {
       line=stripFixtureComments(line).trim(); if (!line) continue;

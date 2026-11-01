@@ -205,6 +205,11 @@ def FunDecl.sigTy? (d : FunDecl) : Option String := do
         guard (R == bytesR)
         guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
         pure "bytesmemory"
+      else if let .struct st := R then
+        -- a nonrecursive struct in memory (`fnRefStruct?`)
+        let c := Semantics.structDisplay st ++ "memory"
+        guard ((fnRefStruct? C c).isSome && C.structName? (Semantics.structDisplay st) == some st)
+        pure c
       else
         -- a memory array of a plain value element (`fnRefElem?`)
         let .array (.prim p) := R | none
@@ -284,10 +289,11 @@ def recPartnersC (f : String) : List String :=
   (reachableC C f).filter fun g => (reachableC C g).contains f
 
 /-- Whether a function type's return component is a memory reference the
-dispatch binds (`fnMemoryDispatch`): `bytes memory` or a memory array of a
-plain value element (`fnRefElem?`). -/
+dispatch binds (`fnMemoryDispatch`): `bytes memory`, a memory array of a
+plain value element (`fnRefElem?`) or a nonrecursive struct in memory
+(`fnRefStruct?`). -/
 def fnMemRet (r : String) : Bool :=
-  r == "bytesmemory" || (fnRefElem? C r).any (!·.2)
+  r == "bytesmemory" || (fnRefElem? C r).any (!·.2) || (fnRefStruct? C r).any (!·.2)
 
 /-- A function type's component as a value: its primitive type and width. -/
 def fnCompTy? (c : String) : Option (PrimTy × Nat) :=
@@ -883,7 +889,13 @@ call's return's, a conditional's first branch's, `r.g`'s external type. -/
 partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
   let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
   match e with
-  | .name x => fnTyOf? C Γ x
+  | .name x =>
+    -- a local or state value of function type, else a function of `C` named
+    -- as a value (`fnTag`): its own signature
+    (fnTyOf? C Γ x).orElse fun _ =>
+      if (lookupBy x Γ).isNone && fnInternal C x then
+        (lookupBy x C.funs).bind (FunDecl.sigTy? C)
+      else none
   | .ternary _ a _ => fnTyOfExpr Γ a
   | .call g args => do
     if g == callValueName then

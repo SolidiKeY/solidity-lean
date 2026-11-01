@@ -2,11 +2,13 @@
 /** Pinned-solc/EVM observations of ABI entry decoding (lane CF1).
  *
  * Usage:
- *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--out FILE]
+ *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--inherited] [--out FILE]
  *
  * `--fixtures` replays the retained Group 10 entry-decoding fixtures from the
  * verified upstream snapshot (`.lake/upstream/solidity`, see
  * `scripts/solidity-upstream.mjs verify`) with their exact calldata bytes.
+ * `--inherited` checks `tests/abi-0.8.38/InheritedSelectors.sol` (inherited and
+ * renamed function values) against its pinned selectors.
  * `--probes` runs `tests/abi-0.8.38/LazyEntry.sol`, whose vectors pin when
  * solc's generated decoder checks offsets, lengths and elements.
  * Every vector runs in four configurations: legacy and viaIR, each with the
@@ -190,7 +192,38 @@ async function probes() {
   return report;
 }
 
+/** Inherited and renamed function values (`tests/abi-0.8.38/InheritedSelectors.sol`):
+ * every configuration returns the source declaration's selector and encoding. */
+export const INHERITED = [
+  ['baseSelector()', ['b3de648b' + '0'.repeat(56)]],
+  ['derivedSelector()', ['b3de648b' + '0'.repeat(56)]],
+  ['inheritedSelector()', ['05a0581e' + '0'.repeat(56)]],
+  ['encodeOverrideHead()', ['ab088fbd' + '0'.repeat(56), 36n, 9n]],
+  ['encodeInheritedHead()', ['05a0581e' + '0'.repeat(56), 36n, 1n]],
+  ['valueSelector()', ['b3de648b' + '0'.repeat(56)]],
+  ['inheritedValueSelector()', ['05a0581e' + '0'.repeat(56)]],
+  ['encodeValue()', ['05a0581e' + '0'.repeat(56), 32n]],
+  ['overloadCalls()', [3n, 1n]],
+  ['superCall()', [4n]],
+  ['callValue()', [1n]],
+  ['callOwnValue()', [3n]],
+];
+async function inherited() {
+  const file = join(ROOT, 'tests/abi-0.8.38/InheritedSelectors.sol');
+  const results = await observe({'InheritedSelectors.sol': {content: readFileSync(file, 'utf8')}},
+    'InheritedSelectors.sol', 'Derived', INHERITED.map(([signature]) => ({signature, calldata: '0x'})));
+  const summary = summarize(results);
+  summary.forEach((o, i) => {
+    const words = INHERITED[i][1].map(w => typeof w === 'bigint' ? w.toString(16).padStart(64, '0') : w);
+    assert.equal(o.agree, true, `${o.label}: configurations disagree`);
+    assert.equal(o.failed, false, `${o.label}: failed`);
+    assert.equal(o.data, '0x' + words.join(''), `${o.label}: data`);
+  });
+  return summary;
+}
+
 const output = {compilerSha256: COMPILER_SHA, configs: CONFIGS};
+if (flag('--inherited')) output.inherited = await inherited();
 if (flag('--fixtures')) output.fixtures = await fixtures();
 if (flag('--probes')) output.probes = await probes();
 const text = JSON.stringify(output, null, 2) + '\n';
