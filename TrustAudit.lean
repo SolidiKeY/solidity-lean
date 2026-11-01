@@ -1756,6 +1756,7 @@ run_cmd do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} storage-write theorems use only the standard axioms"
 
+/-! Lane CF1: the eager ABI entry decoder agrees with solc's lazy calldata reads (model only). -/
 run_cmd do
   let headlines : List Name := [
     ``Solidity.AbiEntry.mdec_cval,

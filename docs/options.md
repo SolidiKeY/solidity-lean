@@ -673,7 +673,9 @@ The preset is two flags: `binaryLeftToRight` and `modularLeftToRight`.
 operand positions and saving an earlier read before a later effect. The
 modular flag uses the existing argument-capture pass in source order; the
 legacy branch retains its early zero-modulus guard. Ordinary calls and indices
-remain left to right, assignments evaluate their source before their target,
+remain left to right, except that a call through an internal function value
+reads the callee before its arguments under `binaryLeftToRight`, as solc's IR
+pipeline does (`dispatchCaptures`); assignments evaluate their source before their target,
 and short-circuit operators and conditional branches retain their conditional
 evaluation. Inlined callees inherit the configuration.
 

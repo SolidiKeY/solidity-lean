@@ -431,8 +431,9 @@ private def memAlias := sol[MemArgs]{
 theorem memAlias_run : (Prog.run (State.init MemArgs) memAlias).toOption.isSome = true := by
   decide +kernel
 
-/-- The direct call observes the same: the dispatch's arm for `bump`'s tag
-is this call on the captured argument (`DispatchArm.chain_tag`). -/
+/-- The direct call observes the same. That the dispatch's arm for `bump`'s
+tag is this call holds by construction of the elaborator, not by a theorem:
+`DispatchArm.chain_tag` assumes the guard semantics (`finite-dispatch.md`). -/
 private def memDirect := sol[MemArgs]{
   uint[] memory xs = new uint[](2); xs[0] = 1; xs[1] = 2;
   uint r = bump(xs);

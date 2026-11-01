@@ -12,7 +12,8 @@ declaration and width rows (`AbiTy.of`); its location from the declaration
 the actual calldata (selector included) and decides, for ABI coder v2:
 
 * `revert`: an entry check fails; solc reverts with empty data before the
-  body (`AbiEntry.verdict_revert_iff`).
+  body (agreement with solc rests on the cited Yul, probes and fuzzing;
+  `AbiEntry.verdict_revert_iff` only unfolds the model's verdict).
 * `run bytes`: the body runs on the decoded values, given to the existing
   typed decoder as their canonical encoding `bytes`. For a calldata parameter
   the eager value is also what every lazy read yields

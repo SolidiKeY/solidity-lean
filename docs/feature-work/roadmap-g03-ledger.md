@@ -1245,7 +1245,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Telling a parenthesised single value apart from a 1-tuple depends on the solc AST alone.
 
 - **`rangeAccess`** (model/partial)
-  - lowering: `Solidity.sliceViewOf?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1018`) — calldata slice view construction
+  - lowering: `Solidity.sliceViewOf?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1021`) — calldata slice view construction
   - lowering: `Solidity.sliceElementCopy` (Solidity.Syntax.Elab.SliceCopy, `Solidity/Syntax/Elab/SliceCopy.lean:13`) — slice element copies
   - regression: `Solidity.Examples.Tactics.AggregateSlices.successful_run` (Solidity.Examples.Tactics.AggregateSlices, `Solidity/Examples/Tactics/AggregateSlices.lean:67`) — successful slice run
   - regression: `Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run` (Solidity.Examples.Tactics.SliceReferenceCopies, `Solidity/Examples/Tactics/SliceReferenceCopies.lean:153`) — invalid endpoints fail
@@ -1344,7 +1344,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`identifiers`** (model/partial)
   - admission: `Solidity.Frontend.Admission.scan` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:425`) — admission walk; declarations keyed by compiler IDs
   - lowering: `Solidity.Frontend.identText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:22`) — quotes raw source names, including $ names and keywords
-  - lowering: `Solidity.freshenStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1245`) — renames locals so shadowed names stay apart
+  - lowering: `Solidity.freshenStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1248`) — renames locals so shadowed names stay apart
   - regression: `Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:12`) — imported shadowing runs correctly
   - no existing anchor: source, backend, theorem
   - missing: No general theorem that lowering keeps declaration identity or scope; only regressions
@@ -1902,9 +1902,9 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 
 - **`calldataLocation`** (model/partial)
   - lowering: `Solidity.calldataCheck` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:743`) — enforces immutability of calldata parameters
-  - lowering: `Solidity.SliceView` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:879`) — typed calldata slice views with bounds
+  - lowering: `Solidity.SliceView` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:882`) — typed calldata slice views with bounds
   - lowering: `Solidity.FunDecl.calldataParams` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:660`) — identifies calldata parameters
-  - lowering: `Solidity.RawExpr.calldataPlace` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:915`) — calldata place resolution
+  - lowering: `Solidity.RawExpr.calldataPlace` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:918`) — calldata place resolution
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: No intrinsic calldata location in Scoped/State; views are lowered away
   - missing: Calldata→memory copies out of memory compiler (R20)
@@ -2002,7 +2002,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - source: `Solidity.Heap.Keeps` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:154`) — heap extension preserves existing object identity
   - source: `Solidity.Heap.alloc` (Solidity.Semantics.Heap, `Solidity/Semantics/Heap.lean:144`) — fresh typed heap allocation
   - backend: `Solidity.Evm.Memory.compile_correct` (Solidity.Evm.MemoryCompile, `Solidity/Evm/MemoryCompile.lean:1245`) — memory-path compiler correctness
-  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:274`) — unified compiler correctness, either path
+  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:402`) — unified compiler correctness, either path
   - no existing anchor: admission, lowering, evm, theorem
   - missing: Core and memory paths cannot mix in one program (R01/R02)
   - missing: Memory capacity is a premise; no 0x41 panic (R25)
@@ -2162,7 +2162,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: the library call is itself a DELEGATECALL in the bytecode: the bridge must admit exactly the compiler-emitted linked form
 - **mixed core/memory programs**
   - through its rows: source: S01 S02 S03.01 S03.03 S04.01 S04.02 S04.03; lowering: G18.02 G18.03 G19 G20 G21 G22.02 G22.05; evm: G46.01 G46.02 G46.03 G46.06 G47
-  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:274`) — unified entry, one path per program
+  - backend: `Solidity.Evm.Compiler.Compilation.correct` (Solidity.Evm.Compiler, `Solidity/Evm/Compiler.lean:402`) — unified entry, one path per program
   - missing: one compiler per whole program; a core prefix cannot feed a memory suffix
 - **whole contracts: dispatch, ABI entry, deployment and sessions**
   - through its rows: source: S00 S01 S03.01 S03.02 S03.03 S04.02 S04.04; lowering: G19 G20 G21 G22.03
@@ -2695,7 +2695,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G18.01 | V07 | 6 | `Solidity.TypeGraph`, `Solidity.Semantics.RecursiveStorage.Admission` | 234 | — | — |
 | G18.02 | V07 | 19 | `Solidity.Semantics.Storage`, `Solidity.Semantics.RecursiveStorage.Paths` | 184 | — | — |
 | G18.03 | V07 | 21 | `Solidity.Semantics.Heap` | 537 | — | — |
-| G18.04 | V07 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1568 | — | — |
+| G18.04 | V07 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1571 | — | — |
 | G18.05 | V07 | 18 | `Solidity.Semantics.RecursiveStorage.Copy` | 187 | — | — |
 | G18.06 | V07 | 4 | new | 0 | — | — |
 | G22.01 | V08 | 13 | `Solidity.Semantics.ContractWorld` | 461 | — | — |
@@ -2757,7 +2757,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G24.01 | V09 | 4 | `Solidity.Evm.Machine` | 685 | — | — |
 | G24.02 | V09 | 5 | `Solidity.Evm.Sim`, `Solidity.Evm.SimLemmas`, `Solidity.Evm.Repr`, `Solidity.Evm.StorageLemmas`, `Solidity.Evm.MemorySource`, `Solidity.Evm.MemoryHeap`, `Solidity.Evm.MemoryAlloc`, `Solidity.Evm.MemoryGrowResult` | 4032 | — | — |
 | G24.03 | V09 | 4 | `Solidity.Evm.Stmt`, `Solidity.Evm.Compile`, `Solidity.Evm.Correct`, `Solidity.Evm.Expr`, `Solidity.Evm.Layout`, `Solidity.Evm.Exp`, `Solidity.Evm.Signed`, `Solidity.Evm.MemoryCompile`, `Solidity.Evm.MemoryPaths`, `Solidity.Evm.MemoryRefWrite`, `Solidity.Evm.MemoryStructCopy` | 6134 | — | — |
-| G24.04 | V09 | 6 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 785 | — | — |
+| G24.04 | V09 | 6 | `Solidity.Evm.Compiler`, `Solidity.Semantics.RunFuel` | 928 | — | — |
 
 No feature cell, by reason: G00: scope freeze (integrated, wave 0); G02: build measurement, no feature obligation; G03: this ledger; G04: restriction audit (integrated, wave 0); G52: differential tests supplement every row; they discharge no stage; G54.03: trust/axiom audit of the composed theorems, not of a row; G55: final audit of the whole ledger.
 <!-- END generated by scripts/roadmap-g03-ledger.py -->
