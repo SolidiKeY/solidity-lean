@@ -1371,3 +1371,21 @@ The strengthened unchanged seven-case suite passes; no skipped/missing scan
 can succeed. This is payment-balance rollback evidence for those installed
 STOP/REVERT worlds, not general world/storage rollback or a transaction-level
 source/compiler proof. All raw earlier harness/kernel logs are retained.
+
+
+Checkpoint17 private combined commit
+b7b141270725ce5b2b8b2fae06d9834c52cc87e9 (tree
+2b4367fd993adcd2f225cda0f5f515a5e2e5b333) checks committed main source
+9662519387b7b37adfb41cbce9323e5ecacf56ad plus the same exact three V13
+producer files, canonical peer client and root import. Only those five paths
+differ at the checked source. Actual full gate1050default+262TestSuite and
+pinned377/131/131 passes, aggregateRSS1725636KiB/oneworker, hostminimum
+17260916KiB, cgrouppeak387874816bytes, noOOM/no swap. Final docs/interface
+metadata leaves all checked Lean/code/test blobs unchanged.
+
+parallel-interface-v3.json binds real source/test hashes, private head/tree,
+actual dependent #check types, bounded EVM evidence and every open producer
+boundary. Original Work/Backfill obligations remain partial/open. Strict frozen
+no-new-docs still fails+2 inherited missing paths; publication-relative no-new
+passes0; raw checker remains exit1 at48missing37ambiguous. No waiver or parent
+completion is claimed. The same original goal remains ACTIVE for ready work.
