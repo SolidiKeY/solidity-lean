@@ -173,3 +173,5 @@ VY2 retained source-reference preparation and original unfinished queues:
 - [VY2 owned bool physical representation](feature-work/inline-assembly-vy2.md#owned-bool-representation-and-source-journals-2026-11-01): actual typed-source/complement journals; full original lane remains partial.
 
 - [VY2 owned bool dynamic inventory](feature-work/inline-assembly-vy2.md#owned-bool-changing-dynamic-inventory-2026-11-01): same-map source/physical journals; full original assignment remains partial.
+
+- VY2 [actual location producer capture](feature-work/inline-assembly-vy2.md#actual-location-producer-capture-2026-11-01): typed source locations and exact owner producer adapters; partial lane.

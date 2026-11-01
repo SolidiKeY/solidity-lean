@@ -3847,3 +3847,45 @@ Y04/Y05/Y06/Y09.02/BackfillA/B, broad ownership/dirty/retained-source adequacy,
 universal memory/allocation/refinement, V10/V11, Y06 source bindings and actual
 Yul/calculus/notation/printers/compiler/joint closure remain unfinished. Ready work
 continues under the parallel amendment; no goal mutation, push or merge occurs.
+
+
+## Actual location producer capture (2026-11-01)
+
+`RetainedLocationRun`, `RetainedLocationProducers` and
+`RetainedLocationControls` add typed capture of actual `Source.Loc` results.
+A scalar `.stor` location contributes its path before `readLoc` returns a
+nonreference value or fails. Local indices are not reinterpreted as storage
+paths; `EM.sub` retains the callee context in the returned location type.
+The executable collector has a kernel recursor twin and exact link theorem.
+No Source representation, owner definition, admission or codec guard changes.
+
+`captureAssignmentRun_source` proves the complete actual evaluator result at
+every horizon: RHS, location, `getV`, then `writeLoc`. Successful RHS values and
+target locations survive later conversion/write errors. Separate
+`captureIncDecRun_source` and `captureDeleteRun_source` preserve their actual
+owner chronology and horizons. Successful location collection alone proves
+neither `pathTy`, historical successful formation nor global reachability.
+
+The inhabited dormant scalar path reads77 although its outer array length is0.
+Two actual `indexLoc` results yield duplicate indices that the existing visit
+union removes. Value-only capture loses this scalar path; late halt retains it,
+and a saved caller keeps its two aliases. Real assignment/static/delete and
+pre/post inc controls retain actual results. The horizon1 RHS-timeout control
+checks missing target capture, not a distinction between alternative orders.
+The resulting checked inventory reuses the concrete captured ownership
+writeback and proves full reencoding, every-H MemOK and source/residual rollback.
+It does not prove arbitrary assignment effects and that raw write are coupled.
+
+Independent design/final finder and skeptic reviews read only these modules
+and owners without Lean/server/tests. Skeptic's timeout-description overclaim
+was narrowed before final validation. No semantic defect was found. Final
+validation/export results are recorded in the versioned handoff at
+`/workspace/vy2-evidence/location-capture/HANDOFF.md`; until those gates finish,
+this text records implementation scope, not a passing-gate claim.
+
+All original queues remain partial. Compound/copy instrumentation, recursive
+intermediate/heap/external-call/global producer completeness, arbitrary
+source/raw simulation and retained dirty-location ownership remain open.
+Broader Y04 ownership, universal Y05/allocation refinement, concrete V10/V11
+instances, Y06 source/Yul bindings and Y09.02/final compiler calculus closure
+remain mandatory; this additive component is not a language restriction.

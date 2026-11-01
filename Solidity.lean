@@ -969,3 +969,5 @@ import Solidity.Yul.Views.RetainedTupleControls
 import Solidity.Yul.Views.OwnedBoolDeclarationControls
 
 import Solidity.Yul.Views.OwnedBoolDynamicFrameControls
+
+import Solidity.Yul.Views.RetainedLocationControls
