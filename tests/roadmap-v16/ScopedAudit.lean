@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.FiniteMemoryCompilation
 import Solidity.Roadmap.V16.DispatchConsumer
 import Solidity.Roadmap.V16.AbiEntryConsumer
 import Solidity.Roadmap.V16.FiniteHeapConsumer
@@ -214,3 +215,14 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.abi_certified_revert
 #print axioms Solidity.Roadmap.V16.abi_run_prerequisites
 #print axioms Solidity.Roadmap.V16.abi_uint_finite_diamond
+
+#print axioms Solidity.Roadmap.V16.finite_memory_reconstruct
+#print axioms Solidity.Roadmap.V16.finite_memory_compile_inversion
+#print axioms Solidity.Roadmap.V16.finite_memory_compile_append
+#print axioms Solidity.Roadmap.V16.finite_memory_compile_append_link
+#print axioms Solidity.Roadmap.V16.finite_memory_certificate_code
+#print axioms Solidity.Roadmap.V16.finite_memory_certificate_fragment
+#print axioms Solidity.Roadmap.V16.finite_memory_public_append_code
+#print axioms Solidity.Roadmap.V16.intrinsic_append_run
+#print axioms Solidity.Roadmap.V16.intrinsic_append_box_iff
+#print axioms Solidity.Roadmap.V16.intrinsic_append_diamond_iff

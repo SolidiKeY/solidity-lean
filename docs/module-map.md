@@ -1323,3 +1323,6 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Roadmap/V16/DispatchConsumer.lean` | Actual intrinsic first-match/no-match/guard-error, local-drop, box/diamond and finite-compiler consumers; no elaborator correspondence claim. |
 | `Solidity/Roadmap/V16/AbiEntryConsumer.lean` | Typed eager/lazy observation, exact entry verdict and uint-state/compiler/spec consumers with actual representation premises. |
 | `tests/roadmap-v16/PublishedConsumerControls.lean` | Inhabited published-decoder value/state/input and populated intrinsic dispatch/local-drop controls; exact named failure/refusal boundaries. |
+
+| `Solidity/Roadmap/V16/FiniteMemoryCompilation.lean` | V16 actual finite-memory compilation-function inversion/canonical append and exact intrinsic source/box/diamond transport; full coverage OPEN |
+| `tests/roadmap-v16/MixedMemoryControls.lean` | Actual public core-to-memory canonical composition, reached rich Input and all-three Rep/observations/resource/payload/exhaustion rejection controls; scoped evidence only |

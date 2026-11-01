@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.FiniteMemoryCompilation
 import Solidity.Roadmap.V16.DispatchConsumer
 import Solidity.Roadmap.V16.AbiEntryConsumer
 import Solidity.Roadmap.V16.FiniteHeapConsumer

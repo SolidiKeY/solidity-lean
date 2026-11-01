@@ -1376,3 +1376,156 @@ NOT relabel the full5400s or prerequisite300s timeout green. Runtime environment
 gate only: RUNTIME_GATE_PASS. Current complete whole-repository gate remains
 FAILED124; full original G48-G51 remains incomplete. Exact-head metadata,
 final committed-diff/handoff reviews and immutable export follow this checkpoint.
+
+
+### Actual mixed core/allocation composition — G49.01/G51 scoped continuation
+
+Continues sealed ABI/dispatch checkpoint3c41a18a26983d9fe5130c27cc5608a94495e058
+in the SAME VM/branch/frozen assignment and blocked goal. Prior immutable seal:
+/workspace/scratch/v16-publication-099bf/SHA256SUMS (312files,
+5f79bbeb74233f6cd587d207b9b713bf1d0bdaec25e638846501fb8756435c92),
+independently finder/skeptic confirmed. No goal reset/reactivation, new VM,
+reserved repair, dependency/toolchain change, default merge, push or PR.
+
+NEW Solidity/Roadmap/V16/FiniteMemoryCompilation.lean proves ten actual
+compilation/source/spec laws: finite_memory_reconstruct,
+finite_memory_compile_inversion/append/append_link,
+finite_memory_certificate_code/fragment, finite_memory_public_append_code,
+intrinsic_append_run/box_iff/diamond_iff. It projects the ACTUAL memory
+constructor certificate, inverts successful public compilation, inducts the
+existing Memory.compileProg function over existing typed Prog, and proves
+canonical code/fragment concatenation from actual success equations and
+fragment links. It does not assume simulation or introduce another AST,
+compiler/execution semantics or general V12 frame adapter. Source append
+retains dependent output/heap extension and EVERY THalt/payload. Box/diamond
+laws preserve unchanged Spec.sat, including genuine exhausted diamonds.
+
+NEW tests/roadmap-v16/MixedMemoryControls.lean reuses READONLY published
+AllocSourceExamples program/initial representation/allocator. Actual public
+compiler chooses CORE for callerPrefix n:=3 and MEMORY for its allocating
+suffix/whole. Low-memory compilation of the SAME scalar prefix is actually
+accepted; code and fragment equality to public core output are proved, not
+premised. Actual public whole canonical code equals prefix.core code ++
+suffix.memory code by NEW compilation-function laws. All source/compile/code/
+fragment equations are discharged in the application, rather than an oracle
+containing desired execution. Prefix public Input and nonpaying diamond
+consumer produce actual core Rep. Rich reached StateRepr/StructAllocatorRepr
+are INDEPENDENTLY constructed via existing published setVal/localWrite from
+the stronger initial witness; core Sim is never cast into heap representation.
+
+Source scalar2 becomes3, same real protected tail77 and sentinel99, dynamic
+int[3] and bool[0] allocations. Suffix and whole actual Inputs retain frame6,
+positive b1, cursor16 and source-computed cost5; old initial-state suffix cost4
+is explicitly different. Source run plus target PC0, COMPLETE tail, all THREE
+public prefix/suffix/whole Rep, real postcondition, source all6-observation
+vector [2,1,0,0,3,3] and target listed11-observation vector
+[1,21,3,16,20,99,3,0,0,0,0] are retained. Target vector lists reserved cursor,
+locals/pointers, old sentinel and all newly allocated cells; it does not assert
+extensional equality of entire machine memory. Exact reached allocator21,
+StateRepr and BaseExtends follow actual growing relation. Entry heap is EMPTY,
+so this application's BaseExtends is vacuous; allocation/cursor/state change,
+stack, aliases/new identities and post are genuinely inhabited. Earlier
+populated caller/old-alias/base-extension witnesses remain sealed unchanged.
+
+Wrong source length, reached source/machine Input, frame3, stale cost4,
+cursor20, pointer alias16 instead20, target revert and false nested diamond
+are rejected. Ordered/allocator/target-negative witnesses depend on staged
+NEW canonical composition. Source nested box/diamond consume NEW unchanged
+Spec.sat append iff laws. Existing actual transaction call reverting with
+payload9 followed by a skipped payload8 statement preserves9; wrong8 rejected
+through NEW exact source append. Existing recBase preserves exhausted,
+retains true diamond, has no successful output and actual compiler refusal.
+These are source semantics controls, NOT new target payload/unsupported-program
+compilation claims. Near-limit W-5 cost inequality is ARITHMETIC ONLY,
+not an inhabited near-limit allocator Input/refusal witness.
+
+Per-file bounded CLI proofs/controls, inventory and scoped #print axioms PASS;
+Lean MCP absent. Initial raw errors retained: reserved Lean keyword prefix,
+missing instruction-list DecidableEq, dependent Except bind/map reduction;
+fixed names/reduction/case ordering, no new global equality instance, no
+weakened theorem and no heartbeat/recursion/proof/node/fuel/time increase.
+All Lean serialized-j1/LEAN_NUM_THREADS1 under same hard12GiB/no-swap group,
+writer lock, single existing cache/OS headroom. Changed owned import closure
+lake build Solidity.Roadmap.V16.LoopControls
+Solidity.Roadmap.V16.FiniteMemoryCompilation PASS188jobs.
+
+Both independent actual proof/control finder/skeptic reviews PASS, no
+mathematical/nonvacuity/ownership defect. Accounting reviews PASS: new
+scripts/roadmap-v16-mixed-audit.py and tests/roadmap-v16/mixed-premises.json
+pin10 complete contracts/telescopes and expected Prop premises;58 EMPTY-telescope
+closed statements,1 SEPARATE universal actual-output rejection law,185 exact
+observed axiom/dependency closure pins. Only standard existing
+propext/Classical.choice/Quot.sound, no axiom/sorry/native_decide/implemented_by.
+21 corruption checks PASS (raw first private-helper selection test error kept,
+fixed to an actually reached private helper); wrong compiler/suffix origins,
+changed/erased halt/payload/Rep, added desiredInput/source-success/notExhausted,
+polymorphic/premise-only alleged witness, missing helper/dependency pin, oracle,
+axiom drift, missing obligations and false closure rejected. All2290 inherited
+IDs pinned and kept OPEN, combination17 explicitly OPEN. Root inventory now280
+actual statements includes generated auxiliaries; counts are not distinct
+executions or compiler coverage. No global ledger/TrustAudit/manifest edits.
+
+Validation reuse is SOURCE-DEPENDENCY checked: all284 transitive local modules
+of actual SolkeyTestSuite and original24workload are BYTE-IDENTICAL to sealed
+3c41 parent; toolchain/config/timing/checker unchanged, no new V16 module in
+that closure. Thus prior actual kernel286, strict491/61/0manual/11refuted/
+0pending, SolKey377/131 and fresh24 262.1288009259879s<=300 evidence remain
+applicable, explicitly NOT a new timing measurement. Full ./run-lean.sh
+FAIL124@5400 and prerequisite FAIL124@300 remain actual failures; new V16 code
+does not repair the unchanged failing full workload, so NO unchanged full retry.
+Current whole-repository confirmation remains FAILED/pending; owned focused
+closure passes do not satisfy that outstanding requirement. Earlier raw137/
+124/docs/EOF findings and all prior seals remain preserved.
+
+Proposed G03 evidence-only reconciliation: combination17 mixed core/memory
+has actual canonical scalar-prefix/allocation-suffix code and constructive
+reached Input/spec application, beyond prior one-backend-per-whole preparation.
+It still does NOT prove arbitrary cross-arm compatibility or all six feature
+combinations memoryLocation/storageLocation/whileStatement/internalCalls/
+sendTransfer/assertBuiltin (R01/R02/R03/R29). Keep combination17 and every
+constructor/feature/stage OPEN; coordinator owns ledger reconciliation.
+
+Entire original G48-G51 remains unfinished: concrete SourceSpec/admission/
+parse/checker/lowering/full-profile progress, integrated final V12-V15 frame/
+ABI packet/byteencoding/pinned Osaka/resources, recursive/external coverage,
+deployment/initcode/runtime installation/constructor failures, rollback and
+reachable adversarial transactions, final callback/loop/spec/actual SolKey
+applications and mandatory full gate still unresolved. No profile/exclusion,
+Forward/Guard/admissibility/hash premise/computable-bound obligation,
+Fml.inTarget, verdict, rule/closer or SolKey correspondence changed. This
+scoped successful combination is not full runtime/parent closure. Goal remains
+blocked and untouched. Exact-head handoff/patch/evidence/checksums are exported
+to /workspace/scratch/v16-mixed-recovery after reviewable commit; no new human
+scope decision is required. Current accounting/final artifacts remain to seal.
+
+Additional investigated combination control: actual CORE assert(true) prefix
+alone is accepted; assertionThenAllocation source execution succeeds, but actual
+Compiler.compile returns NONE for the joined program. Three new closed controls
+are kernel checked and included in58 controls/185 exact reached pins, all21
+corruption tests still PASS. This is an INTRINSIC backend counterexample, not a
+claimed fully SourceSpec-admitted compilation unit. It precisely limits the
+scalar-assignment success application and keeps G03assertBuiltin+memoryLocation
+and combination17 OPEN. Requested prerequisite to RESERVED compiler/pass owner:
+publish an actual checked core-assert/allocating-memory composition certificate
+and canonical compiler selection, preserving source panic vs revert, complete
+rich input/output/frame/allocator observations and public asserts guard. Existing
+finite-memory GrowingResult has only success/revert and cannot be silently
+weakened or relabelled to absorb assert panic. No reserved code/statement changed.
+This investigated producer gap is distinct from SourceSpec and final V12-V15
+blockers; the V16 scalar adapter does not repair it by assuming simulation.
+
+Mixed checkpoint final scoped gates: layer/orphan/trust/noncircular/TestSuite
+source/strict/owned whitespace PASS. Raw docs FAIL1, frozen83/current86 complete
+findings preserved; current3c41parent86=current86 with0new/removed owned findings.
+Both independent actual supplement reviews PASS for the assert/allocation
+refusal and updated58controls/185pins. Separate independent remaining-queue
+reviews found no additional SPECIFIC mandatory ready proof against published
+099bf beyond finishing this checkpoint validation/handoff; this is a bounded
+interface audit, NOT proof of full coverage or impossibility of arbitrary new
+corollaries. Precise unfilled SourceSpec/Admission/CheckedFrontend/Lowering,
+canonical assert/memory producer, byte/runtime/resources, source creation/world
+installation/rollback/adversarial state decode and final SolKey links remain.
+Current full gate is still FAILED124, no unchanged heavy retry or budget raise.
+Exact committed head and every absolute artifact/gate/review/checksum are recorded
+by /workspace/scratch/v16-mixed-recovery/identity.json and handoff.md after export.
+Full original assignment stays partial/blocked and existing goal untouched.
