@@ -2463,3 +2463,16 @@ then affected host/control checks completed; no cache/evidence deletion.
 Independent read-only finder and skeptic source/final-source reviews PASS,
 no findings, neither running Lean/server/builds/writes. Final exact-commit
 artifact reviews/checksums are in the handoff. No full-lane completion claim.
+
+Continuation29 artifact finder correction: the original artifact review found
+that handoff/metadata omitted bundle prerequisites. Final metadata/handoff now
+explicitly mark the Git bundle incremental, NOT standalone, and enumerate all
+six required commits:127c2ee59de16971e45b08a2def54f4e5fae8e2a,
+f4dee4a29c2e208b36db4a4161a4723c735cd775,
+040e59d30a6726fa4f9fee831695eeaa4027ede1,
+204eb1545cbf57e436196e4cba346075515b7279,
+2fe1f8932f96be15b00df03ba2cde46f64a87758,
+443d1f614ebf92d5c553c014a07ee3553bb5058a. Consumers must possess those
+commits; an archive/bundle alone does not establish combined-tree validation.
+This correction changes documentation/artifacts only, preserving every checked
+Lean source/type/report/observation and the original review-set/interface seals.
