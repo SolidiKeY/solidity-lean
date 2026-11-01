@@ -1406,3 +1406,24 @@ Fixed doc gaps (stale M3/admission lines, this section). Recorded: a function
 whose only enum is a return still meets the refusal on the raw path (safe),
 and `inRanges` treats an argument-count mismatch as a revert (pre-existing).
 
+### Validation after the CF1 + CF2 merge, the backfill and the enum item
+
+* `./run-lean.sh` (64m52s): default target "Build completed successfully
+  (1041 jobs)"; `SolkeyTestSuite` "Build completed successfully (286 jobs)"
+  (the `Derived17` OOM did not recur); `check-solkey.sh` the baseline 37
+  mismatches.
+* Lean server, clean: `AbiEntry`, `AbiEntryProofs` (axiom pins),
+  `AbiEntryChecks`, `UpstreamEntry`, `Upstream`,
+  `Examples/Tactics/InheritedSelectorsImport.lean`, `TrustAudit.lean`, and
+  `tests/upstream/{AbiEntryReplay,Replay,EnumAbiRanges,EnumBounds,EnumErrorControls,CompoundAbiShape}.lean`.
+* Node: `solidity-upstream.test.mjs` 25/25; `abi-entry-probe.mjs --fixtures
+  --probes --inherited` pass; `check-abi-vectors.mjs` 31 + 5;
+  `test-solidity.test.mjs` "typed ABI entry decoding" passes, while "canonical
+  nominal ABI matching preserves enum input ranges" cannot run here: it first
+  compiles with the solkey-pinned 0.8.34 compiler, absent from this container
+  (its Lean half, `EnumAbiRanges.lean`, is clean above); `check-g07`: trust,
+  layers (184 core, 0 reach the elaborator), orphans (1078, 0 orphaned),
+  noncircular, grammar, control pins pass, its two "new" items are the
+  baseline axiom-pin drift and `check-doc-paths` 48 (46 + 2);
+  `check-automatic --strict` 491 / 61 / 11 refuted / 0 pending.
+
