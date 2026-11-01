@@ -4313,3 +4313,110 @@ byte/all-profile construction/target allocation failures/general paths/graphs/
 ABI/storage/deep-copy/reserved-copy/finalV10-Source-target obligations remain open.
 The existing goal is BLOCKED unchanged; unavailable worker goal RPC is not
 permission to reset, reactivate or complete it.
+
+
+## Checkpoint 57: uint256 tag member write and reached three-statement program (partial)
+
+Continuing the original G34/BackfillB queue after sealing C56,
+[SourceStructTag.lean](../../Solidity/Backend/MemoryOps/SourceStructTag.lean)
+implements the independently supported named primitive-member application that
+C56 identified but did not implement. Existing Source/Evm/Scalar/constructor
+owners remain read-only. The module composes existing typed operations and
+compiler certificates; it introduces no evaluator, value/state layer, scalar
+compiler, profile restriction or global address injection.
+
+`source_struct_tag_write` proves the actual Source DataList.setNth0 update of
+existing sourceBoolStructData, using its real declaration layout equality.
+`SourceBoolStructAt.write_tag` derives the reached named observer, new uint tag,
+unchanged selected reference, every old Boolean object's intrinsic contents and
+represented Source alias, MemOK, locals, other Source addresses and world frames.
+A represented Boolean Source cell differs from the struct parent because their
+occupied types disagree; no address injection is required.
+
+`SourceBoolStructAt.assign_tag_word` consumes INITIAL Source correspondence,
+aligned Source root/uint RHS local, intrinsic root/current target value, mapFree,
+MemOK, word StateRepr and existing valIn. Actual RHS-first resolved member
+assignment and statement are proved independently of the target. The actual
+intrinsic assignMem field step and WHOLE compileVal/root-pointer/field-write word
+program follow the published PtrFrag.writePrimitive certificate. Reached
+Source/word relations, selected child/aliases, Source world, stack and any supplied
+allocator derive from those executions, never a desired postrelation. Source
+expression n+3/statement n+4 and actual ≤2 timeout retain the existing horizons.
+The finite layout has uint256 tag plus dynamic Boolean-array reference; this
+adds no admission exclusion for other shapes or widths.
+
+Append-only [controls](../../Solidity/Backend/MemoryOps/SourceStructControls.lean)
+apply the theorem to EVERY existing canonical PrimTy.uint.Denote, with full
+Source tables and initial/final16-word vectors, actual member reads, unchanged
+TFF/FTF children and pointer0/tag/cursor/stack/allocator observations. Zero and
+maximum2^256-1 are concrete instances; the maximum word is exactly W-1, with no
+conversion correctness premise, truncation or new cap.
+
+A further actual reached-state application consumes C56's REAL declaration and
+fresh-reference binding outputs, then writes the tag. It proves one THREE-statement
+Source RItems program, matching intrinsic Prog and WHOLE word append for all
+canonical runtime uint values. Source original XΓ.length is6 while initial
+intrinsic Γ.length is4; shifted Source bindings and word local cells remain
+separate. The final tag statement is rebuilt from its actual expression at the
+original Source parameter count. Complete FOUR four-object Source tables and
+FOUR16-word vectors cover input/declaration/reference-binding/tag-write, including
+old children, fresh empty child3/base48, tag7→value, neighbour99, new local5,
+header48, free48→49, retained alias0, stack42 and final allocator49.
+
+Discriminating negatives execute the existing raw Source memSet with uint at the
+reference field, yielding exact stuck "field type" with no heap change. This is
+a raw-interface test, not a well-typed resolved Source-program counterexample.
+A raw word program using child offset1 really overwrites pointer33 and leaves
+tag32 unchanged; complete initial/correct/wrong16-word vectors distinguish it
+from the certified tag-offset0 program. It has no typed compiler certificate.
+Actual low Source horizon2 timeout is kept separate from word behavior. All C56
+and earlier bodies, full vectors, guards and failure prefixes remain verbatim.
+
+Focused standard-guarded closure passed188jobs; four public laws and three
+controls use exact propext/Classical.choice/Quot.sound guards. Distinct earlier
+failed proof/control/guard attempts remain retained; no sorryAx survives the
+passing tree. Per-file Lean MCP and goal read/update RPC are unavailable; the
+existing capped serial route is used and goal identity/status is unchanged.
+
+Independent read-only finder/skeptic core and refreshed control reviews passed;
+final source/docs and committed-artifact reviews and raw commands are in the
+handoff. Kernel and symbolic-word evidence does not establish physical bytes,
+external solc/EVM adequacy, arbitrary side-effectful operands, general Source
+programs/graphs, all-profile constructors/allocation failures or complete memory
+compilation. All original G32-G35 and Backfill parents remain partial/blocked;
+reserved memory-storage copying and final Source/V10/target composition stay open.
+No source observations/profile/predicates/refusals or proof/fuel/node/time/test
+budgets, global registry or historical checker baseline is changed.
+
+
+C57 refined-tree final gates: focused188/full default1099/TestSuite262/
+SolKey377parsed131read-bearing covered and final wrapper exit0. Actual fresh
+Lean4.24.0 (797c613)/Lake5.0.0-src+797c613/KeySort2jobs pass. Strict/trust/layers/
+orphans/lane/complete fixtures/script-corruption/diff checks pass. Scoped933pins/
+118modules have zero unsafe sets. Raw global inventory still **exit1**,
+1292unrecorded=359published inherited+933owned (14original+345incoming inside
+inherited); owned proposals remain coordinator reconciliation, not registry edits.
+Raw strict docs still **exit1**,83complete public-byte-identical findings
+(SHA2561905b6529ffff68bf2ee9256f84952fd8a19e0df94a434b3b052c11638142f2a).
+Separate publiczero-new passes; frozenno-new remains **exit1**,11incoming.
+Warm strict timed **zero** TestSuite modules; independently exact262-file Suite/
+fixture/toolchain bytes and actualmatching Lean/Lake preserve retained C31
+cold26/max160seconds under unchanged300seconds each. No new cold timing coverage.
+Full aggregate Lean/Lake RSS1675508KiB, disk growth266240bytes, new max/OOM/kill
+0; historical12GiBpeak/1051maxevents remain separately recorded. Child12GiB/no-swap
+under16GiBparent, hostSwapTotal0/OS headroom, CPU0/threads1/Lean-j1/cacheOFF and
+all proof/test/time guards stay unchanged. All3159 C56 seal records verify before
+commit; C56 and all earlier exports stay immutable. Both independent SOURCE/docs
+reviews passed; committed-artifact reviews are separately required after export.
+
+Original queue reassessment: G32/G33/G34/G35.01/.03/.04/.05 and Backfill A/B remain
+partial, G35.02 and final G35.06 composition remain blocked on reserved/upstream
+producer interfaces. No independent queue exhaustion is asserted. A further
+supported G34 investigation is actual named uint256-tag DELETE: existing
+Source.deleteLoc, primitive default interfaces and deleteMem_primitive_eq_assign
+must be connected to the independent named observer and word default write.
+C57 assignment and ≤2 timeout do not prove deletion or all-type defaults; that
+application remains unimplemented. Full physical bytes/general paths/graphs/
+ABI/storage/deep-copy/all-profile target allocation failures and final Source/V10/
+target obligations stay open. Existing independently BLOCKED goal is unchanged;
+no worker goal read/update RPC or authorization to mutate/reset it exists.

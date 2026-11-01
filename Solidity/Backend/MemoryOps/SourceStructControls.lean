@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructTag
 import Solidity.Backend.MemoryOps.SourceStructDeclaration
 import Solidity.Backend.MemoryOps.SourceStructGrowth
 import Solidity.Backend.MemoryOps.SourceStructRedirect
@@ -2187,5 +2188,242 @@ theorem named_declared_empty_bounds (p : Roadmap.Pipeline) :
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_declared_empty_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms named_declared_empty_bounds
+
+private def tagLiteral (Δ : Ctx) (v : PrimTy.uint.Denote) : Val C Δ .uint := .simple (.lit v.1 v.2)
+private def tagWord (v : PrimTy.uint.Denote) : Evm.Word := .val (wmod (toWord v.1))
+private def tagHeap (v : PrimTy.uint.Denote) := hp.setField parent layout.tag_type v
+private def tagData (v : PrimTy.uint.Denote) (a : Nat) : Source.Data E.layout SS := sourceBoolStructData dn layout.source_types v a
+private def tagSource (v : PrimTy.uint.Denote) : Source.EMState E XΓ :=
+  ((withArgs sy v true).1,{sy.2 with heap := sy.2.heap.write 2 (tagData v 0) (by rfl)})
+private def tagMachine (v : PrimTy.uint.Denote) := writeMachine machine 32 (tagWord v)
+
+private theorem tagLiteral_run {Δ : Ctx} (v : PrimTy.uint.Denote) (m : Machine) :
+    run (Evm.compileVal 1 (tagLiteral Δ v)) m=.ok (m.push (tagWord v)) 0 := by
+  change run [.push (tagWord v)] m=.ok (m.push (tagWord v)) 0
+  simp only [run,exec_cons_zero,Instr.step,Machine.next,Out.ok_bind,exec_nil]
+  rfl
+
+private theorem tagProgram_run (v : PrimTy.uint.Denote) :
+    run (structTagWriteCode 1 root "tag" (tagLiteral Γ v)) machine=.ok (tagMachine v) 0 := by
+  have hp := (PtrFrag.local (b := 1) root (by decide)).run_of_eval (initial_repr.push (tagWord v))
+    (r := parent) (by simp only [MPath.mvalT];rfl)
+  rw [structTagWriteCode,List.append_assoc,run_append_ok (tagLiteral_run v machine),run_append_ok hp]
+  exact writeFieldWord_run machine ⟨32,by decide⟩ 0 (tagWord v) (by decide)
+
+/-- Every intrinsic uint256 value is supported, with exact Source tag update and
+whole primitive word program; reference child/old aliases stay unchanged. -/
+theorem named_tag_runtime (p : Roadmap.Pipeline) (v : PrimTy.uint.Denote) :
+    (Source.evalE (G p) F0 3 (sourceStructTagAssign layout xroot xi)).run (withArgs sy v true)=
+      (.ok (.val (sourceUint v)),tagSource v) ∧
+    (Source.execS (G p) F0 4 XΓ.length none (.expr (sourceStructTagAssign layout xroot xi) : Source.RStmt E [] false .body XΓ XΓ)
+      (withArgs sy v true).1).run (.nil,sy.2)=(.ok (.normal (tagSource v).1),(.nil,(tagSource v).2)) ∧
+    Stmt.run σ (.assignMem (.field (.var root (by decide)) "tag" layout.tag_type) (.val (tagLiteral Γ v)))=
+      .ok ⟨σ.withHeap (tagHeap v),List.prefix_refl _⟩ ∧
+    run (structTagWriteCode 1 root "tag" (tagLiteral Γ v)) machine=.ok (tagMachine v) 0 ∧
+    SourceBoolStructAt (tagSource v) 2 (tagHeap v) parent addresses layout ∧ Source.MemOK E SH (tagSource v) ∧
+    StateRepr 1 1 8 (Frag.init Γ) (σ.withHeap (tagHeap v)) base (tagMachine v) ∧
+    StructAllocatorRepr (tagHeap v) base 8 ⟨48,by decide⟩ (tagMachine v) ∧
+    (Source.evalE (G p) F0 2 (.member (.local xroot) 0 layout.source_tag_type)).run (tagSource v)=
+      (.ok (.val (sourceUint v)),tagSource v) ∧
+    (Source.evalE (G p) F0 2 (.member (.local xroot) 1 layout.source_child_type)).run (tagSource v)=
+      (.ok (.val (.memRef rfl 0)),tagSource v) ∧
+    [sy.2.heap.get 0,sy.2.heap.get 1,sy.2.heap.get 2,(tagSource v).2.heap.get 0,(tagSource v).2.heap.get 1,(tagSource v).2.heap.get 2]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,tagData v 0⟩] ∧
+    [cells machine,cells (tagMachine v)]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],tagWord v,w[16]]] ∧
+    SourceBoolMemoryAt (tagSource v) 0 (tagHeap v) left .dyn ∧ SourceBoolMemoryAt (tagSource v) 1 (tagHeap v) right .dyn ∧
+    (tagHeap v).field parent layout.tag_type=v ∧ (tagHeap v).field parent layout.child_type=left ∧
+    (tagMachine v).stack=[w[42]] ∧ (tagSource v).1=(withArgs sy v true).1 ∧
+    (tagSource v).2.ex=sy.2.ex ∧ (tagSource v).2.logs=sy.2.logs := by
+  have hr : SourceBoolStructAt (withArgs sy v true) 2 hp parent addresses layout := initial_at.recontext rfl
+  obtain ⟨z,m',hw,he,hs,hi,hc,hr',hm,hword,hl,hstack,halloc,htag,hchild,halias,hframe,heffects⟩ :=
+    SourceBoolStructAt.assign_tag_word layout (G p) F0 0 σ parent addresses hr xroot xi root (tagLiteral Γ v) v rfl rfl rfl rfl
+      (by decide) SH (withArgs_memOK _ _ _ source_memOK) initial_repr rfl
+  have hwc : (Source.writeLoc (E := E) (Γ := XΓ) F0 2 (.mem (τ := .int .u256) 2 0) (sourceUint v)).run (withArgs sy v true)=(.ok (),tagSource v) := by
+    obtain ⟨ht,hs⟩ := source_struct_tag_write (withArgs sy v true) 2 dn layout.source_types u7 v 0 hr.parent
+    exact hs
+  have hz : z=tagSource v := congrArg Prod.snd (hw.symm.trans hwc)
+  subst z
+  have ht : m'=tagMachine v := (Out.ok.inj (hc.symm.trans (tagProgram_run v))).1
+  subst m'
+  change SourceBoolStructAt (tagSource v) 2 (tagHeap v) parent addresses layout at hr'
+  change (tagHeap v).field parent layout.tag_type=v at htag
+  have htagread := hr'.eval_member_tag (G p) F0 0 xroot rfl
+  have hchildread := hr'.eval_member_child (G p) F0 0 xroot rfl
+  rw [htag] at htagread
+  change (tagHeap v).field parent layout.child_type=left at hchild
+  rw [hchild] at hchildread
+  refine ⟨he,hs,hi,hc,hr',hm,hword,halloc _ (by decide) initial_allocator,htagread,hchildread,rfl,rfl,
+    halias left (left_at.recontext rfl),halias right (right_at.recontext rfl),htag,hchild,hstack,rfl,rfl,rfl⟩
+
+private abbrev DTΓ : Source.RCtx := SB::XΓ
+private def tagDeclaredSource (v : PrimTy.uint.Denote) : Source.EMState E DTΓ :=
+  (.cons (.memRef rfl 3) (withArgs sy v true).1,(growthSource []).2)
+private def tagBoundSource (v : PrimTy.uint.Denote) : Source.EMState E DTΓ := ((tagDeclaredSource v).1,boundSource.2)
+private def tagAfterSource (v : PrimTy.uint.Denote) : Source.EMState E DTΓ :=
+  ((tagDeclaredSource v).1,{boundSource.2 with heap := boundSource.2.heap.write 2 (tagData v 3) (by rfl)})
+private def afterTagHeap (v : PrimTy.uint.Denote) := boundHeap.setField growthRoot layout.tag_type v
+private def afterTagMachine (v : PrimTy.uint.Denote) := writeMachine boundMachine 32 (tagWord v)
+private def declaredBoundTaggedItems : Source.RItems E [] false .body XΓ DTΓ :=
+  .stmt (.declVar SB) (.stmt (.expr (sourceStructAssign layout (.there xroot) .here))
+    (.stmt (.expr (sourceStructTagAssign layout (.there xroot) (.there xi))) .nil))
+private def declaredBoundTaggedProg (v : PrimTy.uint.Denote) : Prog C Γ (.mem B::Γ) :=
+  .cons (.declMem B (.user "freshBool") none rfl rfl)
+    (.cons (.assignMem (.field (.var (.there root) (by decide)) "items" layout.child_type) (.ref (.var .here rfl)))
+      (.cons (.assignMem (.field (.var (.there root) (by decide)) "tag" layout.tag_type) (.val (tagLiteral (.mem B::Γ) v))) .nil))
+
+/-- Real declaration/rebinding prefix feeds the new scalar field write. Actual
+THREE-statement Source Items, intrinsic Prog and whole word append all execute
+at the reached states; source argument and word-local contexts remain distinct. -/
+theorem named_declared_tag_program (p : Roadmap.Pipeline) (v : PrimTy.uint.Denote) :
+    (Source.execItems (G p) F0 7 XΓ.length none declaredBoundTaggedItems (withArgs sy v true).1).run (.nil,sy.2)=
+      (.ok (.normal (tagAfterSource v).1),(.nil,(tagAfterSource v).2)) ∧
+    Prog.run σ (declaredBoundTaggedProg v)=.ok ⟨grownDefaultState.withHeap (afterTagHeap v),List.prefix_append _ _⟩ ∧
+    run ((declaredCode++boundCode)++structTagWriteCode 1 (.there root) "tag" (tagLiteral (.mem B::Γ) v)) machine=
+      .ok (afterTagMachine v) 0 ∧
+    SourceBoolStructAt (tagAfterSource v) 2 (afterTagHeap v) growthRoot growthAddress layout ∧
+    Source.MemOK E SH (tagAfterSource v) ∧
+    StateRepr 1 1 8 ((Frag.init Γ).push (.mem B) .ok) (grownDefaultState.withHeap (afterTagHeap v)) grownDefaultBase (afterTagMachine v) ∧
+    StructAllocatorRepr (afterTagHeap v) grownDefaultBase 8 ⟨49,by decide⟩ (afterTagMachine v) ∧
+    [(withArgs sy v true).2.heap.get 2,(tagDeclaredSource v).2.heap.get 2,(tagBoundSource v).2.heap.get 2,(tagAfterSource v).2.heap.get 2]=
+      [some ⟨SS,data 0⟩,some ⟨SS,data 0⟩,some ⟨SS,data 3⟩,some ⟨SS,tagData v 3⟩] ∧
+    [(tagAfterSource v).2.heap.get 0,(tagAfterSource v).2.heap.get 1,(tagAfterSource v).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    [(withArgs sy v true).2.heap.get 0,(withArgs sy v true).2.heap.get 1,(withArgs sy v true).2.heap.get 2,(withArgs sy v true).2.heap.get 3,
+      (tagDeclaredSource v).2.heap.get 0,(tagDeclaredSource v).2.heap.get 1,(tagDeclaredSource v).2.heap.get 2,(tagDeclaredSource v).2.heap.get 3,
+      (tagBoundSource v).2.heap.get 0,(tagBoundSource v).2.heap.get 1,(tagBoundSource v).2.heap.get 2,(tagBoundSource v).2.heap.get 3,
+      (tagAfterSource v).2.heap.get 0,(tagAfterSource v).2.heap.get 1,(tagAfterSource v).2.heap.get 2,(tagAfterSource v).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,none,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory []⟩,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 3⟩,some ⟨SB,sourceBoolMemory []⟩,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,tagData v 3⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    [cells machine,cells grownDefaultMachine,cells boundMachine,cells (afterTagMachine v)]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[48]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],tagWord v,w[48]]] ∧
+    [(afterTagMachine v).mem 5,(afterTagMachine v).mem 48,(afterTagMachine v).mem 49]=[w[48],w[0],w[0]] ∧
+    (afterTagHeap v).field growthRoot layout.tag_type=v ∧ ((afterTagHeap v).field growthRoot layout.child_type).id=3 ∧
+    SourceBoolMemoryAt (tagAfterSource v) 0 (afterTagHeap v) (left.wk (List.prefix_append H [B])) .dyn ∧
+    SourceBoolMemoryAt (tagAfterSource v) 1 (afterTagHeap v) (right.wk (List.prefix_append H [B])) .dyn ∧
+    (tagAfterSource v).1.get .here=.memRef rfl 3 ∧ (tagAfterSource v).1.get (.there (.there (.there soldAlias)))=.memRef rfl 0 ∧
+    (afterTagMachine v).stack=[w[42]] := by
+  have hr0 : SourceBoolStructAt (withArgs sy v true) 2 hp parent addresses layout := initial_at.recontext rfl
+  obtain ⟨mid,z0,mm,hd,hw0,he0,hs0,hitems0,hdi,hiprefix,hcode0,hcode1,hprefix,hrmid,hrbound,hmmid,hmem0,hmword,ha,hsfresh,hsroot,hl0,htr,htf,htag0,hsel0,hlen0,halias0,hstack0,htarget0,heffects0⟩ :=
+    SourceBoolStructAt.declare_assign_word layout (G p) F0 1 σ parent addresses hr0 xroot root rfl rfl (by decide) SH
+      (withArgs_memOK _ _ _ source_memOK) initial_repr initial_allocator (by decide) (by decide) (by decide)
+  have hdknown : (Source.execS (G p) F0 6 XΓ.length none (.declVar SB : Source.RStmt E [] false .body XΓ DTΓ) (withArgs sy v true).1).run (.nil,sy.2)=
+      (.ok (.normal (tagDeclaredSource v).1),(.nil,(tagDeclaredSource v).2)) :=
+    source_decl_statement_run (G p) F0 5 XΓ.length (withArgs sy v true) (.cons (sourceUint v) (.cons (.bool true) sy.1),(growthSource []).2)
+      (.memRef rfl 3) (source_bool_default_run (withArgs sy v true) 3)
+  have hmid : mid=tagDeclaredSource v := Prod.ext
+    (Source.Out.normal.inj (Except.ok.inj (congrArg Prod.fst (hd.symm.trans hdknown))))
+    (congrArg (fun a => a.2.2) (hd.symm.trans hdknown))
+  subst mid
+  have hwknown : (Source.writeLoc (E := E) (Γ := DTΓ) F0 3 (.mem (τ := SB) 2 1) (.memRef rfl 3)).run (tagDeclaredSource v)=(.ok (),tagBoundSource v) := by
+    obtain ⟨ht,hs⟩ := source_struct_write (tagDeclaredSource v) 2 dn layout.source_types u7 0 3 hrmid.parent
+    exact hs
+  have hz0 : z0=tagBoundSource v := congrArg Prod.snd (hw0.symm.trans hwknown)
+  subst z0
+  change mm=boundMachine at htarget0
+  subst mm
+  obtain ⟨z,m',hw,he,hs,hi,hc,hr,hm,hword,hl,hstack,halloc,htag,hchild,halias,hframe,heffects⟩ :=
+    SourceBoolStructAt.assign_tag_word layout (G p) F0 0 (grownDefaultState.withHeap boundHeap) growthRoot growthAddress hrbound
+      (.there xroot) (.there xi) (.there root) (tagLiteral (.mem B::Γ) v) v rfl rfl rfl rfl (by decide) SH hmem0 hmword rfl
+  have hwknown2 : (Source.writeLoc (E := E) (Γ := DTΓ) F0 2 (.mem (τ := .int .u256) 2 0) (sourceUint v)).run (tagBoundSource v)=(.ok (),tagAfterSource v) := by
+    obtain ⟨ht,hs⟩ := source_struct_tag_write (tagBoundSource v) 2 dn layout.source_types u7 v 3 hrbound.parent
+    exact hs
+  have hz : z=tagAfterSource v := congrArg Prod.snd (hw.symm.trans hwknown2)
+  subst z
+  have hptr := (PtrFrag.local (b := 1) (.there root : Idx (.mem B::Γ) (.mem (.struct S))) (by decide)).run_of_eval
+    (hmword.push (tagWord v)) (r := growthRoot) (by simp only [MPath.mvalT];rfl)
+  have hcode : run (structTagWriteCode 1 (.there root) "tag" (tagLiteral (.mem B::Γ) v)) boundMachine=.ok (afterTagMachine v) 0 := by
+    rw [structTagWriteCode,List.append_assoc,run_append_ok (tagLiteral_run v boundMachine),run_append_ok hptr]
+    exact writeFieldWord_run boundMachine ⟨32,by decide⟩ 0 (tagWord v) (by decide)
+  have hmt : m'=afterTagMachine v := (Out.ok.inj (hc.symm.trans hcode)).1
+  subst m'
+  have htagstmt := source_expr_statement_run (G p) F0 3 XΓ.length _ (tagBoundSource v) (tagAfterSource v) _ he
+  have htail := source_items_pair_run (G p) F0 0 XΓ.length _ _ (tagDeclaredSource v) (tagBoundSource v) (tagAfterSource v) hs0 htagstmt
+  have hi0 : Stmt.run σ (.declMem B (.user "freshBool") none rfl rfl)=.ok ⟨grownDefaultState,List.prefix_append _ _⟩ := hdi
+  have hir : Stmt.run grownDefaultState (.assignMem (.field (.var (.there root) (by decide)) "items" layout.child_type) (.ref (.var .here rfl)))=
+      .ok ⟨grownDefaultState.withHeap boundHeap,List.prefix_refl _⟩ := by
+    change TRun.assignMem _ _ grownDefaultState=_
+    have htr' : TEnv.get (.there root) grownDefaultState.env=some growthRoot := rfl
+    have htf' : TEnv.get (.here : Idx (.mem B::Γ) (.mem B)) grownDefaultState.env=some (σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2 := rfl
+    simp only [TRun.assignMem,MSrc.mvalT,MLoc.addrT,MPath.mvalT,htr',htf',Heap.writeAddr,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    rfl
+  have hprefix' : run (declaredCode++boundCode) machine=.ok boundMachine 0 := hprefix
+  refine ⟨?_,?_,?_,hr,hm,hword,halloc _ (by decide) ha,rfl,rfl,rfl,rfl,rfl,htag,?_,halias _ (halias0 left (left_at.recontext rfl)),
+    halias _ (halias0 right (right_at.recontext rfl)),rfl,rfl,hstack⟩
+  · rw [declaredBoundTaggedItems,Source.execItems,Source.Hoare.run_bind,hdknown]
+    change (Source.execItems (G p) F0 6 XΓ.length none _ (tagDeclaredSource v).1 >>= fun o => Source.EM.lift (o.up XΓ)).run (.nil,(tagDeclaredSource v).2)=_
+    rw [Source.Hoare.run_bind,htail]
+    rfl
+  · rw [declaredBoundTaggedProg,Prog.run_cons_ok hi0,Prog.run_cons_ok hir,Prog.run_cons_ok hi,Prog.run_nil]
+    rfl
+  · rw [run_append_ok hprefix']
+    exact hc
+  · change (afterTagHeap v).field growthRoot layout.child_type=boundHeap.field growthRoot layout.child_type at hchild
+    rw [hchild]
+    rfl
+
+private def tagNine : PrimTy.uint.Denote := indexValue ⟨9,by decide⟩
+private def tagMax : PrimTy.uint.Denote := indexValue ⟨W-1,Nat.sub_lt W_pos (by decide)⟩
+private def wrongTagMachine := writeMachine machine 33 w[9]
+private theorem tagWord_max : tagWord tagMax=.val ⟨W-1,Nat.sub_lt W_pos (by decide)⟩ := by
+  have hw : W-1<W := Nat.sub_lt W_pos (by decide)
+  unfold tagWord tagMax indexValue
+  simp only [toWord,Int.natCast_nonneg,↓reduceIte,Int.toNat_natCast]
+  rw [wmod_of_lt hw]
+
+/-- Zero/max are real runtime instances. Wrong raw Source field types are stuck,
+not a well-typed Source-program counterexample; wrong raw word offset executes
+and disagrees with the actual tag write. Exact timeout remains a separate scope. -/
+theorem named_tag_extremes_and_negatives (p : Roadmap.Pipeline) :
+    (Source.evalE (G p) F0 3 (sourceStructTagAssign layout xroot xi)).run (withArgs sy k0 true)=
+      (.ok (.val (sourceUint k0)),tagSource k0) ∧
+    (Source.execItems (G p) F0 7 XΓ.length none declaredBoundTaggedItems (withArgs sy tagMax true).1).run (.nil,sy.2)=
+      (.ok (.normal (tagAfterSource tagMax).1),(.nil,(tagAfterSource tagMax).2)) ∧
+    (Source.evalE (G p) F0 2 (.member (.local (.there xroot)) 0 layout.source_tag_type)).run (tagAfterSource tagMax)=
+      (.ok (.val (sourceUint tagMax)),tagAfterSource tagMax) ∧
+    [(tagMachine k0).mem 32,(tagMachine tagNine).mem 32,(afterTagMachine tagMax).mem 32]=
+      [w[0],w[9],.val ⟨W-1,Nat.sub_lt W_pos (by decide)⟩] ∧
+    (Source.memSet (E := E) (Γ := XΓ) 2 1 (sourceUint tagNine)).run (withArgs sy tagNine true)=
+      (.error (.stuck "field type"),withArgs sy tagNine true) ∧
+    (Source.evalE (G p) F0 2 (sourceStructTagAssign layout xroot xi)).run (withArgs sy tagNine true)=
+      (.error .timeout,withArgs sy tagNine true) ∧
+    run (structTagWriteCode 1 root "items" (tagLiteral Γ tagNine)) machine=.ok wrongTagMachine 0 ∧
+    [cells machine,cells (tagMachine tagNine),cells wrongTagMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[9],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[9]]] ∧
+    wrongTagMachine.mem 32≠(tagMachine tagNine).mem 32 ∧ wrongTagMachine.mem 33≠(tagMachine tagNine).mem 33 := by
+  obtain ⟨hz0,tail0⟩ := named_tag_runtime p k0
+  obtain ⟨hitems,hprog,hcode,hr,hm,hword,ha,tail⟩ := named_declared_tag_program p tagMax
+  have hread := hr.eval_member_tag (G p) F0 0 (.there xroot) rfl
+  have ht : (afterTagHeap tagMax).field growthRoot layout.tag_type=tagMax := by
+    simp only [afterTagHeap,Heap.field,Heap.setField,Heap.get_set_same,MFields.get_set_same]
+  rw [ht] at hread
+  have hp := (PtrFrag.local (b := 1) root (by decide)).run_of_eval (initial_repr.push (tagWord tagNine))
+    (r := parent) (by simp only [MPath.mvalT];rfl)
+  refine ⟨hz0,hitems,hread,?_,?_,source_struct_tag_low_horizon layout (G p) F0 _ xroot xi 2 (by decide),?_,rfl,by decide,by decide⟩
+  · change [w[0],w[9],tagWord tagMax]=_
+    rw [tagWord_max]
+  · rw [Source.memSet,Source.Hoare.run_bind,source_heapObj_run (withArgs sy tagNine true) 2 _ (by rfl)]
+    rfl
+  · rw [structTagWriteCode,List.append_assoc,run_append_ok (tagLiteral_run tagNine machine),run_append_ok hp]
+    exact writeFieldWord_run machine ⟨32,by decide⟩ 1 w[9] (by decide)
+
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_tag_runtime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_tag_runtime
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_declared_tag_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_declared_tag_program
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_tag_extremes_and_negatives' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_tag_extremes_and_negatives
 
 end Solidity.Backend.MemoryOps.SourceStructControls

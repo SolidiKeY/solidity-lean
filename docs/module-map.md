@@ -1340,3 +1340,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceStructGrowth.lean` | Actual paired Source/intrinsic Boolean allocation preserves the finite named struct observer, extends only the fresh identity, derives old-alias frames through reached deletion, and applies the published empty-default word allocator. |
 
 | `Solidity/Backend/MemoryOps/SourceStructDeclaration.lean` | Actual context-changing Source empty default declaration then reached named reference assignment; derives shifted locals, preserves the original parameter count, and proves intrinsic Prog/whole word append with final frames and allocator. |
+
+| `Solidity/Backend/MemoryOps/SourceStructTag.lean` | Actual Source uint256 named-tag member write, intrinsic assignment and whole published primitive-word program; derives named observer/child and alias frames, then applies at actual declaration/reference-binding outputs. |
