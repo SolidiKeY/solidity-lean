@@ -4783,3 +4783,92 @@ exhaustion claim or permission to duplicate reserved owners. Original upstream
 physical bytes/all-profile allocation-failure/general reference-graph/ABI-storage/
 fresh deep-copy/reserved copying/final Source-V10-target obligations remain open.
 The persistent BLOCKED goal is unchanged; no status operation occurred.
+
+
+C62 — LATE checked arithmetic failure after an actual changed prefix
+(partial G34/Backfill B, not whole-lane completion).
+SourceUintLateFailure reuses the existing resolved assignment, Source compound
+update/overflow and published intrinsic/word read-binary-write certificates.
+The all-outcome word theorem is derived, not supplied as a compiler oracle.
+The late composition accepts INITIAL local alignment, bound, MemOK/StateRepr,
+checked mode and a local arithmetic case value+delta out of range. The first
+actual write produces mid/ym/mm. Its length/set-self lookup and unchanged locals
+derive the second operation's actual old value, bound and Source/word relations.
+Source execItems(n+6), intrinsic Prog and complete word append then reject at
+that reached operation. Source returns the actual prefix globals; no target
+suffix machine, rollback or Source panic-byte/word-revert equivalence is asserted.
+
+The controls execute a populated runtime-indexed zero-to-max family. Both declared
+pipelines retain complete initial/prefix typed contents and two-object Source
+tables, all root word contents, explicit16word frame vectors, saved stack42,
+free pointer96, root/alias identities, neighbors8/9, world/local frames and an
+inhabited allocator. A typed inequality proves the first root really changed.
+INITIAL0-plus1 succeeds with result1 while reachedmax-plus1 panics/reverts; the
+same operation's epochs are distinguished, not assumed. Reversing the actual
+program succeeds0-to1-to-max, with real second-stage prerequisites derived and
+complete initial/intermediate/final observations; equal final cell values do not
+make the two program outcomes equal. A lower Source horizon5 executes the real
+material prefix then times out; at horizon6 the arithmetic failure is reached.
+Empty/exact-end inputs instead reject the FIRST statement with index panic and
+no executed arithmetic suffix. C60/C61 and all earlier fixtures remain unchanged.
+
+Generic laws quantify arbitrary intrinsically valid runtime lengths/indices.
+The concrete fixture's17+length<=80 only separates its fixed word regions and is
+not a public payload/depth admission cap. Pure local operands and the same typed
+uint destination are the supported case; no arbitrary effectful RHS ordering,
+unchecked overflow, full type family, recursive Source graph or physical bytes
+are inferred. No representation/compiler/evaluator or reserved producer is added.
+All four new laws and five controls carry exact standard-only axiom guards.
+The timeout theorem's originally guessed empty axiom set failed; its actual
+[propext, Classical.choice, Quot.sound] set is now pinned, not an unsafe allowance.
+
+Focused controls08 passes168jobs, aggregate RSS1022180KiB and newOOMdelta0 under
+unchanged serial12GiB/no-swap containment. Every distinct earlier failed proof/
+normalization/guard attempt remains retained. Three real C60OOM kills and the
+cumulative12GiB peak remain failure history, separate from current passing runs.
+The new lane-specific script tests only pin/evidence admission: actual complete
+execution observations are kernel proofs, not text-test simulations. It exercises
+positive exact coverage and missing/unsafe/renamed guard corruption in memory,
+without editing reserved global pin inventories or source fixtures.
+
+Original queues remain partial/blocked: physical byte representation, all-profile
+constructors/target allocation failures, general references/paths/graphs, other
+arithmetic/effectful operands, ABI/storage/fresh deep-copy/liveness, reserved
+memory-to-storage and final Source/V10/target composition remain unfinished.
+No independent-work exhaustion, external compiler/EVM validation or goal status
+recovery/completion is claimed. Existing BLOCKED goal identity/status is untouched;
+get/update goal RPC and per-file Lean MCP remain unavailable in worker tools.
+
+
+C62 final refined-tree wrapper exit0: default1111/TestSuite262/final SolKey377parsed,
+131read-bearing allcovered. Fresh Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs pass.
+Strict/trust/layers/orphans/lane/completefixtures/script syntax/diff pass; combined
+13scriptcorruptiontests pass, including8new targeted guard-admission cases.
+The initial newscript mutation regex failed to remove guards (6pass/2fail); that
+actual exit1/rawlog is retained. Exact literal-line mutation repaired the test
+without changing any Lean statement/vector, baseline or unsafe-axiom allowance.
+Scoped1001exactstandard pins across130owned modules validate, while raw global
+inventory remains **exit1**,1360unregistered=359public+1001owned/0unsafeerrors.
+Raw strict docs stays **exit1**,83complete public-byte-identical findings; separate
+publiczero-new passes, frozenno-new fails with11incoming. No global registry/debt
+was edited. Warm strict timed0Suite modules; independently current262Suite/
+fixture/toolchain bytes and actual C62versions match retained C31cold26/max160s
+under300s, not new timing coverage. Focused controls08 aggregate1022180KiB/full
+1570840KiB; full diskgrowth270336bytes/newOOMdelta0. All C62execs newOOMdelta0;
+C60cumulative12GiB/max10719/oom3/kill3 remain failed history. Both independent
+finder/skeptic SOURCE/control/doc/script reviews PASS with no confirmed remaining
+finding. All3506 C61sealed entries reverify unchanged. Committed-artifact reviews
+follow the compact additive export. Existing goal stays BLOCKED unchanged.
+
+Reassessment: the requested same-cell latechecked-add failure application is now
+proved, but not all numeric/default/path/copy cases. A further original G33
+investigation is actual numeric default declaration/context extension: the current
+SourceDeclaration adapter source_bool_declaration_word handles Bool arrays,
+while source_decl_statement_run is polymorphic and published declareNewCode plus
+SourceUintMemoryAt/source_uint_alloc supply relevant interfaces. No owned
+source_uint_declaration adapter was found in the current source scan; a numeric
+application still needs independently derived zeroVal/MemOK/fresh-map/context
+alignment/allocator facts rather than assuming the Bool theorem applies. This
+is concrete future work, not implemented or an exhaustion assertion. Full original
+physical-byte/all-profile allocation-failure/reference-graph/ABI/storage/fresh
+copy/reserved memory-to-storage/final Source-V10-target obligations remain open.

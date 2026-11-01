@@ -990,3 +990,5 @@ import Solidity.Backend.MemoryOps.SourceUintSequence
 import Solidity.Backend.MemoryOps.SourceUintMutationControls
 import Solidity.Backend.MemoryOps.SourceUintCompound
 import Solidity.Backend.MemoryOps.SourceUintCompoundControls
+import Solidity.Backend.MemoryOps.SourceUintLateFailure
+import Solidity.Backend.MemoryOps.SourceUintLateFailureControls

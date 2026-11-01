@@ -1356,3 +1356,6 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceUintCompound.lean` | Independent exact uint addition/checked-overflow agreement, actual resolved Source compound update/panic, intrinsic opAssign and complete published read/binary/write word composition with reached correspondence/MemOK/allocator frames. Pure local operands only. |
 | `Solidity/Backend/MemoryOps/SourceUintCompoundControls.lean` | Actual assignment then reached compound update0-to3-to6 in both pipelines, complete three-state contents/tables/16wordframes/alias/neighbor/world/allocator observations, frozen-initial negative tied to real Source program, and max-plus1 actual Source panic versus word revert. |
+
+| `Solidity/Backend/MemoryOps/SourceUintLateFailure.lean` | All-outcome published numeric word composition; actual Source checked-overflow and late arithmetic rejection after a real successful numeric write, with reached heap/Source/word frames, plus exact lower-horizon observation. |
+| `Solidity/Backend/MemoryOps/SourceUintLateFailureControls.lean` | Runtime-indexed material0-to-max prefix, actual max-plus1 rejection, frozen-initial and reversed-order successes, complete Source/intrinsic/word/alias/neighbor/16frame/allocator observations, reached timeout and first-stage empty/endpoint rejection in both pipelines. |
