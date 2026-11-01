@@ -1322,3 +1322,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/WordArrayControls.lean` | Actual compiled alias/private-escape applications after populated caller setup; whole word300, old object/marker/store/sentinel, pointer/header/refusal/order diagnostics and literal packet endpoints. |
 
 | `Backend/AbiWorld/CallerPacket.lean` | Exact committed V12 selected-call caller aliases to current represented uint-array codec observations; private combined-tree preparation, not runtime byte encoding. |
+
+| `Backend/AbiWorld/MixedPacket.lean` | Actual represented uint scalar plus current captured dynamic array to heterogeneous codec head64/full ordered bytes; selected frame/resource transport and explicitly separate post-execution literal packets. |

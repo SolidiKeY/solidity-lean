@@ -1203,3 +1203,77 @@ only: attach these named G41/BackfillB local facts; close no parent feature ID.
 NEW evidence: `/workspace/scratch/v13-caller-tail-8229a81e-evidence`.
 NEW exact-head artifacts: `/workspace/scratch/v13-caller-tail-8229a81e-artifacts`.
 Original sealed exports/manifests are preserved and referenced by the new handoff.
+
+
+## Mixed scalar and current-array packet increment after88111a7b
+
+This original G41/BackfillA/B checkpoint adds
+[`Solidity/Backend/AbiWorld/MixedPacket.lean`](../../Solidity/Backend/AbiWorld/MixedPacket.lean).
+Its intrinsically typed tuple is `[dynamic uint256 array,uint256 scalar]`;
+`snocWord` uses generalized Vals.casesOn, not an untyped representation or a
+second codec. `scalar_complete` derives the actual numeric local from reached
+StateRepr.core.vals. `array_encoding`, `head_size`, `encoded_values` and
+`encoded_length` use the published codec: head64, scalar, length, every ordered
+full uint word, exact96+32*n bytes. There is no ByteRange restriction.
+
+`captured` proves the captured primitive is unchanged while the OLD alias denotes
+the CURRENT reached array. `selected` composes actual CallerPacket.selected with
+typed capture, preserving actual target run, stack, StateRepr, BaseExtends,
+GrowsAllocator, miss/hit, Disjoint, tail withinM/write exclusion, actual source
+success, frame and reached capacity premises. Reached arrays provide length<W;
+raw typed-list codec equations have no admission assumption. Source ABI64-bit
+allocation/fuel/reference/profile admission and byte Fits are separate obligations,
+not consequences of a word-cell heap bound. No source admission theorem is claimed.
+`execute_observed` composes existing literal result emission AFTER observation,
+with a SEPARATE byte-slice machine, actual Fits and two-cell stack bound.
+
+New controls live outside core in
+[`tests/v13-abi-world/MixedCodecControls.lean`](../../tests/v13-abi-world/MixedCodecControls.lean),
+[`tests/v13-abi-world/MixedCallerValues.lean`](../../tests/v13-abi-world/MixedCallerValues.lean), and
+[`tests/v13-abi-world/MixedPacketControls.lean`](../../tests/v13-abi-world/MixedPacketControls.lean).
+The inhabited endpoint reuses the checked selected target and applies new captured
+transport to that SAME reached representation. This differs from literally
+instantiating the generic selected theorem on the large fixture; those attempted
+elaboration routes failed and remain failed evidence. No desired execution or
+capture is assumed, and the generic selected theorem is independently proved.
+
+The real nonempty compiled prefix/call/tail yields complete160bytes with words
+64,42,2,12,11 AND the previous128byte standalone array on one machine. Marker42
+is retained, storage changes9→11, current array is12,11 rather than stale7,11,
+old-address identity and stack77 survive. Resource controls retain costs7+4=11 and
+word-cell cursors135→139. Other/private pointers are excluded by reached heap
+separation. Pure codec fixtures cover empty96bytes, array element300, and max uint256
+in both scalar and element positions, with complete ordered vectors. Negatives retain
+positive baselines for offset32, swapped typed fields, stale/private arrays and
+marker11; marker42 is explicitly distinguished from storage11 in the actual
+compiled result. A separately checked literal160byte result discharges Fits/stack;
+it is not unknown-runtime-memory encoder code or a word/byte simulation.
+
+Strict per-file MCP checks for all4new files, all22headline scoped axiom guards,
+focused/import closure and source fixture checks pass under original bounds.
+The raw45second partial diagnostic,200000-heartbeat normalization failure,
+two11GiB preemptive memory-guard stops and the syntax/focused failure are retained.
+Proof decomposition and reuse of actual checked frame facts repaired the checking
+path; no proof/time/fuel/node/stack/resource budget changed and no guard was lowered.
+No unchanged failed Suite180/composite5400 gate was rerun.
+
+Independent read-only finder/skeptic source reviews pass: actual premises,
+non-vacuity, source ownership, scalar/current-array distinction, concrete endpoint
+versus generic proof route and separate literal machine were checked without Lean.
+All prior25owned modules and prior caller controls remain byte-identical to88111a7b;
+the nine exact read-only private V12 sources at7881cb3a are unchanged. Assigned
+checkout alone still lacks those imports; all passing Lean gates are private
+combined-tree checks. Persistent goal remains blocked and untouched.
+
+Every original queue remains open at its existing status: G40partial, G41partial;
+G42.01/.02/.03/.05blocked; G42.04/.06partial; BackfillsA/Bpartial. Full source/native
+entry/decoder/dispatch agreement, emitted runtime aggregate codec, CALL/RETURNDATA,
+arbitrary callees/callback/library/world and physical resource composition remain
+unresolved. Global coverage/TrustAudit/G03/profile/verdict/pins are unchanged.
+Proposed coordinator ledger attachment: these named G41/BackfillA/B local facts,
+not parent closure. No new human semantic question.
+
+NEW evidence: `/workspace/scratch/v13-mixed-caller-88111a7b-evidence`.
+NEW exact-head artifacts: `/workspace/scratch/v13-mixed-caller-88111a7b-artifacts`.
+Raw docs1/frozen no-new failure remain separate from complete publication/prior
+finding equality; reserved doc repairs and prior mandatory failures stay open.
