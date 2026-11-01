@@ -3162,7 +3162,7 @@ class D:
         'canonicalRethrow': ['Backend/EVM refuse revertData; raw bytes unobservable (R07/R37)', 'Machine memory is word-addressed, so the byte-level revert(ptr,len) is not modelled (R31)'],
         'catchClauses': ['Non-self catch data comes from the oracle table; malformed-payload dispatch only for Error/Panic/raw kinds', 'Typed custom-error catches unsupported; compiler refuses catchData (R07)'],
         'checkedArithmetic': ['Overflow is plain .revert, not Panic 0x11 (solc-alignment)', 'Signed bitwise/arith >> refused by compiler (R12)'],
-        'comments': ['Multi-source NatSpec @custom:key and loopSpec refused (compilationUnitSpecifications)', 'No end-to-end proof that comments carry no meaning or that spans are kept'],
+        'comments': ['Multi-source specifications with global/nominal namespaces, non-contract owners or loopSpec refused (compilationUnitSpecifications)', 'No end-to-end proof that comments carry no meaning or that spans are kept'],
         'comparisons': ['Comparisons of address/bytesN/enum/function values rest on uint lowering (R13), with no nominal legality theorem.'],
         'compoundAssignment': ['Intrinsic opAssign covers only + - * / % (BinOp.hasCompoundAssign). &=, |=, <<=, >>= have no intrinsic form.', 'pushOpAssign (arr.push() += 1) is refused (R18). Compound storage updates inside memory programs are refused (R29).'],
         'conditional': ['Reference-valued ternary arms are not compiled (Val.ternary is primitive-only, memory reference paths R28).', 'Side-effecting arms rely on hoisting to if/else. There is no backend theorem for that lowering.'],

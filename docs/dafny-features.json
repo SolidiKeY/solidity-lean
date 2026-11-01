@@ -874,10 +874,19 @@
         "vscode/src/model.cjs",
         "vscode/test/host.cjs",
         "vscode/src/counterexample.cjs",
-        "vscode/test/counterexample.test.cjs"
+        "vscode/test/counterexample.test.cjs",
+        "vscode/src/lsp-server.cjs",
+        "vscode/src/language-services.cjs",
+        "vscode/src/worker-pool.cjs",
+        "vscode/test/lsp-real.test.cjs",
+        "vscode/src/project.cjs",
+        "vscode/src/solidity-text.cjs",
+        "vscode/test/project.test.cjs",
+        "Solidity/Frontend/SourceUnits.lean",
+        "scripts/solc-unit.mjs"
       ],
-      "assessment": "The Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Opt-in entry audits show vacuous proofs, and exact-goal refutations display certified model prestates. Completion/navigation and positioned execution traces remain open.",
-      "next": "Add completion/navigation and further source-associated language services using explicit compiler evidence."
+      "assessment": "The Solidity Lean extension provides a persistent LSP, original multi-file compilation units and scoped contract specifications, unsaved dependency snapshots, receiver completion, foreign navigation, workspace symbols, compiler-validated formatting, quick fixes and cross-file rename. Bounded workers schedule checked function selections. Diagnostics, Testing, entry audits and certified model prestates remain supported. Assertion splitting, specification-text refactoring, broader multi-source namespaces and positioned traces remain open.",
+      "next": "Extend complex receiver inference, specification-text refactoring, multi-source global/nominal/loop namespaces, assertion splitting and positioned traces."
     },
     {
       "id": "plugins-backends",

@@ -19,10 +19,15 @@ EvmYul modules are unchanged.
 
 The closure includes the upstream EVM state, stack, PC update, opcode
 dispatcher, gas/halting driver and `execBinOp` transformer. It also contains upstream FFI declarations and
-an IO debugging helper. Neither is used to establish an agreement theorem:
-the pinned axiom audits in `SolidityBridge/Checks.lean` show only
-`propext`, `Classical.choice` and `Quot.sound`. No hashing C library or
-upstream conformance executable is linked or run by the bridge gate.
+an IO debugging helper. The original arithmetic agreement does not require FFI correctness; its pinned
+axiom audits in `SolidityBridge/Checks.lean` show only `propext`,
+`Classical.choice` and `Quot.sound`. The optional bounded memory refinement
+explicitly assumes a named zero-allocation correctness contract, with no
+claimed inhabitant. Its separate `scripts/check-external-memory.sh` observation
+fixture links only the verbatim pinned `memset_zero` function and a generated
+ABI wrapper. This neither replaces these Lean declarations nor proves that
+contract. No hashing C library or upstream conformance executable is linked
+or run by the bridge gate.
 
 `SolidityBridge/ExternalEvm.lean` relates its operations to the repository's
 actual numeric stack instructions, proves a CSLib simulation, and connects

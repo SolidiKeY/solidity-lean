@@ -1,4 +1,6 @@
 import Solidity.TestSuite.ScopedProblems
+import Solidity.TestSuite.Derived17MemoryLoop
+import Solidity.TestSuite.MemoryLoopReplay.Refusals
 
 /-! Unannotated upstream loops use automatic `whileUnwind` and the existing
 bounded proof search, including symbolic branch refutation from storage facts. -/
@@ -44,11 +46,6 @@ theorem Solkey.TestSuite.doWhileRunsBodyFirst.proved :
 theorem Solkey.TestSuite.forWritesStorageArray.proved :
     ⊢ Solkey.TestSuite.forWritesStorageArray.problem := by
   sol_prove (steps := 512)
-
-/-- A return exits both nested loops and leaves their caller's result intact. -/
-theorem Solkey.TestSuite.returnLeavesNestedLoops.proved :
-    ⊢ Solkey.TestSuite.returnLeavesNestedLoops.problem := by
-  sol_prove (steps := 1024)
 
 /-- The framed counting invariant proves the final array-length equality. -/
 theorem Solkey.TestSuite.invariantForCountsArrayLength.proved :
