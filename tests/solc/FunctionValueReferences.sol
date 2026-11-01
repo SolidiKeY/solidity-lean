@@ -35,6 +35,10 @@ contract FunctionValueReferences {
     function divmod(uint[] memory xs, uint k) internal pure returns (uint, uint) {
         return (xs[0] / k, xs[0] % k);
     }
+    function divmod2(uint[] memory xs, uint k) internal pure returns (uint, uint) {
+        return (xs[0] / k + 100, xs[0] % k);
+    }
+    function(uint[] memory, uint) internal pure returns (uint, uint) tupleOp;
     function sopA(uint x) internal pure returns (uint) { return x + 1; }
     function sopB(uint x) internal pure returns (uint) { return x + 2; }
     function swapSop() internal returns (uint) { sop = sopB; return 10; }
@@ -166,6 +170,30 @@ contract FunctionValueReferences {
         function(uint[] memory, uint) internal pure returns (uint, uint) h = divmod;
         (uint q, uint r) = h(xs, 5);
         return (q, r);
+    }
+
+    function tupleAssigned(bool b) public returns (uint, uint) {
+        uint[] memory xs = new uint[](1);
+        xs[0] = 17;
+        tupleOp = b ? divmod : divmod2;
+        uint q;
+        uint r;
+        (q, r) = tupleOp(xs, 5);
+        return (q, r);
+    }
+
+    function tupleForward() public pure returns (uint, uint) {
+        uint[] memory xs = new uint[](1);
+        xs[0] = 23;
+        function(uint[] memory, uint) internal pure returns (uint, uint) h = divmod2;
+        return h(xs, 5);
+    }
+
+    function tupleUnassigned() public pure returns (uint) {
+        uint[] memory xs = new uint[](1);
+        function(uint[] memory, uint) internal pure returns (uint, uint) h;
+        (uint q, uint r) = h(xs, 5);
+        return q + r;
     }
 
     function falseObservation() public returns (uint) {

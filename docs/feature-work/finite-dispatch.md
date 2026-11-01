@@ -173,7 +173,8 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   `scripts/dispatch-signatures.test.mjs`).
 - **Capture and aliasing.** The arguments of a call through a function value
   are not hoisted by the caller (`hoistCallArgs`, the expression path in
-  `Arms.lean`): `fnDispatch` and `fnMemoryDispatch` capture each argument
+  `Arms.lean`): `fnDispatch`, `fnMemoryDispatch` and `fnTupleDispatch`
+  capture each argument
   once, left to right (`dispatchCaptures`), a later call argument running
   after an earlier operand's capture. A memory reference is captured as a
   memory local (`fnRefElem?`, `fnRefStruct?`): a memory operand is the
@@ -189,11 +190,17 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
 - **Memory returns.** `fnMemoryDispatch` binds one shared memory destination
   of the return's type in every branch, after the argument captures; a
   zero-argument dispatch keeps its original capture of the tag first.
-- **Several value returns.** `(a, b) = h(x)` and `(uint a, uint b) = h(x)`
-  dispatch to the direct tuple assignment `(a, b) = g(y)` in each branch
-  (`fnTupleDispatch`, `tupleReturn`). Several returns with a memory one stay
-  refused: a direct tuple call binds value returns only (`elabCallRet`'s
-  targets), so there is no direct call to dispatch to.
+- **Several value returns.** `(a, b) = h(x)`, `(uint a, uint b) = h(x)` and
+  `return h(x);` in a function of several returns (lowered to a tuple
+  assignment, `lowerReturn`) dispatch to the direct tuple assignment
+  `(a, b) = g(y)` in each branch (`fnTupleDispatch`; vectors `tupleReturn`,
+  `tupleAssigned` over two candidates, `tupleForward`, `tupleUnassigned`).
+  The callee must be a name: a tuple assignment from `s.f(x)`, `fs[i](x)`
+  or `(h)(x)` keeps the refusal "a call through a function value in a tuple
+  assignment". Several returns with a memory one stay refused: a direct
+  tuple call binds value returns only (`elabCallRet`'s targets), so there is
+  no direct call to dispatch to. The viaIR callee order on this path is
+  untested.
 - **Callee order.** solc's legacy code reads the callee value after the
   arguments, its IR pipeline before them (EVM observations `calleeOrder`,
   `calleeOrderScalar`). Under `evalOrder .viaIR` a named callee's tag is
@@ -252,7 +259,7 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   elements stay unparsed.
 - `scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]`:
   the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
-  off/on (84 executions per EVM version; cancun and osaka both pass), the
+  off/on (100 executions per EVM version; cancun and osaka both pass), the
   source of every expected observation above.
 
 ## Dispatch correctness
@@ -281,8 +288,10 @@ What is not proved: (1) that the elaborated guards
 `elabCall` on the same callee and names, by construction of the elaborator,
 which is `partial`. `memAlias_run`/`memDirect_run` check the same asserts
 for the dispatched and the direct call on one input; no theorem relates the
-two runs. `fnMemoryDispatch` writes raw `if … else if …` and is not
-`DispatchArm.chain`; the lemmas do not cover it.
+two runs. `fnMemoryDispatch` and `fnTupleDispatch` write raw
+`if … else if …` and are not `DispatchArm.chain`; the lemmas do not cover
+them. The three dispatchers repeat the candidate loop and failure; a shared
+helper would keep them from drifting.
 
 ### For lane-soundness (`roadmap-l3-20261030/lane-soundness`)
 
@@ -379,7 +388,7 @@ killed once under parallel load, builds on the retry in 166s;
 the Lean server ("trust: 9 dispatch theorems use only the standard
 axioms"); `node --test` of `finite-dispatch` (30/30; the FunctionTypes.sol
 suite timed out once under load and passes alone), `dispatch-signatures`
-(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (84
+(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (100
 executions, cancun and osaka); `check-layers`, `check-orphans`,
 `check-trust`, `check-automatic --strict` (0 pending), `check-doc-paths`
 (48, as on the base) and `check-g07` (the base's two failures; three new
@@ -392,4 +401,10 @@ modules were elaborated by the Lean server or under a parallel build, so no
 like-for-like figure was taken; the change adds `DispatchChain` (small) to
 `Stmt`'s imports and a `fnTyOf?` lookup per call to an undeclared name in
 `hoistCallArgs`. `Examples/Tactics/FunctionTypes.lean` builds in 85s.
+- Tuple-dispatch review (read-only): no bug found; non-name callees in
+  tuple assignments, the uncovered raw chain, untested forms
+  (`tupleAssign`, several candidates, the unassigned value, `return h(x)`)
+  and the duplicated candidate loop were documented, and the forms gained
+  EVM-observed replay vectors. The refusal at `Arms.lean`'s named-callee
+  `targets` check is now unreachable and was left as a guard.
 
