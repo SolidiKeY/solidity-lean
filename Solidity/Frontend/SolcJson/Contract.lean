@@ -263,12 +263,22 @@ namespace FiniteDispatch
 
 /-- Dispatch components retain the source ABI kind. Word and byte widths
 are bounded in the representation; a word's width is eight times `width + 1`.
-References and nominal types deliberately have no admitted case yet. -/
+Internal memory/storage arrays of a 256-bit word, `bool` or `address`, and
+structs by source name at a location, are the admitted references; calldata,
+nested, narrow, byte or nominal-element arrays have no case. -/
 inductive Ty where
   | bool
   | word (signed : Bool) (width : Fin 32)
   | address
   | memoryBytes
+  /-- An internal memory-array parameter of a scalar element (`uint[] memory`):
+  passed by reference, its location kept in the native key. -/
+  | memoryArray (elem : Ty)
+  /-- An internal storage-array parameter of a scalar element (`uint[] storage`). -/
+  | storageArray (elem : Ty)
+  /-- An internal struct parameter at a location, by its source name
+  (`struct C.S`): nominal, never its members' shape. -/
+  | nominal (name : String) (storage : Bool)
   | bytes (width : Fin 32)
   | function (external : Bool) (parameters returns : List Ty)
   deriving BEq, Repr
@@ -282,6 +292,9 @@ partial def Ty.native : Ty → String
     if width.val == 31 then base else s!"{base}{8 * (width.val + 1)}"
   | .address => "uint"
   | .memoryBytes => "bytesmemory"
+  | .memoryArray elem => elem.native ++ "[]memory"
+  | .storageArray elem => elem.native ++ "[]storage"
+  | .nominal name storage => s!"struct#{name}{if storage then "storage" else "memory"}"
   | .bytes width => s!"bytes{width.val + 1}"
   | .function external parameters returns =>
     fnTyStr (parameters.map Ty.native) (returns.map Ty.native) external
@@ -307,8 +320,32 @@ def parseType : Nat → String → Option Ty
     -- solc's type strings spell these reserved qualifiers as separate words.
     -- Nominal names are never recognized by the scalar cases below.
     let source := (((source.replace " pure" "").replace " view" "").replace " payable" "").replace " internal" ""
+    -- solc spells a struct `struct C.P`: keep that keyword's separator, so
+    -- a type named `structP` (a user-defined value type) is never a struct
+    let source := source.replace "struct " "struct#"
     let source := String.mk (source.toList.filter (!Char.isWhitespace ·))
     if source == "bytesmemory" then return .memoryBytes
+    if source.startsWith "struct#" then
+      let some (suffix, storage) := [("memory", false), ("storagepointer", true),
+          ("storageref", true), ("storage", true)].find? (source.endsWith ·.1) | none
+      let name := (source.drop 7).dropRight suffix.length
+      guard (!name.isEmpty && name.all fun c => c.isAlphanum || c == '_' || c == '$' || c == '.')
+      return .nominal name storage
+    -- a memory or storage array of a word, bool or address; never a byte,
+    -- function, nominal or nested reference element. solc spells a storage
+    -- parameter `storage pointer` (`storage ref` for a state variable).
+    if let some (suffix, storage) := [("[]memory", false), ("[]storagepointer", true),
+        ("[]storageref", true), ("[]storage", true)].find? (source.endsWith ·.1) then
+      let elem ← parseType fuel (source.dropRight suffix.length)
+      match elem with
+      | .bool | .address =>
+        return if storage then .storageArray elem else .memoryArray elem
+      -- a 256-bit word only: the elaborator's capture carries no narrow width
+      | .word signed width =>
+        guard (width.val == 31)
+        let elem := Ty.word signed width
+        return if storage then .storageArray elem else .memoryArray elem
+      | _ => none
     if source == "bool" then return .bool
     if source == "address" then return .address
     if source == "uint" || source == "uint256" then return .word false ⟨31, by decide⟩
@@ -361,9 +398,28 @@ private def signature (fuel : Nat) (declaration : Json)
   guard (ps.length + rs.length ≤ fuel)
   return ⟨ps, rs⟩
 
+/-- A declared parameter's source component. Normalized declaration type
+strings omit the location, unlike a function-valued callee's type string:
+read the retained declaration location rather than conflating memory bytes
+with a primitive word, or a reference with another location. -/
+private def sourceComponent (fuel : Nat) (p : Json) : Option Ty :=
+  let source := J.tyStr p
+  let memory := J.str? p "storageLocation" == some "memory"
+  let source := if source == "bytes" && memory then source ++ " memory" else source
+  let source := if source.endsWith "[]" || (source.startsWith "struct " &&
+      !(source.endsWith "memory" || source.endsWith "pointer" || source.endsWith "ref" ||
+        source.endsWith "storage")) then
+      match J.str? p "storageLocation" with
+      | some "memory" => source ++ " memory"
+      | some "storage" => source ++ " storage"
+      | _ => source
+    else source
+  parseType fuel source
+
 /-- Build native signatures from the same type spelling the body reader
-emits, preserving exact source signatures separately. Reference parameters
-make `native = none`, as in `FunDecl.sigTy?`. Nominal scalar erasures can have
+emits, preserving exact source signatures separately. A reference parameter
+outside the admitted arrays and structs makes `native = none`, as in
+`FunDecl.sigTy?`; a struct's native key is its source name. Nominal scalar erasures can have
 a native key but no source type, so a matching call is refused. -/
 def candidate (structs : Structs) (id : Int) (modelName : String) (declaration : Json) : Candidate :=
   let fuel := declaration.compress.length + 1
@@ -376,15 +432,12 @@ def candidate (structs : Structs) (id : Int) (modelName : String) (declaration :
         ty.startsWith "struct " || ty.startsWith "mapping(" ||
           ty.startsWith "bytes " || ty == "bytes" || ty == "string" || ty.startsWith "string " ||
           (!(ty.startsWith "function ") && ty.contains '['),
-    source := signature fuel declaration (fun p =>
-      let source := J.tyStr p
-      -- Normalized declaration type strings omit the location, unlike a
-      -- function-valued callee's type string. Read the retained declaration
-      -- location rather than conflating memory bytes with a primitive word.
-      let source := if source == "bytes" && J.str? p "storageLocation" == some "memory"
-        then source ++ " memory" else source
-      parseType fuel source),
+    source := signature fuel declaration (sourceComponent fuel),
     native := signature fuel declaration (fun p => do
+      -- A struct is nominal: its native key is its source name, as the
+      -- callee's type string spells it (`Ty.nominal`), never the printed
+      -- table name, so distinct structs of one shape stay distinct.
+      if (J.tyStr p).startsWith "struct " then sourceComponent fuel p else
       let typeNode ← J.opt p "typeName"
       let spelling ← (tyText structs typeNode).toOption
       let loc := (J.str? p "storageLocation").getD ""
@@ -449,9 +502,22 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
     -- Keep the admitted whole signature equal to the implemented typed
     -- dispatcher: reference arguments and external memory returns need their
     -- own ABI/provenance path; they are never erased to scalar components.
-    if parameters.contains .memoryBytes ||
-        (returns.contains .memoryBytes &&
-          (external || !parameters.isEmpty || returns != [.memoryBytes])) then
+    let referenceArray : Ty → Bool := fun
+      | .memoryArray _ | .storageArray _ => true
+      | _ => false
+    let memoryReturn : Ty → Bool := fun
+      | .memoryBytes | .memoryArray _ => true
+      | _ => false
+    let storageArray : Ty → Bool := fun
+      | .storageArray _ | .nominal .. => true
+      | _ => false
+    let nominal : Ty → Bool := fun
+      | .nominal .. => true
+      | _ => false
+    if parameters.contains .memoryBytes || returns.any storageArray ||
+        (external && (parameters.any referenceArray || parameters.any nominal ||
+          returns.any memoryReturn)) ||
+        (returns.any memoryReturn && returns.length != 1) then
       return { result with unresolved := result.unresolved ++ [call] }
     if external && 1 < returns.length then
       return { result with unresolved := result.unresolved ++ [call] }
