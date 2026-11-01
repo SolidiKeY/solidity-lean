@@ -1,6 +1,6 @@
 # VA2 AU03/AU04 handoff
 
-Status: runtime recovered; AU03 warning, typed joined walks, conditional notation/chains and bounded multi-base closer checkpoint checked. Boolean mapping-key kernel closure, a still-failing forced signed sequential fixture, AU04 sharing/loop repair and full assignment gates remain incomplete.
+Status: runtime recovered; AU03 warning, typed joined walks, notation/chains, bounded multi-base closer and original Boolean mapping-key kernel closure checked. The forced signed sequential fixture still fails; isolated post-anon measurement, AU04 sharing/loop repair and full assignment gates remain incomplete.
 
 Repository: `/workspace/va2-sharing`. Branch:
 `codex/solidity-automation-20261031/va2-sharing`. Exact base:
@@ -713,3 +713,41 @@ Independent final source reviews: finder confirmed and guided the unsupported pr
 - The same serial job's separate exact signed sequential retest is FAIL, not a timeout: `sol_close_join_steps: the leaf did not close`. The probe wrapper exit 0 does not turn this structured `success=false` into PASS. This known unfinished backfill remains in the queue and is not replaced by the passing signed-offset ordinary-closer controls.
 
 The committed handoff records this checkpoint's parent `2a437a434eeb084a4e4e68d06a11008b093f3d35`; its own resolved full committed head is bound in the exported `revision.json` and handoff. Whole-assignment status remains partial.
+
+
+## AU03 Boolean mapping-key kernel checkpoint
+
+The exact original `Solkey.TestSuite.boolKeyMappingSymbolicKey.problem` now closes through `sol_prove` alone. Its assigned `Derived5.lean` pin removes only the manual `sol_leaf; sol_close` replay. The theorem has been checked independently in a self-contained MCP snippet and in the actual Derived5 file; the snippet's axiom set is the standard propext/Classical.choice/Quot.sound.
+
+The missing operation was not negative-target splitting. The original final leaf has a positive Boolean equality, under an earlier symbolic mapping result being unequal to one. Existing `Facts.proveEqN` already splits the Boolean atom and substitutes through `addEqn`/`addNeq`/`rebuild`. One branch thereby retains contradictory normalized disequalities. New `Facts.clashRaw_false` derives False only from the unchanged `Facts.Ok.nes` certificate (both sides return unequal values) and typed structural term equality. `directOrClash` tries the old direct equality path first, then scans those retained facts without new normalization. Its soundness feeds the existing proveEqN recursion. `closeFuel=3`, all returns guards, observation/validity/hash premises, syntax constructors and the one-rule strategy remain unchanged. Existing `LFml.verdict_eq_M`/`close_eq_closeM` still check; kernel and executable paths use the same helper. This reuses existing certified atom splitting/substitution, not a new calculus row.
+
+Finished controls are consolidated in the existing registered JoinControls file, without bringing TestSuite imports into the default example target. They include an explicit intrinsic witness for every consistent-list size, a generic semantic proof of the false target for any such size, raw clash plus impossibility of a sound certificate, halting operands not stored as returning disequalities, a partial negative-equality premise that cannot prove false (with an actual semantic countermodel), same numeric ID at bool/uint, shadow removal plus a decisive nested source-binder positive/refuted pair, an ordinary direct equality, the symbolic Boolean-key source assertion and its changed-assertion kernel refutation. Actual per-file diagnostics and headline axiom checks pass. Trial syntax/API errors and recovered empty goals are retained as failures, not proof evidence; the finished source checks decide success.
+
+### Cost boundaries, including failures
+
+Identical benchmark code runs on exact frozen base 8bd8742ad987d566f7ba7624372cec1c020be07c and the candidate, in the same VM/runner/cap. Each logs whether the new helper is present (false on base, true on candidate), guarding against stale cache reuse. Benchmark source hashes and extracted outcomes are retained in `work/bool-facts-performance-results.json` and the raw logs.
+
+Reflective kernel equality checks PASS for direct targets at 0/8/32/128 consistent facts; raw heartbeats base/candidate are 25,699/26,131; 25,582/25,997; 25,563/26,002; 25,565/25,992. This measured constant extra cost is consistent with retaining the fast path. False targets PASS at 0 and 8 facts, with 404,747/436,286 and 504,764/627,977 raw heartbeats. The latter is about 24.4% extra raw heartbeats; no zero-regression claim is made.
+
+Reflective false targets at 32 and 128 facts FAIL at the unchanged default recursion limit in BOTH frozen base and candidate. Both full reflective benchmark runs therefore have structured success=false, despite the orchestration wrapper returning zero. No maxRecDepth/heartbeat increase, expected-verdict edit or deletion hides those failures. The generic semantic control proves the false outcome without forcing those large reflective normal forms; it is not a claim that reflection at those sizes passed.
+
+Separate compiled-execution samples PASS all direct/false 0/8/32/128 rows in both checkouts. At 128 facts, the false-target single sample is 1.929115ms base / 2.461432ms candidate. These are external execution measurements; first rows include warm-up effects, and suite RSS is not per-row RSS. They are not kernel-normalization timings or a new leaf/call-family size law. Exact commands, cgroup/RSS footer and raw results are retained. The initial plain Lake-env CLI attempt failed to resolve a private cached artifact and is retained; the existing MCP setup-file mechanism resolved the cache in each worktree without a new runtime or installation.
+
+### Remaining assignment
+
+AU03's original mapping-key gap is repaired. The exact forced signed sequential range fixture still fails and remains assigned backfill. Isolated post-anon measurement and actual repeated-cost repair, AU04 fresh intrinsic call-result sharing and full payload-size/freshness/evaluation/validity laws and measurements, final full bounded run/timed automatic gate/audits/reviews/package remain incomplete. Non-offset doubling-call leaves still have the original measured exponential growth; no call-sharing completion follows from this Boolean repair.
+
+### Checkpoint gates and resources
+
+All Lean commands use the existing task-owned bounded.py Docker wrapper (same VM, pinned image, network disabled, `memory.max = 12884901888`, `memory.swap.max = 0`, thread 1, Lean `-j1`, at most two configured LSP files, no simultaneous build/server). Actual Lean 4.24.0 / Lake 5.0.0-src+797c613 and prior passing KeySort remain in the combined runtime evidence.
+
+- `... bounded.py bool-checkpoint-affected-build build Solidity.TestSuite.Derived5 Solidity.Examples.Tactics.JoinControls Solidity.Examples.Tactics.JoinSequence Solidity.Examples.Tactics.JoinWalk Solidity.Examples.Tactics.JoinIntervals Solidity.Examples.Chains.StorageCoverage Solidity.Examples.ChainNotation Solidity.Examples.Tactics.PolySize Solidity.Examples.Tactics.CallSummary Solidity.Examples.Tools`: PASS, 283 jobs, wrapper 234.23s, sampled aggregate RSS 2,871,756 KiB, cgroup peak 2,032,439,296 bytes. Old metric/printer/chain/control expectations unchanged and passing.
+- Actual per-file MCP: Closer/Leaf PASS after code and final docstrings; Derived5 PASS; JoinControls PASS after all final source-shadowing controls. New law and positive/refuted/partial/shadow headline `lean_verify` results use only standard axioms. Exact raw/extracted output under `work/mcp-bool-*` and `work/bool-production-evidence-results.json`; latest final records are appended below.
+- Reflective/native benchmark commands use the same MCP probe on current and exact-base worktrees; full commands/caps/RSS are in their matching JSON/logs. Reflective full scripts FAIL as described above; native full scripts PASS. `work/bool-facts-performance-results.json` binds identical source-code hashes and actual outcomes. Suite RSS is separate from each timed row.
+- `node scripts/check-automatic.mjs --strict`, `bash scripts/check-trust.sh`, `node scripts/check-layers.mjs`, `node scripts/check-orphans.mjs`, `git diff --check`: PASS; automation 491 automatic + 61 budgeted / 0 manual / 11 refuted / 0 pending, layers 181 core / 0 elaborator, orphans 1042 reachable / 0 orphan / 0 not allowed.
+- `bash scripts/check-doc-paths.sh`: inherited FAIL, 48 findings; exact frozen-base raw comparison PASS, identical SHA256 01fd3beaa0d1694397f6231999418eea67e797d42150bf68d2d8a96bc4ea109a. The checker itself is not called PASS.
+
+Independent finder and skeptic read-only reviews found no correctness defect. Confirmed test/docstring/evidence findings fixed; measured cost retained. Neither reviewer used Lean/server/build/writes. Evidence `work/reviews-bool-kernel.md`. The exported package will bind this checkpoint's full resolved head; parent is `665e66d3a6cc7822acdea7b5e0a554583b315f3e`. Full goal remains incomplete.
+
+- Final `... bounded.py bool-checkpoint-controls-final-build build Solidity.Examples.Tactics.JoinControls Solidity.TestSuite.Derived5`: PASS, 242 jobs, wrapper 14.24s, sampled aggregate RSS 1,538,668 KiB, cgroup peak 430,653,440 bytes. This checks the exact final source-shadowing additions after the broader 283-job gate.
+- Final `... bounded.py mcp-bool-controls-shadow-final .../mcp_probe.py .../requests/bool-controls-shadow-final.json`: per-file diagnostics PASS and both actual source-shadowing `lean_verify` audits PASS, wrapper 34.24s. Final `... bounded.py mcp-bool-checkpoint-all-axioms .../mcp_probe.py .../requests/bool-all-axioms.json`: PASS, all 25 compiled actual theorem audits use only subsets of propext/Classical.choice/Quot.sound, wrapper 14.65s; extracted `work/bool-final-axiom-results.json`.

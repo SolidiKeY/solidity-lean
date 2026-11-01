@@ -130,3 +130,117 @@ run_meta do
   Lean.logInfo "signed and nested conditionals preserve their AST through both formula printers"
 
 end Solidity.Examples.Tactics.JoinControls
+
+
+/-! # Kernel Boolean-atom substitution and contradictory-fact controls
+The original source pin is in TestSuite/Derived5.lean. These fixtures keep
+partial terms, typed atom identities, binder shadowing and consistent facts
+separate from the impossible branch of a joined Boolean mapping key. -/
+namespace Solidity.Examples.Tactics.JoinControls.BoolAtomJoin
+open Decide
+open scoped Solidity.Scoped
+private abbrev C := StandardExample
+private def unequal : EqF C := ⟨.bool, .var 0, .tt⟩
+private def consistent (n : Nat) : Facts C := { nes := List.replicate n unequal }
+
+/-- Every size of the consistent list is inhabited by the false valuation. -/
+theorem consistent_ok (n : Nat) (g : State C []) : (consistent n).Ok g AEnv.dflt := by
+  refine ⟨(fun _ h => (nomatch h)), ?_, (fun _ h => (nomatch h)), (fun _ h => (nomatch h))⟩
+  intro e he
+  rcases List.mem_replicate.1 he with ⟨_, rfl⟩
+  exact ⟨false, true, rfl, rfl, fun h => Bool.noConfusion h⟩
+
+/-- The consistent controls have an explicit intrinsic state witness. -/
+theorem consistent_inhabited (n : Nat) :
+    ∃ g : State C [], (consistent n).Ok g AEnv.dflt :=
+  ⟨State.init C, consistent_ok n (State.init C)⟩
+
+/-- Positive raw signal, paired with the impossibility of a sound certificate. -/
+theorem rawClash : ({ nes := [⟨.bool, .tt, .tt⟩] } : Facts C).clashRaw = true := rfl
+
+/-- Manually equal sides cannot be inhabited as certified unequal values. -/
+theorem rawClashImpossible (g : State C []) (ν : AEnv) :
+    ¬ ({ nes := [⟨.bool, .tt, .tt⟩] } : Facts C).Ok g ν :=
+  fun h => Facts.clashRaw_false h rawClash
+
+private def haltedPremise : LFml C :=
+  .imp (.not (.eq (.err : LTm C (.val .bool)) .err)) (.eq .tt (.app0 (.lit false)))
+
+/-- A true negative equality on halting terms cannot prove a false target. -/
+theorem haltedPremiseNoExplosion : haltedPremise.close = false := rfl
+
+/-- The partial-term combination is actually false in every intrinsic state. -/
+theorem haltedPremiseCountermodel (g : State C []) (ν : AEnv) :
+    ¬ haltedPremise.holds g ν := by
+  intro h
+  have hn : ¬ (LFml.eq (.err : LTm C (.val .bool)) .err).holds g ν := by
+    intro he
+    obtain ⟨v, hv, _⟩ := (LFml.holds_eq_iff g ν _ _).1 he
+    cases hv
+  have hb : (LFml.eq (.tt : LTm C (.val .bool)) (.app0 (.lit false))).holds g ν := h hn
+  obtain ⟨v, hv, hw⟩ := (LFml.holds_eq_iff g ν _ _).1 hb
+  cases hv
+  cases hw
+
+/-- Halting operands do not create certified returning disequalities. -/
+theorem haltedNotStored :
+    (({} : Facts C).addNe1 (.err : LTm C (.val .bool)) .err).nes = [] := rfl
+
+/-- The same numeric atom at another primitive type remains different. -/
+theorem typedAtomIdentity :
+    ((.var 0 : LTm C (.val .bool)).beqR (.var 0 : LTm C (.val .uint))) = false := rfl
+
+/-- A shadowed atom's old disequality is removed, rather than reused. -/
+theorem shadowDropsFact : ((consistent 1).drop 0).nes = [] := rfl
+
+/-- Every consistent list size has a false target; proved semantically rather
+than forcing large reflective normal forms past the existing recursion limit. -/
+theorem consistentTargetAll (n : Nat) :
+    Facts.proveEqN (.var 1 : LTm C (.val .bool)) .tt closeFuel (consistent n) = false := by
+  cases hres : Facts.proveEqN (.var 1 : LTm C (.val .bool)) .tt closeFuel (consistent n) with
+  | false => rfl
+  | true =>
+    have hp : (LFml.eq (.var 1 : LTm C (.val .bool)) .tt).holds (State.init C) AEnv.dflt :=
+      Facts.proveEqN_sound _ _ closeFuel (consistent_ok n (State.init C)) hres
+    obtain ⟨v, hv, hw⟩ := (LFml.holds_eq_iff (State.init C) AEnv.dflt _ _).1 hp
+    cases hv
+    cases hw
+
+/-- A retained consistent disequality cannot close an unrelated false target. -/
+theorem consistentTarget :
+    Facts.proveEqN (.var 1 : LTm C (.val .bool)) .tt closeFuel (consistent 8) = false := rfl
+
+/-- Undefined equality is not turned into a positive equality by the fallback. -/
+theorem haltedTarget :
+    Facts.proveEqN (.err : LTm C (.val .bool)) .tt closeFuel {} = false := rfl
+
+/-- The old returning equality fast path still succeeds without scanning. -/
+theorem ordinaryDirect :
+    Facts.proveEqN (.var 0 : LTm C (.val .uint)) (.var 0) closeFuel (consistent 32) = true := rfl
+
+private def BoolKeys : Contract := contract!{ mapping(bool => uint) values; }
+local instance : InContract := ⟨BoolKeys⟩
+
+/-- Both symbolic Boolean keys return one of the two written values. -/
+theorem mappingEither : ⊢ dl!{ ∀ bool b;
+    ⟨ values[true] = 1; values[false] = 2; uint r = values[b];
+      assert(r == 1 || r == 2); ⟩ true } := by
+  sol_prove
+
+/-- Writing two does not justify the changed assertion that it is three. -/
+theorem mappingWrong : ¬ (⊢ dl!{ ∀ bool b;
+    ⟨ values[true] = 1; values[false] = 2; uint r = values[b];
+      assert(r == 1 || r == 3); ⟩ true }) := by
+  sol_refute
+/-- An outer false hypothesis does not constrain the newly bound source b. -/
+theorem shadowedEither : ⊢ dl!{ ∀ bool b; b = false → ∀ bool b;
+    ⟨ values[true] = 1; values[false] = 2; uint r = values[b];
+      assert(r == 1 || r == 2); ⟩ true } := by
+  sol_prove
+/-- Reusing the outer fact would falsely prove this inner-key assertion. -/
+theorem shadowedWrong : ¬ (⊢ dl!{ ∀ bool b; b = false → ∀ bool b;
+    ⟨ values[true] = 1; values[false] = 2; uint r = values[b];
+      assert(r == 2); ⟩ true }) := by
+  sol_refute
+
+end Solidity.Examples.Tactics.JoinControls.BoolAtomJoin
