@@ -1015,3 +1015,5 @@ import Solidity.Backend.MemoryOps.SourceUintFixedAlias
 import Solidity.Backend.MemoryOps.SourceUintFixedAliasProgram
 import Solidity.Backend.MemoryOps.SourceUintFixedAliasFailure
 import Solidity.Backend.MemoryOps.SourceUintFixedAliasControls
+import Solidity.Backend.MemoryOps.SourceUintFixedDeclareAlias
+import Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls

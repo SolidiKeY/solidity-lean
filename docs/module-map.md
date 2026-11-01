@@ -1389,3 +1389,6 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintFixedAliasProgram.lean` | Actual reached fixed-reference rebind/write/delete in one existing Source RItems, intrinsic Prog and full existing word append. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedAliasFailure.lean` | Bounds rejection after actual fixed-reference rebinding; successful prefix separated from Source/word error boundaries. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedAliasControls.lean` | Both-pipeline populated fixed identities/old aliases, runtime reached mutation, complete16word order/shared-alias vectors, actual bounds and changed-prefix timeout controls. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedDeclareAlias.lean` | Actual fixed declaration then OLD-local rebind to NEW root and reached write/delete, deriving contexts/identities/Source Items/Prog/whole word append from initial allocation/ownership premises. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean` | Both-pipeline populated old/shared aliases, fresh zero-to42-to0 contents, complete20word/context/local/allocator vectors, skipped-rebind word contrast, actual fresh/old Source reads and wrong-map/timeout observations. |

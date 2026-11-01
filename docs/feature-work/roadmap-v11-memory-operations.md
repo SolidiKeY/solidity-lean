@@ -5569,3 +5569,99 @@ alignment. That exact context-changing rebind application is not established by
 this checkpoint. Broader general shape/path/graph/default/copy/target prerequisites
 remain as above; no independent-queue exhaustion, integration, goal reactivation
 or whole-assignment completion is asserted.
+
+
+## C70: actual fixed declaration, fresh-root rebinding and reached mutation (partial)
+
+`Solidity/Backend/MemoryOps/SourceUintFixedDeclareAlias.lean` consumes the existing
+fixed constructor and C69 alias program. From INITIAL MemOK, genuine positive
+fixed n, scalar local alignment, valid index, Objects StateRepr/AllocatorRepr,
+positive local base, actual cursor+max1n space and new-local frame capacity, it
+derives declaration, OLD-local alias to the genuinely NEW root, write then delete.
+ONE existing Source RItems uses ORIGINAL parameter count throughout all four
+statements; Source cons and intrinsic heap weakening/push and word-frame slot are
+handled separately. No intermediate observer, run or final agreement is a premise.
+Existing typed Prog executes the same four reached stages; complete published
+word constructor/pointer/index/default-write append actually runs. Fresh identity,
+new/old local pointers, all old typed-object/occupied Source-address frames, fresh
+observer, MemOK/StateRepr/allocator/stack/cursor and final ex/events/logs/fnLocals
+are derived. No constructor algorithm or reserved Source/Evm producer was edited.
+
+Source Items n+8 is a SUFFICIENT execution horizon, not a minimal-horizon theorem
+or new admission cap. Declaration statement uses n+7; the three reached statements
+use n+6/n+5/n+4. This slack reconstructs the pure-local expression statements with
+the ORIGINAL parameter count, rather than assuming the new context length equals
+it. Intrinsic old locals use shifted indices and actual TEnv.wk; Source locals use
+cons. Zero-length Source admission remains unproved/unchanged. General reference
+construction/checked target allocation failure/physical bytes stay outside scope.
+
+`Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean` independently
+inhabits the same old populated LEFT=[7,8,7], RIGHT=[9,10,9], neighbour=[11,12] and
+shared backup alias, then actually declares positive fixed3 root3. Both Source
+pipeline configurations execute Source Items11 and corresponding typed Prog from
+those initial inputs. Runtime k<3 and canonical values are supported by the
+control application; the generic theorem quantifies arbitrary positive n. Fresh
+initial zeros become42 at index2, then0; old Source tables/typed contents remain
+unchanged, old destination points to fresh3 while retained alias stays0, and new
+local agrees with the redirected old local. Full20word vectors retain all16old
+observed cells and append new local7 plus fresh40/41/42, with cursor43 and saved
+[77,88] stack. Skipped rebind is a WORD-only contrast clearing OLD LEFT rather
+than fresh. Actual reached Source memElem reads42 then0 at fresh3, while old0
+still reads7; wrong old-address correspondence for the fresh intrinsic root is
+refuted from those computed reads, not assumed injectivity or a desired result.
+A Source Items7 timeout executes the actual insufficient first declaration and
+exposes no allocated suffix; no rollback/panic-byte or word-error state invented.
+
+Earlier fixture/control/vector/guard files remain unchanged. Six new exact
+standard-trio guards and lane-specific evidence-admission/corruption tests are
+required; kernel proofs establish executions, script tests only check evidence
+admission. C70 focused01 PASS238jobs before explicit world-field return extension;
+final focused/full/static/reviews are recorded below when complete. All failed
+syntax/type/canonical matching/local proof-shadowing/Source equality-instance
+attempts stay retained as failures; no unsafe elaboration result accepted.
+
+Original G32/G33/G34/G35.01/.03/.04/.05 and both Backfills remain PARTIAL; G35.02
+reserved memory-to-storage and G35.06 final Source/V10/target remain BLOCKED.
+This context application is not all-profile allocation, arbitrary paths/graphs,
+ABI/storage/fresh deep-copy/emitted loops/liveness or whole compiler closure.
+Kernel/symbolic-word evidence is not external solc/EVM testing. Goal BLOCKED and
+its identity/status/counters unchanged; no integration or queue-exhaustion claim.
+
+C70 FINAL focused02 PASS238jobs after explicit generic world-frame return,
+RSS1027544KiB/newOOM0, all6exact new guards standardtrio. Full01 PASS0 on final
+registered Lean tree:1136default/262Suite/SolKey377parsed/131read-bearing covered.
+Actual Lean4.24.0 commit797c613/Lake5.0.0-src+797c613/KeySort2jobs, selected threads1
+and actual cacheOFF verified. Strict/trust/layers/orphans/lane/complete fixtures
+and113combined script/corruption tests PASS, including8newdeclare-alias admission
+tests. Scoped1115ownedpins/155modules standard-only PASS; rawglobalinventory stays
+FAIL1/1474unregistered=359published+1115owned/0unsafe. No reserved registry edit.
+Rawdocs FAIL1/83 completefindings remains byte-identical to consumed public C31;
+zero-owned-new separatelyPASS; frozen comparison remainsFAIL1/11incoming. Warm
+strict times0newSuite modules; every262current/C31source/fixture/toolchain byte
+and actual70versions independently match retained26cold/max160sunder300 only,
+not new timing coverage. Both independent read-only finder/skeptic SOURCE/control/
+script/document reviews PASS with no confirmed defects; artifact review separate
+postcommit. World ex/events/logs/fnLocals equalities now explicitly returned from
+actual reached C69 frame chain, without adding a premise.
+
+All13C70exec receipts retain6actual failed diagnostics and0newOOM. Historical
+C60/C67 cumulative OOM5/12GiBpeak remains failed history, not this exec RSS. Final
+full aggregateRSS1575172KiB/diskgrowth266240bytes, finalresource783097856available
+bytes preserves512MiBreserve+96MiBforecast; same12GiB/no-swap child/16GiBparent,
+OSheadroom/runtime/cache/mounts/source outputs and all prior seals preserved.
+No old fixture/vector/guard modified. Exact type/context syntax, heap-name
+shadowing, canonical projection and Source.Val non-DecEq diagnostics were repaired
+distinctly; no failure relabeled passed or proof/resource budget increased.
+
+Further original-queue investigation (not an exhaustion claim): existing
+`Solidity/Backend/MemoryOps/SourceUintCompound.lean` proves numeric checked compound
+mutation only through the dynamic SourceUintMemoryAt/type none. C66's genuine
+SourceUintFixedAt/type some-n cannot be obtained by changing the intrinsic ArrTy
+argument there. Published `Solidity/Evm/MemoryCompound.lean` exposes generic
+compoundAssign_eq_write for actual ArrTy, while Objects ArrayRepr.read and
+PtrFrag.write supply read/write constituents read-only. A genuine fixed Source
+compound-success/overflow and compatible Objects target application is not
+implemented by C70; its exact Source eval order, bounds and producer premises
+must be checked before a new application. Reserved-copy/physical-byte/all-profile
+constructor/target-failure/generalgraph/ABI/storage/deep-copy/final Source-V10-target
+obligations remain open; no original parent or persistent goal is declared done.
