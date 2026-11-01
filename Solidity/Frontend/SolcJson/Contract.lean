@@ -1576,7 +1576,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     -- Keep syntax errors distinct from unsupported source features. The test
     -- API can diagnose a selection with no well-formed specification without
     -- turning a usable mixed report into a whole-contract import failure.
-    let sourceScope := if testing then match fspecResult with
+    -- A ledger location in an `assignable` clause is a known, named gap
+    -- (`ledgerAssignable`, below), not a syntax error: it keeps its refusal.
+    let sourceScope := if testing && !rawSpec.any ledgerAssignable then match fspecResult with
       | .error reason => (Source.ScopeScan.rejected [] {
           kind := .invalidAst, name := `solidity.specificationSyntax,
           reason, line := J.line f }).append sourceScope
