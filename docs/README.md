@@ -195,3 +195,5 @@ VY2 [actual memory hash binding](feature-work/inline-assembly-vy2.md#actual-memo
 VY2 [actual source environment inputs](feature-work/inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) binds transaction timestamp/origin and actual source frame reads; full lane partial.
 
 VY2 [concrete packed World adapter](feature-work/inline-assembly-vy2.md#concrete-packed-world-adapter-2026-11-01) binds validated source writes and residual rollback to actual peer frame completion; full lane partial.
+
+VY2 [actual target input frame](feature-work/inline-assembly-vy2.md#actual-target-input-frame-2026-11-01) maps actual source inputs to existing target frame observations; full lane partial.

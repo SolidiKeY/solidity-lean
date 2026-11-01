@@ -632,3 +632,5 @@ VY2 [actual memory hash binding](inline-assembly-vy2.md#actual-memory-hash-bindi
 VY2 [actual source environment inputs](inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) derives supported source magic and physical context observations; full source/call/compiler closure remains open.
 
 VY2 [concrete packed World adapter](inline-assembly-vy2.md#concrete-packed-world-adapter-2026-11-01) commits actual same-plan source/residual/frame-completion agreement in the private peer-input tree; full lane partial.
+
+VY2 [actual target input frame](inline-assembly-vy2.md#actual-target-input-frame-2026-11-01) supplies concrete bounded source/target Word/address/frame input conversion; lowering and full lane remain open.
