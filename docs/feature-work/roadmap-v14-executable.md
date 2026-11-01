@@ -1120,3 +1120,8 @@ remain open. Previous kernel/creation/encoding consumers remain preparation.
 No premise, observation or budget has changed. Exact V13 head
 66c08fdefbbb53c0eee111b09d1baa6277fedff5 is a sealed development dependency,
 not publication or complete-lane evidence; private concrete staging is permitted.
+
+The small parallel interface is recorded in
+[PARALLEL-INTERFACE](../../tests/v14-executable/PARALLEL-INTERFACE.md), with exact
+module blobs and source commit in the adjacent JSON. Its source is committed;
+the external checkpoint export supplies the immutable bundle/archive checksums.

@@ -1,0 +1,50 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "producer_head": "52926966733d2b3eef0bb8090e0ebca4644cb1ef",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "modules": [
+    {
+      "module": "Solidity.Backend.Executable.PaymentCheckpoint",
+      "path": "Solidity/Backend/Executable/PaymentCheckpoint.lean",
+      "blob": "c05a0d12d4387f216c1d29fd675d7f9111cb8940",
+      "sha256": "a02f2d21ef9f59643dd7ebf95b17b925bbb6daa3070566ee6e7e287b78191f97"
+    },
+    {
+      "module": "Solidity.Backend.Executable.PaymentCases",
+      "path": "Solidity/Backend/Executable/PaymentCases.lean",
+      "blob": "58c42f88c6ad7597c47b8f1ec7fe0fa209bc30c0",
+      "sha256": "b4a8fbee7cd5a302883029faff6acecbad2c19ee74840b79482560e81a727904"
+    },
+    {
+      "module": "Solidity.Backend.Executable.CreationFrame",
+      "path": "Solidity/Backend/Executable/CreationFrame.lean",
+      "blob": "8f4bdaa2c32eefff3c43aace1f0caa3a5e5796d7",
+      "sha256": "63b0e7b4a02ff7acd2f7f8806f9a488041663f7a25dc00253d62128e5f0662c1"
+    },
+    {
+      "module": "Solidity.Backend.Executable.CreationArguments",
+      "path": "Solidity/Backend/Executable/CreationArguments.lean",
+      "blob": "36d9abb61c1094dfccd38c6bd9c76d8f0bdbd87f",
+      "sha256": "919f7fcc24511840f0bc8cbb4c8e27d87ba3df65afac65b3ba208613b824df45"
+    },
+    {
+      "module": "Solidity.Backend.Executable.ScalarSequence",
+      "path": "Solidity/Backend/Executable/ScalarSequence.lean",
+      "blob": "713363563762f376936ddecdd00854e958aca374",
+      "sha256": "0efedc1fdb709e02f1ce05a9000ba150ffeb1f76765775d29c361211bfae8631"
+    },
+    {
+      "module": "Solidity.Backend.Executable.ScalarArtifact",
+      "path": "Solidity/Backend/Executable/ScalarArtifact.lean",
+      "blob": "133aa0bb65a041a5fb5bb5bb66a33633ce26d72a",
+      "sha256": "66dc7f17b828239155dc561264643efd511287035f0a2113d506faf8e0f28b92"
+    },
+    {
+      "module": "Solidity.Backend.Executable.Assembly",
+      "path": "Solidity/Backend/Executable/Assembly.lean",
+      "blob": "14b29e6fccd6479912bc6ff86d204604dfeaa7db",
+      "sha256": "7a7364b3aa4c7f7bf79d0644c3089237affbd95ded22b46489b765c4b4043dfa"
+    }
+  ],
+  "limits": "Intrinsic kernel/numeric-slice/artifact construction only. No general Source lowering, fitted stipend gas, history-dependent receipt producer, fetched-byte/state/resource or pinned decoder agreement. Short-circuit/capacity/Fits/placement premises remain explicit in actual signatures."
+}
