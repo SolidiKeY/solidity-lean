@@ -1359,3 +1359,7 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceUintLateFailure.lean` | All-outcome published numeric word composition; actual Source checked-overflow and late arithmetic rejection after a real successful numeric write, with reached heap/Source/word frames, plus exact lower-horizon observation. |
 | `Solidity/Backend/MemoryOps/SourceUintLateFailureControls.lean` | Runtime-indexed material0-to-max prefix, actual max-plus1 rejection, frozen-initial and reversed-order successes, complete Source/intrinsic/word/alias/neighbor/16frame/allocator observations, reached timeout and first-stage empty/endpoint rejection in both pipelines. |
+
+| `Solidity/Backend/MemoryOps/SourceUintDefault.lean` | Actual empty uint256 Source default builder and existing intrinsic/word constructor, occupied-root framing and real low-fuel timeouts. |
+| `Solidity/Backend/MemoryOps/SourceUintDeclaration.lean` | Actual numeric declaration/context extension, independent Source MemOK and published intrinsic/word execution with old-root freshness and frames. |
+| `Solidity/Backend/MemoryOps/SourceUintDeclarationControls.lean` | Populated numeric declaration in both pipelines; runtime old payloads, shared aliases, fresh empty root, whole object tables/word frames and timeout/identity negatives. |

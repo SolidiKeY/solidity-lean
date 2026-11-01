@@ -4872,3 +4872,92 @@ alignment/allocator facts rather than assuming the Bool theorem applies. This
 is concrete future work, not implemented or an exhaustion assertion. Full original
 physical-byte/all-profile allocation-failure/reference-graph/ABI/storage/fresh
 copy/reserved memory-to-storage/final Source-V10-target obligations remain open.
+
+
+## C63 — numeric empty default declaration and context extension (partial G33)
+
+At parent abdab57fa43b6bd0f8167a4466963528873cdef8 the actual SourceDefault and
+SourceDeclaration adapters were Boolean-only. New owned SourceUintDefault and
+SourceUintDeclaration specialize the published independent zeroVal/allocRef,
+Heap.allocDefault/TRun.declMem, and existing uint newArray_correct/declareNewCode
+producers. They introduce no allocator, decoder, evaluator, type or admission rule.
+
+source_uint_default_run/intrinsic/memOK/default_frame/word/lowfuel derive actual
+Source execution, fresh empty intrinsic contents, actual Keeps and logical fresh
+identity, occupied old-address separation, existing whole word execution and real
+zero/one-fuel timeout. SourceUintMemoryAt.withLocals changes only the heap observer;
+it makes no claim that local indices are unchanged. declaration_frame derives the
+actual declaration, old observer across real Source/intrinsic allocation and fresh
+separation. source_uint_declaration_word derives Source-cons locals and MemOK with
+the existing intrinsic local push/heap-prefix extension, StateRepr, allocator and
+unchanged stack. Source and intrinsic local bindings are checked explicitly;
+heap identities append while the word local occupies b+old context length.
+
+Premises remain INITIAL MemOK/StateRepr/StructAllocatorRepr, positive local base,
+space cursor+1<W and frame capacity. Old-object frame laws consume INITIAL
+SourceUintMemoryAt. No desired output relation, successful final operation,
+global address injectivity or second independent run is assumed. The only default
+constructor application here is an EMPTY dynamic uint256 array; it is not an
+all-profile constructor or checked allocation-failure theorem. The existing raw
+word_empty_allocator_wrap law remains unchecked wrapping evidence only.
+
+SourceUintDeclarationControls executes populated runtime old arrays/shared aliases
+and neighbor objects in both declared pipelines. populated_declaration records
+actual Source statement, intrinsic declaration and entire word constructor, fresh
+and both old representations, Source shifted locals, complete16word frame,
+all old content words, saved stack, logical identities and allocator. Additional
+source_object_table/fresh_empty_observations expose all five initial/final Source
+object observations, fresh intrinsic/shifted old local binding, empty contents,
+intrinsic index0=None, actual Source index panic and fresh header96zero.
+nonuniform_run applies the generic producer to nonempty [7,0,max] in both pipelines;
+fresh_context_negative distinguishes fresh identity/word local from retained old
+aliases. populated_timeouts retains actual horizons0..2, with no fresh suffix.
+The fixture's word-region fit bound is not a public payload limit. No fresh word
+read-revert suffix, Source allocation-expression, byte memory or external EVM
+execution is claimed. Earlier fixtures and their vectors remain untouched.
+
+Separate read-only finder and skeptic source/control/script reviews PASS. Both
+requested explicit fresh contents/context/empty-bound observations; those were
+added and checked. The frame vector already included fresh header96 (a preliminary
+review note was corrected), and a direct zero-header clause is now present too.
+The new script tests exact16headline guard admission and missing/unsafe/renamed
+mutants only; it is not execution evidence. All16 guards check actual standard
+sets (fresh_context_negative uses propext/Quot.sound, others the standard trio).
+Focused controls09 passes170jobs, aggregate922988KiB/no newOOM; all earlier failed
+attempts are retained, including the dependent controls01 stopped at a still
+failing frame helper. No failed proof is delivered as a successful theorem.
+
+Fresh Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs and unchanged final wrapper pass:
+default1114/TestSuite262/SolKey377parsed/131read-bearing covered. Full aggregate
+RSS1593824KiB, diskgrowth274432bytes and newOOMdelta0. Existing12GiB/no-swap child,
+16GiBparent, CPU0/serialLean-j1/threads1/cacheOFF and OS headroom are retained.
+Preflight983793664available bytes admitted96MiB forecast above512MiB reserve;
+post-full980967424available. C60historical3OOMkills/cumulative12GiB peak remain
+failed history, not current passing memory evidence. Goal remains BLOCKED
+unchanged; goal get/update RPC and Lean MCP diagnostics unavailable.
+
+All original G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B remain PARTIAL;
+G35.02 and G35.06 remain BLOCKED on reserved copy and final upstream composition.
+Physical bytes, all-profile constructors/target allocation failures, general
+paths/graphs/reference/ABI/storage/deep-copy/liveness and final Source/V10/target
+composition are not supplied by this supported numeric constructor application.
+A next distinct original G33/BackfillB investigation is carrying a nonempty
+existing numeric observer and shifted alias through declaration into actual reached
+numeric write/delete syntax, consuming new fresh empty bounds rather than
+assuming the old local index still denotes the old root. This application is not
+yet proved here; no queue-exhaustion or whole-lane completion is asserted.
+
+C63 final static/completefixture/strict/trust/layer/orphan/lane/script checks pass;
+25combined corruption tests pass (12new guard-admission tests). Scoped1017 exact
+standard-only pins across133owned modules pass; raw globalinventory stays exit1,
+1376unregistered=359public+1017owned/0unsafe errors. Strict docs stays exit1 with
+83complete findings, byte-identical to publicbaseline (separate zero-new PASS),
+while exactfrozenbase comparison retains11incoming and FAIL1. No unrelated
+historical/vendor/global debt was rewritten. Warm strict timed0Suite modules;
+all262currentSuite/fixture/toolchain files independently equal retainedC31 bytes
+and actualversions, so cold26/max160s<300 remains keyed retained evidence only.
+All3573 C62sealed entries reverified unchanged. Separate independent finder and
+skeptic source/control/script reviews PASS with explicit added empty/fresh/context
+observations; committed-artifact review follows export. Earlier failed focused
+checks/coretype/contextinfer/guardformat/dependentindex issues are retained in raw
+logs; controls09 and finalfull pass with no elaboration-generated sorryAx.
