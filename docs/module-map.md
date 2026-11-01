@@ -1300,3 +1300,5 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Backend/Executable/CreationFrame.lean` | Intrinsic paid-prefix creation catch allocation, caller aliases and resumed typed tail; no paid ledger reconciliation or EVM simulation |
 
 | `Backend/Executable/CreationArguments.lean` | Actual typed constructor argument binding, argument-dependent raw failure/catch heap and evaluated-argument/tail rollback; no source lowering/EVM claim |
+
+| `Backend/Executable/PaymentCases.lean` | Actual intrinsic send/receiver settlement equality, funding/overflow failure ordering, transfer-byte and stipend-policy boundaries; no general compiler/EVM theorem |

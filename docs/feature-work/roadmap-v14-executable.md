@@ -1084,3 +1084,39 @@ complete, no human scope weakening is requested, and the original persistent
 goal remains unchanged/blocked. Proposed coordinator ledger updates are only
 independent G44.01/G44.03/Backfill B transport preparation; existing G43/G36/G45
 partial/open verdicts and reserved implementations/pins remain untouched.
+
+
+## Checkpoint 13 — concrete payment cases and parallel interfaces
+
+The human restored the unchanged original goal ACTIVE for ready owned work.
+PaymentCases consumes actual intrinsic TRun.send/transfer, World.enter/finish,
+World.stipend and Stipend.rule. payment_client and settlement_agrees prove
+nonzero success with full functional world equality; successful_transfer adds
+the actual transfer path with protected local99 and its original false bool.
+Rejected send, unfunded transfer and funded body failure retain exact halts.
+no_equal_transfer_halt proves the published source bare-revert versus world
+revertWith(dead) boundary, rather than erasing those bytes. overflow_enters,
+overflow_frame, overflow_settles and overflow_reply_rejects check an actual
+entered caller and full failed-send world preservation for the finite overflow
+receipt. allocation_policy_gap distinguishes source cost refusal from actual
+unmetered world success. These fixed, inhabited reply tables are not a general
+history-dependent receipt producer, source compiler relation or EVM gas proof.
+
+Independent read-only finder/skeptic reviews found no false theorem. Their
+wording/signature/axiom-report requests and the skeptic's overflow entry/full
+settlement request were implemented. Final follow-up reviews and raw checks
+are retained in the new parallel evidence export. Scoped axiom sets contain
+only propext, Classical.choice and Quot.sound (some are propext only).
+Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs passed under12GiB/no swap.
+The first import-closure gate passed1041 default+262TestSuite but explicitly
+skipped SolKey; a separate pinned rules check passed377/131/131. Final checks
+are recorded in the handoff. Historical raw doc failures remain failures;
+there is no new claim that frozen-base global documentation debt is zero.
+
+All original Work and Backfill A/B obligations remain binding. General G43
+stipend/world/asymmetry, G36.03 finite-prefix/divergence, source constructor
+lowering/general frames and G45 fetched-byte/state/resource/decoder adequacy
+remain open. Previous kernel/creation/encoding consumers remain preparation.
+No premise, observation or budget has changed. Exact V13 head
+66c08fdefbbb53c0eee111b09d1baa6277fedff5 is a sealed development dependency,
+not publication or complete-lane evidence; private concrete staging is permitted.
