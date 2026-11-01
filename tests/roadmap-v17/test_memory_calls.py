@@ -23,7 +23,13 @@ class MemoryCallsControls(unittest.TestCase):
         for bad in [b'',raw+raw,raw[:-8],raw.replace(b'"schema": 1',b'"schema": 1, "schema": 1')]:
             with self.subTest(bad=bad[:20]),self.assertRaises(ValueError):m.observation(bad)
     def test_publication_and_query_scope(self):
-        identity=m.publication_identity();self.assertEqual(identity['publication'],m.PUBLICATION)
+        # Old exact-publication consumer must refuse the changed current Compiler.
+        import subprocess
+        published=subprocess.check_output(['git','show',m.PUBLICATION+':Solidity/Evm/Compiler.lean'],cwd=ROOT)
+        if published==(ROOT/'Solidity/Evm/Compiler.lean').read_bytes():
+            identity=m.publication_identity();self.assertEqual(identity['publication'],m.PUBLICATION)
+        else:
+            with self.assertRaisesRegex(ValueError,'producer differs'):m.publication_identity()
         self.assertEqual(len(m.PUBLIC_REQUESTS)+len(m.PRIVATE),16)
         raw=m.query_bytes();self.assertIn(m.name_term('Solidity.Evm.Compiler.Compilation.memoryCalls').encode(),raw);self.assertIn(b'wrong_code_rejected',raw);self.assertIn(b'private_frame_rejected',raw)
         self.assertIn(b'KernelQuery.extract #[request] includeValues',raw)

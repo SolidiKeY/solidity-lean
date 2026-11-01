@@ -41,6 +41,31 @@ TARGETS['warm-memory-calls-observation']=([],['lib/lean/Solidity/Evm/MemoryCallE
 TARGETS['warm-creation-try']=(['Solidity.Examples.Tactics.CreationTrySourceIR'],['lib/lean/Solidity/Examples/Tactics/CreationTrySource.olean','lib/lean/Solidity/Examples/Tactics/CreationTrySourceIR.olean'])
 TARGETS['warm-creation-try-observation']=([],TARGETS['warm-creation-try'][1])
 
+TARGETS['warm-memory-loops']=(['Solidity.Evm.MemoryLoopSourceExamples','Solidity.Evm.MemoryLoopScopeSourceExamples'],['lib/lean/Solidity/Evm/MemoryLoopSourceExamples.olean','lib/lean/Solidity/Evm/MemoryLoopScopeSourceExamples.olean'])
+TARGETS['warm-derived17-prerequisites']=(['Solidity.TestSuite.Derived17'],['lib/lean/Solidity/TestSuite/Derived17.olean'])
+for family in ('direct','scoped'):
+    TARGETS['warm-loop-'+family]=( [], TARGETS['warm-memory-loops'][1])
+
+TARGETS['fresh-derived17']=([],[])
+
+def timing_inputs():
+    import sys
+    binary=Path(sys.executable).resolve();prefix=Path(sys.base_prefix).resolve()
+    e.require(binary.is_relative_to(prefix),'Python runtime escapes prefix')
+    files={}
+    for path in sorted(prefix.rglob('*')):
+        if path.is_file() and 'site-packages' not in path.relative_to(prefix).parts:
+            e.require(path.resolve().is_relative_to(prefix),'Python input escapes mounted prefix')
+            files[str(path)]=resources.hash_file(path)
+    return {'isolatedNoSite':True,'binary':str(binary),'prefix':str(prefix),'version':subprocess.check_output([str(binary),'--version'],text=True).strip(),'files':files}
+
+
+def loop_query_bytes(family):
+    spec=importlib.util.spec_from_file_location('v17_loops',ROOT/'scripts/roadmap-v17-loops.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module.query_bytes(family)
+
+
 def creation_query_bytes():
     spec=importlib.util.spec_from_file_location('v17_creation_try',ROOT/'scripts/roadmap-v17-creation-try.py')
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
@@ -55,6 +80,11 @@ def memory_query_bytes():
 
 def gate_command(gate,out):
     prefix=['lake','-f','roadmap-v17-runtime.lakefile.toml']
+    if gate=='fresh-derived17':
+        import sys
+        return [str(Path(sys.executable).resolve()),'-I','-S','-B',str(ROOT/'scripts/check-memory-loop-timing.py'),'--output',str(out/'fresh-group'),'--results',str(out/'workload.json')]
+    if gate in ('warm-loop-direct','warm-loop-scoped'):
+        return prefix+['env','lean','-j1','--tstack=131072','--root='+str(out),str(out/'LoopQuery.lean')]
     if gate=='warm-creation-try-observation':
         return prefix+['env','lean','-j1','--tstack=131072','--root='+str(out),str(out/'CreationTryQuery.lean')]
     if gate=='warm-memory-calls-observation':
@@ -108,8 +138,12 @@ def validate(record, evidence_root, current, gate, gate_row=None, live_outputs=T
     argv = e.loads(read_bound(evidence_root, record['dockerArgv'], record['dockerArgvSha256']))
     e.require(argv == docker_create_argv(evidence_root.resolve(), current, record['containerName'], record['command']), 'changed Docker spawn configuration')
     e.require(record['command'] == gate_command(gate,evidence_root.resolve()), 'wrong build command')
-    if gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation'):
+    if gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17'):
         e.require(record['installedBefore']==record['installedAfter']==resources.tool_inputs(current),'changed installed observation inputs')
+    if gate=='fresh-derived17':
+        e.require(record['pythonInputsBefore']==record['pythonInputsAfter']==timing_inputs(),'changed Python driver inputs')
+    if gate in ('warm-loop-direct','warm-loop-scoped'):
+        e.require((evidence_root/'LoopQuery.lean').read_bytes()==loop_query_bytes(gate.removeprefix('warm-loop-')),'changed loop query bytes')
     if gate=='warm-creation-try-observation':
         e.require((evidence_root/'CreationTryQuery.lean').read_bytes()==creation_query_bytes(),'changed creation try query bytes')
     if gate=='warm-memory-calls-observation':
@@ -239,6 +273,10 @@ def docker_create_argv(out, current, container_name, command):
     argv = ['create', '--name', container_name, '--network', 'none', '--memory', '12g', '--memory-swap', '12g', '--cpus', '1',
             '--mount', 'type=bind,src=/workspace,dst=/workspace',
             '--mount', f'type=bind,src={lean.parent.parent},dst=/opt/v17-toolchain,readonly']
+    if str(ROOT/'scripts/check-memory-loop-timing.py') in command:
+        import sys
+        prefix=Path(sys.base_prefix).resolve()
+        argv += ['--mount',f'type=bind,src={prefix},dst={prefix},readonly','-e','PYTHONDONTWRITEBYTECODE=1','-e','PYTHONNOUSERSITE=1']
     for tool in e.BUILD_TOOL_NAMES:
         argv += ['--mount', f'type=bind,src={out / (tool + "-launcher")},dst={lean.parent / tool},readonly']
     return argv + ['-w', str(repository), '-e', 'LEAN_NUM_THREADS=1', '-e', 'LEAN_SYSROOT=' + str(lean.parent.parent),
@@ -309,6 +347,21 @@ def check_outcomes(r):
     e.require(r['exit']!=0 or not r['phaseErrors'],'errors contradict successful collection')
 
 
+def post_input_observation(record,stem,before,provider,phase,out):
+    """Retain raw command outcomes even when input collection changes/fails."""
+    record[stem+'Before']=before
+    try:
+        record[stem+'After']=provider()
+        if record[stem+'After']!=before:raise ValueError('input observation changed')
+    except (ValueError,OSError,KeyError,TypeError) as error:
+        record.setdefault(stem+'After',None)
+        record['validationExit']=125
+        record['phaseErrors'].append({'phase':phase,'error':str(error)})
+    record['exit']=final_exit(record['executionExit'],record['cleanupExit'],record['validationExit'])
+    path=out/record['errors'];path.write_text(json.dumps(record['phaseErrors'],indent=2))
+    record['errorsSha256']=e.digest(path.read_bytes())
+
+
 def collect(args):
     ensure_no_unresolved()
     out = args.out.resolve()
@@ -321,7 +374,8 @@ def collect(args):
     start_build, start_cache = inventory(build), inventory(cache)
     mode = 'clean' if args.gate.startswith('clean-') else 'warm'
     if mode == 'clean': e.require(not start_build['files'] and not start_cache['files'], 'refusing nonempty clean start; no cache/build deletion performed')
-    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation') else None
+    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17') else None
+    python_before = timing_inputs() if args.gate=='fresh-derived17' else None
     resource_fields = resource_snapshot(); check_headroom(resource_fields)
     disk = os.statvfs(ROOT); free = disk.f_bavail * disk.f_frsize
     e.require(free >= 1024**3, 'disk guard')
@@ -339,6 +393,7 @@ def collect(args):
     command = gate_command(args.gate,out)
     if args.gate=='warm-memory-calls-observation': (out/'MemoryCallsQuery.lean').write_bytes(memory_query_bytes())
     if args.gate=='warm-creation-try-observation': (out/'CreationTryQuery.lean').write_bytes(creation_query_bytes())
+    if args.gate in ('warm-loop-direct','warm-loop-scoped'): (out/'LoopQuery.lean').write_bytes(loop_query_bytes(args.gate.removeprefix('warm-loop-')))
     script = execution_script(out, command, lake)
     (out/'execution.sh').write_text(script)
     container_name = 'roadmap-v17-' + uuid.uuid4().hex
@@ -433,12 +488,10 @@ def collect(args):
               'executionScript':'execution.sh','executionScriptSha256':e.digest((out/'execution.sh').read_bytes()),
               'buildStart':start_build,'cacheStart':start_cache,'buildEnd':inventory(build),'cacheEnd':inventory(cache),
               'releaseClosed':False}
+    if python_before is not None:
+        post_input_observation(record,'pythonInputs',python_before,timing_inputs,'Python inputs after',out)
     if installed_before is not None:
-        record['installedBefore']=installed_before
-        try: record['installedAfter']=resources.tool_inputs(before)
-        except (OSError,ValueError) as error:
-            record['installedAfter']=None; record['validationExit']=125; record['exit']=final_exit(execution_exit,cleanup_exit,125); errors.append({'phase':'installed inputs after','error':str(error)})
-            (out/'execution-errors.json').write_text(json.dumps(errors,indent=2));record['errorsSha256']=e.digest((out/'execution-errors.json').read_bytes())
+        post_input_observation(record,'installed',installed_before,lambda:resources.tool_inputs(before),'installed inputs after',out)
     if record['exit']==0:
         try: validate(record,out,before,args.gate)
         except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError) as error:

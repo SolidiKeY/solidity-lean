@@ -97,10 +97,9 @@ def observation(raw):
     return v
 
 
-def axiom_prints(raw,expected):
+def axiom_prints(raw,expected,marker='V17_CREATION_KERNEL_END\n'):
     """Accept Lean's actual whitespace wrapping, never extra/truncated prints."""
     text=raw.decode()
-    marker='V17_CREATION_KERNEL_END\n'
     if text.count(marker)!=1:raise ValueError('missing/duplicate metadata terminator')
     text=text.split(marker,1)[1]
     pattern=re.compile(r"'([^']+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])")
