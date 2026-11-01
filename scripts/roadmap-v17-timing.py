@@ -25,18 +25,25 @@ def verify(record,directory,current,producer,producer_directory):
  l=load_loop();m=l.creation().load_memory();k=m.load_kernel();m.verify_stage(k,record,directory,current,producer,producer_directory,None,'warm-derived17-prerequisites','fresh-derived17')
  for name in ['scripts/check-memory-loop-timing.py','scripts/check-memory-loop-timing.mjs']:
   if (ROOT/name).read_bytes()!=subprocess.check_output(['git','show',l.PUBLICATION+':'+name],cwd=ROOT):raise ValueError('changed published timing driver/validator')
- result=k.e.load(directory/'workload.json');summary=validate_shape(result,lambda mod:hashlib.sha256((ROOT/(mod.replace('.','/')+'.lean')).read_bytes()).hexdigest())
+ manifest=k.p.validate_timing_outputs(record,directory)
+ result=k.e.loads(k.p.read_bound(directory,manifest['workload']['path'],manifest['workload']['sha256']));summary=validate_shape(result,lambda mod:hashlib.sha256((ROOT/(mod.replace('.','/')+'.lean')).read_bytes()).hexdigest())
  group=directory/'fresh-group';artifacts={}
+ raw=k.p.read_bound(directory,record['log'],record['logSha256']).decode().splitlines()
+ expected_lines=[str(row['module'])+' '+str(row['exit_code'])+' '+str(row['seconds']) for row in result['checks']]
+ if raw!=expected_lines:raise ValueError('raw driver rows disagree with workload report')
  for row in result['checks']:
   mod=row['module'];source=ROOT/(mod.replace('.','/')+'.lean');out=group/(mod+'.olean');log=group/(mod+'.log');setup=group/(mod+'.setup.json')
   expected=['lean','-j1','--tstack=32768','--setup',str(setup),str(source),'-o',str(out),'-c',str(group/(mod+'.c'))]
   if row.get('command')!=expected or row.get('source')!=str(source) or row.get('output')!=str(out) or row.get('log')!=str(log):raise ValueError('wrong original driver argv/artifacts')
   if (group/(mod+'.source.lean')).read_bytes()!=source.read_bytes() or out.stat().st_size==0:raise ValueError('missing/stale fresh source/output')
-  for path in [out,log,setup,group/(mod+'.source.lean'),group/(mod+'.c')]:artifacts[str(path.relative_to(directory))]=k.p.resources.hash_file(path)
+  for path in [out,log,setup,group/(mod+'.source.lean'),group/(mod+'.c')]:
+   rel=str(path.relative_to(group));sha=manifest['fresh']['files'].get(rel)
+   if sha is None:raise ValueError('unmatched producer artifact')
+   k.p.read_bound(group,rel,sha);artifacts[str(path.relative_to(directory))]=sha
  # Published consumer is reused read-only, with exact current source hashes.
  check=subprocess.run(['node',str(ROOT/'scripts/check-memory-loop-timing.mjs'),str(directory/'workload.json')],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
  if check.returncode:raise ValueError('published cumulative validator rejected: '+check.stdout.decode())
- return {'summary':summary,'artifacts':artifacts,'publishedValidatorOutput':check.stdout.decode(),'sourceSnapshot':current,'pythonInputs':record['pythonInputsBefore'],'semanticPremisesDischarged':False,'releaseClosed':False,'boundary':'Fresh original24-member workload only, not whole suite/corpus/compiler/cache or release closure.'}
+ return {'summary':summary,'artifacts':artifacts,'producerOutputManifest':record['timingOutputs'],'publishedValidatorOutput':check.stdout.decode(),'sourceSnapshot':current,'pythonInputs':record['pythonInputsBefore'],'semanticPremisesDischarged':False,'releaseClosed':False,'boundary':'Fresh original24-member workload only, not whole suite/corpus/compiler/cache or release closure.'}
 
 if __name__=='__main__':
  import argparse,fcntl

@@ -60,3 +60,19 @@ class TimingControls(unittest.TestCase):
  def test_timing_python_isolation_bound(self):
   p=load('provenance');cmd=p.gate_command('fresh-derived17',Path('/tmp/receipt'))
   self.assertEqual(cmd[1:4],['-I','-S','-B']);self.assertIn('check-memory-loop-timing.py',cmd[4]);self.assertEqual(cmd[-1],'/tmp/receipt/workload.json')
+
+ def test_producer_time_output_manifest_rejects_nonempty_corruption(self):
+  import tempfile,hashlib
+  p=load('provenance')
+  with tempfile.TemporaryDirectory() as directory:
+   out=Path(directory);group=out/'fresh-group';group.mkdir()
+   (out/'workload.json').write_text('{"exit_code":0}');(group/'proof.olean').write_bytes(b'nonempty original kernel output');(group/'proof.log').write_text('original log')
+   original=p.capture_timing_outputs(out);(out/'timing-output-manifest.json').write_text(json.dumps(original))
+   record={'timingOutputs':{'path':'timing-output-manifest.json','sha256':p.resources.hash_file(out/'timing-output-manifest.json')}}
+   self.assertEqual(p.validate_timing_outputs(record,out),original)
+   for path,replacement in [(group/'proof.olean',b'nonempty forged kernel output'),(group/'proof.log',b'forged log'),(out/'workload.json',b'{"exit_code":0,"seconds":1}')]:
+    saved=path.read_bytes();path.write_bytes(replacement)
+    with self.subTest(path=path.name),self.assertRaises(ValueError):p.validate_timing_outputs(record,out)
+    path.write_bytes(saved)
+   (group/'extra.olean').write_bytes(b'unmatched')
+   with self.assertRaises(ValueError):p.validate_timing_outputs(record,out)

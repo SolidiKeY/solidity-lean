@@ -142,6 +142,7 @@ def validate(record, evidence_root, current, gate, gate_row=None, live_outputs=T
     if gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17','warm-loop-direct-producer','warm-loop-scoped-producer'):
         e.require(record['installedBefore']==record['installedAfter']==resources.tool_inputs(current),'changed installed observation inputs')
     if gate=='fresh-derived17':
+        validate_timing_outputs(record,evidence_root)
         e.require(record['pythonInputsBefore']==record['pythonInputsAfter']==timing_inputs(),'changed Python driver inputs')
     if gate in ('warm-loop-direct','warm-loop-scoped'):
         e.require((evidence_root/'LoopQuery.lean').read_bytes()==loop_query_bytes(gate.removeprefix('warm-loop-')),'changed loop query bytes')
@@ -348,6 +349,21 @@ def check_outcomes(r):
     e.require(r['exit']!=0 or not r['phaseErrors'],'errors contradict successful collection')
 
 
+def capture_timing_outputs(out):
+    """Immediately post-command byte inventory, not consumer-supplied hashes."""
+    e.require((out/'fresh-group').is_dir(),'missing fresh group directory')
+    e.require(not (out/'workload.json').is_symlink(),'symlink workload report')
+    workload=e.local_file(out,'workload.json')
+    return {'schema':1,'workload':{'path':'workload.json','sha256':resources.hash_file(workload)},'fresh':inventory(out/'fresh-group')}
+
+def validate_timing_outputs(record,out):
+    ref=record['timingOutputs']
+    e.require(set(ref)=={'path','sha256'} and ref['path']=='timing-output-manifest.json','wrong producer output manifest')
+    manifest=e.loads(read_bound(out,ref['path'],ref['sha256']))
+    e.require(manifest==capture_timing_outputs(out),'changed/missing producer timing outputs')
+    return manifest
+
+
 def post_input_observation(record,stem,before,provider,phase,out):
     """Retain raw command outcomes even when input collection changes/fails."""
     record[stem+'Before']=before
@@ -493,6 +509,16 @@ def collect(args):
         post_input_observation(record,'pythonInputs',python_before,timing_inputs,'Python inputs after',out)
     if installed_before is not None:
         post_input_observation(record,'installed',installed_before,lambda:resources.tool_inputs(before),'installed inputs after',out)
+    if args.gate=='fresh-derived17':
+        try:
+            manifest=capture_timing_outputs(out)
+            path=out/'timing-output-manifest.json';path.write_text(json.dumps(manifest,indent=2)+'\n')
+            record['timingOutputs']={'path':path.name,'sha256':resources.hash_file(path)}
+        except (ValueError,OSError,KeyError,TypeError) as error:
+            record['timingOutputs']=None;record['validationExit']=125
+            errors.append({'phase':'timing outputs after command','error':str(error)})
+            record['exit']=final_exit(execution_exit,cleanup_exit,125)
+            path=out/'execution-errors.json';path.write_text(json.dumps(errors,indent=2));record['errorsSha256']=e.digest(path.read_bytes())
     if record['exit']==0:
         try: validate(record,out,before,args.gate)
         except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError) as error:
