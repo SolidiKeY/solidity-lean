@@ -923,3 +923,5 @@ import Solidity.Yul.Views.LocatedSource
 import Solidity.Yul.Views.DeclarationBoundaryControls
 
 import Solidity.Yul.Views.NestedDeclarationFinal
+
+import Solidity.Yul.Views.FixedDeclarationFinal

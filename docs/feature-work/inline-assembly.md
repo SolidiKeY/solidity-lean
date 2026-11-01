@@ -461,3 +461,14 @@ proves actual whole-store snapshot/source equality, raw reencoding, nonwrapping
 bounds, alias/index-error/MemOK and paired journal controls. Existing380 pinned
 external calls remain unchanged. Arbitrary declarations/dirty/dynamic/Yul/
 compiler/calculus closure remain open. Evidence:/workspace/vy2-evidence/nested-declarations.
+
+
+### VY2 recursive fixed-path handoff
+
+The [lane record](inline-assembly-vy2.md#recursive-fixed-declaration-paths-2026-11-01)
+now derives complete recursive fixed-array/struct source registrations from an
+intrinsic finite actual-metadata certificate, including exact extent, path
+coverage/separation/nonwrapping and concrete whole-source/residual snapshot
+composition. New14pinned calls supplement the unchanged380observations.
+Whole storage/dirty/dynamic/allocation/Yul/compiler/calculus closure remains
+open; goal BLOCKED unchanged. Evidence:/workspace/vy2-evidence/recursive-fixed.

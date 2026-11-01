@@ -2165,3 +2165,110 @@ pass. All20unchanged reference negative suites pass. Global docs remains ACTUAL
 exit1 with byte-identical48missing/37ambiguous exact-base debt; zero delta is
 separate. Namespace-audit and proof-budget failures retained, repaired gates
 recorded separately. Original full-lane/goal obligations stay open.
+
+
+## Recursive fixed declaration paths (2026-11-01)
+
+Original Y04/Backfill A/B continuation; full assignment PARTIAL and original
+goal BLOCKED unchanged. Parent271736f27513a98a9c11e863ca9c121bf4fb3e76,
+assigned branch and pinned base unchanged. YQ1–YQ7 remain approved as recorded
+in [scope](../solidity-scope.md); no admission/exclusion/owner API changes.
+
+[FixedDeclaration](../../Solidity/Yul/Views/FixedDeclaration.lean) is a finite
+intrinsic certificate indexed by ACTUAL Source.STy. Scalar support comes from
+existing declarationScalar?, array counts are the actual positive declared
+counts, and each struct carries actual E.structFields equality in declaration
+order. These are finite metadata/constructor facts, not supplied final layout,
+separation/default/inverse/readback/safety laws. Cyclic metadata is not claimed
+total. No depth/fuel/node/address cap or duplicate state/AST is introduced.
+Root assignment remains supplied explicitly and checked against E.rootTy.
+
+[FixedDeclarationPack](../../Solidity/Yul/Views/FixedDeclarationPack.lean)
+reuses ONE packDeclarationPaths scalar traversal and existing roundSlot at
+aggregate entry AND exit. Actual E.cellTy guards and Word slot bounds remain.
+[Spec](../../Solidity/Yul/Views/FixedDeclarationSpec.lean),
+[Paths](../../Solidity/Yul/Views/FixedDeclarationPaths.lean) and
+[Extent](../../Solidity/Yul/Views/FixedDeclarationExtent.lean) prove by structural
+recursion: successful traversal has finiteSeparated registrations, exact full
+leaf-path enumeration without duplicates/skips, subtree path injection and
+cross-separation, scalar spans and exact recursive endByte. Checked Word base
+implies nonwrapping end at most2^256*32. Source.pathTy is structural and does
+not check fixed-array index bounds: declared enumeration DOES, rather than
+changing owner semantics. Original flat/nested APIs and guards remain intact.
+
+[Checked/source](../../Solidity/Yul/Views/FixedDeclarationSource.lean) stores
+actual computation evidence and derives canonical whole Source.Storage
+writeback, unchanged administrative none-versus-explicit-default identity,
+selected view/unselected-cell preservation and full snapshot reencoding with
+complement from that SAME raw snapshot. Actual source frame/applyOp wrappers
+retain full error/static behavior, bank/raw-word reconstruction and
+EVERY-original-H owner MemOK transport. None is unsupported preparation, never
+Yul refusal/no-op/cleaning/deallocation. Dirty OWNED payloads remain open.
+
+Inhabited actual declarations Inner[2][2] plus uint128[3] at base8 produce
+11typed leaves: four bool/u16 struct slots8–11, exact-full two-element slot12,
+spill slot13, end14*32. Controls cover three aggregate levels, nonzero29-byte
+struct padding and16-byte trailing padding, complete/no-extra paths, malformed
+root/cell/overflow and canonical-bool failure. Actual six-source-operation
+storage is proved equal to pure complete snapshot decoding. Actual paired
+residual map equality holds at EVERY Word, including untouched slots; together
+these give complete physical snapshot reconstruction from the ACTUAL source
+and journal. Actual two local storRef aliases use indexLoc/readLoc to observe
+1/3 and preserve exact Panic0x32 on index3. Initial/postwrite/alias/child owner
+MemOK are inhabited; every-H transport, caller-prefix rollback,
+committed-child/enclosing rollback, same-slot order, distinct account/bank
+isolation, actual static empty-revert and full transient raw reset are proved.
+Transient companion reuse is not inferred Solidity transient declaration layout.
+
+Pinned solc0.8.38 commit1835d247/Osaka legacy and viaIR fixture
+[RecursiveDeclaration.sol](../../tests/yul-views/RecursiveDeclaration.sol)
+independently checks declared nested coordinates, six COMPLETE raw words,
+three untouched sentinels, all11logical scalar reads, both distinct write
+orders, complete100-byte Error("recursive") and postfailure fresh read.
+New14ordered calls and369mutation controls pass; all previous380call/report
+fields remain preserved. These are finite external observations, not universal
+kernel source/compiler/target correspondence. Original100m gas/5m steps and
+all proof/heartbeat/recursion budgets remain unchanged.
+
+G0 and git speed history reviewed before additions; owner representations and
+whole obligation signatures unchanged. Performance warning issued. Initial
+whole-tree concrete normalization hit default200000heartbeats; smaller witness
+alone did not repair it. Raw failures retained. Constant eliminator motive plus
+explicit checked component-success equations repair proof structure; final
+inhabited control checks in3.5s without any budget increase or native oracle.
+Failed unsupported primitive-recursor codegen probe also retained. All heavy
+checks serial/private lock/12GiB-no-swap with aggregateRSS/OS/disk monitoring;
+prior launcher overlaps remain historical and are not erased.
+
+Evidence:/workspace/vy2-evidence/recursive-fixed. Final review/gate receipts and
+exact exported head are recorded in its HANDOFF.md and cumulative root
+HANDOFF.md/SHA256SUMS after checks. Global docs remains actual exit1 with
+byte-identical pinned-base48missing/37ambiguous findings; zero delta is
+separate evidence, never a global pass.
+
+Full queue remains open: Y04 whole persistent/transient storage/path/hash/
+dynamic/global-root ownership and dirty-bit semantics; Y05 broader dirty/
+shared-zero/interior forms, whole memory/writeback/allocator provenance and
+refinement; Y06 actual source inputs/environment bindings; concrete V10/V11
+agreements; VY1 source execution/assembly MemOK; Y09.02 actual calculus,
+notation/printers/compiler/final joint closure. Backfill A/B remain partial.
+Available owner MemOK/World/ContractWorld/memory-call/Bridge are not assembly
+adequacy. Published5f6a75b6038371a3917dbe08b660d5f2d1207c58 still lacks Yul
+exports per audited immutable tree; no unpublished producer work imported.
+No genuine new semantic decision; questions=[]. get_goal read/Lean MCP absent;
+no goal action taken and original goal remains BLOCKED unchanged.
+
+
+Final recursive checkpoint gates: actual Lean4.24.0/Lake5.0.0-src+797c613;
+KeySort2jobs exit0; policy full wrapper1142default/262TestSuite/131annotations
+exit0. All2636public declaration signatures/1516theorem reports checked:
+1465standard-only and51axiom-free, none missing/unexpected. All21negative suites
+pass, including new369controls. Strict491automatic/61budgeted/11refuted/0pending,
+trust1172sources/246inventoried sites/0findings, layers333core/0elaborator reach,
+orphans1157reachable/0orphans, markdown base1/current1/new0. Exact global docs
+exit1 remains byte-identical48missing/37ambiguous; baseline comparison delta0
+is separate. Independent final finder and skeptic reviews both clear, neither
+ran Lean/server/build/tests or edited. Final cumulative394call report preserves
+ALL380preceding fields; SHA256
+043cad397185d2d97bb423febfe43c89c130548933351902e873d3cd8a9464cb.
+Full original goal and queues remain unfinished/BLOCKED as stated above.
