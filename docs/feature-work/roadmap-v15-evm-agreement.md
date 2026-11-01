@@ -1416,3 +1416,105 @@ Historical raw failures and the disclosed lost early unsealed retry text/timing
 remain retained/explicit; that retention requirement is not called passed.
 
 Final runtime review: independent finder corrected the metadata boundary unit from32bit-width to32-byte width (256bits); actual theorem/controls were already correct. Both runtime reviewers verified the complete gate log, exact configs and null monitoring violation; no other finding. Final artifact reviews follow the committed-head export separately.
+
+
+## Parallel interface and actual numeric consumers (2026-11-01)
+
+The human authorized exact committed peer checkpoint staging in a private
+worktree, without changing semantics or final integration requirements. The
+clean preserved starting head is c97bcab75406cc4d22614948ef29d67b375dba3a; its112
+checked public laws and13-file seal remain unchanged. No preceding whole-lane
+completion or master merge is required for independently useful consumers.
+
+[ParallelInterface.lean](../../Bridge/SolidityBridge/RoadmapV15/ParallelInterface.lean)
+exports ReferenceObservation/referenceObservation as the actual existing
+Assembly.StateView/observeState, ReferenceRelated as their exact equality, and
+OpcodeReady indexed by actual destination array/state/packet. OpcodeReady has
+only decoded and original driver-gate evidence, a concrete charged state and
+cost; no desired step/simulation is a field. Its continuation still requires
+actual step proof and NonhaltingOpcode. reference_related_exact restores gas
+and execLength to recover equality of the entire real EVM.State, including world,
+memory and buffers. ApprovedResource is the existing G06 pinned GasRes.Admissible
+subtype, kept separate from per-opcode gas adequacy. The reference producer is
+not thereby identified with a complete Osaka transition system; that fork and
+final source/bytecode/observation relation remain open obligations for peers.
+
+[NumericReference.lean](../../Bridge/SolidityBridge/RoadmapV15/NumericReference.lean)
+adds real consumer correspondence for existing Backend.Scalar BitVec words and
+actual reference UInt256 ADD/SUB/MUL. Complete charged supplied-step records,
+world/memory/buffers and arbitrary stack tails are retained. The three intrinsic
+wrapping consumers discharge result selection using published wrappingAdd/Sub/Mul
+certificates and original BinOp.evalT; no source execution or simulation oracle
+is assumed. Arbitrary supplied cost is explicit and is not adequacy by itself.
+
+[ReadyNumeric.lean](../../Bridge/SolidityBridge/RoadmapV15/ReadyNumeric.lean)
+constructs an actual Backend-emitted ADD byte input, proves its actual decoder
+and driver gate at3gas, and constructs OpcodeReady without an adequacy premise.
+The input-height bound is tail.length+2≤1024; arbitrary memory, activeWords,
+world, return buffers and static permission are framed. Both static flags are
+handled. ready_add_intrinsic composes the actual intrinsic wrapping certificate
+with that readiness and the full real X continuation, retaining the typed result
+state. Source caller-frame origin, program reachability, full execution, generic
+Osaka/resource/transaction/trace composition remain distinct unproved clauses.
+
+[ParallelControls.lean](../../Bridge/SolidityBridge/RoadmapV15/ParallelControls.lean)
+inhabits nonzero account/caller/value, memory, return buffers and typed arithmetic
+clients. It preserves the full ordered seven-field numeric observation tuple,
+checks wrapped maximum+2=1 with tail[258,513], subtraction operand order, product
+overflow, signed representation and narrow truncation. Equal observations with
+unequal omitted gas/count remain distinct states; dropping return bytes is
+refuted. Tail1022 is admitted, tail1023 violates the API's input bound, and an
+actual tail1024 target run is rejected for stack overflow. Insufficient gas,
+underflow and zero fuel remain refusals. All16 public headline reports pass:
+three representation equalities are axiom-free, the others use only the standard
+propext/Classical.choice/Quot.sound set. The new total is128 public checked laws;
+conditional interface composition is not counted as parent closure.
+
+Runtime probe failures are retained: an unflagged version invocation tripped the
+strict-j1 guard (137), passing Lake version through a configured build wrapper
+was invalid (1), and a very short successful job exited before a monitor sample
+(125). The new runner adds a10-second startup handshake: it releases work only
+after a successful inspection of its own container, preserving all prior guard
+thresholds and error handling. A corrected probe passes actual Lean4.24.0,
+Lake5.0.0-src+797c613 and KeySort2jobs before RUNTIME_GATE_PASS. Per-file checks
+remain300s/-j1/LEAN_NUM_THREADS1/12GiB/no swap; no budget or trust option changed.
+Proof iteration failures were syntax/constructor/map/finite-case and bounded
+simplifier issues; fixed proofs retain their original statements and controls.
+
+Exact supplied V13 head66c08fdefbbb53c0eee111b09d1baa6277fedff5 and V14
+head74225bbe317f0983ee0e781d446a2f97c1cb807f were hash/head/base-verified and imported
+only into isolated refs/parallel-inputs/20261101 objects. The dirty owned files
+were preserved; no peer was checked out or merged into this branch. Independent
+read-only incoming-API reviews identify three narrow staging leaves: V13
+Backend/AbiWorld/ErrorLayout and ErrorRoundtrip, and V14
+Backend/Executable/ScalarSequence. The V13 leaves have identical existing
+imports. V14's transitive peer context changes reserved decodePanic trailing-byte
+semantics; that edit will be excluded and the unchanged selected leaf checked
+against this preserved core. Broader ReturnedBytes imports conflict with five
+reserved existing files and are not silently substituted or repaired. Peer
+bundles are development inputs, never publication or whole-lane completion.
+
+Separate read-only finder/skeptic reviews cover the concrete state/resource
+interface, numeric hypotheses, non-vacuity, controls and startup guard; neither
+runs Lean/server/builds. A committed PARALLEL-INTERFACE bundle/archive will export
+actual signatures, hashes and producer obligations for V16/V17/VY3. Then work
+continues in a private dependency tree consuming the selected peer declarations;
+only that actual combined tree can establish its own checks. All150 opcode rows
+and G46/G47 parent obligations remain open. The original goal is not reset or
+recreated; cache/source changes and peer API readiness do not weaken observations,
+profiles, Fml.inTarget, verdicts, exclusions or approved per-run hash premises.
+
+
+Parallel-interface checkpoint gate/handoff: actual bounded full source/Bridge
+command passes982default/262TestSuite/2165Bridge jobs in33.415s, actual SolKey
+377parsed/131read-bearing/131covered. Cgroup peak1923248128bytes, limit12GiB,
+swap0 and no guard violation. Focused16 public laws and all complete controls
+pass; kernel-elaborated real signature output is retained. Layer/orphan/trust/
+whitespace pass. Raw global docs remains exit1; separate complete comparisons
+against frozen and genuine published baselines must add zero findings. Both
+independent read-only source/control/guard reviews clear; no reviewer ran Lean.
+This checkpoint exports a concrete reference-side interface and typed numeric
+client, not a completed Osaka or G46/G47 simulation. The subsequent private
+combined tree will consume only the three reviewed exact peer leaves and will
+have its own concrete source hashes, checks, limitations and committed handoff.
+No peer publication, full-lane completion or integration approval is inferred.

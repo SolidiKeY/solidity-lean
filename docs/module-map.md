@@ -1261,3 +1261,10 @@ pass. This is pure encoding/observation evidence, not machine correspondence.
 |---|---|
 | `Bridge/SolidityBridge/RoadmapV15/MetadataReference.lean` | Four bounded actual reference-reader/canonical selector/ABI/packed-function supplied-PUSH consequences, preserving widths/alignment/tails/PC; no resolver/fetch/resources/Osaka closure. |
 | `Bridge/SolidityBridge/RoadmapV15/MetadataReferenceControls.lean` | Complete emitted/reference lists, width0/32max, alignment/endian/length negatives, intrinsic receiver, metadata/argument/fuel refusal and four axiom audits. |
+
+| Module | Role |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/ParallelInterface.lean` | Concrete reference StateView relation, restoration of exact resource fields, separate approved G06 resources and actual decode/gate readiness interface; no full Osaka identification. |
+| `Bridge/SolidityBridge/RoadmapV15/NumericReference.lean` | Actual backend/reference ADD/SUB/MUL word and complete charged-state consumers of intrinsic wrapping certificates. |
+| `Bridge/SolidityBridge/RoadmapV15/ReadyNumeric.lean` | Actual emitted ADD decode, original resource gate, typed result and X continuation with explicit admitted input height. |
+| `Bridge/SolidityBridge/RoadmapV15/ParallelControls.lean` | Nonzero typed clients, complete buffer/state observations, numeric and actual resource/height/refusal negatives;16 axiom audits. |

@@ -78,3 +78,8 @@ import SolidityBridge.RoadmapV15.CompiledStoreControls
 
 import SolidityBridge.RoadmapV15.MetadataReference
 import SolidityBridge.RoadmapV15.MetadataReferenceControls
+
+import SolidityBridge.RoadmapV15.ParallelInterface
+import SolidityBridge.RoadmapV15.NumericReference
+import SolidityBridge.RoadmapV15.ReadyNumeric
+import SolidityBridge.RoadmapV15.ParallelControls
