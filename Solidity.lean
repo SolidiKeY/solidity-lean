@@ -993,3 +993,5 @@ import Solidity.Yul.Views.SourceEnvironmentControls
 import Solidity.Yul.Views.SourceTargetInputControls
 
 import Solidity.Yul.Views.SourceBalanceControls
+
+import Solidity.Yul.Views.StorageBalanceControls

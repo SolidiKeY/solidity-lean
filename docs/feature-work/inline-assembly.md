@@ -636,3 +636,5 @@ VY2 [concrete packed World adapter](inline-assembly-vy2.md#concrete-packed-world
 VY2 [actual target input frame](inline-assembly-vy2.md#actual-target-input-frame-2026-11-01) supplies concrete bounded source/target Word/address/frame input conversion; lowering and full lane remain open.
 
 VY2 [actual source balance inputs](inline-assembly-vy2.md#actual-source-balance-inputs-2026-11-01) derives the actual balance-read/constructed-funds boundary; independent target ledger and final adequacy remain open.
+
+VY2 storage-effect/input checkpoint: validator-derived persistent/transient packed writes preserve actual source code/balance/history observations and constructed target funds; actual static errors and complete resulting state retained. See [lane accounting](inline-assembly-vy2.md). Independent target-ledger/Yul/compiler/full-lane closure remains open.

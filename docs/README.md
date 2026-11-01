@@ -199,3 +199,5 @@ VY2 [concrete packed World adapter](feature-work/inline-assembly-vy2.md#concrete
 VY2 [actual target input frame](feature-work/inline-assembly-vy2.md#actual-target-input-frame-2026-11-01) maps actual source inputs to existing target frame observations; full lane partial.
 
 VY2 [actual source balance inputs](feature-work/inline-assembly-vy2.md#actual-source-balance-inputs-2026-11-01) derives code/history-sensitive source balance observations and constructed target funds; full lane partial.
+
+VY2 storage/balance input stability: [lane checkpoint](feature-work/inline-assembly-vy2.md).
