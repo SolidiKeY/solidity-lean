@@ -2,8 +2,8 @@ import Solidity.Calculus.DecisionGivenHeapBoundary
 import Solidity.Examples.DecisionGapCensus
 
 /-! # Inhabited given-heap source certificates and refusal controls
-The new Answer is independent of the unchanged global pipeline. Unknown here
-is an observed algorithm result, not a premise of the source classifier.
+The all-heap Answer now reaches the real global pipeline. Source classification
+remains independent of all coverage and verdict observations.
 -/
 namespace Solidity.Examples.DecisionGivenHeapReason
 open Solidity.Decide Solidity.Decide.ResidueReason
@@ -73,14 +73,17 @@ theorem valid_refusals : Fml.Valid nonliteralIndex ∧ Fml.Valid literalReflexiv
   · intro σ v
     rfl
 
-/-- The actual global algorithm is unchanged by this independent component. -/
-theorem original_unknown : decideGoal memParamSame = .unknown :=
-  DecisionGapCensus.hiddenParameter_unknown
+/-- Actual global positive results follow from the complete source route. -/
+theorem original_proved : decideGoal memParamSame = .proved := originalWitness.proved
 
-theorem another_unknown : decideGoal anotherIndex = .unknown := by rfl
+theorem another_proved : decideGoal anotherIndex = .proved := anotherWitness.proved
 
-theorem original_notCovered : memParamSame.Covered = false :=
-  DecisionGapCensus.hiddenParameter_notCovered
+theorem original_covered : memParamSame.Covered = true := originalWitness.covered
+
+theorem another_covered : anotherIndex.Covered = true := anotherWitness.covered
+
+/-- The computed-index near miss remains outside the exact source extension. -/
+theorem computed_index_unknown : decideGoal nonliteralIndex = .unknown := by rfl
 
 /-- The existing nonempty-heap and alias countermodels remain certified. -/
 theorem retained_countermodels :

@@ -2446,7 +2446,7 @@ original writer lock, threads1/Lean-j1, one task container, no LSP/build overlap
 actual memory.max12884901888/swap.max0 and host reserve12884901888bytes. Exact
 sampled resource extrema: RSS1463088KiB (shared pages included), charged peak
 630624256bytes, minimum host available17068548096bytes; resources.json retains
-10 failed measurement samples, which are and excluded only from numeric extrema, never from raw evidence.
+10 failed measurement samples, excluded only from numeric extrema, never from raw evidence.
 Public36-declaration axiom audit PASS16.948s contains only existing standard
 propext/Classical.choice/Quot.sound subsets; no new axioms/sorry/trust shortcuts.
 Runtime profile PASS3.163s: original/another-index true+unknown; computed-index
@@ -2471,3 +2471,103 @@ runtime fuel, remaining performance/backfill and final/full gates. The new valid
 Answer is not yet consumed by decideMem; that integration is ready owned work,
 not blocked by held producer TypeExamples/VA1-Q2. No goal/status reset, whole-lane
 completion or publication authorization is inferred.
+
+
+## Certified given-heap pipeline integration (2026-11-01)
+
+The ready4feb9c source certificate is now consumed. New
+Calculus/DecisionGivenHeapExtension.lean lazily wraps every successful existing
+countermodel as an Answer.refuted with exactly that state; only none consults the
+exact all-heap reflexive literal-read Answer. Decision adds decideGiven with
+sound/refutes/complete and exact countermodel-state preservation, uses it only
+in the no-allocation memory branch, and adds the exact source class to
+memCovered. Fresh-array cut and fresh-struct fallback order are unchanged.
+Both Covered/inTarget direct definitions, Waivers and DecisionTheorem signatures/
+bodies remain byte-identical frozen base; adjacent documentation is corrected.
+Covered behavior intentionally expands via memCovered. Producer implementations,
+HashPremise, ProgramReduction, MemObserve and held frontend TypeExamples remain
+whole-file byte-identical base (static-differential.json). No producer API,
+semantics/default, exclusion, hash premise or proof/resource budget changes.
+
+Generic GivenHeapLiteralReadReflexive.noAlloc is derived from full source syntax.
+The proof layer now proves actual memCovered/Covered and decideGoal φ=.proved
+for every C, closed φ:Fml C [], witness w of this exact source class. No coverage,
+verdict or route premise is supplied. Actual completion plus hash freedom rules
+out unknown; w.validH plus existing refutation soundness rules out refuted.
+Existing negative candidate_route retains all its original explicit premises,
+now using decideGiven_preserves_countermodel to retain exact states.
+
+Original memParamSame and another literal-index source improve
+(target=true,Covered=false,unknown)→(true,true,proved), with actual positive
+holdsH certificates. The parent guard changes only its assigned first tag:
+[unknown,refuted]→[proved,refuted]. Its all-state source certificate is proved
+before that update; no truth at one checked heap is promoted. NumericCoverage's
+assigned memory conjunct and Census/own example aliases use the actual proved
+certificate; the entire preceding numeric prefix (including517-node
+Covered=false/hashCovered=false/proved and folded-large controls) is byte-identical.
+The prior4feb9c unknown/noncoverage seals remain immutable historical evidence.
+Computed-index, buried-field and mapping target controls remain unknown/noncovered;
+old parameter/alias actual returned candidate states and holdsH refutations,
+reversed exact child-heap refutation, all given-heap defined/OOB/unset observations
+and all existing signed/array/heap outputs remain.
+
+Raw evidence: /workspace/va1-evidence/given-heap-integration-next. Warned before
+core import/cache invalidation and inspected06a8d16/f31-related speed history.
+Helper MCP3.159/build3.261s pass. First Decision MCP FAIL34.135s on invalid
+Bool.or_eq_true.mp use; elaboration-recovery sorryAx cascades were nonpasses,
+not source axioms or changed expected reports. Fixed proof MCP34.303/build31.906s
+pass unchanged guards. Generic bridge MCP4.170/build3.096s passes.
+Finder/skeptic found stale comments and one missed numeric consumer. Stopped only
+our first affected container at211.373s/exit137, resource_stop=false; explicit
+stop command/reason retained. Repaired source, verified four frozen direct
+definitions and numeric prefix, then Decision MCP37.684s passed before restarting.
+This was a changed-tree repair, not an unchanged stopped-build endpoint.
+
+Cold changed-tree affected run FAIL1 after1002.578s, resource_stop=false: old
+reversed coverage proof expected the prior Boolean shape. Independent consumers
+completed (Memory68s, ledger114s, arithmetic90s, remaining files below300s).
+Repaired that proof by deriving new given-class=false from the existing exact
+fresh witness, preserving its statement. MCP4.242s passes; warm selected closure
+PASS380jobs22.358s. Final8 edited-file MCPs pass: helper4.323, Decision36.289,
+boundary4.160, Memory74.940, census5.327, given controls5.241, reversed5.262,
+numeric30.951s. No file exceeds unchanged300s.
+
+First public68 audit FAIL1/57.421s: the edited NumericCoverage example was checked
+in MCP but omitted from emitted targets, leaving an old olean. No theorem/axiom
+expectation was changed; explicit complete affected target list now includes it.
+Complete affected build PASS3.147s; unchanged68 audit PASS60.736s, all only existing
+propext/Classical.choice/Quot.sound subsets. This emission correction, failed
+raw report and final actual declarations are retained. Runtime-only profile
+PASS3.099s confirms actual target/Covered/verdict for both positives, both exact
+negative candidate refutations, reversed refutation and three remaining unknowns.
+Timings including printing3.724/.379/.588/.273/.560/.305/1.711/.328/.303ms
+(original, another-index, computed, diamond-notation, negative-param, alias,
+reversed, buried, mapping). No EVM/other-host performance claim.
+
+All final commands hold original writer lock, one task child, threads1/Lean-j1,
+actual memory.max12884901888/swap.max0 and host reserve12884901888bytes. Exact
+passing extrema: sampled RSS4611476KiB, charged cgroup peak3427799040bytes,
+host available minimum14261637120bytes. resources.json retains19 failed
+measurement samples. Each gate JSON
+records command/toolchain/head/source hashes and raw output. Passing original
+KeySort setup evidence remains separate from full validation. Static strict
+automatic, reachability/layers/trust and whitespace pass; same85 docs/404 inventory
+findings remain FAIL, compared to frozen-base analysis, with no findings hidden.
+Full ./run-lean.sh remains pending the held producer TypeExamples/VA1-Q2 repair;
+no unchanged stopped full/frontend gate was repeated or claimed passing.
+
+Independent read-only finder/skeptic source reviews found the missed consumer/
+comments and verified their repairs, exact old states, all-heap positive proofs,
+remaining unknowns and preserved numeric controls. Final reversed coverage repair
+reviewed with no further findings; neither reviewer used Lean/server/builds or
+edits. Final documentation/export review and committed package seal are pending
+until this checkpoint is committed. Prior2e992aaf and4feb9c seals are retained.
+
+Whole original assignment remains partial: meaningful global Residue union,
+DecisionTheorem-prime/exhaustive target/Covered/hash bridge, fixed/nested/general
+arrays, broader compound/memory blocks, halting OR, broader revised M4 boundary,
+formula-derived runtime fuel, remaining performance/backfill and final/full gates
+are open. Ready next owned children: minimal UInt syntax/recognizer de-layering
+for the compound-field certificate (warn/inspect history before refactor), and
+exact formula-work consumption proof without raising runtime2048/511 budgets.
+No AU05/AU06, VA2/compiler/decoder takeover, scope/goal reset or publication.

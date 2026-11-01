@@ -1,5 +1,6 @@
 import Solidity.Examples.Decision
 import Solidity.Examples.MemoryStructWitness
+import Solidity.Calculus.DecisionGivenHeapBoundary
 
 /-!
 # Fresh memory arrays and given-heap parameter witnesses (M7)
@@ -415,6 +416,19 @@ theorem memParamSame_valid : Fml.Valid memParamSame := by
   intro σ v
   rfl
 
+/-- The actual exact-source parser supplies the all-heap certificate. -/
+def memParamSame_source : ResidueReason.GivenHeapLiteralReadReflexive memParamSame :=
+  (ResidueReason.givenHeapLiteralRead? memParamSame).get (by decide +kernel)
+
+/-- The supported given-heap source now has an actual complete memory route. -/
+theorem memParamSame_covered : memParamSame.Covered = true := memParamSame_source.covered
+
+/-- The actual global result is proved, not just true at the candidate heap. -/
+theorem memParamSame_proved : decideGoal memParamSame = .proved := memParamSame_source.proved
+
+/-- Certify the actual positive verdict under the unchanged hash reading. -/
+theorem memParamSame_certified : Fml.ValidH memParamSame := decideGoal_sound memParamSame_proved
+
 /-- The concrete checker includes unset when validating the positive control. -/
 theorem memParamSame_checked :
     (memParamSame.checkMemoryAt (MemoryWitness.candidate Gaps)).isYes = true := by
@@ -472,7 +486,7 @@ theorem memoryParameter_emptyDomains :
       (fun r => r.map HRef.id) = [none] := by
   decide +kernel
 
-/-- info: ["unknown", "refuted"] -/
+/-- info: ["proved", "refuted"] -/
 #guard_msgs in #eval [verdict memParamSame, verdict memParamAliasBad]
 /-- info: [true, true] -/
 #guard_msgs in #eval [(memParamSame.checkMemoryAt (MemoryWitness.candidate Gaps)).isYes,

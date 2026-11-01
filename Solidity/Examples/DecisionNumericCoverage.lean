@@ -62,10 +62,10 @@ theorem larger_source_folds_to_covered :
     71 < (literalChain 20).size + (literalChain 20).size ∧ foldedLarge.Covered = true :=
   ⟨foldedLarge_exceeds_criterion, foldedLarge_covered⟩
 
-/-- An independently known target gap remains unknown, without any new exclusion. -/
-theorem preserved_memory_unknown : Solidity.Examples.Decision.memParamSame.inTarget {} = true ∧
-    decideGoal Solidity.Examples.Decision.memParamSame = .unknown :=
+/-- The assigned memory target now has the actual global source certificate. -/
+theorem memory_source_now_proved : Solidity.Examples.Decision.memParamSame.inTarget {} = true ∧
+    decideGoal Solidity.Examples.Decision.memParamSame = .proved :=
   ⟨Solidity.Examples.DecisionGapCensus.hiddenParameter_target,
-    Solidity.Examples.DecisionGapCensus.hiddenParameter_unknown⟩
+    Solidity.Examples.DecisionGapCensus.hiddenParameter_proved⟩
 
 end Solidity.Examples.DecisionNumericCoverage

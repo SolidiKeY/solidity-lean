@@ -975,9 +975,9 @@ remain unchanged, with the original requirement/counterexample retained. This is
 
 The kernel gap census in `Examples/DecisionGapCensus.lean` reuses three
 inhabited existing memory fixtures: each is in target. The given-heap parameter
-is globally valid but remains unknown/noncovered; the nonliteral RHS remains
-unknown/noncovered. The reversed equation now has certified coverage and an
-exact returned-state refutation described below. This
+now has certified coverage/proved from an all-heap source certificate; the
+nonliteral RHS remains unknown/noncovered. The reversed equation has certified
+coverage and an exact returned-state refutation described below. This
 census is not a Residue definition or bridge proof. Integrated memory,
 ledger-quantifier and written-memory sources replayed successfully on the VA1 VM.
 A first precise supported-family boundary is now kernel-proved in
@@ -1223,17 +1223,20 @@ and warm MCP pass unchanged limits; full Residue/bridge/AU02/full gates remain
 open. Raw failures, resources and precise limits are in the VA1 handoff.
 
 
-VA1 given-heap reason component (2026-11-01): an exact constructive classifier
-for one box-bound dynamic uint array with repeated direct literal reads now
-proves validity over every heap/binder value, hash-premised validity and an
-independently usable proved Answer. Source equality, full-term reconstruction,
-nonvacuity and syntax refusals are kernel checked; target admission holds under
-all existing waivers. The global pipeline remains unchanged: the original and
-another-index controls stay unknown, while old parameter/alias negative controls
-retain their exact candidate states and returned refutation certificates.
-Actual defined/out-of-bounds/unset reads are pinned. No global Residue or broader
-memory completion is claimed; pipeline consumption and final/full gates remain
-open. See the VA1 handoff for exact signatures, failures and resource evidence.
+VA1 given-heap literal-read pipeline (2026-11-01): the exact constructive
+classifier for one box-bound dynamic uint array with repeated direct literal
+reads now supplies real Covered/proved results for every closed member, with
+validity over every heap/binder value under the unchanged hash reading. The old
+finite countermodel remains first and its exact state is preserved; no positive
+one-heap check is promoted to validity. Original/another-index positives improve
+unknown→proved; parameter/alias negatives retain their candidate refutations.
+Computed-index, buried and mapping targets remain unknown/noncovered. Actual
+defined/out-of-bounds/unset observations and the 517-node uncovered-but-proved
+control remain unchanged. All edited-file MCPs and complete affected targets
+pass; 68 public declarations have standard-only axiom reports. Full Residue,
+other AU02 children and final/full gates remain open, including held VA1-Q2.
+Exact commands, actual failures, source hashes/resources and reviews are in the
+VA1 handoff.
 
 
 ## Guarded symmetric cancellation

@@ -2,8 +2,8 @@ import Solidity.Calculus.Decision
 import Solidity.Calculus.DecisionGivenHeapReason
 
 /-! # Admission boundary for the given-heap literal-read source family
+Actual coverage/proved results and old negative-state preservation.
 This proof layer can depend on Decision; the low-level Answer module cannot.
-No coverage extension is asserted; existing negative-result routing is certified below.
 -/
 namespace Solidity.Decide.ResidueReason
 
@@ -13,6 +13,25 @@ theorem GivenHeapLiteralReadReflexive.target {C : Contract} {φ : Fml C []}
   rcases w with ⟨name, key, heq⟩
   subst φ
   rfl
+
+/-- The actual memory coverage test includes this recognized source class. -/
+theorem GivenHeapLiteralReadReflexive.memCovered {C : Contract} {φ : Fml C []}
+    (w : GivenHeapLiteralReadReflexive φ) : φ.memCovered = true := by
+  simp only [Fml.memCovered, givenHeapLiteralRead_complete w, Bool.or_true]
+
+/-- No supplied coverage premise: exact source recognition provides the real route. -/
+theorem GivenHeapLiteralReadReflexive.covered {C : Contract} {φ : Fml C []}
+    (w : GivenHeapLiteralReadReflexive φ) : φ.Covered = true := by
+  simp only [Fml.Covered, w.memCovered, Bool.or_true, Bool.true_or]
+
+/-- The actual global verdict is proved; its positive certificate covers every state. -/
+theorem GivenHeapLiteralReadReflexive.proved {C : Contract} {φ : Fml C []}
+    (w : GivenHeapLiteralReadReflexive φ) : decideGoal φ = .proved := by
+  have hd : decideGoal φ ≠ .unknown := decideGoal_complete w.covered w.hashFree
+  cases he : decideGoal φ with
+  | proved => rfl
+  | refuted σ => exact False.elim ((decideGoal_refutes he) (w.validH σ))
+  | unknown => exact False.elim (hd he)
 
 /-- Successful finite countermodel search returns the actual unchanged candidate.
 The Boolean certificate determines only the checker branch; the state comes
@@ -39,10 +58,7 @@ theorem givenHeapCandidate_route {C : Contract} {φ : Fml C []}
   have hmem : decideMem φ = .refuted (MemoryWitness.candidate C) := by
     unfold decideMem
     rw [hAlloc]
-    change (match MemoryWitness.countermodel? φ with
-      | some w => LeafVerdict.refuted w.1
-      | none => .unknown) = .refuted (MemoryWitness.candidate C)
-    rw [hmodel]
+    exact decideGiven_preserves_countermodel ⟨MemoryWitness.candidate C, href⟩ hmodel
   unfold decideGoal
   rw [hHash]
   change decideLeaf φ = .refuted (MemoryWitness.candidate C)

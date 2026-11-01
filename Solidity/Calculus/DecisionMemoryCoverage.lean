@@ -33,8 +33,12 @@ theorem ReversedFreshField.hasAllocAll {C : Contract} {φ : Fml C []}
 /-- The recognized source actually reaches the certified fallback. -/
 theorem ReversedFreshField.memCovered {C : Contract} {φ : Fml C []}
     (w : ReversedFreshField φ) : φ.memCovered = true := by
+  have hgiven : φ.givenHeapLiteralReadReflexive = false := by
+    rcases w with ⟨x, s, f, p, value, hf, hm, heq⟩
+    subst φ
+    rfl
   unfold Fml.memCovered
-  rw [w.hasAllocAll, w.cut_none]
+  rw [w.hasAllocAll, w.cut_none, hgiven, Bool.or_false]
   change (structAnswerWithReversed φ).isSome = true
   exact structAnswerWithReversed_reversed (reversedFreshField_complete w)
 

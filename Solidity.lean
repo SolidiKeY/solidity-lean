@@ -198,6 +198,7 @@ import Solidity.Calculus.DecisionResidueReasons
 import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.DecisionMemoryCoverage
 import Solidity.Calculus.DecisionGivenHeapReason
+import Solidity.Calculus.DecisionGivenHeapExtension
 import Solidity.Calculus.DecisionGivenHeapBoundary
 import Solidity.Examples.DecisionGivenHeapReason
 import Solidity.Calculus.DecisionCompoundFieldReason
