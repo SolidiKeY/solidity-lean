@@ -1361,3 +1361,54 @@ named G41/BackfillA/B facts; close no parent feature.
 NEW evidence: `/workspace/scratch/v13-array-pair-87fc9907-evidence`.
 NEW exact-head artifacts: `/workspace/scratch/v13-array-pair-87fc9907-artifacts`.
 Prior21-entry mixed seal and all94earlier entries remain immutable.
+
+
+## Nested uint-array codec checkpoint (parent 784ac610, 2026-11-01)
+
+Owned `Solidity/Backend/AbiWorld/NestedUintPacket.lean` constructs indexed outer
+Seq values from arbitrary lists of full uint values, reusing WordArrayPacket.sequence
+and the real AbiEntry Val/Seq/Vals/encodeArgs/assemble definitions. Generic proofs
+provide all ordered words/bytes, top offset32, outer length, inner head offsets
+relative to the element-head base AFTER the outer length, exact inner payloads,
+and total bytes64+64*outerLength+32*totalElements. No ByteRange or disjointness
+premise. Raw natural offsets, modulo word serialization and actual source
+lim/allocation/fuel admission remain distinct; heap-length bounds imply no
+unconditional total-size/nonwrap theorem here.
+
+Earlier heads and payload prefixes are preserved only in the stated scoped
+forms. Middle payload growth changes later heads; last payload changes preserve
+the complete earlier prefix. Pure two-array regrouping is also proved, without
+creating a nested runtime heap reference. Generic accepted_layout explicitly
+requires an actual exact typed verdict; finite entry controls instead extract
+actual eager/lazy body values and prove complete encoded-byte agreement. They
+do NOT prove typed-value identity or instantiate that exact premise. Fuel0 is
+blocked, never recast as revert. No universal nested admission/native agreement.
+
+New lane tests `tests/v13-abi-world/NestedCodecControls.lean` and
+`tests/v13-abi-world/NestedEntryControls.lean` cover mixed/empty arrays,
+300/max uint/embedded zero, middle/last growth and wrong-base/relative-offset,
+missing length/swapped/truncated-word byte claims after positive baselines.
+All prior19complete observations are retained unchanged alongside new vectors.
+Malformed byte inequalities are not new decoder-rejection theorems.
+
+Strict per-file diagnostics and registered import build PASS;45scoped axiom
+outputs use only standard propext/Classical.choice/Quot.sound (two are empty).
+Initial direct typed-verdict reduction hit maxRecDepth and lacked Decidable;
+actual Option extraction was factored through an abstract lemma, preserving
+all proof/fuel/node/time limits. Raw failures remain in new evidence. Separate
+independent read-only finder/skeptic source reviews found no semantic issue and
+required the typed-identity reporting boundary above. Neither ran Lean/builds.
+
+Original G40/G41partial; G42.01/.02/.03/.05blocked; G42.04/.06partial;
+BackfillA/Bpartial. Native runtime decoder/dispatch, unknown-memory encoder,
+CALL/RETURNDATA, arbitrary callee/callback/world/library/resource composition
+remain open. This codec increment is not an emitted encoder or nested machine
+representation. Mainalone lacks9private V12 inputs7881cb3a; combined validation
+uses exactly the prior immutable overlay. Goal remains blocked and untouched.
+No reserved producer/profile/pin/fixture/Panic control or prior seal changed.
+Raw docs1/frozen comparison1 and Suite124/181.061s, composite1/5038.87s,
+cold5400exit124 remain failures; no unchanged failed heavy retry. Publication/
+prior complete finding equality is separate. G03 proposal: attach these named
+G41/BackfillA facts, close no parent. Exact new gates/reviews/artifacts are in
+`/workspace/scratch/v13-nested-784ac610-evidence` and
+`/workspace/scratch/v13-nested-784ac610-artifacts`.

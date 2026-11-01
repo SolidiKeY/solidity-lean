@@ -1326,3 +1326,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/MixedPacket.lean` | Actual represented uint scalar plus current captured dynamic array to heterogeneous codec head64/full ordered bytes; selected frame/resource transport and explicitly separate post-execution literal packets. |
 
 | `Backend/AbiWorld/ArrayPairPacket.lean` | Two current represented uint arrays through the real codec: derived second offset/tail sizes, prefix noninterference, equal-alias and selected caller transport; no runtime byte encoder. |
+
+| `Backend/AbiWorld/NestedUintPacket.lean` | Arbitrary nested uint-array intrinsic codec layout, post-length relative offsets, complete ordered full-word payloads, length and scoped prefix noninterference; no nested runtime representation. |

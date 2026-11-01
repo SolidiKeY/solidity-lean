@@ -981,3 +981,5 @@ import Solidity.Backend.AbiWorld.CallerPacket
 import Solidity.Backend.AbiWorld.MixedPacket
 
 import Solidity.Backend.AbiWorld.ArrayPairPacket
+
+import Solidity.Backend.AbiWorld.NestedUintPacket
