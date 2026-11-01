@@ -1,3 +1,4 @@
+import Solidity.Backend.InternalFlow.MemoryStoreLocalFrame
 import Solidity.Backend.InternalFlow.CallerView
 import Solidity.Backend.InternalFlow.StoragePrograms
 import Solidity.Backend.InternalFlow.FragilePrograms
@@ -582,3 +583,57 @@ theorem stale_is_not_live : ∃ r : SRef C (.ref R),
     | none => rfl
     | some value => simp only [Option.bind_some,live,Option.isSome_some] at absent; cases absent
 end Solidity.Backend.InternalFlow.FragileReturnChecks.CapturedResult
+
+namespace Solidity.Backend.InternalFlow.FragileReturnChecks.MemoryLocalFrame
+open Evm Evm.Memory
+private theorem get_return {α : Type} (result : TRes α) (h : result.toOption.isSome = true) :
+    result = .ok (result.toOption.get h) := by
+  cases result with
+  | error e => cases h
+  | ok value => rfl
+
+def store : Stmt C Final Final := write (.there (.there (.there .here))) (.lit 0 rfl) (.lit 91 rfl)
+def written : Solidity.Out C final.st.H Final := (store.run final.st).toOption.get (by decide +kernel)
+theorem source_run : store.run final.st = .ok written := get_return _ (by decide +kernel)
+theorem locals_frame : written.st.env = TEnv.wk written.ext Final final.st.env :=
+  CallerView.memory_store_environment _ _ source_run
+
+def compiled : CompiledStmt 1 producer.frag store :=
+  (Memory.compileStmt 1 producer.frag store).get (by decide +kernel)
+attribute [irreducible] compiled
+def cert : Calls.Statement 1 producer.frag store := Calls.plainStmt compiled
+
+theorem actual_endpoint : ∃ (m₁ : Machine)
+    (m₂ : Machine) (base₂ : Nat → Fin W) (m₃ : Machine) (base₃ : Nat → Fin W),
+    Evm.run prefixCode machine = .ok m₁ 0 ∧ Evm.run producer.code m₁ = .ok m₂ 0 ∧
+    Evm.run cert.code m₂ = .ok m₃ 0 ∧ StateRepr 3 1 128 producer.frag final.st base₂ m₂ ∧ StateRepr 3 1 128 cert.frag written.st base₃ m₃ ∧
+    m₃.stack = machine.stack ∧ BaseExtends final.st.H base₂ base₃ ∧
+    GrowsAllocator 1 128 0 final.st base₂ m₂ written.st base₃ m₃ ∧
+    (∀ (R : RefTy) (i : Idx Final (.mem R)) (r : HRef final.st.H R),
+      TEnv.get i final.st.env = some r → m₃.mem (cellOf 1 i) = .val (base₂ r.id)) ∧
+    (∀ (p : PrimTy) (i : Idx Final (.val p)),
+      ReprV p (TEnv.get i final.st.env) (m₃.mem (cellOf 1 i))) := by
+  obtain ⟨m₁,_base₁,m₂,base₂,hp,hc,repr,stack,extend,grow,input,agrees⟩ := whole_endpoint
+  obtain ⟨m₃,base₃,ht,hr,hk,he,hg⟩ := PublishedDirectCalls.statement_endpoint
+    (L := 3) (frame := 128) cert repr (by decide +kernel) (.inl rfl) written source_run
+  refine ⟨m₁,m₂,base₂,m₃,base₃,hp,hc,ht,repr,hr,hk.trans stack,he,hg,?_,?_⟩
+  · exact CallerView.represented written Thin.refl locals_frame hr he
+  · intro p i
+    exact CallerView.represented_value_drop written Ext.refl Thin.refl locals_frame hr i
+
+theorem changed_contents :
+    (contents final.st,contents written.st) =
+      (some [[2,7,84],[1,23],[2,99,101]],some [[2,91,84],[1,23],[2,99,101]]) := by
+  apply Prod.ext
+  · exact congrArg (fun p => p.2.1) source_final
+  · decide +kernel
+
+theorem wrong_content_frame : contents written.st ≠ contents final.st := by
+  have before := congrArg Prod.fst changed_contents
+  have after := congrArg Prod.snd changed_contents
+  dsimp only at before after
+  rw [after,before]
+  decide +kernel
+
+theorem original_guard_rejects : store.withinM .nonpayable = false := by decide +kernel
+end Solidity.Backend.InternalFlow.FragileReturnChecks.MemoryLocalFrame

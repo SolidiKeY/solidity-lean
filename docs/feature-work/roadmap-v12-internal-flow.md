@@ -2821,3 +2821,52 @@ intake or push/merge/PR. All earlier seals remain immutable; exact committed
 source/signatures/witness/bundle are supplied for private parallel consumers,
 which still require actual combined-tree validation. Independent read-only
 finder/skeptic source and committed-artifact reviews are bound in the handoff.
+
+
+## Continuation35 — heap mutation frames locals, not old contents
+
+New `Backend/InternalFlow/MemoryStoreLocalFrame.lean` proves `CallerView.memory_store_environment`
+by inverting ACTUAL successful intrinsic assignMem execution and consuming the
+published typed weakening law. Every local is retained up to the real returned
+heap extension; no withinM relaxation or Heap.Keeps statement is made. Core,
+module-map and docs registration are append-only.
+
+The populated `FragileReturnChecks.MemoryLocalFrame` client starts at the real
+completed storage-prefix/memory-call/caller-suffix state. A genuinely compiled
+public Memory.compileStmt/Calls.plainStmt store writes OLD object0 element0=91.
+The actual endpoint exposes both target INPUT and OUTPUT representations,
+protected stack, BaseExtends, reached GrowsAllocator0, every old memory-reference
+address and every primitive encoding. The input is derived from the existing
+whole_endpoint, not supplied as a desired midpoint. Complete source contents
+change from [[2,7,84],[1,23],[2,99,101]] to [[2,91,84],[1,23],[2,99,101]];
+wrong_content_frame rejects unchanged contents while original_guard_rejects
+retains withinM.nonpayable=false. This demonstrates local noninterference under
+real old-object mutation without claiming arbitrary callee/whole-state framing.
+These are source observations plus a relational StateRepr target endpoint;
+no new complete numeric target-cell snapshot or external EVM test is asserted.
+
+The imported prototype passes2.465s after retained namespace/product-projection
+errors; failed sorryAx reports are FAILED evidence only, never proof coverage.
+Generic core build passes2.149s; actual changed source preparation44.103s and
+strengthened pointer/value preparation41.865s pass at unchanged120s bounds.
+Seven new actual axiom sets are pinned separately (existing standard axioms).
+All old542 kernel types and C32/C33/C34 scoped type/axiom sets remain unchanged.
+Actual per-file/import/runtime/guard/resource evidence and independent read-only
+finder/skeptic source/artifact reviews are bound in the handoff.
+
+No performance repair or changed held prerequisite justifies an aggregate retry.
+Current raw/cached/full validation stays unfinished with all C32 strictcached
+0/121.091>120, raw124/121.214, originalfull124/300 and prior failures retained.
+All original targets remain; the raw driver now also discovers the added owned
+module. Focused source checks/input inventory never substitute for complete
+aggregate/full gates. Raw docs normal/strict1 and separate complete previous/
+publication comparison remain explicit, not frozen/global success.
+
+All Work1–6 and BackfillsA/B remain partial. General/unbounded/dependent/
+early-control/general-loop/byte-world/target-transient obligations, stronger
+frame assembly and validation work remain. In particular, this standalone
+successful store is NOT a proof of the earlier entire caller-suffix storage-
+alias equation. No independent-work exhaustion, goal write, unmerged intake,
+reserved edit or push/merge/PR. All previous seals remain immutable; exact
+committed source/signature/witness bundles support private parallel consumers,
+which still require actual combined-tree validation.

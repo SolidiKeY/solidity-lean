@@ -1334,3 +1334,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/CallerTail.lean` | Captured caller views and target old-address transport through call-plus-tail candidates using the published tail frame law. |
 
 | `Backend/InternalFlow/CallerView.lean` | Captured typed caller-view reference elimination and reached primitive-array separation consumers. |
+
+| `Backend/InternalFlow/MemoryStoreLocalFrame.lean` | Actual successful heap-store local-environment frame; no heap-content invariant or withinM relaxation. |

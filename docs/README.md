@@ -122,3 +122,5 @@ history is in git.
 - [V12 call-tail frame consumers](feature-work/roadmap-v12-internal-flow.md): scoped reference-result rebind transport and exact committed interfaces.
 
 - [Captured caller-view target consumers](../Solidity/Backend/InternalFlow/CallerView.lean) — typed pointer identity and reached separation.
+
+- [Memory-store local frame](../Solidity/Backend/InternalFlow/MemoryStoreLocalFrame.lean) — actual execution frames locals while heap contents may change.
