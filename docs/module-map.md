@@ -1322,3 +1322,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/CompletedLoopFrame.lean` | Actual successful scoped-loop completion to existing finite-prefix heap/local frames; body guard retained, no target or whole-world simulation. |
 
 | `Backend/InternalFlow/FiniteDispatch.lean` | Actual finite intrinsic dispatch chain composition, checked arm/frame transport, scoped result drop and exact fallback; frontend links required per consumer. |
+
+| `Backend/InternalFlow/StructuredFrame.lean` | Structural successful branch/block/sequence/completed-loop heap frames and protected typed local transport; existing guards retained. |

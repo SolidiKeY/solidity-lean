@@ -2630,5 +2630,63 @@
         "propext"
       ]
     }
+  },
+  "StructuredFlowChecks": {
+    "guard": "tests/internal-flow/check-structured-flow-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.StructuredChecks.changed_marker_not_protected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FrameStmt.sound": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FrameProg.sound": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.actual_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.framed": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.old_contents": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.complete_values": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.existing_guard_unchanged": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.false_branch": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.wrong_observations": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.StructuredChecks.actual_writer_excluded": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }

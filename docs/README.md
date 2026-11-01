@@ -113,3 +113,4 @@ history is in git.
 | Published ordinary memory-call consumer and remaining V12 obligations | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
 | Completed successful loop framing and writer countercontrol (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
 | Finite source-dispatch checked target/frame and memory-export consumers (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
+| Structural branch/block/loop local framing and fresh-source investigation (partial V12) | [roadmap-v12-internal-flow.md](feature-work/roadmap-v12-internal-flow.md) |
