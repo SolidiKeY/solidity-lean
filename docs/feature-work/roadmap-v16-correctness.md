@@ -1197,3 +1197,38 @@ fingerprint. Fresh remote inspection observes newer published master
 checkpoint is preserved, inspect it for newly ready original prerequisites;
 do not treat this scoped checkpoint or a stale prerequisite inventory as
 completion. The original persistent goal remains blocked and untouched.
+
+### Published prerequisite integration099bf (original work continues)
+
+After sealing83aff798 and all116artifact checksums (manifest
+efad04b7394be53e6f6b2f685901d21773079827a7cb181e0904baee3bed5536),
+fetched only published master under the writer lease. Verified exact
+099bfbe185731c354b12a40f28ccf5d98534c779, consumed5f6and frozen2fe ancestry,
+clean assigned branch and unchanged task head; isolated incorporation has no
+conflicts and preserves every own append/import. No unmerged producer source.
+Published additions are typed ABI-entry decoding/agreement and intrinsic
+finite-dispatch selection. Compiler.Compilation remains the same8arms; all
+existing Evm producer bytes are unchanged. The G03 ledger has identical2255
+obligation IDs in the same import environment, no removed IDs, and only a
+combination17cover-line anchor changes274→402; restrictions/missing obligations
+are unchanged. Updated only the OWNED ledger-source pin to this actual
+published ledger, not its contents or any global trust pins.
+
+Read producer docs: ABI mdec_cval/eager_cref/verdict_run_entry/revert_iff are
+actual kernel proofs; no theorem connects them to solc bytecode. Entry coder1,
+constructor/function-valued/nominal-enum args, access-time/lazy-only gaps,
+Panic(0x41) and gas/refusal distinctions remain. Dispatch chain_select/none/tag
+are over existing Stmt.runC; generic guard-elaboration/body-call links and
+dynamic Source resolution/Panic(0x51) are explicitly unproved owner gaps. Do not
+claim SourceSpec/full compiler correctness or replace V13's packet adapter.
+Next owned original-scope work consumes these actual source-level certificates
+in scoped intrinsic/specification consequences and controls, retaining every
+refusal/observation/real backend Input. Broader source rebuild may be needed;
+same single cache, serial hard12GiB/no-swap, fixed proof/time budgets and
+irreducible/explicit-context sharing are preserved. Previous passing and raw
+failed gates/seals remain immutable; this integration is not completion.
+
+Integration whitespace gate raw exit2:3new trailing blank lines in published
+abi-hashes/finite-dispatch/source-inputs docs. Exact incoming bytes verified
+and preserved; no reserved edits. Separate diff against099bf for owned changes
+passes exit0. This distinction does not waive the raw integration finding.

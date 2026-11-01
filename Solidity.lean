@@ -14,6 +14,7 @@ import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Scope
 import Solidity.Syntax.Scoped
+import Solidity.Syntax.DispatchChain
 import Solidity.Syntax.Checked
 import Solidity.Syntax.CheckedExact
 import Solidity.Syntax.PushSource
@@ -37,12 +38,16 @@ import Solidity.Semantics.Termination
 import Solidity.Semantics.LexMetrics
 import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
+import Solidity.Semantics.AbiEntry
+import Solidity.Semantics.AbiEntryProofs
+import Solidity.Semantics.AbiEntryChecks
 import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.Lifetime
 import Solidity.Semantics.Transient
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
+import Solidity.Semantics.Dispatch
 import Solidity.Semantics.RunFrame
 import Solidity.Semantics.DeferredSource
 import Solidity.Semantics.DeferredCallback
@@ -773,6 +778,7 @@ import Solidity.Examples.Tactics.ContractWorldSource
 import Solidity.Examples.Tactics.TransientWorld
 import Solidity.Examples.Tactics.TransientWorldSource
 import Solidity.Tools.Upstream
+import Solidity.Tools.UpstreamEntry
 
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport

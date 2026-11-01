@@ -22,7 +22,7 @@ def validate_owned_imports(inv):
     require(owned <= set(inv["modules"]), "owned theorem module missing from checked import closure")
 
 def current_binding(root=ROOT):
-    frozen=digest(subprocess.check_output(["git","show","5f6a75b6038371a3917dbe08b660d5f2d1207c58:"+LEDGER],cwd=root))
+    frozen=digest(subprocess.check_output(["git","show","099bfbe185731c354b12a40f28ccf5d98534c779:"+LEDGER],cwd=root))
     require(digest((root/LEDGER).read_bytes())==frozen,"modified published G03 ledger")
     names=subprocess.check_output(["git","ls-files","-z","--cached","--others","--exclude-standard","*.lean"],cwd=root).decode().split("\0")
     h=hashlib.sha256()
