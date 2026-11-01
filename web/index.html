@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#3c3c3c">
+  <title>Counter.sol — Solidity Lean</title>
+  <link rel="icon" type="image/svg+xml" href="/media/proved.svg">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/vendor/vs/editor/editor.main.css">
+  <script src="/vendor/vs/loader.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="titlebar">
+    <span class="brand" aria-label="Solidity Lean">◈</span>
+    <nav aria-label="Main menu">
+      <button data-menu="File">File</button><button data-menu="Edit">Edit</button><button data-menu="Selection">Selection</button><button data-menu="View">View</button><button data-menu="Go">Go</button><button data-menu="Run">Run</button><button data-menu="Help">Help</button>
+    </nav>
+    <button id="title" title="Open Command Palette (F1)">Counter.sol — solidity-lean [Offline]</button>
+    <button id="layout-button" title="Toggle panel (Ctrl+J)" aria-label="Toggle panel"></button>
+  </header>
+  <div class="workbench">
+    <nav class="activitybar" aria-label="Activity bar">
+      <button id="main-menu-button" title="Command Palette (F1)" aria-label="Command Palette">☰</button>
+      <button data-view="explorer" class="active" title="Explorer (Ctrl+Shift+E)" aria-label="Explorer"></button>
+      <button data-view="search" title="Search (Ctrl+Shift+F)" aria-label="Search"></button>
+      <button data-view="changes" title="Local changes" aria-label="Local changes"></button>
+      <button data-view="run" title="Run verification" aria-label="Run verification"></button>
+      <button data-view="extensions" title="Built-in extensions" aria-label="Built-in extensions"></button>
+      <button data-view="testing" title="Testing" aria-label="Testing"><span id="test-badge" class="badge" hidden></span></button>
+      <div class="activity-spacer"></div>
+      <button id="offline-button" title="Runs entirely on this computer" aria-label="Offline information"></button>
+      <button data-view="settings" title="Settings" aria-label="Settings"></button>
+    </nav>
+    <aside class="sidebar" aria-label="Side bar">
+      <div class="sidebar-heading"><span id="view-title">EXPLORER</span><div id="view-actions"></div></div>
+      <div id="sidebar-content"></div>
+      <div class="sidebar-bottom" id="outline"><button id="outline-toggle">⌄ &nbsp; OUTLINE</button><div id="outline-content"></div></div>
+    </aside>
+    <div class="resize sidebar-resize" role="separator" aria-label="Resize side bar" aria-orientation="vertical" tabindex="0"></div>
+    <main>
+      <div class="editor-top"><div id="tabs" role="tablist" aria-label="Open editors"></div><div class="editor-actions"><button id="verify-button" title="Verify File (Ctrl+Shift+Enter)" aria-label="Verify File"></button><button id="more-button" title="More actions" aria-label="More actions">···</button></div></div>
+      <div id="breadcrumbs" aria-label="Breadcrumbs"><span class="sol-icon">◈</span><span id="breadcrumb-file">Counter.sol</span></div>
+      <div id="editor" aria-label="Solidity source editor"><div class="loading">Starting local editor…</div></div>
+      <div class="resize panel-resize" role="separator" aria-label="Resize panel" aria-orientation="horizontal" tabindex="0"></div>
+      <section id="panel" aria-label="Bottom panel">
+        <div class="panel-heading"><nav aria-label="Panel tabs"><button data-panel="problems" class="selected">PROBLEMS <span id="problem-count" class="count">0</span></button><button data-panel="output">OUTPUT</button><button data-panel="results">TEST RESULTS</button></nav><div class="panel-tools"><span id="output-channel">Solidity Lean</span><button id="clear-output" title="Clear Output" aria-label="Clear Output"></button><button id="close-panel" title="Close Panel (Ctrl+J)" aria-label="Close Panel">×</button></div></div>
+        <div id="panel-content" tabindex="0"></div>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><button id="remote-status" title="Local offline workspace" aria-label="Local offline workspace">⌁</button><button id="errors-status" title="Show Problems">⊗ 0 &nbsp; △ 0</button><button id="proof-status" title="Verify File">⚗ Solidity Lean: connecting</button><div class="status-spacer"></div><span id="connection-status">Local · Offline</span><span id="position-status">Ln 1, Col 1</span><span>Spaces: 4</span><span>UTF-8</span><span>LF</span><span>Solidity</span><button id="notification-button" title="Notifications" aria-label="Notifications"></button></footer>
+  <dialog id="palette" aria-label="Command Palette"><input id="palette-input" aria-label="Type a command" placeholder="Type a command"><div id="palette-items" role="listbox"></div><div class="palette-hint">↑↓ to navigate &nbsp; ↵ to select &nbsp; esc to close</div></dialog>
+  <dialog id="input-dialog"><form method="dialog"><label id="input-label" for="input-value">File name</label><input id="input-value" autocomplete="off" required><p id="input-error" role="alert"></p><div><button value="cancel" formnovalidate>Cancel</button><button id="input-submit" value="ok">Create</button></div></form></dialog>
+  <div id="toast" role="status" hidden></div>
+  <input type="file" id="file-picker" accept=".sol" multiple hidden>
+</body>
+</html>

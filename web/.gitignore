@@ -1,0 +1,4 @@
+node_modules/
+artifacts/*.png
+artifacts/*.json
+artifacts/*.log

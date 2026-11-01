@@ -56,6 +56,8 @@ theorem per obligation (`lake build SolkeyTestSuite`):
 
 The [VS Code extension](vscode/README.md) verifies Solidity files through the same
 runner, with Test Explorer, diagnostics, hover status and cancellation. The
+[offline web IDE](web/README.md) offers the same local compiler and proof backend
+in a VS Code-style browser workbench. The
 [Dafny feature audit](docs/dafny-parity.md) records reusable verification features
 and the remaining semantic gaps.
 
