@@ -3662,3 +3662,78 @@ This adds no evaluator/AST/fuel/profile or fragment predicate. Tuple-contained
 RVal/intermediate reference capture and arbitrary calls remain open. Per-file
 validation and independent read-only reviews cover the additions; final gates
 are attributed by exact commands and tested-tree hashes in the evidence.
+
+### VY2 runtime tuple and argument capture; parallel physical consumers (2026-11-01)
+
+`RetainedRuntimePaths/Run/TupleProducers/TupleControls` add actual mutual RVal/RVals
+collection, including nested tuple constituents before getV (which really rejects
+tuples), and linked structural executable twins under Gate G0. Actual evalArgs
+head/tail horizon decrement and left-to-right state/error order are preserved by
+`captureArgumentsRun_source`. `captureArgumentsRun_covers` derives membership of
+EVERY successful returned constituent from the actual owner run; successful head
+observations persist when a later argument halts. No new AST/state/interpreter or
+length/depth/fuel cap. Nested successful runtime tuple constituents are traversed;
+intermediate discarded references INSIDE arbitrary head evalE, including nested
+head failure, are not automatically instrumented. evalArgsRev/converted args have
+distinct owner behavior and are not inferred from this forward adapter.
+
+`runtime_mkRet_paths` handles all actual zero/single/multiple arities. Real retVals
+extraction derives path membership from actual getAt/reverse-local return slots,
+preserving its failures. `captureInternalReturn` invokes ENTIRE actual callInternal
+(dispatch, zeroVals, checked runMods, retVals/mkRet and horizons) unchanged; its
+returned runtime values are covered and saved caller contexts are retained through
+actual EM.sub. These endpoint laws are not modifier/body/nested-call instrumentation
+or global producer/reachability/frame adequacy. Syntactic collection, actual owner
+RefOK/pathTy, account attribution and historically successful index formation stay
+separate. Account tags remain contextual; no storage pointer embeds an account.
+
+Inhabited controls include dormant duplicate aliases inside a nested runtime tuple,
+actual tuple/local expression evaluation at every supplied Glob, a real owner
+argument horizon2 with successful first reference then timeout, getV tuple loss,
+retVals/mkRet packaging, wrong-account/missing-tuple distinctions, and the same
+computed CapturedOwnershipPlan source/raw/complement map with real rollback. No
+formation events are fabricated and no owned dirty bits are relabeled residual.
+
+Separate pinned TupleStorage.sol returns three real storage references from an
+internal function before outer shrink and raw nested-header writes; exact complete
+ordered success/error/Panic/storage/log observations are independently specified
+in both solc0.8.38+1835d247 Osaka pipelines. Real AST storage-return/caller tuple
+metadata is bound into the report; malformed/dropped/wrong-location/order/callee
+controls fail closed. All preceding732 calls/18classifications remain unchanged.
+Finite compiler/EVM observations are distinct from synthetic Fixed/hash kernel
+states, source/compiler correspondence or global execution reachability.
+
+The human parallel scheduling amendment is applied: exact committed a532b325
+producer source/bundle/interface is exported immediately in
+`/workspace/vy2-evidence/parallel-interface-a532b325`; dirty tuple work was excluded.
+Actual checked Interface.lean/CONTRACT.md contains existing dependent declarations,
+real premises and witnessed rePlan/re_use_escaped. No whole upstream lane/master
+publication prerequisite is used to stop ready consumer work.
+
+Verified VY4 head9c631ecb07af62039348239763e049275fd78c1e and VY3
+head250555de2df2c16e2413cf329f43c77ce51ac8b6 source packages are staged, hash-bound,
+in `/workspace/vy2-dependency-world-9c631ecb` (detached task-owned dependency tree).
+VY2-owned PhysicalCallMemory consumes ACTUAL World.Raw/Frames: exact available CALL
+prefix, untouched tail/outside, exact RETURNDATACOPY offset/size test including
+zero-size failure, actual childContext physical input and actual complete returndata.
+PhysicalTargetBytes proves actual Backend.Environment.writeBytes equals VY2 copyBytes,
+real materialize execution with unchanged nonwrap fits premise, and actual VY3
+memoryHarness physical agreement. These are concrete peer-body/kernel checks, not
+opaque interface adequacy. Nat byte geometry/target slices are not Word-address,
+allocation/resource/exceptional-EVM or logical-heap/compiler adequacy. Dependency
+checks/exports have separate tested-tree provenance; they do not mutate main owners
+or publish/merge anything. The serialized controller retains final integration.
+
+Entire original Y04/Y05/Y06/BackfillA/B remain PARTIAL; Y09.02 and final concrete
+producer/source/compiler/calculus/joint obligations remain OPEN. Mapping/bytes/
+transient/dirty/general ownership, full intermediate/initial/escape capture and
+arbitrary source/frame adequacy, universal memory/shared-zero/interior/pointer
+writeback, reachable allocation/refinement, concrete V10/V11 agreements and Y06
+bindings remain required. Ready independent work progressed; the previously blocked
+goal was neither mutated nor used to postpone this work. No getter exposed and no
+goal mutator called. YQ1-YQ7 and full original observations/budgets remain unchanged.
+
+Validation/reviews, all raw failures, exact signatures/axioms and final tested-tree
+attribution are under `/workspace/vy2-evidence/tuple-capture`; global docs exit1 is
+retained separately from exact-base zero delta. Minimum trust registration adds
+exactly the two proved runtime collector twins; checker rules are unchanged.

@@ -963,3 +963,5 @@ import Solidity.Yul.Views.RetainedChildEventControls
 import Solidity.Yul.Views.RetainedEntryControls
 
 import Solidity.Yul.Views.RetainedExpressionCapture
+
+import Solidity.Yul.Views.RetainedTupleControls

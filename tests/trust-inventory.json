@@ -1243,5 +1243,15 @@
     "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
     "kind": "override",
     "code": "@[implemented_by returnStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedRuntimePaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by runtimeStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedRuntimePaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by runtimeValuesPathsM]"
   }
 ]

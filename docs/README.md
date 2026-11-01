@@ -167,3 +167,5 @@ VY2 retained source-reference preparation and original unfinished queues:
 [inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-retained-source-references-2026-11-01).
 
 - [VY2 computed entry/return capture](feature-work/inline-assembly-vy2.md#vy2-computed-entry-and-return-capture-2026-11-01): typed entry/return observation and supported physical writeback.
+
+- [VY2 tuple capture and parallel physical consumers](feature-work/inline-assembly-vy2.md#vy2-runtime-tuple-and-argument-capture-parallel-physical-consumers-2026-11-01).
