@@ -1160,3 +1160,58 @@ axioms. Finder/skeptic requested explicit fixed-world labeling, immutable
 producer provenance, actual same-payload RETURN and missing/failed-slice
 negative controls; these were implemented. Final independent source reviews
 are retained with raw diagnostics and the new exact-head export.
+
+
+## Checkpoint 15 — actual receiver-result receipt preparation
+
+PaymentReceipt.prepare derives an intrinsic table receipt from the actual
+World.receiveRun result, after the actual stipend library/storage admission
+check. Successful execution yields an explicit ok receipt; completed failure
+yields a rejecting other receipt with actual THalt.data; noncatchable failure
+or failed admission yields None. None is adapter refusal, not an encoding of
+the exact halt: retain the original actual world run for that observation.
+There is no fallback to the model's accepting missing-entry behavior.
+
+receive_funded derives sender funding through the published actual enter/body/
+finish witness. world_observation proves two-sided Option Bool equality with
+actual World.stipend.send, under the explicit numerical checkpoint premise
+sigma.selfBalance.val = (w.funds sender).val. prepare_refused_iff characterizes
+refusal exactly by an error in that actual full world send. These are actual
+send observation consumers, not a desired simulation hypothesis. General
+producer/declaration resolution, invariant-preserving immutable receipt tables,
+pending caller ledger/world alignment, full source lowering and post-world
+simulation remain OPEN. This checkpoint equality is not an admitted-profile
+restriction and does not close general G43 or enable final G36.03 simulation.
+
+Inhabited controls execute actual receiver success, body failure, entry overflow
+and funding refusal. New head-first installation shadows a stale failure;
+an independently populated other-key Panic17 receipt and protected uint99
+survive. Missing code fails admission before raw receiver failure. An actual
+assumeFalse receiver reaches the published model-exhausted halt; no ordinary
+intrinsic send receipt can reproduce that halt. This is model-stop evidence,
+not EVM out-of-gas. A receipt derived from actual receiver bytes still leaves
+the existing source-transfer bare revert versus world revertWith(dead)
+difference explicit. The arbitrary rejecting-entry transfer helper is not
+misstated as proof of an actual completed receive.
+
+Separate read-only finder/skeptic reviews requested the populated unrelated
+receipt and precise halt-origin/helper wording; these were implemented. Final
+reviews and all raw failures are retained in the checkpoint handoff. Twenty-three
+new scoped axiom reports are guarded with standard axioms only. New bounded
+jobs sample aggregate Lean/Lake RSS, all-container RSS, worker count, host
+headroom and cgroup peak under the unchanged12GiB/no-swap/j1 writer lease.
+Prior sealed exports remain immutable. All original queues remain binding;
+the same original goal stays ACTIVE while ready owned work continues.
+
+
+Checkpoint15 final focused63jobs and required ./run-lean.sh1043default+
+262TestSuite passed; pinned SolKey377/131/131. Actual Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613 and KeySort2jobs precede RUNTIME_GATE_PASS. Measured
+aggregate Lean/Lake RSS peak1712372KiB, one Lean worker, minimum host available
+17338764KiB; cgroup peak393105408bytes, noOOM/swap under unchanged12GiB cap.
+The initial runtime probe exited1 before any build because the Lake wrapper
+prepended its config before --version; it was repaired by probing the actual
+Lake binary. That raw failure is retained separately, not relabeled green.
+Independent final finder/skeptic reviews accepted all fixes and explicit limits.
+Gate commands/raw logs are under /workspace/v14-receipt-evidence. Raw historical
+documentation failures and exact-baseline no-new-findings remain separate.

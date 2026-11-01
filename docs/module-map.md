@@ -1302,3 +1302,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Backend/Executable/CreationArguments.lean` | Actual typed constructor argument binding, argument-dependent raw failure/catch heap and evaluated-argument/tail rollback; no source lowering/EVM claim |
 
 | `Backend/Executable/PaymentCases.lean` | Actual intrinsic send/receiver settlement equality, funding/overflow failure ordering, transfer-byte and stipend-policy boundaries; no general compiler/EVM theorem |
+
+| `Backend/Executable/PaymentReceipt.lean` | Actual receive-result receipt preparation, derived funding, two-sided send Bool/None transport, admission and halt-origin characterization; explicit checkpoint balance condition, no full world/compiler relation |
+| `Backend/Executable/PaymentReceiptChecks.lean` | Populated stale/other receipt controls, receiver failure/overflow/funding/admission ordering, actual assumeFalse model stop and unchanged transfer-byte boundary |

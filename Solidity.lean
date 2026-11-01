@@ -960,3 +960,6 @@ import Solidity.Backend.Executable.CreationFrame
 import Solidity.Backend.Executable.CreationArguments
 
 import Solidity.Backend.Executable.PaymentCases
+
+import Solidity.Backend.Executable.PaymentReceipt
+import Solidity.Backend.Executable.PaymentReceiptChecks
