@@ -5,6 +5,7 @@ import Solidity.Semantics.RevertMemory
 import Solidity.Tools.EntryReturn
 import Solidity.Tools.CreationTryReplay
 import Solidity.Tools.LibraryTryReplay
+import Solidity.Tools.UpstreamEntry
 
 /-!
 # Replay upstream typed ABI semantic vectors
@@ -381,8 +382,23 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       let canonicalOnly ← match vector.getObjVal? "canonicalOnly" with
         | .error _ => pure false
         | .ok j => fromJson? j
-      ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
-      ABI.program C d (function.getD "constructor") ctor false bytes
+      -- ABI coder v2 entries with typed parameter shapes use the typed
+      -- entry decoder (`Semantics/AbiEntry.lean`); v1, constructors and
+      -- function/enum parameters keep the byte-identical gate.
+      let entryPlan := if ctor || canonicalOnly || !ABI.needsCanonical d then UpstreamEntry.Plan.legacy
+        else UpstreamEntry.plan d signature bytes
+      match entryPlan with
+      | .legacy =>
+        ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
+        ABI.program C d (function.getD "constructor") ctor false bytes
+      | .blocked reason => throw reason
+      -- An entry check fails: an empty revert before the body.
+      | .revert => entryProg C [.revert]
+      | .run canonicalBytes =>
+        -- Cross-check: the generated decoder reproduces the typed values.
+        match ABI.canonical C d (function.getD "constructor") canonicalBytes state true with
+        | .error reason => throw s!"generated decoder disagrees with the typed entry decoder: {reason}"
+        | .ok () => ABI.program C d (function.getD "constructor") ctor false canonicalBytes
     if raw then
       if let .error reason := rawProgram then return stopped "blocked" reason
     let program := if raw then rawProgram else if ctor then entryProg C (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [.call (.name "constructor") args]) else do

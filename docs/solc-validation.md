@@ -83,6 +83,14 @@ theorem.
   programs with the SHA-pinned solc and run them on an externally supplied
   EthereumJS VM, legacy and via-IR, against expected results. Optional; no Lake
   dependency. Per-feature evidence, not a generated differential harness.
+- **ABI entry decoding, typed and proved.** `Semantics/AbiEntry.lean` models
+  solc's v2 entry decoder (eager memory parameters, entry-checked calldata
+  parameters with lazy element access); `Semantics/AbiEntryProofs.lean` proves
+  that the eager decoder's values are what lazy reads observe (`mdec_cval`,
+  `eager_cref`). `scripts/abi-entry-probe.mjs` pins the decoder's checks on
+  `tests/abi-0.8.38/LazyEntry.sol` in legacy/via-IR with the optimizer off and
+  on; [abi-hashes.md](feature-work/abi-hashes.md) ("Entry decoding: lazy and
+  noncanonical layouts") has the evidence and the remaining refusals.
 - **Operand order is decided**: legacy by default, `Contract.evalOrder :=
   .viaIR` for source order (`docs/options.md` O9).
 

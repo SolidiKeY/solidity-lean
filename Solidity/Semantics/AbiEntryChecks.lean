@@ -114,8 +114,13 @@ example : (observe (cd [0x100, 0]) [{ shape := .fixed u8 2, loc := .calldata }])
 
 /-! Retained Group 10 vectors. -/
 
--- calldata_array_length_v2: `f(uint256[][]): 0x20, 1, -32 -> 1, 1, 0` is lazy-only
+-- calldata_array_length_v2: `f(uint256[][]): 0x20, 1, -32 -> 1, 1, 0` is lazy-only:
+-- refused for a body that may copy, read lazily (`x[0]` is the outer length word
+-- and its one element the offset word `-32`) for one that only reads.
 example : (observe (cd [0x20, 1, neg 32]) (arr2 .calldata)).1 = lazyOnly := by decide
+example : observe (cd [0x20, 1, neg 32]) [{ shape := .array (.array u256), loc := .calldata, readsOnly := true }] = ("run", (cd [0x20, 1, 0x20, 1, neg 32]).data.drop 4) := by decide +kernel
+-- an element failing on access stays refused even for a reading body
+example : (observe (cd [0x20, 1, 0x1000]) [{ shape := .array (.array u256), loc := .calldata, readsOnly := true }]).1 = lazyFail := by decide
 example : (observe (cd [0x20, 2, 0xA0, 0x40, 2, 23, 42, 0]) (arr2 .calldata)).1 = "run" := by
   decide +kernel
 -- array_exceeds_calldatasize_no_revert_string: `f(uint256[]): 0x20, 1 -> FAILURE`

@@ -12,7 +12,7 @@ n=0
 while IFS= read -r path; do
   [[ -z "$path" || "$path" == \#* ]] && continue
   n=$((n+1))
-  out=".lake/upstream/cf1-$label/$n"
+  out=".lake/upstream/cf1-$label/$n"; mkdir -p ".lake/upstream/cf1-$label"
   start=$(date +%s%3N)
   node scripts/solidity-upstream.mjs run --compiler "$compiler" \
     --filter "test/libsolidity/semanticTests/$path" --batch-size 1 --out "$out" > "$out.log" 2>&1

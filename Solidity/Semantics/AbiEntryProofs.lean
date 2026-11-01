@@ -5,10 +5,14 @@ import Solidity.Semantics.AbiEntry
 
 `mdec_cval`: whatever solc's eager (memory) decoder accepts, the lazy
 calldata accesses of the same bytes accept, with the same typed value. The
-calldata size is below `2^64`, so no address wraps. `verdict_run` reads it
-at the entry: a body runs only on values that every lazy read of a calldata
-parameter reproduces, and `verdict_revert` says a certified revert is exactly
-an entry failure, before the body.
+calldata size is below `2^64`, so no address wraps. `eager_cref` reads it at
+the entry: a calldata parameter that decodes eagerly passes solc's entry
+checks and lazily reads back the same value. `verdict_revert_iff` and
+`verdict_run_entry` unfold the verdict: a certified revert is exactly an entry
+failure, and a body runs only after the entry passed. With `bodyValues`
+(whose calldata parameters take their `eager` value) they compose into the
+per-parameter statement. How faithful the model is to solc rests on the
+probes and the differential fuzzing recorded in `abi-hashes.md`.
 -/
 
 namespace Solidity.AbiEntry

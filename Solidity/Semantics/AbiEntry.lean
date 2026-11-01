@@ -403,6 +403,10 @@ inductive Loc where
 structure Param where
   shape : Shape
   loc : Loc
+  /-- A calldata parameter the body reads only through `.length` and
+  complete index paths (never copied, passed or encoded whole): each such read
+  is one lazy access, so the body's observations are the lazy value's. -/
+  readsOnly : Bool := false
 
 /-- What a parameter holds when the body starts. -/
 inductive Entered (s : Shape) where
@@ -459,9 +463,11 @@ inductive Verdict (ps : List Param) where
   | blocked (reason : String)
 
 /-- Per parameter: its value for the body, or a refusal. A calldata
-parameter must decode eagerly too (then `mdec_cval` makes lazy reads agree);
-a layout only the lazy reader accepts, or one whose element fails only on
-access, is refused by name. -/
+parameter takes its eager value when it decodes eagerly (then `eager_cref`
+makes every lazy read agree). A layout only the lazy reader accepts (negative
+relative offsets) is admitted with its lazy value only for a `readsOnly`
+parameter, whose reads are exactly lazy accesses; otherwise, or when an
+element fails only on access, it is refused by name. -/
 def bodyValues (I : Input) (f : Nat) : (ps : List Param) → Entries ps → Nat →
     Except String (Vals (ps.map Param.shape))
   | [], .nil, _ => .ok .nil
@@ -474,7 +480,9 @@ def bodyValues (I : Input) (f : Nat) : (ps : List Param) → Entries ps → Nat 
         | .error .fuel => throw "ABI decoder fuel exhausted"
         | .error _ =>
           match cvalRef I f p.shape addr len with
-          | .ok _ => throw "calldata layout accepted by lazy access but rejected by an eager copy needs calldata references in the source semantics"
+          | .ok v =>
+            if p.readsOnly then pure v
+            else throw "calldata layout accepted by lazy access but rejected by an eager copy needs calldata references in the source semantics"
           | .error .revert => throw "calldata element fails only on access: needs access-time calldata semantics"
           | .error _ => throw "calldata element validation exhausted fuel"
     let vs ← bodyValues I f ps es (pos + p.shape.headSize)
@@ -526,8 +534,7 @@ end
 /-- The canonical argument bytes of a parameter tuple (no selector). -/
 def encodeArgs {ss : List Shape} (vs : Vals ss) : List UInt8 := assemble (Vals.parts vs)
 
-/-- A verdict's observation: `none` to run, `some true` a certified revert,
-`some false` a refusal. -/
+/-- A verdict's name, for reports: `revert`, `run` or `blocked: <reason>`. -/
 def Verdict.kind {ps : List Param} : Verdict ps → String
   | .revert => "revert"
   | .run _ => "run"

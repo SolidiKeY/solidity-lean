@@ -37,6 +37,9 @@ import Solidity.Semantics.Termination
 import Solidity.Semantics.LexMetrics
 import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
+import Solidity.Semantics.AbiEntry
+import Solidity.Semantics.AbiEntryProofs
+import Solidity.Semantics.AbiEntryChecks
 import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.Lifetime
@@ -760,6 +763,7 @@ import Solidity.Examples.Tactics.ContractWorldSource
 import Solidity.Examples.Tactics.TransientWorld
 import Solidity.Examples.Tactics.TransientWorldSource
 import Solidity.Tools.Upstream
+import Solidity.Tools.UpstreamEntry
 
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport

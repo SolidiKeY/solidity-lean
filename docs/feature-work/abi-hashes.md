@@ -998,3 +998,144 @@ user-requested git pull --ff-only fetched origin/master at a7a35aa5 but exited
 128 because the branches diverged; no fast-forward, merge, rebase, reset or
 working-file replacement occurred. The evidence remains for this isolated
 lane and is not a validation claim about the newly fetched master.
+
+## Entry decoding: lazy and noncanonical layouts (lane CF1, 2026-10-31)
+
+Owner: lane CF1 (`cloud/relocated-20261031/abi-entry-decoding`). Base
+`aaa9db5c`. This section replaces, for ABI coder v2 external entries, the
+byte-identical decode/re-encode admission of M3 ("Reference/function arguments
+require byte-identical decode/re-encode before execution") by a typed model of
+solc's generated entry decoder with kernel proofs. ABI coder v1, constructor
+arguments and function-valued or nominal-enum parameters keep the M3 gate
+unchanged.
+
+### Baseline (reproduced on the base before editing)
+
+BASELINE_TABLE
+
+### What solc's generated decoder does
+
+Evidence: `scripts/abi-entry-probe.mjs` runs `tests/abi-0.8.38/LazyEntry.sol`
+with the vectors of `tests/abi-0.8.38/LazyEntry.vectors.json` and every
+fixture vector above, with the pinned compiler (SHA-256 `6c74ffba…`), in four
+configurations: legacy and via-IR, each with the optimizer off and on. All four
+agree on every vector (57 probe vectors, 22 fixtures); the per-vector outcomes
+are pinned in the vectors file and checked by the script. The function names
+below are the Yul functions solc 0.8.38 emits (identical in both pipelines,
+since legacy codegen also takes the v2 decoder from `ABIFunctions`).
+
+* **Head.** `abi_decode_tuple_*` first reverts with empty data unless the whole
+  head fits: `slt(sub(dataEnd, headStart), headSize)`, with `headStart = 4`.
+  Then each parameter in order. A dynamic parameter's offset word is unsigned
+  and reverts above `0xffffffffffffffff`; it is relative to `headStart`.
+* **Value parameters** are loaded and validated immediately
+  (`validator_revert_t_<k>`: the word equals its cleanup), so a dirty `uint8`,
+  `int16`, `bool`, `bytes3` or `address` reverts at entry.
+* **Memory parameters** (`abi_decode_t_<T>_memory_ptr`) are decoded eagerly
+  and recursively at entry. For `bytes`/arrays: `slt(add(offset, 0x1f), end)`,
+  then the length, then **allocation** (`array_allocation_size_*` panics with
+  `Panic(0x41)` above `2^64 - 1`, `finalize_allocation` when the free pointer
+  would pass `2^64 - 1`), and only then the region check
+  `gt(add(src, length * stride), end)`. Probes: a `bytes memory` length of
+  `2^64 - 1` or `2^64` gives `Panic(0x41)`; `2^32` and `2^63` give an empty
+  revert. Each dynamic element's offset is unsigned, relative to the start of
+  its sequence's (or struct's) element region, and reverts above `2^64 - 1`.
+  Static arrays check `slt(add(offset, 0x1f), end)` and their whole region;
+  structs check `slt(sub(end, headStart), headSize)`. Every word element is
+  validated. Overlapping, out-of-order and unaligned tails, unpadded final
+  `bytes` and dirty `bytes` padding are accepted; invalid UTF-8 in a `string`
+  is accepted.
+* **Calldata parameters** get only the outermost object's entry check
+  (`abi_decode_t_<T>_calldata_ptr`): `bytes`/arrays check the head slot, the
+  length (`≤ 2^64 - 1`, an empty revert, no allocation) and the element region
+  `arrayPos + length * stride ≤ end`; a dynamic struct its head; a static array
+  of dynamic elements its head region. A static calldata array or struct of
+  words is not validated at entry (probe: a dirty `uint8[2] calldata` element
+  is accepted unless read).
+* **Lazy access.** Reading a calldata element validates it then:
+  `calldata_array_index_access` (index check, `Panic(0x32)`), then for a
+  dynamic element `access_calldata_tail(base, ptr)`: the relative offset is a
+  **signed** word, checked by `slt(rel, sub(sub(calldatasize(), base),
+  sub(tailSize, 1)))`, added modulo `2^256`; for `bytes`/arrays the length is
+  at most `2^64 - 1` and `sgt(addr + 32, sub(calldatasize(), length * stride))`
+  reverts. A word element is validated when it is read. Probes: an inner
+  offset out of range, an inner length out of range, a dirty `uint8` element
+  and a struct member offset out of range are all accepted until the element
+  is read, then revert with empty data; a relative offset of `-32` is
+  accepted and read (`calldata_array_length_v2.sol` relies on it).
+* **Copying calldata to memory** (`uint256[][] memory m = x;`) re-decodes with
+  the memory rules: the probe with an inner offset of `-32` reverts on the
+  copy although every element read succeeds.
+* Every decoder failure is `revert(0, 0)`: empty data. Trailing calldata is
+  ignored.
+
+### The typed model
+
+`Solidity/Semantics/AbiEntry.lean` (core, no imports) states this decoder over
+typed shapes and values:
+
+* `Shape` (words of a `Kind`, `bytes`, `T[]`, `T[n]`, tuples) and the
+  intrinsically typed `Val : Shape → Type` with length-indexed `Seq e n` and
+  member-indexed `Vals ms`. A `Word k` carries its validity proof. There is no
+  untyped value layer.
+* `mdec`/`mseq`/`melem`/`mmembers`: the eager memory decoder, in solc's order,
+  with allocation tracked against an upper bound `free` on the initial free
+  memory pointer (the adapter uses `2^32`; solc starts at `0x80`). An
+  allocation that may pass `2^64 - 1` yields `Fail.panic`, which is never
+  certified (panic production belongs to lane-soundness).
+* `cref`: the entry checks of a calldata parameter. `cval`/`cseq`/`celem`/
+  `cmembers` with `tailRef` (`access_calldata_tail`): every lazy access, with
+  EVM `sub`, `slt` and modulo-`2^256` addresses.
+* `entry`: exactly the checks before a body (head, then each parameter).
+  `verdict`: `revert`, `run vs` or `blocked reason`. `encodeArgs` is the
+  canonical encoding (heads, then tails).
+
+Theorems (`Solidity/Semantics/AbiEntryProofs.lean`, pinned with
+`#guard_msgs in #print axioms` and in `TrustAudit.lean`):
+
+* `mdec_cval` (via `mdec_cval_all`, a joint induction over the eight mutual
+  readers): if the eager decoder accepts a value at `p`, the lazy reads of the
+  same bytes accept it with the same typed value, for calldata below `2^64`
+  bytes. `tailRef_of_mdec`, `mdec_bounds`, `tailFits_of` and `regionFits_of`
+  are the arithmetic: unsigned offsets below `2^64` are positive signed words
+  and no address wraps.
+* `eager_cref`: if a calldata parameter decodes eagerly to `v`, solc's entry
+  checks for it pass and the lazy value of the resulting reference is `v`. So
+  the lazy decoder never fails earlier than the eager one and never observes
+  another value.
+* `verdict_revert_iff`: a certified revert is exactly an `entry` failure, so
+  the replay reports it before the body, with empty data.
+* `verdict_run_entry`: a body runs only after every entry check passed.
+
+`Solidity/Semantics/AbiEntryChecks.lean` has 40 kernel-evaluated controls
+(`decide`, `decide +kernel`), one per probe or fixture vector: positive
+(canonical, overlapping, out-of-order, trailing data, unpadded `bytes`, dirty
+padding) with the exact canonical bytes the body receives, negative (each
+entry check, eager element checks, the first failing parameter deciding) and
+the three named refusals.
+
+### Admission (`Solidity/Tools/UpstreamEntry.lean`)
+
+For a v2 entry whose parameters all have typed shapes, the replay decides on
+the actual calldata (selector included):
+
+| Verdict | Replay |
+|---|---|
+| `entry` fails with `revert` | a failure observation with empty data before the body; state rolled back |
+| `entry` passes; every calldata parameter also decodes eagerly | the body runs on the decoded values, handed to the existing typed decoder as their canonical encoding; the existing re-encode check runs on those canonical bytes as a cross-check |
+| possible `Panic(0x41)` | blocked: `possible Panic(0x41) allocation failure in memory decoding` |
+| a calldata layout only lazy access accepts (negative offsets) | blocked: `calldata layout accepted by lazy access but rejected by an eager copy needs calldata references in the source semantics` |
+| a calldata element that fails only when read | blocked: `calldata element fails only on access: needs access-time calldata semantics` |
+
+The body reads calldata parameters as memory values in this elaborator, so
+the two refusals are exactly the inputs where the eager value is not what
+solc's lazy reads produce, or where a copy would revert. Lifting them needs
+calldata references in the source semantics (lane-soundness owns them).
+
+No input is canonicalized silently: the original calldata stays the reported
+observation (`calldataBytes`), and the body cannot observe raw calldata,
+since `msg.data`, assembly and slices of the parameters keep their existing
+refusals. A body that could read `msg.data` would see the original bytes; the
+adapter does not admit one.
+
+RESULTS_SECTION
