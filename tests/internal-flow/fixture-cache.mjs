@@ -10,7 +10,8 @@ if (!["prepare","check"].includes(mode) || !/^tests\/internal-flow\/[A-Za-z][A-Z
 const name=basename(file,".lean"), dir=".lake/build/lib/lean/tests/internal-flow";
 const object=`${dir}/${name}.olean`, manifest=`${dir}/${name}.v12-cache.json`;
 const pinsFile="tests/internal-flow/fixture-axiom-pins.json";
-const expected=JSON.parse(readFileSync(pinsFile,"utf8"))[name];
+const registry=JSON.parse(readFileSync(pinsFile,"utf8"));
+const expected=registry[name];
 if (!expected) throw new Error(`unregistered fixture: ${name}`);
 const hash=p=>createHash("sha256").update(readFileSync(p)).digest("hex");
 function imports(text) {
@@ -35,17 +36,24 @@ function imports(text) {
 }
 
 function key() {
-  const closure=new Set(), pending=imports(readFileSync(file,"utf8"));
-  while(pending.length) {
-    const mod=pending.pop();
-    if (!mod.startsWith("Solidity.")) throw new Error(`unsupported fixture dependency ${mod}`);
-    if(closure.has(mod)) continue;
-    closure.add(mod);
-    const path=mod.replaceAll(".","/")+".lean";
-    for(const dep of imports(readFileSync(path,"utf8"))) {
-      if(dep.startsWith("Solidity.")) pending.push(dep);
-      else if(!/^(Init|Lean|Std)(\.|$)/.test(dep)) throw new Error(`untracked dependency ${dep}`);
+  const closure=new Set(), fixtureDeps=new Set(), pending=imports(readFileSync(file,"utf8"));
+  function sourceFor(mod) {
+    if(mod.startsWith("Solidity.")) return mod.replaceAll(".","/")+".lean";
+    const fixture=/^tests\.«internal-flow»\.([A-Za-z][A-Za-z0-9]*)$/.exec(mod);
+    if(fixture && registry[fixture[1]]) {
+      fixtureDeps.add(fixture[1]);
+      return `tests/internal-flow/${fixture[1]}.lean`;
     }
+    if(/^(Init|Lean|Std)(\.|$)/.test(mod)) return null;
+    throw new Error(`unsupported fixture dependency ${mod}`);
+  }
+  while(pending.length) {
+    const path=sourceFor(pending.pop());
+    if(path===null) continue;
+    if(path===file) throw new Error(`cyclic fixture dependency ${file}`);
+    if(closure.has(path)) continue;
+    closure.add(path);
+    pending.push(...imports(readFileSync(path,"utf8")));
   }
   const inputs={};
   for(const path of [file,pinsFile,expected.guard,"tests/internal-flow/fixture-cache.mjs","lean-toolchain","lakefile.lean","lakefile.toml","lake-manifest.json"])
@@ -55,11 +63,11 @@ function key() {
   // In the authorized wrapper /opt/lean-real is the immutable actual compiler.
   const binary=existsSync("/opt/lean-real/bin/lean")?"/opt/lean-real/bin/lean":`${toolchain}/bin/lean`;
   inputs["compiler-binary"]=hash(binary);
-  for(const mod of [...closure].sort()) {
-    const stem=mod.replaceAll(".","/");
-    inputs[stem+".lean"]=hash(stem+".lean");
-    inputs[".lake/build/lib/lean/"+stem+".olean"]=hash(".lake/build/lib/lean/"+stem+".olean");
+  for(const path of [...closure].sort()) {
+    inputs[path]=hash(path);
+    inputs[".lake/build/lib/lean/"+path.slice(0,-5)+".olean"]=hash(".lake/build/lib/lean/"+path.slice(0,-5)+".olean");
   }
+  for(const dependency of [...fixtureDeps].sort()) inputs[registry[dependency].guard]=hash(registry[dependency].guard);
   // Bind the COMPLETE actual toolchain, including transitive .olean modules,
   // IR and shared runtime libraries; root .olean/version hashes are insufficient.
   const toolRoot=existsSync("/opt/lean-real/bin/lean")?"/opt/lean-real":toolchain;
@@ -79,6 +87,21 @@ function key() {
     inputs["toolchain/"+rel]=byRealPath.get(path);
   }
 
+  // An imported fixture must have its OWN prior checked source/object binding.
+  // Merely hashing an arbitrary object alongside a source is insufficient.
+  const dependencies=[];
+  for(const dependency of [...fixtureDeps].sort()) {
+    const path=`${dir}/${dependency}.v12-cache.json`;
+    if(!existsSync(path)) throw new Error(`missing checked fixture dependency ${dependency}`);
+    inputs[path]=hash(path);
+    dependencies.push([dependency,JSON.parse(readFileSync(path,"utf8"))]);
+  }
+  for(const [dependency,saved] of dependencies) {
+    if(saved.key!==createHash("sha256").update(JSON.stringify(saved.inputs)).digest("hex") ||
+       saved.object_sha256!==inputs[`${dir}/${dependency}.olean`] ||
+       Object.entries(saved.inputs).some(([path,digest])=>inputs[path]!==digest))
+      throw new Error(`stale or altered checked fixture dependency ${dependency}`);
+  }
   return {inputs,key:createHash("sha256").update(JSON.stringify(inputs)).digest("hex")};
 }
 function run(args,log) {

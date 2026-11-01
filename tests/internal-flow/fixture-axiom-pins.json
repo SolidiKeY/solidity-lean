@@ -1599,5 +1599,135 @@
         "propext"
       ]
     }
+  },
+  "CallLoopFacts": {
+    "guard": "tests/internal-flow/check-call-loop-facts-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.callPrefix_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.callPrefix_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.callScope_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.callScope_nonalloc": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_alias_first": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_alias_second": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_capacity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_count_value": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_element_first": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_element_second": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_marker_value": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_private_length": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_rejected_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_rejected_nonalloc": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_rejected_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_returned_length": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_target_reached": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  },
+  "CallLoopEndpoint": {
+    "guard": "tests/internal-flow/check-call-loop-endpoint-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_complete_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_exact_growth": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_loop_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_negative_controls": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_rejected_not_fault": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_rejected_target": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedLoopChecks.call_represented_contents": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }
