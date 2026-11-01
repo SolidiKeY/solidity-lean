@@ -968,3 +968,7 @@ import Solidity.Backend.AbiWorld.LibraryFrameTransport
 import Solidity.Backend.AbiWorld.LibraryFrameControls
 import Solidity.Backend.AbiWorld.EntryTransport
 import Solidity.Backend.AbiWorld.EntryControls
+
+import Solidity.Backend.AbiWorld.PacketEmission
+import Solidity.Backend.AbiWorld.EnumEntry
+import Solidity.Backend.AbiWorld.EnumControls

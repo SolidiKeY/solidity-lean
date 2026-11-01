@@ -1000,3 +1000,61 @@ Human parallel scheduling authorization does not change semantics or completion.
 An exact66c08fde committed interface package is exported separately (not a dirty
 combined-tree snapshot) for peer development; final concrete combined gates remain
 required. All original Work/Backfill queues and blocked goal are preserved.
+
+
+### G40/G41/BackfillA enum and typed packet consumers
+Published Kind.enumBelow n is used directly; no uint8-cardinality equivalence is
+assumed. EnumEntry.invalid_entry proves whole-loaded-word n<=w causes actual entry
+revert before ANY tail parameters at fuel+2. invalid_revert and truncated_revert
+select the existing checked empty REVERT with real Fits/stack conditions. No enum
+comparison/decoder machine code is emitted, no source/native entry theorem added.
+PacketEmission.emitResult/emitCustom consume actual indexed Vals and existing
+encodeArgs/selectorBytes, then actual Failure.emit.returned/custom; execute_result/
+execute_custom retain exact bytes, memory interval, entire old stack and unreachable
+suffix. accepted_packet and EnumControls.accepted_emission discharge actual entry/
+bodyValues witnesses on real decoded tuples. This is value-specialized packet
+emission, NOT a runtime encoder of symbolic word memory or all-profile ABI compiler.
+
+Inhabited memory/calldata signatures put enum3 value2 BEFORE a dynamic uint8-array
+[7,0,255]. Full192bytes, relative offset64, length3, zero/last255 and selector11223344
+are observed; custom selector does not change the argument-relative offset to68.
+Noncanonical tail offset96 (32-byte gap) layout and empty array accepted, exact original inputs
+retained. Missing/truncated word load as0 yet reject by head size; one-past3 and
+highword2^248+2 reject without low-byte cleanup. Invalid leading enum preempts an
+eager memory allocation Panic; calldata retains its own tail behavior. Dirty array
+memory entry reverts, lazy calldata element failure remains named blocked; allocation
+Panic/fuel remain blocked, never certified empty revert. Actual reference after enum
+is100/3; eager64 and cval63 agree via published eager_cref with size<=lim. Old stack
+77/88 and exterior byte observations retained;1023-cell stack rejects. All controls
+are kernel codec/byte-slice facts, not source admission or arbitrary target calls.
+
+Independent read-only source finder/skeptic found no soundness/G0/ownership issue.
+Confirmed clarifications applied: selected-existing-emitter wording, memory-only
+Panic preemption, and one inhabited combined accepted_packet endpoint. Preliminary
+MCP recursion failures were repaired through actual projection witnesses without
+raising limits; raw failures retained. Actual scoped axiom outputs use only the
+standard axioms; exact guards are pinned locally, not in global TrustAudit.
+All prior19ownedmodules/approvedPanic controls remain unchanged. Every original
+Work/Backfill remains partial/blocked. Top-level v2 enum publication does not close
+nested enums, constructor/v1, selector/receive/fallback compiler, runtime aggregate
+encoder, arbitrary external/callback/world/rollback or resource-prefix composition.
+
+
+PARALLEL source checkpoint gates: all22ownedmodules focused closure PASS219jobs;
+new3per-fileMCP PASS and13actual scoped axiom outputs/guards use standardsets only
+(selector_split propext). No oldownedKind match repair needed. Staticimports22/0,
+layers184/0,orphans1100/0,trust1115sources258sites/0; Node25PASS, pinnedTestSuite
+static564rows/0pending/0divergentPASS. ActualLean4.24.0/Lake5.0.0-src+797c613 and
+KeySort2jobsPASS. MCP-container sort script SKIPPED because reference mount absent;
+not a passing sort gate; actual pinned full-container check remains required.
+RawdocsFAIL1: current/published86(48missing38ambiguous), frozen83(46missing37ambiguous).
+Complete finding classes/multiplicities retain exactly3published new findings:
+finite-dispatch Arms.lean ambiguity and2inline-assembly missingpaths. Frozen no-new
+FAIL, publication equalityPASS separately; no reserved doc repair/placeholders.
+Prior51sealed entries verify, oldfirstinterface seal preserved; correctedR2 exact
+66c08fde source interface sealed separately with reviewed no-payment/reference/
+live-at-entry clarifications. Current newenum/packet interface is exported from this
+exact focused-checked commit with full import/default/root/composite gates PENDING;
+peer staging cannot count as final integration. Every original Work/Backfill remains
+partial/blocked; original goal unchanged. Broad checks follow this early committed
+handoff so peer development need not wait for the whole preceding lane/gate.

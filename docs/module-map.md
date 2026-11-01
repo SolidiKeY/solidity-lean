@@ -1313,3 +1313,7 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/LibraryFrameControls.lean` | Populated-prefix library applications, caller/library storage separation, old aliases, exact payments, full packets/ordered results, real typed failure tails and observation-prefix composition; no compiled-world claim. |
 | `Backend/AbiWorld/EntryTransport.lean` | Actual published ABI-entry verdict certificates select existing empty REVERT emission; typed entry/body-value/eager-lazy witness transport, explicit Fits/stack/fuel boundaries. |
 | `Backend/AbiWorld/EntryControls.lean` | Inhabited aggregate/noncanonical diagnostic values and length-only reads, malformed-to-emitter executions, exact named refusals and stack exhaustion; no decoder compiler/native simulation claim. |
+
+| `Backend/AbiWorld/PacketEmission.lean` | Value-specialized published typed codec to actual checked RETURN/custom-error byte emission; exact whole packet, selector, Fits/stack and memory interval premises. |
+| `Backend/AbiWorld/EnumEntry.lean` | Actual nominal enum cardinality failure before arbitrary tail parameters, coupled to selected existing empty REVERT emitter; truncated-head and fuel boundaries retained. |
+| `Backend/AbiWorld/EnumControls.lean` | Actual enum-before-dynamic-memory/calldata clients, complete ordered packet/selector/offset observations, wrong-range/truncation/refusal controls and post-enum eager/lazy reference. |
