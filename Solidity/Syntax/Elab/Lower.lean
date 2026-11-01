@@ -258,6 +258,8 @@ def lowerReturn (rs : List String) (e : RawExpr) : Except String (List RawStmt) 
       pure [.tupleAssign (rs.map fun n => some (.name n)) (.tuple es)]
     else pure ((rs.zip es).map fun (n, e) => .assign (.name n) e)
   | rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
+  -- a conditional of calls (`c ? f(x) : g(x)`), each branch a tuple assignment
+  | rs, e@(.ternary _ (.call ..) (.call ..)) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
   | rs, _ => throw s!"`return` of one value from a function that returns {rs.length}"
 
 /-- The names a statement declares in its own block: a declaration's, a tuple
