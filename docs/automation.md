@@ -1195,6 +1195,18 @@ no target exclusion or premise was added. Exact limits/evidence are in the VA1
 handoff.
 
 
+
+VA1 second exact source reason (2026-11-01): nonliteral uint-linear RHSs of
+map-free fresh-field equations now have a sound/complete typed classifier and
+constructive Decidable instance, separate from reversal. The actual buried-RHS
+fixture has an ordinary/hash-premised countermodel at the unchanged producer
+child heap; original globalunknown remains. Partial-RHS controls preserve halting
+semantics. This proof-layer component reaches Decision through arithmetic modules,
+so direct production import would cycle; no integration or global Residue claim.
+The lower-level reversed-field Answer remains independently ready. Exact limits
+and passing bounded checks are in the VA1 handoff.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

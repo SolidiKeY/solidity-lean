@@ -2202,3 +2202,92 @@ Decision/HashPremise/ProgramReduction and all three memory producer modules
 byte-exact; original DecisionMemory unchanged from parent. Final finder caught
 resource aggregation missing the final source-matched core MCP; corrected to
 include all six final passing checks. Both source/docs reviews otherwise clean.
+
+
+## Exact nonliteral uint-field reason component (2026-11-01)
+
+Parent6cae581963831b65de639e0a79e81dfd79f18243. New owned modules
+Calculus/DecisionCompoundFieldReason and Examples/DecisionCompoundFieldReason;
+shared registrations exactly two additive imports and two module-map rows.
+Existing reason, arithmetic decoder, memory producer and global decision code
+are unchanged. No predicate, premise, observation or budget change.
+
+NonliteralUIntFreshField is a second exact source family, distinct from reversal:
+one map-free fresh struct, direct uint field on the left, and an actual RHS in
+the existing Tm.UIntLinear grammar whose root is not a direct primitive literal.
+The witness carries complete source equality. Existing uintLinearShape evidence
+is reused rather than duplicating arithmetic parsing. The parser uses producer
+alloc/eq views, field lookup and full typed term comparison. Soundness,
+completeness, iff Nonempty and a constructive Decidable instance kernel-check
+for every intrinsic contract/context. No coverage, target or verdict is queried.
+One-line cause: the existing field schema expects a direct literal RHS, whereas
+this uint-linear RHS has a nonliteral root. Structural hash-freedom is proved.
+
+Controls: original memStructBuried,2+3 and partial0-1 classify true; direct
+literals/reflexivity/reversal/Boolean/fixed/given-heap/map-bearing controls false.
+Both reason tags remain distinct on the actual old fixtures. Exact witness-family
+positive/negative decisions execute under kernel decide. Map-bearing input stays
+target-admitted while the existing map-free schema refuses it; no exclusion added.
+
+The actual buried fixture is now proved false at the UNCHANGED producer
+child heap gapMemStruct_state. Pointwise sum01_eval/denote (for every contract/
+context/state) transports0+1 to literal1, then the existing producer fieldEq_refutes
+supplies the same before-parent counterstate. Ordinary and exact hash-premised
+countermodel/nonvalidity follow. zeroMinusOne.eval=none is separately checked;
+classification does not imply a terminating/literal-valued RHS. Original target,
+notCovered and globalunknown pins remain unchanged. No generic countermodel for
+every class member or global pipeline integration is claimed.
+
+Important acyclic integration boundary: this proof-layer module depends on
+Decision through UIntShape→NumericCoverage→NumericBounds→NumericFormula→
+LeafPreparation→UIntPrefix→UIntFormula→UIntGrammar. It cannot be imported directly
+back into Decision. Actual dependency path is saved in integration-dependency.json;
+a concrete lower-level interface is required before production integration.
+The earlier reversed-field component has no such dependency and can progress
+independently. No cyclic import or assumed future API was introduced.
+
+Raw gates /workspace/va1-evidence/compound-reason-next: final core MCP5.252s,
+core target3.179s (270jobs,newfile1.6s), controls MCP5.292s, controls/import-closure
+build3.159s,25 public axiom reports6.300s, actual source-class observer3.100s:
+pass. MCP zero items/dependency failures; all below unchanged300s, warm dependency
+caches retained. Axioms standard-only. Class observer original/another/partial=true,
+direct/reversed/mapping=false; per-call/output1781756/41632/23245/14461/4056/35433ns.
+These source-class runtime observations are separate from kernel/EVM evidence
+and global verdict profiling. Initial hash lemma Boolean grouping failure/source
+retained, fixed with explicit typed equality composition; no theorem weakened.
+
+Writer lock/thread1/-j1, verified hard aggregate12GiB/no-swap and12GiB host reserve
+before every Lean process. Lean4.24.0 commit797c613/Lake5.0.0-src+797c613 observed.
+All-six final gates maximum aggregate sampled RSS1614752KiB/minimum host available
+17127366656bytes, no resource stops. Both independent read-only reviews found no
+source issue; neither used Lean/server/build or edited files.
+
+Global Fml.Residue/DecisionTheorem-prime/exhaustive target/hash bridge, remaining
+AU02/backfill/performance/full gates remain open. The next ready independent
+implementation is reversed-field Answer integration with exact old-answer/state
+preservation. Producer handoff explicitly permits certified mxTop=none fallback
+composition; keep cut-first routing and preserve producer implementation/heap
+observations. Compound integration remains the narrow dependency above, not a
+whole-lane block. Q2 frontend repair held; original full goal incomplete. No
+stop/reset/new goal/VM, push, merge, PR or tag.
+
+Final source strengthening: NonliteralUIntFreshField.schema_refuses proves the
+actual producer fieldEquation returns none on every class member. Typed
+UIntLinear evidence excludes its reflexivity branch; nonliteral root excludes
+its literal branch. This certifies the one-line cause for that schema only,
+not globalunknown. Both independent reviewers found no issue.
+
+Exact strengthened-source final gates supersede the initial25-report timings
+above: core MCP5.350s/core build4.206s; controls MCP4.246s/closure4.156s;26 public
+axiom reports7.377s; observer3.103s, all pass. Final warm observer outputs unchanged,
+times1834515/34933/20771/13210/3936/32789ns including output. All-six final resource
+aggregate maxRSS1664380KiB/minhost17153732608bytes; no stops. Initial raw gates/profile
+remain retained. Full global obligations and production-cycle limits above unchanged.
+
+Final static gates:1098 reachable/zero orphans;180 core/zero elaborator reach;
+strictautomatic491/61 budgets/11 refuted/zero manual or pending; trust1113 sources/
+248 sites/zero findings: pass. Inventory FAIL1 unchanged1206 pins/zero errors/404
+unrecorded changes; strictdocs FAIL1 same85 frozen findings. All26 actual axiom
+sets audited standard-only. Both final docs reviews clean; finder independently
+recomputed all-six resource extrema. Frozen decision/hash/program/memory producer
+bytes unchanged. No full-gate or whole-goal completion claim.

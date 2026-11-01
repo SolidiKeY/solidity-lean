@@ -195,6 +195,7 @@ import Solidity.Calculus.DecisionNumericLogic
 import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericNormalization
 import Solidity.Calculus.DecisionResidueReasons
+import Solidity.Calculus.DecisionCompoundFieldReason
 import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FixedArrayRoot
 import Solidity.Calculus.HashWritten
@@ -258,6 +259,7 @@ import Solidity.Examples.DecisionNumericLogic
 import Solidity.Examples.DecisionNumericTraversal
 import Solidity.Examples.DecisionNumericNormalization
 import Solidity.Examples.DecisionResidueReasons
+import Solidity.Examples.DecisionCompoundFieldReason
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
