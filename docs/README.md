@@ -109,3 +109,7 @@ history is in git.
 VY2 [heap enumeration preparation](feature-work/inline-assembly-vy2.md#computed-ordinary-heap-inventory-2026-11-01) derives canonical typed inventories from actual heap cells; full assembly closure remains open.
 
 VY2 [packed-slot complements](feature-work/inline-assembly-vy2.md#packed-slot-complement-journaling-2026-11-01) covers canonical finite field/residual composition and actual source frame controls; whole-store and assembly closure remain open.
+
+VY2 [computed word-layout registrations](feature-work/inline-assembly-vy2.md#computed-word-layout-registrations-2026-11-01)
+derive canonical path/slot/hash agreements under actual owner per-run conditions;
+packed/whole-store/source/compiler closure remains open.

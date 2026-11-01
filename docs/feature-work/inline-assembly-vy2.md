@@ -1825,3 +1825,86 @@ Independent read-only finder/skeptic reviews found one confirmed strict-validato
 Full queue: Y04/Y05/Y06 and Backfill A/B PARTIAL; actual Y09.02 blocked. Remaining whole store/path/hash/dynamic ownership, changes to ownership domains, dirty/noncanonical/shared-zero/interior/remaining representations, universal memory/writeback, reachable allocator provenance/refinement, actual V10/V11 agreements, Y06 source bindings, VY1 source/assembly MemOK and notation/printer/compiler/calculus/final joint closure remain mandatory. Available owner MemOK/World/ContractWorld/memory-call/Bridge and published general memory-loop compiler components are not Yul adequacy. The user-audited published master5f6a75b6038371a3917dbe08b660d5f2d1207c58 still lacks Yul exports; no unpublished branch imported. Original goal BLOCKED unchanged; get_goal read absent/no goal action. No genuine new human semantic decision; questions=[]. Historical global docs failure and prior resource/launcher events remain retained, zero delta is not a global pass.
 
 Final packed-complement validation: Lean4.24.0/Lake5.0.0-src+797c613; required KeySort2jobs exit0; focused62jobs and full1101default/262TestSuite/131annotations exit0;2156declaration signatures/1238standard-only theorem axiom reports. All366ordered external calls pass, every prior330call report field unchanged,19negative suites including503new mutations pass. Layer/orphan/strict/trust/Markdown gates exit0. Global docs remains ACTUAL exit1 with48missing/37ambiguous findings, byte-identical pinned-base logSHA25601fd3beaa0d1694397f6231999418eea67e797d42150bf68d2d8a96bc4ea109a; zero delta separate. Final finder/skeptic reviews clear after hash/calldata and wording fixes. The generic nonzero transient complement control starts from an arbitrary within-transaction snapshot, not a proved fresh-transaction reachable initial state; external fresh-call/reset observations are separate. All raw failures and previous artifacts retained; no budget raised.
+
+
+## Computed word-layout registrations (2026-11-01)
+
+Checkpoint only: Y04/Backfill A/B remain partial; Y05/Y06 remain partial and
+concrete Y09.02 remains blocked. The original goal stays blocked unchanged.
+Authorization remains the recorded YQ1–YQ7 decisions, not the old proposal's
+pending wording. No admission/manifest change or compiler-owner replacement.
+
+New lane modules LocatedHash, FullWordLayout, LocatedRegistration,
+LocatedSeparation, LocatedInventory, LocatedControls and LocatedSource derive
+canonical uint256 registrations from actual E.rootTy, storage structFields,
+E.cellTy and Storage.STy.locate. FullWordLayout's checker follows the actual
+finite owner tree with no new fuel bound. Mapping keys must be actual bounded
+uint256 values; translation uses Source.wordBytes and an exact Source.keyStep
+control. Wrong root/type/path, structural dynamic bounds and oversized keys
+produce precise preparation errors, never Yul refusal/no-op semantics.
+
+fixedLayoutHash is Fixed.keccak applied to the actual Storage.encode byte list.
+Byte bounds and UInt8 roundtrip are proved, as is lossless preimage encoding
+under the owner's real Pre.Words condition. The real-keccak specialization
+uses the actual Fixed keccak contract; region transport retains EXACT existing
+per-run RegionsDisjoint, never global hash injectivity. Nested mapping/array
+controls prove the exact two hash inputs and their word bounds.
+
+Computed finite inventories derive slots, locations, u256 defaults, codec and
+width obligations. Owner locate_bounded/located_word_inj derive bounds and
+separation, using tree.Fits, root size, L/R bounds, original per-run region
+conditions and executable distinct-path/distinct-symbolic-location checks.
+Different source paths alone do not imply distinct slots. The finite obligation
+adapter uses Classical.choose only to label an existing mapped registration;
+actual preparation/registration/writeback remain executable. No inverse/read/
+result-view/adequacy law is supplied by a caller. Existing finite codec laws
+then derive encode/writeback identity with the exact original store retained.
+
+The actual nonempty Source.Env contains a struct root, full-word mapping,
+dynamic array and nested mapping/array. Inhabited checked controls cover those
+paths, malformed inputs and aliases. Computed mapping registration feeds the
+existing real typed source operations and complementary journal: value777,
+full raw readback, caller-prefix child rollback, successful child followed by
+outer rollback, persistent survival and transient reset are kernel proved.
+The existing Source.keyStep provenance is exact; these ExecState controls do
+not prove a new Source.eval binding/runtime-index correspondence. The transient
+companion uses the same registry deliberately, not an inferred Solidity
+transient declaration-layout agreement.
+
+Boundary: HashedLayout is WORD GRANULARITY, not Solidity packed layout. Root0
+and the supplied owner layout are explicit inputs, not inferred arbitrary
+contract declaration placement. Dynamic locate uses the owner's lmax structural
+bound, not the current logical array length. Whole HashedLayout/path ownership,
+solc packed inference, narrow/dirty owned fields, bytes/string keys, arbitrary
+hash collisions/dynamic ownership and concrete V10 agreement remain open.
+No existing codec, source/heap/world definition, whole-obligation signature,
+expected result or proof/test/resource budget changed.
+
+Separate read-only finder and skeptic reviews found no defects, including the
+finite-inventory delta; neither ran Lean/server/build/tests. Their scope limits
+above are retained. Focused/per-file/full/import/scoped-signature and standard
+axiom results, exact commands/exits and raw intermediate failures are packaged
+under /workspace/vy2-evidence/hashed-registrations. Prior 366 ordered pinned
+legacy/viaIR calls and all report fields are retained unchanged; no new external
+source/compiler correspondence is inferred from kernel preparation controls.
+
+Remaining full queue: Y04 whole derived persistent/transient/path/hash/dynamic
+ownership/writeback; Y05 all memory/dirty/shared-zero/interior forms and reachable
+allocation provenance/refinement plus actual assembly MemOK; Y06 input/environment
+source bindings; Y09.02 actual syntax/calculus/notation/printers/source/compiler
+composition and final joint gates. Existing owner MemOK/World/ContractWorld/
+memory-call/Bridge components are available, but not Yul adequacy. Concrete
+VY1/source and V10/V11/compiler agreements remain unresolved. Both backfill
+queues remain partial. A finite canonical instance does not complete the lane.
+
+
+Validation for computed registrations: per-file focused checks and
+`lake -f lakefile.vy2.toml build Solidity.Yul.Views.LocatedSource` exit0;
+`./run-lean.sh` exit0 (1108 default/262 TestSuite jobs,131 annotations);
+Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs exit0. Scoped audit checks
+2239 declarations/1282 theorem signatures:1236 standard-axiom reports and46
+axiom-free theorems. Strict/trust/layers/orphans and19 existing negative suites
+exit0. Actual global docs exit1 is byte-identical to pinned-base debt
+(48missing/37ambiguous); separate markdown delta is zero. Exact raw commands,
+exits, failed proof/build attempts and final resource report are in the
+versioned HANDOFF. No new external observations replace the retained366 calls.

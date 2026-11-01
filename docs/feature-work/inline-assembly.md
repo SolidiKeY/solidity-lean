@@ -429,3 +429,14 @@ The [VY2 lane record](inline-assembly-vy2.md#computed-ordinary-heap-inventory-20
 ### VY2 packed-slot complement handoff
 
 The [lane record](inline-assembly-vy2.md#packed-slot-complement-journaling-2026-11-01) now derives complement masks from actual finite typed registrations, reconstructs whole raw slots after canonical typed writeback and couples both parts through existing journals and actual Source.applyOp/frame checks. Nonempty actual source controls and pinned mixed-field/padding/order/rollback/reset vectors are included. Pure unchanged preparation is distinct from journaled/static source behavior. Whole ownership/dirty/dynamic/Yul/compiler/calculus closure remains open; no admission or owner-contract change. Versioned evidence: /workspace/vy2-evidence/packed-residual.
+
+
+### VY2 computed word-layout registration handoff
+
+The [lane record](inline-assembly-vy2.md#computed-word-layout-registrations-2026-11-01)
+adds checked actual Source paths through the existing word-granular owner locator,
+approved Fixed preimage bytes, derived finite canonical storage instances and
+source/journal controls. Root0/layout inputs and real per-run region conditions
+remain explicit; no packed-layout or whole-source adequacy is claimed. Full lane
+and producer/compiler/calculus closure remain open. Evidence:
+/workspace/vy2-evidence/hashed-registrations.
