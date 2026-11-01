@@ -60,9 +60,14 @@ jobs:
           use-mathlib-cache: "false"
           test: "false"
           lint: "false"
-          axiom-audit: "true"
-          axiom-audit-root: "Solidity"
-          axiom-audit-allow: "propext,Classical.choice,Quot.sound"
+      # Every declaration under `Solidity` may use only propext,
+      # Classical.choice and Quot.sound; the `unsafe` twins behind
+      # `@[implemented_by]` memo helpers, which reach `lcProof` through
+      # `unsafeCast`/`unsafeBaseIO`, are exempt by name and any new one fails
+      # (`scripts/AxiomAudit.lean`). lean-action's `axiom-audit` applies one
+      # allow list to unsafe constants too, so it cannot express this.
+      - name: Audit every declaration's axioms
+        run: lake env lean --tstack=131072 scripts/AxiomAudit.lean
       - name: Audit headline theorem dependencies
         run: lake env lean --tstack=131072 TrustAudit.lean
       - name: Test source verification and regression suites

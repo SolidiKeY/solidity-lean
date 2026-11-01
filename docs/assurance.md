@@ -31,6 +31,15 @@ core stays dependency-free.
   symbolic execution, compilation, non-vacuity); anything but `propext`,
   `Classical.choice`, `Quot.sound` fails elaboration.  New public theorems
   are added to it.  CI runs both gates after the whole-library build.
+* **Whole-library axiom gate**: `lake env lean --tstack=131072
+  scripts/AxiomAudit.lean` (CI, after the build) reads every constant
+  declared in a `Solidity` module: a safe one may reach only `propext`,
+  `Classical.choice`, `Quot.sound`; an `unsafe` (or `partial`) one may also
+  reach `lcProof` only if listed by name in its `exemptUnsafe` (the six
+  compiled memo/cache twins behind `@[implemented_by]`, through
+  `unsafeCast`/`unsafeBaseIO`); a new one, or a stale exemption, fails.
+  It replaces lean-action's `axiom-audit`, whose single allow list cannot
+  exempt unsafe twins without exempting theorems too.
 * Parser assertions are `#guard` checks, not `native_decide` proofs; parser
   correctness is not proved.
 * **Non-vacuity**: `Examples/Tactics/Nonvacuity.lean` proves the result of
