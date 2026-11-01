@@ -1,3 +1,5 @@
+import Solidity.Roadmap.V16.FiniteHeapConsumer
+import Solidity.Roadmap.V16.CompilerConsumer
 import Solidity.Roadmap.V16.ConstructionCompilation
 import Solidity.Roadmap.V16.ConstructionConsumer
 import Solidity.Roadmap.V16.MemoryLoopConsumer
@@ -185,3 +187,17 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.construction_certificate_code
 #print axioms Solidity.Roadmap.V16.construction_certificate_fragment
 #print axioms Solidity.Roadmap.V16.construction_public_append_code
+#print axioms Solidity.Roadmap.V16.finite_heap_result
+#print axioms Solidity.Roadmap.V16.finite_heap_not_exhausted
+#print axioms Solidity.Roadmap.V16.finite_heap_diamond
+#print axioms Solidity.Roadmap.V16.finite_heap_box
+#print axioms Solidity.Roadmap.V16.compiler_not_exhausted
+#print axioms Solidity.Roadmap.V16.compiler_diamond
+#print axioms Solidity.Roadmap.V16.compiler_box_target
+#print axioms Solidity.Roadmap.V16.finite_heap_failure
+#print axioms Solidity.Roadmap.V16.finite_heap_diamond_iff
+#print axioms Solidity.Roadmap.V16.finite_heap_box_iff
+#print axioms Solidity.Roadmap.V16.finite_memory_cost
+#print axioms Solidity.Roadmap.V16.finite_memory_rep_iff
+#print axioms Solidity.Roadmap.V16.compiler_nonpaying_diamond
+#print axioms Solidity.Roadmap.V16.compiler_source_error

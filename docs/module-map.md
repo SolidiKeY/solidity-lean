@@ -1306,3 +1306,10 @@ four-mode upstream EVM observations and refusal controls;
 `Solidity/Roadmap/V16/ConstructionCompilation.lean` proves structural inversion/append algebra for the actual construction compilation function, retaining typed source programs and observed output fragment/code.
 
 `tests/roadmap-v16/ConstructionControls.lean` supplies actual memory-object construction, zero/fixed-child/rebinding, populated prefix/suffix, canonical code-composition and scoped accounting controls. `scripts/roadmap-v16-construction-audit.py` checks exact statements, generated helpers, origins and trust with negative controls.
+
+| `Solidity/Roadmap/V16/FiniteHeapConsumer.lean` | Scoped actual primitive/reference-array/object compiler result, exact-failure and box/diamond consumers; branch-specific Input/Rep retained. |
+| `Solidity/Roadmap/V16/CompilerConsumer.lean` | Actual public compiler/spec consumers preserving panic/payment/divergence alternatives and exact representation index. |
+| `tests/roadmap-v16/FiniteHeapControls.lean` | Populated alias/mutation, allocator and exact finite-heap failure applications with full observations and rejection controls. |
+| `tests/roadmap-v16/CoreConsumerControls.lean` | Populated core, panic, real payment/oracle, admitted divergence and existing exhaustion controls. |
+| `scripts/roadmap-v16-heap-audit.py` | Revision/complete-statement/control/trust accounting and corruption controls for actual scoped finite/core consumers; no global coverage closure. |
+| `tests/roadmap-v16/heap-premises.json` | Actual checked14headlines and98control complete statements/premises, scoped only. |

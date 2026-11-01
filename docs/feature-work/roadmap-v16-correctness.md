@@ -1101,3 +1101,99 @@ new reserved Yul-path findings, no removed findings, no permission to repair
 or waive. Native ordered-cell checks are bounded independent computation,
 not kernel proof or external EVM evidence. Full original lane remainsblocked;
 other4published finite/core consumers remain next.
+
+### Published finite-heap and core consumers (original G49.01/G51/backfill)
+
+The reviewed construction checkpoint is sealed at9bf486095cb9faa7a23929c74f4fe79e95caa3f9 under
+/workspace/scratch/v16-finite-recovery;164checksums, manifest
+0b04dcefdba7b31df60c18f5058631084a9e293e326977ed985a451bda4a5c99.
+Both final independent read-only artifact reviews and narrow confirmations passed.
+Its full1050/285/SolKey377-131 pass, earlier124/137 failures and85vs83documentation
+FAIL remain distinct. The following work continues the four explicitly ready arms.
+
+NEW FiniteHeapConsumer consumes the actual published memory/referenceArrays/objects
+certificates, retaining their distinct Input and complete Rep, stack and exact
+empty revert. Actual finite certificates exclude source exhaustion; diamond
+yields source+target+post without a desired run/notExhausted premise; box and
+iff retain failure. Primitive memory retains BaseExtends/GrowsAllocator and
+source-computed allocation cost; reference arrays preserve their same-base
+RefArrayStateRepr, and objects preserve complete StateRepr+KeepsAllocator.
+These are admitted-certificate consequences, not full-profile compiler coverage.
+
+NEW CompilerConsumer consumes unchanged Compiler.correct for all8published arms.
+No-exhaustion is not termination: actual divergence remains. Diamond keeps the
+normal target success/full stack/Rep(L+pushes) OR guarded actual payment refusal
+with only a candidate Rep. The nonpaying consequence has an explicit checked
+syntactic pays=false premise. Box target transport requires an actual successful
+target run, and the general error theorem preserves exact source revert vs
+assert-guarded panic and divergence/fault/payment alternatives. No broad Agrees
+alternative is erased or assumed to be success.
+
+FiniteHeapControls reuses the actual populated published object/reference-array
+programs: both mutate distinct aliased children to11/13, retain stack77 and all7
+ordered source/target observations. Wrong output/alias/spec controls consume the
+NEW represented witness; wrong input frame/pointer, all3bounds, exact revert,
+false-post/no-diamond and wrong-payload controls preserve failures. Object
+allocator40 is inhabited. Primitive allocation uses the actual int[2]/bool[0]
+producer, cost4/cursor16→20, full6source/10target observations and post lengths
+0/2 with input scalar2. A separate actual Input protects stack77. Its empty
+initial heap makes BaseExtends vacuous in that example, while allocator growth
+is inhabited (b1/cursor16); populated primitive bad-RHS/bad-index inputs exercise
+new exact-failure/false-post box consumers. No replacement execution semantics.
+
+CoreConsumerControls uses the populated H2/coreAssignment marker8 and protected
+stack77, exact public Sim(L+pushes) and machine cell3=8. Core frame0 is admitted
+because its actual Input has no heap-frame premise; excessive layout is refused.
+Ordinary assert(false) yields source panic and target revert with its guard.
+Real fresh funding10/oracle agreement admits a nonzero transfer3 with source
+balance7 and target balances7/3, while transfer11 is source-and-target revert.
+This refusal is NOT an inhabited source-success/payment-refusal candidate arm.
+Corrupting accepts gives source success/target revert but is rejected by actual
+Input.oracle. The conditional public alternative remains explicitly conditional.
+The published nonallocating memory spin has actual canonical Compiler.compile,
+Input/Room, source divergence and machine fault through NEW generic error
+transport, without evaluating an infinite native run or assuming termination.
+Its box does not imply success; its diamond is false. The prior genuine recBase
+exhausted diamond/no-success counterexample is reused unchanged. None of these
+observations are fabricated G01 events or byte-EVM/deployment/transaction proof.
+
+Focused checks, exact premise/axiom accounting, final gates and independent
+reviews are recorded once observed in a separate /workspace/scratch/v16-heap-recovery
+handoff. All2255constructor/feature/stage obligations remain OPEN; SourceSpec/
+admission/lowering/progress, integrated V12-V15/pinned Osaka/resources, recursive/
+external execution, deployment/rollback/adversarial transactions and final SolKey
+applications remain original prerequisites. No reserved code, profile, semantics,
+Fml.inTarget, SolKey maps, verdicts, proof/fuel/node/test/time budgets or goal changed.
+
+Scoped accounting now pins14complete theorem types/conclusions/dependent
+premise telescopes and98actual closed control statements. Actual reached
+closure has287owned theorem/value/helper nodes; all headline axiom outputs
+contain only propext/Classical.choice/Quot.sound. Nineteen corruption tests
+pass, including erased payment alternative/branch representation, added source
+success/notExhausted/strengthened Input premises, premise-only control, wrong
+public fixture, missing actual Input/helper, hidden oracle/unapproved axioms,
+absent constructor/combination and false full-lane closure. Both independent
+read-only proof/control reviewers passed after adding populated plain-memory
+failure/false-box cases and an actual oracle-corruption negative. Neither
+used a Lean server/build/tests or wrote files. No further specific omission
+within these scoped eight-arm consumers was identified; this does not prove
+all original composition work exhausted. Cross-arm/compiler-stage composition,
+source acceptance/lowering, full-profile/runtime/resource progress and concrete
+world/deployment/transaction/specification producers remain explicit OPEN
+obligations, not premises counted as discharged. Final accounting/artifact
+reviews and required changed-source gates remain separately recorded.
+
+Changed-source `./run-lean.sh` now passes1052default/285kernel jobs and
+SolKey377parsed/131read-bearing/131covered, exit0, hard-cgroup
+peak4263440384bytes. Earlier full124/137 remain retained actual failures.
+Focused metadata/axiom checks pass; current core inventory has200actual
+statements and2255OPEN obligations. Static layer/orphan/trust/noncircular/
+complete-TestSuite checks pass. Raw documentation and exact-base complete
+finding comparison remainFAILED85vs83: the same2reservedYul findings, none
+removed; no reserved citation edits/waiver. Final exact-head inventories,
+strict timing distinction and artifacts will bind the passing Lean source
+fingerprint. Fresh remote inspection observes newer published master
+099bfbe185731c354b12a40f28ccf5d98534c779, not yet consumed. After this
+checkpoint is preserved, inspect it for newly ready original prerequisites;
+do not treat this scoped checkpoint or a stale prerequisite inventory as
+completion. The original persistent goal remains blocked and untouched.
