@@ -1099,7 +1099,14 @@ above and closes none of them. Timings:
 [va1-h6-type-split.md](feature-work/va1-h6-type-split.md).
 
 
-VA1 independent AU02 proof component (2026-11-01):
+VA1 independent AU01/AU02 proof components (2026-11-01):
+`Calculus/DecisionUIntShape.lean` gives a computable syntax recognizer exactly
+equivalent to the existing intrinsic `UIntLinear` grammar and a constructive
+Decidable instance. Accepted source syntax feeds the existing bounded numeric
+coverage/certificate bridge. Rejection denotes only absence of that grammar;
+it is neither a verdict test nor a Residue or unknown classification. The global
+Residue census and target/hash completeness bridge remain open.
+
 `Calculus/DecisionFixedArrayPath.lean` reconstructs one fixed array below
 an arbitrary intrinsic path, with save existence from actual prefix presence,
 optional indexed lookup agreement (explicit length breakpoint), and a frame for

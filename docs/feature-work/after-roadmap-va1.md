@@ -1578,3 +1578,75 @@ owned work continues; the full original goal remains incomplete.
 Final documentation review found the new module-map rows outside their table;
 both rows were moved beside the existing Decision modules before commit. No
 source/proof findings. Original raw failures and earlier seals are preserved.
+
+## AU01 independent decidable source grammar — 2026-11-01
+
+`Calculus/DecisionUIntShape.lean` implements `Tm.uintLinearShape`, exactly
+characterizing the existing intrinsic `Tm.UIntLinear` grammar. Generalized
+`UIntLinearAt` is false at other sorts. Literal recognition returns a typed
+value plus equality with the original term. `uintBinaryEvidence` consumes
+actual optional subderivations; main `uintLinearEvidence` follows structural
+recursion. `uintLinearShape_sound`, `uintLinearShape_complete` and
+`uintLinearShape_iff` prove both directions, supplying a constructive Decidable
+instance without a classical decision oracle. `uintShapePrefix_Covered` and
+`uintShapePrefix_certified` feed the actual existing numeric coverage/certificate
+bridge with unchanged sufficient `a.size + b.size ≤ 71` and exact `ValidH`/
+`holdsH` conclusions. No Covered/verdict/complement test defines the syntax.
+
+The accepted syntax is precisely uint locals, literals, addition/subtraction
+and multiplication with a direct literal operand. Other sorts, observations,
+environment reads, other operators and nonliteral products are outside this
+specific grammar. Rejection alone implies neither unknown nor invalidity nor
+absence of coverage/target admission. This is a concrete decidable component
+for the unfinished residue census, not the global Residue/DecisionTheorem-prime.
+
+Controls check nested addition/subtraction and both literal-product orders,
+reject symbolic products and folded nonliteral coefficients, use the Decidable
+instance for positive/negative grammar membership, apply the real coverage and
+certified-result bridges, and retain the inhabited partial-arithmetic countermodel.
+No source/predicate/default/observation/verdict/pin/budget change is made.
+Registrations are two additive imports and two adjacent module-map rows.
+
+Finder caught initial kernel-evaluated indexed matches violating Gate G0.
+Warned before repair and inspected intrinsic speed history and existing TermEq
+recursors. Replaced indexed dispatch with explicit generalized-index Tm/Op0/Op2
+casesOn and structural recursion. Remaining matches concern types/operators or
+parameter-only Option witnesses. No compiled twin is introduced. Rejected
+source is retained in evidence, together with match/equation-generation, proof,
+layout and local probe failures. Finder and independent skeptic re-reviewed the
+repair read-only and found no remaining source issue; no Lean/server/build/edits.
+
+Exact repaired-source gates in /workspace/va1-evidence/linear-shape-next:
+core MCP 5.261s, core build 3.093s, controls MCP 4.275s, controls build 3.099s,
+14 public theorem/control axiom reports 8.475s, all pass. MCP diagnostics have
+zero errors/warnings/dependency failures; axioms are only standard
+propext/Classical.choice/Quot.sound. Every check uses the original writer lock,
+thread1/-j1, hard aggregate12GiB/no-swap with actual cgroup verification and
+12GiB host reserve. Maximum sampled aggregate RSS 1528452 KiB; minimum host available
+17069674496 bytes. Actual Lean4.24.0/Lake5.0.0-src+797c613 versions are retained.
+
+Static gates pass: 1084 reachable/zero orphans, 180 core/zero elaborator reach,
+491 automatic/61 budget/11 refuted/zero manual or pending, trust1099 sources/
+248 sites/zero findings. Inventory FAIL1 remains byte-identical to the preceding
+checkpoint (1206 pins, zero errors, 404 unrecorded changes); strict docs FAIL1
+retains existing missing/ambiguous references. Original Decision source remains
+byte-exact to frozen base. These failures and the TypeExamples full-gate failure
+remain failures; no unchanged failed heavy gate was repeated as an endpoint.
+
+The earlier fixed-path checkpoint is committed at
+4d44b034dddd81a1bfa2acb02478552e7db2d23d and sealed at
+/workspace/va1-evidence/fixed-path-next/delivery. Initial sealing rejected a
+stale all-source hash from the pre-rename controls; this failure is retained,
+focused core check refreshed, then all274 source hashes matched committed blobs.
+Patch/bundle/handoff/evidence/checksums verify. The immutable parallel-interface
+export at144a2a9d remains unchanged and usable independently.
+
+All original global residue/theorem/hash bridge, broader revised M4 boundary,
+AU02 fixed/nested-array pipeline, memory/halting-OR/general-fuel children,
+remaining baseline/performance/backfill and final concrete full gates remain
+incomplete. Q1 approval is retained; only Q2 frontend ownership repair remains
+held. This checkpoint does not claim a residue shrink or lane completion.
+
+Final finder and skeptic documentation reviews found one shared label incorrectly
+calling the AU01 recognizer AU02; changed to AU01/AU02 proof components before
+commit. No other findings. Both reviews remained read-only without Lean/server.
