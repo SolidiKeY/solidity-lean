@@ -6,9 +6,9 @@ export function sourceHash(bytes) {
 }
 
 /** LSP positions use zero-based lines and UTF-16 code units, unlike solc's UTF-8 bytes. */
-export function sourceRange(bytes, src) {
+export function sourceRange(bytes, src, sourceId=0) {
   const match = /^(\d+):(\d+):(-?\d+)$/.exec(src ?? '');
-  if (!match || match[3] !== '0') return undefined;
+  if (!match || match[3] !== String(sourceId)) return undefined;
   const start = Number(match[1]), length = Number(match[2]), end = start + length;
   if (![start, length, end].every(Number.isSafeInteger) || end > bytes.length) return undefined;
   // Refuse offsets inside a multi-byte sequence rather than emitting a misleading range.
@@ -24,13 +24,14 @@ export function sourceRange(bytes, src) {
 
 /** Match declaration IDs, never source names: overloads and renamed declarations stay distinct. */
 export function sourceLocations(ast, bytes) {
+  const sourceId=Number(ast.src?.split(':').at(-1)??0);
   const contracts = new Map();
   for (const contract of ast.nodes ?? []) {
     if (contract.nodeType !== 'ContractDefinition') continue;
     const functions = new Map((contract.nodes ?? [])
       .filter(node => node.nodeType === 'FunctionDefinition')
-      .map(node => [node.id, sourceRange(bytes, node.src)]));
-    contracts.set(contract.name, { functions, range: sourceRange(bytes, contract.src) });
+      .map(node => [node.id, sourceRange(bytes, node.src,sourceId)]));
+    contracts.set(contract.name, { functions, range: sourceRange(bytes, contract.src,sourceId) });
   }
   return (contractName, row) => {
     const contract = contracts.get(contractName);

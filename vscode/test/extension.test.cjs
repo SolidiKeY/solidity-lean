@@ -16,6 +16,22 @@ function setup(backend) {
 }
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
+test('a queued dependency notification clears old UI without cancelling a fresh verification',async()=>{
+  const env=mock(),disposable=()=>({dispose(){}}),service=new (require('node:events').EventEmitter)();
+  Object.assign(service,{open:async()=>{},cancel(){},dispose:async()=>{}});
+  for(const name of ['registerCompletionItemProvider','registerDefinitionProvider','registerReferenceProvider','registerDocumentSymbolProvider','registerSignatureHelpProvider','registerDocumentHighlightProvider','registerRenameProvider','registerDocumentFormattingEditProvider','registerCodeActionsProvider','registerWorkspaceSymbolProvider'])env.vscode.languages[name]=disposable;
+  Object.assign(env.vscode,{StatusBarAlignment:{Left:1},CodeActionKind:{QuickFix:{}},Uri:{file:path=>({fsPath:path})}});
+  Object.assign(env.vscode.window,{visibleTextEditors:[],createTextEditorDecorationType:disposable,createStatusBarItem:()=>({show(){},hide(){},dispose(){}}),onDidChangeVisibleTextEditors:disposable,onDidChangeActiveTextEditor:disposable});
+  Object.assign(env.vscode.workspace,{textDocuments:[env.doc],onDidOpenTextDocument:disposable,onDidChangeConfiguration:disposable,createFileSystemWatcher:()=>({dispose(){},onDidChange:disposable,onDidCreate:disposable,onDidDelete:disposable})});
+  let complete,signal;const api=createExtension(env.vscode,env.context,args=>{signal=args.signal;return new Promise(resolve=>{complete=resolve;});},service);
+  try{
+    const pending=api.verify(env.doc);await settle();api.reports.set(env.doc.uri.toString(),{results:[row(env)],errors:[]});
+    service.emit('invalidated',{uri:env.doc.uri.toString(),version:env.doc.version});
+    assert.equal(api.reports.has(env.doc.uri.toString()),false);assert.equal(signal.aborted,false);
+    complete({results:[row(env)],errors:[]});assert.equal((await pending).results[0].status,'proved');
+  }finally{await api.dispose();}
+});
+
 test('model distinguishes incomplete proof, import gap, runtime error and success', () => {
   assert.equal(model.resultKind({ status: 'pending' }), 'failed');
   assert.equal(model.resultKind({ status: 'unsupported' }), 'errored');

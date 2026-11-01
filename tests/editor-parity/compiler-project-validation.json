@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "recorded": "2026-10-31T21:28:22.901Z",
+  "integrationBase": "9b24b57311b8daf0d4cd01b52bf420fd024c1d3a",
+  "node": "v24.19.0",
+  "nodeTests": {
+    "command": "LEAN_NUM_THREADS=1 SOLIDITY_LEAN_REAL_BACKEND=$PWD SOURCE_UNITS_SOLJSON=PINNED_0_8_38 node --test --test-concurrency=1 vscode/test/*.test.cjs scripts/source-units.test.mjs scripts/solc-ast-hashes.test.mjs scripts/source-locations.test.mjs scripts/check-dafny-features.test.mjs scripts/check-trust.test.mjs",
+    "tests": 134,
+    "pass": 134,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "cliTests": {
+    "command": "node --test --test-name-pattern='editor reports|file-level structs|finite nominal|reference parameters' scripts/test-solidity.test.mjs",
+    "tests": 5,
+    "pass": 5,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "nativeEditorHost": {
+    "passed": true,
+    "checks": [
+      "activation",
+      "command",
+      "backend process",
+      "Test Explorer items",
+      "hover",
+      "diagnostics",
+      "precondition audit diagnostics",
+      "certified model prestate diagnostics",
+      "escaped model hover",
+      "edit invalidation",
+      "real solc + Lean proof",
+      "real pending obligation",
+      "real declaration ranges",
+      "real finite membership proof",
+      "real impossible entry certificate",
+      "real possible entry certificate",
+      "vacuous proof diagnostic",
+      "real exact-goal refutation certificate",
+      "real model argument source mapping",
+      "real model diagnostic and hover",
+      "real tuple-annotated safety proof",
+      "real invalid tuple component diagnostic",
+      "real tuple result hover",
+      "real lexical shadowing proof",
+      "real renamed witness source positions",
+      "real shadowed function diagnostic and hover",
+      "real default-diamond tuple VC proof",
+      "real equal tuple pending diagnostic",
+      "real tuple diamond proof and pending hovers",
+      "real tuple diamond Test Explorer statuses",
+      "real filtered membership proof and pending sibling",
+      "real reserved quantifier capture rejection",
+      "real mixed-failure retained source ranges",
+      "real filtered diagnostics and hovers",
+      "real filtered Test Explorer statuses",
+      "real project import proof and foreign definition",
+      "real workspace symbols and receiver completion",
+      "real compiler-validated formatting and cross-file rename",
+      "real SPDX and unused declaration quick fixes",
+      "real dependency edit clears report and Testing items"
+    ]
+  },
+  "leanChecks": {
+    "apiBuild": "263 targets completed successfully",
+    "singleFileDiagnostics": [
+      "Solidity/Frontend/SourceUnits.lean",
+      "Solidity/Examples/Tactics/SourceUnitsMetadata.lean"
+    ],
+    "ownershipControls": "Original compilation accepted; duplicate-ID free function/member variable, nested source unit/array, file-global and nominal injections rejected by native Lean"
+  },
+  "trustAudit": "1047 sources, 248 inventoried sites, 0 findings",
+  "baselineCompilerControls": [
+    {
+      "fixture": "reference",
+      "oldSha256": "849b6b6ca45d08f125d1daea1d357f6cef3c0eee53854427dd01342b483e5c15",
+      "newSha256": "849b6b6ca45d08f125d1daea1d357f6cef3c0eee53854427dd01342b483e5c15",
+      "scope": "Single-source compiler output is byte-identical to HEAD for the two reconciled CLI expectations."
+    },
+    {
+      "fixture": "finite",
+      "oldSha256": "26105d4ce07474517336bb5e4c75df83159dbc73f31af97226af4bf853ea6764",
+      "newSha256": "26105d4ce07474517336bb5e4c75df83159dbc73f31af97226af4bf853ea6764",
+      "scope": "Single-source compiler output is byte-identical to HEAD for the two reconciled CLI expectations."
+    }
+  ],
+  "sourceSha256": {
+    "Solidity/Frontend/SourceUnits.lean": "a80e58958f1f2320c18ee5ac64bb731166e0c11116b5f268f47b62a26a4f778f",
+    "scripts/solc-ast.mjs": "992d2e433b330302de28c84a33b4bc0aa6e4c6d9ac493e27aac5f2cc9c20bf7d",
+    "scripts/solc-unit.mjs": "547beecbe4594dd70805fd50a413fecb0fa9b0f7b3248a8d661d94b455dce901",
+    "scripts/source-locations.mjs": "9477948aa9a2021242c936c9a84fea3d726f0ae279c68ae07454b0bc759b03b1",
+    "scripts/test-solidity.mjs": "48fc40fe94a4dc46d81b38b3d1996ad5e928e6120d7b9e34e371c5fa6bd3c435",
+    "vscode/src/backend.cjs": "3c57560d87123777906b665dc67a6f1e114512fa7b1965db763bd61e301c20b0",
+    "vscode/src/counterexample.cjs": "ec05fff2b9eee381e42e049762b8b1810a4d492813df082169ec0ed2bd29c2ba",
+    "vscode/src/editor-services.cjs": "026bb61f83144b664f9058118bf205cf6fb0d34e2ab7da88eee1596cecedd0f5",
+    "vscode/src/extension.cjs": "3bedd2651971bff30ece883a0336176a67b1a6992be69bbe1cc3b3dc950a07c6",
+    "vscode/src/language-services.cjs": "fc6a02645afc4fd851ee681579beb5d52f9f528fd54f32103faafc9801a8283d",
+    "vscode/src/lean-session.cjs": "238f1d2c8126f4049e47b6399ce581adc3a563c9f6e17ec7efb600499169e99d",
+    "vscode/src/lsp-client.cjs": "e8cad5e4ad674b9717432faf59bb2beb4c8319a81208958a5b0fa3a19880bdcd",
+    "vscode/src/lsp-server.cjs": "138a8468b1cd93f6e04f747bf4120aab6665e18583b121f43f26337c880f9041",
+    "vscode/src/lsp-worker.cjs": "8ff541bceba0c003eded58bb3d5b5c66bdb11dc7f258de81721521ef61a5ed69",
+    "vscode/src/model.cjs": "978b27e3577a51ca43de904eac97bdc97a625abf06a5ee151a2b49224645f5c2",
+    "vscode/src/project.cjs": "46ab64d1ca393b83c527083a201c448357898a41cda6101759c056336a313238",
+    "vscode/src/rpc.cjs": "259c146bb78ad42ab4fc3071f3e09688157601073c59067bde49b4a9293a2b80",
+    "vscode/src/solidity-text.cjs": "ddb414ea0745d6b0fbe3586d2d40a5774a54bf8caf2c57d2a91147937a9c4e75",
+    "vscode/src/worker-pool.cjs": "61d70e2b9400a88ea172e1b3ffa7d663905fa158a2e6365a5da933f1bcda88fc"
+  },
+  "upstreamIntegration": {
+    "commit": "8bd8742a",
+    "scope": "Documentation-only automation/compiler plan; implementation source hashes unchanged."
+  }
+}
