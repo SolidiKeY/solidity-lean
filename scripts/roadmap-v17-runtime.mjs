@@ -20,6 +20,10 @@ export function checkCompiler(identity){
  require(identity.bytes===10798266,'wrong approved compiler length');
 }
 export function sameInputs(before,after){require(equal(before,after),'stale or changed execution inputs');}
+export function checkoutStatus(status,actualConfig,expectedConfig){
+ require(status===''||status==='?? roadmap-v17-runtime.lakefile.toml','dirty runtime source');
+ if(status!=='')require(actualConfig===expectedConfig,'changed serial runtime configuration');
+}
 export function snapshot(){
  require(lstatSync(CACHE).isFile(),'approved hidden cache is not a regular file');
  const identity={path:CACHE,bytes:lstatSync(CACHE).size,sha256:sha(CACHE),version:VERSION};
@@ -39,7 +43,11 @@ export function snapshot(){
  for(const name of ['package.json','package-lock.json','generated.mjs','replay.mjs'])files['scripts/evm-reference/'+name]=sha(resolve(runtime,name));
  for(const name of ['SolCases.lean','Solidity/Tools/SolCases.lean','scripts/solidity-upstream.mjs','scripts/roadmap-v17-runtime.mjs','scripts/roadmap-v17-compare.mjs','lean-toolchain','lakefile.toml','.lake/build/bin/solcases'])files[name]=sha(resolve(ROOT,name));
  const git=args=>execFileSync('git',args,{cwd:ROOT,encoding:'utf8'}).trim();
- require(git(['status','--porcelain','--untracked-files=normal'])==='','dirty runtime source');
+ const status=git(['status','--porcelain','--untracked-files=all']);
+ const config=resolve(ROOT,'roadmap-v17-runtime.lakefile.toml');
+ const expectedConfig=readFileSync(resolve(ROOT,'lakefile.toml'),'utf8').replaceAll('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1"]');
+ checkoutStatus(status,status===''?null:readFileSync(config,'utf8'),expectedConfig);
+ if(status!=='')files['roadmap-v17-runtime.lakefile.toml']=sha(config);
  return {schema:1,revision:git(['rev-parse','HEAD']),tree:git(['rev-parse','HEAD^{tree}']),compiler:identity,
   node:{path:realpathSync(process.execPath),version:process.version,sha256:sha(process.execPath)},files,
   leanVersion:execFileSync('lean',['--version'],{encoding:'utf8'}).trim(),lakeVersion:execFileSync('lake',['--version'],{encoding:'utf8'}).trim()};

@@ -709,3 +709,14 @@ ten full metadata rows are incomplete, selected pin `473da894` differs from
 historical `048a74de`, and all 457 closure rows and original G52–G55 obligations
 remain open. Current command/resource/review outcomes are recorded in the new
 external handoff rather than rewriting any sealed set.
+
+The first new runtime attempt stopped before generation with Git/GLIBC exit 2.
+The separate compatibility request uses only the existing host Git and matching
+loader/libc/pcre/zlib, read-only and local to that Git process; the pinned image
+and Node/EVM dependencies remain unchanged. Its next preflight also stopped
+before generation: the new consumer incorrectly rejected the original collector's
+serial temporary Lake configuration. The consumer now permits only that exact
+untracked filename with bytes reproduced from the original serial configuration
+rule, binds its hash before/after, and rejects all other checkout changes. Both
+raw failures remain failures. This is a collector compatibility repair, not a
+clean build claim or permission to ignore dirty source.

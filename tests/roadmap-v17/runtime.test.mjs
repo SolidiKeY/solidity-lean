@@ -4,7 +4,7 @@ import {strict as assert} from 'node:assert';
 import {readFileSync,mkdtempSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
-import {checkCompiler,sameInputs,reportBinding,verifyOutputs,VERSION} from '../../scripts/roadmap-v17-runtime.mjs';
+import {checkCompiler,sameInputs,reportBinding,verifyOutputs,checkoutStatus,VERSION} from '../../scripts/roadmap-v17-runtime.mjs';
 const sha='6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390';
 const good={sha256:sha,version:VERSION,bytes:10798266};
 test('approved identity and changed/missing compiler controls',()=>{
@@ -47,4 +47,10 @@ test('native manifest parser rejects missing duplicate corrupt omitted outputs a
   const missing=structuredClone(manifest);delete missing.files['inputs-after.json'];assert.throws(()=>verifyOutputs('V17_RUNTIME_OUTPUTS '+JSON.stringify(missing),out));
   const failed=JSON.parse(files['runtime-outcome.json']);failed.commandExit=124;const raw=JSON.stringify(failed);writeFileSync(out+'/runtime-outcome.json',raw);manifest.files['runtime-outcome.json']=hash(raw);assert.throws(()=>verifyOutputs('V17_RUNTIME_OUTPUTS '+JSON.stringify(manifest),out));
  }finally{rmSync(out,{recursive:true});}
+});
+
+test('only the exact original serial configuration is an admitted temporary input',()=>{
+ checkoutStatus('',null,'expected');checkoutStatus('?? roadmap-v17-runtime.lakefile.toml','expected','expected');
+ for(const status of ['?? other','M lakefile.toml','?? roadmap-v17-runtime.lakefile.toml\n?? other'])assert.throws(()=>checkoutStatus(status,'expected','expected'));
+ assert.throws(()=>checkoutStatus('?? roadmap-v17-runtime.lakefile.toml','changed','expected'));
 });
