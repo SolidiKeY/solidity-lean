@@ -976,3 +976,5 @@ import Solidity.Backend.MemoryOps.SourceStructSequence
 import Solidity.Backend.MemoryOps.SourceStructRedirect
 
 import Solidity.Backend.MemoryOps.SourceStructGrowth
+
+import Solidity.Backend.MemoryOps.SourceStructDeclaration

@@ -4196,3 +4196,120 @@ Existing source_bool_declaration_word/source_decl_statement_run provide the
 producer, but shifted Source/intrinsic locals and named observer context transport
 must still be derived. C55 zeroVal/allocRef and reached delete do not prove that
 Source RItems context-changing declaration/rebind program.
+
+
+## Checkpoint 56: actual declaration then reached named-field assignment (partial)
+
+[SourceStructDeclaration.lean](../../Solidity/Backend/MemoryOps/SourceStructDeclaration.lean)
+closes the supported application absent from C55: `zeroVal`/`allocRef` in the
+old Source context alone did not execute a context-changing declaration and
+subsequent assignment. No existing producer, evaluator, AST, type or allocator
+is replaced; all Source/Evm/constructor owners remain read-only.
+
+- `SourceBoolMemoryAt.recontext` and `SourceBoolStructAt.recontext` transport
+  the existing finite observers across **equal actual heaps**, without equating
+  locals of different intrinsic Source contexts.
+- `source_items_context_pair_run/error` use the actual `RItems.stmt` interface
+  from input context Γ to reached Δ and then Δ to Δ. The error clause carries
+  the actual reached global state; it constructs no successful suffix state.
+- `SourceBoolStructAt.declare_assign_word` consumes the existing
+  `source_bool_declaration_word` producer at its actual output, derives the old
+  named observer via C55 real allocation transport and uniquely identified
+  Source output, and recontexts it to the new cons local frame. The fresh Source
+  RHS is `.here`; the old Source root is shifted by `.there`. Independently,
+  intrinsic `TEnv.get_wk` derives the weakened old root and the fresh local;
+  runtime word cells append the new local while retaining old cell positions.
+  These are distinct indexing arguments, not a Source/target length assumption.
+- That reached observer, actual fresh child contents, reached `MemOK` and word
+  StateRepr supply C49's resolved reference assignment. Initial root alignment,
+  mapFree, MemOK, StateRepr/StructAllocatorRepr, positive base, fresh space and
+  new-local frame capacity stay explicit. Desired postagreement or an unrelated
+  second successful initial run is never assumed. Final named tag/selected fresh
+  child/empty capacity, every initially represented old Boolean alias, Source
+  external state/events/logs/function locals, stack and actual allocator derive.
+- The actual Source `RItems` program and intrinsic `Prog` each contain BOTH
+  operations, and the target theorem executes the WHOLE declareNewCode followed
+  by structReferenceWriteCode append. It retains separate declaration, reached
+  expression/statement and code executions. Source horizons are: body n+6,
+  declaration n+5, reached assignment expression n+3 and statement n+4. `RItems`
+  retains ORIGINAL Γ.length as parameter count after declaration; the second
+  statement is rederived from its actual expression at this count, rather than
+  silently substituting extended-context length.
+
+Append-only [controls](../../Solidity/Backend/MemoryOps/SourceStructControls.lean)
+execute both declared pipelines with independent populated initial witnesses.
+Actual declaration grows the Source context and heap, then the new local binds
+fresh logical child3/base48 into the existing tag7 parent. Old children TFF/FTF
+and retained alias0 survive. Three complete four-object Source tables and three
+full16-word vectors include initial/mid/final parent pointers16/16/48, free
+pointer48/49/49, all old headers/contents, neighbour99, new local5/header48,
+stack42 and final allocator. Typed Source bindings and intrinsic env IDs record
+fresh3 and shifted root2/oldalias0 separately; heterogeneous Source values stay
+in typed products.
+
+The inhabited stale-RHS run uses the shifted OLD RHS rather than `.here`; actual
+Source/intrinsic/word execution binds child1/base24 instead of fresh3/base48.
+It includes complete Source tables, three full16-word vectors and actual final
+member reads1 versus3. Low Source body horizon5 REALLY completes declaration4
+then times out in assignment3, retaining allocated cell3 and old parent data0;
+body3/zero timeout retains the initial heap. The successful body6 reaches data3.
+These are interpreter horizons, not admission/test-budget changes. A post-success
+primitive Source read at fresh index0 panics, intrinsic index is None, and a real
+target read suffix after the whole successful word prefix reverts. These scopes
+are separate: no three-statement Source bounds program, matching panic payload,
+successful suffix machine or rollback claim is manufactured.
+
+Focused guarded closure passed187jobs. Five public laws and four controls have
+exact standard-trio guards. All C55 control bodies and prior guards/vectors remain
+byte-preserved apart from one import and appended new controls. Earlier failed
+proof/control/guard attempts remain separately retained; no sorryAx survives the
+passing guards. Lean MCP/goal read/update tools are unavailable; bounded serial
+checks are used and the independently BLOCKED goal is unchanged.
+
+Independent preliminary finder/skeptic source reviews found no math/ownership
+issue; final source/control/docs and committed-artifact review receipts are in the
+handoff. This is a G33/G34/BackfillB supported EMPTY-default program application,
+not all-profile construction, nonempty allocator compilation, physical bytes,
+general paths/graphs/ABI/storage/deep-copy or final Source/V10/target closure.
+Every original G32-G35 and Backfill parent remains partial/blocked. No source
+profile, exclusion, predicate, expected fixture, proof/fuel/node/time/TestSuite
+budget or reserved global registry is changed. Kernel/symbolic-word execution
+is not external compiler/EVM validation. Raw global docs/inventory failures and
+complete frozen/public finding comparisons stay distinct from scoped checks.
+
+
+C56 refined-tree final gates: focused187/full default1098/TestSuite262/
+SolKey377parsed131read-bearing covered and final wrapper exit0. Fresh actual
+Lean4.24.0 (797c613)/Lake5.0.0-src+797c613/KeySort2jobs pass. Strict, trust,
+layers, orphans, lane, complete fixtures, script corruption and diff checks pass.
+Scoped926pins/117modules have zero unsafe sets; raw global inventory remains
+**exit1**,1285unrecorded=359published inherited+926owned (14original+345incoming
+within inherited). Additive owned pin/feature proposals go only to the coordinator.
+Raw strict docs remains **exit1**,83complete public-byte-identical findings
+(SHA2561905b6529ffff68bf2ee9256f84952fd8a19e0df94a434b3b052c11638142f2a).
+Separate complete publiczero-new passes; frozenno-new remains **exit1**,11incoming.
+No reserved records or historical baselines are rewritten to mask failures.
+
+Warm strict timed **zero** TestSuite modules. Independently unchanged262-file
+Suite/fixture/toolchain bytes preserve the retained comment-aware import graph;
+actual Lean/Lake versions match retained C31 cold26timings/max160seconds under
+unchanged300seconds each. This is retained evidence, not new cold coverage.
+Full aggregate Lean/Lake peak RSS1628420KiB, disk growth270336bytes, new
+max/OOM/kill events0. Historical12GiBpeak/1051maxevents remain separately recorded;
+child12GiB/no-swap under parent16GiB, hostSwapTotal0/OS headroom, CPU0/threads1/
+Lean-j1/cacheOFF and all existing proof/test/time guards remain unchanged.
+All3091 prior C55 seal records verify unchanged before commit. Separate independent
+read-only finder and skeptic SOURCE/docs reviews passed; committed-artifact
+reviews are separately required after export, without Lean/server/builds.
+
+Further concrete original G34/BackfillB investigation remains available: the
+current finite layout reads uint256 tag fields but has no owned resolved
+primitive-tag member assignment adapter. Published Source.memSet/DataList.setNth,
+Heap.setField, Memory.StructRepr.set/writeField_correct and PtrFrag.writePrimitive
+provide independent interfaces to inspect for an actual Source/intrinsic/word
+application while framing the reference child. This has not been implemented by
+C56, and is not an independent-queue exhaustion assertion. All original physical
+byte/all-profile construction/target allocation failures/general paths/graphs/
+ABI/storage/deep-copy/reserved-copy/finalV10-Source-target obligations remain open.
+The existing goal is BLOCKED unchanged; unavailable worker goal RPC is not
+permission to reset, reactivate or complete it.

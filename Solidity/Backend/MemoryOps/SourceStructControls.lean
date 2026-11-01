@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructDeclaration
 import Solidity.Backend.MemoryOps.SourceStructGrowth
 import Solidity.Backend.MemoryOps.SourceStructRedirect
 import Solidity.Backend.MemoryOps.SourceStructSequence
@@ -1978,5 +1979,213 @@ theorem named_struct_default_word (p : Roadmap.Pipeline) :
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_struct_default_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms named_struct_default_word
+
+private abbrev DΓ : Source.RCtx := SB::SΓ
+private def declaredSource : Source.EMState E DΓ := (.cons (.memRef rfl 3) sy.1,(growthSource []).2)
+private def boundSource : Source.EMState E DΓ :=
+  (declaredSource.1,{declaredSource.2 with heap := declaredSource.2.heap.write 2 (data 3) (by rfl)})
+private def boundHeap := grownDefaultState.heap.setField growthRoot layout.child_type
+  (σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2
+private def boundMachine := writeMachine grownDefaultMachine 33 w[48]
+private def declaredCode : List Instr := declareNewCode 1 (.lit 0 rfl : Simple C Γ .uint)
+private def boundCode : List Instr := structReferenceWriteCode 1 (.there root) .here "items"
+private def declaredProgram : Prog C Γ (.mem B::Γ) :=
+  .cons (.declMem B (.user "freshBool") none rfl rfl)
+    (.cons (.assignMem (.field (.var (.there root) (by decide)) "items" layout.child_type) (.ref (.var .here rfl))) .nil)
+
+/-- Actual context-changing declaration THEN reached assignment in Source
+RItems, intrinsic Prog and full word append, with complete ordered observations. -/
+theorem named_declare_assign_program (p : Roadmap.Pipeline) :
+    (Source.execS (G p) F0 5 SΓ.length none (.declVar SB : Source.RStmt E [] false .body SΓ DΓ) sy.1).run (.nil,sy.2)=
+      (.ok (.normal declaredSource.1),(.nil,declaredSource.2)) ∧
+    (Source.evalE (G p) F0 3 (sourceStructAssign layout (.there sroot) .here)).run declaredSource=
+      (.ok (.val (.memRef rfl 3)),boundSource) ∧
+    (Source.execS (G p) F0 4 SΓ.length none (.expr (sourceStructAssign layout (.there sroot) .here) : Source.RStmt E [] false .body DΓ DΓ) declaredSource.1).run (.nil,declaredSource.2)=
+      (.ok (.normal boundSource.1),(.nil,boundSource.2)) ∧
+    (Source.execItems (G p) F0 6 SΓ.length none (sourceStructDeclareAssign layout sroot) sy.1).run (.nil,sy.2)=
+      (.ok (.normal boundSource.1),(.nil,boundSource.2)) ∧
+    Prog.run σ declaredProgram=.ok ⟨grownDefaultState.withHeap boundHeap,List.prefix_append _ _⟩ ∧
+    run declaredCode machine=.ok grownDefaultMachine 0 ∧ run boundCode grownDefaultMachine=.ok boundMachine 0 ∧
+    run (declaredCode++boundCode) machine=.ok boundMachine 0 ∧
+    SourceBoolStructAt declaredSource 2 grownDefaultState.heap growthRoot growthAddress layout ∧
+    SourceBoolStructAt boundSource 2 boundHeap growthRoot growthAddress layout ∧
+    Source.MemOK E SH declaredSource ∧ Source.MemOK E SH boundSource ∧
+    StateRepr 1 1 8 ((Frag.init Γ).push (.mem B) .ok) (grownDefaultState.withHeap boundHeap) grownDefaultBase boundMachine ∧
+    StructAllocatorRepr boundHeap grownDefaultBase 8 ⟨49,by decide⟩ boundMachine ∧
+    [sy.2.heap.get 0,sy.2.heap.get 1,sy.2.heap.get 2,sy.2.heap.get 3,
+      declaredSource.2.heap.get 0,declaredSource.2.heap.get 1,declaredSource.2.heap.get 2,declaredSource.2.heap.get 3,
+      boundSource.2.heap.get 0,boundSource.2.heap.get 1,boundSource.2.heap.get 2,boundSource.2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,none,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory []⟩,
+       some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 3⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    [cells machine,cells grownDefaultMachine,cells boundMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[48]]] ∧
+    [boundMachine.mem 5,boundMachine.mem 48,boundMachine.mem 49]=[w[48],w[0],w[0]] ∧
+    (declaredSource.1.get .here,declaredSource.1.get (.there sroot),boundSource.1.get .here,
+      boundSource.1.get (.there sroot),boundSource.1.get (.there soldAlias))=
+      (.memRef rfl 3,.memRef rfl 2,.memRef rfl 3,.memRef rfl 2,.memRef rfl 0) ∧
+    [(TEnv.get (.here : Idx (.mem B::Γ) (.mem B)) grownDefaultState.env).map HRef.id,
+      (TEnv.get (.there root) grownDefaultState.env).map HRef.id,
+      (TEnv.get (.there oldAlias) (grownDefaultState.withHeap boundHeap).env).map HRef.id]=[some 3,some 2,some 0] ∧
+    boundHeap.field growthRoot layout.tag_type=u7 ∧ (boundHeap.field growthRoot layout.child_type).id=3 ∧
+    SourceBoolMemoryAt boundSource 0 boundHeap (left.wk (List.prefix_append H [B])) .dyn ∧
+    SourceBoolMemoryAt boundSource 1 boundHeap (right.wk (List.prefix_append H [B])) .dyn ∧
+    [MObj.elems .dyn (boundHeap.get (left.wk (List.prefix_append H [B]))),
+      MObj.elems .dyn (boundHeap.get (right.wk (List.prefix_append H [B]))),
+      MObj.elems .dyn (boundHeap.get (σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2)]=[[true,false,false],[false,true,false],[]] ∧
+    boundMachine.stack=[w[42]] ∧ boundSource.2.ex=sy.2.ex ∧ boundSource.2.logs=sy.2.logs := by
+  obtain ⟨mid,z,m',hdecl,hw,he,hs,hitems,hd,hi,hcode,hc,happend,hrmid,hr,hm0,hm,hword,halloc,hsfresh,hsroot,hl,htr,htf,htag,hsel,hlen,halias,hstack,htarget,heffects⟩ :=
+    SourceBoolStructAt.declare_assign_word layout (G p) F0 0 σ parent addresses initial_at sroot root rfl rfl (by decide) SH source_memOK
+      initial_repr initial_allocator (by decide) (by decide) (by decide)
+  have hdc : (Source.execS (G p) F0 5 SΓ.length none (.declVar SB : Source.RStmt E [] false .body SΓ DΓ) sy.1).run (.nil,sy.2)=
+      (.ok (.normal declaredSource.1),(.nil,declaredSource.2)) :=
+    source_decl_statement_run (G p) F0 4 SΓ.length sy (growthSource []) (.memRef rfl 3) (source_bool_default_run sy 2)
+  have hmL : mid.1=declaredSource.1 := Source.Out.normal.inj (Except.ok.inj (congrArg Prod.fst (hdecl.symm.trans hdc)))
+  have hmS : mid.2=declaredSource.2 := congrArg (fun a => a.2.2) (hdecl.symm.trans hdc)
+  have hmid : mid=declaredSource := Prod.ext hmL hmS
+  subst mid
+  have hknown : (Source.writeLoc (E := E) (Γ := DΓ) F0 2 (.mem (τ := SB) 2 1) (.memRef rfl 3)).run declaredSource=(.ok (),boundSource) := by
+    obtain ⟨ht,hw⟩ := source_struct_write declaredSource 2 dn layout.source_types u7 0 3 hrmid.parent
+    exact hw
+  have hz : z=boundSource := congrArg Prod.snd (hw.symm.trans hknown)
+  subst z
+  change m'=boundMachine at htarget
+  subst m'
+  refine ⟨hdecl,he,hs,hitems,hi,hcode,hc,happend,hrmid,hr,hm0,hm,hword,halloc,rfl,rfl,rfl,rfl,rfl,?_,?_,halias left left_at,halias right right_at,?_,hstack,heffects.1,heffects.2.2.1⟩
+  · exact htag
+  · change boundHeap.field growthRoot layout.child_type=(σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2 at hsel
+    rw [hsel];rfl
+  · simp only [MObj.elems_dyn]
+    rfl
+
+/-- Actual late timeout preserves the reached allocation, not the initial
+heap. Earlier insufficient declaration fuel has a genuinely different result. -/
+theorem named_declare_assign_timeouts (p : Roadmap.Pipeline) :
+    (Source.execS (G p) F0 4 SΓ.length none (.declVar SB : Source.RStmt E [] false .body SΓ DΓ) sy.1).run (.nil,sy.2)=
+      (.ok (.normal declaredSource.1),(.nil,declaredSource.2)) ∧
+    (Source.execS (G p) F0 3 SΓ.length none (.expr (sourceStructAssign layout (.there sroot) .here) : Source.RStmt E [] false .body DΓ DΓ) declaredSource.1).run (.nil,declaredSource.2)=
+      (.error .timeout,(.nil,declaredSource.2)) ∧
+    (Source.execItems (G p) F0 5 SΓ.length none (sourceStructDeclareAssign layout sroot) sy.1).run (.nil,sy.2)=
+      (.error .timeout,(.nil,declaredSource.2)) ∧
+    (Source.execItems (G p) F0 3 SΓ.length none (sourceStructDeclareAssign layout sroot) sy.1).run (.nil,sy.2)=
+      (.error .timeout,(.nil,sy.2)) ∧
+    (Source.execItems (G p) F0 0 SΓ.length none (sourceStructDeclareAssign layout sroot) sy.1).run (.nil,sy.2)=
+      (.error .timeout,(.nil,sy.2)) ∧
+    [sy.2.heap.get 3,declaredSource.2.heap.get 3,boundSource.2.heap.get 3]=
+      [none,some ⟨SB,sourceBoolMemory []⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    [sy.2.heap.get 2,declaredSource.2.heap.get 2,boundSource.2.heap.get 2]=
+      [some ⟨SS,data 0⟩,some ⟨SS,data 0⟩,some ⟨SS,data 3⟩] ∧
+    (Source.readLoc (E := E) (Γ := DΓ) F0 (τ := .bool) (.mem 3 0)).run boundSource=
+      (.error (.revert (Source.panicData .index)),boundSource) ∧
+    boundHeap.index (σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2 .dyn k0=none ∧
+    [grownDefaultMachine.mem 33,boundMachine.mem 33]=[w[16],w[48]] := by
+  have hs : (Source.execS (G p) F0 4 SΓ.length none (.declVar SB : Source.RStmt E [] false .body SΓ DΓ) sy.1).run (.nil,sy.2)=
+      (.ok (.normal declaredSource.1),(.nil,declaredSource.2)) :=
+    source_decl_statement_run (G p) F0 3 SΓ.length sy (growthSource []) (.memRef rfl 3) (source_bool_default_run sy 1)
+  have he := source_struct_assign_low_horizon layout (G p) F0 declaredSource (.there sroot) .here 2 (by decide)
+  have ht := source_expr_statement_error (G p) F0 2 SΓ.length _ declaredSource declaredSource .timeout he
+  have hi := source_items_context_pair_error (G p) F0 2 SΓ.length (.declVar SB) (.expr (sourceStructAssign layout (.there sroot) .here))
+    sy declaredSource declaredSource .timeout hs ht
+  refine ⟨hs,ht,hi,?_,rfl,rfl,rfl,source_bool_bounds boundSource 3 [] (by rfl) 0 (by decide),?_,rfl⟩
+  · have hd := source_bool_declaration_timeouts (G p) F0 sy 2 (by decide)
+    rw [sourceStructDeclareAssign,Source.execItems,Source.Hoare.run_bind,hd]
+  · simp only [Heap.index,MObj.elems_dyn]
+    rfl
+
+private def staleDeclaredHeap := grownDefaultState.heap.setField growthRoot layout.child_type (right.wk (List.prefix_append H [B]))
+private def staleDeclaredSource : Source.EMState E DΓ :=
+  (declaredSource.1,{declaredSource.2 with heap := declaredSource.2.heap.write 2 (data 1) (by rfl)})
+private def staleDeclaredMachine := writeMachine grownDefaultMachine 33 w[24]
+
+/-- The old RHS local is inhabited but wrong: it still denotes RIGHT1/base24,
+where the new local denotes fresh3/base48. Actual wrong execution discriminates it. -/
+theorem named_declare_stale_rhs (p : Roadmap.Pipeline) :
+    (Source.evalE (G p) F0 3 (sourceStructAssign layout (.there sroot) (.there srhs))).run declaredSource=
+      (.ok (.val (.memRef rfl 1)),staleDeclaredSource) ∧
+    Stmt.run grownDefaultState (.assignMem (.field (.var (.there root) (by decide)) "items" layout.child_type) (.ref (.var (.there rhs) rfl)))=
+      .ok ⟨grownDefaultState.withHeap staleDeclaredHeap,List.prefix_refl _⟩ ∧
+    run (structReferenceWriteCode (Γ := .mem B::Γ) 1 (.there root) (.there rhs) "items") grownDefaultMachine=.ok staleDeclaredMachine 0 ∧
+    (Source.evalE (G p) F0 2 (.member (.local (.there sroot)) 1 layout.source_child_type)).run staleDeclaredSource=
+      (.ok (.val (.memRef rfl 1)),staleDeclaredSource) ∧
+    (Source.evalE (G p) F0 2 (.member (.local (.there sroot)) 1 layout.source_child_type)).run boundSource=
+      (.ok (.val (.memRef rfl 3)),boundSource) ∧
+    [staleDeclaredSource.2.heap.get 0,staleDeclaredSource.2.heap.get 1,staleDeclaredSource.2.heap.get 2,staleDeclaredSource.2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 1⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    [cells grownDefaultMachine,cells staleDeclaredMachine,cells boundMachine]=
+      [[w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[49],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[48]]] ∧
+    (declaredSource.1.get (.here : Source.Idx DΓ SB),declaredSource.1.get (.there srhs),staleDeclaredSource.1.get .here)=
+      (.memRef rfl 3,.memRef rfl 1,.memRef rfl 3) ∧
+    staleDeclaredMachine.stack=[w[42]] ∧ staleDeclaredMachine.mem 5=w[48] ∧
+    staleDeclaredMachine.mem 33≠boundMachine.mem 33 := by
+  obtain ⟨hdecl,heok,hsok,hitems,hiprog,hdeclcode,hbindcode,happend,hrmid,hrbound,hmmid,tail⟩ := named_declare_assign_program p
+  obtain ⟨z0,hzero,hdecl0,hd,hcode0,hnew,hmemnew,hmword,ha,hstack0,hid⟩ :=
+    source_bool_declaration_word (G p) F0 sy 0 SH source_memOK σ initial_repr initial_allocator (by decide) (by decide) (by decide)
+  have hz0 : z0=growthSource [] := congrArg Prod.snd (hzero.symm.trans (source_bool_default_run sy 0))
+  subst z0
+  have hv : SourceBoolMemoryAt declaredSource 1 grownDefaultState.heap (right.wk (List.prefix_append H [B])) .dyn := by
+    obtain ⟨hsa,hke,hst,hfr,hmk,hfi,had,hold,hne,hpa,hca,halias,tail⟩ :=
+      initial_at.alloc_bool (defaultArray .bool ⟨0,W_pos⟩) SH source_memOK
+    have hright := (halias right right_at).1
+    simp only [MObj.elems_dyn,defaultArray,List.replicate_zero] at hright
+    exact hright.recontext rfl
+  obtain ⟨z,m',hw,he,hs,hi,hc,hr,hm,hrepr,hl,hstack,htarget,halloc,htag,hsel,hchildren,hsource,heffects⟩ :=
+    SourceBoolStructAt.resolved_assign_word layout (G p) F0 0 grownDefaultState growthRoot (right.wk (List.prefix_append H [B])) growthAddress hrmid hv
+      (.there sroot) (.there srhs) (.there root) (.there rhs) rfl rfl rfl rfl (by decide) SH hmmid hmword
+  have hwc : (Source.writeLoc (E := E) (Γ := DΓ) F0 2 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run declaredSource=(.ok (),staleDeclaredSource) := by
+    obtain ⟨ht,hw⟩ := source_struct_write declaredSource 2 dn layout.source_types u7 0 1 hrmid.parent
+    exact hw
+  have hz : z=staleDeclaredSource := congrArg Prod.snd (hw.symm.trans hwc)
+  subst z
+  change m'=staleDeclaredMachine at htarget
+  subst m'
+  change SourceBoolStructAt staleDeclaredSource 2 staleDeclaredHeap growthRoot growthAddress layout at hr
+  have hread := hr.eval_member_child (G p) F0 0 (.there sroot) rfl
+  change staleDeclaredHeap.field growthRoot layout.child_type=right.wk (List.prefix_append H [B]) at hsel
+  rw [hsel] at hread
+  have hreadgood := hrbound.eval_member_child (G p) F0 0 (.there sroot) rfl
+  refine ⟨he,hi,hc,hread,hreadgood,rfl,rfl,rfl,hstack,rfl,by decide⟩
+
+/-- Bounds after the actual successful program: primitive Source read panics,
+intrinsic indexing is None, and a real target read suffix reverts. These are
+separate observation scopes; there is no successful suffix machine or rollback. -/
+theorem named_declared_empty_bounds (p : Roadmap.Pipeline) :
+    (Source.execItems (G p) F0 6 SΓ.length none (sourceStructDeclareAssign layout sroot) sy.1).run (.nil,sy.2)=
+      (.ok (.normal boundSource.1),(.nil,boundSource.2)) ∧
+    (Source.readLoc (E := E) (Γ := DΓ) F0 (τ := .bool) (.mem 3 0)).run boundSource=
+      (.error (.revert (Source.panicData .index)),boundSource) ∧
+    boundHeap.index (σ.alloc (defaultArray .bool ⟨0,W_pos⟩)).2 .dyn k0=none ∧
+    run ((declaredCode++boundCode)++([.push w[0]]++readArrayCode ⟨48,by decide⟩)) machine=.revert ∧
+    [boundMachine.mem 33,boundMachine.mem 48,boundMachine.mem 0]=[w[48],w[0],w[49]] := by
+  obtain ⟨hdecl,he,hs,hitems,hi,hc0,hc1,hcode,tail⟩ := named_declare_assign_program p
+  have ha := arrayAddr_run boundMachine ⟨48,by decide⟩ ⟨0,W_pos⟩ 0 W_pos (by rfl)
+  have ha' : run (arrayAddrCode ⟨48,by decide⟩) (boundMachine.push w[0])=.revert := by
+    simpa only [Fin.val_zero,Nat.lt_irrefl,↓reduceIte] using ha
+  have hr : run (readArrayCode ⟨48,by decide⟩) (boundMachine.push w[0])=.revert := by
+    rw [readArrayCode,run_append_revert ha']
+  have hp : run [.push w[0]] boundMachine=.ok (boundMachine.push w[0]) 0 := by
+    simp only [run,exec_cons_zero,Instr.step,Machine.next,Out.ok_bind,exec_nil]
+    rfl
+  refine ⟨hitems,source_bool_bounds boundSource 3 [] (by rfl) 0 (by decide),?_,?_,rfl⟩
+  · simp only [Heap.index,MObj.elems_dyn]
+    rfl
+  · rw [run_append_ok hcode,run_append_ok hp]
+    exact hr
+
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_declare_assign_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_declare_assign_program
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_declare_assign_timeouts' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_declare_assign_timeouts
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_declare_stale_rhs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_declare_stale_rhs
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.named_declared_empty_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_declared_empty_bounds
 
 end Solidity.Backend.MemoryOps.SourceStructControls
