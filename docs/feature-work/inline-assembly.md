@@ -308,3 +308,15 @@ Source/compiler/world/G01 closure and the two VY1 compiler-expectation questions
 remain open. No new producer retrieval or goal change occurred. See
 [lane handoff](inline-assembly-vy5.md#scoped-functionloop-composition--2026-11-01).
 Artifacts: `/workspace/vy5-composition/function-source-20261101/final/`.
+
+### VY5 recursive component handoff — 2026-11-01
+
+VY5 adds an actual scoped self-call after the represented physical action, with
+18kernel laws, inhabited32horizon/raw1025 result, bounded missing-decrement
+control, full physical/journal/heap-window preservation and4finite native
+profiles/24orderedcalls. Existing28call function evidence remains unchanged.
+Reviewed parent-provenance omission is fixed and mutation-tested. Joint
+KeySort/build/TestSuite/strict/trust gates pass;492JS+2Python pass.
+All24full obligations/sixSource combinations and missing producer adequacy remain
+open; no goal status change. See [lane details](inline-assembly-vy5.md#genuine-recursive-physical-composition--2026-11-01) and immutable artifacts
+at `/workspace/vy5-composition/recursive-source-20261101/final/`.

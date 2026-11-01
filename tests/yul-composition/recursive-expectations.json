@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "derivation": "Frozen before native execution: recursive f(n,x) returns x when n=0, otherwise f(n-1,x+256). Starting n3/x257 gives1025. Wrong-addend variant adds257 per call, giving1028. Missing decrement is only a bounded kernel exhaustion control, not an EVM termination claim. Physical/account expectations unchanged.",
+  "cells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1025",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "arities": [
+    [
+      2,
+      1
+    ]
+  ],
+  "horizons": [
+    0,
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "completedFrom": 32,
+  "nonwordId": 0,
+  "heapBytes": [
+    170,
+    187
+  ],
+  "sourceLogs": [
+    [
+      "1",
+      [
+        85
+      ]
+    ]
+  ],
+  "targetBytes": [
+    238,
+    187,
+    238
+  ],
+  "physical": {
+    "first": "2868903938",
+    "child": "3439329283",
+    "outer": "0"
+  },
+  "journalLengths": {
+    "residual": 1,
+    "owned": 1,
+    "childResidual": 2,
+    "childOwned": 2,
+    "outerResidual": 0,
+    "outerOwned": 0
+  },
+  "nativePlan": [
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "post": "0",
+      "exception": null,
+      "frames": 1
+    },
+    {
+      "signature": "compose()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1025",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "2868903938",
+        "43707"
+      ],
+      "post": "2868903938",
+      "exception": null,
+      "frames": 1
+    },
+    {
+      "signature": "composeWrong()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1028",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "2868903938",
+        "43707"
+      ],
+      "post": "2868903938",
+      "exception": null,
+      "frames": 1
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "1",
+        "2868903938"
+      ],
+      "post": "2868903938",
+      "exception": null,
+      "frames": 1
+    },
+    {
+      "signature": "outer()",
+      "words": [
+        "3439329283"
+      ],
+      "post": "2868903938",
+      "exception": "revert",
+      "frames": 2
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "1",
+        "2868903938"
+      ],
+      "post": "2868903938",
+      "exception": null,
+      "frames": 1
+    }
+  ]
+}

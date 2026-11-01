@@ -1250,3 +1250,76 @@ reactivated/status-changed; get_goal remains unavailable and the original
 blocked identity is preserved. No new semantic question is introduced.
 Fresh reviewed patch/bundles/interface/handoff/evidence/checksums are versioned
 under `/workspace/vy5-composition/function-source-20261101/final/`.
+
+### Genuine recursive physical composition — 2026-11-01
+
+[RecursivePhysical](../../Solidity/Yul/Composition/RecursivePhysical.lean) uses
+only already-staged intrinsic Syntax/Bodies/Member/Policy/WordAdapter/LocalBlock.
+Its actual2argument/1result scoped function calls itself with n−1 and x+256;
+base n0 assigns x and leaves. Function bodies have empty external context; the
+raw local argument is passed explicitly, never captured. Starting n3 and the
+actual dirty prefix small257 returns1025. The inhabited32horizon completes;
+all completed horizons have this SAME full result by actual runner stability.
+Missing decrement exhausts the actual runner at32 (and every sampled horizon
+0/1/2/4/8/16/32); this is NOT a universal divergence or native timeout theorem.
+The indexed wrong1argument reference is uninhabited. No proof/fuel/test budget
+was increased and no axiom/sorry was introduced.
+
+The18 registered laws retain exact raw words/control, unchanged complete Source.St,
+nonword memoryRef0, the complete real represented physical result, residual and
+owned-byte journals, actual coupled child-success/outer-rollback3journals and
+bounded BB heap-window target copying. Real source/owner/request/preparation/
+separation/nonstatic/MemOK premises are inherited from the SAME concrete physical
+execution. Rollback transport rebases the old Source.St between actual runs from
+initial clean locals; it does not resume dirty locals or roll them back through
+old Source. Raw clean-bridge refusal is checked separately. This is an owned
+component law, not general Source dispatch/compiler/world/Y07 adequacy.
+
+[RecursiveDriver](../../tests/yul-composition/RecursiveDriver.lean) retains actual
+execution projections, no missing-to-zero fallback. The new independent
+[fixture](../../tests/yul-composition/RecursivePhysicalControls.sol) and frozen
+[expectations](../../tests/yul-composition/recursive-expectations.json) derive
+1025 and the wrong-addend1028 before native execution. All4 pinned solc0.8.38
++1835d247/Osaka legacy/viaIR optimizer off/on profiles pass24orderedcalls:
+peek; recurse; wrong-add; peek; successful child/outer revert; peek. Native missing
+decrement is deliberately not executed as a fabricated fuel correspondence.
+The existing28call function fixture/expectations remain unchanged. Source logical
+account1/log55 are distinct from finite native accounts/logs; internal recursive
+Yul calls are not EVM message frames. RETURN/REVERT windows are relative; no
+cross-pipeline pointer equality, complete untouched-world or runTx claim is made.
+
+The [reader](../../scripts/yul-composition/recursive-source.mjs) validates retained
+actual Lean execution, exact source/oracle/catalog/request/profile hashes, full
+ordered fields and actual parent FunctionPhysical provenance. Both independent
+read-only reviewers found the missing parent-function provenance link; fixed by
+verifyFunctionInputs, frozen parent catalog and an actual private-body drift
+mutation. They accepted the fix and scopes with no remaining actionable finding,
+without Lean/server/build/edits. Missing/false recursion timeout, raw words,
+nonword/source/world/storage/rollback/memory, arity, call order, source hashes,
+parent/selected catalogs and proof closure fail closed. All492JS+2Python tests pass.
+
+Existing private cb325c26a3c9be45f41506d23fe60555369ace92 is preserved as ancestor of
+27014d0974884290737dbbf758e155fdc7663cc3; only new consumer/driver and one private
+root import were added. Main standalone import support is not claimed. Final
+registered joint gate exits0: Lean4.24.0 commit797c613; Lake5.0.0-src+797c613;
+KeySort2jobs; library1223/TestSuite262jobs;377taclets/131annotations;190core/
+0elaborator;1238reachable/0orphan; strict491automatic/61budgeted/0manual/
+11refuted/0pending; trust1253sources/252sites/0findings. Scoped18signatures/
+axiom reports use standard axioms only. Final per-file MCP consumer/driver/root
+success=true/partial=false; nonfatal async shutdown warnings remain raw. Initial
+MCP exit1 (redundant impossible arity branch) and one fixture-generation ValueError
+are retained; fixed without budget/premise changes. Historical docs/G03 exit1 and
+other earlier failures remain failures, exact-base comparisons are zero regression
+only. Existing bounded runner/lock,12GiB/no swap,-j1/LEAN_NUM_THREADS=1 and1GiB
+OS-headroom guard are unchanged. No protected data/cache/evidence was deleted;
+only new stopped metadata-only container copies were retired after preserving
+and validating inspect/logs/directory metadata, with immutable image/mounts kept.
+
+Work1/Work3 and Work2/BackfillA/B all remain PARTIAL. All24 full Y01–Y09/Y10/
+G48–G51 obligations and six full Source combinations remain pending. Actual Source
+raw ordinary operators/function/session/JSON hooks, physical-world journals/logs,
+G01 amendments and concrete compiler/world/V16 certificates remain open. Two VY1
+compiler-expectation questions remain unanswered. No new producer retrieval or
+goal creation/reset/reactivation/status change occurred; get_goal is unavailable.
+Evidence and reviewed patch/bundles/interface/handoff/checksums are versioned at
+`/workspace/vy5-composition/recursive-source-20261101/final/`.
