@@ -125,3 +125,6 @@ full-lane integration remains open.
 VY2 [recursive fixed paths](feature-work/inline-assembly-vy2.md#recursive-fixed-declaration-paths-2026-11-01)
 adds checked recursive metadata traversal and concrete canonical source/journal
 composition; full assembly closure remains open.
+
+VY2 [ordered ordinary roots](feature-work/inline-assembly-vy2.md#ordered-ordinary-root-declarations-2026-11-01)
+adds checked cross-root packing/source-bank/readback components; full lane remains partial.

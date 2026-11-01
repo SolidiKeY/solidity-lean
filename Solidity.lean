@@ -927,3 +927,5 @@ import Solidity.Yul.Views.NestedDeclarationFinal
 import Solidity.Yul.Views.FixedDeclarationFinal
 
 import Solidity.Yul.Views.FixedDeclarationTypingControls
+
+import Solidity.Yul.Views.RootDeclarationInitial

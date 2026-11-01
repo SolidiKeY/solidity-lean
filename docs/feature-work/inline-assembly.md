@@ -474,3 +474,14 @@ Whole storage/dirty/dynamic/allocation/Yul/compiler/calculus closure remains
 open; goal BLOCKED unchanged. Evidence:/workspace/vy2-evidence/recursive-fixed.
 The follow-up also derives actual owner pathTy presence for every enumerated
 leaf from root and field metadata; missing-path fallback is not assumed valid.
+
+
+### VY2 ordered ordinary-root handoff
+
+The [lane record](inline-assembly-vy2.md#ordered-ordinary-root-declarations-2026-11-01)
+now threads one computed cursor across checked ordinary roots, derives complete
+cross-root geometry/coverage and actual declaration/bank lookup, and connects
+whole typed storage/actual residual journals/source readback. Constructor and
+padding/reset controls plus14new pinned calls supplement unchanged394calls.
+Scope/origin/inheritance/dirty/dynamic/compiler/calculus closure remains open;
+full goal stays BLOCKED. Evidence:/workspace/vy2-evidence/root-sequence.

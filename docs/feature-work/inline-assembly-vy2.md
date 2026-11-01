@@ -2307,3 +2307,156 @@ behavior introduced by typing lemmas. Both independent follow-up reviews clear.
 No owner/representation/guard/whole obligation signature change, budget increase,
 new axiom or goal action. Final full HEAD/patch/bundle/checksums in absolute
 /workspace/vy2-evidence/recursive-fixed/HANDOFF.md and cumulative handoff.
+
+
+## Ordered ordinary root declarations (2026-11-01)
+
+Original Y04/Backfill A/B continuation; full assignment remains PARTIAL and
+original goal BLOCKED unchanged. Parent4840cc9e746bae7fcfa814edbef0b487aca87aaa,
+assigned branch/base unchanged. Existing6165artifact hashes verified BEFORE
+edits; prior mutable exports/manifests and raw failures preserved. YQ1–YQ7
+remain recorded in [scope](../solidity-scope.md); no promotion of admission or
+manifest coverage, no owner source/compiler/world/heap rewrite.
+
+[RootDeclarations](../../Solidity/Yul/Views/RootDeclarations.lean) carries
+intrinsic existing FixedDeclaration certificates indexed by root name/type
+pairs. It threads ONE byte cursor through actual ordered roots and calls the
+existing FixedDeclaration.pack/ONE packDeclarationPaths scalar algorithm.
+Adjacent scalar roots share available bytes; fixed aggregates retain entry
+AND exit slot rounding. No second scalar planner, untyped state/AST or new
+fuel/depth/root/node/address limit. Explicit constant-motive constructor
+eliminators satisfy G0. Local pack_cons avoids recursive symbolic simp loops.
+
+Metadata adapter: ordinaryRootNames filters ACTUAL Env.decls order by exact
+scope/bank and ordinary mutable state-variable constructor (no constant or
+immutable storage slot). It checks exact complete selected names, distinct
+selected roots and each actual E.rootTy against the typed certificate. It does
+not silently skip an unsupported ordinary type: omitting it fails metadataOrder.
+Source.Syn.collect/decls preserve source order (Source/Decls); frontend
+SolcJson/Contract's vars filter also preserves list order, but compiler roots
+and deployment immutables are NOT rewritten. Source.Env.rootTy/structFields
+provide logical types, not a flattened inherited physical root order or initial
+origin. Scope, bank and Word origin remain explicit; C3/base/active-contract
+layout/custom-origin and global compiler agreements are original open inputs.
+Storage.HashedLayout remains its documented WORD-GRANULAR owner model.
+
+[Spec](../../Solidity/Yul/Views/RootDeclarationSpec.lean),
+[Checked](../../Solidity/Yul/Views/RootDeclarationChecked.lean) and
+[Typing](../../Solidity/Yul/Views/RootDeclarationTyping.lean) derive complete
+leaf enumeration, prefix/root injection and cross-root separation, exact
+scalar spans/endByte, no duplicates, real pathTy presence and nonwrapping
+Word geometry from checked computations and real distinct declarations. No
+caller supplies final layout/separation/default/inverse/readback/safety laws.
+
+A malformed-metadata investigation found that selected-bank Nodup alone misses
+same-ID declarations across banks/constness: owner declOf chooses FIRST by
+kind/scope/name. The preserved pre-fix counterexample passed preparation while
+actual transientRoot selected the other bank. The final checker computes
+ALL state-variable IDs in the selected scope (both banks, all constness,
+including malformed nodes) and rejects duplicateDeclarations. This is checked
+metadata preparation, not a new Solidity admission exclusion or semantic
+premise. [Metadata](../../Solidity/Yul/Views/RootDeclarationMetadata.lean)
+PROVES unique first lookup, actual ordinary mutability/bank and every generated
+leaf's Source.transientRoot agreement. Concrete cross-bank, immutable/plain
+and malformed-node duplicates reject; distinct scopes still accept. This
+component does not validate arbitrary malformed Source syntax or prove source
+program reachability. Original root/FixedDeclaration APIs remain intact.
+
+[Source](../../Solidity/Yul/Views/RootDeclarationSource.lean) reuses concrete
+canonical Source.Storage writeback with complement from the SAME raw snapshot:
+whole administrative unchanged identity (none versus explicit default),
+unselected cells, result view and complete reencoding. Actual current-frame
+Source.applyOp, journal/rollback/reset/MemOK operations remain owner operations.
+[Composition](../../Solidity/Yul/Views/RootDeclarationComposition.lean) equates
+COMPLETE pure storage decoding with seven actual source operations;
+[Final](../../Solidity/Yul/Views/RootDeclarationFinal.lean) equates ACTUAL
+residual journal maps at EVERY Word. Together they reconstruct the entire
+physical snapshot from actual source AND actual residual, not projections.
+
+[Readback](../../Solidity/Yul/Views/RootDeclarationReadback.lean) then derives
+actual Source.readCell result/state and encoded physical field payload for
+every represented leaf. The generic helper states a real finiteView premise;
+concrete persistent and declaration-derived transient instances derive it from
+actual executed snapshots, not supplied final read adequacy. The owner
+Hoare.run_bind/getter equations retain complete state/result behavior. Source
+readLoc/indexLoc local alias controls preserve child REFERENCES, separately
+read the real scalar member, and preserve exact Panic0x32. They do not claim
+a fully chained source-expression alias/member or compiler theorem.
+
+Inhabited scope: adjacent uint8/uint248 exactly fill slot0; bool at1 then
+Inner[2] aligns2–3; uint248 at4 followed by uint16 spills5; marker owns6;
+raw unowned slot7=999. Derived10persistent leaves plus a SEPARATE actual
+uint16 transient declaration at transient slot0. Complete field/path/root
+coverage, masks, missing/mistyped/duplicate/incomplete/overflow/dirty-bool
+preparation controls are inhabited. Every-original-H owner MemOK and real
+initial/postwrite/alias/child instances, selected/unselected/account/bank
+preservation, caller-prefix and committed-child outer rollback, same-slot
+order, static empty revert and full transient RAW reset are proved.
+
+[Initial](../../Solidity/Yul/Views/RootDeclarationInitial.lean) aligns typed
+initial marker55 and complementary padding with constructor OBSERVATIONS at
+slots0–7. Unobserved slots8+ retain arbitrary supplied residual words (0xee… in
+this witness), whereas the fresh EVM constructor leaves them zero. The kernel
+proves COMPLETE reconstruction of the SUPPLIED initial snapshot, not of the
+entire EVM constructor store; no full constructor reachability/correspondence
+is inferred. It also proves every-Word persistent residual/padding preservation
+across updates, marker administrative identity,
+zero transaction-entry transient source/residual and pure reverse-field store
+agreement. Administrative pure writeback is distinct from actual source writes,
+which retain journals/static effects even when values are unchanged. Witnesses
+are actual typed owner states; constructor/program reachability is not inferred.
+
+Pinned [RootSequence.sol](../../tests/yul-views/RootSequence.sol), solc0.8.38
+commit1835d247/Osaka, optimizer off, legacy/viaIR: independent20-word goldens
+cover eight FULL raw slots including residual sentinel, all10logical fields,
+typed+raw transient words, true storage aliases, distinguishable forward/reverse
+orders, complete100-byte Error("root layout"), rollback and fresh transaction
+reads/reset. New14ordered calls and381fail-closed mutants (240coherent ABI
+word mutations plus layout/bank/order/error/budget controls) pass. Every prior
+394observation/report field remains unchanged. No original100m gas/5m-step or
+proof/heartbeat/recursion/test budget changed. External finite observations
+remain separate from kernel source/compiler/target adequacy.
+
+G0/history/build policies inspected; checking-cost warning issued. Independent
+finder caught three indexed equation matches: fixed with explicit eliminators.
+Default recursion/heartbeat/simp-loop diagnostics retained; proof factoring,
+exact numeral equivalence and existing source-step equations repair them with
+unchanged budgets. The independently confirmed cross-bank identity gap is
+fixed by checked actual identities plus a proved lookup/bank theorem; pre-fix
+source and passing witness retained honestly. No axiom/sorry/admit/native oracle,
+owner representation change or raised budget. Heavy work serial/private Lean
+lock, LEAN_NUM_THREADS=1/Lean-j1, existing aggregate12GiB/no-swap/OS+RSS+disk
+monitoring and writer lock. No new executor, goal action, worker import or push.
+
+Full queue remains open: Y04 arbitrary inherited/global/dynamic/mapping/hash
+ownership and dirty-owned transport; Y05 dirty/shared-zero/interior/remaining
+memory forms, whole memory/writeback and reachable allocation refinement;
+Y06 source/environment bindings; concrete V10/V11 agreements; actual VY1
+source execution/assembly MemOK; Y09.02 calculus/notation/printers and final
+source/compiler/joint closure. Backfill A/B partial. Existing MemOK/World/
+ContractWorld/memory-call/Bridge are available, not assembly adequacy. Published
+5f6a75b6038371a3917dbe08b660d5f2d1207c58 still lacks Yul exports per audit;
+no unpublished producers imported. get_goal read/Lean MCP absent; original
+goal BLOCKED unchanged. Questions=[]. Final gates/reviews/head/artifacts in
+/workspace/vy2-evidence/root-sequence/HANDOFF.md. Global docs remains ACTUAL
+exit1 with pinned-base equal48missing/37ambiguous; zero delta is separate.
+
+
+Final ordered-root gates: actual Lean4.24.0/Lake5.0.0-src+797c613 and
+KeySort2jobs exit0; final affected114jobs and policy wrapper1160default/
+262TestSuite/131annotations exit0. Full signature/axiom audit2859
+declarations/1638theorems: 1584standard-only/54axiom-free,
+none missing/unexpected. Strict491automatic/61budgeted/11refuted/0pending;
+trust1190sources/246sites/0findings; layers351core/0elaborator reach;
+orphans1175reachable/0orphans; markdown base1/head1/new0. Global docs ACTUAL
+exit1 same48missing/37ambiguous, byte-identical pinned base SHA256
+01fd3beaa0d1694397f6231999418eea67e797d42150bf68d2d8a96bc4ea109a;
+cmp exit0/zero delta is SEPARATE. All22negative families pass, new381controls.
+Cumulative408call report SHA25635140bee16f8a94c2b5c2ac355a35cd4aef313e10a595bf2c846a180c3138502; all394preceding fields identical.
+
+Separate final read-only finder/skeptic reviews clear after recorded fixes:
+G0 eliminators, actual declaration identity/bank proof and constructor evidence
+scope wording (observed0–7 versus arbitrary residual8+). Neither reviewer ran
+Lean/server/build/tests or edited. All raw recursion/heartbeat/simp/type/monad
+failures retained; no budget increase or new axiom. Original full lane/goal
+remains PARTIAL/BLOCKED and all remaining obligations above stay mandatory.
