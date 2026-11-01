@@ -836,3 +836,142 @@ change, reserved-owner repair or new/reset/reactivated goal occurred.
 Final finder review corrected the decoder-field attribution: decode_reach and
 decode_commutes belong to PublicCorrectness, for the StateExport decoder, not
 to StateExport itself. This documentary correction changes no theorem or scope.
+
+
+### Published loop/scoped-loop consumer recovery (2026-11-01)
+
+Fresh master was exactly 5f6a75b6038371a3917dbe08b660d5f2d1207c58, fetched
+under the writer lease and verified ancestor of origin/master. Integration
+0f488fab93305538106e9e9a4d29579db06936df preserves d6eff and every owned append;
+only an appended module-map conflict required preserving both sides. Reserved
+producer bytes are read-only. Earlier30/110/76/53/59 artifact seals still verify.
+
+`Solidity/Roadmap/V16/MemoryLoopConsumer.lean` consumes actual Loops/LoopScopes
+certificates. Fourteen theorems retain the respective Input, reached Room,
+relational Cost, frame need, exact source result, target PC0, complete stack,
+StateRepr, heap extension, BaseExtends and GrowsAllocator. Actual certificate
+soundness excludes exhausted; diamonds therefore supply genuine successful
+source/target/post witnesses with no success/notExhausted/desired-target premise.
+Boxes retain success/post OR empty revert OR source-diverge/word-fault. The
+separate divergence consumers require the actual source divergence equation;
+inhabited direct and selected fixtures discharge it. Reconstruction and public
+diamond consumers tie these results to actual Compiler.Compilation.Input/Rep.
+No legacy allocationCost substitutes for either loop Cost or Room.
+
+`tests/roadmap-v16/MemoryLoopControls.lean` reuses published ordinary source
+arrays/records in both evaluation orders and real public compiler results.
+Eight genuine Inputs use the producer's checked prefixBudget (3 arrays,2
+records) only to prove reached Room. Existing runF_eq/runF_approx connect finite
+kernel computations at unchanged bound4 to source execution. Actual answer4/3
+specifications, full public representation witnesses, wrong-answer/false-post/
+wrong-frame controls, block/selected/unselected cases and both direct/scoped
+mathematical divergence are checked. False-post boxes retain actual divergence;
+skipping the divergent branch supplies actual success/not-fault. Infinite
+native loops are never evaluated.
+
+Complete ordered targetCells observations are tied by kernel equality to the
+very witnesses from NEW transport. Exact numeric vectors/cursor131 or130,
+pointer128, sentinel99 and their cursor/pointer corruption controls are
+separately native word-machine tests, NOT kernel numeric cursor proofs or
+external byte-EVM tests. The recordIR vector retains its distinct0/5 temporary
+cells. These eight source examples begin with empty heaps: their BaseExtends
+property is retained but vacuous for old references; no nonempty old-reference
+preservation is claimed from them. The branch/divergence fixtures separately
+reuse the producer's populated heap.
+
+The first CLI gate caught a TRes/Except namespace typo. Initial controls caught
+missing fixture oleans, a reserved parser keyword and typed source/runR issues.
+Raw controls-third exited137 at the enforced12GiB cap. Later raw whnf failures
+exhausted the unchanged200000 heartbeat bound. Explicit output contexts, shared
+irreducible output/answer/certificate definitions and fully explicit consumer
+arguments repaired those checks; no heartbeat/resource/fuel/node/time increase
+or trust shortcut was used. Every raw failure and distinct changed-source pass
+is retained separately. No per-file Lean MCP is exposed; bounded CLI fallback
+was used serially with-j1/LEAN_NUM_THREADS=1 and12GiB/no-swap enforcement.
+
+Actual Lean4.24.0/Lake5.0.0-src+797c613 and passing KeySort plus published fixture
+build185jobs are recorded. Direct consumer, final controls, scoped axiom and
+import-inventory gates have passed; combined full/strict/TestSuite gates are
+recorded separately when observed. All2255 current obligations are OPEN,
+including every original2207 (zero removed), plus48 newly imported constructors.
+The owned accounting pins the published G03 bytes, retains the frozen task
+base and never treats ledger coverage entries as V16 discharge. Fourteen exact
+complete premise telescopes, reached public/private helper closure and actual
+axiom sets are checked with wrong-revision, missing/closed-arm, hidden-premise,
+private-oracle/missing-helper and corrupted-control-axiom rejection controls.
+
+Full G48 SourceSpec/admission/lowering/parse/checker/progress, G49 total profile
+coverage and pinned byte-EVM/resource/failure/progress, G50 constructor/runtime
+installation/rollback/adversarial transactions and G51 final concrete SolKey/
+callback/loop/deployment applications remain unresolved. Optional compilation
+and fragment/Room/Input domains are explicit scoped premises, not full-profile
+coverage. Existing Forward/Guard/hash/Horizon/computable-bound obligations,
+Fml.inTarget, profiles/refusals/verdicts/exclusions/SolKey maps remain unchanged.
+No push/default merge/PR, unmerged producer branch, reserved repair, goal reset,
+reactivation or completion occurred. Current docs failures and exact frozen-base
+comparison remain mandatory failures; planned reserved Yul citations are not
+edited or waived. Exact commands/results/head/patch/bundle/reviews/checksums will
+be sealed separately under /workspace/scratch/v16-loops-recovery.
+
+
+Recovery validation and resource follow-through (2026-11-01):
+
+The separate `tests/roadmap-v16/MemoryLoopResourceControls.lean` now checks
+actual direct/scoped exact empty revert, skipped failure, successful allocation,
+allocation before revert, reached capacity refusal, allocating divergence,
+unselected allocation at a full cursor and block-specific frame need. Its 21
+required closed witnesses and ten actual public compiler origins are scoped
+accounting inputs. Legacy allocationCost appears only as a rejected comparison;
+actual Inputs always retain the respective Room. Wrong payload, target class,
+frame, allocator cursor and premise-only/corrupted accounting controls remain
+negative controls. Resource-fourth passed after explicit-context/irreducible
+sharing repairs; earlier resource failures are retained without budget changes.
+
+The required full `./run-lean.sh` gate failed exit124 at its original5400-second
+limit. Its last completed default target was949/1048; kernel/sort phases were
+not reached. No identical full retry occurred. Every Lean input existing at
+that attempt is unchanged; only this separately checked standalone resource
+file was added afterward. This source boundary does not turn the full failure
+into a pass. The frozen-base whole full gate is pending, so this failure is not
+waived as inherited. Older raw exit124/137 failures and seals are preserved.
+
+A separate `lake build SolkeyTestSuite` passed285jobs. The distinct bounded
+Derived17 prerequisite attempt failed124 at300seconds and remains recorded.
+Fresh replay setup first failed on inherited foreign-cache setup paths, then on
+a missing Lake environment, both before proofs. A runtime-only exact Lake-hash
+setup relocation and `lake env` invocation repaired the environment without
+changing sources/dependencies/budgets. All24 original replay modules then passed
+fresh in256.6seconds against the unchanged300-second cumulative limit. Strict
+checking with the actual kernel log and fresh group evidence passed:24 timed
+TestSuite modules,491 automatic,61 budgeted,0 manual,11 refuted,0 pending.
+Separate sort checking passed377parsed taclets/131read-bearing/131covered.
+These are distinct gates; the full gate remains failed. External byte-EVM
+replay is unavailable because @ethereumjs/evm is absent; no external EVM pass
+is claimed. KeySort and actual Lean/Lake versions are retained in raw evidence.
+
+Complete documentation comparison still fails:85current findings versus83at
+the exact frozen base (48missing+37ambiguity versus46+37). The full finding
+sets identify exactly two added reserved planned Yul citations, with none
+removed. Those reserved records are not edited or waived. Layer/orphan/trust/
+structural and complete TestSuite classification gates passed; final exact-head
+accounting and metadata outputs are recorded separately in the sealed handoff.
+
+Independent read-only finder and skeptic reviews inspected the actual diff,
+all14premise telescopes, non-vacuity, complete outcomes, resource matrix,
+helper/trust accounting and ownership without Lean servers/builds/tests/writes.
+Confirmed findings fixed include schema binding, public compiler Input/Rep
+reconstruction, missing exact-revert/reached-resource combinations, control
+axiom validation and direct strengthened-premise mutation tests. A provisional
+public-definition provenance concern was withdrawn after checking actual
+extractor/public compiler dependencies. Neither reviewer identified another
+specific mandatory independently executable scoped control on published5f6.
+Module-map discovery was appended. Final artifact review and immutable hashes
+are recorded in the separate handoff, not inferred from these source reviews.
+
+All2255 original/current accounting obligations remain OPEN (including all2207
+prior obligations). This scoped G49.01/G51 and Backfill work does not close any
+original G48-G51 parent or change the blocked persistent goal. Exact missing
+producers, theorem hypotheses, raw commands/exits/resources, prior seal checks,
+source-boundary checks, final reviews and full committed identity belong in the
+fresh immutable evidence directory already named above. No semantic scope
+choice or reserved-owner repair is requested.

@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Roadmap.V16.MemoryCallConsumer
 import Solidity.Roadmap.V16.CallbackControls
 import Solidity.Roadmap.V16.LoopControls
@@ -138,3 +139,27 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.memory_call_box_iff
 
 #print axioms Solidity.Roadmap.V16.memory_call_box_diamond_dual
+
+#print axioms Solidity.Roadmap.V16.loop_result
+
+#print axioms Solidity.Roadmap.V16.loop_diamond
+
+#print axioms Solidity.Roadmap.V16.loop_box
+
+#print axioms Solidity.Roadmap.V16.loop_divergence
+
+#print axioms Solidity.Roadmap.V16.scoped_loop_result
+
+#print axioms Solidity.Roadmap.V16.scoped_loop_diamond
+
+#print axioms Solidity.Roadmap.V16.scoped_loop_box
+
+#print axioms Solidity.Roadmap.V16.scoped_loop_divergence
+
+#print axioms Solidity.Roadmap.V16.loop_reconstruct
+
+#print axioms Solidity.Roadmap.V16.loop_public_diamond
+
+#print axioms Solidity.Roadmap.V16.scoped_loop_reconstruct
+
+#print axioms Solidity.Roadmap.V16.scoped_loop_public_diamond

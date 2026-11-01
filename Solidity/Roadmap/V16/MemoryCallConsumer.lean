@@ -23,6 +23,8 @@ theorem memory_call_result {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
   | referenceArrays _ => cases path
   | objects _ => cases path
   | construction _ => cases path
+  | memoryLoops _ => cases path
+  | memoryLoopScopes _ => cases path
   | memoryCalls out _ => exact out.sound input.1 input.2.1 input.2.2
 
 /-- Unpack the successful public representation without losing base extension
@@ -41,6 +43,8 @@ theorem memory_call_rep_iff {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
   | referenceArrays _ => cases path
   | objects _ => cases path
   | construction _ => cases path
+  | memoryLoops _ => cases path
+  | memoryLoopScopes _ => cases path
   | memoryCalls _ _ => rfl
 
 /-- Actual source success selects represented target success using soundness,

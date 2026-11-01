@@ -1298,3 +1298,5 @@ four-mode upstream EVM observations and refusal controls;
 `scripts/check-memory-loop-timing.py` freshly checks the entire original
 `Derived17` group; `scripts/check-memory-loop-timing.mjs` validates cumulative
 300-second evidence, with negative controls in its `.test.mjs` companion.
+
+`Solidity/Roadmap/V16/MemoryLoopConsumer.lean` consumes actual published direct/scoped loop compiler certificates, branch-specific Room/Cost and scoped box/diamond specifications. Inhabited ordinary source and reached-resource controls remain test-only in `tests/roadmap-v16/MemoryLoopControls.lean` and `tests/roadmap-v16/MemoryLoopResourceControls.lean`.

@@ -1,3 +1,4 @@
+import Solidity.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Roadmap.V16.MemoryCallConsumer
 import Solidity.Roadmap.V16.CallbackControls
 import Lean

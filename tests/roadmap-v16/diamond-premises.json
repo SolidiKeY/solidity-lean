@@ -1,6 +1,6 @@
 {
   "format": "Lean4.24 closed head-binder Expr repr plus full printed types/constants; no semantic closure claim",
-  "producerRevision": "91e94ab57305ca055127934fd9e68fe9ea5e6be3",
+  "producerRevision": "5f6a75b6038371a3917dbe08b660d5f2d1207c58",
   "theorems": {
     "Solidity.Roadmap.V16.memory_call_not_exhausted": [
       {

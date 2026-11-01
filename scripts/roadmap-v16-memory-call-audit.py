@@ -5,7 +5,7 @@ No constructor/profile/stage obligation is discharged by this structural audit.
 import argparse, importlib.util, json, pathlib, subprocess, sys
 sys.dont_write_bytecode = True
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-PRODUCER = '91e94ab57305ca055127934fd9e68fe9ea5e6be3'
+PRODUCER = '5f6a75b6038371a3917dbe08b660d5f2d1207c58'
 FILES = ['Solidity/Evm/Compiler.lean', 'Solidity/Evm/MemoryCalls.lean',
          'Solidity/Evm/MemoryCallExamples.lean']
 CONSTRUCTOR = 'Solidity.Evm.Compiler.Compilation.memoryCalls'
