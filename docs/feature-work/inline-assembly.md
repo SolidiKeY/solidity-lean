@@ -515,3 +515,12 @@ Canonical preparation and finite compiler/EVM controls are not whole Y04/Y05/
 Y06/Y09.02 or source/compiler adequacy; original full lane/goal remains partial/
 BLOCKED. Exact reviewed tree/gates/premises in
 `/workspace/vy2-evidence/dynamic-storage/HANDOFF.md`; no admission promotion.
+
+
+VY2 ownership-changing dynamic-complement checkpoint (2026-11-01): actual
+Source.readLen-derived inventories, complete old/new raw-map/complement transport,
+source-success-only journaling, source/pure snapshot equality, dependent shrink /
+regrowth, exact alias tail reads, frame rollback and transaction controls. See
+[lane scope](inline-assembly-vy2.md#ownership-changing-dynamic-complements-2026-11-01).
+Full original lane remains PARTIAL/BLOCKED, no admission promotion. Committed
+identity, checks, reviews and exports: `/workspace/vy2-evidence/ownership-transport/HANDOFF.md`.

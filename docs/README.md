@@ -135,3 +135,7 @@ VY2 computed active literal origins: [lane evidence](feature-work/inline-assembl
 
 VY2 [computed dynamic storage headers and live inventories](feature-work/inline-assembly-vy2.md#computed-dynamic-headers-and-live-element-inventories-2026-11-01)
 records the canonical preparation/source-frame checkpoint and remaining full-lane obligations.
+
+
+VY2 [ownership-changing complements](feature-work/inline-assembly-vy2.md#ownership-changing-dynamic-complements-2026-11-01)
+connect computed dynamic snapshots to actual source/residual execution; full lane remains open.

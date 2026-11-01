@@ -940,3 +940,5 @@ import Solidity.Yul.Views.DynamicInventoryControls
 import Solidity.Yul.Views.ComputedDynamicControls
 import Solidity.Yul.Views.DynamicSourceAliasControls
 import Solidity.Yul.Views.ComputedSnapshotControls
+
+import Solidity.Yul.Views.OwnershipBatchControls

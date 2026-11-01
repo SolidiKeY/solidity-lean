@@ -2824,3 +2824,97 @@ Dynamic checkpoint identity: repository `/workspace/solidity-lean`, branch
 source hashes, commands/exits and versioned original patch/bundle/checksums are
 recorded after commit in `/workspace/vy2-evidence/dynamic-storage/HANDOFF.md`.
 No claim of full queue completion; original goal BLOCKED unchanged, questions=[].
+
+
+## Ownership-changing dynamic complements (2026-11-01)
+
+Continuation from accepted `40337e715392c517a73f3bc1eefd85a036c2feb3`;
+base, branch and repository above remain unchanged. YQ1–YQ7 remain approved
+implementation directions. This is original Y04 / Backfill A–B progress; full
+Y04/Y05/Y06 and both backfills stay PARTIAL, Y09.02 BLOCKED, goal BLOCKED
+unchanged. No admission/manifest/owner representation change or producer import.
+
+OwnershipInventory computes OLD live fields from ACTUAL Source.readLen and the
+checked declaration/header trace. OwnershipPlan computes the full old raw map
+from actual source storage plus its complementary journal slice, applies one
+raw word update, computes NEW live fields, checks real finite separation and
+canonical decoding, and prepares the actual Source account operation. Only
+successful Source.applyOp updates the complementary journal. Static source
+failure preserves BOTH prior states and its actual empty-revert result; None
+means unsupported preparation, not source/Yul refusal/no-op/deallocation.
+
+OwnershipTransport derives support from the written slot plus old AND new
+field slots. On that finite union, it writes the new mask of the SAME raw map;
+outside the union, actual old encoding proves the raw word already equals the
+old residual. The resulting ENTIRE complementary map is the new snapshot mask.
+Duplicate support slots retain every undo entry; old journal entries belong to
+historical ownership and are NOT asserted zero under the current inventory.
+No unknown slots, high bits, padding or dropped words are reset or discarded.
+No global hash/collision premise, extra domain/length/fuel cap or opaque final
+readback/inverse/adequacy field is introduced. Hash provenance and existing
+per-run region/offset/type/separation conditions retain their exact boundaries.
+
+OwnershipFrame.pure_connection proves equality of the WHOLE store AND
+complement produced by pure changing-snapshot writeback and ACTUAL source /
+residual execution. Fresh following preparation is proved equal to the ordinary
+executable preparation at the exact output states; its raw map equals the
+previous updated map. Actual child rollback preserves caller prefix; child
+commit followed by enclosing rollback restores the complete companion. EndTx
+preserves the entire represented persistent map and clears actual transient
+source/residual cells and both journals. This adapter changes persistent current
+account ownership only; transient dynamic ownership is still OPEN. Other banks,
+accounts, paths and locals are preserved by actual-operation laws. Every original
+owner typing H MemOK transports through source success/error and arbitrary finite
+request batches. No assembly MemOK or compiler adequacy follows.
+
+OwnershipBatch retains exact successful-prefix state/residual when a later
+preparation returns None, and stops on the complete actual source error.
+OwnershipBanks.same_word_store preserves whole administrative storage, including
+none versus explicit-default cells; effectful account operations still journal.
+It does NOT assert unchanged whole EMState or unchanged historical journals.
+
+Inhabited controls start at the PREVIOUS actual source snapshot operation,
+then run two arrays 2/1 -> 0/0 -> 3/1 through dependent checked plans and the
+executable batch. Former data12/MAX/33 and tail77 become residual words during
+shrink; regrowth derives actual typed Source.readLoc tail77 at the original
+hashed location. Two real local aliases observe length3 and index/read payload;
+index3 produces original Panic0x32. Actual static failure, caller-prefix and
+child-commit/outer-revert laws, other account/bank, every-H/inhabited MemOK,
+nonzero padding/unknown words and complete persistent EndTx reencoding are
+checked. Synthetic hashes1000/2000 and arbitrary kernel seed77 are not numeric
+real Keccak, constructor equality or reachable-execution evidence.
+
+The original DynamicStorage.sol/pinned compiler/Osaka/legacy/viaIR report and
+ALL460 ordered calls/18 separate classifications remain unchanged. New narrow
+history mutations discriminate lost newly residual words, stale masks, reversed
+shrink/growth, aliases, wrong physical roots and failed/static observations with
+coherent ABI bytes. External observations do not prove kernel source/compiler
+correspondence or nested source-frame reachability. Raw proof failures remain
+in /workspace/vy2-evidence/ownership-transport; no budget was raised. Large
+closed-state normalization was replaced by proved existing source provenance,
+typed checker equations and generic transport, not relaxed guards.
+
+Final commands/exits, complete signature/axiom sets, resources, independent
+finder/skeptic reviews, committed head and versioned patch/bundle/checksums are
+recorded in `/workspace/vy2-evidence/ownership-transport/HANDOFF.md`. Global docs
+retains its real exit1; exact-base zero delta is separate evidence. All original
+whole ownership/dirty/nested/mapping/transient cases, universal memory/shared-zero/
+interior writeback and reachable allocation refinement, V10/V11 instances, Y06
+source inputs/environment, actual VY1/source/assembly MemOK, physical calculus /
+notation/printers and source/compiler/joint closure remain OPEN. Questions=[].
+
+
+Ownership checkpoint final kernel/runtime gates: Lean4.24.0 and
+Lake5.0.0-src+797c613, KeySort2jobs exit0; focused196jobs, full policy wrapper
+1225default+262TestSuite/131annotations exit0. Complete3638public signatures /
+2113theorem reports:2043standard-only and70axiom-free, missing0/unexpected0.
+All25prior negative families plus190new ownership-history mutations pass. Fresh
+both-pipeline dynamic replay equals EVERY field of its accepted24-call receipt;
+entire460-call cumulative reference and18separate compiler classifications remain
+byte-identical SHA256496adf1c8b9ddd42f9791ef1f687cdb9e966b28488b4a2206aedb471ab1104fd.
+Independent final finder/skeptic review is clear across THIRTEEN new Ownership
+modules, narrow external test and documentation, without reviewer checks/builds.
+The initial review request's14-module count was corrected by actual filenames;
+no theorem or source finding was hidden. Exact remaining gate/resource outputs
+and committed identity are in the versioned handoff above. Entire original lane
+remains unfinished and its blocked goal unchanged.
