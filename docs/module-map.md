@@ -1305,3 +1305,5 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/PaymentReceipt.lean` | Actual receive-result receipt preparation, derived funding, two-sided send Bool/None transport, admission and halt-origin characterization; explicit checkpoint balance condition, no full world/compiler relation |
 | `Backend/Executable/PaymentReceiptChecks.lean` | Populated stale/other receipt controls, receiver failure/overflow/funding/admission ordering, actual assumeFalse model stop and unchanged transfer-byte boundary |
+
+| `Backend/Executable/PaymentHistory.lean` | Actual two-payment same-key world prefix, ordered Bool discrimination from fixed intrinsic receipt tables, paid-world retention and failed deferred settlement; no target-profile/compiler/loop simulation claim |

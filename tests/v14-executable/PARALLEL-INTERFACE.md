@@ -50,3 +50,27 @@ the witness. General gas/memory expansion, fetched execution, world lowering
 and final producer/core integration remain open. The peer closure has one
 existing-core blob delta in Syntax/Raw canonicalisation; private checking keeps
 the assigned core unchanged and records both hashes rather than importing it.
+
+
+New actual-result interfaces: PaymentReceipt.receive_funded derives funding from
+actual World.receiveRun entry. world_observation equates prepared intrinsic
+Bool/None observations with actual World.stipend.send, under the explicit
+numerical checkpoint condition sigma.selfBalance.val = (w.funds sender).val.
+prepare checks code admission before receiving; prepare_refused_iff identifies
+its refusal with an error in that full actual world send. Preserve the original
+run: Option None loses exact halt identity. These do not supply declaration
+production, general pending-ledger/world alignment, world post-state simulation
+or a fixed whole-program receipt strategy.
+
+PaymentHistory.two_runs executes actual same-key world sends and retains the
+first paid world after the second entry overflows, with ordered(true,false).
+source_program_runs is an actual two-Stmt intrinsic Prog; source_both gives
+ordered prefix observations(true,true), and no_fixed_receipt covers every
+explicit installed ExtResult for this concrete funded fixture. Its Bool local
+is overwritten; this is not a newly defined trace semantics or a final-Bool-only
+counterexample. source_table_unchanged and absent_table_accepts check the
+unchanged/default receipt behavior. deferred_settlement_fails explicitly shows
+that normal intrinsic execution need not have a successful final World.finish.
+These are intrinsic fixture laws, not chain-reachability, Fml.inTarget, admitted
+independent Source/compiler or fetched-EVM counterexamples. No target profile
+or theorem premise is weakened; general G43 and G36.03 remain open.

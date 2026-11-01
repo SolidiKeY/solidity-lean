@@ -1215,3 +1215,48 @@ Lake binary. That raw failure is retained separately, not relabeled green.
 Independent final finder/skeptic reviews accepted all fixes and explicit limits.
 Gate commands/raw logs are under /workspace/v14-receipt-evidence. Raw historical
 documentation failures and exact-baseline no-new-findings remain separate.
+
+
+## Checkpoint 16 — concrete same-key payment history boundary
+
+PaymentHistory executes two actual stipend sends against the same installed,
+empty payable receiver, starting one credit below uint256 capacity. The first
+succeeds and settles sender3→2/receiver→maximum. second_enter_fails exposes the
+actual next entry refusal; second_runs catches it and retains the exact first
+paid world. two_runs preserves ordered(true,false). These are completed actual
+world operations, not a conditional desired simulation certificate.
+
+source_program_runs links the same helper states to an actual two-Stmt
+intrinsic Prog with full=false ordinary-send flags and one unchanged transaction table.
+source_both proves prefix(true,true), protected99, net−2 and balance1.
+no_fixed_receipt constructively excludes every explicit installed ExtResult
+from matching both world prefix Bools. The local is overwritten; this is not
+a new trace semantics or a final-Bool-only counterexample. The absent-table
+control also accepts both calls. pointwise_receipts derives the changed answer
+only after the actual first world operation. It does not prove a fixed
+whole-program table sufficient. deferred_settlement_fails explicitly records
+that the normal intrinsic program's two-credit ledger fails World.finish;
+there is no claim of successful final intrinsic world settlement.
+
+The initial almost-full world is an inhabited intrinsic fixture. No chain
+reachability, Fml.inTarget, admitted independent Source/compiler or pinned EVM
+counterexample is claimed. This is Backfill B/G43 preparation that exposes a
+real interface-composition boundary while preserving all full-profile source,
+world, observation and resource obligations. It is not final G36.03.
+
+Separate read-only finder/skeptic reviews found no false theorem or vacuity.
+Their required prefix-versus-final/target-profile limits are explicit, and the
+suggested direct second-entry/deferred-settlement observations were added.
+Fourteen headline/control axiom outputs are guarded with standard axioms only.
+Raw normalization failures remain retained. The same unchanged goal stays
+ACTIVE; all original queues and reserved producer ownership remain binding.
+
+
+Checkpoint16 focused per-file and required ./run-lean.sh1044default+
+262TestSuite passed; pinned377/131/131. Full gate4.94s, aggregate Lean/Lake
+RSS1709420KiB, one worker, minimum host available17298976KiB, cgroup
+peak388984832bytes with noOOM and zero swap. The earlier actual Lean/Lake/
+KeySort runtime gate is retained with checkpoint15. A final skeptic wording
+finding was fixed: Stmt.send's final false is full=false ordinary-send mode,
+not a general callback-disable flag. Final independent source reviews accept
+with no remaining finding; exact logs/commands in /workspace/v14-history-evidence.
