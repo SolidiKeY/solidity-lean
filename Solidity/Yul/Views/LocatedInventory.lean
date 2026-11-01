@@ -1,4 +1,5 @@
 import Solidity.Yul.Views.LocatedSeparation
+import Solidity.Yul.Views.LocatedProvenance
 
 namespace Solidity.Yul.Views
 
@@ -7,6 +8,18 @@ abbrev LocatedEntry (E : Source.Env) (fixed : Roadmap.Evm.Fixed) (root : Source.
 
 def locatedInventoryPreimages {E fixed root tree} (es : List (LocatedEntry E fixed root tree)) : List Storage.Pre :=
   es.flatMap (fun e => e.2.location.pres (2^256) (fixedLayoutHash fixed))
+
+theorem locatedInventoryPreimages_words {E fixed root tree} (es : List (LocatedEntry E fixed root tree)) :
+    ∀ p ∈ locatedInventoryPreimages es, p.Words := by
+  intro p member
+  obtain ⟨entry,_,inside⟩ := List.mem_flatMap.mp member
+  exact entry.2.preimage_words p inside
+
+theorem locatedInventory_regions_bytes {E fixed root tree} (es : List (LocatedEntry E fixed root tree)) (L R : Nat) :
+    Hash.RegionsDisjoint (2^256) L (fixedLayoutHash fixed) (List.range R) (locatedInventoryPreimages es) ↔
+      Hash.RegionsDisjoint (2^256) L fixed.keccak (List.range R)
+        ((locatedInventoryPreimages es).map layoutPreimageBytes) :=
+  fixedLayoutHash_regions fixed _ (locatedInventoryPreimages_words es)
 
 def locatedInventory {E fixed root tree} (es : List (LocatedEntry E fixed root tree)) (a : Roadmap.Address) :=
   es.map (fun e => e.2.registration a)
@@ -80,6 +93,19 @@ noncomputable def locatedInventoryObligations {E fixed root tree}
       change ∃ v, Source.Val.default E.layout (E.cellTy entry.2.path) = some v
       rw [show E.cellTy entry.2.path = .int .u256 from entry.2.cellType]
       exact ⟨.int 0 (by decide),rfl⟩) residual
+
+/-- The same finite instance directly at approved Fixed BYTE inputs. Every
+Pre.Words fact is derived from successful source-key translation and locate,
+not an extra collision/encoding assumption. -/
+noncomputable def locatedInventoryByteObligations {E fixed root tree}
+    (es : List (LocatedEntry E fixed root tree)) (L R : Nat) (fits : tree.Fits L) (rootFits : tree.size ≤ R)
+    (lb : L ≤ 2^256) (rb : R ≤ 2^256)
+    (regions : Hash.RegionsDisjoint (2^256) L fixed.keccak (List.range R)
+      ((locatedInventoryPreimages es).map layoutPreimageBytes))
+    (checked : locatedInventoryCheck es = true) (a : Roadmap.Address) (residual : SlotView) :
+    ScalarStorageObligations E.layout (E.lay a) {c // c ∈ locatedInventory es a} :=
+  locatedInventoryObligations es L R fits rootFits lb rb
+    ((locatedInventory_regions_bytes es L R).mpr regions) checked a residual
 
 theorem located_inventory_encode_identity {E fixed root tree}
     (es : List (LocatedEntry E fixed root tree)) (L R : Nat) (fits : tree.Fits L) (rootFits : tree.size ≤ R)

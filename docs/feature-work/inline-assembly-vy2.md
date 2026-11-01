@@ -1908,3 +1908,29 @@ exit0. Actual global docs exit1 is byte-identical to pinned-base debt
 (48missing/37ambiguous); separate markdown delta is zero. Exact raw commands,
 exits, failed proof/build attempts and final resource report are in the
 versioned HANDOFF. No new external observations replace the retained366 calls.
+
+
+### General checked-path hash provenance
+
+After source checkpoint ef13e7a08ad8ecb73ec2945ef3aaa3e0464bbcd3,
+LocatedProvenance derives every preimage's Pre.Words from successful actual
+sourceLayoutSteps translation, actual Storage.STy.locate and bounded modulo-word
+parent slots. Structural induction covers struct/static-array offsets, dynamic
+arrays and nested mappings. No word-bound witness is supplied by callers.
+LocatedInventoryPreimages_words lifts this to arbitrary finite checked
+inventories; locatedInventory_regions_bytes transports EXACT original per-run
+regions directly to the actual Fixed byte inputs. locatedInventoryByteObligations
+then constructs the same finite source-storage instance without a supplied
+location/slot/default/inverse/readback law or extra preimage premise.
+Independent read-only finder/skeptic reviews again found no findings. Remaining
+full queue, root0/word-granular/canonical boundaries and blocked goal are unchanged.
+Final commands/exits/signatures/resources and both source heads are recorded in
+the versioned evidence handoff. These are two reviewed preparation checkpoints,
+not final Y04 or full assignment completion.
+
+
+General-provenance final gates: focused78jobs/full wrapper1109default+262suite/
+131annotations exit0; scoped2249declarations/1289theorems (1241 standard-only
+reports,48axiom-free), no new axiom. Trust1139sources/0findings, strict/layers/
+orphans/markdown delta pass. Actual global docs remains the retained exit1;
+no unchanged failed gate rerun. Raw provenance elimination failures are retained.
