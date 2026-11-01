@@ -2024,3 +2024,21 @@ pass; actual cumulative report380calls, old366field bytes unchanged. Global
 docs ACTUAL exit1,48missing/37ambiguous, byte-identical exact-base debt; zero
 delta is separate. Failed recursion/decidability/type and fixture checksum
 attempts remain saved; proofs repaired structurally without budget changes.
+
+
+### Inhabited declaration-state MemOK follow-up
+
+After source checkpoint d0dc0b421c46e103b32b851e42be8d451ff285ad,
+decl_initial_MemOK explicitly supplies every actual owner empty-state conjunct;
+decl_written_inhabited_MemOK instantiates the every-H source-step theorem with
+that concrete initial heap typing. No renamed predicate, assumed desired result,
+additional safety premise or owner-state change. Both read-only reviews clear.
+Affected/per-file/full/signature checks in the same versioned handoff cover the
+final source tree; original full-lane/goal blockers are unchanged.
+
+
+MemOK follow-up final gates: per-file/focused/full wrapper exit0; unchanged
+1116default/262TestSuite/131annotations. Scoped2325declarations/1328theorems:
+1280standard-only reports,48axiom-free. Trust0findings. Existing pinned external
+observations/tests unchanged by the proof-only addition. Original full-lane
+obligations and global docs exit1 remain open, not promoted to passing.

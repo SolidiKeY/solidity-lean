@@ -65,6 +65,12 @@ theorem decl_source_fields :
 theorem decl_source_MemOK (H : Source.HeapTy) (ok : Source.MemOK declPackingEnv H declPackingState) :
     Source.MemOK declPackingEnv H declPackingRun.1.2 := packedSourceStep_MemOK H _ _ _ _ ok
 
+theorem decl_initial_MemOK : Source.MemOK declPackingEnv declPackingState.2.heap.ty declPackingState :=
+  ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩
+
+theorem decl_written_inhabited_MemOK : Source.MemOK declPackingEnv declPackingState.2.heap.ty declPackingRun.1.2 :=
+  decl_source_MemOK _ decl_initial_MemOK
+
 theorem decl_source_full_raw : reencodePersistentSlot declPackingRegistry ⟨declPackingRun.1.2.2.ex,declPackingRun.2⟩ account 0 = some packedRawA := by
   exact packedFrameWrite_persistent_reencode packedStepFrame 0 packedRawA declPackingState declPackingResidual declPackingRun
     (by
