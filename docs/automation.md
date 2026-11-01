@@ -1100,6 +1100,14 @@ above and closes none of them. Timings:
 
 
 VA1 independent AU01/AU02 proof components (2026-11-01):
+`Calculus/DecisionNumericLogic.lean` extends numeric preparation facts to
+quantifier-free logical combinations. A compositional original-source weight
+counts optional equality copies and connectives, deriving the unchanged
+511-node exact tests. The conditional integration interface still requires the
+actual source-to-leaf equation; inhabited clients discharge it and prove exact
+proved/refuted results. General normalization/source traversal and the global
+Residue theorem remain open. Numeric shape alone never waives parameter closure.
+
 `Calculus/DecisionUIntShape.lean` gives a computable syntax recognizer exactly
 equivalent to the existing intrinsic `UIntLinear` grammar and a constructive
 Decidable instance. Accepted source syntax feeds the existing bounded numeric

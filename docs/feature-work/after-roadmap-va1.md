@@ -1650,3 +1650,78 @@ held. This checkpoint does not claim a residue shrink or lane completion.
 Final finder and skeptic documentation reviews found one shared label incorrectly
 calling the AU01 recognizer AU02; changed to AU01/AU02 proof components before
 commit. No other findings. Both reviews remained read-only without Lean/server.
+
+## AU02 independent numeric logical formula bounds — 2026-11-01
+
+`Calculus/DecisionNumericLogic.lean` extends the numeric preparation component
+to quantifier-free logical combinations, using a proof predicate on actual
+`LFml` rather than a replacement IR. `LFml.UIntQF` has tt, strict numeric uint
+equality, not, and, imp; optional source equality uses the existing expansion.
+It retains exact parameter/environment predicates on existing Num evidence.
+Structural proofs establish parser acceptance, parameter closure, no cuts,
+zero conditionals, conditional weight at most two and preparation preservation.
+The tt weight is zero, handled without assuming every body has equality weight.
+
+`Fml.uintQFWeight` uses generalized-index casesOn/structural recursion. Each
+source equation contributes `7 * (a.size + b.size) + 13`, counting optional
+copies; logical constructors add their subweights and one node. Unsupported
+constructors return zero, which is explicitly NOT admission evidence: every
+bound theorem independently requires the intrinsic `QFUIntLinear` predicate.
+`qfUIntLinear_prefix_sourceBound` proves both actual source-polarity translations,
+numeric logical shape, elimination/simplification fixedness and a node bound
+from the original scoped source. `qfUIntLinear_formula_bound` derives the
+unchanged 511-node exact tests when the original source weight is at most511.
+No fuel/node/conditional/proof budget is changed or hidden.
+
+`qfUIntPrefix_inTarget` and `qfUIntPrefix_hashFree` establish the frozen source
+boundary for every admitted logical body and waiver setting. The conditional
+interface `qfUIntLogic_Covered_of_leaf` still requires the actual `leafOf?`
+equation; no assumed future theorem or semantic oracle substitutes for it.
+General source-reducer traversal and normalization remain open. This is NOT
+the global target bridge, Residue theorem or full formula/fuel completion.
+
+`Examples/DecisionNumericLogic.lean` has nontrivial positive/refuted logical
+clients. Their actual leaf equations are kernel proofs. Coverage consumes
+nodes derived from the ORIGINAL source: source weights141/197 conservatively
+bound actual lowered bodies117/173. Ordinary validity and an inhabited
+State.init countermodel are proved. Separate kernel `positive_verdict` and
+`negative_verdict` certify .proved and an actual returned refuting State with
+not holdsH, using original completeness/soundness/refutations and discharged
+hash-freedom. Executable guard observations remain separate native evidence.
+A foreign-parameter numeric body is rejected by the unchanged exact admission
+check; shape alone cannot waive closed-prefix parameters. No verdict changes.
+
+Raw commands/results/source identities are in
+/workspace/va1-evidence/numeric-logic-next. Core MCP 5.254s, focused core build
+2.032s, controls MCP 7.396s, focused controls build 6.325s, and46 public axiom reports
+11.655s pass. MCP diagnostics contain zero errors/warnings/dependency failures;
+axioms are standard propext/Classical.choice/Quot.sound only. Checks hold the
+original writer lock, thread1/-j1, hard aggregate12GiB/no-swap with actual
+cgroup values verified before Lean and12GiB host reserve. Maximum sampled
+aggregate RSS 2043800 KiB; minimum host available 16707321856 bytes. Actual pinned
+Lean4.24.0/Lake5.0.0-src+797c613 versions retained. Initial parser-strip,
+root-namespace, congruence-name and missing-sort failures are retained.
+
+Independent read-only finder and skeptic source/control reviews found no
+confirmed issues, including the added exact kernel verdict certificates.
+Neither edited or used Lean/server/build. Static gates pass:1086 reachable/
+zero orphans,180 core/zero elaborator reach,491 automatic/61 budget/11 refuted/
+zero manual or pending, trust1101 sources/248 sites/zero findings. Inventory
+FAIL1 remains byte-identical prior1206 pins/zero errors/404 unrecorded changes;
+strict docs FAIL1 retains the same85 frozen findings. Decision source is
+byte-exact to frozen base. Full run remains failed/pending as already recorded;
+no unchanged resource-stopped heavy gate is repeated as an endpoint.
+
+This separately exportable component needs no VA2 sharing implementation.
+General traversal proofs for the concrete existing normalizer/source compiler
+are identified next dependencies within the owned proof work; no whole lane
+wait, API simulation or foreign source change is assumed. The existing immutable
+parallel-interface export remains available; newer committed components are
+exported cumulatively at their own heads.
+
+All global AU01 Residue/DecisionTheorem-prime/exhaustive target/hash bridge,
+broader revised program-free boundary, AU02 fixed/nested-array pipeline,
+remaining memory/halting-OR/general-fuel, baseline/performance/backfill and
+required final gates remain incomplete. Q1 is answered; Q2/frontend repair
+stays held without blocking independent work. Goal/VM/branch remain unchanged;
+no push, merge, PR or tag.
