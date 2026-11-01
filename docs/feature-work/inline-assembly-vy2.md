@@ -3737,3 +3737,59 @@ Validation/reviews, all raw failures, exact signatures/axioms and final tested-t
 attribution are under `/workspace/vy2-evidence/tuple-capture`; global docs exit1 is
 retained separately from exact-base zero delta. Minimum trust registration adds
 exactly the two proved runtime collector twins; checker rules are unchanged.
+
+## Owned bool representation and source journals (2026-11-01)
+
+Additive `OwnedBoolEncoding/Journal/Registry/Updates/View/Source/Frame` retain
+all eight bits of an owned storage bool byte. The real logical value remains
+`Source.Val.bool`: zero means false, each nonzero byte means true. A nonzero
+physical true-byte choice is carried separately from unowned complement bytes;
+canonical `boolCodec`, `Source.Val.word`, source state and all old guards remain
+unchanged. `representedBool_decode_raw` and `representedBool_encode_raw` derive
+exact inversion for every byte. No assumed inverse/view/safety field is added.
+This is physical representation preparation, not dirty LOCAL transport/YQ4 closure:
+loading/copying through locals, pipeline cleanup and general assembly adequacy
+still require the actual VY1 embedding and concrete correspondence proofs.
+
+`representedRegistry` retains actual source paths, fields, widths and slots.
+`CheckedInheritedDeclarations.represented` reuses computed declaration/C3/origin
+packing and derives coverage/separation. `representedStoreWriteback_unchanged`
+preserves the WHOLE administrative store and representation journal for a real
+unchanged view, including unwritten versus explicit-default cells. Raw2->3
+changes physical representation while preserving the complete logical store.
+`encodingWrites_result` derives choices from the same supplied raw map; all
+owned bits stay owned, and arbitrary unowned padding remains complementary.
+
+A checked `RepresentedSlotPlan` derives its request equality from the actual
+packed validator. `representedFrameWrite?` binds that request to `F.this`.
+`representedSourceStep` runs actual `Source.applyOp`; complement and owned-byte
+journals advance only on success. Full-slot reencoding, actual empty static revert,
+every-initial-H owner MemOK, caller-prefix rollback and committed-child/enclosing
+rollback are proved for those SAME actions. No separately postulated runs or
+renamed owner invariant replace this composition. Persistent representation
+survives endTx; transient choices reset alongside the existing source/complement
+transaction contract. This does not authorize transient aggregate declarations.
+
+Controls instantiate mixed bool/u16/bytes3/address, zero/unwritten and explicit
+false, raw2/3/255, nonzero padding, bank/account isolation, checked inherited
+layout-at42 writes and malformed request coupling. `OwnedBool.sol` separately
+checks exact truthiness, packed padding/siblings, literal false/true assignments,
+full Error bytes, static refusal and postfailure reads in both pinned pipelines.
+Finite compiler/EVM evidence does not prove local cleanup, constructor-source
+identity, allocator/refinement, reachability or source/compiler adequacy.
+
+Independent reviews found an actual pre-review q-versus-p.request coupling defect;
+the checked request packet repairs it. Raw failed proof attempts and original
+review evidence remain in `/workspace/vy2-evidence/dirty-bool`. Final checks/reviews
+and exact tested-tree attribution are recorded there when completed; no pending
+gate is inferred passed by this paragraph. All prior artifacts are preserved.
+
+Original Y04/Y05/Y06/BackfillA/B remain partial, and Y09.02/final joint source,
+compiler, calculus/notation/printers/Lean-only rows remain open. Ownership-changing
+dynamic bool integration, broader owned dirty representations, mappings/storage
+bytes/transient/retained escape completeness, universal memory/shared-zero/interior/
+pointers, reachable allocation/refinement, concrete V10/V11 instances and Y06
+bindings remain original obligations. Human YQ1-YQ7 remain authoritative (see
+[scope decisions](../solidity-scope.md#inline-assembly-decisions-2026-10-31)). Ready
+independent work continues under the parallel amendment; no goal mutation,
+producer replacement, push or merge is performed.

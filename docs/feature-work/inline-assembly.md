@@ -606,3 +606,5 @@ Exact committed SHA, theorem premises, final gates/reviews/resources and artifac
 - VY2 computed entry/return capture: [lane checkpoint](inline-assembly-vy2.md#vy2-computed-entry-and-return-capture-2026-11-01); partial, final source/compiler closure open.
 
 - VY2 tuple capture and concrete parallel consumers: [lane checkpoint](inline-assembly-vy2.md#vy2-runtime-tuple-and-argument-capture-parallel-physical-consumers-2026-11-01); partial source assignment, exact peer-input exports and isolated consumers.
+
+- VY2 owned bool representation/source journals: [lane checkpoint](inline-assembly-vy2.md#owned-bool-representation-and-source-journals-2026-11-01); partial physical preparation, dirty local/source/compiler closure remains open.

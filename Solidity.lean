@@ -965,3 +965,5 @@ import Solidity.Yul.Views.RetainedEntryControls
 import Solidity.Yul.Views.RetainedExpressionCapture
 
 import Solidity.Yul.Views.RetainedTupleControls
+
+import Solidity.Yul.Views.OwnedBoolDeclarationControls
