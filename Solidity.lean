@@ -977,3 +977,5 @@ import Solidity.Yul.Views.HeapAllocationFreshnessControls
 import Solidity.Yul.Views.RetainedAllocationOrderControls
 
 import Solidity.Yul.Views.AllocationInventoryControls
+
+import Solidity.Yul.Views.AllocationPhysicalControls

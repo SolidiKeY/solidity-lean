@@ -181,3 +181,5 @@ VY2 retained source-reference preparation and original unfinished queues:
 - VY2 [retained allocation lineage extension](feature-work/inline-assembly-vy2.md#retained-allocation-lineage-extension-2026-11-01): whole typed history/source/raw allocation laws; partial lane.
 
 VY2 [computed inventory after allocation](feature-work/inline-assembly-vy2.md#computed-inventory-after-allocation-2026-11-01) connects actual supported heap enumeration and allocation history.
+
+VY2 [actual allocation physical-view bridge](feature-work/inline-assembly-vy2.md#actual-allocation-physical-view-bridge-2026-11-01) proves computed raw-map/source agreement for the supported ordinary heap.
