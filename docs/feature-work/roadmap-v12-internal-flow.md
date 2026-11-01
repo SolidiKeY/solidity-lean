@@ -2562,3 +2562,98 @@ artifact reviews/checksums and complete actual gate receipts are in handoff.
 No kernel proof, external compiler/EVM agreement or entire lane completion is
 inferred from profiling, metadata, inventory, report counts or these scoped
 passes. Every original failure/seal remains.
+
+## Continuation31 — preserve fresh reads, memoize pure import parsing
+
+Owned cache-validation implementation; no Lean production/test source, theorem,
+program, observation, supported profile, refusal, pin or proof budget changes.
+The existing fixture import scanner body is byte-identical, renamed/exported
+`scanFixtureImports`. `imports` memoizes successful results by the ENTIRE exact
+freshly-read source text (no digest/collision premise) and returns a fresh array
+copy, because each traversal pops its root pending list. Failed parses remain
+errors, changed text obtains a distinct entry, and caller mutations cannot
+poison later traversals. No file bytes/hash/key/mtime or toolchain snapshot is
+memoized. The complete source/object read, hash, dependency, key, guard, CLI,
+batch and before/after toolchain code tail remains byte-identical.
+
+Real Node CPU profiling of the previous actual fixture check identified key
+work; the complete input-only diagnostic retained all18 real fixtures and two
+passes of actual hashes/keys. Before21.956s versus candidate18.773s, every key
+and input count identical both passes. This is inventory/performance evidence,
+NOT Lean validation or a gate pass. `check-import-cache.mjs` separately passes
+241 controls over231 actual project sources from all18 bindings, plus nested
+comments/quotes, changed text, repeated parse errors and returned-array alias
+mutation. These parser controls never substitute for source/kernel checking.
+
+The checker file hash correctly invalidated old bindings. Actual checking
+rejected before Lean at the stale AxiomReports dependency. An initial control
+expected the later leaf rejection and failed its too-specific assertion;
+corrected control checks the EXACT observed dependency rejection and confirms
+no Lean invocation. Original raw failure/source retained; this is cache
+provenance rejection, NOT runtime rejection. An initial attempt to save CPU
+analysis without filesystem escalation failed read-only before writing; the
+authorized evidence write then succeeded. No source or gate bypass.
+
+Every registered fixture was then freshly checked from actual source in real
+dependency order, each with the unchanged120s bound, serial-j1/LEAN_NUM_THREADS1
+under hard12884901888B/no-swap and the canonical writer/compiler locks. All18
+source preparations (17 mathematical fixtures plus metadata tool) and all542
+original reports pass. Old metadata was NOT simply re-keyed; actual Lean
+processes generated each checked object/binding. Exact old tuple85 and other
+original68/59/42/27/... inventories retained. Only authenticated stopped own
+containers were removed after receipts; caches and earlier evidence preserved.
+
+COMPLETE registered cached gate now PASS: exit0,117.230s strictly below unchanged
+120s, all18 fixtures/all542 actual builtin reports, complete before/after
+11575-entry toolchain maps with identical SHA256
+617fd68210c0b46750ab92f863878665875839568f23d99320f79053956360f1.
+The final batch receipt exists. This resolves the current cached-gate blocker;
+it does NOT turn C30's124/122.079 or older failures green. All1392 tracked Lean
+sources are independently verified unchanged. All542 imported kernel types
+pass3.516s; prior separate7+6+5+15+3+11+16+14+8 axiom reports rechecked exact.
+Six precise source/import/object/checker/pin corruption controls reject before
+Lean and restore all bytes (18.256s). Complete post-control input inventory
+passes6.660s, separately from the real passing timed gate.
+
+Actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs pass0.903s. Exact actual
+owned/fixture import-refresh phase passes1.420s. No-Lean dynamic drivers retain
+34owned targets,23fixture imports,18fixtures/all542pins and raw38targets with
+failure at every required point; no target/report removed. Final structural,
+report corruption, doc, source and artifact reviews/receipts are in handoff.
+No Lean MCP diagnostics are available; no Lean source edited in this step.
+
+The raw38-source gate remains C30 FAIL124/120.796s and the original full300s,
+broad/default-root/prerequisite failures remain FAIL; TestSuite/sort unreached.
+This cache-only change repairs neither, so no unchanged raw/full retry. Raw
+normal/strict docs1 remains historical/incoming failure, with separate complete
+previous/publication equality and frozen46missing versus48plus ambiguity; no
+new owned findings is not global success. All six original Work items and both
+Backfills remain partial. Unbounded recursion, dependent source lowering,
+early-control/general mixed loops, word-frame/byte-journal/world and target
+transient/callback producers remain open. Larger combined target conjunction
+also remains resource-failed. Fresh raw CLI process/environment overhead is
+ready owned engineering to investigate next, preserving separate fresh Lean
+processes/all38 source checks; rejected persistent-frontend137 experiments are
+not being resumed. No independent-work exhaustion or completion claim.
+
+All31 preceding main seals remain immutable. No push/merge/PR, reserved edit,
+new goal, reset/reactivation/completion or unmerged dependency intake. The
+original blocked full-assignment goal remains unchanged. Published099bfbe185731c354b12a40f28ccf5d98534c779
+is still the consumed producer; no peer package supplied. An exact committed
+PARALLEL-INTERFACE source/signature/bundle checkpoint supports private peer
+worktrees; final combined-tree validation remains mandatory. Both bundles
+explicitly disclose their incremental prerequisites and are not standalone.
+
+Continuation31 final scoped controls: all original542 exact guards/order and72
+report corruption controls pass on the ACTUAL completed cached audit. Structural,
+layer/import/orphan/trust and both dynamic driver coverage controls pass. All
+1392 Lean sources, every original pin/guard and both complete target drivers
+remain byte-identical after adversarial controls. Actual dependent-signature
+query passes1.420s. Six source/import/object/checker/pin freshness countercontrols
+pass with exact error-class assertions and byte restoration; no unexpected
+Lean invocation. Complete post-control inventory passes6.660s separately from
+the real117.230s gate. Original raw normal/strict documentation logs remain
+exit1 and complete previous/publication-equal, with no new owned findings.
+Both independent early protocol reviewers PASS, no freshness/array/error issues,
+neither running Lean/server/builds/writes. Final source and committed-artifact
+reviews and checksums are bound in the handoff; no whole-lane completion.

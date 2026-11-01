@@ -8,7 +8,7 @@ import {pathToFileURL} from "node:url";
 const pinsFile="tests/internal-flow/fixture-axiom-pins.json";
 const registry=JSON.parse(readFileSync(pinsFile,"utf8"));
 const hash=p=>createHash("sha256").update(readFileSync(p)).digest("hex");
-function imports(text) {
+export function scanFixtureImports(text) {
   let clean="", depth=0, quoted=false;
   for(let i=0;i<text.length;i++) {
     const pair=text.slice(i,i+2),c=text[i];
@@ -27,6 +27,19 @@ function imports(text) {
   }
   if(depth || quoted) throw new Error("unclosed source comment/string");
   return [...clean.matchAll(/^\s*import\s+([^\n]+)/gm)].flatMap(m=>m[1].trim().split(/\s+/));
+}
+
+// Cache only the PURE parse of freshly-read exact text, never file bytes,
+// hashes, keys, mtimes or toolchain snapshots. Each traversal consumes its root
+// pending array, so every caller receives a fresh mutable copy.
+const importMemo = new Map();
+export function imports(text) {
+  let parsed=importMemo.get(text);
+  if(parsed===undefined) {
+    parsed=Object.freeze(scanFixtureImports(text));
+    importMemo.set(text,parsed);
+  }
+  return parsed.slice();
 }
 
 // The actual complete toolchain is read, never inferred from mtimes/version.
