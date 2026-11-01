@@ -1,3 +1,5 @@
+import Solidity.Roadmap.V16.ConstructionCompilation
+import Solidity.Roadmap.V16.ConstructionConsumer
 import Solidity.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Roadmap.V16.MemoryCallConsumer
 import Solidity.Roadmap.V16.CallbackControls
@@ -19,7 +21,8 @@ run_cmd do
           ("name", toJson n.toString), ("constructors", toJson (info.ctors.map Name.toString))])
   let mut theorems : Array Json := #[]
   for (n, info) in env.constants.toList do
-    if (`Solidity.Roadmap.V16).isPrefixOf ((privateToUserName? n).getD n) then
+    if (`Solidity.Roadmap.V16).isPrefixOf ((privateToUserName? n).getD n) ||
+        (`_private.Solidity.Roadmap.V16).isPrefixOf n then
       if let .thmInfo _ := info then
         let axs ← collectAxioms n
         let ty ← liftTermElabM do return (← Meta.ppExpr info.type).pretty

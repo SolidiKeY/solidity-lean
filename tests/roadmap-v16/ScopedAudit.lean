@@ -1,3 +1,5 @@
+import Solidity.Roadmap.V16.ConstructionCompilation
+import Solidity.Roadmap.V16.ConstructionConsumer
 import Solidity.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Roadmap.V16.MemoryCallConsumer
 import Solidity.Roadmap.V16.CallbackControls
@@ -163,3 +165,23 @@ import Solidity.Roadmap.V16.SpecificationControls
 #print axioms Solidity.Roadmap.V16.scoped_loop_reconstruct
 
 #print axioms Solidity.Roadmap.V16.scoped_loop_public_diamond
+#print axioms Solidity.Roadmap.V16.construction_result
+#print axioms Solidity.Roadmap.V16.construction_not_exhausted
+#print axioms Solidity.Roadmap.V16.construction_diamond
+#print axioms Solidity.Roadmap.V16.construction_diamond_iff
+#print axioms Solidity.Roadmap.V16.construction_box
+#print axioms Solidity.Roadmap.V16.construction_box_iff
+#print axioms Solidity.Roadmap.V16.construction_capacity
+#print axioms Solidity.Roadmap.V16.construction_diamond_cursor
+#print axioms Solidity.Roadmap.V16.construction_box_diamond_dual
+#print axioms Solidity.Roadmap.V16.construction_append_cert
+#print axioms Solidity.Roadmap.V16.construction_reconstruct
+#print axioms Solidity.Roadmap.V16.construction_public_cert
+#print axioms Solidity.Roadmap.V16.constructionAppendCompiled
+#print axioms Solidity.Roadmap.V16.constructionCompose
+#print axioms Solidity.Roadmap.V16.construction_compile_inversion
+#print axioms Solidity.Roadmap.V16.construction_compile_append
+#print axioms Solidity.Roadmap.V16.construction_compile_append_link
+#print axioms Solidity.Roadmap.V16.construction_certificate_code
+#print axioms Solidity.Roadmap.V16.construction_certificate_fragment
+#print axioms Solidity.Roadmap.V16.construction_public_append_code

@@ -975,3 +975,129 @@ producers, theorem hypotheses, raw commands/exits/resources, prior seal checks,
 source-boundary checks, final reviews and full committed identity belong in the
 fresh immutable evidence directory already named above. No semantic scope
 choice or reserved-owner repair is requested.
+
+
+Memory-object construction continuation (intermediate checkpoint, 2026-11-01):
+
+The loop checkpoint0ed730b044d27bf9cb3b6c297d8294516ce6b4d5 is preserved with
+315verified fresh checksums; the earlier328checksums also remain unchanged.
+Broader queue review identified further independently executable ORIGINAL
+G49.01/G51.02 consumers: memory-object construction, objects, referenceArrays,
+plain memory and core. Loop matrix completeness did not exhaust those queues.
+This continuation consumes construction first; the other four remain ready.
+Construction here means memory-object/reference-array allocation, NOT contract
+deployment or initcode. G50 deployment/transaction applications remain blocked.
+
+`Solidity/Roadmap/V16/ConstructionConsumer.lean` consumes actual published
+Construction.ProgFrag.correct and Objects.GrowingResult, retaining the COMPLETE
+Objects.StateRepr/AllocatorRepr/GrowsAllocator (including fixed/headerless
+objects), actual frameNeedProg and Construction.allocationCostProg. Public
+Input/Rep and source/target equations, PC0 and entire stack tail are retained.
+Actual finite soundness derives no-exhaustion; approved diamonds yield genuine
+source/target/post witnesses without assuming success/notExhausted/desired run.
+Boxes preserve exact empty revert; iff/duality/cursor consequences remain scoped.
+Alias identity and reached capacity follow from real representations/Inputs.
+All eight Compiler constructors remain handled; no profile/exclusion changes.
+
+The NEW typed constructionAppend and certificate adapter compose existing
+intrinsic Prog/ProgFrag values and exact concatenated code, without defining
+another syntax, state or execution model. Actual public prefix/suffix outputs
+and a checked fragment link construct a concrete adapter. Input is constructed
+from the same real state/frame/reached-cost formula, not a desired simulation.
+The canonical public output was initially a separate OPEN proof obligation;
+raw concrete unfolding hit the unchanged200000-heartbeat limit. It is now
+PROVED, not waived: `Solidity/Roadmap/V16/ConstructionCompilation.lean` inverts
+actual Compiler.compile success and proves structural append algebra for the
+actual Construction.compileProg. The recursion decreases existing Prog size;
+it changes no execution fuel or proof budget. constructionShape is a typed
+output fragment/code projection, not a replacement IR. Public append requires
+real success equations, source reconstruction and fragment equality, all
+DISCHARGED by the concrete controls. Canonical code and fragment equality then
+link the populated-entry transport to the ACTUAL public whole-program code.
+Earlier OPEN proposal archives are historical failures, now resolved for this
+scoped case; they are not external dependencies or current open obligations.
+
+`tests/roadmap-v16/ConstructionControls.lean` reuses the published ordinary
+source/compiler fixtures. Kernel proofs connect real source answer11013 to the
+NEW specification witness, machine cell7, retained source alias, protected
+stack77 and exact cursor31. Last permitted cursorW-1, insufficient capacity,
+all three bounds failures, wrong post/value/frame/fault/revertWith[9], reached
+allocation-before-failure cost5 and skipped huge allocation are checked. Runtime
+zero extent (cost1), fixed-child zero/rebinding (cost2), and nonempty fixed-child
+rebind/alias escape returning17000(cost10) add actual constructor combinations;
+the latter belongs to CONSTRUCTION, not the referenceArrays arm. Its two bounds
+failures are preserved. Complete ordered32-cell native observations keep every
+frame/gap/sentinel/allocated-prefix cell; one-cell cursor/alias corruptions are
+rejected. Numeric vectors are native word-machine evidence, not byte-EVM tests.
+The11013result/cursor/alias/last-cursor consequences separately have kernel proofs.
+
+Main/zero/rebind entries begin with empty heaps, so their initial BaseExtends
+old-reference component is vacuous. A structural cut of the SAME intrinsic
+program supplies a real caller prefix/suffix: prefix cost6 constructs sourceH4,
+actual target representation and allocator22; these CONSTRUCT suffix Input
+with cost9. The old parent is actual referenceid3, not a quantified empty type.
+NEW suffix diamond preserves its address and rejects a forged zero map using
+real Objects ownership. Source reconstruction, actual public compiler success
+and fragment-link proofs discharge every premise of canonical code composition.
+Existing Evm.run_append_ok links the complete canonical target run. No prefix/
+suffix Input, source success or desired simulation is silently supplied.
+
+Initial normalization failures were repaired by explicit contexts and shared
+irreducible aliases of the UNCHANGED published program/compiler result, with
+explicit producer equalities. Local test-only HRef equality uses existing
+identity plus proof irrelevance; no global instance/profile changes. A proposed
+child-first native baseline was wrong: the actual producer reserves the parent
+at its cursor. The complete baseline was corrected against that published
+contract; every original raw failure and all32ordered cells are retained.
+No heartbeat/fuel/node/timeout increase, native_decide, implemented_by, axiom,
+sorry or reserved producer edit was used. No Lean MCP is exposed; serial
+bounded CLI diagnostics use-j1/LEAN_NUM_THREADS=1/hard12GiB/no-swap and the writer
+lease with OS headroom and the single source/toolchain cache.
+
+`scripts/roadmap-v16-construction-audit.py` and
+`tests/roadmap-v16/construction-premises.json` pin26exact complete theorem
+contracts against actual metadata and published5f6producer bytes. The audit
+checks49closed scoped controls, actual public compile origins, the distinct
+composition adapter, all public/private value/helper dependencies, signatures
+and axiom sets. Generated splitter names may retain the foreign function's
+namespace while physically belonging to V16: extraction now includes their
+private V16 module prefix, and missing helpers are rejected. Record-field
+proof helpers are traversed rather than mistaken for missing direct provenance.
+All18positive/corruption tests pass, including actual private splitter removal/
+oracle injection, absent combinations, premise-only claims, source revision,
+strengthened same-name premises, wrong public/adapted origins and trust changes.
+Current core inventory contains186actual statements including those private
+helpers; every2255global constructor/feature/combination/stage obligation remains
+OPEN. Twenty-six headline theorems are scoped evidence, not full coverage.
+
+Independent read-only finder/skeptic proof/control/canonical-algebra reviews
+found no mathematical defect; confirmed fixes include frame-comment precision,
+explicit constructor combinations/nonempty old-reference witness, stale OPEN
+wording and complete private-helper extraction. Accounting/final source/artifact
+reviews and remaining gates are recorded separately once observed. No reviewer
+used a Lean server/build/tests or wrote files. Exact-head handoff/patch/bundle,
+raw commands/exits/resources, theorem contracts, reviews and checksums will be
+sealed separately under /workspace/scratch/v16-finite-recovery. Full original
+G48-G51 remains unfinished. Other published finite/core consumers are the next
+independent work; SourceSpec/admission/lowering/full-profile progress, integrated
+V12-V15/pinned byte-EVM, deployment/rollback/adversarial transactions and final
+SolKey applications remain genuine parent prerequisites. The blocked persistent
+goal is untouched; this checkpoint is not an endpoint or completion claim.
+
+Construction validation: actual Lean4.24.0/Lake5.0.0-src+797c613 and
+`lake build Solidity.KeySort Solidity.Evm.MemoryReferenceArrayRebindExamples`
+pass176jobs; environment RUNTIME_GATE_PASS only. Current changed-source
+`./run-lean.sh` passes1050default/285kernel jobs and SolKey377parsed/131read
+coverage, exit0, peak4089778176bytes. This distinct pass preserves the earlier
+full exit124 and all earlier137/124 failures. Root-import1040jobs, all26
+headline axiom prints, focused consumer/compilation/controls and18accounting
+corruption tests pass. Strict automatic classification passes491automatic,
+61budgeted,0manual/0pending; cached current log has0timedTestSuite modules.
+Its separate original24member fresh replay evidence remains256.6314666679973s
+under300 with unchanged member source hashes, not a new timing measurement.
+Layer/orphan/trust/noncircular/TestSuite structural checks pass. Documentation
+raw exit1 and complete exact-base comparison remainFAILED85vs83: exactly2
+new reserved Yul-path findings, no removed findings, no permission to repair
+or waive. Native ordered-cell checks are bounded independent computation,
+not kernel proof or external EVM evidence. Full original lane remainsblocked;
+other4published finite/core consumers remain next.

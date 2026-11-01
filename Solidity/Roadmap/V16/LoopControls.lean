@@ -1,3 +1,5 @@
+import Solidity.Roadmap.V16.ConstructionCompilation
+import Solidity.Roadmap.V16.ConstructionConsumer
 import Solidity.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Semantics.RunFuel
 import Solidity.Roadmap.V16.Transactions

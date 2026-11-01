@@ -1300,3 +1300,9 @@ four-mode upstream EVM observations and refusal controls;
 300-second evidence, with negative controls in its `.test.mjs` companion.
 
 `Solidity/Roadmap/V16/MemoryLoopConsumer.lean` consumes actual published direct/scoped loop compiler certificates, branch-specific Room/Cost and scoped box/diamond specifications. Inhabited ordinary source and reached-resource controls remain test-only in `tests/roadmap-v16/MemoryLoopControls.lean` and `tests/roadmap-v16/MemoryLoopResourceControls.lean`.
+
+`Solidity/Roadmap/V16/ConstructionConsumer.lean` consumes the published object-construction compiler certificate, complete object heap/allocator, reached capacity and scoped box/diamond specifications.
+
+`Solidity/Roadmap/V16/ConstructionCompilation.lean` proves structural inversion/append algebra for the actual construction compilation function, retaining typed source programs and observed output fragment/code.
+
+`tests/roadmap-v16/ConstructionControls.lean` supplies actual memory-object construction, zero/fixed-child/rebinding, populated prefix/suffix, canonical code-composition and scoped accounting controls. `scripts/roadmap-v16-construction-audit.py` checks exact statements, generated helpers, origins and trust with negative controls.
