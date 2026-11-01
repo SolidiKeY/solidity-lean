@@ -689,3 +689,52 @@ not exposed in this turn. YQ1–YQ7 remain authoritative; no new question arises
 New versioned patch, bundle, handoff, raw evidence and checksums are under
 `/workspace/vy5-composition/remaining-20261031/`; all earlier manifests/artifacts
 are preserved. This checkpoint does not complete the original lane.
+
+
+## Parallel consumer interface — 2026-11-01
+
+The human scheduling amendment permits actual peer inputs in a private tree.
+Preserved checkpoint916ad2c5; verified immutable VY3 checkpoint250555de and
+VY4 checkpoint9c631ecb are staged, with exact source hashes in
+[producer inputs](../../tests/yul-composition/producer-inputs.json), at
+`/workspace/vy5-dependencies-20261101` (provenance commit921a3b4b).
+The assigned branch contains only VY5 modules, not producer definitions.
+
+[Interface](../../Solidity/Yul/Composition/Interface.lean) exports
+`Solidity.Yul.Composition.completeAndCopy` over actual VY4 `Effects D L T`,
+address-indexed source layouts, explicit operations/logs/outcome, strict source
+window coordinates, destination and existing target byte-memory `Slice`.
+Its result is `Option (Effects D L T × Slice)`. Failure is not replaced by empty
+bytes. `literalSum : UInt8 → UInt8 → Compilation.Slice 0 1` consumes actual VY3
+arity-indexed literalPair/addWords. No invented producer AST/state semantics,
+axiom, opaque obligation or assumed correctness theorem is introduced.
+
+[Concrete](../../Solidity/Yul/Composition/Concrete.lean) proves rollback plus
+copy, exact selected bytes/outside-memory preservation, failed completion then
+successful completion, strict nested windows and concrete numeric ADD over any
+caller tail. Operations/logs/outcome remain explicit inputs; this is not source
+try/catch adequacy. Copy generates PUSH/MSTORE8 constants from supplied outcome
+bytes under the existing gas/stack-exception-free target executor; it is not
+RETURNDATACOPY lowering or EVM correspondence. Bounds and destination fit are
+real theorem premises. All successful axiom reports contain only standard axioms.
+
+[Controls](../../Solidity/Yul/Composition/Controls.lean) executes inhabited typed
+worlds with slot7, stale returndata and caller logs, supplied child write42 and
+nonce increment, copying ab/cd across31/32 with sentinels30/33 and stack99.
+Revert yields slot7/nonce0/one log; success slot42/nonce1/two logs. Wrong-result
+ADD, underflow and zero-length out-of-bounds controls remain negative.
+Private affected build54jobs and per-file installed MCP diagnostics pass for
+all three modules (success=true, partial=false, no errors). Failed initial
+Lake CLI, namespace/list-normalization and witness syntax attempts are retained.
+Independent finder/skeptic reviews use no Lean server/build; their requested
+scope and inhabited-witness fixes are incorporated. A failed documentation
+shell command was corrected before commit and is not a passing gate.
+
+This early interface package is a dependency input, not full lane delivery.
+VY1/VY2 packages remain in transfer; exact required dirty-local/physical facts
+and remaining compiler/world adequacy contracts are named in producer inputs.
+All24 full obligations/six combinations remain pending. New concrete component
+laws do not relabel them complete. Final combined root/full policy gates remain
+required; no new RUNTIME_GATE_PASS is claimed. The prior finite controls and
+immutable artifacts are unchanged. New evidence/package paths are under
+`/workspace/vy5-composition/parallel-20261101/`.

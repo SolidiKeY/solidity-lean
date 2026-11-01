@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "privateWorktree": "/workspace/vy5-dependencies-20261101",
+  "packages": [
+    {
+      "producer": "vy3-compilation",
+      "head": "250555de2df2c16e2413cf329f43c77ce51ac8b6",
+      "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
+      "files": [
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy3-compilation/250555de2df2c16e2413cf329f43c77ce51ac8b6/checkpoint.bundle",
+          "sha256": "ae4254e2bb83895516114b1dcda4b6e2b653a3d45f1496126fce885aed2c1b02"
+        },
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy3-compilation/250555de2df2c16e2413cf329f43c77ce51ac8b6/source-modules.tar.gz",
+          "sha256": "0eb1cd6d75a6af95831924ea748913f87d92b15bf7fe2317d5ca2ae9deb1396d"
+        }
+      ],
+      "modules": [
+        {
+          "module": "Solidity/Yul/Compilation/Allocation.lean",
+          "sha256": "71a07f9f1bfdfba21a9303b5c26a7d0c4d5ec8dd54d83451e8d155c988b489b6"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/CompilationControls.lean",
+          "sha256": "1bc16d14396a78f9e6ad0bbc4fe270aec5d74a32a1cb8a72af40c8679982db97"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/MemoryHarness.lean",
+          "sha256": "ddc48e67a7a1a3919327772cfd080be0ca02318e83d78c8dcd8aea328611c4ed"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/NestedWrites.lean",
+          "sha256": "a9e20a05306f63d4cc6ccd4462af7df38a564dc40b92311e59ec9dc503f5972b"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/NestedWritesControls.lean",
+          "sha256": "63d863d53c90e35890285ca2d5f59da986ab62eb47267cd877e61287ded0f515"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/Relocation.lean",
+          "sha256": "cd36054a1eea3e30bcec52013eda36767764ece782ef7645c1fefe8cdaa636ab"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/ScopeSemantics.lean",
+          "sha256": "094e5e7d49798fd1fb4f7a53e897b88e1cdf4c344e0fdd6a1f6d5ad2fabc840a"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/ScopeSemanticsControls.lean",
+          "sha256": "dbdf2d98f2452a68bbbe70e4c34f540ff9ad0364f2715312b81adbecf35de0a8"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/Slices.lean",
+          "sha256": "9e09cfcba7a2d3aca126d3b0dcc755fed9518fe96dc4d8fbfe617b7aa6a68de6"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/SlotSemantics.lean",
+          "sha256": "87cb4cb300e78046a4cdcd4b8cb48fbfd176b7e391f4f9f116429e62480a2a7e"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/SlotSemanticsControls.lean",
+          "sha256": "b16aa51e0a0a179d06a590f5cd53dd2aabf83d4f7903bb7303af7b711d2c23d3"
+        }
+      ]
+    },
+    {
+      "producer": "vy4-world",
+      "head": "9c631ecb07af62039348239763e049275fd78c1e",
+      "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
+      "files": [
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy4-world/9c631ecb07af62039348239763e049275fd78c1e/checkpoint.bundle",
+          "sha256": "911a205d1109c72ecdf01f120b6f5640327afc0d7e410ef415bb2c19cf7c103a"
+        },
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy4-world/9c631ecb07af62039348239763e049275fd78c1e/source-modules.tar.gz",
+          "sha256": "8965518543b3c0d1e140bd9e737707cf622f517e2cc509c04b0cd78469646955"
+        }
+      ],
+      "modules": [
+        {
+          "module": "Solidity/Yul/World/Frames.lean",
+          "sha256": "39504c6df2d5a61e3d90a9045bac5f8d84d19074a844d18c9ebea3c8eb014230"
+        },
+        {
+          "module": "Solidity/Yul/World/Lifecycle.lean",
+          "sha256": "f24a42f947df320cff262e7a7deed61fe5a9438d497910e4a6f135a392f2dc35"
+        },
+        {
+          "module": "Solidity/Yul/World/Observations.lean",
+          "sha256": "a73b6c4ae9d0dbef12a8015550435533bc0382dfde8ba0a1d62545aa6e7fc1be"
+        },
+        {
+          "module": "Solidity/Yul/World/Raw.lean",
+          "sha256": "cee7486ecf1c59c65d5eb7b37d67a78514c44cce846c12a8f47883421e4591a0"
+        },
+        {
+          "module": "Solidity/Yul/World/WorldChecks.lean",
+          "sha256": "90bc48e98376bd1424b916d4fa3110e01563deeda9727df947b758f219eab3a5"
+        }
+      ]
+    }
+  ],
+  "unresolved": [
+    "VY1 intrinsic syntax/pure execution/dirty-local package not delivered",
+    "VY2 physical view/ownership/writeback package not delivered",
+    "VY3 target slices are preparation; source compiler simulation, final calling convention and pinned EVM adequacy not supplied",
+    "VY4 supplied operation/outcome completion is not raw callee execution adequacy",
+    "G01 allocation/log amendments and concrete V16/G48-G51 whole-pipeline combination contracts remain open"
+  ],
+  "adapter": "Solidity/Yul/Composition/Interface.lean",
+  "actualLaws": "Solidity/Yul/Composition/Concrete.lean",
+  "witnesses": "Solidity/Yul/Composition/Controls.lean",
+  "scope": "Verified immutable peer bodies consumed privately; no owner merge, no closed full-lane obligation."
+}

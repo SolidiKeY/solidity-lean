@@ -231,3 +231,14 @@ partial, Work1/3 blocked: all24 proof obligations/six combinations and final
 Y10/G48–G51 closure await actual assembly owner interfaces. No Lean/import or
 shared owner code changed; prior kernel gates retain their original tested-tree
 attribution and historical docs/G03 exit1 failures are preserved.
+
+
+### VY5 parallel interface — 2026-11-01
+
+The [VY5 consumer interface](inline-assembly-vy5.md#parallel-consumer-interface--2026-11-01)
+uses hash-verified VY3/VY4 bodies in a private dependency worktree. Concrete
+rollback/window/materialization and numeric ADD laws plus inhabited controls
+pass affected kernel/MCP checks. These are supplied-completion and target-only
+laws, not source try/catch, RETURNDATACOPY lowering or full EVM adequacy.
+All24 obligations/six combinations stay pending; the early package permits
+parallel consumers without duplicating producer semantics.
