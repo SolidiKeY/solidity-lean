@@ -85,7 +85,7 @@ def metadata(raw,family):
  return meta
 
 def verify(record,directory,current,family,producer,producer_directory,previous=None):
- m=creation().load_memory();k=m.load_kernel();raw=m.verify_stage(k,record,directory,current,producer,producer_directory,previous,'warm-memory-loops','warm-loop-'+family)
+ m=creation().load_memory();k=m.load_kernel();raw=m.verify_stage(k,record,directory,current,producer,producer_directory,previous,'warm-loop-'+family+'-producer','warm-loop-'+family)
  obs=observation(raw,family);meta=metadata(raw,family);m.verify_imports(k,meta,record,current,producer,CONFIG[family][0])
  return {'metadata':meta,'observation':obs,'sourceSnapshot':current,'profile':publication_identity(family),'installedInputs':record['installedBefore'],'metadataCompleteForRequested16':True,'semanticPremisesDischarged':False,'releaseClosed':False,'boundary':'Actual warm checked compiler/kernel component and source-order observations only; Room/Cost preserved, no finite-cost substitution or external solc/EVM/gas claim.'}
 

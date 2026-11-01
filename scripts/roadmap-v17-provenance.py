@@ -44,7 +44,8 @@ TARGETS['warm-creation-try-observation']=([],TARGETS['warm-creation-try'][1])
 TARGETS['warm-memory-loops']=(['Solidity.Evm.MemoryLoopSourceExamples','Solidity.Evm.MemoryLoopScopeSourceExamples'],['lib/lean/Solidity/Evm/MemoryLoopSourceExamples.olean','lib/lean/Solidity/Evm/MemoryLoopScopeSourceExamples.olean'])
 TARGETS['warm-derived17-prerequisites']=(['Solidity.TestSuite.Derived17'],['lib/lean/Solidity/TestSuite/Derived17.olean'])
 for family in ('direct','scoped'):
-    TARGETS['warm-loop-'+family]=( [], TARGETS['warm-memory-loops'][1])
+    TARGETS['warm-loop-'+family+'-producer']=([TARGETS['warm-memory-loops'][0][0 if family=='direct' else 1]],[TARGETS['warm-memory-loops'][1][0 if family=='direct' else 1]])
+    TARGETS['warm-loop-'+family]=( [], TARGETS['warm-loop-'+family+'-producer'][1])
 
 TARGETS['fresh-derived17']=([],[])
 
@@ -57,7 +58,7 @@ def timing_inputs():
         if path.is_file() and 'site-packages' not in path.relative_to(prefix).parts:
             e.require(path.resolve().is_relative_to(prefix),'Python input escapes mounted prefix')
             files[str(path)]=resources.hash_file(path)
-    return {'isolatedNoSite':True,'binary':str(binary),'prefix':str(prefix),'version':subprocess.check_output([str(binary),'--version'],text=True).strip(),'files':files}
+    return {'isolatedNoSite':True,'binary':str(binary),'prefix':str(prefix),'version':subprocess.check_output([str(binary),'-I','-S','-B','--version'],text=True,timeout=10).strip(),'files':files}
 
 
 def loop_query_bytes(family):
@@ -138,7 +139,7 @@ def validate(record, evidence_root, current, gate, gate_row=None, live_outputs=T
     argv = e.loads(read_bound(evidence_root, record['dockerArgv'], record['dockerArgvSha256']))
     e.require(argv == docker_create_argv(evidence_root.resolve(), current, record['containerName'], record['command']), 'changed Docker spawn configuration')
     e.require(record['command'] == gate_command(gate,evidence_root.resolve()), 'wrong build command')
-    if gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17'):
+    if gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17','warm-loop-direct-producer','warm-loop-scoped-producer'):
         e.require(record['installedBefore']==record['installedAfter']==resources.tool_inputs(current),'changed installed observation inputs')
     if gate=='fresh-derived17':
         e.require(record['pythonInputsBefore']==record['pythonInputsAfter']==timing_inputs(),'changed Python driver inputs')
@@ -353,7 +354,7 @@ def post_input_observation(record,stem,before,provider,phase,out):
     try:
         record[stem+'After']=provider()
         if record[stem+'After']!=before:raise ValueError('input observation changed')
-    except (ValueError,OSError,KeyError,TypeError) as error:
+    except (ValueError,OSError,KeyError,TypeError,subprocess.SubprocessError) as error:
         record.setdefault(stem+'After',None)
         record['validationExit']=125
         record['phaseErrors'].append({'phase':phase,'error':str(error)})
@@ -374,7 +375,7 @@ def collect(args):
     start_build, start_cache = inventory(build), inventory(cache)
     mode = 'clean' if args.gate.startswith('clean-') else 'warm'
     if mode == 'clean': e.require(not start_build['files'] and not start_cache['files'], 'refusing nonempty clean start; no cache/build deletion performed')
-    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17') else None
+    installed_before = resources.tool_inputs(before) if args.gate in ('warm-memory-calls','warm-memory-calls-observation','warm-creation-try','warm-creation-try-observation','warm-memory-loops','warm-loop-direct','warm-loop-scoped','warm-derived17-prerequisites','fresh-derived17','warm-loop-direct-producer','warm-loop-scoped-producer') else None
     python_before = timing_inputs() if args.gate=='fresh-derived17' else None
     resource_fields = resource_snapshot(); check_headroom(resource_fields)
     disk = os.statvfs(ROOT); free = disk.f_bavail * disk.f_frsize

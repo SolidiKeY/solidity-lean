@@ -47,12 +47,12 @@ class TimingControls(unittest.TestCase):
    with self.assertRaises(ValueError):t.validate_shape(d,lambda _:'0'*64)
 
  def test_post_input_failure_keeps_raw_exit_and_bound_error(self):
-  import tempfile
+  import tempfile,subprocess
   p=load('provenance')
   with tempfile.TemporaryDirectory() as directory:
    out=Path(directory)
    for raw,cleanup in [(0,0),(124,0),(0,125)]:
-    for provider in [lambda: {'changed':True},lambda: (_ for _ in ()).throw(OSError('Python input unavailable'))]:
+    for provider in [lambda: {'changed':True},lambda: (_ for _ in ()).throw(OSError('Python input unavailable')),lambda: (_ for _ in ()).throw(subprocess.CalledProcessError(1,['python','--version'])),lambda: (_ for _ in ()).throw(subprocess.TimeoutExpired(['python','--version'],10))]:
      record={'commandExit':raw,'executionExit':raw,'cleanupExit':cleanup,'validationExit':0,'phaseErrors':[],'errors':'execution-errors.json'}
      p.post_input_observation(record,'pythonInputs',{'original':True},provider,'Python inputs after',out)
      self.assertEqual(record['commandExit'],raw);self.assertEqual(record['validationExit'],125);self.assertEqual(record['exit'],raw or cleanup or 125)
