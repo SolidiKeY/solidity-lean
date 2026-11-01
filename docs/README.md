@@ -151,3 +151,6 @@ adds canonical signed source/residual preparation; full original lane stays open
 VY2 scalar-family dynamic storage component: [lane record](feature-work/inline-assembly-vy2.md) (`ScalarDynamicHeader`, `ScalarOwnershipPlan`); canonical preparation only, original full lane unfinished.
 
 VY2 combined primitive storage inventory: [lane record](feature-work/inline-assembly-vy2.md) (`PrimitiveDynamicSnapshot`, `PrimitiveOwnershipPlan`); canonical persistent preparation, not full Yul support.
+
+VY2 nested primitive-member storage preparation and original unfinished queue:
+[inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-nested-primitive-members-2026-11-01).

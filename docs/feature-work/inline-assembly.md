@@ -564,3 +564,13 @@ whole supplied-map reconstruction and frame/reset laws; no separate-family maske
 runs are substituted. Original full-lane source/compiler/calculus closure remains
 open. [Lane premises/queue](inline-assembly-vy2.md) and versioned evidence:
 `/workspace/vy2-evidence/combined-dynamic/HANDOFF.md`.
+
+
+VY2 nested primitive members checkpoint: actual struct field paths and one packing
+cursor derive nested length headers and hashed live entries, combined with fixed
+siblings/top-level primitive roots. Actual-source changing ownership and residual
+journal share one success-only operation; full reconstruction, alias/frame/reset
+controls and compatibility are constructive canonical preparation, not full Y04
+or Yul adequacy. [Exact premises and entire queue](inline-assembly-vy2.md#vy2-nested-primitive-members-2026-11-01),
+versioned handoff `/workspace/vy2-evidence/nested-dynamic/HANDOFF.md`. Original full
+lane remains unfinished; YQ1-YQ7 and whole obligations unchanged.

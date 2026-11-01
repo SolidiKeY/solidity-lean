@@ -3270,3 +3270,79 @@ notation/printers/Lean-only rows/source/compiler/joint closure remain mandatory.
 Existing owner MemOK/World/ContractWorld/Bridge are available, not Yul adequacy.
 YQ1-YQ7 unchanged; original goal BLOCKED unchanged, get_goal read absent; no goal
 calls or unpublished producer imports; questions=[]. Independent backfill remains.
+
+
+### VY2 nested primitive members (2026-11-01)
+
+Additive checked struct-member/root certificates bind actual `E.structFields`,
+`E.pathTy`/`rootTy`, active inherited root order and computed active origin. The
+single existing packing cursor derives structural `.field` header positions,
+slot entry/exit alignment, scalar/fixed-field coordinates, exact leaf enumeration,
+end and separation. Full-path integer/scalar header adapters append `.index`
+without losing enclosing fields; approved Fixed hashes use the same exact header
+preimages. Existing root certificates embed with identical packing/paths.
+No owner representation/API, compiler, frontend, manifest or exclusion changed.
+
+`MemberComputedStorage.snapshot` includes enclosing fixed fields/headers once and
+ALL live primitive entries from the derived trace. `sourceInventory?` reads each
+full-path length from the SAME actual source state. `MemberOwnershipPlan` derives
+old/new ownership and couples actual `Source.applyOp` success with the existing
+complementary residual update. General `reencode`, `pure_connection`, `old_agrees`,
+`following_fresh/raw`, static/prefix/child/enclosing rollback, persistent endTx,
+account/bank/unselected-cell/unchanged-store and every-original-H `MemOK` laws apply.
+The batch runner preserves exact unsupported-preparation prefixes and source
+errors. These are constructive canonical preparation laws, not Yul execution,
+constructor reachability, dirty-bit semantics or compiler correspondence.
+
+Premises remain actual successful checked declarations, source-derived length,
+canonical codecs/defaults, finite encoding and executable old/new byte/path
+separation. No hash injectivity, opaque inverse/view/safety conclusion, cap or
+increased proof budget is introduced. HashedLayout stays WORD granular; this is
+not V10 agreement or actual transient aggregate declaration layout. Ordinary
+Source administration differs from pure unchanged-store preparation.
+
+Inhabited actual `ND` has a struct containing uint16 guard, uint16[] and int24[]
+members, bytes3/address siblings, plus a top-level bool[] and marker. Full paths,
+partial-slot tails77, nonzero enclosing/data padding, shrink17/11->0/0->18/12,
+signed -1, two actual source aliases/bounds/Panic, every-H MemOK and paired frames
+are kernel checked. Malformed member/index, missing/duplicate metadata,
+nonwrapping, synthetic hash overlap and canonical dirty-bool controls remain
+preparation controls. The initial false negative (seed byte1, hence canonical
+successful growth) is retained in raw evidence; an ACTUAL unowned-byte2 source/
+residual write precedes the corrected unsupported canonical growth. No cleaning,
+new refusal/no-op/deallocation interpretation or expected-verdict change follows.
+
+Separate pinned solc0.8.38+1835d247/Osaka legacy+viaIR fixture adds34 ordered calls,
+complete33word ABI/status/revert/storage/hash/alias/padding observations, static
+failure, successful dirty-bool growth and fresh postfailure reads. 1207 strict
+negative mutations include926 coherent bounded-word changes. All prior614 call
+fields and18 compiler classifications stay unchanged (648 total calls). Original
+100m gas/5m steps and proof/fuel/node/test budgets remain. Kernel synthetic hashes
+and seed states are explicitly distinct from real Keccak/compiler constructor
+execution. Versions/KeySort, final full/focused/TestSuite/strict/trust/scoped axiom,
+reviews/resources and exact committed head are in the versioned handoff:
+`/workspace/vy2-evidence/nested-dynamic/HANDOFF.md`. Raw proof failures retained;
+field witnesses are factored rather than raising heartbeats (initial field-control
+check166s). Global docs is STILL exit1/48missing/37ambiguous; exact-base equality is
+separate zero-regression evidence, never a global pass.
+
+Original queue accounting: Y04 partial (one dynamic struct level with primitive
+leaves, fixed subaggregates via existing leaf certificates; recursive dynamic,
+mapping/storage-bytes/transient/dirty ownership and arbitrary whole-store closure
+remain); Y05 partial (universal memory/shared-zero/interior/pointer/writeback and
+reachable allocation provenance/refinement remain); Y06 partial (actual source/
+Yul input/environment bindings remain); Y09.02 blocked (actual producer execution,
+physical calculus/notation/printers/Lean-only rows/final source/compiler/joint
+closure). Backfill A/B partial, concrete V10/V11 agreements open. Existing owner
+MemOK/World/ContractWorld/Bridge are available, not Yul adequacy. Public Yul exports
+remain unavailable at inspected master099bfbe185731c354b12a40f28ccf5d98534c779;
+no unpublished producer import. Human YQ1-YQ7 remain authoritative. Original full
+goal BLOCKED unchanged; get_goal absent, no goal calls; questions=[]. Independent
+work remains; this checkpoint neither completes nor exhausts the original queue.
+
+Identity: repository `/workspace/solidity-lean`, branch
+`codex/solidity-inline-assembly5-20261031/vy2-physical`, base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, prior reviewed head
+`bedad5225f2481e5821e7b1b30a487ed7d1bf2ae`. Final committed SHA and complete exact
+theorem signatures/premises/axioms, patch/bundle and cumulative checksums are
+recorded in the versioned handoff/evidence. No push/merge/PR or goal mutation.
