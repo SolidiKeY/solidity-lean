@@ -221,6 +221,7 @@ import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionQuantLedger
 import Solidity.Examples.DecisionMemory
+import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation

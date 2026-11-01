@@ -967,9 +967,19 @@ all passed per-file MCP/build below 300 s (largest 109.00 s). All 56 original
 guarded commands remain; one hash-coverage proof is factored through exact
 existing stages. The unchanged DecisionArrays replay consumer passed in
 38.23/36.11 s. The meaningful residue/forward bridge, overall milestone/full
-gates and remaining AU02 work are open. VA1-Q1 remains pending; neither predicate nor the
-false unconditional reverse-inclusion requirement was changed. This is not
+gates and remaining AU02 work are open. The human answered VA1-Q1 on 2026-11-01: "Authorize the certified boundary
+revision" (exact receipt in `docs/solidity-scope.md`). Only that false
+unconditional inclusion requirement is revised; both predicate definitions
+remain unchanged, with the original requirement/counterexample retained. This is not
 `milestone-m7-next` eligibility or permission to publish.
+
+The kernel gap census in `Examples/DecisionGapCensus.lean` reuses three
+inhabited existing memory fixtures: each is in target, unknown and not Covered.
+The given-heap parameter is already proved globally valid; the other two
+miss the exact struct classifier by orientation or a nonliteral RHS. This
+census is not a Residue definition or bridge proof. Integrated memory,
+ledger-quantifier and written-memory sources replayed successfully on the VA1 VM.
+The authorized precise reverse boundary remains to be formulated and proved.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is

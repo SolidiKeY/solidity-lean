@@ -411,3 +411,36 @@ splits and M7-next documentation. It does not authorize AU05/AU06, compiler
 work, publication, pushing or merging. Decisions c, c′, d, e3′ and e3″ and
 the existing validity/hash premises remain unchanged. This approval record
 is setup evidence, not an implementation or validation claim.
+
+
+## VA1-Q1: human-authorized boundary revision (2026-11-01)
+
+Original AU02 requirement, retained for provenance: unconditional
+`Fml.Covered ⊆ Fml.inTarget` on program-free leaves. The retained kernel
+counterexample is committed at `8bbd5606e55f6ceadcbe611c2475370466d88ae9`.
+
+Exact question asked in coordinator `01a19286`:
+
+> VA1 kernel-checked a counterexample to the requested unconditional Covered implies inTarget inclusion. May it replace that false requirement with a precise certified boundary and retained counterexample, leaving both predicates unchanged? Independent work is already progressing.
+
+Exact direct human answer:
+
+> Authorize the certified boundary revision
+
+QuestionItemId:
+`["request_user_input_async","call_4a12e56cd98f422e8a2aec9a4282ef73",0]`.
+Durable original-batch receipt on the coordinator host:
+`decisions/20261101-approved-va1-decision/human-decision.json`.
+This worker records the direct human receipt supplied in the original thread;
+it does not claim that coordinator-host path is a local VM artifact.
+
+This supersedes only the false unconditional inclusion obligation. The revised
+obligation is a precisely stated, kernel-proved supported boundary, with explicit
+quantifiers/signatures, inhabited positive and negative controls, public
+proof/axiom reports, the exact supported class and what remains outside it.
+Both `Covered` and `inTarget` definitions remain byte-for-byte unchanged.
+The old inclusion is not presented as proved under a vacuous/circular or
+stronger precondition. No semantic/default/test/refusal/profile/pin/observation
+or budget change, new axiom or unfinished proof is authorized. Every other
+AU01/AU02/backfill/full-validation obligation remains. Earlier decisions,
+checkpoints, failures and seals are preserved; publication is not authorized.

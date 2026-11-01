@@ -1,6 +1,6 @@
 # VA1 decision lane: setup and open work
 
-Status: **partial; VA1-Q1 pending; independent AU01 work active**, 2026-11-01. Base `8bd8742ad987d566f7ba7624372cec1c020be07c`,
+Status: **partial; VA1-Q1 boundary revision authorized; AU01/AU02 work active**, 2026-11-01. Base `8bd8742ad987d566f7ba7624372cec1c020be07c`,
 branch `codex/solidity-automation-20261031/va1-decision`, checkout
 `/workspace/solidity-lean`. Exact AQ1/AQ2 receipt is recorded in
 [solidity-scope.md](../solidity-scope.md), checkpoint
@@ -346,3 +346,101 @@ Neither failed full gate is reported as passing. The final finder and skeptic
 found only premature artifact-sealing wording; it was corrected to pending
 packaging before commit. Actual packaging verification belongs to the external
 identity/manifest after commit.
+
+## Frozen-source baseline and kernel gap census checkpoint
+
+Parent `2d70adc0ea5d4b6dbd87c86569a6d4ec2b02b123`; full goal remains
+incomplete. The human answered VA1-Q1 during this checkpoint, as recorded in
+`docs/solidity-scope.md`: **"Authorize the certified boundary revision"**.
+This supersedes only the false unconditional reverse inclusion. Earlier
+pending-Q1 statements describe their historical checkpoints; the original
+requirement and `8bbd5606` counterexample remain, and earlier seals are untouched.
+The supported boundary is not formulated or proved by this census checkpoint.
+
+### Reproduced integrated deliveries, reused without source changes
+
+The following files were checked byte-for-byte against the frozen base
+`8bd8742ad987d566f7ba7624372cec1c020be07c`, then passed complete bounded per-file
+MCP and affected builds on this VM (same runner, actual cgroup cap/no swap,
+threads1/-j1, writer lock and 12 GiB host reserve, no build/LSP overlap).
+
+| Frozen module | MCP seconds | Build seconds |
+|---|---:|---:|
+| `Examples/DecisionMemory.lean` | 65.67 | 65.98 |
+| `Examples/DecisionQuantLedger.lean` | 14.90 | 15.11 |
+| `Examples/DecisionWrittenMemory.lean` | 20.50 | 14.83 |
+
+The unchanged KeY-int consumer already passed its affected build in 23.33 s.
+The six historical unknown pins are reused: two-anchor int and ledger
+quantifiers now proved; negative array memory, the given-heap parameter,
+fresh struct and written-memory hash now refuted. Exact public certificate
+pointers include `gapKIntTwoAnchors_goal_verdict`,
+`DecisionQuantLedger.original_goal_proved`, `gapMemParam_verdict`,
+`gapMemStruct_countermodel`, and `DecisionWrittenMemory.original_kernel_verdict`
+with `original_realized_covered`. The original negative-array verdict guard
+also passes; no new exact-verdict theorem is claimed for that native guard.
+All existing controls, states, hash premises, definitions and expected outputs
+are retained. These Lean guards/native evaluations do not assert external
+EVM/compiler agreement. Kernel certificates and native guard evidence are
+separate, as recorded by their original sources.
+
+### Actual remaining target gaps, without a Residue shortcut
+
+New `Examples/DecisionGapCensus.lean` imports and reuses the original fixtures.
+For each row it kernel-proves `inTarget {} = true`, `decideGoal = unknown`,
+and `Covered = false`:
+
+| Existing fixture | Syntactic reason |
+|---|---|
+| `memParamSame` | Given-heap memory parameter; the finite witness fallback returns countermodels, not global validity from one checked heap. |
+| `memStructReversed` | Field/literal equality with the field on the right, outside the exact classifier's orientation. |
+| `memStructBuried` | RHS literal below addition, outside the direct-literal schema. |
+
+The hidden-parameter fixture already has the producer's global
+`memParamSame_valid` proof and positive local check, while its global verdict
+remains unknown. The positive `memStructSame` target pin pairs with existing
+coverage/validity certificates; the realized struct countermodel and full
+child observations are retained. Thus these are actual inhabited controls,
+not a renamed coverage/unknown complement. No `Residue`, bridge or completed
+decision theorem is defined or claimed by this module, and the census is not
+exhaustive. No other producer's source or old observation was edited.
+
+The ten new facts passed complete MCP in 3.15 s and module build in 2.08 s.
+A separate public-name axiom audit passed in 9.55 s: exact ten-name coverage,
+only subsets of `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.
+Actual source SHAs, raw commands/results and baseline identities are saved in
+`/workspace/va1-evidence/baseline-next`, with runner logs
+`/workspace/va1-evidence/independent-20261101/va1-ind-baseline-*` and
+`va1-ind-census-*`. Independent read-only finder and skeptic source reviews
+found no issues; neither used Lean/server/build or wrote files. Final docs and
+static checkpoint gates are recorded with this checkpoint's delivery.
+
+### Current requirement and remaining queue
+
+VA1-Q1 is answered, not pending. After finishing this safe census checkpoint,
+VA1 must formulate and prove the human-authorized precise program-free
+boundary, preserve both predicate definitions byte-for-byte and retain the
+counterexample, with explicit supported/outside classes and inhabited
+positive/negative controls. This is not permission to restate the old false
+claim with an unexplained stronger precondition. The exact human receipt and
+scope are in `docs/solidity-scope.md` alongside the original obligation.
+
+AU01's meaningful decidable Residue, structural target/coverage/hash bridge,
+DecisionTheorem-prime and exhaustive reason census remain open. AU02 array,
+memory, halting-OR and formula-derived fuel children and remaining backfill
+are still open. Full affected closure/run-lean and strict inventory resolution
+remain incomplete. No full-goal completion, milestone eligibility, push,
+merge, PR or tag is authorized or claimed. Original VM/thread/branch/goal,
+frozen base, checkpoint/seal ancestry and all original unrelated obligations
+are preserved.
+
+Census final checkpoint static results: registration 1055 reachable/zero
+orphans, layers 180 core/zero elaborator paths, strict automatic 491 automatic/
+61 step-budget/11 refuted/zero manual or pending, trust 1070 sources/248
+inventoried sites/zero findings; all four passed. Axiom inventory still exits 1
+with zero errors and 404 unrecorded changes (output identical to the prior
+checkpoint); doc paths still exit 1 with the exact 85 frozen-base findings.
+Independent final read-only finder and skeptic found no source, receipt or
+documentation issues. They independently confirmed the frozen producer and
+predicate file identities. Packaging follows commit; no artifact seal is
+claimed until its actual bundle/patch/checksum verification succeeds.
