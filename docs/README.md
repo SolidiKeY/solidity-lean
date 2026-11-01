@@ -132,3 +132,6 @@ adds checked cross-root packing/source-bank/readback components; full lane remai
 VY2 inherited-root canonical preparation: see [lane queue](feature-work/inline-assembly-vy2.md#inherited-active-contract-roots-2026-11-01).
 
 VY2 computed active literal origins: [lane evidence](feature-work/inline-assembly-vy2.md#computed-active-layout-origin-2026-11-01).
+
+VY2 [computed dynamic storage headers and live inventories](feature-work/inline-assembly-vy2.md#computed-dynamic-headers-and-live-element-inventories-2026-11-01)
+records the canonical preparation/source-frame checkpoint and remaining full-lane obligations.

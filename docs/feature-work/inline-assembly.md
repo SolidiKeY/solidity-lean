@@ -505,3 +505,13 @@ computed-active-layout-origin section. Full assignment PARTIAL, original goal
 BLOCKED unchanged; general expressions/dynamic/dirty/whole source/compiler/calculus
 closure remain open. Exact committed head/gates/artifacts:
 /workspace/vy2-evidence/layout-origin/HANDOFF.md.
+
+VY2 dynamic-header/live-inventory checkpoint (2026-11-01): extends the existing
+actual declaration packing/origin computation to uint256[] length cells and
+approved Fixed-hashed element paths, with uncapped runtime-length finite
+inventory, exact canonical raw-map reconstruction, actual Source length/index/
+static/MemOK and paired source/frame controls. See the [lane handoff](inline-assembly-vy2.md#computed-dynamic-headers-and-live-element-inventories-2026-11-01).
+Canonical preparation and finite compiler/EVM controls are not whole Y04/Y05/
+Y06/Y09.02 or source/compiler adequacy; original full lane/goal remains partial/
+BLOCKED. Exact reviewed tree/gates/premises in
+`/workspace/vy2-evidence/dynamic-storage/HANDOFF.md`; no admission promotion.

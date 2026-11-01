@@ -2659,3 +2659,168 @@ moved1→43; neither used Lean/server/build/tests or edited. Actual global docs
 exit1 byte-identical pinned-base48missing/37ambiguous, zero delta SEPARATE.
 Raw normalization/dependent-if/typing/free-variable proof attempts retained.
 No budget increase, axioms or changed expected results. Full lane unfinished.
+
+## Computed dynamic headers and live element inventories (2026-11-01)
+
+Original queue status remains Y04/Y05/Y06 partial, Y09.02 blocked; Backfill A/B
+partial. This extends the existing declaration planner, not the source AST,
+state, owner layout, admission or compiler. Approved YQ1–YQ7 remain recorded in
+[scope](../solidity-scope.md). The original goal remains BLOCKED unchanged.
+
+`StorageDeclaration` is indexed by the actual Source declaration type. Its fixed
+case reuses FixedDeclaration and the ONE scalar cursor; its uint256[] case
+aligns entry and exit, registers the ACTUAL STy.cell uint256 length cell and
+reserves exactly one word regardless of current length. It never substitutes
+inline Data for a storage reference. StorageDeclarations computes the complete
+ordered supported persistent root inventory; ComputedStorage checks existing
+owner C3, declaration identity/order, bank and MOST-DERIVED computed active
+literal/default origin. Existing flat/fixed/root/origin APIs and guards remain.
+Successful pack derives paths, exact end, Word bounds and field separation.
+Headers are traced/extracted from the actual successful computation; no caller
+provides desired slot equalities, default/inverse/readback/adequacy law fields.
+
+DynamicHeader.element constructs the ACTUAL Source root[index i] uint256 cell
+and Storage.Loc.data of the computed header. Its physical word is exactly
+`(Fixed.keccak(layoutPreimageBytes(.data headerSlot)) + i) % 2^256`.
+The preimage is the approved exact32byte big-endian header word; existing Fixed
+hash provenance is reused. Nonwrapping is proved only with its real sum bound.
+No collision-freedom axiom/global injectivity. Distinct elements use modular
+Word-offset injectivity; different arrays/root words retain the EXACT actual
+per-run RegionsDisjoint/preimage/root membership and offset conditions. No
+larger guessed root prefix is substituted. Agreement with word-granular owner
+HashedLayout.locate exposes its EXISTING `i < Storage.lmax` premise ONLY there;
+source index/physical computation do not acquire that extra limit. Arbitrary
+packed/nested/dynamic owner agreement is still open.
+
+DynamicInventory constructs all indices in List.range of the actual uint256
+length, with no new fuel/node/depth/list cap. DynamicInventoryWriteback's public
+snapshotWriteback chooses that length FROM the raw header itself, constructs
+its length-cell/live-element registry, uses actual typed Source.Storage and
+retains all unowned bytes/unknown slots from the SAME snapshot. Separation and
+complete successful raw-map reconstruction are derived, including unrelated
+path preservation and whole-store unchanged identity. There is no claim that
+this potentially enormous mathematical enumeration is a practical whole-store
+runner, nor that changing a length proves program reachability, allocation or
+universal dynamic ownership. Dirty/packed/nested/shared ownership remains open.
+
+DynamicSource and DynamicLengthWorld connect actual Source.readLen/writeLen,
+indexLoc/reference results, exact Panic0x32, static empty revert and every
+original H owner MemOK. Ordinary writeLen writes an explicit Some intWrap256(n)
+and journals even zero; pure unchanged-view preparation preserves none versus
+explicit default. These operations are NOT identified administratively.
+DynamicSourceSequence executes an arbitrary finite list of validated plans
+through ACTUAL applyOp and updates the paired residual only after success. Its
+complete nonstatic result equals the existing packed journal sequence; static
+failure preserves the entire prefix. No product-of-runs adequacy assumption.
+
+Inhabited Base/DS layout-at42 has private uint8 + uint248 sharing42, xs header43,
+uint16 at44 with nonzero high padding, ys header45, marker46; declared transient
+uint16 at0. Actual source cells, two aliases, maxWord elements, index success/
+error, zero shrink/regrow, unrelated bank/account, complete complement/raw-map
+reconstruction, caller-prefix child rollback, committed-child outer rollback,
+static failure, persistent survival and logical/residual transient reset are
+controls. Synthetic hash1000/2000 ONLY inhabits the finite region algebra;
+real Fixed function/input provenance is separately kernel-proved and numeric
+real Keccak/EVM observations separately tested. Direct decoded-store installation
+is a preparation read witness; the actual five-operation source prefix/child
+sequence has its OWN exact source/journal proof. Neither is a constructor-store
+or source/compiler correspondence theorem. Kernel unknown-slot seed77 differs
+from fresh external zeros except where fixture explicitly initializes a slot.
+
+Pinned DynamicStorage.sol/reference adapter uses solc0.8.38/Osaka legacy+viaIR,
+unchanged100m gas/5m steps, inherited layout-at42 and separately transient0.
+Independent exact expected22word arrays include real header hashes, length/raw
+slots, both aliases, maxWord, untouched tail77, padding, marker55/sentinel999,
+shrink-to-zero/regrowth, complete100byte Error("dynamic"),36byte Panic0x32,
+static-call false and fresh postfailure reads. ALL preceding436 ordered calls
+and18 compiler classifications are preserved as prior report fields. Finite
+compiler/EVM evidence is separate from kernel/source/compiler adequacy.
+
+Validation and independent reviews are recorded in the versioned
+`/workspace/vy2-evidence/dynamic-storage/HANDOFF.md`, exact signatures and raw
+command/exit logs. Initial normalization/type/record/proof failures are retained;
+no proof/recursion/heartbeat/test budget was raised. Global docs remain exit1
+with exact-base identical48missing/37ambiguous findings; zero delta separately.
+No manifest promotion. No goal mutation, owner replacement or worker import.
+
+Remaining ORIGINAL obligations: general nested/mapping/runtime hashed/path and
+packed dynamic ownership, dirty owned bits, whole storage writeback/residual
+adequacy; broader memory/shared-zero/interior/dirty forms and actual assembly
+MemOK; reachable allocation provenance/refinement; concrete V10/V11 agreement
+instances; Y06 source/calldata/hash/environment bindings; actual published VY1
+source execution and Y09.02 calculus/notation/printers/compiler/joint closure.
+Existing MemOK/World/ContractWorld/memory-call/Bridge are AVAILABLE, not assembly
+adequacy. Published producer absence is not absence of whole owner lanes.
+
+Further same-checkpoint composition: ComputedDynamicSnapshot traverses the
+ACTUAL attached header trace and derives each typed header certificate from
+successful packing. Every raw header chooses every live index; no manual
+complete element list or skipped unsupported entry. It joins these with all
+computed fixed/header registrations, checks actual resulting field separation,
+and derives whole raw-map reconstruction and unchanged whole-store identity.
+ComputedDynamicControls proves the generated TWO-array inventory equals the
+independently specified nine-field control registry and its entire decoded
+store/result, not only projections. Growth2→3 decodes previously residual tail77
+as the new actual typed element. General changing ownership through a paired
+journal is STILL OPEN: snapshot reconstruction is not a proof of such adequacy.
+DynamicSourceAliasControls separately observes both real local aliases after
+ACTUAL source operations, with inhabited/every-H owner MemOK. General source
+sequence account/bank/unselected-cell/complement preservation is derived from
+validated operations, rather than expanding a particular concrete state.
+
+The complete cumulative declaration-name audit found a new control-name
+collision with the accepted DynamicUintControls memory family. Only the NEW
+storage control was renamed dynStorageState; the accepted family stayed intact.
+Initial audit/proof failures and algebraic repairs are preserved. This is not
+a Source representation change; checking uses the original budgets and private
+serial Lean wrapper. New inventories can cost proportionally to runtime lengths,
+without a newly imposed traversal bound or a practical host totality claim.
+
+The same original source-closure work continues in DynamicLengthCodec and
+ComputedSnapshotSource/Reads/Controls. Actual DeclPosition.registration codec
+transport (including its dependent source type/position) proves the full-width
+header encoding and derives the actual uint256 length value FROM its concrete
+view. Generated root/element bank facts derive from real declaration metadata.
+No caller now needs to supply a finished readLen/readCell agreement for the
+checked snapshot operation. Every generated cell's real readCell result, every
+computed header's complete readLen result and whole raw-map reencoding derive
+from successful actual Source.applyOp and the SAME computed snapshot/complement.
+A nontrivial TWO-array source operation inhabits this composition and every-H
+MemOK, rather than only supplying an assumed view law.
+
+`applySnapshot?` is an EXPLICIT EFFECTFUL canonical account operation at the
+current frame's intrinsically bound account. It preserves actual source static
+empty-revert, ordinary operation/journal administration and success/error MemOK.
+It is NOT automatic writeback for arbitrary Yul/read-only/static blocks, NOT
+pure administrative unchanged identity, NOT a raw Yul semantics and NOT a
+changing-ownership residual journal adapter. Pure snapshot preparation APIs and
+ordinary writeLen remain separate and unchanged. These distinctions are needed
+for eventual actual producer/semantic/refinement composition, which stays open.
+
+Final dynamic-source checkpoint gates: actual Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort2jobs exit0; affected187jobs and mandatory ./run-lean.sh
+1212default+262TestSuite/131annotations exit0. Complete3517public signatures/
+2019theorem reports:1950standard-only/69axiom-free, no missing/unexpected.
+Strict491automatic/61budgeted/11refuted/0pending; trust1242sources/246sites/
+0findings; layers403core/0elaborator reach; imports1227reachable/0orphans;
+Markdown base1/head1/new0. All25cumulative negative families pass, including607
+new strict negatives/398coherent ABI-word mutations.460ordered external calls
+and18SEPARATE compiler classifications; EVERY preceding436report field identical.
+Final cumulative reference SHA256
+496adf1c8b9ddd42f9791ef1f687cdb9e966b28488b4a2206aedb471ab1104fd.
+Actual global docs remains EXIT1 with pinned-base BYTE-IDENTICAL48missing/
+37ambiguous findings, zero delta SEPARATE. No global documentation pass.
+The explicit snapshot API's static refusal is conditional on successful canonical
+preparation; None is unsupported preparation, never a source/Yul refusal/no-op.
+Independent read-only finder/skeptic reviews found no remaining semantic issue;
+complete audit's naming finding was fixed only in new storage controls. Reviews,
+raw failures, exact gates/resources/premises and versioned exports remain in
+`/workspace/vy2-evidence/dynamic-storage/`. Entire original lane unfinished.
+
+Dynamic checkpoint identity: repository `/workspace/solidity-lean`, branch
+`codex/solidity-inline-assembly5-20261031/vy2-physical`, pinned base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, accepted parent
+`f44d7c523159b07e0b0b4975ec9c035de94737cc`. The complete committed head, tested
+source hashes, commands/exits and versioned original patch/bundle/checksums are
+recorded after commit in `/workspace/vy2-evidence/dynamic-storage/HANDOFF.md`.
+No claim of full queue completion; original goal BLOCKED unchanged, questions=[].

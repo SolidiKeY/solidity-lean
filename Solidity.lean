@@ -934,3 +934,9 @@ import Solidity.Yul.Views.InheritedDeclarationReads
 
 import Solidity.Yul.Views.LayoutOriginReads
 import Solidity.Yul.Views.LayoutOriginNegativeControls
+
+import Solidity.Yul.Views.DynamicJournalControls
+import Solidity.Yul.Views.DynamicInventoryControls
+import Solidity.Yul.Views.ComputedDynamicControls
+import Solidity.Yul.Views.DynamicSourceAliasControls
+import Solidity.Yul.Views.ComputedSnapshotControls
