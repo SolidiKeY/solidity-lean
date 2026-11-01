@@ -1,6 +1,7 @@
 import Solidity.Lowering.V08.SourceAbi
 import Solidity.Lowering.V08.SourceCustomErrorControls
 import Solidity.Lowering.V08.CryptoControls
+import Solidity.Lowering.V08.SourceTransient
 namespace Solidity.Lowering.V08.SourceAbiControls
 open Solidity Source
 open SourceCustomErrorControls
@@ -598,4 +599,121 @@ theorem overlong_selector_not_argsOK : AbiKind.encodeWithSelector.argsOK E.isBas
 #print axioms signature_argsOK
 #print axioms memory_signature_argsOK
 #print axioms overlong_selector_not_argsOK
+
+/-- A reached transaction-opening state using the published source endTx. -/
+def transientOpening : Source.St E := SourceTransient.endExecution populated
+def transientWritten : Source.St E :=
+  SourceTransient.transientUpdate transientOpening self scratch (.bool true)
+def setScratch : RExpr E [.bool] .bool := .assign (.state scratchDecl rfl rfl) (.bool true)
+
+theorem source_transient_write (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (global pipeline) frame 4 setScratch).run (locals,transientOpening) =
+      (.ok (.val (.bool true)),(locals,transientWritten)) := rfl
+
+theorem source_transient_read (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (global pipeline) frame 2 (.state scratchDecl rfl : RExpr E [.bool] .bool)).run
+      (locals,transientWritten) = (.ok (.val (.bool true)),(locals,transientWritten)) := rfl
+
+theorem source_transient_read_end (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (global pipeline) frame 2 (.state scratchDecl rfl : RExpr E [.bool] .bool)).run
+      (locals,SourceTransient.endExecution transientWritten) =
+      (.ok (.val (.bool false)),(locals,SourceTransient.endExecution transientWritten)) := rfl
+
+theorem source_transient_rollback :
+    {transientWritten with ex:=transientWritten.ex.undo} = transientOpening :=
+  SourceTransient.transient_undo transientOpening self scratch (.bool true)
+
+/-- Static refusal follows a real RHS local effect; source execution does not
+undo those locals merely because the storage operation reverts. -/
+theorem source_transient_static_after_effect (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (global pipeline) {frame with static:=true} 6
+      (.assign (.state scratchDecl rfl rfl) setFalse)).run (locals,transientOpening) =
+      (.error (.revert []),(.cons (.bool false) .nil,transientOpening)) := rfl
+
+theorem source_transient_zero_horizon (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (global pipeline) frame 0 setScratch).run (locals,transientOpening) =
+      (.error .timeout,(locals,transientOpening)) := rfl
+
+theorem source_transient_complete_vector :
+    (transientWritten.ex.world.accounts sender).balance.val = 93 ∧
+    (transientWritten.ex.world.accounts self).balance.val = 7 ∧
+    (transientWritten.ex.world.accounts self).code = some 0 ∧
+    (transientWritten.ex.world.accounts self).nonce = 1 ∧
+    (transientWritten.ex.world.accounts self).storage.read saved = some (.bool true) ∧
+    (transientOpening.ex.transient.cells self).read scratch = some (.bool false) ∧
+    (transientWritten.ex.transient.cells self).read scratch = some (.bool true) ∧
+    ((SourceTransient.endExecution transientWritten).ex.transient.cells self).read scratch = some (.bool false) ∧
+    transientOpening.ex.journal.length = 0 ∧ transientWritten.ex.journal.length = 1 ∧
+    (SourceTransient.endExecution transientWritten).ex.journal.length = 0 ∧
+    transientWritten.heap.next = 1 ∧
+    transientWritten.heap.get 0 = some ⟨.bytes .memory,.bytes [0,255]⟩ ∧
+    transientWritten.events = populated.events ∧ transientWritten.logs = populated.logs ∧
+    transientWritten.fnLocals = populated.fnLocals :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+def BoolTransientCell : Contract := contract!{ bool saved; bool transient scratch; }
+def boolCatalog : Unit → Contract := fun _ => BoolTransientCell
+def boolInitial : ContractWorld.World boolCatalog := ContractWorld.World.empty boolCatalog
+  (fun address => if address = Controls.sender then ⟨100,by decide +kernel⟩ else ⟨0,by decide +kernel⟩)
+def boolEntry : ContractWorld.Entry BoolTransientCell (List UInt8) :=
+  {locals:=[],body:=sol[BoolTransientCell]{ saved = true; scratch = true; },
+   payable:=true,result:=fun _ => .ok [0,255,128]}
+def boolExecution : TRes (ContractWorld.World boolCatalog × List UInt8) := do
+  let (world,_) ← boolInitial.create () Controls.self .nil Controls.ctx
+  world.call (⟨Controls.self⟩ : ContractWorld.Handle ()) boolEntry Controls.paidCtx
+
+def boolObservation (world : ContractWorld.World boolCatalog) :
+    Option (Int × Int × Bool × Bool) := do
+  let storage ← world.storage? (⟨Controls.self⟩ : ContractWorld.Handle ())
+  let .prim saved ← storage.find (SRef.ofRoot "saved" rfl)
+  let .prim scratch ← storage.find (SRef.ofRoot "scratch" rfl)
+  pure ((world.balance Controls.sender).1,(world.balance Controls.self).1,saved,scratch)
+
+theorem intrinsic_transient_write :
+    (boolExecution.map (fun result => (boolObservation result.1,result.2))).toOption =
+      some (some (93,7,true,true),[0,255,128]) := by decide +kernel
+
+theorem intrinsic_transient_reset :
+    (boolExecution.map (fun result => (boolObservation result.1.resetTransient,result.2))).toOption =
+      some (some (93,7,true,false),[0,255,128]) := by decide +kernel
+
+/-- Instantiates the generic typed-path reset theorem on the actual installed
+catalog. No canonical source-to-contract layout relation is inferred. -/
+theorem intrinsic_selected_reset (world : ContractWorld.World boolCatalog) :
+    (world.resetTransient.storage? (⟨Controls.self⟩ : ContractWorld.Handle ())).bind
+        (fun storage => storage.find (SRef.ofRoot "scratch" rfl)) =
+      (world.storage? (⟨Controls.self⟩ : ContractWorld.Handle ())).bind
+        (fun _ => some (.prim false)) := by
+  exact SourceTransient.target_transient_reset world (⟨Controls.self⟩ : ContractWorld.Handle ())
+    (SRef.ofRoot "scratch" rfl) (by decide +kernel)
+
+theorem wrong_source_stale_transient (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (global pipeline) frame 2 (.state scratchDecl rfl : RExpr E [.bool] .bool)).run
+      (locals,SourceTransient.endExecution transientWritten) ≠
+      (.ok (.val (.bool true)),(locals,SourceTransient.endExecution transientWritten)) := by
+  rw [source_transient_read_end]
+  intro same
+  cases same
+
+theorem wrong_intrinsic_stale_transient :
+    (boolExecution.map (fun result => (boolObservation result.1.resetTransient,result.2))).toOption ≠
+      some (some (93,7,true,true),[0,255,128]) := by decide +kernel
+
+theorem wrong_transient_payload :
+    (boolExecution.map (fun result => (boolObservation result.1.resetTransient,result.2))).toOption ≠
+      some (some (93,7,true,false),[0,255,127]) := by decide +kernel
+
+#print axioms source_transient_write
+#print axioms source_transient_read
+#print axioms source_transient_read_end
+#print axioms source_transient_rollback
+#print axioms source_transient_static_after_effect
+#print axioms source_transient_zero_horizon
+#print axioms source_transient_complete_vector
+#print axioms intrinsic_transient_write
+#print axioms intrinsic_transient_reset
+#print axioms intrinsic_selected_reset
+#print axioms wrong_source_stale_transient
+#print axioms wrong_intrinsic_stale_transient
+#print axioms wrong_transient_payload
 end Solidity.Lowering.V08.SourceAbiControls

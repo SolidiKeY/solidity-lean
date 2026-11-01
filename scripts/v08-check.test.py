@@ -95,3 +95,10 @@ for module in ['SourceAbi','SourceAbiControls']:
  result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-'+module,result,False)
  result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-'+module,result,False)
 print('PASS: source ABI expression evidence corruption controls rejected')
+
+# Additive source-transient leaf binding; all48 earlier cases remain verbatim.
+path='Solidity/Lowering/V08/SourceTransient.lean'
+assert path in original['source_sha256']
+result=copy.deepcopy(original);result['source_sha256'][path]='0'*64;check('changed-SourceTransient',result,False)
+result=copy.deepcopy(original);result['source_sha256'].pop(path);check('missing-SourceTransient',result,False)
+print('PASS: actual source transient evidence corruption controls rejected')

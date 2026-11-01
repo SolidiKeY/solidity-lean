@@ -58,6 +58,6 @@ finally:
    case_ast_sha256=hashlib.sha256(original_cases.encode()).hexdigest(),records=ns['packed_records'])
   with gzip.open(packed,'xb') as out:out.write(json.dumps(record,separators=(',',':')).encode())
 records=ns['packed_records']
-assert len(records)==48 and sum(x['input']['expected_pass'] for x in records)==1
+assert len(records)==50 and sum(x['input']['expected_pass'] for x in records)==1
 assert all((x['exit']==0)==x['input']['expected_pass'] for x in records)
 print('PASS: ALL '+str(len(records))+' original cases; exact streamed production inputs; lossless seed/delta/expandedSHA/rawoutput; packed='+str(packed))

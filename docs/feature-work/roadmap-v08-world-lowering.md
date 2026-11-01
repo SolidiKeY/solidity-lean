@@ -3054,3 +3054,64 @@ stay within the already published closure. No Source/backend/global-manifest/
 TrustAudit edits, hashes-as-injective premise, native shortcut or increased
 budget. Proof/script reviews are read-only and do not start Lean. This checked
 component does not finish any original parent or claim independent work exhausted.
+
+
+## G23 selected transient execution/reset component (2026-11-01)
+
+SourceTransient reads published Source.Eval/Machine/World only. transient_write
+uses actual writeAt/transientRoot/static guard and existing journal apply;
+transient_static_revert keeps exact empty revert and machine. Bool reads after
+existing ExecState.endTx see the typed default. transient_undo restores complete
+source state through actual undo_apply. endExecution updates only the supplied
+execution component; it is NOT another source transaction interpreter, frame
+admission, or a claim that transaction entry keeps source memory. The target
+selected-path reset theorem uses existing World.resetTransient_storage? and
+Storage.resetTransient_find, preserving uninstalled None and the actual init
+lookup; no storage representation theorem is invented.
+
+Controls in SourceAbiControls retain every old fixture. Actual scratch assignment
+and a subsequent actual read share the source cell before endTx, then readfalse
+after endTx; undo restores the actual opening snapshot. The opening uses existing
+endTx on the populated source machine: funds93/7, code0/nonce1, savedtrue, heap0,
+events/logs/fnLocals retained; journal0→1→0 and transientfalse→true→false are exact.
+Static rejection happens AFTER a real RHS localfalse effect; no false rollback
+or timeout/revert conflation. A small EXISTING intrinsic Contract catalog receives
+a real create then7-paid Entry writing both bool roots and returning[0,255,128].
+Actual target observations93/7/true/true become93/7/true/false after reset, with
+same binary result. Wrong stale transient and wrong payload controls discriminate.
+These are selected-cell components, not canonical Source/V07/body/world admission
+or whole-world storage/layout equivalence.
+
+Finder caught a serial-rebuild risk BEFORE any build: appending to the old high-
+fanout SourceEnvironment dependency could stale independent downstream branches.
+Drafts preserved, old file restored EXACT8bf37fe6, and new declarations moved to
+owned SourceTransient leaf. New reviewed wrapper retains unchanged ABI command,
+old source/config/runtime/cache/resource guards, derives exactly the four-module
+cold chain SourceTransient→SourceAbiControls→Audit→PrefixControls and at most
+one cold dependency per node, and proves every other135module source/output/
+trace/hash/setup/ctime warm against successful10390. No new runtime. Its inert
+positive plus4 stale/parallel/foreign/missing-chain negatives pass. Actual warm
+JSON parses correctly across two code-generation layers. A caught newline escape
+unit failure and focused proof failures are retained; no failed gate relabeled.
+
+Final30988-47169f59 PASS140jobs/61.69171207s, cgrouppeak614019072 and sampled
+aggregateRSS1268494336bytes; actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort
+PASS2jobs. Same12GiB/no-swap/CPU1/serial-j1/cacheoff/600s/OSheadroom and proof/
+fuel/node/TestSuite bounds. All813 prior exact standard sets unchanged;19 new
+checked declarations make832. Production/checker/corruption/structural/reviews
+and exact-head artifacts recorded in additive handoff. All48 prior adversarial
+cases remain verbatim plus2 new source-file binding cases. No owner/source/model/
+global ledger/pin/profile/exclusion edits. G23 and every other original parent
+remain PARTIAL; selected observations do not close canonical source transient
+layout/runtime-frame or G16-G22 premises. No independent-exhaustion claim.
+
+
+Transient checkpoint final validation: production832exactpins/74coremodules PASS;
+ALL50 production evidence cases PASS (48earlier byte-verbatim plus2newfile
+mutations); every historical wrapper/runtime test and newactualcold-chain/final
+JSON/profile tests PASS. Fresh trust1060sources246inventory0findings, strict/
+layers/orphans/owned-whitespace PASS. Raw docs/globalpins EXIT1 retained; full
+current/public byte equality remains separate NEW0, frozen+11doc/+345pin debt
+unchanged. No Decision/default/full/literal retry or waived mandatory gate.
+Finder/skeptic accepted proof semantics, selected-cell boundaries and revised
+serial certificate. Exact19newaxiomsets and measured logs are in the handoff.

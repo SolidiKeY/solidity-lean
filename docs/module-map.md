@@ -1270,3 +1270,5 @@ At the root, the notation's own tests:
 
 | `Solidity/Lowering/V08/SourceAbi.lean` | Actual source ABI expression allocation and existing byte observations. |
 | `Solidity/Lowering/V08/SourceAbiControls.lean` | Populated binary/dynamic/static ABI argument and allocation controls. |
+
+| `Lowering/V08/SourceTransient.lean` | Actual typed source transient write/static/read/endTx/undo observations and selected intrinsic reset; canonical layout/frame relation remains open. |
