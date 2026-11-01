@@ -5255,3 +5255,103 @@ modules; independently all262current/C31source-fixture-toolchain keys and actual
 versions match, retaining26cold modules/max160seconds under300, not new timing.
 All3772C65sealed entries reverified. Final idle runtime available904626176bytes
 retains512MiBreserve+96MiBforecast; no newOOM events or resource guard changes.
+
+
+### C67 — genuine fixed uint Source update and primitive deletion (PARTIAL)
+
+The C66 observer carries Source STy some n; existing numeric mutation adapters
+carry none, even where intrinsic ArrTy is generic. Current owned-source inspection
+reproduced that concrete gap. SourceUintFixedWrite preserves genuine fixed Data
+length through actual Source.memSet/Data.array and intrinsic MObj.setElem .fixed.
+It derives reached SourceUintFixedAt and old Source-address/intrinsic-ID/world
+frames, from INITIAL observer and runtime valid index. No dynamic cast, desired
+postrelation, second heap/state/evaluator, address-map injection or new admission
+restriction is introduced. Existing dynamic modules and ALL previous controls and
+guards remain unchanged.
+
+SourceUintFixedAssignment derives actual RHS-first resolved local index lvalue,
+assignment expression and statement, actual intrinsic Stmt.assignMem and WHOLE
+published Objects.PtrFrag.write code. SourceUintFixedDelete derives actual
+primitive zero/default/unit deletion via existing deleteLoc and intrinsic
+primitive-delete/assignment equality, with complete existing headerless word
+code. Inputs are INITIAL operand alignment, fixed observer, Source MemOK and
+Objects.StateRepr; results derive actual Source/intrinsic/word execution,
+reached fixed observer/MemOK, local/stack and Objects.KeepsAllocator frames.
+Declared fixed length bounds Source indexLoc; local lookup is not a runtime
+Source heap-shape/admission theorem. Rejection gives Source index panic versus
+intrinsic/word revert without claiming equal payload or rollback.
+
+source_uint_fixed_declare_write_delete consumes C66's actual positive fixed
+constructor on INITIAL memory/ownership/allocator/space/frame evidence. The
+new Source local cons and intrinsic heap weakening/local push derive the next
+operands. Real assignment outputs feed real deletion. It derives both reached
+Source observers, final word StateRepr/AllocatorRepr, old-ID/other-address frames,
+all stacks, and the WHOLE existing three-code append. Source statements have
+SEPARATE exact horizons (declaration n+4, mutations4); no combined Source RItems
+or intrinsic Prog composition is claimed by this theorem. No assumed final
+agreement, stagewise restoration, Source admission of zero, global injection,
+new allocator or reserved producer implementation is used.
+
+The populated runtime control independently constructs old fixed[7]/neighbor[9]
+with repeated old aliases, Source MemOK and complete object-word ownership.
+For every positive runtime n and canonical k<n under existing cursor32+max1n<W,
+actual fresh declaration then indexed value=k write and default delete are
+observed. At n33/k32 the write materially changes logical element32 to32, then
+clears it; the word reverse order leaves32. The Source reverse program is NOT
+claimed. Old contents7/9, root aliases, fresh full contents/typed Source tables,
+locals, stack77/caller99/freepointer, allocator and FULL16word vectors remain
+explicit. Length1/index0 and length3/index2 are direct producer applications.
+Actual endpoint33 rejects Source assignment/delete and intrinsic/word deletion;
+Source panic bytes are independently pinned, not equated to word payload.
+Same-type old7/fresh0, wrong dynamic/fixed length and skipped-clear/reverse-word
+observations discriminate stale identity/type/order. Logical32 is not physical
+byte encoding. Low-horizon constructor controls remain C66's exact unchanged
+laws. Zero-size padding remains RAW intrinsic/word only, no Source admission.
+
+C67 controls07/08 failed at the enforced12GiB cap, Lean137/Lake1, each newOOM1;
+all raw receipts and earlier elaboration failures remain preserved. Monolithic
+run reduction and then broad simp proof were replaced with explicit short-code
+certificates from published fixedAddr_run and exact append/observed rewrites.
+No limit/heartbeat/fuel/test/stack budget increased. Approval review rejected
+one proposed repair because it removed new control statements; it never ran.
+The accepted safer repair preserved EVERY vector/boundary/positive statement
+and changed only proof bodies/additive helpers. Diagnostic copies are evidence,
+not deliverable admitted proofs. Final checks below record actual outcomes.
+
+Same runtime/image/mounts/toolchain/cache and writer lease preflight verified all
+3855C66sealed entries,882401280available above512MiBreserve+96MiBforecast.
+SerialCPU0/Lean-j1/threads1/cacheOFF/aggregate12GiBnoswap/16GiBparent and OS
+headroom remain unchanged. Per-file Lean MCP and goal get/update unavailable;
+existing persistent goal remains BLOCKED unchanged. Earlier C60OOM history and
+new C67OOM history remain failures even after passing proof repairs.
+
+All original G32/G33/G34/G35.01/.03/.04/.05 and BackfillA/B remain PARTIAL;
+G35.02/.06 remain BLOCKED. General graphs/paths/effects, all-profile/reference
+construction/allocation failure, physical bytes, ABI/storage/deep-copy/liveness,
+reserved copy and final Source/V10/target composition remain unfinished.
+Kernel/symbolic-word evidence is not external compiler/EVM execution. Fixed
+Source Items/Prog declaration/update/delete and later failure composition remain
+supported next applications, not already supplied here or queue exhaustion.
+
+C67 final focused controls12 PASS218jobs/RSS994736KiB with exact23new public
+guards (22standardtrios, axiom-free panic bytes), no sorryAx. Source/control/
+script/document finder AND skeptic reviews independently PASS, no confirmed
+findings. They explicitly checked separate Source statements and word-only
+reverse order, not a Source Items/intrinsic Prog theorem. Final unchanged full
+wrapper PASS0:1126default/262Suite/SolKey377parsed/131read-bearingcovered,
+aggregateRSS1721756KiB/diskgrowth266240bytes/newOOMdelta0. Fresh actual
+Lean4.24.0commit797c613/Lake5.0.0-src+797c613/KeySort2jobs PASS.
+
+C67 strict/trust/layer/orphan/lane/complete-fixture/script checks PASS,73combined
+admission/corruption tests including20newmutation-admission tests. Scoped exact
+standard-only pin validation PASS1084/145ownedmodules; raw global inventory
+FAIL1/1443unrecorded=359published+1084owned/0unsafe. Additive proposed pins
+are coordinator reconciliation evidence only, no reserved-registry modification.
+Raw strict docs FAIL1/83 findings, COMPLETE current/public bytes identical and
+zero-owned-new comparison separatelyPASS; frozen no-new retains11incoming/FAIL1.
+Warm strict times0newSuite modules; independently all262current/C31source/
+fixture/toolchain bytes and fresh67versions match, retaining26cold/max160sunder
+300 timing only, not new cold coverage. All3855C66sealed entries reverified.
+Final idle resource sample874676224availablebytes retains512MiBreserve plus
+96MiBforecast; old and newOOM/cumulativepeak history remains explicitly separate.
+No guard, expected observation, admission decision or source ownership changed.

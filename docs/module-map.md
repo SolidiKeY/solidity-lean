@@ -1373,3 +1373,9 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean` | Genuine fixed Source uint Data/length conversion and observer; actual recursive defaults/exact insufficient fuel, fixed reads/frames and published fixed builder application. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedDeclaration.lean` | Positive fixed Source declaration/MemOK/context linked to the same actual intrinsic default and existing full headerless word-declaration certificate from initial ownership/space. |
 | `Solidity/Backend/MemoryOps/SourceUintFixedDefaultControls.lean` | Populated fixed old7/neighbor9/shared aliases; arbitrary positive new length and explicit1/3/33 executions, complete source/intrinsic/word/context observations, negative types/length/identity/fuel and raw zero-padding-only boundary. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean` | Genuine fixed Source some-n typed element update/bounds and old-object frames. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean` | Genuine fixed Source some-n resolved RHS-first indexed assignment/statement and published headerless object-word certificate. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedDelete.lean` | Genuine fixed Source some-n actual primitive default deletion, indexed Source syntax and intrinsic/word bounds outcomes. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedMutationSequence.lean` | Genuine fixed Source some-n actual declaration then reached fixed write/delete, separate Source statements and whole existing word append; no Source Items/Prog claim. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedMutationControls.lean` | Genuine fixed Source some-n populated runtime reached controls, complete word vectors, logical32 and endpoint/order/stale-type observations. |

@@ -1002,3 +1002,8 @@ import Solidity.Backend.MemoryOps.SourceUintDeclarationFailureControls
 import Solidity.Backend.MemoryOps.SourceUintFixedDefault
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Backend.MemoryOps.SourceUintFixedDefaultControls
+import Solidity.Backend.MemoryOps.SourceUintFixedWrite
+import Solidity.Backend.MemoryOps.SourceUintFixedAssignment
+import Solidity.Backend.MemoryOps.SourceUintFixedDelete
+import Solidity.Backend.MemoryOps.SourceUintFixedMutationSequence
+import Solidity.Backend.MemoryOps.SourceUintFixedMutationControls
