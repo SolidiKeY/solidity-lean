@@ -50,6 +50,7 @@ how these claims are tested against solc is `docs/solc-validation.md`.
 | Enum conversions | `E(x)` asserts that `x` names a member (solc's Panic `0x21`), then is `x`; an enum is a `uint` | `enumCapture` (`Syntax/Elab.lean`) | `Examples/Tactics/SolcOpen.lean` |
 | A call's ABI | a function's obligation assumes what its dispatcher checks before the body: `msg.value == 0` where it is not `payable` and the body reads `msg.value`, a narrow integer or an enum parameter in its range (solc's decoder reverts otherwise); the specified obligation assumes the first already. **Chain fact:** `msg.value < 2^128` where the function is `payable` and its body reads `msg.value` (`etherBound`, `Calculus/SurfaceSpec.lean`; the specified obligation too): no transaction carries more than the ether supply, below `2^128` wei, so `5 + msg.value + msg.value` does not overflow. Every plain imported source obligation also assumes the EVM environment fact `address(this) < 2^160`, including constructors; the core transaction field remains a 256-bit word. Explicit self addresses outside that domain are rejected. See [source-inputs.md](source-inputs.md). | `Problem.callPre` (`Frontend/Problems.lean`) | solkey's `SolcPaymentsOpen`, `SolcTypesOpen` |
 | External calls | `r.f(a);` outside a `try` is `try r.f(a) { } catch { revert(); }`: a failed call reverts the caller, as a call to an address with no code does; `receive` and `fallback` are imported with no obligation of their own | `SolcJson.lean` (`isExternalMember`, `tagOf`) | |
+| Panic returndata | Exact selector, at least36 bytes; decode the first unsigned32-byte word at offset4 and ignore trailing bytes, matching pinned solc try_decode_panic_data. Short/wrong-selector data remains undecoded. Partial-data exclusions use minimum length, never exact length. | `Semantics.decodePanic`, `Pat.notPanic_decode` | `Examples/Tactics/TryConditions.lean`; [diamond-try account](feature-work/diamond-try.md) |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule). **Modelling assumption:** address `0` has no code, so a call to it reverts in the caller whatever the transaction's table says (`TRun.tryCall`'s first test; on the EVM `0` holds no contract on any chain this targets). A callee that is a function of the contract declared before the caller runs, in a frame of its own (`msg.sender` the contract, `msg.value` `0`), when the receiver is `address(this)`: its writes are seen on success and undone on failure, a revert going to the `Error` clause when its data decodes as `Error(string)`, to `Panic` when it decodes as `Panic(uint256)`, to the catch-all otherwise, a panic to `Panic` (`docs/options.md` O8); a named reason or data is bound from the callee's revert (`Stmt.catchData`, `docs/semantic-gaps.md`, "Revert data"). A value call `(bool ok, ) = r.call{value: v}("")` to `address(this)` runs the contract's `receive` so (`msg.value` `v`; a payment to oneself moves no ether), written by the elaborator as a self-call `try` behind `r == address(this)` (`elabValueCall`), `ok` false on any failure. The callee has all the gas, so it may call back under either `transferSemantics` (`ValidT`, `docs/options.md`); `holds` reads it as keeping the state, as solkey's `tryCallNoCallbackBox` does | `Stmt.run` (`.tryCall`), `Binders.decodeT`, `ExecS.tryOk` | `Examples/Tactics/TryCatch.lean` (`selfCall_noCallback`) |
 
 ## Evaluation order
@@ -405,12 +406,22 @@ The plain `holds` reading ignores callbacks, as solkey's `noCallback` does.
 
 ## Calls
 
-solc evaluates every argument of an internal call, left to right, before the
-callee runs. `Stmt.run` does the same: it evaluates the arguments in the
+The default legacy model evaluates supported positional internal-call arguments
+from left to right before entering the callee. `Stmt.run` evaluates them in the
 caller's context (`Args.evalT`) and runs the body in a frame of its own, its
 returns on its parameters (`Stmt.call`, `Syntax/Scoped.lean`), which sees
 no caller's local; KeY's function-body expansion declares the parameters one
 after another, and the two agree because no argument can read a parameter.
+
+The unchanged `tests/solc/ReferenceParameters.sol` function
+`copiesBeforeEffects` exposes a remaining compiler-pipeline limit. With pinned
+solc 0.8.34 (`80d5c536`), Osaka, and the optimizer both disabled and enabled,
+the native legacy executions return normally; both viaIR executions revert
+with assertion `Panic(0x01)`. The model's ordinary-call capture remains left to
+right under `EvalOrder.viaIR`, so this implicit-copy/side-effect interaction is
+an open viaIR alignment gap. These observations identify neither the failing
+assertion nor the precise compiler mechanism. A default legacy API proof does
+not establish viaIR agreement for this fixture.
 
 ### Returns and tuples
 
@@ -554,6 +565,21 @@ stronger obligation, not an additional assumption available to its proofs.
   them); an access through an unset storage pointer reverts (the table
   above). The compiled code has no panic: there a failing `assert` reverts
   (`compile_correct`).
+- **Source semantics (S02–S05, `Solidity/Source/`).** A memory
+  allocation too large for solc (Panic 0x41) is modelled only in the ABI
+  decoder, and only solc's first check: a length word past the data
+  reverts, then a dynamic length of `2^64` or more panics
+  (`array_allocation_size`), then out of bounds reverts (lane V04b). solc
+  also panics in `finalize_allocation` when the free pointer plus the
+  rounded size passes `2^64 - 1`: with the free pointer at `0x80`, from a
+  `bytes`/`string` length above `2^64 - 0xc0` and a value-type array
+  length of `2^59 - 5` or more (`0x80 + 32 + 32·len > 2^64 - 1`), lower for later arguments (the pointer has
+  moved) and under via-IR (the memory guard is higher). Those lengths
+  revert here (they are out of bounds of any call data), where solc
+  panics. The ABI decoder does not decode static arrays, structs or
+  external function types: such an argument is `stuck` (user-defined value
+  types are decoded as their underlying type since lane V04b)
+  ([source-soundness.md](feature-work/source-soundness.md#the-stuck-census)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).

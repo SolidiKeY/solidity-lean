@@ -294,7 +294,7 @@ def Env.ctorInvs (E : Env) (c : String) : List (IdPath × Option (Syn .callArgs)
   | _ => []
 
 /-- The number of parameters of a contract's constructor (`0` without one). -/
-def Env.ctorParams (E : Env) (c : String) : Nat :=
+def Env.ctorArity (E : Env) (c : String) : Nat :=
   match E.decls.find? (fun d => d.scope == Option.some c && d.kind == .constructor) with
   | Option.some ⟨.constructor, _, _, _, .constructor ps _ _ _ _⟩ => (ps.paramNames).length
   | _ => 0
@@ -308,17 +308,17 @@ def Env.argsFor (E : Env) (L : List String) (B : String) : List (Syn .callArgs) 
 /-- **Base constructor arguments** of contract `c`. -/
 structure CtorArgsOK (E : Env) (c : String) : Prop where
   /-- 3364: "Base constructor arguments given twice." -/
-  once : ∀ B ∈ (E.chain c).drop 1, 0 < E.ctorParams B → (E.argsFor (E.chain c) B).length ≤ 1
+  once : ∀ B ∈ (E.chain c).drop 1, 0 < E.ctorArity B → (E.argsFor (E.chain c) B).length ≤ 1
   /-- 3415: "No arguments passed to the base constructor." -/
-  given : E.isAbstract c = false → ∀ B ∈ (E.chain c).drop 1, 0 < E.ctorParams B →
+  given : E.isAbstract c = false → ∀ B ∈ (E.chain c).drop 1, 0 < E.ctorArity B →
     (E.argsFor (E.chain c) B).length = 1
   /-- 7927, 2973: wrong argument count. -/
-  count : ∀ B ∈ (E.chain c).drop 1, ∀ a ∈ E.argsFor [c] B, a.argCount = Option.some (E.ctorParams B)
+  count : ∀ B ∈ (E.chain c).drop 1, ∀ a ∈ E.argsFor [c] B, a.argCount = Option.some (E.ctorArity B)
 
 /-! ## Modifier invocations -/
 
 /-- The modifier invocations of a function's or constructor's declaration. -/
-def Decl.modInvs (d : Decl) : List (IdPath × Option (Syn .callArgs)) :=
+def Decl.modInvList (d : Decl) : List (IdPath × Option (Syn .callArgs)) :=
   match d.kind, d.top, d.node with
   | .function, _, .function _ _ _ _ mods _ _ _ _ => mods.modInvs
   | .constructor, _, .constructor _ mods _ _ _ => mods.modInvs
@@ -341,7 +341,7 @@ modifier visible in the contract with as many arguments as parameters
 parentheses (whose arguments `CtorArgsOK` checks; `constructor() A {}` is
 1563, "Modifier-style base constructor call without arguments"). -/
 def ModInvOK (E : Env) : Prop :=
-  ∀ d ∈ E.decls, ∀ inv ∈ d.modInvs, (∃ m, (E.lookupPath d.scope inv.1).filter (·.kind == .modifier) = [m] ∧
+  ∀ d ∈ E.decls, ∀ inv ∈ d.modInvList, (∃ m, (E.lookupPath d.scope inv.1).filter (·.kind == .modifier) = [m] ∧
       invCount inv.2 = Option.some m.modParams) ∨
     (d.kind = .constructor ∧ inv.2.isSome = true ∧ ∃ c, d.scope = Option.some c ∧ inv.1.last ∈ (E.chain c).drop 1)
 

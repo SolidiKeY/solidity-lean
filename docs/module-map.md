@@ -95,6 +95,24 @@ commands; it never enters the core import graph.
 | `Bridge/SolidityBridge/ExternalEvm/Dispatch.lean` | The core's instruction steps against `EvmYul.EVM.step` on numeric stacks. |
 | `Bridge/SolidityBridge/ExternalEvm/StackOps.lean` | Legal DUP1–16 and SWAP1–16. |
 | `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean` | Proved disagreements (CALL, REVERT, jumps, fixed memory, symbolic slots) that rule out a one-opcode identity theorem. |
+| `Bridge/SolidityBridge/ExternalEvm/Memory.lean` | Actual memory dispatch and fixed/dynamic macros; single-read stack agreement, exact paired store updates, and active-extent counterexample. The primitive/macro layer for the bounded refinement below. |
+| `Bridge/SolidityBridge/ExternalEvm/MemoryBytes.lean` | Pure 32-byte encoding, conditional actual serialization and in-bounds byte write/readback/frame laws; explicit opaque allocator contract. |
+| `Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean` | Persistent preallocated numeric-cell/byte relation, all four actual core/macro simulations, independently inhabited input, composed readback and alignment controls. |
+| `Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean` | Arbitrarily populated pure two-cell inputs; actual fixed/dynamic store/load program compositions, persistent postrelation, exact stack tails and nonzero-neighbor frame controls. |
+| `Bridge/tests/MemoryObserve.lean` | Separate native core/upstream memory observations, driven by `scripts/check-external-memory.sh` with the verbatim pinned allocator; does not prove its contract. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/CodeLayout.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean` | Typed forward-label resolution, checked raw-byte layouts and offset/refusal controls; execution refinement remains separate. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Control.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/Loop.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean` | Actual local jump macros/fetched traces, paired observations, driver refusal controls and constant-loop counted prefixes; composed simulation is in the modules below. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Composition.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/Structured.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/Placement.lean` | Typed source-boundary/frame and placed-code relations; general conditional sequence/branch/nested-loop fetched-run simulation and unbounded loop prefixes under explicit decoder/layout certificates. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/CompositionChecks.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/StackLoopChecks.lean` | Inhabited relocated branch and variable-length stack-consuming loop certificates, kernel simulation proofs, paired source/target and scanner/driver controls. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Static.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/StaticLoop.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/Automatic.lean` | Finite typed layout checks and automatic recursive execution certificates for accepted placed control-flow images. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Scanner.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/Scanned.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/Linked.lean` | Actual parse/next-PC scanner certificates, recursive target membership and linked checked images; no opaque D_J equality assumed. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Driver.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/AutoChecks.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/LinkedChecks.lean` | Charged X prefix refinement under checked finite readiness, exact terminal JD/STOP relation, kernel-inhabited automatic loop/scanner/readiness and actual X observations/refusals. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/Termination.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/PureFetched.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/TerminationChecks.lean` | Checked final JD/STOP placement and gates, exact charged prefix endpoints, source-related X success and inhabited general proof-path controls. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeTrace.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeComposition.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeLocal.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeStructured.lean` | Actual scanner-safe fetched microsteps, source sequence/branch/loop composition and recursive consumption of stored ScannedCode memberships. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/ResourceReady.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeFetched.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/ResourceChecks.lean` | Original driver gates from resource-only readiness plus compiler-derived destination safety; actual X success and finite safety/resource controls. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/NestedDivergence.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeDivergence.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/NestedDivergenceChecks.lean`, `Bridge/SolidityBridge/ExternalEvm/Assembly/SafeDivergenceChecks.lean` | Source divergence witnesses and unbounded scanner-safe fetched prefixes through conditions, bodies, sequence prefixes and finite earlier outer turns; automatic nested certificate and later-entry controls. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutFacts.lean` | Uniqueness of typed image data and raw-validator acceptance of already proved images; no semantic admission completeness claim. |
+| `Bridge/SolidityBridge/ExternalEvm/Assembly/PopChecks.lean` | Automatic certified PUSH/POP/PUSH success, safe atomic POP witness and exact empty-stack source/fetched/driver underflow controls. |
 | `Bridge/SolidityBridge/Adversary.lean` | An independent adversary LTS at a payment boundary; `holdsC_iff_all_policies`, `holdsC_iff_all_callees`. |
 | `Bridge/SolidityBridge/AdversaryPolicy.lean` | A fixed operational callee has exactly the outcomes of its reachable return policy. |
 | `Bridge/SolidityBridge/CallbackTrace.lean` | Completed callback outcomes as observable traces; weak/strong trace equivalence and bisimulation preserve the callback modality. |
@@ -359,6 +377,14 @@ commands; it never enters the core import graph.
 | `Calculus/ProofTree.lean` | The proof tree of a scoped goal `H ⊢ φ` (`ProofTree.build`, `ofFormula`), as `Calculus/TreeData.lean`'s `Tree`: each rule the one `ruleOf?` names, applied as `apply update (Taclet.toStep .r)`; scope ends and hidden binders folded into the node before them; leaves closed by `closeTrue`, then by `sol_leaf` and the scoped `sol_close` (`closeTacs`; behind updates of either modality; `sol_leaf` is declared here), then `Config.closers`; a premise built by a function (`Premise.expandCall`) whnf'd to its constructor; `Proves.impRight`/`allRight`/`emptyModality`. |
 | `Calculus/CallbackRules.lean` | The callback taclets on scoped statements (`CallbackTaclet`: `transferWithCallbackBox`, `sendWithCallbackBox`, `sendWithCallbackDiamond`, `tryCallWithCallbackBox`, `Calculus/Rules.lean`'s lines read under `Schema`), each its no-callback twin (`toTaclet`) and so `Stmt.step`'s (`toStep`); below the judgement, so `RuleShapes` needs nothing above the table.
 | `Calculus/Callback.lean` | `ProvesC I pay` over `Calculus/CallbackRules.lean`'s taclets (sequents `dl{ ..H ⟹ᶜ[I] φ }`, `⟹ᶜ[I; noCallback]` unless `pay`, the invariant a closed formula read past a dropping update, `Fml.closedAt`); their printers. |
+| `Calculus/CallbackSound/Payments.lean` | Formula-level normality implies payment acceptance; sound conditional deterministic/callback transfer diamonds retaining exit and storage/ledger/balance resumption premises. |
+| `Calculus/PaymentClose.lean` | Opt-in bounded payment leaf solver with typed root-frame, ledger-debit and resumption lemmas; generic closer and budgets unchanged. |
+| `Examples/Tactics/PaymentRules.lean` | Automatic guarded transfer derivations and funded/refused/insufficient-balance/failed-prefix countercontrols. |
+| `Examples/Tactics/PaymentCorpus.lean` | Original PiggyBank callback body and zero-value entry booking invariant proof; manual typed corpus transcription, separate from adapter/compiler/EVM support. |
+| `Calculus/PaymentConditions.lean` | Exact funding/recipient alternatives, transfer success/refusal and empty failure bytes; send state/flag equations, deterministic universal diamond equivalence, unique refused callback outcome and callback-send necessity/sufficiency under unchanged semantics. |
+| `Examples/Tactics/PaymentConditions.lean` | Recipient error/panic, zero-value refusal, insufficient/self funding, source error-data impossibility and full-gas failure controls for the approved conditional account. |
+| `Calculus/PaymentWitness.lean` | Exact deterministic transfer/send diamond conditions; callback transfer diamond exactness and callback send diamond sufficiency over intrinsic outcomes, with acceptance and invariant obligations retained. Semantic witnesses, not dispatcher taclets. |
+| `Examples/Tactics/PaymentWitness.lean` | Funded payout and callback invariant witnesses; insufficient funds, recipient revert, send failure, broken exit invariant and callback ledger countercontrols; stipend/full-gas selection. |
 | `Calculus/CallbackHolds.lean` | Formulas read with callbacks over the typed state: `holdsC` (`holds`, a modality over `ExecP`/`ExecF`, the invariant kept as `Fml.stateInv`; its update clause `Upd.afterT`), `Invariant`, `Invariant.top`, `ValidC`, `TransferSem` (`noCallback`: a `try` and a value call call back, `docs/options.md`)/`holdsT`/`ValidT`, `validT_noCallback_iff`; `Fml.callsBack_of_FO`, `Fml.callsBack_of_hasTransfer`; `after_frames_iff`, `holdsC_iff_holds`, `holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`. |
 | `Calculus/CallbackDerive.lean` | `sol_prove`, `sol_derive`, `sol_derive?` on goals read with callbacks (`ValidT`, `ValidC`, `ProvesC`; `docs/options.md`, O3): `ProvesC`'s walk (`CallbackWalk.walk`), `plain` and `Proves`' walk where nothing calls back, the callback taclets, the rule `Stmt.step` fires elsewhere; new premises pruned only by the bounded scoped refutation and `ProvesC.closeFalse`, retaining callback-free context and diamond landing checks; leaves closed by `Proves.assumeInv`, `sol_leaf; sol_close`, `Proves.openInv`. |
 | `Calculus/CallbackSound.lean` | `ProvesC.sound_of`/`ProvesC.fmlValid`/`ProvesC.validT`: the calculus with callbacks sound against `ValidC` for a first-order invariant (`holds_FO_reads`, `holdsC_closedAt_iff`); a rule on a statement that runs as its typed run by `Premise.Runs` (`holdsC_update`, `holdsC_unfold`, `holdsC_bind`, `holdsC_split`), the callback taclets over `ExecS`'s runs (`holdsC_transferCb`, `holdsC_sendCb`, `holdsC_tryCb`), the context and frames with callbacks (`Hyps.wrapC_and`, `holdsC_exit_after`, `holdsC_cons`).  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
@@ -369,7 +395,7 @@ commands; it never enters the core import graph.
 | `Calculus/Sequents.lean` | Checked sequent lines on scoped goals: `show_sequent!{ Γ ⟹ φ }` (and `show sequent!{ … }` under `Scoped`) compares the line the goal prints as (its context folded in front, `Hyps.wrap`, block ends dropped) with the line read scoped (`cdl[C]{ … }`, the entries in front as `sequentFmlC` writes them), and the rule set with the arrow. |
 | `Calculus/SequentNotation.lean` | Scoped sequents as input: wherever it is imported (`Calculus/Surface.lean` imports it), `dl{ ..H, a ⟹[R] φ }` reads as `Proves C R Γ₀ (H.pre a) φ` (the context a `Hyps` telescope built from the left), schema variables and connectives only, as `Delab` prints the rules. |
 | `Calculus/WalkSyntax.lean` | The walk text on a scoped goal (`open scoped Solidity.Scoped`): `apply update r`, `unfold r` (scoped `unfold`, `bind` or `inline`), `split`, `splitBox`, `done`, `Proves.check`, `invBox`/`invLean`, `updIntro`, `empty`, `intro`, `allIntro`, `Proves.fmlValid` (the parameters bound at once, `core_params`; an explicit `∀`, which `cdl!` marks, gets its own `apply allRight`), `refine close ?_`, each the scoped rule of its kind by the named taclet; `core_silent`, the steps KeY does not show (a scope's end, a hidden binder); `core_skip`, `apply empty`/`allIntro` where the strategy already took the step, refused elsewhere. |
-| `Calculus/Closers.lean` | The closers on a scoped leaf: `sol_close`, `sol_close_mt`, `sol_spec_close` read it through `sol_close_unwrap`; `sol_close_eval` on a bare `Fml.Valid ψ`; `sol_merge`, `sol_upd` rewrite it; `sol_prove?` on a scoped goal (the scoped `sol_prove`, then the scoped leaf search, `Derive.searchLeaf`); a scoped formula refuted at a state by its run's outcome at a typed state (`Modality.afterRunTR_not_panic`, `afterRunTR_diamond_fail`, `TRes.isPanic`/`isFail` read by `decide +kernel`). |
+| `Calculus/Closers.lean` | The closers on a scoped leaf: `sol_close`, `sol_close_mt`, `sol_spec_close` read it through `sol_close_unwrap`; `sol_close_eval` on a bare `Fml.Valid ψ`; `sol_merge`, `sol_upd` rewrite it; `sol_auto_theorem` optionally accepts an explicit normalized-leaf proof, emitted as checked auxiliary theorems under unchanged limits; `sol_prove?` on a scoped goal (the scoped `sol_prove`, then the scoped leaf search, `Derive.searchLeaf`); a scoped formula refuted at a state by its run's outcome at a typed state (`Modality.afterRunTR_not_panic`, `afterRunTR_diamond_fail`, `TRes.isPanic`/`isFail` read by `decide +kernel`). |
 | `Calculus/SolSpec.lean` | `sol_spec` on a scoped obligation (`cspec!{f}`): the scoped strategy, then each leaf closed by `Calculus/SurfaceSpec.lean`'s `sol_spec_prep`/`sol_spec_finish`, whose steps read a scoped leaf without its erasure (`Calculus/CloseScoped.lean`); the module holds no code of its own. |
 | `Semantics/Callback.lean` | The callback semantics over the typed run: `COut C H Γ` (over `Out`, the heap's growth carried), an invariant read on the global part (`StateInv`, `StateInv.at`; `StateInv.pay`: whether a `transfer` or a `send` calls back, `Stmt.callsBack`, `Stmt.forksIn`, `docs/options.md`), `ExecS`/`ExecP`/`ExecF` (no `undef` arms, no failed entries; `State.havoc` over typed storage; a call's locals given back by `TRun.callLeave`); the deterministic run is a callback run (`Prog.exec_run`, `Frames.exec_run`), the only one with no payment (`ExecP.eq_run`, `ExecP.forall_iff`). `holdsC` waits for `holds` on typed states. |
 | `Semantics/CallbackFrame.lean` | A callback run within its frame (`ExecS.frame`, `ExecP.frame`): `Stmt.run_frame` for `ExecS`, a callback replacing only the storage and the ledger. |
@@ -575,7 +601,16 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/MemoryCompound.lean` | Compound array/field/local updates and standalone prefix/postfix bumps equal checked binary writes; pure evaluator failures justify read reordering while preserving the complete typed result. |
 | `Evm/MemoryCapture.lean` | Captured array/field/local prefix/postfix bump values, complete source-result equalities and a stack-preserving capture/step/store simulation; the final local store follows the bump, retaining old index reads and local self-assignment. |
 | `Evm/MemoryCompile.lean` | A memory compiler with erased fragment certificates: core/array/primitive-field values, nested reference-field paths for primitive reads/writes/deletion/updates and child aliases, typed memory aliases and reference-member assignment/default-child deletion, primitive-array allocation/default declarations/rebinding/deletion, finite nonrecursive struct construction/local and member deletion with nested struct/primitive-array children, primitive field deletion, compound/bump local/array/field updates, storage writes, guards, scopes and branches; reached costs bound allocations and peak contexts bound every temporary frame. |
-| `Evm/Compiler.lean` | A unified checked entry selecting the core or memory compiler, with correlated code, input and output relations and one agreement theorem retaining the memory path's heap/pointer relation. |
+
+| `Evm/MemoryLoop.lean` | Typed reached loop prefixes, exact allocation cost, source-prefix capacity, zero-cost and one-turn witnesses, unbounded memory-loop simulation and legacy refusal reproduction. |
+| `Evm/MemoryLoopCompile.lean` | Sequential checked finite-body memory loops; typed cost/demand certificates, full body frame reservation, source-only capacity and exact growth composition, nonallocation and exhaustion controls. |
+| `Evm/MemoryLoopExamples.lean`, `Evm/MemoryLoopAllocExamples.lean`, `Evm/MemoryLoopSourceExamples.lean` | Inhabited public inputs, both evaluators, aliases, zero turns, reverts, reached allocations, capacity/frame refusals, mathematical divergence and source legacy/viaIR array/struct loops. |
+| `Evm/MemoryLoopScope.lean`, `Evm/MemoryLoopScopeMeta.lean`, `Evm/MemoryLoopScopeSound.lean`, `Evm/MemoryLoopScopeRoom.lean` | Typed enclosing block/conditional loop certificates, generalized recursor metadata with native equality links, full state/frame/allocation/halting simulation and inhabited nonallocation. |
+| `Evm/MemoryLoopScopeDemand.lean`, `Evm/MemoryLoopScopeBudget.lean`, `Evm/MemoryLoopScopeCompile.lean` | Reached-demand/cost eliminators, selected-scope room and finite-prefix capacity bounds; checked scope compiler with kernel/native equality links and shared constructor equations. Loop bodies retain the existing finite certificate. |
+| `Evm/MemoryLoopScopeExamples.lean`, `Evm/MemoryLoopScopeAllocExamples.lean`, `Evm/MemoryLoopScopeDivergenceExamples.lean`, `Evm/MemoryLoopScopeSourceExamples.lean` | Inhabited public source/target scope controls: zero/revert/refusal, arrays/structs, nontrivial local drop and retained heap growth, last-word allocation capacity, mathematical divergence and allocation before divergence, both source evaluation orders. |
+| `Evm/MemoryCalls.lean` | Typed internal-call expansion certificates over the full memory relation: private frames, nested calls, primitive/pointer arguments, primitive returns and supported memory-reference export; reached allocator costs and source/machine simulation. |
+| `Evm/MemoryCallExamples.lean` | Inhabited public call-compilation inputs, source/machine observations, alias/copy/rebinding and nested return controls, exact reverts, and frame/capacity/external/recursive/payment refusals. |
+| `Evm/Compiler.lean` | A unified checked entry selecting the core, finite-memory, reference-array, object, construction, direct-loop, scoped-loop or internal memory-call compiler, with correlated code, input and output relations and one agreement theorem retaining each memory path's heap/pointer relation. |
 | `Evm/MemoryCompileExamples.lean` | Populated source aliases and an independent array; compiled reads/writes, alias declarations/rebinding, lengths, defaults, composed RHS/index reads, public-entry dispatch, capacity and exact-revert regressions. |
 | `Evm/MemoryExprExamples.lean` | Public-compiler source/target arithmetic, compound updates and all four standalone/captured bump forms, alias preservation, operand/range/divisor failures, short-circuit/conditional skips, guards and a storage/memory round trip. |
 | `Evm/MemoryExamples.lean` | A populated typed-heap representation witness, checked reads/writes, shared-base visibility, frame/length preservation, boundary reversion and address-wrap rejection. |
@@ -652,7 +687,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/State.lean` | S04.01: source values `Val` over a declaration `Layout` (ranges, enum bounds and reference locations intrinsic), contents `Data` (recursive aggregates, content-keyed mappings), typed `memory` (`Heap`, copy and alias laws), read-only `Calldata`, `Storage` typed by its layout, defaults. |
 | `Source/Observe.lean` | S04.02: ABI words and bytes of values (`Val.word`, `Val.word_int`), selectors, `Panic`/`Error` revert data (`panicData_code`, `panic_distinct`) and `revertOutcome`. |
 | `Source/World.lean` | S04.03: instance accounts, the world, transient storage cleared per transaction, transaction configuration, a journal of operations, call frames with journal rollback (`rollback_run`), value transfers. |
-| `Source/Units.lean` | G12: source units of a compilation input (`Program`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
+| `Source/Units.lean` | G12: source units of a compilation input (`UnitSet`), solc's import path resolution and remappings (`Path.absolute`, `Remapping.apply`), declaration identities (`DeclId`), the file-level scope across imports (`Sees`) and G12's judgment `UnitsOK`. |
 | `Source/Overloads.lean` | G12: overload sets across a contract's bases (`InheritedFn`: hidden only by a more derived function with the same parameter types). |
 | `Source/ConstCheck.lean` | G13: compile-time constants: purity of constant initializers (`PureS`, `ConstInitsPure`, solc error 8349), solc's typed constant evaluation (`TEval`, `NamedConst`, `ConstVal`), array lengths through it (`ArrayLenOK`) and acyclic constants (`ConstsAcyclic`). |
 | `Source/UserOps.lean` | G13: user-defined value types: operator bindings of global `using {f as op} for T` directives (`opBindings`, well formed: `UsingOpsOK`), and the typing of operators, `wrap` and `unwrap` (`UdvtTyped`). |
@@ -671,6 +706,26 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Frontend/Checked/ExprExamples.lean` | G10 controls: precedence and associativity lemmas over `Syn.precNode`, every operator, expression trees, refused ambiguous forms, expression constructor coverage (`exprCtors_covered`). |
 | `Frontend/Checked/Certificate.lean` | G11: G05's parse-stage instance: `Units`, `Parses`, `parseChecker` (`checkUnits_sound`), the producer (`produce_accepted`), `FrontendSpec.ofParse`. |
 | `Frontend/Checked/UnitExamples.lean` | G11 controls: statements, definitions and units, every S00 constructor covered (`allCtors_covered`, `profileCtors_covered`), out-of-profile refusals, the G05 checker on a two-unit input. |
+| `Source/Value.lean` | S02: run-time values `RVal`, `Halt`, decidable `STy` equality, wrapping (`wrapBits_mem`), checked/unchecked integer and fixed-point arithmetic, shifts, powers, comparisons, value conversions. |
+| `Source/Elaborated.lean` | S02 prerequisite: resolved bodies, modifier invocations, initializers and base arguments (`Program`), and `Elaborated` (a resolution carrying its program, every part tied to a derivation). |
+| `Source/Unique.lean` | Q1: uniqueness of meaning (`Typed.unique`, `StmtD.unique`, `ItemsD.unique`, `RBody.ofDerivation_unique`), solc's literal typing (`Typed.constShape`), `0.length` refused, literal-gap controls. |
+| `Source/Machine.lean` | S02: the logical storage layout (`Env.cellTy`), `Locals`, the machine state `St`, frames `Fr`, `Glob`, the monad `EM`, storage/memory reads, writes, copies and deletion. |
+| `Source/Eval.lean` | S02/S03: the interpreter of resolved expressions, lvalues, statements, modifiers, internal and external calls, dispatch and environment moves, at a horizon. |
+| `Source/Semantics.lean` | S03.02/S03.04/S04.04/S05: constructor order per pipeline, deployment, transactions, least-horizon completion (`firstDone_mono`), sessions as G01 prefixes (`sessionAt_consistent`, `sourceLang`). |
+| `Source/Ledger.lean` | S05: the semantic status of every expression and statement constructor against S01's coverage (`semExprCoverage_of_typed`, `semExprGaps_spec`). |
+| `Source/SemanticsExamples.lean` | S02–S05 controls: overflow, division by zero, evaluation order per pipeline, short circuit, two placeholders, constructor order, revert rollback of storage and transient storage, a reentrant callback. |
+| `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
+| `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
+| `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
+| `Source/Horizon.lean` | S05 item 2: the interpreter is monotone in its horizon (`belowAt`, horizon independence `runTx_stable`, `firstDone_runTx`), only appends events (`growAt`), and a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
+| `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
+| `Source/Session.lean`, `SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
+| `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |
+| `Source/WellTyped.lean` | V04b preservation: references agree with the heap typing and the layout (`Val.RefOK`, `DataOK`, `RValOK`, `LocalsOK`, `HeapOK`, `StOK`, `EMOK`); memory operations keep it (`alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapAt_ok`). |
+| `Source/ValueProgress.lean` | V04b progress, value layer: `binVal`/`cmpVal`/`shiftVal`/`unaryVal`/`incDecVal`/`convVal`/`constVal` are never stuck in their domains (`NotStuckR`); every elaborated term is in them (`RExpr.OpsOK`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`). |
+| `Source/ExprProgress.lean` | V04b progress, expressions: `NS`/`NSP`; the value fragment (`RExpr.ValFrag`, `RExpr.MapRef`, `RLVal.IsSimple`: locals, value-type state variables, mappings) is never stuck (`exprNSAt`, `evalE_valFrag_ns`; `readAt_ns`, `writeAt_ns`, `keyStep_nsp`, `convRV_ns`); the fragment parameterized by allowed callees (`RExpr.ValFragC`, `CallNS`, `exprNSAt_step`) |
+| `Source/StmtProgress.lean` | V04b progress, statements: the statement value fragment in a body frame is never stuck (`stmtNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`; `RStmt.ext`, `Locals.restore_ok`, `BodyFrame`); calls inside expressions by the joint induction `FragAt`/`fragAt` under `CallsOK` (`evalE_callFrag_ns`); elaborated frames (`Elaborated.body_locals`, `Glob.dispatchFn_params`) |
+| `Source/SoundnessExamples.lean` | V04b controls: value-layer witnesses and stuck negative controls; fragment witnesses evaluated in the kernel (a loop, a storage update), an unframed `return` stuck; call witnesses (`callF_ns`, `recF_ns`, `callF_badFrame_stuck`) |
 
 ## Precompiles
 
@@ -721,7 +776,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson/Getters.lean` | Source ABI identities and record-paired, nonempty getter plans, lowered through ordinary function members; primitive/UDVT values, enum mapping keys, reference-result refusal and empty-data array bounds. |
 | `Frontend/SourceUnits.lean` | Original compilation-unit ASTs, per-source provenance and checked compiler import identities; explicit specification/mixed-legacy-ABI refusals. |
 | `Frontend/Static/Closure.lean` | G12–G14: reachability by saturation over a finite graph (`iter_sound`, `iter_complete`), shared by the static checkers. |
-| `Frontend/Static/Units.lean` | G12: the import resolver `Program.globals` (sound and complete for `Sees`, through cycles), the program check `Program.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
+| `Frontend/Static/Units.lean` | G12: the import resolver `UnitSet.globals` (sound and complete for `Sees`, through cycles), the program check `UnitSet.unitsOK` (`unitsOK_iff`), identities (`Sees.decl_exists`) and agreement with S01's lookup (`globals_lookup`). |
 | `Frontend/Static/Overloads.lean` | G12: the inherited overload set `Env.inheritedFns` (`mem_inheritedFns`, extends S01's lookup) and overload selection (`selectOverload`). |
 | `Frontend/Static/UnitsExamples.lean` | G12 controls: an import cycle, a diamond (one identity), a clash, aliases, a missing unit, remappings, shadowing, an ambiguous overload and overloads across bases. |
 | `Frontend/Static/Infer.lean` | G13: type inference `infer` over every category, returning S01 derivations (`Typed`, `LVal`, `TypedArgs`, `TypedSlots`): sound by construction. |
@@ -762,6 +817,8 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `TestSuite/Derived14.lean` | The twenty obligations added at solkey `1b4341a303` (`send`, internal calls, `return`, tuples), each by `sol_prove`; ground splits are pruned (`Seq.refuteS`, closed by `Proves.closeFalse`). |
 | `TestSuite/Derived15.lean` | 53 migration derivations for returns, overloads, modifiers, helpers, storage shapes, fresh arrays and push operands; the report counts only kernel-checked declarations. |
 | `TestSuite/Derived16.lean` | Native push compound, DIV/MOD, increment and signed three-push derivations; demanded primitive reads close the signed case within the existing bounds. |
+| `Calculus/MemoryLoopReplay.lean` | Typed symbolic aliases and kernel-checked one-layer equations for the unchanged 1024-step walk; untrusted native proposals, exact callback/result accounting, fail-closed checkpoints and empty-residue-only refusal boundary. |
+| `TestSuite/MemoryLoopReplay/*.lean`, `TestSuite/Derived17MemoryLoop.lean` | Twenty shared replay stages for the original nested-return theorem; incomplete, missing-state, wrong-root and residual-leaf refusal controls. |
 | `TestSuite/Derived17.lean` | Unannotated upstream loop derivations, including storage-dependent bounds, break/continue and nested returns; fixed-budget kernel-checked replay. |
 | `TestSuite/Derived18.lean` | The imported native modular arithmetic obligation, proved with explicit Lean-only assignment rules. |
 | `TestSuite/Derived19.lean` | Obligations new at solkey `473da8944c`: `&`'s operand order, a `continue` under an invariant, modifier continuations, the four dangling-storage claims (a length-only push) and shifts, by `sol_prove`. |
@@ -1049,6 +1106,78 @@ At the root, the notation's own tests:
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
 
+## External try execution evidence
+
+| Module | What it defines |
+|---|---|
+| `Semantics/ExternalTryWitness.lean` | Exact external oracle/decoder equations and normal-return witnesses for all four try alternatives; caller-failure controls. |
+| `Counterexamples/DiamondTry.lean` | A reached try admits a caller revert, refuting its universal callback diamond under either payment flag. |
+| `Examples/Tactics/ExternalTryWitness.lean` | Source-shaped explicit-oracle controls, ordered storage observations, caller failures and callback refusal. |
+
+### Deterministic try formula witnesses
+
+| Module | Defines |
+|---|---|
+| `Calculus/Sound/ExternalTryWitness.lean` | State-indexed deterministic diamond transport from explicit normal try and allocated catch-data witnesses; no validity or callback promotion. |
+| `Examples/Tactics/ExternalTryFormula.lean` | Concrete success/catch formulas, allocated raw/reason payloads, explicit frame transport and refusal controls. |
+| `Examples/Tactics/ExternalTryUniversal.lean` | Countermodel over the actual original source-domain builders: no universal normal-try family, deterministic validity or callback source-profile validity for the quoted Probe. |
+
+### Explicit conditional try outcomes
+
+| Module | Defines |
+|---|---|
+| `Semantics/TryConditions.lean` | Exact full-result self/oracle and payload-catch conditions, with argument-prefix success/failure transport. |
+| `Semantics/TryCreateConditions.lean` | Exact creation-try conditions over the unchanged typed world interface. |
+| `Calculus/Sound/TryConditions.lean` | Guarded ordinary formula transport for all results/frames and exact normal-or-exhausted diamond account. |
+| `Examples/Tactics/TryConditions.lean` | Arbitrary-state explicitly guarded source success, certified failure boundaries and typed/runtime replay-context refusals. |
+
+
+### Native self-try entry return bridge
+
+| Module | Defines |
+|---|---|
+| `Semantics/EntryReturn.lean` | Conditional source/serializer call composition, exact heap/reference/caller capture, failures and bounded-to-ordinary execution agreement. |
+| `Tools/EntryReturn.lean` | Exact-declaration, original-prefix-scope entry-only serializer for a primitive prefix plus one source-marked bytes/string memory result, or one return-only external-void function value. |
+| `Examples/Tactics/EntryReturn.lean` | Actual native bridge quotations, bytes/once-only kernel snapshots, normal ordinary witnesses and negative admission/input controls. |
+| `Examples/Tactics/EntryReturnFlow.lean` | Legacy loop-return, alias-mutation, modifier-continuation and default-memory kernel controls. |
+| `Examples/Tactics/EntryReturnFlowIR.lean` | The same controls under existing viaIR modifier frames, with safe kernel declaration factoring for the large quotation. |
+| `Examples/Tactics/EntryReturnMetadata.lean` | Signed narrow and fixed-byte return metadata, exact order and empty memory kernel control. |
+| `Examples/Tactics/EntryReturnFunction.lean` | Output-only external-function address/selector, bytes24 padding, order and once-only kernel witnesses in both evaluation modes; function-input refusals remain. |
+
+### Creation-try caller continuations
+
+| Module | Defines |
+|---|---|
+| `Semantics/CreationTryFrame.lean` | Typed pending caller/creation/handler/tail composition over existing World operations, exact failure and allocation laws, universal bounded-to-ordinary approximation. |
+| `Frontend/CreationTryImport.lean` | Complete-declaration, identity-resolved stateless unpaid creation-try source compiler with actual constructor, local argument, returned handle and Error payload branches. |
+| `Tools/CreationTryReplay.lean` | Bounded native creation source observations with explicit checked runtime context, actual typed world threading and refusal controls. |
+| `Examples/Tactics/CreationTrySource.lean` | Complete original creation source outputs, ordinary transport, argument/rollback/installation/wrong-byte kernel controls and malformed replay controls. |
+| `Examples/Tactics/CreationTrySourceIR.lean` | Separately compiled viaIR original creation source with both ordered output kernel witnesses. |
+
+
+### Linked library try source continuation
+
+| Module | Owning role |
+|---|---|
+| `Semantics/LibraryTryFrame.lean` | Installed library try boundary with total raw extraction, outer decoder, exact caller resume/context/storage/ledger laws and ordinary transport. |
+| `Frontend/LibraryTryImport.lean` | Complete checked library/caller declarations and exact scalar/storage-formal mapping into caller-typed programs. |
+| `Tools/LibraryTryReplay.lean` | Explicit concrete linked runtime context, canonical Boolean input, once-only world execution and caller-storage observations. |
+| `Examples/Tactics/LibraryTrySource.lean` | Original ordered outputs, ordinary-reading equality and actual prefix storage witnesses. |
+| `Examples/Tactics/LibraryTryControls.lean` | Wrong role/identity/frame, decoder/input/static refusals, exact storage alias and atomic rollback controls. |
+| `Examples/Tactics/LibraryTrySourceIR.lean` | Separately compiled via-IR original linked source with all ordered output certificates. |
+
+M1 try producer side witnesses: `Evm/TryByteImage.lean` bounds scalar-frame
+byte images and overlap/snapshots; `Evm/TryByteCapture.lean` reuses typed
+allocation and raw halt; `Evm/TryPanicProducer.lean` computes the source-linked
+36-byte component. `Examples/Tactics/TryPanicProducer.lean` keeps constructed-call
+controls distinct. See [bounded milestone](feature-work/diamond-try-m1.md); none
+admits physical assembly or proves target-byte/original-callee transport.
+| `Semantics/ContractWorldCertificates.lean` | Published paid-run/source-wrapper operation certificates, reused unchanged from origin/master cc155f36. |
+| `Semantics/PaymentWorld.lean` | Typed stipend source frames over actual world calls; send completed-failure handling, transfer exact halt transport, no-op/funding and atomic rollback laws. |
+| `Frontend/PaymentPlan.lean` | Complete declaration-resolved creation/send and initializer/receive/transfer/getter source shapes; unknown effects and full-gas calls refused. |
+| `Frontend/PaymentImport.lean` | Imports actual receive/getter code, builds typed initializer handle assignment and paid creation/payment compositions with source identities. |
+| `Tools/PaymentReplay.lean` | Ordered deterministic source-world observations with actual nested bytes and committed-world audits; gas remains an independent obligation. |
+| `Examples/Tactics/PaymentSource.lean` | Kernel-checked original send and debug transfer source snapshots, initialized handle/funding/getter witnesses and wrong handle/kind/bytes controls. |
 | `Backend/Creation/Artifact.lean` | G44.02 intrinsic artifact sections, executable CODECOPY/RETURN wrapper, exact minimal PUSH widths, layout and argument extraction laws. |
 
 | `Backend/Creation/ArtifactChecks.lean` | G44.02 inhabited layout, argument separation and negative controls with headline kernel axiom pins. |
@@ -1088,3 +1217,82 @@ At the root, the notation's own tests:
 | `Backend/Failure/UnwindChecks.lean` | Inhabited distinct snapshots, nested emitted failures, caller-memory restoration and wrong-snapshot negatives. |
 | `Backend/Failure/Composition.lean` | Arbitrary two-write-block byte noninterference, immutable input preservation and checked emitter concatenation/terminal distinction. |
 | `Backend/Failure/CompositionChecks.lean` | Inhabited both-executed writes, overlap negative, overlapping ignored suffix and same-bytes terminal controls. |
+| `Storage/Representation/Model.lean` | Intrinsic value-independent layout shapes and represented scalar, struct, mapping, fixed/dynamic-array values including retained shadows. |
+| `Storage/Representation/Controls.lean` | Inhabited representation witnesses, source reads, negative scalar control and exact axiom pins. |
+| `Storage/Representation/Reads.lean` | Exact source scalar/mapping/array reads, failures and source frames. |
+| `Storage/Representation/Frames.lean` | Representation locality over existing Occ footprints and nested frames. |
+| `Storage/Representation/Words.lean` | Supported full-word key bounds, normalization and injectivity. |
+| `Storage/Representation/Updates.lean` | Abstract symbolic replacement and nested mapping source saves. |
+| `Storage/Representation/Members.lean` | Source member reads/replacement with whole intrinsic field-store preservation. |
+| `Storage/Representation/UpdateControls.lean` | Inhabited member/nested mapping combinations, defaults, alias controls and axiom pins. |
+| `Storage/Representation/Arrays.lean` | Fixed/dynamic whole-array source saves, live/retained bounds and exact header/element frames. |
+| `Storage/Representation/ArrayControls.lean` | Heterogeneous fixed/dynamic, nested save, defaults, stale aliases, live failures and header controls. |
+| `Storage/Representation/Transport.lean` | Finite per-run numeric realization, covered writes/sequences, frames and existing exact source observations. |
+| `Storage/Representation/TransportControls.lean` | Inhabited root/hash/data run, source read/save/header combinations and collision/bound/coverage/failure controls. |
+| `Storage/Representation/GraphLayout.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphFrames.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphRepresentation.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphCompatibility.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+| `Storage/Representation/GraphControls.lean` | Typed storage graph representation component; see [feature document](feature-work/storage-value-representation.md). |
+
+## G25 scalar lowering preparation
+
+| Module | What it defines |
+|---|---|
+| `Backend/Scalar/Slice.lean` | Independent numeric semantics for real Backend instructions, PUSH32, sequencing and untouched tails. |
+| `Backend/Scalar/Typed.lean` | Intrinsic value relation, literal selection and Boolean operation certificates. |
+| `Backend/Scalar/Widths.lean` | All byte-multiple widths, signed/unsigned cleanup and unsigned cast chains. |
+| `Backend/Scalar/Comparisons.lean` | Source-exact signed and unsigned ordering certificates. |
+| `Backend/Scalar/Wrapping.lean` | Intrinsic unsigned wrapping add/sub/mul and width-cleanup composition. |
+| `Backend/Scalar/Casts.lean` | Source-exact word-preserving uint/int casts. |
+| `Backend/Scalar/Guards.lean` | Retained-operand zero tests and existing panic-byte failure selection at the component boundary. |
+| `Backend/Scalar/Modular.lean` | Source-exact addmod/mulmod with unbounded intermediate arithmetic and zero-modulus failure. |
+| `Backend/Scalar/Bitwise.lean` | Intrinsic unsigned bitwise AND/OR/XOR certificates. |
+| `Backend/Scalar/Values.lean` | State-uniform closed intrinsic Val certificates and actual encoded-byte controls. |
+| `Backend/Scalar/Checked.lean` | Scalar instruction-slice Checked contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Division.lean` | Scalar instruction-slice Division contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Exponentiation.lean` | Scalar instruction-slice Exponentiation contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Heights.lean` | Scalar instruction-slice Heights contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Negation.lean` | Scalar instruction-slice Negation contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/PowerBounds.lean` | Scalar instruction-slice PowerBounds contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/PowerGuard.lean` | Scalar instruction-slice PowerGuard contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Shifts.lean` | Scalar instruction-slice Shifts contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedBits.lean` | Scalar instruction-slice SignedBits contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedChecked.lean` | Scalar instruction-slice SignedChecked contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedDivision.lean` | Scalar instruction-slice SignedDivision contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedGuards.lean` | Scalar instruction-slice SignedGuards contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedMul.lean` | Scalar instruction-slice SignedMul contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/SignedShift.lean` | Scalar instruction-slice SignedShift contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/UnsignedMul.lean` | Scalar instruction-slice UnsignedMul contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/Axioms.lean` | Scalar instruction-slice Axioms contracts; see backend-scalar-lowering.md for exact premises and boundaries. |
+| `Backend/Scalar/ArithmeticWidths.lean` | Scalar ArithmeticWidths contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Capacity.lean` | Scalar Capacity contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/CastChains.lean` | Scalar CastChains contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Combinations.lean` | Scalar Combinations contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Composition.lean` | Scalar Composition contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/FixedBytes.lean` | Scalar FixedBytes contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/Select.lean` | Scalar Select contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/WidthGuards.lean` | Scalar WidthGuards contracts; exact source/bytecode and resource boundaries in backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPower.lean` | Intrinsic signed-power SignedPower slice/source/capacity contracts; see backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPowerPost.lean` | Intrinsic signed-power SignedPowerPost slice/source/capacity contracts; see backend-scalar-lowering.md. |
+| `Backend/Scalar/SignedPowerPrefix.lean` | Intrinsic signed-power SignedPowerPrefix slice/source/capacity contracts; see backend-scalar-lowering.md. |
+
+| G31 preparation module | Purpose |
+|---|---|
+| `Backend/Environment/Observations.lean` | Actual environment opcode selection, local stack semantics, address truncation and intrinsic expression/world observation certificates. |
+| `Backend/Environment/ObservationsChecks.lean` | Inhabited environment witnesses, distinguishing negative controls and headline axiom pins. |
+| `Backend/Environment/Metadata.lean` | Typed metadata PUSH encoding, source declaration selection, selector numeric/ABI alignment, truncation and function/address projections. |
+| `Backend/Environment/ByteConstants.lean` | Byte-valued resolved metadata materialization through PUSH/MSTORE8, exact byte order and memory-frame laws. |
+| `Backend/Environment/MetadataChecks.lean` | Metadata byte regressions, UTF-8 witness, missing metadata refusals and axiom pins. |
+| `Backend/Environment/Crypto.lean` | Executable memory Keccak slices, existing intrinsic hash denotation, exact normalized bytes, argument failure/success, and read-only precompile invocation selection. |
+| `Backend/Environment/Namespace.lean` | ERC-7201's actual two-hash instruction slice, wrapping predecessor, exact ABI-word second preimage and low-byte clearing. |
+| `Backend/Environment/CryptoChecks.lean` | Inhabited typed heap/path hash controls, ecrecover positive/fallback, exact opcode bytes, namespace witness and axiom pins. |
+| `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
+| `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
+| `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
+
+Memory-loop validation helpers: `scripts/memory-loop-evm.mjs` records actual
+four-mode upstream EVM observations and refusal controls;
+`scripts/check-memory-loop-timing.py` freshly checks the entire original
+`Derived17` group; `scripts/check-memory-loop-timing.mjs` validates cumulative
+300-second evidence, with negative controls in its `.test.mjs` companion.

@@ -15,11 +15,16 @@ node scripts/evm-reference/replay.mjs \
   --out .lake/upstream/recursive-reference.json
 ```
 
+The replay and payment regression tests also accept the repository-local
+`.lake/soljson/` cache or `SOLJSON_DIR`; `SOLC_REFERENCE` takes precedence.
+See [payment test setup](../../docs/solidity-upstream-tests.md#reproduce) for
+the exact compiler filenames, unchanged hashes and source-test prerequisites.
+
 `--filter` requires one exact pinned semantic-fixture path. The archive and all
 11,622 source files are verified before execution. The compiler bytes and full
 version are checked. Each required legacy/viaIR pipeline compiles independently
 with optimization disabled and CBOR metadata omitted, executes creation code,
-and retains every supported scalar vector in order. Canonical compiler method
+and retains every supported ABI vector in order. Canonical compiler method
 identifiers select the bytecode entry. Calls share state; the VM rolls failures
 back. Each vector resets transaction warmth and original-storage caches.
 
@@ -47,6 +52,27 @@ compiler-input, source and creation/runtime-bytecode hashes. Keep reports outsid
 historical `tests/upstream/results`. Refer to the Group 03 continuation in
 `docs/feature-work/numeric-operators.md` for per-fixture Lean and reference results.
 
+
+The direct-self-try reference adapter records and checks the actual deployment
+address. Its opt-in `direct-self-try-reference` context permits non-scalar
+callee signatures and recursively whitelisted memory/arithmetic/return/revert
+Yul in compiled bytecode only. Native Lean replay rejects that context kind.
+Constructors/effectful initializers and context/world instructions remain
+refused. Supported raw calldata vectors compare complete expected ABI or revert
+bytes; wrong bytes and invalid byte values are negative controls. Existing gas,
+instruction, settings and expectation policies are unchanged. The
+[conditional try/catch record](../../docs/feature-work/diamond-try.md#human-approved-conditional-account-and-native-adapter-repair)
+separates sixteen original reference passes from four native passes and records
+the remaining blocked pipelines and model decoder boundary.
+
+
+The creation-try source context additionally records actual nested CREATE receipts
+(address, actual failed halt/revert bytes or runtime code hash/size). This is
+compiled-bytecode evidence, separate from kernel proofs and native source
+admission. It does not enable a historical profile or alter panic decoding.
+
+
+Linked-try replay admits the exact validated library directive, deploys the real library then links/deploys the caller on the same machine using pinned compiler linkReferences. It records actual code/delegate context and full return/revert bytes, including prerequisite receipts on failed checks. This is separate compiled-bytecode evidence; no historical profile or general library/ABI admission is enabled.
 ## Generated typed differential cases
 
 After `source /workspace/.setup/activate.sh` (or selecting Lean 4.24.0):
@@ -67,3 +93,30 @@ retained, without claiming cause-preserving minimization. Reports preserve
 sources, bytecode, layout, full adapted observations and hashes. Unknown syntax,
 layout, exceptions or logs are blocked. No JavaScript arithmetic model supplies
 expected results. See [scope and evidence](../../docs/feature-work/generated-differential.md).
+
+Payment-specific replay is additive: `payment-replay.mjs --compiler FILE --filter
+EXACT_PINNED_PATH --out FILE` uses the same pinned compiler/snapshot and unchanged
+100-million gas / five-million instruction ceilings. It retains constructor or
+empty-calldata funding, actual CREATE and receive frames, ordered return/revert
+bytes, and every original gas row across required and named optimized profiles.
+Gas follows the pinned EVMHost and ExecutionFramework accounting; failed creation
+with nonempty output is blocked because its deposit accounting differs from this
+engine. Unknown settings/observations and host limits stay blocked. It records
+executed frame steps, runtime hashes, compiler inputs and dependency provenance.
+
+This tool supplies independent compiled-bytecode observations, never Lean source
+coverage, a callback theorem or a compiler correctness proof. It does not modify
+the existing `replay.mjs` host policy or the core payment/callback semantics.
+Run `node --test --test-concurrency=1 scripts/evm-reference/{replay,payment-replay}.test.mjs`
+with `SOLC_REFERENCE` pointing to the pinned compiler. Keep caches and `TMPDIR`
+on disk and run under the documented writer lock and aggregate resource cap.
+
+
+The upstream source runner uses the payment adapter only after complete-shape
+validation in Lean. Whole payment-fixture success requires fresh provenance-
+matched reference evidence for both pipelines, every functional observation and
+any gas rows; an unmetered typed source match alone stays pending. The SDK is
+therefore needed to finish those payment rows, while the Lean core remains
+independent of it. Install from this package's lockfile with npm ci --ignore-scripts.
+The source witnesses reproduce with scripts/payment-source-fixtures.mjs --check
+and SOLC_REFERENCE pointing to the pinned0.8.38 compiler.

@@ -133,6 +133,12 @@ It reuses the typed aggregate ABI encoder and raw memory-revert path, preserving
 reference locations, delayed reads, source ordering and rollback. Historical
 M5 evidence is unchanged; current and retained evidence remain distinct.
 
+## External try execution witnesses
+
+The [partial step-11 record](diamond-try.md) contains deterministic normal-return
+witnesses, caller-failure controls and the universal callback-diamond obstruction.
+Diamond rules/source automation and the blocked upstream fixture pipelines
+remain open; the record does not increase source support.
 
 ### Step 4 increment: unsigned-power self-call data (2026-10-28)
 
@@ -253,3 +259,29 @@ settings. The [targeted continuation record](../../tests/upstream/revert-power/l
 and [current handoff](../../tests/upstream/revert-power/README.md) distinguish
 current gate success from historical blocked evidence. This document's preceding
 checkpoint is preserved verbatim alongside those records for its original hash.
+### Diamond payment witnesses
+
+The [payment handoff](diamond-payments.md) records the additive deterministic
+and callback diamond witnesses, conditional acceptance formula rules, negative
+controls and bounded original corpus/source evidence. Its earlier unresolved
+formula and corpus obligations are historical checkpoints. Unconditional SolKey
+transfer taclets and the global [G00 payment-acceptance replacement obligation](../solidity-scope.md#user-decisions-2026-10-29)
+remain separate; these conditional proofs do not settle them. External try/catch
+dispatch and general contract-world creation are outside that change.
+
+**Combined integration review (2026-10-29).** Read-only finder and skeptic
+reviews, without the Lean server, confirmed that both frontend dispatch cases,
+module imports, feature evidence and decision records, runner provenance hashes
+and resource/observation limits survive the merge. The skeptic identified two
+documentation issues: assignment-specific payment approval read as global
+approval, and historical formula blockers read as current. The text above and
+[O4](../options.md#o4-diamonds-calls-and-the-invariant-a-specification-declares)
+now distinguish those scopes and retain the compiler-correspondence limitation.
+
+Focused integration checks: `SolcJson/Body.lean` passed per-file Lean MCP
+error diagnostics; `Solidity.lean` remained partial after three 45-second
+waits, without reported errors or failed dependencies, and is not a passing
+gate. All 23 `solidity-upstream.test.mjs` tests passed, as did the generated
+feature audit and whitespace check. The payment-source test could not start
+with its default missing pinned-compiler path. Full combined Lean gates and
+Git staging remain the coordinator's responsibility.

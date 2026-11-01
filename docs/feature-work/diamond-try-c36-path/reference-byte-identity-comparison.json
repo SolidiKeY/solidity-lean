@@ -1,0 +1,20 @@
+[
+  {
+    "pipeline": "legacy",
+    "staticCompilerInputSHA256": "f6b4902eeb6b24de09bbff2a551920bf9af16fce22c769d58e88c0c41a205dd8",
+    "retainedReferenceInputSHA256": "426562d1d3badc188e5b909ebc369467f76e1109cf098b00b590f2cb0cf7bd2c",
+    "inputsEqual": false,
+    "creationByteHashEqual": true,
+    "runtimeByteHashEqual": true,
+    "claim": "Equal retained byte hashes, NOT source-compiler adequacy or replay in this increment. Reference source has preamble/unit differences; AST/source-map identities only from its own exact bundle."
+  },
+  {
+    "pipeline": "viaIR",
+    "staticCompilerInputSHA256": "03fab305ff1a9b86b8b779aba695dd21bb53af7af66b78fd0f9e43ba23a21ac2",
+    "retainedReferenceInputSHA256": "7b1a6efac79cc98114f26f0d3d0943aefa74b0ec0afdca8c5b61dba82f06d6cd",
+    "inputsEqual": false,
+    "creationByteHashEqual": true,
+    "runtimeByteHashEqual": true,
+    "claim": "Equal retained byte hashes, NOT source-compiler adequacy or replay in this increment. Reference source has preamble/unit differences; AST/source-map identities only from its own exact bundle."
+  }
+]

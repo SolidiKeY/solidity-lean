@@ -486,7 +486,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Semantics/LibraryTryFrame.lean",
+        "Solidity/Frontend/LibraryTryImport.lean",
+        "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
       ]
     },
     {
@@ -1883,7 +1888,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Semantics/LibraryTryFrame.lean",
+        "Solidity/Frontend/LibraryTryImport.lean",
+        "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
       ],
       "decision": {
         "date": "2026-10-29",
@@ -1907,7 +1917,15 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Semantics/LibraryTryFrame.lean",
+        "Solidity/Frontend/LibraryTryImport.lean",
+        "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "Solidity/Examples/Tactics/LibraryTrySourceIR.lean",
+        "Solidity/Semantics/RevertData.lean",
+        "Solidity/Calculus/DataIn.lean",
+        "Solidity/Examples/Tactics/TryConditions.lean"
       ]
     },
     {
@@ -2791,7 +2809,22 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Semantics.lean"
+        "Solidity/Semantics.lean",
+        "Solidity/Calculus/PaymentWitness.lean",
+        "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "Solidity/Calculus/CallbackSound/Payments.lean",
+        "Solidity/Examples/Tactics/PaymentRules.lean",
+        "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "Solidity/Calculus/PaymentConditions.lean",
+        "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "scripts/payment-reference.test.mjs",
+        "docs/feature-work/diamond-payments.md",
+        "Solidity/Semantics/PaymentWorld.lean",
+        "Solidity/Frontend/PaymentPlan.lean",
+        "Solidity/Frontend/PaymentImport.lean",
+        "Solidity/Tools/PaymentReplay.lean",
+        "Solidity/Examples/Tactics/PaymentSource.lean",
+        "scripts/payment-source.test.mjs"
       ],
       "decision": {
         "date": "2026-10-29",
@@ -2858,7 +2891,7 @@
       "syntax": "try new C(args) returns(C c)",
       "scope": "abstract",
       "current": "partial",
-      "requirement": "Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. Existing source wrappers now emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial.",
+      "requirement": "Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported. The narrow stateless unpaid Error(string) source continuation now compiles actual local arguments, constructor/handle and caller branches; its conditional kernel correspondence and original creation fixture replay do not establish general world/source or callback validity. Existing source wrappers also emit exact world-operation certificates and conditional funded Reachable bridges; general source shapes remain partial.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.h",
@@ -2869,7 +2902,11 @@
         "Solidity/Semantics/ContractWorld.lean",
         "Solidity/Frontend/WorldImport.lean",
         "Solidity/Examples/Tactics/ContractWorldSource.lean",
-        "Solidity/Semantics/ContractWorldCertificates.lean"
+        "Solidity/Semantics/ContractWorldCertificates.lean",
+        "Solidity/Semantics/CreationTryFrame.lean",
+        "Solidity/Frontend/CreationTryImport.lean",
+        "Solidity/Examples/Tactics/CreationTrySource.lean",
+        "Solidity/Examples/Tactics/CreationTrySourceIR.lean"
       ],
       "decision": {
         "date": "2026-10-29",
@@ -2893,7 +2930,16 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Semantics.lean"
+        "Solidity/Semantics.lean",
+        "Solidity/Calculus/PaymentWitness.lean",
+        "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "Solidity/Calculus/CallbackSound/Payments.lean",
+        "Solidity/Examples/Tactics/PaymentRules.lean",
+        "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "Solidity/Calculus/PaymentConditions.lean",
+        "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "scripts/payment-reference.test.mjs",
+        "docs/feature-work/diamond-payments.md"
       ],
       "decision": {
         "date": "2026-10-29",

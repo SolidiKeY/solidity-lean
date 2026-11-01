@@ -59,8 +59,8 @@ payload cap. `Fits` records machine-word/half-open-address bounds for the
 later execution theorem. MSTORE8 deliberately introduces no padding writes;
 the unused final word bytes must retain their initial values.
 
-`Gap.lean` was checked against only pre-existing modules before payload
-emission: Panic(1) has 36 bytes, crosses a word boundary, ends `[0,0,0,1]`,
+`Solidity/Backend/Failure/Gap.lean` was checked against only pre-existing
+modules before payload emission: Panic(1) has 36 bytes, crosses a word boundary, ends `[0,0,0,1]`,
 and differs from Panic(0); bare backend REVERT encodes only `fd`.
 `EmissionChecks` adds empty/custom exact byte vectors (custom at offset 5),
 panic selector/tail, a 33-byte crossing at nonzero address, Error length,
@@ -455,3 +455,12 @@ These passes were performed by the repair worker; an independent reviewer
 could not start because the collaboration service reported a missing rollout.
 Independent follow-up review remains with the coordinator. The repair is
 uncommitted and leaves the external Git index untouched.
+
+## Integration reference repair (2026-10-30)
+
+Adding the storage-value gap control made the bare backend gap reference
+ambiguous. The reference now names the full backend path; both controls remain
+intact. Read-only finder and skeptic reviews used no Lean server and found no
+issues. Strict documentation checking reports the same findings as the retained
+integration baseline, including 46 missing references, with no new findings.
+No Lean files or checker rules changed; combined gates remain with the coordinator.

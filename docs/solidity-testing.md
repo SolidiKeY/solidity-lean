@@ -190,9 +190,23 @@ requires a future parser-based extension. Function and loop annotations use
 their defining contract or library's scope, including inlined helpers.
 The test runner uses `lake --no-build lean` after building the API, so its
 single-file checks can also read imports held only in Lake's shared cache.
+It uses the first executable `lake` on `PATH`, preserving local wrappers. If
+none is found, it uses `ELAN_HOME/bin/lake` (by default `~/.elan/bin/lake`).
 
-The compiler helper reads one source unit; source imports/remappings and
-unsupported AST forms remain frontend limitations. The frontend imports
+The compiler helper follows imports into a complete original compilation unit.
+`--project-root DIR`, repeatable `--include-path DIR` and `--remapping PREFIX=TARGET`
+configure resolution for both the compiler helper and this runner. Relative and
+context remappings follow solc; cyclic imports retain their source identities.
+Every dependency digest is checked around verification. The CLI remains serial;
+the LSP can schedule exact functions concurrently.
+
+Multi-source contract-local specifications are admitted only without file-level
+variables or enum/struct/UDVT declarations anywhere in the unit. The independent
+Lean check requires structural contract/function ownership; duplicate IDs cannot
+lend ownership to free functions, variables, nested arrays or metadata. Other
+multi-source specification namespaces, loop annotations and static compiler-code
+artifacts remain explicit refusals. See [the project/compiler record](feature-work/compiler-project-services.md).
+Unsupported AST forms remain frontend limitations. The frontend imports
 inherited state, helper bodies and modifiers using checked Solc C3 metadata.
 Only the selected contract's own functions receive independent test rows.
 Specifications can read `this`/`address(this)` and its ledger entry; `\old`

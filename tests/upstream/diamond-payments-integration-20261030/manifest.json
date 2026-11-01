@@ -1,0 +1,341 @@
+{
+  "version": 1,
+  "candidate_head": "1b561734f956e68a193e3a54f88433111b06c7ad",
+  "source_commit": "20bbb1071e12d6e0765c885434df3defc7477b92",
+  "original_validation_verified": false,
+  "original_archive_index_entries": 0,
+  "missing_original_evidence": [],
+  "current_validation": {
+    "lean_files": 7,
+    "complete_diagnostics": true,
+    "errors": 0,
+    "printed_axiom_audits": 45,
+    "new_axioms": false,
+    "regressions": [
+      {
+        "command": [
+          "node",
+          "--test",
+          "scripts/payment-reference.test.mjs"
+        ],
+        "exit": 1,
+        "stopped": null,
+        "seconds": 1.5019413979607634
+      },
+      {
+        "command": [
+          "node",
+          "--test",
+          "scripts/payment-source.test.mjs"
+        ],
+        "exit": 1,
+        "stopped": null,
+        "seconds": 2.0020299190073274
+      },
+      {
+        "command": [
+          "node",
+          "--test",
+          "scripts/evm-reference/payment-replay.test.mjs"
+        ],
+        "exit": 0,
+        "stopped": null,
+        "seconds": 1.0011964910081588
+      },
+      {
+        "command": [
+          "node",
+          "scripts/payment-source-fixtures.mjs",
+          "--check"
+        ],
+        "exit": 0,
+        "stopped": null,
+        "seconds": 0.5014627969940193
+      }
+    ],
+    "full_combined_gate": "not run; coordinator owns rebuild and rerun"
+  },
+  "compiler": {
+    "url": "https://binaries.soliditylang.org/wasm/soljson-v0.8.38+commit.1835d247.js",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "resource_scope": "Retained regression samples concern LOCAL capped integration cgroup and OS reserve; cumulative memory.peak is not per-command RSS. Original source records are verified separately against the frozen source-VM requirements; LOCAL still requires an extra12GiB OS reserve.",
+  "working_file_sha256": {
+    "Solidity/Calculus/CallbackSound/Payments.lean": "6f7767828463620ebd40a59ec90ed25a6d2266d14806c12ae408343034cc42bd",
+    "Solidity/Calculus/PaymentClose.lean": "05acf671e3d9f1d46f7f9893481f8d69740a95d4241de03cdd27b3907a461b82",
+    "Solidity/Calculus/PaymentConditions.lean": "13578fd4ce2844575442f18e1ac3873f2c0160e958bb71cc792787a21bcd1c33",
+    "Solidity/Calculus/PaymentWitness.lean": "213e590c93ff9654ff5d2936e007e28eb4147a8f9d6fbdd8c5bdd7efd524b465",
+    "Solidity/Examples/Tactics/PaymentRules.lean": "6bf6e0ce00b0af9c3834d283ed5e574b8da292f3f39469c4d9d6d18932c61e35",
+    "Solidity/Examples/Tactics/PaymentSource.lean": "2bd8e372086d4234dc789c2482bf5708565fc93b7dd34a30313866358005913d",
+    "Solidity/Examples/Tactics/PaymentWitness.lean": "3c8b7143d26e29952ddf034d41d8435cab64996fe3d41744d54ea668a6d93f1a"
+  },
+  "archive": "raw-evidence.tar.gz",
+  "archive_index": [
+    {
+      "path": "diagnostics/payment-types-Solidity__Calculus__CallbackSound__Payments.lean-1.json",
+      "bytes": 2000,
+      "sha256": "fdfc37befa3525ab371a044e4371582639f07b36f55a6cc28346c041a59f2959"
+    },
+    {
+      "path": "diagnostics/payment-types-Solidity__Calculus__PaymentClose.lean-1.json",
+      "bytes": 532,
+      "sha256": "86da00817d70c62f8a77bcfdc0cc8aecc24a4ce6f1575b774e745333533971c8"
+    },
+    {
+      "path": "diagnostics/payment-types-Solidity__Calculus__PaymentConditions.lean-1.json",
+      "bytes": 7527,
+      "sha256": "3e4dc1278335ba3e1ba16f2ec3ce27561bc38de78158d15ffdf4e3e122c93f48"
+    },
+    {
+      "path": "diagnostics/payment-types-Solidity__Calculus__PaymentWitness.lean-1.json",
+      "bytes": 3110,
+      "sha256": "30dc8fb1d1eb5d536fe24f052274bea7ab279395f6a63e11bb18cac5bfeaad0f"
+    },
+    {
+      "path": "diagnostics/payment-types-Solidity__Examples__Tactics__PaymentRules.lean-1.json",
+      "bytes": 3671,
+      "sha256": "3229514171ccd4b5f94054a78f5f66ba16668a48101ce50ee1224b431b45d8f3"
+    },
+    {
+      "path": "diagnostics/payment-types-Solidity__Examples__Tactics__PaymentSource.lean-1.json",
+      "bytes": 5041,
+      "sha256": "7c3fb052f3ec73911ca8b624c846da3072b6e39671cec4f1f5ebef07bef8558d"
+    },
+    {
+      "path": "diagnostics/payment-types-Solidity__Examples__Tactics__PaymentWitness.lean-1.json",
+      "bytes": 5454,
+      "sha256": "784dfcafab708b5624904c5f8812b58237b5d08a450689ef615e09c148e8fc33"
+    },
+    {
+      "path": "local/payment-reference-retry.py",
+      "bytes": 2648,
+      "sha256": "81d86463b0f4244bcd5566ee44949e5144fcd3d1d9a0f6c17235576d760ba392"
+    },
+    {
+      "path": "local/payment-regressions.py",
+      "bytes": 2864,
+      "sha256": "45840841786aabacac7e124964982d4d05d6a87462a11f2e939b8d3d213abd33"
+    },
+    {
+      "path": "local/payment-types-mcp-host-2.log",
+      "bytes": 23907,
+      "sha256": "9693f40906d370cbc7b43f4f3380a80dc55e9e6eb9d428b550c1f389cdf56850"
+    },
+    {
+      "path": "local/payment-types-mcp-host-2.stderr",
+      "bytes": 3490,
+      "sha256": "0590dd68f15d33e4fdc8344b6e2dea01b8c3b5b9d9a91775c3d2ea126df5728f"
+    },
+    {
+      "path": "local/payment-types-mcp-host.log",
+      "bytes": 3337,
+      "sha256": "aa34fc56e035b7ea9dc337e88de0a300d390897a394f4b9631586ced538f5640"
+    },
+    {
+      "path": "local/payment-types-mcp-host.stderr",
+      "bytes": 5041,
+      "sha256": "6e09d2618c17ecf34c72dd201f1cbd100daacc5c2f37b2b95fe4984eae7f4631"
+    },
+    {
+      "path": "local/payment-types-mcp.py",
+      "bytes": 2196,
+      "sha256": "8d3dbaec2fb7da53242c8bde693a849a1f5d017df88ab9125ce8c5c859e2122c"
+    },
+    {
+      "path": "original-artifact-verification.json",
+      "bytes": 2329,
+      "sha256": "c8ec941dc2a6eadf4fa6cfffbe0acc4cca0385502290765c4d37a4e37c4187bd"
+    },
+    {
+      "path": "original-retrieval.json",
+      "bytes": 5412,
+      "sha256": "3a49d131e1369d6e214dbf2ca44b3293f5cefed3ba9256ae89d634072162c0c7"
+    },
+    {
+      "path": "payment-reference-retry/0.resources.json",
+      "bytes": 1562,
+      "sha256": "c69cba7be9ab275003bc3158293498118cf67f4f82185500227e31d6cece976f"
+    },
+    {
+      "path": "payment-reference-retry/0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "payment-reference-retry/0.stdout.log",
+      "bytes": 52873,
+      "sha256": "83009dcedb853d6d33522b42cc7b0709cd38397f6369b6c0b4c510b6225187f5"
+    },
+    {
+      "path": "payment-reference-retry/results.json",
+      "bytes": 179,
+      "sha256": "4a7768033b98b224c61f53703a5d6cfbc248454188f0ae3de74739666ff1f9a7"
+    },
+    {
+      "path": "payment-regressions/0.resources.json",
+      "bytes": 1562,
+      "sha256": "a08b531b8ce338fddb1eba9d21c2ab825689b43c552f8307df46ce692aa10825"
+    },
+    {
+      "path": "payment-regressions/0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "payment-regressions/0.stdout.log",
+      "bytes": 52873,
+      "sha256": "e9acbc17c00ab2456130cba9f4afca081cdbf3d8966edd47b43847644f8fc6e1"
+    },
+    {
+      "path": "payment-regressions/1.resources.json",
+      "bytes": 1873,
+      "sha256": "de9cf5780bce085994247f7c1d12ae0dd3431e933a26b2344bfa9ca7c99df1e8"
+    },
+    {
+      "path": "payment-regressions/1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "payment-regressions/1.stdout.log",
+      "bytes": 69010,
+      "sha256": "efbf76dbd7bdaccb6282052e2afe5953b09cda5c850ee90f106963ac8ff23ef0"
+    },
+    {
+      "path": "payment-regressions/2.resources.json",
+      "bytes": 1251,
+      "sha256": "44def487ab93a923250a588d5fbf2624a9169ac62b729ac5f39ed1ba38434aef"
+    },
+    {
+      "path": "payment-regressions/2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "payment-regressions/2.stdout.log",
+      "bytes": 677,
+      "sha256": "633623b5227f4c3ef5d9445da22787e91f3ad2df5fafbababeb8bf91b53190c1"
+    },
+    {
+      "path": "payment-regressions/3.resources.json",
+      "bytes": 939,
+      "sha256": "7087c35cbf4ae6d5fc0b0c3307090781723fd0f803e3411d2dec4479c57f4655"
+    },
+    {
+      "path": "payment-regressions/3.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "payment-regressions/3.stdout.log",
+      "bytes": 203,
+      "sha256": "7cbf51f108c0d9a238a0fc502192c4c1befca560dfcc6cb6866efe2ccae17496"
+    },
+    {
+      "path": "payment-regressions/lake-ZHYMyf.log",
+      "bytes": 35809,
+      "sha256": "df8e7a5f2217c8e7f3e0187fa6221533cc46ee8c358af8f2e21a644aebf88ee2"
+    },
+    {
+      "path": "payment-regressions/lake-zQY10I.log",
+      "bytes": 35809,
+      "sha256": "8a71be5461c2b2b516656a100f98fc964f367065aa33ecc791f2bb37182a12f9"
+    },
+    {
+      "path": "payment-regressions/results.json",
+      "bytes": 717,
+      "sha256": "5a4da5fafe7d4f67df8bee3e59fe78d3786779aae39cd6ccdda498612f0d5cf4"
+    },
+    {
+      "path": "repair.diff",
+      "bytes": 10120,
+      "sha256": "fbd102d6f4ee1ec89ae2caeec8856d7f92ec606ce4ea27c11744a5791d0ae743"
+    },
+    {
+      "path": "reviews/finder.txt",
+      "bytes": 784,
+      "sha256": "a3f9aed75a28e155264d6e43a7d0d0a9c693ca88d851b3575ab9aec98a42816f"
+    },
+    {
+      "path": "reviews/skeptic.txt",
+      "bytes": 767,
+      "sha256": "7bb9e59bf109da850c9a7be415eea94a1b09f7ce71600793e130bd369deb6ad2"
+    },
+    {
+      "path": "setup/bin-lake",
+      "bytes": 238,
+      "sha256": "c8a73f14f355ac6655b85a3c1a0c9d269ab517c92e82be9d5ba5c5a17ace8273"
+    },
+    {
+      "path": "setup/payment-regression-bin-lake",
+      "bytes": 341,
+      "sha256": "1fe23d2fafad785db82168f1124a3d015ea6ac53dd3a102277762bdc6550a003"
+    }
+  ],
+  "archive_sha256": "9c935f391f266ca08115ca3d66146cece471b9c8979c2ec50690c75642cfd8ab",
+  "original_archive_index_containers": 1,
+  "reviews": {
+    "finder": "no remaining repair defect",
+    "skeptic": "no remaining repair defect; combined gates must exercise PaymentCorpus",
+    "fixed_finding": "separate archive index container and raw member counts",
+    "reviewed_archive_members_before_review_notes": 38
+  },
+  "original_evidence_supplement": {
+    "verification": "original-evidence-verification.json",
+    "verification_sha256": "f170b44d7da33f7b548eff29a46d22f45066af5991c86c8f977434ebf1dfc7d3",
+    "retrieval": "supplemental-retrieval.json",
+    "retrieval_sha256": "9d762c79c1c3aaaaa8e14fc56e704cb2ab7578e365d5455672ff0faf41f8f9e1",
+    "archive": "original-source-evidence.tar.gz",
+    "archive_sha256": "e8bc40d0aa74edb65d0a99f76891102d0c0ea4ed8d43260e70a096c616fb68b1",
+    "archive_members_verified": 177,
+    "original_records_verified": 175,
+    "original_validation_verified": false,
+    "historical_os_reserve_satisfied": null,
+    "remaining_prerequisites": [],
+    "evidence_verified": true,
+    "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
+    "historical_extra_local_reserve_applicable": false
+  },
+  "evidence_verified": true,
+  "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
+  "coordinator_evidence": {
+    "verification": "coordinator-evidence-verification.json",
+    "verification_sha256": "60b7ab31774179938ef278e11632e6bd5970c411e95008819ec48df188a31210",
+    "archive": "coordinator-evidence.tar.gz",
+    "archive_sha256": "27ca82682ac38c94efc9f774a97a9cc07ffd2cadafd1d37cff01b6ea93ca2992",
+    "original_source_checksum_coverage_added": 0
+  },
+  "coordinator_evidence_repair": {
+    "head": "9641c774b4bf088dfe82c4f5d7cd731040906f88",
+    "integration_passed": false,
+    "supersedes_prior_reviews_for_new_edits": true,
+    "independent_reviews": {
+      "finder": {
+        "task": "/root/evidence_finder_fresh",
+        "result": "No findings after final textual recheck. Verified context/original archive hashes, matching identity, Git trees/blob counts/scanner hashes and provenance/resource boundaries. Initial retrieval counts and old validation/reviews are correctly labeled historical. Read-only; no Lean, builds, scanner execution or writes."
+      },
+      "skeptic": {
+        "task": "/root/evidence_skeptic_fresh",
+        "result": "No remaining confirmed defect or new semantic decision. Independently recomputed scanner behavior from all3508 exact committed Git blobs, reproducing both logs with26identicalfindings, zero new, exits1/1. Verified digests and seven unchanged Lean hashes; stale top-level prerequisite cleared and historical fields labeled. Read-only; no Lean/builds/writes."
+      },
+      "fixed_finding": "Cleared stale top-level missing_original_evidence and labeled original retrieval counts and earlier validation/reviews historical.",
+      "scope": "Evidence repair only; not approval of combined candidate or validation gates."
+    },
+    "combined_gates": "Coordinator must run; previous checks and reviews do not approve this repair",
+    "focused_checks": {
+      "git_diff_check": 0,
+      "documentation": {
+        "exit": 1,
+        "missing": 46,
+        "ambiguous": 37,
+        "payment_findings": []
+      },
+      "lean_files_unchanged": true,
+      "lean_checks_run": false,
+      "full_build_run": false
+    }
+  },
+  "original_archive_index_scope": "Initial retrieval only: one index container and zero raw members. Superseded availability is documented separately in original_evidence_supplement; original receipts and archives remain unchanged.",
+  "current_validation_scope": "Historical focused repair at candidate_head1b561734; retained failures and successes, not combined validation of the coordinator-evidence repair.",
+  "reviews_scope": "Historical focused repair reviews only. New edits require the independent reviews recorded in coordinator_evidence_repair."
+}

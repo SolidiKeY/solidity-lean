@@ -29,7 +29,8 @@ describe the core path.
 ## Memory operations
 
 `Compiler.compile` selects one compiler for the whole program, trying the core,
-first memory, reference-array, full-object and construction paths in order.
+first memory, reference-array, full-object, construction, direct-loop, scoped-loop
+and internal memory-call paths in order.
 Each has its own input and output relation. The core path's output relation is
 `Sim` only; using it as a prefix to memory compilation needs separate
 preservation evidence. The finite struct defaults below use the first memory
@@ -42,7 +43,8 @@ cell each), through typed pointer locals: element and field reads and
 writes, lengths, array reads composed in indices and RHS values (`a[a[0]]`),
 checked operators, short-circuit and conditional expressions over memory
 operands, primitive storage writes, `require`/`revert`, blocks and
-statement-level `if`. Allocation: `new T[](n)` with a simple length (the
+statement-level `if`. Sequential programs may also contain checked loops whose
+conditions and bodies belong to this finite memory fragment (below). Allocation: `new T[](n)` with a simple length (the
 elaborator captures effects first), a declaration without initializer (the
 same as `new T[](0)`), default and literal construction of finite nonrecursive
 structs with primitive members, nested structs and primitive dynamic arrays
@@ -292,24 +294,478 @@ mixed memory program. The later fallbacks accept their separately documented
 array/object fragments; they do not compose those representations with this
 path's finite struct construction.
 
-**Regressions** (each runs the actual source program and the public
-compiler's code, with an inhabited public input):
-`Evm/MemoryCompileExamples.lean`, `Evm/MemoryExprExamples.lean`,
-`Evm/MemoryAllocExamples.lean`, `Evm/MemoryAllocSourceExamples.lean`,
-`Evm/MemoryStructDefaultExamples.lean`, `Evm/MemoryPathExamples.lean`, and the
-`Evm/MemoryStructReferenceDefaultExamples.lean`,
-`Evm/MemoryStructReferenceDefaultModes.lean`,
-`Evm/MemoryStructReferenceDefaultLiterals.lean`, and
-`Evm/MemoryStructReferenceDefaultBoundaries.lean` modules. The latter check nested defaults, legacy/viaIR literals and allocating
-rebinding, retained aliases, finite child/local deletion, empty model children,
-wrong zero pointer words, insufficient capacity, exact failure and unreached
-allocations, with source and target observations and inhabited correctness
-inputs. Invalid empty struct encodings remain model-only; source admission is
-unchanged. The
-large computed compiler results there are marked irreducible for
-elaboration; kernel checks still unfold them, and the pointer compiler
-recurses structurally so acceptance reduces in the kernel (no native
-reduction is trusted).
+## Ordinary internal calls with memory
+
+After the published core, memory, reference-array, object and construction
+backends refuse a program, the public checked entry also accepts direct nonrecursive internal calls whose
+parameters are primitive values or supported memory-pointer paths, returning
+nothing, one primitive (assigned or discarded), or a supported memory
+reference. Calls may nest and occur inside blocks/branches. They may mutate a
+shared argument, rebind their own pointer, allocate objects, and return either
+an alias or an object allocated in the callee. Primitive-member storage-root
+copies into memory parameters remain fresh copies; memory parameters and
+memory returns retain identity.
+
+`Evm/MemoryCalls.lean` reuses the intrinsic `Args.declsThen`, `CallRet` and
+body-frame expansion used by `internalCallExpand`, including the existing
+primitive code generators at the leaves. The original core call compiler is
+still selected first when its whole-program fragment applies. A memory call
+never uses core-only `Sim` as a memory prefix: every caller local stays in the
+full `StateRepr` during the inlined body. Scope exit drops private locals;
+a returned reference copies its pointer into the exported local cell, without
+copying its object. `GrowingResult` retains stack restoration, the grown heap,
+`BaseExtends`, and the exact allocator cursor advance through every frame.
+The syntax-derived call height bounds structural expansion; it is not a
+configurable search, recursion or execution budget.
+
+The call certificate records `Compilation.requiredFrame`, the largest
+expanded context, including caller locals plus all nested parameter/return
+frames. `Compilation.allocationCost` counts only reached source prefixes in
+the exact intrinsic expansion. Failed arguments reach neither return-default
+allocation nor the body; an earlier revert requires no capacity for later
+allocations. Default memory-return objects are still allocated by
+`CallRet.enterT`, even when the body subsequently aliases another object.
+Certificates carry a syntax-derived allocation flag and a proof that a
+false flag means zero cost. `reachedCost_eq` proves the optimized cost is the
+same reached-prefix formula: nonallocating suffixes and branches do not force
+the source evaluator just to compute capacity. This preserves the existing
+memory compiler's deliberate short-circuit (already in commit `3b03ac58`).
+The existing `AllocationInput` policy, nonzero allocating frame base and
+no-runtime-capacity-check policy are unchanged. Both frame and capacity
+refusals have negative controls with inhabited positive inputs.
+
+For compatibility `isMemory` remains the original memory-certificate
+discriminator. `isMemoryCalls` identifies the expanded-call certificate;
+`usesMemory` includes every published heap backend, each with its distinct
+input/output relation. `memoryCalls_input` exposes its reserved-frame
+and reached-cost premises without unfolding the compiler result.
+`Compilation.correct` is the common kernel-checked source/machine agreement
+for the call and published backend certificates, retaining the stronger memory output relation.
+
+**Call refusal boundaries:** external/world/callback calls, recursive-call
+contracts (`callRec`), payments, storage-alias parameters/returns, exported
+primitive tuple returns (`CallRet.rets`), and memory returns whose default
+allocation/layout is outside the existing fragment. Function-value
+reference-argument elaboration is separate; these examples use direct names.
+The bodies and argument conversions must themselves be in the memory
+fragment. No source halt, allocation input, SolKey rule or printer changes.
+
+`Evm/MemoryCallExamples.lean` checks inhabited public inputs and both actual
+source and compiled observations: nested primitive/void calls, alias mutation,
+parameter rebinding, new-object memory returns, nested reference forwarding,
+primitive-member struct returns, implicit storage-to-memory argument copying,
+true/false branches, callee and bounds reverts, failed return arguments,
+zero-cost reverts without an allocator, and frame/capacity/refusal controls.
+The renewed controls add a body-local array escaping by reference across later
+frame reuse, a discarded primitive return, signed `int` and `bool` parameters
+and returns through a memory-using branch, and an isolated private-frame
+refusal. For the latter, all representation and capacity premises are inhabited
+at frame `5`, which fits base `1` plus caller-only need `4`; the expanded
+`requiredFrame` is exactly `12`, so the checked input needs frame at least `13`.
+The stack starts with `77`; a reserved untouched cell holds `99`.
+The callee's mutation and allocation are observed independently on both runs.
+A 4,096-element cost regression also has an inhabited public input and both
+source/machine observations. The identical bounded kernel cost benchmark
+before/after short-circuiting passed at unchanged limits: 2.518/1.014 seconds,
+1,112,559,616/873,324,544 bytes peak sampled group RSS. These are warm measured
+checks, not cold-build bounds.
+The transitive axioms of the public theorem, pointer-return theorem and
+inhabited agreement examples are only `propext`, `Classical.choice`,
+`Quot.sound`.
+
+The matching `tests/solc/MemoryInternalCalls.sol` fixture is replayed by
+`node scripts/check-memory-internal-calls.mjs SOLJSON MODULES_DIR [cancun|osaka]` against
+SHA-pinned solc 0.8.34 (`c8649f8d…cfd11d8`) and optional external EthereumJS
+packages, in legacy/viaIR and optimizer off/on modes: 60 executions on the
+original Cancun default and 60 additional Osaka compatibility executions,
+using identical expected vectors and unchanged gas limits.
+The external `largeCost` vector is only call-execution smoke; its literal return
+is not an independent allocator/capacity observation. The inhabited Lean
+source/heap/cursor checks carry that cost evidence. These source reference
+observations supplement the kernel theorem against this repository's typed
+run and word-addressed machine; they are not universal solc or bytecode
+refinement. Dependencies remain outside the core package.
+
+**Validation and remaining blocker (2026-10-29).** The original gap was
+reproduced against the exact recorded base compiler
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`: the same native direct-call source
+is refused there and accepted here. The bounded default build passed all 687
+jobs, including the old memory regressions and all new inhabited examples.
+The refreshed default build passed in 41.362 seconds with
+1,497,014,272 bytes peak sampled group RSS. The refreshed kernel trust audit
+passed (529 headline theorems; 131.332 seconds). Its serialized final gate
+group took 145.707 seconds with 1,495,232,512 bytes peak sampled group RSS.
+Orphan, layer, strict automatic, trust lint, 26 affected script tests and all
+60 Cancun plus 60 Osaka external EVM observations passed. The independent SolKey check matched 377 taclets and all 131
+read-bearing annotations. The optional documentation-path check still fails
+on 20 historical references in files unchanged from the recorded base.
+
+The required full `./run-lean.sh` is **validation BLOCKED**, not passed: after
+the successful default build its SolKey test-suite phase encountered runtime
+allocation/thread failures. Synchronous elaboration repaired all affected
+modules except unchanged `Solidity.TestSuite.Derived17`. Its final isolated
+attempt, after allocator-purge and clean-page-cache headroom repairs, stopped
+at the **12 GiB whole-VM current guard**, exit 75, after 87.017 seconds with
+10,491,265,024 bytes peak group RSS. This is a resource stop, not a demonstrated
+proof failure. Its transitive imports reach none of the task-changed modules.
+The maximal proved compiler increment is retained; original-assignment
+completion remains false pending this required validation. The shared
+`memory-loops` lane owns the prerequisite performance repair; this lane must
+consume only its validated merged result before rerunning `SolkeyTestSuite`
+and the full script without changing claims or budgets. This dependency did
+not stop independent own-scope work: the renewed audit and controls below
+were completed while the repair was pending.
+
+Every Lean/Lake operation used the checkout writer lock and the managed VM's
+`bounded.py`: inherited 12 GiB per-process address-space ceiling, sampled
+10 GiB workload RSS stop, 12 GiB whole-VM current stop, existing hard 16 GiB VM
+cgroup, actual swap disabled. This is a measured guard, **not** a writable
+12 GiB cgroup guarantee. `LEAN_NUM_THREADS=1` and `-j1` were explicit. Temporary
+untracked Lake configs selected ordinary asynchronous elaboration for the
+default build and synchronous elaboration for thread-sensitive test-suite
+modules; neither changed proof budgets. Clean page-cache reclamation retained
+all cache files on disk. Interrupted transport-supervisor attempts, failed
+checks, exact configs and all resource results are retained in
+`/workspace/solidity-compiler10-20261028-memory-internal-calls` with the handoff.
+
+Independent read-only finder and skeptic reviews used no Lean process/server.
+No soundness finding remains. Their confirmed fixes added successful void-call
+coverage and an allocation-cost shortcut with a zero-cost proof and a native
+thunk (generated C inspected), plus the inhabited 4,096-element regression.
+The skeptic independently confirmed the final validation-blocked classification.
+
+A second independent read-only audit found no implementation defect and three
+concrete control gaps: caller-only versus private-frame reservation, discarded
+primitive returns, and signed/Boolean calls. All three are now covered by
+inhabited kernel proofs and corresponding real compiler/runtime controls;
+both reviewers confirmed the findings addressed. The escaping-local/frame-reuse
+control adds a fourth ownership observation without broadening the fragment.
+No intrinsic representation, compiler policy, expected old observation, proof
+budget or SolKey pin changed. The initial added Solidity fixture used reserved
+identifier `alias`; its failing compiler log is retained, and the identifier
+was corrected to `shared` without changing expected values.
+
+Published-master compatibility was kernel-checked in a detached worktree at
+`cc155f36dc163e221b1f8279c56fb2006113ee7d`, overlaying only the exact task
+compiler modules and expanded controls: `Solidity.KeySort` plus
+`Solidity.Evm.MemoryCallExamples`, 132 jobs, exit 0, 404.065 seconds,
+1,826,172,928 bytes peak sampled group RSS. This is focused compatibility
+against published dependencies, not a claim that the required combined full
+script passed. The original task branch/base and existing commits were retained.
+
+
+The call certificate retains its original primitive-array and primitive-member
+struct layouts. Published aggregate/default-construction backends coexist but
+are not coerced into this call relation; programs requiring their additional construction/access clauses are not
+coerced into the call relation. The new-array prefix followed by a reference-array
+call has an explicit refusal control. Existing opaque pointer-alias clauses
+remain available where the original memory certificate already admits them. The
+separate byte-addressed failure emitter is not connected to this word-machine
+agreement and does not change its existing revert outcomes.
+
+**Published-base reconciliation (2026-10-30).** The exported original task
+checkpoint `6885b749846c536d925a89cdcbaf09163043b756` remains unchanged. An
+isolated task branch at published base
+`8445c3fc203144251b9d1fc9181f7f61a8189522` combines the cumulative task diff
+with the already published aggregate paths. Dispatch preserves their order:
+core, legacy memory, reference arrays, objects, construction, then calls.
+Every published input, output and correctness branch is retained; no aggregate
+relation is coerced into the call relation. `allocationCost` uses the published
+construction cost for that certificate, with an exact three-word positive
+control; `usesMemory` is classification only and includes all heap backends.
+
+The reconciled compiler built 156 jobs, exit 0, in 56.868 seconds with
+1,133,510,656 bytes peak group RSS. Call/aggregate witnesses and the published
+failure observation, slice and unwind controls built 186 jobs, exit 0,
+in 39.658 seconds with 1,489,522,688 bytes peak group RSS. The exact published
+compiler was copied into a separate namespace for a before/after kernel probe:
+it refuses the same ordinary memory call accepted here; actual source and
+compiled observations also pass (exit 0, 1.911 seconds, 947,277,824 bytes peak).
+
+The existing inhabited `require(false)` call still observes an empty source
+revert and rejects a panic observation. A separate nonempty-payload internal
+call has its exact intrinsic source bytes observed by the published failure
+relation while the word compiler still refuses it. These are coexistence and
+refusal controls, not byte/payload refinement for `Evm.Out.revert`. The current
+common compiler and observation theorems print only the standard axioms.
+An initial observation proof tried decidable equality on function-valued
+states; its failed log is retained. The repaired helper recovers the exact
+error from its halt projection without changing outcomes or adding axioms.
+
+The changed default/root build was attempted once under the 300-second group
+limit and stopped at 300.044 seconds, exit 75, peak group RSS 3,744,534,528
+bytes. It is **not passed**. The last completed line was the checked frontend
+certificate; the newest pending setup file was checked frontend `TypeExamples`.
+This records build progress, not a claim of a false theorem or a per-proof
+300-second failure. The required combined full build and its expanded trust
+audit remain outstanding. The separately owned `Derived17` repair remains
+unpublished and unavailable; no sibling branch was imported or unchanged
+expensive failure retried. All current checks use the authorized measured
+fallback and explicit `-j1`; neither resource nor proof/time budgets increased.
+
+The additional published emission/composition/artifact and legacy memory
+registrations passed 188 jobs (exit 0, 44.310 seconds, 1,392,836,608 bytes peak
+RSS). The expanded `TrustAudit.lean` was attempted once as a distinct mandatory
+check and also stopped during import building at the 300-second group limit
+(exit 75, 300.059 seconds, peak RSS 2,166,366,208 bytes); it is not passed.
+Orphan/layer/strict automatic/trust lint checks passed (914 sources, 241
+inventoried sites, zero trust-lint findings), as did all 26 affected script
+tests, the unchanged 60 Cancun and 60 Osaka observations, and the frozen
+377-taclet/131-read-bearing SolKey comparison. The documentation-path checker
+retains the same 20 historical missing references. Both read-only reviewers
+confirmed no compiler/representation/halt regression and the module-map
+omission they identified was corrected. These independent passes do not
+replace either stopped broader gate.
+
+**Pending-import performance investigation (2026-10-30).** Fresh fetch still
+records published master `8445c3fc`; checkpoint `98103415` and the original
+`6885b749` are preserved. The pending `Frontend.Checked.TypeExamples` has a
+13-module source closure, all unchanged from that published base and containing
+none of this task's files. Every one of its 12 saved imported artifact identities
+exists and matches its producer trace. No completed target trace was identified;
+anonymous cache entries alone cannot establish a valid prior exact-input build.
+Library producers use `Elab.async=true`; the trust command's `false` applies to
+its final file. Lake excludes these `weakLeanArgs` from the input key, so that
+flag difference does not demonstrate cache invalidation. The expensive Taclet
+rebuild also has published source/import changes.
+
+One diagnostic checked the exact source and saved setup with profiling, explicit
+`-j1`, the same resource guard and a 300-second ceiling. It requested no compiled
+outputs and populated no reusable target cache. It finished in 81.084 seconds,
+peak aggregate RSS 5,218,258,944 bytes, **exit 1**: theorem traces completed, but
+profiler messages interfered with the two existing `#guard_msgs` expectations.
+This is diagnostic evidence, not a passing validation. The earlier default and
+trust logs list approximately 245.552 and 293.029 seconds of completed build-job
+durations respectively. These rounded job durations are not a wall-time
+decomposition; the evidence is consistent with cumulative published prerequisite
+work, without proving the complete cause or predicting a successful full run.
+No task-induced import/cache defect or single 300-second proof was demonstrated.
+
+Both read-only reviewers confirmed those limits and no new implementation defect.
+Neither unchanged gate was retried, nor were prerequisites prebuilt to evade its
+cumulative budget. Both timeout obligations remain open. A retry requires a
+concrete published performance repair affecting the measured prerequisite work,
+legitimate exact-input cache evidence, or an authorized validation procedure that
+accounts for cumulative prerequisite work. Frontend proof changes belong to the
+G09 parser owner; this task must not take them over. Derived17 publication is an
+additional independent condition for TestSuite/full-script validation. The
+`perf1030-investigation.json` and failed diagnostic log retain source/setup/input
+hashes, producer traces, effective options and reviewer conclusions. No semantic,
+proof, resource, time or search budget changed.
+
+**Published-base preservation check (2026-10-31).** Fresh published master is
+`89ce50152255d6dc82ab733cecacb903b91e948e`. An isolated task branch reapplies
+the reconciled changes; both older exported candidates remain preserved. All
+177 repository sources in the memory-call controls' import closure are
+byte-identical to the October 30 candidate and intersect none of the newly
+published changes. Four additional imports belong to the Lean toolchain. The
+initial naive regex count of 182 also included a token from prose; it is not
+the source-module count. All published root registrations survive, with just
+the two call modules added. No compiler, call proof, fixture or expected
+observation changed, and unchanged proof/EVM controls were not rerun. This is
+source-preservation evidence, not a new kernel validation of the broader base.
+
+The restored same VM reconfirmed Lean 4.24.0 (`797c613`), Lake 5.0.0-src+797c613
+and the actual KeySort build: exit 0, two jobs, 0.304 seconds, peak group RSS
+48,553,984 bytes. Changed-base orphan, layer, strict automation and trust-lint
+gates passed under the same guard (combined 10.666 seconds, peak RSS
+305,029,120 bytes; 1,013 sources, 246 inventoried trust sites, zero findings).
+The documentation-path gate fails with 48 missing references, exactly the
+same byte-for-byte output and exit 1 as an unmodified published-base checkout.
+This expanded published debt is distinct from the older 20-reference baseline;
+it includes archived-log references and prospective inline-assembly paths.
+The first baseline command accidentally ran in the candidate; its separate
+failed log is retained, and the actual baseline was then checked correctly.
+
+Both earlier 300-second default/trust timeouts remain open: this publication
+provides no measured repair to their unchanged pending frontend/printer
+prerequisites, while root/audit imports expand. No unchanged expensive gate
+was retried and no prerequisites were prewarmed. The published Derived17 file
+is still the migration checkpoint; the memory-loops repair is still unavailable.
+The next required condition is a genuine published performance/cache/procedure
+change accounting for cumulative gate work, plus publication of that independent
+repair for TestSuite/full-script validation. Two independent read-only reviews
+found no own-scope compatibility defect. Full original-assignment completion
+remains false; exact source hashes and current/baseline checks are retained in
+`compat1031-status.json` with the cumulative delivery.
+
+### Checked memory loops and enclosing scopes
+
+`Evm/MemoryLoop.lean` proves an unbounded simulation of `Stmt.loop`
+using `Instr.loop`. The condition carries `ValFrag`; the body carries
+the existing finite `ProgFrag`, and its output flags must restrict to
+the entry flags. Every next turn therefore has the same checked fragment.
+`Evm/MemoryLoopCompile.lean` composes those loops with finite statements.
+
+The additive `Evm/MemoryLoopScope.lean` certificates compose these programs
+under enclosing typed blocks and statement-level conditionals. The selected
+branch alone contributes allocation demands and costs. Scope exit drops local
+bindings while retaining the actual heap extension and address map; the join
+weakens flags with the existing restrict/meet operations. Both branches must
+compile, including an unselected branch. Loop bodies still use the original
+finite certificate: a loop inside another loop's BODY remains refused.
+
+`Compiler.compile` tries the core, finite-memory, reference-array, object and
+construction paths first, then direct/sequential `memoryLoops`, then
+`memoryLoopScopes`. Existing
+discriminators retain their meaning; `isMemoryLoopScopes`,
+`memoryLoopScopesResult` and `memoryLoopScopes_input` expose the new result
+and its premises without normalizing a whole computed certificate.
+
+The input is `StateRepr`, a bound covering every temporary frame in either
+branch/body, and reached-prefix `Room`. `LoopPrefix` records actual successful
+turns with their exact allocation cost. A reached true-condition turn requires
+capacity for allocations before a later revert too. Program demands shift a
+reachable suffix by the exact successful prefix cost; unreachable suffixes
+contribute nothing. A zero-iteration loop needs no body capacity.
+`room_nonallocating` is inhabited even for divergence. Scope helpers preserve
+the selected branch's `Room`; an unselected allocating branch needs no capacity.
+The result retains `StateRepr`, stack equality, `BaseExtends`, an exact
+typed `Cost` witness on success, and `GrowsAllocator`.
+
+`MemoryLoopScopeBudget.prefixBudget` is a sufficient, partial recognizer.
+It can bound a finite allocating prefix before a syntactically nonallocating
+suffix without evaluating that suffix. It returns `none` at a scope or loop
+head it cannot bound; manual checked room lemmas handle allocating turns and
+selected/unselected scopes. It is not a termination or universal allocation
+oracle. Cost/demand views are kernel eliminators for the typed certificates.
+
+Normal exit, revert and divergence remain distinct. Absent any finite normal or reverting outcome, the certified loop has
+source `diverge` and machine `fault`; no iteration fuel or successful
+termination premise is added. Continuously allocating divergence generally
+cannot inhabit finite-word capacity. Source exhaustion is not reclassified:
+The memory-loop certificates continue to refuse exhaustion-producing clauses
+such as `assumeFalse`,
+including in unselected branches, and `not_exhausted` follows from the full
+simulation. Existing layout, copy, reference-array, reference-struct, call,
+payment and assembly boundaries are unchanged. This is word-memory compiler
+refinement, not raw bytecode/layout/gas refinement or universal source coverage.
+
+`MemoryLoopScopeMeta` and `MemoryLoopScopeCompile` use generalized kernel
+recursors with native indexed-match twins and universal kernel equality links.
+The compiler's constructor equations share already checked results instead of
+normalizing complete certificates twice. No proof, search, node or timing
+limit was raised.
+
+The original `MemoryLoopExamples`, `MemoryLoopAllocExamples` and
+`MemoryLoopSourceExamples` controls are retained. The additive scope examples
+check inhabited public simulation and actual source/compiled observations for
+arrays, aliases and primitive structs in legacy and viaIR source orders;
+zero iterations with a genuinely reverting body; selected revert; exact
+exhaustion with refusal; unsupported nested loop bodies even when unselected;
+one reached allocation; allocation before revert; a nontrivial enclosing
+local drop (literal `7`, positive scope depth); full temporary-frame
+reservation; and a last-word unselected allocating branch with an actual
+`StateRepr` and public agreement. Selected divergence, an unreachable revert
+suffix, and allocation before nonallocating divergence have kernel-checked
+exact outcomes and inhabited room. Their infinite executions are not run by
+native evaluation. The allocating divergent prefix is also refused without
+its one required cell.
+
+Bare source blocks can flatten during elaboration. Ordinary source regressions
+use retained `if` nodes; typed regressions exercise actual `Stmt.block`.
+`tests/solc/MemoryCompilerLoops.sol` retains the four original functions and
+adds scoped variants. `scripts/memory-loop-evm.mjs` and
+`scripts/memory-loop-scope-evm.mjs` actually execute calls through the pinned
+EthereumJS adapter in all four legacy/viaIR × optimizer-off/on modes with
+published solc 0.8.34. Both sets observe arrays `4`, records `3`,
+allocateTurn `0`, and empty-data revert before return. Wrong-value,
+wrong-halt and unchanged host instruction-budget refusals remain controls.
+These sampled upstream executions complement kernel simulation; they are not
+a solc/EVM refinement theorem. No feature inventory status is promoted.
+
+Integration worktrees must install the optional EVM package from its existing
+lockfile and populate both pinned compiler files in `.lake/soljson/` before
+running these regressions; see [compiler setup](solidity-upstream-tests.md#reproduce).
+Dependencies and compiler caches are local to each worktree. The memory-loop
+runners use `MEMORY_LOOP_SOLC` for the 0.8.34 file; the replay tests discover
+the 0.8.38 file in `.lake/soljson/` (or use `SOLC_REFERENCE`). With those
+prerequisites present, run these checks sequentially under the resource scope:
+
+```sh
+npm ci --ignore-scripts --prefix scripts/evm-reference
+node --test scripts/check-memory-loop-timing.test.mjs scripts/check-automatic.test.mjs scripts/evm-reference/replay.test.mjs
+MEMORY_LOOP_SOLC="$PWD/.lake/soljson/soljson-v0.8.34+commit.80d5c536.js" node scripts/memory-loop-evm.mjs
+MEMORY_LOOP_SOLC="$PWD/.lake/soljson/soljson-v0.8.34+commit.80d5c536.js" node scripts/memory-loop-scope-evm.mjs
+```
+
+The combined integration at `4d5f5d61a3ec252d5b1b5a25488f5c214a51bc2d`
+passed its first 16 gates, then failed to load `@ethereumjs/util` in the
+replay tests. Installing the unchanged dependency lock exposed a second absent
+prerequisite, the pinned 0.8.38 compiler. After restoring both compiler caches
+with their existing SHA-256 checks, the affected tests and both four-mode EVM
+runners exited 0. This repaired checkout setup; no observations, proofs,
+assertions or budgets changed. The full combined gate sequence still requires
+a fresh controller run. Local repair receipts are retained in
+`.lake/integration-repair/resources.json`, `gate-0.log` through `gate-2.log`,
+and the two `memory-loop*-evm.json` reports. Read-only finder and skeptic
+reviews used no Lean server and found no remaining setup defect or changed
+semantic gate. Their request to make the focused evidence discoverable is
+resolved by these paths; full combined validation remains pending.
+
+Current validation, batch `solidity-compiler10-20261028`, original base
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`:
+
+| Check | Actual result |
+|---|---|
+| Runtime | Lean 4.24.0, Lake 5.0.0-src+797c613; versions and KeySort build exited 0. |
+| All eleven scope modules | Exit 0, 14.39 s in the dedicated multi-target build, including original imported controls. |
+| Original/scoped four-mode EVM runners | Each exited 0 (1.54/1.52 s); 32 expected fixture-call observations in total, plus negative controls. |
+| Affected script tests | All 22 passed, exit 0. |
+| Orphans/layers/classification/complete TestSuite/trust | Each exited 0; 152 core modules, zero elaborator reach; 491 automatic + 61 budgeted, zero manual/pending; 552 derived + 11 refuted + 1 excluded; 753 sources / 250 trust sites / zero findings. |
+| Fresh original Derived17 group | All 24 modules freshly checked, exit 0, 262.03 s whole guarded workload, peak group RSS 2,944,225,280 bytes. |
+| Public/scope/capacity/divergence axioms | Only `propext`, `Classical.choice`, `Quot.sound`. |
+| Documentation paths | Exit 1: the same 20 historical references, byte-identical to the recorded failing baseline. This gate is not passed. |
+| Full repository | `./run-lean.sh` exited 0 in 377.01 s: 702 default-build jobs, 282 TestSuite jobs, and all 377 pinned taclets / 131 read-bearing annotations match. Separate final axiom audit exited 0 in 6.97 s. |
+
+The preflight command receipt is `memory-loop-scope-preflight-56`: all
+individual terminal codes are recorded, including the failing documentation
+baseline; total 26.93 s, peak aggregate RSS 1,139,437,568 bytes.
+The complete `memory-loop-scope-full-57` operation (runtime, full script,
+axioms) exited 0 in 384.30 s, peak aggregate RSS 2,914,099,200 bytes and
+kernel build-group memory peak 3,253,170,176 bytes. The fresh
+timing receipt is `memory-loop-scope-derived17-fresh-36`.
+The reproducible timing command is
+`lake -f lakefile.memory-loops.toml env python3 scripts/check-memory-loop-timing.py --output <new-directory> --results <receipt.json>`,
+under one outer 300-second guard. The validator rejects stale, partial,
+cached, failed and over-budget group evidence.
+
+These current heavy checks use a working Docker hard build-group scope:
+actual `memory.max=12884901888` and `memory.swap.max=0`, independently
+verified in each receipt, alongside the unchanged measured guard
+(12 GiB per-process address space, 10 GiB sampled group-RSS stop, 12 GiB
+current-memory stop, 100 ms samples). The parent VM has a hard 16 GiB cgroup
+and disabled swap. Historical worker fallback runs had only that parent
+limit plus sampled/per-process guards; they are not relabeled hard 12 GiB.
+The writer lock stays held inside the container for the whole workload.
+All runs set `LEAN_NUM_THREADS=1`, use explicit Lean `-j1` through an
+archived untracked Lake config, keep caches on disk, and run no Lean server.
+
+The before-scope bounded check of the old compile module/public entry/examples
+and actual refusal took 8.78 s / peak 868,950,016 bytes. Dedicated new module
+checks were approximately 1–2 s for certificate/metadata/soundness/room/budget/
+compiler modules, 2–8 s for examples; these are bounded per-file/cache-state
+measurements, not clean-build speed ratios. Nontrivial computed-certificate
+comparison hit the unchanged 200,000-heartbeat limit. Sharing component
+success equations with `Option.some_get` repaired it; automatic compilation
+is proved to return the shared certificate, not merely sampled equal code.
+
+Historical resource stops, address-space failures, interrupted runs, 300-second
+timeouts and proof-heartbeat failures are retained in the cumulative evidence,
+never counted as passes. In particular the earlier 1110.96/965.51-second replay
+groups and fresh-31 timeout failed the original timing gate. The standalone
+shared repair is commit `082efb3183e66af30d7324a0291a9b45458460d1`, independently
+reviewed and exported against published `040e59d30a6726fa4f9fee831695eeaa4027ede1`;
+its complete fresh group passed in 288.65 s. The original worktree's separate
+fresh 262.03-second pass above includes the same original nine remaining
+proofs, 1024-step walk, 903 visits, refusal controls and unchanged bounds.
+
+Independent read-only finder/skeptic reviews used no Lean server. They found
+no semantic defect and identified missing nontrivial outer-drop and scoped
+divergence controls, which were added and checked. Final source reviews found no outstanding defect after those controls and
+wording corrections. The cumulative handoff records the final gate and artifact
+verification decisions. Full logs, hashes, exact commits, receipts,
+failed attempts and review outcomes accompany the cumulative handoff.
 
 ## What is proved
 
@@ -846,3 +1302,196 @@ followed by bounded gate confirmation. No worker push or merge of master occurre
 The cumulative original checkpoint and current-base task export, full failed and
 passing logs, resource records, reviews and checksums are retained together in
 `/workspace/solidity-compiler10-memory-reference-structs-8445-compat`.
+
+### Historical review1 evidence (superseded)
+
+These results describe the earlier review1 checkpoint in the same VM/branch.
+The failures and incomplete decision are preserved as history; see the
+[current validation](#checked-memory-loops-and-enclosing-scopes) for the
+complete fresh 262.03-second pass and final full-repository confirmation.
+
+At that checkpoint:
+
+* `node scripts/memory-loop-evm.mjs --output <results.json>` executes actual
+  EthereumJS deployment and calls in legacy/viaIR × optimizer-off/on modes.
+  `arrays`, `records`, `allocateTurn` return 4, 3, 0; `allocationBeforeRevert`
+  actually reverts with empty data. Corrected run exited 0 in 1.52 s,
+  sampled aggregate peak 277,245,952 bytes. Wrong-value and wrong-halt controls fail.
+  Separate instruction-limit controls stop deployment and a call as BLOCKED;
+  these host refusals do not establish source `THalt.exhausted` behavior.
+  Bytecode provenance hashes decoded bytes and checks deployed runtime code.
+  These sampled upstream observations are separate from kernel simulation;
+  they do not establish universal solc compiler refinement.
+* The coordinator correction authorizes the measured fallback described above;
+  its host-side record is not visible in this VM. The handoff preserves the
+  supplied instruction as a labelled transcription. Subsequent local Docker
+  checks additionally verify actual `memory.max=12884901888` and
+  `memory.swap.max=0`, with the unchanged sampled guard nested inside.
+  No earlier fallback run is relabelled as a hard-cgroup run.
+* `check-memory-loop-timing.py` and `check-memory-loop-timing.mjs` enforce
+  cumulative accounting for the entire original 24-module proof workload.
+  The earlier per-stage timing claim was insufficient. Full fresh attempts
+  then still stopped at 300 seconds; see `loops.md` and the archived review1 handoff for exact
+  command/result records. No timeout, allocation failure or cached partial
+  workload is a pass. The original assignment could not be marked complete at that checkpoint.
+
+The review1 terminal checks reported Lean 4.24.0 / Lake 5.0.0-src+797c613,
+`lake build Solidity.KeySort`, `./run-lean.sh`, and compiler/replay axiom
+queries each exited 0 under the verified hard Docker scope. The warm full
+script took 1.05 s; the complete runtime/build/axiom group took 9.29 s with
+sampled aggregate peak 1,227,821,056 bytes. These are cached build/audit costs,
+not a fresh proof timing pass. The retained-source fresh group stopped at
+300.024 s, exit 75, sampled peak 1,591,115,776 bytes; only the helper and
+Discover00–03 completed before Discover04 was interrupted. The cumulative
+gate and timed automatic gate correctly exited 1 at that checkpoint. All 22 affected script tests,
+trust (742 sources / 246 sites / zero findings), layers (152 core / zero
+elaborator reach), orphans (728 reachable / zero orphaned) and complete
+TestSuite audit passed. Documentation paths remain failed with the same
+20 byte-identical baseline findings. Independent finder/skeptic final reviews
+confirmed these distinctions and found no further defect; original completion
+remained false at that checkpoint. Current validation supersedes that decision.
+Full historical commands, resource peaks, failures, reviews and hashes are
+preserved in the cumulative evidence.
+
+### Memory-loop integration conflict resolution
+
+The uncommitted merge of `5b3446c835a362dbd12e40314849f763136df17d` into
+`443d1f614ebf92d5c553c014a07ee3553bb5058a` retains all seven checked compiler
+branches. Existing reference-array, object and construction dispatch precedes
+the new direct/scoped loop fallbacks. Each branch keeps its original input,
+output and agreement proof; selector eliminations cover the combined datatype.
+Both parents' documentation and trust entries are retained.
+
+Per-file Lean MCP error diagnostics completed successfully for the compiler,
+the direct/scoped source fixtures, direct/scoped allocation fixtures,
+reference-array rebinding and object construction fixtures. Compiler warning
+diagnostics are empty; its `Compilation.correct` audit reports only `propext`,
+`Classical.choice`, `Quot.sound`, with no source warnings. Source trust
+(1050 sources, 256 sites), layers (172 core modules), orphans (1035 reachable)
+and whitespace checks pass. The repository documentation-path check exits 1
+with 46 missing references, none in the five resolved files; it remains failed.
+No combined full build or original fresh-proof timing gate was run here.
+
+Independent read-only finder and skeptic reviews used no Lean server.
+The finder requested the complete dispatch order in this document and the
+module map, and clarification that the construction fallback refuses all
+loops; both findings were corrected and rechecked. Neither review has an
+outstanding finding. The coordinator retains responsibility for combined
+validation and committing the merge.
+
+
+### Published-master memory-call/loop conflict resolution (2026-10-31)
+
+The pending merge of `91e94ab57305ca055127934fd9e68fe9ea5e6be3` into
+`0256f578904247911482ae2f9b4703a7ee6bb270` retains all eight checked
+compiler branches. Dispatch remains core, finite memory, reference arrays,
+objects, construction, direct loops, scoped loops, then internal memory calls.
+The call fallback retains its zero-push guard. Both parents' `Input`, `Rep`,
+and correctness branches, and the common `Agrees` predicate, are unchanged.
+The loop certificate eliminators now cover calls, and the call eliminator
+covers loops. The combined `requiredFrame` reports each loop certificate's
+need; loop capacity and allocation growth still use `Room` and `Cost`, rather
+than the finite-path `allocationCost` metric. The module map retains both
+families of entries.
+
+Per-file Lean MCP diagnostics completed without errors for `Evm/Compiler.lean`,
+`Evm/MemoryCallExamples.lean`, `Evm/MemoryLoopSourceExamples.lean`, and
+`Evm/MemoryLoopScopeSourceExamples.lean`. The compiler's complete diagnostics
+had no warnings; a temporary `#print axioms` reported only `propext`,
+`Classical.choice`, and `Quot.sound` for `Compilation.correct`, then was removed.
+Layer and orphan checks passed (172 core modules, zero elaborator reach;
+1037 reachable modules, zero orphaned or disallowed). Focused module-map EVM
+paths and whitespace checks passed. These focused checks do not replace the
+coordinator's required combined full validation and timing gates.
+
+Read-only finder and skeptic review passes used no Lean server. The finder
+checked every public declaration from both parents and all mapped EVM paths.
+The skeptic compared every original `Input`, `Rep`, and correctness arm and
+`Agrees` against both parents, checked dispatch order and the zero-push guard,
+and found no added `sorry` or axiom. The helper documentation now explicitly
+states that the finite allocation metric does not replace loop `Cost`/`Room`.
+No outstanding review finding or semantic decision remains. The coordinator
+retains responsibility for combined validation and committing the merge.
+
+### Finite reference-struct published-base continuation (2026-11-01)
+
+The same saved worker VM integrated published `5f6a75b6` (containing the
+`22073f44` memory-loop publication), preserving checkpoints `8276936e` and
+`2cfb116c`. The task's Lean implementation and its original observations are
+unchanged. The eight public dispatch paths and the separate first-memory versus
+construction-fallback refusal boundaries were reconciled in the owning docs.
+No recursive graph copying, reference-element array representation, source
+struct admission, intrinsic representation or optional Bridge import was added.
+
+The actual resumed runtime was Lean 4.24.0 (`797c613`), Lake
+5.0.0-src+797c613; KeySort exited 0 in 0.905 seconds. The original publication
+wait is resolved: all 24 Derived17 modules were freshly checked together in
+240.084 seconds, peak aggregate RSS 2,841,796,608 bytes, under one unchanged
+300-second guard. The full TestSuite target subsequently passed 285 jobs in
+32.260 seconds after bounded dependency scheduling. Cached confirmations are
+not described as fresh proof replays.
+
+All inhabited public struct controls and adjacent registration/refusal controls
+passed 189 jobs in 45.608 seconds, peak group RSS 1,155,915,776 bytes. They retain
+nested/default/empty children, literal modes, alias rebinding, deletion, exact
+reverts, unreached allocation, bad-pointer and capacity controls. The selected
+source tests passed 2/2, affected utility tests 31/31, the pinned upstream nested
+fixture passed legacy/viaIR, and the actual 377-taclet/131-read-bearing SolKey
+comparison passed. Printed allocation/source/public correctness axioms remain
+`propext`, `Classical.choice`, and `Quot.sound`.
+
+A shared scheduling-profile issue was investigated without changing proof
+limits. The exact published 44-module `Evm/Correct.lean` closure, containing no
+task edits, hit its pinned 11,000 heartbeats under forced serial elaboration.
+Normal async elaboration with the same `-j1`, source, heartbeat and resource
+limits passed both an exact-source replay (13.492 seconds) and the actual Lake
+target (14.305 seconds). Its genuinely kernel-checked artifact then unblocked
+the unchanged serial public controls. The serial failure remains a failure;
+no source option, axiom, theorem, expected observation or budget was changed.
+
+UnitExamples first stopped at the whole-VM guard (exit 75, 109.213 seconds,
+7,906,447,360 bytes sampled workload RSS). Between jobs, read-only file-cache
+advice reduced idle VM charge from 2,709,127,168 to 383,901,696 bytes while
+retaining all 21,681 disk files. The unchanged check then passed in 136.337
+seconds, peak group RSS 8,871,755,776 bytes; its retained 100 ms trace measured
+VM charge up to 12,027,527,168 bytes. Recursion passed after dependency
+scheduling in 296.673 seconds, peak RSS 2,336,432,128 bytes. DecisionHashes
+also passed with ready imports in 235.233 seconds, peak RSS 6,587,949,056 bytes.
+
+Full original-assignment completion remains **BLOCKED**, with two measured
+shared prerequisites. `Examples/Decision.lean` reached its own source file and
+timed out in both existing profiles (serial 300.031 seconds / 2,245,287,936 bytes
+RSS; normal async 300.060 seconds / 2,238,099,456 bytes RSS).
+`Examples/Tactics/OpenLoops.lean` likewise timed out in both profiles (serial
+300.067 seconds / 6,763,208,704 bytes RSS; normal async 300.038 seconds /
+6,774,714,368 bytes RSS). These are elapsed-time stops, not OOMs or proofs of
+false claims. Both closures are byte-identical to the published base and contain
+no task-owned changes. Their budget-preserving shared proof repair belongs to
+the appropriate owners/coordinator. No unchanged expensive retry, sibling
+implementation, target exclusion, proof refactor or limit increase was used.
+The root, actual kernel TrustAudit and mandatory full `./run-lean.sh` gates
+remain nonpassing; the source trust lint is a separate passing check. Initial
+aggregate/trust timeouts during prerequisite builds are retained, not promoted
+to passes. The initial run-lean outer RSS measured only its supervisor; its
+interrupted inner guard did not leave a terminal resource record, so that inner
+peak/result is UNKNOWN. All later Node/Lake checks retain separate inner logs.
+
+The existing authorized fallback remained unchanged: hard inherited per-process
+12 GiB address space, sampled 10 GiB workload-group RSS stop, sampled 12 GiB VM
+charge stop, existing hard 16 GiB VM cgroup and actually disabled swap. This is
+not a claim of a 12 GiB workload cgroup or a configured swap-max of zero. There
+was no existing Docker workload group or image on this resumed VM.
+`LEAN_NUM_THREADS=1`, explicit `-j1`, one heavy operation at a time and the
+existing writer lock were retained. Source orphan/layer/strict-automatic/trust
+lint gates passed; strict automation still reports 491 automatic, 61 with a
+step budget, 11 refuted and zero pending. Documentation-path checks retain
+48 byte-identical published-base missing references; that gate remains failed.
+
+Independent read-only finder and skeptic source reviews, without a Lean server,
+found no own-scope correctness, alias, separation, capacity, refusal or dispatch
+defect. They verified the fresh24 source hashes and the valid normal-async
+kernel artifact provenance. The source milestone is implemented and validated;
+this does not substitute for the remaining whole-assignment gates. Cumulative
+commits, original immutable checkpoints, terminal logs, resource traces, review
+records and checksums are exported in
+`/workspace/solidity-compiler10-memory-reference-structs-22073-compat`.

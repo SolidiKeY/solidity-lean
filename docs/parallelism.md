@@ -24,7 +24,8 @@ elaborator.
 - `Semantics` and `Semantics/**`, `Typing/**`, `Theory/**`;
 - the rules: `Calculus.{Fml,Rules,RuleSyntax,RuleKit,KeyTaclets,Step,Arms,
   Blocks,Taclet,Proves,Logic,Preconditions,FiniteMembership,FilteredMembership,
-  Hyp,Correct,FirstOrder,Transient,Lifetime,ContractWorld}` and `RuleSyntax`'s pieces;
+  Hyp,Correct,FirstOrder,Transient,Lifetime,ContractWorld,PaymentWitness,
+  PaymentConditions}` and `RuleSyntax`'s pieces;
 - their soundness: `Calculus.{Sound*,StmtSound,ProvesSound,PremiseSound,
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;
 - what those import: `Calculus.{TermEval,TermEq,TermWk,LoopInvariantWk,Lower,LowerRun,Shift,
