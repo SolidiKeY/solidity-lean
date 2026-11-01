@@ -2870,3 +2870,47 @@ alias equation. No independent-work exhaustion, goal write, unmerged intake,
 reserved edit or push/merge/PR. All previous seals remain immutable; exact
 committed source/signature/witness bundles support private parallel consumers,
 which still require actual combined-tree validation.
+
+
+## Continuation36 — actual mixed-store suffix alias transport (partial)
+
+`Backend/InternalFlow/MixedStoreAliasFrame.lean` proves operational storage-alias
+preservation through actual persistent assignment, a distinct typed primitive
+assignment and heap assignment. The proof inverts the real three statement
+executions; its sole execution premise is their actual successful composed run.
+It neither requires nor proves heap-content preservation or alias liveness.
+The existing withinM exclusions are unchanged.
+
+The existing populated indexed-return fixture now proves MixedSuffix.alias_frame
+through its SAME original suffix, exact_body_result after private local removal,
+and final_slot on the SAME actual compiled whole endpoint. Its final computed
+fragile classification and reached StateRepr supply the real slot, path and
+findLive witness. Wrong-element rejection is transported from the existing
+successful result baseline. Original complete observations, all542 original
+kernel theorem types/85 tuple types, all18 fixture entries/report order and prior
+C32–C35 scoped axiom sets are preserved. New eight actual axiom reports have a
+separate exact guard, including missing/duplicate/order/error corruption controls.
+
+The first new target-slot assembly hit the unchanged200000 heartbeat limit;
+that failure remains raw evidence. Direct elimination of actual reached
+Sim.fragile replaced only the costly thin/drop packaging and passes the SAME
+statement at41.042s for the complete actual fixture, peak sampled RSS1992168KiB.
+The generic composition probe passed1.973s. Per-file2.727s, focused import
+closure2.316s, new actual axiom query2.520s, exact old scoped sets and all542
+kernel type preservation pass. A missing output-directory setup invocation
+failed exit2 and is retained separately from its corrected focused pass.
+Actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort output passed under serial-j1,
+LEAN_NUM_THREADS1, hard12GiB/no-swap and writer/compiler locks.
+
+Independent read-only finder/skeptic source reviews passed without builds.
+Artifact reviews and exact committed identities are recorded in the NEW immutable
+continuation-36 handoff/evidence/checksum set under /workspace/scratch/v12-flow-calls.
+All36 earlier main seals are preserved. All original Work1–6/BackfillsA–B remain
+partial: finite ordinary frame consumers are not general runtime/unbounded
+recursion/dependent dispatch/general early-control loops/byte-world/transient
+closure. Mandatory full124/300s, raw124/121.214s, strict cached121.091s despite
+exit0, prerequisite/broad/OOM failures and raw docs1 remain failed evidence.
+Current complete aggregate is pending: this semantic proof is not a demonstrated
+performance repair and does not authorize an unchanged failed heavy retry.
+Complete current docs equal the previous/publication findings, with historical
+frozen46/current48 debt separate. Original goal identity/status is unchanged.

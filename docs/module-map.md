@@ -1336,3 +1336,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/CallerView.lean` | Captured typed caller-view reference elimination and reached primitive-array separation consumers. |
 
 | `Backend/InternalFlow/MemoryStoreLocalFrame.lean` | Actual successful heap-store local-environment frame; no heap-content invariant or withinM relaxation. |
+
+| `Backend/InternalFlow/MixedStoreAliasFrame.lean` | Actual mixed storage/scalar/heap-store storage-alias frame composition. |

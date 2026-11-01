@@ -997,3 +997,4 @@ import Solidity.Backend.InternalFlow.CallerTail
 import Solidity.Backend.InternalFlow.CallerView
 
 import Solidity.Backend.InternalFlow.MemoryStoreLocalFrame
+import Solidity.Backend.InternalFlow.MixedStoreAliasFrame

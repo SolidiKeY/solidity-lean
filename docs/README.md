@@ -124,3 +124,5 @@ history is in git.
 - [Captured caller-view target consumers](../Solidity/Backend/InternalFlow/CallerView.lean) — typed pointer identity and reached separation.
 
 - [Memory-store local frame](../Solidity/Backend/InternalFlow/MemoryStoreLocalFrame.lean) — actual execution frames locals while heap contents may change.
+
+- [Mixed-store alias frame](../Solidity/Backend/InternalFlow/MixedStoreAliasFrame.lean) — operational alias preservation across actual mutations.

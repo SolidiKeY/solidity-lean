@@ -1,3 +1,4 @@
+import Solidity.Backend.InternalFlow.MixedStoreAliasFrame
 import Solidity.Backend.InternalFlow.MemoryStoreLocalFrame
 import Solidity.Backend.InternalFlow.CallerView
 import Solidity.Backend.InternalFlow.StoragePrograms
@@ -637,3 +638,49 @@ theorem wrong_content_frame : contents written.st ≠ contents final.st := by
 
 theorem original_guard_rejects : store.withinM .nonpayable = false := by decide +kernel
 end Solidity.Backend.InternalFlow.FragileReturnChecks.MemoryLocalFrame
+
+
+namespace Solidity.Backend.InternalFlow.FragileReturnChecks.MixedSuffix
+open Evm Evm.Memory
+/-- The actual suffix writes persistent state, a scalar and the older heap;
+its returned storage-reference local is preserved operationally. -/
+theorem alias_frame : final.st.env.1 = exported.st.env.1 :=
+  CallerView.mixed_store_alias _ _ _ _ _ _ (.here : Idx Final (.alias R)) actual_suffix
+
+theorem exact_body_result : final.st.env.1 = bodyOutput.st.env.2.1 :=
+  alias_frame.trans CapturedResult.returned_reference
+
+/-- On the SAME actual compiled program, final slot/liveness follows from the
+reached representation and preserved actual body result, not a supplied live alias. -/
+theorem final_slot : ∃ (m₁ : Machine) (base₁ : Nat → Fin W)
+    (m₂ : Machine) (base₂ : Nat → Fin W) (r : SRef C (.ref R)) (slot : Slot),
+    Evm.run prefixCode machine = .ok m₁ 0 ∧ Evm.run producer.code m₁ = .ok m₂ 0 ∧
+    StateRepr 3 1 128 producer.frag final.st base₂ m₂ ∧ m₂.stack = machine.stack ∧
+    BaseExtends caller.st.H base₁ base₂ ∧
+    GrowsAllocator 1 128 (producer.cost caller.st) caller.st base₁ m₁ final.st base₂ m₂ ∧
+    bodyOutput.st.env.2.1 = some r ∧ exported.st.env.1 = some r ∧ final.st.env.1 = some r ∧
+    refObs (some r) = some ("rows",[.idx ⟨1,by decide⟩]) ∧
+    m₂.mem 6 = .slot slot ∧ PathSlot C false r slot ∧
+    ∃ sv, final.st.storage.findLive r = some sv := by
+  obtain ⟨m₁,base₁,m₂,base₂,hp,ht,hr,stack,he,hg,hi,ha⟩ := whole_endpoint
+  have observed := congrArg (fun p => p.2.2) source_export
+  cases old : exported.st.env.1 with
+  | none => rw [old] at observed; cases observed
+  | some r =>
+    have flag := Option.some.inj (congrArg (fun flags => flags[2]?) fragile_classification)
+    change producer.frag.get (.here : Idx Final (.alias R)) = .fragile at flag
+    obtain ⟨found,slot,bound,word,path,sv,live⟩ := hr.core.fragile (.here : Idx Final (.alias R)) flag
+    change final.st.env.1 = some found at bound
+    have same : found = r := Option.some.inj (bound.symm.trans (alias_frame.trans old))
+    subst found
+    change m₂.mem 6 = .slot slot at word
+    rw [old] at observed
+    exact ⟨m₁,base₁,m₂,base₂,r,slot,hp,ht,hr,stack,he,hg,
+      CapturedResult.returned_reference.symm.trans old,rfl,alias_frame.trans old,
+      observed,word,path,sv,live⟩
+
+theorem wrong_element_after_suffix :
+    refObs final.st.env.1 ≠ some ("rows",[.idx ⟨0,by decide⟩]) := by
+  rw [alias_frame]
+  exact wrong_element
+end Solidity.Backend.InternalFlow.FragileReturnChecks.MixedSuffix
