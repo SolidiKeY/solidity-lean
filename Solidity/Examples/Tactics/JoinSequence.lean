@@ -39,4 +39,25 @@ theorem refusesRequirement :
 /-- Every typed RHS occurs once in emitted syntax: both branches plus guards. -/
 theorem emittedSize : (LocalWrites.joined (.fresh "se" 0) (.local .here) yes no).size = 33 := rfl
 
+private def captured : Prog C Γ (.val .bool :: Γ) :=
+  .cons (.declLocal .bool (.fresh "se" 0) (some (.simple (.local .here))))
+    (.cons (.block (yes.guarded true (no.guarded false))) .nil)
+private def capturedObserved (b : Bool) : Option (Bool × PrimTy.uint.Denote) :=
+  (((Prog.runSt (start b) captured).map (State.drop (.push .refl))).map
+    (fun σ => (σ.env.1, σ.env.2.1))).toOption
+
+/-- The actual capture block keeps the selected dependent writes and skips
+an untaken failing RHS even after the source condition changes. -/
+theorem capturedChangedGuardDependent :
+    capturedObserved true = some (false, uintOfNat 2) := by
+  unfold capturedObserved captured
+  rw [LocalWrites.captured_drop_runSt (start true) (.fresh "se" 0) (.local .here) yes no]
+  rfl
+
+/-- The selected failing branch remains observable through the block. -/
+theorem capturedSelectedFailure : capturedObserved false = none := rfl
+
+/-- Actual dispatcher syntax includes the extra block node. -/
+theorem capturedEmittedSize : captured.size = 34 := rfl
+
 end Solidity.Examples.Tactics.JoinSequence

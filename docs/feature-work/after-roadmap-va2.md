@@ -518,3 +518,59 @@ its raw failure remains. This static certificate/parity check is not a timed
 TestSuite Lean build or final `./run-lean.sh` pass. Those full final gates and
 all unfinished AU03/AU04 items above remain required. No new exclusion or
 validity/hash premise was introduced. The persistent goal remains incomplete.
+
+
+## AU03 captured-block prerequisite checkpoint (2026-11-01)
+
+Before dispatcher integration, independent finder and skeptic required the
+exact premise wrapper to be covered: Premise.capture declares one snapshot,
+then runs a block containing only the guarded lists. It must not snapshot twice.
+`LocalWrites.captured_drop_runSt` now proves complete state-and-halt equality
+with the original conditional after the outer pop. The inner block drops no
+locals. `captured_sound` covers either modality without validity/arithmetic/
+totality assumptions. `captured_size` counts exactly one additional block node
+beyond the raw joined builder. This is still a standalone prerequisite; the
+walker does not yet dispatch to it and no new rule is registered here.
+
+Concrete controls execute this actual block with a changed source guard and
+subsequent dependent writes, observing original locals `(false, 2)` after
+explicitly popping the snapshot. Selecting the bad branch still yields none;
+the concrete toOption projection merges halt kinds, while the generic theorem
+preserves every halt exactly. Actual emitted program size is 34 versus raw 33.
+
+The first direct rfl success proof hit the unchanged 200000-heartbeat limit;
+raw `mcp-join-capture-examples.log` remains failed. An experiment asking rw to
+infer the list arguments crashed the MCP scratch worker at the hard 12 GiB cap
+(`mcp-join-capture-control-attempt.log`, cgroup peak 12884901888). This is a
+retained failed resource experiment, not a pass or performance result. The
+finished proof unfolds only the observation/wrapper, invokes the exact
+transport theorem with every argument supplied, then computes the original
+conditional. `mcp-join-capture-control-explicit.log` records the successful
+candidate; final `mcp-join-capture-examples-final.log` passes with no errors,
+partial results or timeout. No budget or resource limit was raised.
+
+Both proof files passed per-file MCP (`mcp-join-capture-final.log`); the three
+new generic theorems passed lean_verify (`mcp-join-capture-audits.log`). Exact
+transport and soundness use only propext/Classical.choice/Quot.sound; size uses
+only propext/Quot.sound. All raw tactic/tool failures are retained, including
+unavailable child-container rg for lean_local_search and an audit launch
+refused by writer.lock before starting any concurrent job.
+
+`bounded.py join-capture-prebuild build Solidity.Calculus.Sound.JoinSequence
+Solidity.Calculus.JoinSequenceSize` passed. After stopping MCP,
+`bounded.py join-capture-root-build build Solidity` passed 1015 jobs in 9.15s
+inside / 10.21s runner wall; sampled visible-process RSS 1916972 KiB,
+cgroup peak 1358422016 bytes. Actual aggregate cap remained 12884901888 bytes,
+zero swap, LEAN_NUM_THREADS=1 and explicit Lean -j1. This warm closure is not
+an uncached throughput measurement. Static checks (`join-capture-*.log`)
+pass: strict automatic 491 / 61 budgeted / 0 manual / 11 refuted / 0 pending;
+trust 1055 sources / 248 sites / 0 findings; layers 181 / 0 elaborator; orphans 1040 / 0;
+diff whitespace. The final doc-path check is still compared to the exact base;
+the unchanged 48 failures remain failures. No final run-lean / timed TestSuite claim.
+
+Finder and skeptic independently reviewed the final exact wrapper proofs,
+size law and revised concrete proof read-only without Lean/server/builds.
+Neither found a defect, added premise, exclusion, observation change or budget
+increase. See `work/reviews-join-capture.md`. Dispatcher/query/rule/fragment
+integration, actual walk/leaf measurements and all remaining AU03/AU04 work
+listed above remain unfinished. Full persistent goal remains incomplete.

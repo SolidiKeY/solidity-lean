@@ -91,4 +91,28 @@ theorem LocalWrites.joined_sound {m : Modality} (σ : State C Γ) (name : Var)
       (.unfold (LocalWrites.joined name c thn els) (.push .refl)) σ := by
   exact Premise.sound_unfold σ (LocalWrites.joined_drop_runSt σ name c thn els)
 
+/-- The dispatcher's captured block preserves all Solidity states and halts.
+The inner block pops no locals; the capture alone pops the snapshot. -/
+theorem LocalWrites.captured_drop_runSt (σ : State C Γ) (name : Var)
+    (c : Simple C Γ .bool) (thn els : LocalWrites C Γ) :
+    (Prog.runSt σ (.cons (.declLocal .bool name (some (.simple c)))
+      (.cons (.block (thn.guarded true (els.guarded false))) .nil))).map
+        (State.drop (.push .refl)) =
+      Stmt.runSt σ (.ite (.simple c) thn.program els.program) := by
+  rw [← LocalWrites.joined_drop_runSt σ name c thn els]
+  simp only [LocalWrites.joined, Prog.runSt_cons, Stmt.runSt_block,
+    TRes.map_drop_self, Prog.runSt_nil]
+  congr 2
+  funext τ
+  cases Prog.runSt τ (thn.guarded true (els.guarded false)) <;> rfl
+
+/-- The actual captured-block join is sound for either modality, without
+adding validity, arithmetic or totality premises. -/
+theorem LocalWrites.captured_sound {m : Modality} (σ : State C Γ) (name : Var)
+    (c : Simple C Γ .bool) (thn els : LocalWrites C Γ) :
+    Premise.Runs m (.ite (.simple c) thn.program els.program)
+      (.capture .bool name (.simple c)
+        (.block (thn.guarded true (els.guarded false)))) σ := by
+  exact Premise.sound_unfold σ (LocalWrites.captured_drop_runSt σ name c thn els)
+
 end Solidity

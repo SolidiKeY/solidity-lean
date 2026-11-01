@@ -49,4 +49,15 @@ theorem LocalWrites.joined_size_le (name : Var) (c : Simple C Γ .bool)
   simp only [Stmt.size, Val.size, Simple.size]
   omega
 
+/-- The dispatcher capture emits one block node beyond the raw builder.
+Both guarded branches and the snapshot declaration are counted. -/
+theorem LocalWrites.captured_size (name : Var) (c : Simple C Γ .bool)
+    (thn els : LocalWrites C Γ) :
+    (Prog.cons (.declLocal .bool name (some (.simple c)))
+      (.cons (.block (thn.guarded true (els.guarded false))) .nil)).size =
+      (Stmt.ite (.simple c) thn.program els.program).size +
+        3 * (thn.length + els.length) + 1 := by
+  simp only [Prog.size, Stmt.size, Val.size, Simple.size, LocalWrites.guarded_size]
+  omega
+
 end Solidity
