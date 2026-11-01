@@ -1616,3 +1616,100 @@ untouched; get_goal unavailable. No new goal/reset/reactivation/status change,
 producer retrieval/export turn, push/merge/PR or service. Reviewed exact
 patch/bundles/interface/handoff/evidence/checksums are versioned at
 `/workspace/vy5-composition/attempt-20261101/final/`.
+
+### Typed heap allocation of captured bytes — 2026-11-01
+
+[HeapCatchPhysical](../../Solidity/Yul/Composition/HeapCatchPhysical.lean) consumes
+actual Source.allocRef/alloc, bytesOfRV/heapBytes and Heap.alloc. No replacement
+allocator/state/dispatcher is introduced.38component laws are distinct from the24
+ORIGINAL full obligations, all still pending. Universal allocateRead_run proves,
+for arbitrary typed Source environment/callee locals/state and bytes, the exact
+memory-typed Val.memRef at old heap.next, FULL returned bytes, unchanged callee
+locals and full Source.St with ONLY the actual allocated heap substituted. It
+uses existing Source.Hoare.run_bind and Heap.alloc_get; allocRef_run is the actual
+operation, not an assumed agreement. The actual first EM.attempt captured result
+selects allocation via afterCaptured; success skips allocation, timeout/stuck
+propagate, panic retains the entire assert revert payload. No caller raw values
+are converted to old Locals or reinitialized. Explicit old callee locals remain
+separate from the raw companion, as in the previous consumer.
+
+The actual input is AttemptPhysical.input (existing CatchFunction raw1793 and
+complete caller Source.St). Captured poststate retains Source99/55; allocation
+then creates logical heap object1, advances next1→2 and retains object0 AABB.
+Typed full contents, exact length, freshness, old-object/frame/source/raw retention
+and actual capture/allocation state agreement are proved. EMPTY bytes still
+allocate a typed empty object. The actual readback pair drives the existing raw
+continuation, yielding2307/2305/2341 for2/0/36bytes, retaining nonword alias0 and
+raw bits, refusing runClean, with completed-horizon uniqueness. This allocates and
+reads a typed Source value; it does NOT yet bind a named catch declaration into a
+Source local scope or implement Source.tryStmt selection/general raw sessions.
+
+Refusal controls use actual APIs: allocRef of bool data allocates first, then
+halts stuck("memory reference type"); the new bool cell is RETAINED. heapBytes
+of it refuses "not a bytes object"; reading index2 after valid allocation refuses
+"dangling memory reference". Neither refusal is converted to empty bytes or
+assumed atomic/rolled back. Source heap/frame modification is distinct from
+physical/world journal rollback. The physical_window consumer retains genuine
+Placement of the NEW heap, data-length bound, ReservedOK, strict selected window
+and target-address fit premises. No placement witness/refinement is fabricated;
+logical index1 is NOT an EVM pointer. General G01 allocation refinement and full
+joint source/physical/compiler adequacy remain pending.
+
+[Driver](../../tests/yul-composition/HeapCatchDriver.lean) executes actual capture,
+allocation/reference/readback and continuation, recording all six outcomes,
+logical-reference type/index, full object contents/length/next, old alias/raw/logs
+and refusals. Independently frozen [expectations](../../tests/yul-composition/heap-catch-expectations.json)
+predate this execution. [Reader](../../scripts/yul-composition/heap-catch-source.mjs)
+binds actual private/main Source.State/Machine/Eval/Hoare and parent Attempt→peer
+bodies, current own sources/oracle/catalog, selected ledger and actual Lean
+stdout/stderr/command/exit. It SHA-binds and fully revalidates the immutable old
+attempt/native-v2 report (all24calls/four legacy/viaIR optimizer profiles), then
+checks16full successful/revert/empty/panic byte comparisons against NEW Source
+execution. Native evidence is explicitly historical-replay-only, not a fresh
+compiler/EVM run. Logical references are recorded solely on the Source side;
+no native pointer equality or whole Source correspondence is inferred. Full
+panic tail and empty allocation remain distinguished.
+
+148focused JS tests pass (new module plus affected parent Attempt tests), including
+wrong reference/type/content/length/alias/next/raw/state/branch/refusal mutations,
+equal-return corruption, fake pointer/native-execution/adequacy, stale actual
+producer/private bodies/reference/receipts and missing selected catalog/evidence.
+No unrelated broad reference/781JS+2Python suite was rerun or relabelled: those
+prior results remain attributed to their sealed tree. Focused checks avoid its
+roughly80MB output regeneration under327426048byte initial disk headroom.
+Mandatory joint Lean gates still ran. Independent read-only finder/skeptic
+reviews accepted source/reader/mutations with no findings and no Lean/server/
+build/edits. Generic allocation proofs and physical conditional premises were
+reviewed distinctly from finite old native evidence.
+
+Privateb65e9d776eb1e168cacbdc8be649d9fab4511c23 is preserved as ancestor of
+652278430074592f092f65ff78195fb6f3b27387; only owned consumer/driver and one private
+root import were added. Main standalone import support is not claimed. Actual
+joint gate exits0: Lean4.24.0 commit797c613/Lake5.0.0-src+797c613; KeySort2jobs;
+library1227/TestSuite262jobs;377taclets/131annotations;194core/0elaborator;
+1242reachable/0orphan; strict491automatic/61budgeted/0manual/11refuted/0pending;
+trust1257sources/252sites/0findings. All38 scoped signatures/transitive axioms
+use standard axioms or subsets, no new axiom/sorry. Final MCP consumer/driver/root
+success=true/partial=false/no errors; nonfatal async shutdown warnings retained.
+Earlier failed diagnostics (dependent type/Except layer/monad reduction/state
+unfolding) are raw, corrected with existing laws rather than altered budgets or
+outcomes. Docs/G03 historical exit1 remain failures with exact-base equality,
+never global passes.
+
+Existing lock/serial Lean-j1/LEAN_NUM_THREADS=1/hard12GiB/no swap/OS-headroom
+and proof/fuel/node/test guards remain unchanged. Actual disk/RAM and expected
+output were measured; one container at a time, incremental source/evidence and
+focused cached reads fit. Only NEW stopped VFS metadata-only copies were retired
+after preserving/verifying inspect/logs/directory metadata, immutable image and
+all mounts. All older caches/artifacts/checkouts/manifests remain intact. No
+hidden resource stop or new/reduced guard occurred.
+
+Work1/Work3 and Work2/BackfillA/B remain PARTIAL. All24 original Y01–Y09/Y10/
+G48–G51 obligations and six full Source combinations remain pending. Missing:
+general catch selection/local-scope binding/raw Source operators/function/session/
+frame hooks; concrete physical placement/allocation refinement; physical-world
+journal/log/G01 and actual compiler/world/V16 adequacy. LIB1/unchecked-add remain
+unanswered. Original blocked goal untouched; get_goal unavailable. No producer
+retrieval, owner edits, goal reset/reactivation/completion, push/merge/PR/service.
+Reviewed incremental patch/bundles/interface/handoff/evidence/checksums are at
+`/workspace/vy5-composition/heap-catch-20261101/final/`.

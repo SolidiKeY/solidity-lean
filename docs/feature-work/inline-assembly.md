@@ -356,3 +356,15 @@ scoped-axiom gates pass. All24 ORIGINAL full obligations and six full Source
 combinations remain pending; no Source.tryStmt/heapcatch/frame adequacy inferred.
 See [lane details](inline-assembly-vy5.md#actual-source-halt-capture-with-raw-companion--2026-11-01) and immutable artifacts
 at `/workspace/vy5-composition/attempt-20261101/final/`.
+
+### VY5 captured-byte typed heap consumer — 2026-11-01
+
+VY5 uses actual allocRef/heap allocation/bytesOfRV/heapBytes for full captured
+revert bytes while preserving the raw caller.38component laws prove exact
+reference/content/length/frame changes, readback continuation and refusal effects;
+physical copying retains real placement premises, not heap-index/EVM equality.
+148focused tests and required joint KeySort/build/TestSuite/strict/trust/axiom
+gates pass.16new Source byte comparisons reuse four sealed native profiles; no
+compiler/EVM rerun is claimed. All24 ORIGINAL full obligations/six Source
+combinations remain pending. See [lane details](inline-assembly-vy5.md#typed-heap-allocation-of-captured-bytes--2026-11-01)
+and immutable artifacts `/workspace/vy5-composition/heap-catch-20261101/final/`.
