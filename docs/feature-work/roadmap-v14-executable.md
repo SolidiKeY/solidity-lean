@@ -1517,3 +1517,23 @@ G06 Fitted/Enforced, general frame/source lowering or closure of G43/G45/G36.03.
 Independent separate read-only kernel/test reviews and exact final metrics,
 all original queue obligations, raw docs failures and immutable artifacts are
 recorded in the checkpoint19 handoff. The original full goal stays ACTIVE.
+
+
+Checkpoint19 checked source9991c2e1f02887604dae5a58d7078dca0c9219ce;
+combined private f2acdf876ade9321cd7b5a9c60e9376374e00a86/tree
+60dcbd81181a4c79520fac9015429da5c8c10d8d retains the exact sealed V13
+producer inputs. Main full1050default+262TestSuite and combined1054+262 pass;
+pinned SolKey377/131/131. Actual Lean4.24.0/Lake5.0.0-src+797c613 and successful
+KeySort2jobs precede runtime gate. AggregateRSS1723504/1714464KiB, one worker,
+hostminimum17302440/17282568KiB; cgrouppeaks393031680/388124672bytes, OOM0,
+serial12GiB/no swap and writerlease. Scoped checks pass. Raw docs exit1 remains
+48missing37ambiguous in both; exact published4165 comparison passes0new,
+strict frozen2fe no-new still FAILS+2 inherited missing over46/37. No waiver.
+
+All four read-only kernel/test reviewers accept the final actual code and
+confirmed fixes. New four axiom pins are guarded. parallel-interface-v5.json
+exports exact committed payment/creation/frame/runtime/transfer modules and
+real signatures for concrete combined checking; final docs/interface metadata
+changes no checked Lean/test code. Artifact paths, complete original queue and
+independent final seal reviews are in the checkpoint19 handoff. Original goal
+remains ACTIVE and all earlier sealed artifacts remain intact.
