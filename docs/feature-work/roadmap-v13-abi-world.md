@@ -895,3 +895,93 @@ Three inherited publisher EOF-blank-line diff-check findings remain raw failures
 reserved documents were not repaired. This is source integration, not lane closure.
 The new Shape/Val/Entries and entry/verdict facts remain owned/read-only upstream.
 Owned G40 consumers and bounded validation follow; all original queues stay open.
+
+
+### G40/BackfillA published entry consumer (099bfbe1)
+
+EntryTransport consumes existing indexed AbiEntry.Shape/Val/Entries and exported
+verdict_revert_iff, verdict_run_entry and eager_cref without changing upstream.
+rejection selects the actual Failure.emit.empty only for certified entry.revert;
+runRejection executes that selected real program in the existing checked Slice.
+entry_revert_exec/verdict_revert_exec retain real Fits and two-stack-cell bounds,
+exact empty bytes, unchanged full memory/stack and unreachable suffix. Accepted
+and named-blocked cases produce no rejection program. This is NOT emitted decoder
+code or a proof of entry/native/bytecode equivalence.
+
+body_from_entry/body_witness preserve actual entry and bodyValues witnesses;
+calldata_handoff couples the real reference/eager result with actual cval, keeping
+I.size<=lim and the published one-step fuel difference. Controls compute actual
+aggregate values from the decoder, not arbitrary expected typed fixtures. Complete
+ordered diagnostic values cover nested arrays, shared overlapping tails, a signed
+negative-offset lazy-only layout, and unpadded bytes with embedded zero/padding.
+encodeArgs is only a diagnostic encoding, not a source operation on readsOnly
+parameters. G0 generalized recursors add a length-only typed-value projection
+with concrete1/2 results. bodyObservation still calls published bodyValues; this
+is neither a Source Prog execution witness nor general native x.length admission
+for malformed unaccessed elements. Copying lazy-only layouts, access-time failures,
+possible allocation Panic(0x41), and fuel exhaustion retain exact named blocked
+verdicts and never become certified empty reverts. Dirty uint8 aggregate and a
+truncated head actually drive the real emitter; a1023-cell stack fails closed.
+
+Independent read-only finder/skeptic reviews found no soundness/ownership issue.
+Their confirmed diagnostic-versus-source-body concern was fixed with explicit
+labels, G0 recursor length observations and retained admission limits. Both used
+no Lean/server/builds. Actual scoped axiom guards use only standard axioms; the
+length observer control is axiom-free. Native0.8.38/reference dependencies are
+absent locally; no new native pipeline is exercised or claimed, no0.8.34 substitute.
+
+All original Work1/G40 remains PARTIAL: no all-profile emitted decoder, selector/
+receive/fallback target dispatch, source/native theorem or bytecode simulation.
+G41 remains PARTIAL; G42.01/.02/.03/.05 final target/world applications BLOCKED;
+G42.04/.06 and BackfillA/B remain PARTIAL with the prior exact residual producers.
+Arbitrary callee/callback/world/journal/persistent-transient/resource and CALL/
+RETURNDATA prerequisites stay open. Allocation/access-time/lazy/fuel refusals and
+original profile/fixtures/verdicts/pins/Fml.inTarget/Panic controls stay unchanged.
+Proposed coordinator G03 update: attach local G40/BackfillA evidence only, close
+no parent, edit no generated ledger/global trust pin. Final gates/handoff below
+are bounded evidence, never whole-lane completion.
+
+
+Final entry-checkpoint validation: Lean4.24.0 commit797c613 / Lake5.0.0-src+797c613;
+KeySort passes2 jobs; pinned sort377 taclets/131 read-bearing/table covers131.
+Both new per-file MCP diagnostics pass, focused entry build16 jobs passes, final
+root MCP passes with no failed dependencies/errors. The initial changed-publication
+default gate FAILED1/5386.152s: ReturnedBytes.memory_call_pushes_zero lacked the
+new memoryLoops/memoryLoopScopes constructor alternatives; the scoped axiom guard
+correctly rejected the incomplete elaboration. Only those two false=isMemoryCalls
+branches were added as contradictions; statement/premises/guards unchanged. Both
+independent source reviewers approved that exact2-line fix. Per-file MCP and
+ReturnedBytes controls/prefix closure pass200 jobs/15.343s; repaired full default
+passes1059 jobs/2.110s using the one existing cache. Initial raw failure stays failed.
+Final scoped actual #print axioms passes, including compiled_return with no sorryAx.
+
+One TestSuite attempt was justified by actual published Derived17/MemoryLoopReplay
+proof/dependency changes, documented before running. Under its unchanged180s bound
+it FAILED124/181.125s (Derived8 and Derived7 completed); not retried. The full
+./run-lean.sh composite remains unresolved, with prior1/5038.87s and prior
+Suite124/180.12s preserved. No larger TestSuite bound, bypass or green composite.
+All heavy work serial LEAN_NUM_THREADS=1/Lean-j1, hard12884901888 bytes memory,
+swap.max0, one cache. Initial default sampled peak aggregate RSS9086968KiB,
+cgroup peak hit12GiB with613 max events but0OOM/0OOM-kill; repaired default peak
+1095716864 bytes/0max events, Suite peak6336241664 bytes/0max/0OOM. Root MCP sampled
+peak3441491968 bytes. Disk headroom initially20GiB/final19GiB; prior39 checksum entries all verify.
+
+Static passes:19 owned modules/0 forbidden imports;184 core/0layer violations;
+1096 reachable/0orphans;1111sources/258trust sites/0findings;25 Node adapter tests
+and pinned TestSuite static564=552derived+11refuted+1excluded/0pending/0divergent/2skip.
+Raw docs FAIL1 for current/frozen/publication: complete finding multiplicities
+current86(48missing38ambiguous), frozen83(46missing37ambiguous), publication86.
+Frozen no-new FAIL: two inline-assembly missingpaths plus finite-dispatch Arms.lean
+ambiguity; publication equality PASS separately. Reserved-owner repair requested;
+no reserved doc edited/placeholders added. Owned relative links and diff check pass.
+Three inherited publisher EOF diff-check findings remain failed historical evidence.
+
+Final finder/skeptic source reviews pass actual diff/premises/nonvacuity/ownership,
+with approved local Panic controls byte-unchanged. Both ran no Lean/server/builds.
+New exact-head artifacts and their independent review/seal are outside the source
+checkout; prior seals/raw failures remain intact. Every original Work/Backfill
+status above remains open: this checkpoint only advances G40/BackfillA preparation.
+Missing admitted source/native-to-entry correspondence, all-profile emitted decoder/
+dispatch/aggregate result codecs, target CALL/RETURNDATA, V12 target frames/world,
+arbitrary callees/callbacks, linked library target world and resource prefixes stay
+explicit. The existing blocked goal was not mutated or reactivated.

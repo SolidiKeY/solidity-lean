@@ -965,3 +965,5 @@ import Solidity.Backend.AbiWorld.ReturnedBytesPrefix
 import Solidity.Backend.AbiWorld.ReturnedBytesControls
 import Solidity.Backend.AbiWorld.LibraryFrameTransport
 import Solidity.Backend.AbiWorld.LibraryFrameControls
+import Solidity.Backend.AbiWorld.EntryTransport
+import Solidity.Backend.AbiWorld.EntryControls

@@ -160,6 +160,8 @@ theorem memory_call_pushes_zero {C : Contract} {Γ Δ : Ctx} {b : Nat} {F : Frag
   | objects _ => cases hc
   | construction _ => cases hc
   | memoryCalls _ hz => exact hz
+  | memoryLoops _ => cases hc
+  | memoryLoopScopes _ => cases hc
 
 /-- Consume actual public compiler correctness, retain all frame/allocator/base
 relations, then observe the complete returned object and existing Error codec. -/
