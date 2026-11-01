@@ -1460,3 +1460,60 @@ source-only/external limits and all narrow open producer facts for V15–V17.
 Final metadata changes no checked Lean/test code blob. Immutable checkpoint18
 patch/bundles/source/evidence/checksum paths and separate final artifact reviews
 are recorded in the handoff; all prior sealed exports remain intact.
+
+
+## Checkpoint19 — transfer result branch and paid-prefix rollback consumer
+
+Owned TransferCall composes the actual StipendCall emitter, published Block.ite
+expansion, whole-code assembler and Failure.emit empty-REVERT. compile includes
+the actual caller prelude and CALL prefix in absolute byte coordinates; no
+reserved producer is modified. prefix_preserved retains every prefix instruction;
+branch_destinations consumes both actual assembler pushTag certificates.
+assembly_available exposes only the architectural all32-layout bound, not a
+simulation oracle. The inhabited168-byte prelude/244-byte CALL-prefix fixture
+discharges refs0/1 and their real bounds. Its output is obtained from that
+actual successful assembly, not supplied as a desired output certificate.
+
+failure_suffix extracts out.code.drop(pre.length+6) as actual existing empty
+REVERT plus final JUMPDEST. assembled_failure_terminal executes that exact suffix
+through the existing terminal slice, retaining arbitrary protected stack/memory
+under its real two-cell room condition. The populated machine17/29/memory55
+and wrong nonempty failure bytes controls are constructive. This does not
+prove a global CALL/jump runner reaches the entry; the runners stay distinct.
+
+Independent kernel finder/skeptic identified two composition/control gaps:
+standalone terminal facts needed extraction from actual assembly; invalidbyte8
+needed a connection to the selected operand. Both were fixed. The stronger
+relative_false_target consumes the actual selected false operand, proves its
+coordinate244+5+actualW0+actualW1, and refuses subtraction of244 as a whole-code
+PC: widths≤32 place it inside168 prelude bytes, all excluding JUMPDEST. No
+arbitrary guessed8 is substituted. The old byte8 check remains a separate
+concrete protected-immediate negative. kernel_client's comment was qualified.
+16 guarded headline/control axiom reports retain standard Lean axiom sets.
+Early opaque-recursion normalization/width experiments remain raw failures;
+proofs now consume published equations/certificates, with no raised budget.
+
+New lane-local export-transfer-call.lean emits actual assembler output, with
+failure on missing assembly. check-transfer-call-evm.mjs fixes all eight exact
+scenarios and independently checks complete golden bytes, PUSH payloads,
+absolute targets/width changes, caller prelude, dynamic CALL and prior payment.
+Unlike earlier numeric-only/standalone runCode checks, these bounded external
+tests use actual fetched installed code via EthereumJS10.1.3 Osaka runCall,
+including its real outer message journal. Existing1Mgas/180s limits/pins remain.
+
+Zero/99/13 succeed, while funded reverting99 and unfunded1001 transfer outer
+halts are exact empty-byte REVERT; nested receiver dead bytes remain distinct.
+Unfunded never enters the same reverting receiver. A prior actual successful
+one-unit CALL is observed at POP with self999/other1 before a second transfer:
+success leaves self900/other1/recipient99; failure rolls back to self1000 and
+both recipients0. Full protected signed/uint/spill stack and caller32-byte
+memory are retained. Wrong prefix-relative assembly faults at the exact
+codehash/address/PC250; desired success is a negative control and its message
+journal restores balances. Raw full error is retained, not normalized away.
+
+These are finite fetched-reference observations plus kernel layout/terminal
+consumers, not universal pinned kernel CALL/jump/world/gas/resource simulation,
+G06 Fitted/Enforced, general frame/source lowering or closure of G43/G45/G36.03.
+Independent separate read-only kernel/test reviews and exact final metrics,
+all original queue obligations, raw docs failures and immutable artifacts are
+recorded in the checkpoint19 handoff. The original full goal stays ACTIVE.

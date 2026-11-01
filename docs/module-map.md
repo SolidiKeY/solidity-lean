@@ -1313,3 +1313,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/StipendCall.lean` | Runtime amount DUP2/ISZERO/MUL requested-gas selector, actual CALL operands and full bytes, derived eight-word peak; universal forwarding/world/frame adequacy open |
 | `Backend/Executable/StipendCallChecks.lean` | Same-code zero/nonzero locals, exact test/PUSH boundaries, wrong fixed request, maximum amount, 1014/1015 spill capacity and encoding controls |
+
+| `Backend/Executable/TransferCall.lean` | Actual transfer result branch expansion/whole-code assembly with preserved requested-gas CALL prefix, resolved targets and extracted empty-REVERT terminal suffix; general fetched execution open |
+| `Backend/Executable/TransferCallChecks.lean` | Inhabited full prelude/CALL assembly, concrete range discharge, selected-target relative-coordinate negative, actual terminal suffix/bytes and protected machine controls |
