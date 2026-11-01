@@ -787,3 +787,16 @@ synthetic bookkeeping controls that are never counted as kernel proof. Final
 command, checksum and review evidence lives in the external PARALLEL-INTERFACE
 handoff. The original Derived17 representation hold, false-readiness human-review
 hold, all 457 OPEN rows and every G52–G55/backfill obligation remain binding.
+
+
+The next owned interface is `collect_target(source, request, out)` (CLI `collect`).
+It requires a clean committed consumer, matches all loaded project helper bytes
+against that commit, and retains launch/post consumer and private-target snapshots.
+It runs the unchanged complete kernel collector and fresh live replay for one
+concrete core module, each under the original bound. A timeout prevents replay;
+raw initial/replay exits, consumer validation and post-input failures stay distinct.
+Same-tree HEAD movement, helper drift and dirty consumers are rejected. This does
+not relax the core-only request namespace or supply a Bridge extraction shortcut.
+V14 byte-prefix and V13 ABI-entry transport are separate newly ready leaf requests;
+their actual per-component outcomes remain in the next external handoff. No
+reserved ABI/decoder implementation or previous failed full target is retried.

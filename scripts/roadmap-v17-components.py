@@ -19,6 +19,8 @@ SHA1 = re.compile(r'[0-9a-f]{40}')
 BUILD_GATES = {'runtime-keysort', 'generator-solcases', 'clean-default', 'clean-compiler',
                'clean-frontend', 'warm-default', 'warm-compiler', 'warm-frontend'}
 IDENTITY = ('revision', 'sourceTree', 'sourceToolchainKey', 'inputs', 'runtime', 'buildTools', 'serialConfigSha256')
+IMPORTED_HELPER_SHA256={str(path):p.resources.hash_file(path) for path in
+    (Path(__file__),Path(k.__file__),Path(p.__file__),Path(e.__file__),Path(p.resources.__file__),k.TEMPLATE)}
 
 
 def canonical(value):
@@ -403,21 +405,104 @@ def aggregate(plan, stages):
             'boundary':'Authenticated committed sources and retained gate/attachment accounting; no new kernel or observation sufficiency proof.'}
 
 
+def hardened_snapshot(directory):
+    old=e.git
+    try:
+        e.git=lambda root,*args:git(root,*args).decode().strip()
+        return e.snapshot(directory)
+    finally:e.git=old
+
+
+def consumer_identity():
+    """Require committed consumer code and a clean exact source/tool snapshot."""
+    snapshot=hardened_snapshot(ROOT)
+    paths=[Path(__file__),Path(k.__file__),Path(p.__file__),Path(e.__file__),Path(p.resources.__file__),k.TEMPLATE]
+    helpers={}
+    for path in paths:
+        relative=str(path.relative_to(ROOT));data=path.read_bytes()
+        e.require(e.digest(data)==IMPORTED_HELPER_SHA256[str(path)],'consumer helper changed since import')
+        e.require(data==git(ROOT,'show',snapshot['revision']+':'+relative),'loaded consumer helper differs from committed source')
+        helpers[relative]=e.digest(data)
+    return {'snapshot':snapshot,'helperSha256':helpers}
+
+
+def collect_target(source, req, out):
+    """One actual core-module query+replay, with the unchanged complete extractor."""
+    req=k.request(req);validate_package(source['package']);no_promotion(source)
+    consumer_before=consumer_identity()
+    e.require(type(source.get('schema')) is int and source['schema']==1 and source.get('sourceOnly') is True,'invalid target source-stage schema')
+    root=Path(source['destination']);out=Path(out)
+    e.require(root.resolve()==root and root.is_relative_to('/workspace/scratch'), 'invalid private target source')
+    e.require(out.is_absolute() and out.resolve()==out and out.is_relative_to('/workspace/scratch')
+              and not out.is_relative_to(root) and not out.exists(), 'NEW external target evidence directory required')
+    e.require(git(root,'rev-parse','HEAD').decode().strip()==source['package']['head'], 'target source revision changed')
+    git(root,'merge-base','--is-ancestor',e.BASE,source['package']['head'])
+    e.require(source_inventory(root,source['package']['head'])==source['files'], 'target source files changed')
+    e.require(module_path(req['module']) in source['files'], 'missing concrete producer module')
+    out.mkdir(parents=True)
+    before_code=p.resources.hash_file(Path(__file__))
+    summary={'schema':1,'producerHead':source['package']['head'],'request':req,
+             'consumerRevision':consumer_before['snapshot']['revision'],'consumerBefore':consumer_before,
+             'consumerSha256':before_code,'recordExit':None,'replayExit':None,'postInputExit':0,
+             'semanticPremisesDischarged':False,'releaseClosed':False}
+    old_root,old_provenance_root,old_git=k.ROOT,p.ROOT,e.git
+    current=None
+    try:
+        k.ROOT=root;p.ROOT=root;e.git=lambda directory,*args:git(directory,*args).decode().strip()
+        current=hardened_snapshot(root)
+        e.require(current['sourceTree']==source['package']['tree'],'target package tree changed')
+        e.require(identity(current)==identity(source['snapshot']), 'staged source/tool/config differs at query launch')
+        record=k.collect(req,out/'extract');summary['recordExit']=record['exit'];summary['recordCommandExit']=record.get('commandExit')
+        summary['record']={'path':str(out/'extract/record.json'),'sha256':p.resources.hash_file(out/'extract/record.json')}
+        if record['exit']==0:
+            k.validate_record(record,current)
+            replay=k.collect(req,out/'replay');summary['replayExit']=replay['exit'];summary['replayCommandExit']=replay.get('commandExit')
+            summary['replay']={'path':str(out/'replay/record.json'),'sha256':p.resources.hash_file(out/'replay/record.json')}
+            if replay['exit']==0:
+                k.validate_record(replay,current);k.match_replay(record,replay)
+                summary['checkedDeclarations']=[{key:row[key] for key in ('name','module','kind','typeSha256','valueSha256','axioms','propositionBinders')} for row in record['result']['rows']]
+                summary['completeLiveReplayMatched']=True
+                unexpected=sorted({axiom for row in record['result']['rows'] for axiom in row['axioms']}-{'propext','Classical.choice','Quot.sound'})
+                summary['unexpectedAxioms']=unexpected
+                if unexpected:summary['consumerValidationExit']=1;summary['error']='unexpected scoped axioms'
+    except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError) as error:
+        summary['consumerValidationExit']=2;summary['error']=str(error)
+    finally:
+        k.ROOT,p.ROOT,e.git=old_root,old_provenance_root,old_git
+        try:
+            e.require(before_code==p.resources.hash_file(Path(__file__)),'consumer implementation changed')
+            e.require(source_inventory(root,source['package']['head'])==source['files'],'target source changed after query')
+            summary['targetAfter']=hardened_snapshot(root)
+            e.require(current is None or summary['targetAfter']==current,'target revision/tree/tool/config changed after query')
+            summary['consumerAfter']=consumer_identity()
+            e.require(summary['consumerAfter']==consumer_before,'consumer revision/tree/helper/tool/config changed after query')
+        except (ValueError,OSError,subprocess.SubprocessError) as error:
+            summary['postInputExit']=125;summary['postInputError']=str(error)
+        summary['exit']=next((code for code in (summary['recordExit'],summary['replayExit'],summary.get('consumerValidationExit',0),summary['postInputExit']) if code is not None and code!=0),0)
+        if not summary.get('completeLiveReplayMatched') and summary['exit']==0:summary['exit']=2
+        (out/'component.json').write_text(json.dumps(summary,indent=2)+'\n')
+    return summary
+
+
 def main():
     cli=argparse.ArgumentParser(description=__doc__)
-    cli.add_argument('mode',choices=['stage','aggregate']);cli.add_argument('--request',type=Path,required=True)
+    cli.add_argument('mode',choices=['stage','aggregate','collect']);cli.add_argument('--request',type=Path,required=True)
     cli.add_argument('--bundle',type=Path);cli.add_argument('--destination',type=Path)
-    cli.add_argument('--stages',type=Path);args=cli.parse_args()
+    cli.add_argument('--stages',type=Path);cli.add_argument('--out',type=Path);args=cli.parse_args()
     with open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','a+') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        if args.mode=='collect':
+            e.require(args.stages and args.out,'source receipt and new output required')
+            result=collect_target(e.load(args.stages),e.load(args.request),args.out)
+            print(json.dumps(result,indent=2));return result['exit']
         if args.mode=='stage':
             e.require(args.bundle and args.destination,'bundle and NEW private destination required')
             result=stage(args.bundle,e.load(args.request),args.destination)
-        else:
+        elif args.mode=='aggregate':
             e.require(args.stages,'stage receipt map required')
             result=aggregate(e.load(args.request),e.load(args.stages))
         print(json.dumps(result,indent=2))
 if __name__=='__main__':
-    try:main()
+    try:raise SystemExit(main())
     except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError) as error:
         print(json.dumps({'error':str(error),'semanticPremisesDischarged':False,'releaseClosed':False}));raise SystemExit(2)

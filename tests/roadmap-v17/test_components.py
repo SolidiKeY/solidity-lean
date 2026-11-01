@@ -137,6 +137,42 @@ class ComponentControls(unittest.TestCase):
   root=self.base/'git-parent';root.mkdir();c.git(root,'init','--template=');(root/'file').write_text('x');c.git(root,'add','file');c.git(root,'-c','user.name=V17 control','-c','user.email=control@local.invalid','commit','-m','private worktree config control')
   child=self.base/'git-child';c.git(root,'worktree','add','--detach',str(child),'HEAD');c.safe_config(root);c.safe_config(child)
 
+ def target(self,exits=(0,0),replay_error=False,post_error=False,consumer_changed=False,target_changed=False,unexpected_axiom=False):
+  request={'schema':1,'module':self.module,'declarations':[{'name':'Solidity.Fixture.conditional','kind':'theorem'}]};out=self.base/'target';calls=[];inventory_calls=[]
+  row={'name':'Solidity.Fixture.conditional','module':self.module,'kind':'theorem','typeSha256':'1'*64,'valueSha256':'2'*64,'axioms':['sorryAx'] if unexpected_axiom else ['propext'],'propositionBinders':[0]}
+  def collect(req,directory):
+   directory.mkdir();code=exits[len(calls)];record={'exit':code,'commandExit':code if code!=124 else None,'result':{'rows':[row]}};(directory/'record.json').write_text(json.dumps(record));calls.append(code);return record
+  def inventory(root,head):
+   inventory_calls.append(1)
+   if post_error and len(inventory_calls)>1:raise ValueError('changed source after command')
+   return self.source['files']
+  def replay(*args):
+   if replay_error:raise ValueError('contradictory replay')
+  with patch.object(c,'consumer_identity',side_effect=[{'snapshot':self.snapshot,'helpers':{}},{'snapshot':dict(self.snapshot,revision='f'*40) if consumer_changed else self.snapshot,'helpers':{}}]),patch.object(c,'git',return_value=('a'*40).encode()),patch.object(c,'source_inventory',side_effect=inventory),patch.object(c.e,'snapshot',side_effect=[self.snapshot,dict(self.snapshot,revision='e'*40) if target_changed else self.snapshot]),patch.object(c.k,'collect',side_effect=collect),patch.object(c.k,'validate_record'),patch.object(c.k,'match_replay',side_effect=replay):
+   result=c.collect_target(self.source,request,out)
+  return result,calls
+ def test_per_target_api_success_preserves_conditional_scope(self):
+  result,calls=self.target();self.assertEqual(calls,[0,0]);self.assertEqual(result['exit'],0);self.assertTrue(result['completeLiveReplayMatched']);self.assertFalse(result['semanticPremisesDischarged']);self.assertEqual(result['checkedDeclarations'][0]['propositionBinders'],[0])
+ def test_per_target_api_timeout_does_not_launch_replay(self):
+  result,calls=self.target((124,0));self.assertEqual(calls,[124]);self.assertEqual(result['recordExit'],124);self.assertIsNone(result['recordCommandExit']);self.assertEqual(result['exit'],124);self.assertNotIn('completeLiveReplayMatched',result)
+ def test_per_target_api_replay_and_post_failure_remain_failures(self):
+  result,_=self.target(replay_error=True);self.assertEqual(result['recordExit'],0);self.assertEqual(result['replayExit'],0);self.assertEqual(result['exit'],2)
+ def test_per_target_api_post_failure_does_not_overwrite_raw_success(self):
+  result,_=self.target(post_error=True);self.assertEqual(result['recordExit'],0);self.assertEqual(result['replayExit'],0);self.assertEqual(result['postInputExit'],125);self.assertEqual(result['exit'],125)
+
+ def test_per_target_changed_consumer_revision_and_producer_head_are_failed(self):
+  result,_=self.target(consumer_changed=True);self.assertEqual(result['postInputExit'],125);self.assertEqual(result['recordExit'],0);self.assertEqual(result['exit'],125)
+ def test_per_target_same_tree_producer_revision_move_is_failed(self):
+  result,_=self.target(target_changed=True);self.assertEqual(result['postInputExit'],125);self.assertEqual(result['replayExit'],0);self.assertEqual(result['exit'],125)
+ def test_dirty_consumer_refuses_before_any_kernel_launch(self):
+  request={'schema':1,'module':self.module,'declarations':[{'name':'Solidity.Fixture.conditional','kind':'theorem'}]}
+  with patch.object(c,'consumer_identity',side_effect=ValueError('dirty consumer')),patch.object(c.k,'collect') as launch,self.assertRaisesRegex(ValueError,'dirty consumer'):
+   c.collect_target(self.source,request,self.base/'refused')
+  launch.assert_not_called();self.assertFalse((self.base/'refused').exists())
+
+ def test_per_target_unexpected_axiom_is_retained_but_not_approved(self):
+  result,_=self.target(unexpected_axiom=True);self.assertEqual(result['recordExit'],0);self.assertEqual(result['replayExit'],0);self.assertEqual(result['unexpectedAxioms'],['sorryAx']);self.assertEqual(result['exit'],1);self.assertFalse(result['releaseClosed'])
+
 class PairControls(unittest.TestCase):
  def pair(self):
   snapshot={'revision':'a'*40};clean={'mode':'clean','gate':'clean-compiler','before':snapshot,'after':snapshot,'exit':0,'buildStart':{'files':{}},'cacheStart':{'files':{}},'buildEnd':{'path':'build','files':{'a':'b'}},'cacheEnd':{'path':'cache','files':{'x':'y'}}};warm=copy.deepcopy(clean);warm['mode']='warm';warm['gate']='warm-compiler';warm['buildStart']=copy.deepcopy(clean['buildEnd']);warm['cacheStart']=copy.deepcopy(clean['cacheEnd']);return clean,warm
@@ -146,6 +182,12 @@ class PairControls(unittest.TestCase):
   for field,value in [('before',{}),('mode','clean'),('exit',124),('exit',False),('gate','warm-frontend'),('buildStart',{'files':{}}),('cacheStart',{'files':{}}),('buildEnd',{'path':'build','files':{'a':'changed'}})]:
    a,b=self.pair();b[field]=value
    with self.subTest(field=field),self.assertRaises(ValueError):c.p.pair_consistency(a,b)
+
+ def test_post_snapshot_keeps_hardened_git_and_restores_adapter(self):
+  original=c.e.git
+  with patch.object(c,'git',return_value=b'hardened\n') as git,patch.object(c.e,'snapshot',side_effect=lambda root:c.e.git(root,'status','--porcelain')):
+   self.assertEqual(c.hardened_snapshot(ROOT),'hardened');git.assert_called_once_with(ROOT,'status','--porcelain')
+  self.assertIs(c.e.git,original)
 
 class ActualRetainedControls(unittest.TestCase):
  def test_authentic_old_gate_and_warm_as_clean_corruption(self):
