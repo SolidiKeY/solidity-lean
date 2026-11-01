@@ -408,3 +408,14 @@ placement/history; actual source controls and pinned both-pipeline alias fixture
 remain distinct evidence. Original Y04–Y06/backfills partial, Y09.02/source/
 compiler/calculus closure blocked. No admission promotion or goal transition.
 Full SHAs/commands/checksums: `/workspace/vy2-evidence/joint-memory/HANDOFF.md`.
+
+
+### VY2 finite owned-inventory preparation handoff
+
+See [lane checkpoint](inline-assembly-vy2.md#finite-owned-memory-inventory-2026-11-01).
+Constructive arbitrary finite canonical inventory codecs, actual source writes,
+per-step placement/history/candidate closure, exact sequential/unchanged/raw-view
+and distinct-ID permutation laws; inhabited multi-root/alias/late-error/retained
+controls and separate pinned reference evidence. Original full lane/goal remains
+partial/blocked, no admission promotion. Exact SHAs/artifacts/commands at
+`/workspace/vy2-evidence/owned-inventory/HANDOFF.md`.

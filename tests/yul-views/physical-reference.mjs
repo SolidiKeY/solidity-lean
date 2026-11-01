@@ -1,3 +1,4 @@
+import {replayOwnedInventory} from './owned-inventory-reference.mjs';
 import {replayJointMemory} from './joint-memory-reference.mjs';
 // Lane-owned controls using the unchanged bounded reference-EVM helper.
 // Kernel laws live in Solidity/Yul/Views; this is external evidence only.
@@ -69,9 +70,10 @@ const memberArrays=await replayMemberArrays(compile);
 const retainedMemberArrays=await replayRetainedMemberArrays(compile);
 const memoryScalarWords=await replayMemoryScalarWords(compile);
 const scalarMemoryOps=await replayScalarMemoryOps(compile);
+const ownedInventory=await replayOwnedInventory(compile);
 const jointMemory=await replayJointMemory(compile);
 const scalarMemoryAlias=await replayScalarMemoryAlias(compile);
-const report={jointMemory,scalarMemoryAlias,memoryScalarWords,scalarMemoryOps,retainedMemberArrays,memberArrays,aggregateWriteback,dynamicUint,wordWriteback,mixedHeap,retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
+const report={ownedInventory,jointMemory,scalarMemoryAlias,memoryScalarWords,scalarMemoryOps,retainedMemberArrays,memberArrays,aggregateWriteback,dynamicUint,wordWriteback,mixedHeap,retainedHeap,heapResize,heapBytes,finite,residual,writeback,upstream,kind:'external-reference-only',compilerSha256:sha(readFileSync(compilerPath)),
  sourceSha256:sha(source),lockSha256:sha(readFileSync(new URL('../../scripts/evm-reference/package-lock.json',import.meta.url))),
  fork:'osaka',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,reports};
 writeFileSync(resolve(outPath),JSON.stringify(report,null,2)+'\n');
@@ -93,4 +95,5 @@ console.log('memoryScalarWords: '+memoryScalarWords.variants.map(v=>`${v.viaIR?'
 console.log('scalarMemoryOps: '+scalarMemoryOps.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('scalarMemoryAlias: '+scalarMemoryAlias.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
 console.log('jointMemory: '+jointMemory.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
-process.exitCode=jointMemory.status==='working'&&scalarMemoryAlias.status==='working'&&memoryScalarWords.status==='working'&&scalarMemoryOps.status==='working'&&retainedMemberArrays.status==='working'&&memberArrays.status==='working'&&aggregateWriteback.status==='working'&&dynamicUint.status==='working'&&wordWriteback.status==='working'&&mixedHeap.status==='working'&&retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;
+console.log('ownedInventory: '+ownedInventory.variants.map(v=>`${v.viaIR?'viaIR':'legacy'} ${v.status}`).join(', '));
+process.exitCode=ownedInventory.status==='working'&&jointMemory.status==='working'&&scalarMemoryAlias.status==='working'&&memoryScalarWords.status==='working'&&scalarMemoryOps.status==='working'&&retainedMemberArrays.status==='working'&&memberArrays.status==='working'&&aggregateWriteback.status==='working'&&dynamicUint.status==='working'&&wordWriteback.status==='working'&&mixedHeap.status==='working'&&retainedHeap.status==='working'&&heapResize.status==='working'&&heapBytes.status==='working'&&finite.status==='working'&&residual.status==='working'&&reports.every(r=>r.status==='working')&&upstream.status==='working'&&writeback.status==='working'?0:1;

@@ -1686,3 +1686,94 @@ patch/bundle/handoff/gates/raw resources/checksums versioned at absolute
 `/workspace/vy2-evidence/joint-memory/`; cumulative artifacts retain old versions.
 
 Final checkpoint gates: focused79jobs, full wrapper1065default/262TestSuite/131annotations exit0; actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs0;1718public declarations/961scoped theorem reports standard axioms only. All17negative suites pass including213joint mutations. Layers/orphans/trust/strict/markdown0. Initial five lane short-path doc findings fixed; final globaldocs STILL exit1 same48missing/37ambiguous exact-base debt, zero delta separatePASS. Raw proof, recursion/heartbeat, compiler stack, test-inventory and doc failures retained. Separate final finder/skeptic reviews clear after confirmed external gap fix; full original queue/goal unchanged.
+
+
+## Finite owned memory inventory (2026-11-01)
+
+Continuation from `30e61d054c2096e949f0a4a7274a6efc7283703a`, frozen base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, same assigned branch/VM.
+YQ1–YQ7 decision record remains binding. No owner representation/API/Placement/
+Source.Val.word/MemoryWritebackObligations/MemoryLayoutObligations/PreservesMemOK
+change, source-branch integration, exclusion/admission promotion, goal action,
+new VM/thread/model or budget increase. get_goal and Lean MCP read/diagnostics
+remain unexposed; goal BLOCKED unchanged, bounded per-fileCLI fallback used.
+
+InventoryObject/ObjectLaws reuse actual canonical scalar/pointer member and
+field folds plus unbounded byte/string codecs. Actual indexed Source.Data,
+HasMemoryShape and constructor MemoryImage are returned; no inverse/read/safety
+law fields. Static array word bound is derived from actual Placement and found
+data; dynamic length is the real 256bit header. No new arbitrary heap/list/node/
+fuel/size/address cap. Ordinary type syntax elimination and parameter recursion
+respect G0; Source.State speed history21067a47 inspected and modest additional
+checking cost warned. No indexed AST/state refactor or duplicate untyped IR.
+
+OwnedInventory traverses an ACTUAL finite owned candidate list, retaining every
+candidate/duplicate and its exact declared type. CoversMixedHeap establishes
+completeness; each owned ID is proved below actual Heap.next using boundedness.
+Concrete codecs construct decoded typed data/shape/images and guard ONLY real
+original allocated extent. Structural recursion executes real Source.heapPut;
+InventoryRealization separately packages existing actual Heap/Placement/images
+and constructive retained lineage, never an alternative source semantics.
+Every step derives type/next preservation, refreshed written contents/unchanged
+children, coverage, pointer metadata/decoder stability, placement addresses/free
+and exact current-vs-original shapes. Complete snapshot-to-current-sequential
+preparation/source agreement includes None; no entrypoint assumes generic
+inverse/read/decoder agreement. The internal induction agreement premise is
+instantiated by actual refresh facts at every step. None is unsupported
+preparation with NO source/Yul outcome, no-op, rollback or deallocation meaning.
+
+Generic real source execution preserves complete first/late error results and
+every ORIGINAL H owner MemOK from actual DataOK, supplied concretely by images
+for decoded inventories. Well-owned actual inventory has no root-type error;
+wrong-current-source controls exercise the general source program separately.
+Distinct actual IDs justify arbitrary List.Perm source-result equality; pointer
+aliases are not distinct objects. Repeated SAME decoded candidate is a real
+idempotent shared-object write, no silent filtering; differing same-root values
+are NOT claimed commutative. Whole-state unchanged is proved from actual complete
+supported types, constructor images and unchanged image reads, not assumed
+inverse laws. InventoryView derives final complete mixed raw view, exact every
+word/byte read and reserved/free/zero/gap/padding/tail preservation. Canonical
+success reencoding equals the ENTIRE original snapshot. No dirty-bit cleanup
+or canonical-only language admission is inferred.
+
+Controls use the actual six-root heterogeneous heap (bytes, raw string, static
+scalar array, struct with aliased pointer fields, dynamic reference array and
+unrelated bytes). They prove actual decoder success, all-H MemOK with an
+inhabited original typing, whole unchanged state, reverse permutation, exact
+Source.locals/indexLoc/readLoc/bytes reads through two aliases at every horizon,
+Panic, current shape/history/coverage, complete multi-root zero→regrowth,
+repeated candidate and actual late type error retaining successful caller prefix.
+Initial direct normalization hit200000heartbeat/recursion limits; raw failures
+retained and observations factored through explicit typed heap/source-run laws,
+no raised budget or weakened expected result. Generic modules check in under a
+second; concrete six-root decoder controls about22s, aliases about11s, retained
+controls about20s, recorded separately from cached full gates.
+
+Pinned solc0.8.38/Osaka both pipelines OwnedInventory fixture varies n3/n4/n0,
+traverses nested struct/array roots and true shared-child aliases, both orders,
+retained shrink/regrowth, unrelated cells/free/zero, full dynamic ABI/calldata,
+late Panic0x32, explicit empty revert and fresh calls. Reverse order correctly
+changes last SHARED child write; no false same-root commutation expectation.
+Independent goldens include ALL7words/root and full ABI envelope;241consistent
+word+byte corruptions plus order/calldata/alias/pointer/root/count/coverage/
+revert/status/deployment/attempted-storage/budget mutants,677total, pass. All
+preceding310report fields/expected verdicts remain EXACTLY identical;330ordered
+calls total. Compiler/archive/fork/lock pins and100m gas/5m step unchanged.
+These finite EVM observations are NOT kernel source/compiler/whole-memory or
+reachable-allocator correspondence; compiler default shared-zero intermediates
+are not claimed represented merely because fixture execution succeeds.
+
+Y04/Y05/Y06 and BackfillA/B remain PARTIAL; concrete Y09.02 BLOCKED. Universal
+store/path/hash/dynamic/dirty ownership, memory/writeback/shared-zero/interior/
+unhandled scalar/nested representations, reachable allocation/provenance/
+refinement, exact V10/V11 agreements and actual VY1/source/compiler/calculus/
+notation/printer/final-joint closure remain original open obligations. Actual
+owner MemOK/World/ContractWorld/memory-call/Bridge are AVAILABLE, not substitutes
+for missing Yul adequacy. Original oversized-MemOK counterexample boundary is
+unchanged; no semantic/resource/profile exclusion or capacity premise approved
+by inference. Queues NOT exhausted; no new semantic question established.
+Versioned exact signatures/gates/reviews/resources/patch/bundle/handoff/checksums:
+`/workspace/vy2-evidence/owned-inventory/`; cumulative original artifacts and all
+prior receipts/raw failures/manifests preserved.
+
+Final checkpoint gates: per-file and focused93jobs0; full policywrapper1079default/262TestSuite/131annotations0. Actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs0.1857public declarations/1059scoped theorem reports standard axioms only. All18negative suites pass, including677inventory mutations. Layers/orphans/trust/strict/markdown0. Globaldocs ACTUAL exit1 SAME48missing/37ambiguous exact-base debt, zero delta separate0, not a global pass. Independent finder/skeptic final reviews clear after restored observations and inhabited retained/error controls. Raw failed proofs/limits retained; original whole-lane obligations/blocked goal unchanged.

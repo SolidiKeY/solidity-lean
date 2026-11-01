@@ -1120,3 +1120,18 @@ no concrete Y09.02 rule/notation/printer registration or completeness claim):
 `Solidity/Yul/Views/MemoryTransport.lean`, `Solidity/Yul/Views/JointMemory.lean`,
 `Solidity/Yul/Views/JointPlacement.lean`, `Solidity/Yul/Views/JointSequential.lean`, `Solidity/Yul/Views/JointRetained.lean`, `Solidity/Yul/Views/JointRaw.lean`.
 Premises/scope and evidence: [VY2 checkpoint](feature-work/inline-assembly-vy2.md#joint-ordinary-memory-writeback-2026-10-31).
+
+
+VY2 finite ordinary inventory PREPARATION laws (YQ5 Lean-only, no SolKey taclet,
+no actual Y09.02 calculus/notation/printer completeness claim):
+`inventoryStateWriteback_MemOK`, `inventoryStateWriteback_realization`,
+`inventoryStateWriteback_sequential`, `inventoryStateWriteback_unchanged`,
+`inventoryStateWriteback_view`, `inventoryStateWriteback_reads`,
+`runInventoryUpdates_perm`, `runInventoryUpdates_repeat`. Modules:
+`Solidity/Yul/Views/OwnedInventory.lean`,
+`Solidity/Yul/Views/InventoryRealization.lean`,
+`Solidity/Yul/Views/InventorySequential.lean`,
+`Solidity/Yul/Views/InventoryUnchanged.lean`,
+`Solidity/Yul/Views/InventoryView.lean`,
+`Solidity/Yul/Views/InventoryOrder.lean`.
+Premises/boundaries: [VY2 checkpoint](feature-work/inline-assembly-vy2.md#finite-owned-memory-inventory-2026-11-01).

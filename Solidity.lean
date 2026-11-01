@@ -911,3 +911,5 @@ import Solidity.Yul.Views.MemoryScalarControls
 import Solidity.Yul.Views.CanonicalAliasControls
 
 import Solidity.Yul.Views.JointRetainedControls
+
+import Solidity.Yul.Views.InventoryRetainedControls
