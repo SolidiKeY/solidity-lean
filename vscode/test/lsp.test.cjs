@@ -118,6 +118,30 @@ test('language requests reject edits that arrive while compiler analysis is pend
     s.service.change({textDocument:{uri:s.uri,version:2},contentChanges:[{text:text+' // new'}]});gate.resolve();await assert.rejects(pending,e=>e.code===-32801);
   }finally{s.dispose();}
 });
+test('an imported buffer edit cancels and reschedules an importer during its first analysis',async()=>{
+  const started=deferred();let calls=0;
+  const s=setup({analyze:async(doc,signal)=>{
+    if(++calls===1){doc.projectSnapshot={files:{dependency:{path:join(doc.path,'../Dependency.sol')}}};started.resolve();await new Promise(resolve=>signal.addEventListener('abort',resolve,{once:true}));throw Object.assign(new Error('cancelled'),{code:-32800});}
+    return compiled(doc.text);
+  }});
+  try{const doc=s.service.docs.get(s.uri),pending=s.service.analyze(doc),rejected=assert.rejects(pending,e=>e.code===-32800);await started.promise;
+    s.service.open({uri:pathToFileURL(join(s.root,'Dependency.sol')).href,version:1,text:'contract Dependency {}'});await rejected;
+    assert.ok(doc.timer);assert.ok(s.events.some(e=>e.method==='solidityLean/invalidated'&&e.params.uri===s.uri));
+    clearTimeout(doc.timer);await s.service.analyze(doc);assert.equal(calls,2);
+  }finally{s.dispose();}
+});
+test('a redundant filesystem notification preserves a current proof and a real dependency change invalidates it',async()=>{
+  const s=setup();
+  try{
+    const dependency=join(s.root,'Dependency.sol');writeFileSync(dependency,'contract Dependency {}');
+    const source='import "./Dependency.sol"; '+text;s.service.change({textDocument:{uri:s.uri,version:2},contentChanges:[{text:source}]});
+    await s.service.verify(s.uri);const doc=s.service.docs.get(s.uri),compiled=doc.compiled;
+    compiled.project=require('../src/project.cjs').snapshot(doc.path,doc.text,{projectRoot:s.root},s.service.projectDocuments());doc.projectSnapshot=compiled.project;
+    s.service.invalidatePath(dependency);assert.equal(doc.compiled,compiled);assert.ok(doc.report);assert.equal(doc.verifyAbort.signal.aborted,false);
+    writeFileSync(dependency,'contract Dependency { uint changed; }');s.service.invalidatePath(dependency);assert.equal(doc.compiled,null);assert.equal(doc.report,null);
+    assert.ok(s.events.some(e=>e.method==='solidityLean/invalidated'));
+  }finally{s.dispose();}
+});
 test('contract checkpoint identities and native import warnings remain visible',()=>{
   const root=mkdtempSync(join(tmpdir(),'lsp-checkpoint-'));
   try{const path=join(root,'result.json');writeFileSync(path,JSON.stringify([{function:'f',sourceId:10,status:'proved'}]));

@@ -741,7 +741,7 @@ returning one where the function returns a memory reference (`rets`, its
 reference returns), and passing one to a callee's `memory` parameter the
 callee writes.  `fuel` bounds the callees followed. -/
 partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro rets : List String)
-    (body : List RawStmt) : Except String Unit := do
+    (body : List RawStmt) (fnValues : List (String × String) := []) : Except String Unit := do
   if let some r := sliceRefusal? body then throw r
   if ro.isEmpty then return
   -- Callee memory-argument checks below retain conservative mentions: a
@@ -785,6 +785,25 @@ partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro ret
         if offends then
           throw s!"{g}: calldata passed to a `memory` parameter it writes: solc copies it, \
             the model would share it"
+      -- A call through a function value (`fnValues`: the names of function
+      -- type, with their spelled types) passes a memory reference argument by
+      -- reference (`dispatchCaptures`); its candidates are not followed here,
+      -- so calldata there is refused outright: any argument that mentions it
+      -- (`roMentions`, as for a named callee above), not only one rooted at
+      -- it, so `h(b ? xs : xs)` and `h(id(xs))` are refused too. A callee
+      -- that is not a name (`callValueName`) has no known type: any argument
+      -- mentioning calldata is.
+      let shares := e.any fun
+        | .call g as => match lookupBy g fnValues with
+          | some ty => match fnParts? ty with
+            | some (ps, _, _) => (ps.zip as).any fun (p, a) =>
+                p.endsWith "memory" && ro.any (fun x => a.roMentions x)
+            | none => false
+          | none => g == callValueName && (as.drop 1).any fun a => ro.any (fun x => a.roMentions x)
+        | _ => false
+      if shares then
+        throw "calldata passed to a `memory` parameter of a function value: solc copies it, \
+          the model would share it"
 
 /-- The largest index among the fresh variables a raw statement writes. -/
 def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=

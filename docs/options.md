@@ -673,12 +673,18 @@ The preset is two flags: `binaryLeftToRight` and `modularLeftToRight`.
 operand positions and saving an earlier read before a later effect. The
 modular flag uses the existing argument-capture pass in source order; the
 legacy branch retains its early zero-modulus guard. Ordinary calls and indices
-remain left to right, assignments evaluate their source before their target,
+remain left to right, except that a call through an internal function value
+reads the callee before its arguments under `binaryLeftToRight`, as solc's IR
+pipeline does (`dispatchCaptures`); assignments evaluate their source before their target,
 and short-circuit operators and conditional branches retain their conditional
 evaluation. Inlined callees inherit the configuration.
 
 This is an expression-order choice, not all of `--via-ir`: constructor and
 modifier differences remain as documented in [solc-alignment.md](solc-alignment.md).
+Ordinary-call implicit copies also retain a pipeline limitation: the pinned
+`copiesBeforeEffects` fixture succeeds in legacy and panics in viaIR. The
+[Calls alignment note](solc-alignment.md#calls) records that observation;
+selecting this preset does not establish viaIR agreement for that case.
 Solidity [describes source order as an intention, not a guarantee](https://docs.soliditylang.org/en/latest/ir-breaking-changes.html#semantic-only-changes).
 Yul itself evaluates function arguments right to left; that is a different
 schedule from Solidity source compiled through IR.

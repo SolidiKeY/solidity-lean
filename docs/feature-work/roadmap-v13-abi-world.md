@@ -882,3 +882,16 @@ explicit human scope, genuine malformed negatives and guarded propext-only audit
 Earlier pre-authorization exports are preserved separately and were not sealed;
 the final authorized export uses a new directory/head and never rewrites prior seals.
 No original fixture observation or global semantic/profile default changed.
+
+### Published ABI-entry prerequisite (099bfbe1)
+
+Integrated exact published `099bfbe185731c354b12a40f28ccf5d98534c779`, including
+CF1 `64bc48673aeab48ea79143947104c975e1eba757`, into the isolated assigned lane.
+Both independent read-only integration reviewers verified published source hashes,
+ancestry, preservation of all17 owned modules and approved Panic controls, and
+append-only registration resolution; neither ran Lean/server/builds. Only the
+module-map append conflict needed resolution, retaining both complete sides.
+Three inherited publisher EOF-blank-line diff-check findings remain raw failures;
+reserved documents were not repaired. This is source integration, not lane closure.
+The new Shape/Val/Entries and entry/verdict facts remain owned/read-only upstream.
+Owned G40 consumers and bounded validation follow; all original queues stay open.

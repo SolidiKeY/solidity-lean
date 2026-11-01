@@ -666,9 +666,9 @@ test("reference parameters preserve locations, copies and initialized source inp
   for (const fn of ["storageAndMemory", "nestedStorageReturn", "allocationArgument", "initializedInput"]) {
     assert.equal(status[fn], "proved", fn);
   }
-  // Executable kernel regressions cover the copy's evaluation order. Symbolic
-  // closure of that larger update remains open.
-  assert.equal(status.copiesBeforeEffects, "pending");
+  // The copy is captured before mutate(): r retains 1 while storage becomes 9.
+  // The current backend closes this executable evaluation-order obligation.
+  assert.equal(status.copiesBeforeEffects, "proved");
 });
 
 test("quantified consequents parse and omitted specification bodies stay local", () => {
@@ -1055,7 +1055,9 @@ test("finite nominal declarations and nested tuples retain identity, snapshots a
   assert.deepEqual(failures.errors, []);
   const refused = Object.fromEntries(failures.results.map(r => [r.function, r.status]));
   assert.equal(refused.nestedEffect, 'unsupported');
-  assert.equal(refused.indexedRead, 'unsupported');
+  // The indexed read is lowered and fails its bounds check; its ordinary
+  // diamond is pending rather than a frontend-admission gap.
+  assert.equal(refused.indexedRead, 'pending');
 });
 
 
@@ -1132,5 +1134,14 @@ test("canonical nominal ABI matching preserves enum input ranges", () => {
   assert.deepEqual(report.errors, []);
   assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
   runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumAbiRanges.lean',
+    '--', '--tstack=131072'], 300000);
+});
+
+test("typed ABI entry decoding replays lazy and noncanonical layouts", () => {
+  // Lane CF1 controls (Semantics/AbiEntry.lean): certified entry reverts with
+  // rollback, eager/lazy values, and the named lazy-only refusals.
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/AbiEntryReplay.lean',
+    '--', '--tstack=131072'], 300000);
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/Replay.lean',
     '--', '--tstack=131072'], 300000);
 });

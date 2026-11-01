@@ -14,7 +14,25 @@ function install(vscode,context,servers,reportError){
     try{return await raw(method,doc,params,token);}
     catch(error){if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED')reportError(error);return null;}
   };
+  const workspaceEdit=result=>{const edit=new vscode.WorkspaceEdit();for(const change of result?.documentChanges||[]){
+    const uri=vscode.Uri.parse(change.textDocument.uri),open=vscode.workspace.textDocuments.find(d=>d.uri.toString()===uri.toString());
+    if(change.textDocument.version!==null&&open?.version!==change.textDocument.version)throw new Error('Refactoring target changed; retry the operation');
+    edit.set(uri,change.edits.map(row=>new vscode.TextEdit(range(row.range),row.newText)));
+  }return edit;};
   const providers=[
+    vscode.languages.registerDocumentFormattingEditProvider(selector,{async provideDocumentFormattingEdits(doc,options,token){return (await query('textDocument/formatting',doc,{options},token)||[]).map(e=>new vscode.TextEdit(range(e.range),e.newText));}}),
+    vscode.languages.registerCodeActionsProvider(selector,{async provideCodeActions(doc,selection,options,token){
+      const diagnostics=options.diagnostics.map(d=>({range:{start:d.range.start,end:d.range.end},message:d.message,code:typeof d.code==='object'?d.code.value:d.code,severity:d.severity+1}));
+      const actions=await query('textDocument/codeAction',doc,{range:{start:selection.start,end:selection.end},context:{diagnostics,only:options.only?[options.only.value]:undefined}},token)||[];
+      return actions.map(row=>{const action=new vscode.CodeAction(row.title,vscode.CodeActionKind.QuickFix);action.edit=workspaceEdit(row.edit);return action;});
+    }},{providedCodeActionKinds:[vscode.CodeActionKind.QuickFix]}),
+    vscode.languages.registerWorkspaceSymbolProvider({async provideWorkspaceSymbols(queryText,token){
+      if(!servers.clients.size){const files=await vscode.workspace.findFiles('**/*.sol','**/{node_modules,.lake,.git,.cache}/**',1);if(files.length)await servers.open(await vscode.workspace.openTextDocument(files[0]));}
+      const abort=new AbortController(),registration=token?.onCancellationRequested(()=>abort.abort());if(token?.isCancellationRequested)abort.abort();
+      try{return (await servers.workspaceSymbols(queryText,{signal:abort.signal})).map(s=>new vscode.SymbolInformation(s.name,s.kind-1,'',location(s.location)));}
+      catch(error){if(![-32800,-32801].includes(error.code))reportError(error);return [];}
+      finally{registration?.dispose();}
+    }}),
     vscode.languages.registerCompletionItemProvider(selector,{async provideCompletionItems(doc,position,token){
       const result=await query('textDocument/completion',doc,{position},token);
       return result?new vscode.CompletionList(result.items.map(row=>{const item=new vscode.CompletionItem(row.label,row.kind===14?vscode.CompletionItemKind.Keyword:row.kind===3?vscode.CompletionItemKind.Function:vscode.CompletionItemKind.Variable);item.detail=row.detail;return item;}),result.isIncomplete):null;
@@ -32,8 +50,10 @@ function install(vscode,context,servers,reportError){
     }},'(',','),
     vscode.languages.registerDocumentHighlightProvider(selector,{async provideDocumentHighlights(doc,position,token){return (await query('textDocument/documentHighlight',doc,{position},token)||[]).map(r=>new vscode.DocumentHighlight(range(r.range),vscode.DocumentHighlightKind.Text));}}),
     vscode.languages.registerRenameProvider(selector,{async prepareRename(doc,position,token){const result=await raw('textDocument/prepareRename',doc,{position},token);if(!result)throw new Error('No renameable compiler declaration');return {range:range(result.range),placeholder:result.placeholder};},
-      async provideRenameEdits(doc,position,newName,token){const result=await raw('textDocument/rename',doc,{position,newName},token);const edit=new vscode.WorkspaceEdit();for(const change of result?.documentChanges||[])edit.set(vscode.Uri.parse(change.textDocument.uri),change.edits.map(row=>new vscode.TextEdit(range(row.range),row.newText)));return edit;}})
+      async provideRenameEdits(doc,position,newName,token){return workspaceEdit(await raw('textDocument/rename',doc,{position,newName},token));}})
   ];
+  const watcher=vscode.workspace.createFileSystemWatcher('**/*.sol');
+  providers.push(watcher,watcher.onDidChange(uri=>servers.changed(uri)),watcher.onDidCreate(uri=>servers.changed(uri)),watcher.onDidDelete(uri=>servers.changed(uri)));
   const icons=new Map();
   for(const state of ['proved','pending','running','error'])icons.set(state,vscode.window.createTextEditorDecorationType({
     gutterIconPath:vscode.Uri.file(join(__dirname,'../media',state+'.svg')),gutterIconSize:'contain'}));

@@ -68,7 +68,7 @@ function build(paths,invalidatedPaths=[]) {
     datasets,invalidatedDatasets,latencyRatios,diagnosticDifference:diagnostics,saveEditRace,uiDifference,serverCapabilities,
     interpretation:[`The paired workloads use ${sizes} constant-return functions; the incremental case adds one function.`,
       'Fresh process/profile startup and live-server incremental verification are separate. OS caches were not flushed.',
-      'The local LSP bounds concurrent files with 1–4 workers. Within-file proofs remain serial. Exact-snapshot cache hits and changed-buffer checks are separate; Dafny cache policies have no equivalent local selector.',
+      'The local LSP bounds concurrent functions and files with 1–4 workers. Assertions within one function remain serial. Exact-snapshot cache hits and changed-buffer checks are separate; Dafny cache policies have no equivalent local selector.',
       'Solver overlap is derived from distinct process CPU deltas, not task counts or async calls. A native Lean LSP can include server and file-worker processes; CPU-active Lean processes are not a proof-worker count.',
       'Dafny owns a Boogie engine per project; Boogie 3.5.5 applies VcsCores using a per-engine semaphore. Requested workers are not a global server-wide solver cap.',
       'The editor cancellation metric measures acknowledgement; separate real LSP tests check worker termination. Complex proofs, renderer paint latency and single-declaration assertion-split scaling remain unexamined.',

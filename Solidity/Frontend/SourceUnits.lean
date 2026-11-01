@@ -28,16 +28,21 @@ private def field (j : Json) (key : String) : Json :=
 
 /-- Validate every original location and import before any dependency is lowered.
 The budget is derived from the input size, not a configurable search limit. -/
-private def checkTree (sources : List SourceFile) (sourceId : Nat) (mixedAbiInheritance : Bool := false) :
+private def checkTree (sources : List SourceFile) (sourceId : Nat) (mixedAbiInheritance : Bool := false)
+    (safeSpecifications : Bool := false) (container : String := "") :
     Nat → Json → Except String Unit
   | 0, _ => throw "compilation-unit AST depth bound exhausted"
   | fuel + 1, j => do
     if sources.length > 1 then
       let doc := field j "documentation"
       let text := doc.getStr?.toOption.getD ((doc.getObjValAs? String "text").toOption.getD "")
-      if (text.splitOn "@custom:key").length > 1 ||
+      let kind := (j.getObjValAs? String "nodeType").toOption.getD ""
+      let owner := (container == "source" && kind == "ContractDefinition") ||
+        (container == "contract" && kind == "FunctionDefinition")
+      if ((text.splitOn "@custom:key").length > 1 &&
+          !(safeSpecifications && owner)) ||
           (j.getObjVal? "loopSpec").isOk then
-        throw "solidity.compilationUnitSpecifications: source specifications require file-local lexical resolution"
+        throw "solidity.compilationUnitSpecifications: this specification requires a source-local namespace adapter"
     if mixedAbiInheritance &&
         (j.getObjValAs? String "nodeType").toOption == some "InheritanceSpecifier" then
       throw "solidity.compilationUnitAbiModes: inherited entries with mixed legacy ABI modes require a declaring-source adapter"
@@ -54,8 +59,16 @@ private def checkTree (sources : List SourceFile) (sourceId : Nat) (mixedAbiInhe
         unless sources.any (fun source => source.name == path && source.declarationId == target) do
           throw "import target is absent or disagrees with compilation-unit provenance"
     match j with
-    | .arr values => for value in values do checkTree sources sourceId mixedAbiInheritance fuel value
-    | .obj fields => for (_, value) in fields.toList do checkTree sources sourceId mixedAbiInheritance fuel value
+    | .arr values => for value in values do
+        let next := if value.getObj?.isOk then container else ""
+        checkTree sources sourceId mixedAbiInheritance safeSpecifications next fuel value
+    | .obj fields =>
+      for (key, value) in fields.toList do
+        let kind := (j.getObjValAs? String "nodeType").toOption.getD ""
+        let next := if key == "nodes" && kind == "SourceUnit" && container == "root" && value.getArr?.isOk then "source"
+          else if key == "nodes" && kind == "ContractDefinition" && container == "source" && value.getArr?.isOk
+          then "contract" else ""
+        checkTree sources sourceId mixedAbiInheritance safeSpecifications next fuel value
     | _ => pure ()
 
 /-- Schema 1 and historical inputs retain their exact admission boundary.
@@ -79,7 +92,7 @@ def readCompilationUnit (fixture : Json) : Except String CompilationUnit := do
         name := provenance.source, sourceId, declarationId
         sourceSha256 := provenance.sourceSha256
         requestedCoder := provenance.requestedCoder, gates := provenance.gates }
-      checkTree [source] sourceId false (primary.compress.length + 1) primary
+      checkTree [source] sourceId false false "root" (primary.compress.length + 1) primary
     return { primary, asts := [primary], provenance }
   unless keys fixture ["header", "sourceUnits"] &&
       keys header ["solcVersion", "solkeyCommit", "provenanceVersion", "compilerFile",
@@ -120,11 +133,28 @@ def readCompilationUnit (fixture : Json) : Except String CompilationUnit := do
     asts := asts ++ [ast]
     if name == main then primary := some (ast, provenance)
   let some (ast, provenance) := primary | throw "main source is absent from the compilation unit"
+  -- Only the already implemented declaring-contract namespace is admitted.
+  -- File constants and nominal declarations need source/import name resolution
+  -- before their specifications can share one compilation unit.
+  let rec nominal : Nat → Json → Bool
+    | 0, _ => true
+    | fuel + 1, node =>
+      let kind := (node.getObjValAs? String "nodeType").toOption.getD ""
+      ["EnumDefinition", "StructDefinition", "UserDefinedValueTypeDefinition"].contains kind ||
+        match node with
+        | .arr values => values.any (nominal fuel)
+        | .obj fields => fields.toList.any fun (_, value) => nominal fuel value
+        | _ => false
+  let safeNamespaces := asts.all fun unit =>
+    !nominal (unit.compress.length + 1) unit &&
+      !(((field unit "nodes").getArr?.toOption.getD #[]).any fun node =>
+        (node.getObjValAs? String "nodeType").toOption == some "VariableDeclaration")
   for input in inputs do
     let sourceId ← input.getObjValAs? Nat "id"
     let original ← input.getObjVal? "ast"
     checkTree sources sourceId
       (provenance.pipeline == some .legacy && sources.any (·.requestedCoder != provenance.requestedCoder))
+      safeNamespaces "root"
       (original.compress.length + 1) original
   return { primary := ast, asts, provenance := { provenance with sources } }
 
