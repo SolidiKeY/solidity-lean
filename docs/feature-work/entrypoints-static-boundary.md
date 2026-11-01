@@ -5,6 +5,95 @@ This is an unfinished repair handoff. No semantic implementation or successful
 combined gate is claimed. The `proved` expectation for
 `SolcPaymentsOpen.tryArgumentSideEffect` remains unchanged.
 
+## Integration refresh at `f1808176`
+
+The ownership choice below is historical: the coordinator has since selected
+alternative 1, the original O1 mode producer plus intrinsic operational
+projection. That choice and the human's model-correction authorization remain
+valid. No repeated approval of either is needed. Independent Source try
+inference and general world/compiler expansion remain outside this repair.
+
+The current integration contains the zero-divisor, callback-continuation,
+literal-reason and modifier-only repairs. No content conflict markers were
+found in the affected source, tests or scripts. Its `ExtCall` still has only
+receiver, name and arguments, and `ExecS.tryOk` still permits arbitrary
+invariant-preserving storage/net/balance replacement. The original pending
+payments residual remains relevant; it was not rerun or reported as passing.
+
+The supplied O1 cumulative bundle was independently checked against SHA-256
+`7e7b44e829a1269c8900dc32bd89f29ccce5776c143163ce6e9dd3f1668cccd3`
+and inspected at `cb82043daac3f72865a722225b994dd1ca9e6a5d` in a private
+object database under `.lake/entrypoints-repair/`. It was not merged or applied.
+The following are source findings, not local kernel validation of that branch:
+
+* `SourceInvocation.AtCall` contains actual prefix and capture executions;
+  its `oracle` proves lookup-key agreement. Neither supplies an execution of
+  the selected unknown callee. `StaticInvocation.AtCall.storage_projection`
+  still takes `StaticInvocation.Frame .static` as a premise.
+* `StaticInvocation.Exec.credit` permits net/balance changes. The byte-linked
+  callback success theorem separately requires ledger and balance agreement;
+  storage preservation cannot discharge those premises.
+* `ExternalReturnBytes.decode` reads the caller binder context's word count.
+  Here `id` declares `int`, but the try has no return binders. The retained
+  `SourceInvocationSite.returnTypes` metadata does not yet validate those
+  discarded declared returns or establish the caller's ABI-failure phase.
+
+### Exact remaining prerequisite
+
+Within the selected alternative, the operational invocation/ABI producer must
+supply an execution judgment for this actual resolved call, at its post-capture
+checkpoint, retaining runtime/profile, receiver, arguments, evaluation position,
+inherited restrictions, descendant checkpoints and exact outcome bytes. The
+typed projection must derive
+`StaticInvocation.Frame .static origin.point.st exactOutcome typedFinal`
+from that execution and its caller-state representation. This expression is
+the proposed result type, not an available theorem or an assumed certificate.
+Its storage conclusion must not silently strengthen ledger/balance behavior.
+
+The same invocation must validate the declaration's return demand before
+discarding its values, then project either typed success binders or the actual
+caller decode failure. A successful malformed child return must not become a
+callee failure caught by the try. Ordinary havoc, mutating/reentrant calls,
+failure bytes, invariant obligations, frames/tails and exhaustion retain their
+existing obligations. The bounded implementation consists of that execution
+and representation interface followed by O1's call-linked projection. No such
+producer declaration was found in the supplied source. This remains missing
+implementation under the existing authorization, not a request to approve the
+model correction or owner choice again. An independent Source/world/compiler
+expansion remains excluded; an assumed frame or a synthetic issuer cannot
+replace the missing actual-execution input.
+
+### Fresh evidence and review
+
+An exact copy of O1's `scripts/check-static-capture-vectors.mjs` passed all
+32 native controls across its four existing profiles, using the recovered
+audited dependency artifact, original compiler/source hashes and unchanged
+attempt budget. The script was run from a private directory against the
+current fixture. The full receipt is
+`.lake/entrypoints-repair/native-static-source-reference-current.json`.
+All four malformed-return cases observe successful child bytes `0x01`, caller
+storage `ix = 1` before and after that child, then outer empty revert and root
+`ix = 0`. Ordinary mutation, false-preservation, readonly reentry and nested
+write-refusal controls remain asserted. The earlier failed draft native probe
+and its raw observations were preserved. These finite controls are not
+invocation/frame adequacy or an original combined-gate pass.
+
+The current-tree investigation probe
+`.lake/entrypoints-repair/StaticTryCurrentBoundary.lean` completed per-file MCP
+diagnostics with no errors. It proves arbitrary successful unknown-call
+storage/net/balance replacement, acceptance of every word list by nil binders,
+and rejection of an absent demanded signed return. Axiom reports use only
+`propext`, `Classical.choice` and `Quot.sound`. These are interface witnesses,
+not the full imported obligation's refutation or the missing adequacy proof.
+
+Fresh read-only finder and skeptic reviews independently confirmed both
+missing producer facts and the separate ledger/balance premises; finder also
+confirmed the retained zero-divisor, continuation-dispatch and modifier fixes.
+Neither used the Lean server. No semantics, public premises,
+fixtures, pins, profiles, assertions or budgets were changed. The original
+combined gates remain with the coordinator; this refresh does not complete
+the repair or clear publication.
+
 ## Authority and retained failures
 
 The direct human answer recorded in
