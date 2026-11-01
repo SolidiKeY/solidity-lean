@@ -1003,3 +1003,69 @@ findings and zero added/removed. Neither is waived or passing. Entire
 Decision source and original counterexample byte identities pass. Final
 independent read-only handoff/evidence reviews found no issues. Cumulative
 post-commit patch/bundle/checksum export follows; full goal stays incomplete.
+
+
+## Positive uint-prefix pipeline checkpoint
+
+`Calculus/DecisionUIntPrefix.lean` connects the constructive arithmetic
+source grammar to the existing pipeline for exactly one positive uint
+binder over one equation. For every contract C, binder name x, and terms
+`a b : Tm C [.val .uint] (.val .uint)` satisfying the intrinsic UIntLinear
+grammar, `uintPrefix_sourceReduction` constructs a body ψ with the actual
+source reduction projected by `.map (·.leaf)` equal to
+`some (LFml.all 0 .uint ψ)` and
+`ψ.Src false true`. `uintPrefix_leafOf` proves the actual prepared result is
+`some (LFml.all 0 .uint ψ).elim.condSimp.prenex`. It assumes neither coverage
+nor translation/verdict success. A generic conditional composition helper
+is discharged using the independently proved actual normalizer and reducer
+facts for this family. Equal-polarity comparison uses structural reflexivity
+of existing typed terms/formulas, with no new comparison or trust shortcut.
+
+The normalizer proof has two formula nodes (one binder, one equation),
+independently of term size; it makes no arbitrary-term timing claim. Its
+all-primitive signature is normalization only; constructive arithmetic
+source reduction is specialized to uint. The Src conclusion describes the
+reducer body **before** preparation. This checkpoint does not prove Src
+preservation through preparation, parameter closure, inExact, resource bounds,
+Covered, broader M4 boundary or the exhaustive Residue/DecisionTheorem-prime.
+No complement of this first grammar is designated Residue. Original AU02
+pipeline children and formula-derived fuel remain open; vector/root backfill
+lemmas are not presented as their completion.
+
+`Examples/DecisionUIntPrefix.lean` pins the exact `.all 0` translation of
+actual distinct partial subtractions and the precise prepared output. It
+reuses their semantic countermodel and certified refuted verdict, preserves
+the missing-local/nonlinear refusals, and supplies both literal-multiplication
+directions and an unused binder. The direct-two positive reuses its existing
+proved result and ValidH certificate. No expected verdict or semantic/default
+observation changed. Both frozen predicates and the original 8bbd5606
+counterexample remain byte-identical. Human Q1 remains answered by the exact
+recorded approval; Q2 is pending only for frontend repair/full validation.
+
+Final per-file MCP, focused serial builds and public axiom commands/timings,
+source hashes, versions and sampled aggregate RSS/headroom are retained in
+`/workspace/va1-evidence/uint-prefix-next`. The hard 12 GiB/no-swap cap,
+12 GiB host reserve, thread one/explicit -j1, writer lock and original budgets
+remain unchanged. Failed dependent-rewrite/map-bind transport probes are
+retained as failures. Independent finder and skeptic reviewed the source
+statements read-only without Lean/server/build and found no substantive issue;
+their requested exact output, partial, multiplication and unused-binder
+controls are now present. Final reviews and static results follow below once
+actually checked. Whole-goal and milestone eligibility remain incomplete.
+
+Final prefix reviews found no substantive issue; the finder requested precise
+`.map (·.leaf)` wording for the certified reducer result and it was applied.
+All 21 public theorem axiom reports contain only propext, Classical.choice
+and Quot.sound. Final exact-source MCP passed in 5.26 s (core) and 5.20 s
+(controls); focused builds in 4.17/3.10 s; axiom audit in 13.78 s. Static
+checks pass with 1069 reachable/zero orphans, 180 core/zero elaborator paths,
+491 automatic/61 budget/11 refuted/zero manual or pending, and trust
+1084 sources/248 inventoried sites/zero findings. Axiom inventory remains
+FAIL (1206 pins/zero errors/404 unrecorded), byte-identical to the preceding
+gate. Strict doc paths remain FAIL with exactly the same 85 frozen findings
+(48 missing/37 ambiguous), zero new findings. Full validation's actual source-
+matched resource failures remain failures; no unchanged stopped full build
+was repeated. The owned stopped array-check containers were removed only
+after saving nonsecret state/bounds/mount metadata to recover disk; all
+mounted caches, artifacts, failures and other containers are preserved.
+The whole original goal and remaining queue are incomplete.
