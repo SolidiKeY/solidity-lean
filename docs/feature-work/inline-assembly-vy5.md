@@ -1513,3 +1513,106 @@ unanswered. No producer retrieval, goal creation/reset/reactivation/status chang
 push/merge/PR or service occurred; get_goal is unavailable. Original blocked goal
 identity stays unchanged. Reviewed immutable patch/bundles/interface/handoff/raw
 evidence/checksums are at `/workspace/vy5-composition/catch-function-20261101/final/`.
+
+### Actual Source halt capture with raw companion — 2026-11-01
+
+[AttemptPhysical](../../Solidity/Yul/Composition/AttemptPhysical.lean) consumes
+the ACTUAL `Source.EM.attempt` from Source/Machine, with28component laws distinct
+from all24 original pending obligations. For arbitrary computations, dependent
+callee-local indices and typed inputs, `attempt_run` proves outer.ok containing
+the exact old inner Except result and ENTIRE poststate by the concrete definition,
+not an execution oracle. `companion_actual`/`full_poststate` retain the actual
+callee result/locals/Source.St alongside the unchanged indexed raw caller. Explicit
+old callee locals are supplied separately; no ofClean/runClean/raw-caller reset
+or second untyped state is introduced. No VY4 caller-frame producer is duplicated.
+
+The concrete input is actual CatchFunctionPhysical.completed.state (small1793,
+bool2/full dirty function fields/memoryRef0). An ACTUAL EM.modSt prepends source
+log99 before EM.lift succeeds or halts. All six witnessed outcomes retain99/55
+and the original caller raw words: successBEEF, revertDEAD, empty revert, panic,
+timeout, stuck. `classify`/`route` are explicit CONSUMER routing: success skips
+the continuation, revert preserves all bytes, timeout/stuck propagate unchanged
+with the exact stuck reason. Source.Halt has no panic constructor: Source.panic
+is revert(panicData), preserved byte-for-byte, including the36byte assert payload.
+Continuation fuel0 retains caught bytes and none execution, distinct from Source
+Halt.timeout. Attempt does NOT roll back; `no_implicit_rollback` proves retained
+source log99. Real physical rollback and its three-journal invariants remain the
+separate existing operation; no rollback conclusion is inferred from attempt.
+
+Full captured revert bytes are returned as data; ONLY data.length is bound by an
+existing typed Yul word literal into the current raw small cell, then actual
+existing scoped-function code executes. It yields2307/2305/2341 for lengths2/0/36
+(start1793 plus length plus512), without initialization or clean conversion.
+Arbitrary-data/all-horizon rebase, completed-result uniqueness, nonword retention,
+raw writeback/refusal and exact actual outcome/poststate transport are proved.
+This is not allocation/binding of a Solidity catch memory variable or Source.tryStmt
+semantics. Source/Eval.enterInstance separately uses attempt, restores heap,
+rolls back on revert and propagates other halts; runMods separately saves/restores
+fnLocals. Their general raw dispatcher/function/session/caller-frame hooks remain
+producer obligations, not reimplemented here. Source EM still operates on old
+Source.Locals; our raw LocalValues remain a separate explicit companion.
+
+The [actual driver](../../tests/yul-composition/AttemptDriver.lean) retains each
+captured outcome, branch, raw/poststate log prefix, full panic/revert bytes and
+continuation exhaustion. New independent [native source](../../tests/yul-composition/AttemptControls.sol)
+and frozen [expectations](../../tests/yul-composition/attempt-expectations.json)
+exercise successBEEF (no continuation), DEAD/empty/panic catches with length-bound
+raw continuation, and reads: four pinned solc0.8.38+1835d247/Osaka legacy/viaIR
+optimizer off/on profiles pass24orderedcalls. Actual native external frames roll
+back outerAB/childCD/transient22/33/log66/77 while caller marker7/log55 persists.
+That native rollback is NOT the Source attempt primitive's log99 retention.
+Native timeout/gas/stuck correspondence is not asserted. Both nonempty/empty
+catch and full panic-tail buffers, ordered frames/writes/logs, touched accounts/
+persistent/transient maps and relative RETURN/REVERT/LOG windows are checked.
+Finite runCall evidence is separate from kernel laws, runTx/untouched total-world,
+allocation identity and full Source/compiler/world correspondence.
+
+[Reader](../../scripts/yul-composition/attempt-source.mjs) binds actual main/private
+Source.Machine/Value/Observe bytes plus the existing CatchFunction→RawCatch→peer
+closure, frozen source/oracle/catalog/settings/current bodies, retained Lean
+command/exit/stdout/stderr, exact profile/call identity and all ordered fields.
+Success good() is external pure, so its nested frame must be static; root remains
+nonstatic. Initial native exit1 incorrectly required a nonstatic child; fixed to
+STRICT true from source mutability, not allow-both. Source/oracle values remained
+unchanged and raw failedv1 is retained. False static flag/panic tail/stale catch
+bytes, wrong branch, swallowed timeout/stuck, raw reset/cleanup, false rollback,
+wrong length/source/poststate, equal-return wrong frame/world/state and producer/
+receipt/catalog drift fail closed. All781JS+2Python pass. Previous sealed40call
+reference was not rerun as fresh compiler evidence. Original fixture/oracle hashes
+remain untouched.
+
+Separate independent read-only finder/skeptic reviews accepted source and strict
+static correction; both found a no-op prestate test mutant assigning marker7 when
+success already stored7. Fixed the mutant to0, not the oracle, before full tests;
+no failed test run was fabricated. Rereview accepted with no remaining finding,
+no Lean/server/build/edits. Private9cc86ee418a700936b30595a38734705a32a6bac is an
+ancestor of b65e9d776eb1e168cacbdc8be649d9fab4511c23; only owned consumer/driver
+and one private root import were added. Main standalone import support is not
+claimed. Joint gate exits0: actual Lean4.24.0 commit797c613, Lake5.0.0-src+797c613;
+KeySort2jobs; library1226/TestSuite262jobs;377taclets/131annotations;193core/
+0elaborator;1241reachable/0orphan; strict491automatic/61budgeted/0manual/
+11refuted/0pending; trust1256sources/252sites/0findings. All28 scoped signatures/
+transitive axioms show standard axioms or subsets; no new axiom/sorry. Final MCP
+consumer/driver/root success=true/partial=false/no errors; nonfatal async shutdown
+warnings remain raw. Failed diagnostics from generic result case reduction and
+state-alias rewrite, native static guard and a Python setup syntax error remain
+recorded; all corrected without budget/semantic-value changes. Historical docs/
+G03 exit1 remain failures with exact-base equality, never global passes.
+
+Existing writer lock and bounded runner remain unchanged: serial-j1/
+LEAN_NUM_THREADS=1, hard12GiB/no swap, OS-headroom and all proof/fuel/node/test
+limits. Disk is measured, not declared a new passing gate; no guard/floor is
+lowered and no protected cache/evidence deleted. Only new stopped metadata-only
+VFS copies are retired after retaining/verifying inspect/logs/directory metadata
+and preserving image/mounts. Incremental source archive avoids re-exporting old
+source packages. No hidden resource stop occurred.
+
+Work1/Work3 and Work2/BackfillA/B remain PARTIAL. All24 original Y01–Y09/Y10/
+G48–G51 obligations and six full Source combinations remain pending. Missing:
+general raw Source try selection/byte allocation/binding, ordinary operators,
+function/session hooks, physical-world journal/log/G01 and actual compiler/world/
+V16 adequacy. LIB1/unchecked-add remain unanswered. Original blocked goal stays
+untouched; get_goal unavailable. No new goal/reset/reactivation/status change,
+producer retrieval/export turn, push/merge/PR or service. Reviewed exact
+patch/bundles/interface/handoff/evidence/checksums are versioned at
+`/workspace/vy5-composition/attempt-20261101/final/`.

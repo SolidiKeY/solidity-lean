@@ -344,3 +344,15 @@ KeySort/build/TestSuite/strict/trust/scoped-axiom gates pass. All24 ORIGINAL
 full obligations/sixSource combinations remain pending; no new source dispatch
 or final adequacy is inferred. See [lane details](inline-assembly-vy5.md#scoped-functions-after-raw-catch--2026-11-01)
 and versioned artifacts `/workspace/vy5-composition/catch-function-20261101/final/`.
+
+### VY5 actual Source attempt consumer — 2026-11-01
+
+VY5 consumes actual EM.attempt with explicit old callee locals/raw caller
+companion.28component laws retain all outcome/poststate branches, bind only
+actual revert-byte length into existing raw continuation, and distinguish
+post-log99 retention from separate physical/native rollback. New4profile24call
+finite controls and781JS+2Python pass; joint KeySort/build/TestSuite/strict/trust/
+scoped-axiom gates pass. All24 ORIGINAL full obligations and six full Source
+combinations remain pending; no Source.tryStmt/heapcatch/frame adequacy inferred.
+See [lane details](inline-assembly-vy5.md#actual-source-halt-capture-with-raw-companion--2026-11-01) and immutable artifacts
+at `/workspace/vy5-composition/attempt-20261101/final/`.
