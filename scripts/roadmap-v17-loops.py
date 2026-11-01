@@ -24,15 +24,20 @@ open Lean Lean.Meta Lean.Elab Solidity Solidity.Evm Solidity.Evm.Memory
  s+='def privateName (suffix : String) : TermElabM Lean.Name := do\n  let env ← getEnv\n  let names := env.constants.toList.filterMap fun (n, _) => do\n    let idx ← env.getModuleIdxFor? n\n    if env.header.moduleNames[idx.toNat]! == '+m.name_term(mod)+' && n.toString.endsWith ("." ++ suffix) then some n else none\n  match names with\n  | [n] => return n\n  | _ => throwError "expected one published private constant: {suffix}"\n'
  s+='''elab "v17Loop% " suffix:str : term => do
   mkConstWithFreshMVarLevels (← privateName suffix.getString)
-def stackWords (out : Out) : Option (List Nat) := match out with
+def stackWords (out : Solidity.Evm.Out) : Option (List Nat) := match out with
   | .ok m _ => m.stack.mapM fun w => match w with | .val n => some n.val | _ => none
   | _ => none
 '''
+ s+='def sourceTop {K : Contract} {Δ : Ctx} (i : Idx Δ (.val .uint)) (out : TRes (Solidity.Out K [] Δ)) : Option Int := (v17Loop% "sourceTop") i out\ndef targetCells (cells : List Nat) (out : Solidity.Evm.Out) : Option (List Nat) := (v17Loop% "targetCells") cells out\n'
+ for suffix in ['C','irC','machine']+PRIVATE+['checkedArrays','checkedArraysIR','checkedRecords','checkedRecordsIR']:
+  s+='private abbrev '+suffix+' := v17Loop% '+json.dumps(suffix)+'\n'
  rows=[]
  for i,name in enumerate(['arrays','arraysIR','records','recordsIR']):
   ir=name.endswith('IR');arr=name.startswith('arrays');cap=name[0].upper()+name[1:];cells=[0,1,2,3,4,128,129,130,63] if arr else [0,1,2,3,128,63]
-  row='do\n  let program := v17Loop% '+json.dumps(name)+'\n  let result := v17Loop% '+json.dumps('compiled'+cap)+'\n  let cert := (v17Loop% '+json.dumps('checked'+cap)+').cert\n  let initial := State.init (v17Loop% '+json.dumps('irC' if ir else 'C')+')\n  let machine := v17Loop% "machine"\n  let out := run result.code machine\n  let cells : List Nat := '+str(cells)+'\n  pure (Json.mkObj ['
-  fields=[('name',json.dumps(name)),('viaIR','decide ((v17Loop% '+json.dumps('irC' if ir else 'C')+').evalOrder = .viaIR)'),('source','(v17Loop% "sourceTop") .here (program.run initial)'),('cells','cells'),('target','(v17Loop% "targetCells") cells out'),('stack','stackWords out'),('emptyCodeTarget','(v17Loop% "targetCells") cells (run [] machine)'),('intrinsicCode','reprStr result.code'),('isDirect','result.isMemoryLoops'),('isScoped','result.isMemoryLoopScopes'),('need','cert.need'),('frameFits','decide (1 + cert.need ≤ 64)'),('zeroFrameFits','decide (1 + cert.need ≤ 0)'),('prefixBudget',rel+'.prefixBudget cert initial')]
+  contract='irC' if ir else 'C'
+  row='do\n  let program := '+name+'\n  let result := compiled'+cap+'\n  let cert := checked'+cap+'.cert\n  let initial := State.init '+contract+'\n  let out := run result.code machine\n  let cells : List Nat := '+str(cells)+'\n  pure (Json.mkObj ['
+  order=contract+'.evalOrder'
+  fields=[('name',json.dumps(name)),('viaIR',order+'.binaryLeftToRight && '+order+'.modularLeftToRight && '+order+'.modifierFrames'),('evalOrder','['+order+'.binaryLeftToRight, '+order+'.modularLeftToRight, '+order+'.modifierFrames]'),('source','sourceTop .here (program.run initial)'),('cells','cells'),('target','targetCells cells out'),('stack','stackWords out'),('emptyCodeTarget','targetCells cells (run [] machine)'),('intrinsicCode','reprStr result.code'),('isDirect','result.isMemoryLoops'),('isScoped','result.isMemoryLoopScopes'),('need','cert.need'),('frameFits','decide (1 + cert.need ≤ 64)'),('zeroFrameFits','decide (1 + cert.need ≤ 0)'),('prefixBudget',rel+'.prefixBudget cert initial')]
   row+=', '.join('('+json.dumps(k)+', toJson ('+v+'))' for k,v in fields)+'])';rows.append(row)
   s+='def observation'+str(i)+' : Json := Id.run <| '+row+'\n'
  s+='#eval IO.println ("V17_LOOP_BEGIN\\n" ++ (Json.mkObj [("schema", toJson (1 : Nat)), ("family", toJson '+json.dumps(family)+'), ("base", toJson (1 : Nat)), ("frame", toJson (64 : Nat)), ("cases", toJson [observation0,observation1,observation2,observation3]), ("semanticPremisesDischarged",toJson false),("releaseClosed",toJson false)]).compress ++ "\\nV17_LOOP_END")\nend Solidity.Roadmap.V17.LoopObservation\n'
@@ -59,7 +64,7 @@ def observation(raw,family):
  for row,name in zip(v['cases'],['arrays','arraysIR','records','recordsIR']):
   arr=name.startswith('arrays');ir=name.endswith('IR');cells=[0,1,2,3,4,128,129,130,63] if arr else [0,1,2,3,128,63]
   target=[131,128,128,2,4,2,3,4,99] if arr else ([130,0,5,128,3,99] if ir else [130,128,128,128,3,99])
-  expected={'name':name,'viaIR':ir,'source':4 if arr else 3,'cells':cells,'target':target,'stack':[77],'isDirect':family=='direct','isScoped':family=='scoped','frameFits':True,'zeroFrameFits':False,'prefixBudget':3 if arr else 2}
+  expected={'name':name,'viaIR':ir,'evalOrder':[ir,ir,ir],'source':4 if arr else 3,'cells':cells,'target':target,'stack':[77],'isDirect':family=='direct','isScoped':family=='scoped','frameFits':True,'zeroFrameFits':False,'prefixBudget':3 if arr else 2}
   if set(row)!=set(expected)|{'need','emptyCodeTarget','intrinsicCode'}:raise ValueError('missing/extra ordered observation')
   if any(not creation().equal(row[k],val) for k,val in expected.items()):raise ValueError('changed ordered source/target/alias/allocator/stack/frame observation')
   if type(row['need']) is not int or not 0<=row['need']<64 or not isinstance(row['intrinsicCode'],str) or not row['intrinsicCode'] or row['emptyCodeTarget']==row['target']:raise ValueError('missing need/code/negative control')

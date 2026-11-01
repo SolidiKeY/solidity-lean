@@ -8,7 +8,7 @@ class LoopControls(unittest.TestCase):
  def baseline(self,family):
   rows=[]
   for name in ['arrays','arraysIR','records','recordsIR']:
-   arr=name.startswith('arrays');ir=name.endswith('IR');rows.append(dict(name=name,viaIR=ir,source=4 if arr else 3,cells=[0,1,2,3,4,128,129,130,63] if arr else [0,1,2,3,128,63],target=[131,128,128,2,4,2,3,4,99] if arr else ([130,0,5,128,3,99] if ir else [130,128,128,128,3,99]),stack=[77],emptyCodeTarget=[128],intrinsicCode='synthetic parser baseline only',isDirect=family=='direct',isScoped=family=='scoped',need=5,frameFits=True,zeroFrameFits=False,prefixBudget=3 if arr else 2))
+   arr=name.startswith('arrays');ir=name.endswith('IR');rows.append(dict(name=name,viaIR=ir,evalOrder=[ir,ir,ir],source=4 if arr else 3,cells=[0,1,2,3,4,128,129,130,63] if arr else [0,1,2,3,128,63],target=[131,128,128,2,4,2,3,4,99] if arr else ([130,0,5,128,3,99] if ir else [130,128,128,128,3,99]),stack=[77],emptyCodeTarget=[128],intrinsicCode='synthetic parser baseline only',isDirect=family=='direct',isScoped=family=='scoped',need=5,frameFits=True,zeroFrameFits=False,prefixBudget=3 if arr else 2))
   return dict(schema=1,family=family,base=1,frame=64,cases=rows,semanticPremisesDischarged=False,releaseClosed=False)
  def raw(self,v):return ('V17_LOOP_BEGIN\n'+json.dumps(v)+'\nV17_LOOP_END\n').encode()
  def test_both_shape_baselines_preserve_distinct_records(self):
@@ -16,7 +16,7 @@ class LoopControls(unittest.TestCase):
    v=self.baseline(f);self.assertEqual(l.observation(self.raw(v),f),v);self.assertNotEqual(v['cases'][2]['target'],v['cases'][3]['target'])
  def test_mutations(self):
   for family in l.CONFIG:
-   for key,value in [('target',[131]),('cells',[0,2,1]),('source',False),('stack',[0]),('need',True),('prefixBudget',0),('viaIR',True),('isDirect',False if family=='direct' else True),('frameFits',False),('zeroFrameFits',True),('emptyCodeTarget',[131,128,128,2,4,2,3,4,99])]:
+   for key,value in [('target',[131]),('cells',[0,2,1]),('source',False),('stack',[0]),('need',True),('prefixBudget',0),('viaIR',True),('evalOrder',[False,True,False]),('isDirect',False if family=='direct' else True),('frameFits',False),('zeroFrameFits',True),('emptyCodeTarget',[131,128,128,2,4,2,3,4,99])]:
     v=self.baseline(family);v['cases'][0][key]=value
     with self.subTest(family=family,key=key),self.assertRaises(ValueError):l.observation(self.raw(v),family)
    v=self.baseline(family);v['cases'][3]['target']=v['cases'][2]['target']
@@ -36,7 +36,7 @@ class LoopControls(unittest.TestCase):
    with self.assertRaises(ValueError):l.creation().load_memory().exact_replay(first,bad)
  def test_queries_are_full_and_relation_specific(self):
   for f in l.CONFIG:
-   b=l.query_bytes(f);self.assertEqual(len(l.public_requests(f))+len(l.PRIVATE),16);self.assertIn(b'KernelQuery.extract requests',b);self.assertNotIn(b'includeValues',b.split(b'run_cmd do')[-1]);self.assertNotIn(b'allocationCost',b);self.assertIn(l.CONFIG[f][2].encode()+b'.prefixBudget',b);self.assertFalse(l.publication_identity(f)['finiteAllocationCostUsed'])
+   b=l.query_bytes(f);self.assertEqual(len(l.public_requests(f))+len(l.PRIVATE),16);self.assertIn(b'KernelQuery.extract requests',b);self.assertIn(b'out : Solidity.Evm.Out',b);self.assertLess(b.count(b'v17Loop%'),35);self.assertNotIn(b'includeValues',b.split(b'run_cmd do')[-1]);self.assertNotIn(b'allocationCost',b);self.assertIn(l.CONFIG[f][2].encode()+b'.prefixBudget',b);self.assertFalse(l.publication_identity(f)['finiteAllocationCostUsed'])
 class TimingControls(unittest.TestCase):
  def baseline(self):return {'kind':'fresh-original-Derived17-workload','exit_code':0,'budgetSeconds':300,'seconds':240,'expectedModules':t.MODULES,'checks':[{'module':m,'fresh':True,'exit_code':0,'seconds':9,'sourceSha256':'0'*64} for m in t.MODULES]}
  def test_complete_only(self):self.assertEqual(t.validate_shape(self.baseline(),lambda _:'0'*64)['members'],24)
