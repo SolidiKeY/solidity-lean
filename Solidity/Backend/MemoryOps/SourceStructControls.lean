@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructDelete
 import Solidity.Backend.MemoryOps.SourceStructChild
 import Solidity.Backend.MemoryOps.SourceStructAlias
 import Solidity.Backend.MemoryOps.SourceStructAssignment
@@ -931,5 +932,265 @@ theorem member_child_runtime_endpoint (p : Roadmap.Pipeline) (xs ys : List Bool)
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms member_child_runtime_endpoint
+
+
+private def deletedInitial := selectedState.withHeap mutatedHp
+private def deletedHp := mutatedHp.set right (MObj.setElem .dyn (mutatedHp.get right) 0 false)
+private def deletedSource : Source.EMState E XΓ :=
+  (mutatedSource.1,{mutatedSource.2 with heap := mutatedSource.2.heap.write 1 (sourceBoolMemory [false,true,false]) (by rfl)})
+private def deletedMachine := writeMachine mutatedMachine 25 w[0]
+private def deleteTerm : Source.RExpr E XΓ (.tuple []) := sourceStructChildDelete layout xroot xi
+private def deleteCode := structChildDeleteCode (C := C) 1 root "items" zeroWord
+
+/-- Consume C51's actual reached changed state, not a separately initial run.
+The existing reference-write/selection/content-write prefix makes deletion
+material; old LEFT aliases remain LEFT while selected RIGHT is cleared. -/
+theorem reached_member_child_delete (p : Roadmap.Pipeline) :
+    (Source.evalE (G p) F0 3 term).run sy=(.ok (.val (.memRef rfl 1)),reached) ∧
+    (Source.evalE (G p) F0 3 (sourceStructSelectedAlias layout srhs sroot)).run reached=(.ok (.val (.memRef rfl 1)),selectedAgain) ∧
+    (Source.evalE (G p) F0 4 childTerm).run (withArgs selectedAgain k0 true)=(.ok (.val (.bool true)),mutatedSource) ∧
+    (Source.evalE (G p) F0 4 deleteTerm).run mutatedSource=(.ok Source.RVal.unit,deletedSource) ∧
+    (Source.execS (G p) F0 5 XΓ.length none (.expr deleteTerm : Source.RStmt E [] false .body XΓ XΓ)
+      mutatedSource.1).run (.nil,mutatedSource.2)=(.ok (.normal mutatedSource.1),(.nil,deletedSource.2)) ∧
+    Stmt.run deletedInitial (.deleteMem (.loc (.index .dyn (fieldPath root) zeroWord)) rfl)=
+      .ok ⟨deletedInitial.withHeap deletedHp,List.prefix_refl _⟩ ∧
+    run ((code++selectedCode++childCode)++deleteCode) machine=.ok deletedMachine 0 ∧
+    SourceBoolStructAt deletedSource 2 deletedHp parent addresses layout ∧ Source.MemOK E SH deletedSource ∧
+    StateRepr 1 1 8 (Frag.init Γ) (deletedInitial.withHeap deletedHp) base deletedMachine ∧
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right),MObj.elems .dyn (out.get left),MObj.elems .dyn (out.get right),
+      MObj.elems .dyn (mutatedHp.get left),MObj.elems .dyn (mutatedHp.get right),MObj.elems .dyn (deletedHp.get left),MObj.elems .dyn (deletedHp.get right)]=
+      [[true,false,false],[false,true,false],[true,false,false],[false,true,false],[true,false,false],[true,true,false],[true,false,false],[false,true,false]] ∧
+    [cells machine,cells target,cells selectedMachine,cells mutatedMachine,cells deletedMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[1],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]]] ∧
+    deletedSource.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,false,false]⟩ ∧
+    deletedSource.2.heap.get 1=some ⟨SB,sourceBoolMemory [false,true,false]⟩ ∧
+    deletedSource.2.heap.get 2=some ⟨SS,data 1⟩ ∧
+    (Source.readLoc (E := E) (Γ := XΓ) F0 (τ := .bool) (.mem 1 0)).run deletedSource=(.ok (.bool false),deletedSource) ∧
+    (Source.readLoc (E := E) (Γ := XΓ) F0 (τ := .bool) (.mem 0 0)).run deletedSource=(.ok (.bool true),deletedSource) ∧
+    deletedSource.1.get (.there (.there soldAlias))=.memRef rfl 0 ∧
+    (TEnv.get oldAlias (deletedInitial.withHeap deletedHp).env).map HRef.id=some 0 ∧
+    deletedHp.field parent layout.tag_type=u7 ∧ (deletedHp.field parent layout.child_type).id=1 ∧
+    deletedSource.2.ex=sy.2.ex ∧ deletedSource.2.events=sy.2.events ∧ deletedSource.2.logs=sy.2.logs ∧
+    deletedMachine.stack=[w[42]] ∧ StructAllocatorRepr deletedHp base 8 ⟨48,by decide⟩ deletedMachine := by
+  obtain ⟨he₀,he₁,hprefix,hewrite,hswrite,hiwrite,hr,hm,hrepr,hvectors,hcells,hsource₀,hsource₁,hsource₂,
+    hlocals,htlocals,htag,hid,hex,hev,hlog,hstack,halloc⟩ := reached_member_child_write p
+  have hqr : deletedInitial.heap.field parent layout.child_type=right := by
+    simp only [deletedInitial,mutatedHp,selectedState,State.withHeap,State.setLocal,Heap.field,
+      Heap.get_set_ne out right parent (by decide)]
+    rfl
+  have hk : k0.1.toNat<deletedInitial.heap.len (deletedInitial.heap.field parent layout.child_type) .dyn := by
+    rw [hqr]
+    change k0.1.toNat<(MObj.elems .dyn (mutatedHp.get right)).length
+    simp only [mutatedHp,Heap.get_set_same,MObj.elems_setElem,List.length_set]
+    change k0.1.toNat<(MObj.elems .dyn (out.get right)).length
+    simp only [out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,parent,right,MObj.elems_dyn,k0,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+    decide
+  obtain ⟨out',z',target',hw,hdel,he,hs,hi,hc,hr',hm',hrepr',hl,hstack',halloc',hparent,hother,hsource,hex',hev',hlog',hfn'⟩ :=
+    hr.delete_child_word layout (G p) F0 0 deletedInitial parent addresses xroot xi root zeroWord k0
+      rfl rfl rfl rfl (by decide) hk SH hm hrepr rfl
+  have ho : out'=deletedHp := Option.some.inj (hw.symm.trans (show deletedInitial.heap.writeAddr
+      (.index (deletedInitial.heap.field parent layout.child_type) .dyn k0) false=some deletedHp from by
+        rw [hqr]
+        simp only [Heap.writeAddr,Heap.setIndex]
+        rw [if_pos (by simpa only [hqr] using hk)]
+        rfl))
+  subst out'
+  have hz : z'=deletedSource := by
+    obtain ⟨ht,hw⟩ := source_bool_write mutatedSource 1 [true,true,false] hsource₁ 0 (by decide) false
+    have hknown : (Source.deleteLoc (E := E) (Γ := XΓ) F0 3 (τ := .bool) (.mem 1 0)).run mutatedSource=(.ok (),deletedSource) := hw
+    rw [hqr] at hdel
+    exact congrArg Prod.snd (hdel.symm.trans hknown)
+  subst z'
+  have ht : target'=deletedMachine := by
+    let ptr := [.mload (cellOf 1 root)]++readFieldCode (fieldOffset (structDef S) "items")
+    have hptrCert : PtrFrag 1 (fieldPath root) ptr := .field _ _ _ (.local root (by decide))
+    have hpath : (fieldPath root).mvalT deletedInitial=.ok right := by
+      simp only [fieldPath,MPath.mvalT,MLoc.addrT,Heap.readAddr,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+      exact congrArg Except.ok hqr
+    have hptr := hptrCert.run_of_eval (hrepr.push w[0]) hpath
+    change run ptr (mutatedMachine.push w[0])=.ok ((mutatedMachine.push w[0]).push (.val (base right.id))) 0 at hptr
+    have hraw : run (writeArrayCode (base right.id)) ((mutatedMachine.push w[0]).push w[0])=.ok deletedMachine 0 := by
+      obtain ⟨_,_,hc,_⟩ | ⟨hn,_⟩ := writeArray_correct (hrepr.heap.arrays right) ⟨0,by decide⟩ false w[0] rfl
+      · exact hc
+      · change deletedInitial.heap.writeAddr (.index right .dyn k0) false=none at hn
+        have hwKnown : deletedInitial.heap.writeAddr (.index right .dyn k0) false=some deletedHp := by
+          rw [←hqr];exact hw
+        rw [hwKnown] at hn;cases hn
+    have hcalc : run deleteCode mutatedMachine=.ok deletedMachine 0 := by
+      change run ((compileVal 1 (deleteDefaultValue .bool))++ptr++compileVal 1 zeroWord++writeArrayStackCode) mutatedMachine=_
+      rw [List.append_assoc,List.append_assoc,
+        run_append_ok (show run (compileVal 1 (deleteDefaultValue .bool)) mutatedMachine=.ok (mutatedMachine.push w[0]) 0 from rfl),
+        run_append_ok hptr,
+        run_append_ok (show run (compileVal 1 zeroWord) ((mutatedMachine.push w[0]).push (.val (base right.id)))=
+          .ok (((mutatedMachine.push w[0]).push (.val (base right.id))).push w[0]) 0 from rfl)]
+      rw [writeArrayStackCode,arrayStack_append_eq (mutatedMachine.push w[0]) (base right.id) ⟨0,by decide⟩ _
+        (deletedInitial.heap.len_dyn_lt right) (hrepr.heap.arrays right).length,←writeArrayCode]
+      exact hraw
+    exact (Evm.Out.ok.inj (hc.symm.trans hcalc)).1
+  subst target'
+  refine ⟨he₀,he₁,hewrite,he,hs,hi,(run_append_ok hprefix).trans hc,hr',hm',hrepr',?_,?_,rfl,rfl,rfl,?_,?_,rfl,rfl,?_,?_,rfl,rfl,rfl,hstack',?_⟩
+  · simp only [deletedHp,mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    rfl
+  · rfl
+  · exact source_bool_read deletedSource 1 [false,true,false] rfl 0 (by decide)
+  · exact source_bool_read deletedSource 0 [true,false,false] rfl 0 (by decide)
+  · change deletedHp.field parent layout.tag_type=u7
+    simp only [Heap.field,hparent]
+    exact htag
+  · change (deletedHp.field parent layout.child_type).id=1
+    simp only [Heap.field,hparent]
+    exact hid
+  · exact halloc' _ (by decide) halloc
+
+
+private def wrongDeletedSource : Source.EMState E XΓ :=
+  (mutatedSource.1,{mutatedSource.2 with heap := mutatedSource.2.heap.write 0 (sourceBoolMemory [false,false,false]) (by rfl)})
+private def wrongDeletedHp := mutatedHp.set left (MObj.setElem .dyn (mutatedHp.get left) 0 false)
+
+/-- Actual wrong retained-local deletion changes LEFT, unlike member-selected
+RIGHT deletion. Source panic, intrinsic rejection and word revert stay separate. -/
+theorem member_delete_failure_views (p : Roadmap.Pipeline) :
+    (Source.evalE (G p) F0 4 deleteTerm).run (withArgs sy k3 true)=
+      (.error (.revert (Source.panicData .index)),withArgs sy k3 true) ∧
+    (∀ n,n≤3 → (Source.evalE (G p) F0 n deleteTerm).run (withArgs sy k0 true)=(.error .timeout,withArgs sy k0 true)) ∧
+    hp.writeAddr (.index left .dyn k3) (PrimTy.dflt .bool)=none ∧
+    Stmt.run σ (.deleteMem (.loc (.index .dyn (fieldPath root) endpointWord)) rfl)=.error .revert ∧
+    run (structChildDeleteCode (C := C) 1 root "items" endpointWord) machine=.revert ∧
+    (Source.evalE (G p) F0 3 (sourceIndexedDelete (.there (.there soldAlias)) xi)).run mutatedSource=
+      (.ok Source.RVal.unit,wrongDeletedSource) ∧
+    mutatedHp.writeAddr (.index left .dyn k0) (PrimTy.dflt .bool)=some wrongDeletedHp ∧
+    wrongDeletedSource.2.heap.get 0=some ⟨SB,sourceBoolMemory [false,false,false]⟩ ∧
+    wrongDeletedSource.2.heap.get 1=some ⟨SB,sourceBoolMemory [true,true,false]⟩ ∧
+    MObj.elems .dyn (mutatedHp.get right)≠MObj.elems .dyn (deletedHp.get right) ∧
+    MObj.elems .dyn (wrongDeletedHp.get right)≠MObj.elems .dyn (deletedHp.get right) ∧
+    wrongDeletedSource.2.heap.get 1≠deletedSource.2.heap.get 1 := by
+  have hr : SourceBoolStructAt (withArgs sy k3 true) 2 hp parent addresses layout := initial_at.same_heaps rfl rfl
+  have hge : σ.heap.len (σ.heap.field parent layout.child_type) .dyn≤k3.1.toNat := by
+    change (MObj.elems .dyn (hp.get left)).length≤k3.1.toNat
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn,k3,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+    decide
+  obtain ⟨hb,hn,hd,hrun⟩ := hr.delete_child_word_bounds layout (G p) F0 0 σ parent addresses xroot xi root endpointWord k3
+    rfl rfl rfl rfl (by decide) hge initial_repr rfl
+  have hold : SourceBoolMemoryAt mutatedSource 0 mutatedHp left .dyn := by
+    unfold SourceBoolMemoryAt
+    simp only [mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn]
+    rfl
+  obtain ⟨ht,hw⟩ := source_bool_write mutatedSource 0 [true,false,false] rfl 0 (by decide) false
+  have hraw : (Source.deleteLoc (E := E) (Γ := XΓ) F0 2 (τ := .bool) (.mem 0 0)).run mutatedSource=(.ok (),wrongDeletedSource) := hw
+  have hwrong := hold.eval_delete_of_run (G p) F0 0 (.there (.there soldAlias)) xi k0 rfl rfl (by
+    simp only [mutatedHp,out,Heap.setField,Heap.len,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,k0,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+    decide) hraw
+  refine ⟨hb,source_struct_delete_low_horizon layout (G p) F0 _ xroot xi,hn,hd,hrun,hwrong,?_,rfl,rfl,?_,?_,?_⟩
+  · change mutatedHp.writeAddr (.index left .dyn k0) false=some wrongDeletedHp
+    have hlt : k0.1.toNat<(MObj.elems .dyn (mutatedHp.get left)).length := by
+      simp only [mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,k0,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+      decide
+    simp only [Heap.writeAddr,Heap.setIndex]
+    rw [if_pos hlt]
+    rfl
+  · simp only [deletedHp,mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    change ([true,true,false] : List Bool)≠[false,true,false];decide
+  · simp only [wrongDeletedHp,deletedHp,mutatedHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    change ([true,true,false] : List Bool)≠[false,true,false];decide
+  · intro he
+    have hwrongtable : wrongDeletedSource.2.heap.get 1=some ⟨SB,sourceBoolMemory [false,true,false]⟩ := he.trans rfl
+    have hread₁ := source_bool_read wrongDeletedSource 1 [true,true,false] rfl 0 (by decide)
+    have hread₂ := source_bool_read wrongDeletedSource 1 [false,true,false] hwrongtable 0 (by decide)
+    have hbad := hread₁.symm.trans hread₂
+    cases hbad
+
+
+/-- Arbitrary runtime valid indices consume the ACTUAL reference-write output.
+Logical Source execution requires no invented fixed word layout for the lists. -/
+theorem member_delete_runtime_valid (p : Roadmap.Pipeline) (xs ys : List Bool)
+    (hx : xs.length<2^256) (hy : ys.length<2^256) (j : Fin ys.length) :
+    let k := indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩
+    ∃ (mid : Source.EMState E SΓ) (out' : Heap H) (z : Source.EMState E XΓ),
+      (Source.writeLoc (E := E) (Γ := SΓ) F0 0 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run (runtimeSource xs ys)=(.ok (),mid) ∧
+      (Source.evalE (G p) F0 4 deleteTerm).run (withArgs mid k true)=(.ok Source.RVal.unit,z) ∧
+      SourceBoolStructAt z 2 out' parent addresses layout ∧ Source.MemOK E SH z ∧
+      (Source.readLoc (E := E) (Γ := XΓ) F0 (τ := .bool) (.mem 1 j.val)).run z=(.ok (.bool false),z) := by
+  dsimp only
+  let hp := runtimeHp xs ys hx hy
+  let hp' := hp.setField parent layout.child_type right
+  let k := indexValue ⟨j.val,by have h := j.isLt;change j.val<2^256;omega⟩
+  have hinit : SourceBoolStructAt (runtimeSource xs ys) 2 hp parent addresses layout := by
+    refine ⟨rfl,?_⟩
+    unfold SourceBoolMemoryAt
+    simp only [hp,runtimeHp,Heap.get,Objs.get,left,MObj.elems_dyn];rfl
+  obtain ⟨mid,hwref,hr,hm,hleft,hright⟩ := runtime_children xs ys hx hy
+  obtain ⟨ht,hknown⟩ := source_struct_write (runtimeSource xs ys) 2 dn layout.source_types u7 0 1 hinit.parent
+  have hlocals : mid.1=(runtimeSource xs ys).1 := congrArg (fun x : Except Source.Halt Unit × Source.EMState E SΓ => x.2.1) (hwref.symm.trans hknown)
+  have hrx : SourceBoolStructAt (withArgs mid k true) 2 hp' parent addresses layout := hr.same_heaps rfl rfl
+  have hq : hp'.field parent layout.child_type=right := by rfl
+  have hk : k.1.toNat<hp'.len (hp'.field parent layout.child_type) .dyn := by
+    rw [hq]
+    simpa only [hp',hp,runtimeHp,Heap.setField,Heap.len,Heap.get,Heap.set,Objs.get,Objs.set,parent,right,MObj.elems_dyn,k,indexValue,Int.toNat_natCast] using j.isLt
+  obtain ⟨out',z,hw,he,hr',hm',hl,hparent⟩ := hrx.delete_child_source (G p) F0 0 xroot xi k
+    (by change mid.1.get sroot=_;rw [hlocals];rfl) rfl hk SH (withArgs_memOK _ _ _ hm)
+  have ho : out'=hp'.set right (MObj.setElem .dyn (hp'.get right) k.1.toNat false) :=
+    Option.some.inj (hw.symm.trans (show hp'.writeAddr (.index (hp'.field parent layout.child_type) .dyn k) false=
+      some (hp'.set right (MObj.setElem .dyn (hp'.get right) k.1.toNat false)) from by
+        rw [hq]
+        simp only [Heap.writeAddr,Heap.setIndex]
+        exact if_pos (by simpa only [hq] using hk)))
+  have hqout : out'.field parent layout.child_type=right := by
+    unfold Heap.field
+    rw [hparent]
+    exact hq
+  have hleaf := hr'.leaf
+  rw [hqout] at hleaf
+  have hindex : out'.index right .dyn k=some false := by
+    rw [ho]
+    simp only [Heap.index,Heap.get_set_same,MObj.elems_setElem]
+    exact List.getElem?_set_self (by simpa only [hq,Heap.len] using hk)
+  have hread := (hleaf.read_iff F0 k false).mpr hindex
+  refine ⟨mid,out',z,hwref,he,hr',hm',?_⟩
+  simpa only [k,indexValue,Int.toNat_natCast] using hread
+
+/-- Actual runtime endpoint deletion rejection, including an EMPTY child.
+The independent intrinsic None observation has no word-space assumption. -/
+theorem member_delete_runtime_endpoint (p : Roadmap.Pipeline) (xs ys : List Bool)
+    (hx : xs.length<2^256) (hy : ys.length<2^256) :
+    let k := indexValue ⟨xs.length,hx⟩
+    let y := withArgs (runtimeSource xs ys) k true
+    (Source.evalE (G p) F0 4 deleteTerm).run y=(.error (.revert (Source.panicData .index)),y) ∧
+      (runtimeHp xs ys hx hy).writeAddr (.index left .dyn k) (PrimTy.dflt .bool)=none := by
+  dsimp only
+  have hloc := (member_child_runtime_endpoint p xs ys hx hy).1
+  constructor
+  · rw [deleteTerm,sourceStructChildDelete,Source.evalE,Source.Hoare.run_bind,hloc]
+  · change (runtimeHp xs ys hx hy).writeAddr (.index left .dyn (indexValue ⟨xs.length,hx⟩)) false=none
+    have hn : ¬(indexValue ⟨xs.length,hx⟩).1.toNat <
+        (MObj.elems .dyn ((runtimeHp xs ys hx hy).get left)).length := by
+      simp only [runtimeHp,Heap.get,Objs.get,left,MObj.elems_dyn,indexValue,Int.toNat_natCast]
+      exact Nat.not_lt.mpr (Nat.le_refl _)
+    simp only [Heap.writeAddr,Heap.setIndex]
+    exact if_neg hn
+
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.reached_member_child_delete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reached_member_child_delete
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_delete_failure_views' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_delete_failure_views
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_delete_runtime_valid' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_delete_runtime_valid
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.member_delete_runtime_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms member_delete_runtime_endpoint
 
 end Solidity.Backend.MemoryOps.SourceStructControls

@@ -1330,3 +1330,5 @@ At the root, the notation's own tests:
 | `Solidity/Backend/MemoryOps/SourceStructAlias.lean` | Actual Source struct-member selected local rebinding, intrinsic alias path and whole published word field-read/local-store certificate; reached-state composition with named-field mutation. |
 
 | `Solidity/Backend/MemoryOps/SourceStructChild.lean` | Actual Source named-member-selected Bool-child location/read/assignment and published whole pointer-path word certificates; initial finite observer derives mutation/frame and exact Source bounds. |
+
+| `Solidity/Backend/MemoryOps/SourceStructDelete.lean` | Actual Source delete through a named member-selected Bool child, typed default/intrinsic delete and whole published pointer/index word code, precise frames and general rejection; runtime Source application. |

@@ -3876,3 +3876,68 @@ Existing goal remains BLOCKED unchanged; all original queue parents unfinished.
 Next supported investigation: actual delete through the named member-selected
 child using published Source.deleteLoc and existing word primitive-write/default
 certificates. C51 assignment does not discharge that general deletion/path task.
+
+
+### C52: actual named-member-selected Boolean child deletion
+
+SourceStructDelete composes existing Source .delete syntax and member/index
+evalLoc with published positive-fuel primitive zeroVal/deleteLoc. It returns
+actual unit, not an assumed default-write result. The selected identity comes
+from INITIAL SourceBoolStructAt; no independent desired child/postrelation is
+supplied. Intrinsic Stmt.deleteMem uses the published primitive-delete/default-
+assignment equality; WHOLE PtrFrag.field/index/default-write code executes with
+explicit root/index alignment, mapFree, MemOK, StateRepr/space and valIn premises.
+No Source RHS variable or invented default/conversion oracle is needed.
+
+Actual writes derive parent/tag/pointer/selected-leaf correspondence, MemOK,
+locals/ex/events/logs/fnLocals, stack and allocator preservation. ALL other
+intrinsic objects frame; Source objects frame at DIFFERENT addresses. No global
+injection, graph liveness, physical-byte or recursive-container-delete theorem
+is claimed. General rejection separately proves actual Source panic bytes,
+intrinsic None/Stmt revert and whole symbolic-word revert, with no suffix heap
+or Source/target rollback equivalence. Low-horizon Source timeout is separate.
+
+The inhabited control consumes C51's REAL changed mid after reference-field
+replacement, member selection and Boolean mutation: selected RIGHT TTF clears
+to FTF; retained LEFT TFF/localalias0 remains. Explicit reached Source prefix
+calls/final deletion expression+statement, four-operation word append and FIVE
+complete word vectors retain tag7/neighbour99/cursor48/stack42/actual allocator.
+This is not a four-statement Source RItems theorem. An actual wrong retained-
+local deletion clears LEFT instead, keeps RIGHT TTF and differs from correct
+deletion; skipped deletion differs too. All previous vectors/guards are verbatim
+apart from one import and the appended families.
+
+Runtime valid-index applications consume an ACTUAL reference-write output for
+arbitrary xs/ys intrinsic-valid lengths, execute Source delete and read false
+at the chosen index. A separate actual runtime endpoint panic/intrinsic None
+application includes EMPTY children; this is not inferred from vacuous valid-
+index quantification. General word theorems retain real word-space premises;
+no fixed fixture address layout is asserted for arbitrary runtime payloads.
+
+Focused closure178jobs passes nine new exact standard-trio guards; initial
+published-constructor/type/default/dependent-match proof failures remain retained.
+No budgets or axioms changed. Independent finder/skeptic source/control reviews
+PASS, no confirmed remaining defect. Lean MCP unavailable; existing serial
+bounded runtime used, optional artifact cacheOFF. G32-G35.01-.06 and both
+Backfill queues remain partial/blocked; physical bytes/all-profile construction/
+target failures/general types/recursive graphs/ABI/storage/deep-copy/reserved
+copy/final V10-Source-target remain open. No independent-exhaustion or whole-lane
+completion assertion; goal remains BLOCKED unchanged.
+
+C52 final guarded178/full1094default/262Suite/SolKey377/131 exit0; fresh
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF pass. Strict/complete
+fixtures/trust/layer/orphan/lane/script corruption pass;897standardpins113modules,
+nine new exact standard-trio laws/controls. Independent finder/skeptic source/
+control/guard/docs reviews PASS, no confirmed defect. Full aggregateRSS1740936KiB,
+new max/OOM/kill events0; historical cumulativepeak remains separate. All2839
+C51 seal records verified unchanged; C51 control prefix unchanged. Raw docs1
+retains83 complete public-identical findings, separate publiczero-new0; frozen
+no-newFAIL11incoming. Raw inventory1 remains1256unrecorded=359publicinherited+
+897owned,0unsafe; additive registration proposals are not a globalpass. Goal
+BLOCKED unchanged; every original queue parent remains partial/blocked.
+
+Next investigated composition: actual Source RItems for a member-child write
+then DELETE on its reached heap, reusing source_items_pair_run and intrinsic
+heap-pair/word-append laws. C52 exposes linked expression calls but does not yet
+prove that combined Source program; deriving second bounds/root/locals/word
+representation from first output remains useful original G34/BackfillB work.

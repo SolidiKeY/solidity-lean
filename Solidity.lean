@@ -968,3 +968,5 @@ import Solidity.Backend.MemoryOps.SourceStructControls
 import Solidity.Backend.MemoryOps.SourceStructAlias
 
 import Solidity.Backend.MemoryOps.SourceStructChild
+
+import Solidity.Backend.MemoryOps.SourceStructDelete
