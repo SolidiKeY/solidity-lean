@@ -4636,3 +4636,74 @@ Full original G32-G35 and Backfill A/B remain partial/blocked, including real
 reserved memory-storage/final Source-V10-target producers, physical bytes,
 all-profile construction/failure/general-reference/graph/ABI/deep-copy obligations.
 The existing BLOCKED goal is unchanged; no worker goal status mutation occurred.
+
+
+C60 — numeric Source mutation and reached word composition (partial G34/Backfill B).
+The new SourceUintWrite/SourceUintAssignment/SourceUintDelete/SourceUintSequence
+modules consume the existing immutable INITIAL SourceUintMemoryAt and published
+Source/Evm operations read-only. They derive actual memSet/writeLoc, resolved
+RHS-first indexed assignment, deleteLoc's uint-zero default/unit, reached
+correspondence/MemOK, untouched locals/world and distinct-object/address frames.
+The two Source RItems statements, intrinsic Prog and complete word append execute
+on the actual first output; second bounds follow preserved lengths, not an assumed
+second result. The reverse order and genuine successful-prefix/late bounds failure
+are separate actual executions. Source panic bytes, intrinsic revert and symbolic
+word revert remain separately scoped; Option/errors do not imply rollback.
+
+SourceUintMutationControls independently inhabits populated numeric heaps and
+Source tables with retained aliases and a neighbor. Both pipelines execute actual
+assignment/delete, with complete initial/intermediate/final intrinsic vectors,
+Source two-object tables, all dynamic word contents and fixed sixteen-word frame
+vectors (locals, alias/root, header, neighbor, gaps and free pointer), stack42 and
+allocator96. Max/zero order controls distinguish a materially changed middle even
+when final values equal the initial vector; logical31/32, empty/exact endpoint,
+late rejection and low-horizon timeout are retained. The raw stale-pointer negative
+violates INITIAL StateRepr explicitly, and changes the neighbor instead of the
+represented root; it is not a compiler counterexample. The concrete fixture's
+17+length<=80 separated word layout is a sufficient witness capacity, not a public
+payload cap; generic adapter laws quantify arbitrary runtime lengths/indices.
+
+C60 focused controls12 passes162 jobs with exact standard-only guards, aggregate
+RSS1006644KiB and zero new OOM events. Distinct failed attempts are retained:
+controls10/11 and diagnostic-full01 genuinely reached the12GiB cap and were killed
+(Lean137; wrapper1/1/direct137), not proof passes. Guarded prefix diagnostics
+isolated the remaining concrete stale-pointer proof normalization; replacing its
+broad concrete simplification with a private symbolic-machine proof before
+instantiation preserved every statement/vector and passed without any budget,
+representation or runtime change. The current session cumulative OOM count3 and
+peak12GiB remain historical failures, separate from passing-exec RSS/events.
+
+Independent finder/skeptic read-only reviews of actual Source/intrinsic/word
+operations and controls found no mathematical defect; their normalization concern
+was confirmed by the passing isolated prefixes and repaired without weakening.
+Final refined-tree gates and committed-artifact reviews follow below. This does
+not close general paths/graphs/references, all-profile construction/target
+allocation failure, physical bytes, ABI/storage/fresh deep-copy, reserved copy or
+final Source/V10/target composition. Existing BLOCKED goal remains unchanged.
+
+
+C60 final refined-tree wrapper exit0: default1107/TestSuite262/final SolKey377parsed,
+131read-bearing allcovered. Runtime actual Lean4.24.0/Lake5.0.0-src+797c613 and
+KeySort2jobs pass. Strict/trust/layers/orphans/lane/complete fixtures/script
+corruption/diff pass; exact984standard pins in126owned modules pass scoped
+validation. Raw global inventory remains **exit1**:1343unregistered=359public
+inherited+984owned,0unsafeerrors. Raw strict docs stays **exit1** with83complete
+findings, byte-identical to published baseline; separate publiczero-new passes,
+frozenno-new fails with11incoming findings. No global record/baseline altered.
+Warm strict timed0Suite modules, exact262source/fixture/toolchain bytes preserve
+C31cold26/max160s<300s keyed evidence, not new timing coverage. Full aggregate
+RSS1735856KiB, disk growth266240bytes, newOOMdelta0; cumulative current-epoch
+max10719/oom3/kill3/12GiBpeak stays failed-history evidence. Both independent
+finder/skeptic final SOURCE/control/docs reviews PASS, no confirmed remaining
+findings; independent committed-artifact reviews follow export. Prior3346 C59
+sealed entries reverify unchanged. All original queues remain partial/blocked.
+
+Further original supported investigation: published Source.evalE.compound resolves
+RHS then location once and reads the ACTUAL current cell; existing published
+Evm.MemoryCompound implements intrinsic/word compound assignment. No owned
+numeric Source compound update bridge exists. A useful next application requires
+an independently proved exact Source.binVal/convRV versus intrinsic arithmetic
+clause (including checked overflow), not an assumed desired arithmetic result.
+No claim that independent work is exhausted or that these premises are already
+supplied. General graph/physical-byte/all-profile/ABI/storage/deep-copy/reserved
+copy/final composition remains unfinished and the existing goal stays BLOCKED.

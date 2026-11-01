@@ -983,3 +983,8 @@ import Solidity.Backend.MemoryOps.SourceStructTag
 import Solidity.Backend.MemoryOps.SourceStructTagDelete
 import Solidity.Backend.MemoryOps.SourceUintMemory
 import Solidity.Backend.MemoryOps.SourceUintMemoryControls
+import Solidity.Backend.MemoryOps.SourceUintWrite
+import Solidity.Backend.MemoryOps.SourceUintAssignment
+import Solidity.Backend.MemoryOps.SourceUintDelete
+import Solidity.Backend.MemoryOps.SourceUintSequence
+import Solidity.Backend.MemoryOps.SourceUintMutationControls

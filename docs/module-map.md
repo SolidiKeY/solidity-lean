@@ -1347,3 +1347,9 @@ At the root, the notation's own tests:
 
 | `Solidity/Backend/MemoryOps/SourceUintMemory.lean` | INITIAL Source uint256 array observer with exact existing value conversion; actual Source allocation/MemOK/index reads, bounds, typed heap extension and recursive-builder/snapshot read provenance. No Source copy loop or word compiler. |
 | `Solidity/Backend/MemoryOps/SourceUintMemoryControls.lean` | Runtime nonuniform/max uint Source reads in both pipelines, real break/restore schedules, copied numeric child/fresh identity, neighbors/repeated refs, logical31/32/end33 and intrinsic-fixed observation controls. |
+
+| `Solidity/Backend/MemoryOps/SourceUintWrite.lean` | Actual numeric Source memory writes, reached typed correspondence and local sufficient alias/world frames. |
+| `Solidity/Backend/MemoryOps/SourceUintAssignment.lean` | Resolved numeric indexed assignment, RHS-first Source execution and full existing intrinsic/word write certificate. |
+| `Solidity/Backend/MemoryOps/SourceUintDelete.lean` | Actual numeric default-zero deletion/unit result, bounds and published intrinsic/word delete certificate. |
+| `Solidity/Backend/MemoryOps/SourceUintSequence.lean` | Reached-state numeric assignment/delete and reverse Source RItems, intrinsic Prog and full word append, including late rejection. |
+| `Solidity/Backend/MemoryOps/SourceUintMutationControls.lean` | Independent populated numeric Source/intrinsic/word controls in both pipelines with complete arrays/16-word frames, max/zero, aliases, order, late/empty/endpoint/timeout and raw stale-map negative. |
