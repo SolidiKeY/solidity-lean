@@ -1,0 +1,185 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "producer_source_head": "5acd2141b4a8acb9bcf2f47f39434b6ce58675bd",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "modules_and_tests": [
+    {
+      "path": "Solidity/Backend/Executable/PaymentCheckpoint.lean",
+      "blob": "c05a0d12d4387f216c1d29fd675d7f9111cb8940",
+      "sha256": "a02f2d21ef9f59643dd7ebf95b17b925bbb6daa3070566ee6e7e287b78191f97"
+    },
+    {
+      "path": "Solidity/Backend/Executable/PaymentCases.lean",
+      "blob": "58c42f88c6ad7597c47b8f1ec7fe0fa209bc30c0",
+      "sha256": "b4a8fbee7cd5a302883029faff6acecbad2c19ee74840b79482560e81a727904"
+    },
+    {
+      "path": "Solidity/Backend/Executable/PaymentReceipt.lean",
+      "blob": "d80f1cf02468c194e74edbf9cbdcdf1369f77607",
+      "sha256": "3a18e6618d184b102292bbe295f8ae4e3c8678207aaf62c5bf00c94d24811633"
+    },
+    {
+      "path": "Solidity/Backend/Executable/PaymentHistory.lean",
+      "blob": "d31cf27b2a8562abadea60dab55f471a3701c2c9",
+      "sha256": "0bc83e45ea507159b1d74ca3bdac0ab325193a6bfa7a21f4e3b7bd7369508520"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationFrame.lean",
+      "blob": "8f4bdaa2c32eefff3c43aace1f0caa3a5e5796d7",
+      "sha256": "63b0e7b4a02ff7acd2f7f8806f9a488041663f7a25dc00253d62128e5f0662c1"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationArguments.lean",
+      "blob": "36d9abb61c1094dfccd38c6bd9c76d8f0bdbd87f",
+      "sha256": "919f7fcc24511840f0bc8cbb4c8e27d87ba3df65afac65b3ba208613b824df45"
+    },
+    {
+      "path": "Solidity/Backend/Executable/ScalarSequence.lean",
+      "blob": "713363563762f376936ddecdd00854e958aca374",
+      "sha256": "0efedc1fdb709e02f1ce05a9000ba150ffeb1f76765775d29c361211bfae8631"
+    },
+    {
+      "path": "Solidity/Backend/Executable/ScalarSequenceResources.lean",
+      "blob": "20fb35ac789acd1efa6ebd088c18ff5d995c8e07",
+      "sha256": "fc9637fb0c49480cf80a124828abf1abad151772fa4d512f3c59be54147e3f79"
+    },
+    {
+      "path": "Solidity/Backend/Executable/ScalarArtifact.lean",
+      "blob": "133aa0bb65a041a5fb5bb5bb66a33633ce26d72a",
+      "sha256": "66dc7f17b828239155dc561264643efd511287035f0a2113d506faf8e0f28b92"
+    },
+    {
+      "path": "Solidity/Backend/Executable/Assembly.lean",
+      "blob": "14b29e6fccd6479912bc6ff86d204604dfeaa7db",
+      "sha256": "7a7364b3aa4c7f7bf79d0644c3089237affbd95ded22b46489b765c4b4043dfa"
+    },
+    {
+      "path": "Solidity/Backend/Executable/ValueCall.lean",
+      "blob": "70d63cd45f7f18f2339e7fdcd7ad661e9cb1adc2",
+      "sha256": "8528f71b918553f27a504b8eadcaa225a33f6d9438780f6404fadaa0e2a39d31"
+    },
+    {
+      "path": "Solidity/Backend/Executable/StipendCall.lean",
+      "blob": "7647e9399e177bd687a2d3b6e6dbd122cc7e4d6a",
+      "sha256": "6b92e5cc24d22f078f9ea75fad3767308cde4cf288abdcf894fe7ade76c156c6"
+    },
+    {
+      "path": "Solidity/Backend/Executable/StipendCallChecks.lean",
+      "blob": "016c28df9a0c0a5cd74e600ab8fe507fc7cca07f",
+      "sha256": "e19c202fe1e68153785de31f01e56d3cc8044400e4f492b6a71234522dd5e73c"
+    },
+    {
+      "path": "tests/v14-executable/export-stipend-call.lean",
+      "blob": "a275608322701ebb9ad96aa27b52e18850cad5c6",
+      "sha256": "cf0d0e52cc77bd6099d711226e44615fc6ab133f10325a98026bef7b785adf77"
+    },
+    {
+      "path": "tests/v14-executable/check-stipend-call-evm.mjs",
+      "blob": "aa2b4b2fcc0b0fb8866733ec90eeb8bfc6d01530",
+      "sha256": "bc859d16ad23bd943c6285007752da6f1cf9590f8622754ff62eb02e77a3a845"
+    },
+    {
+      "path": "Solidity/Backend/Executable/TransferCall.lean",
+      "blob": "d62355f5f23804cfb52285a0a81dc531476e535e",
+      "sha256": "8f3732bfd7fc2007f2c4482d4d9bde2ee065e3e5e674aad620624113bf44dd79"
+    },
+    {
+      "path": "Solidity/Backend/Executable/TransferCallChecks.lean",
+      "blob": "0daefe2be0e511f4a37cfbe43f47b9b9b4ed4d7d",
+      "sha256": "81937f888b1926fb2382e2b3c6c8d678ecb7fad84b2adf5ae7dfb9a200ce7839"
+    },
+    {
+      "path": "tests/v14-executable/export-transfer-call.lean",
+      "blob": "39eac8b664d62981210c930356d6e46812e81163",
+      "sha256": "50e8cae1afac727ebc31b3d74fbd654638a4b0768c7ba8006354115047431d5d"
+    },
+    {
+      "path": "tests/v14-executable/check-transfer-call-evm.mjs",
+      "blob": "4f4b79b8142e07532ce06d72d3985191778035b8",
+      "sha256": "1c9012d8c9ca8f741a1293474dc6b706868ae93a3cd73cc067299bdac6ce2bb4"
+    },
+    {
+      "path": "Solidity/Backend/Executable/SendResult.lean",
+      "blob": "9811cc1b71f386bd8d54c00104c5d17af390da3c",
+      "sha256": "98038195efdb5d8bda53865542d33494763be0c6e32acea0f0f253be2340177d"
+    },
+    {
+      "path": "Solidity/Backend/Executable/SendResultChecks.lean",
+      "blob": "1d98ff0ccef344848411c432fd0da33c2e9e5c99",
+      "sha256": "c770299def5c3908655c13ca05ae479346be90e7e92142d69f9963a27c68c834"
+    },
+    {
+      "path": "tests/v14-executable/export-send-result.lean",
+      "blob": "826f21d16a2b8248d79c76a1a33fab5e93e06269",
+      "sha256": "4ce16a0a3170fbabfff64a7737a271921a4c000f3d945e90ba3f0268d10e6fb6"
+    },
+    {
+      "path": "tests/v14-executable/check-send-result-evm.mjs",
+      "blob": "1345861d8b5ec70aafdac6c286988132f8bc528e",
+      "sha256": "5490042e0ff35556870e9dd28ad947511333367965b716c72768e134826f9e50"
+    },
+    {
+      "path": "Solidity/Backend/Executable/PaymentArtifact.lean",
+      "blob": "ae04c19dceb332c88163b0bf1cc88ef52783d29b",
+      "sha256": "cef9e06ca9ef66d8ffc9a8d7ca88127900b81b8f661dfed99c6f60c76d78edd5"
+    },
+    {
+      "path": "Solidity/Backend/Executable/PaymentArtifactChecks.lean",
+      "blob": "2568ad9aa6d4d43cd8d30ff45b0feb9b7c29dbb5",
+      "sha256": "90b586f507b67261283168883b8ed83f732d89eb28cf46c624fd223c882915ba"
+    },
+    {
+      "path": "tests/v14-executable/export-payment-artifact.lean",
+      "blob": "fea980d6ef0f0acd0ff035e2b159468d736bd971",
+      "sha256": "f353a6f3af7079a7ed86fe1f2c19978108cca5b02279ce59b017cedcebc34938"
+    },
+    {
+      "path": "tests/v14-executable/check-payment-artifact-evm.mjs",
+      "blob": "7b6bb1868b7e4357e27a85e5ed99e0c3b1b71a8f",
+      "sha256": "78a2278838853999896f2e6c9029a3dc057bf2be2336628f78da99c965461696"
+    }
+  ],
+  "private_head": "43253420955727b0956a9d9eb9f63a4391c65b18",
+  "private_tree": "01a3413c1f5ab98a929dea54bf254f3c849c4dfe",
+  "peer_head": "66c08fdefbbb53c0eee111b09d1baa6277fedff5",
+  "peer_bundle_sha256": "e5c3cc2ecaa093e32ad3a464eb10eaa4f65ff2d3154c8ec93a8762ba83bf2ee8",
+  "exact_signatures": "/workspace/v14-payment-artifact-evidence/artifact-interface-types.log",
+  "new_guards": 22,
+  "invariants": {
+    "StipendCall.gas_correct": "Actual DUP2/ISZERO/PUSH32/MUL on recipient::encoded uint amount::arbitrary tail; request2300 iff source uint value=0, else0; all original words retained. No capacity premise for numeric slice.",
+    "StipendCall.operands_correct": "Actual constructed frameTail sigma spill for intrinsic State C [int,uint]; no sigma/amount parameter in emitted code; exact gas/address/value/fourzero operands plus unchanged frame. General runtime-frame producer OPEN.",
+    "StipendCall.local_capacity": "Derived eight-word transient peak and2localcells: spill.length\u22641014 iff actual selected prefix stackBound. prefix_safe consumes an actual split/run and this derived room.",
+    "StipendCall.complete_bytes": "All76 bytes, including both PUSH32 payloads, DUP6/DUP2/ISZERO/MUL/CALL. decode_bytes is encoder roundtrip only.",
+    "PaymentReceipt.world_observation": "Actual receive/send Bool-or-None observation under explicit numerical caller balance equality; no pending ledger/source/world post-state simulation.",
+    "CreationFrame/Arguments": "Actual typed constructor catch/run/tail with paid prefix separate from caller pending ledger and real heap/aliases; no unpaid execute shortcut or arbitrary paid caller reconciliation.",
+    "ScalarArtifact/Assembly": "Existing creation-runner artifact and checked layout consequences with actual Prefix/Placement/assembly premises; not arbitrary jump/scalar execution in creation runner.",
+    "TransferCall.assembly_available": "Actual Block.seq/code+ite expansion, all32 byte offset range premise; concrete payment refs0/1 and bounds discharged. isSome/get yields actual output, not supplied desired code.",
+    "TransferCall.prefix_preserved/branch_destinations": "All actual prelude and dynamic CALL instructions retained; both selected pushes resolve absolute valid JUMPDESTs in entire encoding. No fetched CALL/jump execution theorem inferred.",
+    "TransferCall.failure_suffix/assembled_failure_terminal": "Actual out.code.drop(pre.length+6) extracted as existing empty REVERT plus final JUMPDEST, and run by existing terminal slice under2freecells; arbitrary stack/memory preserved. Global jump reachability OPEN.",
+    "TransferCallChecks.relative_false_target": "Actual selected operand coordinate244+5+actualW0+actualW1; subtract244 is invalid whole-program PC, derived from Fin\u226432 and all168 prelude bytes excluding JUMPDEST.",
+    "SendResult.store_correct/source_store": "Actual SWAP1/POP on canonical Bool word above existing bool/uint local encoding preserves uint+spill and matches actual sendT receipt result frame. Canonical CALL flag/general runtime frame production OPEN.",
+    "SendResult.world_store": "Actual prepare/world_observation both Bool/None transported through actual store, under explicit numerical caller/world balance equality. None is preparation refusal, not stored false; exact original run retained separately. Not full pending-ledger/history/post-world/target-CALL reconciliation.",
+    "SendResult.finish_unchanged": "Actual stored-account/storage identity, selfBalance identity, empty ledger imply exact original full world. Rejected fixture derives all premises; not assumed for paid histories.",
+    "SendResult.operands_capacity/store_capacity": "Reuses actual literal operand +7 peak ->spill\u22641015; actual SWAP1/POP entry3cells ->spill\u22641021. These separate numeric boundaries do not imply a full CALL resource certificate.",
+    "SendResultChecks.paid_client/rejected_world_settles": "Actual intrinsic TRun.send full success/reject settlement retained with populated physical result frames; no source profile counterexample or assumed machine relation.",
+    "PaymentArtifact.runtime_length_exact/runtime_bytes": "Actual assembler widen/fixpoint selects1/2byte target widths; runtime exactly321bytes including full control/PUSH/emptyREVERT suffix. No arbitrary selected code/width premise.",
+    "PaymentArtifact.placement/constructor_exec": "Wordfit/PUSH2 length and18byte front derived from actual runtime. Both real nonempty prefix segments then existing COPY/RETURN or REVERT; arbitrary separate Creation.StackWord tail accepted, but Exec exposes outcome only and no universal headroom/final stack.",
+    "PaymentArtifact.constructor_runtime_coordinates": "Actual selected false operand valid inruntime atPC and syntactically valid increationimage at18+PC; same18+PC invalid installedruntime duezero PUSH data. Not jump reachability.",
+    "PaymentArtifactChecks.prefix_tail_boundary": "Actual continuingtwo-segment prefix preserves17/29 and exposesreal memorywrite32 atwrapperentry beforeterminal hidesstate.",
+    "PaymentArtifact.artifact": "ExistingfromAssembly0 preservesactualout runtime/link origin;standaloneheader12 distinct fromprefixed18. Args remainoutside returned/revertedruntime;internalcodevalidation isnotanadmittedSourceobservation."
+  },
+  "witness": "StipendCallChecks.uniform_inputs + peak_boundary/capacity_edges/wrong_fixed_request/maximum_amount; zero/99/13 same code and populated signed/caller spill words. Existing payment_client/constructor frames retained. TransferCallChecks.available/assembled/kernel_client/destinations_inhabited/assembled_terminal_control/relative_false_target: real nonempty prelude+CALL assembly and exact terminal suffix; no chosen output oracle. SendResultChecks paid/rejected fullworld settlement+physicalbool frame, actualmissing/exhaustedNone, wrongPOP/SWAP2, capedges and107bytes; explicitconstructed bool/uint frame. PaymentArtifactChecks bothterminals/argleak/nonempty/origin/link/coordinate/prefixtail: actual321runtime,widths1/2,constructorfront18 andstandalone12,protected17/29 atwrapperentry.",
+  "external_tests": "8exact EthereumJS10.1.3 Osaka CREATE/session cases/6positive2negative;1Mgas/message/180s. Actual321codeinstall/fetchedtransfer;constructorrevertrefundsvaluebutcreatornonce1retained;collisionoccupiedaccountunchanged;empty14front;twoinstancesfinitewithKeccak/ethers/EVM addressagreement; wrongbase18invalidJUMPfullhash/addressPC252 andargleakinvalidopcode. Rawcodevalidationinternal;noCREATE2/generalhashinjectivity/Sourceworld/atomicnew/kernelgasorfetchedcorrespondence.",
+  "runtime_lock_sha256": "c9356aa4f1c318001d49b80a72586c6691a064515af24a770556c02efdf6b6b7",
+  "required_producers_open": [
+    "General runtime-frame/source-lowering producer",
+    "Pinned fetched-byte decoder/step and global CALL/world/state/resource relation",
+    "Universal EIP150/value-stipend forwarding and G06 Fitted/Enforced",
+    "History-dependent payment checkpoint/world ledger reconciliation and exact failure relation",
+    "V12/G37 effectful prefix/divergence interface after independent G43",
+    "Source constructor/runtime/new/try-new complete general correspondence",
+    "Canonical target CALL flag and actual bool/uint runtime-frame/transaction/world producer; store transport alone does not supply it.",
+    "General source constructor/runtime/CREATE world-account-nonce-resource and fetched runtime execution relation; creation byte slice only returns outcome and never executes contained CALL/jumps."
+  ],
+  "limits": "Source-only/numeric kernel consumers plus finite external EVM tests; combined tree checked, not master publication or full-lane completion. Full original goal ACTIVE; no semantic/profile/pin/budget changes."
+}
