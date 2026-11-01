@@ -1134,3 +1134,66 @@ identities pass. Final independent read-only finder/skeptic documentation/
 evidence reviews found no issues. Full validation's earlier actual source-
 matched resource failures remain failures; Q2 and all remaining original
 obligations stay open. This checked checkpoint is census progress only.
+
+
+## Numeric leaf-preparation checkpoint
+
+`Calculus/DecisionLeafPreparation.lean` proves closure of the **existing**
+intrinsic LTm.Num P E grammar through actual storage-read elimination and
+conditional simplification, for every contract, primitive type, parameter
+predicate P and environment predicate E. The unchanged predicates survive;
+no new IR, term representation, preparation function or budget is introduced.
+The seq case explicitly constructs the Boolean definedness guard using two
+seqL closures. It does not treat Boolean false as failure. The resulting
+numeric evidence supplies the existing Src grammar and has zero conditionals.
+
+`uintLinear_toL_numeric` constructs actual numeric translation from intrinsic
+UIntLinear syntax and numeric local bindings; it is not inferred from the
+broader Src grammar, which admits additional cut operators. The real initial
+uint prefix discharges the binding premise. For every typed source term in
+that grammar under one uint binder, `uintLinear_prefix_prepared_numeric`
+constructs an actual toLT output l whose eliminated/simplified term remains
+Num with parameter predicate `q = (.uint,0)` and false environment predicate.
+This means **only the permitted atom**, not that every term mentions it:
+literal-only terms may mention no parameter. No coverage/verdict success is
+assumed in this family theorem.
+
+The controls prove that a false-but-returning Boolean seq guard returns seven,
+a failed guard still halts before/after preparation, nested numeric sequencing
+preserves the same restrictions, and optional equality holds for two halted
+operands while strict leaf equality rejects them. Timestamp input retains its
+specific allowed-environment predicate; msgValue is rejected under that
+predicate. An orElse term remains outside Num. The actual source decrement
+reuses the constructive preparation theorem. A kernel node-growth witness
+explicitly prevents interpreting grammar closure as size preservation.
+
+These are term-level closure/source-transport proofs. Formula/prefix closure,
+prepared parameter enumeration/bounds, full revised M4 boundary, Residue,
+DecisionTheorem-prime and exhaustive target-to-coverage/hash bridge remain
+open. This does not close AU02 pipeline children or formula-derived fuel.
+Both frozen predicates, old counterexample, old verdicts and proof budgets
+remain unchanged. Q1 remains answered; Q2 holds frontend repair/full gates
+only. The original full goal remains incomplete.
+
+Final exact-source per-file MCP passes in 4.23 s (core) and 4.21 s (controls),
+focused builds in 3.09/3.16 s, all 28 public axiom reports in 4.15 s with only
+standard axioms or none. Full commands, source-hash matches, actual versions,
+verified hard cap/prebuild and measured aggregate RSS/host reserve are in
+`/workspace/va1-evidence/leaf-preparation-next/verified-gates.json` and raw logs.
+The same 12 GiB/no-swap, 12 GiB host reserve, thread one/explicit -j1 and
+writer lock remain. Initial missing explicit Boolean sort and redundant simp
+argument diagnostics are retained; final diagnostics have no errors/warnings.
+The blank-line goal probe is not counted as a proof. Independent read-only
+finder/skeptic source/control reviews found no issues; the skeptic's permitted-
+atom wording correction was applied and rechecked. Neither reviewer edited or
+used Lean/server/build. Final static/documentation checks follow.
+
+Final numeric-preparation static gates pass: 1072 reachable/zero orphans,
+180 core/zero elaborator paths, 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1087 sources/248 inventoried sites/zero findings.
+Axiom inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero new findings. Frozen Decision and original counterexample byte identities
+pass. Final independent read-only finder and skeptic documentation/evidence
+reviews found no issues. Exact cumulative patch/bundle/checksum sealing follows.
+Whole goal and all outstanding queue obligations remain incomplete.

@@ -1013,6 +1013,12 @@ noncoverage, with a valid positive claim and false companion countermodel.
 Its illustrative collapsed-key guard changes from true to halt; this is not
 an actual collector/Setting proof or a refutation of `GuardP.floors`. The
 AU02 guard-floor repair remains open.
+`Calculus/DecisionLeafPreparation.lean` next proves that actual uint-prefix
+translation yields the existing Num grammar with only its permitted bound
+atom and no environment input. Elimination and simplification preserve those
+predicates. This is a term-level preparation bridge; formula/prefix closure,
+resource bounds and exhaustive coverage remain open. Numeric sequencing can
+add nodes, as the controls explicitly demonstrate.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
