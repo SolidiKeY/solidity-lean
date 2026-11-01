@@ -616,3 +616,5 @@ VY2 handoff: [actual location producer capture](inline-assembly-vy2.md#actual-lo
 VY2 handoff: [actual byte/string allocation placement](inline-assembly-vy2.md#actual-bytestring-allocation-placement-2026-11-01) adds constructive actual heap allocation; full lane remains partial.
 
 VY2 handoff: [retained allocation lineage extension](inline-assembly-vy2.md#retained-allocation-lineage-extension-2026-11-01) preserves original capacities across actual allocation; full lane remains partial.
+
+VY2 computed-inventory allocation integration: [lane checkpoint](inline-assembly-vy2.md#computed-inventory-after-allocation-2026-11-01). This derives actual fresh-ID coverage and retains capacity history; full lane closure remains open.
