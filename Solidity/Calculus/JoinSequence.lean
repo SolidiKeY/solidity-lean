@@ -135,4 +135,22 @@ theorem Prog.localWrites?_wk_isSome {Γ Δ Ε : Ctx} (h : Thin Γ Δ) (P : Prog 
     cases s <;> try rfl
     simpa only [Prog.wk, Stmt.wk, Prog.localWrites?_cons_assign, Option.isSome_map] using ih h
 
+/-- Weaken Solidity write targets and RHSs without composing or substituting them. -/
+def LocalWrites.wk {Δ : Ctx} (h : Thin Γ Δ) (writes : LocalWrites C Γ) : LocalWrites C Δ :=
+  writes.map (fun w => ⟨w.1, w.2.1.wk h, w.2.2.wk h⟩)
+
+/-- Decoding Solidity `x = a; y = x;` commutes with intrinsic weakening,
+including the complete typed write data, not only success or refusal. -/
+theorem Prog.localWrites?_wk {Γ Δ Ε : Ctx} (h : Thin Γ Δ) (P : Prog C Γ Ε) :
+    ((P.wk h).2.2.localWrites?) = P.localWrites?.map (LocalWrites.wk h) := by
+  revert Δ
+  induction P using Prog.rec (motive_1 := fun _ _ _ => True) <;> try trivial
+  case nil => intros; rfl
+  case cons s tail hs ih =>
+    intro Δ h
+    cases s <;> try rfl
+    simp only [Prog.wk, Stmt.wk, Prog.localWrites?_cons_assign]
+    rw [ih h]
+    cases tail.localWrites? <;> rfl
+
 end Solidity

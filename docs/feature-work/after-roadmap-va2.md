@@ -603,3 +603,42 @@ checker still has the same 48 byte-identical frozen-base failures. All actual
 dispatcher, rule correspondence/fragment integration, walk/leaf measurements,
 closer, chain and AU04 work listed above remains required. Full persistent
 goal remains incomplete.
+
+
+## AU03 complete write-data weakening prerequisite (2026-11-01)
+
+`LocalWrites.wk` shifts each intrinsic target and RHS through the same Thin,
+preserving list order without composing or substituting terms.
+`Prog.localWrites?_wk` proves equality of the complete decoded write data,
+including refusal (`none`), before and after weakening. This strengthens the
+previous success/refusal-only theorem without changing its statement.
+The intrinsic mutual recursor uses a trivial statement motive; rejected
+heads reduce without traversing their continuations. No import, semantic
+premise, observation, proof budget or exclusion changes.
+
+Per-file MCP errors are zero (`work/mcp-join-write-data-wk-final.log`).
+The legal question-mark theorem name is unsupported by lean_verify's name
+validator, so MCP lean_run_code checked the source and explicit `#print axioms`:
+only propext. `bounded.py join-write-data-wk-prebuild build
+Solidity.Calculus.JoinSequence` passed 40 jobs in 4.83s inside / 5.33s runner,
+sampled visible-process RSS peak 837276 KiB, cgroup peak 314159104 bytes.
+Actual memory.max=12884901888, memory.swap.max=0, LEAN_NUM_THREADS=1 and
+explicit Lean -j1 remained enforced. This is a focused prerequisite gate,
+not the final run-lean or timed TestSuite gate.
+
+Independent read-only finder and skeptic found no correctness, typing,
+ordering, refusal, premise or budget issue; neither used Lean/server/builds
+or writes. Evidence: `work/reviews-join-write-data-weakening.md`.
+The static prerequisite checks are saved as `work/join-write-data-*.log`.
+The doc-path checker remains a failure with the same 48 byte-identical
+frozen-base findings; the comparison passes, not the checker itself.
+
+Production dispatcher/rule/fragment integration and concrete control work
+is in progress separately and is not certified by this prerequisite commit.
+Although the Stmt.inSolkey definition is textually unchanged there, its
+joinShape dependency classifies newly joined programs through a Lean-only
+rule; do not claim extensional fragment membership is unchanged. Canonical
+short-circuit programs retain their existing SolKey split path. Full walk
+and leaf measurements, chain restoration, broader closer work, AU04 sharing,
+final gates and checkpoint review/handoff remain required. The persistent
+full-assignment goal remains incomplete.
