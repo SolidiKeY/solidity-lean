@@ -69,6 +69,8 @@ import Solidity.Calculus.SyntaxSize
 import Solidity.Calculus.CallSummary
 import Solidity.Calculus.CallResultCapture
 import Solidity.Calculus.AnonLocalCapture
+import Solidity.Calculus.CallFunctionTable
+import Solidity.Calculus.CallFunctionGraph
 import Solidity.Calculus.Blocks
 import Solidity.Calculus.WkOver
 import Solidity.Calculus.Step
@@ -277,6 +279,7 @@ import Solidity.Examples.Tactics.PolySize
 import Solidity.Examples.Tactics.CallSummary
 import Solidity.Examples.Tactics.CallResultCapture
 import Solidity.Examples.Tactics.AnonLocalCapture
+import Solidity.Examples.Tactics.CallFunctionTable
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertData
 import Solidity.Examples.Tactics.Values
