@@ -1557,3 +1557,77 @@ attach these named canonical nested G40/G41/BackfillA consequences, close no par
 
 NEW evidence: `/workspace/scratch/v13-outer-64e37675-evidence`.
 NEW artifacts: `/workspace/scratch/v13-outer-64e37675-artifacts`.
+
+
+## Canonical byte-string readback checkpoint (parentd8523c15, 2026-11-01)
+
+NEW owned `Solidity/Backend/AbiWorld/BytesReadback.lean` proves generic actual
+Shape.bytes/Val.bytes readback, not another uint-array codec. Existing
+ErrorRoundtrip/CanonicalReadback word readback and ErrorLayout padding length/
+payload laws are reused. New bytes_prefix generalizes actual bytesAt extraction
+under arbitrary prefix/suffix; rounded_formula links the original roundUp to
+existing pad32. Val.enc/encodeArgs remain the only codec; no new loader or allocator.
+
+mdec_bytes consumes actual length-word/payload bytes, arbitrary following bytes,
+ORIGINAL free+(cursor+(roundUp(length)+32))≤lim and positive decoder fuel. It
+proves exact Val.bytes and the rounded allocation cursor. The second allocation
+roundUp is discharged using existing roundUp_words. Length/W/lim bounds follow
+from the actual rounded allocation, not len<W alone. Generic canonical input
+retains arbitrary four-byte selector/trailing bytes; encoded length64+roundUp(n),
+exact payload and all padded zeros are proved. Fuel2 suffices for original top
+melem/eager/entry recursion, fuel1 for mdec. This is NOT a size-independent CPU/
+gas/resource bound; bytesAt still traverses bytes and no proof budget changes.
+
+roundtrip derives actual typed memory/calldata verdicts, both full body byte
+observations and published lazy cval with its one-step fuel difference. Actual
+input-size≤lim supports eager_cref/cval agreement. Helpers without that size
+premise concern the existing intrinsic natural-address decoder/reference checks,
+not universal Source admission. Canonical allocation conditions suffice for the
+eager/body route, not necessary conditions for all noncanonical/lazy/readsOnly
+inputs. No accepted-input predicate, profile, decoder/default or refusal changed.
+
+NEW `tests/v13-abi-world/BytesEntryControls.lean` instantiates the generic proof
+for empty/zero/255/mixed and31/32/33bytes. Actual rounded cursors32/64/64/96 and
+exact padded payloads/zeros are retained. Exact lim allocation accepts; one-byte
+over-limit remains possible Panic BLOCKED. The strengthened incomplete-header
+control hasfree=lim-31: even minimum32byteallocation would fail, but actual entry
+reverts first. Valid header plus truncated payload distinguishes allocation-before-
+region failure. Actual wrong-offset/missing-header/payload entry reverts are proved; the
+certified short-payload failure consumes the real checked empty REVERT adapter
+with Fits/stack conditions.
+
+Dirty padding and unpadded inputs remain accepted; body normalization uses the
+existing canonical codec and does NOT preserve dirty raw padding. Full255payload
+bytes need no per-byte cleanup. Bytes' reference-region checks happen at calldata
+entry, so truncation is entry revert, not an invented element access-time failure.
+Insufficient allocation on full calldata keeps the original lazy-only refusal;
+readsOnly=true run is only intrinsic classification, not permission to encode an
+admitted Source body. Fuel remains blocked, not revert. Unchecked zero-extension
+is explicitly distinct from valid entry. Equal padded tails[17]/[17,0] have distinct
+length words and actual typed values, not assumed padding injectivity.
+
+35headline scoped axiom guards, strict per-file core/control/root diagnostics and
+focused/registered import validation PASS1068jobs.117FULL ordered vectors retain
+ALL70prior vectors byte-identical;22actual cursor/kind outputs retain10old scalar
+observations unchanged. No new external compiler/EVM/native agreement. Raw initial
+namespace/simp, finite membership and length-normalization failures remain in NEW
+evidence; source repairs changed no heartbeat/depth/fuel/node/time/resource limit.
+Independent read-only finder/skeptic source review found no proof defect and checked
+the discriminating header control; final artifact reviews are recorded in export.
+
+Every original queue remains G40/G41partial; G42.01/.02/.03/.05blocked;
+G42.04/.06partial; BackfillA/Bpartial. Canonical bytes progress is not unknown-
+memory encoding or all-profile/runtime/native decoding/dispatch, CALL/RETURNDATA,
+arbitrary callee/callback/library/world/physical-resource composition. Mainalone
+still lacks9private V12 inputs7881cb3a; exact combined validation remains explicit.
+No O1 declared-return/same-invocation/static-frame law is supplied or assumed;
+its sealed proposal remains untouched and with its original owners. Original goal
+blocked and unchanged, no automatic reactivation/completion. All prior seals
+including O1triage are preserved. Raw docs1/frozen86versus83 comparison1 and
+Suite124/181.061s,full1/5038.87s,cold124/5400.579s stay failed; no unchanged failed
+heavy retry. Complete publication/prior finding equality is separate. No reserved
+producer/pin/profile/fixture/Panic-control change, push/merge/PR or peer transfer.
+G03 proposal only attaches named canonical bytes G40/G41/BackfillA facts, closes
+no parent/global ledger. NEW evidence/artifacts:
+`/workspace/scratch/v13-bytes-d8523c15-evidence` and
+`/workspace/scratch/v13-bytes-d8523c15-artifacts`.

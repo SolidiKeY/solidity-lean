@@ -987,3 +987,5 @@ import Solidity.Backend.AbiWorld.NestedUintPacket
 import Solidity.Backend.AbiWorld.CanonicalReadback
 
 import Solidity.Backend.AbiWorld.NestedReadback
+
+import Solidity.Backend.AbiWorld.BytesReadback
