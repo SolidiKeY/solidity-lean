@@ -628,3 +628,5 @@ VY2 [actual struct constructor producer](inline-assembly-vy2.md#actual-struct-co
 VY2 [actual calldata array allocation](inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) connects the real memory decoder, retained allocation and whole-map writeback; final adequacy remains open.
 
 VY2 [actual memory hash binding](inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) connects exact source memory bytes and checked keccak expression to physical hash; final adequacy remains open.
+
+VY2 [actual source environment inputs](inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) derives supported source magic and physical context observations; full source/call/compiler closure remains open.

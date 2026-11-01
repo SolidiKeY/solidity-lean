@@ -987,3 +987,5 @@ import Solidity.Yul.Views.StructConstructorControls
 import Solidity.Yul.Views.AbiUintArrayBoundaryControls
 
 import Solidity.Yul.Views.SourceHashControls
+
+import Solidity.Yul.Views.SourceEnvironmentControls

@@ -191,3 +191,5 @@ VY2 [actual struct constructor producer](feature-work/inline-assembly-vy2.md#act
 VY2 [actual calldata array allocation](feature-work/inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) derives source/physical calldata agreement and supported array allocation; full lane partial.
 
 VY2 [actual memory hash binding](feature-work/inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) proves computed payload/source builtin/sharedFixed agreement; full lane partial.
+
+VY2 [actual source environment inputs](feature-work/inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) binds transaction timestamp/origin and actual source frame reads; full lane partial.
