@@ -4002,3 +4002,86 @@ the changed field and all old Bool-child frames; C51/C52 execute the resulting
 selected child. Existing published statement-pair composition can be reused, but
 C53 same-child write/delete does not yet discharge changed-selected-identity
 program composition or general types/recursive graphs. No exhaustion assertion.
+
+
+### C54: changed selected identity in one actual Source program
+
+SourceStructRedirect composes actual named reference-field replacement with
+deleting the NEW selected Boolean child in ONE Source RItems body, matching
+intrinsic Prog and complete published word append. INITIAL finite struct and
+existing new-child table observations, root/RHS/index alignment, mapFree, Source
+MemOK, real StateRepr and Simple index/valIn premises remain explicit. The first
+actual operation returns the changed field and preserves all Bool-child contents;
+its actual frame derives the NEW child's capacity. Its Source locals and target
+Simple evaluation remain stable, and its independent observer/MemOK/full word
+representation feed stage two. No desired postcorrespondence or independently
+initial second successful run appears as a premise.
+
+Final selected identity/read/parent-tag/stack/allocator are derived. Other Bool
+objects frame under logical inequality to the written new child. Preserving an
+initial Source child observer also requires a different Source address: this is
+a local theorem case, not global injectivity or a profile admission restriction.
+Same-pointer cases remain allowed by the general theorem. Reference assignment
+is pointer rebinding of an existing object, not a deep copy or constructor.
+
+General rejection tests the NEW capacity after the real first operation. Source
+RItems returns actual panic bytes with the changed prefix heap; intrinsic Prog
+and whole word append revert, with no manufactured successful suffix, target
+panic bytes or rollback equivalence. First stmt n+6/second n+5/Items n+7 use the
+existing recurrence. A lower horizon control actually retains first replacement
+before timing out; early horizon0 retains initial state.
+
+Populated BOTH-pipeline controls redirect LEFT->RIGHT then materially clear
+RIGHT[1] true->false, retain LEFT TFF/localalias0, tag7/neighbour99/cursor48/
+stack42 and actual allocator. Complete ordered three-object Source tables and
+THREE FULL16-word vectors are explicit. A separately inhabited Source/intrinsic/
+word/allocator fixture makes LEFT nonempty and RIGHT EMPTY: old LEFT[0] is valid
+and true, yet replacement then deletion fails against new RIGHT length0. Source
+retains the actual replacement, Prog/wholeword reject; two full prefix word
+vectors and tables preserve deliberately nonzero unused right payload cells.
+A nonempty exact-end case and stale-old-child/skipped-deletion observations
+remain distinct; all C53 and older bodies/vectors/guards are verbatim except
+one import and appended controls. No new public runtime payload/depth cap.
+
+Focused guarded180jobs passes six new exact standard-trio laws/controls; earlier
+parent-state-wrapper and exact-end proof failures retained. Independent source/
+control reviews PASS. Per-file Lean MCP unavailable; serial bounded runtime
+used, cacheOFF, no budgets changed. All original G32-G35.01-.06 and Backfill A/B
+parents remain partial/blocked: physical bytes/all-profile construction/target
+allocation failures/general references/graphs/ABI/storage/deep-copy/reserved
+copy/final V10-Source-target remain open. Existing goal BLOCKED unchanged.
+
+Timing evidence is kept separate: current warm strict checking times ZERO new
+TestSuite modules. Retained C31 cold log measured26 modules, maximum160s under
+the original300s each. Exact current Suite import closure, AST fixture and
+lean-toolchain (262 files) byte-match C31 commit3cfa818efae6460f4811b69165b9996a02d4e63b;
+checkpoint54-testsuite-cold-key.json records the full hash key and actual raw
+logs. This is retained cold evidence for that unchanged closure, NOT new timing
+coverage or a cold measurement of the newly added MemoryOps proofs.
+
+C54 final guarded180/full1096default/262Suite/SolKey377/131 exit0; actual fresh
+Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs/cacheOFF pass. Strict/complete
+fixtures/trust/layer/orphan/lane/script corruption pass;906standardpins115modules,
+six new exact standard-trio laws/controls. Independent finder/skeptic source/
+control/guard reviews PASS, no confirmed defect. Full aggregateRSS1573904KiB,
+new max/OOM/kill events0; cumulative history separate. All2954 C53 seal entries
+verified unchanged; old fixture prefix unchanged. Raw docs1 remains83 complete
+public-identical findings, separate publiczero-new0/frozenno-newFAIL11incoming.
+Raw inventory1 remains1265unrecorded=359publicinherited+906owned/0unsafe;
+additive proposal is not a globalpass. Existing goal BLOCKED unchanged.
+
+Current strict timing coverage is0 modules, NOT a new cold pass. Retained C31
+26-module cold timings (max160s, original300s each) apply only to the exact
+unchanged262-file Suite import/AST/toolchain key; actual current and retained
+Lean/Lake version lines also match. Newly elaborated MemoryOps proof timings
+and resource receipts are separate. No cache/source/seal deletion or time-budget
+increase was used.
+
+Next concrete G32/G33/BackfillB investigation: named struct INITIAL observer
+transport across actual published Source.allocRef and intrinsic Heap.alloc,
+using Heap.Keeps.field/len, MObj.elems_wk and Source.Heap.alloc_other. Existing
+SourceMemory has a local Bool copy-schedule growth clause, not a full named
+struct observer/fresh-root application. Derive old-reference weakening and
+actual fresh Bool identity/content without assuming global address injection
+or implementing reserved constructors. General allocation failure/physical
+byte/full-profile/final-composition obligations remain open.

@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceStructRedirect
 import Solidity.Backend.MemoryOps.SourceStructSequence
 import Solidity.Backend.MemoryOps.SourceStructDelete
 import Solidity.Backend.MemoryOps.SourceStructChild
@@ -1375,5 +1376,376 @@ theorem member_write_delete_timeout (p : Roadmap.Pipeline) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms member_write_delete_timeout
+
+
+private def k1 : PrimTy.uint.Denote := indexValue ⟨1,by decide⟩
+private def oneWord : Val C Γ .uint := .simple (.lit 1 (by decide))
+private def xrhs : Source.Idx XΓ SB := .there (.there srhs)
+private def redirectInput := withArgs sy k1 true
+private def redirectMid := withArgs reached k1 true
+private def redirectHp := out.set right (MObj.setElem .dyn (out.get right) 1 false)
+private def redirectSource : Source.EMState E XΓ :=
+  (redirectMid.1,{redirectMid.2 with heap := redirectMid.2.heap.write 1 (sourceBoolMemory [false,false,false]) (by rfl)})
+private def redirectMachine := writeMachine target 26 w[0]
+private def redirectItems := sourceStructReferenceDelete layout xroot xrhs xi
+private def redirectProg : Prog C Γ Γ :=
+  .cons (.assignMem (.field (.var root (by decide)) "items" layout.child_type) (.ref (.var rhs rfl)))
+    (.cons (.deleteMem (.loc (.index .dyn (fieldPath root) oneWord)) rfl) .nil)
+private def redirectCode := structChildDeleteCode (C := C) 1 root "items" oneWord
+
+private theorem clear_right_one {m : Machine} (hm : StateRepr 1 1 8 (Frag.init Γ) (σ.withHeap out) base m) :
+    run redirectCode m=.ok (writeMachine m 26 w[0]) 0 := by
+  let ptr := [.mload (cellOf 1 root)]++readFieldCode (fieldOffset (structDef S) "items")
+  have hptrCert : PtrFrag 1 (fieldPath root) ptr := .field _ _ _ (.local root (by decide))
+  have hpath : (fieldPath root).mvalT (σ.withHeap out)=.ok right := by
+    simp only [fieldPath,MPath.mvalT,MLoc.addrT,Heap.readAddr,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    rfl
+  have hptr := hptrCert.run_of_eval (hm.push w[0]) hpath
+  have hk : 1<out.len right .dyn := by
+    rw [out,arrayLen_setRefField]
+    simp only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn,List.length_cons,List.length_nil]
+    decide
+  have hraw : run (writeArrayCode (base right.id)) ((m.push w[0]).push w[1])=.ok (writeMachine m 26 w[0]) 0 := by
+    obtain ⟨_,_,hc,_⟩ | ⟨hn,_⟩ := writeArray_correct (hm.heap.arrays right) ⟨1,by decide⟩ false w[0] rfl
+    · exact hc
+    · have hw : out.writeAddr (.index right .dyn k1) false=some redirectHp := by
+        simp only [Heap.writeAddr,Heap.setIndex,k1,indexValue,Int.toNat_natCast]
+        exact if_pos hk
+      change out.writeAddr (.index right .dyn k1) false=none at hn
+      rw [hw] at hn;cases hn
+  change run ((compileVal 1 (deleteDefaultValue .bool))++ptr++compileVal 1 oneWord++writeArrayStackCode) m=_
+  rw [List.append_assoc,List.append_assoc,
+    run_append_ok (show run (compileVal 1 (deleteDefaultValue .bool)) m=.ok (m.push w[0]) 0 from rfl),
+    run_append_ok hptr,
+    run_append_ok (show run (compileVal 1 oneWord) ((m.push w[0]).push (.val (base right.id)))=
+      .ok (((m.push w[0]).push (.val (base right.id))).push w[1]) 0 from rfl)]
+  rw [writeArrayStackCode,arrayStack_append_eq (m.push w[0]) (base right.id) ⟨1,by decide⟩ _
+    (out.len_dyn_lt right) (hm.heap.arrays right).length,←writeArrayCode]
+  exact hraw
+
+/-- ONE actual Source RItems program changes selected identity LEFT→RIGHT,
+then materially clears RIGHT[1]. Its old LEFT local remains independent. -/
+theorem reference_then_delete_program (p : Roadmap.Pipeline) :
+    (Source.execItems (G p) F0 7 XΓ.length none redirectItems redirectInput.1).run (.nil,redirectInput.2)=
+      (.ok (.normal redirectSource.1),(.nil,redirectSource.2)) ∧
+    Prog.run σ redirectProg=.ok ⟨σ.withHeap redirectHp,List.prefix_refl _⟩ ∧
+    run (code++redirectCode) machine=.ok redirectMachine 0 ∧
+    (Source.execS (G p) F0 6 XΓ.length none (.expr (sourceStructAssign layout xroot xrhs) : Source.RStmt E [] false .body XΓ XΓ) redirectInput.1).run (.nil,redirectInput.2)=
+      (.ok (.normal redirectMid.1),(.nil,redirectMid.2)) ∧
+    (Source.execS (G p) F0 5 XΓ.length none (.expr (sourceStructChildDelete layout xroot xi) : Source.RStmt E [] false .body XΓ XΓ) redirectMid.1).run (.nil,redirectMid.2)=
+      (.ok (.normal redirectSource.1),(.nil,redirectSource.2)) ∧
+    SourceBoolStructAt redirectSource 2 redirectHp parent addresses layout ∧ Source.MemOK E SH redirectSource ∧
+    SourceBoolMemoryAt redirectSource 0 redirectHp left .dyn ∧
+    StateRepr 1 1 8 (Frag.init Γ) (σ.withHeap redirectHp) base redirectMachine ∧
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right),MObj.elems .dyn (out.get left),
+      MObj.elems .dyn (out.get right),MObj.elems .dyn (redirectHp.get left),MObj.elems .dyn (redirectHp.get right)]=
+      [[true,false,false],[false,true,false],[true,false,false],[false,true,false],[true,false,false],[false,false,false]] ∧
+    [cells machine,cells target,cells redirectMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[7],w[24]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[0],w[0],w[7],w[24]]] ∧
+    [redirectInput.2.heap.get 0,redirectMid.2.heap.get 0,redirectSource.2.heap.get 0]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [true,false,false]⟩] ∧
+    [redirectInput.2.heap.get 1,redirectMid.2.heap.get 1,redirectSource.2.heap.get 1]=
+      [some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SB,sourceBoolMemory [false,false,false]⟩] ∧
+    [redirectInput.2.heap.get 2,redirectMid.2.heap.get 2,redirectSource.2.heap.get 2]=[some ⟨SS,data 0⟩,some ⟨SS,data 1⟩,some ⟨SS,data 1⟩] ∧
+    [(hp.field parent layout.child_type).id,(out.field parent layout.child_type).id,(redirectHp.field parent layout.child_type).id]=[0,1,1] ∧
+    redirectSource.1.get (.there (.there soldAlias))=.memRef rfl 0 ∧
+    (TEnv.get oldAlias (σ.withHeap redirectHp).env).map HRef.id=some 0 ∧
+    redirectHp.field parent layout.tag_type=u7 ∧ redirectMachine.stack=[w[42]] ∧
+    StructAllocatorRepr redirectHp base 8 ⟨48,by decide⟩ redirectMachine := by
+  have hr : SourceBoolStructAt redirectInput 2 hp parent addresses layout := initial_at.same_heaps rfl rfl
+  have hv : SourceBoolMemoryAt redirectInput 1 hp right .dyn := right_at
+  have hk : k1.1.toNat<σ.heap.len right .dyn := by
+    simp only [σ,Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn,k1,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+    decide
+  obtain ⟨ym,z,hout,mm,m',hw₁,hs₁,hs₂,hitems,hprog,hc₁,hc₂,hcode,hsel,hlen,hw₂,hr₁,hv₁,hr₂,hm₁,hm₂,hrepr₁,hrepr₂,hy₁,hy₂,htag,hselfinal,hread,hother,hsource,hstack,halloc⟩ :=
+    hr.reference_delete_program layout (G p) F0 0 σ parent right addresses hv xroot xrhs xi root rhs (.lit 1 (by decide)) k1
+      rfl rfl rfl rfl rfl rfl (by decide) hk SH (withArgs_memOK _ _ _ source_memOK) initial_repr rfl
+  have hknown : (Source.writeLoc (E := E) (Γ := XΓ) F0 4 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run redirectInput=(.ok (),redirectMid) := by
+    obtain ⟨ht,hw⟩ := source_struct_write redirectInput 2 dn layout.source_types u7 0 1 hr.parent
+    exact hw
+  have hym : ym=redirectMid := congrArg Prod.snd (hw₁.symm.trans hknown)
+  subst ym
+  have hmm : mm=target := (Evm.Out.ok.inj (hc₁.symm.trans (redirected_views p).2.2.2.1)).1
+  subst mm
+  have ho : hout=redirectHp := Option.some.inj (hw₂.symm.trans (show out.writeAddr (.index right .dyn k1) false=some redirectHp from by
+    simp only [Heap.writeAddr,Heap.setIndex]
+    exact if_pos (by change k1.1.toNat<out.len right .dyn;rw [out,arrayLen_setRefField];exact hk)))
+  subst hout
+  obtain ⟨ht,hwrite⟩ := source_bool_write redirectMid 1 [false,true,false] rfl 1 (by decide) false
+  have hdel : (Source.deleteLoc (E := E) (Γ := XΓ) F0 3 (τ := .bool) (.mem 1 1)).run redirectMid=(.ok (),redirectSource) := hwrite
+  have he : (Source.evalE (G p) F0 4 (sourceStructChildDelete layout xroot xi)).run redirectMid=(.ok Source.RVal.unit,redirectSource) := by
+    rw [sourceStructChildDelete,Source.evalE,Source.Hoare.run_bind,hr₁.eval_child_loc (G p) F0 0 xroot xi k1 rfl rfl (by rw [hsel,hlen];exact hk)]
+    change (Source.deleteLoc F0 3 (τ := .bool) (.mem 1 1) >>= fun _ => pure Source.RVal.unit).run redirectMid=_
+    rw [Source.Hoare.run_bind,hdel];rfl
+  have hstmt := source_expr_statement_run (G p) F0 4 XΓ.length _ redirectMid redirectSource Source.RVal.unit he
+  have hz : z=redirectSource := Prod.ext hy₂ (congrArg (fun x => x.2.2) (hs₂.symm.trans hstmt))
+  subst z
+  have htarg : m'=redirectMachine := (Evm.Out.ok.inj (hc₂.symm.trans (clear_right_one hrepr₁))).1
+  subst m'
+  have hold : SourceBoolMemoryAt redirectInput 0 hp left .dyn := left_at
+  refine ⟨hitems,hprog,hcode,hs₁,hs₂,hr₂,hm₂,hsource left hold (by decide) (by decide),hrepr₂,?_,?_,rfl,rfl,rfl,?_,rfl,rfl,?_,hstack,halloc _ (by decide) initial_allocator⟩
+  · simp only [redirectHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    rfl
+  · rfl
+  · simp only [Heap.field,hselfinal]
+    rfl
+  · exact htag
+
+
+private def emptyHp : Heap H := runtimeHp [true,false,false] [] (by decide) (by decide)
+private def emptyState := σ.withHeap emptyHp
+private def emptyMachine := writeMachine machine 24 w[0]
+private def emptySource := withArgs (runtimeSource [true,false,false] []) k0 true
+private def emptyMidHp := emptyHp.setField parent layout.child_type right
+private def emptyMidSource : Source.EMState E XΓ :=
+  (emptySource.1,{emptySource.2 with heap := emptySource.2.heap.write 2 (data 1) (by rfl)})
+private def emptyMidMachine := writeMachine emptyMachine 33 w[24]
+private def emptyItems := sourceStructReferenceDelete layout xroot xrhs xi
+private def emptyProg : Prog C Γ Γ :=
+  .cons (.assignMem (.field (.var root (by decide)) "items" layout.child_type) (.ref (.var rhs rfl)))
+    (.cons (.deleteMem (.loc (.index .dyn (fieldPath root) zeroWord)) rfl) .nil)
+private theorem empty_left_repr : ArrayRepr emptyHp left (base left.id) emptyMachine := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,left,MObj.elems_dyn] using (show 16+1+3≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,left,MObj.elems_dyn] using (show emptyMachine.mem 16=.val (wmod 3) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,emptyHp,runtimeHp,left,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases i with
+      | zero => cases Option.some.inj hi;rfl
+      | succ i => cases i with
+        | zero => cases Option.some.inj hi;rfl
+        | succ i => cases hi
+private theorem empty_right_repr : ArrayRepr emptyHp right (base right.id) emptyMachine := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,right,MObj.elems_dyn] using (show 24+1+0≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,right,MObj.elems_dyn] using (show emptyMachine.mem 24=.val (wmod 0) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,emptyHp,runtimeHp,right,MObj.elems_dyn,List.getElem?_nil] at hi
+    cases hi
+private theorem empty_parent_repr : StructRepr emptyHp parent (base parent.id) emptyMachine := by
+  refine ⟨by change 32+2≤W;decide,?_⟩
+  intro f p hf
+  rw [layout.target_fields] at hf
+  by_cases he : f="tag"
+  · subst f
+    cases hf
+    exact ReprV.uint_of rfl
+  · by_cases hc : f="items"
+    · subst f
+      simp only [lookupBy,he,↓reduceIte] at hf
+      cases hf
+    · simp only [lookupBy,he,hc,↓reduceIte] at hf
+      cases hf
+private theorem empty_repr : StateRepr 1 1 8 (Frag.init Γ) emptyState base emptyMachine := by
+  have hc := Sim.init C 0 W_pos (fun _ => 0) ⟨0,W_pos⟩ rfl
+  refine ⟨?_,?_,?_,by decide,?_,?_,?_⟩
+  · refine ⟨hc.store,?_,?_,hc.net,hc.netSelf,hc.bound,?_,hc.env,hc.funds,hc.oracle⟩
+    all_goals intro p i;cases i with | there i => cases i with | there i => cases i with | there i => cases i with | there i => nomatch i
+  · refine ⟨?_,?_,?_⟩
+    · intro p q;obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+      · exact empty_left_repr
+      · exact empty_right_repr
+    · intro p q;obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq <;> decide
+    · intro p t q z hne
+      obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+      all_goals obtain ⟨rfl,hz|hz⟩ := prim_refs z <;> cases hz
+      all_goals first | exact (hne rfl).elim | (simp only [Heap.len,Heap.get,left,right,MObj.elems_dyn] <;> decide)
+  · intro Q i
+    cases i with
+    | here => exact ⟨parent,rfl,rfl⟩
+    | there i => cases i with
+      | here => exact ⟨right,rfl,rfl⟩
+      | there i => cases i with
+        | here => exact ⟨left,rfl,rfl⟩
+        | there i => cases i with
+          | here => exact ⟨parent,rfl,rfl⟩
+          | there i => nomatch i
+  · refine ⟨?_,?_,?_⟩
+    · intro s q;obtain ⟨rfl,hq⟩ := struct_refs q;cases hq;exact empty_parent_repr
+    · intro s q;obtain ⟨rfl,hq⟩ := struct_refs q;cases hq;decide
+    · intro s t q r hne
+      obtain ⟨rfl,hq⟩ := struct_refs q;cases hq
+      obtain ⟨rfl,hr⟩ := struct_refs r;cases hr
+      exact (hne rfl).elim
+  · intro p s q r
+    obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+    all_goals obtain ⟨rfl,hr⟩ := struct_refs r;cases hr
+    all_goals exact .inl (by simp only [Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,left,right,MObj.elems_dyn];decide)
+  · intro s f R q hf
+    obtain ⟨rfl,hq⟩ := struct_refs q;cases hq
+    rw [layout.target_fields] at hf
+    by_cases ht : f="tag"
+    · subst f;cases hf
+    · by_cases he : f="items"
+      · subst f
+        simp only [lookupBy,ht,↓reduceIte] at hf
+        cases hf
+        rfl
+      · simp only [lookupBy,ht,he,↓reduceIte] at hf
+        cases hf
+
+private theorem empty_allocator : StructAllocatorRepr emptyHp base 8 ⟨48,by decide⟩ emptyMachine := by
+  refine ⟨⟨empty_repr.heap,⟨by decide,by decide,rfl,?_⟩,?_⟩,empty_repr.structs,empty_repr.separated,?_⟩
+  · intro addr ha
+    change upd machine.mem 24 w[0] addr=w[0]
+    rw [upd_other _ _ (by change 48≤addr at ha;omega)]
+    exact initial_allocator.arrays.free.zero addr ha
+  · intro p q
+    obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+    all_goals simp only [Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,left,right,base,MObj.elems_dyn] <;> decide
+  · intro s q
+    obtain ⟨rfl,hq⟩ := struct_refs q;cases hq
+    change 32+2≤48;decide
+
+private theorem empty_source_at : SourceBoolStructAt emptySource 2 emptyHp parent addresses layout := by
+  refine ⟨rfl,?_⟩
+  unfold SourceBoolMemoryAt
+  simp only [emptyHp,runtimeHp,Heap.get,Objs.get,left,MObj.elems_dyn]
+  rfl
+private theorem empty_source_right : SourceBoolMemoryAt emptySource 1 emptyHp right .dyn := by
+  unfold SourceBoolMemoryAt
+  simp only [emptyHp,runtimeHp,Heap.get,Objs.get,right,MObj.elems_dyn]
+  rfl
+private theorem empty_memOK : Source.MemOK E SH emptySource :=
+  withArgs_memOK _ _ _ (runtime_memOK [true,false,false] [])
+
+/-- Old LEFT[0] is valid and true, but new RIGHT is empty. The REAL first
+reference replacement remains in the Source panic result, while Prog and whole
+word append reject the NEW capacity. No target rollback/panic-data claim. -/
+theorem reference_delete_new_capacity (p : Roadmap.Pipeline) :
+    hp.index left .dyn k0=some true ∧
+    emptyHp.index left .dyn k0=some true ∧ emptyHp.len right .dyn=0 ∧
+    (Source.execItems (G p) F0 7 XΓ.length none emptyItems emptySource.1).run (.nil,emptySource.2)=
+      (.error (.revert (Source.panicData .index)),(.nil,emptyMidSource.2)) ∧
+    Prog.run emptyState emptyProg=.error .revert ∧
+    run (code++structChildDeleteCode (C := C) 1 root "items" zeroWord) emptyMachine=.revert ∧
+    run code emptyMachine=.ok emptyMidMachine 0 ∧
+    SourceBoolStructAt emptyMidSource 2 emptyMidHp parent addresses layout ∧ Source.MemOK E SH emptyMidSource ∧
+    StateRepr 1 1 8 (Frag.init Γ) (emptyState.withHeap emptyMidHp) base emptyMidMachine ∧
+    [emptySource.2.heap.get 0,emptyMidSource.2.heap.get 0]=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [true,false,false]⟩] ∧
+    [emptySource.2.heap.get 1,emptyMidSource.2.heap.get 1]=[some ⟨SB,sourceBoolMemory []⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    [emptySource.2.heap.get 2,emptyMidSource.2.heap.get 2]=[some ⟨SS,data 0⟩,some ⟨SS,data 1⟩] ∧
+    [cells emptyMachine,cells emptyMidMachine]=
+      [[w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[0],w[0],w[1],w[0],w[7],w[16]],
+       [w[48],w[32],w[16],w[24],w[32],w[99],w[3],w[1],w[0],w[0],w[0],w[0],w[1],w[0],w[7],w[24]]] ∧
+    emptyMidSource.1.get (.there (.there soldAlias))=.memRef rfl 0 ∧
+    emptyMidMachine.stack=[w[42]] ∧ emptyMidMachine.mem 0=w[48] ∧
+    StructAllocatorRepr emptyMidHp base 8 ⟨48,by decide⟩ emptyMidMachine := by
+  have hge : emptyState.heap.len right .dyn≤k0.1.toNat := by
+    simp only [emptyState,State.withHeap,Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,right,MObj.elems_dyn,k0,indexValue,Int.toNat_natCast,List.length_nil]
+    decide
+  obtain ⟨ym,mm,hs,hitems,hprog,hc,hword,hr,hm,hrepr,hl,hsel,hlen,hn,hstack,halloc⟩ :=
+    empty_source_at.reference_delete_reject layout (G p) F0 0 emptyState parent right addresses empty_source_right
+      xroot xrhs xi root rhs (.lit 0 rfl) k0 rfl rfl rfl rfl rfl rfl (by decide) hge SH empty_memOK empty_repr rfl
+  have hknown : (Source.writeLoc (E := E) (Γ := XΓ) F0 4 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run emptySource=(.ok (),emptyMidSource) := by
+    obtain ⟨ht,hw⟩ := source_struct_write emptySource 2 dn layout.source_types u7 0 1 empty_source_at.parent
+    exact hw
+  have href := empty_source_at.resolved_assign_word layout (G p) F0 2 emptyState parent right addresses empty_source_right
+      xroot xrhs root rhs rfl rfl rfl rfl (by decide) SH empty_memOK empty_repr
+  obtain ⟨ym',mm',hw',he',hs',hi',hc',hr',hm',hrep',hyl,hst,htarg,ha,tail⟩ := href
+  have hym' : ym'=emptyMidSource := congrArg Prod.snd (hw'.symm.trans hknown)
+  subst ym'
+  have hmm' : mm'=emptyMidMachine := htarg
+  subst mm'
+  have hy : ym=emptyMidSource := Prod.ext hl (congrArg (fun x => x.2.2) (hs.symm.trans hs'))
+  subst ym
+  have hmmeq : mm=emptyMidMachine := (Evm.Out.ok.inj (hc.symm.trans hc')).1
+  subst mm
+  refine ⟨?_,?_,?_,hitems,hprog,hword,hc,hr,hm,hrepr,rfl,rfl,rfl,?_,rfl,hstack,rfl,halloc _ (by decide) empty_allocator⟩
+  · simp only [Heap.index,Heap.get,Objs.get,hp,left,MObj.elems_dyn,k0,indexValue,Int.toNat_natCast];rfl
+  · simp only [Heap.index,Heap.get,Objs.get,emptyHp,runtimeHp,left,MObj.elems_dyn,k0,indexValue,Int.toNat_natCast];rfl
+  · simp only [Heap.len,Heap.get,Objs.get,emptyHp,runtimeHp,right,MObj.elems_dyn,List.length_nil]
+  · rfl
+
+
+/-- Insufficient Source horizon preserves the ACTUAL changed reference prefix.
+The child has not been deleted; this is distinct from Source panic and from
+successful final clearing, with no target-timeout/rollback equivalence. -/
+theorem reference_delete_timeout (p : Roadmap.Pipeline) :
+    (Source.execItems (G p) F0 6 XΓ.length none redirectItems redirectInput.1).run (.nil,redirectInput.2)=
+      (.error .timeout,(.nil,redirectMid.2)) ∧
+    (Source.execItems (G p) F0 0 XΓ.length none redirectItems redirectInput.1).run (.nil,redirectInput.2)=
+      (.error .timeout,(.nil,redirectInput.2)) ∧
+    redirectMid.2.heap.get 2=some ⟨SS,data 1⟩ ∧ redirectInput.2.heap.get 2=some ⟨SS,data 0⟩ ∧
+    (Source.readLoc (E := E) (Γ := XΓ) F0 (τ := .bool) (.mem 1 1)).run redirectMid=(.ok (.bool true),redirectMid) ∧
+    (Source.readLoc (E := E) (Γ := XΓ) F0 (τ := .bool) (.mem 1 1)).run redirectSource=(.ok (.bool false),redirectSource) ∧
+    target.mem 26=w[1] ∧ redirectMachine.mem 26=w[0] ∧
+    hp.index left .dyn k1=some false ∧ hp.index right .dyn k1=some true ∧
+    MObj.elems .dyn ((out.set left (MObj.setElem .dyn (out.get left) 1 false)).get right)≠MObj.elems .dyn (redirectHp.get right) := by
+  have hr : SourceBoolStructAt redirectInput 2 hp parent addresses layout := initial_at.same_heaps rfl rfl
+  have hv : SourceBoolMemoryAt redirectInput 1 hp right .dyn := right_at
+  obtain ⟨ym,mm,hw,he,hs,hi,hc,hr',hm,hrepr,hy,hstack,hmm,halloc,tail⟩ :=
+    hr.resolved_assign_word layout (G p) F0 1 σ parent right addresses hv xroot xrhs root rhs
+      rfl rfl rfl rfl (by decide) SH (withArgs_memOK _ _ _ source_memOK) initial_repr
+  have hknown : (Source.writeLoc (E := E) (Γ := XΓ) F0 3 (.mem (τ := SB) 2 1) (.memRef rfl 1)).run redirectInput=(.ok (),redirectMid) := by
+    obtain ⟨ht,hw⟩ := source_struct_write redirectInput 2 dn layout.source_types u7 0 1 hr.parent
+    exact hw
+  have hym : ym=redirectMid := congrArg Prod.snd (hw.symm.trans hknown)
+  subst ym
+  have hs₁ : (Source.execS (G p) F0 5 XΓ.length none (.expr (sourceStructAssign layout xroot xrhs) : Source.RStmt E [] false .body XΓ XΓ) redirectInput.1).run (.nil,redirectInput.2)=
+      (.ok (.normal redirectMid.1),(.nil,redirectMid.2)) := hs
+  have hb := source_struct_delete_low_horizon layout (G p) F0 redirectMid xroot xi 3 (by decide)
+  have hs₂ := source_expr_statement_error (G p) F0 3 XΓ.length (sourceStructChildDelete layout xroot xi) redirectMid redirectMid .timeout hb
+  have hitems := source_items_pair_error (G p) F0 0 XΓ.length (.expr (sourceStructAssign layout xroot xrhs))
+    (.expr (sourceStructChildDelete layout xroot xi)) redirectInput redirectMid redirectMid .timeout hs₁ hs₂
+  refine ⟨hitems,rfl,rfl,rfl,source_bool_read redirectMid 1 [false,true,false] rfl 1 (by decide),
+    source_bool_read redirectSource 1 [false,false,false] rfl 1 (by decide),rfl,rfl,?_,?_,?_⟩
+  · simp only [Heap.index,Heap.get,Objs.get,hp,left,MObj.elems_dyn,k1,indexValue,Int.toNat_natCast];rfl
+  · simp only [Heap.index,Heap.get,Objs.get,hp,right,MObj.elems_dyn,k1,indexValue,Int.toNat_natCast];rfl
+  · simp only [redirectHp,out,Heap.setField,Heap.get,Heap.set,Objs.get,Objs.set,hp,left,right,parent,MObj.elems_dyn,MObj.setElem]
+    change ([false,true,false] : List Bool)≠[false,false,false]
+    decide
+
+/-- Nonempty exact end is separately rejected after successful reference
+replacement. All complete preexisting endpoint/fuel vectors remain intact. -/
+theorem reference_delete_exact_end (p : Roadmap.Pipeline) :
+    ∃ (ym : Source.EMState E XΓ) (mm : Machine),
+      (Source.execItems (G p) F0 7 XΓ.length none (sourceStructReferenceDelete layout xroot xrhs xi)
+        (withArgs sy k3 true).1).run (.nil,sy.2)=(.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      Prog.run σ (.cons (.assignMem (.field (.var root (by decide)) "items" layout.child_type) (.ref (.var rhs rfl)))
+        (.cons (.deleteMem (.loc (.index .dyn (fieldPath root) endpointWord)) rfl) .nil))=.error .revert ∧
+      run (code++structChildDeleteCode (C := C) 1 root "items" endpointWord) machine=.revert ∧
+      SourceBoolStructAt ym 2 out parent addresses layout ∧ Source.MemOK E SH ym ∧
+      StateRepr 1 1 8 (Frag.init Γ) (σ.withHeap out) base mm ∧
+      (out.field parent layout.child_type).id=1 ∧ out.len right .dyn=3 := by
+  have hr : SourceBoolStructAt (withArgs sy k3 true) 2 hp parent addresses layout := initial_at.same_heaps rfl rfl
+  have hv : SourceBoolMemoryAt (withArgs sy k3 true) 1 hp right .dyn := right_at
+  have hk : σ.heap.len right .dyn≤k3.1.toNat := by
+    simp only [σ,Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn,k3,indexValue,Int.toNat_natCast,List.length_cons,List.length_nil]
+    decide
+  obtain ⟨ym,mm,hs,hitems,hprog,hc,hword,hr',hm,hrepr,hy,hsel,hlen,hn,hstack,halloc⟩ :=
+    hr.reference_delete_reject layout (G p) F0 0 σ parent right addresses hv xroot xrhs xi root rhs (.lit 3 (by decide)) k3
+      rfl rfl rfl rfl rfl rfl (by decide) hk SH (withArgs_memOK _ _ _ source_memOK) initial_repr rfl
+  refine ⟨ym,mm,hitems,hprog,hword,hr',hm,hrepr,?_,?_⟩
+  · change ((σ.heap.setField parent layout.child_type right).field parent layout.child_type).id=1
+    rw [hsel];rfl
+  · change (σ.heap.setField parent layout.child_type right).len right .dyn=3
+    rw [hlen]
+    simp only [σ,Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn,List.length_cons,List.length_nil]
+
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.reference_then_delete_program' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reference_then_delete_program
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.reference_delete_new_capacity' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reference_delete_new_capacity
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.reference_delete_timeout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reference_delete_timeout
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceStructControls.reference_delete_exact_end' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms reference_delete_exact_end
 
 end Solidity.Backend.MemoryOps.SourceStructControls
