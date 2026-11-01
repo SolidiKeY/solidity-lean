@@ -1098,6 +1098,18 @@ guards stay in `TypeExamples.lean`. This is not part of the M7-next steps
 above and closes none of them. Timings:
 [va1-h6-type-split.md](feature-work/va1-h6-type-split.md).
 
+
+VA1 independent AU02 proof component (2026-11-01):
+`Calculus/DecisionNegativeInstantiation.lean` proves one-way negative-chain
+instantiation using existing guarded LFml.inst, with a concrete fixed-array
+client and an explicit counterexample to equivalence. It changes no decision
+route, coverage predicate or old unknown. Exact reconstruction/pipeline and
+global Residue/theorem obligations remain open. The committed parallel numeric
+interface and immutable source/bundle/checksum paths are recorded in the
+[VA1 handoff](feature-work/after-roadmap-va1.md); consumers need not await the
+whole lane. Combined concrete-tree/full validation remains required.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

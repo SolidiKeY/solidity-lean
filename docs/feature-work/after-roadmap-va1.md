@@ -1443,3 +1443,86 @@ or authorize integration/publication. Q2 remains held only for frontend repair.
 The immutable incremental Git bundle and committed-source archive will be
 exported under /workspace/va1-evidence/parallel-interface-next after review and
 commit; no changing checkout is presented as a checked dependency.
+
+
+### One-way negative-chain instantiation component (2026-11-01)
+
+`Calculus/DecisionNegativeInstantiation.lean` implements negativeChainInst on
+actual intrinsic LFml C formulas. It instantiates only negative quantifier-free
+chains of a chosen primitive K, through the original LFml.inst. Positive chains
+remain unchanged; traversal stops at unselected binders. Original per-sample
+strict definedness guards and substitution are reused. No future producer fact,
+array-root recognition or floor reconstruction premise is assumed.
+
+LFml.negativeChainInst_sound is quantified over every contract, primitive K,
+typed sample list List (LTm C (.val K)), formula, polarity, State C [] and AEnv.
+At positive polarity, satisfaction of the finite instance implies the original;
+at negative polarity, the original implies its finite instances. The proof
+handles negation/conjunction/implication and uses existing LFml.inst_sound at
+the chain. LFml.valid_of_negativeChainInst transports global validity in that
+one direction only. Quantifier-free formulas are preserved at both polarities.
+The generic negativeChainInst_instance_client proves a chain implies its actual
+guarded finite instances for arbitrary typed body contents.
+
+`Examples/DecisionNegativeInstantiation.lean` applies the component to a bounded
+read of the actual fixedArr storage root of the existing Probe contract. Its
+index-one sample is inhabited at State.init; proof uses holds_subst1, the
+index_fixed/empty-prefix path interface, default storage fields and fixed-vector
+list laws, preserving the concrete witness. Positive-chain and halted-sample
+controls retain the original behavior. A Boolean formula is globally valid
+while its one-point finite instance is false: original_valid,
+finite_instance_invalid and no_equivalence explicitly refute the converse.
+The old fixedBlock global unknown is reused unchanged.
+
+This is an independently implemented one-way proof interface for future
+array/memory positive-instance consumers, not exact Prep, refutation transport,
+a decision branch, new coverage or a Residue shrink. It does not close the
+source fixedBlock pin or the entire AU02 fixed/nested-array child. Exact floor
+reconstruction, source/pipeline integration, complete target coverage and other
+original obligations remain open. No decision predicate/model/default/pin,
+observation, refusal, hash premise or proof/test/resource budget changes.
+
+Exact-source per-file MCP is clean in 5.28/5.26 s, focused builds pass in
+4.20/3.11 s and all 14 public axiom reports pass in 5.22 s with only standard
+axioms or none. Actual Lean 4.24.0/Lake 5.0.0-src+797c613, hard memory.max
+12884901888/swap.max 0, thread one/explicit -j1, prebuild resource checks and
+measurements are retained in
+/workspace/va1-evidence/negative-inst-next/verified-gates.json and raw logs.
+Maximum sampled aggregate RSS is 1362820 KiB; minimum host available is
+17103032320 bytes, above 12 GiB. All checks are serial under the original
+writer lock, with no LSP/build overlap and unchanged 300 s bounds. Initial
+congruence-name and concrete conversion/substitution/path/vector failures are
+retained; final diagnostics have zero errors/warnings.
+
+Independent read-only finder and skeptic final source/control reviews found
+no issues; neither edited or used Lean/server/build. Static gates pass:
+1080 reachable/zero orphans, 180 core/zero elaborator paths, strict automatic
+491/61 budget/11 refuted/zero manual or pending, trust 1095 sources/248 sites/
+zero findings. Inventory FAIL1 remains byte-identical 1206 pins/zero errors/
+404 unrecorded changes. Strict docs FAIL1 retains the same 85 frozen findings,
+zero added/removed. Original Decision source and counterexample byte identities
+pass. Final finder documentation/evidence review found no issues. Skeptic
+found the AU02 paragraph appended under unrelated cancellation tests; it was
+moved into the owned M7-next section before commit. No other findings. Neither
+reviewer edited or used Lean/server/build.
+
+The PARALLEL-INTERFACE export is already committed at
+144a2a9db73067e67e778515ccd932630070fea6 with the checked numeric implementation
+at 782dcff93a13fd1a19f0f45e6246146815555ef5. Its immutable 367-file committed
+import-closure archive and incremental bundle are under
+/workspace/va1-evidence/parallel-interface-next. Bundle SHA256:
+c49eddeaeaaa5b01512e0d88d8aa831b6979dfe937f4a592138980e8c96caf62;
+source archive SHA256:
+50c814969bea1f901c429244d51b97e8f152c3eaecb4d55153a52cd6ae9ce60d.
+Bundle verify, source-blob hash verification and SHA256SUMS check pass. An initial
+raw-SHA range bundle export refused as empty (exit128); the named assigned ref
+plus explicit frozen-base exclusion repaired it, with failure retained. No
+history reset, producer substitution or changing-checkout dependency snapshot.
+VA2 may consume these actual checked interfaces now; combined-tree final gates
+remain open. This proof-only component is later than that immutable export and
+is delivered separately at its own checked commit.
+
+All original AU01/AU02 obligations, incomplete baseline/performance/general-fuel
+work and pending/failed full gates remain as previously listed. Q1 is answered;
+Q2/frontend repair remains held without blocking this independent work. No new
+goal, reset, stop/completion, push, merge or tag publication is performed.
