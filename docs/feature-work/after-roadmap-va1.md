@@ -1933,3 +1933,94 @@ program-free boundary, remaining AU02 array/memory/halting-OR/general-fuel/
 normalizer work, baseline/performance/backfill and final gates remain incomplete.
 Q1 answered; Q2 only frontend repair/full-gate hold. Original goal/VM/branch
 preserved; no stop/reset/new goal, push, merge, PR or tag.
+
+
+## Checked bounded-array pipeline increment (2026-11-01)
+
+Parent a878df9d84e9485728ad668e92f4b885c3740ace; frozen base and assigned branch
+unchanged. Before changing ArrayBlock, inspected speed history
+7c044e6a22b226be8b9a810c795a104ac4c87820 and warned about checking costs.
+The old irreducible length/APF implementation is retained as baseBlockPrep.
+blockPrep preserves that exact Prep when its body is quantifier-free or the
+original OR-guarded folded array parser succeeds; only unsupported shapes try
+the committed exact boundedUIntPrep followed by the original length/APF stages.
+The old OR cap precedes fallback lifting. blockPrep_preserves_qf and
+blockPrep_preserves_parsed certify equality of the entire original preparation,
+including normalized forms. All whole-result budgets, source predicates,
+DecisionTheorem, Waivers, hash premises and observations remain unchanged.
+Decision and HashPremise are byte-exact to frozen base; the existing replay
+sources/templates are unchanged from this checkpoint's parent.
+
+Initial hook FAIL1 after911.379s: prepending finite preparation changed two old
+replay normal forms. Raw failure and first source variant retained. Conservative
+repaired affected build FAIL1 after954.361s with resource_stop=false: every old
+consumer, including original ArrayReplay in39s, passed, then four obsolete
+fixed-block noncoverage/unknown assertions failed. This is the observed assigned
+improvement, not a hidden failure: fixedBlock/fixedBad now have inTarget=true,
+Covered=true. All five other assigned array pins remain inTarget=true,
+Covered=false, unknown, with their kernel certificates unchanged.
+
+Only those two assigned classifications changed. fixedBlock_covered and
+fixedBad_covered are kernel facts. fixedBlock_proved derives the actual .proved
+verdict from coverage, structural hash-freedom and the original fixedBlock_valid.
+fixedBad_refuted returns an actual state with decideGoal fixedBad = .refuted σ
+and ¬ Fml.holdsH σ fixedBad, using completeness and the original false-control
+semantics. That returned state is not asserted equal to the independent
+fixedBadState countermodel, which remains intact. Both original formulas are
+unchanged. The owned negative-instantiation consumer now uses
+original_fixed_block_proved; its no_equivalence counterexample remains intact.
+All zero/oversized/wrong-guard/partial-equality/omitted-sample controls remain.
+This closes the two concrete fixed bounded-block pins, not arbitrary fixed-array
+formulas or the whole AU02 fixed-array child.
+
+Final exact-source gates in /workspace/va1-evidence/bounded-pipeline-next:
+
+- ArrayBlock MCP19.157s; gap MCP18.088s; negative-consumer MCP4.281s;
+  bounded-controls MCP5.261s: pass, no errors/warnings/dependency failures.
+- Gap target build16.928s pass; serial affected consumer build138.128s pass
+  (377 jobs; includes memory, numeric traversal, negative instantiation, bounded
+  controls, fixed pairs, memory census and halting-OR controls). Previous changed
+  source rebuild used warm upstream caches; no cache-clearing/full-cold claim.
+  All rebuilt files remained below unchanged300s; largest observed109s ledger.
+- 16 public axiom reports19.135s pass: standard propext/Classical.choice/Quot.sound
+  only. Actual executable verdict observer3.110s pass: fixedBlock proved,
+  fixedBad refuted. Warm per-call/output observations14629093/15252752ns;
+  these are interpreted Lean runtime observations, not kernel or EVM evidence.
+
+Every Lean operation used the original writer lock, LEAN_NUM_THREADS=1/-j1,
+verified aggregate memory.max12884901888 and memory.swap.max0 before Lean,
+and12GiB host reserve. Actual Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613
+observed. Final gates' maximum sampled aggregate RSS2522128KiB;
+minimum host available16335290368bytes. No resource stops.
+Original KeySort setup pass remains separate from final full gate completion.
+Independent finder and skeptic final reviews found no additional issues after
+the known consumer update; neither ran Lean/server/build or edited files.
+Full notes, initial failures, source identities and reason census retained.
+
+Original queue accounting: baseline/reason census partial; AU01 meaningful
+Residue/DecisionTheorem-prime/exhaustive target-and-hash bridge open; module
+split/performance checkpoints delivered but overall milestone eligibility open.
+AU02 concrete fixed pins improved, standalone fixed/path/pair lemmas delivered;
+general fixed/nested arrays, broader memory blocks, halting-OR repair, broader
+human-revised program-free boundary, general formula-derived fuel/normalizer
+closure and final full validation remain open. Backfill numeric source traversal,
+shape/coverage bounds, fixed-path reconstruction, negative controls and axiom
+checks delivered incrementally; remaining global bridge/reason census, complete
+profiling/baseline and final affected/full gates remain. Q1 approved only the
+certified boundary revision; Q2 frontend repair ownership remains pending.
+Do not repeat the unchanged stopped frontend full build or claim another VM's
+published workload as a local gate. No whole-goal completion, stop/reset/new
+objective, push, merge, PR or tag. The immutable numeric PARALLEL-INTERFACE at
+0a773e11 with370-file concrete closure, typed interfaces, clients and explicit
+normalizer premise remains available unchanged. Further owned normalizer/Residue
+implementation is ready independently of Q2; persistent full goal incomplete.
+
+Static checkpoint gates:1092 reachable/zero orphans;180 core/zero elaborator
+reach; strict automatic491/61 step budgets/11 refuted/zero manual or pending;
+trust1107 sources/248 sites/zero findings: all pass. Inventory FAIL1 unchanged
+1206 pins/zero errors/404 unrecorded changes. Strict docs FAIL1 same85 frozen
+findings (48 missing/37 ambiguous); no added/removed findings. Exact source
+comparison confirms frozen Decision, HashPremise and ProgramReduction bytes,
+and replay/Core/facade unchanged from parent. Reviews caught automation text
+appended outside M7-next and list spacing; both routine doc issues fixed.
+All proof and full-goal limits above remain.

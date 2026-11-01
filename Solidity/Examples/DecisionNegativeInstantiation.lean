@@ -3,7 +3,7 @@ import Solidity.Examples.DecisionArrayGaps
 
 /-!
 # Negative-chain proof controls
-An actual typed fixed-root client, preserved unknowns, positive quantifiers,
+An actual typed fixed-root client, positive quantifiers,
 halted substitution guards, and a counterexample to exactness.
 -/
 namespace Solidity.Examples.DecisionNegativeInstantiation
@@ -78,9 +78,10 @@ theorem no_equivalence : ¬ ((converseTrap.negativeChainInst [falseTerm] true).V
   intro h
   exact finite_instance_invalid ((h.mpr original_valid) (State.init Probe) AEnv.dflt)
 
-/-- The existing global fixed-block classification is unchanged by this proof-only component. -/
-theorem original_gap_preserved :
-    decideGoal Solidity.Examples.DecisionArrayGaps.fixedBlock = .unknown :=
-  Solidity.Examples.DecisionArrayGaps.fixedBlock_unknown
+/-- The exact bounded pipeline now closes the original fixed-block gap.
+This one-way instantiation theorem still does not supply a converse. -/
+theorem original_fixed_block_proved :
+    decideGoal Solidity.Examples.DecisionArrayGaps.fixedBlock = .proved :=
+  Solidity.Examples.DecisionArrayGaps.fixedBlock_proved
 
 end Solidity.Examples.DecisionNegativeInstantiation

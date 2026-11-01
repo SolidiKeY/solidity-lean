@@ -1,9 +1,9 @@
 import Solidity.Calculus.DecisionBoundedUInt
 import Solidity.Examples.DecisionArrayGaps
 
-/-! # Exact bounded preparation controls before pipeline integration
-Original assigned array verdicts stay unchanged here. Kernel preparation facts
-are separate from the executable observations of the unchanged decision route.
+/-! # Exact bounded preparation controls
+Kernel preparation equivalences and refusal controls are separate from the
+certified pipeline verdicts in DecisionArrayGaps.
 -/
 namespace Solidity.Examples.DecisionBoundedUInt
 open Solidity.Decide

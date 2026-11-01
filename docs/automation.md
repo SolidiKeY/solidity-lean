@@ -1155,6 +1155,19 @@ interface and immutable source/bundle/checksum paths are recorded in the
 whole lane. Combined concrete-tree/full validation remains required.
 
 
+
+VA1 bounded-array increment (2026-11-01): ArrayBlock now preserves exact old
+quantifier-free/guarded-parser preparations and tries kernel-equivalent bounded
+uint instances on unsupported bodies. The original fixedBlock/fixedBad gap pins
+are now Covered with kernel-certified proved/refuted results and existing
+validity/countermodel controls; the five keyed/field/struct/nested-array pins
+remain unknown. Original replay templates and all budgets remain unchanged.
+Per-file MCP, affected377-job consumer build and16 public axiom reports pass;
+raw earlier failures are retained. This is not general fixed-array completeness,
+Residue/DecisionTheorem-prime, full AU02 or final runtime/full-gate completion.
+Exact premises, resource/timing and open queues are in the VA1 handoff.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

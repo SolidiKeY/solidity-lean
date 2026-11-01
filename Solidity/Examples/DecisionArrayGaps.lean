@@ -2,10 +2,10 @@ import Solidity.Examples.DecisionArrays
 /-!
 # Actual assigned array-gap census
 
-These unchanged decision classifications are baseline controls, not a Residue
-or pipeline-completeness implementation. Fixed-array reads are already covered
-elsewhere; the negative fixed-array blocks below still expose a gap. Arrays
-below keys/fields and arrays of structures/arrays are separately named.
+Fixed bounded blocks now have kernel coverage and certified verdicts through
+exact finite preparation. The other five classifications remain gap controls,
+not a Residue or an exhaustive pipeline-completeness implementation. Arrays below
+keys/fields and arrays of structures/arrays are separately named.
 -/
 namespace Solidity.Examples.DecisionArrayGaps
 open Solidity.Decide
@@ -63,22 +63,14 @@ private theorem unknown_of_check {C : Contract} (φ : Fml C [])
 /-- The original source shape `fixedBlock` is admitted by the requested fragment. -/
 theorem fixedBlock_target : fixedBlock.inTarget {} = true := by decide +kernel
 
-/-- The current complete fragment does not cover `fixedBlock`. -/
-theorem fixedBlock_notCovered : fixedBlock.Covered = false := by decide +kernel
-
-/-- The actual current global decision on `fixedBlock` remains unknown. -/
-theorem fixedBlock_unknown : decideGoal fixedBlock = .unknown :=
-  unknown_of_check fixedBlock (by decide +kernel)
+/-- Exact bounded preparation covers the original positive fixed block. -/
+theorem fixedBlock_covered : fixedBlock.Covered = true := by decide +kernel
 
 /-- The original source shape `fixedBad` is admitted by the requested fragment. -/
 theorem fixedBad_target : fixedBad.inTarget {} = true := by decide +kernel
 
-/-- The current complete fragment does not cover `fixedBad`. -/
-theorem fixedBad_notCovered : fixedBad.Covered = false := by decide +kernel
-
-/-- The actual current global decision on `fixedBad` remains unknown. -/
-theorem fixedBad_unknown : decideGoal fixedBad = .unknown :=
-  unknown_of_check fixedBad (by decide +kernel)
+/-- The same coverage route includes the false fixed-array control. -/
+theorem fixedBad_covered : fixedBad.Covered = true := by decide +kernel
 
 /-- The original source shape `belowKey` is admitted by the requested fragment. -/
 theorem belowKey_target : belowKey.inTarget {} = true := by decide +kernel
@@ -208,9 +200,35 @@ theorem fixedBad_countermodel : ¬ holds fixedBadState fixedBad := by
       (by decide +kernel) (by decide +kernel)).mpr
     rfl
 
-/-- The negative fixed-array control is genuinely false, despite the unknown decision. -/
+/-- The negative fixed-array control is genuinely false. -/
 theorem fixedBad_notValid : ¬ Fml.Valid fixedBad := by
   intro h
   exact fixedBad_countermodel (h fixedBadState)
+
+theorem fixedBlock_hashFree : fixedBlock.hasHash = false := by decide +kernel
+
+theorem fixedBad_hashFree : fixedBad.hasHash = false := by decide +kernel
+
+/-- Coverage and the existing semantic proof force the actual certified verdict. -/
+theorem fixedBlock_proved : decideGoal fixedBlock = .proved := by
+  have hd : decideGoal fixedBlock ≠ .unknown :=
+    decideGoal_complete fixedBlock_covered fixedBlock_hashFree
+  have hv : Fml.ValidH fixedBlock := (Fml.validH_iff fixedBlock_hashFree).mpr fixedBlock_valid
+  cases he : decideGoal fixedBlock with
+  | proved => rfl
+  | refuted σ => exact False.elim (decideGoal_refutes he (hv σ))
+  | unknown => exact False.elim (hd he)
+
+/-- The returned state is kernel-certified; no expected verdict substitutes for it. -/
+theorem fixedBad_refuted : ∃ σ : State Probe [], decideGoal fixedBad = .refuted σ ∧
+    ¬ Fml.holdsH σ fixedBad := by
+  have hd : decideGoal fixedBad ≠ .unknown :=
+    decideGoal_complete fixedBad_covered fixedBad_hashFree
+  cases he : decideGoal fixedBad with
+  | proved =>
+    have hv : Fml.Valid fixedBad := (Fml.validH_iff fixedBad_hashFree).mp (decideGoal_sound he)
+    exact False.elim (fixedBad_notValid hv)
+  | refuted σ => exact ⟨σ, rfl, decideGoal_refutes he⟩
+  | unknown => exact False.elim (hd he)
 
 end Solidity.Examples.DecisionArrayGaps
