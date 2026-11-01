@@ -73,6 +73,8 @@ import Solidity.Calculus.CallFunctionTable
 import Solidity.Calculus.CallFunctionGraph
 import Solidity.Calculus.CallFunctionBase
 import Solidity.Calculus.CallFunctionOperationalBase
+import Solidity.Calculus.CallFunctionLeaf
+import Solidity.Calculus.CallFunctionLeafMetrics
 import Solidity.Calculus.CallResultRestore
 import Solidity.Calculus.Blocks
 import Solidity.Calculus.WkOver
@@ -285,6 +287,7 @@ import Solidity.Examples.Tactics.AnonLocalCapture
 import Solidity.Examples.Tactics.CallFunctionTable
 import Solidity.Examples.Tactics.CallFunctionBase
 import Solidity.Examples.Tactics.CallFunctionOperationalBase
+import Solidity.Examples.Tactics.CallFunctionLeaf
 import Solidity.Examples.Tactics.CallResultRestore
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertData
