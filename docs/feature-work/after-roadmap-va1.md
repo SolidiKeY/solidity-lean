@@ -1274,3 +1274,82 @@ no issues; neither edited or used Lean/server/build. Latest-head full build is
 pending; prior exact-source resource failures are retained and not relabeled.
 Q2 and the remaining original queue remain open. This reviewed proof checkpoint
 is not milestone publication eligibility or full-goal completion.
+
+
+## Sufficient source-derived body-node bound checkpoint
+
+`Calculus/DecisionNumericBounds.lean` uses the existing intrinsic Tm.size,
+without changing any representation, evaluator or runtime/proof/node budget.
+Literal folding never increases its original binary node. For every actual
+UIntLinear term under the real fresh uint prefix, the translated numeric
+output is elimination-fixed, conditional-simplification-fixed, and has no
+more nodes than its source. The local shape/size hypotheses of the generic
+helper are explicitly discharged by that fresh binding; the family theorem
+assumes only the intrinsic source grammar. This is narrower than general Num
+sequencing, which earlier controls showed can grow under elimination.
+
+`optEq_nodes` counts **seven copies of each operand plus thirteen nodes**.
+`uintPrefix_prepared_sourceBound` constructs the actual prepared body ψ with
+its source/parameter/lifting facts and
+`ψ.nodes <= 7*(a.size+b.size)+13`. The sufficient corollary derives the existing
+511 body cap from source sum <=71 (in fact <=510). It is not a necessary
+criterion, a new exclusion, a runtime/fuel increase or completion of AU02's
+formula-derived fuel obligation. It bounds the stripped body, not the outer
+universal node. Literal magnitude is not counted by Tm.size, so no uniform
+runtime claim follows. Separate cut identity/bound, lift identity, relevant
+resource booleans and generic Covered remain open.
+
+The actual controls expose the following distinct boundaries:
+
+| Source case | Raw size sum | Prepared body | Covered | Actual outcome |
+|---|---:|---:|---|---|
+| near symbolic limit | 70 | 503 | true | Coverage and direct ordinary validity certified; search not profiled |
+| larger symbolic pair | 72 | 517 | false | **proved**, with public kernel tag, ValidH and ordinary validity |
+| larger literal source | 82 | 27 | true | proved, with kernel tag and separate validity |
+| both literal subtractions fail | 6 | 27 | true | optional equality valid |
+| one subtraction fails, other side returns | 4 | 3 | true | concrete State.init countermodel and certified actual refutation |
+
+The 517-node formula also has hashCovered=false and is hash-free. Guarded
+execution reports both original dependentReduction? and quantReduction?
+return some; decideLeafA takes the first successful route. These route
+observations are external guarded executions; the actual global proved tag,
+coverage/hash flags, body count and validity have separate public kernel
+proofs. Covered is sufficient, not a complete characterization of every
+answered input. The initial expectation that an over-cap leaf might be unknown
+was rejected by reproduction before any pin: its **proved** outcome is
+retained. It is not inferred to lie in Residue. Similarly the larger source
+that folds small proves source sum >71 cannot classify a gap or unknown.
+No previous expected verdict/observation was changed.
+
+Final exact-source per-file MCP passes in 4.23 s (core) and 28.89 s (controls),
+focused builds in 4.12/24.40 s, all 40 public axiom reports in 23.40 s with only
+standard axioms or none. Initial classification/route executions pass in
+7.45/8.61 s. Full commands, source hashes, versions, hard-cap/prebuild outputs,
+measured aggregate RSS and host reserve are in
+`/workspace/va1-evidence/numeric-bounds-next/verified-gates.json` and raw logs.
+The same 12 GiB/no-swap, 12 GiB host reserve, thread one/explicit -j1, writer
+lock and unchanged proof/300 s guards remain. Typed-match reduction,
+reflexive-inequality and tactic-layout failures are retained; final diagnostics
+have no errors/warnings. No sorry, axiom, dependency or predicate/function
+change is introduced.
+
+Independent read-only finder and skeptic final source/control reviews found
+no issues. Both emphasized sufficient-not-necessary sizing and preservation of
+the uncovered-but-proved control; no unexplained Residue/unknown classification
+follows. Neither edited or used Lean/server/build. Q1 remains answered; Q2
+pending only for frontend repair/full gates. Full Residue/theorem/bridge,
+broader revised M4 and all other open AU02/full-gate obligations remain open.
+This checked source bound is not whole-lane completion. Final static/docs
+reviews follow once actually checked.
+
+Final source-bound static gates pass: 1076 reachable/zero orphans,
+180 core/zero elaborator paths, 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1091 sources/248 inventoried sites/zero findings.
+Axiom inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero added/removed. Frozen Decision and original counterexample byte identities
+pass. Final independent finder/skeptic documentation/evidence reviews found
+no issues; neither edited or used Lean/server/build. Latest-head full gate
+remains pending; earlier source-matched resource failures remain failures.
+Q2 and all remaining original obligations stay open. This is a reviewed
+source-bound checkpoint, not milestone eligibility or full-goal completion.

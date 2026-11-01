@@ -1023,6 +1023,14 @@ prefix body with certified source grammar, only its permitted atom and lifting
 weight two. The actual existing liftedExact check passes for this source
 family, and full frozen admission holds for every waiver setting. Separate
 node/cut bounds, Covered and the exhaustive Residue/target bridge remain open.
+The source-size increment in `Calculus/DecisionNumericBounds.lean` bounds the
+actual prepared body by `7*(a.size+b.size)+13`, using existing intrinsic sizes
+and proved elimination/simplification identities. Source sum at most 71 is
+sufficient for the unchanged 511 body cap, not necessary or a new limit.
+A 517-node control is not Covered or hashCovered yet is actually proved;
+a larger literal source folds to 27 nodes and stays Covered. These preserve
+why neither a size threshold nor noncoverage defines Residue/unknown.
+Separate cut/lift/resource and exhaustive coverage/fuel obligations stay open.
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
