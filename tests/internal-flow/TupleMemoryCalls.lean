@@ -269,10 +269,6 @@ theorem actualSelectorResult :
   delta callProducer
   exact TupleCalls.compileTuple_success prefixProducer.frag "triple" arguments binders body expanded compiled
 
-/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualSelectorResult' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
-#guard_msgs in #print axioms actualSelectorResult
 
 theorem actualExpandedTarget : ∃ m : Evm.Machine,
     Evm.run (prefixProducer.code ++ expanded.code) machine = .ok m 0 := by
@@ -294,14 +290,6 @@ theorem actualExpandedTarget : ∃ m : Evm.Machine,
   · have observed := target_body
     rw [Evm.run_append_ok hp,ht] at observed
     cases observed
-/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualCallConstruction' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
-#guard_msgs in #print axioms actualCallConstruction
-/-- info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualExpandedTarget' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
-#guard_msgs in #print axioms actualExpandedTarget
 
 theorem target_export : words (Evm.run (prefixProducer.code ++ callProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262,263,264,265] =
@@ -757,25 +745,6 @@ theorem actualExpandedTarget : ∃ m : Evm.Machine,
     cases observed
 
 
-/--
-info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedSelection' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
----
-info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualOuterConstruction' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
----
-info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedCost' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
----
-info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedTarget' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in
-#print_checked_axioms actualExpandedSelection, actualOuterConstruction, actualExpandedCost, actualExpandedTarget
 
 theorem target_export : words (Evm.run (prefixProducer.code ++ outerProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,256,257,258,259,260,261,262,263,264,265,266,267] =
@@ -987,3 +956,169 @@ theorem recursion_refusal : (TuplePrograms.compile 1 prefixProducer.frag
   TuplePrograms.program_revert
 
 end Solidity.Backend.InternalFlow.TupleCallChecks.Composed
+
+namespace Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard
+open Evm Evm.Memory PublishedDirectCalls TupleCalls
+
+def output : Solidity.Out C caller.st.H Caller :=
+  ⟨exported.st.drop (Ext.append Caller Results), exported.ext⟩
+def statement : Stmt C Caller Caller := .block (.cons outerCall .nil)
+def checked : Calls.Statement 1 prefixProducer.frag statement :=
+  TupleCalls.Scoped.statement "outerTriple" arguments binders nestedBody expandedProducer
+
+theorem source : statement.run caller.st = .ok output := by
+  change ((Prog.cons outerCall .nil).run caller.st).map _ = _
+  rw [Prog.run_cons_ok source_outer, Prog.run_nil]
+  rfl
+
+theorem full_source : (contents output.st, callerObs output.st) =
+    (some [[2,19,11],[3,23,29,31],[2,99,101],[1,55]], ([some 1,some 0,some 0],42)) := by
+  exact congrArg (fun x => (x.1,(x.2.2,x.2.1[3]!))) ordered_export
+
+theorem expanded_source :
+    (Stmt.block (expand arguments binders nestedBody)).runSt caller.st = .ok output.st := by
+  apply (TupleCalls.Scoped.scoped_tuple_expansion "outerTriple" arguments binders nestedBody caller.st).symm.trans
+  change (statement.run caller.st).map _ = _
+  rw [source]; rfl
+
+theorem fields : checked.code = expandedProducer.code ∧ checked.need = 15 ∧
+    checked.cost caller.st = 5 := by
+  refine ⟨rfl,?_,actualExpandedCost⟩
+  exact congrArg (fun xs => xs[1]!) exact_cost_frame
+
+theorem target : ∃ m₁ base₁ m₂ base₂,
+    Evm.run prefixProducer.code machine = .ok m₁ 0 ∧
+    Evm.run checked.code m₁ = .ok m₂ 0 ∧
+    StateRepr 1 1 128 prefixProducer.frag caller.st base₁ m₁ ∧
+    StateRepr 1 1 128 checked.frag output.st base₂ m₂ ∧
+    m₁.stack = machine.stack ∧ m₂.stack = m₁.stack ∧
+    BaseExtends caller.st.H base₁ base₂ ∧
+    GrowsAllocator 1 128 5 caller.st base₁ m₁ output.st base₂ m₂ := by
+  have pc : prefixProducer.cost initial = 7 := congrArg (fun xs => xs[5]!) exact_frame_cost
+  have pn : prefixProducer.need = 4 := congrArg (fun xs => xs[0]!) exact_frame_cost
+  have capacity : AllocationInput 1 128
+      (prefixProducer.cost initial + checked.cost caller.st) initial bases machine :=
+    .inr ⟨by decide, wmod 256, initial_repr.2, by rw [pc,fields.2.2]; decide⟩
+  have reached := TupleCalls.Scoped.program_statement_endpoint prefixProducer checked initial_repr.1
+    (by rw [pn]; decide) (by rw [fields.2.1]; decide) caller output capacity actual_prefix source
+  simpa only [fields.2.2] using reached
+
+
+/-- Every physical cell remains observed; dropping locals does not erase memory. -/
+theorem full_target : words (Evm.run (prefixProducer.code ++ checked.code) machine)
+    [0,127,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,256,257,258,259,260,261,262,263,264,265,266,267] =
+    some [77,268,99,42,256,256,259,266,42,17,30,1,266,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101,1,55] := by
+  rw [fields.1]
+  exact target_body
+
+theorem actual_extension : output.ext = exported.ext := rfl
+
+theorem wrong_caller : callerObs output.st ≠ ([some 1,some 0,some 0],17) := by
+  rw [show callerObs output.st = ([some 1,some 0,some 0],42) from congrArg Prod.snd full_source]
+  decide
+
+theorem private_does_not_escape : callerObs output.st ≠ ([some 1,some 2,some 0],42) := by
+  rw [show callerObs output.st = ([some 1,some 0,some 0],42) from congrArg Prod.snd full_source]
+  decide
+
+theorem wrong_contents : contents output.st ≠
+    some [[2,7,11],[3,23,29,31],[2,99,101],[1,55]] := by
+  rw [show contents output.st = some [[2,19,11],[3,23,29,31],[2,99,101],[1,55]] from congrArg Prod.fst full_source]
+  decide
+
+theorem wrong_cost : checked.cost caller.st ≠ 0 := by
+  rw [fields.2.2]
+  decide
+
+theorem bare_failure :
+    (Stmt.block (.cons (.call "failedTuple" arguments ret failedBody) .nil)).runSt caller.st =
+      .error .revert := by
+  rw [Stmt.runSt_block,Prog.runSt_single]
+  change (((Stmt.call "failedTuple" arguments ret failedBody).run caller.st).map (·.st)).map
+    (State.drop (Ext.append Caller Results)) = _
+  rw [tuple_failure_source]
+  rfl
+
+
+
+end Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard
+
+/--
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualSelectorResult' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualCallConstruction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.actualExpandedTarget' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedSelection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualOuterConstruction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedCost' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedTarget' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.expanded_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.fields' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.target' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_target' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.actual_extension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_caller' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.private_does_not_escape' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_contents' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_cost' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.bare_failure' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print_checked_axioms Solidity.Backend.InternalFlow.TupleCallChecks.actualSelectorResult, Solidity.Backend.InternalFlow.TupleCallChecks.actualCallConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedSelection, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualOuterConstruction, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedCost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedTarget, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.expanded_source, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.fields, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.full_target, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.actual_extension, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_caller, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.private_does_not_escape, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_contents, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.wrong_cost, Solidity.Backend.InternalFlow.TupleCallChecks.Composed.ScopedDiscard.bare_failure

@@ -1813,3 +1813,155 @@ inhabited controls remains ready assigned work. Published TryPanicProducer and
 TryPanicCarrier were reinspected: source-link provenance and a ghost literal
 carrier do not supply original carried-body construction, arbitrary word-frame
 to byte-journal/world coupling, or an inference from THalt.data=[] to REVERT.
+
+
+## Continuation25 — exact scoped tuple disposal and reached prefix frames (partial)
+
+This is additional original G37.01/G36.01 and Backfill A/B work after C24,
+not whole-lane closure. The original blocked goal is unchanged. All six Work
+items and both Backfills remain partial; no independent-work exhaustion is
+claimed. C24 and all twenty-five preceding sealed sets remain preserved.
+
+### Intrinsic proof and actual target consumer
+
+`TupleCalls.Scoped.scoped_tuple_expansion` proves, for every existing typed
+`Args`, primitive `Binders`, body and caller state, equality of the complete
+`runSt` outcomes of a block containing the tuple call and a block containing
+its published intrinsic expansion. Private dependent environment/state lemmas
+compose result-frame and parameter-frame removal using actual `TEnv.drop`,
+`TEnv.thin`, and the unique intrinsic `Ext`. Success retains the actual entire
+state; errors retain their original `THalt`. This is not `Heap.Keeps`, rollback,
+a new evaluator, or an unbounded recursive compilation theorem.
+
+`TupleCalls.Scoped.statement` consumes a real `Calls.Program` for that
+expansion, then transfers the actual public `Calls.block` soundness through
+proved intrinsic outcome equality. Its fragment is the reached fragment
+restricted to the caller, and its code, need, reached cost, allocation flag and
+zero-cost law are exactly the supplied checked expansion's fields. A whole
+unused result frame requires no result-copy instructions. Ordinary result
+export when results are used, public admission, and every unsupported refusal
+remain unchanged.
+
+`TupleCalls.Scoped.program_statement_endpoint` exposes an actual prefix and
+following statement at a reusable abstract certificate boundary. Its premises
+are the input `StateRepr`, both genuine frame bounds, capacity for
+`before.cost initial + after.cost middle.st`, and the two actual successful
+source executions. It derives the prefix machine/representation and the
+following `AllocationInput` via `GrowsAllocator.nextInput`; it returns both
+target executions, both reached representations, complete stack preservation,
+old caller address preservation and the actual following allocator growth.
+These are real execution/representation premises, not a desired simulation
+assumption. The generic statement alone does not discharge arbitrary callees.
+
+The appended `TupleCallChecks.Composed.ScopedDiscard` fixture discharges those
+premises with the existing real allocating prefix and nested tuple-call body.
+The caller contains two distinct populated old objects and two aliases to the
+first, plus scalar42. The inner call mutates the first object's first element,
+privately rebinds its reference and allocates; the outer body allocates another
+private object. After the entire result/parameter frame drops, the complete
+ordered heap is `[[2,19,11],[3,23,29,31],[2,99,101],[1,55]]`, caller aliases are
+`[some 1,some 0,some 0]`, and caller scalar remains42. The output heap extension
+is the actual exported call extension. No midpoint or content preservation is
+assumed.
+
+The complete target observation reuses the independently checked expanded-code
+endpoint through actual code equality; it retains every old/private physical
+cell, stack77, sentinel99, cursor268, frame15, body cost5 and prefix cost7.
+Logical local dropping does not scrub physical private cells. Wrong same-typed
+caller scalar17, a private object escaping as an old alias, missing mutation7
+instead of19, and omitted cost0 each contradict a positive complete baseline.
+The actual bare-failure scoped control retains `.error .revert`; it does not
+recover a failed state, conflate empty halt projections, or establish byte,
+world, catch, or rollback coupling.
+
+### Kernel evidence, reporting and retained failures
+
+All original mathematical theorem types, proof bodies, ordered observations,
+85 tuple reports and complete542-report registry remain unchanged. The only
+scheduling change to old source is captured axiom metadata. Five metadata guard
+batches (three old single queries, four C24 roots and twelve new roots) are now
+one joint reporting traversal with the same nineteen names, order and exact
+sets. This changes no kernel proof check or builtin command. All nineteen
+roots remain independently covered by the actual unmodified builtin audits.
+`tests/internal-flow/check-scoped-tuple-axioms.py` additionally guards all fifteen
+new actual builtin reports (three generic and twelve concrete), in exact order,
+with standard `propext`, `Classical.choice`, `Quot.sound` sets. Positive output
+and missing/duplicate/reordered/wrong/error-bearing corruption cases are checked.
+The concrete extension equality still depends on the actual computed witness
+through its type; an initial empty-set expectation failed and was corrected
+against actual output, without altering any original pin.
+
+Actual C25 evidence is in
+`/workspace/scratch/v12-flow-calls/continuation-25/evidence`:
+
+- Lean4.24.0 and Lake5.0.0-src+797c613, successful KeySort2-job output;
+  runtime command0/1.610s with cap12884901888B and swap0.
+- Actual scoped source, complete observation, expansion and field projections
+  checked separately in2.100/1.935/1.998/3.040s. The generic prefix boundary and
+  SAME concrete target claim pass3.519s. Final core/import closure passes;
+  all31 owned targets pass15.836s. The full tuple fixture is kernel checked and
+  authenticated, final joint-report version0/43.508s, every old report retained.
+- Current builtin15, retained6/5/7 and all542 actual imported kernel theorem
+  types pass and match their exact baselines. Complete18-module/542-report
+  aggregate initially0/118.300s; current joint-report version exits0 but outer
+  elapsed120.632s, explicitly NOT a strict sub120 end-to-end result. Before and
+  after full11575-entry toolchain binding matches. Original72 axiom corruption
+  controls and new5 scoped controls pass, as do cache/driver corruption checks.
+- COMPLETE35-source raw gates remain FAIL124/121.432s and, after material
+  metadata rebatching, FAIL124/120.861s. Their last progress and partial outputs
+  are retained. Focused checks and cached/import checks do not pass this gate.
+  Joint metadata scheduling measured only a small fixture timing difference
+  from45.085/44.642s to43.508s, not isolated kernel-proof speedup evidence.
+- Two combined concrete target probes hit the actual enforced cap, exits137
+  at44.332s and30.574s. Small source/field checks passed separately; abstract
+  prefix composition resolved the SAME target claim. No unique resource cause
+  or raised limit is claimed. Unknown-helper/qualification and map-syntax
+  setup errors, the failed axiom expectation, and the first rebatch assertion
+  failure are all retained. The assertion failed BEFORE source mutation; its
+  redundant unchanged successful preparation44.642s is not repair evidence.
+- Original full `./run-lean.sh` FAIL124/300s, broad-root124/120.609s,
+  prerequisite/source/OOM/heartbeat/recursion failures and no-build3 inventory
+  remain retained; TestSuite/sort were not reached by the full gate. No unchanged
+  full or broad-root retry occurred. Normal/strict docs remain raw exit1;
+  complete current findings equal publication/C24, with frozen46missing versus
+  current48missing plus the incoming Arms ambiguity. No global docs pass.
+
+All heavy work is serial explicit Lean-j1/LEAN_NUM_THREADS1 under the canonical
+writer/compiler locks and hard aggregate12GiB/no-swap cap, with measured OS/disk
+headroom. Only verified own stopped CIDs are cleaned; existing keyed caches,
+other work and raw logs remain. No new axiom/sorry/native shortcut, heartbeat,
+recursion-depth, fuel, node, test, stack or time increase is used. Independent
+read-only finder and skeptic reviews of the actual proof/control and metadata
+changes found no issue; final exact-head artifact review is a separate step.
+
+### Required-root preparation and remaining original obligations
+
+Authenticated same-cache required-root preparation continues separately, with
+one actual target/120s per process. The source transition from C24 permits ONLY
+the actual owned TupleCalls change; every other discovered source/compiler hash
+must match. All prior twelve timeout holds stay excluded, and the actual roots
+are excluded from this preparation controller. Receipts, source/object hashes,
+resource peaks and final missing/held counts are recorded in the new handoff.
+Preparation/inventory is never a full, native, TestSuite or sort gate. It grants
+no reserved edit or budget waiver.
+
+Work1 general runtime/storage/result frames, Work2 uncapped recursive
+source/target compilation, Work3 full dependent-signature dispatch/lowering,
+Work4 general mixed bodies and early-control lowering/V14 application, Work5
+word-frame/live-byte-journal/world coupling, and Work6 target transient/reset/
+callback representation remain open. Current `Machine` has no independent target
+transient/callback-world field. The existing syntax has no early-return/break/
+continue constructor. `Loops.LoopCert` requires actual `ValFrag` and `ProgFrag`
+body/stability evidence; a `Calls.Program` alone is not that body certificate.
+The ghost panic byte carrier does not supply the original general carried-source
+body producer. No failed state follows from `TRes.error`.
+
+Further READY owned proof engineering is not declared exhausted: construction/
+code-sharing facts for `Composed.target_body`, `target_unwind`, and `target_final`
+remain to reduce raw elaboration, alongside finite scoped-call/loop consumers
+where actual `ProgFrag` and reached Demand/Room/Cost can be discharged. Public
+selector/construction links must be derived from actual compiler results, never
+supplied as a desired endpoint. This checkpoint does not waive those gaps or any
+original Backfill A/B item. Proposed coordinator reconciliation is only partial
+G37.01/G36.01/Backfill A-B evidence; no global G03/status/pin/refusal edit or
+parent closure, no push/merge/PR, no goal change and no semantic choice.

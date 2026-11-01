@@ -228,4 +228,103 @@ theorem compileTuple_success {b : Nat} {Γ ps rs Γf : Ctx} (F : Evm.Frag Γ)
  Quot.sound] -/
 #guard_msgs in #print axioms compileTuple_success
 
+namespace Scoped
+
+/-- Dropping the result frame after exact tuple expansion also removes the
+private parameter frame. This is a typed state equality, not Heap.Keeps. -/
+private theorem drop_return_env {H : HTy} (Γ ps rs : Ctx)
+    (e : TEnv C H (rs ++ (ps ++ Γ))) :
+    TEnv.drop (Ext.append Γ rs)
+      (TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))) e) =
+    TEnv.drop ((Ext.append Γ ps).trans (Ext.append (ps ++ Γ) rs)) e := by
+  induction rs with
+  | nil => exact TEnv.thin_ofExt _ _
+  | cons t rs ih => exact ih e.2
+
+private theorem drop_return_state {Γ ps rs : Ctx} (σ : State C (rs ++ (ps ++ Γ))) :
+    State.drop (Ext.append Γ rs)
+      (State.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))) σ) =
+    State.drop ((Ext.append Γ ps).trans (Ext.append (ps ++ Γ) rs)) σ := by
+  change σ.withEnv (TEnv.drop (Ext.append Γ rs)
+      (TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))) σ.env)) =
+    σ.withEnv (TEnv.drop ((Ext.append Γ ps).trans (Ext.append (ps ++ Γ) rs)) σ.env)
+  rw [drop_return_env]
+
+theorem scoped_tuple_expansion {Γ ps rs Γf : Ctx} (f : Name)
+    (args : Args C Γ ps) (bs : Binders rs) (body : Prog C (rs ++ ps) Γf)
+    (σ : State C Γ) :
+    (Stmt.block (.cons (.call f args (.rets bs) body) .nil)).runSt σ =
+      (Stmt.block (TupleCalls.expand args bs body)).runSt σ := by
+  rw [Stmt.runSt_block,Prog.runSt_single,← TupleCalls.expand_runSt f args bs body σ,
+    Stmt.runSt_block]
+  cases h : (TupleCalls.expand args bs body).runSt σ with
+  | error e => rfl
+  | ok τ =>
+    change Except.ok (State.drop _ (State.thin _ τ)) = Except.ok (State.drop _ τ)
+    apply congrArg Except.ok
+    rw [Ext.eq_of_depth (Prog.cons (.call f args (.rets bs) body) .nil).ext (Ext.append Γ rs),
+      Ext.eq_of_depth (TupleCalls.expand args bs body).ext
+        ((Ext.append Γ ps).trans (Ext.append (ps ++ Γ) rs))]
+    exact drop_return_state τ
+
+/-- Compile an unused tuple result through the published block constructor.
+No result-copy instructions are needed after its complete local frame drops.
+Admission and finite direct-body compilation remain the caller's responsibility. -/
+def statement {b : Nat} {Γ ps rs Γf : Ctx} {F : Frag Γ}
+    (f : Name) (args : Args C Γ ps) (bs : Binders rs)
+    (body : Prog C (rs ++ ps) Γf)
+    (compiled : Calls.Program b F (expand args bs body)) :
+    Calls.Statement b F (.block (.cons (.call f args (.rets bs) body) .nil)) where
+  frag := compiled.frag.restrict Γ
+  code := compiled.code
+  need := compiled.need
+  cost := compiled.cost
+  allocates := compiled.allocates
+  zeroCost := compiled.zeroCost
+  sound := by
+    intro L frame σ base m repr room capacity
+    have same : (Stmt.block (.cons (.call f args (.rets bs) body) .nil)).run σ =
+        (Stmt.block (expand args bs body)).run σ :=
+      state_result_injective (scoped_tuple_expansion f args bs body σ)
+    rw [same]
+    exact (Calls.block compiled).sound repr room capacity
+
+/-- info: 'Solidity.Backend.InternalFlow.TupleCalls.Scoped.scoped_tuple_expansion' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms scoped_tuple_expansion
+/-- info: 'Solidity.Backend.InternalFlow.TupleCalls.Scoped.statement' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms statement
+
+/-- Actual prefix and scoped-statement execution expose both reached frames.
+Capacity comes from the summed reached costs; nextInput derives the midpoint.
+This is a finite certificate consumer, not unbounded recursive simulation. -/
+theorem program_statement_endpoint {C : Contract} {b L frame : Nat} {Γ Δ Ξ : Ctx}
+    {F : Frag Γ} {P : Prog C Γ Δ} {s : Stmt C Δ Ξ}
+    (before : Calls.Program b F P) (after : Calls.Statement b before.frag s)
+    {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
+    (repr : StateRepr L b frame F σ base m)
+    (roomBefore : b + before.need ≤ frame) (roomAfter : b + after.need ≤ frame)
+    (middle : Solidity.Out C σ.H Δ) (out : Solidity.Out C middle.st.H Ξ)
+    (capacity : AllocationInput b frame (before.cost σ + after.cost middle.st) σ base m)
+    (hp : P.run σ = .ok middle) (hs : s.run middle.st = .ok out) :
+    ∃ m₁ base₁ m₂ base₂,
+      Evm.run before.code m = .ok m₁ 0 ∧ Evm.run after.code m₁ = .ok m₂ 0 ∧
+      StateRepr L b frame before.frag middle.st base₁ m₁ ∧
+      StateRepr L b frame after.frag out.st base₂ m₂ ∧
+      m₁.stack = m.stack ∧ m₂.stack = m₁.stack ∧
+      BaseExtends middle.st.H base₁ base₂ ∧
+      GrowsAllocator b frame (after.cost middle.st) middle.st base₁ m₁ out.st base₂ m₂ := by
+  obtain ⟨m₁,base₁,hp',repr₁,stack₁,bases₁,growth₁⟩ := PublishedDirectCalls.program_endpoint before repr roomBefore
+    (capacity.of_le (Nat.le_add_right _ _)) middle hp
+  obtain ⟨m₂,base₂,hs',repr₂,stack₂,bases₂,growth₂⟩ := PublishedDirectCalls.statement_endpoint after repr₁ roomAfter
+    (growth₁.nextInput capacity) out hs
+  exact ⟨m₁,base₁,m₂,base₂,hp',hs',repr₁,repr₂,stack₁,stack₂,bases₂,growth₂⟩
+
+/-- info: 'Solidity.Backend.InternalFlow.TupleCalls.Scoped.program_statement_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms program_statement_endpoint
+end Scoped
+
 end Solidity.Backend.InternalFlow.TupleCalls
