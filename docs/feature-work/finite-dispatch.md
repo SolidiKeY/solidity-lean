@@ -356,3 +356,33 @@ with the confirmed findings and their fixes:
 - Skeptic 10: the storage-copy deviation names structs and says the viaIR
   copy point is unpinned.
 
+## Handoff (lane CF2)
+
+Checkpoints: 1 (memory arrays), 2 (storage arrays), 3 (memory returns
+beside arguments; nonrecursive structs in memory and storage) and 4 (chain
+selection theorems, lane-soundness notes) are implemented on
+`cloud/relocated-20261031/function-values`. Still refused: several returns
+with a memory one, narrow array elements, struct returns, calldata
+arguments to function values, and every reference in an external
+signature.
+
+Gates run: `./run-lean.sh` (`lake build`: 1019 jobs, success; the
+SolkeyTestSuite step OOM-kills `Derived17`, the baseline, and under parallel
+load `Derived21`, which has no function values); `TrustAudit.lean` through
+the Lean server ("trust: 8 dispatch theorems use only the standard
+axioms"); `node --test` of `finite-dispatch` (30/30; the FunctionTypes.sol
+suite timed out once under load and passes alone), `dispatch-signatures`
+(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (80
+executions, cancun and osaka); `check-layers`, `check-orphans`,
+`check-trust`, `check-automatic --strict` (0 pending), `check-doc-paths`
+(48, as on the base) and `check-g07` (the base's two failures; three new
+pinned theorems).
+
+Elaboration time of `Syntax/Elab/*.lean` on the base, from an otherwise idle
+`lake build`: Context 19s, Values 29s, Lower 26s, Arms 179s, Stmt 14s
+(`Frontend/SolcJson/Body` 33s, `Contract` 53s). After the change these
+modules were elaborated by the Lean server or under a parallel build, so no
+like-for-like figure was taken; the change adds `DispatchChain` (small) to
+`Stmt`'s imports and a `fnTyOf?` lookup per call to an undeclared name in
+`hoistCallArgs`. `Examples/Tactics/FunctionTypes.lean` builds in 85s.
+
