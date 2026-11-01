@@ -185,3 +185,5 @@ VY2 [computed inventory after allocation](feature-work/inline-assembly-vy2.md#co
 VY2 [actual allocation physical-view bridge](feature-work/inline-assembly-vy2.md#actual-allocation-physical-view-bridge-2026-11-01) proves computed raw-map/source agreement for the supported ordinary heap.
 
 VY2 [generic ordinary object allocation](feature-work/inline-assembly-vy2.md#generic-ordinary-object-allocation-2026-11-01) adds checked struct/array allocation and exact source/physical composition.
+
+VY2 [actual struct constructor producer](feature-work/inline-assembly-vy2.md#actual-struct-constructor-producer-2026-11-01) connects checked actual owner operands to physical allocation; full lane remains partial.
