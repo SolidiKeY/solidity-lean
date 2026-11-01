@@ -45,32 +45,48 @@ def resource_snapshot():
 
 
 def hash_file(path):
-    """Read-only direct IO avoids repopulating file cache during inventories.
+    """Original SHA256 interface; shared direct IO avoids rewarming file pages."""
+    return _hash_file(path, False)['sha256']
 
-    Unsupported filesystems fall back to ordinary reads; the unchanged resource
-    guard still measures actual capacity afterward. No cache pages are dropped.
-    """
+
+def hash_blob(path):
+    """Hash actual file bytes as both SHA256 and a Git blob, with stable stat checks."""
+    return _hash_file(path, True)
+
+
+def _hash_file(path, include_git):
     import errno,hashlib,mmap,os
     before=path.stat()
+    def hashers():
+        values={'sha256':hashlib.sha256()}
+        if include_git:values['gitBlob']=hashlib.sha1(b'blob '+str(before.st_size).encode()+b'\0')
+        return values
     result=None
     if before.st_size and hasattr(os,'O_DIRECT'):
         fd=None;buffer=None
         try:
             fd=os.open(path,os.O_RDONLY|os.O_DIRECT)
-            buffer=mmap.mmap(-1,1024*1024);h=hashlib.sha256();total=0
+            buffer=mmap.mmap(-1,1024*1024);values=hashers();total=0
             while total<before.st_size:
                 n=os.readv(fd,[buffer])
                 if not n:raise ValueError('input changed during direct checksum')
-                h.update(memoryview(buffer)[:n]);total+=n
+                for digest in values.values():digest.update(memoryview(buffer)[:n])
+                total+=n
             if total!=before.st_size:raise ValueError('input changed during direct checksum')
-            result=h.hexdigest()
+            result={key:digest.hexdigest() for key,digest in values.items()}
         except OSError as error:
             if error.errno not in (errno.EINVAL,errno.EOPNOTSUPP,errno.ENOSYS):raise
         finally:
             if buffer is not None:buffer.close()
             if fd is not None:os.close(fd)
     if result is None:
-        with path.open('rb') as stream:result=hashlib.file_digest(stream,'sha256').hexdigest()
+        values=hashers();total=0
+        with path.open('rb') as stream:
+            while chunk:=stream.read(1024*1024):
+                for digest in values.values():digest.update(chunk)
+                total+=len(chunk)
+        if total!=before.st_size:raise ValueError('input changed during checksum')
+        result={key:digest.hexdigest() for key,digest in values.items()}
     after=path.stat()
     if (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns,before.st_ctime_ns)!=(after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns):
         raise ValueError('input changed during checksum')

@@ -800,3 +800,13 @@ not relax the core-only request namespace or supply a Bridge extraction shortcut
 V14 byte-prefix and V13 ABI-entry transport are separate newly ready leaf requests;
 their actual per-component outcomes remain in the next external handoff. No
 reserved ABI/decoder implementation or previous failed full target is retried.
+
+
+Source verification now computes Git-blob SHA1 and SHA256 together through the
+existing stable-stat direct-I/O path. The previous buffered source inventory
+could rewarm a complete private tree immediately before resource admission. The
+change preserves both actual-byte checks and the original hash_file API; an
+unsupported filesystem still falls back to ordinary reads, and only the actual
+unchanged headroom guard determines admission. Speed-related history
+`6405ce0b` was inspected before this I/O change; no Lean checking is refactored.
+Exact timing/resource observations and all earlier refusals are retained.

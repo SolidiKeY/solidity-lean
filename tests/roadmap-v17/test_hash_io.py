@@ -20,4 +20,18 @@ class HashIoControls(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp)/'input';p.write_bytes(b'one');before=p.stat();p.write_bytes(b'two bytes');after=p.stat()
             with patch.object(Path,'stat',side_effect=[before,after]),self.assertRaises(ValueError):r.hash_file(p)
+    def test_git_blob_and_sha256_match_actual_bytes_and_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p=Path(tmp)/'input'
+            for size in [0,1,4095,4096,4097,1024*1024+17]:
+                raw=(bytes(range(256))*((size+255)//256))[:size];p.write_bytes(raw)
+                expected={'sha256':hashlib.sha256(raw).hexdigest(),'gitBlob':hashlib.sha1(b'blob '+str(size).encode()+b'\0'+raw).hexdigest()}
+                with self.subTest(size=size):
+                    self.assertEqual(r.hash_blob(p),expected)
+                    with patch.object(os,'open',side_effect=OSError(errno.EINVAL,'unsupported direct IO')):self.assertEqual(r.hash_blob(p),expected)
+                    self.assertEqual(p.read_bytes(),raw)
+    def test_git_blob_input_change_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p=Path(tmp)/'input';p.write_bytes(b'one');before=p.stat();p.write_bytes(b'two bytes');after=p.stat()
+            with patch.object(Path,'stat',side_effect=[before,after]),self.assertRaises(ValueError):r.hash_blob(p)
 if __name__=='__main__':unittest.main()

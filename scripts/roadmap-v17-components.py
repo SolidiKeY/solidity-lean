@@ -79,11 +79,10 @@ def source_inventory(directory, head):
                   and str(path) == name and '\\' not in name and all(x.lower()!='.git' for x in path.parts), 'unsafe/duplicate source path')
         actual = directory / name
         e.require(actual.resolve() == actual and actual.is_file() and not actual.is_symlink(), 'escaping source')
-        data = actual.read_bytes()
-        blob = hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
-        e.require(blob == oid and bool(actual.stat().st_mode & 0o111) == (mode == '100755'),
+        digests=p.resources.hash_blob(actual)
+        e.require(digests['gitBlob'] == oid and bool(actual.stat().st_mode & 0o111) == (mode == '100755'),
                   'checkout bytes/mode differ from committed blob')
-        files[name] = {'gitBlob': oid, 'sha256': e.digest(data), 'mode': mode}
+        files[name] = {'gitBlob': oid, 'sha256': digests['sha256'], 'mode': mode}
     e.require(files, 'empty private source')
     actual_files=set()
     for base,dirs,names in os.walk(directory,followlinks=False):
