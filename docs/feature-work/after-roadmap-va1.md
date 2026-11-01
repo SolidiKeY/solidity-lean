@@ -1429,3 +1429,17 @@ are completed backfill, not substitutes for those children. Q1 is answered; Q2
 holds only frontend repair/full validation. Latest-source full ./run-lean.sh is
 pending; earlier source-matched resource failures remain failures. No milestone
 eligibility, publication or full-goal completion is claimed.
+
+
+### Parallel interface checkpoint (2026-11-01)
+
+The human authorized concurrent implementation scheduling. The concrete numeric
+coverage and fixed-array interfaces are specified in
+[parallel-interface.md](after-roadmap-va1/parallel-interface.md), including exact
+checked producer head, source hashes, typed signatures, witnessed clients, real
+premises and outstanding combined-tree gates. VA2 needs no future VA1 theorem
+to consume this package privately. It does not imply full Residue/AU02 closure
+or authorize integration/publication. Q2 remains held only for frontend repair.
+The immutable incremental Git bundle and committed-source archive will be
+exported under /workspace/va1-evidence/parallel-interface-next after review and
+commit; no changing checkout is presented as a checked dependency.
