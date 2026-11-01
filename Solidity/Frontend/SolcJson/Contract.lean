@@ -506,10 +506,10 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
       | .memoryArray _ | .storageArray _ => true
       | _ => false
     let memoryReturn : Ty → Bool := fun
-      | .memoryBytes | .memoryArray _ => true
+      | .memoryBytes | .memoryArray _ | .nominal _ false => true
       | _ => false
     let storageArray : Ty → Bool := fun
-      | .storageArray _ | .nominal .. => true
+      | .storageArray _ | .nominal _ true => true
       | _ => false
     let nominal : Ty → Bool := fun
       | .nominal .. => true

@@ -468,6 +468,19 @@ function referenceVectors(viaIR) {
     ['arrayReturn(bool)', ['true'], ['106', '106', '1']],
     ['arrayReturn(bool)', ['false'], ['5', '110', '1']],
     ['bytesReturn()', [], ['3', '65']],
+    ['tupleReturn()', [], ['3', '2']],
+    ['structReturn(bool)', ['true'], ['4', '5']],
+    ['structReturn(bool)', ['false'], ['40', '0']],
+    ['tupleCallee(bool)', ['true'], ['3', '2']],
+    ['tupleCallee(bool)', ['false'], ['103', '2']],
+    ['tupleCalleeForward(bool)', ['true'], ['4', '2']],
+    ['tupleCalleeForward(bool)', ['false'], ['104', '2']],
+    ['structReturnAssign()', [], ['6', '7']],
+    ['structReturnForward()', [], ['30']],
+    ['tupleAssigned(bool)', ['true'], ['3', '2']],
+    ['tupleAssigned(bool)', ['false'], ['103', '2']],
+    ['tupleForward()', [], ['104', '3']],
+    ['tupleUnassigned()', [], panic51],
     ['structMemory()', [], ['2', '2', '43']],
     ['structStorage()', [], ['8', '8']],
     ['nominalQ()', [], ['9']],
@@ -539,6 +552,17 @@ test('calldata passed to a memory parameter of a function value is refused', () 
   r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
 });
 
+test('calldata in a tuple assignment through a function value is refused', () => {
+  productionCheck(`contract C {
+    function split(uint[] memory xs) internal pure returns(uint, uint) { xs[0] = 7; return (xs[0], 1); }
+    function e(uint[] calldata xs) external pure returns(uint) {
+      function(uint[] memory) internal pure returns(uint, uint) h = split;
+      (uint a, uint b) = h(xs); return a + b + xs[0];
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "e")).any fun r =>
+  r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
+});
+
 test('struct candidates are nominal: a same-shaped struct function is not scanned', () => {
   // With a structural key, poison (same shape as P, reading block.number)
   // would be a native-compatible candidate and its body would be refused.
@@ -594,11 +618,12 @@ test('other reference signatures remain refused', () => {
       S memory s;
       function(S memory) external view returns(uint) h = this.target; h(s);
     }`,
-    // a struct return
+    // a storage struct return (a memory struct return is admitted)
     `struct S { uint a; }
-    function target() internal pure returns(S memory s) { s.a = 1; }
-    function entry() public pure {
-      function() internal pure returns(S memory) h = target; h();
+    S stored;
+    function target() internal view returns(S storage s) { s = stored; }
+    function entry() public view {
+      function() internal view returns(S storage) h = target; h();
     }`,
     // a nominal element
     `struct S { uint a; }

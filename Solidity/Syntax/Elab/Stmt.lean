@@ -216,6 +216,10 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
   -- before an earlier storage operand is copied.
   if f != "constructor" && funs.all (·.1 != f) && (fnTyOf? C (← ctx) f).isSome then
     return ([], args)
+  -- likewise through a callee that is not a name: `callValue`, the memory and
+  -- the tuple dispatch capture it at its function type, then the arguments
+  if f == callValueName && (args.head?.bind (fnTyOfExpr C (← ctx))).isSome then
+    return ([], args)
   let d := if f == "constructor" then C.ctor else lookupBy f funs
   let some d := d | return ← hoistArgs args
   unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
@@ -355,8 +359,8 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   pure P
 
 
-/-- Internal memory-return dispatch (`bytes memory` or `T[] memory`, one
-return) uses the same source tags, scope checks and argument captures as
+/-- Internal memory-return dispatch (`bytes memory`, `T[] memory` or a
+struct in memory, one return) uses the same source tags, scope checks and argument captures as
 scalar dispatch (`dispatchCaptures`). The shared destination is intrinsically
 a memory reference, and each branch binds the selected call's returned alias;
 no storage copy or scalar encoding of the returned reference is introduced. -/
@@ -365,9 +369,10 @@ partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
   let some (ps, [r], false) := fnParts? ty
     | throw "memory dispatch needs an internal signature with one memory return"
   let dstTy : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
-    match fnRefElem? C r with
-    | some (e, false) => pure (.array (.named e))
-    | _ => throw s!"memory dispatch returns a {r}, not a memory reference"
+    match fnRefElem? C r, fnRefStruct? C r with
+    | some (e, false), _ => pure (.array (.named e))
+    | none, some (st, false) => pure (.named st)
+    | _, _ => throw s!"memory dispatch returns a {r}, not a memory reference"
   unless ps.length == args.length do
     throw s!"memory dispatch takes {ps.length} arguments, not {args.length}"
   if let some c := ps.find? fun c =>
@@ -509,9 +514,10 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
   if let some (h, ty, actuals) := dynamic then
     let some (_, [r], false) := fnParts? ty | throw "memory function value of several returns"
     let expected : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
-      match fnRefElem? C r with
-      | some (e, false) => pure (.array (.named e))
-      | _ => throw s!"memory function value returns a {r}"
+      match fnRefElem? C r, fnRefStruct? C r with
+      | some (e, false), _ => pure (.array (.named e))
+      | none, some (st, false) => pure (.named st)
+      | _, _ => throw s!"memory function value returns a {r}"
     let (T, _) ← ElabM.lift (elabTyW C expected)
     unless T == .ref R do throw "memory function value returns a different reference type"
     let (P, _) ← fnMemoryDispatch h ty actuals
@@ -787,6 +793,39 @@ must be entered in). -/
 partial def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
   ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabBranch ss))
 
+/-- **A tuple assignment from a call through an internal function value**
+`(a, b) = h(x)`: the dispatch's captures (`dispatchCaptures`), then one
+branch per candidate `g` of `h`'s type, the direct tuple assignment
+`(a, b) = g(y)` on the captured arguments, then the unassigned-value failure.
+Value returns only: a direct tuple call binds primitive returns. -/
+partial def fnTupleDispatch (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+    ElabM (SProg C) := do
+  let some (ps, rs, false) := fnParts? ty
+    | throw s!"{h}(…): an external function value in a tuple assignment"
+  unless ps.length == args.length do throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  unless rs.length == ts.length do throw s!"{h} returns {rs.length} values, not {ts.length}"
+  if let some c := ps.find? fun c =>
+      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function type with a {c} parameter is not modelled"
+  if let some c := rs.find? fun c => (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function value returning a {c} among several values is not modelled \
+      (a direct tuple call binds value returns)"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"{h}(…) may call {g}, which is not declared before this function: \
+          declare the functions of type {ty} first"
+  let (pre, tag, as) ← dispatchCaptures (.name h) ty ps args
+  let failure := if (← read).selfFrame || (← read).retainFailureData then
+      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
+  let dispatch := cands.foldr (fun (g, t) rest =>
+    RawStmt.ite (.binop .eqB tag (.num t)) [.tupleAssign ts (.call g as)] [rest]) failure
+  elabStmtsP (pre ++ [dispatch])
+
 /-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
 `ParserUtils.tupleAssignment` writes it.  From a call of a function of several
 returns: the call (`CallRet.rets`), then `tᵢ = rᵢ;` for each target, left to
@@ -830,6 +869,19 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   | .ternary c a b =>
     elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
+    -- a call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
+    -- `(h)(x)`): the callee into a fresh local of its type first, as
+    -- `callValue` does, then the dispatch on that local
+    if f == callValueName then
+      if let h :: rest := args then
+        if let some ty := fnTyOfExpr C (← ctx) h then
+          let y := toString (← freshCapture "se")
+          let P ← elabStmtsP [.decl (.named ty) y (some h)]
+          return P ++ (← fnTupleDispatch ts y ty rest)
+    -- a call through an internal function value (`fnTupleDispatch`)
+    if (← read).funs.all (·.1 != f) then
+      if let some ty := fnTyOf? C (← ctx) f then
+        return ← fnTupleDispatch ts f ty args
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"

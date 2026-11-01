@@ -388,6 +388,8 @@ def MemArgs : Contract := contract!{
   function tokPlus(Token memory t) returns (uint r) { t.value = t.value + 1; r = t.value; }
   function tokStored(Token storage t) returns (uint r) { t.value = t.value + 7; r = t.value; }
   function tokOther(Account memory a) returns (uint r) { r = a.balance; }
+  function divmod(uint[] memory xs, uint k) returns (uint q, uint r) { q = xs[0] / k; r = xs[0] % k; }
+  function mkTok(uint v) returns (Token memory t) { t.value = v; }
   function viaParam(function (uint[] memory) returns (uint) h, uint[] memory xs)
       returns (uint r) { r = h(xs); }
 }
@@ -409,6 +411,8 @@ local instance : InContract := ⟨MemArgs⟩
      ("tokPlus", some "function(Tokenmemory)returns(uint)"),
      ("tokStored", some "function(Tokenstorage)returns(uint)"),
      ("tokOther", some "function(Accountmemory)returns(uint)"),
+     ("divmod", some "function(uint[]memory,uint)returns(uint,uint)"),
+     ("mkTok", some "function(uint)returns(Tokenmemory)"),
      ("viaParam", some "function(function(uint[]memory)returns(uint),uint[]memory)returns(uint)")]
 
 /-- The dispatch of `h(xs)` as the elaborator writes it: the argument is
@@ -522,6 +526,20 @@ theorem structWrongNominal : ¬ (⊨ᶠ dl!{ ⟨ Token memory t;
     function (Token memory) returns (uint) h = tokOther; uint r = h(t); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
+/-- Several value returns: `(uint q, uint r) = h(xs, 5)` with `h = divmod`
+is the direct tuple assignment `(q, r) = divmod(xs, 5)` in its branch. -/
+private def tupleReturn := sol[MemArgs]{
+  uint[] memory xs = new uint[](1); xs[0] = 17;
+  function (uint[] memory, uint) returns (uint, uint) h = divmod;
+  (uint q, uint r) = h(xs, 5);
+  assert(q == 3); assert(r == 2);
+}
+
+/-- `(uint q, uint r) = h(xs, 5)` with `h = divmod`: `q == 3`, `r == 2`. -/
+theorem tupleReturn_run :
+    (Prog.run (State.init MemArgs) tupleReturn).toOption.isSome = true := by
+  decide +kernel
+
 /-- A never-assigned storage function value reverts. solc's IR pipeline
 raises `Panic(0x51)`; its legacy pipeline jumps to an invalid destination
 (finite-dispatch.md, "Recorded deviations"): both are failures. -/
@@ -532,6 +550,52 @@ theorem memUnassigned : ¬ (⊨ᶠ dl!{ ⟨ uint[] memory xs = new uint[](1); ui
 theorem memNoCopy : ¬ (⊨ᶠ dl!{ ⟨ uint[] memory xs = new uint[](1);
     function (uint[] memory) returns (uint) h = bump; uint r = h(xs); assert(xs[0] == 0); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+/-- `memNoCopy` fails for the copy reason only: the same program without the
+false `assert` returns, and with it the run halts by the assertion's panic,
+not a revert. -/
+theorem memNoCopy_reason :
+    (Prog.run (State.init MemArgs) (sol[MemArgs]{ uint[] memory xs = new uint[](1);
+      function (uint[] memory) returns (uint) h = bump; uint r = h(xs); })).toOption.isSome = true ∧
+    (Prog.run (State.init MemArgs) (sol[MemArgs]{ uint[] memory xs = new uint[](1);
+      function (uint[] memory) returns (uint) h = bump; uint r = h(xs);
+      assert(xs[0] == 0); })).halt? = some .panic := by
+  exact ⟨by decide +kernel, by decide +kernel⟩
+
+/-- An unassigned value's call halts by a revert, not a panic: outside a
+self-call frame the model reads solc's `Panic(0x51)` as the ordinary revert;
+its exact bytes are pinned by the import replay (`unassigned()`,
+`unassignedStored()`). -/
+theorem memUnassigned_halt :
+    (Prog.run (State.init MemArgs) (sol[MemArgs]{ uint[] memory xs = new uint[](1);
+      uint r = op(xs); })).halt? = some .revert := by
+  decide +kernel
+
+/-- A struct return: `Token memory t = h(5)` with `h = mkTok` binds the
+returned memory struct. -/
+private def structReturn := sol[MemArgs]{
+  function (uint) returns (Token memory) h = mkTok;
+  Token memory t = h(5);
+  assert(t.value == 5);
+}
+
+/-- `Token memory t = h(5)` with `h = mkTok`: `t.value == 5`. -/
+theorem structReturn_run :
+    (Prog.run (State.init MemArgs) structReturn).toOption.isSome = true := by
+  decide +kernel
+
+/-- A callee that is not a name in a tuple assignment: the callee first,
+then the dispatch (`(true ? divmod : divmod)(xs, 5)`). -/
+private def tupleCallee := sol[MemArgs]{
+  uint[] memory xs = new uint[](1); xs[0] = 17;
+  (uint q, uint r) = (true ? divmod : divmod)(xs, 5);
+  assert(q == 3); assert(r == 2);
+}
+
+/-- `(uint q, uint r) = (true ? divmod : divmod)(xs, 5)`: `q == 3`, `r == 2`. -/
+theorem tupleCallee_run :
+    (Prog.run (State.init MemArgs) tupleCallee).toOption.isSome = true := by
+  decide +kernel
 
 /-- Model-only behaviour on a program solc rejects (`h = scalar` is a type
 error there): the elaborator does not type-check a function value's
