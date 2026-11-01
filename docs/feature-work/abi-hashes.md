@@ -146,7 +146,8 @@ roll back. The canonical probe is separate, calls no source body, and discards
 its temporary heap. No expected return/failure guides admission.
 
 Reference/function arguments require byte-identical decode/re-encode before
-execution. This deliberately blocks noncanonical, overlapping, unaligned or
+execution (for ABI coder v2 entries superseded by the typed entry decoder:
+see "Entry decoding: lazy and noncanonical layouts" below). This deliberately blocks noncanonical, overlapping, unaligned or
 malformed reference layouts: external calldata references can defer checks
 that a memory decoder performs eagerly. Dirty unused array elements therefore
 cannot certify an expected failure. Primitive v2 entry decoding checks widths,
@@ -998,3 +999,316 @@ user-requested git pull --ff-only fetched origin/master at a7a35aa5 but exited
 128 because the branches diverged; no fast-forward, merge, rebase, reset or
 working-file replacement occurred. The evidence remains for this isolated
 lane and is not a validation claim about the newly fetched master.
+
+## Entry decoding: lazy and noncanonical layouts (lane CF1, 2026-10-31)
+
+Owner: lane CF1 (`cloud/relocated-20261031/abi-entry-decoding`). Base
+`aaa9db5c`. This section replaces, for ABI coder v2 external entries, the
+byte-identical decode/re-encode admission of M3 ("Reference/function arguments
+require byte-identical decode/re-encode before execution") by a typed model of
+solc's generated entry decoder with kernel proofs. ABI coder v1, constructor
+arguments and function-valued or nominal-enum parameters keep the M3 gate
+unchanged.
+
+### Baseline (reproduced on the base before editing)
+
+Every fixture whose retained Group 10 reason names lazy/noncanonical ABI
+decoding or a compound type expression (`tests/upstream/cf1-abi-entry-fixtures.txt`,
+42 fixtures, including all 27 of the "noncanonical ABI input" vector set) was
+rerun on the base with the unchanged runner, one exact path per invocation
+(`scripts/abi-entry-fixtures.sh`, `--batch-size 1`). The base gives **13
+working / 29 blocked**; the documents above were partly stale: the three
+compound decoder fixtures of M6 and ten of the 27 noncanonical inputs already
+work (v2 primitive entry checks), and most remaining "noncanonical input"
+fixtures now block on other named reasons.
+
+| Fixture (under semanticTests/) | Base verdict | Base reason | Classification |
+|---|---|---|---|
+| abicoder/calldataDecoding/array/calldata_array_length_v2.sol | blocked | noncanonical calldata requires lazy ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| abicoder/calldataDecoding/array/calldata_array_indexing_1d_2d_v2.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| abicoder/validation/array_exceeds_calldatasize_no_revert_string.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| array/calldata_array_bounds_check_nested_bytes.sol | blocked | noncanonical calldata requires lazy ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| array/concat/bytes_concat_nested.sol | blocked | noncanonical calldata requires lazy ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| array/copying/calldata_2d_bytes_to_memory_2.sol | blocked | noncanonical calldata requires lazy ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| array/copying/nested_array_calldata_to_memory.sol | blocked | noncanonical calldata requires lazy ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| array/copying/nested_array_element_memory_to_memory.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| array/indexAccess/arrays_complex_memory_index_access.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| smoke/bytes_and_strings.sol | blocked | noncanonical calldata requires lazy ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| strings/concat/string_concat_nested.sol | blocked | noncanonical calldata requires lazy ABI decoder replay | missing typed semantics: v2 lazy/noncanonical entry decoding |
+| abicoder/cleanup/enum_v1.sol | blocked | nominal enum ABI range not adapted | runner exclusion: nominal enum range (declaration metadata) |
+| abicoder/cleanup/enum_v2.sol | blocked | nominal enum ABI range not adapted | runner exclusion: nominal enum range (declaration metadata) |
+| arithmetics/checked_add_v1.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | runner exclusion: ABI v1 canonical-only gate (v1 decoder not modelled) |
+| arithmetics/checked_add_v2.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| cleanup/cleanup_address_types_v1.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | runner exclusion: ABI v1 canonical-only gate (v1 decoder not modelled) |
+| cleanup/cleanup_address_types_v2.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| cleanup/cleanup_bytes_types_v1.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | runner exclusion: ABI v1 canonical-only gate (v1 decoder not modelled) |
+| enums/enum_with_256_members.sol | blocked | nominal enum ABI range not adapted | runner exclusion: nominal enum range (declaration metadata) |
+| operators/shifts/shift_right_garbled_signed_v1.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+| operators/shifts/shift_right_garbled_signed_v2.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+| operators/shifts/shift_right_garbled_v1.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+| operators/shifts/shift_right_garbled_v2.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+| operators/shifts/shift_right_negative_lvalue_signextend_int16_v1.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | runner exclusion: ABI v1 canonical-only gate (v1 decoder not modelled) |
+| operators/shifts/shift_right_negative_lvalue_signextend_int16_v2.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| operators/shifts/shift_right_negative_lvalue_signextend_int32_v1.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | runner exclusion: ABI v1 canonical-only gate (v1 decoder not modelled) |
+| operators/shifts/shift_right_negative_lvalue_signextend_int32_v2.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| operators/shifts/shift_right_negative_lvalue_signextend_int8_v1.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | runner exclusion: ABI v1 canonical-only gate (v1 decoder not modelled) |
+| operators/shifts/shift_right_negative_lvalue_signextend_int8_v2.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| operators/shifts/shift_underflow_negative_rvalue.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| userDefinedValueType/cleanup.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+| userDefinedValueType/cleanup_abicoderv1.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+| userDefinedValueType/conversion.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| userDefinedValueType/conversion_abicoderv1.sol | blocked | calldata requires lazy/noncanonical ABI decoder replay | runner exclusion: ABI v1 canonical-only gate (v1 decoder not modelled) |
+| userDefinedValueType/parameter.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+| viaYul/detect_add_overflow.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| viaYul/detect_div_overflow.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| viaYul/detect_mul_overflow.sol | working | functional runtime vectors match in every required source evaluation mode | already working (stale doc entry) |
+| viaYul/function_entry_checks.sol | blocked | noncanonical ABI input requires ABI decoder replay | runner exclusion: JS scalar adapter (dirty word / extra data on a scalar signature) |
+| viaYul/unary_operations.sol | blocked | raw ABI replay with physical calldata/memory assembly not adapted | runner exclusion: physical calldata/memory assembly |
+
+So the missing typed semantics is the ten v2 lazy/noncanonical refusals
+(the "ten noncanonical inputs" and the "lazy aggregate probe refusals" of M3
+name the same set as it stands now); the four "compound dynamic type
+expressions" are three working fixtures and `calldata_nested_array_static_reencode_v2.sol`,
+whose remaining refusal is the lazy one. ABI v1 (7), nominal enums (3),
+assembly (6) and the scalar adapter (1) are runner exclusions outside this
+lane's decoder.
+
+### What solc's generated decoder does
+
+Evidence: `scripts/abi-entry-probe.mjs` runs `tests/abi-0.8.38/LazyEntry.sol`
+with the 57 vectors of `tests/abi-0.8.38/LazyEntry.vectors.json` and every
+vector of the 22 fixtures in its `FIXTURES` list (the lane fixtures that
+compile with their vectors), with the pinned compiler (SHA-256 `6c74ffba…`),
+in four configurations: legacy and via-IR, each with the optimizer off and on
+(fixtures in their required pipelines only). The script asserts that the
+configurations agree on every vector, that every probe vector has its pinned
+outcome and that every fixture vector has its upstream expectation. The
+function names below are the Yul functions solc 0.8.38 emits (identical in
+both pipelines, since legacy codegen also takes the v2 decoder from
+`ABIFunctions`).
+
+* **Head.** `abi_decode_tuple_*` first reverts with empty data unless the whole
+  head fits: `slt(sub(dataEnd, headStart), headSize)`, with `headStart = 4`.
+  Then each parameter in order. A dynamic parameter's offset word is unsigned
+  and reverts above `0xffffffffffffffff`; it is relative to `headStart`.
+* **Value parameters** are loaded and validated immediately
+  (`validator_revert_t_<k>`: the word equals its cleanup), so a dirty `uint8`,
+  `int16`, `bool`, `bytes3` or `address` reverts at entry.
+* **Memory parameters** (`abi_decode_t_<T>_memory_ptr`) are decoded eagerly
+  and recursively at entry. For `bytes`/arrays: `slt(add(offset, 0x1f), end)`,
+  then the length, then **allocation** (`array_allocation_size_*` panics with
+  `Panic(0x41)` above `2^64 - 1`, `finalize_allocation` when the free pointer
+  would pass `2^64 - 1`), and only then the region check
+  `gt(add(src, length * stride), end)`. Probes: a `bytes memory` length of
+  `2^64 - 1` or `2^64` gives `Panic(0x41)`; `2^32` and `2^63` give an empty
+  revert. Each dynamic element's offset is unsigned, relative to the start of
+  its sequence's (or struct's) element region, and reverts above `2^64 - 1`.
+  Static arrays check `slt(add(offset, 0x1f), end)` and their whole region;
+  structs check `slt(sub(end, headStart), headSize)`. Every word element is
+  validated. Overlapping, out-of-order and unaligned tails, unpadded final
+  `bytes` and dirty `bytes` padding are accepted; invalid UTF-8 in a `string`
+  is accepted.
+* **Calldata parameters** get only the outermost object's entry check
+  (`abi_decode_t_<T>_calldata_ptr`): `bytes`/arrays check the head slot, the
+  length (`≤ 2^64 - 1`, an empty revert, no allocation) and the element region
+  `arrayPos + length * stride ≤ end`; a dynamic struct its head; a static array
+  of dynamic elements its head region. A static calldata array or struct of
+  words is not validated at entry (probe: a dirty `uint8[2] calldata` element
+  is accepted unless read).
+* **Lazy access.** Reading a calldata element validates it then:
+  `calldata_array_index_access` (index check, `Panic(0x32)`), then for a
+  dynamic element `access_calldata_tail(base, ptr)`: the relative offset is a
+  **signed** word, checked by `slt(rel, sub(sub(calldatasize(), base),
+  sub(tailSize, 1)))`, added modulo `2^256`; for `bytes`/arrays the length is
+  at most `2^64 - 1` and `sgt(addr + 32, sub(calldatasize(), length * stride))`
+  reverts. A word element is validated when it is read. Probes: an inner
+  offset out of range, an inner length out of range, a dirty `uint8` element
+  and a struct member offset out of range are all accepted until the element
+  is read, then revert with empty data; a relative offset of `-32` is
+  accepted and read (`calldata_array_length_v2.sol` relies on it).
+* **Copying calldata to memory** (`uint256[][] memory m = x;`) re-decodes with
+  the memory rules: the probe with an inner offset of `-32` reverts on the
+  copy although every element read succeeds.
+* Every decoder failure is `revert(0, 0)`: empty data. Trailing calldata is
+  ignored.
+
+### The typed model
+
+`Solidity/Semantics/AbiEntry.lean` (core, no imports) states this decoder over
+typed shapes and values:
+
+* `Shape` (words of a `Kind`, `bytes`, `T[]`, `T[n]`, tuples) and the
+  intrinsically typed `Val : Shape → Type` with length-indexed `Seq e n` and
+  member-indexed `Vals ms`. A `Word k` carries its validity proof. There is no
+  untyped value layer.
+* `mdec`/`mseq`/`melem`/`mmembers`: the eager memory decoder, in solc's order,
+  with allocation tracked against an upper bound `free` on the initial free
+  memory pointer (the adapter uses `2^32`; solc starts at `0x80`). An
+  allocation that may pass `2^64 - 1` yields `Fail.panic`, which is never
+  certified (panic production belongs to lane-soundness).
+* `cref`: the entry checks of a calldata parameter. `cval`/`cseq`/`celem`/
+  `cmembers` with `tailRef` (`access_calldata_tail`): every lazy access, with
+  EVM `sub`, `slt` and modulo-`2^256` addresses.
+* `entry`: exactly the checks before a body (head, then each parameter).
+  `verdict`: `revert`, `run vs` or `blocked reason`. `encodeArgs` is the
+  canonical encoding (heads, then tails).
+
+Theorems (`Solidity/Semantics/AbiEntryProofs.lean`, pinned with
+`#guard_msgs in #print axioms` and in `TrustAudit.lean`):
+
+* `mdec_cval` (via `mdec_cval_all`, a joint induction over the eight mutual
+  readers): if the eager decoder accepts a value at `p`, the lazy reads of the
+  same bytes accept it with the same typed value, for calldata below `2^64`
+  bytes. `tailRef_of_mdec`, `mdec_bounds`, `tailFits_of` and `regionFits_of`
+  are the arithmetic: unsigned offsets below `2^64` are positive signed words
+  and no address wraps.
+* `eager_cref`: if a calldata parameter decodes eagerly to `v`, solc's entry
+  checks for it pass and the lazy value of the resulting reference is `v`. So
+  the lazy decoder never fails earlier than the eager one and never observes
+  another value.
+* `verdict_revert_iff`: a certified revert is exactly an `entry` failure (the
+  model's checks before a body); the replay reports it before the body, with
+  empty data.
+* `verdict_run_entry`: a body runs only after every entry check passed.
+
+The first two theorems are proofs about the model; the last two unfold
+`verdict`. That `entry`, `mdec` and `cval` are solc's decoder is evidence, not
+proof: the Yul citations above, the pinned probes and an independent
+differential fuzz (below, "Review"). No theorem covers the `readsOnly`
+admission; its argument is the syntactic one stated with it.
+
+`Solidity/Semantics/AbiEntryChecks.lean` has 40 kernel-evaluated controls
+(`decide`, `decide +kernel`) over probe and fixture vectors: positive
+(canonical, overlapping, out-of-order, trailing data, unpadded `bytes`, dirty
+padding, a lazy-only layout for a read-only parameter) with the exact
+canonical bytes the body receives, negative (each entry check, eager element
+checks, the first failing parameter deciding) and the named refusals.
+`tests/upstream/AbiEntryReplay.lean` replays the same cases through the
+upstream `replay` (counters check once-only bodies and rollback), including a
+struct with a dynamic member (out-of-order and head-overlapping member tails,
+calldata and memory); it and the
+changed `tests/upstream/Replay.lean` run from `scripts/test-solidity.test.mjs`.
+
+### Admission (`Solidity/Tools/UpstreamEntry.lean`)
+
+For a v2 entry (not a constructor) whose parameters all have typed shapes and
+no nominal enum or function type, the replay decides on the actual calldata,
+selector included (`UpstreamEntry.plan`, `AbiEntry.verdict`):
+
+| Decision | Replay |
+|---|---|
+| `entry` fails with `revert` | the source call is still built (its own refusals apply); then a failure observation with empty data before the body, state rolled back |
+| `entry` passes; every calldata parameter decodes eagerly | the body runs on the decoded values, handed to the existing typed decoder as their canonical encoding; the existing re-encode check runs on those bytes as a cross-check (`generated decoder disagrees with the typed entry decoder: …` if it ever failed) |
+| a calldata layout only lazy reads accept, for a parameter the body reads only through complete index paths and `.length` (`readsOnly`) | the body runs on the lazily read value |
+| the same layout for any other body | blocked: `calldata layout accepted by lazy access but rejected by an eager copy needs calldata references in the source semantics` |
+| a calldata element that fails only when read | blocked: `calldata element fails only on access: needs access-time calldata semantics` |
+| a possible `Panic(0x41)` | blocked: `possible Panic(0x41) allocation failure in memory decoding` |
+| decoded arguments more than four times the calldata (plus 4096 bytes) | blocked: `decoded arguments exceed four times the calldata: gas is outside the model` (overlapping tails can make solc run out of gas) |
+| a byte above 255, calldata of `2^64` bytes or more, exhausted decoder fuel | blocked by name (`invalid calldata byte`, `calldata of 2^64 bytes or more`, `ABI decoder fuel exhausted`, `calldata element validation exhausted fuel`) |
+| ABI coder v1, constructors, function or nominal enum parameters, all-primitive signatures | unchanged (the M3 gate, or the primitive path) |
+
+`readsOnly` holds when the declaration has no modifiers, the parameter's shape
+is arrays/`bytes` down to words (no tuple), and every occurrence of its name
+in the body is either a complete read `x[i]…[j]` of a word or the `.length` of
+a shorter path (index expressions checked in turn). Each such read is one
+lazy access in solc (`calldata_array_index_access`, `access_calldata_tail`,
+the word validator), which `cval` defines; full lazy validation succeeded, so
+none fails, and the body's view of the parameter is the lazy value. Copies,
+passing, returning, encoding, slices and aliases mention the name and are
+refused.
+
+No input is canonicalized silently: the original calldata stays the reported
+observation (`calldataBytes`), and `msg.data` and assembly keep their existing
+refusals, so a body cannot read raw calldata. A body that could read
+`msg.data` would see the original bytes; the adapter does not admit one.
+
+### Fixture results
+
+Per-fixture before/after evidence, with complete ordered observations, report
+hashes and output directories: `tests/upstream/cf1-abi-entry-results.json`
+(collected by `scripts/abi-entry-collect.py`). Same compiler, archive, runner
+script, timeout and loop fuel before and after; only the model changed. All
+42 fixtures: **13 working / 29 blocked before, 21 working / 21 blocked
+after**; no fixture regressed, and every one of the 13 kept its verdict.
+
+| Fixture | Before | After | After reason / observations |
+|---|---|---|---|
+| abicoder/calldataDecoding/array/calldata_array_length_v2.sol | blocked | working | every vector in both pipelines; 34 observations |
+| abicoder/calldataDecoding/array/calldata_array_indexing_1d_2d_v2.sol | blocked | working | every vector in both pipelines; 16 observations |
+| abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol | blocked | blocked | calldata element fails only on access: needs access-time calldata semantics; 6 observations |
+| abicoder/validation/array_exceeds_calldatasize_no_revert_string.sol | blocked | working | every vector in both pipelines; 6 observations |
+| array/calldata_array_bounds_check_nested_bytes.sol | blocked | working | every vector in both pipelines; 6 observations |
+| array/concat/bytes_concat_nested.sol | blocked | working | every vector in both pipelines; 2 observations |
+| array/copying/calldata_2d_bytes_to_memory_2.sol | blocked | working | every vector in both pipelines; 4 observations |
+| array/copying/nested_array_calldata_to_memory.sol | blocked | working | every vector in both pipelines; 8 observations |
+| smoke/bytes_and_strings.sol | blocked | blocked | entry return bridge needs a primitive prefix and one final bytes/string memory result; 6 observations |
+| strings/concat/string_concat_nested.sol | blocked | working | every vector in both pipelines; 2 observations |
+
+`calldata_nested_array_static_reencode_v2.sol`: its failing vectors fail inside
+`abi.encode(a)` on a calldata element (an access-time failure), so it stays
+blocked by name. `bytes_and_strings.sol`: its three noncanonical `e(bytes)`
+vectors now agree in both pipelines; the fixture blocks next on `g()`, a
+multiple reference return (retained interface, not this lane). The ABI v1
+fixtures keep the M3 gate: v1 decoding (cleaning instead of validation) is not
+modelled here.
+
+### Review
+
+Read-only, without Lean workers.
+
+* **Skeptic** (model against solc): ported `verdict`, `encodeArgs`, `mdec`,
+  `cref` and `cval` to JavaScript and fuzzed them against the pinned compiler
+  on the EVM, about 10,400 vectors over 14 shapes in calldata and memory
+  (one run in all four configurations), each function returning
+  `keccak256(abi.encode(params))`: **0 mismatches**; every verdict class was
+  exercised. Confirmed one gap: overlapping tails can decode to megabytes, and
+  solc runs out of gas where the model would run the body. Fixed: the
+  4×-calldata refusal. Also fixed: stale theorem names in the proofs' module
+  docstring, a wrong `Verdict.kind` docstring, unregistered modules.
+* **Finder** (integration): no soundness defect in the admission. Fixed: bytes
+  above 255 were wrapped on the new path (now `invalid calldata byte`); the
+  revert path skipped the source call's own refusals (now built first);
+  `AbiEntryReplay.lean` was not run (now in `scripts/test-solidity.test.mjs`);
+  the probe script did not assert fixture expectations (now it does); this
+  section's admission table and theorem wording (made to match the code).
+  Recorded, not changed: calldata slices of dynamic elements copied to memory
+  (`#sliceCopy`) predate this lane and are not re-probed here.
+
+### Validation
+
+* Lean: `lean_diagnostic_messages` clean on every touched Lean file; no
+  `sorry`, axiom, `native_decide`, `implemented_by` or heartbeat change. The
+  four headline theorems are pinned with `#guard_msgs in #print axioms`
+  (`mdec_cval`, `eager_cref`: `propext, Classical.choice, Quot.sound`;
+  `verdict_revert_iff`, `verdict_run_entry`: `propext`) and registered in
+  `TrustAudit.lean` ("trust: 4 ABI entry-decoding theorems use only the
+  standard axioms").
+* `./run-lean.sh`: the default target builds (1021 jobs, 17m49s wall for the
+  whole script on 4 cores, warm). `SolkeyTestSuite` stops on the known
+  `TestSuite.Derived17` OOM (exit 137, baseline); `check-solkey.sh` run
+  separately reports the baseline 37 mismatches. On the base, the same script
+  had the unchanged `Examples/Tactics/OpenLoops.lean` killed by OOM once
+  (65m52s); it built here.
+* Node: `solidity-upstream.test.mjs` 25/25, `check-abi-vectors.mjs` 31 vectors
+  and 5 rejections, `abi-entry-probe.mjs --fixtures --probes` pass, the new
+  `test-solidity.test.mjs` entry passes; `check-g07.mjs`: trust, layers
+  (183 core modules, 0 reach the elaborator), orphans (1036, 0 orphaned),
+  noncircular, grammar and control pins pass; its two "new" items are the
+  baseline axiom-pin drift (unchanged 1209 pins, 407 unrecorded) and
+  `check-doc-paths` 48 missing (46 baselined + 2), byte-identical to the base
+  checkout's output. `check-automatic --strict`: 491 / 61 / 11 refuted / 0
+  pending.
+
+### Limitations
+
+* ABI coder v1 entries, constructor arguments, function-valued and
+  nominal-enum parameters keep the M3 gate.
+* Access-time failures (an element that fails only when read) and lazy-only
+  layouts read other than through complete index paths stay refused: they
+  need calldata references in the source semantics (lane-soundness).
+* `Panic(0x41)` is never certified; gas is not modelled (the 4× bound).
+* No theorem connects `entry`/`cval` to solc's bytecode: that is the
+  evidence above, and the specification for the compiled-decoder lanes.
+

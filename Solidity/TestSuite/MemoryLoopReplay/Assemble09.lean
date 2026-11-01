@@ -1,0 +1,7 @@
+import Solidity.TestSuite.MemoryLoopReplay.Assemble08
+open scoped Solidity.Scoped
+resume_memory_replay Solkey.TestSuite.returnLeavesNestedLoops.problem
+assemble_memory_replay
+assemble_memory_replay
+assemble_memory_replay
+save_memory_replay

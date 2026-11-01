@@ -61,6 +61,7 @@ import Solidity.Source.Unique
 import Solidity.Source.Horizon
 import Solidity.Source.Session
 import Solidity.Source.SoundnessExamples
+import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.Dispatch
 import Solidity.Examples.Tactics.FunctionTypes
 
@@ -1754,6 +1755,22 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} storage-write theorems use only the standard axioms"
+
+/-! Lane CF1: the eager ABI entry decoder agrees with solc's lazy calldata reads (model only). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.AbiEntry.mdec_cval,
+    ``Solidity.AbiEntry.eager_cref,
+    ``Solidity.AbiEntry.verdict_revert_iff,
+    ``Solidity.AbiEntry.verdict_run_entry]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} ABI entry-decoding theorems use only the standard axioms"
 
 /-! Lane CF2: finite dispatch over reference arguments selects the candidate's arm per tag. -/
 run_cmd do

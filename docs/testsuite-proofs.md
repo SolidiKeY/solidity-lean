@@ -13,6 +13,12 @@ are internal helpers, two `skip` rows, one excluded and the refuted ones
 the gate that every obligation is closed by `sol_prove` or `sol_refute`
 (`docs/automation.md`).
 
+The shared nested-return proof retains its original 1024-step walk and one
+cumulative 300-second gate for all 24 fresh workload modules, including the
+other nine unchanged Derived17 proofs. The original worktree passes in 262.03 s;
+earlier cached/per-stage timings remain failures. See the sharing record in
+`loops.md` and `scripts/check-memory-loop-timing.py`.
+
 ## Decisions
 
 - **Box meaning.** A failed `assert` is a Panic halt (`THalt.panic`, solc's

@@ -979,3 +979,39 @@ The coordinator owns independent finder/skeptic reviews and the full combined
 gates. No competing full build, index write, commit, push, source VM, skill
 or monitor modification is part of this follow-up. No semantic decision is
 required.
+
+
+### Published-master trust inventory conflict (2026-10-31)
+
+Resolved the inventory conflict between integration HEAD
+`c5a89bd963146ace8a4540b608ef1a2d5481e20a` and published master
+`9b24b57311b8daf0d4cd01b52bf420fd024c1d3a` by retaining all ten
+memory-loop entries and both CreationTryReplay/LibraryTryReplay entries.
+An exact multiset comparison against all three Git stages confirms the
+246-entry base plus ten and two additions, yielding 258 entries without
+loss or extra allowances. JSON parsing, the comparison, the source trust
+inventory audit and whitespace checks exit 0. The audit reports 1,086
+Lean sources, 258 inventoried implementation/recovery sites and zero findings.
+
+Local read-only finder and skeptic passes checked preservation of parent
+entries and source-site/count agreement; neither found a confirmed issue.
+Both independent reviewer launches failed before starting with the
+thread-store error `no rollout found for thread id
+01a19369-fe0a-7e53-a1c9-61ce3f78a57a`. Independent reviews and combined
+validation remain with the coordinator. No Lean source, semantics, budget,
+source VM, skill or monitor was changed; no Lean server/build was started.
+The working-tree resolution is left unstaged and uncommitted for the
+coordinator. No semantic decision is required.
+
+Follow-up index resolution: the existing working-tree inventory was rechecked
+against Git stages 1/2/3 and is their exact multiset union (246 base entries,
+ten memory-loop additions, two try-replay additions). The static trust audit
+again exits 0: 1,086 sources, 258 sites, zero findings. Read-only preservation
+checks of both parents' imports and module-map registrations and scoped
+whitespace checks also exit 0. The inventory is now marked resolved in Git;
+this documentation remains unstaged and no commit is made. Independent finder
+and skeptic launches again failed before starting with `no rollout found for
+thread id 01a1936f-10d4-7ee3-9734-0be8b062f5a1`; the local read-only passes
+found no issue, but do not replace independent coordinator reviews. No Lean
+source was edited and no Lean server or build was started; combined validation
+remains with the coordinator.

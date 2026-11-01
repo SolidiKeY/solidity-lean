@@ -169,11 +169,15 @@ private def abiCheck (vectors : List Json) (status : String) (count : Nat) : IO 
 -- Output mismatches cannot guide admission or become passes.
 #eval abiCheck [abiVector "decode(bytes)" ["bytes"] ["uint256[]"]
   (abiWords [32,192,32,4,3,4,5,6]) (abiWords [32,4,3,4,5,99])] "broken" 1
--- Malformed aggregate data must stay blocked even when failure is expected:
--- the external calldata decoder can defer checks until individual accesses.
+-- A malformed element of a calldata array must stay blocked even when failure
+-- is expected: solc's calldata decoder defers element checks to each access.
+#eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"] (abiWords [32,1,256]) [] true]
+  "blocked" 0
+-- The outermost length and offset are entry checks (`Semantics/AbiEntry.lean`,
+-- `AbiEntry.verdict_revert_iff`): an empty revert before the body, as solc.
 #eval (do
-  for bytes in [abiWords [32,1,256], abiWords [32,10], abiWords [999,0]] do
-    abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"] bytes [] true] "blocked" 0 : IO Unit)
+  for bytes in [abiWords [32,10], abiWords [999,0]] do
+    abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"] bytes [] true] "working" 1 : IO Unit)
 #eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"]
   (abiWords [32,2,1,255]) (abiWords [7])] "working" 1
 -- Primitive v2 entry checks are eager: invalid width and short calldata revert

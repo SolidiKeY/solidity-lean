@@ -95,6 +95,17 @@ private def AliasReturn : Contract := contract!{
     .assign (.name "alias") (.name "xs")])),
   .assign (.index (.name "alias") (.num 0)) (.num 1)]).isOk == false
 
+/-- Calldata passed to a function value's `memory` parameter is refused when
+the argument mentions it at all, not only when rooted at it (integration
+review of lane CF2); a fresh memory local is admitted. -/
+private def fnMem : List (String × String) :=
+  [("h", "function(uint[] memory)returns(uint)")]
+#guard (calldataCheck [] 8 ["xs"] [] (sol_raw!{ uint r = h(xs); }) fnMem).isOk == false
+#guard (calldataCheck [] 8 ["xs"] [] (sol_raw!{ uint r = h(b ? xs : xs); }) fnMem).isOk == false
+#guard (calldataCheck [] 8 ["xs"] [] (sol_raw!{
+  uint[] memory ys = new uint[](1); uint r = h(ys);
+}) fnMem).isOk == true
+
 -- Memory reassignment cannot manufacture a calldata origin, even nested.
 #guard ((sol_raw!{
   xs = m; uint[] calldata v = xs;

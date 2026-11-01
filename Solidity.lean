@@ -38,6 +38,9 @@ import Solidity.Semantics.Termination
 import Solidity.Semantics.LexMetrics
 import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
+import Solidity.Semantics.AbiEntry
+import Solidity.Semantics.AbiEntryProofs
+import Solidity.Semantics.AbiEntryChecks
 import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.Lifetime
@@ -154,6 +157,7 @@ import Solidity.Calculus.LeafDerive
 import Solidity.Calculus.AllLeft
 import Solidity.Calculus.Rigid
 import Solidity.Calculus.ProvesDerive
+import Solidity.Calculus.MemoryLoopReplay
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.Closers
 import Solidity.Calculus.ProveChunked
@@ -507,6 +511,18 @@ import Solidity.Precompiles.PointEval
 import Solidity.Precompiles.Osaka
 import Solidity.Stipend.Rule
 import Solidity.Evm.MemoryCompileExamples
+import Solidity.Evm.MemoryLoopSourceExamples
+import Solidity.Evm.MemoryLoopScope
+import Solidity.Evm.MemoryLoopScopeMeta
+import Solidity.Evm.MemoryLoopScopeSound
+import Solidity.Evm.MemoryLoopScopeRoom
+import Solidity.Evm.MemoryLoopScopeDemand
+import Solidity.Evm.MemoryLoopScopeBudget
+import Solidity.Evm.MemoryLoopScopeCompile
+import Solidity.Evm.MemoryLoopScopeExamples
+import Solidity.Evm.MemoryLoopScopeDivergenceExamples
+import Solidity.Evm.MemoryLoopScopeAllocExamples
+import Solidity.Evm.MemoryLoopScopeSourceExamples
 import Solidity.Evm.MemoryExprExamples
 import Solidity.Evm.MemoryExamples
 import Solidity.Evm.Interpreter
@@ -762,6 +778,7 @@ import Solidity.Examples.Tactics.ContractWorldSource
 import Solidity.Examples.Tactics.TransientWorld
 import Solidity.Examples.Tactics.TransientWorldSource
 import Solidity.Tools.Upstream
+import Solidity.Tools.UpstreamEntry
 
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
