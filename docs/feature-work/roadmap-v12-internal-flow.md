@@ -2657,3 +2657,64 @@ exit1 and complete previous/publication-equal, with no new owned findings.
 Both independent early protocol reviewers PASS, no freshness/array/error issues,
 neither running Lean/server/builds/writes. Final source and committed-artifact
 reviews and checksums are bound in the handoff; no whole-lane completion.
+
+
+## Continuation32 — caller pointers after a real extended-context suffix
+
+`CallerView.reference_drop` and `represented_drop` consume the actual context
+extension, captured dropped caller environment, reached `StateRepr` and
+`BaseExtends`. They expose the transported typed reference and its entry target
+address while output result/local binders remain. They assert no heap-content
+invariant. No syntax, evaluator, compiler admission or reserved producer changed.
+
+The populated `FiniteDispatchEndpoint` client now proves
+`ProtectedTail.final_alias_after_drop`, `final_other_is_not_old`, `final_pointers`,
+`final_target_pointers` and `final_target_observed`. The closed target witness
+comes from the real compiled allocating prefix, selected memory-result call and
+allocating suffix. It exposes BOTH actual prefix/final representations, composed
+base extension, growth11, stack77, cursor139, all protected final-context pointer
+cells, the same complete ordered22-cell observation and captured final caller
+view. The old object is actually mutated by the callee; unrelated/private/default
+objects and all previous observations and controls remain distinct. The separate
+stronger middle-machine-plus-final conjunction is not silently counted proved.
+
+Finder and skeptic reviewed independently without Lean/builds. The skeptic
+identified a missing exposed prefix representation; the theorem now includes it
+and the composed `BaseExtends`. A genuine implicit-polymorphic type error in the
+strengthened proof was retained, then fixed with an explicit dependent type.
+Final actual fixture preparation passes24.130s/120; imported composition probe
+passes3.186s. Actual seven new builtin axiom sets are pinned separately; all542
+original imported kernel types (including85 tuple types), reports/order/pins and
+retained7+6+5+15+3+11+16+14+8 scoped axiom queries remain unchanged.
+
+Owned raw-driver engineering shares one genuine `lake env` setup but launches a
+fresh separate `lean -j1 --tstack=131072 SOURCE` for every original34 owned files
+and four original fixtures, with inherited stdin, shared output/error log fd,
+unchanged source order and failfast. No cached main-source import or persistent
+frontend is used. Before/after source/config hashes and target membership are
+checked. No-Lean controls cover every failure position, setup/spawn/signals,
+environment/log bytes and private-tree membership mutation. Actual fresh-source
+controls reject invalid current source despite a valid previous object and
+retain separate private scopes. The four-file diagnostic comparison does NOT
+establish an end-to-end speedup (outer4.905s versus4.950s).
+
+The changed COMPLETE raw gate still FAILS124/121.214 at TupleMemoryCalls.
+The COMPLETE current cached command returns0 with18fixtures/542actual builtin
+reports and complete11575-entry before/after toolchain equality, BUT outer
+121.091s exceeds the unchanged120s bound: its strict bounded gate is FAILED.
+The prior C31 genuine117.230s pass remains historical, not a pass of this tree.
+No unchanged retry follows. Original full124/300, broad/raw/prerequisite137/124
+and documentation normal/strict1 remain retained failures; TestSuite/sort are
+unreached. Current complete docs findings remain previous/publication-equal,
+not frozen-equal/global success. Runtime Lean4.24.0/Lake5.0.0-src+797c613 and
+actual KeySort two-job output pass independently.
+
+All Work1–6 and BackfillsA/B remain partial. Unbounded target/source recursion,
+general/dependent dispatch lowering, early-control/general mixed loops,
+word-frame/live-byte-journal/world and target transient/callback applications
+remain genuine producer obligations. The original blocked goal stays unchanged;
+no independent-work exhaustion or whole-lane closure is claimed. Exact committed
+module hashes, dependent signatures, witnessed clients and incremental bundle
+prerequisites are exported in a new PARALLEL-INTERFACE checkpoint for private
+V13/V14/V16/Yul worktrees. No peer package was supplied or imported, no reserved
+edit or push/merge/PR occurred, and every previous seal remains immutable.

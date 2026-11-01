@@ -690,3 +690,77 @@ theorem middle_snapshot : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ :
 #guard_msgs in #print axioms middle_snapshot
 
 end Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
+
+namespace Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
+open Evm Evm.Memory
+
+/-- The actual allocating suffix keeps the captured old alias after dropping
+its result/local prefix; the callee's old-object mutation is not hidden. -/
+theorem final_alias_after_drop :
+    TEnv.get ((capIndex.wk projection).ext post.ext) total.st.env =
+      some (old.wk total.ext) :=
+  CallerView.reference_drop total post.ext projection protected_final_frame
+    capIndex old old_inputs.1
+
+theorem final_other_is_not_old :
+    TEnv.get ((capIndex.wk projection).ext post.ext) total.st.env ≠
+      some (other.wk total.ext) := by
+  rw [final_alias_after_drop]
+  intro impossible
+  have ids := congrArg (fun x => x.map HRef.id) impossible
+  change (some 0 : Option Nat) = some 1 at ids
+  cases ids
+
+/-- Genuine reached representation and composed entry-address extension,
+not a requested simulation or a heap-content invariant. -/
+theorem final_pointers {base₁ base₃ : Nat → Fin W} {m₃ : Machine}
+    (repr : StateRepr 1 1 64 postCert.frag total.st base₃ m₃)
+    (addresses : BaseExtends mid.st.H base₁ base₃) :
+    ∀ (R : RefTy) (i : Idx View (.mem R)) (r : HRef mid.st.H R),
+      TEnv.get (i.wk projection) mid.st.env = some r →
+        m₃.mem (cellOf 1 ((i.wk projection).ext post.ext)) = .val (base₁ r.id) :=
+  CallerView.represented_drop total post.ext projection protected_final_frame repr addresses
+
+/-- The existing checked prefix/selected-call/suffix endpoint discharges the
+reached representation and composed address premises for every protected alias. -/
+theorem final_target_pointers :
+    ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₃ : Machine) (base₃ : Nat → Fin W),
+      run seed.code machine = .ok m₁ 0 ∧
+      run (seed.code ++ checked.code ++ postCert.code) machine = .ok m₃ 0 ∧
+      StateRepr 1 1 64 seed.frag mid.st base₁ m₁ ∧
+      StateRepr 1 1 64 postCert.frag total.st base₃ m₃ ∧
+      BaseExtends mid.st.H base₁ base₃ ∧
+      GrowsAllocator 1 64 11 (State.init C) bases machine total.st base₃ m₃ ∧
+      m₃.stack = [w[77]] ∧ m₃.mem 0 = w[139] ∧
+      ∀ (R : RefTy) (i : Idx View (.mem R)) (r : HRef mid.st.H R),
+        TEnv.get (i.wk projection) mid.st.env = some r →
+          m₃.mem (cellOf 1 ((i.wk projection).ext post.ext)) = .val (base₁ r.id) := by
+  obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,ht,whole,hr₁,hr₂,hr₃,he₂,he₃,grows,stack,cursor⟩ := endpoint
+  have addresses : BaseExtends mid.st.H base₁ base₃ := BaseExtends.trans chosen.ext he₂ he₃
+  exact ⟨m₁,base₁,m₃,base₃,hp,whole,hr₁,hr₃,addresses,grows,stack,cursor,
+    final_pointers hr₃ addresses⟩
+
+/-- Complete original ordered observations and the actual captured final caller
+view coexist with the newly proved protected target addresses. -/
+theorem final_target_observed :
+    ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₃ : Machine) (base₃ : Nat → Fin W),
+      run seed.code machine = .ok m₁ 0 ∧
+      run (seed.code ++ checked.code ++ postCert.code) machine = .ok m₃ 0 ∧
+      StateRepr 1 1 64 seed.frag mid.st base₁ m₁ ∧
+      StateRepr 1 1 64 postCert.frag total.st base₃ m₃ ∧
+      BaseExtends mid.st.H base₁ base₃ ∧
+      GrowsAllocator 1 64 11 (State.init C) bases machine total.st base₃ m₃ ∧
+      m₃.stack = [w[77]] ∧ m₃.mem 0 = w[139] ∧
+      afterCells base₃ m₃ = [w[42],.val (base₁ 0),.val (base₁ 0),.val (base₁ 1),w[2],
+        .val (base₁ 0),w[5],.val (base₁ 0),.val (base₁ 0),w[2],w[12],w[11],w[2],w[23],w[29],
+        w[0],w[0],w[2],w[99],w[101],w[11],w[139]] ∧
+      TEnv.thin projection (TEnv.drop post.ext total.st.env) =
+        TEnv.wk total.ext View (TEnv.thin projection mid.st.env) ∧
+      ∀ (R : RefTy) (i : Idx View (.mem R)) (r : HRef mid.st.H R),
+        TEnv.get (i.wk projection) mid.st.env = some r →
+          m₃.mem (cellOf 1 ((i.wk projection).ext post.ext)) = .val (base₁ r.id) := by
+  obtain ⟨m₁,base₁,m₃,base₃,hp,whole,hr₁,hr₃,addresses,grows,stack,cursor,pointers⟩ := final_target_pointers
+  exact ⟨m₁,base₁,m₃,base₃,hp,whole,hr₁,hr₃,addresses,grows,stack,cursor,
+    observe_after hr₃ addresses cursor,protected_final_frame,pointers⟩
+
+end Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
