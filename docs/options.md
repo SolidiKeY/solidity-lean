@@ -679,6 +679,10 @@ evaluation. Inlined callees inherit the configuration.
 
 This is an expression-order choice, not all of `--via-ir`: constructor and
 modifier differences remain as documented in [solc-alignment.md](solc-alignment.md).
+Ordinary-call implicit copies also retain a pipeline limitation: the pinned
+`copiesBeforeEffects` fixture succeeds in legacy and panics in viaIR. The
+[Calls alignment note](solc-alignment.md#calls) records that observation;
+selecting this preset does not establish viaIR agreement for that case.
 Solidity [describes source order as an intention, not a guarantee](https://docs.soliditylang.org/en/latest/ir-breaking-changes.html#semantic-only-changes).
 Yul itself evaluates function arguments right to left; that is a different
 schedule from Solidity source compiled through IR.
