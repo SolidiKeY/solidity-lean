@@ -3934,3 +3934,52 @@ shared-zero/interior/pointers and the exact existing AllocationRefines contract
 remain open. The oversized owner-MemOK counterexample still refutes only the
 unqualified ordinary-placement inference, not all realization/writeback relations
 or a proved reachable execution. No semantic/profile decision is assumed.
+
+
+## Retained allocation lineage extension (2026-11-01)
+
+`HeapAllocationCommute` derives actual whole Heap.write/alloc commutation at an
+old typed target, and structural next/type invariants for existing actual
+RetainedAllocation histories. `RetainedHeapAllocation.retainAllocated` rebuilds
+EVERY old typed write over the extended actual origin, with original capacities,
+and identifies the output with executable retainedAllocationPlacement using
+existing placement choice extensionality. The existential construction is a
+proved conclusion, not an input inverse/read/coverage/adequacy law. No existing
+Source/Placement/RetainedAllocation representation, constructor or API changes.
+No origin reset to a shrunken current heap, arbitrary depth/fuel cap, assumed
+hash injectivity, new alignment or stronger convenience premise.
+
+`RetainedAllocationRegions` preserves FULL original allocation regions, including
+dormant tail/padding, when a fresh byte/string allocation lies beyond original
+free. `RetainedAllocationOrder` proves complete actual owner heapPut/allocRef
+program result/state equality for a genuinely old typed cell and whole raw-map
+allocation/mstore commutation under real disjoint word-window conditions.
+Missing/new targets and overlapping headers have explicit counter-controls;
+failed source writes are not silently treated as commuting successful no-ops.
+
+Inhabited controls shrink3->0, allocate a fresh nonUTF8 string, then regrow the
+old object4 using its ORIGINAL64-byte capacity. A second control shrinks the new
+object too, lifts a multi-write history through another allocation at577, then
+regrows the new object8. Both64-byte original capacities survive independently.
+Actual source MemOK, caller/sub restoration, three real pointer reads at every
+horizon, new/unrelated cells, complete raw order, FMP/zero/gaps/padding are checked.
+EM.sub's shared heap is not portrayed as external-frame memory rollback.
+
+The separate pinned-solc RetainedAllocation fixture explicitly allocates64bytes
+between shrink/regrowth. Complete31-word raw ABI snapshots retain branch tags,
+old/new pointers and aliases, nonzero padding, free/zero words and marker777;
+stages, full Error/Panic, static failure and fresh postfailure calls are ordered.
+Its single aligned explicit-allocation execution is not the synthetic kernel
+second unaligned allocation, a generic solc new-bytes padding policy, source
+admission, reachability or compiler correspondence. Earlier fixture fields and
+budgets remain unchanged. Independent read-only finder/skeptic reviews clear;
+reviewers ran no Lean/server/build/tests. Final validation is still pending at
+this section's write; exact final receipts/signatures/exports are recorded in
+`/workspace/vy2-evidence/retained-allocation-lift/HANDOFF.md`.
+
+This closes lifting of the existing retained typed-write domain through fresh
+allocation, not universal memory/refinement or global source/frame adequacy.
+Whole-store/path/hash/dirty/transient ownership, broader shared-zero/interior/
+pointer memory, reachable allocator/target agreement, concrete V10/V11, Y06
+source/Yul bindings and Y09.02/final source/compiler/joint closure remain open.
+The full original Work/Backfill queues and goal are not completed by this component.

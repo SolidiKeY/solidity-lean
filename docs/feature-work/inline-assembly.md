@@ -614,3 +614,5 @@ Exact committed SHA, theorem premises, final gates/reviews/resources and artifac
 VY2 handoff: [actual location producer capture](inline-assembly-vy2.md#actual-location-producer-capture-2026-11-01) extends typed source-path capture; full lane remains partial.
 
 VY2 handoff: [actual byte/string allocation placement](inline-assembly-vy2.md#actual-bytestring-allocation-placement-2026-11-01) adds constructive actual heap allocation; full lane remains partial.
+
+VY2 handoff: [retained allocation lineage extension](inline-assembly-vy2.md#retained-allocation-lineage-extension-2026-11-01) preserves original capacities across actual allocation; full lane remains partial.
