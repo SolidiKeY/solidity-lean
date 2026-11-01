@@ -3108,3 +3108,82 @@ Raw failed attempts and all old artifacts/caches remain preserved. Exact final
 source identity, complete signatures/axioms, gates/reviews/resources and original
 patch/bundle/checksums: `/workspace/vy2-evidence/signed-dynamic/HANDOFF.md`.
 Original goal BLOCKED unchanged; get_goal read absent; questions=[].
+
+
+## Scalar-family dynamic ownership (2026-11-01)
+
+Original Y04/Backfill A-B progress, not full-lane completion. Accepted parent
+`1b133944b611b777a83f84beb06e1b22d81f613f`, same assigned branch and pinned base.
+YQ1-YQ7 remain approved; no exclusions, semantic judgments or budgets changed.
+Gate G0/history reviewed: actual Source/Heap/World/type representations unchanged;
+additive constant-motive StorageDeclaration case, parameter-only scalar descriptor.
+The constructor addition recompiles affected downstream proofs; prior speed-motivated
+state/recursor design is preserved. Existing writer/private Lean locks and hard
+12GiB/no-swap runtime retained, with measured resources and serial heavy launchers.
+
+DynamicScalarKind selects ACTUAL bool, address(payability), valid bytesN types and
+existing DeclScalar fields/widths/codecs. StorageDeclaration.scalarArray is indexed
+by that real dynamic-array type. Existing u256/unsigned/signed APIs and guards are
+unchanged, and their selectors skip the additive constructor. ScalarDynamicHeader
+and scalarFamilyTrace derive actual header coordinates and all component live paths
+from the original checked declaration traversal/active origin and Source.readLen.
+Packing uses quotient slots/remainder low-byte offsets, exact widths, Fixed header
+preimage bytes, genuine per-run region/offset/no-wrap premises, not global hash
+injectivity or arbitrary runtime caps. Address leaves12padding bytes per slot;
+bytes3 leaves2padding bytes per10elements. BytesN is big-endian WITHIN its low
+storage field, unlike the high/left-aligned ABI/memory word.
+
+This is a bool/address/fixedBytes component inventory. Separate integer traces,
+mappings/nested data and arbitrary complete HashedLayout ownership are NOT silently
+claimed covered. Existing scalar codec inverses are reused; successful concrete
+family decoding is proved to exactly reencode, including bytesN/address and bool0/1.
+No opaque inverse, safety, final-view or output-layout law is a certificate field.
+ScalarOwnershipPlan derives old inventory from actual source, new inventory from
+raw headers and success-only residual journaling from actual Source.applyOp. Exact
+whole supplied map reconstruction retains unowned partial-slot bytes, padding,
+unknown slots and dropped tails across shrink/zero/regrow. Whole unchanged store,
+none-vs-explicit-default administration, other accounts/banks/unselected paths,
+actual readLoc/indexLoc/length aliases, exact static errors, caller-prefix child
+rollback, committed-child outer rollback, persistent endTx and every original H
+MemOK are proved within the concrete preparation scope.
+
+Inhabited actual source controls use bool34 across32-byte packing, bytes3 length12
+across10-per-slot, three address elements, nonzero residual/padding, two aliases,
+real false/true and byte/address payloads, repeated actual source operations and
+nonempty fixed hash preimages. Canonical bool byte2 is NOT representable: growth
+exposing it yields preparation None and retains the actual successful prefix.
+This is neither a source/Yul refusal, no-op, cleaning policy nor deallocation.
+The finite pinned EVM dirtyGrow succeeds and observes truthy2 with the original raw
+byte retained; that unresolved representation bridge and YQ4 remain OPEN.
+
+External ScalarDynamic.sol is independently specified for pinned solc0.8.38+
+1835d247/Osaka, both pipelines, original100m gas/5m steps. New42 ordered calls cover
+complete38word dynamic ABI, typed bytes3/address/bool return alignment, raw slots,
+headers/hash roots/aliases/padding, shrink/zero/regrow/member changes, dirty growth,
+full Error("scalar")/Panic0x32/static failures and fresh postfailure reads.
+1561negative controls include1230bounded coherent ABI-word mutations plus strict
+missing/reordered/wrong-root/type/hash/bytes/address-padding/dirty-byte/error tests.
+Final fresh replay matches every field; all prior524 fields/18classifications
+are unchanged, total566calls. All29negative suites pass. Repaired final wrapper
+1298default/262TestSuite/131annotations, strict/trust/layers/zero-orphan checks
+pass. Complete scoped audit:4371declarations,2613theorems;2538standard-only/75
+axiom-free, no missing/unexpected axioms. Initial orphan exit1 is retained;
+ScalarDynamicSnapshot now imports the acyclic ScalarDynamicRegions laws.
+These finite tests do not prove source/compiler/target or Yul adequacy.
+
+Independent read-only finder/skeptic reviews found no confirmed semantic defect;
+component coverage and bool2 boundary are explicit. No reviewer Lean/server/build/
+tests/edits. Final gate/signature/axiom results and actual committed source hashes
+will be recorded in `/workspace/vy2-evidence/scalar-dynamic/HANDOFF.md`; raw failed
+proof attempts retained, including unchanged-budget recursion failures. Global docs
+remains rawEXIT1 with48missing/37ambiguous exact-base findings; equality comparison
+is separate from a global pass.
+
+All original Work/Backfill items remain: broader nested/mapping/storage-bytes/
+transient/dirty ownership and cross-component closure; universal memory/writeback,
+shared-zero/interior/pointer representations and reachable allocation/refinement;
+concrete V10/V11 agreements; Y06 actual source/Yul bindings; actual VY1/assembly
+MemOK/Y09.02 calculus/notation/printers/rule-map/source/compiler/joint closure.
+Existing owner MemOK/World/ContractWorld/Bridge components are available, not Yul
+adequacy. Producer prerequisites not assumed. Original goal BLOCKED unchanged;
+get_goal read unavailable, no goal calls; questions=[]. Independent backfill remains.

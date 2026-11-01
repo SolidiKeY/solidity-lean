@@ -946,3 +946,5 @@ import Solidity.Yul.Views.OwnershipBatchControls
 import Solidity.Yul.Views.PackedDynamicMixedControls
 
 import Solidity.Yul.Views.SignedDynamicCrossControls
+
+import Solidity.Yul.Views.ScalarFamilyWriteControls

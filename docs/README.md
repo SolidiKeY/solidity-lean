@@ -147,3 +147,5 @@ adds computed partial-slot source/residual preparation; full original lane remai
 
 VY2 [signed dynamic integer ownership](feature-work/inline-assembly-vy2.md#signed-dynamic-integer-ownership-2026-11-01)
 adds canonical signed source/residual preparation; full original lane stays open.
+
+VY2 scalar-family dynamic storage component: [lane record](feature-work/inline-assembly-vy2.md) (`ScalarDynamicHeader`, `ScalarOwnershipPlan`); canonical preparation only, original full lane unfinished.

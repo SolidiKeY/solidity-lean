@@ -542,3 +542,15 @@ reads and actual source-success-only complement/frame transport. See
 Full lane remains PARTIAL/BLOCKED; kernel source laws and finite pinned pipeline
 controls are separate from full Yul/compiler adequacy. Exact committed tree /
 gates/exports: `/workspace/vy2-evidence/signed-dynamic/HANDOFF.md`.
+
+### VY2 scalar-family dynamic ownership checkpoint (2026-11-01)
+
+New intrinsic bool/address/fixedBytes declaration certificates and typed scalar
+header/element/component snapshots reuse existing source codecs, one declaration
+cursor, Source.readLen and Source.applyOp. Persistent canonical complement/frame
+transport is proved; no frontend admission or compiler/source adequacy is claimed.
+Bool2 growth remains unsupported canonical preparation while pinned EVM growth
+succeeds; storage bytesN low alignment is distinct from ABI/memory left alignment.
+Full queue, premises, reviews and versioned handoff:
+[inline-assembly-vy2.md](inline-assembly-vy2.md),
+`/workspace/vy2-evidence/scalar-dynamic/HANDOFF.md`.

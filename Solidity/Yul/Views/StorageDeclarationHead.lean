@@ -1,3 +1,4 @@
+import Solidity.Yul.Views.DynamicScalarKind
 import Solidity.Yul.Views.LayoutOriginReads
 import Solidity.Yul.Views.LocatedRegistration
 
@@ -16,6 +17,8 @@ inductive StorageDeclaration (E : Source.Env) : Source.STy → Type where
   | signedArray (t : Source.IntTy) (signed : t.signed = true) :
       StorageDeclaration E (.array .storage (.int t) none)
 
+  | scalarArray (kind : DynamicScalarKind) : StorageDeclaration E (.array .storage kind.ty none)
+
 /-- Reuses the existing scalar cell codec, not a claim that the declared
 reference type is scalar. Source.STy.cell makes this actual header uint256. -/
 def uintHeaderCell (E : Source.Env) : FixedDeclaration E (.int .u256) := .scalar (.int .u256) (by rfl)
@@ -26,16 +29,18 @@ def StorageDeclaration.pack {E τ} (d : StorageDeclaration E τ) : FixedPackFn E
     (alignFixedPack (uintHeaderCell E).pack)
     (fun _ _ _ => alignFixedPack (uintHeaderCell E).pack)
     (fun _ _ => alignFixedPack (uintHeaderCell E).pack)
+    (fun _ => alignFixedPack (uintHeaderCell E).pack)
 
 def StorageDeclaration.paths {E τ} (d : StorageDeclaration E τ) : Source.SPath → List Source.SPath :=
   StorageDeclaration.casesOn (motive := fun _ _ => Source.SPath → List Source.SPath) d
-    (fun fixed => fixed.paths) (fun p => [p]) (fun _ _ _ p => [p]) (fun _ _ p => [p])
+    (fun fixed => fixed.paths) (fun p => [p]) (fun _ _ _ p => [p]) (fun _ _ p => [p]) (fun _ p => [p])
 
 def StorageDeclaration.endByte {E τ} (d : StorageDeclaration E τ) : Nat → Nat :=
   StorageDeclaration.casesOn (motive := fun _ _ => Nat → Nat) d
     (fun fixed => fixed.endByte) (fun cursor => roundSlot ((uintHeaderCell E).endByte (roundSlot cursor)))
     (fun _ _ _ cursor => roundSlot ((uintHeaderCell E).endByte (roundSlot cursor)))
     (fun _ _ cursor => roundSlot ((uintHeaderCell E).endByte (roundSlot cursor)))
+    (fun _ cursor => roundSlot ((uintHeaderCell E).endByte (roundSlot cursor)))
 
 theorem StorageDeclaration.pack_good {E τ} (d : StorageDeclaration E τ) : FixedPackGood d.pack := by
   cases d with
@@ -43,6 +48,7 @@ theorem StorageDeclaration.pack_good {E τ} (d : StorageDeclaration E τ) : Fixe
   | uintArray => exact alignFixedPack_good _ (uintHeaderCell E).pack_good
   | packedUnsignedArray _ _ _ => exact alignFixedPack_good _ (uintHeaderCell E).pack_good
   | signedArray _ _ => exact alignFixedPack_good _ (uintHeaderCell E).pack_good
+  | scalarArray _ => exact alignFixedPack_good _ (uintHeaderCell E).pack_good
 
 theorem StorageDeclaration.pack_paths {E τ} (d : StorageDeclaration E τ) : FixedPackPaths d.pack d.paths := by
   cases d with
@@ -50,6 +56,7 @@ theorem StorageDeclaration.pack_paths {E τ} (d : StorageDeclaration E τ) : Fix
   | uintArray => exact alignFixedPack_paths _ _ (uintHeaderCell E).pack_paths
   | packedUnsignedArray _ _ _ => exact alignFixedPack_paths _ _ (uintHeaderCell E).pack_paths
   | signedArray _ _ => exact alignFixedPack_paths _ _ (uintHeaderCell E).pack_paths
+  | scalarArray _ => exact alignFixedPack_paths _ _ (uintHeaderCell E).pack_paths
 
 theorem StorageDeclaration.pack_end {E τ} (d : StorageDeclaration E τ) : FixedPackEnd d.pack d.endByte := by
   cases d with
@@ -57,6 +64,7 @@ theorem StorageDeclaration.pack_end {E τ} (d : StorageDeclaration E τ) : Fixed
   | uintArray => exact alignFixedPack_end _ _ (uintHeaderCell E).pack_end
   | packedUnsignedArray _ _ _ => exact alignFixedPack_end _ _ (uintHeaderCell E).pack_end
   | signedArray _ _ => exact alignFixedPack_end _ _ (uintHeaderCell E).pack_end
+  | scalarArray _ => exact alignFixedPack_end _ _ (uintHeaderCell E).pack_end
 
 theorem dynamic_header_cell {E : Source.Env} {root : Source.DeclName}
     (declared : E.rootTy root = some (.array .storage (.int .u256) none)) :
@@ -89,6 +97,12 @@ theorem StorageDeclaration.paths_typed {E τ} (d : StorageDeclaration E τ) (p :
     rw [typed]
     rfl
   | signedArray _ _ =>
+    have same : q = p := List.mem_singleton.mp member
+    subst q
+    rw [typed]
+    rfl
+
+  | scalarArray _ =>
     have same : q = p := List.mem_singleton.mp member
     subst q
     rw [typed]

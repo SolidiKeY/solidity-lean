@@ -4,7 +4,7 @@ namespace Solidity.Yul.Views
 
 def StorageDeclaration.integerType? {E τ} (d : StorageDeclaration E τ) : Option Source.IntTy :=
   StorageDeclaration.casesOn (motive := fun _ _ => Option Source.IntTy) d
-    (fun _ => none) (some .u256) (fun t _ _ => some t) (fun t _ => some t)
+    (fun _ => none) (some .u256) (fun t _ _ => some t) (fun t _ => some t) (fun _ => none)
 
 /-- Typed header metadata from the ONE original ordered packing cursor. -/
 def StorageDeclarations.integerHeaders {E ds} (d : StorageDeclarations E ds) :
@@ -52,6 +52,11 @@ theorem StorageDeclarations.integerHeaders_sound {E ds} (d : StorageDeclarations
             · rw [← next] at member
               obtain ⟨h,hm⟩ := ih _ _ _ second member
               exact ⟨h,List.mem_append.mpr (Or.inr hm)⟩
+          | scalarArray kind =>
+            change (root,t,incoming) ∈ tail.integerHeaders ((StorageDeclaration.scalarArray (E := E) kind).endByte cursor) at member
+            rw [← next] at member
+            obtain ⟨h,hm⟩ := ih _ _ _ second member
+            exact ⟨h,List.mem_append.mpr (Or.inr hm)⟩
           | uintArray =>
             change (root,t,incoming) ∈ (name,Source.IntTy.u256,cursor)::tail.integerHeaders _ at member
             rcases List.mem_cons.mp member with same | member

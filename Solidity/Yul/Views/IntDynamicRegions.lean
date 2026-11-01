@@ -36,6 +36,7 @@ theorem StorageDeclarations.integer_header_roots {E ds} (d : StorageDeclarations
     | uintArray => exact List.Sublist.cons₂ root (ih ((StorageDeclaration.uintArray (E := E)).endByte cursor))
     | packedUnsignedArray t u h => exact List.Sublist.cons₂ root (ih ((StorageDeclaration.packedUnsignedArray (E := E) t u h).endByte cursor))
     | signedArray t h => exact List.Sublist.cons₂ root (ih ((StorageDeclaration.signedArray (E := E) t h).endByte cursor))
+    | scalarArray k => exact List.Sublist.cons root (ih ((StorageDeclaration.scalarArray (E := E) k).endByte cursor))
 
 theorem ComputedStorage.integer_headers_unique {E ds d active a} (r : @ComputedStorage E ds d active a) :
     (r.integerTrace.map Prod.fst).Nodup := (d.integer_header_roots _).nodup r.distinct
