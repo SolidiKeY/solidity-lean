@@ -367,8 +367,9 @@ arguments to function values, and every reference in an external
 signature.
 
 Gates run: `./run-lean.sh` (`lake build`: 1019 jobs, success; the
-SolkeyTestSuite step OOM-kills `Derived17`, the baseline, and under parallel
-load `Derived21`, which has no function values); `TrustAudit.lean` through
+SolkeyTestSuite step OOM-kills `Derived17`, the baseline; `Derived21`, also
+killed once under parallel load, builds on the retry in 166s;
+`check-solkey`: 37 mismatches, the baseline); `TrustAudit.lean` through
 the Lean server ("trust: 8 dispatch theorems use only the standard
 axioms"); `node --test` of `finite-dispatch` (30/30; the FunctionTypes.sol
 suite timed out once under load and passes alone), `dispatch-signatures`
