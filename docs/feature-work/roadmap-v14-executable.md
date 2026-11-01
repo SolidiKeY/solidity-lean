@@ -1389,3 +1389,53 @@ boundary. Original Work/Backfill obligations remain partial/open. Strict frozen
 no-new-docs still fails+2 inherited missing paths; publication-relative no-new
 passes0; raw checker remains exit1 at48missing37ambiguous. No waiver or parent
 completion is claimed. The same original goal remains ACTIVE for ready work.
+
+
+## Checkpoint18 — dynamic ordinary-payment requested gas
+
+Owned StipendCall consumes the existing pinned stipend, Scalar numeric slice,
+ValueCall local relocation and typed constructed frame. Actual emitted DUP2,
+ISZERO, PUSH32(stipend), MUL chooses request2300 for zero value and request0
+for nonzero value. Code is independent of caller/amount. operands_correct
+preserves the full signed/uint/spill frame and exact gas/address/value/buffer
+order. This proves a requested operand, not universal EIP150/value-stipend
+forwarding or G06 Fitted/Enforced. The actual general frame producer remains
+OPEN; frameTail is an independently constructed two-local representation.
+
+Actual heightTrace reaches entry+8 at the flag/stipend PUSH boundary before
+MUL reduces it to+7. local_capacity derives spill≤1014 from two local cells;
+the old fixed-gas spill1015 is now a meaningful rejected boundary. prefix_safe
+consumes the existing capacity theorem. Complete encoding is76bytes including
+all PUSH payloads, DUP6/DUP2, ISZERO, MUL and CALL. decode_bytes is the existing
+encoder roundtrip; numeric_boundary=None remains unsupported CALL, not revert.
+No arithmetic, opcode, source or gas semantics is reimplemented. Componentwise
+byte proofs avoid unfolding symbolic payloads; failed budget-normalization logs
+are retained and no proof/resource limit was raised.
+
+Inhabited controls use zero/99/13 runtime amounts with distinct populated
+signed locals and spills17/29, maximum uint, exact test and eight-word peak,
+wrong fixed request and physical-capacity negatives. All19 headline/control
+axiom outputs are guarded against actual standard Lean axiom sets.
+
+New lane-only export-stipend-call.lean and check-stipend-call-evm.mjs consume
+actual Backend.encode output and the unchanged offline EthereumJS10.1.3
+Osaka cache/pin from checkpoint17. Six cases at the existing1Mgas/180s limits
+observe2300 callee-entry gas for amounts0/99/13 and a real dead-byte REVERT.
+Full protected stack/memory, debit/credit, exact return bytes and rollback are
+checked. Unfunded1001 against1000 never enters the installed reverting receiver,
+returns false/empty bytes and preserves balances. Wrong fixed2300 requests for
+nonzero99 enter at4600 and reject the desired2300 observation. These are bounded
+external observations only, not kernel CALL/world/resource correspondence or
+full failure-ordering proof. No source failure-byte mismatch is erased.
+
+Separate independent read-only finder/skeptic kernel reviews found no proof,
+non-vacuity or ownership defect; requested guarded axiom reports are implemented.
+Test/final reviews and current gates are recorded in the checkpoint18 handoff.
+Original G43, G36.03, G44.01-.03, G45.01-.06 and Backfill A/B retain their
+existing exact open producer obligations. This incremental consumer does not
+close the lane; the original goal remains ACTIVE for ready assigned work.
+
+Independent harness finder required identical bodies across all five ordinary
+cases (including zero/nonzero) and identical reverting receiver bytes across
+funded/unfunded cases. These checks plus exact STOP receiver bytes were added;
+the skeptic found no remaining runtime-observation defect.

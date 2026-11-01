@@ -1310,3 +1310,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/ValueCall.lean` | Real empty-data CALL byte emitters with literal or relocated DUP6 local amount; actual numeric operand frames, derived capacity, full PUSH payload order; CALL/gas/world/frame-producer adequacy open |
 | `Backend/Executable/ValueCallChecks.lean` | Distinct literal inputs, uniform two-caller typed local reads, protected signed/uint/spill frame, wrong-index/order, exact capacity,160-bit address and unsupported-CALL controls |
+
+| `Backend/Executable/StipendCall.lean` | Runtime amount DUP2/ISZERO/MUL requested-gas selector, actual CALL operands and full bytes, derived eight-word peak; universal forwarding/world/frame adequacy open |
+| `Backend/Executable/StipendCallChecks.lean` | Same-code zero/nonzero locals, exact test/PUSH boundaries, wrong fixed request, maximum amount, 1014/1015 spill capacity and encoding controls |

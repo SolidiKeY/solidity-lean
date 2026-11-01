@@ -968,3 +968,6 @@ import Solidity.Backend.Executable.PaymentHistory
 
 import Solidity.Backend.Executable.ValueCall
 import Solidity.Backend.Executable.ValueCallChecks
+
+import Solidity.Backend.Executable.StipendCall
+import Solidity.Backend.Executable.StipendCallChecks
