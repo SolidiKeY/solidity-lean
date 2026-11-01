@@ -1,0 +1,41 @@
+{
+  "consumer_head": "09b608b424fbbddeffa07075c8f03359f6146387",
+  "producer_head": "66c08fdefbbb53c0eee111b09d1baa6277fedff5",
+  "worktree": "/workspace/v14-private-deps/v13-error-consumer",
+  "modules": [
+    {
+      "path": "Solidity/Backend/AbiWorld/ErrorLayout.lean",
+      "sha256": "c2b90db39297b37a1af7f3846ae87e1670d38eeb602fed3de98b3b8c2769d6e1",
+      "blob": "a809d9ac21d8eb2f4430c9f529611df85ecd9869"
+    },
+    {
+      "path": "Solidity/Backend/AbiWorld/ErrorRoundtrip.lean",
+      "sha256": "b64e8c5646fee9b3463ee9098d72b6c655e922c28bf53eb15777109fb6433a48",
+      "blob": "7035a38919d95c9682ceaae3c8b92d653aeea583"
+    },
+    {
+      "path": "Solidity/Backend/AbiWorld/ErrorEmission.lean",
+      "sha256": "cda9ef4b708ff503ed91317db8d10c73b47e7eb08bec672635eeb24a689235cf",
+      "blob": "b01003bd8db668867cfa02297fa502df601361cc"
+    }
+  ],
+  "closure_existing_delta": {
+    "Solidity/Syntax/Raw.lean": "kept local2513fcf1aa048415193e2651f7991c8856753ace; peer32fa7d05e94169d500de4e081decea694e70fb7a adds canonFnTy array canonicalisation; no reserved edit, concrete combined recheck required"
+  },
+  "limits": "private development only; no producer merge/publication/full integration",
+  "client_source": "tests/v14-executable/staged/PeerFailure.lean",
+  "canonical_private_module": "Solidity/Backend/Executable/PeerFailure.lean",
+  "check_command": "LEAN_NUM_THREADS=1 lake -f v14-runtime.lakefile.toml env lean -j1 --tstack=131072 Solidity/Backend/Executable/PeerFailure.lean",
+  "resource_guard": "flock writer.lock through exit; Docker memory.max12884901888 memory.swap.max0; timeout180; shared source/toolchain keyed .lake artifact cache; no concurrent Lean/LSP",
+  "provenance": "Concrete private closure is checked independently. Peer prior gates are not reused as this combined tree evidence.",
+  "private_head": "58a00e6018c82128d78ba41b93d4968f1d6c47f5",
+  "private_tree": "2c2bb40ad13c6ff19db444336837f6c43b4c4753",
+  "parent": "09b608b424fbbddeffa07075c8f03359f6146387",
+  "status": "private exact concrete tree; no merge/publication/full lane adequacy",
+  "combined_gate": {
+    "command": "./run-lean.sh via bounded-peer-full.py peer-combined-full",
+    "status": "pass",
+    "evidence": "/workspace/v14-parallel-evidence/peer-combined-full.log",
+    "decisive": "1045 default+262TestSuite,377/131/131;12GiB/no swap;4.05s;noOOM"
+  }
+}

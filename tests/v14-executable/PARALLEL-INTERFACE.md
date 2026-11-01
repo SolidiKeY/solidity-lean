@@ -29,3 +29,24 @@ capacity, Fits and placement conditions. No desired simulation oracle is an
 input. V15–V17 may consume these exact source-only interfaces incrementally;
 final integration requires checking a concrete combined tree. General G43,
 G36.03, source/general runtime frames and fetched-byte/resources remain open.
+
+
+The staged `staged/PeerFailure.lean` client consumes exact V13 checkpoint
+66c08fdefbbb53c0eee111b09d1baa6277fedff5 ErrorEmission/ ErrorRoundtrip/ ErrorLayout.
+Materialize it byte-identically as Solidity/Backend/Executable/PeerFailure.lean
+in a private dependency tree, with those exact three producer source blobs.
+It is deliberately not registered in the assigned core before integration.
+`constructor_catch` composes actual checkedRun REVERT bytes with the existing
+paid creation caller's typed catch result; `emitted_resume` runs the real tail
+on its grown heap, retaining the independent fixed paidOne fixture. The numeric result derives
+no machine-world relation.
+The slice itself has no world. The concrete machine has distinct words17/29,
+memory0x55, offset32, and an unsupported ADD suffix after REVERT. `actual_slice`
+retains its entire protected stack. `capacity_refused` fails at1023 caller words;
+`raw_bytes_refused` and the actual emitted same-payload RETURN refuse wrong
+packet/terminal; missing/failed slice observations cannot fabricate a catch.
+No codec or semantics are reimplemented. Fits and two cells are derived for
+the witness. General gas/memory expansion, fetched execution, world lowering
+and final producer/core integration remain open. The peer closure has one
+existing-core blob delta in Syntax/Raw canonicalisation; private checking keeps
+the assigned core unchanged and records both hashes rather than importing it.

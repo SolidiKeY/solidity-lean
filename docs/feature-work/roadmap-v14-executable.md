@@ -1125,3 +1125,38 @@ The small parallel interface is recorded in
 [PARALLEL-INTERFACE](../../tests/v14-executable/PARALLEL-INTERFACE.md), with exact
 module blobs and source commit in the adjacent JSON. Its source is committed;
 the external checkpoint export supplies the immutable bundle/archive checksums.
+
+
+## Checkpoint 14 — exact peer emission to typed constructor catch
+
+The staged lane-local client in tests/v14-executable/staged/PeerFailure.lean
+uses actual sealed V13 ErrorEmission.execute_error/catch_error and the existing
+CreationFrame.branch/caught_run/tail. constructor_catch relates the actual
+slice terminal to the actual typed catch outcome; emitted_resume composes the
+heap-dependent caller tail, retaining the actual supplied paidOne world. That
+world is not a state of the numeric slice. The fixture derives Fits32 and two
+free cells, protects words17/29 and existing memory0x55, and halts before an
+unsupported ADD suffix. Capacity1023, malformed raw ca/fe and success-terminal
+negative controls are explicit. The handler allocates the existing Error reason
+and drops only its catch local, preserving the old heap aliases.
+
+The client is a staged lane test, not a registered core module requiring an
+unmerged producer. Exact committed inputs are materialized privately and their
+hashes, checked combined tree and gates are recorded in the new handoff. No
+reserved producer implementation is modified. This is substantive G44.03 /
+Backfill B packet/frame transport, not general source constructor lowering,
+new/try-new compiler adequacy or pinned EVM creation. All original obligations
+and proof budgets remain; the original goal stays ACTIVE for ready work.
+
+
+The concrete private combined commit is
+58a00e6018c82128d78ba41b93d4968f1d6c47f5 (tree
+2c2bb40ad13c6ff19db444336837f6c43b4c4753). Its ./run-lean.sh gate
+passed1045 default+262TestSuite and pinned377/131/131 in4.05s, under
+12GiB/no swap with Lean-j1 and the writer lease. This validates that concrete
+staged import closure, not master publication, whole-lane adequacy or a
+world/gas theorem. Eleven new scoped axiom reports contain only standard
+axioms. Finder/skeptic requested explicit fixed-world labeling, immutable
+producer provenance, actual same-payload RETURN and missing/failed-slice
+negative controls; these were implemented. Final independent source reviews
+are retained with raw diagnostics and the new exact-head export.
