@@ -1277,3 +1277,87 @@ NEW evidence: `/workspace/scratch/v13-mixed-caller-88111a7b-evidence`.
 NEW exact-head artifacts: `/workspace/scratch/v13-mixed-caller-88111a7b-artifacts`.
 Raw docs1/frozen no-new failure remain separate from complete publication/prior
 finding equality; reserved doc repairs and prior mandatory failures stay open.
+
+
+## Audit87fc9907: two current dynamic-array packets
+
+Original G41/BackfillA/B increment afterb7b64c76; full V13 remains partial.
+[`Solidity/Backend/AbiWorld/ArrayPairPacket.lean`](../../Solidity/Backend/AbiWorld/ArrayPairPacket.lean)
+concatenates existing intrinsic Vals with generalized casesOn, reads both arrays
+from ONE actual StateRepr using WordArrayPacket.local_complete, and uses the
+published AbiEntry.Val/Seq/Vals codec unchanged. There is no replacement encoder,
+new source/heap/target semantics, emitted runtime memory reader or new literal
+packet pipeline. Equal references and equal indices are allowed generically.
+
+The actual first encoded payload determines secondOffset:64+payload.length,
+proved96+32*n. Exact total length is128+32*(n+m). Generic encoded_values/words,
+head_slices, first_tail/second_tail/first_prefix and prefix_noninterference retain
+complete order. Changing second contents OR length preserves the first prefix;
+this is a codec fact, NOT a heap-write frame for aliased objects. Empty arrays
+still encode a length word, so empty-first secondOffset is96, not64.
+
+Both current arrays and both entry-address identities follow actual captured
+caller references. selected consumes CallerPacket.selected, retaining original
+compilation/miss/hit/Disjoint/tail withinM/write exclusion/source execution/
+representation/frame/capacity, stack/BaseExtends/GrowsAllocator premises. The
+original Disjoint guard concerns return destination versus captured view; no
+array-separation hypothesis was added. Both typed heap lengths are<W. This does
+NOT imply the byte offset96+32*n<W; generic wordBytes formulas are raw codec,
+not an unwrapped-decoder or Source ABI64 allocation/fuel/profile theorem.
+Concrete offset160 bound and actual published second-head loads at byte32
+returning96/160 pass; the96/128/160 arithmetic cases are proved separately.
+
+New tests
+[`tests/v13-abi-world/ArrayPairCodecControls.lean`](../../tests/v13-abi-world/ArrayPairCodecControls.lean),
+[`tests/v13-abi-world/ArrayPairValues.lean`](../../tests/v13-abi-world/ArrayPairValues.lean), and
+[`tests/v13-abi-world/ArrayPairControls.lean`](../../tests/v13-abi-world/ArrayPairControls.lean)
+reuse the existing populated compiled prefix and selected call/tail. ONE reached
+machine provides BOTH256byte packets: shared old object[64,160,2,12,11,2,12,11]
+and distinct older object[64,160,2,12,11,2,23,29], alongside original160byte mixed
+and128byte standalone observations. The shared-object witness uses distinct
+retained locals pointing to the same reference; no narrower equal-index-only
+fixture. Both headers2, old-address identities, marker42/store11, stack77 and
+actual base/growth relations remain. Alias controls prove shared cell equality,
+other-cell inequality and private-object refusal from reached representation.
+Resources retain actual prefix7+call4=11wordcells and cursors135→139.
+
+Codec-only empty/full-word controls include both-empty128, one-empty192 and
+full-word224byte packets with300 and maximum uint elements in the two arrays.
+Wrong second offsets, swapped tails, stale[7,11], private[99,101], deduplication,
+missing empty length words and byte truncation claims have positive baselines.
+Changing the second array length to zero still preserves the full first prefix.
+All19complete ordered vectors, including all9prior mixed/standalone vectors
+reexported byte-identical, are retained. No altered expected vector or ByteRange
+restriction. Pure codec fixtures are distinct from compiled/source admission.
+
+All4new files have strict per-file MCP PASS, focused/import and three source
+fixture checks PASS, and34headline scoped axiom guards with only standard
+propext/Classical.choice/Quot.sound dependencies. Raw syntax, redundant-tactic,
+length-equation and recursion-depth constructor-search failures remain in NEW
+evidence. Constructor search for the huge numeric bound was replaced by kernel
+decision checking; no proof/recursion/time/fuel/node/stack budget changed. An
+initial intended heap-length edit missed its exact target; the retained repeat
+failure was followed by verified replacement using published Heap.len/MObj laws.
+No unchanged failed Suite180/composite5400 retry or guard weakening.
+
+Independent read-only finder/skeptic source reviews pass without Lean/server/
+builds. They checked actual premises/non-vacuity, same-machine observations,
+equal aliases, nonwrap/admission distinctions and ownership. All prior26owned
+modules and old test fixtures remain unchanged; nine exact read-only privateV12
+sources at7881cb3a are unchanged. Mainalone still lacks those imports; all passing
+Lean gates are private combined-tree validation. Persistent goal remains blocked
+and untouched; this recovery does not reactivate automatic continuation.
+
+Every original queue: G40partial/G41partial; G42.01/.02/.03/.05blocked;
+G42.04/.06partial; BackfillsA/Bpartial. General source/native decoder/dispatch,
+unknown-runtime aggregate encoding, CALL/RETURNDATA, arbitrary callee/callback/
+library/world/physical resource composition and mandatory whole-lane gates remain
+open. Raw docs1/frozen regressions stay failed, separate from complete publication/
+prior finding equality. Old Suite124/181.061s, full1/5038.87s, cold5400exit124 and
+all original sealed failures remain. No reserved edit/pin/profile/verdict/semantic
+change, new axiom, goal mutation or publication. G03 proposal only: attach these
+named G41/BackfillA/B facts; close no parent feature.
+
+NEW evidence: `/workspace/scratch/v13-array-pair-87fc9907-evidence`.
+NEW exact-head artifacts: `/workspace/scratch/v13-array-pair-87fc9907-artifacts`.
+Prior21-entry mixed seal and all94earlier entries remain immutable.
