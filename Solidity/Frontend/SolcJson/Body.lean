@@ -372,14 +372,31 @@ partial def tyText (S : Structs) (j : Json) : Except Gap String := do
     -- one is printed too, and a call through it refused by the elaborator
     let ps := ((J.opt j "parameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
     let rs := ((J.opt j "returnParameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
-    if ps.any fun p => ["memory", "storage", "calldata"].contains ((J.str? p "storageLocation").getD "") then
+    -- A reference parameter is printed only for an internal memory or
+    -- storage array of an elementary type (`uint[] memory`), the ones the
+    -- finite dispatcher passes by reference (`fnRefElem?`); others stay refused.
+    let arrayLoc (p : Json) : Option String :=
+      (J.str? p "storageLocation").filter (["memory", "storage"].contains ·)
+    -- A struct parameter (`fnRefStruct?`) is printed at its location too.
+    let memArray (p : Json) : Bool :=
+      (arrayLoc p).isSome && J.str? j "visibility" != some "external" &&
+        ((J.opt p "typeName").any fun t => (J.kind t == "ArrayTypeName" &&
+          (J.opt t "length").all (· == .null) &&
+          (J.opt t "baseType").any (J.kind · == "ElementaryTypeName")) ||
+          (J.kind t == "UserDefinedTypeName" && (J.tyStr p).startsWith "struct "))
+    if ps.any fun p => ["memory", "storage", "calldata"].contains ((J.str? p "storageLocation").getD "") &&
+        !memArray p then
       throw (.unsupported "a function type with a reference parameter")
-    let ps ← ps.mapM fun p => do tyText S (← J.get p "typeName")
+    let ps ← ps.mapM fun p => do
+      let T ← tyText S (← J.get p "typeName")
+      pure (if memArray p then s!"{T} {(arrayLoc p).getD ""}" else T)
     let rs ← rs.mapM fun p => do
       let T ← tyText S (← J.get p "typeName")
       let loc := (J.str? p "storageLocation").getD ""
       if ["memory", "storage", "calldata"].contains loc then
-        unless loc == "memory" && T == "bytes" && ps.isEmpty && rs.length == 1 &&
+        -- one internal `bytes memory` or elementary memory-array return
+        -- (`fnMemRet`), beside any printable parameters
+        unless loc == "memory" && (T == "bytes" || memArray p) && rs.length == 1 &&
             J.str? j "visibility" != some "external" do
           throw (.unsupported "this function type's reference return")
         return T ++ " memory"
