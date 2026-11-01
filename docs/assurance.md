@@ -228,6 +228,13 @@ and CI showed the same failures without them).
   root) outside the pass. `localAlias` elaborates; the `roMentions` refusal
   of `099bfbe1` is untouched. The test then stops at `sliceRead`,
   `sliceOfSlice`, `slicePast`: pending, "open proof goals" (below).
+  **Reverted at integration (2026-11-02):** the roots also admit named-argument
+  reverts with a calldata array (`uint[] calldata solcErrorCaptureN = v`,
+  `SolcJson/Body.lean`), which `tests/upstream/AggregateErrorControls.lean`
+  and `AggregateErrorBoundary.lean` pin as refused ("without a known calldata
+  origin"), with no replay evidence for the admitted path; and test 31 still
+  fails on its slice rows. Master keeps the refusal; reapply together with
+  replayed error-encoding vectors and updated pins.
 * **44** (`a48fd85f`): in the testing import a specification that does not
   parse became a `solidity.specificationSyntax` scope rejection, raised
   before the named refusal "ledger locations in assignable clauses are not
