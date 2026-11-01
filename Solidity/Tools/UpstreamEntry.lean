@@ -28,8 +28,10 @@ the actual calldata (selector included) and decides, for ABI coder v2:
 * `blocked`: a named refusal (a lazily accepted layout an eager copy rejects,
   an element failing only on access, a possible `Panic(0x41)`, or decoded
   arguments more than four times the calldata, where solc may run out of gas).
-* `legacy`: a parameter outside the typed shapes (function values, nominal
-  enums); the previous byte-identical gate applies unchanged.
+* `legacy`: a parameter outside the typed shapes (function values, enums
+  nested in arrays or structs, an enum without its declared bound); the
+  previous gate applies unchanged. A top-level enum parameter decodes at its
+  declared cardinality (`Kind.enumBelow`), as `validator_revert_t_enum_*`.
 -/
 
 namespace Solidity.Tools.UpstreamEntry
@@ -97,12 +99,21 @@ def readsOnly (d : FunDecl) (x : String) (s : Shape) : Bool :=
     | some depth => (d.body.flatMap (RawStmt.flatMapDeep fun st => st.exprs)).all
         (readsOnlyIn x depth)
 
-/-- The typed parameters of a declaration, or `none` outside the shapes. -/
-def params (d : FunDecl) : Option (List Param) :=
-  d.params.mapM fun (x, T) => do
-    guard (plain T d.widths x)
-    let t ← AbiTy.of T d.widths x
-    let shape ← shapeOf t
+/-- The typed parameters of a declaration, or `none` outside the shapes.
+`enums` gives a top-level enum parameter's declared largest member (the
+import row's `paramRanges`, by position); an enum parameter without one, and
+an enum nested in an array or a struct, keep their refusals. -/
+def params (d : FunDecl) (enums : Nat → Option Nat := fun _ => none) : Option (List Param) :=
+  d.params.zipIdx.mapM fun ((x, T), i) => do
+    let enum := (Semantics.lookupBy (x ++ "#enum") d.widths).isSome || (enums i).isSome
+    let shape ← if enum then do
+        guard (T matches .prim _)
+        let hi ← enums i
+        pure (Shape.word (.enumBelow (hi + 1)))
+      else do
+        guard (plain T d.widths x)
+        let t ← AbiTy.of T d.widths x
+        shapeOf t
     let loc := match T with
       | .prim _ => Loc.value
       | .ref _ => if Semantics.lookupBy x d.paramLocs == some ParamLoc.calldata then .calldata else .memory
@@ -117,9 +128,10 @@ inductive Plan where
 
 /-- Decide one raw vector: `signature` is the canonical ABI signature and
 `args` the argument bytes after the selector. -/
-def plan (d : FunDecl) (signature : String) (args : List Nat) : Plan :=
+def plan (d : FunDecl) (signature : String) (args : List Nat)
+    (enums : Nat → Option Nat := fun _ => none) : Plan :=
   if args.any (256 ≤ ·) then .blocked "invalid calldata byte" else
-  match params d with
+  match params d enums with
   | none => .legacy
   | some ps =>
     let data := Semantics.selectorBytes (Semantics.customSelector signature) ++ args.map UInt8.ofNat

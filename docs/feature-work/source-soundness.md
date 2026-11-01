@@ -816,3 +816,22 @@ general match or by per-case `rfl` equations, never by
 **Elaboration.** `ExprProgress.lean` and `StmtProgress.lean` each check
 in under a minute with the language server; `SoundnessExamples.lean`
 evaluates the loop and storage witnesses in the kernel in seconds.
+
+## Lane FU1 (followup-20261101): checkpoint 4's first two items
+
+**Not started in `Solidity/Source`.** `abi.decode` (the `.elemType`
+constructor, "type names as values (abi.decode) are not typed",
+`Ledger.lean`) and calldata references (`.slice`; `Eval.lean`'s "calldata
+arrays are not modelled" and "member of calldata" `stuck` arms) keep their
+gap-ledger entries: typing them, extending the G13 checker, preservation
+and gap-relative progress did not fit beside the lane's other items (each
+core change costs a 45–70 min rebuild on the lane's VM).
+
+**Done in the elaborated model** (the layer the upstream replay runs): a
+top-level enum in `abi.decode` (`enum_with_256_members`' frontend gap) is
+decoded at its member count (`abiDecodeWith`, `Syntax/Elab/Lower.lean`; the
+import admits it in `SolcJson/Body.lean`), and with the replay's enum
+parameter/return positions the fixture is working in both pipelines; see
+[abi-hashes.md](abi-hashes.md), "Lane FU1". `calldata_nested_array_static_reencode_v2`
+(an element that fails only when read inside `abi.encode`) needs
+access-time calldata reads in the elaborated model and stays blocked.

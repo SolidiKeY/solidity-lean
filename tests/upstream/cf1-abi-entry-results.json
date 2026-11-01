@@ -1,24 +1,24 @@
 {
  "version": 1,
- "lane": "CF1 abi-entry-decoding",
- "batch": "relocated-20261031",
- "branch": "cloud/relocated-20261031/abi-entry-decoding",
- "baseCommit": "aaa9db5ce1d62f4c8ae3bb9e0778ddf0e727ee07",
- "recordedAt": "2026-11-01T00:24:27Z",
+ "lane": "FU1 followups (after column rerun; before kept from CF1)",
+ "batch": "followup-20261101",
+ "branch": "cloud/followup-20261101/followups",
+ "baseCommit": "457130f3da4bc474825bc8f3df6bf65e1c33f813",
+ "recordedAt": "2026-11-01T20:17:07Z",
  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
- "command": "scripts/abi-entry-fixtures.sh SOLJSON {before|after}: node scripts/solidity-upstream.mjs run --compiler SOLJSON --filter test/libsolidity/semanticTests/PATH --batch-size 1 --out .lake/upstream/cf1-{before|after}/N",
+ "command": "scripts/abi-entry-fixtures.sh SOLJSON fu1final; scripts/abi-entry-collect.py --keep-before OLD.json .lake/upstream/cf1-fu1final OUT.json META.json",
  "runtimePolicy": "unchanged: 120000 ms per pipeline, 1000 loop fuel, every required pipeline",
  "before": "base Solidity/Tools/Upstream.lean (byte-identical gate), model and runner at aaa9db5c",
- "after": "typed entry decoder (Semantics/AbiEntry.lean, Tools/UpstreamEntry.lean); runner script unchanged",
- "note": "Observations are complete and in order (byte lists hex-encoded). Fixture list: tests/upstream/cf1-abi-entry-fixtures.txt.",
+ "after": "typed entry decoder (Semantics/AbiEntry.lean, Tools/UpstreamEntry.lean) after the CF1+CF2 integration merge, with top-level v2 enum parameters (Kind.enumBelow); runner relaxes enum metadata for top-level v2 enums only",
+ "note": "Observations are complete and in order (byte lists hex-encoded). Fixture list: tests/upstream/cf1-abi-entry-fixtures.txt. The before column is CF1's (copied from the previous file with --keep-before); the after column is cf1-fu1final, rerun on lane FU1 (CF1+CF2 merged, top-level enum abi.decode, import-declared enum parameters and returns at the replay).",
  "counts": {
   "before": {
    "blocked": 29,
    "working": 13
   },
   "after": {
-   "working": 21,
-   "blocked": 21
+   "working": 22,
+   "blocked": 20
   }
  },
  "fixtures": [
@@ -171,10 +171,10 @@
     }
    },
    "after": {
-    "reportSha256": "b18b53e0ed655b14782b5768a34a5e6c4e2752da8aa27029dd235e942a58f435",
-    "outputDirectory": ".lake/upstream/cf1-after/1",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "2a0bfd208892db45b3f79f3fb70a2fe3fc9a3afff54b9dccd435dfb932d0ff73",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/1",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_length_v2.sol",
      "stage": "lean-runtime",
@@ -610,10 +610,10 @@
     }
    },
    "after": {
-    "reportSha256": "dc1032f8f671e72b3e57a6ad22ff80f47a5a1bf13c0df23a197680931842e88b",
-    "outputDirectory": ".lake/upstream/cf1-after/2",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "199b89d66e0695b58ab2dc61baeac985eeca223f31feea67780b5edbe8e0e7cb",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/2",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_1d_2d_v2.sol",
      "stage": "lean-runtime",
@@ -921,10 +921,10 @@
     }
    },
    "after": {
-    "reportSha256": "2dead35863465c3ea45d58ab6c51c90e7019c8e6a9643c80e3ec69baa273becd",
-    "outputDirectory": ".lake/upstream/cf1-after/3",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "0c525a75947ad8fb5b8b5cec26cb76862e5d239228eb7b0c52815ef5471857a1",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/3",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol",
      "stage": "lean-runtime",
@@ -1102,10 +1102,10 @@
     }
    },
    "after": {
-    "reportSha256": "7e3aced3197aeed4f2331dcebb5e5ea7e2358c9475e100bf845da1bc3cb8f22e",
-    "outputDirectory": ".lake/upstream/cf1-after/4",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "107a491a1bfbfcd62403e6212ee33cbc0dee6c3bc216b638f4b99bfe75ab4df8",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/4",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol",
      "stage": "lean-runtime",
@@ -1237,10 +1237,10 @@
     }
    },
    "after": {
-    "reportSha256": "3c37cbaf936fc88c9f5266575a764babeb43c1117688af34a6cfff8b683a383c",
-    "outputDirectory": ".lake/upstream/cf1-after/5",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "d05607842bb8c2d10caa2ff45318e1b5d47cfb1249fb841d3194e32079e4a957",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/5",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/validation/array_exceeds_calldatasize_no_revert_string.sol",
      "stage": "lean-runtime",
@@ -1354,10 +1354,10 @@
     }
    },
    "after": {
-    "reportSha256": "f7e4284cba5360119b4a9137a9ed988ede7cb22210af441c77dce6e908f4abda",
-    "outputDirectory": ".lake/upstream/cf1-after/6",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "a34969057a8444e29b06315cea4a6a3983a2bfa5c125defc8d26cf25e5620e81",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/6",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/array/calldata_array_bounds_check_nested_bytes.sol",
      "stage": "lean-runtime",
@@ -1471,10 +1471,10 @@
     }
    },
    "after": {
-    "reportSha256": "2c2ddc2ea302c75afe451f96b92df2c607397d9f8f6217eaef8763938d297d79",
-    "outputDirectory": ".lake/upstream/cf1-after/7",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "502daa48268ca7e506e8ed5155e12ef14974323ff9c942955928b3bfc99e6691",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/7",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/array/concat/bytes_concat_nested.sol",
      "stage": "lean-runtime",
@@ -1556,10 +1556,10 @@
     }
    },
    "after": {
-    "reportSha256": "904093d1e189627e27e1a61e0e330011b5798cf4b06557afa49457a43e86b1d3",
-    "outputDirectory": ".lake/upstream/cf1-after/8",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "7057cae952e616103b36daa655505c6fbf8085c4056313ec9ed0296cb701e860",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/8",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory_2.sol",
      "stage": "lean-runtime",
@@ -1657,10 +1657,10 @@
     }
    },
    "after": {
-    "reportSha256": "446ef02883bf076a8aa040a75433c2bd270a2fe14fea1e64b90c8200e517e050",
-    "outputDirectory": ".lake/upstream/cf1-after/9",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "e4f4c75b6ea32bc18b3bac73339393642ab0ccd919bb93248a64151733cb9344",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/9",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/nested_array_calldata_to_memory.sol",
      "stage": "lean-runtime",
@@ -1888,10 +1888,10 @@
     }
    },
    "after": {
-    "reportSha256": "4727f02f6b7fb10be3500877ca70e2b67dc6f19ef9048a7dccb3be8dfb7aab4e",
-    "outputDirectory": ".lake/upstream/cf1-after/10",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "840da424307c936a272c2e1cd16bcf5044fd945e1475fac039effc11fe4b12a0",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/10",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/nested_array_element_memory_to_memory.sol",
      "stage": "lean-runtime",
@@ -2071,10 +2071,10 @@
     }
    },
    "after": {
-    "reportSha256": "9c4d03edd4ffb61788c80de5e90b3a122c3be43d9fd7488a9bf610464960bd18",
-    "outputDirectory": ".lake/upstream/cf1-after/11",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "505cf89d4879daa3ba6578faefbeb91582da6a844e1045b4b9229779b09de7aa",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/11",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/array/indexAccess/arrays_complex_memory_index_access.sol",
      "stage": "lean-runtime",
@@ -2156,10 +2156,10 @@
     }
    },
    "after": {
-    "reportSha256": "41dbe8cf732c0461c1b5a16ab55a3f19895b493894510eb71f7679ed355701dd",
-    "outputDirectory": ".lake/upstream/cf1-after/12",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "c57e954017856bbd4c1623013d70f39c68263dc3eb9dc33794441ac1cd488b64",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/12",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/smoke/bytes_and_strings.sol",
      "stage": "lean-runtime",
@@ -2273,10 +2273,10 @@
     }
    },
    "after": {
-    "reportSha256": "d33ae5eeaa19a8b6dce1d168c1e0c909e50dccbc58db16cdb2bcb93e3abf8906",
-    "outputDirectory": ".lake/upstream/cf1-after/13",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "cbaa5a18233c51d2754262a394cd11e6ad8299e32e2cb5de05c304211a48e6ea",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/13",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/strings/concat/string_concat_nested.sol",
      "stage": "lean-runtime",
@@ -2338,10 +2338,10 @@
     }
    },
    "after": {
-    "reportSha256": "c55e33ccb30b10061e698808c2a5ae2bc5560c30ab7968c8a581e8040ee8426f",
-    "outputDirectory": ".lake/upstream/cf1-after/14",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "cdbce241ae9fb5e7f410021f335a7bd0940a234be7be25e6fe1128c66475e24b",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/14",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/cleanup/enum_v1.sol",
      "stage": "lean-runtime",
@@ -2365,15 +2365,15 @@
     }
    },
    "after": {
-    "reportSha256": "4382c3c4abcf981422b666528cc15a68d1fd4d48a9685976f4fdec066b2c277c",
-    "outputDirectory": ".lake/upstream/cf1-after/15",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "03be924bfee9b4e9b91ecbc357c86365277f1896894c8c656c0dd2b5f8e76290",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/15",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/cleanup/enum_v2.sol",
      "stage": "lean-runtime",
      "status": "blocked",
-     "reason": "nominal enum ABI range not adapted"
+     "reason": "raw ABI replay with physical calldata/memory assembly not adapted"
     }
    }
   },
@@ -2413,10 +2413,10 @@
     }
    },
    "after": {
-    "reportSha256": "e9444933f964c5d753d744e0198325394385b9bc6bceea5516a56d4dcbcf65a5",
-    "outputDirectory": ".lake/upstream/cf1-after/16",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "652051af23ad75ffa468f114afbb4125e65b0ba6007e433e6b098a1341de74ce",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/16",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v1.sol",
      "stage": "lean-runtime",
@@ -2547,10 +2547,10 @@
     }
    },
    "after": {
-    "reportSha256": "52f8967c67c1f909374a3af36b2f9f6babf23b01c6ca7b7844195b1c8e049edf",
-    "outputDirectory": ".lake/upstream/cf1-after/17",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "41ece0c4cd9c4c569848305ffb6497dd66e14ca288823dfeeb20d2e36fc4618b",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/17",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v2.sol",
      "stage": "lean-runtime",
@@ -2672,10 +2672,10 @@
     }
    },
    "after": {
-    "reportSha256": "cc056fdd20b4af69f090c707501df4ec7c659cd488c94bb72dd5236ef634101f",
-    "outputDirectory": ".lake/upstream/cf1-after/18",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "bfad17bda669593fade8237d74179ed51229bc0a84e534b718c7fbfa05fbfee5",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/18",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v1.sol",
      "stage": "lean-runtime",
@@ -2765,10 +2765,10 @@
     }
    },
    "after": {
-    "reportSha256": "eccdbdf6ebf4f43c8a5e7bc67462e4ef20ae3b7c384c21c361cdcbecba978918",
-    "outputDirectory": ".lake/upstream/cf1-after/19",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "c1adccc23fa58b2894a4b0b04f2c6800a8b3f9d06d462fbc38cbf62ccd03db03",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/19",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v2.sol",
      "stage": "lean-runtime",
@@ -2858,10 +2858,10 @@
     }
    },
    "after": {
-    "reportSha256": "dc5a3717d3ebbb18f694ab4c7c6987e8614e879e78a8c41c3424c1b2f1acb343",
-    "outputDirectory": ".lake/upstream/cf1-after/20",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "f7e6feba4bebc46dcf053321fe5675445d017ab378af105812651bb203a04452",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/20",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_bytes_types_v1.sol",
      "stage": "lean-runtime",
@@ -2897,15 +2897,181 @@
     }
    },
    "after": {
-    "reportSha256": "278e22558f620e95859f92466515e7eaffc4826302c5ea441d15a5ac005302a2",
-    "outputDirectory": ".lake/upstream/cf1-after/21",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "aa89305f3de1db23acc931a125df2e0a1242626806e78ddbfe3a17f585a71619",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/21",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/enums/enum_with_256_members.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "nominal enum ABI range not adapted"
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
+     "requiredPipelines": [
+      "legacy",
+      "viaIR"
+     ],
+     "variants": [
+      {
+       "status": "working",
+       "reason": "all supported runtime vectors match",
+       "pipeline": "legacy",
+       "path": "test/libsolidity/semanticTests/enums/enum_with_256_members.sol",
+       "observed": [
+        {
+         "values": [],
+         "signature": "getMinMax()",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000100"
+        }
+       ]
+      },
+      {
+       "status": "working",
+       "reason": "all supported runtime vectors match",
+       "pipeline": "viaIR",
+       "path": "test/libsolidity/semanticTests/enums/enum_with_256_members.sol",
+       "observed": [
+        {
+         "values": [],
+         "signature": "getMinMax()",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000100"
+        }
+       ]
+      }
+     ]
     }
    }
   },
@@ -2924,10 +3090,10 @@
     }
    },
    "after": {
-    "reportSha256": "de38645c5fba7b5c89d1b2f9843e7cda385403ede3b0e65395b5dac920dabbc0",
-    "outputDirectory": ".lake/upstream/cf1-after/22",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "4ff87da431162ff4df2a6a41784b7e4f42d08c626aeb93aa9aed6c2996b5b920",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/22",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_signed_v1.sol",
      "stage": "lean-runtime",
@@ -2951,10 +3117,10 @@
     }
    },
    "after": {
-    "reportSha256": "83a915232072aec0653489450ebe542bf49fcfbb990527e4add077ddaf4346e2",
-    "outputDirectory": ".lake/upstream/cf1-after/23",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "58247290a4f1d6b60ccc29b24fb56ff44663889cc337c68b148dd0dedd58c3a5",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/23",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_signed_v2.sol",
      "stage": "lean-runtime",
@@ -2978,10 +3144,10 @@
     }
    },
    "after": {
-    "reportSha256": "a649a55dbaec687f174b4f78e928404fc6e8fcb6cae0ae7f24f423a6eaf2e7dd",
-    "outputDirectory": ".lake/upstream/cf1-after/24",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "42f174627273fdf4dfd123d1decf2384684c19fbe0f65d86d5766e799c689abf",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/24",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_v1.sol",
      "stage": "lean-runtime",
@@ -3005,10 +3171,10 @@
     }
    },
    "after": {
-    "reportSha256": "3723f067be18b8bae1f08900a26cdbf86df37bb63c96713da9f0e8b550b1d50e",
-    "outputDirectory": ".lake/upstream/cf1-after/25",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "fb88dbfa85934050fb29c84ed5bfcdb91ede744ea35cabf22ec664afed8bcfc6",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/25",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_v2.sol",
      "stage": "lean-runtime",
@@ -3044,10 +3210,10 @@
     }
    },
    "after": {
-    "reportSha256": "7a12f4813c8f6c8b1acc489567dd645deae06c167413b60ae46bd05d5023e93f",
-    "outputDirectory": ".lake/upstream/cf1-after/26",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "2e67b1d6f382d24d19285dfef869c7a17729c544b78ee397f6f175df0912cd2b",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/26",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v1.sol",
      "stage": "lean-runtime",
@@ -3185,10 +3351,10 @@
     }
    },
    "after": {
-    "reportSha256": "fdd1dd84c5893ccf123f6e016f6cafa22e7683b4c25c0852aef81142cca0f6c2",
-    "outputDirectory": ".lake/upstream/cf1-after/27",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "ceae3972b3e865fe6d48ab29d69b3ecc3a743e0d4e656f4823420cfbac036a5b",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/27",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v2.sol",
      "stage": "lean-runtime",
@@ -3326,10 +3492,10 @@
     }
    },
    "after": {
-    "reportSha256": "e5d17e4785d01786545e5f7069b029644249943ef512f0cf0ed09ea9947e42cf",
-    "outputDirectory": ".lake/upstream/cf1-after/28",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "a45196f94401cd03f268148a8260e06b1e0f020fa8c904a6f74bbc7ac181d3dd",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/28",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v1.sol",
      "stage": "lean-runtime",
@@ -3467,10 +3633,10 @@
     }
    },
    "after": {
-    "reportSha256": "b080423d3e08a5ce2cffb45266ffa66de2158230153ca6b94ab54f264813cccd",
-    "outputDirectory": ".lake/upstream/cf1-after/29",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "2d915722eb5c188c68d7439eacd895785808ce18057f05350a50ece9267f94e8",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/29",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v2.sol",
      "stage": "lean-runtime",
@@ -3608,10 +3774,10 @@
     }
    },
    "after": {
-    "reportSha256": "54eaa6358e26c614a1404d176bbeff5e82ffd51f11a4d97c6972686cc429a1ad",
-    "outputDirectory": ".lake/upstream/cf1-after/30",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "2a27cb5c69fbe9682056e7e127ae9076f3fb5a0641d34e8d713e79e6a8fff439",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/30",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v1.sol",
      "stage": "lean-runtime",
@@ -3749,10 +3915,10 @@
     }
    },
    "after": {
-    "reportSha256": "78fce6b3557d7da7d7d5fefb95ed79ffee1dbecd743fa74061afd778a254e676",
-    "outputDirectory": ".lake/upstream/cf1-after/31",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "c25e00ac9df00604a7732a024e53d85c68947a0615dae36dbd5881e0c327eafa",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/31",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v2.sol",
      "stage": "lean-runtime",
@@ -3932,10 +4098,10 @@
     }
    },
    "after": {
-    "reportSha256": "fd203fd9f8e58749f71e4885c1c486b7f84609fedf0ebe30f5db9a82a2da23f0",
-    "outputDirectory": ".lake/upstream/cf1-after/32",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "22afbcf8363c917b9ce16b3b1880d8c5c75d6e944c052c5de6201b695000f23d",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/32",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_underflow_negative_rvalue.sol",
      "stage": "lean-runtime",
@@ -4013,10 +4179,10 @@
     }
    },
    "after": {
-    "reportSha256": "1febae16f34f5e878b1ff0915c3efb3bbcb072cff477d13749b7c696cdbfc351",
-    "outputDirectory": ".lake/upstream/cf1-after/33",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "98a39fa6c82f9943a8103961d3c135e036a54270e15ec0c346221195e7e65d28",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/33",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup.sol",
      "stage": "lean-runtime",
@@ -4040,10 +4206,10 @@
     }
    },
    "after": {
-    "reportSha256": "62cb0d6576e0b73e5e48720432ece5c819f0510663040d4a1f83d36cd69ff3f0",
-    "outputDirectory": ".lake/upstream/cf1-after/34",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "6c0091ff0c71c573efe1873d691c112dadf2d2c2483b26da7301cd9e85be1e6f",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/34",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup_abicoderv1.sol",
      "stage": "lean-runtime",
@@ -4473,10 +4639,10 @@
     }
    },
    "after": {
-    "reportSha256": "46927c8559fd189845f74e6a37db7dc74a3a43823f60980dcd49a96c7e624726",
-    "outputDirectory": ".lake/upstream/cf1-after/35",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "c0e94a0a690cd4b9e05dc24d95172496202ac45678dff8d9100c9f035550372d",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/35",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion.sol",
      "stage": "lean-runtime",
@@ -4999,10 +5165,10 @@
     }
    },
    "after": {
-    "reportSha256": "9c83773b5ddd06565cec4104918b182a5207348060ac3c20f2c54bb5c060dc78",
-    "outputDirectory": ".lake/upstream/cf1-after/36",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "a5c669cdedbd24f9c8db05b8189262d219db198dc5059031bef06013d95c5b81",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/36",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion_abicoderv1.sol",
      "stage": "lean-runtime",
@@ -5119,10 +5285,10 @@
     }
    },
    "after": {
-    "reportSha256": "5442a771f67c35b068eff7a293f1d87cc007673827b3c9c7d536dc5cd438aa4b",
-    "outputDirectory": ".lake/upstream/cf1-after/37",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "08aca7507b3717f89e77b0f8ec1603d80a066379e4ad596de13fdbcf3dd89917",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/37",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/parameter.sol",
      "stage": "lean-runtime",
@@ -5280,10 +5446,10 @@
     }
    },
    "after": {
-    "reportSha256": "a9860638a25fe8124207f7d1869bae9ce601e1f499d27631bda3b0c3ec1c1de6",
-    "outputDirectory": ".lake/upstream/cf1-after/38",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "243badf42e4398d8cb1c67c16bd658cd400febf47968b2581fa7aad4d533c801",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/38",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
      "stage": "lean-runtime",
@@ -5671,10 +5837,10 @@
     }
    },
    "after": {
-    "reportSha256": "d02eb631a330725bc7b5ae8babb243301091cf9e22344f294b1b60487daedb52",
-    "outputDirectory": ".lake/upstream/cf1-after/39",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "5ad422aae7ee7c5fb66b586c59b94a6314a7d9d71841ee94c4f7c3d437a305e6",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/39",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_div_overflow.sol",
      "stage": "lean-runtime",
@@ -6366,10 +6532,10 @@
     }
    },
    "after": {
-    "reportSha256": "df7f73da033f9a5a82c0beec85c72db08f4e0da75ea903b6569fd7537717aa6c",
-    "outputDirectory": ".lake/upstream/cf1-after/40",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "73870b866037c2c392c85829042873bc5a4a03d5827e0eccb2b21c142993faad",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/40",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_mul_overflow.sol",
      "stage": "lean-runtime",
@@ -6831,10 +6997,10 @@
     }
    },
    "after": {
-    "reportSha256": "0bd0536a436269b483f72582c73e5a2a2365a39fd166e59d7c7111d36be15298",
-    "outputDirectory": ".lake/upstream/cf1-after/41",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "5b0dbb982cf7791fd0a2b93c576c1aa32dfef12f5ed8e112a0eac1b4f47244e0",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/41",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/function_entry_checks.sol",
      "stage": "lean-runtime",
@@ -6858,10 +7024,10 @@
     }
    },
    "after": {
-    "reportSha256": "bec3463464a90b4dbd83d9311881eca8c99edb0717da232c769b86ea15725366",
-    "outputDirectory": ".lake/upstream/cf1-after/42",
-    "modelSha256": "2c4f7bfdbf0785f4a8ae46a6257708b3fe334776367f4c53ce01e903f9bfc77b",
-    "runnerSha256": "e4acfe35dc90e23f1a24d135901d7e870d640ebc5c340951fe5d472e44840669",
+    "reportSha256": "a37142e44fe646d1258bb05c1641b40a719913755e731124a99b1ccc3b5ffe8c",
+    "outputDirectory": ".lake/upstream/cf1-fu1final/42",
+    "modelSha256": "8633205ed211f00ef62565bdb8fe5edfccf0893f2eecdff8d14adde4339aea00",
+    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/unary_operations.sol",
      "stage": "lean-runtime",

@@ -31,6 +31,17 @@ core stays dependency-free.
   symbolic execution, compilation, non-vacuity); anything but `propext`,
   `Classical.choice`, `Quot.sound` fails elaboration.  New public theorems
   are added to it.  CI runs both gates after the whole-library build.
+* **Whole-library axiom gate**: `lake env lean --tstack=131072
+  scripts/AxiomAudit.lean` (CI, after the build) reads every constant
+  declared in a `Solidity` module that `import Solidity` reaches (the
+  default library; not the `SolidityCorpus`/`SolkeyTestSuite` modules): a
+  safe one may reach only `propext`,
+  `Classical.choice`, `Quot.sound`; an `unsafe` (or `partial`) one may also
+  reach `lcProof` only if listed by name in its `exemptUnsafe` (the six
+  compiled memo/cache twins behind `@[implemented_by]`, through
+  `unsafeCast`/`unsafeBaseIO`); a new one, or a stale exemption, fails.
+  It replaces lean-action's `axiom-audit`, whose single allow list cannot
+  exempt unsafe twins without exempting theorems too.
 * Parser assertions are `#guard` checks, not `native_decide` proofs; parser
   correctness is not proved.
 * **Non-vacuity**: `Examples/Tactics/Nonvacuity.lean` proves the result of
@@ -175,3 +186,34 @@ pass their dedicated checks. The final full-repository `./run-lean.sh` confirmat
 including the pinned TestSuite and SolKey annotation checks.
 Historical timing/resource failures and the unchanged documentation-path debt
 remain explicit; sampled EVM observations do not promote source coverage.
+
+### CI regression step after the audit fix (lane FU1, 2026-11-01)
+
+With the whole-library axiom gate passing (workflow run 41339114510 on
+master `457130f3` + the audit commit only: Build, "Audit every declaration's
+axioms", "Audit headline theorem dependencies" and the editor and bridge
+jobs passed), CI reached "Test source verification and regression suites"
+for the first time since about 2026-10-29: 62 pass, 9 fail in
+`scripts/test-solidity.test.mjs`. All nine are on master (the run carries no
+other change); the last green run is 2026-10-20 (`292a4681`), 1320 commits
+earlier, so a bisection (about 11 full rebuilds of 45–70 min on the lane's
+VM) did not fit. Seven were reproduced locally on the lane's tree with
+`SOLKEY_ROOT`, `LEAN_NUM_THREADS=1` and solc 0.8.34 as CI sets them
+(`node --test --test-name-pattern=… scripts/test-solidity.test.mjs`, 25 min);
+the first failing row of each:
+
+| # | Test | First failing row | Evidence |
+|---|---|---|---|
+| 30 | bytesN, bytes and string | `indexOutOfRange`: pending, expected proved | proof search |
+| 31 | calldata | `localAlias`: unsupported, "a calldata slice ordinary alias without a known calldata origin" (`Syntax/Elab/Context.lean`, `sliceStmts`, since `c31e76b6`) | the import prints `function «localAlias»(uint[] calldata «xs») { uint[] calldata «ys» = «xs»; … }`; the same text in `contract!{}` elaborates, so the import's path loses the calldata roots (`Syntax/Contract.lean` `calldataRoots`) — not the `roMentions` refusal of `099bfbe1` |
+| 40 | full frozen TestSuite function table | "maximum recursion depth has been reached", compiler IR check failures at `SolTests.TestSuite._list._lam_0`, then `(interpreter) unknown declaration 'SolTests.TestSuite.report'` | CI log only |
+| 42 | quantified consequents / omitted bodies | `omittedBody`: excluded, expected unsupported | `excluded` is a documented gap status (`docs/solidity-testing.md`); which change moved the row is not identified |
+| 43 | specification parameter renaming | `tryScopeExit`: pending, expected proved | proof search |
+| 44 | unsupported ledger frames | `ledgerGap`: "solidity.specificationSyntax: <input>:1:14: expected ';'" instead of "ledger locations in assignable" | the specification parser now rejects the clause before the ledger check |
+| 45 | constant specifications | `quantifiedShadow`: pending, expected unsupported | admission changed: a refusal became an open obligation |
+| 57 | solkey solc/open ports | `tryArgumentSideEffect`: pending, expected proved | CI log only |
+| 60 | revert data | `reasonBytes`: pending, expected proved | proof search |
+
+None is in the lane's files (the reproduction includes the lane's changes,
+and CI showed the same failures without them); none was fixed here, and no
+expectation was changed. Lane FU1 stops at this record.

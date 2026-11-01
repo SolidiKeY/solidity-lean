@@ -1782,7 +1782,12 @@ run_cmd do
     ``Solidity.Examples.Tactics.FunctionTypes.memAlias_run,
     ``Solidity.Examples.Tactics.FunctionTypes.memDirect_run,
     ``Solidity.Examples.Tactics.FunctionTypes.storAlias_run,
-    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned]
+    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.structReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleCallee_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.memNoCopy_reason,
+    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned_halt]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name
@@ -1791,3 +1796,22 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} dispatch theorems use only the standard axioms"
+
+/-! Lane FU1: narrow and byte elements through function values, callees
+that are not names, and the tuple ternary return. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Examples.Tactics.FunctionTypes.narrowAlias_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.narrowOverflow,
+    ``Solidity.Examples.Tactics.FunctionTypes.byteArgs_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleCalleeDyn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.scalarCallee_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.ternaryReturn_run]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU1 dispatch theorems use only the standard axioms"

@@ -192,9 +192,19 @@ private def typeExpr : RawTy → Except String RawExpr
 def needsCanonical (d : FunDecl) : Bool :=
   d.params.any fun (x,T) => !(T matches .prim _) || (fnRow? d.widths x).isSome
 
-def validate (d : FunDecl) (inputs outputs : List String) : Except String Unit := do
-  let actualInputs ← d.params.mapM fun (x,T) => shape 128 T d.widths x
-  let actualOutputs ← d.rets.mapM fun (x,T) => shape 128 T d.widths x
+/-- `topEnums`: top-level primitive parameters and returns with a declared
+enum cardinality, read at their ABI type `uint8` (the replay passes the
+parameters when the entry has a nominal parameter range, and a v2 entry's
+top-level enum returns, `ImportRow.retEnums`, always); a parameter's range is
+the typed entry decoder's (`UpstreamEntry.params`). Every nested enum keeps
+the refusal. -/
+def validate (d : FunDecl) (inputs outputs : List String) (topEnums : List String := []) :
+    Except String Unit := do
+  let top (x : String) (T : Ty) : Except String String :=
+    if topEnums.contains x && T matches .prim _ then pure "uint8"
+    else shape 128 T d.widths x
+  let actualInputs ← d.params.mapM fun (x,T) => top x T
+  let actualOutputs ← d.rets.mapM fun (x,T) => top x T
   unless actualInputs == inputs && actualOutputs == outputs do
     throw s!"ABI schema disagrees with admitted declarations: {actualInputs} -> {actualOutputs}"
 
@@ -365,11 +375,23 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       -- Primitive ranges have byte widths; other nominal ranges need a decoder adapter.
       let row : Option ImportRow := if ctor then rows.find? (·.sourceName == "constructor") else
         function.bind fun name => rows.find? (·.name == name)
-      if row.any (fun (r : ImportRow) => (r.paramRanges ++ r.elemRanges.map (fun (entry : String × Int × Int × Option Nat) => (entry.1, entry.2.1, entry.2.2.1))).any fun (_, lo, hi) =>
-          !(List.range 32).any fun k =>
+      let byteRange : Int × Int → Bool := fun (lo, hi) => (List.range 32).any fun k =>
             let bits := 8 * (k + 1)
             (lo == 0 && hi == (2^bits : Int) - 1) ||
-              (lo == -(2^(bits - 1) : Int) && hi == (2^(bits - 1) : Int) - 1)) then
+              (lo == -(2^(bits - 1) : Int) && hi == (2^(bits - 1) : Int) - 1)
+      -- a declared enum parameter (`paramEnums`) is nominal even when its
+      -- range is a byte range (an enum of 256 members): its word is
+      -- validated by the typed entry decoder, never truncated
+      let nominal := row.any fun (r : ImportRow) => !r.paramEnums.isEmpty ||
+        (r.paramRanges ++ r.elemRanges.map (fun (entry : String × Int × Int × Option Nat) => (entry.1, entry.2.1, entry.2.2.1))).any fun (_, lo, hi) =>
+          !byteRange (lo, hi)
+      -- Only parameter ranges (never element ranges) can be top-level enums
+      -- for the typed entry decoder; any other nominal range is refused.
+      let nominalElems := row.any fun (r : ImportRow) => r.elemRanges.any fun (_, lo, hi, _) => !byteRange (lo, hi)
+      let canonicalOnly ← match vector.getObjVal? "canonicalOnly" with
+        | .error _ => pure false
+        | .ok j => fromJson? j
+      if nominal && (ctor || canonicalOnly || nominalElems) then
         throw "nominal enum ABI range needs a declaration adapter"
       let bytes ← vector.getObjValAs? (List Nat) "calldata"
       let inputs ← vector.getObjValAs? (List String) "inputTypes"
@@ -378,17 +400,39 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
         let some f := function | throw "missing unique source ABI declaration"
         let some d := Semantics.lookupBy f C.funs | throw "missing source ABI function"
         pure d
-      ABI.validate d inputs outputs
-      let canonicalOnly ← match vector.getObjVal? "canonicalOnly" with
-        | .error _ => pure false
-        | .ok j => fromJson? j
+      -- A top-level enum parameter's declared largest member, by position:
+      -- a nominal (not byte-width) range of the import row.
+      let enums : Nat → Option Nat := fun i => do
+        let r ← row
+        guard (r.params.length == d.params.length)
+        let (x, _) ← r.params[i]?
+        let (_, lo, hi) ← r.paramRanges.find? (·.1 == x)
+        guard (lo == 0 && 0 ≤ hi && (!byteRange (lo, hi) || r.paramEnums.contains i))
+        pure hi.toNat
+      -- a declared enum parameter whose position cannot be matched would
+      -- decode as a plain word: refuse rather than drop its bound
+      if row.any (fun r => !r.paramEnums.isEmpty && r.params.length != d.params.length) then
+        throw "nominal enum ABI range needs a declaration adapter"
+      let enumNames := (d.params.zipIdx.filter fun (_, i) => (enums i).isSome).map (·.1.1) ++
+        (d.params ++ d.rets).filterMap fun (x, _) =>
+          if (Semantics.lookupBy (x ++ "#enum") d.widths).isSome then some x else none
+      -- a top-level enum return is read at its ABI type `uint8` whenever
+      -- the import names it (`retEnums`): encoding a member is its value
+      let retEnums : List String := if ctor || canonicalOnly then [] else
+        match row with
+        | some r =>
+          if r.retEnums.any (· ≥ d.rets.length) then []
+          else r.retEnums.filterMap (fun i => d.rets[i]?.map (·.1))
+        | none => []
+      ABI.validate d inputs outputs ((if nominal then enumNames else []) ++ retEnums)
       -- ABI coder v2 entries with typed parameter shapes use the typed
       -- entry decoder (`Semantics/AbiEntry.lean`); v1, constructors and
-      -- function/enum parameters keep the byte-identical gate.
-      let entryPlan := if ctor || canonicalOnly || !ABI.needsCanonical d then UpstreamEntry.Plan.legacy
-        else UpstreamEntry.plan d signature bytes
+      -- function/nested-enum parameters keep the byte-identical gate.
+      let entryPlan := if ctor || canonicalOnly || (!ABI.needsCanonical d && !nominal) then UpstreamEntry.Plan.legacy
+        else UpstreamEntry.plan d signature bytes enums
       match entryPlan with
       | .legacy =>
+        if nominal then throw "nominal enum ABI range needs a declaration adapter"
         ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
         ABI.program C d (function.getD "constructor") ctor false bytes
       | .blocked reason => throw reason

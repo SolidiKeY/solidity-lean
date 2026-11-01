@@ -258,6 +258,8 @@ def lowerReturn (rs : List String) (e : RawExpr) : Except String (List RawStmt) 
       pure [.tupleAssign (rs.map fun n => some (.name n)) (.tuple es)]
     else pure ((rs.zip es).map fun (n, e) => .assign (.name n) e)
   | rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
+  -- a conditional of calls (`c ? f(x) : g(x)`), each branch a tuple assignment
+  | rs, e@(.ternary _ (.call ..) (.call ..)) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]
   | rs, _ => throw s!"`return` of one value from a function that returns {rs.length}"
 
 /-- The names a statement declares in its own block: a declaration's, a tuple
@@ -1495,6 +1497,18 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
     -- a byte string: its offset in the head, its length and bytes in the tail
     if dynBytesTy T then
       let (R, x) ← abiDecodeBytes T d (32 * i) n
+      return (P ++ Q ++ R, .name x)
+    -- an enum: its word read as a `uint8` (zero high bytes), then solc's
+    -- validator (`validator_revert_t_enum_*`): an empty revert unless it is
+    -- below the member count, so the conversion `E(w)` names a member
+    if let some ms := lookupBy T C.enums then
+      let w := toString (← freshCapture "se")
+      let x := toString (← freshCapture "se")
+      let some (reads, _) := abiDecodeAt "uint8" d w (.num (32 * i)) |
+        throw s!"abi.decode at {T}: internal: the enum's word"
+      let R ← elabStmtsP ([enough] ++ reads ++
+        [.require (.binop .lt (.name w) (.num ms.length)),
+         .decl (.named T) x (some (.call T [.name w]))])
       return (P ++ Q ++ R, .name x)
     if (valueKind? T).isSome then
       let w := toString (← freshCapture "se")

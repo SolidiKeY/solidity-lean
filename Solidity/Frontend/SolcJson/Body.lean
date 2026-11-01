@@ -117,6 +117,12 @@ structure SolcFun where
   /-- The memory array parameters whose elements the ABI decoder bounds so:
   name, least and greatest value, and a fixed array's length. -/
   elemRanges : List (String × Int × Int × Option Nat) := []
+  /-- The returns of a top-level enum type, by position (a return may be
+  unnamed): the ABI spells them `uint8`, the model a `uint` (the replay's
+  `ABI.validate`). -/
+  retEnums : List Nat := []
+  /-- The parameters of a top-level enum type, by position (as `retEnums`). -/
+  paramEnums : List Nat := []
   /-- Specification members, retained only for the testing import mode. -/
   specMembers : String := ""
   /-- Raw directive/text pairs, for validating one clause at a time before
@@ -1866,12 +1872,26 @@ partial def call (j : Json) : PM String := do
       match args with
       | [b, ts] =>
         let forbidden := (← get).enumDecodeTypes
-        if (J.nodes ts).any (fun node => (J.ref? node).any forbidden.contains) then
+        let st ← get
+        -- A top-level enum component (`abi.decode(b, (E))`) decodes at its
+        -- member count (`abiDecodeWith`, solc's enum validator); an enum
+        -- inside an array or a struct keeps the refusal.
+        let topEnum (t : Json) : Option String := do
+          let t := unparen t
+          guard (J.kind t == "Identifier" || J.kind t == "MemberAccess")
+          let id ← J.ref? t
+          guard (lookupBy id st.enumBounds).isSome
+          lookupBy id st.enumNativeNames
+        let comps := match J.kind ts, J.arr? ts "components" with
+          | "TupleExpression", some cs => cs.toList
+          | _, _ => [ts]
+        if comps.any (fun c => (topEnum c).isNone &&
+            (J.nodes c).any (fun node => (J.ref? node).any forbidden.contains)) then
           unsupported "ABI decoding of enum values requires nominal cardinality checks"
-        let tyName (t : Json) : PM String := do PM.lift (abiTyText (← get).structs t)
-        let names ← match J.kind ts, J.arr? ts "components" with
-          | "TupleExpression", some cs => cs.toList.mapM tyName
-          | _, _ => do pure [← tyName ts]
+        let tyName (t : Json) : PM String := do
+          if let some e := topEnum t then return identText e
+          PM.lift (abiTyText (← get).structs t)
+        let names ← comps.mapM tyName
         return s!"abi.decode({← expr b}, ({", ".intercalate names}))"
       | _ => unsupported "abi.decode with other than two arguments"
     if member == "wrap" || member == "unwrap" then
@@ -2100,6 +2120,14 @@ partial def tupleValue (v : Json) : PM String := do
   else if J.kind v == "FunctionCall" && (J.opt v "expression").any (fun f =>
       J.kind f == "MemberAccess" && J.str? f "memberName" == some "decode" &&
         (J.opt f "expression").any (builtinNamed · "abi"))
+  then expr v
+  -- a call through an internal function value whose callee is not a name
+  -- (`(b ? f : g)(x)`, `fs[i](x)`): the elaborator's tuple dispatch. Only
+  -- `isValueCallee` shapes: a library or using-for call (`L.f(x)`, `x.f()`)
+  -- stays refused here.
+  else if J.kind v == "FunctionCall" && J.str? v "kind" == some "functionCall" &&
+      (J.opt v "expression").any (fun f => isValueCallee f &&
+        ((J.tyStr f).splitOn " external").length == 1)
   then expr v
   else unsupported "a tuple assigned from neither a tuple, nor a call of a function of this \
     contract, nor `(bool ok, ) = a.call{value: v}(\"\")`"
