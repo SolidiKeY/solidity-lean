@@ -27,7 +27,7 @@ theorem DeclPosition.registration_start {E : Source.Env} {τ} (position : DeclPo
 
 /-- Traverses actual declared fields in order. All coordinates come from the
 existing packedStart. No final slots/offsets/defaults/separation laws are inputs. -/
-def packDeclarationFields (E : Source.Env) (root : Source.DeclName) (a : Roadmap.Address)
+def packDeclarationPaths (E : Source.Env) (pathAt : Nat → Source.SPath) (a : Roadmap.Address)
     (index : Nat) (fields : List (String × Source.STy)) (cursor : Nat) :
     Except DeclarationPackingError (List (ScalarPath E.layout (E.lay a)) × Nat) :=
   match fields with
@@ -36,12 +36,18 @@ def packDeclarationFields (E : Source.Env) (root : Source.DeclName) (a : Roadmap
     | none => .error .unsupportedScalar
     | some seed =>
       let position := seed.position cursor
-      if typed : E.cellTy (declarationFieldPath root index) = τ then
+      if typed : E.cellTy (pathAt index) = τ then
         if bound : position.start / 32 < 2^256 then
-          (packDeclarationFields E root a (index+1) rest (position.start+position.field.width)).map
-            (fun result => (position.registration (declarationFieldPath root index) typed a bound :: result.1,result.2))
+          (packDeclarationPaths E pathAt a (index+1) rest (position.start+position.field.width)).map
+            (fun result => (position.registration (pathAt index) typed a bound :: result.1,result.2))
         else .error .slotOverflow
       else .error .cellMismatch
+
+/-- Backwards-compatible flat declaration entry point, with identical guards. -/
+def packDeclarationFields (E : Source.Env) (root : Source.DeclName) (a : Roadmap.Address)
+    (index : Nat) (fields : List (String × Source.STy)) (cursor : Nat) :
+    Except DeclarationPackingError (List (ScalarPath E.layout (E.lay a)) × Nat) :=
+  packDeclarationPaths E (declarationFieldPath root) a index fields cursor
 
 structure PackedDeclaration (E : Source.Env) (root : Source.DeclName) (a : Roadmap.Address) (base : Roadmap.Word) where
   name : Source.DeclName

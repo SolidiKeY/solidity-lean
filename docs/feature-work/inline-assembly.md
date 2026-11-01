@@ -451,3 +451,13 @@ computed registry to source/frame/complement journaling. A declaration-derived
 fixed-array/struct boundary adapter and14new pinned ordered calls are included.
 Whole nested/source/layout/dirty/compiler/calculus obligations remain open;
 no admission promotion. Evidence: /workspace/vy2-evidence/declaration-packing.
+
+
+### VY2 nested declaration source-registry handoff
+
+The [lane record](inline-assembly-vy2.md#nested-declared-source-registry-and-writeback-2026-11-01)
+now computes complete fixed-array/inner-struct Source.SPath registrations and
+proves actual whole-store snapshot/source equality, raw reencoding, nonwrapping
+bounds, alias/index-error/MemOK and paired journal controls. Existing380 pinned
+external calls remain unchanged. Arbitrary declarations/dirty/dynamic/Yul/
+compiler/calculus closure remain open. Evidence:/workspace/vy2-evidence/nested-declarations.

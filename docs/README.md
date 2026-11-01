@@ -117,3 +117,7 @@ packed/whole-store/source/compiler closure remains open.
 VY2 [declaration-derived packing](feature-work/inline-assembly-vy2.md#declaration-derived-packed-registrations-2026-11-01)
 computes canonical mixed-field registrations and source/journal controls;
 whole-store and assembly closure remain open.
+
+VY2 [nested source-registry preparation](feature-work/inline-assembly-vy2.md#nested-declared-source-registry-and-writeback-2026-11-01)
+connects computed nested paths to actual source writeback and residual journals;
+full-lane integration remains open.

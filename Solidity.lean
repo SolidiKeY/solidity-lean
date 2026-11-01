@@ -921,3 +921,5 @@ import Solidity.Yul.Views.PackedResidualTypedSourceControls
 import Solidity.Yul.Views.LocatedSource
 
 import Solidity.Yul.Views.DeclarationBoundaryControls
+
+import Solidity.Yul.Views.NestedDeclarationFinal

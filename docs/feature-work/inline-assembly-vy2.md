@@ -2042,3 +2042,126 @@ MemOK follow-up final gates: per-file/focused/full wrapper exit0; unchanged
 1280standard-only reports,48axiom-free. Trust0findings. Existing pinned external
 observations/tests unchanged by the proof-only addition. Original full-lane
 obligations and global docs exit1 remain open, not promoted to passing.
+
+
+## Nested declared source registry and writeback (2026-11-01)
+
+Original Y04/Backfill A/B continuation, full lane PARTIAL and original goal
+BLOCKED unchanged. Parent:a6f77acb3048e20d05b88836f81d59e9017516b8. YQ1–YQ7
+remain approved as recorded earlier; no admission/manifest/exclusion change.
+
+The existing declaration packing implementation is factored into ONE
+packDeclarationPaths traversal accepting an actual Source.SPath constructor.
+The old packDeclarationFields API/guards and theorem signature are preserved
+as its exact flat specialization. No second planner/source state/untyped IR.
+The generic path proof derives monotone live spans, finite separation under a
+proved concrete path-constructor injection, and actual declared index bounds.
+An exact ordered path-list theorem proves no omitted/extra elements. Extent
+proofs identify the computed end with existing PackedMembers/repeatedMembers,
+not a caller-supplied equality. Every output field constructs its actual Word
+slot with its original nonwrapping check; rounded total physical extent is
+proved within the real word-coordinate domain, without an arbitrary size cap.
+
+NestedDeclaration consumes the existing actual DeclaredArrayStruct lookup
+certificate. prepareNestedDeclaration builds ALL paths [.field0,.index i] for
+the actual fixed count and [.field1,.field j] for actual ordered inner fields,
+checking E.cellTy at every path and choosing existing exact scalar codecs.
+Their explicit Source path constructors are proved injective/cross-distinct.
+Alignment, separation, index coverage, exact component ends and physical bounds
+are derived from actual successful operations. Source storage references remain
+references; no nested Source.Data contents are relabeled or owner types changed.
+
+NestedDeclarationSource derives canonical actual Source.Storage snapshot
+writeback, full raw-map reencoding with exact computed complement, unchanged
+WHOLE administrative store and unselected-path preservation. No assumed final
+inverse/view/readback/safety law fields. Actual frame preparation/applyOp uses
+the computed registry with derived separation; successful persistent/transient
+steps reconstruct the entire supplied word. Every ORIGINAL H owner MemOK is
+transported across complete real source results, retaining static refusal.
+Canonical preparation failure remains None/error of preparation, NOT a Yul
+refusal/no-op/deallocation/cleaning semantics. Dirty owned bytes remain open.
+
+The inhabited uint24[12]/mixed inner struct now yields16 ACTUAL typed source
+registrations at base4:10array elements in slot4,2in slot5 and bool/u16/bytes3/
+address in slot6. Exact owned masks are30/6/26bytes, preserving the2/26/6
+nonzero residual bytes. Array live end166, inner start192, inner live end218,
+rounded end224 agree with prior derived components. Controls cover exact paths,
+wrong-path/overflow/invalid canonical bool preparation and exclusion of index12
+from the generated registry. The physical bound is real, not a decoder cap.
+
+Three actual Source.applyOp/frame steps populate the nested cells and exact
+complement from the SAME raw words. NestedDeclarationComposition proves equality
+of the COMPLETE Source.Storage result with pure snapshot writeback, using real
+finiteWriteback append/input laws and actual selected-slot source steps. Full
+map reencoding follows by rewriting that equality, not matching a few return
+words or assuming source adequacy. Actual Source.readLoc keeps the parent as a
+storRef; two real storage-reference locals use indexLoc/readLoc to observe1/12.
+The actual fixed-array index12 path gives the original36byte Panic(0x32).
+Initial/postwrite/alias/child actual owner MemOK are inhabited; every-H transport
+is retained. This is finite supported source-path closure, not a Yul compiler
+or whole arbitrary heap/store theorem.
+
+Paired actual source/residual sequence equality underlies caller-prefix child
+rollback and committed-child/enclosing rollback. Controls preserve unselected
+paths, other accounts/banks, exact raw words, arbitrary residual padding and
+persistent state across endTx. Full transient raw reset derives actual zero
+defaults from an executable individual-codec check, not a supplied view law.
+Repeated same-slot orders have distinguishable final words. Transient reuse
+of this registry is an explicit companion adapter, not independently inferred
+Solidity transient declarations/layout.
+
+One first journal proof exceeded the UNCHANGED200000 heartbeat limit while
+comparing expanded worlds. Raw failure retained. Universal actual-op bank and
+complement preservation plus exact request equations replace that reduction;
+repaired generic/closure checks are small, with no raised heartbeat/recursion/
+fuel/node/test/resource budget. G0/history reviewed and performance warning
+issued before factoring; old Source/Heap/World/compiler definitions unchanged.
+No indexed source value/state is matched through a new untyped representation.
+
+Both independent read-only finder/skeptic source and reset-delta reviews clear;
+no reviewer Lean/server/build/tests/edits. Existing380 ordered pinned legacy/
+viaIR observations are retained BYTE IDENTICALLY at audited reportSHA256
+214fff4f136569a4b3350212fd66e577269573674b2ab05ebe5a0a9a39200a54.
+No new external expectations/calls/profile changes. The new kernel slot4/5/6
+constants are independently compared to both existing writeForward receipts;
+this remains finite external evidence, not source/compiler correspondence.
+All prior observations, pins, gas100million/steps5million and old negative
+inventories remain binding. Exact commands/exits, raw failures, signatures,
+resources/reviews/artifacts: /workspace/vy2-evidence/nested-declarations.
+
+Full queue remains unfinished: arbitrary-root/global packing and dynamic/hash/
+dirty ownership/writeback, broader memory/shared-zero/interior representations,
+reachable allocation provenance/refinement, concrete V10/V11 agreements, Y06
+actual source/environment inputs and VY1/source/assembly MemOK/Y09.02 notation/
+printers/calculus/compiler/joint closure. Existing owner MemOK/World/Bridge are
+available, not Yul adequacy. Supported positive fixed-array/scalar-struct shape
+is not a language exclusion or recursive traversal cap. Whole nested Source.Data
+realization and arbitrary declarations remain open. Questions=[]; no new human
+semantic choice established. Both original backfill queues remain partial.
+
+
+### Actual paired physical-map closure
+
+NestedDeclarationFinal additionally proves equality of the ENTIRE actual
+persistent residual map (all Word coordinates) with the concrete pure snapshot
+complement, using actual paired sequence, validated requests and real key writes.
+Combined with complete Source.Storage equality, actual source PLUS actual
+journal reconstructs the whole supplied physical snapshot, including untouched
+slots. No residual/result-view/adequacy equality is supplied by a caller.
+Computed individual defaults of all16registrations also yield full transient
+raw reset at EVERY physical word. This remains the supported canonical nested
+component; arbitrary declaration/dirty/dynamic/compiler closure is unfinished.
+Raw metavariable-search heartbeat failures retained; explicit residual/key
+normalization repairs them under the unchanged200000 limit. Prior scoped-audit
+namespace-collector failure is preserved separately and repaired by tracking
+actual namespaces, not by dropping declarations.
+
+
+Final nested gates: actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs
+exit0; focused82jobs/full wrapper1128default/262TestSuite/131annotations exit0.
+Scoped2450declarations/1415theorems: 1365standard-only reports,
+50axiom-free. Strict/trust(1158sources,0findings)/layers/orphans/markdown delta
+pass. All20unchanged reference negative suites pass. Global docs remains ACTUAL
+exit1 with byte-identical48missing/37ambiguous exact-base debt; zero delta is
+separate. Namespace-audit and proof-budget failures retained, repaired gates
+recorded separately. Original full-lane/goal obligations stay open.
