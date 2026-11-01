@@ -1838,3 +1838,55 @@ in `/workspace/memory-storage-copy-published-20261101-evidence`.
 Checkpoint documentation checking exits 1 on both published base and task tree:
 48 missing references and 37 ambiguities, byte-identical findings, zero delta.
 No historical/vendor debt was rewritten or relabeled passed.
+
+
+### Local validation after publication (2026-11-01)
+
+The five legacy memory example modules now match published `5f6a75b6` exactly.
+Their task-added copy-bound adapters were obsolete after restoring the legacy
+API; independent finder and skeptic reviews confirmed that restoring the
+published witnesses changes no program, theorem statement, expected observation,
+control or budget. The first repaired module passed in 5.07 s; the other four
+passed in 72.34 s, peak aggregate RSS 2,665,639,936 bytes. Commit `832540456`
+records this compatibility repair.
+
+Independent prerequisites were checked serially after each new resource stop,
+without dropping the failed target from the mandatory roster. The final import
+DAG has 1,096 required modules across the six original roots. Eight failed
+prerequisites block 27 modules; all remaining 1,069 modules are covered by
+successful independent target builds, including both executable roots. The
+source-elaboration prerequisites exposed by the final coverage audit also pass.
+This dependency coverage is not a passing full build.
+
+The allocator-only repair `MIMALLOC_PURGE_DELAY=0` allowed unchanged published
+`Backend.Scalar.PowerBounds` to pass in 231.49 s, peak aggregate RSS
+1,853,415,424 bytes. The full workflow then stopped at `Frontend.Checked.UnitExamples`.
+Recognized demand-commit allocator options were subsequently measured on that
+same prerequisite: exit 137, no OOM, OS-reserve stop after 50.79 s. Neither
+allocator experiment changes source checking options, proof budgets or guards.
+The failed full builds, interrupted target records and their terminal group
+receipts remain failed and preserved.
+
+The exact remaining resource failures are `Frontend.Checked.UnitExamples`,
+`Examples.DecisionHashes`, `Examples.Tactics.OpenLoops`,
+`Counterexamples.PreFixSortAnnotations`, `SortCheck.Faithfulness`,
+`Examples.Tactics.RevertData`, `Source.Horizon` and `TestSuite.Derived21`.
+Their source closures match publication; identity is not a passing baseline.
+Root/import needs the first seven; combined TrustAudit needs UnitExamples,
+DecisionHashes, OpenLoops and Horizon; complete TestSuite and corpus need
+Derived21. Owner source algorithms and claims were not changed. These mandatory
+checks remain blocked, so the assignment and persistent goal are not complete.
+
+Both native executable targets and actual taclet-sort alignment pass: 377
+taclets parsed, all 131 read-bearing annotations match the exact frozen rules.
+The timing validator tests pass 3/3. Corpus source probing and all generated
+verdict/module/root/scoreboard comparisons pass in 29.14 s; this does not replace
+the blocked full corpus build. The 93-headline kernel axiom audit and four-mode
+EVM observations above remain separate evidence, with unchanged inputs.
+
+All logs and the exact dependency ledger are in
+`/workspace/memory-storage-copy-published-20261101-evidence`. Old recovery inputs,
+failed attempts and checksum-bound exports remain untouched. Terminal owned
+container layers were reclaimed only after preserving status, configuration,
+timestamped logs and mountpoint-only filesystem differences; source, caches,
+base image and recovery bytes were retained.
