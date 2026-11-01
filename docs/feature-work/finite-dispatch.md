@@ -238,6 +238,11 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   evaluated before the arguments in both schedules (`callValue`, and the
   tuple path's capture in `elabTuple`,
   pre-existing): under the legacy schedule solc evaluates it after them.
+- A parenthesised declared function as a callee with a call among its
+  arguments, `uint r = (g)(k(1));` (solc's single-element tuple callee), is
+  refused since `fnTyOfExpr` types a bare function name: the argument is no
+  longer hoisted, and `checkIn` rejects the nested call. It fails closed;
+  `g(k(1))` is unaffected (integration review, round 2).
 - The elaborator does not type-check a function value's assignment
   (`h = scalar` for a `function(uint[] memory)` local); solc rejects such
   programs. The dispatch then has no arm for that tag and reverts
@@ -463,3 +468,20 @@ like-for-like figure was taken; the change adds `DispatchChain` (small) to
   the `tyText` comment in `Body.lean`, which still names only arrays and
   `bytes` among memory returns.
 
+
+### Integration review (round 2, 2026-11-01)
+
+Read-only finder and skeptic on the merge of CF1 `99a8ce42` and CF2
+`6de34328` over master `099bfbe1`; no soundness defect or wrong verdict.
+Fixed at integration: the frontend's tuple-value branch for calls through
+internal function values (`tupleValue`, `SolcJson/Body.lean`) admitted any
+callee of internal function type, so library (`L.f(x)`) and using-for
+(`x.f()`) tuple assignments reached the elaborator untested; it now uses
+`isValueCallee`, the non-name callees its comment names. Docs: the
+callee-first deviation is stated in [options.md](../options.md), the module
+map row lists tuple and struct-return dispatch, and the `(g)(k(1))` refusal
+is recorded above. Open, not fixed: no tuple test with a memory return among
+several (`(bytes memory a, uint b) = h()`) or with calldata through a non-name
+callee; `tupleCallee_run` uses `true ? divmod : divmod`, so only the EVM
+vectors check which branch runs; non-tuple `(f)(x)` and `(b ? f : g)(x)` and
+the `lowerReturn` arm `ternary (call) (call)` are untested.

@@ -3133,7 +3133,7 @@ class D:
                        "manifest scope is still `upstream`"],
         'abiDecode': ["Enum decoding is refused ('requires nominal cardinality checks'). Lazy/noncanonical aggregate entry decoding is pending.", 'No backend/EVM stage. Calldata/ABI entry is outside the compiler theorems (R04, R20).'],
         'abiEncode': ['ABI is absent from the compiler theorems (R04), with no backend/EVM stage.', 'Internal function markers are refused. Struct enum members lose nominal identity, so recursive coverage is partial.'],
-        'abiEncodeCall': ['Implicit fixed-byte narrowing is refused. ABI identity of inherited renamed function values is left.', 'No backend/EVM stage (R04).'],
+        'abiEncodeCall': ['Implicit fixed-byte narrowing is refused.', 'No backend/EVM stage (R04).'],
         'abiEncodePacked': ['Packed arrays and hex-literal aggregates have only partial contextual coercions.', 'No backend/EVM stage (R04). Packed collisions are only kept, never proved.'],
         'abiEncodeWithSelector': ['Selector-prefix lowering supports restricted argument shapes only. Full recursive ABI is unestablished.', 'No backend/EVM stage (R04).'],
         'abiEncodeWithSignature': ['Only literal signatures are hashed once at elaboration. Argument shapes are restricted.', 'No backend/EVM stage (R04). The hash is computed concretely with no injectivity claim (correct).'],
