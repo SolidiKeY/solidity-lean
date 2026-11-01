@@ -1,0 +1,611 @@
+{
+  "schema": 1,
+  "producer": "vy1-words",
+  "head": "c7b128fd10df2fa51929cb68bdba020cf2ca07a5",
+  "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
+  "bundle": {
+    "path": "/workspace/shared/parallel-work-20261101/vy1-words/c7b128fd10df2fa51929cb68bdba020cf2ca07a5/checkpoint.bundle",
+    "sha256": "a046a61d2cb221d6701a6c354bbfc72b344220128e972a7d32d610a8c7a96f48"
+  },
+  "archive": {
+    "path": "/workspace/shared/parallel-work-20261101/vy1-words/c7b128fd10df2fa51929cb68bdba020cf2ca07a5/source-modules.tar.gz",
+    "sha256": "46fd3b2e1f5b35707657c2f68ca416def082593c71fb4b2b435e3e7165788cf6"
+  },
+  "interface": {
+    "path": "/workspace/shared/parallel-work-20261101/vy1-words/c7b128fd10df2fa51929cb68bdba020cf2ca07a5/interface.json",
+    "sha256": "409cb6fc38c5e535a1fcdd0f2a7d7eeab61d4568ff33b7c9ba17012ee5776e84"
+  },
+  "archiveFiles": 80,
+  "modules": [
+    {
+      "path": "Solidity/AST.lean",
+      "sha256": "f4247aaa927e3dd13c22d4f34a019e7c534484866a5ff554084cc33cffc90e88"
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Check.lean",
+      "sha256": "080f2cf13448d87033e9454f460663a155975ea412050077f629819dae7f19cf"
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Lexer.lean",
+      "sha256": "7c8545210edd7f6255a8e0990035dc506ae8345ce95af4a7f7345397ec3fdfca"
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Parser.lean",
+      "sha256": "e7f3df06490946870a43712ecbd93f6f0a6140bbdb561665e665935158c745c3"
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Prec.lean",
+      "sha256": "1ba7dd728814ee45008755c139701560565f0fbb6557b8e68930f373e45f5bdf"
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Print.lean",
+      "sha256": "df481269236679b9934ee1cb60e00a980ff5a1f13bbb2407c1e9859af7b5b660"
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Tables.lean",
+      "sha256": "4989b4811753c9515a07be8236f53a0fa537bf1f2ecf7cdd7c33978c65d5b2ff"
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Token.lean",
+      "sha256": "6eee8ccd98f4e70a4ff9d8632d81b594bff98e0732254ad88039f4a66de3787a"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/Yul.lean",
+      "sha256": "b537339d906dd588501d9b403d193f30625582526481b092c20f319397c84f62"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/YulMetadata.lean",
+      "sha256": "cb775ef16de2191fa4428e7b9a4bac574cd8e3dd22fdc16025b19c2535faf1a8"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/YulMetadataWords.lean",
+      "sha256": "8a6a2f91ac476b49d1ddb6b26de686a0f39fef5596d4f257cc8ec58239192b0c"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/YulNames.lean",
+      "sha256": "6d9156106373c4063e90a87bd535d0518b8fff99618d813acdf8ee57ff0e06d5"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/YulSafety.lean",
+      "sha256": "f11bd1db269f4c95a82c434566bebc9eee9e76261cd2dae26625cc7e7ff5d9d4"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/YulScopedParse.lean",
+      "sha256": "b90de595354709fd206c3acaa866870b102d946e071975bcf575aee3a760d139"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/YulWords.lean",
+      "sha256": "2b31225e0bb2e35996ed13d7b4852a599ccc7ef4a1f74021a18e43ad3af70130"
+    },
+    {
+      "path": "Solidity/Hash/CollisionBound.lean",
+      "sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+      "path": "Solidity/Keccak.lean",
+      "sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+      "path": "Solidity/KeySort.lean",
+      "sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+      "path": "Solidity/RevertBytes.lean",
+      "sha256": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee"
+    },
+    {
+      "path": "Solidity/Roadmap/Contracts.lean",
+      "sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+      "path": "Solidity/Roadmap/Evm.lean",
+      "sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+      "path": "Solidity/Scope.lean",
+      "sha256": "d37a9e4393e9b9da12bcd85beb428965becc2d3947838b1d11f510b07170c4ff"
+    },
+    {
+      "path": "Solidity/Semantics.lean",
+      "sha256": "588c96429a3d91ef043d5ae731a1f98f3a12a8a394a601e287550828db32497d"
+    },
+    {
+      "path": "Solidity/Source/Const.lean",
+      "sha256": "46ea4e0b34c80b91ccf30dec162398c290a5ad3a8403e58317a1d67d46888fa3"
+    },
+    {
+      "path": "Solidity/Source/Ctor.lean",
+      "sha256": "2ccaac06787dc1aeab8fe923f6a38bb4a9657b868becafb12732358ca07cfe13"
+    },
+    {
+      "path": "Solidity/Source/Decls.lean",
+      "sha256": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9"
+    },
+    {
+      "path": "Solidity/Source/Elaborated.lean",
+      "sha256": "b6f7a4fd560ef3d916ed54c171632e1e4e74d9c1623608697d1b8690507492a0"
+    },
+    {
+      "path": "Solidity/Source/Eval.lean",
+      "sha256": "c7966316ffa86735c29251a8ab1c352d9380fe844f8ca84a8ec1aa36ace8a88c"
+    },
+    {
+      "path": "Solidity/Source/ExprProgress.lean",
+      "sha256": "5c811359bfdeb14f69598bb70efa2d519b541716aeb7f4ce53f988633f1e24f2"
+    },
+    {
+      "path": "Solidity/Source/Hoare.lean",
+      "sha256": "18babea61c50d94235e25299fcccf02aa87eaac416be2d350bac1d4451b6ce96"
+    },
+    {
+      "path": "Solidity/Source/Machine.lean",
+      "sha256": "06642136430a6e40962dedfa5804ef590e5a3f0779d92e2888f3db7a41b178cd"
+    },
+    {
+      "path": "Solidity/Source/Observe.lean",
+      "sha256": "82db004513511e206ee57eb7437831d8908df9cab29b18271092406ccb166212"
+    },
+    {
+      "path": "Solidity/Source/Resolve.lean",
+      "sha256": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1"
+    },
+    {
+      "path": "Solidity/Source/Resolved.lean",
+      "sha256": "3fb2d8b7559b106f39b1f44c25525bc984d2f0801464fea124b60372217e5779"
+    },
+    {
+      "path": "Solidity/Source/Semantics.lean",
+      "sha256": "91ad31ae3b48873a6c606d241d77c8f66a28b698f75d1c6c014c636f36bb5381"
+    },
+    {
+      "path": "Solidity/Source/State.lean",
+      "sha256": "ed7cb956dd17097a6bdb75d787e48810f057c7c7eda1ea7a7b9bef3b5c516120"
+    },
+    {
+      "path": "Solidity/Source/Syntax.lean",
+      "sha256": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95"
+    },
+    {
+      "path": "Solidity/Source/Types.lean",
+      "sha256": "7bb6c26eaad2fbff46c11e54ead9451156d31b54cbd0400d17d76336021bd73e"
+    },
+    {
+      "path": "Solidity/Source/Typing.lean",
+      "sha256": "8489d8002e2fb8bed1b4374dde7b3ea5b76b7e0901576f05df00ec87a33bbe80"
+    },
+    {
+      "path": "Solidity/Source/Value.lean",
+      "sha256": "6e1e9d0740f1c2b0783cd2ee56011e2174ba6333bb422d0fd12bb8dd1cb673f7"
+    },
+    {
+      "path": "Solidity/Source/ValueProgress.lean",
+      "sha256": "10d506493cc3e0dbd40aa9f6fcb64ebcb5165bdb718eaeef82b0d571c6a09f40"
+    },
+    {
+      "path": "Solidity/Source/WellFormed.lean",
+      "sha256": "7b1ed96f14f9ff91c34bca8150cdd657e12eb520c05c7c2aa463bba86e69189a"
+    },
+    {
+      "path": "Solidity/Source/World.lean",
+      "sha256": "61855329c308e42edb5bc0997be35dd80a63278bb6a818f885bba7666d62e64c"
+    },
+    {
+      "path": "Solidity/SpecSyntax.lean",
+      "sha256": "0d93503bea09cc6e1174fa5bcf6150705f5db360dfffa0fc33885bad23b3e236"
+    },
+    {
+      "path": "Solidity/Syntax.lean",
+      "sha256": "81e376192590dacc20ae1b3c1cb27e4cf144289d89be28beb40452d4fe7340e8"
+    },
+    {
+      "path": "Solidity/Syntax/Checked.lean",
+      "sha256": "27c2e199e4275370d18314eb80f610d4d97f95bf27df26aac042b8875f4ce964"
+    },
+    {
+      "path": "Solidity/Syntax/Contract.lean",
+      "sha256": "9b5ea3c97492fc24b9d3e9957acf07fd489afad9cd62a63784170c9a41d2f8bc"
+    },
+    {
+      "path": "Solidity/Syntax/Grammar.lean",
+      "sha256": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8"
+    },
+    {
+      "path": "Solidity/Syntax/Raw.lean",
+      "sha256": "d2fe8be8e0613c8f80b92210f965fdbb7aa067d3bf72548b204909f3f92a28f2"
+    },
+    {
+      "path": "Solidity/Syntax/Scoped.lean",
+      "sha256": "b1fa2db12fc79ad445a32658f9231b0e09ce4b34c717bc00e46d0470d9c1e098"
+    },
+    {
+      "path": "Solidity/Theory/Segs.lean",
+      "sha256": "57e4a32ca89346c6e840f90866f0cdfd8fc2765cb268e09f693e267a5cb0b673"
+    },
+    {
+      "path": "Solidity/Update.lean",
+      "sha256": "b6770b0a55a024edbf17e0abe396984bac6ca3797e0a3d238a9b62af5adfb830"
+    },
+    {
+      "path": "Solidity/Yul/AssignmentCheck.lean",
+      "sha256": "30df8fa1daabd010688adc8bdc2088b57ec180dff7f1a5b3c7e2337db398041d"
+    },
+    {
+      "path": "Solidity/Yul/BlockEnvironment.lean",
+      "sha256": "a1c456763f24a843984433b30793fd635295f625a55921d8a04b23b9a9d9ca10"
+    },
+    {
+      "path": "Solidity/Yul/BlockExtract.lean",
+      "sha256": "442fb6f601bd5a7e6873004fad2cdcd58de90d8480c4c160231a6e943fd6e734"
+    },
+    {
+      "path": "Solidity/Yul/BlockHeaders.lean",
+      "sha256": "47cf7192e387dde8c4e673223a4c41ded3f58acb1077ab6b1b84219032750fb2"
+    },
+    {
+      "path": "Solidity/Yul/BlockScope.lean",
+      "sha256": "addd59bd465372fb2ea34db97355da4338529e8ace094360a44e79ae6d15ca35"
+    },
+    {
+      "path": "Solidity/Yul/BlockTyping.lean",
+      "sha256": "776574cf633ad05e8e451c10e031fff5cbc27d776c93ade55a9f7e343d973b9a"
+    },
+    {
+      "path": "Solidity/Yul/Builtins.lean",
+      "sha256": "461ae4232aa26bbfadb7614049d22b7e8e7ec5468ff8ab94c1b3f059145405e9"
+    },
+    {
+      "path": "Solidity/Yul/CatalogLaws.lean",
+      "sha256": "fd5027d370cf1f9d55b8ca2bd374384d5e91767df5008720ab8920b7c29f0170"
+    },
+    {
+      "path": "Solidity/Yul/CheckedParse.lean",
+      "sha256": "9322785893b7389e8fb2981d74ee4f58bb0b13d8fc707b829b01ddbb4ddc789c"
+    },
+    {
+      "path": "Solidity/Yul/Checks/CleanLocals.lean",
+      "sha256": "b9f51079491e4fdd3cbbdee78ee8542fb121317c2e62acfb2aad6d1503aa38c4"
+    },
+    {
+      "path": "Solidity/Yul/Checks/LocalBlock.lean",
+      "sha256": "54d8707675e1129f2a2c6b6e974cd241d8d4f35020a0517b1da95b6033367d55"
+    },
+    {
+      "path": "Solidity/Yul/Checks/LocalWordView.lean",
+      "sha256": "da3b8488135b4c1c168872ddc791af192e99303ab55977c45a17b59753a1683f"
+    },
+    {
+      "path": "Solidity/Yul/Checks/SourceTypes.lean",
+      "sha256": "cc01f78043601691137fb45291918f2d385227ed7c383cedfe1645b1f2459983"
+    },
+    {
+      "path": "Solidity/Yul/CleanFunctions.lean",
+      "sha256": "1793bf624794b195fddc21fd0ca84fcdda5dff0e0cf6e8605601dc24e9827795"
+    },
+    {
+      "path": "Solidity/Yul/CleanLocals.lean",
+      "sha256": "e422bbbac8ecdbdfe8a113a0770c9495830d57693d0871172c3aaeb9e517883a"
+    },
+    {
+      "path": "Solidity/Yul/ClosedFunctions.lean",
+      "sha256": "b6bb9353032643d1bc4b36e368f85ee52f06204f7e426f1d01c96b2fdf4269df"
+    },
+    {
+      "path": "Solidity/Yul/ClosedHorizon.lean",
+      "sha256": "c12d75978dab0e75ca36d74b12cac48bab7492a765d78a188b3e84dae30bd560"
+    },
+    {
+      "path": "Solidity/Yul/ClosedProfile.lean",
+      "sha256": "e20513dfd875360f081421514520b10eea5bc2c0df32e9c1bb85d5bffbbf68ba"
+    },
+    {
+      "path": "Solidity/Yul/ClosedPure.lean",
+      "sha256": "f4d4687beb0c43128e0ee9df2f92eb93dcec4d2bfae07a0329ebbd3700adc01e"
+    },
+    {
+      "path": "Solidity/Yul/ClosedRun.lean",
+      "sha256": "e367b56cc718c37cc470c8617ca8f268eea64dec8749427f216542b137f41d19"
+    },
+    {
+      "path": "Solidity/Yul/ClosedSyntax.lean",
+      "sha256": "4d089a5ac076df037d5dd6e7a584e969f0027a947286911fc6322b3dea8a93bd"
+    },
+    {
+      "path": "Solidity/Yul/DeclarationCheck.lean",
+      "sha256": "da7d93f6bffb436df7a675ea83bdbce651d845fa659b0e742a61823f2414b44b"
+    },
+    {
+      "path": "Solidity/Yul/DeclarationParse.lean",
+      "sha256": "2059da62beb5abf8a52b1ad16e868def660f333fac0cf8baa8cda3503bd6f059"
+    },
+    {
+      "path": "Solidity/Yul/DeclarationScope.lean",
+      "sha256": "e321811050ae33213e72304d09e73cc561bed164c01ec69ae3ed5b5620c5d3fb"
+    },
+    {
+      "path": "Solidity/Yul/ExpressionCheck.lean",
+      "sha256": "53a3906b5292a4a68cd90404c76490a3869ff96bf0b488dcb742e3d16f0fac4f"
+    },
+    {
+      "path": "Solidity/Yul/ExternalCheck.lean",
+      "sha256": "4ff1987aeb93bb3ef9d2272d6b9bff2c5ac722d12785763c1bf475063673a0d6"
+    },
+    {
+      "path": "Solidity/Yul/ExternalKeys.lean",
+      "sha256": "2ef7162258a96dcfc21b5735bb6ed6188918cb7e10b6cfa44942dea54141a0af"
+    },
+    {
+      "path": "Solidity/Yul/ExternalScope.lean",
+      "sha256": "77373c258252b7363b4727d860f2275ac3d18385869d326aa45cb10f313f1a07"
+    },
+    {
+      "path": "Solidity/Yul/FunctionScope.lean",
+      "sha256": "e319b6bd9c746f0c8ff81babfa7a47159555168d1175245edd0d3aed2fb7d8cf"
+    },
+    {
+      "path": "Solidity/Yul/GlobalExternal.lean",
+      "sha256": "fc6e9eefd5bf27d41bbbef03d060fa78990128fe9e95b10faddf65ecd163910d"
+    },
+    {
+      "path": "Solidity/Yul/LocalBlock.lean",
+      "sha256": "4b9b8a327131e8a194a104676b4d72d024615bf7486d0165964cdb123136fcd0"
+    },
+    {
+      "path": "Solidity/Yul/LocalProjection.lean",
+      "sha256": "d59903e43d8c1cacde17e11b0b8cef94b945e4b6c6fc128adfb7588e643b1f1c"
+    },
+    {
+      "path": "Solidity/Yul/LocalScope.lean",
+      "sha256": "0a0b9edaab8c776896808295509c66506d6cc0a6be3afafe2e6108dd9f02bb68"
+    },
+    {
+      "path": "Solidity/Yul/LocalState.lean",
+      "sha256": "8c0ab4734abf5869c8f51a9f5b85311b4cf296262d1f6537d66655ffe343fb63"
+    },
+    {
+      "path": "Solidity/Yul/LocalValues.lean",
+      "sha256": "ffbc23416f89474b6248cfbf4f2993b38d34eeed5624b77fa0d3cbb6dd907be9"
+    },
+    {
+      "path": "Solidity/Yul/LocalWordView.lean",
+      "sha256": "511b51f4dea80e38fb855238f6059aed76aee3e3c9b9117743abd36e8fcfbe4f"
+    },
+    {
+      "path": "Solidity/Yul/LocalWordWrite.lean",
+      "sha256": "25f3370784a40f57ceec916fb1170edbaadb9b11859f3cc26a753e188a1d8ddb"
+    },
+    {
+      "path": "Solidity/Yul/LocalWriteback.lean",
+      "sha256": "35919e59152af452cf69e5e0d17b3197804a6cbfed10d9241bf1fc1b596787a8"
+    },
+    {
+      "path": "Solidity/Yul/OccurrenceCheck.lean",
+      "sha256": "d9b2b1195aaa09a08ee2c240a95ae150864008d4865af48d7047db7738140d18"
+    },
+    {
+      "path": "Solidity/Yul/PlacementCheck.lean",
+      "sha256": "423363f9c2fcd376e1189bc2e01ac4317d807d7ce16c62019dda704357c96e52"
+    },
+    {
+      "path": "Solidity/Yul/ReservedNames.lean",
+      "sha256": "723d2c323f67e8d0c4db6a4d0d0e2d267b9707d9bfaf9df3f502f9747dfed1b9"
+    },
+    {
+      "path": "Solidity/Yul/ScalarLocals.lean",
+      "sha256": "3b0871d90a351fe741c82aacb1aff505493a1b0411e513b0e45bffcc873c6662"
+    },
+    {
+      "path": "Solidity/Yul/ScopedAssignments.lean",
+      "sha256": "df9ef8519c73501400f9f95389cdd8767e308be3340f2cde4588ec070a541ecb"
+    },
+    {
+      "path": "Solidity/Yul/ScopedBlockTyping.lean",
+      "sha256": "02565b495e084b3bb4e958cb82b8e2c9770da1fe8b4ccf0770a8bcb494dfb353"
+    },
+    {
+      "path": "Solidity/Yul/ScopedExpressions.lean",
+      "sha256": "a7a6b94e5de167f4b45fe1ec0206f7885a1ea0f58ddc43d25bd0acb324d0d1ad"
+    },
+    {
+      "path": "Solidity/Yul/ScopedNames.lean",
+      "sha256": "42b91ae566b4e5b8cba4cf8789fddac077167a2c17170eb605a92ec7641378ba"
+    },
+    {
+      "path": "Solidity/Yul/ScopedSyntax.lean",
+      "sha256": "85c55b2f67ddffeb5f11fcd43863c4d3109dc3c3a8fd045baf8270ea09d4fc8d"
+    },
+    {
+      "path": "Solidity/Yul/ScopedWordSyntax.lean",
+      "sha256": "397540b67deb7dd8fef811de6922a30a82cf4ff182b617ca26a9ff6b6d1720a9"
+    },
+    {
+      "path": "Solidity/Yul/SourceBindings.lean",
+      "sha256": "703eb78a2caecbfc6b51b26046c2f26cfdae11618753bcd7097ba7d40c5ac771"
+    },
+    {
+      "path": "Solidity/Yul/SourceContext.lean",
+      "sha256": "b645fe45068ab60ae01e78f7b86fdae5f83d8ed86d953e601f983e3370722116"
+    },
+    {
+      "path": "Solidity/Yul/SourceTypes.lean",
+      "sha256": "3613e9eeb14210c94f949e0ded01e320f811113ad55eb8304e962afc0340423b"
+    },
+    {
+      "path": "Solidity/Yul/Static.lean",
+      "sha256": "03ed763b33c1c29ac6f67e74a4c8d8da6ad8eb9eb38332c357e0785bde9e7cd5"
+    },
+    {
+      "path": "Solidity/Yul/Syntax.lean",
+      "sha256": "7555149d716a78d959c819c0ec226c587398f2a1935f3844028051443bc3dc1f"
+    },
+    {
+      "path": "Solidity/Yul/TierPolicy.lean",
+      "sha256": "3d9de42f4ea48a176961d3b7ce4928103fe5f4c8659af23eb58246c168436b31"
+    },
+    {
+      "path": "Solidity/Yul/WordAdapter.lean",
+      "sha256": "ded4bbc735e0deb7dc9235809d0c14a36ad049199cfa9a22fa5b5d20f70491b1"
+    },
+    {
+      "path": "Solidity/Yul/WordAdapterLogic.lean",
+      "sha256": "96da80d03a8ae85ed8216dc8cf667474a79b9c9b6365025bf69959eff1b78119"
+    },
+    {
+      "path": "Solidity/Yul/WordArguments.lean",
+      "sha256": "fc1e16dcfc68e01c00ced8672d1bba62002f51b1ec84678b6b1e09d603357a0c"
+    },
+    {
+      "path": "Solidity/Yul/WordBranches.lean",
+      "sha256": "fc3f087b9f19a575cf5960056dab164997fe2445deb1c30aa56ee0634e02ea2d"
+    },
+    {
+      "path": "Solidity/Yul/WordCells.lean",
+      "sha256": "e51f619ae074a4bef801857bb41d14e3864252169fe0aadc25147ed880f2134a"
+    },
+    {
+      "path": "Solidity/Yul/WordCoverage.lean",
+      "sha256": "6dd5f92e9a4d311fcc720e458617e989ef63534dbea18056b79630f7b0813c73"
+    },
+    {
+      "path": "Solidity/Yul/WordExpressions.lean",
+      "sha256": "ae30e1dd73098e304a48a33b4a98c34f6424e10de34f9f907db3eff019410621"
+    },
+    {
+      "path": "Solidity/Yul/WordInputs.lean",
+      "sha256": "6e31934d1fd6d096b6d874804ac3429e73e05e4cc69b6c7ef9b6e86982c2461d"
+    },
+    {
+      "path": "Solidity/Yul/WordLocals.lean",
+      "sha256": "99debc419129cea0c245acc166ac6b813df2bb3b970176432f701f4e8a670db7"
+    },
+    {
+      "path": "Solidity/Yul/WordLogic.lean",
+      "sha256": "c6d25abea7f6cedd07df243cde319b89c5c472db71e18c96f03b6011e215be59"
+    },
+    {
+      "path": "Solidity/Yul/WordLoops.lean",
+      "sha256": "d50a5615cd0d80e8650c7b41d0f67583afc69ff60b2209ecae14aa8a574d0f4c"
+    },
+    {
+      "path": "Solidity/Yul/WordNotation.lean",
+      "sha256": "d02fb05ddf3fd31582ee3492f81092398922b6190e33d3aae1190898bb66e407"
+    },
+    {
+      "path": "Solidity/Yul/WordPolicy.lean",
+      "sha256": "8d9e29b39010f3a7ac0348d307ba1d00540e8473876cc31ceff1b699e190014e"
+    },
+    {
+      "path": "Solidity/Yul/WordRules.lean",
+      "sha256": "9a3ca2a520b9eb06b44e25f52e940b76533ed31069b29eea5cf0cea0608e24ba"
+    },
+    {
+      "path": "Solidity/Yul/WordSwitch.lean",
+      "sha256": "6c564d2c4ca106021794c3acec083f5b662cb5efa011d87c666651bcdd422a32"
+    },
+    {
+      "path": "Solidity/Yul/WordSyntax.lean",
+      "sha256": "b56e33b6d01fb41856805d5d582436b288256a611fc4dafc735b844a83e1d37c"
+    },
+    {
+      "path": "Solidity/Yul/WordTerms.lean",
+      "sha256": "4b5c17c72298a50950d1701074fa82beffa183205d3da920531ffda631833fe0"
+    },
+    {
+      "path": "Solidity/Yul/WordUpdates.lean",
+      "sha256": "d023ba4c74f04e0937f3f9d505b07973ab0d1df884e8ff2dba141412c7ef315f"
+    },
+    {
+      "path": "Solidity/Yul/Words.lean",
+      "sha256": "8942f26f4c2ff9e4668de78112962eb42be4f11146c3889875411826c01f37c5"
+    }
+  ],
+  "added": [
+    "Solidity/Frontend/SolcJson/Yul.lean",
+    "Solidity/Frontend/SolcJson/YulMetadata.lean",
+    "Solidity/Frontend/SolcJson/YulMetadataWords.lean",
+    "Solidity/Frontend/SolcJson/YulNames.lean",
+    "Solidity/Frontend/SolcJson/YulSafety.lean",
+    "Solidity/Frontend/SolcJson/YulScopedParse.lean",
+    "Solidity/Frontend/SolcJson/YulWords.lean",
+    "Solidity/Yul/AssignmentCheck.lean",
+    "Solidity/Yul/BlockEnvironment.lean",
+    "Solidity/Yul/BlockExtract.lean",
+    "Solidity/Yul/BlockHeaders.lean",
+    "Solidity/Yul/BlockScope.lean",
+    "Solidity/Yul/BlockTyping.lean",
+    "Solidity/Yul/Builtins.lean",
+    "Solidity/Yul/CatalogLaws.lean",
+    "Solidity/Yul/CheckedParse.lean",
+    "Solidity/Yul/Checks/CleanLocals.lean",
+    "Solidity/Yul/Checks/LocalBlock.lean",
+    "Solidity/Yul/Checks/LocalWordView.lean",
+    "Solidity/Yul/Checks/SourceTypes.lean",
+    "Solidity/Yul/CleanFunctions.lean",
+    "Solidity/Yul/CleanLocals.lean",
+    "Solidity/Yul/ClosedFunctions.lean",
+    "Solidity/Yul/ClosedHorizon.lean",
+    "Solidity/Yul/ClosedProfile.lean",
+    "Solidity/Yul/ClosedPure.lean",
+    "Solidity/Yul/ClosedRun.lean",
+    "Solidity/Yul/ClosedSyntax.lean",
+    "Solidity/Yul/DeclarationCheck.lean",
+    "Solidity/Yul/DeclarationParse.lean",
+    "Solidity/Yul/DeclarationScope.lean",
+    "Solidity/Yul/ExpressionCheck.lean",
+    "Solidity/Yul/ExternalCheck.lean",
+    "Solidity/Yul/ExternalKeys.lean",
+    "Solidity/Yul/ExternalScope.lean",
+    "Solidity/Yul/FunctionScope.lean",
+    "Solidity/Yul/GlobalExternal.lean",
+    "Solidity/Yul/LocalBlock.lean",
+    "Solidity/Yul/LocalProjection.lean",
+    "Solidity/Yul/LocalScope.lean",
+    "Solidity/Yul/LocalState.lean",
+    "Solidity/Yul/LocalValues.lean",
+    "Solidity/Yul/LocalWordView.lean",
+    "Solidity/Yul/LocalWordWrite.lean",
+    "Solidity/Yul/LocalWriteback.lean",
+    "Solidity/Yul/OccurrenceCheck.lean",
+    "Solidity/Yul/PlacementCheck.lean",
+    "Solidity/Yul/ReservedNames.lean",
+    "Solidity/Yul/ScalarLocals.lean",
+    "Solidity/Yul/ScopedAssignments.lean",
+    "Solidity/Yul/ScopedBlockTyping.lean",
+    "Solidity/Yul/ScopedExpressions.lean",
+    "Solidity/Yul/ScopedNames.lean",
+    "Solidity/Yul/ScopedSyntax.lean",
+    "Solidity/Yul/ScopedWordSyntax.lean",
+    "Solidity/Yul/SourceBindings.lean",
+    "Solidity/Yul/SourceContext.lean",
+    "Solidity/Yul/SourceTypes.lean",
+    "Solidity/Yul/Static.lean",
+    "Solidity/Yul/Syntax.lean",
+    "Solidity/Yul/TierPolicy.lean",
+    "Solidity/Yul/WordAdapter.lean",
+    "Solidity/Yul/WordAdapterLogic.lean",
+    "Solidity/Yul/WordArguments.lean",
+    "Solidity/Yul/WordBranches.lean",
+    "Solidity/Yul/WordCells.lean",
+    "Solidity/Yul/WordCoverage.lean",
+    "Solidity/Yul/WordExpressions.lean",
+    "Solidity/Yul/WordInputs.lean",
+    "Solidity/Yul/WordLocals.lean",
+    "Solidity/Yul/WordLogic.lean",
+    "Solidity/Yul/WordLoops.lean",
+    "Solidity/Yul/WordNotation.lean",
+    "Solidity/Yul/WordPolicy.lean",
+    "Solidity/Yul/WordRules.lean",
+    "Solidity/Yul/WordSwitch.lean",
+    "Solidity/Yul/WordSyntax.lean",
+    "Solidity/Yul/WordTerms.lean",
+    "Solidity/Yul/WordUpdates.lean",
+    "Solidity/Yul/Words.lean"
+  ],
+  "conflicts": [],
+  "scope": "Actual Source LOCAL pure-block runner with concrete complete initialization/writeback; allhorizon completeword/controlprojection, oldSt/nonpurelocalpreservation and completedstable. Purelocalsretagraw: viewidentityonly, notLocalValuesidentity. NotoldSourceRStmt/generalSource/session/compiler semantics. Dependencyinputonly.",
+  "producerUnresolved": [
+    "SRC1 sharedSource hook/rawresulttransport: oldEM/Locals/RVal clean,RStmt onlyrethrow,RExpr noordinaryFnproperties; restrictedlegacyownersread-only",
+    "Dirty ordinarySource operators/rawfnframes/sessions and actualSource/solc-ID/span/role/comment provenance/generaladmission",
+    "Independent openAST simulation/generalrethrow physicalagreement and Source/G51/physical/compiler/world finaljointcomposition",
+    "LIB1 pending; compiler5016/1834 failures retained"
+  ]
+}

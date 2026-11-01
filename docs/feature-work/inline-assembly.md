@@ -275,3 +275,20 @@ pending; physical-world journals/logs, dirty locals, allocation/G01 and actual
 compiler/world/V16 assembly certificates still need concrete producer facts.
 See [lane handoff](inline-assembly-vy5.md#actual-physicalsource-consumer-checkpoint--2026-11-01).
 New artifacts: `/workspace/vy5-composition/physical-source-20261101/final/`.
+
+
+### VY5 actual raw-local/physical/scoped-loop consumer — 2026-11-01
+
+Sealed VY1 c7b128fd10df2fa51929cb68bdba020cf2ca07a5 now feeds the existing actual
+VY2/VY3/VY4/V16 private tree.43new kernel laws cover halt-preserving physical-first
+raw-local execution, dirty/two-Fn/nonword/source preservation, coupled rollback
+transport, typed heap/target byte agreement and concrete scoped Yul loops.
+Private validated head c6c529aaa6075488ff84b8606af508432dd50053 passes full kernel/
+import/TestSuite/strict gates and43scoped axiom reports. The initial six-site trust
+audit failure is retained; independently reviewed private-only ordinary .admit
+method registrations make the unchanged checker pass.328JS+2Python and4profiles/
+20native calls pass unchanged expectations. All24full obligations/six Source
+combinations remain open: no raw ordinary-Source resume, full loop/compiler/world
+adequacy, log conversion or G01 refinement is inferred. See the
+[lane handoff](inline-assembly-vy5.md#actual-raw-local--physical--scoped-loop-consumer--2026-11-01).
+Fresh sealed artifacts: `/workspace/vy5-composition/dirty-source-20261101/final/`.

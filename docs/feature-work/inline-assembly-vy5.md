@@ -967,3 +967,159 @@ remains blocked and untouched; get_goal is not exposed, and no new/reset/
 reactivated goal or competing continuation was created in this manual recovery.
 No semantic question is pending. Fresh patch/bundles/handoff/evidence/checksums
 are versioned under `/workspace/vy5-composition/physical-source-20261101/final/`.
+
+
+## Actual raw-local / physical / scoped-loop consumer — 2026-11-01
+
+This continues the frozen Y10 assignment from reviewed
+ d36a280a9e6a68eefc2283b62e4623b3bfbeabdc on the assigned branch, pinned base
+0b078cefaf7daad79007b87b72df64eb6936420f. The missing-VY1-package condition is
+resolved by sealed c7b128fd10df2fa51929cb68bdba020cf2ca07a5. Verified bundle
+SHA256 a046a61d2cb221d6701a6c354bbfc72b344220128e972a7d32d610a8c7a96f48,
+archive46fd3b2e1f5b35707657c2f68ca416def082593c71fb4b2b435e3e7165788cf6,
+and interface409cb6fc38c5e535a1fcdd0f2a7d7eeab61d4568ff33b7c9ba17012ee5776e84
+match delivery. All80 archive modules match the committed tree/module hashes;
+125-file import closure adds80 files with no version conflict. The delivered
+interface's optional source/Interface path is not relied on; actual module
+bodies/signatures from the verified Git bundle are the inputs.
+
+The existing private dependency tree extends physical checkpoint
+ a3b983b7abafbf299a0b2ac4452a55c849d6e37b via VY1 stage
+020814b93b87a683ce7931618779b4bfba6691cf to validated
+c6c529aaa6075488ff84b8606af508432dd50053 at
+`/workspace/vy5-dependencies-20261101`. No foreign producer definition changed.
+The assigned branch retains source-only consumer modules; supplied dependencies
+and the complete root registration remain private development inputs, not a
+master integration or standalone general-assembly admission claim.
+[Exact producer receipt](../../tests/yul-composition/local-producer-input.json)
+records125 source hashes,80 added modules and retained producer limitations.
+
+Four new modules add43 named kernel component laws, independently witnessed:
+
+| Module | Actual result and boundary |
+|---|---|
+| [LocalPhysical](../../Solidity/Yul/Composition/LocalPhysical.lean) | Executes the actual represented physical Source action first, retaining the entire physical result and both journals; only actual Except success enters actual VY1 runLocalBlock. Full raw-word/control projection holds at every horizon; source errors, horizon exhaustion and completion remain distinct. Static failure preserves original source/journals and executes no local code at every fuel. |
+| [LocalPhysicalControls](../../Solidity/Yul/Composition/LocalPhysicalControls.lean) | Same actual originEnv/Source.Ctx carries six source locals but seven word cells: dirty bool2, uint8=257, two distinct same-type external-function locals with full raw address/selector fields, fixed byte and a heap-backed nonword memory reference. Actual physical raw0xab000002 and child0xcd000003, checked preparation/owner/separation/nonstatic/MemOK, full Source.St/nonword retention, raw clean?/runClean refusal, coupled three-journal rollback and all-completed-horizon equality are proved. |
+| [LocalPhysicalMemory](../../Solidity/Yul/Composition/LocalPhysicalMemory.lean) | Reconstructs the complete physical raw word after actual local execution. Actual retained heap lookup/MemoryImage/Placement/reserved-area/window/target bounds yield exact target byte-copy agreement, without an allocator refinement or full raw-state MemOK assertion. |
+| [LoopPhysical](../../Solidity/Yul/Composition/LoopPhysical.lean) | Actual intrinsic Yul FOR uses a scoped zero-initialized counter after the physical step and dirty prefix: three iterations produce raw uint8=1025; CONTINUE runs post/test and also1025; BREAK is consumed after one increment,513; wrongcount2 gives769. Source/nonword/rawslot persist and every completed horizon has the same complete outcome. This is not old Source.RStmt loop dispatch, lowering, or full Solidity-loop coverage. |
+
+The physical-first boundary has no assumed producer theorem. Its static error
+is retained as Except.error; successful local exhaustion is Except.ok none.
+Both physical journals are returned alongside that result. Initial and physical
+clean phases have actual Source.MemOK witnesses with a real allocated AABB byte
+object backing memRef0. Raw LocalValues are distinct from old clean Source.Locals:
+word-view identity does not imply literal LocalValues identity. All pure cells
+are retagged raw by writeback, even unchanged/canonical words. The theorem
+no_raw_resume proves every Unit-returning old Source.EM action is refused by runClean on the
+completed raw witness. No cleanup policy or ordinary-source resumption is inferred.
+
+The rollback law uses the actual VY2 source/complement/owned-byte journals and
+restores the full clean Source state. The raw-local transport law rebases St
+between actual local runs with identical initial locals; it does NOT execute a
+physical action after raw local writeback or claim dirty-local frame rollback.
+The precise missing direction is an actual raw Source hook/operator/frame/session
+semantics preserving LocalValues; old runClean demonstrably cannot supply it.
+Source.St.logs55 is an internal preservation sentinel, not silently mapped into
+native logs or VY4 topic observations. Physical-world journal/log integration,
+G01 allocation/unified-observation amendments, actual compiler/world/V16 assembly
+certificates and all full Y10 combinations remain open.
+
+[LocalDriver](../../tests/yul-composition/LocalDriver.lean) executes actual producer
+and consumer definitions and retains seven ordered horizons, complete word cells,
+all legal transfers, static halts, raw-resume refusal, real heap/nonword/log
+sentinels, raw physical words and target BB memory sentinels. No missing capture
+is replaced with zero. The independently source-derived
+[expectations](../../tests/yul-composition/local-expectations.json) were saved
+before native observations. The [finite fixture](../../tests/yul-composition/LocalPhysicalControls.sol)
+compares the same raw fields/storage/AABB output in pinned solc0.8.38+1835d247/
+Osaka, legacy/viaIR and optimizer off/on. All4profiles/20orderedcalls pass:
+peek; joint physical/raw block; peek; child-success/outer-revert; peek. Expected
+values never changed. Raw bool2/u8=257/full-word Fn fields agree in this control
+across profiles; no general ordinary-Solidity cleanup/pipeline theorem follows.
+Return windows are relative, without native/source allocation-pointer equality.
+Source logical account1/log sentinel and native predicted account domain are
+separate finite controls, not an asserted address/world correspondence relation.
+
+The first new fixture wrapper failed compiler8894 because inheriting a contract
+with custom storage layout is forbidden. Its complete raw input/diagnostic is
+retained. The corrected new wrapper inherits the same uncustomized B/C bases
+and repeats D's unchanged fields/methods with explicit layout42. The older
+PhysicalControls.sol and every original expected outcome remain unchanged.
+[Runner](../../scripts/yul-composition/local-source.mjs) validates full ordered
+capture/result/request/frame identities, deployment address/runtime installation,
+pre/post slot42–48 maps, account balance/nonce/code, selected RETURN/REVERT windows,
+child ownership/input and rollback writes. runCall host nonce behavior remains
+separate from runTx/deferred cleanup. Complete untouched-world/source adequacy
+is not claimed. Current receipt/source/oracle/ledger bytes and all actual private
+producer/consumer bodies, retained Lean stdout/stderr/command/exit metadata and
+raw compiler receipts are revalidated on report read, not merely declared hashes.
+
+[Local ledger](../../tests/yul-composition/local-component-ledger.json) registers31
+facts; [loop ledger](../../tests/yul-composition/loop-component-ledger.json) adds12.
+[Extra catalog validator](../../scripts/yul-composition/component-extras.mjs)
+rejects missing selected catalogs, stale proof bodies and false closure. All24
+full obligations/six source combinations remain pending. The previous physical
+and component catalogs are preserved as their tested historical scopes; these
+new extensions supersede their earlier missing-VY1-package condition.
+
+Final affected scripts pass328JS+2Python, including actual filesystem-read
+missing/stale receipt/source/oracle/body simulations, equal-return wrong storage/
+world/memory, lost dirty bits, function aliasing, wrong nonword/source, control/
+horizon/static/resume/rollback mutations and stale/missing/false-proof catalogs.
+Final private joint gate passes actual Lean4.24.0 commit797c613 and
+Lake5.0.0-src+797c613, explicit KeySort2jobs, library1221jobs, TestSuite262jobs,
+SolKey377taclets/131read annotations,188core/0elaborator and1236reachable/
+0orphans. Strict remains491automatic/61budgeted/0manual/11refuted/0pending.
+All43 exact signatures/scoped axiom reports pass with only standard axioms or
+none. Final per-file MCP checks pass four new modules, driver and private root:
+success=true, partial=false, no errors; nonfatal shutdown warnings remain raw.
+
+The first joint command passed build/signature/strict phases then failed trust
+with six newly imported .admit method-name registrations missing. That exit1
+and every earlier failed edit/fixture probe remain raw. Actual Builtin.admit is
+an ordinary Except Refusal Unit tier/resource/callcode checker; all six sites
+are its definition/method uses/unfolds/lemma statements, not Lean proof admission.
+The [isolated registration](../../tests/yul-composition/local-trust-registration.json)
+and exact patch are independently reviewed: only private tests/trust-inventory
+appends six exact sites,246→252. Main shared inventory and checker/forbidden-token
+rules are unchanged. Final same-checker trust1251sources/252sites/0findings passes.
+No axiom/sorry/native proof bypass or expected semantic verdict change occurs.
+An orphan audit accidentally run in the source-only assigned checkout correctly
+failed with13unintegrated consumer modules; that exit1 is retained separately.
+The correct private import-root audit passes, without claiming standalone main
+source support. Historical docs/G03 exit1 remain baseline-identical failures.
+
+Independent read-only finder and skeptic reviews used no Lean/server/build.
+They found physical-halt loss in the first adapter and a current-file provenance
+reader gap. Both were fixed and discriminating tests added. Separate rereviews
+accepted all43 kernel laws, fixture/driver/runner, narrow private trust amendment
+and coverage boundaries with no remaining concrete source finding. Detailed
+review records and exact commands/outputs/resources are exported with the handoff.
+
+Heavy work remains serial under the writer lock, Lean-j1/LEAN_NUM_THREADS=1,
+hard aggregate12GiB/equal memory-swap (no swap), OS/RSS/disk monitoring and disk
+caches. Docker uses vfs and each check copied its immutable base; this caused
+rapid disk loss. Only new stopped dirty-source containers were retired after
+SizeRw=0 and exported directory-only bind-placeholder differences were verified;
+exact inspect/directory metadata and logs, immutable image and ALL mounted caches
+remain preserved. A strict empty-diff guard first refused those mount directories
+and removed nothing; that failed probe is also retained. No prior container,
+source, sealed manifest/cache or evidence was discarded. No resource/proof/fuel/
+node/gas/test budget increased and no OOM/hidden resource stop occurred.
+
+Work1/Work3 remain partial despite43 new actual joint/loop laws and checked import
+closure. Work2/BackfillA/B remain partial despite20new native calls, fail-closed
+source/proof/provenance controls and ready-input consumption. Original227working
+upstream profiles/458finite asserted calls,21older-fork blocks,416compiler probes
+and eight intended mutants remain unchanged and attributed to sealed tested
+reports; unchanged full reference commands were not rerun as new evidence.
+Concrete Source.RStmt/JSON/dirty-ordinary operators/raw function frames/sessions,
+physical-world journals/logs, G01 contracts and actual compiler/world/V16 assembly
+facts still block all24/six final source obligations. No generic assumption or
+finite control substitutes for those proofs. The full goal stays blocked and
+untouched; get_goal is not exposed, no status change/reset/recreation or competing
+continuation occurred. DecisionsYQ1–YQ7 remain those recorded in solidity-scope.md.
+No new semantic question is pending. Fresh committed patch/private bundle/interface/
+handoff/evidence/checksums are versioned under
+`/workspace/vy5-composition/dirty-source-20261101/final/`; all eight earlier sealed
+manifests, raw failures and caches are preserved.

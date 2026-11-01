@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "producerHead": "c7b128fd10df2fa51929cb68bdba020cf2ca07a5",
+  "ownerDependency": "VY1 builtin admission method naming / shared trust-inventory integration",
+  "baseInventorySha256": "6b2feefc46b64e4fa2d9c97a37e533f3c605e3281144aac0b62e433d625dd908",
+  "entries": [
+    {
+      "file": "Solidity/Yul/Builtins.lean",
+      "kind": "recovery",
+      "code": "def Builtin.admit {a r : Nat} (tier : Tier) (b : Builtin a r) : Except Refusal Unit :="
+    },
+    {
+      "file": "Solidity/Yul/ClosedPure.lean",
+      "kind": "recovery",
+      "code": "(checkWordBuiltin b).isSome = true \u2194 b.admit .A = .ok () := by"
+    },
+    {
+      "file": "Solidity/Yul/TierPolicy.lean",
+      "kind": "recovery",
+      "code": "b.admit tier = .ok () \u2194 BuiltinP tier b := by"
+    },
+    {
+      "file": "Solidity/Yul/TierPolicy.lean",
+      "kind": "recovery",
+      "code": "unfold Builtin.admit BuiltinP"
+    },
+    {
+      "file": "Solidity/Yul/TierPolicy.lean",
+      "kind": "recovery",
+      "code": "b.admit tier"
+    },
+    {
+      "file": "Solidity/Yul/TierPolicy.lean",
+      "kind": "recovery",
+      "code": "change ((b.admit tier >>= fun _ => allFin _ (fun i => checkExpr tier (args i))) = .ok ()) \u2194 _"
+    }
+  ],
+  "rationale": "Six exact ordinary .admit method occurrences, not Lean admit tactics. Builtin.admit returns Except Refusal Unit and is implemented by tier/resource/callcode checks. No proof term construction, axiom, sorry, Meta admission, unsafe or override. Existing checker and forbidden-token rules unchanged. Registration is private integration only; main shared inventory untouched."
+}
