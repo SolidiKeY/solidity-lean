@@ -216,6 +216,10 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
   -- before an earlier storage operand is copied.
   if f != "constructor" && funs.all (·.1 != f) && (fnTyOf? C (← ctx) f).isSome then
     return ([], args)
+  -- likewise through a callee that is not a name: `callValue`, the memory and
+  -- the tuple dispatch capture it at its function type, then the arguments
+  if f == callValueName && (args.head?.bind (fnTyOfExpr C (← ctx))).isSome then
+    return ([], args)
   let d := if f == "constructor" then C.ctor else lookupBy f funs
   let some d := d | return ← hoistArgs args
   unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args

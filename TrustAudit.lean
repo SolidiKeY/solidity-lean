@@ -1783,7 +1783,11 @@ run_cmd do
     ``Solidity.Examples.Tactics.FunctionTypes.memDirect_run,
     ``Solidity.Examples.Tactics.FunctionTypes.storAlias_run,
     ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned,
-    ``Solidity.Examples.Tactics.FunctionTypes.tupleReturn_run]
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.structReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleCallee_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.memNoCopy_reason,
+    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned_halt]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name
