@@ -2022,3 +2022,40 @@ supplied as a desired endpoint. This checkpoint does not waive those gaps or any
 original Backfill A/B item. Proposed coordinator reconciliation is only partial
 G37.01/G36.01/Backfill A-B evidence; no global G03/status/pin/refusal edit or
 parent closure, no push/merge/PR, no goal change and no semantic choice.
+
+
+### Final unchanged-budget full-gate investigation
+
+The reviewed source/proof checkpoints are538cbcfe42929389c7594c02d28edcf94abf5257
+and18f8d749e2eeeec29a593d90a2a130a7f83a03ea. After authenticated preparation,
+three actual COMPLETE `./run-lean.sh` attempts preserved every default/native/
+TestSuite/sort target and the original300s cap: exits124 at300.887,300.535 and
+301.050s. None reached TestSuite/sort; no whole-pipeline pass is claimed.
+
+The first attempt actually completed PowerBounds in256s, emitted the checked
+`threshold_bounds` axiom report `[propext, Quot.sound]`, built executable root
+modules and linked the Lean CLI. Its new completed dependency justified the
+second complete attempt at the SAME300s bound. That attempt replayed PowerBounds
+and completed UnitExamples in152s; this genuinely new dependency justified the
+third. The third emitted no further completed source dependency, so no further
+unchanged retry is justified. Source.Horizon was observed active in the second
+attempt; the final incomplete command and all raw resources/progress are saved.
+A post-full31-missing-object inventory is existence ONLY: partially emitted or
+old objects never relabel an exit124 command as passed. All earlier cold120s
+failures, the original full124/300s and every later full failure stay retained.
+
+PowerBounds and its six-source import closure are byte-identical to the EXACT
+frozen base, compared through Git. This is source-provenance comparison, not an
+executed base gate or waiver. Reserved source/performance repair remains with
+its owners; no file, theorem, matrix, trust pin or budget there was changed.
+Actual full failure, native progress and sort/TestSuite readiness are distinct.
+The single source/toolchain-keyed cache and all25 previous seals are preserved.
+
+The current owned raw35 gate remains FAIL124/120.908, current complete cached
+542-report command is exit0/120.095 outer (NOT strictsub120), and all original
+542 imported kernel types plus actual15+3 new scoped sets remain exact. Original
+72 and new5 axiom-guard corruption controls, cache corruption controls, source
+header preservation and structural/ownership checks pass separately. Raw normal/
+strict docs remain1 with complete publication/C24 findings equality; no new owned
+finding and no global docs pass. There is no source eligibility, full-assignment
+completion, independent-work exhaustion, publication or goal-state change.
