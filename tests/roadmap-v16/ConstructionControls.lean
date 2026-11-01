@@ -855,4 +855,3 @@ run_cmd do
           ("dependencies", toJson (info.getUsedConstantsAsSet.toList.map Name.toString)),
           ("axioms", toJson (axs.toList.map Name.toString))])
   logInfo m!"V16-INVENTORY {(Json.mkObj [("definitions", .arr definitions), ("modules", toJson (env.header.moduleNames.toList.map Name.toString)), ("inductives", .arr inductives), ("theorems", .arr theorems)]).compress}"
-
