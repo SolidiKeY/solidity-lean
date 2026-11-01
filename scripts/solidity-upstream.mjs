@@ -280,8 +280,8 @@ function checkAbiMetadata(p, top = false) {
   // A top-level enum parameter/return (ABI `uint8`) of an ABI coder v2 entry is
   // replayed at its declared cardinality from the source declaration (Lean
   // `paramRanges`, `Semantics/AbiEntry.lean` `Kind.enumBelow`); nested enums
-  // stay refused. Lean's raw path still refuses an enum return of a function
-  // without an enum parameter.
+  // stay refused. Lean's raw path replays enum parameters and returns by
+  // position (`Tools/Upstream.lean`), refusing an unmatched position.
   if (/^enum\s/.test(p.internalType ?? '') && !(top && p.type === 'uint8'))
     throw new Error('nominal enum ABI range not adapted');
   for (const c of p.components ?? []) checkAbiMetadata(c);

@@ -567,3 +567,15 @@ section pointer, `abi-entry-collect.py` argument handling. Recorded, not
 changed: inside `sol{}` (not the import), `AbiTy.of` ignores `#enum` rows,
 so a DSL `abi.decode(b, (E[]))` decodes without the member-count check
 (pre-existing; the import refuses nested enums).
+
+### Integration review (lane FU1, 2026-11-01)
+
+Read-only finder and skeptic on the merge of FU1 `62f41850` over master
+`457130f3`. Fixed at integration: a memory-array return through a function
+value now keeps full-word elements (`FunDecl.sigTy?`, `fnMemRet`). FU1 had
+admitted narrow and `bytesN` returns, but the call site compares only the
+type, not the element width (`exprShape`), so `uint[] memory b = h(a)` was
+admitted for a `uint8[]` return, which solc rejects, and aliased the narrow
+object at width 256. A narrow or `bytesN` return is refused again. Docstrings
+corrected. Open: the `AxiomAudit.lean` treatment of a constant missing from
+the environment as clean (not exploitable with a complete import).
