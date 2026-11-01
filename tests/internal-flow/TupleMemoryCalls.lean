@@ -709,12 +709,120 @@ def expandedProducer : Calls.Program 1 prefixProducer.frag (expand arguments bin
   (TuplePrograms.compile 1 prefixProducer.frag (expand arguments binders nestedBody)).get (by decide +kernel)
 attribute [irreducible] expandedProducer
 
+theorem exact_cost_frame : [outerProducer.need,expandedProducer.need,scopedProducer.need,suffixProducer.need,
+    producer.need,outerProducer.cost caller.st,scopedProducer.cost caller.st,suffixProducer.cost unwound.st,
+    producer.cost caller.st] = [15,15,15,4,15,5,5,0,5] := by decide +kernel
+
+theorem actualExpandedSelection : TuplePrograms.compile 1 prefixProducer.frag (expand arguments binders nestedBody) = some expandedProducer := by
+  delta expandedProducer
+  exact (Option.some_get _).symm
+theorem actualOuterConstruction : outerProducer =
+    Calls.cons (tupleReturn "outerTriple" arguments binders nestedBody expandedProducer)
+      (Calls.nil 1 (tupleReturn "outerTriple" arguments binders nestedBody expandedProducer).frag) := by
+  have selected := TuplePrograms.compile_tuple_nil_success prefixProducer.frag "outerTriple"
+    arguments binders nestedBody expandedProducer
+    (Option.isNone_iff_eq_none.mp (by decide +kernel))
+    (Option.isNone_iff_eq_none.mp (by decide +kernel)) (by decide +kernel) actualExpandedSelection
+  have actual : TuplePrograms.compile 1 prefixProducer.frag (.cons outerCall .nil) = some outerProducer := by
+    delta outerProducer
+    exact (Option.some_get _).symm
+  exact Option.some.inj (actual.symm.trans selected)
+theorem actualExpandedCost : expandedProducer.cost caller.st = 5 := by
+  have same : outerProducer.cost caller.st = expandedProducer.cost caller.st := by
+    rw [actualOuterConstruction]
+    rfl
+  exact same.symm.trans (congrArg (fun xs => xs[5]!) exact_cost_frame)
+
 theorem target_body : words (Evm.run (prefixProducer.code ++ expandedProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,256,257,258,259,260,261,262,263,264,265,266,267] =
     some [77,268,99,42,256,256,259,266,42,17,30,1,266,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101,1,55] := by decide +kernel
+theorem actualExpandedTarget : ∃ m : Evm.Machine,
+    Evm.run (prefixProducer.code ++ expandedProducer.code) machine = .ok m 0 := by
+  have pc : prefixProducer.cost initial = 7 := congrArg (fun xs => xs[5]!) exact_frame_cost
+  have pn : prefixProducer.need = 4 := congrArg (fun xs => xs[0]!) exact_frame_cost
+  have capacity : AllocationInput 1 128
+      (prefixProducer.cost initial + expandedProducer.cost caller.st) initial bases machine :=
+    .inr ⟨by decide, wmod 256, initial_repr.2, by rw [pc,actualExpandedCost]; decide⟩
+  obtain ⟨m₁,base₁,hp,repr,stack,bases,allocator⟩ := program_endpoint prefixProducer
+    initial_repr.1 (by rw [pn]; decide) (capacity.of_le (Nat.le_add_right _ _)) caller actual_prefix
+  have room : 1 + expandedProducer.need ≤ 128 := by
+    have hn : expandedProducer.need = 15 := congrArg (fun xs => xs[1]!) exact_cost_frame
+    rw [hn]; decide
+  have reached := allocator.nextInput capacity
+  rcases expandedProducer.sound repr room reached with
+    ⟨out,m,base,hs,ht,repr',stack',bases',allocator'⟩ | ⟨hs,ht⟩
+  · exact ⟨m,(Evm.run_append_ok hp).trans ht⟩
+  · have observed := target_body
+    rw [Evm.run_append_ok hp,ht] at observed
+    cases observed
+
+
+/--
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedSelection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualOuterConstruction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedCost' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+---
+info: 'Solidity.Backend.InternalFlow.TupleCallChecks.Composed.actualExpandedTarget' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print_checked_axioms actualExpandedSelection, actualOuterConstruction, actualExpandedCost, actualExpandedTarget
+
 theorem target_export : words (Evm.run (prefixProducer.code ++ outerProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,256,257,258,259,260,261,262,263,264,265,266,267] =
-    some [77,268,99,42,256,256,259,17,30,1,30,1,266,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101,1,55] := by decide +kernel
+    some [77,268,99,42,256,256,259,17,30,1,30,1,266,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101,1,55] := by
+  obtain ⟨m,executed⟩ := actualExpandedTarget
+  have full := target_body
+  rw [executed] at full
+  have snapshot := numeric_stack_cells m [0, 127, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267] [77] [268, 99, 42, 256, 256, 259, 266, 42, 17, 30, 1, 266, 29, 1, 29, 1, 263, 2, 19, 11, 3, 23, 29, 31, 2, 99, 101, 1, 55] rfl full
+  have h0 : m.mem 0 = observedWord 268 := congrArg (fun xs => xs[0]!) snapshot.2
+  have h1 : m.mem 127 = observedWord 99 := congrArg (fun xs => xs[1]!) snapshot.2
+  have h2 : m.mem 1 = observedWord 42 := congrArg (fun xs => xs[2]!) snapshot.2
+  have h3 : m.mem 2 = observedWord 256 := congrArg (fun xs => xs[3]!) snapshot.2
+  have h4 : m.mem 3 = observedWord 256 := congrArg (fun xs => xs[4]!) snapshot.2
+  have h5 : m.mem 4 = observedWord 259 := congrArg (fun xs => xs[5]!) snapshot.2
+  have h8 : m.mem 7 = observedWord 17 := congrArg (fun xs => xs[8]!) snapshot.2
+  have h9 : m.mem 8 = observedWord 30 := congrArg (fun xs => xs[9]!) snapshot.2
+  have h10 : m.mem 9 = observedWord 1 := congrArg (fun xs => xs[10]!) snapshot.2
+  have h11 : m.mem 10 = observedWord 266 := congrArg (fun xs => xs[11]!) snapshot.2
+  have h12 : m.mem 11 = observedWord 29 := congrArg (fun xs => xs[12]!) snapshot.2
+  have h13 : m.mem 12 = observedWord 1 := congrArg (fun xs => xs[13]!) snapshot.2
+  have h14 : m.mem 13 = observedWord 29 := congrArg (fun xs => xs[14]!) snapshot.2
+  have h15 : m.mem 14 = observedWord 1 := congrArg (fun xs => xs[15]!) snapshot.2
+  have h16 : m.mem 15 = observedWord 263 := congrArg (fun xs => xs[16]!) snapshot.2
+  have h17 : m.mem 256 = observedWord 2 := congrArg (fun xs => xs[17]!) snapshot.2
+  have h18 : m.mem 257 = observedWord 19 := congrArg (fun xs => xs[18]!) snapshot.2
+  have h19 : m.mem 258 = observedWord 11 := congrArg (fun xs => xs[19]!) snapshot.2
+  have h20 : m.mem 259 = observedWord 3 := congrArg (fun xs => xs[20]!) snapshot.2
+  have h21 : m.mem 260 = observedWord 23 := congrArg (fun xs => xs[21]!) snapshot.2
+  have h22 : m.mem 261 = observedWord 29 := congrArg (fun xs => xs[22]!) snapshot.2
+  have h23 : m.mem 262 = observedWord 31 := congrArg (fun xs => xs[23]!) snapshot.2
+  have h24 : m.mem 263 = observedWord 2 := congrArg (fun xs => xs[24]!) snapshot.2
+  have h25 : m.mem 264 = observedWord 99 := congrArg (fun xs => xs[25]!) snapshot.2
+  have h26 : m.mem 265 = observedWord 101 := congrArg (fun xs => xs[26]!) snapshot.2
+  have h27 : m.mem 266 = observedWord 1 := congrArg (fun xs => xs[27]!) snapshot.2
+  have h28 : m.mem 267 = observedWord 55 := congrArg (fun xs => xs[28]!) snapshot.2
+  have code : outerProducer.code = expandedProducer.code ++ exportCode 1 Caller Params binders := by
+    rw [actualOuterConstruction]
+    change (expandedProducer.code ++ exportCode 1 Caller Params binders) ++ [] = _
+    exact List.append_nil _
+  rw [code,← List.append_assoc,Evm.run_append_ok executed]
+  simp only [words, run, Caller, Params, binders, TupleCalls.exportCode, cell, List.length_cons,
+    List.length_nil, Nat.zero_add, Nat.reduceAdd, Nat.add_zero, List.nil_append, List.cons_append,
+    exec_cons_zero, Out.bind, Instr.step, Machine.next, snapshot.1, List.map_cons, List.map_nil,
+    exec, upd, Nat.reduceEqDiff, ↓reduceIte, reduceCtorEq, Nat.succ_ne_self,
+    List.mapM_cons, List.mapM_nil, Option.pure_def, Option.bind_eq_bind, Option.bind_some,
+    h0, h1, h2, h3, h4, h5, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, h22, h23, h24, h25, h26, h27, h28]
+  decide +kernel
 theorem target_unwind : words (Evm.run (prefixProducer.code ++ scopedProducer.code) machine)
     [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265,266,267] =
     some [77,268,99,1730,256,256,259,17,30,1,2,19,17,3,23,29,31,2,99,101,1,55] := by decide +kernel
@@ -722,9 +830,6 @@ theorem target_final : words (Evm.run (prefixProducer.code ++ producer.code) mac
     [0,127,1,2,3,4,5,6,7,256,257,258,259,260,261,262,263,264,265,266,267] =
     some [77,268,99,1735,256,256,259,17,30,1,2,19,1735,3,23,29,31,2,99,101,1,55] := by decide +kernel
 
-theorem exact_cost_frame : [outerProducer.need,expandedProducer.need,scopedProducer.need,suffixProducer.need,
-    producer.need,outerProducer.cost caller.st,scopedProducer.cost caller.st,suffixProducer.cost unwound.st,
-    producer.cost caller.st] = [15,15,15,4,15,5,5,0,5] := by decide +kernel
 
 def checked : Compiler.Compilation 1 prefixProducer.frag program :=
   .memoryCalls producer (by decide +kernel)
@@ -784,7 +889,20 @@ theorem wrong_cursor : words (Evm.run (prefixProducer.code ++ producer.code) mac
     decide
 theorem wrong_overlap : words (Evm.run
     (prefixProducer.code ++ expandedProducer.code ++ badHighFirst) machine) [5,6,7] =
-    some [77,1,30,1] := by decide +kernel
+    some [77,1,30,1] := by
+  obtain ⟨m,executed⟩ := actualExpandedTarget
+  have full := target_body
+  rw [executed] at full
+  have snapshot := numeric_stack_cells m
+    [0,127,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,256,257,258,259,260,261,262,263,264,265,266,267]
+    [77] [268,99,42,256,256,259,266,42,17,30,1,266,29,1,29,1,263,2,19,11,3,23,29,31,2,99,101,1,55] rfl full
+  have high : m.mem 8 = observedWord 30 := congrArg (fun xs => xs[9]!) snapshot.2
+  have flag : m.mem 9 = observedWord 1 := congrArg (fun xs => xs[10]!) snapshot.2
+  rw [Evm.run_append_ok executed]
+  simp only [words,badHighFirst,Evm.run,Evm.exec,Evm.Instr.step,Evm.Out.bind,
+    Evm.Machine.next,Evm.upd,snapshot.1,high,flag,List.map_cons,List.map_nil,
+    Nat.reduceEqDiff,reduceIte]
+  decide +kernel
 
 -- A nested bare failure skips both export layers, the outer allocation and suffix.
 def failingInner : Stmt C Input (Results ++ Input) :=

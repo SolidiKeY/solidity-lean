@@ -83,6 +83,34 @@ def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
   | some out => some out
   | none => layers b (height P) F P
 
+/-- Actual finite selector construction for a tuple call followed by nil.
+The premises are compiler results and finite syntax height, not simulation. -/
+theorem compile_tuple_nil_success {b : Nat} {Γ ps rs Γf : Ctx}
+    (F : Frag Γ) (f : Name) (args : Args C Γ ps) (bs : Binders rs)
+    (body : Prog C (rs ++ ps) Γf)
+    (out : Calls.Program b F (TupleCalls.expand args bs body))
+    (outerRefused : Calls.compile b F (.cons (.call f args (.rets bs) body) .nil) = none)
+    (expandedRefused : Calls.compile b F (TupleCalls.expand args bs body) = none)
+    (sameHeight : height (TupleCalls.expand args bs body) = height body)
+    (compiled : compile b F (TupleCalls.expand args bs body) = some out) :
+    compile b F (.cons (.call f args (.rets bs) body) .nil) =
+      some (Calls.cons (TupleCalls.tupleReturn f args bs body out)
+        (Calls.nil b (TupleCalls.tupleReturn f args bs body out).frag)) := by
+  have entered : layers b (height body) F (TupleCalls.expand args bs body) = some out := by
+    rw [compile,expandedRefused] at compiled
+    simpa only [sameHeight] using compiled
+  rw [compile,outerRefused]
+  have outerHeight : height (.cons (.call f args (.rets bs) body) .nil) = height body + 1 := by
+    change max (height body + 1) 0 = height body + 1
+    exact Nat.max_zero _
+  rw [outerHeight]
+  change Option.bind
+    (Option.bind (layers b (height body) F (TupleCalls.expand args bs body))
+      (fun selected => some (TupleCalls.tupleReturn f args bs body selected)))
+    (fun head => some (Calls.cons head (Calls.nil b head.frag))) = _
+  rw [entered]
+  rfl
+
 /-- Eliminate a known bare failure through the public program certificate.
 Keeping the certificate generic avoids unfolding a large concrete get-proof
 merely to select its soundness field. No successful failed state is recovered. -/
@@ -97,5 +125,10 @@ theorem program_revert {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ}
   · rw [failed] at hs
     contradiction
   · exact ht
+
+/-- info: 'Solidity.Backend.InternalFlow.TuplePrograms.compile_tuple_nil_success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms compile_tuple_nil_success
 
 end Solidity.Backend.InternalFlow.TuplePrograms

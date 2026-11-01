@@ -1700,3 +1700,86 @@ Independent final source and exact helper0 driver reviews find no confirmed
 semantic/trust/control flaw. Final committed-artifact reviews are recorded in
 the handoff; no reviewer runs Lean/builds. All eight original queue items remain
 partial and the original blocked goal remains unchanged.
+
+## Continuation24 — actual nested tuple construction and target-stage reuse
+
+Partial original Work1/Work4/BackfillA-B. The original blocked goal, frozen base,
+all previous seals and semantic/profile/observation/proof budgets are unchanged.
+No upstream intake, reserved implementation edit or compiler admission change.
+
+The owned TuplePrograms.compile_tuple_nil_success proves the EXISTING selector's
+actual tupleReturn-plus-nil construction from ordinary outer/expanded None,
+actual owned expanded Some, and exact finite syntax-height equality. These are
+compiler/syntax premises, never a desired simulation equation. The populated
+Composed fixture discharges all premises, including undecidable certificate
+None equality through actual decidable isNone observations. Its full
+actualOuterConstruction identifies the genuine selected record, including code,
+fragment, need, allocation cost and soundness fields. No new evaluator, AST,
+call-depth admission cutoff or assumed certificate is introduced.
+
+The original exact_cost_frame statement/proof is unchanged and merely earlier;
+its original report position remains unchanged. Reached expanded cost5 now
+follows from actualOuterConstruction and that actual outer-cost fact. Real
+initial capacity7+5, prefix execution/StateRepr and GrowsAllocator.nextInput
+supply the reached input to expandedProducer.sound. The successful zero-skip
+endpoint is closed; its failure alternative contradicts the pre-existing,
+independently checked target_body observation. There is no circular dependency
+on the rewritten export or wrong-copy controls and no assumed midpoint.
+
+The SAME complete target_export vector now follows from that actual endpoint,
+full numeric stack/cell reconstruction, the selected certificate's exact code
+and the six real export instructions via run_append_ok. The SAME wrong_overlap
+vector [77,1,30,1] likewise executes only the six actual badHighFirst instructions.
+Every old caller/private/heap cell, alias, result order, scalar, stack77,
+sentinel99, cursor268 and cost/frame observation/refusal remains. target_body,
+target_unwind and target_final still have their existing independently checked
+proofs; broader staged-sharing work is not claimed complete. All542 original
+kernel theorem types (85 tuple types included), original17 mathematical pin maps
+and report orders are preserved. New generic+four fixture lemmas have separate
+actual UNMODIFIED builtin axiom guards: propext/Classical.choice/Quot.sound.
+Their fixture metadata reporting remains separate from ordinary kernel checking.
+
+Actual fresh whole-fixture preparation passes39.198s/120s. The COMPLETE35-source
+fresh sweep passes exit0/118.689s at the original120s command bound. The complete
+18-module cached gate, including all original542 builtin reports, passes
+exit0/116.950s after fresh rechecking of the two legitimately stale StorageReturn
+and FragileReturn bindings. The stale rejection (exit1/20.263s) and an earlier
+missing parser-log setup failure (exit1/9.260s) remain raw failures, not negative
+control successes. All72 report-guard corruption controls, cache/dependency
+corruption controls,7 older and6 retained separate axiom sets pass. Original
+proof statements/vectors/pins were not narrowed to obtain these results.
+
+The earlier C24 proof version also completed with exit0 under the unchanged120s
+command timeout, but outer wrappers measured120.640s cached and120.313s fresh;
+these are NOT sub120s end-to-end claims. No isolated performance improvement is
+inferred from different whole-file timings. Failed generic match-splitter,
+definitional-associativity and undecidable-certificate probes remain evidence
+only, including their sorryAx diagnostics; no failed proof is delivered.
+No heartbeat/recursion/fuel/node/time/resource bound was raised.
+
+Runtime again records Lean4.24.0/Lake5.0.0-src+797c613 and actual KeySort2-job
+success. All heavy processes remain serial-j1/LEAN_NUM_THREADS1 under hard12GiB,
+swap.max0 and writer/compiler locks. Only verified own stopped C24 CID layers
+are removed for headroom, preserving all caches and raw records. Read-only
+finder/skeptic reviews find no circularity, hidden oracle, ownership or changed
+control; exact committed-artifact reviews are recorded in the handoff.
+
+Required-root preparation is separate from validation: an explicit local import
+inventory found1103 resolvable source nodes and414 absent object files. Two small
+actual frontier dependencies were prepared and source/object hashes checked.
+Further authenticated current-source frontier preparation continues serially,
+with individual120s bounds and retained outcomes, stopping for diagnosis on a
+new timeout/OOM or concrete disk blocker. Neither inventory nor warm-cache
+preparation passes the original full gate. Final handoff records its actual
+extent, failures and any justified later full attempt. No unchanged failed
+full/broad operation is repeated or renamed green.
+
+All Work1–6/BackfillA-B remain partial. General runtime frames/unbounded recursive
+source/target transport, dependent full-signature lowering, early controls and
+general mixed-loop certificates, word-frame/live-byte-journal/world coupling,
+and independent target transient/callback state remain actual producer holds.
+The original full124/300s, broad-root124/120.609s, prior prerequisite/raw/137 and
+budget failures remain preserved. Raw normal/strict docs remain exit1; complete
+findings equal publication/C23, with frozen46missing versus48 plus incoming
+Arms ambiguity. No source delivery/integration eligibility, full-lane closure,
+new semantic choice or independent-work-exhaustion claim is made.
