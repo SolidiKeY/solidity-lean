@@ -422,5 +422,7 @@
   "attemptComponentEvidence": "tests/yul-composition/attempt-component-ledger.json",
   "heapCatchComponentEvidence": "tests/yul-composition/heap-catch-component-ledger.json",
   "scopeCatchComponentEvidence": "tests/yul-composition/scope-catch-component-ledger.json",
-  "rethrowComponentEvidence": "tests/yul-composition/rethrow-component-ledger.json"
+  "rethrowComponentEvidence": "tests/yul-composition/rethrow-component-ledger.json",
+  "nativeRethrowEvidence": "tests/yul-composition/native-rethrow-ledger.json",
+  "observedNativeRethrowEvidence": "tests/yul-composition/observed-native-rethrow-ledger.json"
 }

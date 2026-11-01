@@ -395,3 +395,15 @@ adequacy claim; all24 original obligations/sixSourcecombinations remain pending.
 Resource incident/ENOSPC and recovered verified current metadata copies are
 explicit; old protected data and failing baseline gates preserved.
 Artifacts: `/workspace/vy5-composition/rethrow-20261101/final/`.
+
+
+### VY5 fresh finite native rethrow evidence (2026-11-01)
+
+[Lane handoff](inline-assembly-vy5.md#fresh-finite-native-canonical-rethrow-2026-11-01):
+actual pinned solc/Osaka try/catch canonical rethrow. Original fixture retains
+STRICTFAIL five optimized viaIR journal checks/all36calls captured. Separate
+pre-frozen externally audited fixture passes36calls/four profiles,20 finite
+Source failure/fullbyte projections/eight executed negatives; native state
+independently checked, no SourceSt/compiler proof inferred.138JS tests pass.
+No kernel/import change; all24 obligations/sixSourcecombinations remain pending.
+Artifacts: `/workspace/vy5-composition/native-rethrow-20261101/final/`.

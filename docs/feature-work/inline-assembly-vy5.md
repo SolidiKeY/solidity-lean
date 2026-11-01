@@ -1903,3 +1903,117 @@ get_goal absent; no goal creation/reset/reactivation/completion or publication.
 Prior mainb43389dc and privatea2e7ed9a preserved as ancestors. Incremental immutable
 patch/bundles/interface/handoff/evidence/checksums:
 `/workspace/vy5-composition/rethrow-20261101/final/`.
+
+
+## Fresh finite native canonical rethrow (2026-11-01)
+
+[NativeRethrowControls](../../tests/yul-composition/NativeRethrowControls.sol)
+implements actual Solidity `try this.child(...)` / `catch(bytes memory data)` /
+canonical memory-safe `revert(add(data,32),mload(data))`. [Original expectations](../../tests/yul-composition/native-rethrow-expectations.json)
+were frozen BEFORE compiler/VM execution: DEAD, empty, full36-byte assert panic,
+same-length AABB negative, successful BEEF try branch, getter/dead/getter after
+successful marker7, and an actual always-revert negative. Four profiles are
+explicitly legacy/viaIR optimizer-off/on, pinned solc0.8.38 commit1835d247 and
+Osaka. No original sources/verdicts/old oracle hashes were changed.
+
+A REAL failure remains: the strict original journal oracle expects persistent
+writes7→99→8, but viaIR optimized removes the child99/catch8 stores before
+unconditional revert. Original-v3 records ALL36 ordered calls/four profiles and
+five strict persistent-journal mismatches (calls0,1,2,3,6 in viaIR optimized),
+then exits1. Other three profiles have no call-check errors. Full return/revert
+bytes and final touched state match the original expected outcomes; the strict
+whole-report gate nevertheless remains FAIL. This is not relabelled green,
+excluded, or used to claim source/compiler correspondence. Earlier v1 failed a
+reader API assumption (partial frame array where compareState requires complete
+array); fixed by checking the complete independent root+child frame array,
+without removing fields or changing expected semantics. Raw failures/captures/
+compiler outputs and the pre-refactor checker snapshot are retained.
+
+The ADDITIVE [ObservedNativeRethrowControls](../../tests/yul-composition/ObservedNativeRethrowControls.sol)
+adds actual external view `checkMarker(99)` in child and `checkMarker(8)` in
+catch. These reads make the writes observable before rethrow. Its SEPARATE
+[expectations](../../tests/yul-composition/observed-native-rethrow-expectations.json)
+were also frozen BEFORE its compiler/VM execution, derived from the new source;
+it does not replace the original failed fixture. Failed paths have exactly four
+frames: root0/child1/audit99frame2depth2/audit8frame3depth1. Audit pre/post reads
+must see marker99/transient33 and marker8/transient22. Audits return empty bytes:
+root final returndata buffer is therefore EMPTY, while allocated catch memory
+still retains the original complete payload for canonical rethrow. Relative
+REVERT windows check full data, including empty and panic tail; compiler memory
+addresses/final arbitrary memory are not equated across pipelines (YQ3).
+
+Final hardened observed-v2 passes actual36calls/four profiles. All nine calls
+per profile preserve exact ordinal/selector/caller/owner/code/static/depth/value,
+success/failure/exception/full bytes, ordered logs, complete declared API-touched
+pre/post account balances/nonces/code and persistent/transient slot maps. Slot0
+is independently derived from marker storage layout; CREATE address from caller
+and nonce0, code from compiler output rather than observed VM state. Ordered
+persistent/transient writes, child/outer rollback, frame prefix restoration,
+audit states, child/root buffers and semantic RETURN/REVERT/LOG windows are
+checked. Successful BEEF/marker7 followed by later reverted DEAD/getter detects
+lost caller-prefix state. Wrong AABB and actual always-revert must NOT match the
+selected Source DEAD and success outcomes. These are genuine executed negatives,
+not changed expected verdicts. runCall and its host cleanup remain distinct from
+runTx/finalization; untouched-world/total-state/source adequacy is not asserted.
+
+[Core adapter](../../scripts/yul-composition/native-rethrow-core.mjs) reuses the
+UNCHANGED shared machine/capture/compiler primitives, with two lane-owned
+[original](../../scripts/yul-composition/native-rethrow.mjs) /
+[audited](../../scripts/yul-composition/observed-native-rethrow.mjs) configurations.
+It binds pinned source/compiler/settings/input/output/code/runtime/ABI/layout,
+current core/wrapper/shared-engine/dependency-lock hashes, actual capture files,
+ordered matrix and execution receipt. A passing report requires exact empty
+row.errors as well as recomputed call checks; independent skeptic found this
+consistency gap and it is fixed, tested and re-executed with hardened hashes.
+No shared engine, dependency lock, instruction/gas limit or producer body changed.
+Advisory AST policy checks are not VY1 Lean admission/importer proofs.
+
+Full prior actual RethrowDriver Source execution is SHA-bound and revalidated,
+including all24 historical caught calls transitively. NEW native result links
+compare only failure and FULL bytes against actual completed Source cases:
+20 positive comparisons and eight intended negative comparisons across four
+profiles. Native state is independently checked; it is NOT equated to the
+different logical Source companion heap/logs/journals. Source zero-fuel timeout
+cases remain unlinked controls, never native execution evidence. Source success
+case9 is explicitly a bypass with NO rethrow executed; its fuel0 is unused and
+not identified with native gas. No new kernel theorem, general Source catch
+selector/error decoding/raw dispatch or compiler/world/V16 adequacy follows.
+
+138 new/affected JS tests pass, including coherent same-length payload/panic-tail/
+always-revert mutations, equal-return wrong world/storage/transient/audit/journal/
+window, missing/reordered/stale profile/source/receipt/core/engine/model evidence,
+required registry removal and pass+error consistency. They explicitly assert
+original36-call strict failure and unchanged original freeze hashes. Both
+independent read-only finder/skeptic accepted source/factory/additive distinction
+and tests; no builds/Lean/server/edit by reviewers. Their report-consistency
+finding is repaired. Prior eight mutants/227working/21fork blocks and all sealed
+reference observations remain attributed to their original tested trees.
+
+No Lean file/import/signature/axiom or private dependency body changed. Existing
+RethrowPhysical20laws and joint1229/TestSuite262/KeySort2/strict/trust/MCP results
+remain attributed to mainf827c43d/private33b48a30, with Lean4.24.0/Lake5.0.0-src+
+797c613 and standard scoped axioms; no new kernel pass inferred from JS/solc/EVM.
+Unchanged expensive Lean/full-corpus gates were not rerun. Current focused script
+checks, exact unchanged kernel-file comparison, preserved signature artifacts
+and source-body validation cover the actual change. Docs/G03 EXIT1 with exact
+pinned-base equality remain FAILED global gates, not passes.
+
+Initial308588544byte measured headroom minus comparable178450432byte container
+cost and16MiB output estimate left113360896bytes projected. Actual small outputs
+were measured before each next operation; cached serial runs fit. Unique empty
+native-rethrow prefix and checked metadata retirement before the next container
+avoid the prior collision. All protected images/mounts/caches/evidence/history
+are preserved; only current stopped SizeRw0 directory-only metadata copies are
+verified/logged/retired. Existing writer lock, enforced12GiB/no swap, OSheadroom,
+serialLEAN_NUM_THREADS=1 and gas100000000/step5000000/proof/test budgets remain
+unchanged. No broad80MB native corpus regeneration, guard relaxation or ENOSPC.
+
+Work1/Work3 remain PARTIAL: all24 full obligations/six Source combinations and
+actual general selector/raw hooks/physical placement/refinement/G01/compiler/
+world/V16/joint closure pending. Work2/BackfillA/B advance fresh finite selected
+rethrow evidence but remain PARTIAL, including the ORIGINAL strict native journal
+mismatch and remaining corpus/state-source obligations. LIB1/unchecked-add stay
+unanswered. Original blocked goal unchanged/get_goal unavailable; no goal status
+mutation, producer retrieval, push/merge/PR or service. Reviewed immutable
+incremental patch/bundle/interface/handoff/evidence/checksums:
+`/workspace/vy5-composition/native-rethrow-20261101/final/`.
