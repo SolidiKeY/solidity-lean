@@ -583,3 +583,13 @@ struct levels and both-pipeline observations are inhabited; canonical preparatio
 is not Yul/compiler adequacy. [Full original queue/premises](inline-assembly-vy2.md#vy2-recursive-dynamic-structs-2026-11-01).
 Versioned handoff `/workspace/vy2-evidence/recursive-dynamic/HANDOFF.md`. Original
 lane remains partial; YQ1-YQ7 and full original closure obligations unchanged.
+
+
+VY2 aggregate dynamic-array preparation checkpoint: see
+[the lane record](inline-assembly-vy2.md#vy2-aggregate-dynamic-array-preparation-2026-11-01).
+Derived aggregate stride, typed nested live collection and actual canonical
+snapshot/source application are partial preparation. Dormant aliases after outer
+shrink expose a concrete retained-path/history obligation, not a new exclusion.
+Full original queue and producer/compiler/calculus closure remain unfinished.
+Exact signatures, tested-tree/gates/reviews/resources and committed full SHA:
+`/workspace/vy2-evidence/aggregate-dynamic/HANDOFF.md`.

@@ -157,3 +157,7 @@ VY2 nested primitive-member storage preparation and original unfinished queue:
 
 VY2 recursive dynamic struct preparation and unfinished original work:
 [inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-recursive-dynamic-structs-2026-11-01).
+
+
+VY2 aggregate dynamic-array preparation and retained-alias boundary:
+[original lane queue](feature-work/inline-assembly-vy2.md#vy2-aggregate-dynamic-array-preparation-2026-11-01).

@@ -3425,3 +3425,67 @@ Repository `/workspace/solidity-lean`, branch
 `0b078cefaf7daad79007b87b72df64eb6936420f`, prior reviewed full HEAD
 `9b0b5b4cfa1b2bbe0e79b175ebe6c3b57cebabe2`. Final committed full SHA and exact
 public theorem signatures/premises/axioms are checksum-bound in the handoff.
+
+
+### VY2 aggregate dynamic-array preparation (2026-11-01)
+
+Additive `AggregateStorageDeclaration` certificates cover actual array-of-struct
+and nested dynamic-array header geometry. `SlotTranslation` derives aligned
+footprints from the existing scalar/recursive packing traversal; no second
+packing planner, source state or arbitrary depth/runtime cap is introduced.
+Static pack success derives bounded separated fields, complete static paths and
+exact end. Runtime `collect` visits full index/field paths, uses the approved
+Fixed header preimage and checked positive/nonwrapping aggregate strides, and
+propagates failed descendants. These are checked PREPARATION boundaries, not
+source/Yul execution refusals or new exclusions. Primitive old APIs remain intact.
+
+`aggregateSnapshot_reencode` derives whole supplied-map reconstruction from the
+actual generated inventory, actual checked separation and successful canonical
+writeback. `aggregateSnapshot_unchanged` preserves WHOLE administrative store
+identity on the real generated finite view, including none versus explicit
+default. `aggregateApplySnapshot?` uses actual Source.applyOp and rejects transient
+roots in this persistent-only preparation component. Its complete source result
+preserves every initial-H owner MemOK; static errors preserve the prior state.
+No final read/inverse/safety/placement result is a structure input. Concrete
+controls derive actual source readLen inventory from one state and reconstruct
+all raw words with nonzero padding and unknown slots.
+
+**Investigated remaining obligation:** a live-only nested inventory is NOT
+alias-closed after outer shrink. Actual owner RefOK checks storRef path typing,
+not ancestor runtime lengths; indexLoc checks when forming a reference and
+readLoc/readLen do not recheck every ancestor. EM.sub restores suspended caller
+locals, so scanning only current locals cannot recover all caller-held aliases.
+`ag_retained_inner_length` and `ag_dormant_paths` exhibit the exact gap: outer
+length0, retained inner alias length2, raw dormant header changed to3, but live
+inventory contains only the outer header. A constructive retained-path/history
+relation across frames remains required. This establishes neither a false owner
+claim nor a necessary new human semantic choice; no no-alias premise, refusal,
+cleanup or observation weakening is approved or implemented. General nested
+source/raw traversal equality and coupled ownership-changing frame journal
+closure are also OPEN; pure snapshot inversion is not that execution theorem.
+
+The separate pinned legacy/viaIR AggregateDynamic fixture observes retained
+aliases, array-of-struct stride4, nested array header stride1, signed/bool siblings,
+nonzero tails/padding, inner shrink/regrowth, full failure bytes and fresh reads.
+Reviews repaired paired runtime-size deletion and an initially unobserved
+post-revert child write; their original source/run evidence is preserved.
+Final gate/test/review/signature/axiom/resource records are in
+`/workspace/vy2-evidence/aggregate-dynamic/HANDOFF.md`; only saved actual exits
+establish a pass. The previous682-call report is preserved and final equality is
+checked separately, never inferred from a successful new fixture run.
+
+ORIGINAL queue remains: Y04/Backfill A-B PARTIAL (finite canonical components;
+whole nested/mapping/storage-bytes/transient/dirty ownership and alias-history
+transport open); Y05 PARTIAL (universal realization/writeback, shared-zero,
+interior/pointer forms, reachable allocation/refinement and actual assembly
+MemOK); Y06 PARTIAL (actual source/Yul bindings); Y09.02 BLOCKED (actual producer
+execution/physical calculus/notation/printers/Lean-only rows/final compiler/source/
+joint closure). Concrete V10/V11 agreement instances remain open. Existing owner
+MemOK/World/ContractWorld/Bridge exist, not Yul adequacy. Approved YQ1-YQ7 and
+canonical rethrow/admission unchanged. Original goal BLOCKED unchanged; getter
+unavailable, no goal calls; questions=[]. No completion/backfill-exhaustion claim.
+Repository `/workspace/solidity-lean`, branch
+`codex/solidity-inline-assembly5-20261031/vy2-physical`, base
+`0b078cefaf7daad79007b87b72df64eb6936420f`, starting reviewed HEAD
+`2ad8438ad86d88e29a46188dfd45aa909bbaa165`. Final full committed SHA is bound in
+the exported handoff; source/compiler finite testing boundaries remain explicit.
