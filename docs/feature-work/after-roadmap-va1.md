@@ -1852,3 +1852,84 @@ remain incomplete. Q1 answered; Q2 remains only frontend repair/full-gate hold.
 Next array pipeline work must reuse these checked components and audit existing
 bounded/boolean preparations before implementing any additional expansion.
 Goal/VM/branch unchanged; no push, merge, PR or tag.
+
+## AU02 exact literal-bounded uint preparation — 2026-11-01
+
+`Calculus/DecisionBoundedUInt.lean` proves `boundedUInt_inst_iff` for every
+Contract/state/valuation/binder/canonical uint literal bound and every
+quantifier-free LFml body. The body may contain arbitrary existing typed
+storage/memory/ledger/hash terms and partial operands. Its actual guarded
+finite instances are equivalent at every starting state; no flooring, new
+validity/hash premise, semantic oracle or assumed future fact is used.
+Complete samples use the real canonical uint round-trip, not a guessed domain.
+
+Term and formula literal-substitution node counts and the real conjunction
+builder yield the proved estimate `bound.val.toNat * (body.nodes + 5) + 1`.
+`boundedUIntStep` checks that estimate against the unchanged511-node limit
+BEFORE allocating samples. This is a per-expansion guard, not a bound on the
+whole recursively prepared formula: all original whole-result checks remain
+required. An oversized or unsupported quantifier is retained after its children
+are prepared; its body may already have changed pointwise-equivalently. No budget
+is raised.
+Candidate extraction uses generalized-index LTm/Op2 casesOn and the existing
+literal inspector, then `boundedUIntGuard?` verifies equality with the actual
+strict guard through LFml.same. It cannot infer meaning from candidate data.
+
+`boundedUIntExpand` builds an actual existing LFml with pointwise equivalence
+bottom-up. `boundedUIntPrep` uses that theorem to preserve both polarities and
+return the SAME original refuting state. This is a concrete semantic reduction,
+not a new formula IR or a completion certificate. It is NOT hooked into the
+decision pipeline in this checkpoint. Decision/ArrayBlock/HashPremise remain
+byte-exact to frozen base; both frozen Covered/inTarget definitions, Waivers,
+DecisionTheorem, observations and expected verdicts remain unchanged.
+
+`Examples/DecisionBoundedUInt.lean` has actual frozen-source fixedBlock/fixedBad
+leaves that become quantifier-free with exact pointwise meaning. Controls cover
+zero-bound truth, oversized preservation, wrong binder/truth value/nonvariable
+left operand refusals, strict versus optional halting, and a missing-sample
+counterexample: truncated samples pass while the original universal is false;
+complete samples retain that refutation. Kernel facts are distinct from native
+classification/performance observations. Before-pipeline probe reproduces both
+assigned pins as `(true,false,unknown)`; raw output and exact source identities
+are retained. No verdict improvement/array-child completion is claimed yet.
+
+Raw gates at /workspace/va1-evidence/bounded-uint-next after the review wording
+correction: final core MCP 5.308s, focused core build 4.168s, final controls MCP
+5.245s, controls build 4.221s,37 public theorem/runtime-definition axiom reports
+7.369s and executable warm profile 4.161s, all pass. Complete MCP diagnostics have zero errors/warnings/
+dependency failures. Axioms standard propext/Classical.choice/Quot.sound only;
+no sorry/admit/native trust shortcut. Original writer lock, thread1/-j1,
+verified hard12GiB aggregate/no-swap and12GiB host reserve apply. Actual pinned
+Lean4.24.0/Lake5.0.0-src+797c613 observed. Maximum sampled aggregate RSS1708188 KiB;
+minimum host available17002926080 bytes.
+
+Initial successful warm executable preparation measurements (single invocation, imports/cache
+already warm, noinline wrapper/IO input and forced output): real fixed leaf
+qf=true 628067 ns; oversized1000 qf=false 57927 ns; oversized2^128 qf=false 31677 ns.
+The wording-only exact-source repeat measured316116/23065/23245 ns respectively.
+These are preparation timings, not full decision/cold-build/EVM results. Initial
+list API, missing node import/argument order, conjunction arithmetic, candidate
+elaboration and free-variable kernel-decision failures are retained. The local
+probe initially targeted a declaration line instead of its tactic; corrected
+positioned probes selected the closed arithmetic proof. The external profiler
+initially had a missing namespace/name collision; original source/failure retained,
+corrected profiler passes. No failed/stopped gate is relabeled passing.
+
+Independent finder and skeptic source/control reviews found no issues, including
+added refusal controls and exact allocation/meaning boundaries; neither edited
+or ran Lean/server/build. Static gates pass:1092 reachable/zero orphans,180 core/
+zero elaborator reach,491 automatic/61 budget/11 refuted/zero manual or pending,
+trust1107 sources/248 sites/zero findings. Inventory FAIL1 unchanged1206 pins/
+zero errors/404 unrecorded changes; strict docs FAIL1 same85 frozen findings.
+Original full TypeExamples resource failure retained; latest full gate pending.
+
+Next owned integration must first inspect speed history and warn, retain the
+irreducible slot/length/APF preparation boundaries, then check a narrow concrete
+pipeline change. Before/after classifications and kernel proved/refuted controls
+are required before changing any assigned expected unknown pin. Unrelated
+expectations and all budgets remain frozen. No producer-owned frontend repair.
+All global AU01 residue/theorem/exhaustive target/hash bridge, broader revised
+program-free boundary, remaining AU02 array/memory/halting-OR/general-fuel/
+normalizer work, baseline/performance/backfill and final gates remain incomplete.
+Q1 answered; Q2 only frontend repair/full-gate hold. Original goal/VM/branch
+preserved; no stop/reset/new goal, push, merge, PR or tag.

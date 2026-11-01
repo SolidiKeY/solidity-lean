@@ -1122,6 +1122,14 @@ coverage/certificate bridge. Rejection denotes only absence of that grammar;
 it is neither a verdict test nor a Residue or unknown classification. The global
 Residue census and target/hash completeness bridge remain open.
 
+`Calculus/DecisionBoundedUInt.lean` proves exact finite instantiation of a
+literal-bounded uint universal with any quantifier-free body. Its pointwise
+preparation verifies actual guard equality and checks a formula-derived estimate
+against the unchanged 511-node limit before allocating samples. This is a
+per-expansion bound; original whole-result checks remain required. Actual frozen
+fixed-array leaves prepare quantifier-free, but the pipeline is not hooked yet:
+fixedBlock/fixedBad remain target/unknown with Covered=false in the recorded probe.
+
 `Calculus/DecisionFixedArrayPair.lean` reconstructs two arrays at diverging
 intrinsic prefixes, deriving both actual saves and both indexed read equations
 plus a disjoint frame. Each array retains its own typed elements, length and
