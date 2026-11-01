@@ -76,6 +76,7 @@ import Solidity.Calculus.CallFunctionOperationalBase
 import Solidity.Calculus.CallFunctionLeaf
 import Solidity.Calculus.CallFunctionLeafMetrics
 import Solidity.Calculus.CallFunctionTermPower
+import Solidity.Calculus.CallFunctionPlan
 import Solidity.Calculus.CallResultRestore
 import Solidity.Calculus.Blocks
 import Solidity.Calculus.WkOver
@@ -290,6 +291,7 @@ import Solidity.Examples.Tactics.CallFunctionBase
 import Solidity.Examples.Tactics.CallFunctionOperationalBase
 import Solidity.Examples.Tactics.CallFunctionLeaf
 import Solidity.Examples.Tactics.CallFunctionTermPower
+import Solidity.Examples.Tactics.CallFunctionPlan
 import Solidity.Examples.Tactics.CallResultRestore
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertData
