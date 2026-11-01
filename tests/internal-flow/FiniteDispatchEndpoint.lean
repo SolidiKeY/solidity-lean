@@ -1,3 +1,4 @@
+import Solidity.Backend.InternalFlow.CallerView
 import Solidity.Backend.InternalFlow.CallerTail
 import Solidity.Backend.InternalFlow.CallerFrame
 import tests.«internal-flow».FiniteDispatchFacts
@@ -596,5 +597,96 @@ theorem protected_final_frame :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms protected_final_frame
+
+end Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
+
+namespace Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail
+open Evm Evm.Memory
+
+theorem middle_pointers {base₁ base₂ : Nat → Fin W} {m₂ : Machine}
+    (repr : StateRepr 1 1 64 checked.frag chosen.st base₂ m₂)
+    (addresses : BaseExtends mid.st.H base₁ base₂) :
+    ∀ (R : RefTy) (i : Idx View (.mem R)) (r : HRef mid.st.H R),
+      TEnv.get (i.wk projection) mid.st.env = some r →
+        m₂.mem (cellOf 1 (i.wk projection)) = .val (base₁ r.id) :=
+  CallerView.represented (σ := mid.st) chosen projection complete_caller_frame repr addresses
+
+theorem middle_endpoint : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ : Machine) (base₂ : Nat → Fin W),
+    run seed.code machine = .ok m₁ 0 ∧ run checked.code m₁ = .ok m₂ 0 ∧
+    StateRepr 1 1 64 seed.frag mid.st base₁ m₁ ∧
+    StateRepr 1 1 64 checked.frag chosen.st base₂ m₂ ∧
+    BaseExtends mid.st.H base₁ base₂ ∧
+    ∀ (R : RefTy) (i : Idx View (.mem R)) (r : HRef mid.st.H R),
+      TEnv.get (i.wk projection) mid.st.env = some r →
+        m₂.mem (cellOf 1 (i.wk projection)) = .val (base₁ r.id) := by
+  obtain ⟨m₁,base₁,m₂,base₂,m₃,base₃,hp,hc,ht,whole,hr₁,hr₂,hr₃,he₂,he₃,grows,stack,cursor⟩ := endpoint
+  exact ⟨m₁,base₁,m₂,base₂,hp,hc,hr₁,hr₂,he₂,
+    middle_pointers (base₁ := base₁) (base₂ := base₂) (m₂ := m₂) hr₂ he₂⟩
+
+def capIndex : Idx View (.mem A) := .there .here
+def otherIndex : Idx View (.mem A) := .there (.there (.there .here))
+def sameIndex : Idx View (.mem A) := .there (.there (.there (.there .here)))
+def xsIndex : Idx View (.mem A) := .there (.there (.there (.there (.there .here))))
+
+theorem old_inputs :
+    TEnv.get (capIndex.wk projection) mid.st.env = some old ∧
+    TEnv.get (otherIndex.wk projection) mid.st.env = some other ∧
+    TEnv.get (sameIndex.wk projection) mid.st.env = some old ∧
+    TEnv.get (xsIndex.wk projection) mid.st.env = some old := by
+  refine ⟨CallerView.by_id _ _ ?_,CallerView.by_id _ _ ?_,CallerView.by_id _ _ ?_,CallerView.by_id _ _ ?_⟩
+  · change (locals mid.st)[2]! = some 0
+    exact congrArg (fun x => x.2.2.1[2]!) before_values
+  · change (locals mid.st)[4]! = some 1
+    exact congrArg (fun x => x.2.2.1[4]!) before_values
+  · change (locals mid.st)[5]! = some 0
+    exact congrArg (fun x => x.2.2.1[5]!) before_values
+  · change (locals mid.st)[6]! = some 0
+    exact congrArg (fun x => x.2.2.1[6]!) before_values
+
+theorem middle_snapshot : ∃ (m₁ : Machine) (base₁ : Nat → Fin W) (m₂ : Machine) (base₂ : Nat → Fin W),
+    run seed.code machine = .ok m₁ 0 ∧ run checked.code m₁ = .ok m₂ 0 ∧
+    StateRepr 1 1 64 checked.frag chosen.st base₂ m₂ ∧
+    [m₂.mem 6,m₂.mem 4,m₂.mem 3,m₂.mem 2] =
+      [.val (base₁ 0),.val (base₁ 1),.val (base₁ 0),.val (base₁ 0)] ∧
+    m₂.mem 6 ≠ .val (base₂ privateNew.id) ∧
+    m₂.mem 6 ≠ .val (base₂ other.id) ∧
+    m₂.mem 6 ≠ .val (base₂ sharedDefault.id) := by
+  obtain ⟨m₁,base₁,m₂,base₂,hp,hc,hr₁,hr₂,addresses,capturedRefs⟩ := middle_endpoint
+  have cap := capturedRefs A capIndex old old_inputs.1
+  have otherPtr := capturedRefs A otherIndex other old_inputs.2.1
+  have same := capturedRefs A sameIndex old old_inputs.2.2.1
+  have xs := capturedRefs A xsIndex old old_inputs.2.2.2
+  change m₂.mem 6 = .val (base₁ 0) at cap
+  change m₂.mem 4 = .val (base₁ 1) at otherPtr
+  change m₂.mem 3 = .val (base₁ 0) at same
+  change m₂.mem 2 = .val (base₁ 0) at xs
+  have privateWrong := CallerView.different_array (σ := mid.st) chosen projection
+    complete_caller_frame hr₂ capIndex old old_inputs.1 privateNew (by decide +kernel)
+  have otherWrong := CallerView.different_array (σ := mid.st) chosen projection
+    complete_caller_frame hr₂ capIndex old old_inputs.1 (other.wk chosen.ext) (by decide +kernel)
+  have defaultWrong := CallerView.different_array (σ := mid.st) chosen projection
+    complete_caller_frame hr₂ capIndex old old_inputs.1 (sharedDefault.wk chosen.ext) (by decide +kernel)
+  refine ⟨m₁,base₁,m₂,base₂,hp,hc,hr₂,?_,privateWrong,otherWrong,defaultWrong⟩
+  rw [cap,otherPtr,same,xs]
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.middle_pointers' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms middle_pointers
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.middle_endpoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms middle_endpoint
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.old_inputs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms old_inputs
+
+/-- info: 'Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail.middle_snapshot' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms middle_snapshot
 
 end Solidity.Backend.InternalFlow.MemoryDispatchChecks.ProtectedTail

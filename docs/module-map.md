@@ -1332,3 +1332,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/CallerFrame.lean` | Captured typed caller subframes and exact old-reference target addresses for finite selected direct calls; body writes do not imply content preservation. |
 
 | `Backend/InternalFlow/CallerTail.lean` | Captured caller views and target old-address transport through call-plus-tail candidates using the published tail frame law. |
+
+| `Backend/InternalFlow/CallerView.lean` | Captured typed caller-view reference elimination and reached primitive-array separation consumers. |

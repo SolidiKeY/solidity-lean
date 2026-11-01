@@ -993,3 +993,5 @@ import Solidity.Backend.InternalFlow.TargetObservation
 import Solidity.Backend.InternalFlow.CallerFrame
 
 import Solidity.Backend.InternalFlow.CallerTail
+
+import Solidity.Backend.InternalFlow.CallerView
