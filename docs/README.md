@@ -175,3 +175,5 @@ VY2 retained source-reference preparation and original unfinished queues:
 - [VY2 owned bool dynamic inventory](feature-work/inline-assembly-vy2.md#owned-bool-changing-dynamic-inventory-2026-11-01): same-map source/physical journals; full original assignment remains partial.
 
 - VY2 [actual location producer capture](feature-work/inline-assembly-vy2.md#actual-location-producer-capture-2026-11-01): typed source locations and exact owner producer adapters; partial lane.
+
+- VY2 [actual byte/string allocation placement](feature-work/inline-assembly-vy2.md#actual-bytestring-allocation-placement-2026-11-01): derived physical placement and actual source allocation; partial lane.

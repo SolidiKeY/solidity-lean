@@ -3889,3 +3889,48 @@ source/raw simulation and retained dirty-location ownership remain open.
 Broader Y04 ownership, universal Y05/allocation refinement, concrete V10/V11
 instances, Y06 source/Yul bindings and Y09.02/final compiler calculus closure
 remain mandatory; this additive component is not a language restriction.
+
+
+## Actual byte/string allocation placement (2026-11-01)
+
+`HeapAllocationPlacement` constructs a valid output Placement for the ACTUAL
+Source.Heap.alloc result. It retains every old occupied address/shape, assigns
+only fresh logical Heap.next, derives cross-object separation from the existing
+free bound, and retains the chosen next free Word. Inputs are actual old
+Placement, base at/after oldfree, physical address freshness and actual rounded
+footprint fitting the chosen free Word. They are genuine allocation-space
+conditions, not assumed decode/read/view/inverse/output-placement laws. No new
+alignment, source cap, owner representation or semantic guard is imposed.
+
+`HeapByteAllocation` connects actual memory bytes/string allocRef results and
+EVERY initial H owner MemOK/RefOK, deriving header length bounds from the actual
+footprint. The physical encoder writes new header/live bytes and the free-pointer
+word; it retains padding, gaps, zero-slot and old regions where the real reserved
+premises hold. Decode and existing pure writeback leave the WHOLE allocated
+heap/state unchanged. Allocation itself changes heap/next as the owner specifies.
+`HeapAllocationReads` preserves old objects and real pointer aliases at every
+source horizon; locals/world/events/logs/function locals remain the originals.
+
+Inhabited controls use real byteState/MemOK, nonUTF8 bytes/string, an empty
+allocated object, two sequential allocations, a valid unaligned second address577,
+31/32/33 rounded boundaries, retained nonzero padding/gap bytes and exact old/new
+source reads. A separate actual metamodel zero-extent object shows why physical
+freshness is not implied by base>=oldfree alone. It claims neither Solidity
+admission of a fixed-length0 array nor execution reachability. Conventional bump
+freshness is derived only when old extents are genuinely positive; a later base
+also suffices. Shared-zero representations remain a separate original obligation.
+
+Read-only independent design/final finder and skeptic reviews found no semantic
+defects. They ran no Lean/server/build/tests. Validation/export receipts and
+exact source signatures live in `/workspace/vy2-evidence/heap-allocation/HANDOFF.md`.
+Final gates are pending while this source section is written, not preclaimed.
+No compiler fixture changes are needed for this source/physical choice adapter;
+existing finite observations remain separate from kernel/source correspondence.
+
+All original queues remain partial. Actual old retained allocation histories
+are not reset to shrunken current extents. Their extension through allocation,
+reachable compiler allocation choices, universal memory realization/writeback,
+shared-zero/interior/pointers and the exact existing AllocationRefines contract
+remain open. The oversized owner-MemOK counterexample still refutes only the
+unqualified ordinary-placement inference, not all realization/writeback relations
+or a proved reachable execution. No semantic/profile decision is assumed.

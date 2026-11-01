@@ -612,3 +612,5 @@ Exact committed SHA, theorem premises, final gates/reviews/resources and artifac
 - VY2 owned bool dynamic inventory: [lane checkpoint](inline-assembly-vy2.md#owned-bool-changing-dynamic-inventory-2026-11-01); actual source/representation/complement transport, partial original lane with retained/local/compiler closure open.
 
 VY2 handoff: [actual location producer capture](inline-assembly-vy2.md#actual-location-producer-capture-2026-11-01) extends typed source-path capture; full lane remains partial.
+
+VY2 handoff: [actual byte/string allocation placement](inline-assembly-vy2.md#actual-bytestring-allocation-placement-2026-11-01) adds constructive actual heap allocation; full lane remains partial.

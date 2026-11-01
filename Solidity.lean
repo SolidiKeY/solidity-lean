@@ -971,3 +971,5 @@ import Solidity.Yul.Views.OwnedBoolDeclarationControls
 import Solidity.Yul.Views.OwnedBoolDynamicFrameControls
 
 import Solidity.Yul.Views.RetainedLocationControls
+
+import Solidity.Yul.Views.HeapAllocationFreshnessControls
