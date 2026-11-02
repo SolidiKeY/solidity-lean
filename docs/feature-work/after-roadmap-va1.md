@@ -3394,3 +3394,87 @@ collector integration; wider memory and halting OR; broader approved M4 boundary
 later compiler/path/read-layout formula-derived fuel; remaining baseline/backfill,
 performance and full gates. Original decisions, counterexample, failures and
 seals preserved. No goal reset/mutation, push, merge, PR or publication.
+
+
+## Partial-OR reason component (2026-11-02)
+
+Parent checkpoint3e9c0ad25c50d269b5d30551f9edbb72427313b8; original branch/base,
+VM/thread/goal and earlier approvals/counterexample/seals are preserved. No
+producer dependency or VA2 work is replaced. VA1-Q2 remains held. This is an
+owned AU01 reason-census/target-bridge increment; the global theorem stays open.
+
+Calculus/DecisionHaltingOrReason defines PartialOrRoots with actual root-type
+proofs, PartialOrBlockAt with its complete two-uint-binder source equation, an
+exact parser and named constructive decidable membership at supplied typed
+roots/literals. This is not discovery of those parameters and never examines
+Covered or decideGoal. The one-line reason identifies the APF OR requirement
+for left-operand definedness. Hash-freedom follows from the full source syntax.
+Calculus/DecisionHaltingOrBoundary proves actual prepared-source translation,
+actual ApfTm parser result, failing left.guardDs and guard.guardB, and generic
+all-waiver target admission. The supported class is this exact source family;
+other OR shapes/partial operations and global reconstruction remain outside.
+
+The existing valid floorClaim1 and false floorBad are inhabited members, as is
+floorClaim0. Existing actual-state countermodel and valid proof are retained.
+The client extracts the real guard from the complete leafOf? output, checks
+its actual collected mapping root, and proves the actual parser refuses that
+guard. A sibling replacing checked subtraction by the scalar passes guardB;
+that total sibling and a no-OR sibling are nonmembers. Covered/proved closed
+Boolean OR is also outside. Existing target/noncoverage/global-unknown pins
+are unchanged. No class-wide global unknown theorem, floors counterexample or
+complete reconstruction Setting is claimed.
+
+Read-only finder and skeptic reviews completed without Lean/server/builds.
+Skeptic requested a full-leaf link and positive total-guard control; both were
+added and kernel checked. Final source/docs reviews found no remaining issue.
+Three additive imports/three module-map rows only; existing producers, frozen
+Covered/inTarget/DecisionTheorem definitions and hash premises are unchanged.
+Frozen-predicate hashes and parent source preservation are saved in evidence.
+
+Final bounded MCP source/boundary/client4.244/7.457/5.250s PASS; owned boundary
+build5.248s PASS;27 public signature/axiom reports10.589s PASS with only existing
+standard axioms. Affected build first FAILED errno28 while writing the original
+Lake artifact cache; exact exit1/raw failure retained. No unchanged retry or
+cache deletion occurred. Installed Lake Config/Env.lean documents LAKE_CACHE_DIR;
+a new task-owned existing-VM /tmp/va1-owned-lake-cache-20261102 bind was verified
+uid1000/writable with9GiB available and actual cgroup memory.max12884901888 /
+swap.max0 before retry. The recovered affected build PASS4.199s. Original cache
+is untouched; replacement artifact cache initially empty, checkout oleans warm.
+This tmpfs cache is ephemeral and not required as a source dependency artifact.
+No cold/full source-build claim. Runtime limits/host reserve remain unchanged.
+
+Interpreted profile PASS3.127s: valid unknown16.777037ms, false unknown9.732406ms,
+covered Boolean OR0.550090ms, repeated valid unknown9.768732ms, including printing.
+Actual input identities and commands are retained; no budgets/verdicts changed.
+Sampled aggregate RSS 1715568 KiB; cgroup peak 1550999552 bytes; minimum host available 16142057472 bytes; 13 unsuccessful samples retained.
+Hard12GiB/no swap, threads1/-j1, single writer/build and12GiB host reserve applied.
+
+Strict automatic/layer/trust/whitespace pass. Initial new shorthand doc path
+finding was fixed and its raw failure retained. Strict docs still FAIL with
+exactly85 frozen-base findings; axiom inventory still FAIL404 unrecorded changes
+(previously recorded versus base403). Prior full/TypeExamples resource failures
+remain failures; no unchanged full gate was repeated. Aggregate Solidity/full
+run-lean gate and final concrete integration remain pending.
+
+Planned immutable export (pending bundle/export audit at commit time):
+/workspace/va1-evidence/halting-or-reason-next/
+PARALLEL-INTERFACE.bundle and JSON catalog, with actual committed module/type/
+signature hashes, nontrivial witnessed client and explicit unresolved premises.
+delivery/original.patch and va1.bundle are cumulative to the original frozen
+base; saved standalone prerequisite bundle, exact reconstruction/fsck and all
+prior archive hashes are required and retained. Evidence is a delta archive
+plus prior-evidence.json references, not a replacement for earlier seals. Final
+identity/checksum files must bind the actual resulting committed head; the
+artifact review and export checks are not yet claimed by this source commit.
+
+Remaining entire original queue is partial: exhaustive meaningful Residue union,
+DecisionTheorem-prime and all target/coverage/hash routes; actual fixed/nested
+array decision integration, wider memory and halting-OR reconstruction; broader
+approved M4 boundary; later compiler/read-layout formula-derived fuel; remaining
+baseline/backfill, slow-module performance and full strict/axiom gates. Q1 revision
+is approved as previously recorded; Q2/producer TypeExamples repair remains held.
+No new exclusion/premise, model/semantic change, axiom/sorry/native trust shortcut,
+proof-budget increase, goal mutation, push/merge/PR/tag publication occurred.
+
+This increment is kernel proof evidence only; no EVM/external-test validation
+is claimed. Interpreted timings are observations, not a semantic oracle.

@@ -1064,6 +1064,17 @@ a larger literal source folds to 27 nodes and stays Covered. These preserve
 why neither a size threshold nor noncoverage defines Residue/unknown.
 Separate cut/lift/resource and exhaustive coverage/fuel obligations stay open.
 
+`Calculus/DecisionHaltingOrReason.lean` supplies an independently decidable
+exact nested partial-OR source class, parameterized by actual typed roots and
+literals. Its complete source equation does not inspect coverage or verdicts.
+`Calculus/DecisionHaltingOrBoundary.lean` proves all-waiver target admission, actual
+prepared-guard recognition and failure of the left-definedness test required
+by APF OR. Clients link this to the guard extracted from the actual complete
+leaf, retain valid and false unknown members, and check an accepted total
+sibling. This is one reason component, not the exhaustive Residue union or
+a global unknown theorem; it is not a counterexample to `GuardP.floors`.
+
+
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
 not proved", the plan); `docs/module-map.md`.  The modules:
