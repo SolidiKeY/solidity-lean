@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""A checkout-scoped stdio MCP bridge with a local Unix socket."""
+import fcntl,hashlib,json,os,pathlib,select,shlex,socket,subprocess,sys,time
+
+def rootdir(): return os.path.realpath(subprocess.check_output(["git","rev-parse","--show-toplevel"],text=True).strip())
+def sockname(root):
+    return os.path.join(os.environ.get("LEAN_MCP_SOCKDIR","/tmp"),"lean-mcp-"+hashlib.sha256(root.encode()).hexdigest()[:20]+".sock")
+def send(sock,obj):
+    with socket.socket(socket.AF_UNIX) as s:
+        s.settimeout(120); s.connect(sock); s.sendall((json.dumps(obj)+"\n").encode()); f=s.makefile("rb"); line=f.readline()
+        if not line: raise RuntimeError("daemon closed connection")
+        return json.loads(line)
+def daemon(root,path):
+    os.chdir(root)
+    try: os.unlink(path)
+    except FileNotFoundError: pass
+    server=None; listener=socket.socket(socket.AF_UNIX)
+    try:
+        cmd=os.environ.get("LEAN_MCP_SERVER_CMD", "bash "+shlex.quote(root+"/scripts/run-lean-mcp.sh"))
+        server=subprocess.Popen(shlex.split(cmd),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,text=True,bufsize=1)
+        seq=0
+        def rpc(method,params=None,notify=False):
+            nonlocal seq
+            msg={"jsonrpc":"2.0","method":method,"params":params or {}}
+            if not notify: seq+=1; msg["id"]=seq
+            server.stdin.write(json.dumps(msg)+"\n"); server.stdin.flush()
+            if notify: return {}
+            while True:
+                line=server.stdout.readline()
+                if not line: raise RuntimeError("MCP server exited")
+                reply=json.loads(line)
+                if reply.get("id")==seq:
+                    if "error" in reply: raise RuntimeError(str(reply["error"]))
+                    return reply.get("result",{})
+        rpc("initialize",{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"coord-tools","version":"1"}})
+        rpc("notifications/initialized",notify=True)
+        listener.bind(path); os.chmod(path,0o600); listener.listen(8)
+        idle=float(os.environ.get("LEAN_MCP_IDLE","7200"))
+        while True:
+            ready,_,_=select.select([listener],[],[],idle)
+            if not ready: break
+            conn,_=listener.accept()
+            with conn:
+                try:
+                    req=json.loads(conn.makefile("rb").readline()); kind=req["kind"]
+                    if kind=="status": reply={"pid":os.getpid(),"server":server.pid}
+                    elif kind=="stop": reply={"stopped":True}
+                    elif kind=="tools": reply=rpc("tools/list")
+                    elif kind=="call": reply=rpc("tools/call",{"name":req["name"],"arguments":req["arguments"]})
+                    else: raise ValueError("unknown request")
+                    conn.sendall((json.dumps({"ok":True,"result":reply})+"\n").encode())
+                    if kind=="stop": break
+                except Exception as e:
+                    conn.sendall((json.dumps({"ok":False,"error":str(e)})+"\n").encode())
+    finally:
+        listener.close()
+        if server:
+            server.terminate()
+            try: server.wait(timeout=5)
+            except subprocess.TimeoutExpired: server.kill(); server.wait()
+        try: os.unlink(path)
+        except FileNotFoundError: pass
+
+def result_data(r):
+    if r.get("isError"): return None
+    if "structuredContent" in r:
+        data=r["structuredContent"]; return data.get("result",data)
+    for x in r.get("content",[]):
+        if x.get("type")=="text":
+            try: return json.loads(x["text"])
+            except ValueError: return {"text":x["text"]}
+    return {}
+def main():
+    if len(sys.argv)>1 and sys.argv[1]=="--supervisor":
+        env=json.load(sys.stdin)
+        child=subprocess.Popen([sys.executable,os.path.abspath(__file__),"--daemon",sys.argv[2],sys.argv[3]],env=env)
+        return child.wait()
+    if len(sys.argv)>1 and sys.argv[1]=="--daemon": daemon(sys.argv[2],sys.argv[3]); return 0
+    root=rootdir(); path=sockname(root); args=sys.argv[1:]
+    if not args: raise ValueError("usage: lean-mcp start|stop|status|tools|call|diag|goal|try")
+    cmd=args.pop(0)
+    def request(obj):
+        r=send(path,obj)
+        if not r.get("ok"): raise RuntimeError(r.get("error"))
+        return r["result"]
+    def running():
+        try: return request({"kind":"status"})
+        except (OSError,RuntimeError): return None
+    if cmd=="status":
+        s=running()
+        if not s: return 1
+        print(f"pid={s['pid']} server={s['server']} socket={path}"); return 0
+    if cmd=="stop":
+        if running(): request({"kind":"stop"})
+        return 0
+    if cmd not in ("start","tools","call","diag","goal","try"): raise ValueError("unknown command")
+    if not running():
+        os.makedirs(os.path.dirname(path),exist_ok=True)
+        with open(path+".lock","w") as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            if not running():
+                supervisor=subprocess.Popen([sys.executable,os.path.abspath(__file__),"--supervisor",root,path],env={"PATH":os.defpath},stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True,text=True)
+                supervisor.stdin.write(json.dumps(dict(os.environ))); supervisor.stdin.close()
+                for _ in range(300):
+                    if running(): break
+                    time.sleep(.1)
+                else: raise RuntimeError("daemon failed to start")
+    if cmd=="start": return 0
+    if cmd=="tools":
+        for t in request({"kind":"tools"}).get("tools",[]): print(t["name"])
+        return 0
+    if cmd=="call":
+        if len(args)!=2: raise ValueError("call TOOL JSON")
+        r=request(dict(kind="call",name=args[0],arguments=json.loads(args[1])))
+        for c in r.get("content",[]):
+            if c.get("type")=="text": print(c.get("text",""))
+        return 1 if r.get("isError") else 0
+    if cmd in ("diag","goal","try"):
+        if len(args)<(1 if cmd=="diag" else 2): raise ValueError("missing arguments")
+        file=os.path.abspath(args[0]); a={"file_path":file}
+        if cmd=="diag": name="lean_diagnostic_messages"; a.update(severity="error",interactive=False)
+        elif cmd=="goal": name="lean_goal"; a["line"]=int(args[1])
+        else:
+            if len(args)<3: raise ValueError("try FILE LINE TACTIC...")
+            name="lean_multi_attempt"; a.update(line=int(args[1]),snippets=args[2:])
+        r=request(dict(kind="call",name=name,arguments=a)); data=result_data(r)
+        if data is None: raise RuntimeError("MCP tool error")
+        if data.get("partial") or data.get("timed_out"): raise RuntimeError("MCP response is incomplete")
+        if cmd=="goal": print(json.dumps(data,ensure_ascii=False)); return 0
+        if cmd=="diag":
+            items=data.get("items",[]); errors=[x for x in items if x.get("severity")=="error"]
+            for x in errors: print(f"ERROR {x.get('line',0)}:{x.get('column',0)} {x.get('message','')}")
+            print(f"diag: {len(errors)} errors"); return 1 if errors else 0
+        passed=False
+        for item in data.get("items",[]):
+            ok=not item.get("timed_out") and not item.get("goals") and not any(d.get("severity")=="error" for d in item.get("diagnostics",[]))
+            print(("PASS " if ok else "FAIL ")+item.get("snippet","")); passed|=ok
+        return 0 if passed else 1
+    return 2
+if __name__=="__main__":
+    try: sys.exit(main())
+    except Exception as e: print("lean-mcp: "+str(e),file=sys.stderr); sys.exit(2)
