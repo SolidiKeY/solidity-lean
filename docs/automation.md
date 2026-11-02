@@ -1307,6 +1307,18 @@ zero reads but fail arithmetic Src/flattening; struct/nested-array cases stop
 at leafOf?. Their distinct unknown pins remain unchanged.
 
 
+VA1 mapping-bearing reversal reason (2026-11-02): DecisionMappingFieldReason
+exactly recognizes a literal-left/primitive-field-right equality under a fresh
+struct binder whose actual syntactic mapFree guard is false. Complete typed
+source equality, operand comparisons and field lookup yield witness iff and
+constructive decidability, independent of coverage/verdict. Hash freedom and
+specific existing boundAnswer refusal are proved; the high boundary proves
+all-waiver target admission. Two literal sources remain globally unknown, with
+map-free and distinct-shape negative controls. No semantic contains-mapping
+equivalence or mapping-child realization is assumed. This is a meaningful reason
+component, not global Residue exhaustiveness or a new target exclusion.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

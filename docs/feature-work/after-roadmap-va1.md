@@ -2934,3 +2934,60 @@ keyed/field/struct/nested array collector/coverage and reconstruction compositio
 wider memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511
 bound, remaining performance/backfill/full gates and held VA1-Q2 remain open.
 No other lane scope taken; prior seals/goal identity/failures preserved.
+
+
+## Decidable map-guard reversed-field reason (2026-11-02)
+
+After sealed820d41b5, owned DecisionMappingFieldReason adds a separately named
+MappingReversedFreshField source family: all C/Γ, exact fresh-struct binder,
+actual primitive-field lookup, direct literal on the left/field on the right,
+complete intrinsic source equality, and (Ty.ref(struct s)).mapFree=false.
+“Mapping-bearing” names this actual syntactic guard; no separate equivalence
+with a semantic contains-mapping predicate is claimed. The one-line reason is
+that the existing fresh-struct realization requires a map-free struct whereas
+this source fails that structural guard. No new target exclusion is introduced.
+
+Recognition uses actual allocView/eqView/literalTerm, field enumeration and full
+Tm.beqR comparisons. Public soundness/completeness/iff and constructive Decidable
+prove exact membership without querying target/Covered/decideGoal. Generic
+hashFree and schema_refuses prove only actual boundAnswer refusal for every
+body of that binder, not all-route/global unknown. Separate high
+DecisionMappingFieldBoundary proves target admission for every existing waiver
+setting and every closed member. No child-heap realization, countermodel,
+coverage or future theorem is assumed; the map-free children premise is
+unavailable here and remains a substantive proof obligation.
+
+Actual original mappingReversed0 and new mappingOne1 both inhabit the class,
+are hash-free/admitted, and remain globally unknown by kernel computation.
+Supported map-free original/five/Bool reversals, map-bearing reflexive, compound
+RHS and given-heap shapes are negative controls. Constructive proposition
+decisions also have inhabited positive/negative controls. Existing verdicts,
+source definitions, frozen predicates/premises/budgets remain unchanged. Three
+root imports/three map rows are narrow additive registrations.
+
+Raw /workspace/va1-evidence/mapping-reason-next. Final core MCP5.260s, boundary
+MCP4.175s, client MCP4.241s, explicit affected emission3.106s and15 public
+type/axiom reports5.244s pass; only existing standard axiom subsets. Initial
+client MCP4.218s failed because a Gaps formula was mixed into a StandardExample
+list. The same given-heap input is now a separate conjunct, preserving intrinsic
+contract typing and every expectation. Failed source/output retained; review
+alone was not claimed to establish elaboration. No budget increase or coercion.
+
+Same original writer lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, threads1/
+Lean-j1, hard memory.max12884901888/swap.max0 and12GiB host reserve. Sampled
+aggregate RSS1533308KiB, cgroup peak612241408bytes, minimum host available
+17164214272bytes;9 unsuccessful measurements retained. Required static gates
+pass except unchanged broad85 documentation/404 inventory findings, retained
+against frozen-base analysis. Earlier full/TypeExamples resource stops remain
+failures; VA1-Q2 remains held and its source untouched. Kernel/Lean evidence
+only, no EVM claim.
+
+Independent read-only finder/skeptic source reviews report no findings after
+the intrinsic-contract control repair. They verify exact family/premises and
+specific-schema versus global-verdict distinction; neither uses Lean/server/
+builds/edits. Final docs/export review and committed package seal remain pending
+until performed. Global Residue union/exhaustive target/hash bridge and
+DecisionTheorem-prime remain open, as do general array collector/coverage, wider
+memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511 bound,
+remaining performance/backfill and final full gates. Goal/VM/branch and prior
+seals/failures preserved; no push/merge/PR/tag or whole-goal completion.

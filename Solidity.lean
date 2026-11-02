@@ -198,6 +198,8 @@ import Solidity.Calculus.DecisionNumericLogic
 import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericNormalization
 import Solidity.Calculus.DecisionResidueReasons
+import Solidity.Calculus.DecisionMappingFieldReason
+import Solidity.Calculus.DecisionMappingFieldBoundary
 import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.DecisionMemoryCoverage
 import Solidity.Calculus.DecisionGivenHeapReason
@@ -274,6 +276,7 @@ import Solidity.Examples.DecisionNumericLogic
 import Solidity.Examples.DecisionNumericTraversal
 import Solidity.Examples.DecisionNumericNormalization
 import Solidity.Examples.DecisionResidueReasons
+import Solidity.Examples.DecisionMappingFieldReason
 import Solidity.Examples.DecisionCompoundFieldReason
 import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.MemoryFloor
