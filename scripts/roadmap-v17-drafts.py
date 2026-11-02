@@ -49,10 +49,19 @@ def draft_request(packet, expected, family):
                                "boundary":"exact authenticated producer claims, not verified declarations"}
     if family == "v09":
         info=p.load(bodies["MANIFEST.json"])
+        reviewed = "FINAL-MANIFEST.json" in bodies or "COMPLETE-SIGNATURES.json" in bodies
+        if reviewed:
+            p.require("FINAL-MANIFEST.json" in bodies and "COMPLETE-SIGNATURES.json" in bodies,
+                      "incomplete reviewed metadata pair")
+            final=p.load(bodies["FINAL-MANIFEST.json"])
+            for key in ("head","base","candidates","exact_committed_dependencies"):
+                p.require(final[key]==info[key],"reviewed/legacy source identity contradiction")
+            info=final
         head,base=info["head"],info["base"]
         candidates=info["candidates"]
         bindings=info["exact_committed_dependencies"]
-        signatures=p.load(bodies["DRAFT-SIGNATURES.json"])
+        signatures=(p.load(bodies["COMPLETE-SIGNATURES.json"])["candidate_signatures"]
+                    if reviewed else p.load(bodies["DRAFT-SIGNATURES.json"]))
         candidate_sources={path:v["sha256"] for path,v in candidates.items()}
         for path,value in candidates.items():
             p.require(d.module_path(value["module"]) == path,"draft module mapping")
@@ -79,7 +88,11 @@ def draft_request(packet, expected, family):
     roots=sorted(path[:-5].replace("/",".") for path in candidate_sources)
     request={"schema":1,"producerHead":head,"producerBase":base,"packetSha256":expected["packetSha256"],
              "roots":roots,"sources":{**candidate_sources,**{path:v["sha256"] for path,v in bindings.items()}}}
-    return request,bindings,{"family":family,"signaturesClaimedOnly":signatures,"sourceReceipt":receipt,
+    return request,bindings,{"family":family,"signaturesClaimedOnly":signatures,
+                             "selectedManifest": "FINAL-MANIFEST.json" if family=="v09" and reviewed else
+                                 ("MANIFEST.json" if family=="v09" else "DRAFT-INTERFACE.json"),
+                             "selectedSignatures": "COMPLETE-SIGNATURES.json" if family=="v09" and reviewed else
+                                 ("DRAFT-SIGNATURES.json" if family=="v09" else "DRAFT-INTERFACE.json"),"sourceReceipt":receipt,
                              "authenticatedClaimDocuments":claim_links,
                              "fullSourceSignatureMembers":{path:sha for path,sha in expected["members"].items() if path.endswith(".lean")},
                              "boundary":"Full required-declaration/signature/constraint/premise claims remain in hash-linked documents/source; none kernel validated"}

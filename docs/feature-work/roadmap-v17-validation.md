@@ -985,3 +985,65 @@ kernel metadata. Seventeen draft controls and 36 existing packet controls pass.
 The raw docs checker still exits 1 with 48 findings versus frozen-base 46;
 two reserved inline-assembly findings remain, with zero new V17 findings.
 Source-only layers/orphans/trust checks pass; final trust closure is not run.
+
+
+### Complete V09 reviewed inputs and local diagnostic requests (2026-11-02)
+
+The durable reviewed DraftA/DraftB packets and the exact original5511806c
+189-source dependency archive resolve V17's previous26-version request.
+Every dependency SHA256/Git blob matches. Actual lexical traversal now covers
+192 modules for DraftA and191 for DraftB, with zero source issues. These are
+source-byte results, not published prerequisites or kernel/theorem passes.
+Reviewed FINAL-MANIFEST and COMPLETE-SIGNATURES are selected together; retained
+legacy metadata must agree on source/head/base/dependency identities. Superseded
+signature snippets remain retained, without silently becoming current evidence.
+
+The owned `scripts/roadmap-v17-diagnostic-request.py` renders per-component
+LOCAL-DIAGNOSTIC-REQUEST artifacts. DraftA retains all18 requested declarations
+across their actual claimed defining modules; DraftB retains all9. Existing
+request/query/axiom generators are reused unchanged, including complete values,
+100000-node/512-depth limits and no theorem truncation. Claimed headers must
+match named, unique exact source bytes with balanced delimiters through their
+actual top-level proof assignment. This is not elaboration of implicit context,
+premises or theorem types. The native extractor must establish those facts.
+
+Requests bind exact source/config bytes, observed Lean/Lake binaries/versions,
+all installed elaboration object/shared-library hashes using the existing
+inventory helper, and producer toolchain-source claims. The final renderer
+requires clean committed consumer identity and checks helper bytes against
+that commit. Tool-version probes run; no Lean proof/query/build runs here.
+
+The generated payload is only for the coordinator's existing approved private
+workflow, original lock, native-process serialization, fresh admission and hard
+12GiB/no-swap scope. One cumulative300s boundary covers build, all full queries,
+axioms and integrity collection for a component. The bare payload enforces no
+outer cap or admission and never certifies a gate. Its bootstrap requires a new
+canonical output outside inputs, an independently authenticated request digest
+and the coordinator's explicitly selected trusted Python runtime. Source/tool/
+config/query bytes are checked before and after. Failures still attempt final
+integrity and object/setup collection; raw command/pipeline/collection exits
+remain distinct and original nonzero exits are preserved. Hard-kill missing
+finalizers remain unknown/failed evidence, never inferred success.
+
+Object sidecars record findOLean lookup hashes, variants and available setup
+hashes. They do NOT authenticate actual loaded selectors or source/object
+correspondence: those and independent live replay remain outer mandatory
+obligations. Missing query/setup/object evidence is NONPASS. No source-only
+receipt or parameterized theorem is promoted. All request proof/release flags
+remain false until actual independent evidence is checked.
+
+A fresh production guard recorded14720139264 effective bytes, below the
+unchanged15032385536 requirement; no existing Lean/Lake job was found, no process
+was closed and no proof/container launched. Numeric refusal telemetry is now
+retained in this turn's external admission receipt. V14/V13 stay queued. The
+coordinator-owned V11C75/C76/public-master repairs are not duplicated. Earlier
+V11 failures, all ten incomplete Derived17 metadata rows, all457 rows, the
+corrected compiler-readiness review/optional-vendor holds and the full original
+G52-G55/Backfill queue remain open.
+
+Separate independent finder/skeptic reviews fixed incomplete failure finalizers,
+mandatory-output exit handling, consumer identity nesting, coherent nested
+signature truncation, external request pinning and lookup/selector ambiguity.
+Twelve new request controls pass, including actual reviewed inputs and synthetic
+collection-failure controls; no diagnostic payload or Lean proof is executed by
+those controls. Final exact-head requests remain REQUEST_NOT_EXECUTED.
