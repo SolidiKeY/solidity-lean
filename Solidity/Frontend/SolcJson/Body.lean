@@ -123,6 +123,10 @@ structure SolcFun where
   retEnums : List Nat := []
   /-- The parameters of a top-level enum type, by position (as `retEnums`). -/
   paramEnums : List Nat := []
+  /-- The parameters with an enum nested in an array or a struct, by
+  position: each nested enum's key and member count (`abiEnumPositions`;
+  the replay decodes them as `Kind.enumBelow`, `UpstreamEntry.shapeAt`). -/
+  paramEnumPositions : List (Nat × List (String × Nat)) := []
   /-- Specification members, retained only for the testing import mode. -/
   specMembers : String := ""
   /-- Raw directive/text pairs, for validating one clause at a time before
@@ -1216,6 +1220,33 @@ partial def unparen (j : Json) : Json :=
     if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
   | _, _ => j
 
+/-- The enum positions of `abi.decode`'s component `t` (a type expression,
+or a type name inside a struct), by the keys `solcEnumBelow` reads
+(`abiEnumBelow?`: `""` the value, `k[]` an element, `k.f` a member `f`),
+each with its enum's member count (`bounds` holds the largest member);
+`none` where a position is not one of these. -/
+partial def abiEnumPositions (declarations : List Json) (bounds : List (Int × Nat)) :
+    Nat → String → Json → Option (List (String × Nat))
+  | 0, _, _ => none
+  | fuel + 1, key, t =>
+    let t := unparen t
+    match J.kind t with
+    | "ElementaryTypeNameExpression" | "ElementaryTypeName" => some []
+    | "IndexAccess" => do
+      abiEnumPositions declarations bounds fuel (key ++ "[]") (← J.opt t "baseExpression")
+    | "ArrayTypeName" => do
+      abiEnumPositions declarations bounds fuel (key ++ "[]") (← J.opt t "baseType")
+    | "Identifier" | "UserDefinedTypeName" => do
+      let id ← (J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?
+      if let some hi := lookupBy id bounds then return [(key, hi + 1)]
+      let d ← declarations.find? (J.id? · == some id)
+      if J.kind d != "StructDefinition" then return []
+      let ms ← (J.arrD d "members").toList.mapM fun m => do
+        let f ← J.str? m "name"
+        abiEnumPositions declarations bounds fuel (key ++ "." ++ f) (← J.opt m "typeName")
+      pure ms.flatten
+    | _ => none
+
 /-- Use exactly the native literal parser when folding a static byte length. -/
 def staticCompilerLength? (hex : String) : Option Nat := (hexBytes? hex).map List.length
 
@@ -1885,12 +1916,23 @@ partial def call (j : Json) : PM String := do
         let comps := match J.kind ts, J.arr? ts "components" with
           | "TupleExpression", some cs => cs.toList
           | _, _ => [ts]
-        if comps.any (fun c => (topEnum c).isNone &&
+        -- A nested enum (an array's element, a struct's member, at any depth)
+        -- decodes at its carrier and is checked below its member count:
+        -- `solcEnumBelow(T, "k", n, …)` (`abiEnumBelow?`, `abiReadGen`).
+        let positions (c : Json) : Option (List (String × Nat)) :=
+          abiEnumPositions st.declarations st.enumBounds
+            ((J.nodes c).length + st.declarations.length + 1) "" c
+        if comps.any (fun c => (topEnum c).isNone && (positions c).isNone &&
             (J.nodes c).any (fun node => (J.ref? node).any forbidden.contains)) then
           unsupported "ABI decoding of enum values requires nominal cardinality checks"
         let tyName (t : Json) : PM String := do
           if let some e := topEnum t then return identText e
-          PM.lift (abiTyText (← get).structs t)
+          let text ← PM.lift (abiTyText (← get).structs t)
+          match positions t with
+          | some ps@(_ :: _) =>
+            let args := ps.map fun (k, n) => s!"{k.quote}, {n}"
+            return s!"solcEnumBelow({text}, {", ".intercalate args})"
+          | _ => return text
         let names ← comps.mapM tyName
         return s!"abi.decode({← expr b}, ({", ".intercalate names}))"
       | _ => unsupported "abi.decode with other than two arguments"

@@ -352,15 +352,50 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let x ← captureRef C "mv" (.mem R) (.newArr T n)
     pure (P ++ Q ++ [.of Γ (.declMem R x (some (.newArr se hR)) rfl
       (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
-  | .call "#sliceIndex" [off, len, k, past] => do
+  | .call "#bytesIndex" [b, i, .num n] => do
+    -- `b[i]` of a `bytesN` at a symbolic index (`bytesAt`): the base, then
+    -- the index, each held; the bounds check, a revert (`Panic(0x32)`'s data
+    -- where a `catch` reads it, as an array index's); then the byte, its
+    -- shift in range
+    let (P, b) ← hoist b
+    let (Pb, b) ← captureExpr C b
+    let (Q, i) ← hoist i
+    let (Pi, i) ← captureExpr C i
+    let Γ ← nctx
+    let guard ← checkIn C Γ .bool (.binop .lt i (.num n))
+    let sc ← read
+    let check := if sc.selfFrame || sc.retainFailureData then panicStmt 0x32 guard else .require guard
+    let sh : RawExpr := .binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i)
+    let (R, e) ← hoist (.binop .mod (.binop .shr b sh) (.num 256))
+    pure (P ++ Pb ++ Q ++ Pi ++ [.of Γ check] ++ R, e)
+  | .call "#sliceIndex" [off, len, k, _past] => do
     let (P, k) ← hoist k
-    let x := toString (← freshCapture "se")
-    let Q ← elabStmtsP [.decl (.named "uint") x (some k)]
-    -- The addition is evaluated only for an in-range relative index.
-    -- The base's own bounds check supplies Panic(0x32) otherwise.
-    let ix := RawExpr.ternary (.binop .lt (.name x) len) (sliceAdd off (.name x)) past
-    let (R, ix) ← hoist ix
-    pure (P ++ Q ++ R, ix)
+    -- A literal or a `uint256` name is read as it stands (nothing is
+    -- evaluated between the check and the read); another index is held
+    -- once in a fresh `uint`. A copy beside the bounds premises costs the
+    -- closer a whole evaluation (test 31, `sliceRead`).
+    let Γk ← ctx
+    let direct : Bool := match k with
+      | .num _ => true
+      | .name _ => (intTyOf C Γk k).any fun (p, n) => p == .uint && n == 256
+      | _ => false
+    let (Q, xv) ← if direct then pure ([], k) else do
+      let x := toString (← freshCapture "se")
+      pure (← elabStmtsP [.decl (.named "uint") x (some k)], RawExpr.name x)
+    -- The view's own bounds check where solc makes it (after the index):
+    -- `Panic(0x32)` where failure data is retained, a revert elsewhere, as
+    -- the base's check past its end did before. The addition is evaluated
+    -- only for an in-range relative index, and the read is then the plain
+    -- `base[off + x]` with `x < len` a premise (KeY's `inBounds` branch),
+    -- so no closer has to know that a read past the end fails (test 31,
+    -- `sliceRead`; lane FU2-C).
+    let (R, len) ← hoist len
+    let Γ ← nctx
+    let guard ← checkIn C Γ .bool (.binop .lt xv len)
+    let sc ← read
+    let check := if sc.selfFrame || sc.retainFailureData then panicStmt 0x32 guard else .require guard
+    let (S, ix) ← hoist (sliceAdd off xv)
+    pure (P ++ Q ++ R ++ [.of Γ check] ++ S, ix)
   | .call "#sliceAt" [view, k] => do
     let t := toString (← freshCapture "mv")
     let (v, pre) ← ElabM.lift (inlineSliceOpen t view)
@@ -827,11 +862,23 @@ def inlinedBody (rc : ElabRec C) (f : String) (d : FunDecl) (ρ : List (String �
   if shared then CallMemo.setBody C key k₀ P (← get).2
   pure P
 
+/-- A call's several return binders from their local types and names, in
+the order they are bound: a value one, or a memory one, whose default is a
+fresh object. -/
+def RetBinders.ofList (l : List (LTy × Var)) : Except String ((ρ : Ctx) × RetBinders ρ) :=
+  l.foldlM (init := ⟨[], .nil⟩) fun ⟨_, bs⟩ (t, x) => match t with
+    | .val p => pure ⟨_, bs.snoc p x⟩
+    | .mem R => do
+      let ⟨hm⟩ ← memOk R
+      if hd : (Ty.ref R).defaultOkS = true then pure ⟨_, bs.snocMem R x hd hm⟩
+      else throw s!"a {Ty.ref R} return, whose default is not well-formed"
+    | _ => throw "internal: a return binder that is neither a value nor in memory"
+
 /-- `elabCallRet`'s elaboration of the call, from the numbering it is entered at. -/
 def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
-    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) := do
   let fnDispatch := @ElabRec.fnDispatch C rc
   let callValue := @ElabRec.callValue C rc
   let elabStmtsP := @ElabRec.elabStmtsP C rc
@@ -934,7 +981,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
       | none => throw s!"{f}: reference parameter {n} needs a data location"
     pj := pj + 1
   let mut mret : Option (RefTy × Var × Bool) := none
-  let mut mrets : List (PrimTy × Var × Nat) := []
+  let mut mrets : List (Var × LocalTy) := []
   let mut Γr : ECtx := []
   let kind ← match d.rets, res with
     -- a void call with targets (a void function's obligation, `f(x̄)@C;`)
@@ -969,23 +1016,37 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
       ρ := (n, toString r) :: ρ
       Γr := [(toString r, .val p w (shapeUnder d.widths n))]
       if targets then
-        mrets := [(p, r, w)]
-        pure (RetKind.rets [(p, r)])
+        mrets := [(r, .val p w (shapeUnder d.widths n))]
+        pure (RetKind.rets [(.val p, r)])
       else pure (RetKind.val p r)
     | rs, some _ => throw s!"{f} returns {rs.length} values, which a tuple assignment takes"
     | rs, none => do
-      if d.retMem then throw s!"{f}: `memory` on a return of a function of several returns"
+      if d.retMem && d.retStorage then
+        throw s!"{f}: a return's data location does not match its type (a reference return \
+          needs `memory`, a value return none)"
       if d.retStorage then throw s!"{f}: `storage` on a return of a function of several returns"
       -- declared in the caller's context too (`CallRet.rets`): fresh at
-      -- every call, a recursive one's too
+      -- every call, a recursive one's too; a memory one a fresh default
+      -- object on entry, its pointer what the caller's target reads
       for (n, T) in rs do
-        let .prim p := T | throw s!"{f}: its return {n} has a reference type"
-        let w := (lookupBy n d.widths).getD 256
-        let r ← freshCapture "se"
-        ρ := (n, toString r) :: ρ
-        Γr := (toString r, .val p w (shapeUnder d.widths n)) :: Γr
-        mrets := mrets ++ [(p, r, w)]
-      if targets then pure (RetKind.rets (mrets.map fun (p, r, _) => (p, r))) else pure RetKind.none
+        match T with
+        | .prim p =>
+          let w := (lookupBy n d.widths).getD 256
+          let r ← freshCapture "se"
+          ρ := (n, toString r) :: ρ
+          Γr := (toString r, .val p w (shapeUnder d.widths n)) :: Γr
+          mrets := mrets ++ [(r, .val p w (shapeUnder d.widths n))]
+        | .ref R =>
+          unless d.retMem do
+            throw s!"{f}: its return {n} of reference type {Ty.ref R} needs `memory`"
+          if recursive then
+            throw s!"{f} is recursive and returns a memory value among several"
+          let r ← freshCapture "mv"
+          ρ := (n, toString r) :: ρ
+          Γr := (toString r, .mem R (shapeUnder d.widths n)) :: Γr
+          mrets := mrets ++ [(r, .mem R (shapeUnder d.widths n))]
+      if targets then pure (RetKind.rets (mrets.map fun (r, t) => (t.toLTy, r)))
+      else pure RetKind.none
   let Γf := Γr ++ Γp
   let rnames : List Var := match kind with
     | .val _ r | .mem _ r | .storage _ r => [r]
@@ -1036,8 +1097,15 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
     | .none =>
       -- several returns of a call that is a statement: declared on entry, at
       -- their defaults
-      let (decls, _) := mrets.foldl (fun (acc : SProg C × NCtx) (p, r, _) =>
-        (acc.1 ++ [.of acc.2 (.declLocal p r none)], (r, .val p) :: acc.2)) ([], ECtx.toNCtx Γp)
+      let (decls, _) ← mrets.foldlM (fun (acc : SProg C × NCtx) (r, t) => match t with
+        | .mem R _ => do
+          let ⟨hm⟩ ← ElabM.lift (memOk R)
+          match hd : (Ty.ref R).defaultOkS with
+          | true => pure (acc.1 ++ [.of acc.2 (.declMem R r none hd hm)], (r, .mem R) :: acc.2)
+          | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
+        | .val p _ _ => pure (acc.1 ++ [.of acc.2 (.declLocal p r none)], (r, .val p) :: acc.2)
+        | _ => throw s!"internal: {f}'s return {r} is neither a value nor in memory")
+        ([], ECtx.toNCtx Γp)
       match recBody with
       | some (n, mk) => pure (.of Γs (.callRec f n as .none (← mk ([] ++ ps) as.names)))
       | none =>
@@ -1054,7 +1122,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
         let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.val p] ++ ps) P)
         pure (.of Γs (.call f as (.val p r res') b))
     | .rets l =>
-      let ⟨ρs, bs⟩ := Binders.ofList l
+      let ⟨ρs, bs⟩ ← ElabM.lift (RetBinders.ofList l)
       match recBody with
       | some (n, mk) =>
         pure (.of Γs (.callRec f n as (.rets bs) (← mk (ρs ++ ps) (bs.names ++ as.names))))
@@ -1097,7 +1165,7 @@ first call's were (`CallMemo`), so that its body is one term at every call. -/
 def elabCallRetWith (rc : ElabRec C) (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
-    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) := do
   let sc ← read
   let shared := !ctor && !targets && sc.recs.all (·.name != f) && !isRecursiveC C f &&
     ((sc.funs.find? (·.1 == f)).map (·.2.endsWithCall)).getD false
@@ -1114,7 +1182,10 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   let hoistArgs := @ElabRec.hoistArgs C rc
   let hoistCallArgs := @ElabRec.hoistCallArgs C rc
   match s0 with
+  -- a literal reason (`"m"`, `hex"…"`, as the solc import prints every
+  -- string literal): its bytes, nothing allocated (`elabStmt1`)
   | .revertReason m => do
+    if m.bytesLit?.isSome then return ([], .revertReason m)
     let (P, m) ← hoist m
     pure (P, .revertReason m)
   | .revertRaw m => do
@@ -1124,6 +1195,7 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
     -- The condition must finish before the reason's allocation or effects.
     let (P, c) ← hoist c
     let (Pc, c) ← forceArg C c
+    if m.bytesLit?.isSome then return (P ++ Pc, .requireReason c m)
     let (Q, m) ← hoist m
     let x := toString (← freshCapture "mv")
     let R ← rc.elabStmtsP [.declMemory (.named "string") x (some m)]
@@ -1895,7 +1967,14 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
     if (← read).selfFrame || (← read).retainFailureData then
       pure [.of (← nctx) (.revertData [.bytes (Semantics.encodeError m.toUTF8.toList)])]
     else pure [.of (← nctx) .revert]
-  | .revertReason m => memoryRevert .reason m
+  -- a literal reason (`hex"…"`, as the solc import prints a string
+  -- literal): `Error(string)`'s data of its bytes, literal, nothing
+  -- allocated; the data a memory reason carries (`memoryRevert`), in every
+  -- frame, so a self-call's `catch` reads it (`CatchKind.datas`)
+  | .revertReason m => do
+    if let some bs := m.bytesLit? then
+      return [.of (← nctx) (.revertData [.bytes (Semantics.encodeError (bs.map UInt8.ofNat))])]
+    memoryRevert .reason m
   | .revertRaw d => memoryRevert .raw d
   | .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])
   | .requireMsg c m => do

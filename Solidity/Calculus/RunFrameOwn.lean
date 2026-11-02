@@ -741,6 +741,29 @@ theorem Binders.own {H : HTy} : {ρ : Ctx} → Binders ρ → (x : TEnv C H ρ) 
   | _, .nil, x => TEnv.Own.nil x
   | _, .snoc bs _ _, x => TEnv.Own.cons (by intro R h; cases h) (Binders.own bs x.2)
 
+/-- Several returns entered from an own state: own, each memory return's
+object fresh. -/
+theorem RetBinders.enterT_own {ps : Ctx} : {ρ : Ctx} → (bs : RetBinders ρ) → (τ : State C ps) →
+    b ≤ τ.H.length → TEnv.Own b τ.env → Heap.OwnAbove b τ.heap →
+    TEnv.Own b (bs.enterT τ).st.env ∧ Heap.OwnAbove b (bs.enterT τ).st.heap ∧
+      b ≤ (bs.enterT τ).st.H.length
+  | _, .nil, _, hb, he, hh => ⟨he, hh, hb⟩
+  | _, .snoc bs _ _, τ, hb, he, hh =>
+    let ih := RetBinders.enterT_own bs τ hb he hh
+    ⟨TEnv.Own.cons (by intro R h; cases h) ih.1, ih.2.1, ih.2.2⟩
+  | _, .snocMem bs R _ _ hm, τ, hb₀, he₀, hh₀ => by
+    obtain ⟨he, hh, hb⟩ := RetBinders.enterT_own bs τ hb₀ he₀ hh₀
+    have ho := SVal.own_copyStToM (SVal.dflt (.ref R)) hm (bs.enterT τ).st.heap
+    refine ⟨?_, Heap.OwnAbove.grow (SVal.keeps_copyStToM _ hm _) hh ho.1 hb,
+      Nat.le_trans hb (List.IsPrefix.length_le ((bs.enterT τ).st.allocDefaultG R hm).ext)⟩
+    intro _ i x hx
+    cases i with
+    | here =>
+      have e : ((bs.enterT τ).st.allocDefaultG R hm).val = x := Option.some.inj hx
+      subst e
+      exact Nat.le_trans hb ho.2
+    | there j => exact TEnv.Own.wk _ he j x hx
+
 /-- A call's frame entered from an own state: own, a memory return's object
 fresh. -/
 theorem CallRet.enterT_own {Γ' rs ps : Ctx} (ret : CallRet Γ rs Γ') (τ : State C ps)
@@ -750,7 +773,7 @@ theorem CallRet.enterT_own {Γ' rs ps : Ctx} (ret : CallRet Γ rs Γ') (τ : Sta
   cases ret with
   | none => exact ⟨he, hh, hb⟩
   | val p r res => exact ⟨TEnv.Own.cons (by intro R h; cases h) he, hh, hb⟩
-  | rets bs => exact ⟨TEnv.Own.append _ _ _ (Binders.own bs _) he, hh, hb⟩
+  | rets bs => exact RetBinders.enterT_own bs τ hb he hh
   | mem R r hd hm =>
     have ho := SVal.own_copyStToM (SVal.dflt (.ref R)) hm τ.heap
     refine ⟨?_, Heap.OwnAbove.grow (SVal.keeps_copyStToM _ hm τ.heap) hh ho.1 hb,

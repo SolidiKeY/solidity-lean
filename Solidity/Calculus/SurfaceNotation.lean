@@ -262,6 +262,16 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
     `(RawTerm.arith BinOp.div $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term * $b:dl_term) => do
     `(RawTerm.arith BinOp.mul $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| $a:dl_term +% $b:dl_term) => do
+    `(RawTerm.arith BinOp.addW $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| $a:dl_term -% $b:dl_term) => do
+    `(RawTerm.arith BinOp.subW $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| $a:dl_term *% $b:dl_term) => do
+    `(RawTerm.arith BinOp.mulW $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| $a:dl_term >> $b:dl_term) => do
+    `(RawTerm.arith BinOp.shr $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| $a:dl_term << $b:dl_term) => do
+    `(RawTerm.arith BinOp.shl $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term && $b:dl_term) => do
     `(RawTerm.arith BinOp.and $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term || $b:dl_term) => do

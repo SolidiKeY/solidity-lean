@@ -1456,7 +1456,9 @@ The three actual roots and the bounded repairs are:
   native enum conversions check cardinality before exposing the uint8 carrier;
   a same-named shadow enum cannot supply another declaration's range. Whole
   enum arrays retain ABI array padding. Enum/composite `abi.decode` targets
-  remain refused because the native decoder lacks nominal cardinality checks.
+  were refused because the native decoder lacked nominal cardinality checks;
+  since lane FU2-D they decode at their carriers with each enum position
+  checked (`solcEnumBelow`, `docs/feature-work/abi-hashes.md`).
 - `various/typed_multi_variable_declaration.sol`: a restricted source helper
   uses the existing shared typed storage-return frame. Admission requires a
   nonvirtual internal/private helper with no modifiers/specification, a single

@@ -83,7 +83,7 @@ def STy.memShape : STy → STy
 def Val.RefOK (E : Env) (H : HeapTy) : {τ : STy} → Val E.layout τ → Prop
   | τ, .memRef _ a => ∃ σ, H a = some σ ∧ σ.memShape = τ.memShape
   | τ, .storRef _ p => E.pathTy p = some τ
-  | _, .cdRef _ _ => False
+  | _, .cdRef _ _ _ => True
   | _, _ => True
 
 /-- A value of a type without a location is no reference. -/
@@ -92,7 +92,7 @@ theorem Val.refOK_of_loc {H : HeapTy} {τ : STy} (hτ : τ.loc? = none) (v : Val
   cases v with
   | memRef h _ => rw [hτ] at h; cases h
   | storRef h _ => rw [hτ] at h; cases h
-  | cdRef h _ => rw [hτ] at h; cases h
+  | cdRef h _ _ => rw [hτ] at h; cases h
   | _ => trivial
 
 theorem Val.RefOK.mono {H H' : HeapTy} (hle : H.Le H') {τ : STy} {v : Val E.layout τ}
@@ -1304,6 +1304,7 @@ theorem deleteLoc_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.la
   | memByte a i =>
     exact Hoare.bind (Hoare.conseq ((zeroOK n).val H _) (fun _ h => h) (fun _ _ h => h.1) (fun _ _ h => h))
       fun v => writeLoc_memByte_mem F n a i v
+  | cd off => exact Hoare.bind ((zeroOK n).val H τ) fun _ => Hoare.halt' fun _ h => h.1
 
 
 /-! ## Copies from storage keep the memory invariant -/
@@ -1637,6 +1638,7 @@ theorem writeLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.l
   | mem a i => exact writeLoc_mem_mem F n a i v
   | memByte a i =>
     exact Hoare.conseq (writeLoc_memByte_mem F n a i v) (fun _ h => h.1) (fun _ _ h => h) (fun _ _ h => h)
+  | cd off => exact Hoare.halt' fun _ h => h.1
 
 /-- **Every `delete` keeps `MemOK`**, halts included. -/
 theorem deleteLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ) :
@@ -1646,6 +1648,7 @@ theorem deleteLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.
   | «local» i => exact deleteLoc_mem F n _ fun _ h => nomatch h
   | mem a i => exact deleteLoc_mem F n _ fun _ h => nomatch h
   | memByte a i => exact deleteLoc_mem F n _ fun _ h => nomatch h
+  | cd off => exact deleteLoc_mem F n _ fun _ h => nomatch h
 
 end
 

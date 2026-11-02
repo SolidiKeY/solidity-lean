@@ -70,6 +70,14 @@ def Binders.quote : {ρ : Ctx} → Binders ρ → Lean.Expr
   | _, .nil => mkConst ``Binders.nil
   | _, @Binders.snoc ρ bs p x => mkAppN (mkConst ``Binders.snoc) #[ctxE ρ, Binders.quote bs, toExpr p, toExpr x]
 
+def RetBinders.quote : {ρ : Ctx} → RetBinders ρ → Lean.Expr
+  | _, .nil => mkConst ``RetBinders.nil
+  | _, @RetBinders.snoc ρ bs p x =>
+    mkAppN (mkConst ``RetBinders.snoc) #[ctxE ρ, RetBinders.quote bs, toExpr p, toExpr x]
+  | _, @RetBinders.snocMem ρ bs R x _ _ =>
+    mkAppN (mkConst ``RetBinders.snocMem) #[ctxE ρ, RetBinders.quote bs, toExpr R, toExpr x,
+      rflTrue, rflTrue]
+
 def CodeBinder.quote : {κ : Ctx} → CodeBinder κ → Lean.Expr
   | _, .none => mkConst ``CodeBinder.none
   | _, .some x => mkAppN (mkConst ``CodeBinder.some) #[toExpr x]
@@ -250,7 +258,7 @@ def CallRet.quote : {rs Γ' : Ctx} → CallRet Γ rs Γ' → Lean.Expr
   | _, _, .val p r res =>
     mkAppN (mkConst ``CallRet.val) #[Γe, toExpr p, toExpr r,
       optQ (mkAppN (mkConst ``Idx) #[Γe, toExpr (LTy.val p)]) (Idx.quote Γe) res]
-  | _, _, @CallRet.rets _ rs bs => mkAppN (mkConst ``CallRet.rets) #[Γe, ctxE rs, Binders.quote bs]
+  | _, _, @CallRet.rets _ rs bs => mkAppN (mkConst ``CallRet.rets) #[Γe, ctxE rs, RetBinders.quote bs]
   | _, _, .mem R r _ _ => mkAppN (mkConst ``CallRet.mem) #[Γe, toExpr R, toExpr r, rflTrue, rflTrue]
   | _, _, .storage R r => mkAppN (mkConst ``CallRet.storage) #[Γe, toExpr R, toExpr r]
 

@@ -638,7 +638,7 @@ theorem holdsC_selfFails_notSelf {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets :
 theorem holdsC_selfFails_halt {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (σ : State C Γ)
     (hs : (call.addr.evalT σ).1 = σ.tx.selfAddress.1) {e : THalt} (he : e ≠ .exhausted)
-    (hc : ExecS (I.stateInv pay) σ (.call call.fn sargs (.rets rets) sbody) (.halt e)) :
+    (hc : ExecS (I.stateInv pay) σ (.call call.fn sargs (.rets rets.toRet) sbody) (.halt e)) :
     holdsC I pay σ (call.selfFails rets sargs sbody) := by
   have hi : call.isSelf.evalT σ = .ok true := by
     rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
@@ -650,15 +650,15 @@ its callback run is its run (`ExecS.eq_run`, `Prog.panicCodes_call`). -/
 theorem Prog.panicCodes_exec {J : StateInv C} {ρ ps Γf : Ctx} {sbody : Prog C (ρ ++ ps) Γf}
     {ks : List Semantics.Word} (hK : sbody.panicCodes = some ks) {f : Name}
     (sargs : Args C Γ ps) (rets : Binders ρ) (σ : State C Γ) {e : THalt}
-    (hc : ExecS J σ (.call f sargs (.rets rets) sbody) (.halt e)) :
+    (hc : ExecS J σ (.call f sargs (.rets rets.toRet) sbody) (.halt e)) :
     e ≠ .panic ∧ ∀ d v, e = .revertWith d → Semantics.decodePanic d = some v → v ∈ ks := by
-  have ht : Stmt.callsBack J.pay (.call f sargs (.rets rets) sbody) = false :=
+  have ht : Stmt.callsBack J.pay (.call f sargs (.rets rets.toRet) sbody) = false :=
     Prog.callsBack_of_hasTransfer sbody (Prog.panicCodes_hasTransfer hK)
   have he := ExecS.eq_run hc ht
-  have hr : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e := by
-    change COut.halt e = COut.ofRes (TRun.call sargs (.rets rets) sbody.ext sbody.runR σ) at he
+  have hr : TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ = .error e := by
+    change COut.halt e = COut.ofRes (TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ) at he
     revert he
-    cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    cases TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ with
     | ok _ => intro he; cases he
     | error e' => intro he; cases he; rfl
   exact Prog.panicCodes_call hK sargs rets σ hr
@@ -733,10 +733,10 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     (hx : holdsC I pay σ (Fml.closedAt I))
     (h0 : holdsC I pay σ (Binders.nil.all (Fml.modalK .box
       (.cons (.require call.hasCode) (.cons (.require call.isSelf)
-        (.cons (.call call.fn sargs (.rets rets) sbody) ok)) : Prog C ([] ++ Γ) Γok)
+        (.cons (.call call.fn sargs (.rets rets.toRet) sbody) ok)) : Prog C ([] ++ Γ) Γok)
       (.pop .block ((Ext.append Γ []).trans
         (Prog.cons (.require call.hasCode) (.cons (.require call.isSelf)
-          (.cons (.call call.fn sargs (.rets rets) sbody) ok)) : Prog C ([] ++ Γ) Γok).ext)
+          (.cons (.call call.fn sargs (.rets rets.toRet) sbody) ok)) : Prog C ([] ++ Γ) Γok).ext)
         (.seq ω κ)) φ)))
     (hok : holdsC I pay σ (.imp (Fml.isBool call.hasCode.lower true)
       (.imp (Fml.isBool call.notSelf.lower true)
@@ -815,11 +815,11 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     have hi : call.isSelf.evalT σ = .ok true := by
       rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
     have h₃ := holdsC_modalK σ (.cons (.require call.hasCode) (.cons (.require call.isSelf)
-        (.cons (.call call.fn sargs (.rets rets) sbody) ok))) _ φ h0 _
+        (.cons (.call call.fn sargs (.rets rets.toRet) sbody) ok))) _ φ h0 _
       (ExecP.require_true hc0 (ExecP.require_true hi (ExecP.cons hc hP)))
     rw [COut.thenF_map_cat, COut.thenF_map_cat, show (Ext.append Γ []).trans
       (Prog.cons (.require call.hasCode) (.cons (.require call.isSelf)
-        (.cons (.call call.fn sargs (.rets rets) sbody) ok))).ext =
+        (.cons (.call call.fn sargs (.rets rets.toRet) sbody) ok))).ext =
       (Ext.append Γ ρ).trans ok.ext from Subsingleton.elim _ _] at h₃
     cases o with
     | ok o' => exact fun o'' he => h₃ o'' (.pop he)
@@ -832,7 +832,7 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     have hi : call.isSelf.evalT σ = .ok true := by
       rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
     exact holdsC_modalK σ (.cons (.require call.hasCode) (.cons (.require call.isSelf)
-        (.cons (.call call.fn sargs (.rets rets) sbody) ok))) _ φ h0 _
+        (.cons (.call call.fn sargs (.rets rets.toRet) sbody) ok))) _ φ h0 _
       (ExecP.require_true hc0 (ExecP.require_true hi (ExecP.violated hc)))
 
 /-- **`sendNoCallbackBox`, with callbacks unset**: a gas-limited send runs as

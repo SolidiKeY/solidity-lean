@@ -79,7 +79,7 @@ finite tail of actual recaptures. New parent fields retain old aliases while chi
 theorem interstage (n copies : Nat) (hn : n+3 < 2^256) :
     ∃ mid out, runCaptures (hp n hn) r .dyn [first] = some mid ∧
       MObj.elems .dyn (mid.get r) = [true,true,false] ++ List.replicate n false ∧
-      ¬ BoolChildRepr (bools (old n)) (fun _ => 7) mid (.val (.cdRef rfl 7)) r ∧
+      ¬ BoolChildRepr (bools (old n)) (fun _ => 7) mid (.val (.cdRef rfl 7 0)) r ∧
       runCaptures (mid.alloc obj).1 (r.wk e) .dyn ([repair]++restoreCycles copies++[repair]) = some out ∧
       (r.wk e).id ≠ (mid.alloc obj).2.id ∧
       (MObj.elems .dyn (out.get (mid.alloc obj).2)).map HRef.id = [0,0] ∧
@@ -99,7 +99,7 @@ theorem interstage (n copies : Nat) (hn : n+3 < 2^256) :
     have hid := Option.some.inj (hf.symm.trans hpre)
     rw [← hid]
     exact (ScheduleControls.primitive_intermediate n hn).2.1
-  have hbroken : ¬ BoolChildRepr (bools (old n)) (fun _ => 7) mid (.val (.cdRef rfl 7)) r := by
+  have hbroken : ¬ BoolChildRepr (bools (old n)) (fun _ => 7) mid (.val (.cdRef rfl 7 0)) r := by
     have hf := (ScheduleControls.primitive_intermediate n hn).1
     have hid := Option.some.inj (hf.symm.trans hpre)
     rw [← hid]

@@ -131,6 +131,23 @@ def inferCall (Γ : Ctx) (f : String) (args : Syn (.list .expr)) (σs : List STy
     | Option.none => Option.none
   | _ => Option.none
 
+/-- `abi.decode(x, ts)` from the data's inferred derivation. -/
+def inferDecode (Γ : Ctx) (g : String) (x ts : Syn .expr) (rx : Unit → Option (Inferred Γ x)) :
+    Option (Inferred Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil))))) :=
+  match hr : Γ.resolve g with
+  | Option.some (.builtin .abi) =>
+    match rx () with
+    | Option.some ⟨σ, dx⟩ =>
+      if hs : σ.decodeSrc = true then
+        match hd : Γ.decodeTys ts with
+        | Option.some τs =>
+          if hok : τs.all (STy.decodable Γ.env) = true then Option.some ⟨_, .abiDecode hr dx hs hd hok⟩
+          else Option.none
+        | Option.none => Option.none
+      else Option.none
+    | Option.none => Option.none
+  | _ => Option.none
+
 mutual
 
 /-- **Type inference** of an expression: a type and a derivation. -/
@@ -280,11 +297,48 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     let ⟨σ, d⟩ ← Typed.inferN n Γ x
     if he : σ.explicit Γ.isBase (el.ty σ.convLoc) = true then pure ⟨_, .convElem d rfl he⟩
     else Option.none
+  | .slice a o o' => do
+    let ⟨τ, da⟩ ← Typed.inferN n Γ a
+    if hτ : τ.sliceable = true then
+      match o, o' with
+      | .some s, .some e => do
+        let ⟨σ, ds⟩ ← Typed.inferN n Γ s
+        let ⟨ρ, de⟩ ← Typed.inferN n Γ e
+        if h1 : σ.isIndex = true then
+          if h2 : ρ.isIndex = true then pure ⟨_, .slice da hτ ds h1 de h2⟩ else Option.none
+        else Option.none
+      | .some s, .none => do
+        let ⟨σ, ds⟩ ← Typed.inferN n Γ s
+        if h1 : σ.isIndex = true then pure ⟨_, .sliceFrom da hτ ds h1⟩ else Option.none
+      | .none, .some e => do
+        let ⟨ρ, de⟩ ← Typed.inferN n Γ e
+        if h2 : ρ.isIndex = true then pure ⟨_, .sliceTo da hτ de h2⟩ else Option.none
+      | .none, .none => pure ⟨_, .sliceAll da hτ⟩
+    else Option.none
   | .payableConv (.positional (.cons x .nil)) => do
     let ⟨σ, d⟩ ← Typed.inferN n Γ x
     if hp : σ.isPayableArg = true then
       pure ⟨_, .payable d hp⟩
     else Option.none
+  | .call (.new t) (.positional (.cons x .nil)) =>
+    match ht : t.ty Γ.env Γ.scope .memory with
+    | Option.some τ =>
+      if hτ : τ.newable = true then do
+        let ⟨σ, d⟩ ← Typed.inferN n Γ x
+        if hl : σ.isIndex = true then pure ⟨_, .newArray ht hτ d hl⟩ else Option.none
+      else Option.none
+    | Option.none => Option.none
+  | .inlineArray x xs => do
+    let ⟨τ, d⟩ ← Typed.inferN n Γ x
+    let ⟨τs, ds⟩ ← TypedArgs.inferN n Γ xs
+    match hc : STy.commonOf Γ.isBase τ τs with
+    | Option.some σ =>
+      if hσ : σ.oneWord = true then
+        if hf : argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
+          pure ⟨_, .inlineArray d ds hc hσ hf⟩
+        else Option.none
+      else Option.none
+    | Option.none => Option.none
   | .call (.ident f) (.positional args) => do
     let ⟨σs, da⟩ ← TypedArgs.inferN n Γ args
     match hct : Γ.convTarget f, args, σs, da with
@@ -307,6 +361,11 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
           | _, _ => Option.none
         | _ => inferCall Γ f args σs da
   | .call (.member c f) (.positional args) => do
+    let dec : Option (Inferred Γ (.call (.member c f) (.positional args))) :=
+      match c, f, args with
+      | .ident g, "decode", .cons x (.cons ts .nil) => inferDecode Γ g x ts (fun _ => Typed.inferN n Γ x)
+      | _, _, _ => Option.none
+    dec.orElse fun _ => do
     let ⟨σs, da⟩ ← TypedArgs.inferN n Γ args
     let abi : Option (Inferred Γ (.call (.member c f) (.positional args))) :=
       match c with
@@ -501,7 +560,17 @@ def StmtD.inferSimple (C : Ctx) {k : SCtx} (L : List (String × STy)) (i : Syn .
           else Option.none
       else Option.none
     | Option.none => Option.none
-  | _ => Option.none
+  | .declTuple h d ds e =>
+    match hs : C.tupleSlots h d ds with
+    | Option.some slots =>
+      (Typed.infer (C.at L) e).bind fun ⟨σ, de⟩ =>
+        match σ, de with
+        | .tuple σs, de =>
+          if hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true then
+            Option.some ⟨_, .declTuple hs de hf⟩
+          else Option.none
+        | _, _ => Option.none
+    | Option.none => Option.none
 
 /-- `return e;` against a single return. -/
 def StmtD.inferSingle (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .expr) :
@@ -600,6 +669,47 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
     match hf : ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) with
     | [_] => Option.some ⟨L, .revertError da hf⟩
     | _ => Option.none
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets (.block okb) (.catchPlain (.block cb)) .nil =>
+    match Typed.infer (C.at L) c, TypedArgs.infer (C.at L) args with
+    | Option.some ⟨.contract dn, dc⟩, Option.some ⟨σs, da⟩ =>
+      match ho : extOverloads C.env C.isBase dn f σs with
+      | [d] =>
+        match hs : d.fnSig C.env with
+        | Option.some (ps, rs) =>
+          if hf : argsFit C.isBase σs ps = true then
+            match ht : rets.tys C.env C.scope .memory with
+            | Option.some tys =>
+              if hsame : (tys.isEmpty || STy.sameList tys rs) = true then
+                (ItemsD.inferN n C ((tryLocals rets.paramNames rs).reverse ++ L) okb).bind fun ⟨_, dok⟩ =>
+                (ItemsD.inferN n C (catchLocals Option.none L) cb).map fun ⟨_, dcb⟩ =>
+                  ⟨L, .tryCall dc da ho hs hf ht hsame dok (.plain cb) dcb⟩
+              else Option.none
+            | Option.none => Option.none
+          else Option.none
+        | Option.none => Option.none
+      | _ => Option.none
+    | _, _ => Option.none
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets (.block okb)
+      (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) y) .nil (.block cb)) .nil =>
+    match Typed.infer (C.at L) c, TypedArgs.infer (C.at L) args with
+    | Option.some ⟨.contract dn, dc⟩, Option.some ⟨σs, da⟩ =>
+      match ho : extOverloads C.env C.isBase dn f σs with
+      | [d] =>
+        match hs : d.fnSig C.env with
+        | Option.some (ps, rs) =>
+          if hf : argsFit C.isBase σs ps = true then
+            match ht : rets.tys C.env C.scope .memory with
+            | Option.some tys =>
+              if hsame : (tys.isEmpty || STy.sameList tys rs) = true then
+                (ItemsD.inferN n C ((tryLocals rets.paramNames rs).reverse ++ L) okb).bind fun ⟨_, dok⟩ =>
+                (ItemsD.inferN n C (catchLocals (Option.some (y.getD "")) L) cb).map fun ⟨_, dcb⟩ =>
+                  ⟨L, .tryCall dc da ho hs hf ht hsame dok (.bytes y cb) dcb⟩
+              else Option.none
+            | Option.none => Option.none
+          else Option.none
+        | Option.none => Option.none
+      | _ => Option.none
+    | _, _ => Option.none
   | _, .assembly false _ body =>
     if hb : isRethrow body = true then
       match hv : rethrowVar? body with

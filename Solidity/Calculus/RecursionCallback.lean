@@ -168,7 +168,7 @@ theorem FunContractC.forall_storage {Γf : Ctx} {R : RefTy} {b : Prog C ([.alias
 /-- A contract at a call that returns several values is one at every such
 call. -/
 theorem FunContractC.forall_rets {Γf : Ctx} {b : Prog C (rs ++ ps) Γf} {req : Fml C ps}
-    {ens : Fml C (rs ++ (Olds ++ ps))} (bs : Binders rs) (h2 : 2 ≤ rs.length)
+    {ens : Fml C (rs ++ (Olds ++ ps))} (bs : RetBinders rs) (h2 : 2 ≤ rs.length)
     (h : FunContractC (Γ := []) I pay (CallRet.rets bs) b req ens m) :
     ∀ {Γ Γ' : Ctx} (ret : CallRet Γ rs Γ'), FunContractC I pay ret b req ens m := by
   intro Γ Γ' ret
@@ -178,11 +178,11 @@ theorem FunContractC.forall_rets {Γf : Ctx} {b : Prog C (rs ++ ps) Γf} {req : 
   | mem => simp at h2
   | storage => simp at h2
   | rets bs' =>
+    have e : ∀ σ : State C ps, (CallRet.rets (Γ := Γ) bs').enterT σ =
+        (CallRet.rets (Γ := []) bs).enterT σ := fun σ => RetBinders.enterT_eq σ bs' bs
     intro σ hσ
-    have := h σ hσ
-    simp only [CallRet.enterT] at this ⊢
-    rw [Binders.defaultsT_eq bs bs'] at this
-    exact this
+    rw [e σ]
+    exact h σ hσ
 
 /-- What a formula says past `snapOld` with callbacks, it says of the
 snapshots. -/
@@ -208,9 +208,7 @@ theorem CallRet.execP_declsThen {J : StateInv C} {Δ : Ctx} (ret : CallRet Γ rs
     obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ) (s := .declLocal p r Option.none) rfl
       (Stmt.runSt_declLocal_none p r σ)
     exact ExecP.cons hd h
-  | rets bs =>
-    have h' : ExecP J σ (bs.declsThen rest) u := Binders.execP_declsThen bs rest σ h
-    simpa only [CallRet.enterT, map_cat_refl] using h'
+  | rets bs => exact RetBinders.execP_declsThen bs rest σ h
   | mem R r hd hm =>
     obtain ⟨_, hd'⟩ := ExecS.det_ok (J := J) (σ := σ) (s := .declMem R r Option.none hd hm) rfl
       (Stmt.runSt_declMem_none R r hd hm σ)
@@ -219,6 +217,14 @@ theorem CallRet.execP_declsThen {J : StateInv C} {Δ : Ctx} (ret : CallRet Γ rs
     obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ) (s := .declStorage R r Option.none) rfl
       (Stmt.runSt_declStorage_none R r σ)
     exact ExecP.cons hd h
+
+/-- The same, the frame entered named by its outcome `O`. -/
+theorem CallRet.execP_declsThen_eq {J : StateInv C} {Δ : Ctx} (ret : CallRet Γ rs Γ')
+    (rest : Prog C (rs ++ ps) Δ) (σ : State C ps) (O : Out C σ.H (rs ++ ps))
+    (hO : ret.enterT σ = O) {u : COut C O.st.H Δ} (h : ExecP J O.st rest u) :
+    ExecP J σ (ret.declsThen rest) (u.map (Out.cat O)) := by
+  subst hO
+  exact CallRet.execP_declsThen ret rest σ h
 
 /-- A callback run from a state equal to another, of the same heap. -/
 theorem ExecP.transport' {J : StateInv C} {Δ Δ' : Ctx} {P : Prog C Δ Δ'} {X Y : State C Δ}
@@ -277,12 +283,14 @@ theorem FunContractC.ofHoldsC {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps
       (CallRet.enterT_snap ret σ).symm
   have hb := singleton_iff.mpr (block_of_execP hw)
   have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (thinOlds rs ps)) hrel).eq_lifted
-  cases ret
-  all_goals
-    have hb' := ExecP.transport' eX rfl hb
-    have h3 := h2 _ (CallRet.execP_declsThen _ _ σ.snap hb')
-    rw [hl] at h3
-    exact after_of_thenF_lift _ hens _ h3
+  have hO : ret.enterT σ.snap = (⟨State.lift (thinOlds rs ps) (ret.enterT σ).st
+      (TEnv.append rs (TEnv.take rs (ret.enterT σ).st.env)
+        (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps rs) (ret.enterT σ).st.env))),
+      (ret.enterT σ).ext⟩ : Out C σ.snap.H (rs ++ (Olds ++ ps))) :=
+    Out.eq_of_st eX.symm
+  have h3 := h2 _ (CallRet.execP_declsThen_eq _ _ σ.snap _ hO hb)
+  rw [hl] at h3
+  exact after_of_thenF_lift _ hens _ h3
 
 end ContractC
 
@@ -448,9 +456,10 @@ theorem holdsC_callRec_of {μ : Mutability} {f : Name} {d : Nat} {args : Args C 
       refine k a ha x hct hg hag (holdsC_callPost hpost a ha x.st.storage x.st.net
         x.st.selfBalance (fun hn => ?_) (fun hn => ?_))
       · have hk := hg.keeps hn
-        cases ret <;> exact hk
+        cases ret <;> first | exact hk |
+          exact ⟨hk.1.trans (RetBinders.enterT_keeps _ _).1, hk.2.trans (RetBinders.enterT_keeps _ _).2.1⟩
       · have hb := hg.selfBalance hn
-        cases ret <;> exact hb
+        cases ret <;> first | exact hb | exact hb.trans (RetBinders.enterT_keeps _ _).2.2
     | halt e => exact hct
     | violated => exact hct.elim
 
@@ -579,29 +588,31 @@ theorem holdsC_callVal_k {μ : Mutability} {p : PrimTy} {r : Var}
 
 /-- The continuation of a call of several results, with callbacks
 (`holds_callRets`). -/
-theorem holdsC_callRets_k {μ : Mutability} {bs : Binders rs}
+theorem holdsC_callRets_k {μ : Mutability} {b : Binders rs}
     {body : Prog C (rs ++ ps) Γf} {ω : Prog C (rs ++ Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
     {ens : Fml C (rs ++ (Olds ++ ps))} (hw : writesRets rs.length body = true) {σ : State C Γ}
-    (a : TEnv C σ.H ps) (o : Out C ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)).st.H Γf)
+    (a : TEnv C σ.H ps) (o : Out C (⟨(σ.withEnv a).withEnv (TEnv.append rs b.defaultsT a), List.prefix_refl _⟩ : Out C σ.H (rs ++ ps)).st.H Γf)
     (hens : holds (State.withOlds rs (σ.withEnv a).net (σ.withEnv a).storage
       (State.drop body.ext o.st)) ens)
-    (hg : TGFrame μ ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)).st o.st)
+    (hg : TGFrame μ (⟨(σ.withEnv a).withEnv (TEnv.append rs b.defaultsT a), List.prefix_refl _⟩ : Out C σ.H (rs ++ ps)).st o.st)
     (hag : TLocAgree 0 (Prog.writesAt 0 body)
-      ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)).st.env (TEnv.drop body.ext o.st.env))
+      (⟨(σ.withEnv a).withEnv (TEnv.append rs b.defaultsT a), List.prefix_refl _⟩ : Out C σ.H (rs ++ ps)).st.env (TEnv.drop body.ext o.st.env))
     (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
-      (Fml.callResult (.rets bs) ens ω κ φ m)) :
-    (COut.ok (TRun.callLeave (.rets bs) body.ext σ
-      ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)) o)).thenF
+      (Fml.callResult (.rets b.toRet) ens ω κ φ m)) :
+    (COut.ok (TRun.callLeave (.rets b.toRet) body.ext σ
+      (⟨(σ.withEnv a).withEnv (TEnv.append rs b.defaultsT a), List.prefix_refl _⟩ : Out C σ.H (rs ++ ps)) o)).thenF
       (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ) := by
   obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
   obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
   dsimp only [CallRet.enterT, State.withEnv] at hH hheap hsb htx hag hens
   dsimp only at hX
+  change holdsC I pay _ (b.toRet.all _) at hX
+  rw [Binders.toRet_all] at hX
   subst hH
   cases hheap
   have hps : TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env) = a := by
     rw [TLocAgree.drop_eq hag hw, TEnv.drop_append]
-  have hX' := holdsC_binders_all bs _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
+  have hX' := holdsC_binders_all b _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
     (.modal m .nil (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
       (.seq ω κ)) φ)) (TEnv.take rs (TEnv.drop body.ext env)) hX
   have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
@@ -630,7 +641,7 @@ theorem holdsC_callRets_k {μ : Mutability} {bs : Binders rs}
       (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
         (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
           ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env)) =
-      (TRun.callLeave (.rets bs) body.ext σ ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a))
+      (TRun.callLeave (.rets b.toRet) body.ext σ (⟨(σ.withEnv a).withEnv (TEnv.append rs b.defaultsT a), List.prefix_refl _⟩ : Out C σ.H (rs ++ ps))
         ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
     simp only [TRun.callLeave]
     rw [TEnv.wk_self]
@@ -709,7 +720,8 @@ theorem holdsC_callStorage_k {μ : Mutability} {R : RefTy} {r : Var}
 return's contract is over a grown heap (`Calculus/MemContract.lean`), which
 the callback runs' frame does not give (`ExecS.frame`). -/
 def CallRet.isValues {Γ rs Γ' : Ctx} : CallRet Γ rs Γ' → Bool
-  | .none | .val .. | .rets _ | .storage .. => true
+  | .none | .val .. | .storage .. => true
+  | .rets bs => bs.noMem
   | .mem .. => false
 
 /-- **A recursive call by its contract is sound with callbacks**
@@ -729,9 +741,12 @@ theorem holdsC_callRecContract {μ : Mutability} {f : Name} {d : Nat} {args : Ar
   | val =>
     exact holdsC_callRec_of (hc.1 _) hc.2.1 hreq hpre hpost
       fun a _ o h₁ h₂ h₃ h₄ => holdsC_callVal_k hc.2.2 a o h₁ h₂ h₃ h₄
-  | rets =>
-    exact holdsC_callRec_of (hc.1 _) hc.2.1 hreq hpre hpost
-      fun a _ o h₁ h₂ h₃ h₄ => holdsC_callRets_k hc.2.2 a o h₁ h₂ h₃ h₄
+  | rets bs =>
+    obtain ⟨b, rfl⟩ := RetBinders.exists_toRet bs hk
+    refine holdsC_callRec_of (hc.1 _) hc.2.1 hreq hpre hpost fun a _ => ?_
+    rw [show (CallRet.rets (Γ := Γ) b.toRet).enterT (σ.withEnv a) = _ from
+      Binders.enterT_toRet b _]
+    exact fun o h₁ h₂ h₃ h₄ => holdsC_callRets_k hc.2.2 a o h₁ h₂ h₃ h₄
   | storage =>
     exact holdsC_callRec_of (hc.1 _) hc.2.1 hreq hpre hpost
       fun a _ o h₁ h₂ h₃ h₄ => holdsC_callStorage_k hc.2.2 a o h₁ h₂ h₃ h₄
@@ -788,7 +803,9 @@ theorem FunContractC.forall_mem {Γf : Ctx} {b : Prog C ([.mem R] ++ ps) Γf} {r
   intro Γ Γ' ret
   cases ret with
   | mem => exact h
-  | rets bs => cases bs
+  | rets bs =>
+    cases bs with
+    | snocMem bs => cases bs; exact h
 
 theorem RecContractCM.base (μ : Mutability) (req : Fml C ps)
     (ens : Fml C ([.mem R] ++ (Olds ++ ps))) (m : Modality) :

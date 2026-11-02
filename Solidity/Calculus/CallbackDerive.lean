@@ -157,6 +157,17 @@ partial def containsTransferNormality (φ : Expr) : MetaM Bool := do
     containsTransferNormality φ.appArg!
   else return false
 
+/-- `φ` without what it never reads: a loop body's end with no break test,
+`Fml.invPost m hu ω κ φ post B` with `B` reducing to `none`, is `post`
+alone (`Fml.invPost`), the rest of the program `⟨ ω κ ⟩ φ` after the loop
+unread. Only the first such end is looked at; a break test there keeps the
+whole formula. -/
+partial def liveFml (φ : Expr) : MetaM Expr := do
+  let some e := φ.find? fun e => e.isAppOf ``Fml.invPost && e.getAppNumArgs == 12 | return φ
+  if e.appArg!.hasLooseBVars then return φ
+  unless (← whnf e.appArg!).isAppOf ``Option.none do return φ
+  liveFml (φ.replace fun x => if x == e then some e.appFn!.appArg! else none)
+
 /-- The steps that may apply at the `ProvesC` goal `g`, in the order tried. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do
   let ty ← instantiateMVars (← g.getType)
@@ -167,10 +178,12 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   -- not `plain` on a recursive call (no rule of `Proves` steps over it, and
   -- `rfl` would unroll its frames) or a `{havoc}` (`Proves` has no rule for
   -- it). An explicit try calls back too, so avoid an ordinary-proof
-  -- attempt on every capture before it: the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
+  -- attempt on every capture before it: the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`).
+  -- A `try` only in a loop body's unread continuation (`liveFml`) does not count
   let φi ← instantiateMVars φ0
   let containsGuard ← containsTransferNormality φi
-  let noPlain := containsGuard || (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Stmt.tryCall || e.isConstOf ``Fml.havoc ||
+  let φs ← liveFml φi
+  let noPlain := containsGuard || (φs.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Stmt.tryCall || e.isConstOf ``Fml.havoc ||
     e.isConstOf ``Fml.grow).isSome
   let φ ← whnf φ0
   let rest : Array (Array (TSyntax `tactic)) ← match φ.getAppFn.constName? with

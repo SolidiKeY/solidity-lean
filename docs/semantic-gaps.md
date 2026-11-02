@@ -62,8 +62,9 @@ proof uses it, never derived from a machine model.
 - **Function types**: reference signatures outside the internal fragment in
   [finite-dispatch.md](feature-work/finite-dispatch.md) (memory/storage
   arrays of a word of any width, a `bytesN`, `bool` or `address`, and
-  nonrecursive structs as arguments, one memory return; not several returns
-  with a memory one), and
+  nonrecursive structs as arguments, one memory return, several returns with
+  full-word memory ones in `sol{}`, not through the solc import; a direct
+  call also admits narrow elements of the target's width), and
   calldata passed to a function value's memory parameter; a value
   of an external function this contract does not declare (`I(a).g`), and
   `abi.encodeCall` of one: its signature is unknown to `sol{}`.
@@ -82,6 +83,26 @@ proof uses it, never derived from a machine model.
   self-call's callee every panic is a revert with no data.
 - **`ecrecover`**: no general proof of the curve arithmetic or of equivalence
   to the precompile ([feature-work/abi-hashes.md](feature-work/abi-hashes.md)).
+
+- **Source semantics** (`Solidity/Source`, the S02–S05 reference
+  interpreter): the constructor ledger's gaps are `callOptions` beyond
+  `value`, `metaType` and `new` (`semExprGaps`; `new` as contract creation;
+  `new T[](n)` of one-word `T`, `new bytes(n)` and `new string(n)` run since lane FU2-B; inline arrays of one-word
+  elements are typed and evaluated since lane FU2-B, reference and
+  fractional elements refused; `fallback(bytes calldata) returns (bytes
+  memory)` runs since lane FU2-B), and among
+  statements `try` beyond one plain or `bytes memory` clause without
+  value (lane FU2-B; out of gas in the callee is not modelled, solc
+  catches it; tuple declarations are typed and evaluated since lane
+  FU2-B, without a progress theorem; a non-tuple initializer, a literal
+  component typed at its own type and repeated names are not modelled:
+  `docs/solc-alignment.md`); since lane FU2-B `abi.decode` is typed
+  and evaluated at the decoder's types (static arrays, structs, nested
+  arrays, fixed point and external function types are refused), and
+  `calldata` references (`bytes`, `string`, one-word-element dynamic
+  arrays) and their slices are read with access-time checks; `calldata`
+  structs, static and nested `calldata` arrays are not
+  ([feature-work/source-soundness.md](feature-work/source-soundness.md)).
 
 ## Closed
 
@@ -188,8 +209,10 @@ finds no marker.
   What differs is rewritten before the statement (`bytesPure`):
   `bytesM(b)` keeps the left bytes or pads on the right, as an implicit
   widening does; `b.length` is `N`; `b[i]` is
-  `uint8((b >> 8((N-1) -% i)) % 256)`, divided by `i < N ? 1 : 0` so an
-  index out of range reverts as an array's does; a literal at `bytesN` is
+  `uint8((b >> 8((N-1) -% i)) % 256)` behind `require(i < N)`, `i` held
+  first (`#bytesIndex`), so an index out of range reverts as an array's
+  does (`Panic(0x32)`'s data where a self-call's `catch` reads it); a
+  literal index is checked by the elaborator; a literal at `bytesN` is
   left-aligned. A marker row beside the width says which positions are bytes
   (`k#bytes ↦ N`, `valueRows?`).
 - `bytes` and `string` are `bytes1[]`: a `uint[]` of 8-bit elements in
@@ -207,6 +230,15 @@ finds no marker.
   the callee writes. What is left only reads, where sharing and copying agree.
   Slices `b[i:j]` are views (`RawStmt.sliceViews`) with primitive copies where
   a whole value is needed: [calldata-slice-copies.md](calldata-slice-copies.md).
+- **External calldata validation timing** (upstream replay only): solc
+  checks a nested calldata element when it is read. The replay models it for
+  a parameter whose body only indexes it, takes lengths, or passes it whole
+  to `abi.encode`/`abi.encodePacked` (`Semantics/AbiAccess.lean`,
+  `UpstreamEntry.accessOnly`); copies to memory, aliases, passing, slices,
+  struct members and modifiers keep the named refusal ("calldata element
+  fails only on access"). The calculus is unaffected: there, calldata values
+  are the decoded ones ([feature-work/abi-hashes.md](feature-work/abi-hashes.md),
+  "Lane FU2-C").
 - A storage array copied to memory keeps its length: `len` of a copy of
   `sfind(s, p)` is `len(s, p)` (`lenAtN`, `LTm.sfindLen?`,
   `SVal.copyStToM_array_len`; Lean only).
@@ -274,9 +306,14 @@ a fresh memory `bytes` with the array writes the model has:
   (`ByteSrc`). A top-level enum component (`abi.decode(b, (E, uint))`) is
   read as a `uint8` and reverts unless below the member count, as solc's
   `validator_revert_t_enum_*` (lane FU1; `EnumDecode` in
-  `Examples/Tactics/AbiFeatures.lean`); an enum inside an array or a struct
-  is still refused by the import ("ABI decoding of enum values requires
-  nominal cardinality checks").
+  `Examples/Tactics/AbiFeatures.lean`); an array of enums (`(E[])`,
+  `(E[2])`) checks each element the same way (`abiReadGen`, lane FU2-D;
+  `EnumArrayDecode`, EVM vectors `tests/abi-0.8.38/EnumArrays.vectors.json`);
+  the import prints a component with nested enums (arrays, struct members,
+  any depth) as `solcEnumBelow(T, "k", n, …)`, decoded at its carriers and
+  checked at each position (lane FU2-D, `tests/upstream/EnumArrays.lean`);
+  in hand-written `sol{}` a struct's enum member is a plain `uint`, its enum
+  lost, so only the carrier's range is checked there.
 
 **`sha256`, `ripemd160`, `ecrecover`.** `Hashes.lean` computes SHA-256 and
 RIPEMD-160 as `Keccak.lean` does, checked against standard vectors.
@@ -350,6 +387,12 @@ and its code; `revert E(a, b)` with `E`'s selector and `abi.encode(a, b)`.
   data, literal and custom-error data are emitted only in the callee a
   self-call `try` runs (`selfFrame`) and its calls; elsewhere
   `require(c, "m")` is `require(c)`, so no other proof changes shape.
+  A reason written as a byte literal (`hex"6d"`, and every string literal
+  of the solc import, which prints them so: `byteLiteralText`) is
+  `Error(string)`'s literal data in every frame, as a computed reason's
+  memory bytes are, with nothing allocated (lane FU2-D; `requireReason` is
+  `if (c) {} else { revert … }` there). The two readings of one source
+  differ only in data no modality reads outside a self-call's `catch`.
   Computed memory operands keep their bytes everywhere (`RevPart.mem`,
   `Semantics/RevertMemory.lean`); the importer accepts the whole-buffer
   rethrow `assembly { revert(add(d, 32), mload(d)) }` and no other assembly.
@@ -403,4 +446,5 @@ out by one lemma (`stmt_sim_outside`). Checking times did not move otherwise.
   reflective closer; not added.
 - A raw datum always includes the empty one (an evaluator's revert), so a
   `catch (bytes memory d)` goal holds for `d` empty too.
-- Literal errors outside a self-call frame keep the empty-data lowering.
+- Literal errors (`"m"`, a custom error) outside a self-call frame keep the
+  empty-data lowering; a byte-literal reason keeps its data (above).

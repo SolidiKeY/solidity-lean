@@ -95,6 +95,15 @@ def qBinders : (ρ : Ctx) → Binders ρ → QM Expr
     let b ← qBinders ρ bs
     return mkApp4 (mkConst ``Binders.snoc) (← qCtx ρ) b (toExpr p) (toExpr x)
 
+def qRetBinders : (ρ : Ctx) → RetBinders ρ → QM Expr
+  | _, .nil => return mkConst ``RetBinders.nil
+  | _ :: ρ, .snoc bs p x => do
+    let b ← qRetBinders ρ bs
+    return mkApp4 (mkConst ``RetBinders.snoc) (← qCtx ρ) b (toExpr p) (toExpr x)
+  | _ :: ρ, .snocMem bs R x _ _ => do
+    let b ← qRetBinders ρ bs
+    return mkAppN (mkConst ``RetBinders.snocMem) #[← qCtx ρ, b, toExpr R, toExpr x, rflTrue, rflTrue]
+
 def qCode : (κ : Ctx) → CodeBinder κ → Expr
   | _, .none => mkConst ``CodeBinder.none
   | _, .some x => mkApp (mkConst ``CodeBinder.some) (toExpr x)
@@ -221,7 +230,7 @@ def qCallRet (Γ : Ctx) : (rs Γ' : Ctx) → CallRet Γ rs Γ' → QM Expr
       | some i => pure (optE ty (some (← qIdx Γ (.val p) i)))
     return mkApp4 (mkConst ``CallRet.val) (← qCtx Γ) (toExpr p) (toExpr r) res
   | rs, _, .rets bs => do
-    let b ← qBinders rs bs
+    let b ← qRetBinders rs bs
     return mkApp3 (mkConst ``CallRet.rets) (← qCtx Γ) (← qCtx rs) b
   | _, _, .mem R r _ _ => do
     return mkAppN (mkConst ``CallRet.mem) #[← qCtx Γ, toExpr R, toExpr r, rflTrue, rflTrue]

@@ -259,6 +259,16 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     `(Term.binop BinOp.mul PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term % $b:dl_term) => do
     `(Term.binop BinOp.mod PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term +% $b:dl_term) => do
+    `(Term.binop BinOp.addW PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term -% $b:dl_term) => do
+    `(Term.binop BinOp.subW PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term *% $b:dl_term) => do
+    `(Term.binop BinOp.mulW PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term >> $b:dl_term) => do
+    `(Term.binop BinOp.shr PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term << $b:dl_term) => do
+    `(Term.binop BinOp.shl PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term && $b:dl_term) => do
     `(Term.binop BinOp.and PrimTy.bool $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term || $b:dl_term) => do

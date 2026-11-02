@@ -69,7 +69,7 @@ theorem TRun.catchBytes_self_data {ρ ps Γf : Ctx} (c : ExtCall C Γ)
     (sbody : TStep C (ρ ++ ps) Γf) (σ : State C Γ) (d : List UInt8)
     (hnz : (c.addr.evalT σ).1 ≠ 0)
     (hself : (c.addr.evalT σ).1 = σ.tx.selfAddress.1)
-    (hcall : TRun.call sargs (.rets rets) hs sbody σ = .error (THalt.ofData d)) :
+    (hcall : TRun.call sargs (.rets rets.toRet) hs sbody σ = .error (THalt.ofData d)) :
     TRun.catchBytes c rets sargs hs sbody true σ = .ok d := by
   have hc : decide ((c.addr.evalT σ).1 = σ.tx.selfAddress.1) = true := by
     simp only [hself, decide_true]
@@ -87,7 +87,7 @@ theorem TRun.catchData_self_data {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ)
     (σ : State C Γ) (d bs : List UInt8)
     (hnz : (c.addr.evalT σ).1 ≠ 0)
     (hself : (c.addr.evalT σ).1 = σ.tx.selfAddress.1)
-    (hcall : TRun.call sargs (.rets rets) hs sbody σ = .error (THalt.ofData d))
+    (hcall : TRun.call sargs (.rets rets.toRet) hs sbody σ = .error (THalt.ofData d))
     (hdecode : kind.decode d = some bs) :
     TRun.catchData c rets sargs hs sbody true kind h₁ body σ =
       (TRun.litBytesT bs body σ).map

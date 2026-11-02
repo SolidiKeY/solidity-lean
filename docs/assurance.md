@@ -176,6 +176,7 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
 | Revert semantics | Exact symbolic catch relationships; literal data outside self-call frames; broader panic-code alignment (self-calls already fail with solc's `Panic` codes, `Prog.withPanics`). |
 | Exact verification | `docs/automation.md`, M7 "What is not proved". |
+| Source semantics | The ledger's remaining gaps and the whole-program progress theorem (`docs/feature-work/source-soundness.md`; `abi.decode` at the decoder's types and `calldata` references to `bytes`/`string`/one-word arrays, tuple declarations (no progress theorem), inline arrays of one-word elements, `new T[](n)` and `try`/`catch` with one plain or `bytes memory` clause (no arm theorem) added by lane FU2-B, with arm theorems for locals only, `Solidity/Source/Decode.lean`, `Solidity/Source/Calldata.lean`). |
 
 
 Memory-loop compiler follow-up: the full original 24-module Derived17 workload
@@ -208,7 +209,7 @@ the first failing row of each:
 | 31 | calldata | `localAlias`: unsupported, "a calldata slice ordinary alias without a known calldata origin" (`Syntax/Elab/Context.lean`, `sliceStmts`, since `c31e76b6`) | the import prints `function «localAlias»(uint[] calldata «xs») { uint[] calldata «ys» = «xs»; … }`; the same text in `contract!{}` elaborates, so the import's path loses the calldata roots (`Syntax/Contract.lean` `calldataRoots`) — not the `roMentions` refusal of `099bfbe1` |
 | 40 | full frozen TestSuite function table | "maximum recursion depth has been reached", compiler IR check failures at `SolTests.TestSuite._list._lam_0`, then `(interpreter) unknown declaration 'SolTests.TestSuite.report'` | CI log only |
 | 42 | quantified consequents / omitted bodies | `omittedModifier`: excluded, expected unsupported | `excluded` is a documented gap status (`docs/solidity-testing.md`); which change moved the row is not identified |
-| 43 | specification parameter renaming | `tryScopeExit`: pending, expected proved | proof search |
+| 43 | specification parameter renaming | `tryScopeExit`: pending, expected proved | proof search; fixed in lane FU2-A (below) |
 | 44 | unsupported ledger frames | `ledgerGap`: "solidity.specificationSyntax: <input>:1:14: expected ';'" instead of "ledger locations in assignable" | the specification parser now rejects the clause before the ledger check |
 | 45 | constant specifications | `quantifiedShadow`: pending, expected unsupported | admission changed: a refusal became an open obligation |
 | 57 | solkey solc/open ports | `tryArgumentSideEffect`: pending, expected proved | CI log only |
@@ -233,8 +234,64 @@ and CI showed the same failures without them).
   `SolcJson/Body.lean`), which `tests/upstream/AggregateErrorControls.lean`
   and `AggregateErrorBoundary.lean` pin as refused ("without a known calldata
   origin"), with no replay evidence for the admitted path; and test 31 still
-  fails on its slice rows. Master keeps the refusal; reapply together with
-  replayed error-encoding vectors and updated pins.
+  fails on its slice rows. Master kept the refusal until it was reapplied with
+  replayed error-encoding vectors and updated pins (next item).
+* **31, reapplied (lane FU2-C, 2026-11-02):** `974dd1de` reapplied unchanged.
+  The two admitted calldata named-argument reverts (`arrayCalldata`,
+  `pairCalldata` of `tests/upstream/AggregateErrorControls.sol`) are replayed
+  on raw calldata (canonical, a noncanonical offset, trailing data, an empty
+  array and string) with the error data pinned solc produces in all four
+  configurations (`tests/abi-0.8.38/AggregateCalldataErrors.vectors.json`,
+  `scripts/abi-entry-probe.mjs --aggregate`); wrong payloads are `broken`
+  (`tests/upstream/AggregateErrorControls.lean`); `AggregateErrorBoundary.lean`
+  now pins that no row is refused. Test 31 locally: every listed row proves
+  except `sliceRead`, `sliceOfSlice`, `slicePast`, which now reach the prover
+  and stay `pending` ("open proof goals", the closer gap below), and
+  `sliceHashed`, which ends in a heartbeat timeout of the compiled walk
+  (`error`; the test accepts `proved`/`pending`). `sliceHashed` has no
+  calldata alias, so the reapply does not reach it; not bisected.
+* **31, `sliceRead` (lane FU2-C, item 4):** the view's index was lowered as
+  `base[x < len ? off + x : base.length]`, the out-of-view branch reading past
+  the base's end so that its bounds check reverts; no closer knows that such a
+  read fails, so the leaf lacked the fact that closes it. `#sliceIndex`
+  (`Syntax/Elab/Arms.lean`) now makes the view's own check where solc does,
+  after the index: `Panic(0x32)` where failure data is retained, a revert
+  elsewhere (the split `modular` uses for its zero divisor), then the plain
+  read `base[off + x]` with `x < len` a premise, KeY's `inBounds` branch. The
+  outcomes are unchanged in every mode (where failure data is retained, `withPanics`, the old branch ended in the base's `Panic(0x32)` and the new check is `Panic(0x32)`; elsewhere both are an empty revert);
+  no rule, closer or soundness proof changed. Test 31 after it: `slicePast`
+  proves (was pending); `sliceRead`, `sliceOfSlice` stay `pending`. The
+  `sliceRead` leaf is now `… se9 = true → {ie14 := 1 + se2} {se13 :=
+  read(memory, base[ie14])} {se12 := se13 == se1} se12 = true` with `base :=
+  xs`, `se1 := read(memory, xs[1 + k])`, `se2 := k`: valid, and `sol_close`
+  closes it with ten times the default heartbeats (diagnosis only, not
+  committed), so what is left is the closer's cost, not a missing fact.
+  Probes at the time (scratch, not committed): the same reads on the parameter itself
+  proved within budget, so did a view at offset 0 and a view read at a literal
+  index; a view at offset 1 or 2 read at a symbolic index timed out
+  (`xs[1:]`, `t[q] == xs[1 + q]`), and so does `t.length == xs.length - 1`.
+  **Closed within the default budget (FU2-C round 2):** profiling the leaf
+  with slice-free stand-ins showed two lowering artefacts, each harmless
+  alone and together too costly for `sol_close_eval`: the copy of the view's
+  index (`se2 := k`) beside the bounds premises, and the trivially true check
+  `len <= len` of a view to the end (`xs[1:]`). `#sliceIndex` now reads a
+  literal or `uint256` name index as it stands (nothing is evaluated between
+  the check and the read), and `sliceOpen` (`Syntax/Elab/Context.lean`) does
+  not emit `e <= len` when `e` is the outer length. Test 31: `sliceRead`,
+  `sliceOfSlice`, `slicePast` prove (no heartbeat change, no closer change).
+* **31, `sliceHashed` (bisected, FU2-C round 2):** the base commit
+  `84a2a4be` (worktree, built from the artifact cache) gives the same
+  `error`, "(deterministic) timeout at `sol_prove's compiled walk, after its
+  16384-step stage`", so it predates this lane. Cause: `keccak256(b[4:])`
+  copies the view to memory (`#sliceCopy`, `Syntax/Elab/Arms.lean`) with a
+  `while` loop of symbolic trip count (`b.length - 4`) and no invariant; the
+  compiled walk unrolls it, no stage up to 16384 steps reaches the end, and
+  `Derive.prove` (`Calculus/ProvesDerive.lean`) raises the heartbeat error
+  where the test accepts `pending`. Not fixed: either a loop specification
+  for a symbolic copy (which would also replace the unrolling the proved
+  slice-copy rows rely on) or classifying budget exhaustion as `pending` in
+  proof search; both outside slice reads. On the base the same run also has
+  `localAlias` refused and `sliceRead`, `sliceOfSlice`, `slicePast` pending.
 * **44** (`a48fd85f`): in the testing import a specification that does not
   parse became a `solidity.specificationSyntax` scope rejection, raised
   before the named refusal "ledger locations in assignable clauses are not
@@ -260,14 +317,153 @@ Rerun of the nine on the lane head (`9ff01fd7` + this record, 22:40 UTC):
 `reasonBytes`). The full gate after these fixes: default 1041 jobs and
 TestSuite 286 jobs built, solkeycheck at its baseline 37.
 
-**Open: proof automation** (30, 31's slice rows, 43, 57, 60), each "open
-proof goals" in a `box` obligation. For `sliceRead` (`t = xs[1:]; assert(t[k]
-== xs[1 + k])`) the CLI's goal dump (`action: inspect`, `show: goals`) leaves
-`read(memory, base[(k < len - 1 ? 1 + k : len)]) == read(memory, xs[1 + k])`
-without the bounds facts that would close it or make the read revert: a
-closer gap, not an admission change. For `indexOutOfRange` (`bytes4 b =
-"abcd"; bytes1 x = b[i];` with `i >= 4`, expected to revert) the leaf keeps
-`b[i]`'s lowering `((b >> 8 * (3 - i)) % 256) / (i < 4 ? 1 : 0)` as a plain
-update `se3 := se4 / se8` and ends at `false = true`: the zero divisor's
-revert branch is not taken by the search (the leaf also prints raw `‹Tm…›`
-escapes for `subW`/`mulW`, a printer gap). Not bisected (see above).
+**Lane FU2-A (2026-11-02), rows 43 and 57: fixed / passing.** With the
+pinned soljson installed (`SOLKEY_ROOT`, `LEAN_NUM_THREADS=1`), the CLI goal
+dump of `SpecBindings.tryScopeExit` (`inspect … --show goals`) showed one open
+`ProvesC` leaf: the loop's preservation goal in the `try` success clause,
+valid and closed by `ProvesC.plain` then `sol_leaf`/`sol_close`. The callback
+walk never tried `plain` there: `CallbackWalk.movesAt` skips it wherever the
+goal mentions `Stmt.tryCall` (7a6120d's guard against an ordinary-proof
+attempt on every capture before a `try`), and the body's end
+`Fml.invPost m hu ω κ φ post B`, with no break test (`B` reducing to `none`),
+still carries the enclosing `try` in its unread continuation `⟨ ω κ ⟩ φ`,
+although it is `post` alone. `CallbackWalk.liveFml` drops that continuation
+before the scan; a break test keeps it. No rule, closer or soundness change:
+`plain` still checks `callsBack = false` by `rfl`. FU2-D's unreduced
+`Val.wk … .lower` terms were the leaf's printing (escapes), not the cause;
+the `dsimp` tried on them was not needed and is not kept. Regression:
+`TryCatch.scopeExitKeepsAge` (the same function in `contract!{}`, binder `a`;
+the row's specification, `Panic` loop and shadowing `age` go through the
+import only). `node --test --test-name-pattern="specification parameter
+renaming|solc/open self-calls" scripts/test-solidity.test.mjs`: 2 pass (43
+and 57). Reviews: the guard is narrowed only under a body's end without a
+break test (7a6120d's speed motivation otherwise kept; an earlier draft also
+ignored `Hyps.freshC` indices and was dropped as unneeded); only the first
+such end is inspected, which can keep `plain` skipped where it could run,
+never the reverse; full build and SolkeyTestSuite green.
+
+**Open: proof automation** (integration of batch fu2-20261102, 2026-11-02):
+only test 31's `sliceHashed`, which ends in a heartbeat-timeout `error`
+rather than open goals in a `box` obligation (budget exhaustion of the
+symbolic `#sliceCopy` loop; it fails the same way at base `84a2a4be`, see
+lane FU2-C above). Rows 30 and 60 are fixed by lane FU2-D (`#bytesIndex`,
+literal revert data), 31's `sliceRead`, `sliceOfSlice` and `slicePast` by
+lane FU2-C (`#sliceIndex`), and 43 and 57 pass since lane FU2-A. The goal
+dumps that described `sliceRead`'s `base[(k < len - 1 ? 1 + k : len)]` leaf
+and `indexOutOfRange`'s zero-divisor lowering are historical: both lowerings
+are gone.
+
+**Integration note (batch fu2-20261102): `cdRef`'s length in the Backend.**
+Lane FU2-B gave `Source.Val.cdRef` a length (`cdRef h off len`), which the
+source interpreter uses as the array's element count (`lengthOf`,
+`indexLoc`, `sliceR`, `cdToMem` in `Solidity/Source/Eval.lean`). The Backend
+memory proofs (`Solidity/Backend/MemoryOps/Calldata*.lean` and the snapshot
+controls) build such values with length `0`: they read calldata only through
+`Source.Calldata.objects` (`DecodedArrayRead`, `DecodedArrayAt`), never
+through `Eval`, and their `off` is an object-table key, not a byte offset
+into `Fr.cd`, so no statement changes meaning. Under the source semantics
+those values would read as empty arrays: a bridge from these relations to
+`Source.evalE` must first carry the child's real length
+(`(MObj.elems .dyn (hp.get r)).length`).
+
+**Integration review notes (batch fu2-20261102).** Recorded from the
+read-only finder and skeptic on the combined merge; none is a soundness
+defect.
+- A call with a memory return among several is never summarised by a
+  callee contract (`RetBinders.all` puts `ff` under a memory binder, so
+  `holds_callRets` discharges that case by absurdity): such calls are always
+  inlined, and a recursive function with such a return is refused. A
+  completeness gap, not a premise.
+- `CallbackWalk.liveFml` narrows `7a6120d`'s speed guard (only under a loop
+  body's end without a break test); no timing was measured for it.
+- Lane FU2-A's backfill `c583e274` changes viaIR evaluation order: a storage
+  operand of a memory parameter is copied after the last argument, for
+  direct and dispatched calls, and `scripts/finite-dispatch.test.mjs`
+  expects solc's viaIR vector for `argumentOrder` (901).
+- `#bytesIndex` is a `.call`, so a symbolic `bytesN` index counts as an
+  effect and is captured; a path that does not hoist meets it as an unknown
+  call and refuses (fail-closed; not checked for specifications over `b[i]`).
+- Entry proof obligations do not yet assume nested enum ranges
+  (`Problem.callPre` reads `paramRanges`/`elemRanges` only): incomplete, not
+  unsound (lane FU2-D).
+
+### Lane FU2-D (fu2-20261102): the five rows diagnosed, 30 and 60 fixed
+
+Bisecting by rebuilding is not affordable here (each step is a 45–70 min
+full rebuild; the last green CI run, `292a4681`, is about 1,300 commits back).
+Instead each row's first open goal was reproduced with the CLI goal dump
+(`node scripts/solidity-lean.mjs inspect FILE --function F --show goals
+--no-build`, `SOLKEY_ROOT` set) and its cause traced to the commit that
+introduced it, from the history of the code it names (`git log -S`).
+
+| # | Row | Cause | First failing commit | Owner | State |
+|---|---|---|---|---|---|
+| 30 | `indexOutOfRange` | `bytesAt` (`Syntax/Elab/Values.lean`) lowered `b[i]` of a `bytesN` at a symbolic index to `uint8(((b >> 8 *% ((N-1) -% i)) % 256) / (i < N ? 1 : 0))`. The walk keeps the division as an update; behind the symbolic shift the closer does not refute it: in a scratch reproduction `sol_close_eval` times out on the leaf, while the same zero divisor without the shift closes. A missing reading, not a refactor. | not identified: the function was added in `4dd2d9d0` and its row in `f9a1cf42` (2026-10-20, both after the last green CI run), asserting `proved`, so it presumably closed when written; the lowering is `1789394d`'s, unchanged since (`63ac4b63` only moved it), so a later closer or walk change stopped it closing, not identified without rebuilds | FU2-D | fixed: `#bytesIndex` (below) |
+| 31 | `sliceRead` | fixed by lane FU2-C (see its section above); `sliceHashed` remains, see "Open: proof automation" | — | `fu2-calldata-access` | not this lane's |
+| 43 | `tryScopeExit` | fixed since by lane FU2-A (`CallbackWalk.liveFml`; the `Val.wk` escapes below were the leaf's printing, not the cause). On this lane's head: still pending. Its open goals are the loop invariants inside the `try`'s success clause (`age >= 0 && i <= 1`, `age` the `returns (uint age)` binder): they reach the leaf as unreduced `(Val.wk (Thin.keepAll …) v).lower` terms (printed as `‹…›` escapes), which the closer does not evaluate, so even `se3 < 1 ⟹ se3 + 1 <= 1` stays open. A binder weakening in the try's frame, not a closer rule. | not identified (the row is in the last green run, `1f02521b`) | `fu2-frame-returns` | handed over |
+
+| 57 | `tryArgumentSideEffect` | proved on the lane head with the test's `--self-address 0x…DeaDBeef` (every row of that test passes, `trySuccessKeepsStorageUnsound` and `callKeepsStorageUnsound` pending as pinned). Its callee has no literal reason and no `bytesN` index, so this lane's changes do not reach it: most likely fixed on master before the base, plausibly by `48db830` (the revert of the calldata-root import change that FU1's run carried). | not identified | `fu2-frame-returns` | passes here; not rerun at the base |
+| 60 | `reasonBytes` (also `reasonOfBranch`, `reasonPastCustom`) | `ea06b814` ("Solidity features", 2026-10-26) made the solc import print every string literal that has a `hexValue` as `hex"…"` (`byteLiteralText`, `SolcJson/Body.lean`), where it printed the quoted `value` before. `require(false, "boom")` then parses as `requireReason` (a reason expression) instead of `requireMsg`, so the self-call's callee reverts with the reason in a fresh memory `bytes` (`revertData [.mem …]`); `CatchKind.datas` knows no data of a memory part, and `catchDataStep` binds the reason as any bytes (`Fml.allocAll`). A refactor regression, inferred from `ea06b814`'s diff (not rebuilt at `ea06b814^`; nothing else in it touches the require/revert path). The test (`75dc97b4`, `aa47a432`, 2026-10-21) is after the last green CI run, so it never ran green in CI; it asserted `proved` when written. | `ea06b814` (inferred) | FU2-D | fixed: literal reasons (below) |
+
+Not a cause: every self-call `try` is read under the callback reading
+(`Fml.callsBack` is `true` for any `tryCall`, since `1a10f08b`); this is as
+designed, and the rows close under it once the data is literal.
+
+**Row 30, `#bytesIndex`.** A symbolic index of a `bytesN` is now
+`uint8(#bytesIndex(b, i, N))`, which `hoist` (`Syntax/Elab/Arms.lean`) reads
+as `b` and `i` held in fresh locals, `require(se < N);` (in a self-call's
+callee, or a frame that keeps failure data, `Panic(0x32)`'s data, the code
+of an array index, `Checked.idxPG`; the old divisor panicked with `0x12`),
+then the byte `(b >> 8 *% ((N-1) -% se)) % 256`. The `require` rule's
+branches are KeY's `inBounds`/`outOfBounds` (`docs/lean-key-rule-map.md`); no
+calculus rule was added. A literal index is unchanged (checked by the
+elaborator). The printer gap is closed: `dl{}`/`tm{}` print and read `+%`,
+`-%`, `*%`, `>>`, `<<` at `uint` (`Calculus/RuleSyntax/{Grammar,Schemas,Print}.lean`,
+`Calculus/SurfaceNotation.lean`), so the leaf has no `‹Tm…›` escape.
+
+**Row 60, literal reasons.** `revertReason`/`requireReason` of a literal
+(`"m"` or `hex"…"`, `RawExpr.bytesLit?`) is elaborated as `Error(string)`'s
+literal data (`revertData [.bytes (encodeError bytes)]`), nothing allocated,
+in every frame, as the memory reason carried its data in every frame
+(`memoryRevert`); `requireReason c m` is `if (c) {} else { revert … }`. The
+callee's data is literal again, `CatchKind.datas` lists it, and the `catch`
+reads the reason. Pinned by `Examples/Tactics/ComputedRevert.lean`
+(`unicode_hex_reason_exact`, unchanged) and the RevertData rows.
+
+**Results on the lane head** (`runSolidityTests`, `SOLKEY_ROOT` and
+`LEAN_NUM_THREADS=1` as CI sets them): `tests/solc/Bytes.sol` every row proved
+(`indexOutOfRange` included); `tests/solc/RevertData.sol` every row proved
+(before: `reasonBytes`, `reasonOfBranch`, `reasonPastCustom` pending);
+`SolcPaymentsOpen.sol` (row 57) as pinned; `SpecBindings.sol` (row 43) all
+as pinned but `tryScopeExit`.
+
+**Reviews** (read-only finder and skeptic, no Lean server). Confirmed and
+fixed: the record above now says that rows 30 and 60 never ran green in CI
+and that `ea06b814` is inferred; `docs/semantic-gaps.md` ("Revert data") now
+says that a byte-literal reason carries its data in every frame while a
+quoted `"m"` keeps the empty-data lowering outside a self-call (one source,
+two readings, differing only in data no modality reads; the existing pin
+`unicode_hex_reason_exact` needs the former); under `pp.sol.pushArithmetic`
+an `int` shift printed as `>>` would read back as the `uint` one, so the
+shifts and wrapping operators now print only at `uint`
+(`Calculus/PrintTerm.lean`). Not confirmed: a flat struct with an enum member
+decoding unchecked in `sol{}` — the struct table has no `#enum` row
+(`StructEnc.valueRowsOf`), so the member is a plain `uint` either way (the
+recorded limitation). Recorded, not changed: enum-typed mapping keys of a
+public getter get no `paramEnums`.
+
+**Gates on the lane head.** `./run-lean.sh` (69m32s): default target 1041
+jobs and `SolkeyTestSuite` 286 jobs built, solkeycheck at its baseline 37.
+Lean server clean on `TrustAudit.lean` and `scripts/AxiomAudit.lean`; no new
+`sorry`, axiom, `native_decide`, `implemented_by` or heartbeat change, and no
+new headline theorem (no pin added). Node: `test-solidity.test.mjs` tests for
+rows 30, 57 and 60 and the new `EnumArrayDecode` pin pass, row 43's fails on
+`tryScopeExit` (above); `finite-dispatch.test.mjs` 34/34;
+`solidity-upstream.test.mjs` 25/25; `check-g07` at its baselines (axiom-pin
+drift, `check-doc-paths` 48); `check-automatic --strict` 491 / 61 / 11
+refuted / 0 pending; `roadmap-g03-ledger.py --check` clean after `--write`
+and its `abiDecode` sentence updated. Elaboration of the touched modules did
+not slow (`Syntax/Elab/Arms` 130 s → 89 s, `Examples/Tactics/Bytes` 105 s →
+108 s, `RevertData` 206 s → 232 s, within run-to-run noise); the core edits
+(`Calculus/RuleSyntax`, `Calculus/PrintTerm`) are syntax and printer rows,
+undoing no speed-motivated change.

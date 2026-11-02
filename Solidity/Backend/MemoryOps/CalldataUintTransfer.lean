@@ -30,7 +30,7 @@ def calldataUint {D : Source.Layout} (d : Source.Data D (.int .u256)) : PrimTy.u
       exact decide_eq_true (by constructor; exact h.1; omega)
     | memRef h _ => cases h
     | storRef h _ => cases h
-    | cdRef h _ => cases h
+    | cdRef h _ _ => cases h
 
 /-- Extract finite decoded contents, retaining arbitrary runtime lengths. A
 reference-valued Data.val is not mistaken for the decoded object it names. -/
@@ -74,7 +74,7 @@ theorem calldataUint_exact {D : Source.Layout} (d : Source.Data D (.int .u256)) 
     | int _ _ => rfl
     | memRef h _ => cases h
     | storRef h _ => cases h
-    | cdRef h _ => cases h
+    | cdRef h _ _ => cases h
 
 /-- The exact uint range conversion retains the value, not a truncated word. -/
 theorem calldataUint_sourceUint {D : Source.Layout} (v : PrimTy.uint.Denote) :

@@ -61,9 +61,16 @@ import Solidity.Source.Unique
 import Solidity.Source.Horizon
 import Solidity.Source.Session
 import Solidity.Source.SoundnessExamples
+import Solidity.Source.DecodeExamples
+import Solidity.Source.CalldataExamples
+import Solidity.Source.Decode
+import Solidity.Source.Calldata
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.Dispatch
 import Solidity.Examples.Tactics.FunctionTypes
+import Solidity.Examples.Tactics.MemoryReturns
+import Solidity.Calculus.RecursionCallback
+import Solidity.Semantics.AbiAccess
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -1815,3 +1822,104 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} lane FU1 dispatch theorems use only the standard axioms"
+
+/-! Lane FU2-A: several returns with memory ones in the call frame
+(`RetBinders`), the call rules' soundness over them, and the runs. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.RetBinders.enterT_lift,
+    ``Solidity.RetBinders.runSt_declsThen,
+    ``Solidity.Stmt.runSt_callRets,
+    ``Solidity.Premise.sound_callRets,
+    ``Solidity.Premise.sound_callCaptureRets,
+    ``Solidity.ExecS.callRets_inline,
+    ``Solidity.holdsC_callRets,
+    ``Solidity.holds_callRets,
+    ``Solidity.holds_callContract,
+    ``Solidity.FunContract.forall_rets,
+    ``Solidity.FunContractC.forall_rets,
+    ``Solidity.holdsC_callRecContract,
+    ``Solidity.Stmt.sound,
+    ``Solidity.Examples.Tactics.MemoryReturns.splitAssign_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.bothAlias_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.untouchedDefault_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.omitted_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.falseObservation_panics,
+    ``Solidity.Examples.Tactics.MemoryReturns.narrowAssign_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.untouched_proved,
+    ``Solidity.Examples.Tactics.MemoryReturns.split_proved,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueSplit_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueTernaryT_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueTernaryF_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueAlias_run]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-A frame theorems use only the standard axioms"
+
+/-! Lane FU2-B: `abi.decode` in the source semantics (typing, checker,
+preservation and progress of the decoder). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.hasType_iff,
+    ``Solidity.Source.Typed.unique,
+    ``Solidity.Source.TypingExamples.exprCoverage_operand,
+    ``Solidity.Source.TypingExamples.elemType_decode_operand,
+    ``Solidity.Source.Ledger.semExprGaps_spec,
+    ``Solidity.Source.decodeArg_ok,
+    ``Solidity.Source.decodeArgs_ok,
+    ``Solidity.Source.abiDecodeData_ok,
+    ``Solidity.Source.evalE_abiDecode_ok,
+    ``Solidity.Source.evalE_abiDecode_lit_ok,
+    ``Solidity.Source.evalE_abiDecode_local_ok,
+    ``Solidity.Source.Ledger.semExprCoverage_of_operand]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-B decode theorems use only the standard axioms"
+
+/-! Lane FU2-B: `calldata` references and slices in the source semantics. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.decodeArg_entry_ok,
+    ``Solidity.Source.decodeArgs_entry_ok,
+    ``Solidity.Source.readLoc_cd_ok,
+    ``Solidity.Source.cdToMem_ok,
+    ``Solidity.Source.evalE_cdLength_ok,
+    ``Solidity.Source.evalE_cdIndex_ok,
+    ``Solidity.Source.evalE_cdSlice_ok]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-B calldata theorems use only the standard axioms"
+
+/-! Lane FU2-C: access-time calldata reads agree with the lazy decoder (model only). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.AbiEntry.cpart_agree,
+    ``Solidity.AbiEntry.cpart_of_cval,
+    ``Solidity.AbiEntry.cval_revert_of_cpart,
+    ``Solidity.AbiEntry.cat_cpart,
+    ``Solidity.AbiEntry.verdictA_off,
+    ``Solidity.AbiEntry.verdictA_revert_iff,
+    ``Solidity.AbiEntry.verdictA_run_entry]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} access-time calldata theorems use only the standard axioms"

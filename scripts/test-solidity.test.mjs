@@ -459,6 +459,19 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     assert.equal(status[name], 'proved', name);
 });
 
+test("nested enums in abi.decode are admitted at their carriers (tests/solc/EnumArrayDecode.sol)", () => {
+  // docs/feature-work/abi-hashes.md, lane FU2-D: `solcEnumBelow` positions;
+  // the decode loops have no invariant, so the claims stay open
+  // (docs/semantic-gaps.md, "Loops without invariants")
+  const report = runSolidityTests(["tests/solc/EnumArrayDecode.sol"], {build:false, batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  for (const fn of ["dynamicArray", "fixedArray", "structMember"]) {
+    assert.notEqual(rows[fn].status, "unsupported", fn);
+    assert.doesNotMatch(rows[fn].reason ?? "", /cardinality/, fn);
+  }
+});
+
 test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)

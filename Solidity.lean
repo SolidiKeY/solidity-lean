@@ -41,6 +41,8 @@ import Solidity.Semantics.RevertData
 import Solidity.Semantics.AbiEntry
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.AbiEntryChecks
+import Solidity.Semantics.AbiAccess
+import Solidity.Semantics.AbiAccessChecks
 import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.Lifetime
@@ -283,6 +285,7 @@ import Solidity.Examples.Tactics.InheritedSelectorsImport
 import Solidity.Examples.Tactics.AbiHexCall
 import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.FunctionTypes
+import Solidity.Examples.Tactics.MemoryReturns
 import Solidity.Examples.Tactics.SignedCasts
 import Solidity.Examples.Tactics.SolcOpen
 import Solidity.Examples.Tactics.CleanTail
@@ -499,6 +502,12 @@ import Solidity.Source.ValueProgress
 import Solidity.Source.ExprProgress
 import Solidity.Source.StmtProgress
 import Solidity.Source.SoundnessExamples
+import Solidity.Source.Decode
+import Solidity.Source.DecodeExamples
+import Solidity.Source.Calldata
+import Solidity.Source.CalldataExamples
+import Solidity.Source.InlineExamples
+import Solidity.Source.TryExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic

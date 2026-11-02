@@ -181,7 +181,7 @@ theorem deterministic_long_panic : (panicStatement longPanic).run panicState =
     panic_callee_halts longPanic panicState
   have hs : (guardedCall.addr.evalT panicState).1 = panicState.tx.selfAddress.1 := rfl
   have he : Semantics.decodeError longPanic = none := by decide +kernel
-  simp only [TRun.tryCall, hs, decide_true, Bool.true_and, if_true, hc, he, long_panic_data]
+  simp only [TRun.tryCall, Binders.toRet, hs, decide_true, Bool.true_and, if_true, hc, he, long_panic_data]
   rfl
 
 /-- Undecodable short returndata remains the exact rethrown actual halt. -/

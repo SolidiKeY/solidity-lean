@@ -91,18 +91,19 @@ constructor without a wildcard and gives each typed one a derivation
   constructor S01 types is `evaluated`. Its derivations elaborate to
   `RExpr`/`RStmt`, and the interpreter has an arm for every constructor of
   those (no wildcard; Lean's exhaustiveness check);
-- `semExprGaps_spec`: the gaps (`slice`, `callOptions` beyond `value`,
-  `metaType`, `new`, `inlineArray`, `elemType`) are exactly the
-  constructors S01 defers;
-- among statements, `declTuple` and `try` are gaps, and `assembly` is
+- `semExprGaps_spec`: the gaps (`callOptions` beyond `value`,
+  `metaType`, `new`) are exactly the constructors S01 defers (lane FU2-B
+  removed `slice` and `inlineArray`, now typed, and `elemType`, an operand
+  of `abi.decode` and conversions, `exprCoverage_operand`);
+- among statements, `try` is a gap (`declTuple` is typed since lane FU2-B), and `assembly` is
   excluded apart from the canonical rethrow.
 
 "Evaluated" is a classification, not progress. An arm can be `stuck` on
 some inputs:
 
 - ABI decoding of static arrays, structs and arrays of non-value types;
-- calldata references;
-- `fallback` with parameters;
+- calldata references (lane FU2-B models `bytes`/`string`/one-word arrays);
+- `fallback` with parameters (modelled by lane FU2-B);
 - nested-array copies;
 - the ABI of external function types (user-defined value types are
   decoded as their underlying type since lane V04b);
@@ -444,6 +445,6 @@ but would make `forward_iff`/`guard_iff` vacuous, so none is given.
 fragment, which must first be delimited (`stuck` is told apart from
 divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
-rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
-`try`, tuple declarations, `fallback` with parameters (the decoder's
+rule); calldata references, `abi.decode` beyond the decoder's types (lane FU2-B), contract creation and `new` of reference elements, slices of memory and storage, inline arrays beyond one-word elements (lane FU2-B),
+`try`, progress of tuple declarations (typed and evaluated by lane FU2-B), a theorem for `fallback` with parameters, which lane FU2-B runs (the decoder's
 dynamic-length `Panic(0x41)` is modelled since lane V04b).

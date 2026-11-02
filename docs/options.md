@@ -672,7 +672,10 @@ The preset is two flags: `binaryLeftToRight` and `modularLeftToRight`.
 `hoistPair` shares the capture policy between binary schedules, preserving
 operand positions and saving an earlier read before a later effect. The
 modular flag uses the existing argument-capture pass in source order; the
-legacy branch retains its early zero-modulus guard. Ordinary calls and indices
+legacy branch retains its early zero-modulus guard. Under
+`binaryLeftToRight` a storage operand of a memory parameter is copied after
+every argument ran, as solc's IR pipeline does (`hoistCallArgs`,
+`dispatchCaptures`; legacy copies at its position). Ordinary calls and indices
 remain left to right, except that a call through an internal function value
 reads the callee before its arguments: a named value under
 `binaryLeftToRight`, as solc's IR pipeline does (`dispatchCaptures`), and a

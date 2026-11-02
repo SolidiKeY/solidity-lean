@@ -329,8 +329,26 @@ def expandFun (enums : TyEnv)
         let (t, w) ← expandStateTyW enums ⟨p[0]⟩
         for (k, b) in w do ws := ws.push (← `(($(quote (n ++ k)), $(quote b))))
         rets := rets.push (← `(($(quote n), $t)))
-        retMem := retMem || (p[1].find? fun s => s.isAtom && s.getAtomVal == "memory").isSome
-        retStorage := retStorage || (p[1].find? fun s => s.isAtom && s.getAtomVal == "storage").isSome
+        let isMem := (p[1].find? fun s => s.isAtom && s.getAtomVal == "memory").isSome
+        let isSto := (p[1].find? fun s => s.isAtom && s.getAtomVal == "storage").isSome
+        retMem := retMem || isMem
+        retStorage := retStorage || isSto
+        -- several returns: each reference return needs its own location and a
+        -- value return takes none (solc's rule); the flags are per function,
+        -- so a mismatch sets both, which the elaborator refuses
+        -- (`elabCallRetCore`, "a return's data location does not match")
+        if ps.size > 1 then
+          let rec isRef : TSyntax `sol_ty → Bool
+            | `(sol_ty| $x:ident) =>
+              dynBytesTy (x.getId.toString false) ||
+                (lookupBy (x.getId.toString false) enums.structs).isSome
+            | `(sol_ty| $_:sol_ty []) | `(sol_ty| $_:sol_ty [ $_:num ]) => true
+            | `(sol_ty| mapping ( $_:sol_ty => $_:sol_ty )) => true
+            | _ => false
+          let ref := !(p[0].isOfKind ``solFnTy) && isRef ⟨p[0]⟩
+          if ref != (isMem || isSto) then
+            retMem := true
+            retStorage := true
       continue
     match (⟨a⟩ : TSyntax `sol_fattr) with
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>

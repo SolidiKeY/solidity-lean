@@ -994,7 +994,11 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
         (vs, origins, k, pre.push (.declMemory (.named "#sliceBase") base (some b)))
       pure { base, off := .num 0, fin := .field (.name base) "length" }
   let i ← i.mapM sliceNode
-  let j ← (if j matches .call "#sliceEnd" [] then pure outer.len else j.mapM sliceNode)
+  -- `b[i:]` ends at the outer view's length: its `e <= len` check is
+  -- `len <= len`, true, and not emitted (a premise the closer would carry
+  -- to every leaf; test 31, `sliceRead`).
+  let toEnd := j matches .call "#sliceEnd" []
+  let j ← (if toEnd then pure outer.len else j.mapM sliceNode)
   let fixed : RawExpr → Bool
     | .num _ => true
     | .field (.name x) "length" => x == outer.base
@@ -1011,7 +1015,7 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
     | _, _ => ss.push (.require (.binop .le st e))
   -- Check relative bounds before adding an offset. An invalid large bound
   -- must revert as a slice, rather than overflowing offset + bound.
-  let ss := ss.push (.require (.binop .le e outer.len))
+  let ss := if toEnd then ss else ss.push (.require (.binop .le e outer.len))
   let (off, ss) := bind "o" (sliceAdd outer.off st) ss
   let (fin, ss) := bind "f" (sliceAdd outer.off e) ss
   modifyThe SliceSt fun (vs, origins, k, pre) => (vs, origins, k, pre ++ ss)

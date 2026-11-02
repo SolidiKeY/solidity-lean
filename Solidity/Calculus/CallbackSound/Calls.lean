@@ -227,6 +227,33 @@ theorem Binders.execP_declsThen {Γ Δ : Ctx} : {ρ : Ctx} → (bs : Binders ρ)
       (s := .declLocal p x none) rfl (Stmt.runSt_declLocal_none p x _)
     simpa only [map_cat_refl] using ExecP.cons hd h
 
+/-- **Several return variables declared, with callbacks**, as the call
+enters them: a value one at its default, a memory one a fresh default
+object. -/
+theorem RetBinders.execP_declsThen {Γ Δ : Ctx} : {ρ : Ctx} → (bs : RetBinders ρ) →
+    (rest : Prog C (ρ ++ Γ) Δ) → (σ : State C Γ) → ∀ {u : COut C (bs.enterT σ).st.H Δ},
+      ExecP J (bs.enterT σ).st rest u →
+        ExecP J σ (bs.declsThen rest) (u.map (Out.cat (bs.enterT σ)))
+  | _, .nil, _, _, u, h => by cases u <;> exact h
+  | _, .snoc bs p x, rest, σ, u, h => by
+    obtain ⟨e, hd⟩ := ExecS.det_ok (J := J) (σ := (bs.enterT σ).st)
+      (s := .declLocal p x none) rfl (Stmt.runSt_declLocal_none p x _)
+    have h2 := RetBinders.execP_declsThen bs _ σ (ExecP.cons hd h)
+    cases u <;> exact h2
+  | _, .snocMem bs R x hd hm, rest, σ, u, h => by
+    obtain ⟨e, hd'⟩ := ExecS.det_ok (J := J) (σ := (bs.enterT σ).st)
+      (s := .declMem R x none hd hm) rfl (Stmt.runSt_declMem_none R x hd hm _)
+    have h2 := RetBinders.execP_declsThen bs _ σ (ExecP.cons hd' h)
+    cases u <;> exact h2
+
+/-- The same, the frame entered named by its outcome `O`. -/
+theorem RetBinders.execP_declsThen_eq {Γ Δ ρ : Ctx} (bs : RetBinders ρ)
+    (rest : Prog C (ρ ++ Γ) Δ) (σ : State C Γ) (O : Out C σ.H (ρ ++ Γ)) (hO : bs.enterT σ = O)
+    {u : COut C O.st.H Δ} (h : ExecP J O.st rest u) :
+    ExecP J σ (bs.declsThen rest) (u.map (Out.cat O)) := by
+  subst hO
+  exact RetBinders.execP_declsThen bs rest σ h
+
 /-- A call's callback runs: its arguments halt, or its body runs in its frame
 (`ExecS.callArgs`, `ExecS.callBody`). -/
 theorem ExecS.call_inv {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name} {args : Args C Γ ps}
@@ -243,42 +270,44 @@ theorem ExecS.call_inv {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name} {ar
 variables at their defaults, the body lifted under the caller's locals as a
 block, the parameters thinned out from under the return variables. -/
 theorem ExecS.callRets_inline {Γ ps rs Γf : Ctx} {σ : State C Γ} {f : Name}
-    {args : Args C Γ ps} {bs : Binders rs} {body : Prog C (rs ++ ps) Γf} {o : COut C σ.H (rs ++ Γ)}
+    {args : Args C Γ ps} {bs : RetBinders rs} {body : Prog C (rs ++ ps) Γf}
+    {o : COut C σ.H (rs ++ Γ)}
     (he : ExecS J σ (.call f args (.rets bs) body) o) :
     ∃ u, ExecP J σ (args.declsThen (bs.declsThen
         (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil))) u ∧
       o = u.map fun x => ⟨x.st.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))), x.ext⟩ := by
   rcases ExecS.call_inv he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
   · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
-  · obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.keepAll rs (Thin.atop ps Γ))
-      (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a))
-      (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)) hp
-    have hs : (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)).lift
-          (Thin.keepAll rs (Thin.atop ps Γ))
-          (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)) =
-        (σ.withEnv (TEnv.append ps a σ.env)).withEnv
-          (TEnv.append rs (bs.defaultsT (C := C)) (σ.withEnv (TEnv.append ps a σ.env)).env) := by
-      simp only [State.lift, State.withEnv, TEnv.put_keepAll, TEnv.put_atop, TEnv.drop_append]
-    have hb := ExecS.transport (H := σ.H)
-      (X := (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)).lift
-          (Thin.keepAll rs (Thin.atop ps Γ))
-          (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)))
-      (Y := (σ.withEnv (TEnv.append ps a σ.env)).withEnv
-          (TEnv.append rs (bs.defaultsT (C := C)) (σ.withEnv (TEnv.append ps a σ.env)).env))
-      rfl rfl hs (block_of_execP hw)
-    refine ⟨_, Args.execP_declsThen args _ σ a ha
-      (Binders.execP_declsThen bs _ _ (singleton_iff.mpr hb)), ?_⟩
+  · let E := bs.enterT (σ.withEnv a)
+    let τ := σ.withEnv (TEnv.append ps a σ.env)
+    let D := TEnv.append rs (TEnv.take rs E.st.env) (TEnv.wk E.ext (ps ++ Γ) (TEnv.append ps a σ.env))
+    have hp' : ExecP J E.st body o' := hp
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.keepAll rs (Thin.atop ps Γ)) E.st D hp'
+    have hY : E.st.lift (Thin.keepAll rs (Thin.atop ps Γ)) D = (bs.enterT τ).st := by
+      show _ = (bs.enterT (σ.withEnv (TEnv.append ps a σ.env))).st
+      rw [State.withEnv_append_lift σ a, RetBinders.enterT_lift]
+    have hO : bs.enterT τ =
+        (⟨E.st.lift (Thin.keepAll rs (Thin.atop ps Γ)) D, E.ext⟩ : Out C τ.H (rs ++ (ps ++ Γ))) :=
+      Out.eq_of_st hY.symm
+    have hb := block_of_execP hw
     have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.keepAll rs (Thin.atop ps Γ)))
       hr).eq_lifted
-    rw [hl]
+    rw [hl] at hb
+    refine ⟨_, Args.execP_declsThen args _ σ a ha
+      (RetBinders.execP_declsThen_eq bs _ τ _ hO (singleton_iff.mpr hb)), ?_⟩
     cases o' with
     | ok x =>
       refine congrArg COut.ok (Out.eq_of_st ?_)
-      simp only [Out.drop, Out.lift, TRun.callLeave, State.lift, State.drop, State.thin,
+      simp only [Out.drop, Out.lift, Out.cat, TRun.callLeave, State.lift, State.drop, State.thin,
         State.withEnv, CallRet.leaveT]
-      exact congrArg (fun E => (State.mk x.st.storage x.st.H x.st.heap E x.st.net
-        x.st.selfBalance x.st.tx : State C (rs ++ Γ)))
-        (TEnv.thin_put_keepAllAtop _ _ _ a σ.env).symm
+      refine congrArg (fun E => (State.mk x.st.storage x.st.H x.st.heap E x.st.net
+        x.st.selfBalance x.st.tx : State C (rs ++ Γ))) ?_
+      symm
+      simp only [D]
+      rw [TEnv.append_wk, TEnv.wk_trans]
+      conv => lhs; rw [← TEnv.append_take_drop rs (TEnv.drop body.ext x.st.env)]
+      rw [TEnv.put_keepAll, TEnv.put_atop, TEnv.append_wk, TEnv.drop_append, TEnv.thin_keepAll,
+        TEnv.thin_ofExt, TEnv.drop_append]
     | halt => rfl
     | violated => rfl
 
@@ -295,7 +324,7 @@ theorem COut.thenF_thin {H : HTy} {Γ Γ' Γ₀ : Ctx} {e : Thin Γ Γ'} {κ : F
 /-- **A call of several results, with callbacks**: its inlined body, the
 parameters thinned out. -/
 theorem holdsC_callRets {Γ ps rs Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
-    {args : Args C Γ ps} {bs : Binders rs} {body : Prog C (rs ++ ps) Γf}
+    {args : Args C Γ ps} {bs : RetBinders rs} {body : Prog C (rs ++ ps) Γf}
     {ω : Prog C (rs ++ Γ) Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
     (h : holdsC I pay σ (.modal m (args.declsThen (bs.declsThen
         (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))

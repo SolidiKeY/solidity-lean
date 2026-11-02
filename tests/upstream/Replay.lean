@@ -169,10 +169,15 @@ private def abiCheck (vectors : List Json) (status : String) (count : Nat) : IO 
 -- Output mismatches cannot guide admission or become passes.
 #eval abiCheck [abiVector "decode(bytes)" ["bytes"] ["uint256[]"]
   (abiWords [32,192,32,4,3,4,5,6]) (abiWords [32,4,3,4,5,99])] "broken" 1
--- A malformed element of a calldata array must stay blocked even when failure
--- is expected: solc's calldata decoder defers element checks to each access.
+-- A malformed element of a calldata array is checked only where it is read
+-- (solc's calldata decoder defers element checks to each access; lane FU2-C,
+-- `Semantics/AbiAccess.lean`): a body that never reads it returns 7, as solc
+-- does (`LazyEntry` probe "dirty narrow element, not accessed"), so an
+-- expected failure is broken rather than certified.
+#eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"] (abiWords [32,1,256]) (abiWords [7])]
+  "working" 1
 #eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"] (abiWords [32,1,256]) [] true]
-  "blocked" 0
+  "broken" 1
 -- The outermost length and offset are entry checks (`Semantics/AbiEntry.lean`,
 -- `AbiEntry.verdict_revert_iff`): an empty revert before the body, as solc.
 #eval (do
@@ -326,15 +331,16 @@ private def FreshControls : Contract := contract!{
   unless (report.getObjValAs? String "status").toOption == some "working" do
     throw (IO.userError report.pretty) : IO Unit)
 
--- ABI v1 raw admission has a stricter boundary: only canonical input, even
--- for primitive arguments. No v2 decoder failure can certify a v1 failure.
+-- ABI v1 value parameters are cleaned, not validated (lane FU2-C,
+-- `UpstreamEntry.v1Plan`, `V1Entry` probes): a `uint8` word 256 reads as 0,
+-- so expecting 256 is broken; no v2 decoder failure certifies a v1 failure.
 #eval (do
-  for (n,status) in [(255,"working"),(256,"blocked")] do
+  for (n,want,status) in [(255,255,"working"),(256,0,"working"),(256,256,"broken")] do
     let vector := Json.mkObj [("signature",toJson "narrow(uint8)"),
       ("calldata",toJson (abiWords [n])), ("inputTypes",toJson ["uint8"]),
       ("outputTypes",toJson ["uint256"]), ("canonicalOnly",toJson true),
-      ("failure",toJson false), ("expectedBytes",toJson (abiWords [n]))]
-    abiCheck [vector] status (if n == 255 then 1 else 0) : IO Unit)
+      ("failure",toJson false), ("expectedBytes",toJson (abiWords [want]))]
+    abiCheck [vector] status 1 : IO Unit)
 
 -- Trailing bytes lie outside declared objects. They are retained in the input
 -- but cannot become extra elements, alter the result or certify a failure.
@@ -343,7 +349,9 @@ private def FreshControls : Contract := contract!{
 #eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"]
   (abiWords [32,2,1,255,999]) [] true] "broken" 1
 #eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"]
-  (abiWords [32,3,1,255,999]) [] true] "blocked" 0
+  (abiWords [32,3,1,255,999]) [] true] "broken" 1
+#eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"]
+  (abiWords [32,3,1,255,999]) (abiWords [7])] "working" 1
 
 #eval (do
   let data := abiWords [32,2,1,255] ++ [170,187,255]

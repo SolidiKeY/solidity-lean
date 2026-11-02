@@ -151,6 +151,9 @@ function scalarArg(token, type) {
   if (type.startsWith('int') && n >= 2n**255n && n < 2n**256n) n -= 2n**256n;
   const signed = type.startsWith('int');
   const bits = type.startsWith('address') ? 160 : Number(type.match(/\d+/)?.[0] ?? 256);
+  // TestFileParser writes a negative literal as its two's-complement word:
+  // for a 256-bit unsigned type that word is canonical (`-2` is 2^256 - 2).
+  if (!signed && !type.startsWith('address') && bits === 256 && n < 0n && n >= -(2n**255n)) n += 2n**256n;
   if (n < (signed ? -(2n**BigInt(bits-1)) : 0n) || n >= 2n**BigInt(signed ? bits-1 : bits))
     throw new Error('noncanonical ABI input requires ABI decoder replay');
   return n.toString();
