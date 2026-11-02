@@ -5,13 +5,19 @@ import fcntl,hashlib,json,os,pathlib,select,shlex,socket,subprocess,sys,time
 def rootdir(): return os.path.realpath(subprocess.check_output(["git","rev-parse","--show-toplevel"],text=True).strip())
 def sockname(root):
     return os.path.join(os.environ.get("LEAN_MCP_SOCKDIR","/tmp"),"lean-mcp-"+hashlib.sha256(root.encode()).hexdigest()[:20]+".sock")
-def send(sock,obj):
+CALL_TIMEOUT=float(os.environ.get("LEAN_MCP_TIMEOUT","1800"))
+def send(sock,obj,timeout=None):
     with socket.socket(socket.AF_UNIX) as s:
-        s.settimeout(120); s.connect(sock); s.sendall((json.dumps(obj)+"\n").encode()); f=s.makefile("rb"); line=f.readline()
+        s.settimeout(timeout or CALL_TIMEOUT); s.connect(sock); s.sendall((json.dumps(obj)+"\n").encode()); f=s.makefile("rb"); line=f.readline()
         if not line: raise RuntimeError("daemon closed connection")
         return json.loads(line)
 def daemon(root,path):
     os.chdir(root)
+    try:
+        with socket.socket(socket.AF_UNIX) as probe:
+            probe.settimeout(2); probe.connect(path)
+        return  # another daemon owns the socket
+    except OSError: pass
     try: os.unlink(path)
     except FileNotFoundError: pass
     server=None; listener=socket.socket(socket.AF_UNIX)
@@ -41,17 +47,26 @@ def daemon(root,path):
             if not ready: break
             conn,_=listener.accept()
             with conn:
+                def reply_with(obj):
+                    # A client that has gone away (probe, timeout, Ctrl-C) must not kill the daemon.
+                    try: conn.sendall((json.dumps(obj)+"\n").encode())
+                    except OSError: pass
                 try:
-                    req=json.loads(conn.makefile("rb").readline()); kind=req["kind"]
+                    conn.settimeout(10); line=conn.makefile("rb").readline(); conn.settimeout(None)
+                except OSError: continue
+                if not line.strip(): continue
+                try:
+                    req=json.loads(line); kind=req["kind"]
                     if kind=="status": reply={"pid":os.getpid(),"server":server.pid}
                     elif kind=="stop": reply={"stopped":True}
                     elif kind=="tools": reply=rpc("tools/list")
                     elif kind=="call": reply=rpc("tools/call",{"name":req["name"],"arguments":req["arguments"]})
                     else: raise ValueError("unknown request")
-                    conn.sendall((json.dumps({"ok":True,"result":reply})+"\n").encode())
+                    reply_with({"ok":True,"result":reply})
                     if kind=="stop": break
                 except Exception as e:
-                    conn.sendall((json.dumps({"ok":False,"error":str(e)})+"\n").encode())
+                    reply_with({"ok":False,"error":str(e)})
+            if server.poll() is not None: break  # server died: exit so the next call restarts it
     finally:
         listener.close()
         if server:
@@ -84,11 +99,15 @@ def main():
         if not r.get("ok"): raise RuntimeError(r.get("error"))
         return r["result"]
     def running():
-        try: return request({"kind":"status"})
-        except (OSError,RuntimeError): return None
+        try:
+            r=send(path,{"kind":"status"},timeout=10)
+            return r["result"] if r.get("ok") else None
+        except socket.timeout: return {"busy":True}  # accepted but serving a long call
+        except (OSError,RuntimeError,ValueError): return None
     if cmd=="status":
         s=running()
         if not s: return 1
+        if s.get("busy"): print(f"busy socket={path}"); return 0
         print(f"pid={s['pid']} server={s['server']} socket={path}"); return 0
     if cmd=="stop":
         if running(): request({"kind":"stop"})
@@ -101,9 +120,11 @@ def main():
             if not running():
                 supervisor=subprocess.Popen([sys.executable,os.path.abspath(__file__),"--supervisor",root,path],env={"PATH":os.defpath},stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True,text=True)
                 supervisor.stdin.write(json.dumps(dict(os.environ))); supervisor.stdin.close()
-                for _ in range(300):
+                deadline=time.time()+float(os.environ.get("LEAN_MCP_START_WAIT","600"))  # first run may pip-install
+                while time.time()<deadline:
                     if running(): break
-                    time.sleep(.1)
+                    if supervisor.poll() is not None and not running(): raise RuntimeError("daemon failed to start")
+                    time.sleep(.2)
                 else: raise RuntimeError("daemon failed to start")
     if cmd=="start": return 0
     if cmd=="tools":
