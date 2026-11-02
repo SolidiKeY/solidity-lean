@@ -1357,3 +1357,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/RecursiveLayout.lean` | Recursive canonical allocation, fuel and actual codec extents. |
 | `Backend/AbiWorld/RecursiveReadback.lean` | Mutual actual recursive decoder/window readback. |
 | `Backend/AbiWorld/RecursiveEntry.lean` | Uniform indexed canonical parameter entry/body identity. |
+
+| `Backend/AbiWorld/LocationPeak.lean` | Location-sensitive sufficient recursive canonical allocation bounds and actual entry/body readback. |

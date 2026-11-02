@@ -1012,3 +1012,5 @@ import Solidity.Backend.AbiWorld.NestedByteListReadback
 import Solidity.Backend.AbiWorld.RecursiveLayout
 import Solidity.Backend.AbiWorld.RecursiveReadback
 import Solidity.Backend.AbiWorld.RecursiveEntry
+
+import Solidity.Backend.AbiWorld.LocationPeak
