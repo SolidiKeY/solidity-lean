@@ -39,6 +39,38 @@ run_elab do
       addDecl bad
       addDecl tainted
       agrees `AuditProbe.reused false
+  -- Equal names and counts do not identify loaded declaration contents.
+  -- Serialize tiny checked fixtures, then import the same module name from
+  -- distinct artifacts. Every synthetic axiom stays in a restored environment.
+  IO.FS.withTempDir fun dir => do
+    let base := other.setMainModule `AuditSnapshot
+    let writeFixture (file : System.FilePath) (value : Expr) : CoreM Unit :=
+      withEnv base do
+        addDecl bad
+        addDecl (.thmDecl {
+          name := `AuditProbe.reused
+          levelParams := []
+          type := mkConst ``True
+          value := value })
+        saveModuleData file `AuditSnapshot (← mkModuleData (← getEnv))
+    let goodFile := dir / "good.olean"
+    let badFile := dir / "bad.olean"
+    writeFixture goodFile (mkConst ``True.intro)
+    writeFixture badFile (mkConst `AuditProbe.nonstandard)
+    let load (file : System.FilePath) : IO Environment :=
+      importModules #[{module := `AuditSnapshot}] {} 0 (loadExts := true)
+        (arts := ({} : NameMap ImportArtifacts).insert `AuditSnapshot (.ofArray #[file]))
+    let first ← load goodFile
+    let changed ← load badFile
+    unless first.header.moduleNames == changed.header.moduleNames &&
+        first.constants.map₁.size == changed.constants.map₁.size do
+      throwError "collision control must have identical import names and counts"
+    withEnv first do
+      agrees `AuditProbe.reused true
+      agrees `AuditProbe.reused true
+    withEnv changed do
+      agrees `AuditProbe.reused false
+      agrees `AuditProbe.reused false
   agrees ``Classical.em true
   unless !(← getEnv).contains `AuditProbe.nonstandard && !(← getEnv).contains `AuditProbe.reused do
     throwError "audit test leaked synthetic declarations"

@@ -99,27 +99,38 @@ private def elabClosed (t : Term) : TermElabM Expr := do
   Term.synthesizeSyntheticMVarsNoPostponing
   instantiateMVars e
 
-/-- A successful transitive audit of immutable imported declarations. The memo
-is reused only for the same imports (equal module names and imported-constant
-count), which a process cannot change. Source and proof declarations are always
-traversed anew, even when their names recur. -/
-private initialize importedAudit : IO.Ref (Option (Environment × NameSet)) ← IO.mkRef none
+/-- Process-local serials for import origins. `modifyGet` allocates each
+unbounded natural atomically, including concurrent native imports. -/
+private initialize nextAuditOrigin : IO.Ref Nat ← IO.mkRef 0
+
+/-- Derived source environments inherit their origin. Another import, even
+of equal module names and sizes, gets a fresh serial. Missing initial state
+never enables cache reuse. Do not use `Ref.ptrEq`: on the pinned runtime it
+compares the references' content pointers, so two Unit refs compare equal. -/
+private initialize auditOrigin : EnvExtension (Option Nat) ←
+  registerEnvExtension
+    (nextAuditOrigin.modifyGet fun n => (some (n + 1), n + 1)) (asyncMode := .local)
+
+/-- Successful imported axiom closures, tied to their loaded origin. Retain
+that immutable import snapshot while its audited names are cached. -/
+private initialize importedAudit : IO.Ref (Option (Nat × Environment × NameSet)) ← IO.mkRef none
 
 /-- Check the standard-axiom policy, reusing only successful imported closures.
 This returns a policy decision, not a complete axiom inventory. -/
 def usesOnlyStandardAxioms (name : Lean.Name) : CoreM Bool := do
   let env ← getEnv
+  let origin := auditOrigin.getState env
   let cached ← importedAudit.get
-  let visited := match cached with
-    | some (old, visited) =>
-      if !env.header.moduleNames.isEmpty && env.header.moduleNames == old.header.moduleNames
-          && env.constants.map₁.size == old.constants.map₁.size then visited else {}
-    | none => {}
+  let visited ← match origin, cached with
+    | some origin, some (old, _, visited) =>
+      pure (if origin == old then visited else {})
+    | _, _ => pure {}
   let (_, state) := ((CollectAxioms.collect name).run env).run { visited }
   if state.axioms.all (standardAxioms.contains ·) then
-    let imported := state.visited.foldl (fun names n =>
-      if env.isImportedConst n && (env.checked.get.find? n).isSome then names.insert n else names) ({} : NameSet)
-    importedAudit.set (some (env.importEnv?.getD env, imported))
+    if let some origin := origin then
+      let imported := state.visited.foldl (fun names n =>
+        if env.isImportedConst n && (env.checked.get.find? n).isSome then names.insert n else names) ({} : NameSet)
+      importedAudit.set (some (origin, env.importEnv?.getD env, imported))
   return state.axioms.all (standardAxioms.contains ·)
 
 /-- Whether the obligation `p` may hand control to a callee that calls back

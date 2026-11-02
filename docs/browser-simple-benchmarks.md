@@ -4,6 +4,9 @@ The browser is still slower than SolKey. Reusing successful audits of immutable
 imports improves warm proof checking substantially; it does not fix cold startup.
 The detailed measurements separate that improvement from cached proof results.
 
+The follow-up [simplifier investigation](simp-performance.md) profiles this
+baseline and measures preparation one update at a time.
+
 ## Inputs and method
 
 Six programs cover a constant return, identity, storage assignment, increment,
@@ -87,6 +90,12 @@ Generated contracts and proof declarations never enter the memo, so changed
 programs and reused names are audited again. A different imported snapshot
 invalidates the memo. Failed audits never extend it. Full counterexample axiom
 inventories still use the original uncached collector.
+
+This report captures the policy at `1db639a2`. Upstream `19bf3ba6` subsequently
+replaced pointer identity with equality of imported module names and imported
+constant counts. The [simplifier follow-up](simp-performance.md) integrates
+that change, adds a loaded-origin token to prevent equal-name/count collisions,
+and measures the final combined frontend.
 
 The compiled native control builds all 312 project modules in the frontend
 closure as C, loads them as a Lean plugin and retains kernel and axiom checks.

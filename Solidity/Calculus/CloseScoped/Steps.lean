@@ -1367,12 +1367,10 @@ elab "sol_close_join_finish" : tactic => do
     throwError "sol_close_join_steps: arithmetic comparison negated"
   evalTactic (← `(tactic| sol_close_finish))
 
-/-- The leaf (`Fml.Valid ψ`) closed one update at a time (`peel`), the post
-read as the updates were, then `omega` on the intervals, the defining facts'
-cases only if it fails (`sol_close_finish`, within 20000 heartbeats of its
-own: a false leaf fails in about the cost of a true one).  Fails where a
-goal is left. -/
-def closeSteps : TacticM Unit := do
+/-- Prepare a leaf one update at a time (`peel`), then read the post and
+name its values. Keep the residual goals for the caller's solver; preparation
+must not speculate with an expensive closing attempt before falling back. -/
+def prepareSteps : TacticM Unit := do
   evalTactic (← `(tactic| (sol_close_unwrap; intro σ)))
   let some (g, bounds, prems) ← peel (← getMainGoal) {} #[] 0 | setGoals []; return
   let gs ← runOn g (← `(tactic| sol_close_eval))
@@ -1381,12 +1379,32 @@ def closeSteps : TacticM Unit := do
     let (gs', hs, ps) ← introFront g
     if let some (g', _) ← settle gs' hs bounds (prems ++ ps.toArray) then rest := rest.push g'
   setGoals rest.toList
+
+/-- The leaf (`Fml.Valid ψ`) closed one update at a time (`prepareSteps`),
+then `omega` on the intervals, the defining facts' cases only if it fails
+(`sol_close_finish`, within 20000 heartbeats of its own). Fails where a goal
+is left. -/
+def closeSteps : TacticM Unit := do
+  prepareSteps
   evalTactic (← `(tactic| all_goals first | omega | sol_skip_after 20000 sol_close_join_finish))
   unless (← getGoals).isEmpty do throwError "sol_close_join_steps: goals left"
 
 /-- `sol_close_join_steps`'s budget, in thousands of heartbeats, within the
 declaration's own. -/
 def budget : Nat := 100000
+
+/-- A speculative specification preparation uses at most 20000 thousand
+heartbeats, capped by the enclosing declaration's remaining allowance. -/
+def prepBudget : Nat := 20000
+
+/-- Global writes use the original whole-leaf preparation. The step route
+currently loses useful storage-read normalization on these leaves. -/
+def hasGlobalWrite (e : Expr) : Bool :=
+  (e.find? fun e => e.isConstOf ``UpdElem.storage || e.isConstOf ``UpdElem.memory ||
+    e.isConstOf ``UpdElem.selfBalance || e.isConstOf ``UpdElem.net ||
+    e.isConstOf ``UpdElem.pay || e.isConstOf ``UpdElem.netMt ||
+    e.isConstOf ``UpdElem.setBalance).isSome
+
 
 end CloseJ
 
@@ -1606,6 +1624,16 @@ def evalSolCloseAnonSteps : Tactic := fun _ => closeAnonSteps false
 
 @[tactic Solidity.tacticSol_close_joined_anon_steps]
 def evalSolCloseJoinedAnonSteps : Tactic := fun _ => closeAnonSteps true
+
+@[tactic Solidity.tacticSol_close_join_prep]
+def evalSolCloseJoinPrep : Tactic := fun _ => withMainContext do
+  let ty ← instantiateMVars (← getMainTarget)
+  unless ty.isAppOf ``Solidity.Fml.Valid && CloseJ.countJoins ty 0 1 > 0 &&
+      !CloseJ.hasGlobalWrite ty do
+    throwError "sol_close_join_prep: no supported local join"
+  let some _ ← Budget.bounded CloseJ.prepBudget do
+      focus <| Term.withoutErrToSorry <| withoutRecover CloseJ.prepareSteps
+    | throwError "sol_close_join_prep: preparation failed"
 
 @[tactic Solidity.tacticSol_close_join_steps]
 def evalSolCloseJoinSteps : Tactic := fun _ => withMainContext do

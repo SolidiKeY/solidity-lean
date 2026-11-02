@@ -292,6 +292,12 @@ own (`CloseJ.budget`); fails, leaving the leaf as it was, where it does not
 close it. -/
 syntax "sol_close_join_steps" : tactic
 
+/-- Prepare a specification leaf with at least one joined local value, one
+update at a time (`CloseJ.prepareSteps`). Leaves arithmetic goals for the
+caller's solver. Global state writes keep the whole-leaf preparation path.
+Bounded by `CloseJ.prepBudget`; restores the goal if preparation fails. -/
+syntax "sol_close_join_prep" : tactic
+
 /-- A leaf whose joined values (`{x := c ? t : e}`, `ifElseJoin`) are split
 back into their cases, KeY's `ifthenelse_split` on the antecedent
 (`Fml.SplitTo.here`, `Calculus/LeafSplit.lean`): one goal per case, each
