@@ -4268,3 +4268,6 @@ import Solidity.Backend.InternalFlow.RuntimeFrameContext
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
 import Solidity.Examples.DecisionMemoryFixtureData
 import Solidity.Examples.DecisionVerdictData
+
+import Solidity.Calculus.DecisionSourceBoundary
+import Solidity.Examples.DecisionSourceBoundary

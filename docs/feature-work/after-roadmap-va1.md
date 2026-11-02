@@ -4021,3 +4021,130 @@ inputs must be inspected, never assumed. AU03/AU04, G46.05 and SS-CP5-HASHED pro
 remain outside this work. Coordinator announces master a3205e6a1a1be1471fa0dc91688eca032d8acd85;
 fetch, ancestry verification and required rebase precede the final handoff. No AU05
 implementation, walk changes, push, merge, PR, tag publication or goal reset occurred.
+
+## Derived source allocation boundary and VA2 rebase (2026-11-02)
+
+The assigned branch now descends from published master
+`a3205e6a1a1be1471fa0dc91688eca032d8acd85`. Its rebased implementation parent is
+`172a66d19a1be9c21edc926ade4b007f2e3b6107`; the original checked source parent
+`dd67b75573d2399a30222eda2ac5d279e6d50e01` remains at
+`refs/va1/pre-a320-source-route` and in the checksum-bound pre-a320 bundle.
+The original frozen base remains `8bd8742ad987d566f7ba7624372cec1c020be07c`.
+Both independent rebase reviewers verified preservation of all previous owned
+implementation/control sources and 720 master-only files. Shared conflicts
+retain both approval records, both lane handoff links and additive registrations.
+Master's rules, sharing sources and memory-loop 987/973 controls are unchanged.
+The published ProgramReduction callRets signature now uses RetBinders; this
+is an incoming producer change, not an owned replacement. HashPremise is
+byte-identical to the preserved pre-rebase source.
+
+### Exact supported source class and proofs
+
+`Solidity/Calculus/DecisionSourceBoundary.lean` proves for arbitrary Contract C,
+Ctx Γ, Fml C Γ and uint bound/value:
+
+```lean
+SourceUIntLiteralChain.noAlloc
+    (w : SourceUIntLiteralChain bound value φ) : φ.hasAllocAll = false
+```
+
+The leaf witness contains an actual literal substitution returning a primitive
+equation. Constructor inversion proves that its original body cannot conceal
+an allocation formula; induction handles the primitive universal prefix.
+No coverage/verdict test or validity oracle supplies this syntax fact.
+For closed formulas, `sourceUIntLiteralDiscovery_covered` now derives actual
+Covered=true from actual discovery alone. `sourceUIntLiteralDiscovery_proved`
+retains the exact additional premise φ.hasHash=false and proves the public
+verdict equals proved. Existing theorem signatures and algorithm definitions
+are unchanged by this proof increment. Covered, inTarget, DecisionTheorem and
+Waivers remain frozen.
+
+The client module `Solidity/Examples/DecisionSourceBoundary.lean` applies these
+interfaces to all five unchanged assigned formulas, reuses their actual
+inhabited three-cell antecedent and false fixed-array countermodel, and proves
+a fresh-allocation formula is outside both discovery and the genuine witness
+family. That last control claims neither global unknown nor failed coverage.
+Hash freedom and target admission do not follow from this source grammar.
+This is not the wider revised Q1 boundary, exhaustive Residue, DecisionTheorem-prime
+or general array/memory/fuel completion. The original 8bbd5606 counterexample
+and all earlier seals/failures remain preserved.
+
+### Actual gates and resource evidence
+
+All commands below ran through the task-owned cache-view runner with the
+original writer lock, LEAN_NUM_THREADS=1, explicit Lean -j1, measured aggregate
+RSS, hard child memory.max=12884901888 and memory.swap.max=0, plus the 12 GiB
+host reserve. No simultaneous LSP/build was used. MCP serve now explicitly
+selects the same bounded private Lake configuration; the prior wrapper is saved.
+Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, and
+Lake 5.0.0-src+797c613 were observed in each container.
+
+- `lake -f .va1-lakefile.toml build Solidity.Calculus.Decision`: final repaired
+  attempt passes in 40.768735s. Earlier read-only cache-write failures are
+  retained individually, including each bounded retry-ceiling failure.
+- Per-file MCP on DecisionSourceBoundary: passes in 5.326549s with no messages;
+  focused build passes in 3.170577s. The prior Boolean-precedence diagnostic
+  remains raw evidence; its parentheses were corrected without changing claims.
+- Client import closure: final attempt passes in 13.906184s. Client MCP passes
+  in 3.159535s with no messages; focused build passes in 2.085079s.
+- `lake -f .va1-lakefile.toml env lean -j1 --tstack=131072` on the public
+  source-boundary audit: 14 reports, pass 9.678974s; only propext, Classical.choice
+  and Quot.sound. No sorry/admit/new axiom or native shortcut was introduced.
+- Bounded `run-keysort.sh`: pass 1.020872s. Actual output: parsed 377 taclets,
+  131 read-bearing, table covers 131; annotations match the actual solkey file;
+  KEYSORT_PASS. This supports the runtime check, not whole-lane completion.
+
+The post-rebase host-reserve stop is retained as process exit 143/wrapper 75,
+resource_stop=true: sampled host availability 12753010688 bytes was below
+12884901888. Its latest setup was HashReduction; it is not a passing gate.
+Subsequent independently reviewed lossless views recovered 503520360 private
+cache bytes and 256229288 private output bytes, preserving canonical payloads,
+saved metadata and read-only canonical mounts. HashReduction then elaborated
+in 32 s without another reserve stop; its cache-write failure was separately
+repaired before the final passing closure. After that pass, another verified
+603506320 duplicate cache bytes were released to provide diagnostic headroom.
+Live view mtimes can differ from saved private mtimes; restoration metadata
+is retained. These are incremental/cache-identity-specific checks, not a fresh
+full default build or EVM evidence. All original stopped full gates remain open.
+
+Raw evidence, repair manifests and immutable pre-rebase artifacts are under
+`/workspace/va1-evidence/source-route-next`. The separate source-only rebased
+interface package is `post-a320-interface`; its prerequisite receipt lists
+all 11 bundle prerequisites, each a verified ancestor of frozen base 8bd. Independent
+finder/skeptic verified all 340 archived files, 42 interfaces, patches and checksums.
+The new checked proof checkpoint will have its own exact-head export; the
+earlier immutable source-only package remains unchanged.
+
+### Independent reviews and remaining queue
+
+Read-only finder and skeptic, neither using Lean/server/build, both report
+no source findings for the final boundary and client modules. They confirmed
+that no-allocation is derived, the hash premise remains explicit, target
+admission is not asserted, positives are inhabited and countermodels survive.
+Both separately verified the 113 output duplicate identities before memory
+recovery; artifact prerequisite wording was corrected in a separate receipt.
+Registration and static checks are recorded in the accompanying checkpoint
+evidence. The new exact-head export is pending the following source commit.
+
+The full assignment remains incomplete: exhaustive Residue/DecisionTheorem-prime
+and target/Covered/hash bridge; remaining baseline reproduction and Decision
+performance work; general fixed/nested/key/field/struct array, broader memory,
+halting-OR and wider revised program-free boundary; general formula-derived
+511-node fuel; remaining backfill and affected/full strict/trust/docs gates.
+H6's narrow TypeExamples split remains delivered at preserved 16409976 and
+rebased 4eb9a695; its post-master consumer/full gates are not claimed here.
+AU05 is now assigned after AU02; VA2's publication prerequisite is present,
+but no AU05 implementation or SS-CP5-HASHED premise has been consumed. No
+AU03/AU04 work is redone, and no push/merge/PR/tag publication is performed.
+
+Checkpoint static results: orphan, layer, strict automatic, static trust and
+staged whitespace checks pass. The strict documentation gate still fails:
+48 missing and 38 ambiguous references, compared with the exact frozen-base
+48 missing/37 ambiguous raw result. The single additional citing document
+is byte-identical to integration base a3205e6a, where both candidate modules
+already exist; no new owned documentation finding was introduced. The axiom
+inventory gate fails with 1858 pinned theorems, 0 errors and 438 unrecorded changes.
+Its expected inventory is not rewritten to hide drift. These failed gates
+remain explicit unfinished obligations despite the 14 passing public proof
+audits; see boundary-static-gates.json and boundary-docs-vs-frozen-base.json
+in the external evidence directory.

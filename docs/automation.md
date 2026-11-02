@@ -1468,3 +1468,15 @@ This is the finite recognized subclass, not global Residue/DecisionTheorem-prime
 general array completeness. Narrow actual fixture modules remove unnecessary numeric
 and memory regression dependencies. Full/rebase gates remain open; see the
 [VA1 handoff](feature-work/after-roadmap-va1.md).
+
+VA1's source allocation boundary (2026-11-02) now derives
+`SourceUIntLiteralChain.noAlloc` from the actual substitution equation and
+universal-prefix syntax. `sourceUIntLiteralDiscovery_covered` therefore needs
+only genuine finite source discovery; `sourceUIntLiteralDiscovery_proved`
+still requires the unchanged separate `hasHash = false` premise. The five
+original assigned sources, their inhabited antecedent and false fixed-array
+countermodel are checked clients. Fresh-allocation formulas are outside this
+source family; no global verdict is asserted for that negative control.
+This does not establish target membership, the exhaustive Residue/DecisionTheorem-prime
+bridge or the wider Q1 program-free boundary. The rebased Decision import
+closure passes; full-lane gates remain open. See the VA1 handoff.
