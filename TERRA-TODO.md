@@ -132,8 +132,10 @@ Routine lemmas to add after producer validation:
 
 `lowerCopy` and `error_iff_copy_error` now execute all actual word validation
 branches and reflect exact Source errors/unchanged full original state on validation failure over certified ABI
-entry. Sol retains actual Source argument header/decode/conversion composition
-without an entry-success premise. Independent typed Source/frame admission,
+entry. `sourceCopy_run` and `entry_error_iff_source_error` now compose actual
+Source argument header/decode/conversion without an entry-success premise.
+Sol retains general Source declaration/expression/frame/compiler admission;
+this client is not a general lowering certificate. Independent typed Source/frame admission,
 recursive shapes/location copies and physical runtime realization remain open.
 Registration for new modules must be generated under H14.
 
@@ -147,3 +149,20 @@ Routine integer validation equations for Terra:
   corresponding `lowerCopy ... = .error halt`. Reason: same actual match.
 These are not hypothetical simulation premises; exact definitions and
 error_iff_copy_error already constrain them. Controls remain unproved.
+
+
+Routine integer entry consequences for Terra:
+- `lowerEntry_of_ok`: with actual `entry : Source.cdTail data index 32 =
+  .ok (offset,length)`, `lowerEntry ... index = lowerCopy ... entry`.
+- `lowerEntry_of_error`: with actual `entry : Source.cdTail data index 32 =
+  .error halt`, `lowerEntry ... index = .error halt`.
+  Reason for both: split the real dependent match, no new validation or
+  simulation law. Keep Source.Halt and input/frame equations exact.
+- `successful_import`: same actual entry/validation arguments as copy_related,
+  but replace Source.cdToMem in the conclusion by sourceCopy and include
+  lowerEntry success plus actual Source result/fresh address/full grown state.
+  Reason: instantiate sourceCopy_run, lowerCopy_success and copy_related.
+  The existing lowerCopy_success TODO must first be proved. Preserve actual
+  ordered values and independent Source/target IDs, not balance-only or
+  erased frame observations. This is routine composition, not final compiler
+  or machine correctness; inhabited controls remain required.

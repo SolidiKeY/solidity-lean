@@ -125,4 +125,66 @@ theorem error_iff_copy_error {E : Source.Env} {Λ : Source.RCtx} {C : Contract} 
       have wrong := congrArg Prod.fst impossible
       rw [observed] at wrong
       cases wrong
+
+
+/-- Client of actual Source argument decoding followed by its existing
+calldata-to-memory conversion, at the existing conversion budget zero. -/
+def sourceCopy {E : Source.Env} {Λ : Source.RCtx} (t : Source.IntTy) (frame : Source.Fr)
+    (data : Roadmap.Bytes) (index : Nat) : Source.EM E Λ (Source.RVal E.layout (sourceTy t)) := do
+  let argument ← Source.decodeArg data index (.array .calldata (.int t) none)
+  Source.convRV frame 0 (sourceTy t) (.val argument)
+
+/-- Header failure precedes conversion; successful headers invoke the real
+Source copy on the reached typed argument, without a new evaluator. -/
+theorem sourceCopy_run {E : Source.Env} {Λ : Source.RCtx} (t : Source.IntTy) (frame : Source.Fr)
+    (data : Roadmap.Bytes) (index : Nat) (source : Source.EMState E Λ) :
+    (sourceCopy t frame data index).run source =
+      match Source.cdTail data index 32 with
+      | .error halt => (.error halt,source)
+      | .ok (offset,length) => (Source.cdToMem frame (sourceTy t) offset length).run source := by
+
+  unfold sourceCopy
+  rw [Source.Hoare.run_bind, Source.decodeArg_cdArray_run data index (.int t) rfl source]
+  rw [Source.cdHeadBytes_of_word (τ := .int t) rfl]
+  unfold Source.cdArg
+  cases Source.cdTail data index 32 with
+  | error halt => rfl
+  | ok pair => cases pair; rfl
+
+/-- Execute actual ABI entry before word validation; both error channels are
+Source diagnostics rather than machine halts. -/
+def lowerEntry {E : Source.Env} {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (t : Source.IntTy) (frame : Source.Fr) (selector data : Roadmap.Bytes)
+    (selector_length : selector.length = 4) (input : frame.cd = selector ++ data) (index : Nat) :
+    Except Source.Halt (State C (.mem (runtimeTy t) :: Γ)) :=
+  match entry : Source.cdTail data index 32 with
+  | .error halt => .error halt
+  | .ok (_offset,_length) => lowerCopy (E := E) target t frame selector data selector_length input entry
+
+/-- Exact Source diagnostics and unchanged full state, reflected both ways
+for actual argument decoding/conversion. No successful ABI entry is assumed.
+Selector/frame consistency is retained; this is not machine correspondence. -/
+theorem entry_error_iff_source_error {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (source : Source.EMState E Λ) (target : State C Γ) (t : Source.IntTy) (frame : Source.Fr)
+    (selector data : Roadmap.Bytes) (selector_length : selector.length = 4)
+    (input : frame.cd = selector ++ data) (index : Nat) (halt : Source.Halt) :
+    lowerEntry (E := E) target t frame selector data selector_length input index = .error halt ↔
+      (sourceCopy t frame data index).run source = (.error halt,source) := by
+
+  rw [sourceCopy_run]
+  unfold lowerEntry
+  split
+  · rename_i actual observed
+    conv => rhs; rw [observed]
+    constructor
+    · intro same
+      cases same
+      rfl
+    · intro same
+      have equality := Except.error.inj (congrArg Prod.fst same)
+      cases equality
+      rfl
+  · rename_i offset length observed
+    conv => rhs; rw [observed]
+    exact error_iff_copy_error source target t frame selector data selector_length input observed halt
 end Solidity.Backend.Aggregates.IntegerArrays

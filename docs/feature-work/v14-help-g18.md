@@ -301,3 +301,37 @@ and physical realization. Inhabited width/order/dirty/empty/populated-alias
 controls, generated registration and checkpoint closure remain unfinished.
 Master88d68150 was fetched/inspected unchanged; no reserved edits, goal changes,
 full failed-gate repetition, expected-verdict or budget changes occurred.
+
+
+### Integer argument header/decode/conversion increment
+
+IntegerArrays.sourceCopy now calls actual typed Source.decodeArg for calldata
+arrays of any Source.IntTy, then the existing convRV at its existing budget0.
+sourceCopy_run derives the real header-error versus conversion ordering.
+lowerEntry executes that actual cdTail before lowerCopy; the new
+entry_error_iff_source_error removes the successful-entry premise and reflects
+exact Source.Halt/full unchanged original state in BOTH directions. Actual
+selector length4 and frame.cd=selector++data remain explicit. The index is a
+provided Source argument index; no whole-dispatch/signature/minimum-head/index
+producer or general Source/frame/compiler admission is inferred.
+
+This uses actual Source budget behavior, not EVM gas or expression fuel.
+Conversion/allocation and ordered validation remain actual native operations;
+no new AST, Source evaluator, copy implementation, desired simulation premise
+or target semantics is introduced. Failure is before allocation, not an
+executed rollback journal. General payment/world/history and fetched/resource
+correspondence are unchanged open obligations. Private V07 Scalar5d45c086
+binding/validation remains the exact prior input, not a published prerequisite.
+
+Scratch six-candidate trials for run law and full error law fail1 and are
+preserved; typed decoder run/actual header splitting supply the hard steps.
+Final private per-file/scoped two-axiom check passes1.99s, peak812716KiB,
+oneLean,cgroup446328832bytes,noOOM/swap; both headline axioms standard3.
+Same saved VM/head verified after startup, no surviving job or goal operation;
+master88d68150 fetched/inspected unchanged. No Source/Static/reserved changes.
+
+Routine lowerEntry match equations and successful-import composition now
+join H14 TERRA-TODO, with inhabited signed/unsigned, dirty/order/empty/caller
+controls and local/heap projections still pending. Standard combined build,
+generated registrations and checkpoint closure remain pending; no unchanged
+failed full/docs gate repeated or relabelled. Original queue remains partial.
