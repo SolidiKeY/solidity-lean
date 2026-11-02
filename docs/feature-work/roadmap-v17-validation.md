@@ -1256,3 +1256,41 @@ requested declaration/axiom sets, unique valid axiom identifiers, complete
 brackets and record boundaries. Nineteen host-only kernel controls pass;
 truncation, duplicate output/axioms, garbage and changed axioms are rejected.
 This parser repair does not itself supply successful collection or live replay.
+
+### Admitted private V13/V14 replay checkpoint (2026-11-02)
+
+Actual Lean4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b),
+Lake5.0.0-src+797c613: runtime KeySort passed at544e7173, command/cleanup/
+validation exits0 and "Build completed successfully (2 jobs)." The wrappers
+retain one native worker, explicit-j1, 12GiB cap/no-swap and unchanged300s.
+This is the narrow RUNTIME_GATE_PASS, not clean/full proof closure.
+
+After the demonstrated parser repair atc76008ec, the five actual V13
+EntryTransport declarations passed complete type/value/dependency/axiom
+extraction (43.654s) and independent fresh replay (39.059s). Producer head is
+66c08fdefbbb53c0eee111b09d1baa6277fedff5. rejection_iff has no proposition
+binder; entry_revert_exec/verdict_revert_exec retain binder indices6,7,8,
+and run_not_rejected/blocked_not_rejected retain4. Axioms are only propext,
+Classical.choice and Quot.sound as applicable. The old exit125 is preserved.
+
+V14's previously never-launched mandatory replay now passes command/driver/
+postchecks0 and matches all four complete old extraction rows at producer
+74225bbe317f0983ee0e781d446a2f97c1cb807f. The passing initial extraction
+was not repeated. Exact historical summary/request/receipt paths and hashes,
+producer inputs, current consumer and external driver bytes are bound before
+and after. prefix_trans retains proposition binders10,11; prefix_stack_tail7;
+returned_excludes_reverted6; reverted_bytes_unique6,7. All four use only
+Quot.sound/propext. Full ASTs/dependencies/axioms are retained in actual
+record.json files; private source remains read-only, unpublished staging.
+
+321 owned host controls ran (50 external-fixture controls skipped), all active
+controls pass. Layer/orphan/source-trust checks pass; the initial trust checker
+invocation without required stdin failed and remains retained separately.
+Raw documentation checker exit1 and exact-base no-new-findings exit1 remain:
+48 current versus46 base missing paths, with two reserved inline-assembly
+additions and zero new owned findings. No global green claim follows.
+Independent read-only finder/skeptic reviews cover the resource policy, parser,
+exact replay driver and actual artifacts. H1/H4 do not discharge semantic
+premises. All457 rows, ten Derived17 structural rows, original G52-G55 and
+both backfills remain incomplete; clean/full/cache-equivalence, strict/corpus/
+TestSuite, source-chain and final integration/trust/release gates remain open.
