@@ -48,6 +48,8 @@ import Solidity.Backend.AbiWorld.PanicReadWindow
 import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.Aggregates.BoolArrayControls
+import Solidity.Backend.Aggregates.BoolArrayEntry
+import Solidity.Backend.Aggregates.BoolArrayEntryControls
 import Solidity.Backend.Aggregates.BoolArrays
 import Solidity.Backend.Aggregates.ByteParameterControls
 import Solidity.Backend.Aggregates.ByteParameters
