@@ -2615,3 +2615,75 @@ compiler/world/V16 and final adequacy remain open. LIB1, unchecked-add and stric
 optimized-viaIR journal decisions remain unanswered. Original BLOCKED goal is
 unchanged; no get_goal read tool is exposed and no goal mutation was attempted.
 Sealed incremental artifacts: `/workspace/vy5-composition/failure-consumer-20261102/final/`.
+
+
+### VY5 actual Source doWhile consumer (2026-11-02)
+
+`Solidity/Yul/Composition/DoWhilePhysical.lean` adds20 actual Source constructor
+and transport laws, not20 original full obligations. Existing typed alias/body
+rethrow executes BEFORE an arbitrary condition: DEAD/empty/fullpanic propagate
+at fuel+5 even when the condition is false or poison. Actual break and return
+skip the condition; return remains ret. Continue reaches the real assignment
+condition and changes a clean typed caller flag, while normal declaration
+extends then restores the actual local scope before that assignment. Selected
+literal-true/continue diverges at every horizon by induction. Low do fuel0..4
+and assignment-continue fuel0..2 preserve the exact pending Source state.
+
+Actual EM.sub/attempt transport retains the original outer evaluator locals,
+complete Source.St, raw LocalValues/nonword aliases, fnLocals, heap, log prefix
+and represented/residual/owned-byte journal companions. It returns changed clean
+Out locals separately; raw values are never passed through runClean/ofClean.
+An inhabited firstPhysical carrier plus actual allocated byte object supplies
+DEAD/empty/panic and same-length AABB wrong-alias controls. Reference equality
+and actual heap lookup are explicit generic premises, not desired execution
+oracles. Companion retention is not a new rollback, representation-validity,
+physical-placement/allocation-refinement or raw Source-resumption theorem.
+
+Frozen BEFORE execution, the independent source-derived oracle defines50 ordered
+Source cases under legacy/viaIR Source contexts. The actual driver matched all
+selected fields: full bytes, flow/changed local indices, heap extent/contents,
+fnLocals, raw dirty/function/nonword cells, outer scope, log prefix and physical
+word/source/residual/owned journals. Positive and negative controls distinguish
+body-first false condition, poison conditions skipped/reached, break then outer
+rest versus revert suppressing it, timeout and dangling references.74 mutation
+and provenance tests pass, rejecting stale module/driver/oracle/ledger/runner,
+missing/reordered evidence, wrong full payload/scope/journals/high bits and
+malformed raw execution receipts. No fresh native comparisons are claimed.
+
+Final registered joint EXIT0: actual Lean4.24.0 commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b and Lake5.0.0-src+797c613;
+KeySort2jobs precedes ./run-lean.sh library1293/TestSuite262.203core/0elaborator,
+1308reachable/0orphan/0notallowed, strict491automatic/61budgeted/0manual/11refuted/
+0pending; complete-input trust1323sources/252sites/0findings.20 complete scoped
+signatures/axiom reports use standard propext/Classical.choice/Quot.sound only.
+Initial diagnostic EXIT1 (implicit declaration type and wrongly qualified
+sub_run) remains retained, separately from corrected passing diagnostics. MCP
+shutdown RuntimeError after a successful result is retained as stderr, not a
+Source proof failure or suppressed diagnostic. Separate finder/skeptic read-only
+reviews run no Lean/server/build; final results and raw commands are sealed.
+
+Resource preflight202248192bytesfree -178450432 comparable mounted container
+layer -10485760 conservative COMPLETE incremental allowance leaves13312000bytes.
+Before joint200540160bytesfree; after verified exited metadata retirement,
+199491584bytesfree. The20-law olean is333200bytes; no new dependency closure,
+image or broad native archive. Engineering allowance is not a changed guard.
+Writer lock, serial-j1/LEAN_NUM_THREADS1, hard12GiB/no-swap/CPU1 and12GiB OS
+reserve remained unchanged. Only current-step exited SizeRw0 directory metadata
+was retired AFTER inspect/log/directory receipts. Protected caches/images/
+mounts/history/evidence remain intact; no resource stop or ENOSPC occurred.
+
+All Work1/2/3 and BackfillA/B remain PARTIAL. All24 ORIGINAL full obligations and
+six general Source combinations/fullProofGate remain pending. This closes only
+the selected actual Source doWhile child. The selected ordinary nonempty-revert
+producer is already resolved and consumed by FailurePhysical; it is NOT listed
+as missing again. Frontend/Yul admission, general raw/function/session/operator
+hooks, Source try/error selector, allocation/refinement/G01/compiler/world/V16
+and final adequacy remain open. LIB1, unchecked-add and original optimized-viaIR
+strict-journal human holds remain unanswered. Original native report
+`c0e8e6cd7f2f62865135b57ab395b3d256f3d0b474d20c17f88957e8d702f660`
+retains four profiles/36calls/five failures(calls0,1,2,3,6)/EXIT1; hash preservation
+only, not fresh replay. Historical docs/G03 EXIT1 and exact-base equality remain
+failed global gates with zero new regressions. No unchanged failing global
+command was rerun. Original BLOCKED goal unchanged; get_goal read tool remains
+unavailable, no goal mutation. Incremental artifacts/signatures/evidence:
+`/workspace/vy5-composition/do-while-20261102/final/`.

@@ -486,3 +486,11 @@ cases,107 tests; no fresh native comparisons. All24 original obligations/six
 general combinations remain pending. See [lane handoff](inline-assembly-vy5.md#vy5-selected-ordinary-failure-consumer-2026-11-02)
 and `/workspace/vy5-composition/failure-consumer-20261102/final/` for exact
 producer premises, source hashes, failed diagnostics and sealed evidence.
+
+
+VY5 (2026-11-02): actual Source doWhile body-first, normal scope restoration,
+break/continue/return and timeout consumers add20 component laws,50 ordered
+Source cases and74 mutation tests. No fresh native comparison; all24 original
+obligations/six full combinations stay pending. See [lane handoff](inline-assembly-vy5.md#vy5-actual-source-dowhile-consumer-2026-11-02)
+and `/workspace/vy5-composition/do-while-20261102/final/` for exact premises,
+source signatures, resource receipts and retained failures.
