@@ -39,3 +39,8 @@ import SolidityBridge.ExternalEvm.Assembly.LinkedChecks
 import SolidityBridge.ExternalEvm.Assembly.ResourceChecks
 import SolidityBridge.ExternalEvm.Assembly.SafeDivergenceChecks
 import SolidityBridge.ExternalEvm.Assembly.PopChecks
+
+import SolidityBridge.RoadmapV15.P10.Interface
+import SolidityBridge.RoadmapV15.P10.Controls
+import SolidityBridge.RoadmapV15.P10.Execution
+import SolidityBridge.RoadmapV15.P10.ExecutionControls

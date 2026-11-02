@@ -1539,3 +1539,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 |---|---|
 | `Bridge/SolidityBridge/RoadmapV15/P10/Interface.lean` | Typed backend opcode sites, complete emitted bytes, pinned decoder and on-demand fetched step facts. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/Controls.lean` | Inhabited nonzero prefix/immediate/context and actual decoder/fuel controls; fourteen scoped axiom reports. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/Execution.lean` | Exact charged fetched CALL/return-data/jump operations and X continuation; no assumed execution result. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ExecutionControls.lean` | Funded/underfunded/static account execution, complete18-field outcomes, copy opacity and jump/resource negatives. |
