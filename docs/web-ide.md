@@ -78,6 +78,12 @@ marker waits for the editor and actual compiler worker to start; loading failure
 invalidate it so reopening retries the original embedded data. The closed asset
 broker maps fetch, synchronous library XHR, scripts and nested workers to Blob URLs.
 CSP permits no HTTP runtime connections. No service worker or backend is required.
+Each worker receives structured-cloned Blob handles and creates its own URLs on
+demand. Local-file workers cannot import the parent's `blob:null` URLs. A small
+bootstrap queues messages until its embedded entry script has loaded, then replays
+them to the installed handler. Checksums use the same SHA-256 implementation when
+an opaque worker lacks Web Crypto. Compiler startup errors terminate the owned
+worker before reconnecting, including partially initialized workers.
 The Brotli decoder streams through 64-KiB input and 1-MiB output buffers so a
 large decoded module does not leave a second whole-module allocation in Wasm
 memory. Its boundary/size/truncation tests compare against Node's native decoder
@@ -210,6 +216,11 @@ the default target, with unused Info-manual generation disabled. A fresh empty
 Docker build passed all layout assertions and the `2^256` arithmetic probe.
 The recovery workflow only replaces a failed-IDE run whose commit is an ancestor
 of the new push, so a delayed helper cannot cancel a newer build.
+The clean file-origin test then exposed cross-worker Blob URL ownership. An
+opaque-iframe regression now checks nested imports, fetch, synchronous XHR and
+early messages after revoking the parent's URLs; a second case verifies that
+heartbeat activity stops after partial startup fails. Completed kernel assets
+are cached before browser validation, so a later UI failure preserves that build.
 
 The writer lock is held throughout changes and checks. Heavy jobs run sequentially.
 This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap

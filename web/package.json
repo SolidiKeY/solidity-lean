@@ -17,6 +17,7 @@
     "test:native:proofs": "node test/browser.cjs --proofs",
     "test:website:proofs": "node test/website.cjs --proofs",
     "test:single": "node test/website.cjs --single --proofs",
+    "test:embedded": "node test/embedded-assets.cjs",
     "test:protocol": "node test/proofs.test.cjs"
   },
   "engines": {

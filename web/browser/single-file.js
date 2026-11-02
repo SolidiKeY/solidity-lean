@@ -1,12 +1,16 @@
 /* A closed asset namespace shared by the page and every nested worker. */
 function installEmbeddedAssets(assets){
   const nativeFetch=globalThis.fetch.bind(globalThis),NativeWorker=globalThis.Worker,NativeXHR=globalThis.XMLHttpRequest;
+  // file: workers have distinct opaque origins. Clone Blob handles into each
+  // worker and create its URLs locally; a parent's blob:null URLs cannot be
+  // imported or fetched from that worker.
+  const urls=Object.create(null);
   function resolve(input){
     const value=String(input instanceof Request?input.url:input);
     if(value.startsWith('blob:'))return value;
     const path=new URL(value,'https://embedded.invalid/').pathname;
     if(!assets[path])throw new Error('Missing embedded asset: '+path);
-    return assets[path];
+    return urls[path]??=URL.createObjectURL(assets[path]);
   }
   globalThis.fetch=(input,init)=>{try{return nativeFetch(input instanceof Request?new Request(resolve(input),input):resolve(input),init);}catch(error){return Promise.reject(error);}};
   if(globalThis.importScripts){const nativeImport=globalThis.importScripts.bind(globalThis);globalThis.importScripts=(...urls)=>nativeImport(...urls.map(resolve));}
@@ -14,9 +18,11 @@ function installEmbeddedAssets(assets){
   globalThis.Worker=class extends NativeWorker{
     constructor(url,options){
       if(options?.type==='module')throw new Error('Embedded workers must use the bundled classic format');
-      const source=`(${installEmbeddedAssets.toString()})(${JSON.stringify(assets)});importScripts(${JSON.stringify(resolve(url))});`;
+      const entry=new URL(String(url),'https://embedded.invalid/').pathname;
+      if(!assets[entry])throw new Error('Missing embedded worker: '+entry);
+      const source=`onmessage=async event=>{const queued=[];onmessage=event=>queued.push(event);try{const {assets,entry}=event.data;(${installEmbeddedAssets.toString()})(assets);const source=await assets[entry].text();onmessage=null;(0,eval)(source);for(const message of queued)dispatchEvent(message);}catch(error){setTimeout(()=>{throw error;},0);}};`;
       const bootstrap=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
-      super(bootstrap,options);URL.revokeObjectURL(bootstrap);
+      super(bootstrap,options);this.postMessage({assets,entry});URL.revokeObjectURL(bootstrap);
     }
   };
   return resolve;
@@ -72,7 +78,7 @@ function prepareSingleFile(build,expected){
     const assets=Object.create(null);
     await new Promise((resolve,reject)=>{
       const tx=db.transaction('assets'),store=tx.objectStore('assets');
-      for(const key of entries){const get=store.get(key);get.onsuccess=()=>{if(get.result instanceof Blob)assets[key]=URL.createObjectURL(get.result);};}
+      for(const key of entries){const get=store.get(key);get.onsuccess=()=>{if(get.result instanceof Blob)assets[key]=get.result;};}
       tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error);
     });
     if(Object.keys(assets).length!==expected)throw new Error('Offline storage is incomplete. Reload the HTML to prepare it again.');

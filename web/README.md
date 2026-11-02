@@ -83,6 +83,7 @@ disables proof controls and never treats Solidity compilation as a proof.
 ```sh
 node web/test/proofs.test.cjs           # failure/cancellation protocol boundaries
 node web/test/compression.test.mjs     # bounded decoder vs native Brotli, invalid streams
+npm run test:embedded --prefix web    # worker-owned assets, early messages, startup cleanup
 npm run test:website --prefix web      # real browser compiler and disconnected reload
 npm run test:website:proofs --prefix web # real kernel proofs, cancellation and offline proofs
 npm run test:single --prefix web       # one HTML, reuse, disconnected fresh workers/proofs
