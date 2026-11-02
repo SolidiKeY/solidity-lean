@@ -111,6 +111,24 @@
       "failed": false,
       "data": "0x0000000000000000000000000000000000000000000000000000000000000007"
      }
+    },
+    {
+     "label": "trailing data ignored",
+     "signature": "u(uint16)",
+     "calldata": "0x0000000000000000000000000000000000000000000000000000000000010005ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000005"
+     }
+    },
+    {
+     "label": "address masked to 160 bits",
+     "signature": "ad(address)",
+     "calldata": "0x00000000000000000000ffff0000000000000000000000000000000000001234",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000001234"
+     }
     }
    ]
   }

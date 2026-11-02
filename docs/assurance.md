@@ -257,7 +257,7 @@ and CI showed the same failures without them).
   after the index: `Panic(0x32)` where failure data is retained, a revert
   elsewhere (the split `modular` uses for its zero divisor), then the plain
   read `base[off + x]` with `x < len` a premise, KeY's `inBounds` branch. The
-  outcomes are unchanged (the old branch ended in the base's `Panic(0x32)`);
+  outcomes are unchanged in every mode (where failure data is retained, `withPanics`, the old branch ended in the base's `Panic(0x32)` and the new check is `Panic(0x32)`; elsewhere both are an empty revert);
   no rule, closer or soundness proof changed. Test 31 after it: `slicePast`
   proves (was pending); `sliceRead`, `sliceOfSlice` stay `pending`. The
   `sliceRead` leaf is now `… se9 = true → {ie14 := 1 + se2} {se13 :=

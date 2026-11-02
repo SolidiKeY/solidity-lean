@@ -1666,7 +1666,7 @@ the check is an ordinary `require`/`Panic(0x32)` statement.
 
 **Backfill: ABI coder v1 value parameters** (`UpstreamEntry.v1Plan`). v1
 cleans a value word instead of validating it; pinned solc, legacy with the
-optimizer off and on (`tests/abi-0.8.38/V1Entry.sol`, 13 vectors,
+optimizer off and on (`tests/abi-0.8.38/V1Entry.sol`, 14 vectors (trailing data and a lone `address` included),
 `scripts/abi-entry-probe.mjs --v1`, whose expectations are an independent
 port of the cleanup): `uintN` masked, `intN` sign-extended from its low `N`
 bits, `bool` 1 for any nonzero word, `bytesN` its high `N` bytes, `address`
@@ -1708,3 +1708,32 @@ parameter directly close within budget. Reproduction: import
 `tests/solc/Calldata.sol` (`scripts/solc-ast.mjs --source …`), then
 `sol_prove; all_goals sol_leaf; all_goals sol_close` on
 `Solc.Calldata.sliceRead.problem`. FU2-C did not edit `Calculus/**`.
+
+**Review of item 4 and the backfill** (read-only finder and skeptic, no Lean
+server). Skeptic: v1, a differential test against pinned solc (legacy,
+optimizer off and on): 547 vector pairs per setting over 47 functions,
+each dirty input against the same input with every head word cleaned by
+the rule above, comparing success, return data and logs; uses covered
+include checked and unchecked arithmetic, shifts by and of dirty words,
+`**`, bitwise operations, comparisons, conversions, all encodings and
+`keccak256`, packed storage, mapping keys, memory arrays, internal and
+external self-calls, events, modifiers with parameters, assembly reading
+the parameter, UDVTs (a `bool` UDVT included), `uint248`/`int248`/
+`bytes31`: 0 disagreements; a short head reverts, trailing data is ignored.
+It confirmed both exclusions: a v1 constructor does not clean at entry
+(assembly reads the raw word), and a v1 enum is masked to `uint8` with no
+range check. Slices: `t[k]` with `k >= t.length` is `Panic(0x32)` in all
+four configurations, after its own index and before any operand the
+pipeline evaluates later (legacy right-first, via-IR left-first, as
+`Contract.evalOrder`), and a bad slice bound reverts first. No
+counterexample. Finder: no code defect (evaluation order, `len` hoisting,
+`off + x` overflow, panic/revert choice, ternary/short-circuit placement,
+loop conditions, slices of slices, constructors/enums/function types/
+contract types/UDVTs/`address payable` in `v1Plan`, the cross-check,
+`scalarArg`). Confirmed and fixed: the probe count (now 14 vectors, with a
+trailing-data and a lone `address` vector added), the "outcomes unchanged"
+wording in `assurance.md` (per mode), `v1Plan`'s docstring (cleanup at
+decoding). Recorded, not changed: a zero-parameter v1 entry runs on `[]`
+(trailing data dropped; not observable under the `msg.data` refusal); a
+slice read directly in a failure-retaining body outside the entry call
+would now carry `Panic(0x32)` data (closer to solc; no producer found).

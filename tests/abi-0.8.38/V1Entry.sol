@@ -6,5 +6,6 @@ contract V1Entry {
   function k(uint8 a, int16 b, bool c, bytes3 d, address e) public pure returns (uint8, int16, bool, bytes3, address) { return (a, b, c, d, e); }
   function u(uint16 a) public pure returns (uint256) { return a; }
   function s(int8 a) public pure returns (int256) { return a; }
+  function ad(address a) public pure returns (uint256) { return uint160(a); }
   function bo(bool a) public pure returns (uint256) { return a ? 7 : 3; }
 }

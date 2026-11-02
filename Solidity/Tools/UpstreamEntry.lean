@@ -284,9 +284,9 @@ def accessParams (d : FunDecl) (ps : List Param) : Nat → Bool := fun k =>
 
 /-! ### ABI coder v1 value parameters (lane FU2-C backfill)
 
-ABI coder v1 does not validate a value parameter: it cleans the word where
-the body uses it (legacy `CompilerUtils` cleanup), so a dirty word reads as
-its cleanup, and calldata shorter than the head reverts with empty data.
+ABI coder v1 does not validate a value parameter: it cleans the word when
+it decodes it (legacy `CompilerUtils` cleanup; `abicoder/cleanup/enum_v1.sol`
+reads the cleaned word in assembly), so a dirty word reads as its cleanup, and calldata shorter than the head reverts with empty data.
 Pinned solc 0.8.38, legacy with the optimizer off and on
 (`tests/abi-0.8.38/V1Entry.sol`, `scripts/abi-entry-probe.mjs --v1`):
 `uintN` is masked, `intN` sign-extended from its low `N` bits, `bool` is
