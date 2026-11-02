@@ -1361,3 +1361,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/LocationPeak.lean` | Location-sensitive sufficient recursive canonical allocation bounds and actual entry/body readback. |
 
 | `Backend/AbiWorld/SiblingReadback.lean` | Indexed recursive sibling-prefix byte windows and actual decoder/entry/body noninterference. |
+
+| `Backend/AbiWorld/{ReferenceFields,RawEntryTransport,SeqPrefix}.lean` | Canonical raw-entry/reference identity and actual indexed decoder sibling-prefix transport; sufficient guards only. |

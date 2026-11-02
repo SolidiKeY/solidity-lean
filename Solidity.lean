@@ -1016,3 +1016,9 @@ import Solidity.Backend.AbiWorld.RecursiveEntry
 import Solidity.Backend.AbiWorld.LocationPeak
 
 import Solidity.Backend.AbiWorld.SiblingReadback
+
+import Solidity.Backend.AbiWorld.ReferenceFields
+
+import Solidity.Backend.AbiWorld.RawEntryTransport
+
+import Solidity.Backend.AbiWorld.SeqPrefix
