@@ -14,8 +14,9 @@ every constructor without a wildcard):
   interpreter (`evalE`, `execS`, `Solidity/Source/Eval.lean`) matches every
   constructor of `RExpr`, `RLVal`, `RStmt` and `RItems` without a
   wildcard (Lean's exhaustiveness check).  An arm can still be `stuck` on
-  some inputs (dynamic ABI decoding, calldata references, `fallback` with
-  parameters, nested-array copies): `semExprCoverage_of_typed` is a
+  some inputs (dynamic ABI decoding, calldata references beyond
+  `bytes`/`string`/one-word arrays, `fallback` signatures solc refuses,
+  nested-array copies): `semExprCoverage_of_typed` is a
   classification, not a progress theorem;
 - a constructor S01 defers stays a recorded gap with its stage, never an
   exclusion (G00's profile still contains it);

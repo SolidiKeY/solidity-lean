@@ -552,7 +552,8 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   calldata explicitly; the other four were not re-checked by the review; all shadowed by the decoder's
   refusal: no `cdRef` is ever built);
 - getters of non-value types (`string public s`);
-- `fallback` with parameters;
+- `fallback` with parameters (lane FU2-B runs
+  `fallback(bytes calldata) returns (bytes memory)`; other signatures);
 - the default of function-typed variables (a function-typed state
   variable read before written; function-typed locals, fields, returns);
 - **storage-pointer and calldata return slots and uninitialised calldata
@@ -759,7 +760,8 @@ for `storeVal`'s `storRef` arm; preservation of `EMOK`/`MemOK` for
   from the elaboration;
 - the run-time gaps not on the ledger
   (storage-pointer and calldata return slots, function-typed defaults,
-  getters of non-value types, `fallback` with parameters, dynamic ABI
+  getters of non-value types, `fallback` signatures other than solc's
+  `(bytes calldata) returns (bytes memory)`, dynamic ABI
   decoding and encoding of aggregates, calldata references).
 
 **Deriving the frame for elaborated programs.** `Elaborated.bodies_typed`
@@ -1198,7 +1200,19 @@ functions in Horizon's lemma lists (`zeroVals`, `runMods`, `retVals`,
 `bytesOfRV`), so the split `dispatch` proofs stand without new lemmas.
 Controls in `Solidity/Source/CalldataExamples.lean` (`unitFb`): input
 `0xaabbccdd` returns `0xbbcc` unencoded and stores the length 4; a slice
-past the input reverts. No theorem about the branch.
+past the input reverts. No theorem about the branch. Checked: Horizon
+rechecked through the Lean server after the branch, without new lemmas
+or heartbeat changes. The feature inventory's `rawCalldata` exclusion
+(`docs/solidity-feature-inventory.md`) is the G00 profile's, for the
+compiled pipeline; this is the source semantics' model.
+
+Review (finder and skeptic, read-only): the semantics needed no fix;
+fixed: stale "stuck"/open entries (`source-s03.md`, `coverage-plan.md`,
+the census above, `Ledger.lean`'s docstring), the Horizon claim now cites
+its check; recorded in `docs/solc-alignment.md`: other fallback
+signatures elaborate and are `stuck` at run time (solc refuses them);
+untested paths (a named output assigned, an output never assigned, empty
+call data reaching the fallback, value to a non-`payable` one, modifiers).
 
 **`new`, `try`/`catch`: not
 started** (time; each is a typing rule, an interpreter arm and its

@@ -610,6 +610,11 @@ stronger obligation, not an additional assumption available to its proofs.
   the legacy code generator allocates first, unobservable without
   assembly)
   ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
+- **`fallback` with parameters** (lane FU2-B): the source semantics runs
+  `fallback(bytes calldata input) returns (bytes memory output)`, `input`
+  all of the call data and `output` returned unencoded, as solc; other
+  signatures, which solc refuses, elaborate and are `stuck` at run time
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).

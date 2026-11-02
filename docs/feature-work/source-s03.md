@@ -162,7 +162,9 @@ These items are also listed under `limitations:`.
   instantiated.
 - **The stipend rule** (G06 Q3). Payments run `receive` with no stipend
   limit.
-- **`fallback` with parameters.** `stuck`.
+- **`fallback` with parameters.** `stuck` until lane FU2-B, which runs
+  `fallback(bytes calldata) returns (bytes memory)`
+  ([source-soundness.md](source-soundness.md)); other signatures stay `stuck`.
 - **Calls to precompile addresses.** Treated as environment accounts;
   G01 says they behave as their definitions.
 - **Library calls through `DELEGATECALL`.** External library functions
