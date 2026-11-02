@@ -99,7 +99,16 @@ function fixture(mode,file,out,sharedToolchain=null,batchItems=null) {
   if(!expected) throw new Error(`unregistered fixture: ${name}`);
 
 function key() {
-  const closure=new Set(), fixtureDeps=new Set(), pending=imports(readFileSync(file,"utf8"));
+  // Fresh bytes/digests live only for THIS invocation. Bind dependency parsing
+  // and its input hash to the same exact read; no source/hash freshness cache
+  // survives the next pre/post key() call. Pure importMemo remains separate.
+  const sourceDigests=new Map();
+  function readSource(path) {
+    const bytes=readFileSync(path);
+    sourceDigests.set(path,createHash("sha256").update(bytes).digest("hex"));
+    return imports(bytes.toString("utf8"));
+  }
+  const closure=new Set(), fixtureDeps=new Set(), pending=readSource(file);
   function sourceFor(mod) {
     if(mod.startsWith("Solidity.")) return mod.replaceAll(".","/")+".lean";
     const fixture=/^tests\.«internal-flow»\.([A-Za-z][A-Za-z0-9]*)$/.exec(mod);
@@ -116,14 +125,14 @@ function key() {
     if(path===file) throw new Error(`cyclic fixture dependency ${file}`);
     if(closure.has(path)) continue;
     closure.add(path);
-    pending.push(...imports(readFileSync(path,"utf8")));
+    pending.push(...readSource(path));
   }
   const inputs={};
   for(const path of [file,pinsFile,expected.guard,"tests/internal-flow/fixture-cache.mjs","lean-toolchain","lakefile.lean","lakefile.toml","lake-manifest.json"])
-    if(existsSync(path)) inputs[path]=hash(path);
+    if(existsSync(path)) inputs[path]=sourceDigests.get(path) ?? hash(path);
   Object.assign(inputs, sharedToolchain ?? toolchainInputs());
   for(const path of [...closure].sort()) {
-    inputs[path]=hash(path);
+    inputs[path]=sourceDigests.get(path);
     inputs[".lake/build/lib/lean/"+path.slice(0,-5)+".olean"]=hash(".lake/build/lib/lean/"+path.slice(0,-5)+".olean");
   }
   for(const dependency of [...fixtureDeps].sort()) inputs[registry[dependency].guard]=hash(registry[dependency].guard);

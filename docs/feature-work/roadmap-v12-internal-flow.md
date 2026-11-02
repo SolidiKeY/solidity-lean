@@ -3188,3 +3188,67 @@ global failure. General runtime/unbounded recursion/full-signature dispatch,
 early-control/general-loop producers and word-frame/live-byte-journal/world/
 transient/callback transport remain open. No goal write/reactivation/completion,
 publication, peer transfer or independent-work-exhaustion claim follows.
+
+
+## C41 — invocation-local source I/O in fixture authentication (partial)
+
+The owned fixture-cache driver now reads each root/transitive source once per
+key invocation, hashes that fresh raw Buffer and parses imports from the same
+bytes. Only a local digest map survives the traversal; the next key invocation
+starts empty and reads all sources again. Existing pure text parse memoization
+is unchanged and is NOT claimed as this repair. Input insertion order, complete
+actual toolchain hashing before/after, all guards/configs/objects/dependency
+receipts, imported-fixture authentication and batch/report checks are unchanged.
+This is coherent per-file byte binding, not an atomic filesystem snapshot;
+the writer lease and fresh pre/post checks remain essential.
+
+The no-Lean key controls compare actual old/new key bodies with identical input
+bytes and exact serialized key/input order. They cover invalid UTF8 raw hashing,
+changed import-closure rebuilding, root/transitive source/object/guard/config/
+driver/manifest mutations between calls, missing dependencies, valid-JSON receipt
+corruption, mutation after a source read, and missing/reordered/duplicate/wrong/
+error reports using the actual parser/batch splitter. Controlled test receipts
+are NOT production authentication or Lean proof evidence.
+
+The first telemetry run retained a negative whole-key result (median10.440→
+10.575seconds). Its read wrapper normalized legacy UTF8 reads to Buffers;
+corrected telemetry preserves actual production read modes. Over the same27
+fixtures, source reads fall10130→5065 and median source-read time571→62ms.
+Corrected whole-key medians10.560→10.544seconds are essentially flat: no broad
+or statistically established whole-key/kernel speedup is claimed. Both raw
+profiles are retained, with complete real toolchain comparisons and identical
+complete old/new key outputs. Benchmark dependency receipts exist only in memory
+and do not authenticate actual objects.
+
+The changed driver hash intentionally invalidates existing production fixture
+manifests even though key serialization is compatible for identical inputs.
+Fresh source-bound preparation is required for every affected fixture, under
+its existing per-process bound. It is not a split raw/full/aggregate gate.
+Exactly one complete registered cached attempt may follow this measured source
+I/O repair and successful authentication, at the SAME strict outer120s bound
+with every27fixture/739orderedreport and complete toolchain before/after check.
+Its actual outcome is recorded in the C41 handoff; earlier failures are never
+rewritten. No unchanged raw-source/full300s retry is justified by this change.
+
+All intrinsic and fixture Lean sources, all739 registry pins/order (including
+original542types/85tupletypes and prior703pins), observations, proof budgets,
+profiles/refusals and reserved producers remain byte-preserved. The exact
+public MemoryTurn/loopBody/memory_loop_iter owner request remains unresolved;
+no withdrawn generic iterator proof is recreated. All original Work1–6 and
+Backfills A/B stay partial. The blocked goal is untouched. No publication,
+peer transfer, general source/target/world closure or independent-work-exhaustion
+claim follows from this validation-code checkpoint.
+
+
+C41 actual outcome: all27 source-bound preparations and739 exact ordered
+standalone report guards PASS. The one complete cached attempt FAILS with
+exit124,120.820seconds outer elapsed at unchanged120s. The owned/import build
+completed239jobs and the complete792-line combined harness (27fixture imports,
+739reports and separators) was written. Its child diagnostics file was not
+written before timeout: existing run() buffers spawnSync output and writes it
+only on return. This does not locate a particular slow declaration or establish
+that all combined reports completed. Raw wrapper/cgroup/RSS/timeout output is
+retained; no output is invented and no unchanged retry follows. Future narrow
+profiling/diagnostic-retention work is independently ready; source read sharing
+alone does not establish sufficient aggregate headroom. All old raw/full/docs
+failures and every semantic queue remain partial.
