@@ -299,6 +299,49 @@ private theorem qfUIntLinear_normalizer_work {C : Contract} (fuel budget : Nat)
         · change rest + (φ.normalizationWork + ψ.normalizationWork + 1) = budget + 1
           omega
 
+/-- Every successful real traversal consumes the counted work, even when its
+input budgets were not assumed sufficient. No minimal-depth claim is needed. -/
+private theorem qfUIntLinear_normalizer_consumption {C : Contract} (fuel budget : Nat)
+    {Γ : Ctx} {φ : Fml C Γ} (h : φ.QFUIntLinear)
+    (d : DeclarationReduction φ) (rest : Nat)
+    (hd : actualNormalization fuel φ budget = some (d, rest)) :
+    rest + φ.normalizationWork = budget := by
+  induction fuel generalizing Γ φ budget rest with
+  | zero => change none = some (d, rest) at hd; cases hd
+  | succ fuel ih =>
+    cases budget with
+    | zero => change none = some (d, rest) at hd; cases hd
+    | succ budget =>
+      cases h with
+      | tt =>
+        rw [actual_truth] at hd
+        have he : budget = rest := congrArg Prod.snd (Option.some.inj hd)
+        change rest + 1 = budget + 1
+        omega
+      | @eq a b ha hb =>
+        rw [actual_eq] at hd
+        have he : budget = rest := congrArg Prod.snd (Option.some.inj hd)
+        change rest + 1 = budget + 1
+        omega
+      | @not φ hφ =>
+        rw [actual_not, Option.map_eq_some_iff] at hd
+        obtain ⟨⟨e, middle⟩, he, hresult⟩ := hd
+        have hc : middle + φ.normalizationWork = budget := ih budget hφ e middle he
+        have hm : middle = rest := congrArg Prod.snd hresult
+        change rest + (φ.normalizationWork + 1) = budget + 1
+        omega
+      | @and φ ψ hφ hψ | @imp φ ψ hφ hψ =>
+        first | rw [actual_and] at hd | rw [actual_imp] at hd
+        rw [Option.bind_eq_some_iff] at hd
+        obtain ⟨⟨e, middle⟩, he, hnext⟩ := hd
+        rw [Option.map_eq_some_iff] at hnext
+        obtain ⟨⟨f, last⟩, hf, hresult⟩ := hnext
+        have hc : middle + φ.normalizationWork = budget := ih budget hφ e middle he
+        have hf' : last + ψ.normalizationWork = middle := ih middle hψ f last hf
+        have hl : last = rest := congrArg Prod.snd hresult
+        change rest + (φ.normalizationWork + ψ.normalizationWork + 1) = budget + 1
+        omega
+
 /-- A source-derived sufficient budget for actual normalization; no fixed2048
 premise or supplied normalization certificate. This is not the later511-node cut. -/
 theorem qfUIntLinear_normalization_by_work {C : Contract} {Γ : Ctx}
@@ -318,6 +361,41 @@ theorem qfUIntLinear_normalization_at_work {C : Contract} {Γ : Ctx}
     ∃ d : DeclarationReduction φ,
       ProgramNormalization.ofFormula? φ.normalizationWork φ = some d :=
   qfUIntLinear_normalization_by_work h φ.normalizationWork (Nat.le_refl _)
+
+/-- For this syntax class, the counted formula work exactly characterizes
+success when the public normalizer shares one initial fuel/node budget. -/
+theorem qfUIntLinear_normalization_iff_work {C : Contract} {Γ : Ctx}
+    {φ : Fml C Γ} (h : φ.QFUIntLinear) (budget : Nat) :
+    (ProgramNormalization.ofFormula? budget φ).isSome = true ↔
+      φ.normalizationWork ≤ budget := by
+  constructor
+  · intro hs
+    change ((actualNormalization budget φ budget).map Prod.fst).isSome = true at hs
+    cases he : actualNormalization budget φ budget with
+    | none => rw [he] at hs; cases hs
+    | some pair =>
+      rcases pair with ⟨d, rest⟩
+      have hc : rest + φ.normalizationWork = budget :=
+        qfUIntLinear_normalizer_consumption budget budget h d rest he
+      omega
+  · intro hb
+    obtain ⟨d, hd⟩ := qfUIntLinear_normalization_by_work h budget hb
+    rw [hd]
+    rfl
+
+/-- An insufficient aggregate budget really refuses; it cannot be hidden by
+smart output collapse or small formula depth. -/
+theorem qfUIntLinear_normalization_below_work {C : Contract} {Γ : Ctx}
+    {φ : Fml C Γ} (h : φ.QFUIntLinear) (budget : Nat)
+    (hb : budget < φ.normalizationWork) :
+    ProgramNormalization.ofFormula? budget φ = none := by
+  cases he : ProgramNormalization.ofFormula? budget φ with
+  | none => rfl
+  | some d =>
+    have hs : (ProgramNormalization.ofFormula? budget φ).isSome = true := by rw [he]; rfl
+    have hw : φ.normalizationWork ≤ budget :=
+      (qfUIntLinear_normalization_iff_work h budget).mp hs
+    omega
 
 /-- One positive binder adds exactly one visit to the source-derived budget. -/
 theorem qfUIntPrefix_normalization_by_work {C : Contract} (name : Var)

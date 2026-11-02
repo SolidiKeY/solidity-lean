@@ -1288,7 +1288,11 @@ at_work and positive-prefix theorems construct real normalization certificates
 at formula-derived budgets without a supplied normalizer equation. Tests retain
 5-versus4 truth-collapse refusal, counts3/9/11 and the extra prefix visit, plus
 existing proved/refuted/unknown controls. Generalized indexed recursion follows
-G0. Runtime2048 and the later511-node cut remain unchanged; the broader runtime
+G0. A subsequent exact-consumption theorem now also proves necessity: public
+normalization succeeds iff computed work fits its shared initial budget, for
+this grammar. Generic below-work refusal and all-budget5/9/11 threshold clients
+are kernel-checked. This is exact public shared budget, not independent minimal
+depth. Runtime2048 and the later511-node cut remain unchanged; the broader runtime
 fuel/cut obligation and global Residue theorem are still open.
 
 

@@ -142,6 +142,24 @@ theorem arithmetic_and_prefix_controls :
     (ProgramNormalization.ofFormula? (negativeBody.normalizationWork + 1) negative).isSome = true := by
   exact ⟨by decide +kernel, by rfl, by rfl, by rfl, by rfl, by rfl⟩
 
+/-- A complete threshold statement for the actual shared-budget normalizer,
+including every insufficient and surplus budget, despite truth collapse. -/
+theorem collapsed_threshold (budget : Nat) :
+    (ProgramNormalization.ofFormula? budget collapsed).isSome = true ↔ 5 ≤ budget :=
+  qfUIntLinear_normalization_iff_work collapsed_grammar budget
+
+/-- Larger arithmetic source weights do not alter the exact formula threshold. -/
+theorem numeric_thresholds (budget : Nat) :
+    ((ProgramNormalization.ofFormula? budget positiveBody).isSome = true ↔ 9 ≤ budget) ∧
+    ((ProgramNormalization.ofFormula? budget negativeBody).isSome = true ↔ 11 ≤ budget) :=
+  ⟨qfUIntLinear_normalization_iff_work positive_grammar budget,
+    qfUIntLinear_normalization_iff_work negative_grammar budget⟩
+
+/-- A generic insufficient-budget refusal supplies the concrete branching
+negative control without executing a decision verdict. -/
+theorem branching_refusal_from_work : ProgramNormalization.ofFormula? 4 collapsed = none :=
+  qfUIntLinear_normalization_below_work collapsed_grammar 4 (by decide +kernel)
+
 /-- info: ["proved", "refuted"] -/
 #guard_msgs in #eval [positive, negative].map (fun φ => match decideGoal φ with
   | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")

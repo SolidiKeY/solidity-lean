@@ -2821,3 +2821,59 @@ boundary, full formula-derived runtime fuel, remaining performance/backfill and
 final/full gates remain open. This independent fuel component does not consume
 VA2 sharing ownership or TypeExamples repair. Prior seals/failures and original
 goal identity are preserved; no push/merge/tag or whole-goal completion.
+
+
+## Necessary and sufficient normalizer work (2026-11-02)
+
+After sealede645f435, owned DecisionNumericNormalization strengthens the real
+normalizer proof without altering any existing function or sufficient theorem.
+For every C/Γ/φ.QFUIntLinear/fuel/budget/d/rest, successful actualNormalization
+fuel φ budget=some(d,rest) implies rest+φ.normalizationWork=budget, without
+sufficient-budget hypotheses. Success inversion recovers both actual child
+computations and their real intermediate remainder. Zero fuel/budget contradict
+success. This preserves truth-collapse order and arbitrary partial UInt terms.
+
+Public qfUIntLinear_normalization_iff_work proves, for all such φ and budget,
+(ProgramNormalization.ofFormula? budget φ).isSome=true iff
+φ.normalizationWork≤budget. Public qfUIntLinear_normalization_below_work derives
+actual none for every smaller budget. This is exact minimum shared public budget
+(the same number initializes fuel and shared nodes), not minimum independent
+depth. Original state-bound proof, source-derived sufficiency/prefix, runtime2048
+and later511-node cut remain unchanged. This is not an exhaustive decision-fuel
+implementation or a Residue/coverage theorem. No supplied output/coverage/verdict
+premise, oracle, new axiom, weakened observation or increased budget.
+
+Clients characterize all budgets, including surplus values: collapsed truth
+branches succeed iff5≤budget; numeric positive/negative bodies iff9/11≤budget.
+Generic below-work refusal produces the concrete4-node branching failure.
+Existing computed source counts, exact/+1 prefix boundaries and original
+proved/refuted/below-key unknown controls remain unchanged. No imports, producer
+files, registrations or expected verdicts change. Decision/HashPremise/
+ProgramReduction and held TypeExamples remain byte-identical to prior checkpoint.
+
+Raw evidence /workspace/va1-evidence/normalizer-minimum-next. Final core MCP
+12.799s, core emit9.631s, client MCP7.468s, affected client emit6.283s, public
+8-declaration type/axiom audit9.519s pass. Only existing standard axiom subsets.
+The first induction mistakenly fixed rest (11.790sFAIL); generalization was
+correct but argument order then failed11.654s. A per-file goal query inspected
+the real induction signature, and final repair passes. Both failed sources/
+raw outputs and inspected goal remain; none is a passing gate. Final source/client
+MCPs report success with no items/failed dependencies.
+
+Original lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, serial threads1/Lean-j1,
+actual memory.max12884901888/swap.max0 and12GiB host reserve retained. Measured
+aggregate RSS2170740KiB, cgroup peak1312038912bytes, host available minimum
+16416120832bytes;9 unsuccessful resource measurements retained. Static strict
+automatic/layers/reachability/trust/whitespace pass. Broad docs85/inventory404
+findings remain FAIL and earlier fullgate/TypeExamples stops remain failures.
+No unchanged stopped full build repeated. No EVM evidence is claimed.
+
+Independent read-only finder/skeptic source reviews report no findings; both
+verify actual successful-child accounting and exact shared-budget scope. Neither
+uses Lean/server/builds/edits. Final docs/export reviews and immutable committed
+package seal remain pending until performed. Original full goal remains partial:
+global meaningful Residue/DecisionTheorem-prime/target/hash bridge, keyed/field/
+struct/nested arrays, broader memory, halting OR, revised broader program-free M4
+boundary, whole-pipeline formula-derived fuel/511 bound, remaining performance/
+backfill/final full gates and held VA1-Q2 are open. Prior seals/approvals/failures
+preserved; no goal reset/completion, scope takeover or publication.
