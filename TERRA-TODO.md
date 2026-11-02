@@ -94,3 +94,42 @@ Source.deleteLocal_array_run; exhausted branches keep the original Source
 heap while intrinsic allocation keeps old target objects. This would observe
 only old contents, NOT synchronize Source timeouts with logical target success.
 Do not infer matching verdicts or general frame simulation from it.
+
+
+# H14 cascade — generic integer-array consumer (private V07 prerequisite)
+
+Module `Solidity.Backend.Aggregates.IntegerArrays` now proves value_related,
+capacity and copy_related. It imports exact peer Scalar5d45c086, not yet
+integrated into this helper branch. Use only the recorded private stage until
+combined integration; no substitute scalar implementation or proof oracle.
+
+Routine lemmas to add after producer validation:
+
+- `IntegerArrays.target_old_heap`: for `target,t,values,room`,
+  `Heap.Keeps (List.prefix_append target.H [runtimeTy t]) target.heap
+    (lower target t values room).heap`.
+  Reason: existing Heap.keeps_alloc; no new copy arithmetic.
+- `IntegerArrays.target_old_local`: for any actual typed local index i,
+  `TEnv.get (.there i) (lower target t values room).env =
+    LTy.TDenote.wk (List.prefix_append target.H [runtimeTy t]) _
+      (TEnv.get i target.env)`.
+  Reason: existing TEnv.get_wk; actual frame extension already in lower.
+- `IntegerArrays.target_new_local`: for `target,t,values,room`,
+  `TEnv.get .here (lower target t values room).env =
+    some (target.alloc (object target.H t values room)).2`.
+  Reason: actual State.allocPush/push equation; connects the new binding to
+  the allocated reference. Added following independent finder review.
+- `IntegerArrayControls`: inhabited actual ABI copies for unsigned8 values
+  [255,0] and signed8 values [-1,-128] using canonical 256-bit encoded words;
+  prove copy_related instances and exact numeric/order observations through
+  V07.integer_observe. Preserve populated bytes/caller aliases. Add dirty
+  unsigned8 word256 and signed8 non-sign-extended word255 rejection controls,
+  empty input and swapped-order negatives. These are UNPROVED requested
+  controls, not asserted outputs; inspect actual decodeWord before choosing
+  fixtures and retain source-specific failure bytes/rollback. Do not alter
+  expected verdicts. No source dispatch/fetched-EVM claim.
+
+Sol retains total actual Source error/target adapter composition beyond the
+successful validation theorem. Independent typed Source/frame admission,
+recursive shapes/location copies and physical runtime realization remain open.
+Registration for new modules must be generated under H14.

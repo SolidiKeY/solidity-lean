@@ -230,3 +230,45 @@ TERRA-TODO. Populated inhabited joint controls, registration generator and
 checkpoint10 gates remain unfinished. No full/docs failed gate is rerun or
 relabelled, no Source/Static/reserved implementation is changed, and the
 original queue/goal remains incomplete.
+
+
+### Private V07 integer-array consumer increment
+
+All remaining deletion-local projection/control glue is delegated in
+TERRA-TODO under H14; no completed checkpoint10 is claimed. Fresh master
+88d68150b5ea0087dc9d50502088a6a34efcce48 was fetched/inspected and adds no
+equivalent consumer. To continue independently ready G18.04/.05 work,
+IntegerArrays consumes the exact sealed V07 Scalar checkpoint
+5d45c086bce93a47140327112333019f923ebdd7 (blob
+0ca8696879e8d121071a1bca38632e572dff7507, SHA256
+2e0e760d63885f01e5c19c5a8dd8bb5903d78cf5ec96a052846003b8746e4b3d).
+No foreign branch is merged or reserved producer edited. A narrow private
+source-keyed stage reuses existing oleans by symlink, compiles that exact
+producer source and audits its four scalar headline axioms before consumption.
+Initial source-root/search-view failures1 are preserved, then repaired with
+explicit root and cache symlinks, never a replacement implementation.
+
+The new owned module adapts every actual Source.IntTy to V07.integerPrim and
+integerValue, preserving its numeric observation. Actual ABI region and
+ordered decodeWord validation derive object capacity, not an extra capacity
+premise. copy_related proves actual Source cdToMem allocation and intrinsic
+typed allocation carry the same ordered converted values, with independent
+fresh identities. No integer arithmetic/width theorem, Source evaluator,
+untyped AST or machine semantics is reimplemented. Source width remains in
+Source values; target signed/unsigned carriers are the existing intrinsic
+primitives, not a new arbitrary-width runtime representation.
+
+Six scratch candidates were tried for each proof before manual steps. Final
+private per-file/signature/three-axiom check passes1.90s, peakLean/Lake785328KiB,
+oneworker,cgroup427839488bytes,noOOM/swap. Producer check passes2.51s with
+standard axioms only; all three consumer theorems use standard3 axioms.
+The success validation equation remains explicit. Total-error adapter,
+inhabited signed/unsigned dirty-word/order/empty/populated-caller controls,
+old/new-local and heap projections remain in TERRA-TODO. Finder requested the
+new-local equation be listed; it is now included. This is provisional private
+kernel evidence, NOT an integrated standard build or source/compiler/EVM proof.
+
+No Solidity.lean hand edit: registration waits for H14 generator, toolkit still
+absent. Standard combined validation is pending exact V07 incorporation;
+original full124/docsraw1/frozenno-new1 and all queue obligations remain open.
+No new external compiler/EVM tests or whole-lane completion claim.
