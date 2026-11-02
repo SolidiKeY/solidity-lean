@@ -1307,3 +1307,13 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Backend/Environment/Composition.lean` | Constructed intrinsic Val certificates, exact target concatenation/stack order, materialization/hash adapters and typed source-sequence fallback. |
 | `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
 | `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
+
+### VA2 checked call-family consumer (AU04)
+
+| Module | Purpose |
+|---|---|
+| `Calculus/CallFunctionAffine.lean` | Checked affine power coefficients, early-overflow preservation and exact shared-leaf cases |
+| `Tools/CallFunctionShare.lean` | Kernel-checked explicit sharing/closure and original-walk versus whole-leaf measurements |
+| `Examples/Tactics/CallFunctionAffine.lean` | Inhabited order, zero, word-edge, overflow and false-result controls |
+| `Examples/Tactics/CallFunctionShare.lean` | Actual parsed non-offset call-family source proofs and old/new leaf pins |
+| `Examples/Tactics/CallFunctionShareControls.lean` | Parsed countermodels and transactional profile/no-shrink refusal controls |

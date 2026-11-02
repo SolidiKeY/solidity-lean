@@ -965,3 +965,9 @@ import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.SignedPower
 import Solidity.Backend.Scalar.SignedPowerPost
 import Solidity.Backend.Scalar.SignedPowerPrefix
+
+import Solidity.Calculus.CallFunctionAffine
+import Solidity.Tools.CallFunctionShare
+import Solidity.Examples.Tactics.CallFunctionAffine
+import Solidity.Examples.Tactics.CallFunctionShare
+import Solidity.Examples.Tactics.CallFunctionShareControls

@@ -946,3 +946,7 @@ are capped at 512 syntax nodes before substitution; the final condition is
 also capped. Non-ground conditions use the existing `Seq.refuteS` clauses.
 A rigid refusal or failed check conservatively walks both branches, even if
 contradictory unused premises could have closed one in the previous path.
+
+### VA2 AU04 explicit consumer
+
+`sol_share_calls` and `sol_close_call_shared` are Lean-only leaf transformations, not new SolKey-shaped calculus constructors. Their soundness uses `CallFunctionTransform.valid_iff` and `CallFunctionAffine.holds_shared_affine_cases`; actual source-call transport remains the existing certified summary bridge. The affine profile is certified internally with immediate kernel validation. Unsupported profiles keep ordinary handling; no validity premise, observation or SolKey rule name changes.
