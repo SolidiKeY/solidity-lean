@@ -3601,3 +3601,45 @@ without evaluating an unreachable suffix). At the actual caller costs are0/4 and
 both selected public roots have need8. The represented successful endpoint states
 GrowsAllocator with the actual public program cost. This is constructor-derived
 metadata, not a failed-state frontier or a global frame/recursion theorem.
+
+
+### C48 — shared reached prefix capacity; validation investigation remains open
+
+`SharedPrefixCapacity.fork` consumes one actual `Calls.Program`, entry
+`StateRepr`, frame bound, successful intrinsic prefix execution, and initial
+`AllocationInput (prefix.cost + max left right)`. It produces ONE actual target
+prefix endpoint with reached representation, unchanged stack, `BaseExtends`,
+`GrowsAllocator`, and both alternative continuation capacity premises. The
+maximum supports choosing either continuation, not sequentially running both.
+`SharedArgumentEndpoint.shared_capacity` discharges these premises for the SAME
+populated C46/C47 prefix and actual public bad/good costs 0/4. No desired
+midpoint, target continuation simulation or failed State is supplied. Existing
+successful 20-element vector, private/old/result addresses, bad-index failure,
+frame/cursor/alias negatives and every old theorem/pin remain unchanged.
+Two additive actual builtin axiom reports retain precisely Classical.choice,
+Quot.sound and propext. All 31 fixtures remain registered; 829 old ordered
+reports remain unchanged, with two additive reports (831 total).
+
+C48 source-only diagnostics reject proof re-elaboration as a demonstrated
+cached-harness cause: all 31 imported fixtures plus immediate dependency
+inspection of 829 roots passed in 3.374s (0.076s direct inspection). A 30-root
+sample of the UNMODIFIED standard transitive axiom collector took 6.363s inside
+9.133s process time. These are diagnostic samples, not authentication, aggregate
+measurements or a performance repair. The collector follows checked types AND
+values without certificate normalization. C47 head types already transitively
+reach the compiler; opacity alone cannot cut that dependency. A certificate
+value repair for the older prefix remains investigated, not implemented or
+measured. NO cached/raw/full aggregate was retried. Their historical failures,
+documentation raw failures and all original Work1–6/BackfillA–B obligations remain
+open. This independent finite-prefix consequence is not general frame, recursion,
+dispatch, loop, rollback, byte/world or transient closure; the original blocked
+goal remains unchanged.
+
+C48 independent read-only finder and skeptic source reviews PASS with no confirmed
+finding; neither runs Lean/server/builds. They explicitly confirm that both
+capacities refer to ONE actual reached machine and address map and that max is
+an alternative budget. The changed source/client and focused import/KeySort
+checks pass; driver coverage/fail-fast and actual report corruption checks pass.
+Documentation normal/strict raw exits remain 1, complete outputs byte-identical
+to C47; frozen comparison retains two incoming missing paths and one incoming
+ambiguity (48 missing versus 46, 86 total findings versus 83). No owned addition.

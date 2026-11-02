@@ -28,6 +28,12 @@ PINS = {'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_argument_
                                                                                      'propext'],
  'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_metadata': ['Classical.choice',
                                                                            'Quot.sound',
+                                                                           'propext'],
+ 'Solidity.Backend.InternalFlow.SharedPrefixCapacity.fork': ['Classical.choice',
+                                                             'Quot.sound',
+                                                             'propext'],
+ 'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.shared_capacity': ['Classical.choice',
+                                                                           'Quot.sound',
                                                                            'propext']}
 ORDER = ['Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_argument_failure',
  'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_revert',
@@ -37,7 +43,9 @@ ORDER = ['Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_argument
  'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_not_success',
  'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.wrong_emitted_cursor',
  'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.distinct_emitted_programs',
- 'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_metadata']
+ 'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_metadata',
+ 'Solidity.Backend.InternalFlow.SharedPrefixCapacity.fork',
+ 'Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.shared_capacity']
 log = Path(sys.argv[1]).read_text()
 reports = re.findall(r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)",log)
 assert [n for n,_ in reports] == ORDER, "missing, extra, duplicate or reordered actual report"

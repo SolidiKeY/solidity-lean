@@ -1,5 +1,6 @@
 import tests.«internal-flow».SharedArgumentFacts
 import tests.«internal-flow».ArgumentFailureEndpoint
+import Solidity.Backend.InternalFlow.SharedPrefixCapacity
 namespace Solidity.Backend.InternalFlow.SharedCallPrefix.Checks
 open Evm Evm.Memory
 open ArgumentFailureTarget.Checks
@@ -85,6 +86,21 @@ theorem public_metadata : publicBad.cost caller.st = 0 ∧ publicGood.cost calle
    rw [← original_good,exact_frame.2]
    rfl
 
+/-- Both actual public alternatives use the SAME represented prefix endpoint.
+The larger budget is established at entry, not assumed at the midpoint. -/
+theorem shared_capacity : ∃ reached addresses,
+ Evm.run prefixProducer.code machine = .ok reached 0 ∧
+ StateRepr 1 1 128 F caller.st addresses reached ∧
+ reached.stack = machine.stack ∧ BaseExtends initial.H bases addresses ∧
+ GrowsAllocator 1 128 (prefixProducer.cost initial) initial bases machine caller.st addresses reached ∧
+ AllocationInput 1 128 (publicBad.cost caller.st) caller.st addresses reached ∧
+ AllocationInput 1 128 (publicGood.cost caller.st) caller.st addresses reached := by
+ apply SharedPrefixCapacity.fork prefixProducer
+   PublishedDirectCalls.Checks.initial_repr.1 frame_rooms.1 caller prefix_execution
+ rw [public_metadata.1,public_metadata.2.1]
+ change AllocationInput 1 128 (prefixProducer.cost initial + 4) initial bases machine
+ simpa only [costs.2.2] using good_capacity
+
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_argument_failure
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_revert
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_success_vector
@@ -94,4 +110,6 @@ theorem public_metadata : publicBad.cost caller.st = 0 ∧ publicGood.cost calle
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.wrong_emitted_cursor
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.distinct_emitted_programs
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_metadata
+#print axioms Solidity.Backend.InternalFlow.SharedPrefixCapacity.fork
+#print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.shared_capacity
 end Solidity.Backend.InternalFlow.SharedCallPrefix.Checks

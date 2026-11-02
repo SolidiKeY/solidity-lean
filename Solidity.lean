@@ -1013,3 +1013,5 @@ import Solidity.Backend.InternalFlow.CallArgumentPrefix
 import Solidity.Backend.InternalFlow.ArgumentFailureTarget
 
 import Solidity.Backend.InternalFlow.SharedCallPrefix
+
+import Solidity.Backend.InternalFlow.SharedPrefixCapacity
