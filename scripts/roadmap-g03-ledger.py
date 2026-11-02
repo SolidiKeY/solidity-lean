@@ -86,9 +86,6 @@ def load_plan(root):
             wave_of[m.group(1)] = wave
     children = re.findall(r"^\| ([SG]\d\d\.\d\d) —", text, re.M)
     in_plan = len([g for g in groups if g not in {c.split(".")[0] for c in children}]) + len(children)
-    proposed = [pid for pid, _, _ in D.PROPOSED_PACKAGES]
-    stale = [pid for pid in proposed if pid in children]
-    children = children + [pid for pid in proposed if pid not in children]
     parents = {c.split(".")[0] for c in children}
     for c in children:
         wave_of[c] = wave_of.get(c.split(".")[0])
@@ -103,7 +100,6 @@ def load_plan(root):
         if m:
             vms.append((m.group(1), m.group(2).strip(), m.group(3).strip()))
     return dict(groups=groups, children=children, parents=parents, packages=packages, in_plan=in_plan,
-                proposed=proposed, stale_proposals=stale,
                 stated=stated, wave_of=wave_of, vms=vms)
 
 
@@ -566,8 +562,6 @@ def build(root):
     plan = load_plan(root)
     if plan["stated"] is None or plan["stated"] < 0:
         errors.append(f"coverage-plan.md's stated package count does not match its {plan['in_plan']} rows")
-    for pid in plan["stale_proposals"]:
-        errors.append(f"PROPOSED_PACKAGES: {pid} is already in coverage-plan.md; drop the proposal")
     pk = set(plan["packages"])
     imports = load_imports_cached(root)
 
@@ -1670,8 +1664,7 @@ class D:
                 "of wave 3",
          ["G03 Q1 — shared compiler foundation", "Roadmap (G03)"],
          {"backend": "G24.01 G24.02 G24.03 G24.04"},
-         ["the child rows are not yet in coverage-plan.md's manifest and VM table (integration step 1); the "
-          "checker applies them from `PROPOSED_PACKAGES` until they land",
+         ["the child rows are in coverage-plan.md's manifest; the VM schedule awaits G02",
           "no frozen interface exists: `Slot`, `Sim`/`StateRepr` and `StmtOut` are concrete today"],
          None),
     ]
@@ -1763,9 +1756,9 @@ class D:
         ("G22.04", "G22.03", "G-parent children in listed order", "roadmap"),
         ("G22.05", "G22.04", "G-parent children in listed order", "roadmap"),
         ("G23", "G16 G17 G18.06 G19 G20 G21 G22.05", "G23's whole-source composition follows G16–G22", "roadmap"),
-        ("G24.02", "G24.01", "G-parent children in listed order (proposed G24 children)", "roadmap"),
-        ("G24.03", "G24.02", "G-parent children in listed order (proposed G24 children)", "roadmap"),
-        ("G24.04", "G24.03", "G-parent children in listed order (proposed G24 children)", "roadmap"),
+        ("G24.02", "G24.01", "G-parent children in listed order (G24 children)", "roadmap"),
+        ("G24.03", "G24.02", "G-parent children in listed order (G24 children)", "roadmap"),
+        ("G24.04", "G24.03", "G-parent children in listed order (G24 children)", "roadmap"),
         ("G25", "G24.04", "G25–G31 follow G24", "roadmap"),
         ("G26", "G24.04", "G25–G31 follow G24", "roadmap"),
         ("G27.01", "G24.04", "G25–G31 follow G24", "roadmap"),
@@ -3311,20 +3304,6 @@ class D:
     # Integrated wave-0 packages: their modules are rechecked by every build,
     # so later edits below them are ordinary integration checks, not findings.
     INTEGRATED = ("G00", "G04")
-    # Foundation children of G24 (user decision on G03 Q1, relayed by the
-    # coordinator 2026-10-29): proposed manifest rows, applied by the checker
-    # until coverage-plan.md carries them (then `--check` asks to drop them).
-    PROPOSED_PACKAGES = [
-        ("G24.01", "Slot interface", "Freeze an abstract storage-slot interface (root, mapping-key and "
-         "array-element images, offsets) under every compiler proof, so G27.05 replaces the symbolic `Slot` "
-         "behind it without changing its signatures."),
-        ("G24.02", "State interface", "Freeze the typed core/memory state relations (`Sim`, `StateRepr`, the "
-         "allocator input) as one relation interface that every backend pass and the `decode` export use."),
-        ("G24.03", "Statement interface", "Freeze the statement-leaf outcome and pass-certificate signatures "
-         "(`StmtOut`, the per-statement compile entry, `Cert` instances) that G25–G44 extend by new cases only."),
-        ("G24.04", "Unified entry", "Unify the core/memory compiler entry on the frozen interfaces so mixed "
-         "programs compose; restate T1/T12/T13/T15 without the unreachable payment disjunct."),
-    ]
     # Modules whose interface each foundation child freezes: findings through
     # them between packages scheduled after the child are resolved by it.
     FROZEN = {
