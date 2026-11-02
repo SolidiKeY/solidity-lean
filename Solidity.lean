@@ -203,6 +203,7 @@ import Solidity.Calculus.DecisionNumericGround
 import Solidity.Calculus.DecisionNumericGroundSource
 import Solidity.Calculus.DecisionSourceInstance
 import Solidity.Calculus.DecisionSourceChain
+import Solidity.Calculus.DecisionArrayReasons
 import Solidity.Calculus.DecisionNumericFlatten
 import Solidity.Calculus.DecisionNumericStages
 import Solidity.Calculus.DecisionNumericCompiler
@@ -292,6 +293,7 @@ import Solidity.Examples.DecisionNumericGround
 import Solidity.Examples.DecisionNumericGroundSource
 import Solidity.Examples.DecisionSourceInstance
 import Solidity.Examples.DecisionSourceChain
+import Solidity.Examples.DecisionArrayReasons
 import Solidity.Examples.DecisionNumericFlatten
 import Solidity.Examples.DecisionNumericStages
 import Solidity.Examples.DecisionNumericCompiler

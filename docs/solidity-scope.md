@@ -444,3 +444,18 @@ stronger precondition. No semantic/default/test/refusal/profile/pin/observation
 or budget change, new axiom or unfinished proof is authorized. Every other
 AU01/AU02/backfill/full-validation obligation remains. Earlier decisions,
 checkpoints, failures and seals are preserved; publication is not authorized.
+
+
+### VA1-Q2 / H6 performance-only authorization
+
+Coordinator message received on 2026-11-02 reports the human decision verbatim:
+H6 (VA1-Q2): "VA1 splits it".
+
+This resolves only VA1-Q2's ownership hold for a narrow performance-only split
+of TypeExamples and necessary registrations. Statements, observations and all
+proof/resource/test budgets must be preserved. It does not authorize a semantic
+repair, changed expectations, new premise/exclusion, compiler-lane expansion,
+push/merge/publication, or changes to the original full-goal requirements.
+AQ1/AQ2 and the approved VA1-Q1 boundary revision remain as recorded above.
+The message identifies Claude Code as coordinator and retires the previous
+Codex listener/auditor; no VM/branch/goal identity is changed by this receipt.

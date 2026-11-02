@@ -1064,6 +1064,18 @@ a larger literal source folds to 27 nodes and stays Covered. These preserve
 why neither a size threshold nor noncoverage defines Residue/unknown.
 Separate cut/lift/resource and exhaustive coverage/fuel obligations stay open.
 
+`Calculus/DecisionArrayReasons.lean` supplies four separately named source
+reason classes: arrays below mapping keys, arrays below fields, structure fields
+at array elements, and nested array reads. Generalized intrinsic constructor
+inspection and actual source literal-chain evidence determine membership at
+supplied bounds/literals; coverage and verdicts are never consulted. These
+classes cover valid literal-instance chains with those immediate path shapes,
+not arbitrary/negative array goals or all array gaps. Five existing unknown
+pins inhabit them; covered direct fixed roots remain outside these classifiers.
+The exhaustive Residue union, negative companions and global array integration
+remain open. H6 resolves VA1-Q2: the human answered "VA1 splits it", authorizing
+a performance-only TypeExamples split with statements/observations/budgets intact.
+
 `Calculus/DecisionSourceChain.lean` completes the existing source literal-chain
 parser's recognition theorem and constructive decidability at supplied bounds
 and literals. Its actual result produces an existing exact declaration-reduction

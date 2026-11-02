@@ -3630,3 +3630,112 @@ gates. This source-chain completeness/preparation backfill is completed only at
 its stated interface. Q1 revision approved; Q2 held. No predicate/default/model/
 expected-verdict/exclusion change, new axiom/sorry/native shortcut, goal mutation,
 push/merge/PR or tag publication occurs.
+
+
+## Four array source-reason classes and H6 setup (2026-11-02)
+
+Parent1021e1c257ecc6afce5b780336efe2d1f096c646 and all original decisions,
+source/VM/branch/base/goal identities and earlier seals are preserved. The
+coordinator message received2026-11-02 quotes human H6 (VA1-Q2): "VA1 splits it".
+This exact receipt is recorded in docs/solidity-scope.md and verified before
+any TypeExamples edits. Q2 is resolved only for a narrow performance-only split;
+statements, observations and budgets stay unchanged. TypeExamples still matches
+frozen base, SHA256c7f9a497e4666f60708c746b190250070d208b03a0b24f39a973f5488c40a6b5.
+The Claude Code session is now coordinator; the Codex listener/auditor is retired.
+No continuation/goal is created or reset. The authorized split is next work.
+
+Calculus/DecisionArrayReasons defines four separately named source families and
+one-line reasons: ArrayBelowKeyAt, ArrayBelowFieldAt, ArrayOfStructAt and
+ArrayOfArrayAt. Generalized intrinsic Op/IndexTy/Tm/Fml constructor dispatch
+recognizes the immediate storage-read path. Membership also retains the actual
+SourceUIntLiteralChain with its complete source equation/substitution evidence.
+At supplied bounds/literals the parser is complete, membership constructive and
+decidable, and reason kinds are disjoint. It never calls Covered or decideGoal.
+
+The supported class is valid literal-instance chains with those immediate path
+shapes, not all array goals, negative companions or exhaustive Residue. Reasons
+identify general source bridges still open, not universal parser refusal or
+unknown theorems. Five actual existing unknown pins inhabit the four classes.
+The existing actual three-cell state/antecedent is retained. Direct fixed-root
+covered targets are outside these classifiers; wrong-kind, wrong-bound and
+out-of-range controls distinguish them. The real false fixed-array model rules
+out every parameter/kind pair. Hash-free validity uses the existing explicit
+hasHash=false premise; no hash premise, exclusion or observation changes.
+
+Finder/skeptic found ordinary indexed Op matching in five new helpers and an
+overstated nonresidual-control name. Helpers now use generalized casesOn,
+including IndexTy, and the theorem is covered_fixed_targets. Both confirmed the
+fixes. A keyword case-label syntax error and a negative-control simplification
+failure were fixed with raw diagnostics/attempt results retained. No producer,
+calculus strategy, proof budget or original expected verdict was changed.
+
+Final bounded MCP core/client5.294/5.323s PASS; affected build4.230s PASS;
+20 public signature/axiom reports8.547s PASS with standard axioms only. Initial
+profile FAILED on missing ToString for the diagnostic enum tuple; exact script
+and exit retained. Repaired diagnostic printing profile PASS3.147s. New source
+kind/classification plus original target/Covered observations, including print:
+key18.458669ms, fixed-key11.661746ms, field6.544393ms, struct1.542825ms,
+nested2.767431ms, covered-fixed5.009861ms, false-fixed5.632519ms,
+wrong-bound8.518738ms, repeated key9.506677ms. Global unknowns are separately
+kernel-pinned unchanged; this profile does not claim verdict-only timings.
+Warm checkout/import/cache identity, not a cold/full-build result.
+Sampled aggregate RSS 1440544 KiB; cgroup peak 455675904 bytes; minimum host available 15722323968 bytes; 12 unsuccessful samples retained.
+Actual hard12GiB/no swap, threads1/-j1, original writer lock and12GiB host reserve
+apply. Two additive root imports/two module-map rows. Strict automatic/layer/
+trust/whitespace pass; docs retain exactly85 frozen-base findings, inventory
+retains404 unrecorded changes. All actual failures remain failures. Prior full/
+TypeExamples resource stops are not rerun unchanged or promoted to success;
+H6 now authorizes repairing their split. No EVM/external validation is claimed.
+
+### Same-VM Git storage recovery
+
+At head1021e1c2 root free space fell to528384bytes. All1218 loose Git objects,
+including unreachable ones, received byte-verified backups and canonical SHA1
+checks. A verified persistent79KB seed pack of48 owned handoff blobs preceded
+205 duplicate-only removals (157 already packed plus48 seed); a verified1.23MB
+pack preceded removal of the remaining1013 duplicates. Official git prune-packed
+removed only redundant representations after exact dry-run membership checks.
+All35631 distinct object ID/type/size entries, refs, index and worktree status
+were identical throughout;37030 is the packed-entry count, not distinct objects.
+Baseline plus five transaction fscks passed; all32 journal commands passed.
+Source head/branch/data, old packs/caches and prior artifacts are untouched.
+Root free space rose528384→12001280bytes. No reset, reachability pruning, source
+change or runtime/proof-gate pass follows from this storage operation.
+
+The transaction self-held the original writer lock; finder/skeptic independently
+verified byte backups, pack hashes, complete object catalogs and all invariants.
+Missing optional /usr/bin/time, EXDEV output-mode failure and a read-only output
+write failure are retained. Supported stdout packing/explicit strict indexing
+resolved setup; its own failed auxiliary files remain raw evidence. Host Git
+metadata maintenance used one thread/16MiB delta cache; measured child maxRSS is
+not represented as an aggregate cap. Lean/LSP bounds were unchanged. A separate
+byte-backup compression/verification job passed under the existing hard container
+bounds; no original backup was removed.
+
+Persistent recovery evidence/checksums:
+/workspace/va1-evidence/git-storage-recovery; raw encoding backups additionally
+remain in /tmp/va1-evidence-20261102/git-storage-recovery (ephemeral). Canonical
+Git object contents are persistent in the original repository. Source-chain
+sealed artifacts now have a byte-identical persistent mirror at
+/workspace/va1-evidence/source-chain-next-persistent; all original tmpfs files and
+workspace alias remain. This supersedes the retrieval risk for the source-chain
+handoff itself; optional raw encoding backups still require retrieval before
+VM reboot/teardown. No installed coordinator/guard code or daemon was changed.
+
+Planned export, pending checks at source commit:
+/workspace/va1-evidence/array-reasons-next carries committed modules/signatures,
+actual producer facts, nontrivial witnessed clients, cumulative patch/bundle,
+committed handoff and delta evidence plus all prior archive checksums. Exact-head
+fresh reconstruction/fsck, source hashes and independent artifact reviews are
+required before export success. One immutable bundle may have two hard-linked
+paths; final manifest binds the resulting committed head.
+
+Whole original queue remains partial: exhaustive meaningful Residue/reasons union,
+DecisionTheorem-prime and all target/Covered/hash bridges; actual fixed/nested
+array pipeline integration and negative companions; broader memory/partial-OR
+reconstruction; broader approved M4 boundary; remaining general formula-derived
+fuel and baseline/backfill/performance/full gates. H6 performance-only TypeExamples
+split is authorized next; there are no unanswered VA1-Q1/Q2 choices. Other scope
+holds remain authoritative. No new premise/exclusion/model/default/test-budget,
+axiom/sorry/native shortcut, expected-verdict change, goal mutation, push/merge/
+PR or tag publication occurs.
