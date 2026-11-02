@@ -2017,3 +2017,114 @@ unanswered. Original blocked goal unchanged/get_goal unavailable; no goal status
 mutation, producer retrieval, push/merge/PR or service. Reviewed immutable
 incremental patch/bundle/interface/handoff/evidence/checksums:
 `/workspace/vy5-composition/native-rethrow-20261101/final/`.
+
+
+## Actual Source runtime block and ABI-error consumers (2026-11-02)
+
+The latest inventory had direct canonical rethrow but NO runtime local declaration/
+block composition. [RuntimeBlockPhysical](../../Solidity/Yul/Composition/RuntimeBlockPhysical.lean)
+adds28 kernel laws in the owned namespace, consuming existing intrinsic Source
+constructors/semantics only. `aliasDecl` is ACTUAL resolved `.declInit (.local i)`;
+`declare_run` executes `evalE`/identity `convRV`/`getV`, returning the new indexed
+local followed by original locals. `aliasItems`/`aliasBlock` execute actual
+`execItems`/`execS`, then rethrow through the NEW alias head. Generic Env/Glob/
+frame/contexts/local-reference and heap.get premises are exact. Full error bytes
+and complete Source.St propagate for EVERY horizon `fuel+4`;0–3 are real runtime
+timeouts. This is not another fixed counter sample or a supplied execution oracle.
+
+The next independently ready leaf also advances: ACTUAL `Source.reraise` /
+`EM.attempt` / `allocRef`+full readback / runtime declaration-block rethrow.
+`outcome_revert` computes this complete chain for arbitrary bytes and typed
+caller state. `allocatedState` merely names the actual `Heap.alloc` post-state,
+not a replacement allocator. All Source.St fields except the real heap allocation
+are retained, and typed outer locals restored around the evaluator's empty local
+carrier. `runtime_actual` exposes an arbitrary actual action.run result AND its
+post-state, with NO desired execution premise; it does NOT claim arbitrary
+actions restore their prior locals/state. Successful `reraise` bypasses allocation;
+timeout/stuck propagate. `stuck_post` executes real modSt+halt and retains the
+actual prefix update, never inventing rollback.
+
+ACTUAL `Source.extReturn` is an UNFUELLED helper taking returns/outcome (no invented
+frame/fuel arguments). `ext_return_revert` proves full reverted bytes propagate
+BEFORE any length/ABI decoding, for any return signature. `externalResult` is an
+explicit consumer that discards a successful decoded value only AFTER running
+the real helper. `external_revert` composes its full nonempty error with actual
+allocation/declaration/rethrow; `short_return_caught` contrasts an explicit DEAD
+revert with a successful two-byte DEAD payload for bool returns: the latter
+really triggers EMPTY revert before allocation. No favorable decoder oracle,
+new Source hook, catch selector or reserved Source implementation is introduced.
+
+Inhabited sample uses the SAME actual raw caller from the previous physical catch
+witness: seven exact dirty cells including bool2/small1793/function fields,
+nonword alias0/AABB and caller-prefix log55. The complete actual result/typed locals/
+newheap are proved; full DEAD, empty and panic payloads, old alias and raw refusal
+are retained. Wrong alias initialization picks old AABB instead of new DEAD even
+though both length2. No ofClean/runClean resume is used on actual dirty cells;
+no_clean_resume is proved. Logical indices are never identified with physical
+EVM pointers. Real physical placement/MemOK/allocation refinement/G01 and separate
+physical journals remain premises/open; local scope restoration is not world or
+frame rollback. Ordinary raw Source operators/functions/sessions remain missing.
+
+[Driver](../../tests/yul-composition/RuntimeBlockDriver.lean) executes actual
+Source declaration and extracts refs[1,1,0],12 runtime outcomes and wrong-alias
+readback. [Expectations](../../tests/yul-composition/runtime-block-expectations.json)
+were frozen before execution. [Reader](../../scripts/yul-composition/runtime-block-source.mjs)
+and [mutations](../../scripts/yul-composition/runtime-block-source.test.mjs) bind
+actual main/private Source Types/Value/Elaborated/Machine/Eval/Resolved/State/Hoare,
+parent producer/consumer provenance, exact own bodies/ledger/oracle, actual Lean
+command/stdout/stderr/exit and selected registration.130 new/affected JS tests
+pass. Full bytes/panic tail, declared alias/order, low-fuel allocation, wrong
+ABI branch, prefix/nonword/raw/scope/state and stale/missing evidence controls
+are discriminating. Driver serialization is finite; generic kernel laws establish
+full Source.St equality. ZERO new native comparisons/execution are claimed; prior
+24call historical evidence and ORIGINAL five native strict journal FAILs are
+SHA-bound and retained. No new native fixture substitutes for these kernel leaves.
+
+Private joint gate exits0: actual Lean4.24.0 commit797c613/Lake5.0.0-src+797c613;
+KeySort2jobs; library1230/TestSuite262;377taclets/131annotations;197core/
+0elaborator;1245reachable/0orphan; strict491automatic/61budgeted/11refuted/
+0pending; trust1260sources/252sites/0findings. All28 exact signatures/transitive
+axioms standard propext/Classical.choice/Quot.sound or subsets, no new axiom/sorry/
+native proof shortcut. Final MCP consumer/driver/private root success=true,
+partial=false/no errors; async shutdown warnings retained. Failed initial typing/
+constructor reduction/actual API signature/dependent-layout inference diagnostics
+are preserved separately; fixed by real constructors, explicit intrinsic indices
+and actual laws, without changed premises/outcomes/budgets. Main standalone
+producer closure is not claimed. Only a narrow private root import is added.
+Independent read-only finder/skeptic accepted kernel, driver, reader and mutations
+with no findings and no Lean/server/build/edit.
+
+EXACT pending VY4 consumer request (not an assumption/publication, no active peer
+interruption): `/workspace/vy5-composition/runtime-block-20261102/producer-request.json`.
+Existing declaration is `Source.callAddr G F n address value input static :
+Source.EM E [] Solidity.Roadmap.Outcome`. Requested packet supplies actual module/
+names/commit/source hashes, inhabited ordinary typed body/Env/Glob/frame/state/
+request and kernel-checked NONEMPTY revert/full post-state execution, with real
+caller-prefix/heap/frame premises. Source.reraise then feeds the proved generic
+consumer; no ordinary typed-function execution or callAddr agreement is assumed.
+Coordinator may relay the exact checked packet when ready. General Source try
+selection/error decoding and raw function/frame/session hooks remain OPEN.
+
+Initial291897344byte disk and comparable178450432byte metadata-copy growth were
+measured; an8MiB incremental estimate fit. Actual process/container inventory was
+idle before admission. Original supervisor/data unchanged; task-local supervisor
+also monitors the actual repository12GiB AVAILABLE-memory reserve, alongside the
+unchanged hard12GiB cgroup cap/memory=memorySwap/no swap/CPU1, explicit-j1,
+LEAN_NUM_THREADS=1 and shared writer lock. All minimum available samples exceed
+12GiB; no admission/resource stop, cleanup or hidden failure. Unique runtime-block
+prefix and verified stopped SizeRw0 directory-only metadata retirement preserve
+all protected caches/images/mounts/evidence. No host-wide imagined token across
+other VMs. No representation refactor or raised proof/fuel/node/test budget.
+Docs/G03 historical EXIT1 remain failed global gates with exact-base equality,
+not passes. Old native failures and optional LIB1/unchecked-add/vendor holds
+remain unchanged; approved SpecConstants correction is not imported or broadened.
+
+Work1/Work3 advance these concrete runtime/heap/raw/ABI kernel consumers but remain
+PARTIAL: all24 original obligations/six full Source combinations and final joint
+Source/compiler/world/V16/G01 adequacy remain pending. Work2/BackfillA/B remain
+PARTIAL with existing native journal failures and broader corpus/world/source
+obligations. No whole-lane absence was used to block the two ready leaves. Original
+blocked goal unchanged/get_goal unavailable; no reset/reactivation/completion,
+new VM/thread/producer retrieval, push/merge/PR/service. Reviewed exact committed
+heads/signatures/request/patch/bundles/raw evidence/checksums:
+`/workspace/vy5-composition/runtime-block-20261102/final/`.

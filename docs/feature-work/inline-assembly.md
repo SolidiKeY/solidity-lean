@@ -407,3 +407,15 @@ Source failure/fullbyte projections/eight executed negatives; native state
 independently checked, no SourceSt/compiler proof inferred.138JS tests pass.
 No kernel/import change; all24 obligations/sixSourcecombinations remain pending.
 Artifacts: `/workspace/vy5-composition/native-rethrow-20261101/final/`.
+
+
+### VY5 actual Source runtime block/error consumers (2026-11-02)
+
+[Lane handoff](inline-assembly-vy5.md#actual-source-runtime-block-and-abi-error-consumers-2026-11-02):
+28 new kernel laws execute real typed declInit/evalE/execItems/block rethrow and
+reraise/attempt/heap allocation, then actual extReturn full-revert/short-return
+error transport. Inhabited dirty caller/heap/prefix and fullbytes/alias/fuel/error
+controls;130JS, joint1230/TestSuite262/signatures/strict/trust/MCP pass.
+Exact VY4 ordinary typed-function packet requested, not assumed. No new native
+fixture/comparison, five native strictFAILs retained. All24/six/fulladequacy pending.
+Artifacts: `/workspace/vy5-composition/runtime-block-20261102/final/`.
