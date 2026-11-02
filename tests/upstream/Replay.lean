@@ -331,15 +331,16 @@ private def FreshControls : Contract := contract!{
   unless (report.getObjValAs? String "status").toOption == some "working" do
     throw (IO.userError report.pretty) : IO Unit)
 
--- ABI v1 raw admission has a stricter boundary: only canonical input, even
--- for primitive arguments. No v2 decoder failure can certify a v1 failure.
+-- ABI v1 value parameters are cleaned, not validated (lane FU2-C,
+-- `UpstreamEntry.v1Plan`, `V1Entry` probes): a `uint8` word 256 reads as 0,
+-- so expecting 256 is broken; no v2 decoder failure certifies a v1 failure.
 #eval (do
-  for (n,status) in [(255,"working"),(256,"blocked")] do
+  for (n,want,status) in [(255,255,"working"),(256,0,"working"),(256,256,"broken")] do
     let vector := Json.mkObj [("signature",toJson "narrow(uint8)"),
       ("calldata",toJson (abiWords [n])), ("inputTypes",toJson ["uint8"]),
       ("outputTypes",toJson ["uint256"]), ("canonicalOnly",toJson true),
-      ("failure",toJson false), ("expectedBytes",toJson (abiWords [n]))]
-    abiCheck [vector] status (if n == 255 then 1 else 0) : IO Unit)
+      ("failure",toJson false), ("expectedBytes",toJson (abiWords [want]))]
+    abiCheck [vector] status 1 : IO Unit)
 
 -- Trailing bytes lie outside declared objects. They are retained in the input
 -- but cannot become extra elements, alter the result or certify a failure.
