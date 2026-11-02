@@ -510,4 +510,4 @@ pinned per-pipeline trace contract passes fresh36calls/4profiles/20Sourcebyte
 projections/8intended negatives and175tests. Original strict report remains
 FAILED, unchanged. All24original/six full combinations pending. See
 [lane handoff](inline-assembly-vy5.md#vy5-h1-resource-recovery-and-h3-per-pipeline-traces-2026-11-02)
-and `/workspace/vy5-composition/pipeline-contract-20261102/final/`.
+and `/workspace/vy5-composition/pipeline-contract-20261102/final-v2/`.

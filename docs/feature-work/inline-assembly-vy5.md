@@ -2787,7 +2787,7 @@ exited vy5-* containers after retaining inspect/exit/log/hash receipts; recovere
 20808921088bytes (188014592→20996935680available). No active container, image,
 mounted cache, evidence file or Git commit was removed. All prior sealed
 handoffs remain. Both cgroup memory.reclaim and drop_caches are read-only here;
-no bypass attempted, and MemAvailable after attempts exceeded17GiB. H1 changes
+no bypass attempted, and MemAvailable after attempts exceeded17decimalGB (about16.6GiB). H1 changes
 OS-available admission reserve to4GiB; hard12GiB memory/no-swap, CPU1, serial
 -j1/LEAN_NUM_THREADS1, writer lock and every proof/fuel/gas/step budget remain.
 Old resource receipts describe their actual old reserve; only new wrapper uses4.
@@ -2848,4 +2848,4 @@ nonempty ordinary-function producer is already resolved. LIB1 and unchecked-add
 holds remain unanswered; H1/H3 answer neither. Original goal identity/status/
 objective/counters remain unchanged; get_goal read tool unavailable, no mutation.
 New evidence/cleanup/immutable contract, source and incremental artifacts:
-`/workspace/vy5-composition/pipeline-contract-20261102/final/`.
+`/workspace/vy5-composition/pipeline-contract-20261102/final-v2/`.
