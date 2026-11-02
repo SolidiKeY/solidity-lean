@@ -1285,10 +1285,25 @@ entries (`source-s00-s01.md`, the `new` paragraph below); recorded in
 `docs/solc-alignment.md`: `{value: v}`, other clauses, dynamic returns
 `stuck`, the code check made where solc ≥ 0.8.10 calls.
 
-**Contract creation (`new C(…)`): not
-started** (time; it is a typing rule, an interpreter arm, both checkers,
-uniqueness and controls as above, and contract creation from a running
-instance in `Solidity/Source`: Checkpoint 4).
+**Contract creation (`new C(…)`): not started; why.** What it needs
+exists in part: accounts carry a nonce (`Account.nonce`,
+`Solidity/Source/World.lean`), and `Fixed.createAddress`
+(`Solidity/Roadmap/Contracts.lean`) gives the CREATE address from the
+creator and its nonce, reachable through `Glob.fixed`. What blocks it is
+where construction lives: `construct`, `runInits`, `collectArgs`,
+`giveArgs` and `runCtorBody` are in `Solidity/Source/Semantics.lean`,
+which imports `Eval.lean`, and they call the interpreter's mutual
+functions (`evalE`, `evalConvArgs`, `runMods`) at a given fuel. An `evalE`
+arm for `new C(…)` needs them either inside the mutual block (a new
+member, so a new field in `BelowAt`, `GrowAt` and `ApproxAt` and in every
+split proof's lemma list, `Solidity/Source/Horizon.lean`) or abstracted
+over the mutual functions as oracles (new `_below`/`_grow`/`_const`/
+`Approx` lemmas for the construction loops, and `HorizonDeploy.lean`'s
+proofs about `construct` re-proved over the abstraction). Either is a
+refactor of the heartbeat-sensitive Horizon proofs, which AGENTS.md asks
+to warn about before starting, and it did not fit the lane's remaining
+time. The nonce increment, the address collision rule, the creation
+value and the init-code size limit are further work on top.
 
 **Backfill (checkpoint 5): not started.** Its parts that do not need
 G16+ are `hashed` (a recorded-preimage component of `St`, threaded
