@@ -4284,3 +4284,42 @@ source-frame adequacy; Y05 universal memory/allocation refinement; Y06 complete
 source/Yul inputs; Y09.02 actual calculus/notation/printers/Lean-only rows;
 V10/V11 and final source/compiler/joint closure remain open. Both original
 Backfill queues remain partial; the persistent goal is unchanged. Questions=[].
+
+
+## Actual-frame calldata copy and hash
+
+On `5f7fcdb942232c3805a15a404a6faf836a170bc1`,
+`Solidity/Yul/Views/FrameCalldata.lean` and
+`Solidity/Yul/Views/FrameCalldataControls.lean` bind the existing raw input
+semantics to actual `Source.CallFrame.input`, without replacing source input
+or inventing Yul syntax. Destination geometry uses existing computed
+ResidualWindowPlan; source offsets are actual words and source+i stays Nat.
+CALLDATACOPY intentionally has NO MCOPY-style source-end ValidRange premise:
+missing bytes zero-pad even at maximum source offset, never wrap moduloWord.
+
+Whole physical map equality, actual canonical writeback whole-source identity,
+every-original-H MemOK, exact padded byte/slice reads, reserved words and
+SAME-Fixed hash of the entire copied slice are proved. No collision premise,
+selector stripping, allocation/resource adequacy or actual Yul execution is
+assumed. Static frame input remains readable; zero copies preserve the map.
+Controls inhabit actual frame input, six-root heap, partial/end padding,
+empty input, maxWord+nonzero size, no-wrap negative and both actual aliases.
+
+Separate pinned solc0.8.38/Osaka legacy/viaIR fixture uses full raw calldata
+including selector/ABI words and appended DE/AD/77; expected copies/hash/padding,
+reserved/free words, two aliases, empty/max offsets and malformed bool are
+independent complete ABI/status observations. This is finite external evidence,
+not a kernel source/compiler correspondence proof. All previous fixtures and
+budgets are preserved. An initial mutation incorrectly assumed a stateful
+storage declaration in this stateless fixture; its raw failure is retained and
+the mutation now explicitly inserts fake storage metadata.
+
+Exact gates/reviews/signatures/resources are versioned at
+`/workspace/vy2-evidence/frame-calldata`. Full Y04/Y05/Y06/Y09.02 and both
+Backfill queues remain partial. Concrete V10 physical source-layout agreement
+is not supplied by delivered stack-local compiler slices; VY1 syntax/execution
+producer package is still absent from delivered inputs. Existing published
+source/world/memory APIs are present and used, not substitutes for those
+missing final contracts. Universal memory/dirty/ownership/allocation refinement
+and final source/Yul/calculus/compiler closure remain mandatory. No owner rewrite,
+new state/AST/axiom, changed semantic/profile/exclusion or raised budget.

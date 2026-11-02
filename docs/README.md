@@ -211,3 +211,5 @@ VY2 residual memory-window preparation and retained-tail laws: [lane checkpoint]
 VY2 chronological physical `mcopy` preparation and source-state preservation: [lane record](feature-work/inline-assembly-vy2.md#chronological-residual-memory-copies).
 
 VY2 mapping roundtrips and transient slot/frame/reset laws: [lane record](feature-work/inline-assembly-vy2.md#mapping-slot-views-and-transient-slots).
+
+VY2 actual-frame calldata copy/hash binding: [lane record](feature-work/inline-assembly-vy2.md#actual-frame-calldata-copy-and-hash).

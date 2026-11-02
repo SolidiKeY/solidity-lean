@@ -659,3 +659,9 @@ unchanged laws use the original HashedLayout per-run region contract. Actual
 transient source/complement load/store, static failure, paired frame rollback
 and every-slot transaction reset are additive physical results. Full source/
 Yul/compiler and universal layout/dirty ownership remain unfinished.
+
+
+VY2 actual frame calldata/hash handoff: [lane record](inline-assembly-vy2.md#actual-frame-calldata-copy-and-hash).
+Actual raw frame bytes, source-preserving residual copy, zero padding at maximum
+source offset and SAME-Fixed hashing are standalone proved physical components.
+Concrete producer/compiler/calculus and universal source closure remain open.

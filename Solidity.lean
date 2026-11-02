@@ -1008,3 +1008,5 @@ import Solidity.Yul.Views.ResidualMcopyControls
 
 import Solidity.Yul.Views.MappingSlotControls
 import Solidity.Yul.Views.TransientSlotControls
+
+import Solidity.Yul.Views.FrameCalldataControls
