@@ -622,10 +622,16 @@ Costs that guide work:
   741 s: the arithmetic over conversion and remainder atoms), so they are
   pinned by coverage, not evaluated in the build; `Examples/DecisionKInt.lean`
   records its verdicts in a comment for the same reason.
-* `Examples/Decision.lean` builds in about 460 s (`sortedLe`, a
-  two-variable block, about two minutes of it), `Examples/DecisionArrays.lean`
-  in about 1500 s, presumably its two kernel coverage checks
-  (`gapArrayBlock_block`, `arrayBlockBad_block`), not yet profiled.  The
+* `Examples/Decision.lean` took 282–284 s single-threaded (`-j1`) before
+  its split of 2026-11-02; with `LEAN_NUM_THREADS=1` the pieces build in
+  27 s (`Decision`, formulas and storage arrays), 58 s
+  (`DecisionFeatures`), 105 s (`DecisionGaps`) and 90 s
+  (`DecisionGapOperators`).  Interpreted `#eval` verdicts dominate
+  (`set_option profiler true`, language server):
+  `gapLedgerWrite` … `payBalanceBad` 58 s, `gapIntDiv` … `gapMulW` 45 s,
+  `gapColumn` … `gapPositiveForall` 30 s, `netSwap` 19 s, and three
+  `hashCovered` kernel checks 32 s.  `Examples/DecisionArrays.lean`, once
+  about 1500 s, built in 19 s in the same run.  The
   gate's 300 s budget covers TestSuite modules only.
 
 ### Given-heap memory witnesses
@@ -969,7 +975,8 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
    later milestones may only shrink `Fml.Residue`.
 3. **Split `Examples/Decision.lean`** (and `Examples/DecisionArrays.lean`)
    into modules that each build in under 300 s; profile interpreted verdict
-   evaluation first. Group 07 measured the `DecisionArrays` coverage pins at
+   evaluation first. `Examples/Decision.lean` was split on 2026-11-02 (times
+   under "Running time"); `Examples/DecisionArrays.lean` built in 19 s then. Group 07 measured the `DecisionArrays` coverage pins at
    about one second each, with the final verdict `#eval` as its slow stage.
 4. **Tag** the result `milestone-m7-next`, record it here, push to master,
    and stop for the user's next instruction.

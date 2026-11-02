@@ -74,6 +74,15 @@ largest workers fell (`Calculus/Closer` 3.2 → 2.0 GB, `Calculus/MemRead`
 2.9 → 2.1 GB).  `tests/trust-inventory.json` (`scripts/check-trust.sh`)
 names pieces, so a split updates it.
 
+A file split for **time**, not size, is cut differently: its definitions
+stay in the file its importers already name, and its checks (`#eval` pins,
+`decide +kernel` coverage) move to sibling pieces that each import it and
+nothing imports, so they build in parallel and off the importers' path.
+`Examples/Decision.lean` was split this way (2026-11-02; times in
+`docs/automation.md`, M7-next).  A module whose time is one declaration
+(`Examples/Tactics/OpenLoops.lean`'s `binomialRowsNine`) gains nothing from a
+split.
+
 **Pitfalls.**
 
 - *A matcher is shared only within its module.* `Semantics/Storage`'s

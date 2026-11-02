@@ -716,6 +716,9 @@ import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.AutoComplete
 import Solidity.Examples.Decision
+import Solidity.Examples.DecisionFeatures
+import Solidity.Examples.DecisionGaps
+import Solidity.Examples.DecisionGapOperators
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionQuantLedger
