@@ -107,13 +107,15 @@
       }
     },
     "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean": {
-      "sha256": "45b4e5da100c5e208d7eece80d4ae99946d29f5430ee7e265bdaa015c97c34c6",
+      "sha256": "49379fc62c2c4ecb57fa8bf927e1ee42c735424cef3b631fff82c6798bf6027d",
       "namespace": "Solidity.Backend.MemoryOps.Physical.Controls",
       "declarations": [
         "source_read_and_neighbor",
         "changed_store",
         "wrong_unscaled_offset",
-        "live_payload_then_local_restore"
+        "live_payload_then_local_restore",
+        "reached_source_write",
+        "frozen_source_is_wrong"
       ],
       "pins": {
         "Solidity.Backend.MemoryOps.Physical.Controls.source_read_and_neighbor": [
@@ -134,8 +136,32 @@
           "Classical.choice",
           "Quot.sound",
           "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.reached_source_write": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.frozen_source_is_wrong": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
         ]
       }
+    },
+    "Solidity/Backend/MemoryOps/PhysicalUintWrite.lean": {
+      "namespace": "Solidity.Backend.MemoryOps.Physical",
+      "pins": {
+        "Solidity.Backend.MemoryOps.Physical.UintArrayAt.write_cell": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "sha256": "ea85742d9ec20260bde83ff1f9833fcb29fd6388d2093829480ba8be630a55d4",
+      "declarations": [
+        "UintArrayAt.write_cell"
+      ]
     }
   }
 }
