@@ -17,7 +17,7 @@
 # --strict: it is the hazard this repository is most prone to, since the
 # reader cannot tell which file is meant either.
 #
-# References into the sibling repositories (`SolKey/`, `EvmYul/`, `Decode/`)
+# References into the sibling repositories (`SolKey/`, `EvmYul/`, `Decode/`, `Mathlib/`)
 # are not ours to resolve and are listed in EXTERNAL below.
 #
 # Exit 0 = every reference resolves, 1 = at least one does not.
@@ -30,7 +30,7 @@ strict=0
 
 # Prefixes naming a file in another repository, plus the one deliberate
 # placeholder (`PartNN` stands for Part01..Part11).
-EXTERNAL='^(SolKey/|EvmYul/|Decode/)|PartNN'
+EXTERNAL='^(SolKey/|EvmYul/|Decode/|Mathlib/)|PartNN'
 
 lean_files=$(git ls-files '*.lean')
 
@@ -55,7 +55,7 @@ while IFS=$'\t' read -r src ref; do
     ambiguous=$((ambiguous + 1))
   fi
 done < <(
-  git ls-files -z \
+  git ls-files -z -- '*.md' '*.lean' \
     | xargs -0 grep -o -n '`[A-Za-z][A-Za-z0-9_/.-]*\.lean`' \
     | sed 's/`//g' \
     | awk -F: '{print $1"\t"$3}' \
