@@ -3,6 +3,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.CallbackSound
+import Solidity.Calculus.CallbackDerive
 import Solidity.Tools.Inspect
 
 /-!
@@ -320,5 +321,32 @@ theorem pingKeepsInv_honest :
       all_goals
         sol_leaf
         sol_close
+
+section ScopeExit
+
+/-- A contract whose `try` success clause runs an annotated loop over the
+returned value (solkey TestSuite row 43, `tryScopeExit`). -/
+def ScopeExit : Contract := contract!{
+  uint age;
+  function externalValue() public view returns (uint r) { r = age; }
+  function scopeExit() public view {
+    try this.externalValue() returns (uint a) { uint i = 0;
+      /// @custom:key invariant a >= 0 && i <= 1
+      /// @custom:key decreases 1 - i
+      while (i < 1) { i++; } } catch { }
+  }
+}
+
+local instance : InContract := ⟨ScopeExit⟩
+
+/-- `try this.externalValue() returns (uint a) { uint i = 0; while (i < 1)
+{ i++; } } catch { }` keeps `age == 0`: the loop's preservation leaf no longer
+mentions the `try`, only its unread continuation does (`Fml.invPost` with no
+break test), so `sol_prove` steps it in `Proves` and closes it. -/
+theorem scopeExitKeepsAge :
+    ValidT .noCallback dl!{ age == 0 → [ scopeExit(); ] age == 0 } := by
+  sol_prove
+
+end ScopeExit
 
 end Solidity.Examples.Tactics.TryCatch
