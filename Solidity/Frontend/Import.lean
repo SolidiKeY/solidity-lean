@@ -703,17 +703,32 @@ def elabSolcImport : CommandElab := fun stx => do
       { model with widths := $(quote markers) ++ model.widths })
   let ctStx ← if c.sourceDecls.isEmpty then pure ctStx else do
     let metadataName ← liftTermElabM do
-      let name ← mkFreshUserName (N ++ `_sourceDecls)
-      let value : Expr := toExpr c.sourceDecls
-      let valueTy : Expr ← inferType value
-      addAndCompile <| .defnDecl {
-        name
-        levelParams := []
-        type := valueTy
-        value
-        hints := .regular 0
-        safety := .safe }
-      pure name
+      -- A list literal nests as deep as it is long, and compiling one of a
+      -- large source (solkey's TestSuite) exceeds the default recursion
+      -- depth: the list is defined in chunks of 64, appended.
+      let define (value : Expr) : TermElabM Lean.Name := do
+        let name ← mkFreshUserName (N ++ `_sourceDecls)
+        let valueTy : Expr ← inferType value
+        addAndCompile <| .defnDecl {
+          name
+          levelParams := []
+          type := valueTy
+          value
+          hints := .regular 0
+          safety := .safe }
+        pure name
+      let rec chunks (xs : List (String × SourceFunction)) (fuel : Nat) : List (List (String × SourceFunction)) :=
+        match fuel, xs with
+        | 0, _ | _, [] => if xs.isEmpty then [] else [xs]
+        | f + 1, xs => xs.take 64 :: chunks (xs.drop 64) f
+      let parts ← (chunks c.sourceDecls c.sourceDecls.length).mapM fun part => define (toExpr part)
+      match parts with
+      | [name] => pure name
+      | _ =>
+        let ty ← inferType (toExpr c.sourceDecls)
+        let value ← parts.foldrM (fun part acc => mkAppM ``List.append #[mkConst part, acc])
+          (mkApp (mkConst ``List.nil [0]) ty.appArg!)
+        define value
     liftTermElabM <| `(attachSourceDeclarations $(⟨ctStx⟩) $(mkIdent metadataName))
   let ctStx ← if provenance.legacyFixture then
       match legacyOrderOverride with
