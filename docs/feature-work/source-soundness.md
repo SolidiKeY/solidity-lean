@@ -1150,7 +1150,28 @@ Review (finder and skeptic, read-only):
 - checking cost: `pushVals_*` joined every Horizon lemma list; Horizon was
   rechecked through the Lean server without heartbeat changes.
 
-**Inline arrays, `new`, `try`/`catch`, `fallback` with parameters: not
+**Inline arrays (done for one-word elements).** `Typed.inlineArray`
+(`Solidity/Source/Typing.lean`) types `[e₁, …, eₙ]` as `T[n] memory`: `T`
+is solc's common type, `Type::commonType` folded left to right from the
+first element's mobile type (`STy.common`, `STy.commonOf`), it is one word
+(`STy.oneWord`), and every element converts implicitly to it (`argsFit`).
+`RExpr.inlineArray` carries the elements converted (`RConvArgs` at
+`List.replicate n T`); the interpreter evaluates them left to right
+(`evalConvArgs`) and allocates the array (`inlineData`, `allocRef`), so no
+new Horizon lemma is needed (the new constructor falls in the last
+`ctorIdx` range of every split proof). Both checkers have the rule
+(`Typed.inferN`; G13's `inlineRes`/`inlineOne` with `inlineArray_mem`, so
+`hasType_iff` holds), uniqueness of meaning covers it (`uniqE_inline`),
+`OpsOK` too. `exprCoverage` classifies it `typed` (witness
+`w_inlineArray`: `[a, 1]`), and `semExprGaps` loses it. Controls in
+`Solidity/Source/InlineExamples.lean`: `[uint8(1), 2, 3][i]` reads and
+panics `0x32` past the length, `[1, 256]` is `uint16[2]`, `[a, 1]` into a
+declared `uint256[2] memory`; `[1, -1]` (no common type) is refused, as by
+solc. Not modelled (refused): reference elements (`["a", "b"]`,
+`string memory[2]`; nested inline arrays), fractional elements (`[1/3]`,
+which solc types `ufixed256x77`), function-type elements. No arm theorem.
+
+**`new`, `try`/`catch`, `fallback` with parameters: not
 started** (time; each is a typing rule, an interpreter arm and its
 Horizon lemmas, both checkers, uniqueness and controls as above; `new` and
 `try`/`catch` also need contract creation and external-call failure

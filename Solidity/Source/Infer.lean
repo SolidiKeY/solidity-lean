@@ -320,6 +320,17 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     if hp : σ.isPayableArg = true then
       pure ⟨_, .payable d hp⟩
     else Option.none
+  | .inlineArray x xs => do
+    let ⟨τ, d⟩ ← Typed.inferN n Γ x
+    let ⟨τs, ds⟩ ← TypedArgs.inferN n Γ xs
+    match hc : STy.commonOf Γ.isBase τ τs with
+    | Option.some σ =>
+      if hσ : σ.oneWord = true then
+        if hf : argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
+          pure ⟨_, .inlineArray d ds hc hσ hf⟩
+        else Option.none
+      else Option.none
+    | Option.none => Option.none
   | .call (.ident f) (.positional args) => do
     let ⟨σs, da⟩ ← TypedArgs.inferN n Γ args
     match hct : Γ.convTarget f, args, σs, da with

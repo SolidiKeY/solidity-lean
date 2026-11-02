@@ -1284,6 +1284,31 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-- `[x, xs…]` (lane FU2-B): the elements' types fix the common type. -/
+theorem uniqE_inline {Γ : Ctx} {x : Syn .expr} {xs : Syn (.list .expr)}
+    (ih : Uniq Γ (sizeOf (Syn.inlineArray x xs))) : UniqE Γ (.inlineArray x xs) := by
+  intro τ τ' d d'
+  have hce : (Syn.inlineArray x xs).const = Option.none := rfl
+  have hbo : (Syn.inlineArray x xs).binOp? = Option.none := rfl
+  have hx : sizeOf x < sizeOf (Syn.inlineArray x xs) := by simp only [Syn.inlineArray.sizeOf_spec]; omega
+  have hxs : sizeOf xs < sizeOf (Syn.inlineArray x xs) := by simp only [Syn.inlineArray.sizeOf_spec]; omega
+  cases d with
+  | inlineArray dx ds hc _ _ =>
+    cases d' with
+    | inlineArray dx' ds' hc' _ _ =>
+      obtain ⟨h1, e1⟩ := ih.e x hx dx dx'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.a xs hxs ds ds'
+      cases h2
+      rw [hc] at hc'; cases hc'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-- **Slices** (`a[s:e]`, FU2-B). -/
 theorem uniqE_slice {Γ : Ctx} {a : Syn .expr} {o o' : Syn (.opt .expr)}
     (ih : Uniq Γ (sizeOf (Syn.slice a o o'))) : UniqE Γ (.slice a o o') := by
@@ -1538,6 +1563,7 @@ theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ
   | payableConv A => exact uniqE_payable ih
   | index a o => exact uniqE_index ih
   | slice a o o' => exact uniqE_slice ih
+  | inlineArray x xs => exact uniqE_inline ih
   | assign op a b => exact uniqE_assign ih
   | member a x => exact uniqE_member ih
   | call f A =>

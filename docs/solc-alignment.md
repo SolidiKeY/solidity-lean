@@ -597,6 +597,11 @@ stronger obligation, not an additional assumption available to its proofs.
   repeated names (`(uint a, uint a) = (1, 2);`, a `DeclarationError` in
   solc) are accepted, the later one innermost
   ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
+- **Inline arrays** (lane FU2-B, `Typed.inlineArray`): only one-word
+  element types are typed; `["a", "b"]` (`string memory[2]`), nested inline
+  arrays and `[1/3]` (`ufixed256x77` in solc) are refused where solc
+  accepts them
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).

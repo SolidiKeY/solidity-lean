@@ -345,6 +345,7 @@ def RExpr.OpsOK {E : Env} {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .assignCopy l e _ => RLVal.OpsOK l ∧ RExpr.OpsOK e
   | _, .abiDecode d _ _ => RExpr.OpsOK d
   | _, .slice a _ s _ e _ _ => RExpr.OpsOK a ∧ RExpr.OpsOK s ∧ RExpr.OpsOK e
+  | _, .inlineArray args _ => RConvArgs.OpsOK args
 
 def RArgs.OpsOK {E : Env} {Γ : RCtx} : {τs : List STy} → RArgs E Γ τs → Prop
   | _, .nil => True
@@ -440,6 +441,8 @@ theorem Typed.toR_opsOK {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → (d : Typ
   | _, _, .sliceFrom da _ ds _ => And.intro (Typed.toR_opsOK da) (And.intro (Typed.toR_opsOK ds) trivial)
   | _, _, .sliceTo da _ de _ => And.intro (Typed.toR_opsOK da) (And.intro trivial (Typed.toR_opsOK de))
   | _, _, .sliceAll da _ => And.intro (Typed.toR_opsOK da) (And.intro trivial trivial)
+  | _, _, .inlineArray dx ds _ _ _ =>
+    RArgs.convert_opsOK _ _ _ (And.intro (Typed.toR_opsOK dx) (TypedArgs.toR_opsOK ds))
 
 theorem TypedArgs.toR_opsOK {Γ : Ctx} : {es : Syn (.list .expr)} → {τs : List STy} →
     (d : TypedArgs Γ es τs) → RArgs.OpsOK d.toR

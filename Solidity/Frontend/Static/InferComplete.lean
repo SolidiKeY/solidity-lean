@@ -654,6 +654,22 @@ theorem sliceAll_mem {a : Syn .expr} {τ : STy} {da : Typed Γ a τ}
   refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, ?_⟩
   rw [dif_pos hτ]; exact List.mem_singleton.mpr rfl
 
+theorem inlineArray_mem {x : Syn .expr} {xs : Syn (.list .expr)} {τ σ : STy} {τs : List STy}
+    {d : Typed Γ x τ} {ds : TypedArgs Γ xs τs} (hx : Res.expr d ∈ infer Γ x)
+    (hxs : ⟨τs, ds⟩ ∈ argsOf Γ (infer Γ xs)) (hc : STy.commonOf Γ.isBase τ τs = Option.some σ)
+    (hσ : σ.oneWord = true) (hf : argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true) :
+    Res.expr (Typed.inlineArray d ds hc hσ hf) ∈ infer Γ (.inlineArray x xs) := by
+  refine List.mem_append_right _ ?_
+  show _ ∈ inlineRes Γ (infer Γ x) (infer Γ xs)
+  refine List.mem_flatMap.mpr ⟨⟨τ, d⟩, mem_tysOf' hx, List.mem_flatMap.mpr ⟨⟨τs, ds⟩, hxs, ?_⟩⟩
+  show _ ∈ inlineOne Γ τ d τs ds
+  unfold inlineOne
+  split
+  · rename_i σ' hc'
+    rw [hc] at hc'; cases hc'
+    rw [dif_pos ⟨hσ, hf⟩]; exact List.mem_singleton.mpr rfl
+  · rename_i hc'; rw [hc] at hc'; cases hc'
+
 theorem extCallValue_mem {c v : Syn .expr} {f : String} {es : Syn (.list .expr)} {σs ps rs : List STy}
     {dn : DeclName} {d : Decl} {dc : Typed Γ c (.contract dn)} (hc : Res.expr dc ∈ infer Γ c)
     {dv : Typed Γ v σ} (hv' : Res.expr dv ∈ infer Γ v)
@@ -916,6 +932,10 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
   | _, _, .abiDecode hr dx hs hd hok => by
     obtain ⟨dx', hx⟩ := exists_expr (typed_complete dx)
     exact mem_tysOf (abiDecode_mem hx hr hs hd hok)
+  | _, _, .inlineArray dx ds hc hσ hf => by
+    obtain ⟨dx', hx⟩ := exists_expr (typed_complete dx)
+    obtain ⟨ds', h⟩ := exists_args (args_complete ds)
+    exact mem_tysOf (inlineArray_mem hx h hc hσ hf)
 
 /-- **Completeness for lvalues.** -/
 theorem lval_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → LVal Γ e τ →

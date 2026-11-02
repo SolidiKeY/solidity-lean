@@ -241,6 +241,9 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   (an absent start is `0`; an absent end is the length, `toEnd`). -/
   | slice {τ σ ρ : STy} (a : RExpr E Γ τ) (hτ : τ.sliceable = true) (s : RExpr E Γ σ) (hs : σ.isIndex = true)
       (e : RExpr E Γ ρ) (he : ρ.isIndex = true) (toEnd : Bool) : RExpr E Γ τ
+  /-- `[e₁, …, eₙ]`: a new memory array of the converted elements. -/
+  | inlineArray {σ : STy} {n : Nat} (args : RConvArgs E Γ (List.replicate n σ)) (hσ : σ.oneWord = true) :
+      RExpr E Γ (.array .memory σ (some n))
 
 /-- Resolved argument lists. -/
 inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
@@ -362,6 +365,8 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .sliceFrom da hτ ds hs => .slice da.toR hτ ds.toR hs (.const (Q.ofInt 0)) zero_isIndex true
   | .sliceTo da hτ de he => .slice da.toR hτ (.const (Q.ofInt 0)) zero_isIndex de.toR he false
   | .sliceAll da hτ => .slice da.toR hτ (.const (Q.ofInt 0)) zero_isIndex (.const (Q.ofInt 0)) zero_isIndex true
+  | .inlineArray (τs := τs) d ds _ hσ hf =>
+    .inlineArray (n := τs.length + 1) (RArgs.convert _ (RArgs.cons d.toR ds.toR) hf) hσ
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :

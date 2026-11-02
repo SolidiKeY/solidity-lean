@@ -498,6 +498,21 @@ def sliceRes {a : Syn .expr} {o o' : Syn (.opt .expr)} (ra : List (Res Γ .expr 
   | .none, .some _, _, ro' => sliceToRes Γ ra (unslot Γ ro')
   | .none, .none, _, _ => sliceAllRes Γ ra
 
+/-- `[x, xs…]` (FU2-B) at one derivation of each: the common type, one
+word, every element converting to it. -/
+def inlineOne {x : Syn .expr} {xs : Syn (.list .expr)} (τ : STy) (d : Typed Γ x τ) (τs : List STy)
+    (ds : TypedArgs Γ xs τs) : List (Res Γ .expr (.inlineArray x xs)) :=
+  match hc : STy.commonOf Γ.isBase τ τs with
+  | Option.some σ =>
+    if h : σ.oneWord = true ∧ argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
+      [.expr (.inlineArray d ds hc h.1 h.2)] else []
+  | Option.none => []
+
+/-- `[x, xs…]`, from the elements' results. -/
+def inlineRes {x : Syn .expr} {xs : Syn (.list .expr)} (rx : List (Res Γ .expr x))
+    (rxs : List (Res Γ (.list .expr) xs)) : List (Res Γ .expr (.inlineArray x xs)) :=
+  (tysOf Γ rx).flatMap fun p => (argsOf Γ rxs).flatMap fun q => inlineOne Γ p.1 p.2 q.1 q.2
+
 /-- `a.transfer(v)`, `a.send(v)` on an `address payable`, one argument. -/
 def payOne : (m : String) → {a v : Syn .expr} → Typed Γ a (.address true) → (σ : STy) → Typed Γ v σ →
     List (Res Γ .expr (.call (.member a m) (.positional (.cons v .nil))))
@@ -625,7 +640,7 @@ def infer : {c : Cat} → (s : Syn c) → List (Res Γ c s)
   | _, .namedArg _ v => namedRes Γ (infer v)
   | _, .metaType t => constRes Γ (.metaType t)
   | _, .new t => constRes Γ (.new t)
-  | _, .inlineArray x xs => constRes Γ (.inlineArray x xs)
+  | _, .inlineArray x xs => constRes Γ (.inlineArray x xs) ++ inlineRes Γ (infer x) (infer xs)
   | _, .elemType el h => constRes Γ (.elemType el h)
   | _, _ => []
 

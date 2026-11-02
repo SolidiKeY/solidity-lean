@@ -717,6 +717,21 @@ def STy.oneWord : STy → Bool
   | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
   | _ => false
 
+/-- solc's `Type::commonType` of two element types of an inline array:
+`a`'s mobile type if `b` converts to it, else `b`'s if `a` converts to it
+(lane FU2-B). -/
+def STy.common (B : DeclName → DeclName → Bool) (a b : STy) : Option STy :=
+  if b.implicit B a.mobile then Option.some a.mobile
+  else if a.implicit B b.mobile then Option.some b.mobile else Option.none
+
+/-- The common type of an inline array's element types, folded left to
+right from the first's mobile type, as solc's `TypeChecker` does. -/
+def STy.commonOf (B : DeclName → DeclName → Bool) (a : STy) : List STy → Option STy
+  | [] => Option.some a.mobile
+  | b :: bs => match STy.common B a b with
+    | Option.some c => STy.commonOf B c bs
+    | Option.none => Option.none
+
 /-- **A sliceable type** (`a[s:e]`, lane FU2-B): `bytes` or a dynamic array
 of one-word values in `calldata` (solc: index range access only for
 dynamic calldata arrays). -/
@@ -981,6 +996,13 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       Γ.resolve g = Option.some (.builtin .abi) → Typed Γ x σ → σ.decodeSrc = true →
       Γ.decodeTys ts = Option.some τs → τs.all (STy.decodable Γ.env) = true →
       Typed Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) (STy.ret τs)
+  /-- `[e₁, …, eₙ]` (lane FU2-B): a new `T[n] memory`, `T` the elements'
+  common type (`STy.commonOf`), each element converting to it; only
+  one-word element types (references are not modelled). -/
+  | inlineArray {e : Syn .expr} {es : Syn (.list .expr)} {τ σ : STy} {τs : List STy} :
+      Typed Γ e τ → TypedArgs Γ es τs → STy.commonOf Γ.isBase τ τs = Option.some σ → σ.oneWord = true →
+      argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true →
+      Typed Γ (.inlineArray e es) (.array .memory σ (Option.some (τs.length + 1)))
 
 /-- Typing of an argument list. -/
 inductive TypedArgs (Γ : Ctx) : Syn (.list .expr) → List STy → Type where

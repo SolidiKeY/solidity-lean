@@ -81,6 +81,9 @@ def w_abiDecode : Typed Γ (.call (.member (.ident "abi") "decode") (.positional
 /-- `cd[1:]` on a `bytes calldata` parameter (FU2-B). -/
 def w_slice : Typed Γ (.slice (.ident "cd") (.some one) .none) (.bytes .calldata) :=
   .sliceFrom (.loc rfl rfl) rfl ty_one rfl
+/-- `[a, 1]` (FU2-B): a `uint256[2] memory`, `1` converting to `a`'s type. -/
+def w_inlineArray : Typed Γ (.inlineArray a (.cons one .nil)) (.array .memory (.int IntTy.u256) (some 2)) :=
+  .inlineArray ty_a (.cons ty_one .nil) rfl rfl rfl
 def w_payableConv : Typed Γ (.payableConv (.positional (.cons (.ident "o") .nil))) (.address true) :=
   .payable ty_o rfl
 def w_unaryPrefix : Typed Γ (.unaryPrefix .not (.ident "flag")) .bool := .not ty_flag
@@ -225,11 +228,10 @@ for constructors of other categories (`exprCoverage_total`). -/
 def exprCoverage : Ctor → Option Coverage
   | .index | .member | .call | .payableConv | .unaryPrefix | .unarySuffix | .exp | .mulDivMod
   | .addSub | .shift | .bitAnd | .bitXor | .bitOr | .order | .equality | .and | .or | .cond
-  | .assign | .tuple | .ident | .lit | .litUnit | .slice => some .typed
+  | .assign | .tuple | .ident | .lit | .litUnit | .slice | .inlineArray => some .typed
   | .callOptions => some (.deferred "S02" "call options belong to external calls and creation (S02/S03)")
   | .metaType => some (.deferred "S04.02" "type(T) members read the artifact table and ABI identities")
   | .new => some (.deferred "S03" "creation and memory allocation are typed with their semantics")
-  | .inlineArray => some (.deferred "S02" "inline arrays take the mobile type of their elements (S02)")
   | .elemType => some (.operand .call "a type name: the callee of an elementary conversion (convElem) and a type expression of abi.decode (abiDecode, FU2-B); type(T) is metaType's")
   | _ => none
 
@@ -267,6 +269,7 @@ theorem exprCoverage_typed (k : Ctor) (ht : exprCoverage k = some .typed) :
     | exact ⟨_, _, rfl, ⟨w_lit⟩⟩
     | exact ⟨_, _, rfl, ⟨w_litUnit⟩⟩
     | exact ⟨_, _, rfl, ⟨w_slice⟩⟩
+    | exact ⟨_, _, rfl, ⟨w_inlineArray⟩⟩
 
 /-- **Coverage of operands**: every constructor classified as an operand
 occurs in a typed expression whose root is its parent. -/

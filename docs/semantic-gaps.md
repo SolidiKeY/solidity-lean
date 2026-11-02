@@ -85,7 +85,9 @@ proof uses it, never derived from a machine model.
 
 - **Source semantics** (`Solidity/Source`, the S02–S05 reference
   interpreter): the constructor ledger's gaps are `callOptions` beyond
-  `value`, `metaType`, `new` and `inlineArray` (`semExprGaps`), and among
+  `value`, `metaType` and `new` (`semExprGaps`; inline arrays of one-word
+  elements are typed and evaluated since lane FU2-B, reference and
+  fractional elements refused), and among
   statements `try` (tuple declarations are typed and evaluated since lane
   FU2-B, without a progress theorem; a non-tuple initializer, a literal
   component typed at its own type and repeated names are not modelled:

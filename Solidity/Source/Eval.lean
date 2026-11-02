@@ -389,6 +389,17 @@ def convRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layo
   | _, τ, .val x => return .val (← lift (convVal τ x))
   | _, _, _ => halt (.stuck "implicit conversion")
 
+/-- The `i`-th of `m` values of one type. -/
+def Vals.nthRep {D : Layout} {σ : STy} : {m : Nat} → Vals D (List.replicate m σ) → Fin m → Val D σ
+  | 0, _, i => i.elim0
+  | _ + 1, .cons v _, ⟨0, _⟩ => v
+  | _ + 1, .cons _ vs, ⟨i + 1, h⟩ => Vals.nthRep vs ⟨i, Nat.lt_of_succ_lt_succ h⟩
+
+/-- **An inline array's contents** (lane FU2-B): its converted elements. -/
+def inlineData {D : Layout} {σ : STy} {m : Nat} (vs : Vals D (List.replicate m σ)) :
+    Data D (.array .memory σ (some m)) :=
+  .array m (fun _ h => (Option.some.inj h).symm) (fun i => .val (vs.nthRep i))
+
 /-- A tuple value's components. -/
 def RVal.untuple {D : Layout} {σs : List STy} : RVal D (.tuple σs) → R (RVals D σs)
   | .tuple vs => pure vs
@@ -986,6 +997,9 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
   | .abiDecode (τs := τs) data _ _ => do
     let v ← evalE G F n data
     abiDecodeData (← bytesOfRV F n v) τs
+  | .inlineArray args _ => do
+    let vs ← evalConvArgs G F n args
+    return .val (← allocRef (inlineData vs))
   | .slice a _ s _ e _ toEnd => do
     let av ← getV (← evalE G F n a)
     let si ← indexNat (← evalE G F n s)

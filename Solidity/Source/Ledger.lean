@@ -53,7 +53,6 @@ def semExprCoverage (k : Ctor) : Option SemStatus :=
     | .callOptions => some (.gap "S02" "only `{value: v}` on an external call is typed and evaluated (`extCall`)")
     | .metaType => some (.gap "S04.02" "type(T) members read the artifact table")
     | .new => some (.gap "S03" "contract creation and `new T[](n)` are not typed")
-    | .inlineArray => some (.gap "S02" "inline arrays are not typed")
     | _ => some (.gap "S02" "deferred by S01")
   | none => none
 
@@ -92,7 +91,7 @@ theorem semExprCoverage_of_operand (k p : Ctor) (r : String) (h : exprCoverage k
 
 /-- The expression constructors still without semantics. -/
 def semExprGaps : List Ctor :=
-  [.callOptions, .metaType, .new, .inlineArray]
+  [.callOptions, .metaType, .new]
 
 /-- Whether S01 defers a constructor. -/
 def deferred (k : Ctor) : Bool :=
