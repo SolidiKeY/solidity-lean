@@ -1347,3 +1347,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Backend/InternalFlow/LoopLocalTarget.lean` | Actual LoopCert result/protected-local adapters, reached source-prefix Room/cost and compiler construction boundaries. |
 
 | `Solidity/Backend/InternalFlow/LoopCallerPrefix.lean` | Protected caller views for actual healthy source horizons; public condition/body error boundaries. Concrete all-N target witnesses in owned CallerPrefix fixtures. |
+
+| `Solidity/Backend/InternalFlow/CallArgumentPrefix.lean` | Actual typed argument-prefix failure before call entry/body/export, with allocating successful comparison and exact failure controls; source only. |

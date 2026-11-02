@@ -3319,3 +3319,68 @@ complete publication-doc equality remains separate from frozen additions.
 The private MemoryLoop prefix API request, general recursion/dispatch/early-
 control/frame/byte-journal/transient/world obligations remain open. No goal
 administration, publication, peer transfer or independent-work-exhaustion claim.
+
+
+## C43 — actual key-phase attribution and argument-prefix failure (partial)
+
+The new host-only key profiler executes the exact committed955 key body against
+all27 actual source/object/guard/config/dependency-manifest closures. It adds
+only dependency wrappers and a nonmutating observer before binding validation;
+no synthetic binding, substituted object or bypassed validation is supplied.
+The baseline bytes are SHA-bound to955 in evidence. A fresh complete shared
+batch-style toolchain snapshot before/after is the EXISTING behavior, not a new
+sharing proposal. Fresh read/crypto/import/JSON timing and byte counts reset
+per invocation; output references are comparison assertions, not read caches.
+The22 stale dependency failures and5 returned keys are not cache authentication
+(the root caller's saved-binding check is outside key()). VM/wrapper/GC costs
+and partial validation paths are explicit limitations, not kernel timings.
+
+One baseline sweep measured10.686seconds of key work:5038 object reads/hash
+consume9.35GB and about9.1seconds (read3.339/hash.update5.733). Manifest reads
+consume188.307MB in122 calls/~92ms; parsing61 manifests takes~325ms. Source
+reads are~69ms. Thus source/manifest reads are not the dominant measured key
+work. Per-path attribution identifies large read-only producer objects, e.g.
+Semantics.Callback, Calculus.SoundSummary/Lands and syntax elaborators. No
+reserved object, authenticated input or required freshness check is removed.
+
+A prospective same-invocation manifest Buffer variant was tested ONLY in the
+experiment. It halves manifest-read bytes188.307→94.154MB (122→61 reads), with
+median read time~90→16ms, but whole-key pairs are mixed: before10.636/11.170/
+11.113s; after10.674/11.139/10.681s. The small affected phase and VM/GC variance
+do not establish a material gate repair or causal whole-key speedup. Production
+fixture-cache.mjs remains byte-identical to955. Controls verify stable serialized
+inputs/order/results or actual stale errors, fresh between-call changes,
+self-consistent manifest corruption and report-order failures. They also expose
+the interleaving difference: the candidate parses its first hashed bytes while
+legacy may parse a later version; no universal mutation-interleaving equivalence
+is claimed or silently installed. No Lean preparation or gate follows profiling.
+
+A DIFFERENT ready original Work1/Backfill A source leaf is completed in
+CallArgumentPrefix. Three typed Args suffix laws propagate an actual failed
+prefix through scalar/storage/memory arguments. call_failure consumes the real
+args.evalT error and unfolds published TRun.call: default-result entry, private
+body and export are not reached. It introduces no evaluator/AST or assumed
+simulation. The generic implication preserves its supplied halt; its inhabited
+argument evaluator control is actual bare revert, not panic/bytes/divergence.
+
+The populated typed caller has an allocated old memory reference and distinct
+scalar locals9/11. Its actual argument prefix reads the reference and9; an empty
+array index0 then fails. A successful argument variant uses the SAME allocating
+body and proves real entry/private heap growth1→2→3, ordered argument environment
+11/9/ref0, exported default result identity1, caller identity0 and retained9/11.
+A private object2 is dropped. Wrong scalar/result/private identity and false
+success/panic controls have this nonempty successful baseline. Failed execution
+returns no State: no failed heap, old-content invariant, rollback, target frame,
+allocation-cost or byte/world theorem is reconstructed. No restricted function-
+reference job or compiler admission/refusal is altered.
+
+Focused/per-file/import checks and actual17 scoped signature/axiom reports pass;
+these are separate additive core reports, not replacements for the original
+27fixture/739pin inventory, which is unchanged. Early identifier/bind/rfl proof
+failures are retained and fixed without raised proof limits. Runtime versions/
+KeySort are checked for this genuine source implementation, not to profile.
+Independent read-only finder/skeptic source/artifact reviews accompany the seal.
+All original Work1–6/Backfills A/B stay partial. Cached124/120.820, raw124,
+full124/300/TestSuite-sort unreached and normal/strict docs1 remain failed.
+No unchanged heavy retry, goal administration, publication, peer transfer,
+exclusion/premise change or independent-work-exhaustion claim follows.

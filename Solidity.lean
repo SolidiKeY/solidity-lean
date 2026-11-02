@@ -1007,3 +1007,5 @@ import Solidity.Backend.InternalFlow.LocalStoreLoop
 import Solidity.Backend.InternalFlow.LoopLocalTarget
 
 import Solidity.Backend.InternalFlow.LoopCallerPrefix
+
+import Solidity.Backend.InternalFlow.CallArgumentPrefix

@@ -134,3 +134,5 @@ V12 syntax-derived local-only loop framing and mixed allocating controls: [owned
 V12 represented mixed allocating loop endpoints and exact source/target controls: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
 
 V12 concrete all-horizon mixed-loop caller transport and nonterminating/failure controls: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
+
+V12 actual argument-prefix failure and host-only key-phase attribution: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
