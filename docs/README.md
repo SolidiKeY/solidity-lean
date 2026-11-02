@@ -128,3 +128,5 @@ P10 fetched CALL/RETURNDATA/JUMP helper: [interface and handoff](feature-work/ro
 - [V15 stack-family consumers](feature-work/roadmap-v15-stack-family-consumers.md): checked fetched DUP/SWAP clauses at every legal depth.
 
 - [V15 signed division consumers](feature-work/roadmap-v15-signed-division-consumers.md): bounded representation and actual charged SDIV/SMOD clauses.
+
+- [V15 arithmetic shift consumers](feature-work/roadmap-v15-arithmetic-shift-consumers.md): actual SAR representation and charged execution, preserving saturation.
