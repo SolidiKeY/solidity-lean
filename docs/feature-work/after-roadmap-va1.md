@@ -3332,3 +3332,65 @@ memory and halting OR; broader approved M4 boundary; later compiler/general
 formula-derived fuel; remaining backfill/performance and affected/full gates.
 Prior full/TypeExamples resource stops remain failures, VA1-Q2 remains held,
 and no unchanged stopped build is repeated. No goal mutation/publication.
+
+
+### Actual numeric source-to-flattener stages checkpoint (partial)
+
+`Calculus/DecisionNumericStages.lean` composes actual public normalization,
+source reduction, leaf preparation and node-derived numeric flattening. Closed
+QFUIntLinear source weight≤2048, or a positive uint binder with body weight≤2047,
+yields the real numeric leaf, preserved grammar and nodes bounded by original
+source weight, then an actual flattener result with unchanged body and no reads.
+No caller-supplied normalizer/leaf equations or future compiler facts appear.
+The one prefix reserves one existing traversal step. These are source-to-body
+stages, not flattening a quantified wrapper or proving later compiler/global
+coverage completeness.
+
+The owned normalization file adds only `qfUIntPrefix_normalization_sourceFuel`.
+Removing that new lemma reproduces parent7ea6b573 byte-for-byte; every old
+signature, proof, constant and runtime function remains unchanged. The old511
+coverage theorem is not rewritten. Actual clients use the ORIGINAL517-node
+source (with source weight517), identify its actual numeric body's517 nodes,
+and derive actual flattening. A genuinely refuted closed source also reaches
+these stages, with its old countermodel certificate retained. Original large
+source target/Covered=false/hashCovered=false/proved observations are unchanged.
+
+Final bounded MCP normalizer/core/client11.754/5.230/4.178s; affected closure
+build3.115s;12 public signature/axiom reports11.573s; interpreted profile3.097s
+PASS. No sorryAx/new axiom/native trust or checking-budget change. Inputs and
+imports were warm; no clean/full-build claim. Identical original517 input
+first/repeated staged+global observations took51.244484/43.993072ms including
+printing; negative ground1.089172ms. These timings include target, coverage,
+hash coverage, actual source/flatten traversal and the existing global verdict.
+Raw exact commands/source hashes: /workspace/va1-evidence/numeric-stages-next.
+Sampled aggregate RSS 2189256 KiB; cgroup peak 1279426560 bytes; minimum host available 16422653952 bytes. Actual hard 12GiB/no swap, threads1/-j1 and12GiB host reserve; 15 unsuccessful measurements retained.
+
+The complete owned reverse import closure has six nonaggregate modules; all
+were built. Additional Examples/DecisionNumericNormalization consumer build
+passes in5.311s, replaying original numeric and array controls. Aggregate
+Solidity remains part of the held final full gate (affected-closure.json).
+
+Read-only finder/skeptic source reviews found no issues and checked actual
+producer composition, one-step prefix accounting and explicit stage limits;
+neither used Lean/server/builds. Two additive root imports/two module-map rows
+register owned modules; no shared producer or reserved lane code is rewritten.
+Required strict automatic/layer/trust/whitespace gates pass. Strict docs still
+FAIL with exactly the frozen base's85 findings; full list/raw hashes compared.
+Existing axiom inventory and prior full/TypeExamples stops remain failures.
+VA1-Q2 remains held; no unchanged failed full build is repeated.
+
+Disk measured about16MiB free before packaging. All prior files/caches/artifacts
+remain intact. The required immutable prerequisite Git bundle now serves as
+this checkpoint's concrete source package, with full import-closure blob hashes
+and literal signatures; a redundant source tar is omitted. Reconstruction from
+the saved standalone base bundle, exact committed head and full fsck is required
+before export success. Delta evidence references the numeric-flatten and earlier
+source-instance/ground-source archives by path/SHA256; no source simulation is
+substituted. Final combined integration/whole-lane handoff remain open.
+
+Remaining original queue: global meaningful Residue/reasons union and
+DecisionTheorem-prime/exhaustive target/hash bridge; actual array decision and
+collector integration; wider memory and halting OR; broader approved M4 boundary;
+later compiler/path/read-layout formula-derived fuel; remaining baseline/backfill,
+performance and full gates. Original decisions, counterexample, failures and
+seals preserved. No goal reset/mutation, push, merge, PR or publication.

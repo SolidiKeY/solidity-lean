@@ -437,6 +437,20 @@ theorem qfUIntPrefix_normalization {C : Contract} (name : Var)
   rw [actual_all 2047 2047 name .uint φ, hd]
   rfl
 
+/-- The source traversal's own bound suffices for prefix normalization.
+The existing 511-bound coverage theorem and runtime defaults are unchanged. -/
+theorem qfUIntPrefix_normalization_sourceFuel {C : Contract} (name : Var)
+    {φ : Fml C [.val .uint]} (h : φ.QFUIntLinear) (hw : φ.uintQFWeight ≤ 2047) :
+    ∃ χ : Fml C [.val .uint],
+      (ProgramNormalization.ofFormula? 2048 (.all name .uint φ)).map (·.formula) =
+        some (.all name .uint χ) ∧ χ.QFUIntLinear ∧ χ.uintQFWeight ≤ φ.uintQFWeight := by
+  obtain ⟨d, rest, hd, hg, hs, hc⟩ :=
+    qfUIntLinear_normalizer_state 2047 2047 h (by omega) (by omega)
+  refine ⟨d.formula, ?_, hg, hs⟩
+  change ((actualNormalization 2048 (.all name .uint φ) 2048).map Prod.fst).map (·.formula) = _
+  rw [actual_all 2047 2047 name .uint φ, hd]
+  rfl
+
 /-- Compose through the actual normalized source, which can differ syntactically
 from its input. This is an equation about the real existing pipeline. -/
 theorem leafOf_of_normalized_to {C : Contract} (φ χ : Fml C []) (ψ : LFml C)

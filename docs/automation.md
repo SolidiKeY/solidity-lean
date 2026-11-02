@@ -1032,6 +1032,12 @@ and no 511-node premise. A 517-node partial optional body traverses with zero re
 while its unchanged exactBounded test remains false. This closes that restricted
 traversal proof obligation; later arithmetic compiler totality, path/read
 realization and global removal of the 511-node cap remain open.
+`Calculus/DecisionNumericStages.lean` composes these actual source and traversal
+certificates under unchanged 2048-step normalization/source bounds (one step
+reserved for a positive uint binder). The original 517-node source reaches its
+real numeric body and node-derived flattening; original global observations
+remain unchanged. No supplied intermediate producer equations or later compiler
+completeness are assumed.
 `Examples/DecisionHaltingOrGaps.lean` separates already-covered partial
 Boolean lowering from the actual open APF guard-floor case. A nested halting
 `||` guard in a negative two-key mapping block has certified target/unknown/
