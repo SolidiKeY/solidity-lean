@@ -1,0 +1,141 @@
+{
+  "public_base": "e7cc378c275eafe7a047c63f672bedbed2fec6ff",
+  "modules": {
+    "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean": {
+      "sha256": "600bfae545a80249150782b53c9df61a2a690c4d82d4646f0e3009150a94bd0e",
+      "namespace": "Solidity.Backend.MemoryOps.Physical",
+      "declarations": [
+        "word_bytes_length",
+        "readMemory_congr",
+        "readMemory_write_frame",
+        "cell_write_same",
+        "cell_write_other",
+        "WordFrame.write",
+        "word_mstore",
+        "byte_mstore",
+        "WordFrame.mstore"
+      ],
+      "pins": {
+        "Solidity.Backend.MemoryOps.Physical.word_bytes_length": [
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.readMemory_congr": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.readMemory_write_frame": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.cell_write_same": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.cell_write_other": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.WordFrame.write": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.word_mstore": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.byte_mstore": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.WordFrame.mstore": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    },
+    "Solidity/Backend/MemoryOps/PhysicalByteJournal.lean": {
+      "sha256": "2ebcd71b72f7a4fb0826d428e2181c070d685244ecaef31d16836126da5d7162",
+      "namespace": "Solidity.Backend.MemoryOps.Physical",
+      "declarations": [
+        "getBytes_length",
+        "getBytes_at",
+        "readMemory_eq_getBytes",
+        "writeBytes_eq_putBytes",
+        "revert_live",
+        "checkpoint_revert_frame",
+        "revert_written_word"
+      ],
+      "pins": {
+        "Solidity.Backend.MemoryOps.Physical.getBytes_length": [
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.getBytes_at": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.readMemory_eq_getBytes": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.writeBytes_eq_putBytes": [],
+        "Solidity.Backend.MemoryOps.Physical.revert_live": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.checkpoint_revert_frame": [],
+        "Solidity.Backend.MemoryOps.Physical.revert_written_word": [
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    },
+    "Solidity/Backend/MemoryOps/PhysicalSourceUint.lean": {
+      "sha256": "9c6b1069b8b39a7674b1b34bdb5d29bbcbd57277102920c585703d0d2045a928",
+      "namespace": "Solidity.Backend.MemoryOps.Physical",
+      "declarations": [
+        "UintArrayAt.read"
+      ],
+      "pins": {
+        "Solidity.Backend.MemoryOps.Physical.UintArrayAt.read": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    },
+    "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean": {
+      "sha256": "45b4e5da100c5e208d7eece80d4ae99946d29f5430ee7e265bdaa015c97c34c6",
+      "namespace": "Solidity.Backend.MemoryOps.Physical.Controls",
+      "declarations": [
+        "source_read_and_neighbor",
+        "changed_store",
+        "wrong_unscaled_offset",
+        "live_payload_then_local_restore"
+      ],
+      "pins": {
+        "Solidity.Backend.MemoryOps.Physical.Controls.source_read_and_neighbor": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.changed_store": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.wrong_unscaled_offset": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.live_payload_then_local_restore": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    }
+  }
+}
