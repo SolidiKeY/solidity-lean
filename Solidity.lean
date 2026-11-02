@@ -3334,3 +3334,21 @@ import Solidity.Yul.World.TransientTargetPort
 import Solidity.Yul.World.TransientTargetRollback
 import Solidity.Yul.World.TransientTargetRollbackControls
 import Solidity.Yul.World.WorldChecks
+import Solidity.Yul.Composition.CorrectnessControls
+import Solidity.Yul.Composition.CorrectnessInstances
+import Solidity.Yul.Composition.CorrectnessPublic
+import Solidity.Yul.Composition.CorrectnessPublicControls
+import Solidity.Yul.Composition.P6FrameControls
+import Solidity.Yul.Composition.P6FrameCorrectness
+import Solidity.Yul.CheckedParse
+import Solidity.Yul.DeclarationParse
+import Solidity.Yul.EvmArithmetic
+import Solidity.Yul.EvmBitwise
+import Solidity.Yul.EvmSigned
+import Solidity.Yul.RawDefaultDeclaration
+import Solidity.Yul.RawLocalDeclaration
+import Solidity.Yul.RawLocalScope
+import Solidity.Yul.RawSourceReturnControl
+import Solidity.Yul.RawSourceVoidReturn
+
+
