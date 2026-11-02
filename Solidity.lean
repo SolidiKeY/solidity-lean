@@ -1089,3 +1089,52 @@ import Solidity.Backend.Passes.TailLoop
 import Solidity.Backend.Passes.TailMachine
 import Solidity.Backend.Passes.TripleSequence
 import Solidity.Backend.Passes.CompilerProofChecks
+
+
+import Solidity.Lowering.V08.Audit
+
+import Solidity.Lowering.V08.NestedControls
+
+import Solidity.Lowering.V08.HandlerControls
+
+import Solidity.Lowering.V08.LibraryHandlerControls
+import Solidity.Lowering.V08.CreationSuccessControls
+import Solidity.Lowering.V08.TransactionPrefixes
+import Solidity.Lowering.V08.PrefixControls
+
+import Solidity.Lowering.V08.SourceEnvironment
+import Solidity.Lowering.V08.SourceEnvironmentControls
+
+import Solidity.Lowering.V08.SourceFailures
+import Solidity.Lowering.V08.SourceFailureControls
+import Solidity.Lowering.V08.SourceKeccak
+import Solidity.Lowering.V08.SourceKeccakControls
+import Solidity.Lowering.V08.SourceEmit
+import Solidity.Lowering.V08.SourceEmitControls
+import Solidity.Lowering.V08.SourceCallable
+import Solidity.Lowering.V08.SourceCallableControls
+import Solidity.Lowering.V08.SourceDispatch
+import Solidity.Lowering.V08.SourceDispatchControls
+import Solidity.Lowering.V08.SourceCustomErrors
+import Solidity.Lowering.V08.SourceCustomErrorControls
+
+import Solidity.Lowering.V08.SourceCustomErrorFailures
+import Solidity.Lowering.V08.SourceCustomErrorFailureControls
+
+import Solidity.Lowering.V08.SourceAbi
+import Solidity.Lowering.V08.SourceAbiControls
+
+import Solidity.Lowering.V08.SourceAbiEntryControls
+import Solidity.Lowering.V08.SourceRethrow
+import Solidity.Lowering.V08.SourceRethrowControls
+import Solidity.Lowering.V08.SourceStandardRethrow
+import Solidity.Lowering.V08.SourceStandardRethrowControls
+import Solidity.Lowering.V08.SourcePrefixedRethrowControls
+import Solidity.Lowering.V08.SourceTransientRethrowControls
+import Solidity.Lowering.V08.SourceTransientMixedRethrowControls
+import Solidity.Lowering.V08.SourceTransientEmitControls
+import Solidity.Lowering.V08.SourceTransientEmitPanicControls
+import Solidity.Lowering.V08.SourceTransientBytesEmitControls
+import Solidity.Lowering.V08.H1Audit
+
+import Solidity.Lowering.V08.CallableReflection

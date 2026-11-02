@@ -1458,3 +1458,79 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/Passes/TailLoop.lean` | Typed compiler transport or control proof component. |
 | `Backend/Passes/TailMachine.lean` | Typed compiler transport or control proof component. |
 | `Backend/Passes/TripleSequence.lean` | Typed compiler transport or control proof component. |
+
+## V08 independent adapters (partial lane)
+
+| Module | Purpose |
+|---|---|
+| `Lowering/V08/Callable.lean` | Typed result observation extension; paid frame and exact halt preserved. |
+| `Lowering/V08/AbiObservations.lean` | Independent source/intrinsic word, panic and reason byte agreement. |
+| `Lowering/V08/Transactions.lean` | Snapshot, atomic status, observation and repeated reset laws. |
+| `Lowering/V08/LibraryCreation.lean` | Linked caller-context and creation-continuation observations. |
+| `Lowering/V08/Controls.lean` | Funded, failure-byte, rollback, reset and caught constructor controls. |
+| `Lowering/V08/AbiControls.lean` | Exact catch positives and malformed/wrong-code negatives. |
+| `Lowering/V08/LibraryControls.lean` | Delegated owner isolation and nonempty constructor installation. |
+| `Lowering/V08/Audit.lean` | Headline axiom output pinned by lane-specific controls. |
+| `Lowering/V08/CallbackControls.lean` | Paid invariant/havoc callback, actual settlement and atomic rollback witnesses; no source reentrancy claim. |
+| `Lowering/V08/CallableMetadata.lean` | Source resolved argument/conversion metadata and checked target frame labels; no source evaluator |
+| `Lowering/V08/MetadataControls.lean` | Nonempty source function/error metadata, typed target binding and wrong-order/signature controls |
+| `Lowering/V08/EnvironmentProjection.lean` | Total source/intrinsic word/address, request/environment and account/session-ledger observation adapters; no source execution certificate |
+| `Lowering/V08/ProjectionControls.lean` | Populated independent instance journals and actual target nested paid frames, reset/payload negatives and external-ledger selection controls |
+| `Lowering/V08/SelectorObservations.lean` | Independent canonical signature/custom-selector bytes, prefix splitting and ordered ABI word observation extension |
+| `Lowering/V08/SelectorControls.lean` | Kernel UTF-8/selector/argument-order controls; no collision axiom or native trust shortcut |
+| `Lowering/V08/EmitControls.lean` | Actual erased-emit typed effects/read/failure/payment regressions with matching source event/argument-tree fixtures; no source execution theorem |
+| `Lowering/V08/CryptoObservations.lean` | Published Keccak output-word bound and fixed source/intrinsic word/ABI-byte observation transport; no hash/precompile implementation |
+| `Lowering/V08/CryptoControls.lean` | Inhabited real Keccak pin, actual standard vector and wrong-byte/word kernel controls |
+| `Lowering/V08/PayableMetadata.lean` | Source ordinary-entry payable/receive/fallback metadata and actual numeric frame payment guards; no exposure/body/readonly certificate |
+| `Lowering/V08/PayableControls.lean` | Source receive membership and payment flags, malformed/noncallable/constructor refusals, actual paid/zero-call controls |
+| `Lowering/V08/DeclarationRoles.lean` | Source contract/library role metadata on supplied typed catalogue, preserved storage/other keys and actual ordinary-call/create refusals |
+| `Lowering/V08/RoleControls.lean` | Source library membership and real typed empty-library installation/refusal/catalogue controls |
+| `Lowering/V08/InheritedMetadata.lean` | Published mutOK/FnOverrideOK payment-tag transport and actual entry-header guards; source body/dispatch remains separate |
+| `Lowering/V08/InheritedControls.lean` | Nonempty two-contract source chain, proved baseFns/override certificate, funded header and exact wrong-header/mutability controls |
+| `Lowering/V08/NestedControls.lean` | Two populated atomic rollback boundaries with real creation-continuation failure and complete observation controls. |
+| `Lowering/V08/HandlerControls.lean` | Completed constructor failure, paid catch-handler failure, exact payload and ancestor rollback controls. |
+| `Lowering/V08/LibraryHandlerControls.lean` | Real caller-context library work inside failed creation-handler rollback and exact context/payload controls. |
+| `Lowering/V08/CreationSuccessControls` | Successful creation, caller-library continuation, exact failure and rollback controls |
+| `Lowering/V08/TransactionPrefixes` | Arbitrary finite prefixes of actual transactions with ordered exact histories |
+| `Lowering/V08/PrefixControls` | Funded commit, real post-commit failures and reads with complete boundary observations |
+| `Lowering/V08/SourceEnvironment.lean` | Actual independent resolved environment execution and intrinsic observation transport; explicit positive/zero horizons. |
+| `Lowering/V08/SourceEnvironmentControls.lean` | Populated source state, both pipelines and actual paid target context controls. |
+| `Lowering/V08/SourceFailures.lean` | Actual resolved literal-reason failure execution and exact intrinsic payload transport. |
+| `Lowering/V08/SourceFailureControls.lean` | Binary, empty and unaligned reasons, horizon distinctions and real paid rollback. |
+| `Lowering/V08/SourceKeccak.lean` | Actual resolved literal Keccak execution, exact heap allocation and explicitly pinned intrinsic byte/word observation. |
+| `Lowering/V08/SourceKeccakControls.lean` | Populated binary, empty and 33-byte executions, both pipelines, complete machine and actual wrong-output controls. |
+| `Lowering/V08/SourceEmit.lean` | Actual emit argument/encoding/static/failure boundaries, log-only erasure and exact intrinsic word encoding observations. |
+| `Lowering/V08/SourceEmitControls.lean` | Declared event, populated source machine, allocation/local argument order, panic/static/timeout and malformed encoding controls. |
+| `Lowering/V08/SourceCallable.lean` | Actual source callable initialization, selected body, checked frame, return extraction and caller-local/failure boundaries. |
+| `Lowering/V08/SourceCallableControls.lean` | Populated two-argument/one-result source calls, declaration discrimination, exact contexts, order/local retention and failure controls. |
+| `Lowering/V08/SourceDispatch.lean` | Published source free/outside-linearization selection and body lookup laws. |
+| `Lowering/V08/SourceDispatchControls.lean` | Actual free/internal-library ambient context calls, real competing body, repeated reached calls, full state and independent intrinsic observations. |
+| `Lowering/V08/SourceCustomErrors.lean` | Actual custom-error execution and selector transport with explicit independent signature input-byte equality. |
+| `Lowering/V08/SourceCustomErrorControls.lean` | Populated exact custom-error payload/order/static/panic/timeout controls and concrete UTF-8 signature checks. |
+| `Solidity/Lowering/V08/SourceCustomErrorFailures.lean` | Actual custom-error argument/encoding failure boundaries. |
+| `Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean` | Populated source panic, rethrow and aggregate-encoding-gap controls. |
+| `Solidity/Lowering/V08/SourceAbi.lean` | Actual source ABI expression allocation and existing byte observations. |
+| `Solidity/Lowering/V08/SourceAbiControls.lean` | Populated binary/dynamic/static ABI argument and allocation controls. |
+| `Lowering/V08/SourceTransient.lean` | Actual typed source transient write/static/read/endTx/undo observations and selected intrinsic reset; canonical layout/frame relation remains open. |
+| `Lowering/V08/SourceAbiEntryControls.lean` | Actual Source ABI allocation bytes and published eager/lazy entry decoding controls; no general calldata/body adequacy. |
+| `Lowering/V08/SourceRethrow.lean` | Actual packed-literal allocation, reached-reference canonical rethrow and independent intrinsic byte observation. |
+| `Lowering/V08/SourceRethrowControls.lean` | Populated complete-machine, neighboring-object, caller-local and horizon controls. |
+| `Lowering/V08/SourceStandardRethrow.lean` | Actual standard ABI allocation/rethrow and distinct source timeout boundaries. |
+| `Lowering/V08/SourceStandardRethrowControls.lean` | Full populated standard/reversed execution,320-byte payload, offset words and negative controls. |
+| `Lowering/V08/SourcePrefixedRethrowControls.lean` | Actual selector/signature and string-reference allocation/rethrow, complete heap/state controls. |
+| `Lowering/V08/SourceTransientRethrowControls.lean` | Actual transient statement / ABI declaration / canonical rethrow sequence; explicit rollback/reset controls. |
+| `Lowering/V08/SourceTransientMixedRethrowControls.lean` | Actual mixed effecting ABI arguments after a transient-writing statement prefix, exact rethrow and explicit rollback. |
+| `Lowering/V08/SourceTransientEmitControls.lean` | Actual effecting emit after a reached transient/caller prefix; exact log erasure, static order and explicit journal rollback/end. |
+| `Lowering/V08/SourceTransientEmitPanicControls.lean` | Actual event argument panic after transient/hash prefixes; precise bytes, existing decoder observation and explicit rollback/end. |
+| `Lowering/V08/SourceTransientBytesEmitControls.lean` | Valid dynamic-memory RawBytes event at reached transient/caller prefix; exact allocation, payload and boundary controls. |
+| `Lowering/V08/H1Audit.lean` | V08 exact axiom inventory including finite-prefix and source-boundary controls. |
+| `Lowering/V08/SourceTransientReentry.lean` | Explicit event execution, end and fresh transient reentry. |
+| `Lowering/V08/SourceTransientOwnerRollback.lean` | Owner-isolated reached writes and explicit nested rollback. |
+| `Lowering/V08/SourceTransientOwnerCommit.lean` | Reached inner commit, later write and outer rollback. |
+| `Lowering/V08/SourceTransientInnerRollbackOuterCommit.lean` | Inner rollback, later owner write and outer commit. |
+| `Lowering/V08/SourceTransientErrorCallerRollback.lean` | Exact raw errors followed by explicit caller rollback and end. |
+| `Lowering/V08/SourceTransientReachedPayment.lean` | Actual funded Source transfer at the reached event/transient state. |
+| `Lowering/V08/SourceTransientRejectedPayment.lean` | Actual unaffordable second transfer preserves its paid input. |
+| `Lowering/V08/SourceTransientSameOwnerPayment.lean` | Same-owner identity and affordability versus distinct-owner draining transfer. |
+| `Lowering/V08/SourceTransientZeroPayment.lean` | Zero distinct-owner transfer retains world but adds two journal entries. |
+| `Lowering/V08/CallableReflection.lean` | Exact typed callable success reflection under injective observation, with funded and lossy counterexamples. |

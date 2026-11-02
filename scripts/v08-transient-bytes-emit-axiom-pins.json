@@ -1,0 +1,134 @@
+{
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.actual_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.arguments_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.boundary_cases": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.boundary_lengths": [],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.bytes_event_member": [],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.complete_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.dangling_error": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.direct_static": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.emit_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.encoding_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.end_fields": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.end_reads": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.erased_execution": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.fresh_not_stale": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.memory_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.payload_transport": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.prefix_argument_timeout": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.prefix_static_refusal": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.rollback_logged": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.sequence_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.stale_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.static_boundary_contrast": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.wrong_automatic_rollback": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.wrong_byte_order": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.wrong_length": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.wrong_padding": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.wrong_reference": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientBytesEmitControls.zero_timeout": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}
