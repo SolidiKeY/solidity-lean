@@ -40,7 +40,7 @@ inductive SemStatus where
 /-- The semantic status of an expression constructor. -/
 def semExprCoverage (k : Ctor) : Option SemStatus :=
   match exprCoverage k with
-  | some .typed => some .evaluated
+  | some .typed | some (.operand _ _) => some .evaluated
   | some (.deferred _ _) =>
     match k with
     | .callOptions => some (.gap "S02" "only `{value: v}` on an external call is typed and evaluated (`extCall`)")
@@ -48,14 +48,13 @@ def semExprCoverage (k : Ctor) : Option SemStatus :=
     | .metaType => some (.gap "S04.02" "type(T) members read the artifact table")
     | .new => some (.gap "S03" "contract creation and `new T[](n)` are not typed")
     | .inlineArray => some (.gap "S02" "inline arrays are not typed")
-    | .elemType => some (.gap "S02" "type names as values (abi.decode) are not typed")
     | _ => some (.gap "S02" "deferred by S01")
   | none => none
 
 /-- The semantic status of a statement constructor. -/
 def semStmtCoverage (k : Ctor) : Option SemStatus :=
   match stmtCoverage k with
-  | some .typed => some .evaluated
+  | some .typed | some (.operand _ _) => some .evaluated
   | some (.deferred stage reason) =>
     match k with
     | .assembly => some (.gap "S00" "excluded; the canonical rethrow is typed and evaluated (`RStmt.rethrow`)")
@@ -82,7 +81,7 @@ theorem semStmtCoverage_of_typed (k : Ctor) (h : stmtCoverage k = some .typed) :
 
 /-- The expression constructors still without semantics. -/
 def semExprGaps : List Ctor :=
-  [.slice, .callOptions, .metaType, .new, .inlineArray, .elemType]
+  [.slice, .callOptions, .metaType, .new, .inlineArray]
 
 /-- Whether S01 defers a constructor. -/
 def deferred (k : Ctor) : Bool :=

@@ -282,6 +282,17 @@ def unRet {D : Layout} : (rs : List STy) → RVal D (STy.ret rs) → R (RVals D 
   | _ :: _ :: _, .tuple vs => pure vs
   | _ :: _ :: _, _ => stuck "return tuple"
 
+/-- **`abi.decode`** (FU2-B): data shorter than one head word per type
+reverts with no data (solc's `abi_decode_tuple` head check), then the
+values are decoded as a call's arguments are (`decodeArgs`): an invalid
+word, an offset or length word past the data, or a tail past the data
+reverts with no data, a length of `2^64` or more panics with `0x41`. -/
+def abiDecodeData {Γ : RCtx} (data : Bytes) (τs : List STy) : EM E Γ (RVal E.layout (STy.ret τs)) :=
+  if data.length < 32 * τs.length then halt (.revert [])
+  else do
+    let vs ← decodeArgs data τs 0
+    pure (mkRet τs vs.toR)
+
 /-! ## Conversions with state -/
 
 /-- **An implicit conversion** (`RExpr.conv`): a constant at its target
@@ -869,6 +880,9 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
       copyInto F n τ p v
       return .val (← storRef τ p)
     | _ => halt (.stuck "copy target")
+  | .abiDecode (τs := τs) data _ _ => do
+    let v ← evalE G F n data
+    abiDecodeData (← bytesOfRV F n v) τs
 termination_by structural n
 
 /-- Two operands in the pipeline's order: right first under legacy, left

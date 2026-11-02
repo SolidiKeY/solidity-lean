@@ -61,6 +61,7 @@ import Solidity.Source.Unique
 import Solidity.Source.Horizon
 import Solidity.Source.Session
 import Solidity.Source.SoundnessExamples
+import Solidity.Source.DecodeExamples
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.Dispatch
 import Solidity.Examples.Tactics.FunctionTypes
@@ -1815,3 +1816,26 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} lane FU1 dispatch theorems use only the standard axioms"
+
+/-! Lane FU2-B: `abi.decode` in the source semantics (typing, checker,
+preservation and progress of the decoder). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.hasType_iff,
+    ``Solidity.Source.Typed.unique,
+    ``Solidity.Source.TypingExamples.exprCoverage_operand,
+    ``Solidity.Source.TypingExamples.elemType_decode_operand,
+    ``Solidity.Source.Ledger.semExprGaps_spec,
+    ``Solidity.Source.decodeArg_ok,
+    ``Solidity.Source.decodeArgs_ok,
+    ``Solidity.Source.abiDecodeData_ok,
+    ``Solidity.Source.evalE_abiDecode_ok,
+    ``Solidity.Source.evalE_abiDecode_lit_ok]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-B decode theorems use only the standard axioms"

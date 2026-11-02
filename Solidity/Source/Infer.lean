@@ -131,6 +131,20 @@ def inferCall (Γ : Ctx) (f : String) (args : Syn (.list .expr)) (σs : List STy
     | Option.none => Option.none
   | _ => Option.none
 
+/-- `abi.decode(x, ts)` from the data's inferred derivation. -/
+def inferDecode (Γ : Ctx) (g : String) (x ts : Syn .expr) (rx : Option (Inferred Γ x)) :
+    Option (Inferred Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil))))) :=
+  match hr : Γ.resolve g, rx with
+  | Option.some (.builtin .abi), Option.some ⟨σ, dx⟩ =>
+    if hs : σ.decodeSrc = true then
+      match hd : Γ.decodeTys ts with
+      | Option.some τs =>
+        if hok : τs.all (STy.decodable Γ.env) = true then Option.some ⟨_, .abiDecode hr dx hs hd hok⟩
+        else Option.none
+      | Option.none => Option.none
+    else Option.none
+  | _, _ => Option.none
+
 mutual
 
 /-- **Type inference** of an expression: a type and a derivation. -/
@@ -307,6 +321,11 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
           | _, _ => Option.none
         | _ => inferCall Γ f args σs da
   | .call (.member c f) (.positional args) => do
+    let dec : Option (Inferred Γ (.call (.member c f) (.positional args))) :=
+      match c, f, args with
+      | .ident g, "decode", .cons x (.cons ts .nil) => inferDecode Γ g x ts (Typed.inferN n Γ x)
+      | _, _, _ => Option.none
+    dec.orElse fun _ => do
     let ⟨σs, da⟩ ← TypedArgs.inferN n Γ args
     let abi : Option (Inferred Γ (.call (.member c f) (.positional args))) :=
       match c with

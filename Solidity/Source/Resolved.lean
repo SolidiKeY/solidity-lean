@@ -230,6 +230,9 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | abiEncode {σs : List STy} (k : AbiKind) (args : RArgs E Γ σs) : RExpr E Γ (.bytes .memory)
   /-- A copy into storage. -/
   | assignCopy {τ σ : STy} (l : RLVal E Γ τ) (e : RExpr E Γ σ) (h : σ.copiesTo τ = true) : RExpr E Γ τ
+  /-- `abi.decode`: the data, decoded at types the decoder reads. -/
+  | abiDecode {σ : STy} {τs : List STy} (data : RExpr E Γ σ) (hs : σ.decodeSrc = true)
+      (hd : τs.all (STy.decodable E) = true) : RExpr E Γ (STy.ret τs)
 
 /-- Resolved argument lists. -/
 inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
@@ -346,6 +349,7 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .send da dv h => .send da.toR (.conv dv.toR (.inl h))
   | .abiEncode (k := k) _ _ da _ => .abiEncode k da.toR
   | .assignCopy l db h _ => .assignCopy l.toR db.toR h
+  | .abiDecode _ dx hs _ hd => .abiDecode dx.toR hs hd
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :

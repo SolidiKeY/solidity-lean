@@ -343,6 +343,7 @@ def RExpr.OpsOK {E : Env} {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .transfer a v | _, .send a v => RExpr.OpsOK a ∧ RExpr.OpsOK v
   | _, .abiEncode _ args => RArgs.OpsOK args
   | _, .assignCopy l e _ => RLVal.OpsOK l ∧ RExpr.OpsOK e
+  | _, .abiDecode d _ _ => RExpr.OpsOK d
 
 def RArgs.OpsOK {E : Env} {Γ : RCtx} : {τs : List STy} → RArgs E Γ τs → Prop
   | _, .nil => True
@@ -433,6 +434,7 @@ theorem Typed.toR_opsOK {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → (d : Typ
   | _, _, .send da dv _ => And.intro (Typed.toR_opsOK da) (Typed.toR_opsOK dv)
   | _, _, .abiEncode _ _ da _ => TypedArgs.toR_opsOK da
   | _, _, .assignCopy l db _ _ => And.intro (LVal.toR_opsOK l) (Typed.toR_opsOK db)
+  | _, _, .abiDecode _ dx _ _ _ => Typed.toR_opsOK dx
 
 theorem TypedArgs.toR_opsOK {Γ : Ctx} : {es : Syn (.list .expr)} → {τs : List STy} →
     (d : TypedArgs Γ es τs) → RArgs.OpsOK d.toR

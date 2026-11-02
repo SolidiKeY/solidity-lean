@@ -652,6 +652,89 @@ def AbiKind.argsOK (B : DeclName → DeclName → Bool) : AbiKind → List STy �
   | .encodeWithSignature, σ :: σs => σ.isStringy && σs.all STy.abiArg
   | _, _ => false
 
+/-! ### `abi.decode` -/
+
+/-- The user-defined type a name denotes as a type expression (solc's
+`TypeType` of the declaration), in `memory`: a struct, an enum, a
+user-defined value type, a contract or an interface. A local or any
+other declaration is not a type. -/
+def Ctx.typeNameOf (Γ : Ctx) (x : String) : Option STy :=
+  match Γ.resolve x with
+  | Option.some (.decls [d]) =>
+    match d.kind with
+    | .struct => Option.some (.struct .memory ⟨d.scope, d.name⟩)
+    | .enum => Option.some (.enum ⟨d.scope, d.name⟩)
+    | .udvt => Option.some (.udvt ⟨d.scope, d.name⟩)
+    | .contract | .interface => Option.some (.contract ⟨d.scope, d.name⟩)
+    | _ => Option.none
+  | _ => Option.none
+
+/-- The types a list of type expressions names, in `memory`: an
+elementary type name, a user-defined type by an unqualified name, an
+array of one (`T[]`, `T[k]` with a positive constant `k`); qualified names
+(`L.S`) are not read. -/
+def Syn.typeExprs (Γ : Ctx) : {c : Cat} → Syn c → Option (List STy)
+  | _, .elemType el _ => Option.some [el.ty .memory]
+  | _, .ident x => (Γ.typeNameOf x).map ([·])
+  | _, .index t o =>
+    match t.typeExprs Γ, arrayLen o with
+    | Option.some [σ], Option.some k => Option.some [.array .memory σ k]
+    | _, _ => Option.none
+  | _, .some x => x.typeExprs Γ
+  | _, .nil => Option.some []
+  | _, .cons x xs =>
+    match x.typeExprs Γ, xs.typeExprs Γ with
+    | Option.some a, Option.some b => Option.some (a ++ b)
+    | _, _ => Option.none
+  | _, _ => Option.none
+
+/-- The types `abi.decode`'s second argument names: the components of a
+parenthesized list of type expressions (`(T)` and `(T, U)`, every
+component present), or a single type expression. -/
+def Ctx.decodeTys (Γ : Ctx) (e : Syn .expr) : Option (List STy) :=
+  match e with
+  | .tuple o s => (Syn.cons o s).typeExprs Γ
+  | e => e.typeExprs Γ
+
+/-- The data `abi.decode` reads: `bytes` in memory or storage, or a string
+literal (all implicitly `bytes memory`, as solc requires). `bytes calldata`
+is refused here: calldata references are not modelled in the source
+semantics. -/
+def STy.decodeSrc : STy → Bool
+  | .bytes .memory | .bytes .storage | .stringLit _ => true
+  | _ => false
+
+/-- A one-word ABI value the decoder reads (`decodeElemWord`), other than
+fixed point (solc's ABI coder does not implement it) and function types. -/
+def STy.wordElem : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .enum _ | .contract _ => true
+  | _ => false
+
+/-- The underlying type of a user-defined value type, as `Env.layout`
+(`Solidity/Source/Machine.lean`) reads it. -/
+def Env.udvtUnderlying (E : Env) (d : DeclName) : STy :=
+  match E.declOf .udvt d with
+  | Option.some ⟨.udvt, _, _, _, .udvt _ el⟩ => el.ty .memory
+  | _ => .bool
+
+/-- A one-word value the decoder reads: a user-defined value type at its
+underlying type, any other type by `STy.wordElem`. -/
+def STy.decodableElem (E : Env) : STy → Bool
+  | .udvt d => (E.udvtUnderlying d).wordElem
+  | τ => τ.wordElem
+
+/-- **A type `abi.decode` reads in the source semantics**: the types the
+ABI decoder of S02/S04 (`decodeArgs`) decodes: a one-word value type, an
+enum at its member count, a user-defined value type at its underlying
+type, `bytes`/`string` in memory, and a dynamic memory array of
+one-word values. Static arrays, structs, nested arrays, fixed point and
+external function types are refused (a named refusal: the decoder does
+not read them). -/
+def STy.decodable (E : Env) : STy → Bool
+  | .bytes .memory | .string .memory => true
+  | .array .memory σ none => σ.decodableElem E
+  | τ => τ.decodableElem E
+
 /-- A reference type moved to a location (nested arrays with it). -/
 def STy.withLoc (l : DataLoc) : STy → STy
   | .bytes _ => .bytes l
@@ -858,6 +941,13 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   literal; the target is a storage location, not a local `storage` pointer. -/
   | assignCopy {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ → σ.copiesTo τ = true →
       Γ.namesLocal a = false → Typed Γ (.assign .assign a b) τ
+  /-- `abi.decode(data, (T₁, …, Tₙ))` (FU2-B): the values the ABI decoder
+  reads from `bytes` data, at the named types in `memory`, each one the
+  decoder reads (`STy.decodable`); one type is its value, more a tuple. -/
+  | abiDecode {g : String} {x ts : Syn .expr} {σ : STy} {τs : List STy} :
+      Γ.resolve g = Option.some (.builtin .abi) → Typed Γ x σ → σ.decodeSrc = true →
+      Γ.decodeTys ts = Option.some τs → τs.all (STy.decodable Γ.env) = true →
+      Typed Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) (STy.ret τs)
 
 /-- Typing of an argument list. -/
 inductive TypedArgs (Γ : Ctx) : Syn (.list .expr) → List STy → Type where

@@ -173,6 +173,15 @@ theorem pos_mem {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} {d : TypedA
     (h : ⟨τs, d⟩ ∈ argsOf Γ (infer Γ es)) : Res.pos d ∈ infer Γ (.positional es) :=
   List.mem_map.mpr ⟨_, h, rfl⟩
 
+-- The `abi.decode` part of a call's results matches on the arguments,
+-- which stops smart unfolding at an abstract call; the structural
+-- recursor unfolds it.
+set_option smartUnfolding false in
+/-- The call rules' part of a call's results. -/
+theorem call_sub {Γ : Ctx} {f : Syn .expr} {a : Syn .callArgs} {r : Res Γ .expr (.call f a)}
+    (h : r ∈ (infer Γ a).flatMap (callRes Γ f (infer Γ f))) : r ∈ infer Γ (.call f a) :=
+  List.mem_append_right _ h
+
 theorem args1_mem {Γ : Ctx} {x : Syn .expr} {σ : STy} {d : Typed Γ x σ} (h : Res.expr d ∈ infer Γ x) :
     Res.pos (TypedArgs.cons d .nil) ∈ infer Γ (.positional (.cons x .nil)) := by
   apply pos_mem
@@ -531,7 +540,7 @@ theorem callMember_sub {c : Syn .expr} {m : String} {es : Syn (.list .expr)} {σ
     {r : Res Γ .expr (.call (.member c m) (.positional es))}
     (hr : r ∈ abiRes Γ c m σs ds ++ (infer Γ (.member c m)).flatMap (memberCallOne Γ σs ds)) :
     r ∈ infer Γ (.call (.member c m) (.positional es)) :=
-  List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, pos_mem h, hr⟩)
+  call_sub (List.mem_flatMap.mpr ⟨_, pos_mem h, hr⟩)
 
 theorem extCall_mem {c : Syn .expr} {f : String} {es : Syn (.list .expr)} {σs ps rs : List STy}
     {dn : DeclName} {d : Decl} {dc : Typed Γ c (.contract dn)} (hc : Res.expr dc ∈ infer Γ c)
@@ -555,7 +564,7 @@ theorem transfer_mem {c v : Syn .expr} {dc : Typed Γ c (.address true)} (hc : R
     {dv : Typed Γ v σ} (hv : Res.expr dv ∈ infer Γ v) (h : σ.implicit Γ.isBase (.int IntTy.u256) = true) :
     Res.expr (Typed.transfer dc dv h) ∈
       infer Γ (.call (.member c "transfer") (.positional (.cons v .nil))) := by
-  refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, args1_mem hv,
+  refine call_sub (List.mem_flatMap.mpr ⟨_, args1_mem hv,
     List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, recv_mem hc, ?_⟩)⟩)
   simp only [memberCallOne, payRes, payOne]
   rw [dif_pos h]; exact List.mem_singleton.mpr rfl
@@ -564,7 +573,7 @@ theorem send_mem {c v : Syn .expr} {dc : Typed Γ c (.address true)} (hc : Res.e
     {dv : Typed Γ v σ} (hv : Res.expr dv ∈ infer Γ v) (h : σ.implicit Γ.isBase (.int IntTy.u256) = true) :
     Res.expr (Typed.send dc dv h) ∈
       infer Γ (.call (.member c "send") (.positional (.cons v .nil))) := by
-  refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, args1_mem hv,
+  refine call_sub (List.mem_flatMap.mpr ⟨_, args1_mem hv,
     List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, recv_mem hc, ?_⟩)⟩)
   show _ ∈ (if h : σ.implicit Γ.isBase (.int IntTy.u256) = true then [Res.expr (Typed.send dc dv h)] else [])
   rw [dif_pos h]; exact List.mem_singleton.mpr rfl
@@ -583,6 +592,25 @@ theorem abiEncode_mem {g m : String} {es : Syn (.list .expr)} {σs : List STy} {
       rw [hk] at hk'; cases hk'
       rw [dif_pos ha]; exact List.mem_singleton.mpr rfl
     · rename_i hk'; rw [hk] at hk'; cases hk'
+  · rename_i hn; exact absurd hr hn
+
+theorem abiDecode_mem {g : String} {x ts : Syn .expr} {σ : STy} {τs : List STy} {dx : Typed Γ x σ}
+    (hx : Res.expr dx ∈ infer Γ x) (hr : Γ.resolve g = Option.some (.builtin .abi))
+    (hs : σ.decodeSrc = true) (hd : Γ.decodeTys ts = Option.some τs) (hok : τs.all (STy.decodable Γ.env) = true) :
+    Res.expr (Typed.abiDecode hr dx hs hd hok) ∈
+      infer Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) := by
+  refine List.mem_append_left _ (List.mem_append_right _ ?_)
+  show _ ∈ decodeRes Γ g x ts (infer Γ x)
+  simp only [decodeRes]
+  split
+  · rename_i hr'
+    split
+    · rename_i τs' hd'
+      rw [hd] at hd'; cases hd'
+      rw [dif_pos hok]
+      refine List.mem_filterMap.mpr ⟨⟨σ, dx⟩, mem_tysOf' hx, ?_⟩
+      simp only [dif_pos hs]
+    · rename_i hd'; rw [hd] at hd'; cases hd'
   · rename_i hn; exact absurd hr hn
 
 theorem extCallValue_mem {c v : Syn .expr} {f : String} {es : Syn (.list .expr)} {σs ps rs : List STy}
@@ -828,6 +856,9 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
     obtain ⟨dl', hl⟩ := exists_lval (lval_complete dl)
     obtain ⟨db', hb⟩ := exists_expr (typed_complete db)
     exact mem_tysOf (assignCopy_mem hl hb h hn)
+  | _, _, .abiDecode hr dx hs hd hok => by
+    obtain ⟨dx', hx⟩ := exists_expr (typed_complete dx)
+    exact mem_tysOf (abiDecode_mem hx hr hs hd hok)
 
 /-- **Completeness for lvalues.** -/
 theorem lval_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → LVal Γ e τ →

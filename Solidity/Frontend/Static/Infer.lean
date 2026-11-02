@@ -443,6 +443,21 @@ def abiRes : (c : Syn .expr) → (m : String) → {es : Syn (.list .expr)} → (
     | _ => []
   | _, _, _, _, _ => []
 
+/-- `abi.decode(x, ts)` (FU2-B), from the data's results: the type
+expressions are read, not typed. -/
+def decodeRes (g : String) (x ts : Syn .expr) (rx : List (Res Γ .expr x)) :
+    List (Res Γ .expr (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil))))) :=
+  match hr : Γ.resolve g with
+  | Option.some (.builtin .abi) =>
+    match hd : Γ.decodeTys ts with
+    | Option.some τs =>
+      if hok : τs.all (STy.decodable Γ.env) = true then
+        (tysOf Γ rx).filterMap fun p =>
+          if hs : p.1.decodeSrc = true then Option.some (.expr (.abiDecode hr p.2 hs hd hok)) else Option.none
+      else []
+    | Option.none => []
+  | _ => []
+
 /-- `a.transfer(v)`, `a.send(v)` on an `address payable`, one argument. -/
 def payOne : (m : String) → {a v : Syn .expr} → Typed Γ a (.address true) → (σ : STy) → Typed Γ v σ →
     List (Res Γ .expr (.call (.member a m) (.positional (.cons v .nil))))
@@ -557,7 +572,11 @@ def infer : {c : Cat} → (s : Syn c) → List (Res Γ c s)
   | _, .member a m =>
     let ra := infer a
     constRes Γ _ ++ memberRes Γ m ra ++ magicFor Γ a m ++ structMemberRes Γ m ra ++ recvRes Γ m ra
-  | _, .call f a => constRes Γ _ ++ (infer a).flatMap (callRes Γ f (infer f))
+  | _, .call f a => constRes Γ _ ++
+      (match f, a with
+       | .member (.ident g) "decode", .positional (.cons x (.cons ts .nil)) => decodeRes Γ g x ts (infer x)
+       | _, _ => []) ++
+      (infer a).flatMap (callRes Γ f (infer f))
   | _, .payableConv a => constRes Γ _ ++ (infer a).flatMap (payableConvRes Γ)
   | _, .slice a o o' => constRes Γ (.slice a o o')
   | _, .callOptions f n ns =>

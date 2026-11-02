@@ -68,6 +68,13 @@ def w_index_mapping : Typed Γ (.index (.ident "m") (.some (.ident "o"))) (.int 
 def w_member : Typed Γ (.member (.ident "arr") "length") (.int IntTy.u256) := .length ty_arr rfl
 def w_call : Typed Γ (.call (.elemType (.int false 8 (by decide)) (by decide))
     (.positional (.cons a .nil))) (.int IntTy.u8) := .convElem ty_a rfl rfl
+/-- `abi.decode(hex"…", (uint8, bool))` (FU2-B): the type names are read
+as the decoder's types, not typed as values. -/
+def w_abiDecode : Typed Γ (.call (.member (.ident "abi") "decode") (.positional (.cons (.lit (.hexStr [0, 1]))
+    (.cons (.tuple (.some (.elemType (.int false 8 (by decide)) (by decide)))
+      (.cons (.some (.elemType .bool (by decide))) .nil)) .nil))))
+    (.tuple [.int IntTy.u8, .bool]) :=
+  .abiDecode (τs := [.int IntTy.u8, .bool]) rfl (.hexStr _) rfl rfl rfl
 def w_payableConv : Typed Γ (.payableConv (.positional (.cons (.ident "o") .nil))) (.address true) :=
   .payable ty_o rfl
 def w_unaryPrefix : Typed Γ (.unaryPrefix .not (.ident "flag")) .bool := .not ty_flag
@@ -200,6 +207,9 @@ def r_emit : RStmt CE.env CE.rets CE.inModifier .body (tysOf LE) (tysOf LE) := w
 /-- How S01 covers a constructor. -/
 inductive Coverage where
   | typed
+  /-- Typed only as an operand that another constructor's rule reads (not
+  types): never an expression of its own, typed inside `parent`. -/
+  | operand (parent : Ctor) (role : String)
   /-- Deferred to a stage, with the reason. -/
   | deferred (stage reason : String)
   deriving DecidableEq, Repr
@@ -215,7 +225,7 @@ def exprCoverage : Ctor → Option Coverage
   | .metaType => some (.deferred "S04.02" "type(T) members read the artifact table and ABI identities")
   | .new => some (.deferred "S03" "creation and memory allocation are typed with their semantics")
   | .inlineArray => some (.deferred "S02" "inline arrays take the mobile type of their elements (S02)")
-  | .elemType => some (.deferred "S02" "a type name as a value (abi.decode, type(T)) is S02's; S01 types it only as a conversion callee (convElem)")
+  | .elemType => some (.operand .call "a type name: the callee of an elementary conversion (convElem) and a type expression of abi.decode (abiDecode, FU2-B); type(T) is metaType's")
   | _ => none
 
 /-- **Every expression constructor is classified.** -/
@@ -251,6 +261,21 @@ theorem exprCoverage_typed (k : Ctor) (ht : exprCoverage k = some .typed) :
     | exact ⟨_, _, rfl, ⟨w_ident⟩⟩
     | exact ⟨_, _, rfl, ⟨w_lit⟩⟩
     | exact ⟨_, _, rfl, ⟨w_litUnit⟩⟩
+
+/-- **Coverage of operands**: every constructor classified as an operand
+occurs in a typed expression whose root is its parent. -/
+theorem exprCoverage_operand (k p : Ctor) (r : String) (ho : exprCoverage k = some (.operand p r)) :
+    ∃ (e : Syn .expr) (τ : STy), e.ctor = p ∧ k ∈ e.nodes.map Node.ctor ∧ HasType Γ e τ := by
+  cases k <;> simp only [exprCoverage, reduceCtorEq, Option.some.injEq, Coverage.operand.injEq] at ho
+  obtain ⟨rfl, -⟩ := ho
+  exact ⟨_, _, rfl, by decide, ⟨w_call⟩⟩
+
+/-- `abi.decode`'s type expressions are operands of a typed call. -/
+theorem elemType_decode_operand :
+    ∃ (e : Syn .expr) (τ : STy), e.ctor = .call ∧ Ctor.elemType ∈ e.nodes.map Node.ctor ∧
+      (∃ g x ts, e = .call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) ∧
+      HasType Γ e τ :=
+  ⟨_, _, rfl, by decide, ⟨_, _, _, rfl⟩, ⟨w_abiDecode⟩⟩
 
 /-- **The coverage of every statement constructor**, explicitly. -/
 def stmtCoverage : Ctor → Option Coverage
@@ -570,3 +595,8 @@ end Solidity.Source.TypingExamples
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.bareReturn_refused
 /-- info: 'Solidity.Source.TypingExamples.twoCtors_illFormed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.twoCtors_illFormed
+
+/-- info: 'Solidity.Source.TypingExamples.exprCoverage_operand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.TypingExamples.exprCoverage_operand
+/-- info: 'Solidity.Source.TypingExamples.elemType_decode_operand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.TypingExamples.elemType_decode_operand

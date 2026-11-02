@@ -1175,7 +1175,11 @@ theorem uniqE_callIdent {Γ : Ctx} {n : String} {A : Syn .callArgs}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Calls through a member**: external calls, payments, ABI encoding. -/
+/-- `decode` is no encoding function. -/
+theorem AbiKind.ofMember_decode : AbiKind.ofMember "decode" = Option.none := by decide
+
+/-- **Calls through a member**: external calls, payments, ABI encoding and
+decoding. -/
 theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.member c n) A))) : UniqE Γ (.call (.member c n) A) := by
   intro τ τ' d
@@ -1203,6 +1207,7 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
     | transfer da' _ _ => cases (ih.e c hsz.1 dc da').1
     | send da' _ _ => cases (ih.e c hsz.1 dc da').1
     | abiEncode hr _ _ _ => cases Typed.ident_builtin hr dc
+    | abiDecode hr _ _ _ _ => cases Typed.ident_builtin hr dc
     | _ => first
       | exact (no_const hce ‹_›).elim
       | (exfalso; apply no_binOp hbo; assumption)
@@ -1252,6 +1257,25 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
         simp only [Syn.call.sizeOf_spec, Syn.member.sizeOf_spec, Syn.positional.sizeOf_spec]; omega
       obtain ⟨h1, e1⟩ := ih.a args hsz da da'
       cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | abiDecode _ _ _ _ _ =>
+      cases (eq_of_beq hn)
+      rw [AbiKind.ofMember_decode] at hk; cases hk
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @abiDecode g x ts σ τs hr dx hs hd hok =>
+    cases d' with
+    | extCall dc' _ _ _ => cases Typed.ident_builtin hr dc'
+    | abiEncode _ hk' _ _ =>
+      cases (eq_of_beq hn)
+      rw [AbiKind.ofMember_decode] at hk'; cases hk'
+    | abiDecode _ dx' _ hd' _ =>
+      have hsz : sizeOf x < sizeOf (Syn.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) := by
+        simp only [Syn.call.sizeOf_spec, Syn.member.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e x hsz dx dx'
+      cases h1
+      rw [hd] at hd'; cases hd'
       exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
     | _ => first
       | exact (no_const hce ‹_›).elim

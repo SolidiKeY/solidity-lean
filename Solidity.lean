@@ -499,6 +499,8 @@ import Solidity.Source.ValueProgress
 import Solidity.Source.ExprProgress
 import Solidity.Source.StmtProgress
 import Solidity.Source.SoundnessExamples
+import Solidity.Source.Decode
+import Solidity.Source.DecodeExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic
