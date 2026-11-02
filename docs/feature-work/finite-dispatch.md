@@ -859,3 +859,21 @@ keep their own schedule; the `EvalOrder` docstring in `Syntax/Raw.lean`
 ("calls … keep their existing sequencing") is stale but left, since editing
 that module rebuilds the library; the constructor-statement path and the
 admitted storage-to-calldata conversion are pre-existing.
+
+### Follow-up (lane FU2-A, coordinator request): rows 43 and 57, replays
+
+With the pinned soljson installed in the solkey checkout, the replays the
+handoff above could not run now run, and the viaIR order vectors pass under
+the import: `node --test scripts/finite-dispatch.test.mjs` 34/34,
+`solidity-upstream.test.mjs` 25/25. TestSuite row 43 (`tryScopeExit`) is
+fixed in the callback walk (`CallbackWalk.liveFml`, `Calculus/CallbackDerive.lean`;
+diagnosis and reviews in `docs/assurance.md`, "Lane FU2-A"), with the
+regression `TryCatch.scopeExitKeepsAge`; row 57 (`tryArgumentSideEffect`)
+passes unchanged. `scripts/test-solidity.test.mjs` for both: 2 pass. Gates
+on this head: `./run-lean.sh` both builds green, `check-solkey` 37 (baseline);
+`check-g07 --log` must-pass gates ok (baselined: check-doc-paths 48, the
+axiom-pin note); `check-automatic --strict` 491 automatic, 0 pending;
+`roadmap-g03-ledger --check` after `--write` (a line anchor in
+`TryCatch.lean` moved). Not done: the solc-import side of item 3 (several
+returns with a memory one through `SolcJson/Body.lean` function values,
+with EVM vectors): not attempted in this follow-up.

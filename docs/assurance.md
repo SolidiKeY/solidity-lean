@@ -208,7 +208,7 @@ the first failing row of each:
 | 31 | calldata | `localAlias`: unsupported, "a calldata slice ordinary alias without a known calldata origin" (`Syntax/Elab/Context.lean`, `sliceStmts`, since `c31e76b6`) | the import prints `function «localAlias»(uint[] calldata «xs») { uint[] calldata «ys» = «xs»; … }`; the same text in `contract!{}` elaborates, so the import's path loses the calldata roots (`Syntax/Contract.lean` `calldataRoots`) — not the `roMentions` refusal of `099bfbe1` |
 | 40 | full frozen TestSuite function table | "maximum recursion depth has been reached", compiler IR check failures at `SolTests.TestSuite._list._lam_0`, then `(interpreter) unknown declaration 'SolTests.TestSuite.report'` | CI log only |
 | 42 | quantified consequents / omitted bodies | `omittedModifier`: excluded, expected unsupported | `excluded` is a documented gap status (`docs/solidity-testing.md`); which change moved the row is not identified |
-| 43 | specification parameter renaming | `tryScopeExit`: pending, expected proved | proof search |
+| 43 | specification parameter renaming | `tryScopeExit`: pending, expected proved | proof search; fixed in lane FU2-A (below) |
 | 44 | unsupported ledger frames | `ledgerGap`: "solidity.specificationSyntax: <input>:1:14: expected ';'" instead of "ledger locations in assignable" | the specification parser now rejects the clause before the ledger check |
 | 45 | constant specifications | `quantifiedShadow`: pending, expected unsupported | admission changed: a refusal became an open obligation |
 | 57 | solkey solc/open ports | `tryArgumentSideEffect`: pending, expected proved | CI log only |
@@ -260,31 +260,32 @@ Rerun of the nine on the lane head (`9ff01fd7` + this record, 22:40 UTC):
 `reasonBytes`). The full gate after these fixes: default 1041 jobs and
 TestSuite 286 jobs built, solkeycheck at its baseline 37.
 
-**Lane FU2-A (2026-11-02), rows 43 and 57: not reproduced.** The rows run
-through `scripts/test-solidity.test.mjs`, which compiles
-`tests/solc/SpecBindings.sol` and `tests/solc/open/SolcPaymentsOpen.sol` with
-the pinned soljson (`scripts/solc-ast.mjs`); neither has a stored AST fixture,
-and this lane's session was not permitted to run the downloaded compiler, so
-the CLI goal dump (`action: inspect`, `show: goals`) could not be taken and
-no rule or closer change was made. Row 43's `tryScopeExit` is a self `try`
-(`try this.externalValue()`), whose callee frame now enters through
-`Binders.toRet` (`CallRet.rets`, lane FU2-A); that path's proofs re-check and
-its behaviour is unchanged for value binders (`Binders.enterT_toRet`), but
-the row was not rerun. Lane FU2-D (`fu2-testsuite-closer`) found 57 passing
-on its tree and 43 failing on unreduced `(Val.wk (Thin.keepAll …) v).lower`
-terms in the try's success clause, and handed 43 to this lane. Reproduced in
-`sol{}` (scratch, not kept): the same function, a self `try this.f() returns
-(uint a)` whose success and `Panic` clauses each hold an annotated loop, then
-the annotated `while (false)`, under `requires age == 0; ensures age == 0`
-(`spec!{…}`), proves by `sol_symex`/`sol_close` on this lane's head, as do the
-direct and call-inlined forms. `sol{}` refuses the row's binder `age`, which
-shadows the state variable; the solc import renames such a local and
-rewrites the loop specification by name (`rewriteLoop`,
-`SolcJson/Body.lean`), so the stuck weakening most likely comes from that
-import-side path, which cannot be exercised here without the compiler. Not
-fixed.
+**Lane FU2-A (2026-11-02), rows 43 and 57: fixed / passing.** With the
+pinned soljson installed (`SOLKEY_ROOT`, `LEAN_NUM_THREADS=1`), the CLI goal
+dump of `SpecBindings.tryScopeExit` (`inspect … --show goals`) showed one open
+`ProvesC` leaf: the loop's preservation goal in the `try` success clause,
+valid and closed by `ProvesC.plain` then `sol_leaf`/`sol_close`. The callback
+walk never tried `plain` there: `CallbackWalk.movesAt` skips it wherever the
+goal mentions `Stmt.tryCall` (7a6120d's guard against an ordinary-proof
+attempt on every capture before a `try`), and the body's end
+`Fml.invPost m hu ω κ φ post B`, with no break test (`B` reducing to `none`),
+still carries the enclosing `try` in its unread continuation `⟨ ω κ ⟩ φ`,
+although it is `post` alone. `CallbackWalk.liveFml` drops that continuation
+before the scan; a break test keeps it. No rule, closer or soundness change:
+`plain` still checks `callsBack = false` by `rfl`. FU2-D's unreduced
+`Val.wk … .lower` terms were the leaf's printing (escapes), not the cause;
+the `dsimp` tried on them was not needed and is not kept. Regression:
+`TryCatch.scopeExitKeepsAge` (the same function in `contract!{}`, binder `a`;
+the row's specification, `Panic` loop and shadowing `age` go through the
+import only). `node --test --test-name-pattern="specification parameter
+renaming|solc/open self-calls" scripts/test-solidity.test.mjs`: 2 pass (43
+and 57). Reviews: the guard is narrowed only under a body's end without a
+break test (7a6120d's speed motivation otherwise kept; an earlier draft also
+ignored `Hyps.freshC` indices and was dropped as unneeded); only the first
+such end is inspected, which can keep `plain` skipped where it could run,
+never the reverse; full build and SolkeyTestSuite green.
 
-**Open: proof automation** (30, 31's slice rows, 43, 57, 60), each "open
+**Open: proof automation** (30, 31's slice rows, 60; 43 and 57 pass since lane FU2-A), each "open
 proof goals" in a `box` obligation. For `sliceRead` (`t = xs[1:]; assert(t[k]
 == xs[1 + k])`) the CLI's goal dump (`action: inspect`, `show: goals`) leaves
 `read(memory, base[(k < len - 1 ? 1 + k : len)]) == read(memory, xs[1 + k])`
