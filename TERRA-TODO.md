@@ -16,3 +16,17 @@ Actual failure schedules are NOT consulted by the current bare-horizon Source
 session. Do not fill this gap by ignoring schedules, choosing a favorable
 operational reference, or weakening the frozen resource-point law. These routine
 facts do not construct `FailureProjection S` or `SourceRealization` for a real S.
+
+## Independent failure-plan routine glue
+
+| Module | Lemma statement | Why routine |
+|---|---|---|
+| `Solidity/Lowering/P8/FailureProjection.lean` | `(points (requestCut h balances i b cut)).tx i = .runs b (some cut)` | Unfold requestCut/points, simp only if_pos rfl. |
+| same | `j ≠ i → (points (requestCut h balances i b cut)).tx j = .runs (balances j) none` | One if_neg branch, no runtime adequacy. |
+| same | `(points (requestCut h balances i b cut)).frame k = none` | Record projection. |
+| same | `(requestCut h balances i b cut).horizon = h` | Record projection. |
+| same | `¬ NoFail (points requestCutWitness)` | Instantiate proved request_cut_not_noFail and exact selected-request projection. |
+| same | `(frameDiagonal extract).tx i = .runs 0 none` | Definitional projection; makes minimal-counterexample request side explicit. |
+
+These statements do not change Source resources or the frozen interface.
+The request-cut and diagonal soundness arguments remain with VY5.

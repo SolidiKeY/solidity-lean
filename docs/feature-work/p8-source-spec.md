@@ -62,3 +62,87 @@ coordinator’s Terra worker; no Lean placeholder or assumed producer is added.
 All original 24 full assembly obligations and six general Source combinations
 remain open. Actual Y01–Y09, raw/local sessions, allocation/refinement/G01,
 compiler/world/V16 and final combined closure are not discharged by this leaf.
+
+## P8-SPEC-RESOURCE1: exact law conflict and decision packet
+
+The coordinator assigns FailurePoints execution to VY5 but explicitly withholds
+permission to change the current Source resource representation. No such change
+has been made. The conflicting equations are jointly:
+
+- `SourceSpec.failures_with : ∀ r f, S.failures (S.withFailures r f) = f`
+  (in the pre-existing `Roadmap.Contracts` SourceSpec reused by frozen P8a);
+- frozen `P8a.FailureProjection.points_ofPoints : ∀ p,
+  projection.points (projection.ofPoints p) = p`.
+
+For `S.lang.Res = Nat`, define `extract n = projection.points (S.failures n)`
+and `replace n p = S.withFailures n (projection.ofPoints p)`. The equations
+require `extract (replace n p) = p` for EVERY FailurePoints p, impossible by
+the checked diagonal theorem. The P8a law by itself is not contradictory;
+the problem is its composition with total replacement on Nat resources.
+
+A minimal frame-only counterexample is the new `SpecFailures.frameDiagonal
+extract`: all requests are `.runs 0 none`; frame n is `some 0` if
+`(extract n).frame n = none`, otherwise `none`. If any proposed replacement
+encodes this plan as j, equality at only coordinate j requires either
+`none = some 0` or `some cut = none`. `frameDiagonal_ne` proves disagreement
+for every j. Two fixed plans alone would not prove impossibility: Nat can
+encode finitely many choices; the universal diagonal is necessary.
+
+### Option (a): owner-reviewed frozen-law revision
+
+copy-recovery reviews the relationship between total arbitrary-plan
+`ofPoints`/`points_ofPoints`, existing `SourceSpec.failures_with`, and the
+current Nat-resource machine. It must identify any changes required in
+Roadmap.SourceSpec as well as the frozen P8a contract, with explicit consumer
+impact. No particular revision, restricted-domain exclusion, missing failure
+case or changed adequacy claim is approved here. A Nat-only partial interface
+cannot be presented as implementing the original all-plan Source contract.
+VY5 will not edit either frozen law or reduce observations locally.
+
+### Option (b): smallest Source resource extension
+
+Reuse the existing `Source.FailureResources.Bound = Nat × FailurePoints`:
+replace only the session-level Lang resource by this carrier; keep the current
+intrinsic AST/value types and the horizon component. Resource extension order
+retains the SAME plan and increases only horizon, as already defined on Bound.
+The projection/replacement equations then hold by the product projections.
+That representation step is necessary but does not implement failure execution.
+
+The required implementation/proof footprint is:
+
+- `Source/Semantics.lean` and `Source/Session.lean`: `sessionGo`,
+  `sessionFrom`, `sessionAt` and event variants/`sourceLangEvents` consume
+  request fates, exact post-fee balance and request event cuts. Dropped requests
+  stay distinct from reverted, timed-out and stuck executions. Reuse the actual
+  sender-funds boundary and prove the balance/ledger agreement; do not truncate
+  arbitrary Nat balances silently into words.
+- `Source/Machine.lean` and `Source/Eval.lean`: thread access to the fixed
+  plan plus a stable external-frame ordinal and event-cut progress through the
+  actual CALL/STATICCALL/creation/library/environment entry operations, including
+  `callAddr`, `enterInstance`, `dispatch` and deployment. Depth is not a frame
+  ordinal. The execution cursor must not lose attempted frame identities under
+  rollback; logical state/journal rollback remains the real existing operation.
+- `Source/Horizon.lean`, `Source/HorizonDeploy.lean` and session consistency
+  proofs: re-establish horizon approximation/event-prefix monotonicity at fixed
+  plan, stable frame/event indexing across horizons and exact halt/state/rollback
+  behavior at cuts. No larger fuel or proof budgets are proposed.
+- `Source/Funds.lean`/`FundsControls.lean` and affected progress/preservation
+  consumers: retain actual validity/refusal distinctions and recheck imports
+  against the extended execution parameter.
+- P8 `FailureProjection`/`SourceRealization`: construct actual failure projection,
+  NoFail request/frame facts, OperationalReference, origins and exact execution
+  agreement; hashed/resource consistency and downstream G01/V16 consumers remain
+  real proofs. A bare product with an ignored second component is insufficient.
+
+This is a proposed implementation boundary for human review, not a committed
+Source representation change or claim that these proofs already exist.
+
+## Independent Failures progress
+
+`request_cut_not_noFail` proves that ANY `.runs balance (some cut)` request
+contradicts the canonical NoFail predicate, including cut zero and positive
+balances with no scheduled frame cuts. `requestCutWitness` is horizon 3,
+request 7, balance 257, cut 0; request 6 remains balance 7 and all frames remain
+uncut. Plan-level selected-field controls distinguish wrong balances, lost cuts
+and reversed frame flipping. They do not execute Source or native bytecode.
+Routine point/horizon/locality facts are listed in TERRA-TODO for Terra.
