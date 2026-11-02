@@ -222,22 +222,25 @@ example : isRevert (Prog.runF 1000 mixedIRP (State.init Imported.RemainingIR.Mix
 
 #guard (Semantics.structWidths ((Imported.Remaining.EnumStructFields.structName? "Record").getD "")).contains ("small", 8)
 #guard (Semantics.structWidths ((Imported.RemainingIR.EnumStructFields.structName? "Record").getD "")).contains ("small", 8)
+-- Lane FU2-D: a struct with an enum member decodes at its carrier, the
+-- member checked below its count (`solcEnumBelow`, `abiReadGen`), where the
+-- import refused it before ("nominal cardinality checks").
 #guard Imported.Remaining.EnumDecodeRefusal.report.any fun row =>
-  row.sourceName == "decode" && row.status == .unsupported &&
-    (row.reason.splitOn "nominal cardinality checks").length > 1
+  row.sourceName == "decode" && row.status == .elaborated
 #guard Imported.RemainingIR.EnumDecodeRefusal.report.any fun row =>
-  row.sourceName == "decode" && row.status == .unsupported &&
-    (row.reason.splitOn "nominal cardinality checks").length > 1
+  row.sourceName == "decode" && row.status == .elaborated
 
 #guard Imported.Remaining.MixedReturnRefusal.report.any fun row =>
   row.sourceName == "selected" && row.status != .elaborated
 #guard Imported.RemainingIR.MixedReturnRefusal.report.any fun row =>
   row.sourceName == "selected" && row.status != .elaborated
 
+-- Lane FU2-D: nested enum parameters are admitted with their enum positions
+-- (`paramEnumPositions`), which the replay decodes as `Kind.enumBelow`
+-- (`UpstreamEntry.shapeAt`); before, "recursive enum cardinality checks".
 #guard [Imported.Remaining.EnumInputRefusal.report, Imported.RemainingIR.EnumInputRefusal.report].all fun rows =>
   ["direct", "records", "nested"].all fun name => rows.any fun row =>
-    row.sourceName == name && row.status == .unsupported &&
-      (row.reason.splitOn "recursive enum cardinality checks").length > 1
+    row.sourceName == name && row.status == .elaborated && !row.paramEnumPositions.isEmpty
 #guard [Imported.Remaining.EnumInputRefusal.report, Imported.RemainingIR.EnumInputRefusal.report].all fun rows =>
   ["scalar", "array"].all fun name => rows.any fun row =>
     row.sourceName == name && row.status == .elaborated

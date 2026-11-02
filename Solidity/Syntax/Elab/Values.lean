@@ -930,12 +930,33 @@ partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
       let (tb, k, .prim _) ← widthPath? C Γ e | none
       (fnRow? tb k).map canon
 
+/-- `solcEnumBelow(T, "k₁", n₁, …)`, a component of `abi.decode` the solc
+import writes for a type with nested enums (lane FU2-D): `T` at its carriers
+(`uint`, `uint8`), each enum position `kᵢ` (`""` the value, `k[]` an element
+of `k`, `k.f` a member `f` of `k`) checked below its member count `nᵢ`, as
+solc's validator (`abiReadGen`). -/
+def abiEnumBelowName : String := "solcEnumBelow"
+
+/-- The type and the checked positions of a `solcEnumBelow(…)` component. -/
+def abiEnumBelow? : RawExpr → Option (RawExpr × List (String × Nat))
+  | .call f (t :: rest) => do
+    guard (f == abiEnumBelowName)
+    let rec pairs : List RawExpr → Option (List (String × Nat))
+      | [] => some []
+      | k :: .num n :: more => do
+        let bs ← k.bytesLit?
+        pure ((String.mk (bs.map Char.ofNat), n) :: (← pairs more))
+      | _ => none
+    pure (t, ← pairs rest)
+  | _ => none
+
 /-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
 partial def abiTyExpr? : RawExpr → Option RawTy
   | .name t =>
     if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array else some (.named t)
   | .index t (.num m) => (abiTyExpr? t).map (.fixed · m)
   | .call "#abiArrayType" [t] => (abiTyExpr? t).map .array
+  | e@(.call ..) => (abiEnumBelow? e).bind fun (t, _) => abiTyExpr? t
   | _ => none
 
 /-- The narrow positions of a value of reference type: a place's

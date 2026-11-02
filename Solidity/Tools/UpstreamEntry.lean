@@ -28,10 +28,12 @@ the actual calldata (selector included) and decides, for ABI coder v2:
 * `blocked`: a named refusal (a lazily accepted layout an eager copy rejects,
   an element failing only on access, a possible `Panic(0x41)`, or decoded
   arguments more than four times the calldata, where solc may run out of gas).
-* `legacy`: a parameter outside the typed shapes (function values, enums
-  nested in arrays or structs, an enum without its declared bound); the
-  previous gate applies unchanged. A top-level enum parameter decodes at its
-  declared cardinality (`Kind.enumBelow`), as `validator_revert_t_enum_*`.
+* `legacy`: a parameter outside the typed shapes (function values, an enum
+  without its declared bound); the previous gate applies unchanged. A
+  top-level enum parameter decodes at its declared cardinality
+  (`Kind.enumBelow`), as `validator_revert_t_enum_*`, and so does an enum
+  nested in an array or a struct at the positions the import row lists
+  (`paramEnumPositions`, `shapeAt`; lane FU2-D).
 -/
 
 namespace Solidity.Tools.UpstreamEntry
@@ -45,13 +47,22 @@ def kindOf : AbiKind → Option Kind
   | .bytesN n => some (.fixedBytes n)
   | _ => none
 
-/-- The typed shape of a nested ABI type. -/
-partial def shapeOf : AbiTy → Option Shape
-  | .val k => (kindOf k).map .word
+/-- The typed shape of a nested ABI type whose enum positions `below` (by
+the keys of `abiEnumBelow?`: `k[]` an element, `k.f` a member, the import
+row's `paramEnumPositions`) are words of their enum's cardinality
+(`Kind.enumBelow`, solc's `validator_revert_t_enum_*`); `key` is this
+value's. -/
+partial def shapeAt (below : List (String × Nat)) (key : String) : AbiTy → Option Shape
+  | .val k => match Semantics.lookupBy key below with
+    | some n => some (.word (.enumBelow n))
+    | none => (kindOf k).map .word
   | .bytes => some .bytes
-  | .arr t => (shapeOf t).map .array
-  | .fixed t n => (shapeOf t).map (.fixed · n)
-  | .tuple _ ms => (ms.mapM fun (m : String × AbiTy) => shapeOf m.2).map .tuple
+  | .arr t => (shapeAt below (key ++ "[]") t).map .array
+  | .fixed t n => (shapeAt below (key ++ "[]") t).map (.fixed · n)
+  | .tuple _ ms => (ms.mapM fun (m : String × AbiTy) => shapeAt below (key ++ "." ++ m.1) m.2).map .tuple
+
+/-- The typed shape of a nested ABI type. -/
+def shapeOf (t : AbiTy) : Option Shape := shapeAt [] "" t
 
 /-- Nominal enums and function values keep their own refusals. -/
 partial def plain (T : Ty) (ws : List (String × Nat)) (k : String) : Bool :=
@@ -101,9 +112,11 @@ def readsOnly (d : FunDecl) (x : String) (s : Shape) : Bool :=
 
 /-- The typed parameters of a declaration, or `none` outside the shapes.
 `enums` gives a top-level enum parameter's declared largest member (the
-import row's `paramRanges`, by position); an enum parameter without one, and
-an enum nested in an array or a struct, keep their refusals. -/
-def params (d : FunDecl) (enums : Nat → Option Nat := fun _ => none) : Option (List Param) :=
+import row's `paramRanges`, by position), `positions` a parameter's nested
+enum positions (`paramEnumPositions`); an enum parameter without its bound
+keeps its refusal. -/
+def params (d : FunDecl) (enums : Nat → Option Nat := fun _ => none)
+    (positions : Nat → List (String × Nat) := fun _ => []) : Option (List Param) :=
   d.params.zipIdx.mapM fun ((x, T), i) => do
     let enum := (Semantics.lookupBy (x ++ "#enum") d.widths).isSome || (enums i).isSome
     let shape ← if enum then do
@@ -113,7 +126,10 @@ def params (d : FunDecl) (enums : Nat → Option Nat := fun _ => none) : Option 
       else do
         guard (plain T d.widths x)
         let t ← AbiTy.of T d.widths x
-        shapeOf t
+        -- nested enums at their carriers, each word below its cardinality;
+        -- a position that names no word of the type is refused, not dropped
+        guard ((positions i).all fun (k, _) => (t.valKeys "").contains k)
+        shapeAt (positions i) "" t
     let loc := match T with
       | .prim _ => Loc.value
       | .ref _ => if Semantics.lookupBy x d.paramLocs == some ParamLoc.calldata then .calldata else .memory
@@ -129,9 +145,10 @@ inductive Plan where
 /-- Decide one raw vector: `signature` is the canonical ABI signature and
 `args` the argument bytes after the selector. -/
 def plan (d : FunDecl) (signature : String) (args : List Nat)
-    (enums : Nat → Option Nat := fun _ => none) : Plan :=
+    (enums : Nat → Option Nat := fun _ => none)
+    (positions : Nat → List (String × Nat) := fun _ => []) : Plan :=
   if args.any (256 ≤ ·) then .blocked "invalid calldata byte" else
-  match params d enums with
+  match params d enums positions with
   | none => .legacy
   | some ps =>
     let data := Semantics.selectorBytes (Semantics.customSelector signature) ++ args.map UInt8.ofNat

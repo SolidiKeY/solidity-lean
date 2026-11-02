@@ -279,10 +279,11 @@ a fresh memory `bytes` with the array writes the model has:
   `Examples/Tactics/AbiFeatures.lean`); an array of enums (`(E[])`,
   `(E[2])`) checks each element the same way (`abiReadGen`, lane FU2-D;
   `EnumArrayDecode`, EVM vectors `tests/abi-0.8.38/EnumArrays.vectors.json`);
-  the import still refuses every nested enum ("ABI decoding of enum values
-  requires nominal cardinality checks": its enum-array locals are `uint8`
-  carriers), and `sol{}` reads a struct's enum member as a `uint`, its enum
-  lost.
+  the import prints a component with nested enums (arrays, struct members,
+  any depth) as `solcEnumBelow(T, "k", n, …)`, decoded at its carriers and
+  checked at each position (lane FU2-D, `tests/upstream/EnumArrays.lean`);
+  in hand-written `sol{}` a struct's enum member is a plain `uint`, its enum
+  lost, so only the carrier's range is checked there.
 
 **`sha256`, `ripemd160`, `ecrecover`.** `Hashes.lean` computes SHA-256 and
 RIPEMD-160 as `Keccak.lean` does, checked against standard vectors.

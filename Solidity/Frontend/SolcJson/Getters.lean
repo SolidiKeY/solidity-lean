@@ -159,6 +159,9 @@ private def getterValueType (S : Structs) (declarations : List Json) (node : Jso
         | throw (.unsupported "a public getter value type without declaration identity")
       let some declaration := declarations.find? (J.id? · == some id)
         | throw (.unsupported "a public getter value type declaration is missing")
+      -- an enum value: its carrier (`uint`, `uint8` for a struct's enum); the
+      -- getter row's `retEnums` gives the ABI its `uint8` (lane FU2-D)
+      if J.kind declaration == "EnumDefinition" then return ← tyText S node
       unless J.kind declaration == "UserDefinedValueTypeDefinition" do
         throw (.unsupported "public getter needs a nominal or reference-valued ABI return/input")
       J.get declaration "underlyingType"

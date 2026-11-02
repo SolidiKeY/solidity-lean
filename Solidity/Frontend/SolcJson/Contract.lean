@@ -1320,8 +1320,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       rets := (plan.toOption.map (·.rets)).getD []
       -- a getter whose value (past its mapping keys and array indexes) is
       -- an enum returns it at its ABI type `uint8`, as a source function's
-      -- top-level enum return (`retEnums`); a struct's members are not
-      -- counted, so a struct getter with an enum member keeps the refusal
+      -- top-level enum return (`retEnums`); a struct getter's enum members
+      -- have the `uint8` carrier, which the ABI spells already
       retEnums := Id.run do
         let mut t := (J.opt declarationNode "typeName").getD .null
         for _ in [:(J.nodes t).length + 1] do
@@ -1332,6 +1332,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         let enumRef := ((J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?).bind
           (lookupBy · enumBounds)
         if enumRef.isSome && ((plan.toOption.map (·.rets)).getD []).length == 1 then [0] else []
+      -- (its enum mapping keys keep the membership guard of its body,
+      -- `getterWalk`'s `enumSize`, and no `paramEnums`: a nominal row would
+      -- block the ABI v1 replay, which needs the legacy path)
       body
       writingCall := false }
     pure (id, f, (plan.toOption.map (·.sourceParams)).getD [])
@@ -1535,7 +1538,11 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         let enumArray := J.kind type == "ArrayTypeName" &&
           [some "memory", some "calldata"].contains (J.str? p "storageLocation") &&
           ((J.opt type "baseType").bind J.ref?).any fun id => (lookupBy id enumBounds).isSome
-        if abiFacing && enumComposite && !directEnum && !enumArray then
+        -- every nested enum position with its member count, for the typed
+        -- entry decoder (`paramEnumPositions`); otherwise refused
+        let positioned := (abiEnumPositions declarations enumBounds
+          ((J.nodes type).length + declarations.length + 1) "" type).isSome
+        if abiFacing && enumComposite && !directEnum && !enumArray && !positioned then
           throw (.unsupported "an ABI composite parameter requires recursive enum cardinality checks" (J.line p))
         let ((t, x), _) ← (do
           let t ← PM.lift (tyText S type)
@@ -1653,6 +1660,12 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       paramEnums := sourceParams.toList.zipIdx |>.filterMap fun (p, i) => do
         guard (((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds)).isSome
         pure i,
+      paramEnumPositions := sourceParams.toList.zipIdx |>.filterMap fun (p, i) => do
+        let t ← J.opt p "typeName"
+        let ps ← abiEnumPositions declarations enumBounds
+          ((J.nodes t).length + declarations.length + 1) "" t
+        guard (ps.any (·.1 != ""))
+        pure (i, ps),
       paramRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, t), p) => do
         if let some n := ((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds) then
           return (x, 0, n)

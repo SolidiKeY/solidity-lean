@@ -109,6 +109,8 @@ structure ImportRow where
   retEnums : List Nat := []
   /-- The parameters of a top-level enum type, by position (`SolcFun.paramEnums`). -/
   paramEnums : List Nat := []
+  /-- The parameters with nested enums (`SolcFun.paramEnumPositions`). -/
+  paramEnumPositions : List (Nat × List (String × Nat)) := []
   deriving Repr, Inhabited
 
 deriving instance ToExpr for Tag
@@ -122,7 +124,8 @@ def ImportRow.ofFun (f : SolcFun) (status : ImportStatus) (reason : String) : Im
     sourceFeatures := f.sourceScope.features, sourceDiagnostic := f.sourceScope.diagnostic?,
     tag := f.tag, params := f.params, status, reason, payable := f.payable,
     writingCall := f.writingCall, paramRanges := f.paramRanges, elemRanges := f.elemRanges,
-    retEnums := f.retEnums, paramEnums := f.paramEnums }
+    retEnums := f.retEnums, paramEnums := f.paramEnums,
+    paramEnumPositions := f.paramEnumPositions }
 
 /-- The declaration `N.f` of the row `f` of `N`'s import. -/
 def ImportRow.declName (N : Lean.Name) (r : ImportRow) : Lean.Name := N ++ Lean.Name.mkSimple r.name

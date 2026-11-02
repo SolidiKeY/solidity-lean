@@ -179,6 +179,25 @@ def shape : Nat → Ty → List (String × Nat) → String → Except String Str
       return "(" ++ String.intercalate "," parts ++ ")"
     | .ref (.mapping ..) => throw "mapping has no ABI encoding"
 
+/-- `shape`, with the nested enum positions `below` (keys as
+`UpstreamEntry.shapeAt`'s, `pk` this value's) spelled `uint8`, their ABI
+type, whatever their carrier. -/
+def shapeEnum (below : List (String × Nat)) : Nat → Ty → List (String × Nat) → String → String →
+    Except String String
+  | 0, _, _, _, _ => throw "ABI schema depth budget exhausted"
+  | fuel + 1, T, ws, key, pk => do
+    match T with
+    | .prim _ => if (lookupBy pk below).isSome then return "uint8" else shape (fuel + 1) T ws key
+    | .ref (.array E) =>
+      if lookupBy (key ++ "[]#bytes") ws == some 1 then shape (fuel + 1) T ws key
+      else return (← shapeEnum below fuel E ws (key ++ "[]") (pk ++ "[]")) ++ "[]"
+    | .ref (.fixed E n) => return (← shapeEnum below fuel E ws (key ++ "[]") (pk ++ "[]")) ++ s!"[{n}]"
+    | .ref (.struct s) =>
+      let parts ← (structDef s).mapM fun (f, E) =>
+        shapeEnum below fuel E (structWidths s) f (pk ++ "." ++ f)
+      return "(" ++ String.intercalate "," parts ++ ")"
+    | .ref (.mapping ..) => throw "mapping has no ABI encoding"
+
 private def typeExpr : RawTy → Except String RawExpr
   | .named s => pure (.name s)
   | .array T => do
@@ -196,13 +215,16 @@ def needsCanonical (d : FunDecl) : Bool :=
 enum cardinality, read at their ABI type `uint8` (the replay passes the
 parameters when the entry has a nominal parameter range, and a v2 entry's
 top-level enum returns, `ImportRow.retEnums`, always); a parameter's range is
-the typed entry decoder's (`UpstreamEntry.params`). Every nested enum keeps
-the refusal. -/
-def validate (d : FunDecl) (inputs outputs : List String) (topEnums : List String := []) :
-    Except String Unit := do
+the typed entry decoder's (`UpstreamEntry.params`). A nested enum position
+(`positions`, by parameter name: `paramEnumPositions`) is spelled `uint8`
+(`shapeEnum`). -/
+def validate (d : FunDecl) (inputs outputs : List String) (topEnums : List String := [])
+    (positions : List (String × List (String × Nat)) := []) : Except String Unit := do
   let top (x : String) (T : Ty) : Except String String :=
     if topEnums.contains x && T matches .prim _ then pure "uint8"
-    else shape 128 T d.widths x
+    else match lookupBy x positions with
+      | some below => shapeEnum below 128 T d.widths x ""
+      | none => shape 128 T d.widths x
   let actualInputs ← d.params.mapM fun (x,T) => top x T
   let actualOutputs ← d.rets.mapM fun (x,T) => top x T
   unless actualInputs == inputs && actualOutputs == outputs do
@@ -383,11 +405,17 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       -- range is a byte range (an enum of 256 members): its word is
       -- validated by the typed entry decoder, never truncated
       let nominal := row.any fun (r : ImportRow) => !r.paramEnums.isEmpty ||
+        !r.paramEnumPositions.isEmpty ||
         (r.paramRanges ++ r.elemRanges.map (fun (entry : String × Int × Int × Option Nat) => (entry.1, entry.2.1, entry.2.2.1))).any fun (_, lo, hi) =>
           !byteRange (lo, hi)
       -- Only parameter ranges (never element ranges) can be top-level enums
       -- for the typed entry decoder; any other nominal range is refused.
-      let nominalElems := row.any fun (r : ImportRow) => r.elemRanges.any fun (_, lo, hi, _) => !byteRange (lo, hi)
+      -- (an array whose enum positions the row lists, `paramEnumPositions`,
+      -- is decoded at them instead)
+      let positioned : List String := (row.map fun (r : ImportRow) =>
+        r.paramEnumPositions.filterMap fun (i, _) => r.params[i]?.map (·.1)).getD []
+      let nominalElems := row.any fun (r : ImportRow) => r.elemRanges.any fun (x, lo, hi, _) =>
+        !byteRange (lo, hi) && !positioned.contains x
       let canonicalOnly ← match vector.getObjVal? "canonicalOnly" with
         | .error _ => pure false
         | .ok j => fromJson? j
@@ -424,12 +452,22 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
           if r.retEnums.any (· ≥ d.rets.length) then []
           else r.retEnums.filterMap (fun i => d.rets[i]?.map (·.1))
         | none => []
-      ABI.validate d inputs outputs ((if nominal then enumNames else []) ++ retEnums)
+      -- nested enum positions, by parameter position (`paramEnumPositions`)
+      let positions : Nat → List (String × Nat) := fun i => Option.getD (do
+        let r ← row
+        guard (r.params.length == d.params.length)
+        let (_, ps) ← r.paramEnumPositions.find? (·.1 == i)
+        pure ps) []
+      if row.any (fun r => !r.paramEnumPositions.isEmpty && r.params.length != d.params.length) then
+        throw "nominal enum ABI range needs a declaration adapter"
+      let namedPositions := d.params.zipIdx.filterMap fun ((x, _), i) =>
+        if (positions i).isEmpty then none else some (x, positions i)
+      ABI.validate d inputs outputs ((if nominal then enumNames else []) ++ retEnums) namedPositions
       -- ABI coder v2 entries with typed parameter shapes use the typed
       -- entry decoder (`Semantics/AbiEntry.lean`); v1, constructors and
       -- function/nested-enum parameters keep the byte-identical gate.
       let entryPlan := if ctor || canonicalOnly || (!ABI.needsCanonical d && !nominal) then UpstreamEntry.Plan.legacy
-        else UpstreamEntry.plan d signature bytes enums
+        else UpstreamEntry.plan d signature bytes enums positions
       match entryPlan with
       | .legacy =>
         if nominal then throw "nominal enum ABI range needs a declaration adapter"

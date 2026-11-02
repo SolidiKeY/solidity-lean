@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-only
 pragma solidity ^0.8.4;
 
-// `abi.decode` of nested enums through the solc import (lane FU2-D): still
-// refused, "ABI decoding of enum values requires nominal cardinality
-// checks". `sol{}` decodes an array of enums at the member count
-// (`abiReadGen`, `EnumArrayDecode` in Examples/Tactics/AbiFeatures.lean;
-// EVM vectors in tests/abi-0.8.38/EnumArrays.vectors.json), but the import
-// declares enum-array locals at their `uint8` carrier, and `sol{}` reads a
-// struct's enum member as a `uint`, its enum lost.
+// `abi.decode` of nested enums through the solc import (lane FU2-D): the
+// import prints each component as `solcEnumBelow(T, "k", n, …)`, `T` at its
+// carriers and each enum position `k` checked below its member count `n`
+// (`abiReadGen`); the EVM vectors are tests/abi-0.8.38/EnumArrays.vectors.json,
+// replayed by tests/upstream/EnumArrays.lean.
 contract EnumArrayDecode {
     enum E { A, B, C }
     struct S { E e; uint x; }
