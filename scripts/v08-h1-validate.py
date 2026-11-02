@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Reviewed H1 resource policy; old wrappers and sealed records untouched."""
+import calendar,datetime
 import os,sys,time,json,socket,http.client,pathlib,hashlib,fcntl,signal,uuid,importlib.util,re,tomllib,subprocess
 ROOT=pathlib.Path('/workspace/v08-world-lowering-public099');E=pathlib.Path('/workspace/v08-world-lowering-evidence/h1-recovery-20261102')
 LIMIT=12884901888;RAM_RESERVE=4294967296;WALL=600;DEADLINE=None
@@ -20,6 +21,10 @@ def api(method,path,data=None,cleanup=False):
    secret_free(b.decode(errors='replace'));(ACTIVE_OUT/('api-overflow-'+str(time.time_ns())+'.partial')).write_bytes(b)
   raise RuntimeError('bounded API/log response overflow; incomplete evidence')
  return status,b
+
+def log_since(started_at):
+ whole,fraction=started_at[:-1].split('.')
+ return str(calendar.timegm(datetime.datetime.fromisoformat(whole).timetuple()))+'.'+fraction
 
 def get(path,cleanup=False):
  s,b=api('GET',path,cleanup=cleanup);assert s==200,(s,path,b[:80]);return json.loads(b)
@@ -103,7 +108,10 @@ def run():
   cfg=pathlib.Path('/workspace/v08-world-lowering-evidence/published-099-investigation-20261101/runtime-public099.toml')
   settings=tomllib.loads(cfg.read_text());assert all('-j1' in x.get('weakLeanArgs',[]) for x in settings['lean_lib']+settings['lean_exe'])
   spec=importlib.util.spec_from_file_location('graph',ROOT/'scripts/v08-build-graph.py');g=importlib.util.module_from_spec(spec);sys.dont_write_bytecode=True;spec.loader.exec_module(g)
-  assert (E/'focused-modules.txt').read_text().splitlines()==g.SourceGraph(ROOT).closure(['Solidity.KeySort','Solidity.Lowering.V08.H1Audit'])
+  assert sys.argv[1:] in [[],['--suite']]
+  requested=['Solidity.KeySort','SolkeyTestSuite'] if sys.argv[1:]==['--suite'] else ['Solidity.KeySort','Solidity.Lowering.V08.H1Audit']
+  assert (E/'focused-modules.txt').read_text().splitlines()==g.SourceGraph(ROOT).closure(requested)
+  put(out/'requested-targets.json',{'requested':requested,'mode':'suite' if sys.argv[1:] else 'owned','Decision_omitted_from_full_gate':False,'meaning':'Separate component gate, never a default/full replacement'})
   old=get('/containers/47c5808627ffeadf7d11884f8c37dd554eae2ed7bc5d55756781500b6ecf9a20/json');image=get('/images/'+old['Image']+'/json');secret_free(json.dumps(image['Config']))
   binds=[m['Source']+':'+m['Destination']+('' if m['RW'] else ':ro') for m in old['Mounts']]+[str(E)+':'+str(E)]
   for b in binds:assert pathlib.Path(b.split(':')[0]).exists()
@@ -129,11 +137,14 @@ def run():
   protected_before=protected();oldroot=pathlib.Path('/workspace/v08-world-lowering-published');old_source=sources(oldroot);old_head=subprocess.check_output(['git','--no-optional-locks','-C',str(oldroot),'rev-parse','HEAD'],text=True).strip();root_head=subprocess.check_output(['git','--no-optional-locks','-C',str(ROOT),'rev-parse','HEAD'],text=True).strip()
   put(out/'protected-before.json',{'containers':protected_before,'old_source':old_source,'old_head':old_head,'root_head':root_head})
   source=sources();controls={str(p):sha(p) for p in [pathlib.Path(__file__),ROOT/'scripts/v08-h1-check.sh',ROOT/'scripts/v08-build-graph.py',E/'focused-modules.txt',cfg]}
-  s,prefix=api('GET','/containers/'+cid+'/logs?stdout=1&stderr=1');assert s==200;demux(prefix)
+  previous_finished=j['State']['FinishedAt'];prefix=b''
   (out/'prefix.raw').write_bytes(prefix)
-  put(out/'before.json',{'source':source,'controls':controls,'profile':profile,'free_ram':free_ram(),'disk':disk(),'prefix_bytes':len(prefix),'prefix_sha256':hashlib.sha256(prefix).hexdigest()})
+  (out/'target-list.txt').write_bytes((E/'focused-modules.txt').read_bytes())
+  put(out/'before.json',{'source':source,'controls':controls,'profile':profile,'free_ram':free_ram(),'disk':disk(),'prefix_bytes':len(prefix),'prefix_sha256':hashlib.sha256(prefix).hexdigest(),'log_mode':'invocation-start-window-v2','previous_finished_at':previous_finished})
   print('RUN',out,flush=True);DEADLINE=time.monotonic()+WALL;signal.alarm(WALL);started=True
   s,b=api('POST','/containers/'+cid+'/start');assert s==204,(s,b[:100])
+  current=get('/containers/'+cid+'/json');invocation_start=current['State']['StartedAt'];assert invocation_start>previous_finished
+  put(out/'invocation-window.json',{'container':cid,'started_at':invocation_start,'since':log_since(invocation_start),'previous_finished_at':previous_finished,'scope':'ALL console emitted after this actual container start; prior cumulative logs retained untouched'})
   with open(out/'samples.jsonl','w') as f:
    while True:
     j=get('/containers/'+cid+'/json')
@@ -151,10 +162,13 @@ def run():
    except BaseException as ex:reason=(reason or '')+'; cleanup '+str(ex)
   try:
    if started:
-    s,cumulative=api('GET','/containers/'+cid+'/logs?stdout=1&stderr=1',cleanup=True);assert s==200 and cumulative.startswith(prefix)
+    assert j['State']['StartedAt']==invocation_start
+    query='/containers/'+cid+'/logs?stdout=1&stderr=1&since='+log_since(invocation_start)
+    s,cumulative=api('GET',query,cleanup=True);assert s==200
+    assert prefix==b''
     raw=cumulative[len(prefix):];decoded=demux(raw);secret_free(decoded.decode(errors='replace'));(out/'raw.log').write_bytes(raw);(out/'build.log').write_bytes(decoded)
     put(out/'runtime-after.json',j)
-    put(out/'log-bindings.json',{'raw_sha256':sha(out/'raw.log'),'decoded_sha256':sha(out/'build.log'),'cumulative_sha256':hashlib.sha256(cumulative).hexdigest(),'prefix_sha256':hashlib.sha256(prefix).hexdigest()})
+    put(out/'log-bindings.json',{'raw_sha256':sha(out/'raw.log'),'decoded_sha256':sha(out/'build.log'),'cumulative_sha256':hashlib.sha256(cumulative).hexdigest(),'prefix_sha256':hashlib.sha256(prefix).hexdigest(),'scope':'invocation-start-window-v2','query':query})
     assert source==sources() and all(sha(pathlib.Path(p))==h for p,h in controls.items()),'source/config inventory changed'
     assert old_source==sources(oldroot) and old_head==subprocess.check_output(['git','--no-optional-locks','-C',str(oldroot),'rev-parse','HEAD'],text=True).strip() and root_head==subprocess.check_output(['git','--no-optional-locks','-C',str(ROOT),'rev-parse','HEAD'],text=True).strip() and protected_before==protected(),'protected prior source/container changed'
     source_checked=True

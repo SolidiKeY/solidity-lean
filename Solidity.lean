@@ -932,3 +932,5 @@ import Solidity.Lowering.V08.SourceTransientEmitControls
 import Solidity.Lowering.V08.SourceTransientEmitPanicControls
 import Solidity.Lowering.V08.SourceTransientBytesEmitControls
 import Solidity.Lowering.V08.H1Audit
+
+import Solidity.Lowering.V08.CallableReflection

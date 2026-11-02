@@ -1294,3 +1294,5 @@ At the root, the notation's own tests:
 | `Lowering/V08/SourceTransientRejectedPayment.lean` | Actual unaffordable second transfer preserves its paid input. |
 | `Lowering/V08/SourceTransientSameOwnerPayment.lean` | Same-owner identity and affordability versus distinct-owner draining transfer. |
 | `Lowering/V08/SourceTransientZeroPayment.lean` | Zero distinct-owner transfer retains world but adds two journal entries. |
+
+| `Lowering/V08/CallableReflection.lean` | Exact typed callable success reflection under injective observation, with funded and lossy counterexamples. |

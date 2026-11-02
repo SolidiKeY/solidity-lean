@@ -118,3 +118,5 @@ V08 custom-error failure boundaries and controls are recorded in [the owning roa
 - [V08 reached transient/event-panic application](feature-work/roadmap-v08-world-lowering.md).
 - [V08 valid dynamic-memory event application](feature-work/roadmap-v08-world-lowering.md).
 - [V08 source transaction boundary and funded journal controls](feature-work/roadmap-v08-world-lowering.md).
+
+- [V08 exact callable observation reflection and ABI handoff](feature-work/roadmap-v08-world-lowering.md).

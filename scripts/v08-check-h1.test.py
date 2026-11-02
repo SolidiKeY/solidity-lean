@@ -4,7 +4,10 @@ import importlib.util,json,pathlib,sys,unittest.mock as mock
 sys.dont_write_bytecode=True
 root=pathlib.Path(sys.argv[1]);run=pathlib.Path(sys.argv[2])
 spec=importlib.util.spec_from_file_location('guard',root/'scripts/v08-check-h1.py');guard=importlib.util.module_from_spec(spec);spec.loader.exec_module(guard)
-assert guard.validate(root,run)['pins']==1209
+assert sys.argv[3:] in [[],['--suite']]
+component='suite' if sys.argv[3:] else 'owned'
+positive=guard.validate(root,run,component)
+assert positive['component']=='SolkeyTestSuite' if component=='suite' else positive['pins']==1217
 read_bytes=pathlib.Path.read_bytes;read_text=pathlib.Path.read_text
 cases=[]
 def corrupt(path,value,label):cases.append((path,value,label))
@@ -46,11 +49,21 @@ mutate('runtime-after.json',lambda d:d['Config'].update(WorkingDir='/tmp'),'actu
 mutate('runtime-after.json',lambda d:d['Config']['Env'].append('LEAN_NUM_THREADS=2'),'extra-env')
 mutate('runtime-after.json',lambda d:d.update(Name='/wrong'),'actual-name')
 mutate('before.json',lambda d:d['profile']['HostConfig']['Binds'].append('/tmp:/tmp'),'unapproved-bind')
+mutate('invocation-window.json',lambda d:d.update(since='0.0'),'shifted-log-since')
+mutate('invocation-window.json',lambda d:d.update(container='wrong'),'window-container')
+mutate('invocation-window.json',lambda d:d.update(started_at='1970-01-01T00:00:00.000000000Z'),'window-start')
+mutate('invocation-window.json',lambda d:d.update(previous_finished_at='2099-01-01T00:00:00.000000000Z'),'window-finish')
+mutate('invocation-window.json',lambda d:d.update(scope='tail-only'),'window-scope')
+mutate('log-bindings.json',lambda d:d.update(query='tail=1'),'log-query')
+mutate('before.json',lambda d:d.update(log_mode='cumulative'),'log-mode')
+mutate('requested-targets.json',lambda d:d.update(mode='wrong'),'wrong-component-mode')
+mutate('requested-targets.json',lambda d:d.update(requested=['Solidity.KeySort']),'omitted-component-root')
 for path,value,label in cases:
+ if component=='suite' and label=='axiom-set':continue
  def rb(p):return value if p==path else read_bytes(p)
  def rt(p,*a,**k):return value.decode() if p==path else read_text(p,*a,**k)
  with mock.patch.object(pathlib.Path,'read_bytes',rb),mock.patch.object(pathlib.Path,'read_text',rt):
-  try:guard.validate(root,run)
+  try:guard.validate(root,run,component)
   except (AssertionError,ValueError,KeyError):pass
   else:raise AssertionError('corruption accepted: '+label)
-print(json.dumps({'positive':1,'corruptions_rejected':len(cases),'labels':[x[2] for x in cases]}))
+print(json.dumps({'positive':1,'corruptions_rejected':len(cases)-(1 if component=='suite' else 0),'labels':[x[2] for x in cases]}))

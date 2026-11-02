@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Validate H1 component evidence; does not certify default/full/Decision gates."""
-import hashlib,json,pathlib,re,sys
+import hashlib,json,pathlib,re,sys,calendar,datetime,importlib.util
 
-PIN_SHA256={'v08-axiom-pins.json': 'bbf9497b64531610b2d778c27d288559d32198a9c49e84e4847513166670fb49', 'v08-h1-axiom-pins.json': '0fe89d90dc084da716ede6114c281cda79ea8a708446630f44477885881b930a', 'v08-prefixed-rethrow-axiom-pins.json': '26194dfe21dc1be940738c4ea939d2fff968f4e1bc627a0f08416fed880397c2', 'v08-rethrow-axiom-pins.json': '97bf4efb235d56181a79a684e31deb81ed7352f84c3d917a627376ce2e3d7954', 'v08-standard-rethrow-axiom-pins.json': '33f19ede9d742e6447d10e0bb763491173b16d03d9acbd51349d909948422966', 'v08-transient-bytes-emit-axiom-pins.json': 'ee54d6deef3875e4946f26e1feec5139a67c802c63db3abf09a4379070e41516', 'v08-transient-emit-axiom-pins.json': 'e1b160d2579533adc66a463de9d52e5ea3fba9afcabdb7bd9548458c9f016a22', 'v08-transient-emit-panic-axiom-pins.json': '7272b5aee0f185561b6773fe6cf74c4a675cdd2b0bb828e0fe82309915945209', 'v08-transient-mixed-axiom-pins.json': 'a8d5d93c2c5d67fc042c7d9a93344e2885c9341831ed22e236c8447b270a6e37', 'v08-transient-rethrow-axiom-pins.json': 'ee6041d02cfa1ed58b3c31242c205922abb2c81b7139e81268ada539876539e5'}
+PIN_SHA256={'v08-axiom-pins.json': 'bbf9497b64531610b2d778c27d288559d32198a9c49e84e4847513166670fb49', 'v08-callable-reflection-axiom-pins.json': '6f3940e2ab4626b6582211098012fe957fadc36fb30ab2d61b475996b20229e6', 'v08-h1-axiom-pins.json': '0fe89d90dc084da716ede6114c281cda79ea8a708446630f44477885881b930a', 'v08-prefixed-rethrow-axiom-pins.json': '26194dfe21dc1be940738c4ea939d2fff968f4e1bc627a0f08416fed880397c2', 'v08-rethrow-axiom-pins.json': '97bf4efb235d56181a79a684e31deb81ed7352f84c3d917a627376ce2e3d7954', 'v08-standard-rethrow-axiom-pins.json': '33f19ede9d742e6447d10e0bb763491173b16d03d9acbd51349d909948422966', 'v08-transient-bytes-emit-axiom-pins.json': 'ee54d6deef3875e4946f26e1feec5139a67c802c63db3abf09a4379070e41516', 'v08-transient-emit-axiom-pins.json': 'e1b160d2579533adc66a463de9d52e5ea3fba9afcabdb7bd9548458c9f016a22', 'v08-transient-emit-panic-axiom-pins.json': '7272b5aee0f185561b6773fe6cf74c4a675cdd2b0bb828e0fe82309915945209', 'v08-transient-mixed-axiom-pins.json': 'a8d5d93c2c5d67fc042c7d9a93344e2885c9341831ed22e236c8447b270a6e37', 'v08-transient-rethrow-axiom-pins.json': 'ee6041d02cfa1ed58b3c31242c205922abb2c81b7139e81268ada539876539e5'}
 
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
-def validate(root,run):
+def validate(root,run,component="owned"):
+ assert component in ["owned","suite"]
  result=json.loads((run/'result.json').read_text());before=json.loads((run/'before.json').read_text())
  assert result['exit']==result['actual_exit']==0 and result['reason'] is None
  assert result['cleanup_stopped'] and result['source_and_controls_checked'] and result['samples']>0
@@ -17,7 +18,7 @@ def validate(root,run):
  assert before['controls'].keys()==required
  for name,digest in before['controls'].items():assert sha(pathlib.Path(name))==digest,('control',name)
  profile=before['profile'];host=profile['HostConfig']
- assert host['Binds']==['/workspace/.setup/tools/lean-4.24.0-linux:/opt/lean:ro', '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/node:ro', '/workspace/.setup/solkey:/workspace/.setup/solkey:ro', '/workspace/v08-world-lowering-evidence/published-099-investigation-20261101:/workspace/v08-world-lowering-evidence/published-099-investigation-20261101:ro', '/workspace/v08-world-lowering-public099:/workspace/v08-world-lowering-public099', '/workspace/v08-world-lowering-evidence/h1-recovery-20261102:/workspace/v08-world-lowering-evidence/h1-recovery-20261102']
+ assert sorted(host['Binds'])==sorted(['/workspace/.setup/tools/lean-4.24.0-linux:/opt/lean:ro', '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/node:ro', '/workspace/.setup/solkey:/workspace/.setup/solkey:ro', '/workspace/v08-world-lowering-evidence/published-099-investigation-20261101:/workspace/v08-world-lowering-evidence/published-099-investigation-20261101:ro', '/workspace/v08-world-lowering-public099:/workspace/v08-world-lowering-public099', '/workspace/v08-world-lowering-evidence/h1-recovery-20261102:/workspace/v08-world-lowering-evidence/h1-recovery-20261102'])
  assert host['Memory']==host['MemorySwap']==12884901888 and host['NanoCpus']==1000000000 and host['NetworkMode']=='none'
  assert profile['Env']==['LEAN_NUM_THREADS=1','LAKE_CACHE_DIR=','LAKE_ARTIFACT_CACHE=false']
  assert profile['Cmd']==['timeout','--signal=KILL','600','sh',str(root/'scripts/v08-h1-check.sh')]
@@ -58,6 +59,17 @@ def validate(root,run):
   n=int.from_bytes(raw[i+4:i+8],'big');assert i+8+n<=len(raw);decoded.append(raw[i+8:i+8+n]);i+=8+n
  assert b''.join(decoded)==(run/'build.log').read_bytes()
  prefix=(run/'prefix.raw').read_bytes()
+ assert before['log_mode']=='invocation-start-window-v2' and prefix==b''
+ assert bindings['scope']==before['log_mode']
+ window=json.loads((run/'invocation-window.json').read_text())
+ assert window['container']==actual['Id']
+ assert window['started_at']==actual['State']['StartedAt']
+ assert window['previous_finished_at']==before['previous_finished_at']<window['started_at']
+ whole,fraction=window['started_at'][:-1].split('.')
+ since=str(calendar.timegm(datetime.datetime.fromisoformat(whole).timetuple()))+'.'+fraction
+ assert window['since']==since
+ assert bindings['query']=='/containers/'+actual['Id']+'/logs?stdout=1&stderr=1&since='+since
+ assert window['scope']=='ALL console emitted after this actual container start; prior cumulative logs retained untouched'
  assert len(prefix)==before['prefix_bytes']
  assert hashlib.sha256(prefix).hexdigest()==bindings['prefix_sha256']==before['prefix_sha256']
  assert hashlib.sha256(prefix+raw).hexdigest()==bindings['cumulative_sha256']
@@ -67,6 +79,22 @@ def validate(root,run):
  assert 'sorryAx' not in log
  targets=(pathlib.Path(next(n for n in before['controls'] if n.endswith('/focused-modules.txt')))).read_text().splitlines()
  assert re.findall(r'^H1_TARGET=(.*)$',log,re.M)==targets
+ requested=json.loads((run/'requested-targets.json').read_text())
+ roots=['Solidity.KeySort','SolkeyTestSuite'] if component=='suite' else ['Solidity.KeySort','Solidity.Lowering.V08.H1Audit']
+ assert requested['requested']==roots and requested['mode']==component
+ assert requested['Decision_omitted_from_full_gate'] is False
+ saved_bytecode=sys.dont_write_bytecode
+ sys.dont_write_bytecode=True
+ spec=importlib.util.spec_from_file_location('v08graph',root/'scripts/v08-build-graph.py');graph=importlib.util.module_from_spec(spec)
+ try:spec.loader.exec_module(graph)
+ finally:sys.dont_write_bytecode=saved_bytecode
+ assert (run/'target-list.txt').read_text().splitlines()==targets
+ assert targets==graph.SourceGraph(root).closure(roots)
+ parts=re.split(r'^H1_TARGET=(.*)\n',log,flags=re.M)
+ assert all('Build completed successfully' in parts[i+1] for i in range(1,len(parts)-1,2))
+ if component=='suite':
+  assert targets[-1]=='SolkeyTestSuite'
+  return {'component':'SolkeyTestSuite','targets':len(targets),'kernel_component_only':True,'mandatory_full_pass':False}
  pins={}
  pinfiles=sorted((root/'scripts').glob('v08*axiom-pins.json'))
  assert {p.name:sha(p) for p in pinfiles}==PIN_SHA256
@@ -76,7 +104,7 @@ def validate(root,run):
  for name,axioms in re.findall(r"'(Solidity\.Lowering\.V08\.[^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)",log):
   value=sorted(x.strip() for x in axioms.split(',') if x.strip())
   assert name not in found or found[name]==value;found[name]=value
- assert pins==found and len(pins)==1209
+ assert pins==found and len(pins)==1217
  assert all(set(v)<=set(['propext','Classical.choice','Quot.sound']) for v in pins.values())
  declared=set()
  for p in (root/'Solidity/Lowering/V08').glob('*.lean'):
@@ -85,4 +113,5 @@ def validate(root,run):
  assert declared==pins.keys()
  return {'component':'H1Audit','pins':len(pins),'targets':len(targets),'kernel_component_only':True,'mandatory_full_pass':False}
 if __name__=='__main__':
- print(json.dumps(validate(pathlib.Path(sys.argv[1]),pathlib.Path(sys.argv[2])),sort_keys=True))
+ assert sys.argv[3:] in [[],['--suite']]
+ print(json.dumps(validate(pathlib.Path(sys.argv[1]),pathlib.Path(sys.argv[2]),'suite' if sys.argv[3:] else 'owned'),sort_keys=True))

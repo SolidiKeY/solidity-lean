@@ -3640,3 +3640,67 @@ Canonical SourceSpec/V07/type/layout/ABI/body/heap/linkage/runtime-frame/bytecod
 admission and reserved-owner premises remain open. No whole-lane completion,
 source-call/callback application or external solc/EVM adequacy is claimed. The
 existing blocked goal identity/objective is untouched.
+
+
+## H10 ABI handoff and G20 exact result reflection (2026-11-02)
+
+The later human H10 update transfers G21 ABI/calldata and exception lowering to
+V13. No new G21 work is started. Existing checked modules/pins/source packets are
+available for coordinator exchange; their partial ABI/SourceSpec/decoder/frame
+limitations remain. Retained work is G20,G22.03-.05,G23 and Backfill A/B;
+G22.01/.02 remain with compiler10/readonly-external. This supersedes the earlier
+same-day retained-G21 ownership paragraph, not its historical evidence.
+
+New `CallableReflection.success_iff` reflects an observed successful intrinsic
+call to the exact returned World and typed value under explicit result-observer
+injectivity. It derives from actual World.call/observeEntry, not an assumed whole
+execution relation. `tagged` retains both length and full bytes. Actual funded
+installed-body clients retain93/7balances,saved3,scratch9 and exactbinaryreturn;
+a same-body alternative decoder gives the same lossy length observation while
+its complete bytes differ. Wrong double-payment observations are refuted. No
+source signature/body/frame/linkage or ABI equivalence follows from injectivity.
+Eight new precise standard axiom sets preserve all1209 old sets unchanged.
+
+The first full new closure failed: the new import was incorrectly placed after
+a module docstring. That import order was fixed without changing the proof or
+statement. Simultaneously cumulative reused-container console exceeded the
+32MiB API response cap (gate125/actual1). Failed record and rawpartial retained;
+exact decimalUnixnanosecond StartedAt retrieval recovered the complete invocation
+log. A prior RFC3339 API query returned500 and is retained. The reviewed collector
+now requests ALL console since the actual engine start, binds its exact query,
+previousfinish/start/finalruntime identity and framed bytes, and keeps the SAME
+32MiB per-response limit. No logs, runtimes or evidence were deleted, no time/
+proof/resource limit increased. A stale topological list then failed preflight125
+before runtime selection; regeneration retained exactly the same164targets.
+The corrected164module closure passes;1217exactsets,all1209old unchanged,41current
+corruption controls including seven exact-window negatives. Historical mandatory
+Decision/default/full holds are unaffected by this logging repair.
+
+Artifact review identified a naming ambiguity: the first `original.patch` is the
+single H5 commit on7c, not the entire frozen-base diff. Its immutable seal is
+preserved. Additive `checkpoint-h1-delivery-addendum-20261102` provides the full
+frozen-base patch and exact incremental/full/bundle scope descriptor. Incoming
+published prerequisites in the full frozen diff are not all V08-owned changes.
+Coordinator integrates, with actual concrete-tree combined gates still required.
+
+
+Current099 Suite attempts now have concrete evidence: the cold run stopped at
+TermLaws.Storage (161targets complete), and the same-key warm run stopped at
+LeafShare (209complete). Both retain gate125/actual137 at600s, confirmedstop,
+source/configunchanged, no reportedOOM and parentlifetimeOOMcounters0. Durable
+completed-prefix manifests bind successful logsegments and actualolean hashes;
+these do NOT pass the Suite or justify Decision/default retry. Latest owned
+confirmation after those attempts is PASS164targets/1217exactsets, all1209old
+unchanged;43corruption controls preserve owned-vs-Suite separation. Actual per-run
+target snapshots are now retained, and graph import restores bytecode flags.
+
+Further retained G22.03 source work is NOT exhausted: published
+`Source.Semantics.deploy` (Semantics.lean:147), `construct` and the checked
+`Source.SemanticsExamples.GAB` constructor-order producer provide a concrete
+ready source-deployment application. Source.Eval's expression cases alone are
+not the complete source-world execution interface. Next applications should
+retain the full populated Source machine, code installation, explicit revert
+rollback versus timeout, heap clearing and constructor pipeline order, then
+relate only genuinely supplied intrinsic/frame/layout facts. No such new
+application is claimed checked by this checkpoint. Canonical constructor/try-new/
+SourceSpec/V07/bytecode adequacy and all mandatory final gates remain open.

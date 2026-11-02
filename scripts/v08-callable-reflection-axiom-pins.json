@@ -1,0 +1,34 @@
+{
+  "Solidity.Lowering.V08.CallableReflection.exact_distinct": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableReflection.funded_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableReflection.funded_reflection": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableReflection.lossy_equal": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableReflection.lossy_inputs": [],
+  "Solidity.Lowering.V08.CallableReflection.success_iff": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.CallableReflection.tagged_injective": [],
+  "Solidity.Lowering.V08.CallableReflection.wrong_payment": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}
