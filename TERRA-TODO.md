@@ -228,3 +228,38 @@ Routine controls in IntegerArrayControls remain UNPROVED:
   signed truncation, wrong source address or wrong target reference.
 These instantiate actual existing definitions; inspect decoder canonicality
 before fixtures. They are not external EVM or general frame/compiler tests.
+
+
+# H14 cascade — selected calldata read and eager-import boundary
+
+CalldataRead.eval_read_run derives the actual typed index expression result
+from the selected decoder, with unchanged full Source state. imported_read
+compares it to the validated imported snapshot and derives Source uint256
+index bounds. Whole-array validation is an EXPLICIT conditional snapshot
+premise, never inferred from selected-read success or counted as general
+calldata lowering. selected_success_import_error proves the semantic boundary
+from actual selected-word and traversal equations; no machine halt is asserted.
+
+Routine controls for Terra (UNPROVED):
+- Build uint8 calldata array data with ABI head32, length2, first word255,
+  second word256. The latter MUST be `List.replicate 30 0 ++ [1,0]`:
+  existing NestedCalldataControls.word stores only UInt8.ofNat n and word256
+  would incorrectly wrap to zero. Prove actual word observations first.
+- With existing populated caller fixtures and actual G, prove Source typed
+  selected index0 at budget2 returns uint8 255 with full unchanged caller;
+  eager lowerEntry fails with actual Source.revert[] due to second word.
+  Prove real entry and decoder equations, instantiate boundary theorem;
+  reject treating eager validation as a total selected-read compiler.
+- For fully canonical signed8/unsigned8 arrays instantiate imported_read;
+  prove exact source/numeric order, preserved caller objects and target handle.
+- Instantiate first selected-index OOB using published eval_cdIndex_out_run
+  together with copy_first_out. Direct calldata read leaves original Source
+  heap unchanged, whereas copy-then-bad-read preserves the grown copied heap.
+  Do NOT identify those states or intrinsic none with machine panic.
+
+Routine index-bound extraction: same local arithmetic used in imported_read
+and selected_success_import_error may be factored into a proved helper; no
+new caller-provided typing or representability premise, larger budget or
+source scalar implementation. General selected-element target lowering must
+respect lazy selected-word validation; a blanket eager-validation premise
+cannot close the admitted Source profile. No semantic choice is requested.

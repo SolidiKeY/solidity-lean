@@ -350,4 +350,104 @@ theorem copy_first_out {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : 
     rfl
   · rw [Source.cdToMem_array_run, validation]
     rfl
+
+
+/-! Typed selected-element calldata observations versus an already validated
+imported snapshot. This is not general calldata-read compilation: eager
+whole-array validation is strictly stronger than selecting one element. -/
+namespace CalldataRead
+
+def expr {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy) :
+    Source.RExpr E (Expression.argumentTy t :: .int Source.IntTy.u256 :: caller) (.int t) :=
+  .indexArray (.local .here) (.local (.there .here)) rfl
+
+theorem eval_read_run {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy) (G : Source.Glob E)
+    (frame : Source.Fr) (n offset length index : Nat) (bound : index < length)
+    (typed : Source.IntTy.u256.lo ≤ (index : Int) ∧ (index : Int) ≤ Source.IntTy.u256.hi)
+    (tail : Source.Locals E.layout caller) (state : Source.St E) :
+    let before : Source.EMState E (Expression.argumentTy t :: .int Source.IntTy.u256 :: caller) :=
+      (.cons (.cdRef rfl offset length) (.cons (.int index typed) tail),state)
+    (Source.evalE G frame (n+2) (expr t)).run before =
+      ((Source.decodeWord E.layout (Source.cdWordAt frame (offset+32*index)) (.int t)).map
+        Source.RVal.val,before) := by
+
+  simp only [expr, Source.eval_cdIndex_run, Source.indexLoc, Source.lengthOf, pure_bind,
+    if_pos bound, Source.STy.isValueTy, Source.STy.oneWord, if_true]
+  simp only [Source.readLoc]
+  cases Source.decodeWord E.layout (Source.cdWordAt frame (offset+32*index)) (.int t) <;> rfl
+/-- Conditional snapshot comparison. Index typing is derived from actual ABI
+extent, but whole-array validation remains explicit and is NOT a consequence
+of a successful selected-element Source read. -/
+theorem imported_read {E : Source.Env} {caller : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (t : Source.IntTy) (G : Source.Glob E) (frame : Source.Fr) (n : Nat)
+    (selector data : Roadmap.Bytes) (selector_length : selector.length = 4)
+    (input : frame.cd = selector ++ data) {entryIndex offset length : Nat}
+    (entry : Source.cdTail data entryIndex 32 = .ok (offset,length))
+    (tail : Source.Locals E.layout caller) (state : Source.St E) (target : State C Γ)
+    {values : List (Source.Val E.layout (.int t))}
+    (validation : (List.range length).mapM (fun j => Source.decodeWord E.layout
+      (Source.cdWordAt frame (offset+32*j)) (.int t)) = .ok values) (index : Fin length) :
+    let room := capacity t frame selector data selector_length input entry validation
+    ∃ (typed : Source.IntTy.u256.lo ≤ (index.val : Int) ∧ (index.val : Int) ≤ Source.IntTy.u256.hi)
+      (bound : index.val < values.length),
+      let before : Source.EMState E (Expression.argumentTy t :: .int Source.IntTy.u256 :: caller) :=
+        (.cons (.cdRef rfl offset length) (.cons (.int index.val typed) tail),state)
+      (Source.evalE G frame (n+2) (expr t)).run before =
+        (.ok (.val (values.get ⟨index.val,bound⟩)),before) ∧
+      (lower target t values room).heap.readAddr
+        (.index (target.alloc (object target.H t values room)).2 ArrTy.dyn (uintOfNat index.val)) =
+          some (value t (values.get ⟨index.val,bound⟩)) ∧
+      ((lower target t values room).heap.readAddr
+        (.index (target.alloc (object target.H t values room)).2 ArrTy.dyn (uintOfNat index.val))).bind
+          PrimTy.num? = (values.get ⟨index.val,bound⟩).key := by
+
+  dsimp only
+  have small : index.val < 2^256 := Nat.lt_trans
+    (Nat.lt_trans index.isLt (BoolArrays.entry_geometry frame selector data selector_length input entry).1)
+    (by decide)
+  have typed : Source.IntTy.u256.lo ≤ (index.val : Int) ∧ (index.val : Int) ≤ Source.IntTy.u256.hi := by
+    change (0 : Int) ≤ (index.val : Int) ∧ (index.val : Int) ≤ ((2^256-1 : Nat) : Int)
+    omega
+  let before : Source.EMState E (Expression.argumentTy t :: .int Source.IntTy.u256 :: caller) :=
+    (.cons (.cdRef rfl offset length) (.cons (.int index.val typed) tail),state)
+  obtain ⟨bound,_,targetRead,numeric⟩ := copy_read_related t frame selector data selector_length input entry
+    before target validation index
+  obtain ⟨_,_,position,_⟩ := Source.cdToMem_array_read_run frame (.int t) offset length before validation index
+  refine ⟨typed,bound,?_,targetRead,numeric⟩
+  rw [eval_read_run t G frame n offset length index.val index.isLt typed tail state, position]
+  rfl
+/-- Explicit semantic boundary: actual selected-word success can coexist with
+actual eager-import failure. These are Source/native phase observations, not a
+Source-success/machine-revert theorem or an approved profile restriction. -/
+theorem selected_success_import_error {E : Source.Env} {caller : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (t : Source.IntTy) (G : Source.Glob E) (frame : Source.Fr) (n : Nat)
+    (selector data : Roadmap.Bytes) (selector_length : selector.length = 4)
+    (input : frame.cd = selector ++ data) {entryIndex offset length : Nat}
+    (entry : Source.cdTail data entryIndex 32 = .ok (offset,length))
+    (tail : Source.Locals E.layout caller) (state : Source.St E) (target : State C Γ)
+    (index : Fin length) (selected : Source.Val E.layout (.int t)) (halt : Source.Halt)
+    (selected_ok : Source.decodeWord E.layout (Source.cdWordAt frame (offset+32*index.val)) (.int t) = .ok selected)
+    (validation_error : (List.range length).mapM (fun j => Source.decodeWord E.layout
+      (Source.cdWordAt frame (offset+32*j)) (.int t)) = .error halt) :
+    ∃ typed : Source.IntTy.u256.lo ≤ (index.val : Int) ∧ (index.val : Int) ≤ Source.IntTy.u256.hi,
+      let before : Source.EMState E (Expression.argumentTy t :: .int Source.IntTy.u256 :: caller) :=
+        (.cons (.cdRef rfl offset length) (.cons (.int index.val typed) tail),state)
+      (Source.evalE G frame (n+2) (expr t)).run before = (.ok (.val selected),before) ∧
+      lowerEntry (E := E) target t frame selector data selector_length input entryIndex = .error halt := by
+
+  have small : index.val < 2^256 := Nat.lt_trans
+    (Nat.lt_trans index.isLt (BoolArrays.entry_geometry frame selector data selector_length input entry).1)
+    (by decide)
+  have typed : Source.IntTy.u256.lo ≤ (index.val : Int) ∧ (index.val : Int) ≤ Source.IntTy.u256.hi := by
+    change (0 : Int) ≤ (index.val : Int) ∧ (index.val : Int) ≤ ((2^256-1 : Nat) : Int)
+    omega
+  let before : Source.EMState E (Expression.argumentTy t :: .int Source.IntTy.u256 :: caller) :=
+    (.cons (.cdRef rfl offset length) (.cons (.int index.val typed) tail),state)
+  refine ⟨typed,?_,?_⟩
+  · rw [eval_read_run t G frame n offset length index.val index.isLt typed tail state, selected_ok]
+    rfl
+  · apply (entry_error_iff_source_error before target t frame selector data selector_length input entryIndex halt).2
+    simp only [sourceCopy_run, entry]
+    rw [Source.cdToMem_array_run, validation_error]
+end CalldataRead
 end Solidity.Backend.Aggregates.IntegerArrays

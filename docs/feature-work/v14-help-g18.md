@@ -405,3 +405,41 @@ or whole-profile completion is asserted. Generated registration, combined
 validation, low-budget/scoped success glue, original checkpoint10 and all
 original Work/Backfill final obligations remain open. Master147eeb0c was
 fetched/inspected unchanged; no unchanged failed full/docs gates repeated.
+
+
+### Selected calldata expression versus validated snapshot boundary
+
+CalldataRead.expr is the actual typed indexArray of the calldata-array local
+and a uint256 index local. eval_read_run derives native evaluation from the
+published generic Source index law and selected decodeWord, preserving the
+complete original state. imported_read derives the Source uint256 bounds from
+actual ABI extent and compares this real selected read to the imported
+intrinsic array's typed/numeric read. Its whole-array validation premise stays
+explicit: a successful selected read does NOT supply that premise.
+
+selected_success_import_error makes the semantic boundary visible: actual
+selected-word decoder success and actual whole traversal error derive direct
+Source-expression success and eager lowerEntry failure. This is not a machine
+counterexample, G43 fix or approved profile exclusion. General calldata-read
+lowering must preserve lazy selected-element validation; eager import cannot
+be promoted to that compiler by assuming away dirty unselected words. No
+human semantic choice is requested and no admitted profile is narrowed.
+
+The inhabited uint8 data [255,256] witness remains a concrete H14 TODO; word256
+must be encoded as30zero bytes++[1,0], since existing word helper truncates to
+one UInt8. Source before the direct read keeps old heap/caller, distinct from
+copy-then-bad-read's grown heap. All numeric/signed/order and native-versus-EVM
+boundaries remain explicit, with no new Source/EVM semantics or reserved edits.
+
+Six-candidate scratch trials and failed dependent readLoc/header normalizations
+remain raw. Published equation rewriting closes the readLoc dependency without
+budget changes. Final private per-file/three-axiom/signature check passes4.24s,
+peak857660KiB,oneLean,cgroup488550400bytes,noOOM/swap; all3 standard axioms.
+Separate read-only finder and skeptic find no issue, with inhabited controls
+still pending. Masterd886729d fetched/inspected; it adds proof-cost tooling,
+not a duplicate array consumer. Exact private V07 source remains unchanged.
+
+Generated registration, standard combined validation, H14 routines/controls,
+low-budget laws and all original Work/Backfill closure remain unfinished.
+Original full124/docsraw1/frozenno-new1 preserved without unchanged reruns;
+no goal, pin, profile, proof/fuel/test/time/resource budget or verdict changes.
