@@ -46,13 +46,22 @@ jobs:
           lint: 'false'
       - name: Cache the pinned browser kernel and libraries
         id: kernel
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: .cache/browser-kernel/assets
           key: browser-lean-v1-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'Solidity/**/*.lean', 'web/browser/BrowserFrontend.lean', 'web/browser/bridge.cpp', 'web/tools/lean-wasm/**', 'web/tools/build-lean-browser.sh', 'web/tools/package-lean.mjs') }}
       - name: Build Lean and GMP for WebAssembly
         if: steps.kernel.outputs.cache-hit != 'true'
         run: bash web/tools/build-lean-browser.sh
+      # Preserve a completed expensive kernel build even if later UI tests fail.
+      # Runtime-source changes produce a different key; broken kernels cannot
+      # mask a source fix through this cache.
+      - name: Save the compiled kernel before browser validation
+        if: steps.kernel.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/browser-kernel/assets
+          key: ${{ steps.kernel.outputs.cache-primary-key }}
       - name: Prepare the pinned Solidity compiler
         run: |
           mkdir -p "$SOLKEY_ROOT/keyext.solidity.core/build/soljson"
@@ -70,6 +79,7 @@ jobs:
         run: |
           npx --prefix web playwright install --with-deps chromium
           export CHROMIUM_PATH="$(node -p 'require("./web/node_modules/playwright").chromium.executablePath()')"
+          node web/test/embedded-assets.cjs
           node --max-old-space-size=192 web/test/website.cjs --single --file --proofs
       - uses: actions/upload-artifact@v4
         if: always()

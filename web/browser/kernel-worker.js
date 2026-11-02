@@ -7,7 +7,7 @@ let runtimePromise;
 let inflate=bytes=>gunzipSync(bytes);
 const diagnostics=[];
 const stderr=[];
-const sha256=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+const sha256=async bytes=>Array.from(globalThis.crypto?.subtle?new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)):digest(bytes),b=>b.toString(16).padStart(2,'0')).join('');
 async function asset(entry){
   const response=await fetch(entry.url);if(!response.ok)throw new Error('Missing browser proof asset: '+entry.url);
   const bytes=new Uint8Array(await response.arrayBuffer());
