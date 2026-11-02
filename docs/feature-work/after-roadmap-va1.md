@@ -2877,3 +2877,60 @@ struct/nested arrays, broader memory, halting OR, revised broader program-free M
 boundary, whole-pipeline formula-derived fuel/511 bound, remaining performance/
 backfill/final full gates and held VA1-Q2 are open. Prior seals/approvals/failures
 preserved; no goal reset/completion, scope takeover or publication.
+
+
+## Actual typed-prefix storage observations (2026-11-02)
+
+After sealede757deb2, actual array-gap staging in array-key-next distinguishes
+concrete blockers before repair. Fixed root/bad controls collect3 reads, pass
+Src/lifting/flattening with235/223 nodes. Fixed-below-key, dynamic-below-key and
+below-field pass prefix/free-parameter coverage, bounded preparation and cut,
+but collect0 reads and fail arithmetic Src/flattening (57/61/47 nodes); lifting
+still succeeds. Arrays of structs/arrays stop earlier at leafOf?. Thus the
+root-only ElemPath restriction is not evidence that the whole cut returns none.
+No source-family gap cause is conflated or expected verdict changed.
+
+Owned DecisionFixedArrayStorage now connects existing SVal fixedFloorAtPath to
+actual Storage.set at an arbitrary intrinsically typed root/prefix. Absence
+remains none. For all contracts/root types/fixed lengths/continuation types,
+success plus the unchanged length-breakpoint premise transports full optional
+find, real Storage.obs.word and Storage.obs.has to floored indices, including
+undefined/out-of-range observations. Diverging same-root paths retain lookup;
+other roots retain complete values. No successful-prefix/save premise is
+assumed beyond the actual optional result; existing presence supplies existence.
+This is the previously missing real-storage observation layer, not another
+vector/path proof or a collector/coverage implementation.
+
+Inhabited clients use actual mapping and nested-fixed storage roots. Selected
+row value9 becomes7; non-default sibling key stays9 and another-root sentinel
+stays42. Presence distinguishes in-range2 from out-of-range3. An absent nested
+outer prefix refuses reconstruction, without installing a default. Omitting
+the length breakpoint gives an actual false presence-transport control.
+No default/observation/predicate/decision/classifier changes. Two imports/two
+module-map rows are narrow additive registrations. Producer files and all five
+array unknown pins remain unchanged.
+
+Raw /workspace/va1-evidence/array-key-next. Detailed stage replay4.172s, final
+core MCP5.264s, client MCP4.161s, explicit affected emit3.154s and14 public
+type/axiom declarations4.197s all pass. Initial stage harness mistakenly used
+--run without main: exit1/3.148s retained with source; corrected invocation
+adds detailed observations and passes. It is not a failed theorem or a passing
+gate. No proof failures or proof-budget increases in this component. Only
+existing standard axiom subsets. Original lock, Lean4.24.0/Lake5.0.0-src+797c613,
+threads1/Lean-j1, hard memory.max12884901888/swap.max0 plus12GiB host reserve
+remain enforced. Sampled aggregate RSS1387204KiB, cgroup peak526958592bytes,
+minimum host available17157500928bytes;9 failed measurements retained.
+
+Reachability1113/layers180core/strict automatic491/61budgets/11refuted/trust1128
+sources/248sites and whitespace pass. Same broad85 docs/404 inventory findings
+remain FAIL against frozen-base analysis; old full/TypeExamples resource failures
+remain failures. No EVM or full combined-tree evidence claimed. Independent
+read-only finder/skeptic source reviews find no issues; neither uses Lean/server/
+builds or edits. Final documentation/export review and committed seal remain
+pending until performed.
+
+Global meaningful Residue/DecisionTheorem-prime/target/hash bridge, general
+keyed/field/struct/nested array collector/coverage and reconstruction composition,
+wider memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511
+bound, remaining performance/backfill/full gates and held VA1-Q2 remain open.
+No other lane scope taken; prior seals/goal identity/failures preserved.

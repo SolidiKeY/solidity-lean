@@ -1296,6 +1296,17 @@ depth. Runtime2048 and the later511-node cut remain unchanged; the broader runti
 fuel/cut obligation and global Residue theorem are still open.
 
 
+VA1 typed-prefix storage bridge (2026-11-02): DecisionFixedArrayStorage lifts
+existing optional fixedFloorAtPath reconstruction into actual Storage.set.
+Generic word/presence transport includes undefined/out-of-range paths, with
+the length breakpoint explicit; diverging paths and other roots are framed.
+Inhabited keyed/nested storage controls preserve non-default siblings/sentinel
+and show absence and missing-length refusal boundaries. This is not collector
+integration. Actual pipeline tracing shows keyed/field cases pass prep/cut with
+zero reads but fail arithmetic Src/flattening; struct/nested-array cases stop
+at leafOf?. Their distinct unknown pins remain unchanged.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

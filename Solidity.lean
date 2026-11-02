@@ -190,6 +190,7 @@ import Solidity.Calculus.DecisionNumericBounds
 import Solidity.Calculus.DecisionNumericCoverage
 import Solidity.Calculus.DecisionNegativeInstantiation
 import Solidity.Calculus.DecisionFixedArrayPath
+import Solidity.Calculus.DecisionFixedArrayStorage
 import Solidity.Calculus.DecisionFixedArrayPair
 import Solidity.Calculus.DecisionBoundedUInt
 import Solidity.Calculus.DecisionUIntShape
@@ -265,6 +266,7 @@ import Solidity.Examples.DecisionNumericBounds
 import Solidity.Examples.DecisionNumericCoverage
 import Solidity.Examples.DecisionNegativeInstantiation
 import Solidity.Examples.DecisionFixedArrayPath
+import Solidity.Examples.DecisionFixedArrayStorage
 import Solidity.Examples.DecisionFixedArrayPair
 import Solidity.Examples.DecisionBoundedUInt
 import Solidity.Examples.DecisionUIntShape
