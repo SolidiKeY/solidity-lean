@@ -1,4 +1,7 @@
 node_modules/
+dist/
+.lean-browser-build/
 artifacts/*.png
 artifacts/*.json
 artifacts/*.log
+artifacts/browser-profiles/

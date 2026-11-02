@@ -1,0 +1,424 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 167a28c..2b76455 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -129,8 +129,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+ 
+     # From https://emscripten.org/docs/compiling/WebAssembly.html#backends:
+     # > The simple and safe thing is to pass all -s flags at both compile and link time.
+-    set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -pthread -flto")
+-    string(APPEND LEANC_EXTRA_CC_FLAGS " -pthread")
++    set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -sMEMORY64=2 -fwasm-exceptions -mtail-call")
++    string(APPEND LEANC_EXTRA_CC_FLAGS " -sMEMORY64=2 -fwasm-exceptions -mtail-call")
+     string(APPEND LEAN_EXTRA_CXX_FLAGS " -D LEAN_EMSCRIPTEN ${EMSCRIPTEN_SETTINGS}")
+     string(APPEND LEAN_EXTRA_LINKER_FLAGS " ${EMSCRIPTEN_SETTINGS}")
+ endif()
+@@ -685,9 +685,9 @@ if (LLVM AND ${STAGE} GREATER 0)
+   set(EXTRA_LEANMAKE_OPTS "LLVM=1")
+ endif()
+ 
+-set(STDLIBS Init Std Lean Leanc)
++set(STDLIBS Init Std Lean)
+ if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+-  list(APPEND STDLIBS Lake)
++  list(APPEND STDLIBS Leanc Lake)
+ endif()
+ 
+ add_custom_target(make_stdlib ALL
+diff --git a/src/kernel/environment.cpp b/src/kernel/environment.cpp
+index 1e8514e..0bf4558 100644
+--- a/src/kernel/environment.cpp
++++ b/src/kernel/environment.cpp
+@@ -25,7 +25,7 @@ extern "C" uint8 lean_environment_quot_init(object*);
+ extern "C" object* lean_kernel_record_unfold (object*, object*);
+ extern "C" object* lean_kernel_get_diag(object*);
+ extern "C" object* lean_kernel_set_diag(object*, object*);
+-extern "C" uint8* lean_kernel_diag_is_enabled(object*);
++extern "C" uint8 lean_kernel_diag_is_enabled(object*);
+ 
+ void diagnostics::record_unfold(name const & decl_name) {
+     m_obj = lean_kernel_record_unfold(to_obj_arg(), decl_name.to_obj_arg());
+diff --git a/src/kernel/replace_fn.cpp b/src/kernel/replace_fn.cpp
+index 08e6b17..5ee4e3e 100644
+--- a/src/kernel/replace_fn.cpp
++++ b/src/kernel/replace_fn.cpp
+@@ -13,6 +13,90 @@ Author: Leonardo de Moura
+ 
+ namespace lean {
+ 
++#ifdef LEAN_EMSCRIPTEN
++// Browser engines have a small machine-call stack. Keep the original preorder,
++// cache policy and scope offsets while placing traversal continuations on the
++// heap. Borrow original nodes: extra owning references would change sharing
++// tests and therefore the callback/cache behavior.
++template<typename Enter, typename Finish>
++static expr browser_replace_iterative(expr const & root, unsigned offset, Enter enter, Finish finish) {
++    struct frame {
++        expr const * source;
++        unsigned offset;
++        unsigned stage{0};
++        bool shared{false};
++        expr first;
++        expr second;
++        frame(expr const & e, unsigned n):source(&e),offset(n) {}
++    };
++    std::vector<frame> frames;
++    frames.emplace_back(root, offset);
++    expr value;
++    while (!frames.empty()) {
++        frame & current = frames.back();
++        expr const & e = *current.source;
++        unsigned n = current.offset;
++        if (current.stage == 0) {
++            if (optional<expr> result = enter(e, n, current.shared)) {
++                value = std::move(*result);
++                frames.pop_back();
++                continue;
++            }
++            current.stage = 1;
++            switch (e.kind()) {
++            case expr_kind::Const: case expr_kind::Sort:
++            case expr_kind::BVar: case expr_kind::Lit:
++            case expr_kind::MVar: case expr_kind::FVar:
++                value = finish(e, n, e, current.shared);
++                frames.pop_back();
++                continue;
++            case expr_kind::MData: frames.emplace_back(mdata_expr(e), n); continue;
++            case expr_kind::Proj: frames.emplace_back(proj_expr(e), n); continue;
++            case expr_kind::App: frames.emplace_back(app_fn(e), n); continue;
++            case expr_kind::Pi: case expr_kind::Lambda:
++                frames.emplace_back(binding_domain(e), n); continue;
++            case expr_kind::Let: frames.emplace_back(let_type(e), n); continue;
++            }
++            lean_unreachable();
++        }
++        switch (e.kind()) {
++        case expr_kind::MData:
++            value = finish(e, n, update_mdata(e, value), current.shared); break;
++        case expr_kind::Proj:
++            value = finish(e, n, update_proj(e, value), current.shared); break;
++        case expr_kind::App: case expr_kind::Pi: case expr_kind::Lambda:
++            if (current.stage == 1) {
++                current.first = std::move(value);
++                current.stage = 2;
++                if (e.kind() == expr_kind::App) frames.emplace_back(app_arg(e), n);
++                else frames.emplace_back(binding_body(e), n + 1);
++                continue;
++            }
++            value = finish(e, n, e.kind() == expr_kind::App ? update_app(e, current.first, value) : update_binding(e, current.first, value), current.shared);
++            break;
++        case expr_kind::Let:
++            if (current.stage == 1) {
++                current.first = std::move(value);
++                current.stage = 2;
++                frames.emplace_back(let_value(e), n);
++                continue;
++            }
++            if (current.stage == 2) {
++                current.second = std::move(value);
++                current.stage = 3;
++                frames.emplace_back(let_body(e), n + 1);
++                continue;
++            }
++            value = finish(e, n, update_let(e, current.first, current.second, value), current.shared);
++            break;
++        default: lean_unreachable();
++        }
++        frames.pop_back();
++    }
++    return value;
++}
++#endif
++
+ class replace_rec_fn {
+     struct key_hasher {
+         std::size_t operator()(std::pair<lean_object *, unsigned> const & p) const {
+@@ -30,6 +114,21 @@ class replace_rec_fn {
+     }
+ 
+     expr apply(expr const & e, unsigned offset) {
++#ifdef LEAN_EMSCRIPTEN
++        return browser_replace_iterative(e, offset,
++            [&](expr const & node, unsigned n, bool & shared) -> optional<expr> {
++                if (m_use_cache && !is_likely_unshared(node)) {
++                    auto it = m_cache.find(mk_pair(node.raw(), n));
++                    if (it != m_cache.end()) return some_expr(it->second);
++                    shared = true;
++                }
++                if (optional<expr> result = m_f(node, n))
++                    return some_expr(save_result(node, n, std::move(*result), shared));
++                return none_expr();
++            }, [&](expr const & node, unsigned n, expr result, bool shared) {
++                return save_result(node, n, std::move(result), shared);
++            });
++#else
+         bool shared = false;
+         if (m_use_cache && !is_likely_unshared(e)) {
+             auto it = m_cache.find(mk_pair(e.raw(), offset));
+@@ -72,6 +171,7 @@ class replace_rec_fn {
+             }
+             lean_unreachable();
+         }
++    #endif
+     }
+ public:
+     template<typename F>
+@@ -95,6 +195,25 @@ class replace_fn {
+     }
+ 
+     expr apply(expr const & e) {
++#ifdef LEAN_EMSCRIPTEN
++        return browser_replace_iterative(e, 0,
++            [&](expr const & node, unsigned, bool & shared) -> optional<expr> {
++                if (is_shared(node)) {
++                    auto it = m_cache.find(node.raw());
++                    if (it != m_cache.end()) return some_expr(it->second);
++                    shared = true;
++                }
++                lean_inc(node.raw());
++                lean_inc_ref(m_f);
++                lean_object * result = lean_apply_1(m_f, node.raw());
++                if (lean_is_scalar(result)) return none_expr();
++                expr replaced(lean_ctor_get(result, 0), true);
++                lean_dec_ref(result);
++                return some_expr(save_result(node, replaced, shared));
++            }, [&](expr const & node, unsigned, expr result, bool shared) {
++                return save_result(node, result, shared);
++            });
++#else
+         bool shared = false;
+         if (is_shared(e)) {
+             auto it = m_cache.find(e.raw());
+@@ -142,6 +261,7 @@ class replace_fn {
+             return save_result(e, update_let(e, new_t, new_v, new_b), shared);
+         }}
+         lean_unreachable();
++    #endif
+     }
+ public:
+     replace_fn(lean_object * f):m_f(f) {}
+diff --git a/src/lean.mk.in b/src/lean.mk.in
+index 131a73a..fdacef2 100644
+--- a/src/lean.mk.in
++++ b/src/lean.mk.in
+@@ -96,6 +96,17 @@ $(BC_OUT)/%.bc: $(OLEAN_OUT)/%.olean
+ 	@
+ endif
+ 
++# Preserve the exact test-runner IR while avoiding enormous unused native loops.
++ifeq (@CMAKE_SYSTEM_NAME@, Emscripten)
++ifneq (@BROWSER_RUNNER_FILTER@,)
++$(TEMP_OUT)/Lean/Server/Test/Runner.o.export: $(C_OUT)/Lean/Server/Test/Runner.c
++	@mkdir -p "$(@D)"
++	python3 "@BROWSER_RUNNER_FILTER@" "$<" "$@.browser.c"
++	$(LEANC) -c -o "$@" "$@.browser.c" $(LEANC_OPTS) -DLEAN_EXPORTING
++	@rm "$@.browser.c"
++endif
++endif
++
+ ifdef LLVM
+ $(TEMP_OUT)/%.o.export: $(BC_OUT)/%.bc
+ else
+diff --git a/src/runtime/interrupt.cpp b/src/runtime/interrupt.cpp
+index d32e9b3..840801e 100644
+--- a/src/runtime/interrupt.cpp
++++ b/src/runtime/interrupt.cpp
+@@ -30,7 +30,7 @@ void reset_heartbeat() { g_heartbeat = 0; }
+ 
+ void set_max_heartbeat(size_t max) { g_max_heartbeat = max; }
+ 
+-extern "C" LEAN_EXPORT obj_res lean_internal_set_max_heartbeat(usize max) {
++extern "C" LEAN_EXPORT obj_res lean_internal_set_max_heartbeat(usize max, obj_arg /* w */) {
+     set_max_heartbeat(max);
+     return lean_io_result_mk_ok(lean_box(0));
+ }
+diff --git a/src/runtime/io.cpp b/src/runtime/io.cpp
+index b5861f1..dee47b8 100644
+--- a/src/runtime/io.cpp
++++ b/src/runtime/io.cpp
+@@ -942,7 +942,7 @@ extern "C" LEAN_EXPORT obj_res lean_io_getenv(b_obj_arg env_var, obj_arg) {
+ #if defined(LEAN_EMSCRIPTEN)
+     // HACK(WN): getenv doesn't seem to work in Emscripten even though it should
+     // see https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#interacting-with-code-environment-variables
+-    char* val = reinterpret_cast<char*>(EM_ASM_INT({
++    char* val = reinterpret_cast<char*>(EM_ASM_PTR({
+         var envVar = UTF8ToString($0);
+         var val = ENV[envVar];
+         if (val) {
+@@ -1321,7 +1321,7 @@ extern "C" LEAN_EXPORT obj_res lean_io_app_path(obj_arg) {
+     return io_result_mk_ok(mk_string(buf2));
+ #elif defined(LEAN_EMSCRIPTEN)
+     // See https://emscripten.org/docs/api_reference/emscripten.h.html#c.EM_ASM_INT
+-    char* appPath = reinterpret_cast<char*>(EM_ASM_INT({
++    char* appPath = reinterpret_cast<char*>(EM_ASM_PTR({
+         if ((typeof process === "undefined") || (process.release.name !== "node")) {
+             return 0;
+         }
+@@ -1332,7 +1332,7 @@ extern "C" LEAN_EXPORT obj_res lean_io_app_path(obj_arg) {
+         return pathOnWasmHeap;
+     }));
+     if (appPath == nullptr) {
+-        return io_result_mk_error("no Lean executable file exists in WASM outside of Node.js");
++        return io_result_mk_ok(mk_string("/bin/lean"));
+     }
+ 
+     object * appPathLean = mk_string(appPath);
+diff --git a/src/runtime/memory.cpp b/src/runtime/memory.cpp
+index 1d72df9..fe08291 100644
+--- a/src/runtime/memory.cpp
++++ b/src/runtime/memory.cpp
+@@ -126,7 +126,7 @@ void set_max_memory(size_t max) {
+     g_max_memory = max;
+ }
+ 
+-extern "C" LEAN_EXPORT lean_obj_res lean_internal_set_max_memory(size_t max) {
++extern "C" LEAN_EXPORT lean_obj_res lean_internal_set_max_memory(size_t max, lean_obj_arg /* w */) {
+     set_max_memory(max);
+     return lean_io_result_mk_ok(lean_box(0));
+ }
+diff --git a/src/runtime/object.cpp b/src/runtime/object.cpp
+index 8e068ec..55a7f33 100644
+--- a/src/runtime/object.cpp
++++ b/src/runtime/object.cpp
+@@ -698,6 +698,11 @@ class task_manager {
+     void enqueue_core(unique_lock<mutex> & lock, lean_task_object * t) {
+         lean_assert(t->m_imp);
+         unsigned prio = t->m_imp->m_prio;
++#if defined(LEAN_EMSCRIPTEN) && !defined(LEAN_MULTI_THREAD)
++        // Reuse the existing reentrant synchronous-task path in browser workers.
++        run_task(lock, t);
++        return;
++#endif
+         if (prio == LEAN_SYNC_PRIO) {
+             run_task(lock, t);
+             return;
+@@ -911,6 +916,9 @@ public:
+         unique_lock<mutex> lock(m_mutex);
+         if (t->m_value)
+             return;
++#if defined(LEAN_EMSCRIPTEN) && !defined(LEAN_MULTI_THREAD)
++        throw exception("Cannot wait for an unresolved promise in the synchronous browser runtime");
++#endif
+         // see `Task.get`
+         bool in_pool = g_current_task_object && g_current_task_object->m_imp->m_prio <= LEAN_MAX_PRIO;
+         if (g_current_task_object && g_current_task_object->m_imp->m_prio == LEAN_SYNC_PRIO) {
+@@ -975,6 +983,9 @@ extern "C" LEAN_EXPORT void lean_init_task_manager_using(unsigned num_workers) {
+     if (num_workers > 0) {
+         g_task_manager = new task_manager(num_workers);
+     }
++#elif defined(LEAN_EMSCRIPTEN)
++    // Promises need dependency bookkeeping even when tasks run synchronously.
++    g_task_manager = new task_manager(0);
+ #endif
+ }
+ 
+@@ -1004,6 +1015,9 @@ scoped_task_manager::scoped_task_manager(unsigned num_workers) {
+     if (num_workers > 0) {
+         g_task_manager = new task_manager(num_workers);
+     }
++#elif defined(LEAN_EMSCRIPTEN)
++    // Promises need dependency bookkeeping even when tasks run synchronously.
++    g_task_manager = new task_manager(0);
+ #endif
+ }
+ 
+diff --git a/src/runtime/stackinfo.cpp b/src/runtime/stackinfo.cpp
+index 4865565..75c502e 100644
+--- a/src/runtime/stackinfo.cpp
++++ b/src/runtime/stackinfo.cpp
+@@ -53,7 +53,7 @@ size_t get_stack_size(bool main) {
+ #elif defined(LEAN_EMSCRIPTEN)
+ size_t get_stack_size(bool main) {
+     if (main) {
+-        return emscripten_stack_get_end() - emscripten_stack_get_base();
++        return emscripten_stack_get_base() - emscripten_stack_get_end();
+     } else {
+         return lthread::get_thread_stack_size();
+     }
+diff --git a/src/runtime/thread.h b/src/runtime/thread.h
+index ce72161..8234607 100644
+--- a/src/runtime/thread.h
++++ b/src/runtime/thread.h
+@@ -181,6 +181,8 @@ public:
+ template<typename T> class unique_lock {
+ public:
+     unique_lock(T const &) {}
++    template<typename Tag> unique_lock(T const &, Tag) {}
++    void release() {}
+     ~unique_lock() {}
+     void lock() {}
+     void unlock() {}
+diff --git a/src/runtime/uv/dns.cpp b/src/runtime/uv/dns.cpp
+index e72c507..b46381f 100644
+--- a/src/runtime/uv/dns.cpp
++++ b/src/runtime/uv/dns.cpp
+@@ -161,7 +161,7 @@ extern "C" LEAN_EXPORT lean_obj_res lean_uv_dns_get_name(b_obj_arg addr, obj_arg
+ #else
+ 
+ // Std.Internal.IO.Async.DNS.getAddrInfo (host service : @& String) (family : UInt8) : IO (IO.Promise (Except IO.Error (Array IPAddr)))
+-extern "C" LEAN_EXPORT lean_obj_res lean_uv_dns_get_info(b_obj_arg name, b_obj_arg service, uint8_t family, int8_t protocol, obj_arg /* w */) {
++extern "C" LEAN_EXPORT lean_obj_res lean_uv_dns_get_info(b_obj_arg name, b_obj_arg service, uint8_t family, obj_arg /* w */) {
+     lean_always_assert(
+         false && ("Please build a version of Lean4 with libuv to invoke this.")
+     );
+diff --git a/src/runtime/uv/system.cpp b/src/runtime/uv/system.cpp
+index b312d44..a6704af 100644
+--- a/src/runtime/uv/system.cpp
++++ b/src/runtime/uv/system.cpp
+@@ -628,7 +628,7 @@ extern "C" LEAN_EXPORT lean_obj_res lean_uv_os_get_passwd(obj_arg /* w */) {
+ }
+ 
+ // Std.Internal.UV.System.osGetGroup : IO (Option GroupInfo)
+-extern "C" LEAN_EXPORT lean_obj_res lean_uv_os_get_group(obj_arg /* w */) {
++extern "C" LEAN_EXPORT lean_obj_res lean_uv_os_get_group(uint64_t gid, obj_arg /* w */) {
+     lean_always_assert(
+         false && ("Please build a version of Lean4 with libuv to invoke this.")
+     );
+diff --git a/src/runtime/uv/udp.cpp b/src/runtime/uv/udp.cpp
+index d0d63a1..2b19039 100644
+--- a/src/runtime/uv/udp.cpp
++++ b/src/runtime/uv/udp.cpp
+@@ -395,7 +395,7 @@ extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getpeername(b_obj_arg socket, ob
+ }
+ 
+ /* Std.Internal.UV.UDP.Socket.getSockName (socket : @& Socket) : IO SocketAddress */
+-extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getsockname(b_obj_arg socket) {
++extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getsockname(b_obj_arg socket, obj_arg /* w */) {
+     lean_uv_udp_socket_object *udp_socket = lean_to_uv_udp_socket(socket);
+ 
+     struct sockaddr_storage addr_storage;
+@@ -558,7 +558,7 @@ extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getpeername(b_obj_arg socket, ob
+     );
+ }
+ 
+-extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getsockname(b_obj_arg socket) {
++extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getsockname(b_obj_arg socket, obj_arg /* w */) {
+     lean_always_assert(
+         false && ("Please build a version of Lean4 with libuv to invoke this.")
+     );
+diff --git a/src/runtime/uv/udp.h b/src/runtime/uv/udp.h
+index 7cff0fb..3d97e19 100644
+--- a/src/runtime/uv/udp.h
++++ b/src/runtime/uv/udp.h
+@@ -50,7 +50,7 @@ extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_cancel_recv(b_obj_arg socket, ob
+ // UDP Socket Utility Functions
+ 
+ extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getpeername(b_obj_arg socket, obj_arg /* w */);
+-extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getsockname(b_obj_arg socket);
++extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_getsockname(b_obj_arg socket, obj_arg /* w */);
+ extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_set_broadcast(b_obj_arg socket, uint8_t enable, obj_arg /* w */);
+ extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_set_multicast_loop(b_obj_arg socket, uint8_t enable, obj_arg /* w */);
+ extern "C" LEAN_EXPORT lean_obj_res lean_uv_udp_set_multicast_ttl(b_obj_arg socket, uint32_t ttl, obj_arg /* w */);
+diff --git a/src/shell/CMakeLists.txt b/src/shell/CMakeLists.txt
+index 63b2444..d4db5e2 100644
+--- a/src/shell/CMakeLists.txt
++++ b/src/shell/CMakeLists.txt
+@@ -211,3 +211,8 @@ FOREACH(T ${LEANLAKETESTS})
+                LAKE=lake ./test.sh")
+   endif()
+ ENDFOREACH(T)
++
++if(DEFINED BROWSER_FRONTEND_C)
++  target_sources(leanmain PRIVATE "${BROWSER_FRONTEND_C}" "${BROWSER_BRIDGE_CPP}")
++  target_compile_options(leanmain PRIVATE -fPIC)
++endif()

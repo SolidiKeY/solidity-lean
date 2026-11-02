@@ -4,19 +4,31 @@
   "private": true,
   "description": "Offline web workbench for the Solidity Lean VS Code extension",
   "scripts": {
-    "start": "node server.cjs",
+    "build": "node tools/build-static.mjs",
+    "start": "node tools/serve-static.cjs",
+    "start:native": "node server.cjs",
     "test": "node --test test/server.test.cjs",
-    "test:browser": "node test/browser.cjs",
-    "test:proofs": "node test/browser.cjs --proofs"
+    "test:browser": "node test/website.cjs",
+    "test:website": "node test/website.cjs",
+    "test:proofs": "node test/website.cjs --proofs",
+    "test:native:browser": "node test/browser.cjs",
+    "test:native:proofs": "node test/browser.cjs --proofs",
+    "test:website:proofs": "node test/website.cjs --proofs",
+    "test:protocol": "node test/proofs.test.cjs"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
+    "@noble/hashes": "1.8.0",
+    "buffer": "6.0.3",
+    "fflate": "0.8.2",
     "monaco-editor": "0.55.1",
+    "path-browserify": "1.0.1",
     "ws": "8.18.3"
   },
   "devDependencies": {
+    "esbuild": "0.25.12",
     "pixelmatch": "7.1.0",
     "playwright": "1.62.1",
     "pngjs": "7.0.0"

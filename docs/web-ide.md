@@ -1,145 +1,154 @@
-# Offline web IDE
+# Offline browser IDE
 
-`web/` provides an offline local web workbench for Solidity Lean. The visual
-reference is the production extension in VS Code's web workbench, running in an
-isolated OpenVSCode Server 1.105.1 host with Default Dark+, a 1440 × 900 viewport,
-14 px monospace text and 20 px line height. Both run the same `Counter.sol` example.
+`web/` builds a static website matching the Solidity Lean VS Code extension.
+Monaco, Solidity compilation, language services and Lean proof checking run in
+browser workers. After its first complete asset preparation, the website works
+with its host stopped and the browser disconnected. Application source stays
+in browser storage; no proof backend or WebSocket is required.
 
-## Runtime and trust boundary
+## Runtime and correspondence
 
-The browser uses Monaco 0.55.1. Its token patterns are read directly from
-`vscode/syntaxes/solidity.tmLanguage.json`; proof decorations use the extension's
-four SVGs. Dark+ token colors, line-number width, glyph margin and pane geometry
-follow the reference. The workbench includes editor tabs, Explorer, Outline,
-search, local change comparisons, verification controls, Testing, Problems,
-Output, results, settings and a keyboard command palette.
+Monaco 0.55.1 uses the extension's grammar and four proof SVGs. Dark+ token colors,
+line numbers, glyph margin, font and pane geometry follow the real extension in
+an isolated OpenVSCode Server 1.105.1 profile at 1440 × 900, 14 px and 20 px line height.
+Explorer, Outline, search, local changes, Testing, Problems, Output, results,
+settings and keyboard commands use the same workbench shell.
 
-The Node HTTP/WebSocket server binds `127.0.0.1`. Each browser connection has an
-isolated temporary directory under `.lake/web-ide/` and an instance of the
-extension's production `LanguageClient`. That launches the unchanged stdio LSP,
-pinned solc compiler, bounded worker pool and native Lean kernel. No alternate
-proof engine or simulated proof result is used. The core Lean package gains no
-dependencies. A WASM port is unnecessary for this local-runtime arrangement;
-fully browser-contained kernel checking remains future work.
+A browser worker bundles the unchanged `solc-ast.mjs` compiler frontend and the
+extension's AST language services, formatter, project snapshots and report
+validation. In-memory platform adapters provide files and SHA-256. They cannot
+spawn a process or read the host filesystem. The same-origin soljson 0.8.34
+compiler is checksum-verified before execution. Language operations use exact
+unsaved snapshots, include closed importers and validate affected compilation roots.
+`vscode/src/report.cjs` extracts the native backend's existing pure report parser
+so both runtimes use the same validation.
 
-Compilation, completion, hover, symbols, signature help, references, highlights,
-definitions, formatting, guarded rename and quick fixes use the production LSP.
-Native version checks are preserved when translating workspace edits to Monaco.
-Every edit immediately clears all displayed proofs, synchronizes its buffer and
-invalidates imported results. Workspace-sensitive operations synchronize every
-open model and materialize all browser workspace files, including unopened and
-closed dirty imports. The four-open-document limit is independent of the
-128-file/32-MiB workspace limit. Unsupported source constructs retain the native
-backend's explicit admission gaps and pending states.
+A disposable worker hosts Lean 4.24.0, upstream commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, with explicit browser-port patches.
+Emscripten 4.0.15 and GMP 6.2.1 preserve the native 64-bit Lean object/integer
+layout while lowering memory access to ordinary WebAssembly. WebAssembly tail
+calls prevent compiled frontend call chains from exhausting the browser stack.
+The browser does not require the Memory64 proposal or a thread pool.
 
-HTTP exposes an explicit asset allowlist and bounded example/bootstrap endpoints.
-It has no shell endpoint or generic filesystem API. WebSocket origin and Host
-checks restrict browser callers to the local origin; method, path and snapshot
-validation prevent workspace traversal and stale calls. Settings retain the
-per-session project root. Disconnection disposes the session and process tree,
-including when a language-server restart is in flight.
+The port replaces the C++ expression-replacement recursion with an explicit
+traversal stack in the browser build. This is trusted substitution code, so it
+has direct differential checks against the unchanged recursive implementation:
+3,500 mixed-node/shared-DAG cases compare exact results, callback traces, scope
+offsets, pruning, cache policies, identity and exception unwinding. Separate
+checks exercise 50,000-deep applications and 30,000-deep binders. Both C++ and
+Lean-callback variants are covered. The runtime's startup probe exercises 6,000
+binder levels, accepts a valid declaration, rejects an ill-typed declaration,
+and checks synchronous promise map/bind/drop behavior. Native kernel behavior
+and the Solidity core model are not changed.
 
-## Offline behavior and storage
+The generated loader also avoids a linear scan of roughly 180,000 exports on
+every symbol lookup. Export membership uses direct lookup; new function-table
+entries use a cached symbol index. Build scripts pin and check upstream sources,
+GMP layout, native serialized-library version and compiler checksum. The full
+patch, traversal oracle and build tools are under `web/tools/lean-wasm/`.
 
-After one-time dependency and toolchain preparation, all editor assets, compiler
-input and kernel checking stay on the computer. CSP limits connections to the
-local origin. There are no external fonts, CDN imports, accounts, telemetry,
-hosted proof endpoints or production publication. The browser tests abort and
-record any attempted external HTTP request.
+`BrowserFrontend.lean` reuses immutable imported environments, then creates fresh
+synchronous command state and a unique main module per check. Unique names keep
+project alias caches from colliding across revisions. Existing `solc_import`,
+`solc_scoped_problems` and `#solkey_test` retain their admission, kernel and axiom
+checks. Only fresh checkpoints matching the selected AST declarations produce
+results. Nonzero exits and missing checkpoints are errors. Solidity compilation
+alone never produces a proved status.
 
-The service worker controls the first Monaco load and caches its AMD graph and
-workers. A fresh-profile regression visits once, disconnects completely, reloads,
-edits and then checks persistence after reconnection. Browser files and settings
-are stored locally. Proofs are never persisted as fresh certificates and are
-cleared when the backend disconnects. `Ctrl+S` preserves a named, versioned buffer;
-typing or switching tabs during its asynchronous work cannot mark another
-snapshot clean. Export downloads a `.sol` file. Local Changes compares the current
-buffer with its last saved browser snapshot; it is not a Git implementation.
+Proof jobs are serialized. Source/dependency changes terminate obsolete active
+workers and invalidate their epochs; late results cannot update the editor.
+Cancel, timeout and restart clear owned work. Automatic verification does not
+replay an explicit cancellation or a failing job indefinitely.
 
-Native Node/Lean is required for fresh proofs. A completely disconnected browser
-can edit cached files but cannot run the native kernel. Browser storage is
-origin-specific; exporting is the durable backup, and imported disk files are
-never overwritten. A change of port creates a different browser storage origin.
+## Offline preparation and limits
 
-## Reproducing the comparison
+`web/dist` contains only static assets. The optional native comparison server
+is development tooling and is excluded from deployment. Static builds force
+browser mode even for a URL containing `?backend=native`.
 
-Run the commands in [web/README.md](../web/README.md). The browser suite exercises
-real Monaco rename, formatting and F12, exact unsaved buffers, unopened imports,
-rapid multi-file edits, compiler errors, local diffs, settings, disconnected
-reload, narrow layout and the command palette. `test:proofs` additionally checks
-that `one()` is kernel-proved while `openGoal()` stays pending, compares a warm
-repeat, checks the exact proof hover and verifies immediate proof invalidation.
+The tested artifact contains 773.6 MiB of assets, including 1,822 proof-library
+modules (2,445.1 MiB serialized, compressed per module). The first visit caches
+the complete manifest before opening Monaco. A missing manifest, failed asset
+or storage quota error prevents an incomplete cache from announcing readiness.
+Installation failures surface visibly rather than waiting forever. Build-specific
+cache names support updates and remove obsolete application caches.
 
-For a real reference editor, install `vscode/` and
-`web/test/reference-extension/` only into an isolated VS Code/OpenVSCode profile.
-Set `SOLIDITY_LEAN_REFERENCE_REPORT` to an output JSON file. Open
-`web/examples/Counter.sol` and run **Solidity Lean Parity: Capture**. This calls the
-production extension API three times, records real timings/reports, Testing items,
-diagnostics and hover, and leaves its real decorations visible for screenshots.
-The probe has no production role and never injects fixture results.
+Hashed libraries are immutable same-origin assets. A lazy filesystem verifies
+compressed hashes and retains at most 64 MiB of inflated modules, or one larger
+module. It does not preload the entire library into linear memory. CSP limits
+application connections to the website origin. HTTPS or localhost is required;
+opening `index.html` as a local file is unsupported.
 
-Capture both workbenches with identical viewport, source, theme, font and panel
-geometry, then run:
+Files/settings use browser storage. Save identifies the named versioned buffer;
+typing or switching tabs cannot mark a different snapshot clean. Failed persistence
+retains the dirty marker. Export downloads a `.sol` copy; origin storage can be
+cleared or evicted, so Export is the durable backup. Proof reports are not stored
+as fresh certificates. Local Changes compares snapshots rather than implementing Git.
 
-```sh
-node web/test/compare.cjs /absolute/path/reference.png /absolute/path/web.png
-```
+The prototype supports four open documents, 128 flat workspace filenames and
+32 MiB of source snapshots. Storage quotas may be smaller. One proof worker runs
+at a time with a 4 GiB linear-memory limit. Use a modern desktop browser with
+WebAssembly tail calls and 64-bit integer operations.
 
-This produces a side-by-side PNG, pixel diff and JSON metrics. It separately
-compares the code region so uniform panels cannot hide a different editor.
-Pixel comparisons describe only the captured states, not full VS Code parity.
-Generated artifacts stay in ignored `web/artifacts/` and can be regenerated.
+## Measured validation
 
-## Measured result
+Fourteen real Chromium checks pass with every WebSocket constructor forbidden,
+zero external requests and zero uncaught page errors. They cover compilation,
+rename/formatting, imported definitions, closed sibling refactoring, missing
+imports, failed saves, real kernel proofs, active cancellation, a changed false
+specification, certified opt-in counterexamples and fresh compilation/proofs
+following a disconnected reload with the static asset server stopped.
 
-The completed local comparison passed 57 unit/regression tests (47 existing
-extension/LSP checks and 10 web server checks), plus 13 browser integration
-checks. The real `Solidity.Frontend.Testing` build passed with 264 jobs. Browser
-checks recorded zero external HTTP requests and zero uncaught page errors.
+Five protocol tests cover partial nonzero outputs, missing checkpoints, wrong
+declarations, timeout causes and cancellation. These explicitly use a mock worker
+and are not evidence of kernel proof success. Two additional Chromium cases
+verify visible failure for a missing asset manifest or required worker asset.
+The native frontend build passed 264 jobs; 66 extension/LSP/backend/web transport
+regressions also passed during implementation.
 
-| Observation | Native VS Code extension | Offline web IDE |
+| Observation | Real VS Code extension | Browser website |
 |---|---:|---:|
-| First measured verification | 7,637.9 ms | 7,879.2 ms |
-| Repeated checked-result lookup | 137.3 / 136.5 ms | 144.9 ms |
+| First measured verification | 8,175.2 ms | 74,894.9 ms |
+| Repeated checked-result lookup | 173.4 / 147.1 ms | 146.5 ms |
 | `increment()`, `reset()`, `one()` | proved | proved |
 | `openGoal()` | pending | pending |
-| Proof diagnostics | one pending warning | identical message, code and severity |
+| Pending diagnostic and source range | identical | identical |
 
-The web workbench's fresh-profile startup was 852.4 ms. These are observations
-from one local environment with prepared Lean artifacts, not general performance
-guarantees. The reference host's scripted editor-readiness time includes UI
-navigation delays and is not used as a startup benchmark.
+Browser cold verification includes the first library import. Fresh verification
+after stopping the server and reloading offline took 74,139 ms. Editor readiness
+was 8,676.3 ms in the functional run and 11,753.4 ms in the comparison run,
+including complete first-visit asset caching. Native scripted editor-readiness
+includes navigation and is not used as a startup benchmark. These are observations
+from one local environment with prepared artifacts, not performance guarantees.
 
-The final 1440 × 900 Problems/Testing screenshots differ in 26,973 pixels (2.08%)
-at pixelmatch's 0.1 threshold with antialiasing ignored. The separate 1000 × 540
-code region differs by 0.02%. The workbenches share the visible source, token
-colors, gutter results, diagnostics and editor geometry. Remaining visible
-differences include title/menu controls, native run-history icons, filter chrome,
-some panel tabs and the explicit local/offline connection indicator.
+The final Testing/Problems screenshots differ in 27,025 pixels (2.09%) at
+pixelmatch's 0.1 threshold with antialiasing ignored. The separate 1000 × 540 code
+region differs by 0.02%. Both images were inspected directly. Visible differences
+include title/menu controls, native test-run history/filter chrome, some panel
+labels and the browser/offline status. Pixel similarity describes these captures,
+not complete VS Code feature parity.
 
-`browser-report.json`, `native-report.json`, `unit-test.log`, `native-problems.png`,
-`web-problems.png`, `side-by-side.png`, `visual-diff.png` and
-`visual-comparison.json` preserve this run's evidence under `web/artifacts/`.
-The browser report also records the selected-function gutter run, cached offline
-reload and responsive-layout checks. The reference probe and browser reports
-were compared directly for exact function statuses and diagnostic equivalence.
+Evidence is generated under `web/artifacts/`: `website-report.json`,
+`website-reference-report.json`, `native-report.json`, `replace-differential.log`,
+`native-problems.png`, `website-problems.png`, `website-offline-proofs.png`,
+`side-by-side.png`, `visual-diff.png` and `visual-comparison.json`.
+See [web/README.md](../web/README.md) for commands. The reference probe calls the
+production extension API and never injects fixture results.
 
-## Milestone review
+## Milestone review and resource bounds
 
-Independent read-only finder and skeptic reviews identified and resolved:
-first-load Monaco caching, unopened/closed import snapshots, multi-file edit
-synchronization, guarded rename versions, project-root loss after settings
-changes, wrong-file individual Testing runs, cross-file definition opening,
-completion-kind mapping, save identity and restart/disconnect cleanup. Regressions
-cover these boundaries. Neither review used the Lean server.
-Follow-up findings about transfer size, cleanup during server shutdown and F12
-at the open-editor limit were also fixed; tests cover the transport and teardown
-cases. The browser exercises actual native-backed rename and cross-file F12.
+Read-only finder and skeptic reviews identified and resolved closed-importer
+rename, missing-import diagnostics, stale cache cleanup, active cancellation,
+nonzero partial checkpoints, output cleanup, timeout causes, automatic replay,
+mandatory offline manifests, installation failure handling and loader callback
+exceptions. They separately reviewed the iterative replacement's reference
+counts, cache decisions, scope offsets, child order and result lifetimes. Final
+reviews found no remaining actionable implementation issue and confirmed the
+stopped-host offline proof artifact. Neither review used the Lean server.
 
-The managed environment has no systemd user/system bus. The required sequential
-backend rebuild therefore uses an aggregate RSS/12-GiB available-memory watchdog
-rather than a systemd scope, and a temporary configuration sets `-j1`. A tried
-address-space limit caused thread creation failures by bounding virtual memory;
-it was removed, and those interrupted attempts are not passing checks.
-The writer lock is held throughout changes and checks. No Lean source or core
-representation is changed by this work.
+The writer lock is held throughout changes and checks. Heavy jobs run sequentially.
+This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap
+and an available-memory guard; browser QA uses an owned-process RSS/available-memory
+watchdog with the required 12-GiB host reserve. The complete browser run peaked
+at 4.82 GiB aggregate RSS. Task-owned profiles/reference files were moved off the
+RAM disk. Interrupted resource/stack-overflow attempts are not passing checks.
