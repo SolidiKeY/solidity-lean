@@ -823,3 +823,38 @@ Aggregation retains failed mandatory kernel/replay records as per-component
 pending obligations, including raw phases and numeric preflight observations;
 it does not promote a partial extraction or suppress unrelated ready components.
 No further unchanged replay attempt is scheduled.
+
+
+### Bounded private packet intake (2026-11-02)
+
+The owned `scripts/roadmap-v17-packets.py` accepts a separately authenticated
+schema-1 request containing `packetSha256`, a full `producerHead` claim and an
+exact `members` path-to-SHA256 map. It reads without extracting or executing
+packet files. Its CLI enforces 16 MiB compressed, 32 MiB raw, 512 MiB address
+space and a 60-second alarm; it spawns no subprocesses. Strict member-set,
+regular-file, path, header, termination, checksum and duplicate checks protect
+intake. Producer commit membership, complete imports, theorem signatures,
+axioms and replay are explicitly **not verified by intake**. These remain
+separate obligations in the existing private component validation workflow.
+
+Fresh measurements for both queued V14 replay and V13 ABI entry returned
+NONPASS: effective 14,750,191,616 bytes versus required 15,032,385,536. No
+container or Lean query launched. No memory policy or cache was changed.
+The announced V11 reference packet was absent at its supplied RAM path in
+this executor, and its abbreviated producer object was unavailable locally.
+This is missing input, not a source or kernel pass. No actual V11 dependency
+inventory or draft proof is inferred. V09/V11 reference and draft packets can
+be admitted individually when exact bytes and required dependencies arrive;
+whole-lane publication is not required for provisional private diagnostics.
+All 457 rows and final release obligations remain open.
+
+The checkpoint's independent read-only finder and skeptic reviews found and
+resolved missing TAR end blocks after a zero payload, concatenated gzip streams,
+scalar request handling and dot paths. Sixteen controls pass. Both reviewers
+confirmed the corrected narrow byte-intake boundary without Lean or builds.
+The raw documentation checker still exits 1 (48 findings versus frozen-base
+46); two new findings concern reserved inline-assembly paths, zero concern V17.
+The exact-base no-new gate therefore remains failed. Source layers, orphan and
+properly invoked source-only trust checks pass; an initial trust invocation
+without its required NUL file-list input failed and is retained separately.
+No current runtime, kernel, cache-equivalence or release gate follows.
