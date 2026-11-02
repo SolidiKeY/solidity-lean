@@ -183,8 +183,11 @@ deleted code; their text is at `aa1b76c5`.
   object.  So the hidden binder has an inhabitant at every type and
   `Stmt.sound` needs no hypothesis (`docs/solc-alignment.md`, "Memory local
   without an object").
-- **19.** `CallRet.isRets` follows solkey: a memory return steps by
-  `internalCallExpand`, not `functionBodyExpand`.
+- **19.** `CallRet.isRets` follows solkey: a single memory return steps by
+  `internalCallExpand`, not `functionBodyExpand`; a memory return among
+  several returns to targets (`CallRet.rets`, `RetBinders.snocMem`, lane
+  FU2-A) and steps by `functionBodyExpand`, declared `T memory r;` in its
+  premise.
 - **27, 28.** A leaf keeps its leading `∀`s, read at their types; `cdl!`
   marks the parameters (`Fml.markExplicit`), so an explicit `∀` keeps its
   range and gets its `allRight` line in the walk.

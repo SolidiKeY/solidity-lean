@@ -38,6 +38,10 @@ def MemRets : Contract := contract!{
   function swapped(uint[] memory xs) returns (uint[] memory p, uint[] memory q) {
     q = xs; p = new uint[](1); p[0] = 8;
   }
+  struct P { uint x; }
+  function pair() returns (P memory p, P memory q) { }
+  function valueDefault() returns (uint a, uint[] memory b) { b = new uint[](1); }
+  function word(uint k) returns (bytes memory b, uint n) { b = new bytes(2); b[1] = 0x41; n = k; }
 }
 
 local instance : InContract := ⟨MemRets⟩
@@ -83,6 +87,48 @@ private def untouchedDefault := sol[MemRets]{
 /-- `(a, b) = untouched();`: `a == 3`, `b.length == 0`. -/
 theorem untouchedDefault_run :
     (Prog.run (State.init MemRets) untouchedDefault).toOption.isSome = true := by
+  decide +kernel
+
+/-- The target is rebound to the callee's object, not left as it was: an
+earlier array of length 3 is replaced by the empty default. -/
+private def rebound := sol[MemRets]{
+  uint a; uint[] memory b = new uint[](3);
+  (a, b) = untouched();
+  assert(b.length == 0);
+}
+
+/-- `b = new uint[](3); (a, b) = untouched();`: `b.length == 0`. -/
+theorem rebound_run :
+    (Prog.run (State.init MemRets) rebound).toOption.isSome = true := by
+  decide +kernel
+
+/-- Two memory returns are two fresh objects, and an unassigned value
+return beside a memory one is its default. -/
+private def freshPair := sol[MemRets]{
+  P memory p; P memory q;
+  (p, q) = pair();
+  p.x = 1;
+  assert(q.x == 0);
+  uint a = 7; uint[] memory b;
+  (a, b) = valueDefault();
+  assert(a == 0); assert(b.length == 1);
+}
+
+/-- `(p, q) = pair(); p.x = 1;`: `q.x == 0`; `(a, b) = valueDefault();`: `a == 0`. -/
+theorem freshPair_run :
+    (Prog.run (State.init MemRets) freshPair).toOption.isSome = true := by
+  decide +kernel
+
+/-- A `bytes memory` return beside a value one, directly. -/
+private def wordAssign := sol[MemRets]{
+  bytes memory b; uint n;
+  (b, n) = word(4);
+  assert(n == 4); assert(b.length == 2); assert(b[1] == 0x41);
+}
+
+/-- `(b, n) = word(4)`: `n == 4`, `b[1] == 0x41`. -/
+theorem wordAssign_run :
+    (Prog.run (State.init MemRets) wordAssign).toOption.isSome = true := by
   decide +kernel
 
 /-- One target omitted, and the call as a statement: the callee still runs. -/
@@ -191,6 +237,19 @@ theorem valueTernaryF_run :
     (Prog.run (State.init MemRets) valueTernaryF).toOption.isSome = true := by
   decide +kernel
 
+/-- A `bytes memory` return beside a value one through a function value. -/
+private def valueWord := sol[MemRets]{
+  function (uint) returns (bytes memory, uint) h = word;
+  bytes memory b; uint n;
+  (b, n) = h(4);
+  assert(n == 4); assert(b[1] == 0x41);
+}
+
+/-- `h = word; (b, n) = h(4);`: `n == 4`, `b[1] == 0x41`. -/
+theorem valueWord_run :
+    (Prog.run (State.init MemRets) valueWord).toOption.isSome = true := by
+  decide +kernel
+
 /-- Two memory returns through a function value: the returned parameter
 aliases the caller's argument, whichever position it is returned at. -/
 private def valueAlias := sol[MemRets]{
@@ -222,6 +281,38 @@ def StoreRets : Contract := contract!{
 -- between memory arrays of different element types).
 /-- error: Solidity elaboration failed: mv2 has narrow positions ·[] 8 bits wide where none are expected: solc converts no reference type to one of another element type -/
 #guard_msgs in #check sol[NarrowRets]{ uint a; uint[] memory b; (a, b) = nw(); }
+
+/-- Each return's location is its own: a reference return without one, or a
+value return with one, is refused (solc's rule). -/
+def BadLocs : Contract := contract!{
+  function noLoc() returns (uint[] memory a, uint[] b) { }
+  function onValue() returns (uint memory a, uint[] memory b) { }
+}
+
+/-- error: Solidity elaboration failed: noLoc: a return's data location does not match its type (a reference return needs `memory`, a value return none) -/
+#guard_msgs in #check sol[BadLocs]{ uint[] memory a; uint[] memory b; (a, b) = noLoc(); }
+
+/-- error: Solidity elaboration failed: onValue: a return's data location does not match its type (a reference return needs `memory`, a value return none) -/
+#guard_msgs in #check sol[BadLocs]{ uint a; uint[] memory b; (a, b) = onValue(); }
+
+-- A narrow element among several through a function value: the target's
+-- type is compared without widths there, so it stays full-word (`fnMemRet`).
+def NarrowValue : Contract := contract!{
+  function nw() returns (uint a, uint8[] memory b) { b = new uint8[](1); a = 1; }
+}
+
+/-- error: Solidity elaboration failed: h(…): a function value returning a uint8[]memory among several values is not modelled (a direct tuple call binds value and full-word memory returns) -/
+#guard_msgs in #check sol[NarrowValue]{ function () returns (uint, uint8[] memory) h = nw;
+  uint a; uint8[] memory b; (a, b) = h(); }
+
+-- The printed program: the call and its targets as the one tuple
+-- assignment, the memory target among them (`Stmt.retTarget?`).
+/--
+info: uint a;
+uint[] memory b;
+(a, b) = split(5);
+-/
+#guard_msgs in #eval IO.println (Prog.show [] sol[MemRets]{ uint a; uint[] memory b; (a, b) = split(5); })
 
 /-- info: 'Solidity.Examples.Tactics.MemoryReturns.bothAlias_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms bothAlias_run

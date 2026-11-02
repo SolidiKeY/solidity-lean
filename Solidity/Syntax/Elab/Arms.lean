@@ -986,6 +986,9 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
       else pure (RetKind.val p r)
     | rs, some _ => throw s!"{f} returns {rs.length} values, which a tuple assignment takes"
     | rs, none => do
+      if d.retMem && d.retStorage then
+        throw s!"{f}: a return's data location does not match its type (a reference return \
+          needs `memory`, a value return none)"
       if d.retStorage then throw s!"{f}: `storage` on a return of a function of several returns"
       -- declared in the caller's context too (`CallRet.rets`): fresh at
       -- every call, a recursive one's too; a memory one a fresh default

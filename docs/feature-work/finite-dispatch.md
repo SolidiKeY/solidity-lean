@@ -631,11 +631,16 @@ Proofs touched: the arms that read `enterT` of `.rets` (`RunFrame`,
 `CallbackSound`), each by an induction over `RetBinders` instead of the
 former definitional unfolding; arms that only read `leaveT` are unchanged.
 Checking speed: `enterT` of value-only binders no longer reduces to one
-`TEnv.append` by definition, so three proofs that unfolded it
-(`holds_callRets`, `Stmt.runSt_callRets`, `CallRet.enterT_snap`) rewrite
-with `Binders.enterT_toRet` / `RetBinders.enterT_lift` instead; no
-kernel-evaluated certificate unfolds `enterT` (`git log -S enterT` shows no
-earlier speed-motivated change to it).
+`TEnv.append` by definition, so the proofs that unfolded it
+(`holds_callRets`, `holdsC_callRets_k`, `Stmt.runSt_callRets`,
+`ExecS.callRets_inline`, `CallRet.enterT_snap`, `FunContract.forall_rets`,
+`FunContractC.forall_rets`, `CallRet.execP_declsThen`) rewrite with
+`Binders.enterT_toRet`, `RetBinders.enterT_lift` or `RetBinders.enterT_eq`
+instead. Kernel-evaluated runs of a tuple call (`decide +kernel`, e.g.
+`FunctionTypes.tupleReturn_run`) now evaluate the recursive
+`RetBinders.enterT`, one step per return variable; the elaboration times
+after the change are recorded below. `git log -S enterT` shows no earlier
+speed-motivated change to it.
 
 Baseline (base `84a2a4be`, `./run-lean.sh` on this lane's 4-core VM, fresh
 `.lake`): `lake build` 67m40s wall, 1039 of 1041 jobs (`Source.Horizon` and
@@ -672,9 +677,12 @@ that build: `Syntax.Scoped` 13s, `Semantics.Run` 8.9s, `Semantics.RunWk`
   `snocMem nil` case, `CallRet.isValues` of `.rets bs` now `bs.noMem`, so
   the recursive-contract rule with callbacks does not take a memory return
   among several). The premises of `functionBodyExpand`,
-  `functionCallArgCapture` and the contract rules are unchanged in shape:
-  `RetBinders.declsThen` writes `T memory r;` where `Binders.declsThen`
-  wrote nothing, and the rule map needs no row.
+  `functionCallArgCapture` and the contract rules are unchanged in
+  statement; `functionBodyExpand`'s premise now also declares a memory
+  return (`T memory r;`, `RetBinders.declsThen`'s new case), recorded in the
+  rule map's `functionBodyExpand` row. `holdsC_callRecContract`'s existing
+  premise `ret.isValues` is now `bs.noMem` for `.rets` (it was `true`); its
+  automated caller discharges it by `rfl` on concrete binders.
 - **Elaborator.** `elabCallRetCore` admits a memory return among several
   (`retMem`, not `retStorage`), declared `mv…` in the frame and the caller;
   `RetKind.rets` and the call's result list carry `LocalTy`s; a statement
@@ -695,13 +703,18 @@ that build: `Syntax.Scoped` 13s, `Semantics.Run` 8.9s, `Semantics.RunWk`
 
 Tests: `Examples/Tactics/MemoryReturns.lean`, kernel-checked runs
 (`decide +kernel`) `splitAssign_run`, `bothAlias_run` (a returned parameter
-aliases the argument), `untouchedDefault_run`, `omitted_run`,
-`narrowAssign_run`, `falseObservation_panics` (the false observation
-panics), through function values `valueSplit_run`, `valueTernaryT_run`,
-`valueTernaryF_run` (`(c ? split : split2)(5)`, only the chosen callee
-runs), `valueAlias_run`; calculus proofs `untouched_proved`,
-`split_proved` (`sol_symex`/`sol_close`, the value target); refusals of a
-storage return among several and of a wider target (`#guard_msgs`).
+aliases the argument), `untouchedDefault_run`, `rebound_run` (the target is
+rebound, not left as it was), `freshPair_run` (two memory returns are two
+objects; an unassigned value return beside one is its default),
+`wordAssign_run` (`bytes memory`), `omitted_run`, `narrowAssign_run`,
+`falseObservation_panics` (the false observation panics), through function
+values `valueSplit_run`, `valueTernaryT_run`, `valueTernaryF_run` (`(c ?
+split : split2)(5)`, only the chosen callee runs), `valueWord_run`,
+`valueAlias_run`; calculus proofs `untouched_proved`, `split_proved`
+(`sol_symex`/`sol_close`, the value target); the printed program; refusals
+(`#guard_msgs`) of a storage return among several, of a wider target, of a
+location that does not match a return's type, and of a narrow element
+through a function value.
 
 Open: the closer does not resolve a memory array's length or elements after
 its allocation (`[ uint[] memory b; ] b.length == 0` stays open with no call
@@ -711,3 +724,44 @@ pinned by the runs. EVM-observed vectors were not added: running the pinned
 soljson and the EVM harness (`scripts/check-function-value-references.mjs`)
 was refused by this session's command policy, and fixture expectations may
 not be written by hand.
+
+### Review (lane FU2-A)
+
+Read-only finder and skeptic (no Lean server) on `84a2a4be..a78e122`.
+Confirmed and fixed:
+
+- Finder 1: both printers stopped the tuple at a memory-local target
+  (`b = mv1;` is `Stmt.rebindMem`), printing `(a, ) = split(5); b = mv1;`.
+  `ppRetTargetS` (`PrintStmt`) and `Stmt.retTarget?` (`Scoped.lean`) read
+  a `rebindMem … (.alias (.var r))` target; the printed program is pinned
+  in `MemoryReturns.lean`. Memory-field and storage targets of a memory
+  return still print apart (the call, then each read).
+- Finder 2 / skeptic 8: the data-location flags are per function
+  (`FunDecl.retMem`), so `returns (uint[] memory a, uint[] b)` and
+  `returns (uint memory a, uint[] memory b)`, which solc rejects, were
+  admitted. The `contract!{}` reader (also the solc import's) now checks
+  each of several returns (a reference one has a location, a value one
+  none) and marks a mismatch, which `elabCallRetCore` refuses ("a return's
+  data location does not match its type"); both pinned.
+- Skeptic 2–4: the speed paragraph claimed no kernel run unfolds `enterT`
+  (every `decide +kernel` tuple run does) and undercounted the rewritten
+  proofs; the premise wording ("wrote nothing") hid that
+  `functionBodyExpand`'s premise now declares `T memory r;`. Corrected
+  above, the rule map's `functionBodyExpand` row and `intrinsic.md`
+  decision 19 updated.
+- Skeptic 6–7: tests added for a target rebound from an earlier object
+  (`rebound_run`), two memory returns being two objects and an unassigned
+  value return beside a memory one (`freshPair_run`), `bytes memory`
+  among several directly and through a function value (`wordAssign_run`,
+  `valueWord_run`), and the narrow-element refusal through a function value.
+- Skeptic 9: stale lines in `kernel-port.md` (several returns, value types
+  only; `Binders.defaultsT_eq`) and `semantic-gaps.md` corrected.
+
+Recorded, not changed: the tuple *declaration* `(uint a, uint[] memory b) =
+f(x);` does not parse in `sol{}` (`solTupleDecl` takes no location; finder
+3), so only the assignment form is tested; viaIR modifier frames
+(`Lower.lean`, `modifierFrames`) now reach several returns with a memory one
+and alias the return pointer as viaIR does, untested (finder 4); direct calls
+of such functions through the solc import reach the elaborator with no EVM
+vectors behind them (skeptic 12); `holdsC_callRecContract`'s `isValues`
+premise now excludes a memory binder (skeptic 1, by design).

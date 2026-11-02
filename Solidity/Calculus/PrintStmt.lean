@@ -732,6 +732,12 @@ partial def ppRetTargetS (t : SPiece) : PrM (Option (TSyntax `sol_expr × Expr))
     let_expr MSrc.val _ _ _ v := (← whnf src) | return none
     let some r ← local? v | return none
     return some (← ppExprS ns l, r)
+  -- a memory local target of a memory return (`b = mv1;`): the pointer
+  | Stmt.rebindMem _ _ _ i rhs =>
+    let_expr MRhs.alias _ _ _ p := (← whnf rhs) | return none
+    let_expr MPath.var _ _ _ r _ := (← whnf p) | return none
+    let some x ← ppVar? (← idxName ns i) | return none
+    return some (← `(sol_expr| $x:ident), ← idxName ns r)
   | _ => return none
 
 /-- A call that returns to targets (`CallRet.rets`) and the statements after

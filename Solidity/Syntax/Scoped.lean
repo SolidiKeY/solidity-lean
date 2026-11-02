@@ -733,6 +733,7 @@ def Stmt.retTarget? {Γ Γ' : Ctx} (rs : List Var) (ns : List Var) :
   | .assignLocal x (.simple (.local r)) => (rs.findIdx? (· == r.name ns)).map (·, toString (x.name ns))
   | .assign l (.val (.simple (.local r))) => (rs.findIdx? (· == r.name ns)).map (·, l.toStr ns)
   | .assignMem l (.val (.simple (.local r))) => (rs.findIdx? (· == r.name ns)).map (·, l.toStr ns)
+  | .rebindMem x (.alias (.var r _)) => (rs.findIdx? (· == r.name ns)).map (·, toString (x.name ns))
   | _ => none
 
 /-- The statements after a call of several returns that assign them, in
