@@ -1510,7 +1510,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/Passes/TailMachine.lean` | Typed compiler transport or control proof component. |
 | `Backend/Passes/TripleSequence.lean` | Typed compiler transport or control proof component. |
 
-## V08 independent adapters (partial lane)
+## V08 independent adapters
 
 | Module | Purpose |
 |---|---|
@@ -1629,7 +1629,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBounds.lean` | RETURNDATACOPY gate order and in-range gate, the gas-only charged state, and the out-of-range refusal lifted through `FrozenV1.api`. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBoundsControls.lean` | Populated gas, arity, range, endpoint, capacity and fuel controls; the gate does not depend on the static flag. |
 
-### P1 runtime frames (partial; [runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
+### P1 runtime frames ([runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
 
 | Module | Purpose |
 |---|---|
@@ -1645,7 +1645,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameInterfaceV1.lean` | Frozen v1 signatures: `Emission`, `Entry`, `Returned` and the unproved `Pending*` premise structures. |
 | `Backend/InternalFlow/RuntimeFrameInterfaceV2.lean` | Frozen v2 `Pending*` structures: each needs an entry whose source run succeeds (`SuccessfulEntry`) or bare-reverts (`RevertingEntry`); v1 relations unchanged. |
 
-### P9 checked call graphs and Source preservation/progress (partial)
+### P9 checked call graphs and Source preservation/progress
 
 See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-preservation-allocations.md](feature-work/source-preservation-allocations.md) and [source-progress-checked.md](feature-work/source-progress-checked.md).
 
@@ -1671,3 +1671,40 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Source/Progress/BuiltinAdmission.lean`, `Source/Progress/ArithmeticBuiltins.lean`, `Source/Progress/RecoveryBuiltin.lean`, `Source/Progress/LiteralBuiltins.lean` | `BuiltinFragment` and progress of the nine implemented builtins on scalar and literal arguments (`checked_builtin`). |
 | `Source/Progress/EmitBuiltins.lean`, `Source/Progress/BuiltinStatements.lean` | Progress of direct `emit` nodes and builtin expression statements. |
 | `Source/Progress/BuiltinControls.lean`, `Source/Progress/ScalarBuiltinControls.lean`, `Source/Progress/LiteralBuiltinControls.lean` | Builtin and event executions, argument order, zero modulus, hashes, messages and refusals. |
+
+## Additional registered modules
+
+| Module | Purpose |
+|---|---|
+| `Corpus/SolcControlFlow.lean` | solkey `solc/SolcControlFlow.sol`, ported |
+| `Corpus/SolcExpressions.lean` | solkey `solc/SolcExpressions.sol`, ported |
+| `Corpus/SolcMappings.lean` | solkey `solc/SolcMappings.sol`, ported |
+| `Corpus/SolcMemory.lean` | solkey `solc/SolcMemory.sol`, ported |
+| `Corpus/SolcStructs.lean` | solkey `solc/SolcStructs.sol`, ported |
+| `Evm/TryPanicCarrier.lean` | Closed intrinsic constructed-call carrier. No original-source construction, |
+| `Examples/ChainRewrites.lean` | The lines after the program, as chain links |
+| `Examples/Chains/MemoryToStorage.lean` | Memory-to-storage copies, as chains |
+| `Examples/ExampleNames.lean` | Printed names for the rules' fresh variables |
+| `Examples/Tactics/CallOperands.lean` | Call-valued operands: `values.push(makeValue());` |
+| `Examples/Tactics/Contracts.lean` | Calls by contract |
+| `Examples/Tactics/CrossDomain.lean` | Storage and memory: the copies between them |
+| `Examples/Tactics/ExternalReturnBytes.lean` | Inhabited kernel controls of the actual primitive byte decoder. |
+| `Examples/Tactics/LedgerDelete.lean` | A struct with a mapping, written and deleted — both layers |
+| `Examples/Tactics/Net.lean` | Payment: what a `transfer` changes |
+| `Examples/Tactics/PrimitiveReturnProjection.lean` | Inhabited primitive declaration/binder controls. No source/native frame is issued. |
+| `Examples/Tactics/Revert.lean` | The two modalities: `revert();`, `require`, `assert` |
+| `Examples/Tactics/TermTaclets.lean` | Term taclets on a sequent |
+| `Examples/Tactics/TryCatch.lean` | `try`/`catch`: an external call and a block per way it ends |
+| `Examples/Tactics/TryPanicCarrier.lean` | Nonvacuous constructed-call controls. No source or target adequacy claim. |
+| `Source/SessionExamples.lean` | Controls of sessions with unfinished transactions (S05 item 2) |
+| `TestSuite/Derived10.lean` | solkey's `TestSuite`, derived (10 of 12) |
+| `TestSuite/Derived11.lean` | solkey's `TestSuite`, derived (11 of 12) |
+| `TestSuite/Derived2.lean` | solkey's `TestSuite`, derived (2 of 12) |
+| `TestSuite/Derived3.lean` | solkey's `TestSuite`, derived (3 of 12) |
+| `TestSuite/Derived4.lean` | solkey's `TestSuite`, derived (4 of 12) |
+| `TestSuite/Derived5.lean` | solkey's `TestSuite`, derived (5 of 12) |
+| `TestSuite/Derived6.lean` | solkey's `TestSuite`, derived (6 of 12) |
+| `TestSuite/Derived7.lean` | solkey's `TestSuite`, derived (7 of 12) |
+| `TestSuite/Derived8.lean` | solkey's `TestSuite`, derived (8 of 12) |
+| `TestSuite/Derived9.lean` | solkey's `TestSuite`, derived (9 of 12) |
+| `SolCases.lean` | Deterministic bounded enumeration; seed rotates the boundary pool. stdout is JSONL. |
