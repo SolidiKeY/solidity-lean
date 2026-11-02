@@ -237,7 +237,7 @@ lock using the same runtime and bounds:
   git -C ${VM_WORKSPACE}/solidity-lean status --short
   cp ${VM_WORKSPACE}/next10-memory-negative-block-evidence/lakefile.memory-negative.toml ${VM_WORKSPACE}/solidity-lean/lakefile.memory-negative.toml
   docker run --rm --user 1000:1000 --memory=12g --memory-swap=12g \
-  --mount type=bind,src=/workspace,dst=/workspace \
+  --mount type=bind,src=${VM_WORKSPACE},dst=${VM_WORKSPACE} \
   --mount type=bind,src=/usr,dst=/usr,readonly \
   --mount type=bind,src=/opt/codex/runtimes,dst=/opt/codex/runtimes,readonly \
   -w "${VM_WORKSPACE}/solidity-lean" ubuntu:24.04 bash -c 'source ${VM_SETUP}/activate.sh; export LEAN_NUM_THREADS=1; export PATH=${VM_WORKSPACE}/next10-memory-negative-block-evidence/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:$PATH; bash ./run-lean.sh'

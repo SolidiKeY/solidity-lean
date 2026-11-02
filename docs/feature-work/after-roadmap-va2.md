@@ -85,7 +85,7 @@ privilege, catalog or VM changes were made. Podman/nerdctl are absent.
 
 A task-owned child container using pinned image
 `debian@sha256:f6b08b09a05725f9431502d3b5714f5c4576e82c1a84fa1debe0c24a7e0c3ec4`
-mounted the exact existing `/workspace` tree, including the isolated checkout
+mounted the exact existing `${VM_WORKSPACE}` tree, including the isolated checkout
 and existing toolchain. It ran as UID/GID 1000 with `--network=none`,
 `--memory=12g --memory-swap=12g`. Actual child cgroup values were
 `memory.max=12884901888` and `memory.swap.max=0`. The daemon reports
