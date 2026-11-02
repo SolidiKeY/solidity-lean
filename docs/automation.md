@@ -1064,6 +1064,14 @@ a larger literal source folds to 27 nodes and stays Covered. These preserve
 why neither a size threshold nor noncoverage defines Residue/unknown.
 Separate cut/lift/resource and exhaustive coverage/fuel obligations stay open.
 
+`Calculus/DecisionSourceChain.lean` completes the existing source literal-chain
+parser's recognition theorem and constructive decidability at supplied bounds
+and literals. Its actual result produces an existing exact declaration-reduction
+certificate through the checked AllLeft/substitution proof. Five original array
+sources reach this preparation stage; the false fixed-array model excludes a
+hit for every parameter pair. Parameter discovery and global normalizer/decision
+integration remain open, and original coverage/verdict observations are unchanged.
+
 `Calculus/DecisionNumericCompiler.lean` derives the unchanged arithmetic
 compiler's operand-depth premises from numeric syntax and a computable maximum
 equation-operand depth. It reaches the actual cut/read-layout/compiler producer

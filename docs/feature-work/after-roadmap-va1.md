@@ -3555,3 +3555,78 @@ Numeric read-free compiler composition is now independently proved; it does not
 remove the broader producer's511 premise or alter global Covered/inTarget.
 No new exclusion/premise/model/default, axiom/sorry/native shortcut, budget/pin
 change, goal mutation, push/merge/PR or tag publication occurs.
+
+
+## Source-chain completeness and exact preparation (2026-11-02)
+
+Parent52b24d4ede5eb66ccae66d1386071f71a9cd5248, original branch/base/VM/thread/
+goal, decisions and all earlier seals are preserved. This closes the explicitly
+open completeness point for the existing SourceUIntLiteralChain parser and
+provides an independently consumable AU02 array preparation component. It does
+not redo the existing source-instance/inhabited-array proofs or take VA2 work.
+
+Calculus/DecisionSourceChain proves the existing structural parser complete for
+every actual chain at supplied bound/literal parameters, exact membership iff
+and constructive Decidable membership. No coverage/verdict predicate defines
+that source family. sourceUIntLiteralReduction? computes the real chain and
+uses its existing AllLeft/instLit validity proof to construct the existing
+DeclarationReduction.certified output. The returned formula is truth with
+pointwise equivalence at every original typed state. No arbitrary validity or
+future completion certificate is an input. Parameter discovery and global
+normalizer/decision registration remain open; no global observations change.
+
+Clients reuse the actual struct/nested/key/fixed-key/field witnesses from the
+previous checked source-instance delivery. They obtain actual preparation
+outputs and retain the existing constructed three-cell state satisfying the
+original antecedent. The real false fixed-array model excludes preparation
+for every bound/value pair, including mismatch and out-of-range controls.
+Existing raw leaf refusal and all five global unknowns are pinned unchanged.
+The pointwise source equivalence preserves original partial-read behavior.
+
+Final bounded MCP core/client4.190/4.174s PASS; affected build3.188s PASS;
+17 public signature/axiom reports7.365s PASS with only existing standard axioms.
+Interpreted profile3.177s PASS, combined source/preparation/original-decision
+observations including printing: struct8.268905ms, nested4.045509ms,
+key23.833236ms, fixed-key13.824990ms, field11.788651ms; false-fixed28.098717ms,
+closed truth0.480725ms and repeated struct3.676121ms. Original unknown/refuted/
+proved controls match exactly. These are warm checkout/cache measurements,
+not a cold source/full build or a separate parser-only timing claim.
+Sampled aggregate RSS 1444520 KiB; cgroup peak 391716864 bytes; minimum host available 15699496960 bytes; 11 unsuccessful samples retained.
+Actual hard12GiB/no swap, threads1/-j1, existing writer lock and12GiB host reserve
+apply. No Lean/build overlap or proof-budget increase. Two narrow additive root
+imports/module-map rows; existing parser, source witnesses, normalizer, predicates
+and solver files are byte-for-byte preserved versus parent. Finder/skeptic
+read-only source reviews found no issue; neither used Lean/server/builds.
+A trailing-blank documentation failure was fixed and its raw exit retained.
+Strict automatic/layer/trust/whitespace pass; strict docs retain the exact85
+frozen-base findings and axiom inventory retains404 unrecorded changes. Earlier
+full/TypeExamples failures stay failures; Q2 and producer repair remain held.
+Kernel model evidence only; no EVM/external-test validation is claimed.
+
+Storage boundary: root filesystem had approximately0.8MiB left after focused
+outputs. No protected file/cache/artifact was removed. New evidence/export data
+uses the existing same-VM tmpfs, actual directory
+/tmp/va1-evidence-20261102/source-chain-next, through the retained workspace
+alias /workspace/va1-evidence/source-chain-next. This storage is ephemeral across
+VM reboot and must be retrieved before any VM teardown/reboot. Source checkout,
+branch, commits and original goal identity remain in their original locations.
+The task-owned extra container bind changes no resource/network/user guard.
+All prior source bundles/archives remain on their original workspace paths.
+
+Planned immutable export, pending checks at source commit: this evidence folder
+will contain actual committed module/signature/import hashes, producer facts,
+nontrivial clients, cumulative original.patch/Git bundle, committed handoff,
+delta archive and SHA256 manifest. The two bundle paths may hard-link one
+immutable source package; delta evidence references it separately. Fresh
+standalone-prerequisite reconstruction, exact head/fsck and independent artifact
+reviews are required before export success. Final identity/checksums bind head.
+
+Remaining whole queue is partial: exhaustive meaningful Residue/reasons union,
+DecisionTheorem-prime and complete target/Covered/hash bridges; global array
+preparation/discovery/decision integration, generic nested-array reconstruction;
+broader memory and partial-OR reconstruction; broader approved M4 boundary;
+remaining general formula-derived fuel, baseline/backfill/performance and full
+gates. This source-chain completeness/preparation backfill is completed only at
+its stated interface. Q1 revision approved; Q2 held. No predicate/default/model/
+expected-verdict/exclusion change, new axiom/sorry/native shortcut, goal mutation,
+push/merge/PR or tag publication occurs.
