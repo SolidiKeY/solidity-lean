@@ -1543,3 +1543,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/ExecutionControls.lean` | Funded/underfunded/static account execution, complete18-field outcomes, copy opacity and jump/resource negatives. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/Modular.lean` | Full-precision ADDMOD/MULMOD scalar representation, actual fetched charged State and X continuation with explicit gas/stack bounds. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ModularControls.lean` | Complete-State overflow-sensitive modular, zero/max modulus,1024-stack and fetched combination controls; actual error-order negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ExponentConsumer.lean` | Scalar/reference EXP representation, actual fetched charged execution and proved1610 local gas bound. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PowerControls.lean` | Whole-State nonzero, wrap, maximal-exponent, stack, charge and actual EXP→ADDMOD controls. |

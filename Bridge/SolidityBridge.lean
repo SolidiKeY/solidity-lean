@@ -47,3 +47,6 @@ import SolidityBridge.RoadmapV15.P10.ExecutionControls
 
 import SolidityBridge.RoadmapV15.P10.Modular
 import SolidityBridge.RoadmapV15.P10.ModularControls
+
+import SolidityBridge.RoadmapV15.P10.ExponentConsumer
+import SolidityBridge.RoadmapV15.P10.PowerControls

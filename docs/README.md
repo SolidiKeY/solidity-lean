@@ -122,3 +122,5 @@ P10 fetched CALL/RETURNDATA/JUMP helper: [interface and handoff](feature-work/ro
 - [V15 modular consumers](feature-work/roadmap-v15-modular-consumers.md): full-precision scalar/fetched ADDMOD and MULMOD clauses.
 
 - [V15 completion fence](feature-work/roadmap-v15-runtime-completion.md): strict observed-workload completion and terminal-status checks.
+
+- [V15 power consumers](feature-work/roadmap-v15-power-consumers.md): actual EXP encoding, charged execution and local resource clauses.
