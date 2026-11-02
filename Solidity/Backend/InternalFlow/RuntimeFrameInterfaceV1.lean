@@ -45,7 +45,8 @@ structure Entry {C : Contract} {Γ Δ : Ctx} (plan : Emission C Γ Δ)
 /-- At least one represented entry. This does not make `ReturnClaim`
 non-vacuous: the plan's state-indexed budgets may admit only callers whose
 source run fails, and `PendingRecursiveReturns` may realize only index 0, where
-`recBase` exhausts. It does not establish profile coverage or budgets. -/
+`recBase` exhausts. It does not establish profile coverage or budgets.
+`InterfaceV2.SuccessfulEntry` ties the entry to a successful source run. -/
 def RealizableEntry {C : Contract} {Γ Δ : Ctx} (b : Nat) (F : Frag Γ)
  (plan : Emission C Γ Δ) : Prop :=
  ∃ (L frame : Nat) (caller : State C Γ) (base : Nat → Fin W)

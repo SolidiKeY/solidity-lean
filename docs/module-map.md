@@ -1643,6 +1643,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameRestore.lean` | Restoring a saved word into the original caller cell. |
 | `Backend/InternalFlow/RuntimeFrameContext.lean` | Whole caller-context capture/restore around a checked body. |
 | `Backend/InternalFlow/RuntimeFrameInterfaceV1.lean` | Frozen v1 signatures: `Emission`, `Entry`, `Returned` and the unproved `Pending*` premise structures. |
+| `Backend/InternalFlow/RuntimeFrameInterfaceV2.lean` | Frozen v2 `Pending*` structures: each needs an entry whose source run succeeds (`SuccessfulEntry`) or bare-reverts (`RevertingEntry`); v1 relations unchanged. |
 
 ### P9 checked call graphs and Source preservation/progress (partial)
 
