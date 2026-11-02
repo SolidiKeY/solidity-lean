@@ -1623,3 +1623,20 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderControls.lean` | All-width nonuniform payloads, endian/length/truncation controls and arbitrary-seed whole-State PUSH client. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean` | Frozen V1 interface: 18 decode/charged-step/continuation statements (see `docs/feature-work/roadmap-v15-p10.md`). |
 | `Bridge/SolidityBridge/RoadmapV15/P10/FrozenWitness.lean` | `FrozenV1.api` from existing P10 theorems; no new fact. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBounds.lean` | RETURNDATACOPY gate order and in-range gate, the gas-only charged state, and the out-of-range refusal lifted through `FrozenV1.api`. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBoundsControls.lean` | Populated gas, arity, range, endpoint, capacity and fuel controls; the gate does not depend on the static flag. |
+
+### P1 runtime frames (partial; [runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
+
+| Module | Purpose |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameSemantics.lean` | `callRec` replaced by its finite thunk body, with an equal execution. |
+| `Backend/InternalFlow/RuntimeFrameTarget.lean` | Published `Calls` certificates transported along that equation. |
+| `Backend/InternalFlow/RuntimeFrameTransport.lean` | Argument, entry/body extension and result export at the checked target endpoint. |
+| `Backend/InternalFlow/RuntimeFrameStack.lean` | Runtime-pointer word push/pop on the existing machine. |
+| `Backend/InternalFlow/RuntimeFrameSaved.lean` | Reserved frame words preserve `StateRepr`; scalar/reference saves. |
+| `Backend/InternalFlow/RuntimeFrameFootprint.lean` | Word intervals preserved by allocation, rebinding and array-write leaves. |
+| `Backend/InternalFlow/RuntimeFrameComposition.lean` | Checked certificates paired with constructor-derived scratch-safety proofs. |
+| `Backend/InternalFlow/RuntimeFrameRestore.lean` | Restoring a saved word into the original caller cell. |
+| `Backend/InternalFlow/RuntimeFrameContext.lean` | Whole caller-context capture/restore around a checked body. |
+| `Backend/InternalFlow/RuntimeFrameInterfaceV1.lean` | Frozen v1 signatures: `Emission`, `Entry`, `Returned` and the unproved `Pending*` premise structures. |

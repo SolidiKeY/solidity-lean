@@ -120,3 +120,5 @@ yet links Source executions to the intrinsic world or to bytecode.
 
 V15 P10 partial checkpoint: [fetched-byte EVM steps against EvmYul](feature-work/roadmap-v15-p10.md),
 including the frozen CALL/RETURNDATA/JUMP interface consumed by later lanes.
+
+P1 runtime-frame partial checkpoint: [foundation and frozen interface v1](feature-work/runtime-frame-p1.md).

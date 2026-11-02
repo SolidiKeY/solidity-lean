@@ -1188,3 +1188,15 @@ import Solidity.Examples.Tactics.CallFunctionShare
 import Solidity.Examples.Tactics.CallFunctionShareControls
 import Solidity.Calculus.CloseCallSharing
 import Solidity.Examples.Tactics.CallSharingDefault
+
+-- V12 P1 runtime-frame foundation and frozen interface v1.
+import Solidity.Backend.InternalFlow.RuntimeFrameSemantics
+import Solidity.Backend.InternalFlow.RuntimeFrameTarget
+import Solidity.Backend.InternalFlow.RuntimeFrameTransport
+import Solidity.Backend.InternalFlow.RuntimeFrameStack
+import Solidity.Backend.InternalFlow.RuntimeFrameSaved
+import Solidity.Backend.InternalFlow.RuntimeFrameFootprint
+import Solidity.Backend.InternalFlow.RuntimeFrameComposition
+import Solidity.Backend.InternalFlow.RuntimeFrameRestore
+import Solidity.Backend.InternalFlow.RuntimeFrameContext
+import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1

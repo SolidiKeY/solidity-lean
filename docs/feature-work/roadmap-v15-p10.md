@@ -58,6 +58,7 @@ and error-order negatives.
 | `BalanceEnvironmentConsumer`, `BalanceEnvironmentControls` | BALANCE | Charged read; the frame's `funds` field is defined from the EVM account map, so the funds agreement holds by construction. |
 | `DecoderAgreement`, `DecoderAgreementControls` | 117 non-immediate opcodes | Backend bytes against the reference decoder and fetched dispatch. |
 | `PushDecoderAgreement`, `PushDecoderControls` | PUSH0–32 | Payload extraction against the reference reader. |
+| `ReturnCopyBounds`, `ReturnCopyBoundsControls` | RETURNDATACOPY | The order of the gas, arity, natural source-endpoint and capacity checks. The charged state changes only gas. The gate classification unfolds `driverGate` directly. The out-of-range refusal (`InvalidMemoryAccess`) is lifted to `driverSteps` and `EVM.X` through `FrozenV1.api`. The physical copy, padding and read values are not proved, and errors carry no final state. |
 
 ## Known differences and open items
 

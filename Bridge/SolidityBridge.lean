@@ -74,3 +74,6 @@ import SolidityBridge.RoadmapV15.P10.PushDecoderControls
 
 import SolidityBridge.RoadmapV15.P10.FrozenInterface
 import SolidityBridge.RoadmapV15.P10.FrozenWitness
+
+import SolidityBridge.RoadmapV15.P10.ReturnCopyBounds
+import SolidityBridge.RoadmapV15.P10.ReturnCopyBoundsControls
