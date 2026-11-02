@@ -3172,3 +3172,50 @@ whole-pipeline fuel/511 derivation, remaining profiling/backfill and full gates.
 AQ1/AQ2/Q1 decisions and all old seals/failures remain. No goal mutation or
 publication. Parallel package and cumulative prerequisite bundle export follow
 this checked source commit; final concrete integration remains open.
+
+
+### Ground numeric source-discovery checkpoint (partial)
+
+`Calculus/DecisionNumericGroundSource.lean` removes the previous supplied-leaf
+premise for every contract and closed `Fml.QFUIntLinear` formula with source
+`uintQFWeight≤511`. It proves both actual translations and structural node
+bounds, actual `ExactAt.ofFormula?` traversal, real source reduction/preparation,
+and actual normalization grammar/weight preservation. `qfUIntGround_logic_Covered`
+composes these real producers. `qfUIntGround_logic_boundary` quantifies all waiver
+settings and proves frozen inTarget, Covered and hash freedom; answered/certified
+results retain actual `ValidH`/`¬holdsH`. This is a precise supported family,
+not the original false unconditional reverse inclusion, exhaustive Residue or
+full DecisionTheorem-prime. No predicate/model/source default/budget change.
+
+Concrete clients use partial unsigned0-1: optional equality of two failures is
+proved; failure versus literal0 is refuted at exactly State.init Bank; a logical
+combination is covered/answered. Actual source weights55/41/139 and all-waiver
+boundary proofs avoid supplied normalizer/leaf/verdict premises. Free-parameter
+and other gap controls remain in earlier preserved modules. Broader numeric
+syntax, mixed/broader prefixes and other original clauses remain outside this
+supported theorem. Two owned root imports/two module-map rows register modules;
+our four new numeric rows are placed in the existing numeric table. No other
+producer registrations are rewritten.
+
+Raw evidence: /workspace/va1-evidence/ground-source-next. Core/client MCP
+5.280/5.271s, affected closure build4.199s and20public signature/axiom reports
+23.479s PASS. No sorryAx/new axiom/native shortcut; only existing propext,
+Classical.choice and Quot.sound. Raw initial Option-bind proof, reserved
+identifier/constructor/Decidable-client failures are retained, never counted as
+passes. Independent read-only finder/skeptic checked source and scopes without
+Lean/server/builds; constructor finding fixed, map table placement finding fixed.
+The previous sealed ground export had two metadata findings (nested named-arg
+signature truncation and prose instead of leafOf? signature); original sealed
+artifacts stay immutable and separate ground-next/PARALLEL-INTERFACE-corrected.json
+repairs both, independently verified and bound by ground-next/FINAL-SHA256SUMS.
+Measured aggregate RSS1711796KiB; cgroup peak633901056bytes; minimum host available17091850240bytes. Hard12GiB/no swap, threads1/-j1 and12GiB host reserve enforced; 9 failed measurements retained.
+
+Static commands/exits remain in static-gates.json, including known failing
+inventory/docs gates. Prior full/TypeExamples resource stops and pending VA1-Q2
+remain failures/held. No full goal completion or milestone publication is claimed.
+Remaining original queue: global meaningful decidable Residue/reasons union,
+DecisionTheorem-prime/exhaustive target/hash bridge, five general array routes,
+wider memory, halting-OR guard, broader revised M4 boundary, whole-pipeline
+fuel/511 derivation, remaining baseline/backfill/performance and affected/full
+final gates. Original8bb counterexample/AQ1/AQ2/Q1 decisions and all previous
+failures/seals preserved. No goal/VM/thread reset, no push/merge/PR/tag.

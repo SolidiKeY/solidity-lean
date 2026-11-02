@@ -1013,8 +1013,11 @@ prepared grammar, parameter closure and actual source-derived bounds for the
 stated one-prefix QFUIntLinear family of weight at most 511. Broader prefixes
 and the exhaustive Residue/target bridge remain open; this grammar's complement
 is not Residue. The ground numeric leaf interface separately discharges
-zero-prefix exact tests and coverage when supplied an actual leaf equation;
-closed source discovery remains open.
+zero-prefix exact tests and conditional leaf coverage. The subsequent
+`Calculus/DecisionNumericGroundSource.lean` proof discharges actual closed
+source discovery/normalization for QFUIntLinear formulas of source weight≤511,
+with all-waiver target membership, hash freedom and actual certified verdicts.
+This supported family does not establish exhaustive Residue or broader M4 coverage.
 `Examples/DecisionHaltingOrGaps.lean` separates already-covered partial
 Boolean lowering from the actual open APF guard-floor case. A nested halting
 `||` guard in a negative two-key mapping block has certified target/unknown/
