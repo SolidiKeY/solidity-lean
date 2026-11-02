@@ -187,4 +187,83 @@ theorem entry_error_iff_source_error {E : Source.Env} {Λ : Source.RCtx} {C : Co
   · rename_i offset length observed
     conv => rhs; rw [observed]
     exact error_iff_copy_error source target t frame selector data selector_length input observed halt
+
+
+/-! Actual typed Source expression/client transport; Source budgets below
+are not EVM gas or a producer of physical runtime-frame admission. -/
+namespace Expression
+abbrev argumentTy (t : Source.IntTy) : Source.STy := .array .calldata (.int t) none
+
+/-- Derive the existing Source implicit conversion judgment for every width.
+Explicit decidable equality avoids reducing the generated equality machinery. -/
+theorem conversion_allowed (E : Source.Env) (t : Source.IntTy) :
+    (argumentTy t).implicit E.isBase (sourceTy t) = true := by
+  change (decide (t = t) && true && true) = true
+  simp only [Bool.and_true, decide_eq_true_eq]
+
+def expr {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy) :
+    Source.RExpr E (argumentTy t :: caller) (sourceTy t) :=
+  .conv (.local .here) (.inl (conversion_allowed E t))
+
+theorem eval_expr_run {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy) (G : Source.Glob E)
+    (frame : Source.Fr) (n offset length : Nat) (tail : Source.Locals E.layout caller)
+    (state : Source.St E) :
+    let before : Source.EMState E (argumentTy t :: caller) :=
+      (.cons (.cdRef rfl offset length) tail,state)
+    (Source.evalE G frame (n+2) (expr t)).run before =
+      (Source.cdToMem frame (sourceTy t) offset length).run before := by
+
+  dsimp only
+  unfold expr
+  change ((Source.evalE G frame (n+1) (.local .here)) >>= fun argument =>
+    Source.convRV frame (n+1) (sourceTy t) argument).run _ = _
+  rw [Source.Hoare.run_bind, Source.eval_local_run]
+  change (Source.convRV frame (n+1) (sourceTy t)
+    (.val (.cdRef (τ := argumentTy t) rfl offset length))).run _ = _
+  rw [Source.convRV_cdArray]
+
+def scopedCopy {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy) (G : Source.Glob E)
+    (frame : Source.Fr) (budget : Nat) (data : Roadmap.Bytes) (index : Nat) :
+    Source.EM E caller (Source.RVal E.layout (sourceTy t)) := do
+  let argument ← Source.decodeArg data index (argumentTy t)
+  let tail ← Source.EM.locals
+  let (result,_) ← Source.EM.sub (.cons argument tail) (Source.evalE G frame budget (expr t))
+  pure result
+
+/-- Actual EM.sub drops the argument-local extension while retaining the
+reached complete state, on both native success and native error at n+2. -/
+theorem scopedCopy_run {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy) (G : Source.Glob E)
+    (frame : Source.Fr) (n : Nat) (data : Roadmap.Bytes) (index : Nat)
+    (source : Source.EMState E caller) :
+    (scopedCopy t G frame (n+2) data index).run source =
+      (sourceCopy t frame data index).run source := by
+
+  rcases source with ⟨tail,state⟩
+  rw [sourceCopy_run]
+  unfold scopedCopy
+  rw [Source.Hoare.run_bind, Source.decodeArg_cdArray_run data index (.int t) rfl,
+    Source.cdHeadBytes_of_word (τ := .int t) rfl]
+  unfold Source.cdArg
+  cases entry : Source.cdTail data index 32 with
+  | error halt => rfl
+  | ok pair =>
+    rcases pair with ⟨offset,length⟩
+    change ((Source.EM.sub (.cons (.cdRef (τ := argumentTy t) rfl offset length) tail)
+      (Source.evalE G frame (n+2) (expr t))) >>= fun result => pure result.1).run (tail,state) = _
+    rw [Source.Hoare.run_bind]
+    unfold Source.EM.sub
+    dsimp only [ExceptT.run, ExceptT.mk]
+    have evaluation := eval_expr_run t G frame n offset length tail state
+    dsimp only [ExceptT.run, ExceptT.mk] at evaluation
+    rw [evaluation]
+    have inside := Source.cdToMem_array_run frame (.int t) offset length
+      ((.cons (.cdRef (τ := argumentTy t) rfl offset length) tail,state) :
+        Source.EMState E (argumentTy t :: caller))
+    have outside := Source.cdToMem_array_run frame (.int t) offset length
+      ((tail,state) : Source.EMState E caller)
+    dsimp only [ExceptT.run, ExceptT.mk] at inside outside
+    rw [inside,outside]
+    cases (List.range length).mapM (fun j => Source.decodeWord E.layout
+      (Source.cdWordAt frame (offset+32*j)) (.int t)) <;> rfl
+end Expression
 end Solidity.Backend.Aggregates.IntegerArrays

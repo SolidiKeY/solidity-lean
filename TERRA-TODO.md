@@ -166,3 +166,34 @@ Routine integer entry consequences for Terra:
   ordered values and independent Source/target IDs, not balance-only or
   erased frame observations. This is routine composition, not final compiler
   or machine correctness; inhabited controls remain required.
+
+
+# H14 cascade — integer typed expression and scoped client
+
+Within `IntegerArrays.Expression`, conversion_allowed derives the actual
+Source implicit judgment for every Source.IntTy; expr uses that proof.
+eval_expr_run and scopedCopy_run are proved at the existing Source budget
+n+2. This is not physical execution or general frontend/profile lowering.
+
+Routine lemmas for Terra:
+- `eval_expr_zero` / `eval_expr_one`: for any actual extended
+  `before : Source.EMState E (argumentTy t :: caller)`, actual
+  `(Source.evalE G frame 0 (expr t)).run before` and budget1 respectively
+  equal `(.error .timeout,before)`. Reason: actual evalE budget equations.
+- `scopedCopy_low_run`: for budget≤1 and arbitrary complete caller source,
+  actual scopedCopy.run equals `match Source.cdTail data index 32 with
+  | .error halt => (.error halt,source)
+  | .ok _ => (.error .timeout,source)`.
+  Reason: real header law plus zero/one expression equations and EM.sub;
+  no word validation or allocation before timeout after a successful header.
+- `scoped_error_iff`: at budget n+2, `lowerEntry ... = .error halt ↔
+  (Expression.scopedCopy t G frame (n+2) data index).run source =
+  (.error halt,source)` under the SAME frame/selector equations as the
+  existing native entry_error_iff_source_error. Reason: scopedCopy_run.
+- Instantiate successful-import and populated signed8/unsigned8/empty/dirty/
+  truncated-header controls for the real scoped expression. Preserve old
+  aliases/objects/full caller locals, exact signed numeric order and errors.
+  Add a phase-success versus expression-budget0-timeout negative to prevent
+  counting Source.Halt phase reflection as fuel/gas/machine adequacy.
+All remain unproved TODO statements; no whole profile or completed checkpoint
+follows. Sol retains general source/frame/compiler adequacy beyond this client.

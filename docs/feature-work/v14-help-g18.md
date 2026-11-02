@@ -335,3 +335,39 @@ join H14 TERRA-TODO, with inhabited signed/unsigned, dirty/order/empty/caller
 controls and local/heap projections still pending. Standard combined build,
 generated registrations and checkpoint closure remain pending; no unchanged
 failed full/docs gate repeated or relabelled. Original queue remains partial.
+
+
+### Generic integer typed expression and caller-scope increment
+
+Within IntegerArrays.Expression, conversion_allowed derives the ACTUAL Source
+implicit conversion for calldata→memory integer arrays at every Source.IntTy.
+The first naive rfl expression constructor failed; the generic implicit
+judgment needs reflexive element equality. Six admission trials included a
+200000-heartbeat whnf failure, retained raw. Explicitly exposing the existing
+decidable self-equality and simplifying boolean conjunction proves the judgment
+without a new premise, native shortcut or changed budget. No Source/checker
+representation or global instance is altered. Actual RExpr.conv carries that
+proof; eval_expr_run proves real evalE at n+2 equals native cdToMem.
+
+scopedCopy executes actual argument decode, extends the real typed locals,
+uses actual evalE through EM.sub, then drops only the added local extension.
+scopedCopy_run proves the full reached state/result equals native sourceCopy
+at n+2 on header error, word-validation error and success. Source budget is
+explicit, not gas or physical runtime-frame availability; exhausted 0/1 cases
+are unproved routine TODO obligations, not excluded from the admitted profile.
+No whole compiler/dispatcher/minimum-head/index/general frame admission follows.
+
+Private V07 exact source binding is unchanged. Six-candidate run/scope trials
+and their failures remain raw. One final doc-comment syntax error is fixed
+(module comment before namespace); the failed exit1 is retained. Final private
+per-file + three headline axiom queries passes3.88s, peak848608KiB, oneLean,
+cgroup477888512bytes, noOOM/swap. conversion_allowed uses only propext;
+eval_expr_run/scopedCopy_run use standard3 axioms. No proof/test/fuel/node/time
+limit increase. Same saved head verified after readiness race; no goal changes.
+Master147eeb0c adds proof tooling, not a duplicate aggregate consumer.
+
+H14 low-budget equations, exact scoped error iff, success composition and
+inhabited signed/unsigned/dirty/truncated/empty/populated-alias controls remain
+in TERRA-TODO. Generated registration, standard combined checking and original
+checkpoint10 closure remain pending. Original failed full/docs gates and all
+original Work/Backfill obligations remain unchanged, no lane closure claimed.
