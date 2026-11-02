@@ -3476,3 +3476,67 @@ Original raw/full/TestSuite/sort/docs obligations and all eight original queues
 remain partial. All Lean/fixture sources and739pins are byte unchanged; earlier
 542/85 type inventories retained, not a new separate type audit. Exact committed
 artifact reviews accompany the seal. Original blocked goal is untouched.
+
+
+### C46 — actual argument failure to compiled bare revert (partial)
+
+`ArgumentFailureTarget.call_revert` combines actual `Args.evalT = .error .revert`
+with a published `Calls.Statement`, real `StateRepr`, exact expanded frame room
+and reached `AllocationInput`. `after_prefix` derives that representation and
+remaining capacity from actual successful prefix execution using
+`program_endpoint` and `GrowsAllocator.nextInput`. No target simulation, midpoint
+representation, failed State or desired preservation equation is postulated.
+
+The new ArgumentFailureFacts/ArgumentFailureEndpoint clients reuse the checked
+PublishedMemoryCalls prefix READ ONLY: nonempty array object0 contains[7,11], two
+caller aliases name it, scalar42, stack[77], sentinel99 at127, allocation starts256.
+The actual typed argument prefix evaluates the old reference and42; last index2
+fails with bare revert, whereas index1 gives11. Both actual expanded programs
+and public root direct-call selectors admit; checked `Calls.memoryReturn`
+constructs their genuine target statement certificates. The same memory-return
+body allocates privately and rebinds its result. Actual success has caller/entry/
+body heap counts1/2/3, argument order(11,42,ref0), default object1 not returned,
+exported private object2, old aliases0 and caller scalar42. Source lengths and
+all old/new element observations are checked; no generic Heap.Keeps is asserted.
+
+Closed failed_endpoint/failed_composition prove the real prefix reaches its
+represented caller and the compiled bad call/composition returns exactly target
+bare revert. The successful_endpoint also derives its midpoint and genuine
+capacity. Prefix cost3, bad reached cost0 and good cost4; both call frames need8.
+The complete successful target observation is
+[77,263,99,42,256,256,260,42,11,260,260,0,0,2,7,11,0,2,0,0]
+at addresses[0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262]
+following the protected stack. Thus cursor263, old pointers256, default object at259
+and escaping private result at260 are distinct. Private physical cells are retained
+in the observation even though their binders are dropped logically. Negative
+controls reject success/fault, source panic/exhausted/payload, wrong argument
+order/result/default alias, wrong target alias/cursor and insufficient frame
+premise (the latter is NOT a runtime rejection).
+
+Boundary: source non-entry follows the existing TRun.call argument bind. Target
+Out.revert has no returned State/frontier/bytes/world journal. Bad producer cost0
+is reached-cost metadata, NOT proof of failed-target cursor, rollback or absence
+of body effects. A separately compiled actual Args.declsThen.nil program also
+reverts at the same represented caller; existing run_append_revert absorbs any
+suffix. Its equality with an instruction prefix of the full call is NOT assumed
+or claimed. That extra closed code decomposition was investigated: opaque rfl
+failed, and explicit certificate normalization (including an isolated fragment
+rewrite) reached the ORIGINAL200000-heartbeat limit. Raw failures are retained;
+no limits were increased and the unproved equation was removed. Exact instruction
+construction sharing remains ready proof engineering, not an unavailable semantic
+producer or an approved premise. The actual full-call revert endpoint is proved
+independently through the public checked producer.
+
+All39 new headline builtin axiom reports are pinned (23facts/core,16endpoint).
+The original27fixtures/739pins remain exactly unchanged after removing additions;
+expanded29fixtures/778reports are registered, aggregate PENDING. Adding the registry
+entries intentionally stales earlier manifest bindings; none are rebound or
+relabelled green. CLI per-file/focused checks are used because Lean MCP is not
+available. No unchanged cached/raw/full attempt is run. Retain C45cached124 at
+121.001s/120s, earliercached124/120.820s, raw124, full124/300s with TestSuite/sort
+unreached, docsnormal/strict1. All six original Work items and both Backfills
+remain partial: general frames/unbounded recursion/dependent dispatch, early-control/
+general mixed loops, live word-frame/byte-journal and transient/world coupling are
+not closed. This intrinsic finite-call client is not frontend name-resolution,
+source lowering, bytecode/gas agreement, recursive compilation or whole-lane closure.
+The original blocked goal is untouched; no administration, push, merge or peer transfer.

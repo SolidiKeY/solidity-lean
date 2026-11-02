@@ -3736,5 +3736,210 @@
         "propext"
       ]
     }
+  },
+  "ArgumentFailureFacts": {
+    "guard": "tests/internal-flow/check-argument-failure-facts-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.prefix_execution": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.good_arguments": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failed_arguments": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.body_execution": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.good_call": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.bad_call": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.costs": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.frame_rooms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.observations": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.argument_prefix": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.prefix_order": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.bad_read": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.source_lengths": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.source_contents": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.wrong_argument_order": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.wrong_return_alias": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.wrong_default_escape": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.public_admission": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.argument_failure": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.argument_cost_room": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.caller_fragment": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.call_revert": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.after_prefix": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  },
+  "ArgumentFailureEndpoint": {
+    "guard": "tests/internal-flow/check-argument-failure-endpoint-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.bad_capacity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.good_capacity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failed_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failed_composition": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.successful_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failure_not_success": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failure_not_fault": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failure_not_panic": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failure_not_exhausted": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.failure_not_payload": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.ordered_target": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.exact_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.wrong_target_alias": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.wrong_cursor": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.short_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ArgumentFailureTarget.Checks.target_argument_program": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }
