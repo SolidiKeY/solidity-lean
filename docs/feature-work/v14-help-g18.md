@@ -155,3 +155,27 @@ P1 V2 is now on published masterd4e72c5d. SuccessfulEntry may be used, but requi
 All original/helper Work/Backfill remain partial/open/reassigned in QUEUE. H12 end-of-lane checks occur only at checkpoints; unchanged failed heavy full180s gate is not repeated for activity and root/TestSuite/SolKey/strict/cumulative final confirmation remains pending. Raw docs/frozen no-new failures remain separate from complete equality to exact helperbasefebf/private07c9; prior corrections/seals preserved. No goal administration/completion or parent closure.
 
 Checkpoint9 committed handoff: parent `f7029c40ec2f379e7d1c5a9c14305719d002aa62`; final touched80-job closure+22 scoped signatures/axioms rawPASS4.03s, peak aggregate775472KiB, oneLean, cgroup449724416bytes, noOOM/swap. SameVMreattach lostsession81968 but completedlog/fullqueries survived, nojob remained andunchangedhead/files wereverified; adoptedthisreceiptwithout rerun. Exact22 audit and8/8 controls PASS; checkpoint layer/orphan/trust/diff PASS. Raw docs FAIL1; complete86-finding equality to helperbasefebf/private07c9 PASS separately; frozen no-new FAIL retained. Independent source/guard finder+skeptic ACCEPT. Sourcebudget0/1/n+2, actualentry→expression order, P1V2bare-revert/allcaller caveats andno machine/gas claim are explicit. Exact committedhead/typedpremises/failedattempts/sourcehashes/queue/immutable exports are in checkpoint9's handoff; goal unchanged/incomplete.
+
+
+## H14 incremental deletion producer (not completed checkpoint10)
+
+Fresh master fcd5ba31b93d5b1cbe9bd3f36732dc7e4048eb00 was inspected;
+no equivalent aggregate deletion consumer exists. BoolArrayDelete proves
+actual default_heap allocation and run_var local rebinding over intrinsic
+State/Idx/HRef and existing TRun.deleteMem, without a simulation premise.
+Focused CLI check passes; default_heap uses propext and run_var uses only
+propext, Classical.choice, Quot.sound. Per-file MCP/lean_multi_attempt and
+coord-tools are unavailable. CLI automation trials are retained, including
+failed dependent decide/rfl/omega attempts and unavailable sol_prove/sol_chain
+(the core does not import tactic frontends). Expanded simp-only reduction
+succeeds; no budget or representation change. The initial admission refusal75
+launched no process; H1 task-cache advice restored the unchanged guard.
+
+H14 cascade statements in TERRA-TODO.md defer routine populated alias,
+contents/local/heap preservation controls. Joint Source deletion transport
+and its timeout distinction remain Sol soundness work. This is NOT a complete
+checkpoint or G18.05 result. Read-only finder and skeptic find no source flaw;
+both require the pending inhabited controls before checkpoint closure.
+Solidity.lean is untouched; new-module registration waits for the H14 generator.
+No full gate rerun: previous full timeout124, raw docs1, frozen no-new1 and
+all original missing compiler/world/frame/fetched execution obligations remain.
