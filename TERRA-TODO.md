@@ -25,7 +25,7 @@ No earlier excluded Terra tasks or completed work are restored here.
 # H14 cascade — G18.05 local bool-array deletion
 
 Producer module: `Solidity.Backend.Aggregates.BoolArrayDelete`.
-`default_heap` and `run_var` are proved; the following are NOT proved claims.
+`default_heap`, `run_var`, and `delete_related` are proved; the following are NOT proved claims.
 Do not add axioms, `sorry`, higher budgets, or an assumed lowering simulation.
 Use the actual `TRun.deleteMem`, Source `deleteLocal_array_run`, and existing
 `BoolArrays.Related`; Source ids and intrinsic heap ids remain independent.
@@ -74,9 +74,10 @@ Try automation first; retain strict scoped axiom outputs.
 
 ## Soundness work retained by Sol
 
-After these lemmas, derive a joint operation consequence using actual
-Source local deletion at budget n+2 and the actual target result, deriving
-`BoolArrays.Related` for the new empty references. Cover Source budgets 0/1
+`delete_related` now derives the actual post-deletion `BoolArrays.Related`
+for independent fresh references at Source budget n+2. Caller/alias preservation
+and populated joint controls remain unfinished. Cover Source budgets 0/1
 as timeout with original full state; logical target success does not imply
-Source fuel sufficiency. This is unfinished. General Source/frame lowering,
+Source fuel sufficiency. Do not count the new-content relation as general
+frame/history preservation. General Source/frame lowering,
 physical execution/gas, general recursive copy/delete and G18.05 remain OPEN.

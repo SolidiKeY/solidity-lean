@@ -179,3 +179,26 @@ both require the pending inhabited controls before checkpoint closure.
 Solidity.lean is untouched; new-module registration waits for the H14 generator.
 No full gate rerun: previous full timeout124, raw docs1, frozen no-new1 and
 all original missing compiler/world/frame/fetched execution obligations remain.
+
+
+### H14 deletion soundness increment
+
+`BoolArrayDelete.delete_related` derives the actual Source deletion postheap
+relation at budget n+2 to the independently fresh intrinsic empty allocation.
+There is no assumed initial relation: newly allocated defaults have equal
+contents regardless of prior contents, while their IDs remain independent.
+This does NOT establish caller/alias history preservation; populated controls,
+low-budget Source cases and routine heap/local statements remain in TERRA-TODO.
+Actual target deletion is the separately proved run_var equation, not EVM code.
+
+Scratch automation emulates lean_multi_attempt as clarified by H14: six
+examples try simp-only, decide, omega, rfl, sol_prove and sol_chain. Raw failed
+attempts and the repaired proof are retained. The empty value witness and
+empty-index extensionality supply the steps automation did not close; no
+budget changed. Focused new-module/import closure passes (72 jobs,1.68s,
+peak Lean/Lake829120KiB, one Lean, no OOM/swap). Scoped delete_related axioms
+are exactly propext, Classical.choice, Quot.sound. Independent read-only
+finder/skeptic review this delta; no Source/Frontend/Static/reserved changes.
+Registration remains pending the H14 generator; Solidity.lean untouched.
+This remains an incremental partial result, not completed checkpoint10.
+Original full/docs failures and all outstanding queue obligations remain.

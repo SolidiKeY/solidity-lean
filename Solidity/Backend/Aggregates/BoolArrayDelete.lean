@@ -1,5 +1,6 @@
 import Solidity.Backend.Aggregates.BoolArrays
 import Solidity.Semantics.Run
+import Solidity.Source.MemoryLocalDelete
 
 /-! G18.05 logical typed deletion consumer. No Source fuel, physical stack,
 gas, fetched instruction, or general lowering correspondence is inferred. -/
@@ -27,4 +28,24 @@ theorem run_var {C : Contract} {Γ : Ctx} (state : State C Γ)
     SVal.copyStToM_array, SVec.copyStToM_nil,
     State.grow, State.alloc, empty]
   rfl
+/-- Relate the actual independently allocated defaults after sufficient Source
+fuel. This derives the new contents relation; old caller/alias preservation is
+a separate obligation, and Source timeout is not target logical failure. -/
+theorem delete_related {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (frame : Source.Fr) (n : Nat) (source : Source.EMState E Λ)
+    (si : Source.Idx Λ sourceTy) (target : State C Γ) (ti : Idx Γ (.mem boolR)) :
+    Related ((Source.deleteLoc frame (n+2) (.local si)).run source).2.2.heap source.2.heap.next
+      ((target.alloc (empty target.H)).1.setLocal ti (some (target.alloc (empty target.H)).2)).heap
+      (target.alloc (empty target.H)).2 := by
+  simp only [Source.deleteLocal_array_run, Related]
+  refine ⟨[], ?_, ?_⟩
+  · simp only [Source.Heap.alloc, Source.Heap.get, if_true]
+    congr 3
+    funext k
+    exact Fin.elim0 k
+  · change MObj.elems ArrTy.dyn ((target.heap.alloc (empty target.H)).1.get
+        (target.heap.alloc (empty target.H)).2) = []
+    rw [Heap.get_alloc_self]
+    simp only [empty, MObj.wk, MObj.elems_dyn, List.map_nil]
+
 end Solidity.Backend.Aggregates.BoolArrayDelete
