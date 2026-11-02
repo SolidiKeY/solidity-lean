@@ -1214,3 +1214,28 @@ Final static gates: `checkpoint-static.py va2-final` PASS strict automatic sourc
 Final artifact destinations: `/workspace/va2-sharing-artifacts/checkpoint-va2-final/original.patch`, `va2-sharing.bundle`, `source.tar.gz`, `handoff.md`, `evidence.tar.gz`, `module-manifest.json`, `PARALLEL-INTERFACE.md`, `shared-registration.patch`, `revision.json` and `SHA256SUMS` in that same directory. Export is from the final clean committed head; patch/bundle/source/module/evidence checksums and bundle verification must complete before the goal/result is marked done. Previous checkpoint packages remain immutable. No later integration/default-branch publication is claimed.
 
 Final independent delivery finder and skeptic reviews found no remaining assigned implementation/proof/check gap or hidden premise/budget/source-verdict/exclusion change. They confirmed the separate inherited-docpath FAIL/comparisonPASS and complete concrete gate accounting (`work/reviews-va2-final-delivery.md`). Source files remain byte-identical to validated856cd19640a52d1a21a7c3aaa7cb5ef94e08b362. The exported `delivery-verification.json` records patch-applied-tree, bundle-ref and archive-blob identities, plus full resolved head; the exported handoff receives the actual verification outcome. Final result/goal completion follows only after those checks and every SHA256SUMS entry pass.
+
+## Master integration review (2026-11-02)
+
+VA2 head `ae1a1d56` merged onto master `febf70a6`; the only conflicts were the
+additive `Solidity.lean` imports and `docs/module-map.md` rows (both kept).
+Master's memory-loop replay (`TestSuite/MemoryLoopReplay/`) recorded 903
+visits of `returnLeavesNestedLoops`; `ifElseJoinSequence` makes it 987, so
+`Discover09`/`Assemble09` now hold 87 steps and the literalized refusal
+control uses node 973 (was 889). Gates: `./run-lean.sh` builds pass (sibling
+SolKey sort check drifts, known baseline; pinned `solkeycheck` OK), fresh
+memory-loop group 275.67 s ≤ 300 s, check-testsuite, check-automatic
+`--strict`, check-trust, orphans and layers ok; doc paths equal master's.
+
+Finder and skeptic reviews (read-only, no Lean server) found no soundness
+defect. Fixed: stale "903 visits" in `docs/loops.md` and
+`docs/compiler-verification.md`; the "walk unchanged" sentence in
+`docs/lean-key-rule-map.md` now scopes to call sharing. Recorded, not changed
+(Lean docstring edits would rebuild most of the tree):
+`Calculus/CloseCallSharing.lean:7` says the walk is unchanged (true of call
+sharing only); the `SolkeyFragment.lean` docstring names only `ifElseJoin`,
+although multi-write `if`s now leave SolKey's `ifElseSplit` for the Lean-only
+`ifElseJoinSequence`; `Sound/JoinSequence.lean` lacks a `#print axioms`
+pin; `sol[]{}` literal-loop warnings now also appear in master's
+`Evm/MemoryLoop*SourceExamples.lean` (outside `#guard_msgs`, noise only).
+Walk headroom for `returnLeavesNestedLoops` fell from 121 to 37 steps.

@@ -664,8 +664,9 @@ to its own input. No additional soundness or scope finding remained.
 
 ### Nested-return proof sharing (compiler10 memory-loop validation)
 
-The unchanged `returnLeavesNestedLoops` obligation consumes 903 visits of
-its original 1024-step walk. `Calculus/MemoryLoopReplay.lean` shares typed
+The unchanged `returnLeavesNestedLoops` obligation consumes 987 visits of
+its original 1024-step walk (903 before VA2's `ifElseJoinSequence` step,
+which joins multi-write `if` arms; integration 2026-11-02). `Calculus/MemoryLoopReplay.lean` shares typed
 symbolic states and one-layer equations universally linked to existing
 `runK`. Checked child equations instantiate the callback in original
 postorder. The root uses `Proves.of_residueWithin` with exactly 1024 steps.
@@ -695,6 +696,12 @@ helper/refusals into the original memory-loop worktree, a second complete
 fresh workload passed in 262.03 s, exit 0, peak RSS 2,944,225,280 bytes
 (`memory-loop-scope-derived17-fresh-36`). Both include all 24 fresh modules;
 neither substitutes a cached partial timing. The old failures remain archived.
+
+After the VA2 merge (987 visits; last checkpoint pair holds 87 steps; the
+literalized refusal control moved from node 889 to 973, the first node that
+reaches literal freshness) the complete fresh group passed in 275.67 s, exit 0,
+on the host (`scripts/check-memory-loop-timing.py`, 24 modules). Headroom is
+37 of 1024 walk steps and about 24 s of the 300-second allowance.
 
 `scripts/check-memory-loop-timing.py` checks the entire original group into a
 new directory, rewires ALL group imports to those fresh outputs, and records

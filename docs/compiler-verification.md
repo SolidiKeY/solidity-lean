@@ -739,6 +739,8 @@ reviewed and exported against published `040e59d30a6726fa4f9fee831695eeaa4027ede
 its complete fresh group passed in 288.65 s. The original worktree's separate
 fresh 262.03-second pass above includes the same original nine remaining
 proofs, 1024-step walk, 903 visits, refusal controls and unchanged bounds.
+Since the VA2 merge (2026-11-02) the walk has 987 visits; its fresh group
+passed in 275.67 s (`docs/loops.md`).
 
 Independent read-only finder/skeptic reviews used no Lean server. They found
 no semantic defect and identified missing nontrivial outer-drop and scoped
