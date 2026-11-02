@@ -52,7 +52,10 @@ by hand (`workflow_dispatch`) on any branch:
    gap between pushes); on another branch the newer run cancels the older,
    and the site is uploaded as the run's `github-pages` artifact instead.
    `pages-recovery.yml` lets a newer push replace an older run whose IDE job
-   already failed; a healthy default-branch build keeps its place in the queue.
+   already failed. A healthy default-branch build keeps its place unless a
+   maintainer explicitly marks the new commit `[replace-pages]` (for example,
+   when the older run still uses a loader already known to fail). An ancestry
+   check prevents a delayed helper from cancelling a newer build.
 6. **Check the published IDE** in Chromium against the generated build ID,
    then disconnect networking and restart its compiler/kernel before more proofs.
    Reports and screenshots are retained as workflow artifacts.

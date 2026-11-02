@@ -17,6 +17,7 @@ jobs:
           script: |
             const repository = context.repo;
             const branch = context.ref.replace('refs/heads/', '');
+            const replaceRequested = /\[replace-pages\]/.test(context.payload.head_commit?.message || '');
             const {data} = await github.rest.actions.listWorkflowRuns({
               ...repository, workflow_id: 'pages.yml', branch,
               status: 'in_progress', per_page: 20
@@ -26,13 +27,13 @@ jobs:
               const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
                 ...repository, run_id: run.id, per_page: 100
               });
-              if (!jobs.some(job => job.name === 'ide' && job.conclusion === 'failure')) continue;
+              if (!replaceRequested && !jobs.some(job => job.name === 'ide' && job.conclusion === 'failure')) continue;
               // A delayed helper must never cancel a newer push's run.
               const comparison = await github.request('GET /repos/{owner}/{repo}/compare/{basehead}', {
                 ...repository, basehead: `${run.head_sha}...${context.sha}`
               });
               if (comparison.data.status !== 'ahead') continue;
-              core.info(`Replacing Pages run ${run.id}: its IDE job already failed.`);
+              core.info(`Replacing Pages run ${run.id}: ${replaceRequested ? 'explicit replacement requested' : 'its IDE job already failed'}.`);
               try {
                 await github.rest.actions.cancelWorkflowRun({...repository, run_id: run.id});
               } catch (error) {
