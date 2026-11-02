@@ -3252,3 +3252,70 @@ retained; no output is invented and no unchanged retry follows. Future narrow
 profiling/diagnostic-retention work is independently ready; source read sharing
 alone does not establish sufficient aggregate headroom. All old raw/full/docs
 failures and every semantic queue remain partial.
+
+
+## C42 — durable diagnostics and observed stage lifecycle (partial)
+
+The owned validation runner now awaits an asynchronous child and fsyncs received
+stdout/stderr chunks into separate raw files. A successful child produces the
+same legacy stdout-then-stderr completed log used by the unchanged report
+parser. Failed, over-bound or interrupted children never return partial text to
+guards/cache writers. The installed Node24.19 legacy spawnSync probe rejects
+600stdout+600stderr bytes at maxBuffer1024; this VM's combined64MiB bound is
+preserved, not doubled from an unverified per-stream interpretation.
+
+An append-only flushed JSONL stage journal records actual starts as unfinished,
+observed ends/failures, signals and owned child-group cleanup/close. Key before/
+after, report validation, both full batch toolchain snapshots/comparison,
+harness creation and the combined child have named stages. Key/authentication,
+input ordering, parser/count/order, toolchain and guard functions remain
+byte-identical. All async callers are awaited; batch prechecks are serial.
+Diagnostic records never authorize a cache or gate pass. Stage durations exclude
+their own start/end journal flush, but parent/child durations include nested
+logging/lifecycle overhead. No kernel CPU-time or performance gain is inferred.
+
+The child gets a private process group. Catchable cancellation forwards TERM,
+then escalates after1second within the original outer10second cleanup grace;
+this timer exists only after cancellation/failure, not during normal validation.
+All post-spawn setup/error paths kill that owned group and await actual close.
+Handlers/fds are restored and closed. SIGKILL cannot be handled: the existing
+container/external supervisor must stop the recorded group. Fully written raw
+received chunks and flushed start records survive; unreceived pipe bytes and
+an interrupted JSONL tail are not claimed complete. A missing terminal record
+remains unfinished, never reconstructed as success. These are diagnostic records,
+not source/world rollback journals or semantic execution evidence.
+
+Host-only fake-lake controls cover exact legacy completed text/UTF8/arguments,
+nonzero/signal/spawn/output-bound failures, all report corruptions, serial
+await/fail-fast, parentTERM/KILL, descendants, actual outer timeout, handler
+restoration and protected stage fields. Real /dev/full journal-after-spawn and
+output I/O failures test close/reap and no success-marker behavior. Test-only
+/dev/full symlinks are failure fixtures, not readable output payloads.
+The first host suite timed out because its fake background child was not unref'd;
+that raw120.947s failure is preserved. The repaired final19-case suite passes
+in5.201s under the same120s/hard12GiB/no-swap cap. No Lean process was run.
+
+Finder/skeptic identified a real post-spawn journaling-before-close-listener gap;
+tracking/consumers now precede journaling and cleanup awaits even setup failures.
+The suggested per-stream buffer interpretation was checked against actual
+Node24.19, refuted and withdrawn; no output budget was increased. Successful
+later tests are separate from the retained original failure.
+
+A real read-only stale-fixture rejection (with a sentinel forbidding any child)
+records actual key-before work3.386seconds, then expected stale driver binding
+failure, with no child launched. It includes a fresh full per-file toolchain
+hash and is not a batch or kernel cost measurement. Existing C41 source-read
+I/O measurements/flat whole-key timings and buffered timeout artifacts locate
+no particular slow theorem. Actual combined-child/closing stage costs remain
+pending a separately justified future check. Instrumentation/fsync adds overhead
+and is NOT an optimization or authority to retry an unchanged failed gate.
+
+All Lean sources,27fixtures/739pins/observations and original Work1–6/Backfills
+A/B remain unchanged and partial. Changing the driver invalidates its old cache
+bindings; no redundant Lean re-preparation is performed just for logging.
+Original cached124/120.820s, raw124, full124/300s/TestSuite-sort unreached and
+normal/strict docs1 failures are retained. Current full validation is pending;
+complete publication-doc equality remains separate from frozen additions.
+The private MemoryLoop prefix API request, general recursion/dispatch/early-
+control/frame/byte-journal/transient/world obligations remain open. No goal
+administration, publication, peer transfer or independent-work-exhaustion claim.

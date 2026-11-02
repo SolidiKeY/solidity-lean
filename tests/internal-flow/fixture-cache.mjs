@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Compiled fixture reuse in the ONE existing Lake tree. Not a full-source gate.
-import {readFileSync,writeFileSync,mkdirSync,existsSync,readdirSync,realpathSync,statSync} from "node:fs";
+import {readFileSync,writeFileSync,mkdirSync,existsSync,readdirSync,realpathSync,statSync,openSync,writeSync,fsyncSync,closeSync} from "node:fs";
 import {resolve,basename} from "node:path";
-import {createHash} from "node:crypto";
-import {spawnSync} from "node:child_process";
+import {createHash,randomUUID} from "node:crypto";
+import {spawn} from "node:child_process";
 import {pathToFileURL} from "node:url";
 const pinsFile="tests/internal-flow/fixture-axiom-pins.json";
 const registry=JSON.parse(readFileSync(pinsFile,"utf8"));
@@ -82,21 +82,115 @@ export function visitFixtures(files,check) {
 export function requireSameToolchain(before,after) {
   if(JSON.stringify(before)!==JSON.stringify(after)) throw new Error("toolchain changed during complete fixture batch");
 }
-function run(args,log) {
-  const child=spawnSync("lake",args,{encoding:"utf8",maxBuffer:64*1024*1024});
-  writeFileSync(log,(child.stdout??"")+(child.stderr??""));
-  if(child.error) throw child.error;
-  if(child.status!==0) process.exit(child.status??1);
-  return (child.stdout??"")+(child.stderr??"");
+// Audit records are not certificates. A start is explicitly unfinished until
+// an observed return/error supplies a terminal record; SIGKILL cannot invent one.
+export class StageJournal {
+  constructor(out) { this.path=`${out}/fixture-stages.jsonl`; this.run=randomUUID(); this.next=0; this.active=[]; }
+  record(event,data={}) {
+    const row={...data,run:this.run,pid:process.pid,event,monotonic_ns:process.hrtime.bigint().toString(),utc:new Date().toISOString()};
+    const fd=openSync(this.path,"a");
+    try { writeFileSync(fd,JSON.stringify(row)+"\n"); fsyncSync(fd); } finally { closeSync(fd); }
+  }
+  start(stage,data) { const frame={id:++this.next,stage,start:process.hrtime.bigint()}; this.record("start",{...data,id:frame.id,parent:this.active.at(-1)?.id??null,stage,state:"unfinished"}); frame.start=process.hrtime.bigint(); this.active.push(frame); return frame; }
+  end(frame,error) {
+    const data={id:frame.id,stage:frame.stage,elapsed_ns:(process.hrtime.bigint()-frame.start).toString()};
+    try { if(error) this.record(error.interrupted?"unfinished":"failure",{...data,state:error.interrupted?"unfinished":"failed",error:{name:error.name,message:error.message,code:error.code,signal:error.signal,exitCode:error.exitCode}});
+    else this.record("end",{...data,state:"complete"});
+    } finally { if(this.active.pop()!==frame) throw new Error("nonserial stage lifecycle"); }
+  }
+  measure(stage,fn,data={}) {
+    const frame=this.start(stage,data);
+    let value; try { value=fn(); if(value?.then) throw new Error("async work in synchronous stage"); } catch(error) { this.end(frame,error); throw error; }
+    this.end(frame); return value;
+  }
+  async measureAsync(stage,fn,data={}) {
+    const frame=this.start(stage,data);
+    let value; try { value=await fn(); } catch(error) { this.end(frame,error); throw error; }
+    this.end(frame); return value;
+  }
+}
+export async function visitFixturesAsync(files,check) {
+  const results=[]; for(const file of files) results.push(await check(file)); return results;
+}
+export const MAX_CHILD_OUTPUT_BYTES=64*1024*1024; // Original spawnSync maxBuffer.
+class ChildExit extends Error { constructor(code,signal) { super(`child failed: ${signal??code}`); this.exitCode=code??1; this.signal=signal; } }
+class Interrupted extends Error { constructor(signal) { super(`interrupted by ${signal}`); this.interrupted=true; this.signal=signal; } }
+export function cliFailure(error) {
+  if(error.interrupted) { process.kill(process.pid,error.signal); return; }
+  if(!(error instanceof ChildExit)) console.error(error);
+  process.exitCode=error.exitCode??1;
 }
 
-function fixture(mode,file,out,sharedToolchain=null,batchItems=null) {
+// Await every child and durably retain RECEIVED chunks, even on outer timeout.
+// The completed log retains legacy stdout+stderr grouping for exact parsing.
+// No partial/failed result is returned to guards or certificate writers.
+export async function run(args,log,journal,limit=MAX_CHILD_OUTPUT_BYTES) {
+  if(!Number.isSafeInteger(limit)||limit<0||limit>MAX_CHILD_OUTPUT_BYTES) throw new Error("invalid output bound");
+  return journal.measureAsync("child",async()=>{
+    const paths={stdout:log+".stdout",stderr:log+".stderr"};
+    const fds={}; let child,completion,completed,escalation,problem,interrupted,received=0,retained=0,cleanupError,returned=false;
+    const kill=signal=>{if(child?.pid)try{process.kill(-child.pid,signal);}catch(error){if(error.code!=="ESRCH"){cleanupError??=error;problem??=error;}}};
+    const stop=()=>{kill("SIGTERM");if(!escalation)escalation=setTimeout(()=>kill("SIGKILL"),1000);};
+    const handlers=new Map();
+    try {
+      for(const signal of ["SIGTERM","SIGINT","SIGHUP"]) {
+        const handler=()=>{interrupted??=new Interrupted(signal);try{journal.record("signal",{state:"unfinished",signal,child_pid:child?.pid});}catch(error){problem??=error;}finally{stop();}};
+        handlers.set(signal,handler);process.on(signal,handler);
+      }
+      writeFileSync(log,"");
+      fds.stdout=openSync(paths.stdout,"w"); fds.stderr=openSync(paths.stderr,"w");
+      child=spawn("lake",args,{stdio:["ignore","pipe","pipe"],detached:true});
+      // Observe errors/close BEFORE any fallible setup or journal write.
+      completion=new Promise(resolve=>{
+        child.on("error",error=>{problem??=error;});
+        child.on("close",(code,signal)=>{completed={code,signal};resolve(completed);});
+      });
+      const consume=(stream,bytes)=>{
+        received+=bytes.length;
+        const available=Math.max(0,limit-retained),part=bytes.subarray(0,available);
+        if(!problem&&part.length)try{let offset=0;while(offset<part.length){const n=writeSync(fds[stream],part,offset,part.length-offset);if(n<=0)throw new Error("short output write");offset+=n;retained+=n;}fsyncSync(fds[stream]);}catch(error){problem=error;stop();}
+        if(received>limit&&!problem){problem=Object.assign(new Error("child output exceeds maxBuffer"),{code:"ENOBUFS"});stop();}
+      };
+      child.stdout.on("data",bytes=>consume("stdout",bytes));
+      child.stderr.on("data",bytes=>consume("stderr",bytes));
+      for(const stream of [child.stdout,child.stderr])stream.on("error",error=>{problem??=error;stop();});
+      journal.record("child-spawn",{state:"unfinished",args,log,...paths,child_pid:child.pid,process_group:child.pid,limit});
+      const result=await completion;
+      journal.record("child-close",{...result,state:interrupted?"unfinished":problem||result.code!==0?"failed":"returned",received_bytes:received,retained_bytes:retained});
+      if(interrupted)throw interrupted;
+      if(problem)throw problem;
+      fsyncSync(fds.stdout);fsyncSync(fds.stderr);
+      const text=readFileSync(paths.stdout,"utf8")+readFileSync(paths.stderr,"utf8");
+      writeFileSync(log,text,{flush:true});
+      if(result.code!==0)throw new ChildExit(result.code,result.signal);
+      returned=true;return text;
+    } finally {
+      // Only this invocation's private process group; never another session.
+      // SIGKILL of the parent itself requires the existing container/supervisor
+      // to stop its group, using child-spawn's recorded pgid. No fake end record.
+      try {
+        kill("SIGKILL");
+        if(completion)await completion;
+        journal.record("child-group-cleanup",{state:"cleanup-attempted",process_group:child?.pid,signal:"SIGKILL",scope:"only this invocation",observed_close:completed??null,cleanup_error:cleanupError?.code});
+      } finally {
+        if(escalation)clearTimeout(escalation);
+        for(const [signal,handler]of handlers)process.removeListener(signal,handler);
+        for(const fd of Object.values(fds))closeSync(fd);
+      }
+      if(returned&&cleanupError)throw cleanupError;
+    }
+  },{args,log,stdout:log+".stdout",stderr:log+".stderr",state:"unfinished"});
+}
+
+async function fixture(mode,file,out,sharedToolchain=null,batchItems=null,stages=null) {
   if(!["prepare","check"].includes(mode) || !/^tests\/internal-flow\/[A-Za-z][A-Za-z0-9]*\.lean$/.test(file ?? "") || !out?.startsWith("/"))
     throw new Error("usage: fixture-cache.mjs prepare|check tests/internal-flow/Name.lean /absolute/evidence");
   const name=basename(file,".lean"),dir=".lake/build/lib/lean/tests/internal-flow";
   const object=`${dir}/${name}.olean`,manifest=`${dir}/${name}.v12-cache.json`;
   const expected=registry[name];
   if(!expected) throw new Error(`unregistered fixture: ${name}`);
+  stages??=new StageJournal(out);
+  return stages.measureAsync(`fixture.${mode}.${name}${batchItems?".precheck":""}`,async()=>{
 
 function key() {
   // Fresh bytes/digests live only for THIS invocation. Bind dependency parsing
@@ -167,31 +261,32 @@ function guard(log) {
 mkdirSync(dir,{recursive:true});
 if(mode==="prepare") {
   // Call only AFTER actual Lake refresh of the full owned/fixture import list.
-  const before=key();
-  const log=run(["env","lean","-j1","--tstack=131072","-o",object,file],`${out}/prepared-${name}.log`);
-  const reports=guard(log), after=key();
+  const before=stages.measure(`key.before.${name}`,key);
+  const log=await run(["env","lean","-j1","--tstack=131072","-o",object,file],`${out}/prepared-${name}.log`,stages);
+  const reports=stages.measure(`reports.${name}`,()=>guard(log)), after=stages.measure(`key.after.${name}`,key);
   if(before.key!==after.key) throw new Error("inputs changed during kernel checking");
   writeFileSync(manifest,JSON.stringify({...after,object_sha256:hash(object),reports},null,2)+"\n");
   const result={fixture:file,mode,key:after.key,reports,object}; console.log(JSON.stringify(result)); return result;
 } else {
   if(!existsSync(manifest)) throw new Error(`missing checked fixture cache: prepare ${file}`);
-  const saved=JSON.parse(readFileSync(manifest,"utf8")), current=key();
+  const saved=JSON.parse(readFileSync(manifest,"utf8")), current=stages.measure(`key.before.${name}`,key);
   if(saved.key!==current.key || JSON.stringify(saved.inputs)!==JSON.stringify(current.inputs) || saved.object_sha256!==hash(object))
     throw new Error(`stale or altered compiled fixture ${file}; run bounded preparation`);
   const harness=`import tests.«internal-flow».${name}\n`+Object.keys(expected.pins).sort().map(n=>`#print axioms ${n}\n`).join("");
   const harnessFile=`.lake/build/${name}-v12-import.lean`;
   writeFileSync(harnessFile,harness);writeFileSync(`${out}/cached-${name}-import.lean`,harness);
   const finish=log=>{
-  const reports=guard(log);
+  const reports=stages.measure(`reports.${name}`,()=>guard(log));
   // Recheck keys after execution, including the exact consumed fixture object.
-  if(key().key!==saved.key || hash(object)!==saved.object_sha256) throw new Error("inputs changed while importing fixture");
+  if(stages.measure(`key.after.${name}`,key).key!==saved.key || hash(object)!==saved.object_sha256) throw new Error("inputs changed while importing fixture");
   writeFileSync(`${out}/cached-${name}-key.json`,JSON.stringify({...saved,fixture:file,reports,toolchain_verification:sharedToolchain?"complete-batch-boundary":"complete-per-file-boundary"},null,2)+"\n");
   const result={fixture:file,mode,key:saved.key,reports,object}; console.log(JSON.stringify(result)); return result;
   };
   if(batchItems) { batchItems.push({file,harness,names:Object.keys(expected.pins).sort(),finish}); return; }
-  return finish(run(["env","lean","-j1","--tstack=131072",harnessFile],`${out}/cached-${name}-diagnostics.log`));
+  return finish(await run(["env","lean","-j1","--tstack=131072",harnessFile],`${out}/cached-${name}-diagnostics.log`,stages));
 }
 
+  });
 }
 // Split ONLY actual Lean reports, retaining count/order and failing on any
 // diagnostic error. Per-fixture exact-set guards still validate every slice.
@@ -206,37 +301,42 @@ export function splitBatchReports(log,groups) {
     return slice.map(m=>m[0]).join("\n")+"\n";});
 }
 
-function batch(out,files) {
+async function batch(out,files) {
   if(!out?.startsWith("/")) throw new Error("absolute batch evidence directory required");
   const all=Object.keys(registry).map(name=>`tests/internal-flow/${name}.lean`).sort();
   if(JSON.stringify(files)!==JSON.stringify(all)) throw new Error("batch must contain EVERY registered fixture exactly once in sorted order");
-  const before=Object.freeze(toolchainInputs());
+  const stages=new StageJournal(out);
+  return stages.measureAsync("batch",async()=>{
+  const before=Object.freeze(stages.measure("toolchain.before",toolchainInputs));
   const items=[];
-  visitFixtures(files,file=>fixture("check",file,out,before,items));
+  await visitFixturesAsync(files,file=>fixture("check",file,out,before,items,stages));
   // Every fixture source/object/dependency key is freshly checked before the
   // actual combined Lean import. No fixture, report or freshness check is cut.
   const combined=items.map(item=>item.harness.split("\n")[0]).join("\n")+"\n"+
     items.map(item=>item.harness.split("\n").slice(1).join("\n")).join("\n");
   const harness=".lake/build/v12-all-fixtures-import.lean";
-  writeFileSync(harness,combined);writeFileSync(`${out}/cached-all-fixtures-import.lean`,combined);
-  const log=run(["env","lean","-j1","--tstack=131072",harness],`${out}/cached-all-fixtures-diagnostics.log`);
-  const slices=splitBatchReports(log,items);
+  stages.measure("harness.write",()=>{writeFileSync(harness,combined);writeFileSync(`${out}/cached-all-fixtures-import.lean`,combined);});
+  const log=await run(["env","lean","-j1","--tstack=131072",harness],`${out}/cached-all-fixtures-diagnostics.log`,stages);
+  const slices=stages.measure("reports.batch",()=>splitBatchReports(log,items));
   const results=visitFixtures(items,(item)=>{
     const index=items.indexOf(item),slice=slices[index];
     writeFileSync(`${out}/cached-${basename(item.file,".lean")}-diagnostics.log`,slice);
     return item.finish(slice); // Exact guard AND fresh post-import key/object.
   });
-  const after=toolchainInputs();
-  requireSameToolchain(before,after);
+  const after=stages.measure("toolchain.after",toolchainInputs);
+  stages.measure("toolchain.compare",()=>requireSameToolchain(before,after));
   const record={status:"pass",execution:"one-actual-Lean-process-all-imports-and-all-axiom-reports",toolchain_verification:"complete-before-and-after-batch",toolchain_entries:Object.keys(before).length,
     before_sha256:createHash("sha256").update(JSON.stringify(before)).digest("hex"),
     after_sha256:createHash("sha256").update(JSON.stringify(after)).digest("hex"),
     fixtures:results,reports:results.reduce((n,result)=>n+result.reports,0)};
   writeFileSync(`${out}/cached-batch-toolchain.json`,JSON.stringify(record,null,2)+"\n");
   console.log(JSON.stringify(record));
+  });
 }
 if(process.argv[1] && import.meta.url===pathToFileURL(resolve(process.argv[1])).href) {
   const [mode,...args]=process.argv.slice(2);
-  if(mode==="batch") batch(args[0],args.slice(1));
-  else fixture(mode,args[0],args[1]);
+  try {
+    if(mode==="batch") await batch(args[0],args.slice(1));
+    else await fixture(mode,args[0],args[1]);
+  } catch(error) { cliFailure(error); }
 }
