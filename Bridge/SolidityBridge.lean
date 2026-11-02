@@ -44,3 +44,6 @@ import SolidityBridge.RoadmapV15.P10.Interface
 import SolidityBridge.RoadmapV15.P10.Controls
 import SolidityBridge.RoadmapV15.P10.Execution
 import SolidityBridge.RoadmapV15.P10.ExecutionControls
+
+import SolidityBridge.RoadmapV15.P10.Modular
+import SolidityBridge.RoadmapV15.P10.ModularControls
