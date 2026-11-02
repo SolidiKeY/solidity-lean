@@ -1052,3 +1052,26 @@ is not modelled), a `calldata` parameter of a constructor (solc refuses
 one; here its offset would be relative to the arguments, which no program
 reaches). Progress of the arms is closed for locals; for other operand
 expressions it is the walk's.
+
+### Item 3: agreement with the elaborated model (not stated; why)
+
+The assignment asks for the source/elaborated relation "as far as the
+existing relation reaches". No semantic relation between the source
+interpreter (`Solidity/Source`, `evalE`/`runTx`) and the elaborated model
+(`Solidity/Syntax/Elab`, lowered to `Solidity/Semantics`) exists in the
+repository: no Lean module outside `Solidity/Source` imports the
+interpreter (`Solidity/Frontend/**` imports only S01's syntax and typing),
+and `docs/source-inputs.md` describes the elaborated model's own entry
+decoder (`Semantics/AbiEntry.lean`) against solc, not against the source
+interpreter. The two share only S01's typing (`Frontend/Static` checks it,
+`hasType_iff`). Stating agreement for `abi.decode` and `calldata`
+references would first need a value correspondence (source `Val`/`RVal`
+and heaps against the elaborated model's typed states and memory), a
+state correspondence for storage and call data, and a simulation over the
+whole interpreter step, which is a lane of its own (S05 lists it with the
+whole-program progress theorem as open). What is aligned instead: both
+decoders follow solc's generated decoder (head check, offset and length
+checks, Panic `0x41`, validators; access-time validation for calldata in
+the source model, which lane `fu2-calldata-access` brings to the elaborated
+model), and the controls here use the same encodings the CF1 fixtures do
+(`tests/upstream/cf1-abi-entry-results.json`, not changed by this lane).
