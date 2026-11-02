@@ -354,8 +354,18 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
   | .call "#sliceIndex" [off, len, k, _past] => do
     let (P, k) ← hoist k
-    let x := toString (← freshCapture "se")
-    let Q ← elabStmtsP [.decl (.named "uint") x (some k)]
+    -- A literal or a `uint256` name is read as it stands (nothing is
+    -- evaluated between the check and the read); another index is held
+    -- once in a fresh `uint`. A copy beside the bounds premises costs the
+    -- closer a whole evaluation (test 31, `sliceRead`).
+    let Γk ← ctx
+    let direct : Bool := match k with
+      | .num _ => true
+      | .name _ => (intTyOf C Γk k).any fun (p, n) => p == .uint && n == 256
+      | _ => false
+    let (Q, xv) ← if direct then pure ([], k) else do
+      let x := toString (← freshCapture "se")
+      pure (← elabStmtsP [.decl (.named "uint") x (some k)], RawExpr.name x)
     -- The view's own bounds check where solc makes it (after the index):
     -- `Panic(0x32)` where failure data is retained, a revert elsewhere, as
     -- the base's check past its end did before. The addition is evaluated
@@ -365,10 +375,10 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- `sliceRead`; lane FU2-C).
     let (R, len) ← hoist len
     let Γ ← nctx
-    let guard ← checkIn C Γ .bool (.binop .lt (.name x) len)
+    let guard ← checkIn C Γ .bool (.binop .lt xv len)
     let sc ← read
     let check := if sc.selfFrame || sc.retainFailureData then panicStmt 0x32 guard else .require guard
-    let (S, ix) ← hoist (sliceAdd off (.name x))
+    let (S, ix) ← hoist (sliceAdd off xv)
     pure (P ++ Q ++ R ++ [.of Γ check] ++ S, ix)
   | .call "#sliceAt" [view, k] => do
     let t := toString (← freshCapture "mv")
