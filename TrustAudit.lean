@@ -65,6 +65,7 @@ import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.Dispatch
 import Solidity.Examples.Tactics.FunctionTypes
 import Solidity.Examples.Tactics.MemoryReturns
+import Solidity.Calculus.RecursionCallback
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.

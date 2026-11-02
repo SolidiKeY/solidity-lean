@@ -260,6 +260,19 @@ Rerun of the nine on the lane head (`9ff01fd7` + this record, 22:40 UTC):
 `reasonBytes`). The full gate after these fixes: default 1041 jobs and
 TestSuite 286 jobs built, solkeycheck at its baseline 37.
 
+**Lane FU2-A (2026-11-02), rows 43 and 57: not reproduced.** The rows run
+through `scripts/test-solidity.test.mjs`, which compiles
+`tests/solc/SpecBindings.sol` and `tests/solc/open/SolcPaymentsOpen.sol` with
+the pinned soljson (`scripts/solc-ast.mjs`); neither has a stored AST fixture,
+and this lane's session was not permitted to run the downloaded compiler, so
+the CLI goal dump (`action: inspect`, `show: goals`) could not be taken and
+no rule or closer change was made. Row 43's `tryScopeExit` is a self `try`
+(`try this.externalValue()`), whose callee frame now enters through
+`Binders.toRet` (`CallRet.rets`, lane FU2-A); that path's proofs re-check and
+its behaviour is unchanged for value binders (`Binders.enterT_toRet`), but
+the row was not rerun. The sibling lane `fu2-testsuite-closer` owns the
+closer work on these rows.
+
 **Open: proof automation** (30, 31's slice rows, 43, 57, 60), each "open
 proof goals" in a `box` obligation. For `sliceRead` (`t = xs[1:]; assert(t[k]
 == xs[1 + k])`) the CLI's goal dump (`action: inspect`, `show: goals`) leaves

@@ -657,6 +657,21 @@ that build: `Syntax.Scoped` 13s, `Semantics.Run` 8.9s, `Semantics.RunWk`
 `Calculus.PrintStmt` 39s, `Syntax.Elab.Arms` 111s, `Syntax.Elab.Stmt` 12s,
 `Examples.Tactics.FunctionTypes` 55s.
 
+After the change (build rebuilding everything below `Syntax.Scoped`, same
+VM, 59m47s wall for `lake build`; module times under a 4-job build vary by
+a few seconds with scheduling): `Syntax.Scoped` 11s, `Semantics.Run` 6.9s,
+`Semantics.RunWk` 17s, `Semantics.RunFrame` 11s, `Typing.TypedRunInv` 3.3s,
+`Calculus.Blocks` 4.8s, `Calculus.RunFrameMem` 12s, `Calculus.RunFrameOwn`
+7.6s, `Calculus.SoundCalls` 8.4s, `Calculus.SoundCatch` 4.1s,
+`Calculus.FunContract` 9.2s, `Calculus.MemContract` 2.8s,
+`Calculus.Recursion` 8.8s, `Calculus.RecursionCallback` 11s,
+`Calculus.CallbackSound.Calls` 14s, `Calculus.CallbackSound.Rules` 6.9s,
+`Calculus.SolkeyFragment` 39s, `Calculus.PrintStmt` 41s, `Syntax.Elab.Arms`
+124s, `Syntax.Elab.Stmt` 13s, `Examples.Tactics.FunctionTypes` 61s (its
+kernel tuple runs now evaluate `RetBinders.enterT`); the new
+`Examples.Tactics.MemoryReturns` 6s. The largest increases are `Arms`
+(+13s, the elaborator's several-returns branch) and `FunctionTypes` (+6s).
+
 ### Implementation (lane FU2-A, items 2–3)
 
 - **Frame.** `RetBinders` and `RetBinders.enterT` as designed above;
@@ -765,3 +780,41 @@ and alias the return pointer as viaIR does, untested (finder 4); direct calls
 of such functions through the solc import reach the elaborator with no EVM
 vectors behind them (skeptic 12); `holdsC_callRecContract`'s `isValues`
 premise now excludes a memory binder (skeptic 1, by design).
+
+### Handoff (lane FU2-A)
+
+Items 1–3 done (above); item 4 and the backfill not done (blocked, see
+`docs/assurance.md`, "Lane FU2-A", and the "Open" paragraph above). Gates on
+the lane head:
+
+- `./run-lean.sh`: `lake build` "Build completed successfully (1042 jobs)",
+  `lake build SolkeyTestSuite` "Build completed successfully (286 jobs)"
+  (no OOM kill on this run), `check-solkey` 37 mismatches (the baseline).
+- Lean server: every touched file clean; `TrustAudit.lean` "trust: 25 lane
+  FU2-A frame theorems use only the standard axioms"; `scripts/AxiomAudit.lean`
+  "115263 declarations under Solidity, 6 exempt unsafe implementations, 0
+  findings". No `sorry`, axiom, `native_decide`, `implemented_by` or
+  heartbeat change in the diff.
+- `node scripts/check-g07.mjs --log`: all must-pass gates ok; baselined:
+  check-doc-paths 48 (the 2 beyond the script's 46 cite
+  `inline-assembly.md`, not touched here), axiom-pin drift.
+- `node scripts/check-automatic.mjs --strict`: 491 automatic, 61 with a step
+  budget, 0 manual, 11 refuted, 0 pending.
+- `python3 scripts/roadmap-g03-ledger.py --check`: 0 errors after `--write`
+  (line anchors moved).
+- `node --test scripts/finite-dispatch.test.mjs` and
+  `solidity-upstream.test.mjs`: not run to completion: they compile through
+  `scripts/solc-ast.mjs`, which needs the pinned soljson in the solkey
+  checkout (absent), and this session was not permitted to install or run
+  the downloaded compiler. The same blocks the EVM replay vectors
+  (`check-function-value-references.mjs`).
+
+Shared files: one `import` line in `Solidity.lean`, one row in
+`docs/module-map.md`, two import lines and one appended block in
+`TrustAudit.lean`. Edits outside this lane's area, all needed by the core
+change: `Solidity/Examples/Tactics/{Print,TryPanicProducer,TryPanicCarrier,
+TryConditions}.lean` (a `RetBinders` literal; `Binders.toRet` in three
+`simp only` lists), `Semantics/EntryReturn.lean` (a binder type),
+`Syntax/Contract.lean` (per-return location check). No file under
+`Solidity/Evm/**`, `Backend/**`, `Storage/**`, `Precompiles/**`, `Roadmap/**`,
+`Source/**`, `Frontend/SolcJson/**` or TestSuite `Derived*` changed.
