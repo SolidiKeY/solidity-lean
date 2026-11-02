@@ -1680,3 +1680,61 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Source/Progress/BuiltinAdmission.lean`, `Source/Progress/ArithmeticBuiltins.lean`, `Source/Progress/RecoveryBuiltin.lean`, `Source/Progress/LiteralBuiltins.lean` | `BuiltinFragment` and progress of the nine implemented builtins on scalar and literal arguments (`checked_builtin`). |
 | `Source/Progress/EmitBuiltins.lean`, `Source/Progress/BuiltinStatements.lean` | Progress of direct `emit` nodes and builtin expression statements. |
 | `Source/Progress/BuiltinControls.lean`, `Source/Progress/ScalarBuiltinControls.lean`, `Source/Progress/LiteralBuiltinControls.lean` | Builtin and event executions, argument order, zero modulus, hashes, messages and refusals. |
+
+
+### P8 admission helper checkpoint
+
+| Module | Role |
+|---|---|
+| `Frontend/Admission/Profile.lean` | Exact existing extracted-use classification, feature preservation and combined-root failure laws; not extraction completeness. |
+| `Frontend/Admission/RootObservations.lean` | Exhaustive typed expression/statement child traversal for local observation sites, exact policy IDs, supplied-root aggregation; callee closure and importer agreement remain open. |
+| `Frontend/Admission/Controls.lean` | Kernel positive, refusal, combination and false-expectation controls for the partial P8 interfaces. |
+| `Source/FailureResources.lean` | G06 failure schedule/horizon algebra and axiom-free obstruction to a Nat-only failure retraction; not wired into source execution. |
+
+See [P8 checkpoint and remaining obligations](feature-work/p8-admission.md).
+
+| `Lowering/P8/CheckedSyntax.lean` | Checked source byte/piece/layout certificates carrying input settings and main; exact raw-input checks and units-only settings obstruction. Full admission and SourceSpec remain open. |
+
+### P8 relayed schema checkpoint
+
+| Module | Role |
+|---|---|
+| `Lowering/V07/Scalar.lean` | Exact relayed V07 source interface; no execution adequacy claim. |
+| `Lowering/V07/DeclarationGraph.lean` | Exact relayed V07 source interface; no execution adequacy claim. |
+| `Lowering/P8/FieldAdmission.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+| `Lowering/P8/ResourceBoundary.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+| `Lowering/P8/ScalarSchema.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+| `Lowering/P8/ScalarSchemaControls.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+| `Lowering/P8/ShapeSchema.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+| `Lowering/P8/ShapeSchemaControls.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+| `Lowering/P8/GraphSchema.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+| `Lowering/P8/GraphSchemaControls.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
+
+See [schema provenance, premises and checks](feature-work/p8a-schema-checkpoint.md).
+
+| `Frontend/Admission/ProgramObservations.lean` | Finite actual Program container observation scan and modifier/base identity scans; exact occurrence and constructor-origin theorems, not executed-target completeness. |
+| `Frontend/Admission/ProgramObservationControls.lean` | Kernel populated multi-container/order/target controls and false omission expectations; not an Elaborated or execution witness. |
+
+See [program roster checkpoint](feature-work/p8a-program-observations.md).
+
+| `Lowering/P8/DispatchCoverage.lean` | Finite actual target/body coverage: reuse P9 function membership, prove modifier membership, checked selected-body existence and observation inclusion. Not whole admission. |
+| `Lowering/P8/DispatchCoverageControls.lean` | Published P9 function/source observation reuse; populated synthetic recursion/modifier and retained-caller missing-target refusals. |
+
+See [dispatch coverage checkpoint](feature-work/p8a-dispatch-coverage.md).
+
+| `Lowering/P8/SourceResolutions.lean` | Exact ordered per-unit Source.Resolves' packet producer/checker with settings/main preservation and raw/byte-parse composition; not global import typing or SourceSpec. |
+| `Lowering/P8/SourceResolutionControls.lean` | Inhabited one-/two-unit chain, both pipelines, pragma coder and same-label source-resolution corruption/link/order refusals. |
+
+See [source resolution checkpoint](feature-work/p8a-source-resolutions.md).
+
+| `Lowering/P8/SourceMetadata.lean` | Exact all-unit composition of existing strict/inheritance metadata and UnitsOK; original parsed-tree coherence comes from checked resolution. Not full G15. |
+| `Lowering/P8/SourceMetadataControls.lean` | Both-pipeline and two-unit composed positives; impure constant, absent import, duplicate-name and absent-main refusals. Nontrivial inheritance controls remain in TERRA-TODO. |
+
+See [component metadata checkpoint](feature-work/p8a-source-metadata.md).
+
+| `Lowering/P8/SourceMetadataObligations.lean` | Script-generated typed proposed M01–M03 control statements and explicit PendingControls proof fields; no witness or completed control. |
+
+| `Lowering/P8/SourceAllSettings.lean` | Acceptance closure of the exact component chain under every admitted settings value; not execution equivalence or full SourceSpec.AllPipelines. |
+| `Lowering/P8/ProducerAssembly.lean` | Generated frozen H14D AdmissionHalf/AssemblyType/PendingGlue signatures; VY5 fields remain typed parameters; no witness. |
+
+See [admission settings and assembly boundary](feature-work/p8a-all-settings.md).
