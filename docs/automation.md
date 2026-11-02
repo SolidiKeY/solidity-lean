@@ -1026,6 +1026,12 @@ and arrays whose leaf translation refuses. The literal/bound are supplied
 classification parameters; global decision/coverage integration remains open,
 and all original unknown pins are preserved. This is no compiler replacement
 or finite-sample promotion.
+`Calculus/DecisionNumericFlatten.lean` independently proves actual read-free
+Num/UIntQF flattening from structural depth/shared nodes, with exact remainder
+and no 511-node premise. A 517-node partial optional body traverses with zero remainder
+while its unchanged exactBounded test remains false. This closes that restricted
+traversal proof obligation; later arithmetic compiler totality, path/read
+realization and global removal of the 511-node cap remain open.
 `Examples/DecisionHaltingOrGaps.lean` separates already-covered partial
 Boolean lowering from the actual open APF guard-floor case. A nested halting
 `||` guard in a negative two-key mapping block has certified target/unknown/

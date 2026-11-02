@@ -3273,3 +3273,62 @@ halting-OR, broader approved program-free boundary, whole-pipeline fuel/node
 bound, remaining profiling/backfill and full gates. No other lane's producer,
 predicate/default/pin/budget is changed. Original decisions, counterexample,
 seals and failed gates preserved; no goal reset/mutation, push, merge or PR.
+
+
+### Uncapped numeric flattening checkpoint (partial)
+
+`Calculus/DecisionNumericFlatten.lean` proves actual existing `flattenFuel?`
+execution for every `LTm.Num P E` term from its structural depth/shared-node
+requirements: output is exactly `Flattened.pure`, remainder is r−nodes, and no
+511 premise occurs. Sequencing, failed terms, literals, environments, linear
+binary and unary constructors retain their actual syntax/partial semantics.
+`numeric_formula_flattenFuel` proves the corresponding actual `LFml.UIntQF`
+formula execution, unchanged formula and empty reads. Formula-derived wrappers
+and the zero-remainder theorem instantiate these bounds directly. Private pure
+certificates are not assumed results: proofs establish equality with the real
+flattener constructor by constructor. No producer or runtime default is changed.
+
+This is the independent read-free traversal part of the original AU02 fuel
+obligation. It does not remove the global exactBounded cap or establish later
+arithmetic compilation/read-layout/path realization above 511, and does not
+prove a necessary minimum depth. Existing normalizer-work, cut expansion,
+flattening and arithmetic-compiler resource obligations stay distinct.
+
+The new client constructs a genuine 517-node optional-equality/failed-sequencing
+body, proves its actual flattening/zero remainder and all-state inhabitance,
+and proves that same body's unchanged exactBounded test remains false. Strict
+failure-versus-value equality stays false. Small tests isolate insufficient
+depth and insufficient shared nodes; exact successful resources are pinned.
+The original global 517-node uncovered-but-proved control remains unchanged.
+Initial implicit failed-term sort, dependent induction hypotheses and concrete
+unfolding recursion failures are retained. Symbolic structural-size and zero
+remainder proofs fix them without increasing any checking/proof budgets.
+
+Final bounded MCP core/client6.312/4.174s, affected closure build3.136s,
+20 public signature/axiom reports5.296s and interpreted profile3.103s PASS.
+All imports/dependencies were warm; the final build compiled the new client in
+1.1s (381 jobs including cached dependencies). No clean/full build is claimed.
+For the identical interpreted input n=238/budget517, first and repeated calls
+were1.181521/0.376247ms including printing; budget516 refused in0.301995ms.
+These are actual flattener-stage timings, not decision verdict or cold-build
+measurements. Raw evidence: /workspace/va1-evidence/numeric-flatten-next.
+Aggregate sampled RSS 1642620 KiB; cgroup peak 841723904 bytes; minimum host available 17017274368 bytes. Actual hard 12GiB/no swap, threads1/-j1 and 12GiB host reserve; 8 failed measurements retained.
+
+Independent read-only finder/skeptic reviewed source and controls without Lean,
+server or builds; no source findings. Both verified the actual producer equality,
+nonvacuous partial controls and stage limits. Required strict automatic/layer/
+trust/whitespace gates pass. Strict docs still FAIL with exactly the frozen
+base's 85 findings; exact list/raw hashes compared in docs-vs-frozen-base.json.
+The existing axiom inventory discrepancy still FAILS; no pass is invented.
+No sorryAx/new axiom/native trust shortcut. Two additive root imports/two rows
+register owned modules; M7-next prose records only this restricted progress.
+
+Intermediate delta evidence references the prior source-instance archive and
+its cumulative ground-source prerequisite, each by absolute path/SHA256; all
+older artifacts/caches are preserved. Full original goal remains incomplete:
+global meaningful Residue/reason union/DecisionTheorem-prime/exhaustive target
+and hash bridge; actual general array decision/collector integration; wider
+memory and halting OR; broader approved M4 boundary; later compiler/general
+formula-derived fuel; remaining backfill/performance and affected/full gates.
+Prior full/TypeExamples resource stops remain failures, VA1-Q2 remains held,
+and no unchanged stopped build is repeated. No goal mutation/publication.
