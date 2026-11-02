@@ -613,15 +613,19 @@ theorem abiDecode_mem {g : String} {x ts : Syn .expr} {σ : STy} {τs : List STy
     · rename_i hd'; rw [hd] at hd'; cases hd'
   · rename_i hn; exact absurd hr hn
 
+theorem unslot_mem {s : Syn .expr} {σ : STy} {ds : Typed Γ s σ} (h : Res.expr ds ∈ infer Γ s) :
+    Res.expr ds ∈ unslot Γ (infer Γ (.some s)) :=
+  List.mem_filterMap.mpr ⟨_, slot_mem h, rfl⟩
+
 theorem slice_mem {a s e : Syn .expr} {τ σ ρ : STy} {da : Typed Γ a τ} {ds : Typed Γ s σ}
     {de : Typed Γ e ρ} (ha : Res.expr da ∈ infer Γ a) (hs' : Res.expr ds ∈ infer Γ s)
     (he' : Res.expr de ∈ infer Γ e) (hτ : τ.sliceable = true) (hs : σ.isIndex = true)
     (he : ρ.isIndex = true) :
     Res.expr (Typed.slice da hτ ds hs de he) ∈ infer Γ (.slice a (.some s) (.some e)) := by
   refine List.mem_append_right _ ?_
-  show _ ∈ sliceBoth Γ (infer Γ a) (infer Γ s) (infer Γ e)
-  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨σ, ds⟩, mem_tysOf' hs',
-    List.mem_flatMap.mpr ⟨⟨ρ, de⟩, mem_tysOf' he', ?_⟩⟩⟩
+  show _ ∈ sliceBoth Γ (infer Γ a) (unslot Γ (infer Γ (.some s))) (unslot Γ (infer Γ (.some e)))
+  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨σ, ds⟩, mem_tysOf' (unslot_mem hs'),
+    List.mem_flatMap.mpr ⟨⟨ρ, de⟩, mem_tysOf' (unslot_mem he'), ?_⟩⟩⟩
   rw [dif_pos ⟨hτ, hs, he⟩]; exact List.mem_singleton.mpr rfl
 
 theorem sliceFrom_mem {a s : Syn .expr} {τ σ : STy} {da : Typed Γ a τ} {ds : Typed Γ s σ}
@@ -629,8 +633,8 @@ theorem sliceFrom_mem {a s : Syn .expr} {τ σ : STy} {da : Typed Γ a τ} {ds :
     (hs : σ.isIndex = true) :
     Res.expr (Typed.sliceFrom da hτ ds hs) ∈ infer Γ (.slice a (.some s) .none) := by
   refine List.mem_append_right _ ?_
-  show _ ∈ sliceFromRes Γ (infer Γ a) (infer Γ s)
-  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨σ, ds⟩, mem_tysOf' hs', ?_⟩⟩
+  show _ ∈ sliceFromRes Γ (infer Γ a) (unslot Γ (infer Γ (.some s)))
+  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨σ, ds⟩, mem_tysOf' (unslot_mem hs'), ?_⟩⟩
   rw [dif_pos ⟨hτ, hs⟩]; exact List.mem_singleton.mpr rfl
 
 theorem sliceTo_mem {a e : Syn .expr} {τ ρ : STy} {da : Typed Γ a τ} {de : Typed Γ e ρ}
@@ -638,8 +642,8 @@ theorem sliceTo_mem {a e : Syn .expr} {τ ρ : STy} {da : Typed Γ a τ} {de : T
     (he : ρ.isIndex = true) :
     Res.expr (Typed.sliceTo da hτ de he) ∈ infer Γ (.slice a .none (.some e)) := by
   refine List.mem_append_right _ ?_
-  show _ ∈ sliceToRes Γ (infer Γ a) (infer Γ e)
-  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨ρ, de⟩, mem_tysOf' he', ?_⟩⟩
+  show _ ∈ sliceToRes Γ (infer Γ a) (unslot Γ (infer Γ (.some e)))
+  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨ρ, de⟩, mem_tysOf' (unslot_mem he'), ?_⟩⟩
   rw [dif_pos ⟨hτ, he⟩]; exact List.mem_singleton.mpr rfl
 
 theorem sliceAll_mem {a : Syn .expr} {τ : STy} {da : Typed Γ a τ}

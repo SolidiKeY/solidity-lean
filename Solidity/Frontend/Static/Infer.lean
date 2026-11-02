@@ -481,6 +481,23 @@ def sliceToRes {a e : Syn .expr} (ra : List (Res Γ .expr a)) (re : List (Res Γ
 def sliceAllRes {a : Syn .expr} (ra : List (Res Γ .expr a)) : List (Res Γ .expr (.slice a .none .none)) :=
   (tysOf Γ ra).flatMap fun pa => if h : pa.1.sliceable = true then [.expr (.sliceAll pa.2 h)] else []
 
+/-- A present slot's derivations as the expression's. -/
+def unslot {s : Syn .expr} (r : List (Res Γ (.opt .expr) (.some s))) : List (Res Γ .expr s) :=
+  r.filterMap fun x =>
+    match x with
+    | .slot d => Option.some (.expr d)
+    | _ => Option.none
+
+/-- `a[o:o']`, by which bounds are present, from the operands' results. -/
+def sliceRes {a : Syn .expr} {o o' : Syn (.opt .expr)} (ra : List (Res Γ .expr a))
+    (ro : List (Res Γ (.opt .expr) o)) (ro' : List (Res Γ (.opt .expr) o')) :
+    List (Res Γ .expr (.slice a o o')) :=
+  match o, o', ro, ro' with
+  | .some _, .some _, ro, ro' => sliceBoth Γ ra (unslot Γ ro) (unslot Γ ro')
+  | .some _, .none, ro, _ => sliceFromRes Γ ra (unslot Γ ro)
+  | .none, .some _, _, ro' => sliceToRes Γ ra (unslot Γ ro')
+  | .none, .none, _, _ => sliceAllRes Γ ra
+
 /-- `a.transfer(v)`, `a.send(v)` on an `address payable`, one argument. -/
 def payOne : (m : String) → {a v : Syn .expr} → Typed Γ a (.address true) → (σ : STy) → Typed Γ v σ →
     List (Res Γ .expr (.call (.member a m) (.positional (.cons v .nil))))
@@ -601,12 +618,7 @@ def infer : {c : Cat} → (s : Syn c) → List (Res Γ c s)
        | _, _ => []) ++
       (infer a).flatMap (callRes Γ f (infer f))
   | _, .payableConv a => constRes Γ _ ++ (infer a).flatMap (payableConvRes Γ)
-  | _, .slice a o o' => constRes Γ (.slice a o o') ++
-      (match o, o' with
-       | .some s, .some e => sliceBoth Γ (infer a) (infer s) (infer e)
-       | .some s, .none => sliceFromRes Γ (infer a) (infer s)
-       | .none, .some e => sliceToRes Γ (infer a) (infer e)
-       | .none, .none => sliceAllRes Γ (infer a))
+  | _, .slice a o o' => constRes Γ (.slice a o o') ++ sliceRes Γ (infer a) (infer o) (infer o')
   | _, .callOptions f n ns =>
     let rn := infer n
     constRes Γ (.callOptions f n ns) ++ (infer f).flatMap fun r => rn.flatMap fun r' => optsOne Γ ns r r'
