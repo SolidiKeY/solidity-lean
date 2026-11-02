@@ -1010,3 +1010,5 @@ import Solidity.Yul.Views.MappingSlotControls
 import Solidity.Yul.Views.TransientSlotControls
 
 import Solidity.Yul.Views.FrameCalldataControls
+
+import Solidity.Yul.Views.NestedMappingControls

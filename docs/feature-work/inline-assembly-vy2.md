@@ -4323,3 +4323,50 @@ source/world/memory APIs are present and used, not substitutes for those
 missing final contracts. Universal memory/dirty/ownership/allocation refinement
 and final source/Yul/calculus/compiler closure remain mandatory. No owner rewrite,
 new state/AST/axiom, changed semantic/profile/exclusion or raised budget.
+
+### Recursive word-key mapping views (2026-11-02)
+
+`NestedMappingLayout`, `NestedMappingSlots` and `NestedMappingControls` extend
+Y04 independently of unpublished Yul execution. Checked actual `E.rootTy`
+metadata determines positive mapping depth; the exact number of bounded word
+keys is intrinsic. `FullWordLayout`, actual `Storage.STy.locate` and source
+`pathTy` derive all paths and symbolic locations. No traversal/depth cap or
+second planner/state is added. `nestedMapping_word` proves the exact approved
+Fixed byte-preimage recurrence, outer key first. Symbolic path/location
+injectivity is separate from numeric separation: the latter retains the
+owner's exact finite-run `RegionsDisjoint` premise over ALL intermediate
+preimages. No global hash injection is assumed.
+
+Constructive total finite encoding and typed writeback prove whole actual
+administrative-store decode-after-encode/unchanged identity, complete supplied
+raw-map reconstruction and unrelated path/slot preservation. Controls include
+shared mapping prefixes, depth three, duplicate keys, malformed depth/metadata,
+synthetic collision, explicit-default versus unwritten cells, nonzero unknown
+slots, real source writes/static failure, caller-prefix child rollback,
+committed-child enclosing rollback, account isolation, persistent endTx and
+actual initial/every-H owner MemOK. The original single-level/transient APIs
+and their guards remain unchanged.
+
+This component is persistent word-key mappings ending uint256 at the existing
+HashedLayout root0. It is not arbitrary global declaration placement, packed
+mapping-value layout, general mapping keys, transient mapping admission,
+dirty-local adequacy or whole-store/source/compiler closure. Finite run keys
+are explicit inventory, not a proof of arbitrary initial/escaped-reference
+coverage. Preparation failure has no invented Yul refusal/no-op meaning.
+
+Separate pinned solc0.8.38/Osaka legacy/viaIR fixture checks exact real nested
+Keccak parent/leaf slots, sibling/outer-key isolation, full raw/typed values,
+unchanged SSTORE/static refusal, complete revert bytes, fresh postfailure
+reads and root/unknown-gap preservation. The seeded kernel hash is synthetic
+and is not equated with these real compiler/Keccak observations. Existing
+fixture fields and budgets are retained. Initial proof/driver failures and the
+incorrect other-account residual expectation remain in raw evidence; the
+correct preservation control uses that account's actual owned default.
+
+The source checks are versioned in `/workspace/vy2-evidence/nested-mapping`.
+Full Y04/Y05/Y06/Y09.02 and both backfill queues remain unfinished, including
+broader ownership/dirty/reference escape, universal memory/writeback/allocation
+refinement, concrete V10/V11 agreements and actual source/Yul/calculus/compiler
+joint closure. Existing owner state/world/memory APIs are used, not replaced.
+The persistent goal is unchanged; this checkpoint does not resolve its precise
+producer/composition dependencies or claim full-lane completion.
