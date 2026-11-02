@@ -1336,3 +1336,6 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/BytesReadback.lean` | Actual generic byte-string mdec/eager/memory/calldata/body/lazy identity, exact padding and original rounded allocation/fuel bounds; no runtime encoder or native/world agreement. |
 
 | `Backend/AbiWorld/TupleReadback.lean` | Actual canonical heterogeneous and two-dynamic-array entry/body typed identity, all memory/calldata array locations, reversed mixed order, exact sequential cursor and original sufficient fuel/allocation bounds. |
+
+| `Backend/AbiWorld/EntryComposition.lean` | Unconditional indexed entry concatenation, exact head/cursor/fuel and ordered failures; actual dynamic codec window laws. |
+| `Backend/AbiWorld/BytesArrayReadback.lean` | Actual canonical bytes/uint-array entry/body identities in both orders and all memory/calldata combinations, real rounded allocation and sufficient original bounds. |

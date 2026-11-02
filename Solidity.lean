@@ -991,3 +991,6 @@ import Solidity.Backend.AbiWorld.NestedReadback
 import Solidity.Backend.AbiWorld.BytesReadback
 
 import Solidity.Backend.AbiWorld.TupleReadback
+
+import Solidity.Backend.AbiWorld.EntryComposition
+import Solidity.Backend.AbiWorld.BytesArrayReadback

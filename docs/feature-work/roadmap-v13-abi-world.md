@@ -1701,3 +1701,91 @@ Hard12GiB/swap0, cgroup peak1973567488bytes, no OOM events. Independent final
 finder/skeptic SOURCE reviews PASS/no findings; final committed-artifact reviews
 remain separately recorded in the export. Early proof/parser errors and a writer-
 lock refusal are retained, with corrected final diagnostics; no budgets changed.
+
+
+## 2026-11-02 compositional entry and bytes/uint-array readback
+
+NEW `Solidity/Backend/AbiWorld/EntryComposition.lean` defines typed appendEntries
+using the existing indexed Entries recursor. heads_append and UNCONDITIONAL
+enter_append prove arbitrary parameter-list concatenation with exact pos+headsOf
+prefix and actual reached allocation cursor. The SAME original fuel argument is
+used on prefix and tail, just as enter reuses it for every parameter; no remaining-
+fuel consumption relation or CPU/gas bound is claimed. prefix_failure/tail_failure
+preserve actual ordered failures. This law composes enter, NOT entry's global head
+check or arbitrary body validation. encoded_dynamic_pair/layout_reads derive the
+actual dynamic head64, second offset64+first real payload length and exact byte
+windows through the EXISTING assemble/Val.enc/encodeArgs codec. No second codec.
+
+NEW `Solidity/Backend/AbiWorld/BytesArrayReadback.lean` proves actual [bytes,uint[]]
+and [uint[],bytes] entry/body indexed identity for all FOUR memory/calldata
+combinations in EACH order. Both clients CONSUME enter_append and discharge the
+actual byte/window/mdec/cref facts, not a desired successful decoder/verdict premise.
+bytes_window reuses BytesReadback.mdec_bytes and the real rounded allocation;
+array_window/reference_window reuse TupleReadback/CanonicalReadback unchanged.
+
+Selectors are arbitrary length4, suffix arbitrary. Complete actual input size≤lim
+bounds natural offsets below W; len<W alone is never used as an offset bound.
+Original free+costBytes+costArray≤lim is an explicit SUFFICIENT allocation condition,
+not an admission restriction. costBytes=roundUp(bytes.length)+32, costArray=32+32*n.
+Fuel n+4 suffices for the actual recursion, dominating bytes' two steps, unchanged
+across params. No ByteRange premise on uint elements;300/max/zero remain full words.
+Exact entry cursor follows argument order, spentBytes+spentArray or reverse;
+calldata spends0 at entry. Published bodyValues separately copies each calldata
+argument eagerly from cursor0; this does not define a sequential body allocator.
+
+NEW `tests/v13-abi-world/BytesArrayControls.lean` instantiates both generic theorems
+for empty,31/32/33bytes, unequal96byte/64array costs and full-word arrays. Actual
+second heads160 versus128 and refs100/196 versus100/164 discriminate order. Actual
+entry cursors160/96/64/0, exact lim success/one-over Panic, malformed second offsets,
+missing/short heads/tails, first allocation before invalid second offset and second
+allocation before short byte payload are checked. Short header reverts BEFORE even
+minimum allocation would fail. Calldata entry at zero fuel can pass while body
+classification remains fuel blocked. Weaker calldata capacity remains a run while
+one-byte-tighter eager copy keeps the original lazy-only refusal. Complete padded
+zeros are retained. Wrong-byte claims have positive canonical/reverse baselines;
+byte equality is not typed alias identity or a classified failure.
+
+triple_observed is a FINITE actual three-parameter body-byte observation and head
+loads96/192/42 through existing decoder/codec, not generic typed triple identity or
+compiler coverage. Generic arbitrary-list composition remains the enter equality.
+All160FULL ordered vectors preserve ALL134prior (including prior117) byte-identical;
+47scalar observations preserve ALL29prior (including prior22). Scoped29 actual
+standard-only axiom guards pass. No new external compiler/EVM/native pipelines.
+
+Independent read-only source finder/skeptic PASS; fuel-comment precision finding
+closed without proof/budget changes. Final command/axiom/observation/resource and
+committed-artifact review evidence is in the NEW checkpoint export. Failed local
+syntax/namespace/proof/depth attempts are retained; explicit codec rewriting fixes
+the depth failure with NO raised heartbeat/depth/fuel/node/time/resource limit.
+
+Parallel ownership: O1 owns its primitive declared-demand consumer; V15/V16/V17
+keep their distinct leaves. This canonical input work supplies NO raw-return byte/
+declared-return metadata/same-invocation/static-frame law. The prior sealed O1
+proposal stays intact and unadopted. A small current local-availability handoff
+records real source types/hashes and the precise missing producer contract; it
+must not substitute selector-bearing entry decoding for raw RETURNDATA validation.
+The existing human model-repair approval is acknowledged, not requested again.
+
+ALL original queues remain G40partial,G41partial,G42.01/.02/.03/.05blocked,
+G42.04/.06partial,BackfillA/Bpartial. Unknown-memory runtime encoder, all-profile
+source/native/runtime decoding/selector/receive/fallback compilation, CALL/RETURNDATA,
+arbitrary callees/callback/library/world/physical resources and mandatory final
+whole-lane checks remain OPEN. Mainalone lacks the exact9 private V12 inputs7881cb3a;
+passing combined-tree development checks do not establish publication/standalone
+closure. No claim that all independently ready backfill is exhausted. Goal remains
+blocked unchanged; recovery is not reactivation/completion. All earlier seals,
+Panic approval/controls, profiles/pins/verdicts/refusals/fixtures/budgets preserved.
+Raw docs1/frozen86vs83,Suite124/181.061s,full1/5038.87s,cold124/5400.579s remain
+FAILURES, not unchanged heavy retries. Complete prior/publication finding equality
+is separate. Only proposed G03 reconciliation: G40/G41 compositional canonical
+readback preparation, never parent closure; generated ledgers remain untouched.
+
+Final recovery checks: strict per-file composition/bytes-array/control/root MCP
+PASS; focused guarded modules and registered import closure PASS1071jobs; final
+controls and full signatures/observations/29scoped standard axioms PASS. Static
+import/layer/orphan/trust/whitespace PASS. Lean4.24.0/Lake5.0.0-src+797c613 and
+actual KeySort “Build completed successfully (2 jobs).” RUNTIME_GATE_PASS only for
+this runtime check. Hard12GiB/no swap, peak2103234560bytes and no OOM. Independent
+source/owning-roadmap finder and skeptic PASS; comment precision finding CLOSED.
+All245prior checksum entries/19manifests verify, untouched. Final committed-artifact
+reviews/seals and the narrow caller-phase availability packet are in the export.
