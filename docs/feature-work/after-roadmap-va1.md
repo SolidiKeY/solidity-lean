@@ -3845,3 +3845,78 @@ no source or handoff findings. They verified the45-gate/40-report census, exact
 source preservation and stated partial/full-storage limits; neither used Lean,
 a server or a build. The finder additionally streamed every durable raw member
 and view. Review records are in the checkpoint evidence, not assumed passes.
+
+
+## Finite source-literal discovery checkpoint (2026-11-02)
+
+This completes the ready child identified after H6, without a VA2 prerequisite.
+`Solidity/Calculus/DecisionSourceDiscovery.lean` traverses explicit intrinsic term
+constructors on the equation/implication/universal skeleton consumed by the existing
+source-chain parser. Bounds are direct source uint literals; instance candidates
+are those literals plus zero. It never expands a numeric bound into all uints or
+consults Covered, inTarget, decideGoal or semantic validity to discover a hit.
+Every hit carries the actual unchanged SourceUIntLiteralChain parser witness.
+This is not an exhaustive literal inventory of program/update formulas.
+
+`SourceUIntLiteralChain.bound_mem` derives bound occurrence structurally.
+`sourceUIntLiteralDiscovery_complete` quantifies over every contract/context,
+formula, bound, value and genuine chain; it explicitly requires the value to
+belong to sourceUIntDiscoveryValues. No unconditional value-occurrence claim is
+made. Witness extraction, iff and constructive Decidable characterize the
+independently stated SourceUIntLiteralCandidate family. The parameters theorem
+proves membership for the actual returned hit. Preparation computes an existing
+DeclarationReduction to tt with equivalence at every original typed state; it
+uses a computed source proof. ValidH transport retains exactly hasHash=false.
+No global pipeline registration or predicate/decision definition changes occur.
+
+`Solidity/Examples/DecisionSourceDiscovery.lean` reuses all five original array
+fixtures and genuine source-chain witnesses. Each has actual discovery, computed
+preparation and hash-free validity; the original inhabited three-cell antecedent
+is retained. A real false fixed-array source refuses discovery. A covered/proved
+fixed source overlaps the class, while proved tt lies outside it; this is neither
+a complement-of-coverage nor an unknown-test family. An ignored binder has a
+successful supplied value2 witness absent from the source candidates, while the
+actual algorithm returns bound3/value0. This control explains the explicit value
+premise and zero fallback. All five original global unknown pins are unchanged.
+
+Final per-file MCP diagnostics pass (core4.265901 s, client4.297064 s); focused
+builds pass (core2.093987 s, affected client2.095132 s). Axiom reports pass in
+11.897824 s:28 public reports, standard axioms only. Interpreted profile passes
+2.120069 s; IO-loaded indices and noinline reporting force actual discovery:
+fixture0 first3.005531 ms/repeat0.131368 ms, fixtures1–4 respectively0.786626,
+0.429908,0.325731,0.249927 ms; covered fixed0.195906 ms; false fixed0.325902 ms;
+tt0.009374 ms. These are warm imported parser evaluations including result
+printing, not cold elaboration or a global decision/full performance claim.
+Raw initial tactic/type failures and exact failed client source are retained.
+
+The six selected checks use the same pinned Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b
+and Lake5.0.0-src+797c613, hard cgroup memory.max12884901888/swap.max0 before
+Lean, threads1/-j1 and one heavy job at a time under the original writer lock.
+Measured sampled aggregate RSS1641308KiB, cgroup peak632340480 bytes, minimum
+host available14772842496 bytes;6 unsuccessful sampling attempts remain recorded.
+The earlier actual KeySort pass and runtime identity remain sealed in H6 evidence;
+no new runtime/full pass is inferred from these source checks.
+
+Independent read-only finder and skeptic both report no source findings. They
+checked finite candidates, genuine parser witnesses, the explicit value premise,
+actual returned parameters, hash transport, preparation and overlap/miss/false/zero
+controls; neither used Lean/server/build. Evidence is
+`/workspace/va1-evidence/source-discovery-next`. Committed parallel interface, bundle, cumulative patch and checksum-bound delivery
+are pending export and verification after the source checkpoint commit.
+
+Whole-goal accounting remains partial: global meaningful decidable Residue,
+DecisionTheorem-prime and exhaustive target/Covered/hash bridge are unproved.
+General fixed/nested/key/field/struct array integration, broad memory, partial-OR
+reconstruction, broad certified program-free boundary and general formula-derived
+511-node fuel remain open, along with remaining baseline/performance/backfill and
+full gates. Both frozen predicates, the8bbd5606 counterexample, all budgets and
+observations remain unchanged. The H6 full run's real disk stop137 is retained;
+no unchanged full retry occurred. Strict-doc/pin inventory baseline failures stay
+failures. This is incremental source preparation, not milestone-m7 eligibility,
+whole-lane completion or EVM/solc equivalence.
+
+Current static gates: strict automatic, trust, orphan, layer and whitespace pass.
+The strict doc output is byte-exact frozen output (85 findings:48 missing and37
+ambiguous references), exit1; inventory retains the existing404-versus403 drift.
+Both reviewers identified premature export wording; it now explicitly says pending.
+No source findings remain.

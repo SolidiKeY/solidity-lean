@@ -1448,3 +1448,13 @@ records the deviation.
   overflowing and false cases. False cases may be `refuted` or `pending`,
   never `proved`. `externalValue == proved` is a hard gate; do not relax it to
   `pending`.
+
+
+
+M7-next source discovery progress: finite uint parameters are now collected from
+the actual source-chain skeleton, with computed parser witnesses, constructive
+membership and pointwise preparation proofs. Completeness explicitly retains
+instance-value candidate membership; bound occurrence is derived. Five original
+array fixtures and covered/false/unused-binder controls pass focused checks. Their
+global verdict pins remain unchanged, and the global Residue/bridge and full gates
+remain open. See [VA1 handoff](feature-work/after-roadmap-va1.md).
