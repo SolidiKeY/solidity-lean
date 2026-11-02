@@ -483,7 +483,7 @@ through the interpreter's binds, `sub`, `lift`, pipelines and matches.
 | `Elaborated.body_locals` (from `Decl.frame?_lengths`, `Frame.mk?_lengths`, `Syn.tys_params_length`, `Syn.tys_typeName_length`, `Frame.tysOf_locals`) | every elaborated body's locals are its returns over its parameters, last innermost: the frame `callInternal` builds |
 | `Glob.dispatchFn_params`, `Elaborated.callInternal_call_ns` | dispatch finds an override with the called declaration's parameter types; for a call node only the override's return types (and membership in the unit) stay open |
 | `Elaborated.callInternal_ns`, `Elaborated.callInternal_sig_ns` (from `Elaborated.body_sig`, `Decl.frame?_fnSig`) | in an elaborated program, `callInternal_ns`'s frame hypotheses reduce to dispatch coherence, stated syntactically: the declaration virtual dispatch finds has the call's signature (`fnSig`); when dispatch returns the called declaration itself, that is the call node's own premise |
-| `evalE_callFrag_ns`, `stmt_callFrag_ns`, `callInternal_callFrag_ns` (from `fragAt`: the joint induction `FragAt` over expressions, statements, bodies without modifiers and internal calls; `exprNSAt_step`, `stmtNSAt_step`, `mods_step`, `call_step`) | **internal calls inside expressions**: the fragment is parameterized by the callees it allows (`RExpr.ValFragC A`, `RStmt.ValFragC A`; the call-free `ValFrag` is `A = fun _ => False`, so `evalE_valFrag_ns`, `stmtNS`, `itemsNS` and `callInternal_ns` keep their statements, while `exprNSAt`/`stmtNSAt` now state the case `A = fun _ => False`), and for a program whose allowed functions are implemented by fragment bodies in the call's frame (`CallsOK A G c`, per contract `c` whose frames run the call, **assumed**: no lemma derives it for an elaborated program) evaluation is never `stuck`, recursion included |
+| `evalE_callFrag_ns`, `stmt_callFrag_ns`, `callInternal_callFrag_ns` (from `fragAt`: the joint induction `FragAt` over expressions, statements, bodies without modifiers and internal calls; `exprNSAt_step`, `stmtNSAt_step`, `mods_step`, `call_step`) | **internal calls inside expressions**: the fragment is parameterized by the callees it allows (`RExpr.ValFragC A`, `RStmt.ValFragC A`; the call-free `ValFrag` is `A = fun _ => False`, so `evalE_valFrag_ns`, `stmtNS`, `itemsNS` and `callInternal_ns` keep their statements, while `exprNSAt`/`stmtNSAt` now state the case `A = fun _ => False`), and for a program whose allowed functions are implemented by fragment bodies in the call's frame (`CallsOK A G c`, per contract `c` whose frames run the call; assumed here, and derived for checked elaborated programs by `Lowering/P9`, see [p9-checked-callgraphs.md](p9-checked-callgraphs.md)) evaluation is never `stuck`, recursion included |
 | `BodyFrame.ext`, `Locals.setAt_ok`, `Locals.setAt_ok'` | declarations keep the frame; writing a return slot is never `stuck` |
 | `ItemsD.toR_ns` | so is the elaboration of a typing derivation whose image is in the fragment (`OpsOK` from the derivation) |
 | `RStmt.ext`, `RItems.ext`, `Locals.restore_ok`, `Out.close_ok`, `Out.up_ok` | ending a scope is never `stuck`: a statement's output context extends its input |
@@ -514,8 +514,8 @@ it: modifiers (`runMods` with invocations,
 `_`), the coherence of dispatch and elaboration (that the body virtual
 dispatch finds has the call's return types and is one of the unit's: the
 parameter half is proved, `Glob.dispatchFn_params`), for calls inside
-expressions the whole-program hypothesis `CallsOK` (assumed, not derived
-for elaborated programs: every allowed callee, dispatched from the
+expressions the whole-program hypothesis `CallsOK` (assumed here, derived for
+checked elaborated programs by `Lowering/P9`: every allowed callee, dispatched from the
 contract whose frame runs the call, is a body without modifiers, in the
 fragment and `OpsOK`, in the call's frame, with defaulted return types),
 memory (the `heap` invariant, `WellTyped.lean`), arrays and
@@ -625,8 +625,9 @@ method; a split list.
 read-only, on 3f61cf3..90f4226). No correctness defect; the horizon
 bookkeeping of `fragAt` was checked against `Eval.lean` by both. Fixed:
 no witness used the mutual part (skeptic): `recF_ns`, `recF_timeout`;
-the coverage-plan row and this document now say that `CallsOK` is
-assumed, not derived, and what it requires (both); `CallsOK`'s quantifier
+the historical checkpoint recorded `CallsOK` as an assumed hypothesis (both);
+the P9/S05 follow-up below now derives it after actual elaboration and complete
+finite catalogue admission; `CallsOK`'s quantifier
 over every contract was stronger than needed (finder): it is now per
 contract (`CallsOK A G c`, `FragAt A G c n`, `StmtNSAt`'s contract
 predicate `Q`); the
@@ -809,11 +810,12 @@ general match or by per-case `rfl` equations, never by
   `St.fnLocals` and check its context at run time, so they need a state
   invariant (the running modifier's frame) in the pre- and postcondition,
   that is, Hoare triples over `NSP`'s "from any state";
-- `CallsOK` for elaborated programs: from `Elaborated.callInternal_call_ns`
-  per call, given the override return-type and unit-membership lemmas
-  above and a characterisation of the bodies in the fragment;
-- memory: `WellTyped.lean`'s `EMOK` in the pre- and postconditions (the
-  heap typing grows), which also gives preservation;
+- `CallsOK` for checked elaborated programs: now derived by the P9 complete
+  catalogue checker; see [checked program progress](source-progress-checked.md);
+- memory on the existing call value fragment: `MemOK` is preserved by a joint
+  Hoare induction; the fragment has no memory operations and value-typed
+  results, so its content is frame restoration. Allocating expression arms are
+  proved separately in [source preservation](source-preservation-allocations.md);
 - external calls, `emit`, builtins and the transaction layer.
 
 **Elaboration.** `ExprProgress.lean` and `StmtProgress.lean` each check
@@ -1313,3 +1315,22 @@ at every call site); both change `Machine.lean`/`Eval.lean` and every
 split Horizon proof, a lane of their own
 ([source-s05.md](source-s05.md), "Why `SourceSpec` and `Failures` stay
 open"). `Parses`/`Resolves` belong to the front end.
+
+## Allocation and frame preservation (2026-11-02)
+
+[The checked preservation bridges](source-preservation-allocations.md) reuse
+existing decoder, allocator and storage-copy results and add actual literal,
+struct-constructor and ABI encoding allocation arms, exact frame restoration
+and inhabited caller-reference/nested-copy controls. The joint Hoare preservation induction
+(`FragMemAt`) is now closed on the existing call value fragment under
+`CallsOK`, with inhabited memory-prefix controls. This does not prove
+universal allocating-expression preservation or source/compiler refinement.
+
+## Checked call-program progress (2026-11-02)
+
+[The actual elaboration/call-catalogue adapter](source-progress-checked.md)
+derives the `CallsOK` hypothesis and exposes all-horizon expression,
+internal-call and block progress with memory preservation. Its actual contract
+and inhabited heap controls retain the original source observations/refusals.
+This remains conditional admission of the existing value/call fragment; no
+world/session, `SourceSpec`, termination or compiler-refinement claim follows.

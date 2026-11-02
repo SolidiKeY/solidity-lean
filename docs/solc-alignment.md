@@ -716,3 +716,11 @@ recorded in [solidity-upstream-tests.md](solidity-upstream-tests.md#group-01-via
 This lowering uses existing typed statements and sound rules. Runtime/EVM
 agreement and the fixed-program proof controls do not constitute a universal
 compiler-correctness theorem.
+
+## Overloads differing only in return types
+
+solc rejects two functions with the same name and parameter types and
+different return types. The Source elaborator (`Source.elaborate`) accepts
+them, and dispatch selects the first declaration.
+`Lowering/P9/ReturnControls.lean` checks that P9's whole-program checker
+refuses such a unit, but the elaborator itself does not reject it yet.

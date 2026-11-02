@@ -122,3 +122,5 @@ V15 P10 partial checkpoint: [fetched-byte EVM steps against EvmYul](feature-work
 including the frozen CALL/RETURNDATA/JUMP interface consumed by later lanes.
 
 P1 runtime-frame partial checkpoint: [foundation and frozen interface v1](feature-work/runtime-frame-p1.md).
+
+P9 and Source soundness checkpoints: [checked call graphs](feature-work/p9-checked-callgraphs.md), [allocation and frame preservation](feature-work/source-preservation-allocations.md) and [checked call-program progress](feature-work/source-progress-checked.md).

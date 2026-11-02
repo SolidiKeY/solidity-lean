@@ -1203,3 +1203,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameComposition
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore
 import Solidity.Backend.InternalFlow.RuntimeFrameContext
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
+
+-- P9 checked call graphs; Source preservation and progress.
+import Solidity.Lowering.P9.ProgramControls
+import Solidity.Source.Preservation.Controls
+import Solidity.Source.Progress.Controls
