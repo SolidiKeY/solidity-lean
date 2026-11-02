@@ -1047,3 +1047,66 @@ signature truncation, external request pinning and lookup/selector ambiguity.
 Twelve new request controls pass, including actual reviewed inputs and synthetic
 collection-failure controls; no diagnostic payload or Lean proof is executed by
 those controls. Final exact-head requests remain REQUEST_NOT_EXECUTED.
+
+
+### Static peer-consumption and selector contracts (2026-11-02)
+
+The coordinator reports that the original immutable DraftA request694d1f2d
+failed at its original300s deadline: elapsed300.312742s including cleanup,
+observed peak3256987648bytes, minimum host availability35163959296bytes,
+zero swap and an empty own cgroup before lease release. Compilation reached
+189/193 and all25 owned foundation modules, but reserved local `prefix` at
+lines69/105 of ReframedFailureWitness caused parse errors. No complete build,
+metadata, axiom or replay result exists. This is a reported parser/deadline
+failure, not a semantic counterexample; raw service receipts are requested,
+not invented or labeled locally verified.
+
+The coordinator's static rename/23 have annotations and unchanged27 headers
+remain separate corrected inputs, unvalidated here. Their source hashes must
+never be used as replay of the old request. Automatic review rejected B under
+a shared300s interpretation. The requested additional300s shared across corrected
+A+B is PENDING human approval. No native, setup-file, B or replay invocation is
+authorized by this checkpoint. V17 makes no admission attempt or Lean/version/
+container invocation, closes no process and duplicates no source repair.
+
+`scripts/roadmap-v17-selector-contract.py` adds static requirements derived from
+the exact sealed A/B requests and lexical source graphs. It retains all18/9
+names and each defining module, rejects empty/duplicate query groups and source
+closures, and binds original full extractor/axiom bytes and budgets. Exact
+request equality is explicitly not native replay verification and rejects
+setup/argv/env/evidence fields rather than silently ignoring them.
+
+Installed Lean4.24 Setup/Environment/Elab.Import/Util.Path source bytes are
+hash-checked against the pinned toolchain-source claims. ImportArtifacts arrays
+are ordered [olean, IR, server, private]; IR is not the second olean. Legacy
+external isModule=false selects private-level olean parts, but consistency
+of raw setup and before/after part hashes still does not authenticate a process.
+Fallback evaluator IR remains an explicit input obligation; the earlier installed
+olean/shared-library inventory alone does not establish all evaluator IR inputs.
+
+A new explicit --setup observation changes selector inputs and cannot
+retroactively authenticate or replay the original no-setup run. Command arrays
+are templates for a future separately authenticated first observation only;
+all execution is held. No budget is newly granted per module/query/replay.
+Actual setup bytes, effective child argv/env, source/object/cache and all part
+hashes before/after, protected service/lease outcomes and complete raw outputs
+must arrive before any native evidence acceptance. Missing earlier observations
+remain unknown; a later hash cannot be relabeled a pre-command observation.
+
+Existing generic kernel.verify requires its exact fresh-Docker/workspace/pipeline
+record; Derived17 verification accepts only its fixed ten names. Neither accepts
+these raw local diagnostics. The static contract records exact existing API/
+invocation requirements and the missing separately reviewed supplemental local
+receipt consumer, without weakening either existing validator or fabricating
+fresh paths. Source Prog.run remains distinct from independent Solidity Source
+adequacy and full compiler/EVM/world correspondence.
+
+The external contracts also list25 already-compiled foundation modules by exact
+source hash for read/hash-only salvage of existing object/setup/progress evidence.
+That does not promote the failed whole component or authorize a cache rebuild.
+Thirteen static controls pass, including actual sealed requests and negative
+empty/duplicate, wrong budget/source/IR/selector and typed-after input cases.
+Both independent read-only finder/skeptic reviews confirmed the corrected
+non-vacuity and complete-request comparison boundaries; neither ran Lean/builds.
+All selector/kernel/replay/premise/release flags remain false, all457 rows remain
+open, and every original Work/Backfill/release obligation and human hold persists.
