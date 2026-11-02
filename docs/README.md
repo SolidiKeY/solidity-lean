@@ -51,6 +51,7 @@ history is in git.
 | [feature-work/precompiles.md](feature-work/precompiles.md) | Osaka's 18 precompiles as computed core functions with gas and failure laws, G06's `Fixed` instance, the vector provenance and the Bridge agreement. |
 | [feature-work/stipend-cost-rule.md](feature-work/stipend-cost-rule.md) | The compiler-independent stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs, its examples and the compiler obligation (G43). |
 | [feature-work/inline-assembly.md](feature-work/inline-assembly.md) | Authorized inline assembly extension: the exclusions it reopens, tiers, groups Y01–Y10, lanes VY1–VY5 and approved decisions YQ1–YQ7; implementation gates remain open. |
+| [feature-work/compiler-transport-proofs.md](feature-work/compiler-transport-proofs.md) | Compiler transport proofs, reached failure controls, full small-frame output and remaining Source/EVM obligations. |
 | [feature-work/memory-operation-proofs.md](feature-work/memory-operation-proofs.md) | Typed Source/heap/word memory-operation lemmas, reached decrement failures and the remaining physical/backend boundary. |
 | [feature-work/primitive-return-projection.md](feature-work/primitive-return-projection.md) | Primitive return-byte validation before binding/discard, checked controls and the remaining O1 operational boundary. |
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
