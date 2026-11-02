@@ -56,7 +56,7 @@ nonpassing**. Its completed source/module checks, 740-second Horizon baseline,
 of those modules only. The full build/TestSuite/sort pipeline did not pass.
 No full gate is rerun for this interface-only turn.
 
-VM receipts: `/workspace/p8-admission-help-20261102-evidence`.
+VM receipts: `${VM_WORKSPACE}/p8-admission-help-20261102-evidence`.
 Independent finder/skeptic reviewed the signature draft read-only, without
 Lean/server/builds. Findings prompted external reference/root parameters,
 meaning-origin/resource-point laws and full choice roundtrip coverage. These

@@ -57,7 +57,7 @@ Independent read-only finder and skeptic, neither using Lean/server/builds,
 found no confirmed defect and required the parse-versus-admission boundary.
 No full/end-of-lane gates were run for this turn under H12. The prior full run
 interrupted for H12 remains nonpassing. VM evidence is
-`/workspace/p8a-implementation-20261102-evidence`.
+`${VM_WORKSPACE}/p8a-implementation-20261102-evidence`.
 
 Remaining current P8a obligations: full execution/observation-root extraction,
 actual resolution/metadata/settings chain and frontend completeness, source

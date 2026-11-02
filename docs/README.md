@@ -124,7 +124,9 @@ yet links Source executions to the intrinsic world or to bytecode.
 V15 P10 partial checkpoint: [fetched-byte EVM steps against EvmYul](feature-work/roadmap-v15-p10.md),
 including the frozen CALL/RETURNDATA/JUMP interface consumed by later lanes.
 
-P1 runtime-frame partial checkpoint: [foundation and frozen interfaces v1 and v2](feature-work/runtime-frame-p1.md).
+P1 runtime-frame partial checkpoint: [foundation, frozen interfaces v1–v3 and producers](feature-work/runtime-frame-p1.md); [P1-CALL value-call producer](feature-work/p1-call-producer.md) and [G37.03/P4 typed dispatch](feature-work/roadmap-g37-dispatch-p4.md).
+
+P8 partial checkpoints: [P8a frozen interface](feature-work/p8a-frozen-interface.md), [admission checkpoint](feature-work/p8-admission.md), [settings and assembly boundary](feature-work/p8a-all-settings.md) and [P8b frozen consumer interface](feature-work/p8b-frozen-interface.md).
 
 P9 and Source soundness checkpoints: [checked call graphs](feature-work/p9-checked-callgraphs.md), [allocation and frame preservation](feature-work/source-preservation-allocations.md) and [checked call-program progress](feature-work/source-progress-checked.md).
 

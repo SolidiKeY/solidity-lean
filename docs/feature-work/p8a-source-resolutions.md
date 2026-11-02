@@ -98,7 +98,7 @@ control gaps: same-label resolution corruption, nonempty original link
 refusal, and an inhabited TWO-unit full three-stage control. They approve
 checkpoint accuracy only. Logs, terminal receipts, exact source hashes and
 sealed cumulative exports are recorded by the machine-readable handoff.
-Evidence: `/workspace/p8a-implementation-20261102-evidence`.
+Evidence: `${VM_WORKSPACE}/p8a-implementation-20261102-evidence`.
 
 Consumers: V07/V08/V09/V16/V17/VY5. V16 retains P8b/G01. S02-IMMUT,
 SS-CP5-HASHED and SS-NEW remain queued. Existing persistent goal unchanged;

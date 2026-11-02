@@ -59,7 +59,7 @@ See [admission checkpoint](p8-admission.md) and
 All native checks use Lean 4.24.0, Lake 5.0.0-src+797c613, LEAN_NUM_THREADS=1,
 explicit -j1, a hard whole-group 12 GiB cap, no swap, and authorized 4 GiB
 available-host reserve. Native terminal receipts and logs are retained in
-`/workspace/p8a-implementation-20261102-evidence`.
+`${VM_WORKSPACE}/p8a-implementation-20261102-evidence`.
 
 - `timeout 300 lake build Solidity.Lowering.P8.GraphSchemaControls`: exit 0,
   42 jobs, 3.321 s, peak aggregate RSS 731545600 bytes.
@@ -67,7 +67,7 @@ available-host reserve. Native terminal receipts and logs are retained in
   exit 0, 32 jobs, 3.839 s, peak aggregate RSS 515485696 bytes.
 - Final touched targets GraphSchemaControls, FieldAdmission, ResourceBoundary,
   Controls: exit 0, 55 jobs, 4.084 s, peak aggregate RSS 727687168 bytes.
-- `timeout 300 lake env lean --tstack=131072 /workspace/p8a-implementation-20261102-evidence/CheckpointAudit.lean`:
+- `timeout 300 lake env lean --tstack=131072 ${VM_WORKSPACE}/p8a-implementation-20261102-evidence/CheckpointAudit.lean`:
   exit 0; only propext, Classical.choice and Quot.sound occur. The horizon
   obstruction and resource replacement laws are axiom-free. Parse soundness
   and settings obstruction use propext only.

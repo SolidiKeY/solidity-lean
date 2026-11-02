@@ -72,7 +72,7 @@ close its persistent goal.
 
 ## Evidence and review
 
-VM evidence: `/workspace/p8-admission-help-20261102-evidence`.
+VM evidence: `${VM_WORKSPACE}/p8-admission-help-20261102-evidence`.
 Per-file checks, actual terminal reports, failed elaboration attempts, source
 hashes and the final handoff are preserved there. Serial Lean 4.24.0 / Lake
 5.0.0-src+797c613, explicit -j1, hard aggregate 12 GiB, zero swap and the
@@ -84,7 +84,7 @@ server use. Corrected findings: external-call feature ID, omitted self site,
 precise scheduled-failure wording, generalized G0 recursors, and explicit S01
 refusal instead of fabricating an excluded typed expression.
 
-Current reconciliation evidence is separately retained at `/workspace/p8a-implementation-20261102-evidence`. The 32-job resource/controls and 42-job guarded-graph passes are focused checks, not a full build, complete admission, SourceSpec or EVM adequacy result. See [schema checkpoint](p8a-schema-checkpoint.md).
+Current reconciliation evidence is separately retained at `${VM_WORKSPACE}/p8a-implementation-20261102-evidence`. The 32-job resource/controls and 42-job guarded-graph passes are focused checks, not a full build, complete admission, SourceSpec or EVM adequacy result. See [schema checkpoint](p8a-schema-checkpoint.md).
 
 ## Actual program containers
 

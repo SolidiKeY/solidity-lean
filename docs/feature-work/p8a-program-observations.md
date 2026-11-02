@@ -83,7 +83,7 @@ fixed: isolate constructor-side control; preserve modifier/base target
 identities. Source, commands, terminal receipts, measurements, reviews and
 checksum-bound cumulative artifacts are recorded in the machine-readable
 handoff for this document's commit. Evidence directory:
-`/workspace/p8a-implementation-20261102-evidence`.
+`${VM_WORKSPACE}/p8a-implementation-20261102-evidence`.
 
 Producer remains P8a (G15 + S05-SPEC/S03-FAILURES), consumers V07/V08/V09/V16/
 V17/VY5. V16 owns P8b/G01. S02-IMMUT, SS-CP5-HASHED, SS-NEW remain queued.

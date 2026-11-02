@@ -1683,6 +1683,10 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameNoneProducer.lean` | v2 void-call, fixed-thunk and failure producers built from checked certificates and real entry witnesses. |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3RecursiveUnwind.lean` | Runtime descent prefixes at every horizon and LIFO return loop with captured caller recovery (target side only). |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean` | Actual `callRec` countdown family: all-horizon execution and `RecursiveReturnCoherence`; no v3 recursive instance. |
+| `Backend/InternalFlow/RuntimeFrameV3CallProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3CallProducerControls.lean` | v3 `PendingCallProducer` for primitive value-returning calls (`coverage`, `returns`, `bare_revert`, `make`) and an applied control with real success and revert runs. |
+| `Backend/InternalDispatch.lean`, `Backend/InternalDispatch/Typed.lean`, `Backend/InternalDispatch/Agreement.lean`, `Backend/InternalDispatch/Chain.lean` | G37.03/P4 typed dispatch tables, full-signature checks and the typed equality-guard chain (not emitted bytecode). |
+| `Backend/InternalDispatch/FrozenV1.lean`, `Backend/InternalDispatch/FrozenV2.lean`, `Backend/InternalDispatch/FrozenV3.lean` | Dispatch consumers of the frozen P1 v1–v3 `Pending*` families; v3 transports an approved input through profile agreement and coverage. |
+| `Backend/InternalDispatch/Controls.lean`, `Backend/InternalDispatch/FrozenV1Controls.lean`, `Backend/InternalDispatch/FrozenV2Controls.lean`, `Backend/InternalDispatch/FrozenV3Controls.lean` | Source-backed selector controls and refusals; empty-domain refusal for v3. |
 
 ### P9 checked call graphs and Source preservation/progress
 
@@ -1758,7 +1762,7 @@ See [dispatch coverage checkpoint](feature-work/p8a-dispatch-coverage.md).
 See [source resolution checkpoint](feature-work/p8a-source-resolutions.md).
 
 | `Lowering/P8/SourceMetadata.lean` | Exact all-unit composition of existing strict/inheritance metadata and UnitsOK; original parsed-tree coherence comes from checked resolution. Not full G15. |
-| `Lowering/P8/SourceMetadataControls.lean` | Both-pipeline and two-unit composed positives; impure constant, absent import, duplicate-name and absent-main refusals. Nontrivial inheritance controls remain in TERRA-TODO. |
+| `Lowering/P8/SourceMetadataControls.lean` | Both-pipeline and two-unit composed positives; impure constant, absent import, duplicate-name and absent-main refusals. Nontrivial inheritance controls (M01–M03) remain open. |
 
 See [component metadata checkpoint](feature-work/p8a-source-metadata.md).
 

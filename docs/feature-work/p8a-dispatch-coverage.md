@@ -81,7 +81,7 @@ interrupted full run stay nonpassing. Per-file MCP was unavailable.
 Independent finder and skeptic reviewed read-only without Lean/server/builds.
 Control gaps fixed: populated modifier branch and nonvacuous global missing
 body tests. They approve checkpoint accuracy, not source completion.
-Evidence: `/workspace/p8a-implementation-20261102-evidence`.
+Evidence: `${VM_WORKSPACE}/p8a-implementation-20261102-evidence`.
 
 ## Remaining P8a work
 

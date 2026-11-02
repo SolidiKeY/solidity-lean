@@ -45,7 +45,7 @@ is retained. These are component/source certificate observations, not EVM
 execution. The scratch file is preserved as `SettingsConsumers01.lean`.
 
 Routine named pipeline specialization and assembly constructor glue are
-DELEGATED as R01/R02 in [TERRA-TODO.md](../../TERRA-TODO.md), not implemented
+DELEGATED as R01/R02 in the lane's TERRA-TODO list (not on master), not implemented
 as new manual routine lemmas. Prior inheritance controls M01–M03 remain
 pending. Scratch consumer validation does not claim those named goals passed.
 
@@ -86,7 +86,7 @@ performance; no P8a/Terra implementation landed. Rebase preserved checkpoint
   50 jobs, 1.549s, peak aggregate RSS 692523008 bytes.
 - `timeout 300 lake build Solidity.Lowering.P8.ProducerAssembly`: exit0,
   61 jobs, 1.558s, peak aggregate RSS 680808448 bytes; typecheck only, no witness.
-- `timeout 300 lake env lean --tstack=131072 /workspace/p8a-implementation-20261102-evidence/SettingsConsumers01.lean`:
+- `timeout 300 lake env lean --tstack=131072 ${VM_WORKSPACE}/p8a-implementation-20261102-evidence/SettingsConsumers01.lean`:
   exit0, 1.818s, peak aggregate RSS 1134112768 bytes. Scratch-only unused-simp
   warnings are retained; no production warning was added.
 
@@ -94,7 +94,7 @@ Printed producer/assembly headline axiom sets contain only propext,
 Classical.choice, Quot.sound. Lean4.24.0 / Lake5.0.0-src+797c613;
 LEAN_NUM_THREADS=1, explicit -j1, hard whole-group12GiB/no swap, authorized
 4GiB host reserve. No timeout/OOM/resource stop. New registrations are script
-generated; model review checks the result. `/workspace/coord-tools` remained
+generated; model review checks the result. `${VM_WORKSPACE}/coord-tools` remained
 absent, so the existing guarded native workflow was used. Use toolkit scripts
 when supplied. Full/root/import/combined TrustAudit/TestSuite/corpus/strict/
 docs/sort final gates remain required; no focused result substitutes for them.
@@ -102,7 +102,7 @@ All historical failures and interrupted full runs stay nonpassing.
 
 Independent read-only finder/skeptic used no Lean/server/builds and found no
 producer soundness/interface defect. They approved only partial-checkpoint
-accuracy. Evidence: `/workspace/p8a-implementation-20261102-evidence`.
+accuracy. Evidence: `${VM_WORKSPACE}/p8a-implementation-20261102-evidence`.
 Revision, hashes, exact gates, review records and cumulative exports are in the
 machine-readable handoff. No goal reset/completion, push or master edit.
 
