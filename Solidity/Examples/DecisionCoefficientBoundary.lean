@@ -1,6 +1,6 @@
 import Solidity.Calculus.DecisionCoefficientBoundary
 import Solidity.Calculus.Notation
-import Solidity.Examples.DecisionGapCensus
+import Solidity.Examples.DecisionMemoryParameterData
 
 /-!
 # Inhabited controls for the source-coefficient boundary

@@ -92,8 +92,8 @@ theorem negative_verdict : ∃ σ : State Bank [], decideGoal negative = .refute
   | refuted σ => exact ⟨σ, rfl, decideGoal_refutes he⟩
   | unknown => exact False.elim (hd he)
 
-theorem remaining_unknown : decideGoal DecisionArrayGaps.belowKey = .unknown :=
-  DecisionArrayGaps.belowKey_unknown
+theorem array_source_certified : decideGoal DecisionArrayGaps.belowKey = .proved :=
+  DecisionArrayGaps.belowKey_proved
 
 def shortBody : Fml Bank [.val .uint] :=
   .imp .tt (.eq DecisionUIntBridge.current DecisionUIntBridge.current)

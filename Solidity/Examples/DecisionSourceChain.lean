@@ -3,7 +3,7 @@ import Solidity.Examples.DecisionSourceInstance
 
 /-! # Actual array source-chain preparation clients
 This checks the new preparation producer without registering it globally;
-existing unknown/refutation observations and original storage controls remain.
+certified source verdicts/refutation observations and original storage controls remain.
 -/
 namespace Solidity.Examples.DecisionSourceChain
 open Solidity.Decide
@@ -58,9 +58,9 @@ theorem outside_guard_control :
   false_preparation_refused _ _
 
 theorem preserved_controls :
-    decideGoal arrayStruct = .unknown ∧ decideGoal arrayArray = .unknown ∧
-    decideGoal belowKey = .unknown ∧ decideGoal fixedBelowKey = .unknown ∧
-    decideGoal belowField = .unknown := preserved_global_unknowns
+    decideGoal arrayStruct = .proved ∧ decideGoal arrayArray = .proved ∧
+    decideGoal belowKey = .proved ∧ decideGoal fixedBelowKey = .proved ∧
+    decideGoal belowField = .proved := Solidity.Examples.DecisionSourceInstance.source_route_proved
 
 theorem raw_leaf_refusals : leafOf? arrayStruct = none ∧ leafOf? arrayArray = none :=
   before_leaf_translation

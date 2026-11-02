@@ -43,6 +43,7 @@ theorem NonliteralUIntFreshField.memCovered {C : Contract} {φ : Fml C []}
     (w : NonliteralUIntFreshField φ) : φ.memCovered = true := by
   unfold Fml.memCovered
   rw [w.hasAllocAll, w.cut_none, w.notGiven, Bool.or_false]
+  simp only [Bool.not_true, Bool.false_and, Bool.or_false, Bool.true_and]
   change (structAnswerWithCompound φ).isSome = true
   exact structAnswerWithCompound_source (nonliteralUIntFreshField_complete w)
 

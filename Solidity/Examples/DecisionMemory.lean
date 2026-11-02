@@ -1,4 +1,6 @@
-import Solidity.Examples.Decision
+import Solidity.Examples.DecisionMemoryParameterData
+import Solidity.Examples.DecisionMemoryFixtureData
+import Solidity.Examples.DecisionVerdictData
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Calculus.DecisionGivenHeapBoundary
 import Solidity.Calculus.DecisionCompoundCoverage
@@ -395,10 +397,6 @@ section MemoryParameters
 
 local instance memoryParameterContract : InContract := ⟨Gaps⟩
 open scoped Solidity.Scoped
-
-/-- A repeated Theory read is equal even at an unset memory parameter. -/
-def memParamSame : Fml Gaps [] :=
-  dl![.box]{ s[0] = s[0] where uint[] memory s }
 
 /-- Two hidden locals can name the same array; no fresh-apart premise exists. -/
 def memParamAliasBad : Fml Gaps [] :=

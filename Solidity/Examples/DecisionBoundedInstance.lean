@@ -31,10 +31,10 @@ theorem actual_hash_certificates : Fml.ValidH belowKey ∧ Fml.ValidH belowField
   ⟨boundedUIntInstance_source_validH keySource keyPrefix keyWitness (by decide +kernel),
     boundedUIntInstance_source_validH fieldSource fieldPrefix fieldWitness (by decide +kernel)⟩
 
-/-- Both source witnesses lie outside the existing covered/global route for now. -/
-theorem retained_gap_controls : belowKey.Covered = false ∧ belowField.Covered = false ∧
-    decideGoal belowKey = .unknown ∧ decideGoal belowField = .unknown :=
-  ⟨belowKey_notCovered, belowField_notCovered, belowKey_unknown, belowField_unknown⟩
+/-- Both original source witnesses now receive coverage and certified positive verdicts. -/
+theorem source_route_controls : belowKey.Covered = true ∧ belowField.Covered = true ∧
+    decideGoal belowKey = .proved ∧ decideGoal belowField = .proved :=
+  ⟨belowKey_covered, belowField_covered, belowKey_proved, belowField_proved⟩
 
 def fixedSource : SourceReduction fixedBelowKey :=
   (sourceReduction? fixedBelowKey).get (by decide +kernel)
@@ -45,8 +45,8 @@ def fixedPrefix : UniversalPrefix fixedSource.leaf.elim.condSimp.prenex :=
 theorem fixed_source_refusal : fixedPrefix.body.boundedUIntLiteralInstance (uintOfNat 1) = false := by
   decide +kernel
 
-theorem fixed_gap_preserved : fixedBelowKey.Covered = false ∧ decideGoal fixedBelowKey = .unknown :=
-  ⟨fixedBelowKey_notCovered, fixedBelowKey_unknown⟩
+theorem fixed_source_route : fixedBelowKey.Covered = true ∧ decideGoal fixedBelowKey = .proved :=
+  ⟨fixedBelowKey_covered, fixedBelowKey_proved⟩
 
 def partialBody : LFml Probe := .eq (.err (s := .val .uint)) (.err (s := .val .uint))
 def partialGood : LFml Probe := .imp

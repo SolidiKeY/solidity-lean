@@ -3920,3 +3920,104 @@ The strict doc output is byte-exact frozen output (85 findings:48 missing and37
 ambiguous references), exit1; inventory retains the existing404-versus403 drift.
 Both reviewers identified premature export wording; it now explicitly says pending.
 No source findings remain.
+
+
+## Computed source answers and narrow data interfaces (2026-11-02; pre-rebase checkpoint)
+
+The finite source-discovery component now feeds the real decision pipeline.
+`DecisionSourceAnswer` preserves every old given-heap Answer, including its exact
+counterstate function, and consults computed source-chain discovery only after an
+old miss. A structural constructor prefilter is proved complete for every genuine
+SourceUIntLiteralChain; it excludes no discovered member. Positive answers use the
+actual parser witness's pointwise validity, not a supplied validity oracle.
+
+Decision's existing memory coverage helper includes the finite source family on
+its no-fresh-allocation route. `sourceUIntLiteral_covered` explicitly requires
+hasAllocAll=false and a computed discovery hit. `sourceUIntLiteral_proved` additionally
+requires exactly hasHash=false, then proves the public decideGoal result is proved.
+The old decideGiven_complete signature remains available; the extended premise has
+a separately named decideGiven_complete_sources theorem. Existing countermodels
+retain their original returned states. Two older coverage proofs needed only Bool
+simplification updates for the new disjunct; their signatures and claims are unchanged.
+
+All five assigned original fixtures (arrays of structs/arrays, below keys, fixed
+arrays below keys, below fields) now have kernel-certified Covered=true and public
+proved verdicts. Their formulas and target pins are unchanged. Only the authorized
+five-fixture expectations/aliases changed, through the actual coverage/proved bridge.
+The original false fixed-array countermodel, its refuted verdict, inhabited positive
+heap, raw source-translation refusals, direct fixed-array controls, discovery miss
+and unused-binder controls remain. This closes the recognized finite literal-instance
+subclass, not arbitrary arrays or negative-array reconstruction.
+
+The direct Covered and inTarget definitions, DecisionTheorem, Waivers, decideLeaf
+and decideGoal are byte-identical to the preceding checkpoint; Covered, inTarget,
+DecisionTheorem and Waivers also match the frozen base. Covered's extension grows
+through its memCovered helper, as intended for this certified pipeline increment.
+ProgramNormalization, sourceReduction, AutoComplete, HashPremise and Rules were not
+edited. The retained8bbd5606 false-inclusion counterexample replays successfully.
+
+The original qualified Gaps contract and memParamSame fixture are now produced by
+DecisionGapData and DecisionMemoryParameterData. Existing litU/isT/allU/gapMemory and
+verdict declarations move verbatim to DecisionMemoryFixtureData and DecisionVerdictData.
+Legacy modules re-export their moved declarations. Memory and coefficient/numeric
+clients import these actual narrow producers instead of the full regression chain;
+no contract fields, models, source formulas, old guard outputs or proof budgets change.
+Original Core/GapCore imports remain. Their wider regression closure is still a final
+gate obligation; no source-only package is called a validated full combined tree.
+
+Evidence: /workspace/va1-evidence/source-route-next. Eleven final route/consumer MCP
+checks pass, including Decision36.483709s, ArrayGaps11.826802s, coefficient9.640639s
+and numeric-normalization7.500916s. The memory entry point passes diagnostics79.505923s
+and build76.377834s after the two confirmed proof fixes. Public axiom audit passes
+38.718518s with standard axioms only. Actual interpreted verdict+coverage profile
+passes2.099618s: five assigned positives are proved/covered, fixedBad is refuted/covered,
+tt remains proved; first/repeated struct samples7.777154/2.431295ms including printing.
+These are warm imported evaluations, not a cold whole-build or EVM/solc claim.
+
+Current runtime KeySort passes1.208761s:377 taclets parsed,131 read-bearing, table131;
+annotations match and actual KEYSORT_PASS is retained. Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613. Every Lean/LSP job uses the original writer lock, threads1/-j1,
+hard cgroup memory.max12884901888/swap.max0, one heavy job and12GiB host reserve.
+
+The private build-output view exposes original artifacts read-only. Full run failed
+137/215.901191s at the host-reserve guard; root disk remained available. Unchanged
+hash regression rebuilds also reached that guard. Hash split/factoring experiments
+and all actual failures are preserved outside the checkout; original HashCore is
+restored byte-exactly. The last stopped legacy import attempt's newest setup file
+is HashThreeKinds; no semantic/kernel error is inferred from a resource stop.
+No unchanged heavy retry or full-gate pass is claimed.
+
+Lossless cache representation recovery verifies484 exact private/persistent olean
+pairs (1534924784 bytes). Their logical paths/content remain; canonical files are
+read-only in every future task runner. Private duplicate storage removal raised
+MemAvailable from14926572 to16417916KiB. Live view mtimes become canonical mtimes;
+saved mode/mtime permit exact private-copy restoration. Both write paths reject
+EROFS in the probe. Actual later cache writes that hit views remain failed gates;
+only the observed private entry is materialized before a distinct retry. Original
+canonical bytes are never modified. Use cache-view-run.py/full-cache-view-run.py;
+old unprotected runners are historical and unsafe for these views. cache-views.py
+checks or materializes entries under the original lock. All old seals remain.
+
+Independent read-only finder/skeptic reviews confirmed exact moved declarations,
+old public completeness compatibility, genuine computed witnesses, filter completeness,
+unchanged false controls and direct frozen predicates. They verified all484 cache
+pairs/protections (finder hashes; skeptic metadata distinction). Confirmed findings
+were fixed; neither reviewer used Lean/server/build. Final documentation/artifact
+reviews and post-rebase validation are pending at this source checkpoint.
+
+Whole queue remains incomplete: baseline/backfill census; meaningful global decidable
+Residue, DecisionTheorem-prime and exhaustive target/Covered/hash bridge; remaining
+Decision performance/full gates; general fixed/nested/key/field/struct arrays, broad
+memory, partial-OR reconstruction, broader certified program-free boundary and
+formula-derived511-node fuel. Earlier source/numeric/fuel components and these five
+certified positives do not replace those obligations. Strict-doc/inventory frozen
+failures remain failures. No milestone-m7 eligibility or whole-goal completion claim.
+
+Registry update: H6 is already committed16409976c7768737459f7473cf3adb6208326b4f,
+with the sealed TypeExamples bundle/manifest available for coordinator retrieval.
+Current item remains AU01; AU02 follows. AU05 is newly assigned only after AU02 and
+verified integration/rebase of VA2 ae1a1d56; its real master Hash and SS-CP5-HASHED
+inputs must be inspected, never assumed. AU03/AU04, G46.05 and SS-CP5-HASHED production
+remain outside this work. Coordinator announces master a3205e6a1a1be1471fa0dc91688eca032d8acd85;
+fetch, ancestry verification and required rebase precede the final handoff. No AU05
+implementation, walk changes, push, merge, PR, tag publication or goal reset occurred.

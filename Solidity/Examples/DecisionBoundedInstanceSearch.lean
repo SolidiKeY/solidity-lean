@@ -49,9 +49,9 @@ theorem boundary_refusals : (boundedUIntLiteralSearch? zeroBound).isNone = true 
 theorem refused_valid_controls : zeroBound.Valid ∧ oversized.Valid := by
   constructor <;> intro g ν hall <;> trivial
 
-/-- New semantic certificates do not silently change existing decision pins. -/
-theorem retained_unknowns : decideGoal belowKey = .unknown ∧
-    decideGoal belowField = .unknown ∧ decideGoal fixedBelowKey = .unknown :=
-  ⟨belowKey_unknown, belowField_unknown, fixedBelowKey_unknown⟩
+/-- Actual source discovery now certifies these three original source decisions. -/
+theorem source_route_proved : decideGoal belowKey = .proved ∧
+    decideGoal belowField = .proved ∧ decideGoal fixedBelowKey = .proved :=
+  ⟨belowKey_proved, belowField_proved, fixedBelowKey_proved⟩
 
 end Solidity.Examples.DecisionBoundedInstanceSearch

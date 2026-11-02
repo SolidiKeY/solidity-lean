@@ -459,3 +459,18 @@ push/merge/publication, or changes to the original full-goal requirements.
 AQ1/AQ2 and the approved VA1-Q1 boundary revision remain as recorded above.
 The message identifies Claude Code as coordinator and retires the previous
 Codex listener/auditor; no VM/branch/goal identity is changed by this receipt.
+
+
+### VA1 registry scheduling update — 2026-11-02
+
+The coordinator's user message assigns VA1 sole writing of Calculus files for its
+current AU01 item, then AU02. AU05 is additionally assigned after AU02, conditional
+on verified integration of VA2 ae1a1d56 and rebasing onto master. The announced master
+is a3205e6a1a1be1471fa0dc91688eca032d8acd85; fetch/ancestry/code verification is required.
+AU05 must use actual master Hash code and copy-recovery's SS-CP5-HASHED typed premise.
+AU03/AU04, G46.05 and SS-CP5-HASHED production are not reassigned. Before each new item,
+fetch origin master and reuse actual ready deliveries. This records queue ownership,
+not an exclusion, premise, profile or semantic change. AQ1/AQ2, Q1's certified-boundary
+revision and H6's exact “VA1 splits it” authorization remain as recorded above.
+No AU05 work or further walk change has started; the announced987/1024 memory-loop
+visits and unchanged300s timing guard must be preserved and revalidated when relevant.

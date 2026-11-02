@@ -794,6 +794,7 @@ import Solidity.Calculus.DecisionNumericGroundSource
 import Solidity.Calculus.DecisionSourceInstance
 import Solidity.Calculus.DecisionSourceChain
 import Solidity.Calculus.DecisionSourceDiscovery
+import Solidity.Calculus.DecisionSourceAnswer
 import Solidity.Calculus.DecisionArrayReasons
 import Solidity.Calculus.DecisionNumericFlatten
 import Solidity.Calculus.DecisionNumericStages
@@ -835,6 +836,7 @@ import Solidity.Examples.AutoComplete
 import Solidity.Examples.DecisionCore
 import Solidity.Examples.DecisionArithmetic
 import Solidity.Examples.DecisionMapping
+import Solidity.Examples.DecisionGapData
 import Solidity.Examples.DecisionGapCore
 import Solidity.Examples.DecisionGapKInt
 import Solidity.Examples.DecisionLedger
@@ -861,6 +863,7 @@ import Solidity.Examples.DecisionHashKeys
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionQuantLedger
+import Solidity.Examples.DecisionMemoryParameterData
 import Solidity.Examples.DecisionMemory
 import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionCoefficientBoundary
@@ -4246,3 +4249,22 @@ import Solidity.Yul.World.TransientTargetPort
 import Solidity.Yul.World.TransientTargetRollback
 import Solidity.Yul.World.TransientTargetRollbackControls
 import Solidity.Yul.World.WorldChecks
+import Solidity.Examples.Tactics.CallFunctionAffine
+import Solidity.Examples.Tactics.CallFunctionShare
+import Solidity.Examples.Tactics.CallFunctionShareControls
+import Solidity.Calculus.CloseCallSharing
+import Solidity.Examples.Tactics.CallSharingDefault
+
+-- V12 P1 runtime-frame foundation and frozen interface v1.
+import Solidity.Backend.InternalFlow.RuntimeFrameSemantics
+import Solidity.Backend.InternalFlow.RuntimeFrameTarget
+import Solidity.Backend.InternalFlow.RuntimeFrameTransport
+import Solidity.Backend.InternalFlow.RuntimeFrameStack
+import Solidity.Backend.InternalFlow.RuntimeFrameSaved
+import Solidity.Backend.InternalFlow.RuntimeFrameFootprint
+import Solidity.Backend.InternalFlow.RuntimeFrameComposition
+import Solidity.Backend.InternalFlow.RuntimeFrameRestore
+import Solidity.Backend.InternalFlow.RuntimeFrameContext
+import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
+import Solidity.Examples.DecisionMemoryFixtureData
+import Solidity.Examples.DecisionVerdictData

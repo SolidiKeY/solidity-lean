@@ -1,3 +1,4 @@
+import Solidity.Examples.DecisionVerdictData
 import Solidity.Calculus.Decision
 import Solidity.Examples.ReadRealization
 import Solidity.Examples.DecisionHashes
@@ -238,10 +239,5 @@ def columnApf : Fml Allow [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) �
 
 end
 
-def verdict {C : Contract} (φ : Fml C []) : String :=
-  match decideGoal φ with
-  | .proved => "proved"
-  | .refuted _ => "refuted"
-  | .unknown => "unknown"
 
 end Solidity.Examples.Decision

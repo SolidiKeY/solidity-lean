@@ -17,7 +17,7 @@ theorem GivenHeapLiteralReadReflexive.target {C : Contract} {φ : Fml C []}
 /-- The actual memory coverage test includes this recognized source class. -/
 theorem GivenHeapLiteralReadReflexive.memCovered {C : Contract} {φ : Fml C []}
     (w : GivenHeapLiteralReadReflexive φ) : φ.memCovered = true := by
-  simp only [Fml.memCovered, givenHeapLiteralRead_complete w, Bool.or_true]
+  simp only [Fml.memCovered, givenHeapLiteralRead_complete w, Bool.or_true, Bool.true_or]
 
 /-- No supplied coverage premise: exact source recognition provides the real route. -/
 theorem GivenHeapLiteralReadReflexive.covered {C : Contract} {φ : Fml C []}

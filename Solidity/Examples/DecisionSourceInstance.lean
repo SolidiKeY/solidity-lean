@@ -85,10 +85,10 @@ theorem false_source_not_certifiable :
   intro ⟨w⟩
   exact fixedBad_notValid w.valid
 
-theorem preserved_global_unknowns : decideGoal arrayStruct = .unknown ∧
-    decideGoal arrayArray = .unknown ∧ decideGoal belowKey = .unknown ∧
-    decideGoal fixedBelowKey = .unknown ∧ decideGoal belowField = .unknown :=
-  ⟨arrayStruct_unknown, arrayArray_unknown, belowKey_unknown, fixedBelowKey_unknown,
-    belowField_unknown⟩
+theorem source_route_proved : decideGoal arrayStruct = .proved ∧
+    decideGoal arrayArray = .proved ∧ decideGoal belowKey = .proved ∧
+    decideGoal fixedBelowKey = .proved ∧ decideGoal belowField = .proved :=
+  ⟨arrayStruct_proved, arrayArray_proved, belowKey_proved, fixedBelowKey_proved,
+    belowField_proved⟩
 
 end Solidity.Examples.DecisionSourceInstance

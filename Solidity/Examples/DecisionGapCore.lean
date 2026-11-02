@@ -1,3 +1,5 @@
+import Solidity.Examples.DecisionMemoryFixtureData
+import Solidity.Examples.DecisionGapData
 import Solidity.Examples.DecisionMapping
 
 namespace Solidity.Examples.Decision
@@ -12,18 +14,6 @@ set_option Elab.async false
 that `decideGoal` still answers `unknown` on: each in the fragment, by the
 kernel, and answered `unknown` (the compiled verdicts below).  The list is
 `docs/automation.md`'s (M7, "What is not proved"). -/
-
-/-- The roots the shapes read. -/
-def Gaps : Contract := contract!{
-  struct Acc { uint v; bool live; }
-  mapping(uint => mapping(uint => uint)) allow;
-  mapping(uint => uint) balances;
-  mapping(int => uint) ibal;
-  mapping(bool => uint) flags;
-  mapping(uint => Acc) accs;
-  uint[] arr;
-  uint[3] fixedArr;
-}
 
 section Gaps
 
@@ -99,20 +89,12 @@ section GapTerms
 /-! ### Memory, the ledger and KeY's `int` without quantifiers -/
 
 /-- Leaves written with the constructors: `dl!` has no notation for them. -/
-def litU {Γ : Ctx} (n : Nat) : Tm Gaps Γ (.val .uint) := .app0 (.lit (uintOfNat n))
 def litI {Γ : Ctx} (n : Int) (h : PrimTy.int.inRange n = true := by decide) : Tm Gaps Γ (.val .int) :=
   .app0 (.lit (p := .int) ⟨n, h⟩)
-def isT {Γ : Ctx} (b : Tm Gaps Γ (.val .bool)) : Fml Gaps Γ := .eq b (.app0 (.lit (p := .bool) true))
 def xU : Tm Gaps [.val .uint] (.val .uint) := .pvV .here
 def xI : Tm Gaps [.val .int] (.val .int) := .pvV .here
-def allU (φ : Fml Gaps [.val .uint]) : Fml Gaps [] := .all (.user "x") .uint φ
 def allI (φ : Fml Gaps [.val .int]) : Fml Gaps [] := .all (.user "x") .int φ
 
-/-- A memory read: `∀ fresh s. len(s) > 0 → s[0] == 0`.  A counterexample
-once, decided by the fresh arrays' lane (below). -/
-def gapMemory : Fml Gaps [] := .allocAll (.user "s") (.array (.prim .uint))
-  (.imp (isT (.app2 (.binop .gt rfl) (.app2 .mlen (.app0 .memory) (.pvI .here)) (litU 0)))
-    (.eq (.app2 .read (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (litU 0))) (litU 0)))
 /-- A binder of KeY's unbounded `int`: `∀ int z. z + 1 > z`.  A
 counterexample once; proved since feature 26 (the binder read as a ledger
 entry, `Fml.zT`). -/

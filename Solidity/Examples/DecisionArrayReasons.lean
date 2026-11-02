@@ -3,7 +3,8 @@ import Solidity.Examples.DecisionSourceChain
 
 /-! # Inhabited and distinguishing nested-array reason controls
 The four source reasons classify actual original gap pins. Direct fixed-array
-covered controls remain outside, and no global verdict expectation is changed.
+covered controls remain outside these four reasons. The five valid-instance
+fixtures now receive certified positive source-route verdicts.
 -/
 namespace Solidity.Examples.DecisionArrayReasons
 open Solidity.Decide Solidity.Decide.ResidueReason
@@ -75,8 +76,8 @@ theorem actual_source_validity : Fml.ValidH belowKey ∧ Fml.ValidH fixedBelowKe
     fieldGap.validH (by decide +kernel), structGap.validH (by decide +kernel),
     nestedGap.validH (by decide +kernel)⟩
 
-theorem preserved_unknowns : decideGoal arrayStruct = .unknown ∧ decideGoal arrayArray = .unknown ∧
-    decideGoal belowKey = .unknown ∧ decideGoal fixedBelowKey = .unknown ∧ decideGoal belowField = .unknown :=
+theorem source_route_proved : decideGoal arrayStruct = .proved ∧ decideGoal arrayArray = .proved ∧
+    decideGoal belowKey = .proved ∧ decideGoal fixedBelowKey = .proved ∧ decideGoal belowField = .proved :=
   DecisionSourceChain.preserved_controls
 
 theorem covered_fixed_targets : fixedBlock.inTarget {} = true ∧ fixedBlock.Covered = true ∧

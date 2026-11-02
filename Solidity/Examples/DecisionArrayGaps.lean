@@ -1,10 +1,13 @@
-import Solidity.Examples.DecisionArrays
+import Solidity.Calculus.Decision
+import Solidity.Calculus.Surface
+import Solidity.Syntax.Contract
 /-!
 # Actual assigned array-gap census
 
 Fixed bounded blocks now have kernel coverage and certified verdicts through
-exact finite preparation. The other five classifications remain gap controls,
-not a Residue or an exhaustive pipeline-completeness implementation. Arrays below
+exact finite preparation. The five formerly unknown valid-instance fixtures now have computed source-chain
+coverage and certified positive verdicts. This is not exhaustive array completeness
+or an implementation of the global Residue theorem. Arrays below
 keys/fields and arrays of structures/arrays are separately named.
 -/
 namespace Solidity.Examples.DecisionArrayGaps
@@ -49,17 +52,6 @@ def arrayArray : Fml Probe [] := dl[Probe]{ ∀ uint k;
   ("fixedKey", fixedBelowKey), ("field", belowField), ("struct", arrayStruct), ("array", arrayArray)].map
   (fun (name, φ) => (name, classify φ))
 
-private def unknownCheck {C : Contract} : LeafVerdict C → Bool
-  | .unknown => true
-  | _ => false
-
-private theorem unknown_of_check {C : Contract} (φ : Fml C [])
-    (h : unknownCheck (decideGoal φ) = true) : decideGoal φ = .unknown := by
-  cases hd : decideGoal φ with
-  | proved => rw [hd] at h; cases h
-  | refuted σ => rw [hd] at h; cases h
-  | unknown => rfl
-
 /-- The original source shape `fixedBlock` is admitted by the requested fragment. -/
 theorem fixedBlock_target : fixedBlock.inTarget {} = true := by decide +kernel
 
@@ -75,52 +67,57 @@ theorem fixedBad_covered : fixedBad.Covered = true := by decide +kernel
 /-- The original source shape `belowKey` is admitted by the requested fragment. -/
 theorem belowKey_target : belowKey.inTarget {} = true := by decide +kernel
 
-/-- The current complete fragment does not cover `belowKey`. -/
-theorem belowKey_notCovered : belowKey.Covered = false := by decide +kernel
+/-- Computed source-chain recognition covers the original `belowKey` fixture. -/
+theorem belowKey_covered : belowKey.Covered = true :=
+  sourceUIntLiteral_covered (by decide +kernel) (by decide +kernel)
 
-/-- The actual current global decision on `belowKey` remains unknown. -/
-theorem belowKey_unknown : decideGoal belowKey = .unknown :=
-  unknown_of_check belowKey (by decide +kernel)
+/-- The actual original source now has a kernel-certified positive verdict. -/
+theorem belowKey_proved : decideGoal belowKey = .proved :=
+  sourceUIntLiteral_proved (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
 /-- The original source shape `fixedBelowKey` is admitted by the requested fragment. -/
 theorem fixedBelowKey_target : fixedBelowKey.inTarget {} = true := by decide +kernel
 
-/-- The current complete fragment does not cover `fixedBelowKey`. -/
-theorem fixedBelowKey_notCovered : fixedBelowKey.Covered = false := by decide +kernel
+/-- Computed source-chain recognition covers the original `fixedBelowKey` fixture. -/
+theorem fixedBelowKey_covered : fixedBelowKey.Covered = true :=
+  sourceUIntLiteral_covered (by decide +kernel) (by decide +kernel)
 
-/-- The actual current global decision on `fixedBelowKey` remains unknown. -/
-theorem fixedBelowKey_unknown : decideGoal fixedBelowKey = .unknown :=
-  unknown_of_check fixedBelowKey (by decide +kernel)
+/-- The actual original source now has a kernel-certified positive verdict. -/
+theorem fixedBelowKey_proved : decideGoal fixedBelowKey = .proved :=
+  sourceUIntLiteral_proved (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
 /-- The original source shape `belowField` is admitted by the requested fragment. -/
 theorem belowField_target : belowField.inTarget {} = true := by decide +kernel
 
-/-- The current complete fragment does not cover `belowField`. -/
-theorem belowField_notCovered : belowField.Covered = false := by decide +kernel
+/-- Computed source-chain recognition covers the original `belowField` fixture. -/
+theorem belowField_covered : belowField.Covered = true :=
+  sourceUIntLiteral_covered (by decide +kernel) (by decide +kernel)
 
-/-- The actual current global decision on `belowField` remains unknown. -/
-theorem belowField_unknown : decideGoal belowField = .unknown :=
-  unknown_of_check belowField (by decide +kernel)
+/-- The actual original source now has a kernel-certified positive verdict. -/
+theorem belowField_proved : decideGoal belowField = .proved :=
+  sourceUIntLiteral_proved (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
 /-- The original source shape `arrayStruct` is admitted by the requested fragment. -/
 theorem arrayStruct_target : arrayStruct.inTarget {} = true := by decide +kernel
 
-/-- The current complete fragment does not cover `arrayStruct`. -/
-theorem arrayStruct_notCovered : arrayStruct.Covered = false := by decide +kernel
+/-- Computed source-chain recognition covers the original `arrayStruct` fixture. -/
+theorem arrayStruct_covered : arrayStruct.Covered = true :=
+  sourceUIntLiteral_covered (by decide +kernel) (by decide +kernel)
 
-/-- The actual current global decision on `arrayStruct` remains unknown. -/
-theorem arrayStruct_unknown : decideGoal arrayStruct = .unknown :=
-  unknown_of_check arrayStruct (by decide +kernel)
+/-- The actual original source now has a kernel-certified positive verdict. -/
+theorem arrayStruct_proved : decideGoal arrayStruct = .proved :=
+  sourceUIntLiteral_proved (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
 /-- The original source shape `arrayArray` is admitted by the requested fragment. -/
 theorem arrayArray_target : arrayArray.inTarget {} = true := by decide +kernel
 
-/-- The current complete fragment does not cover `arrayArray`. -/
-theorem arrayArray_notCovered : arrayArray.Covered = false := by decide +kernel
+/-- Computed source-chain recognition covers the original `arrayArray` fixture. -/
+theorem arrayArray_covered : arrayArray.Covered = true :=
+  sourceUIntLiteral_covered (by decide +kernel) (by decide +kernel)
 
-/-- The actual current global decision on `arrayArray` remains unknown. -/
-theorem arrayArray_unknown : decideGoal arrayArray = .unknown :=
-  unknown_of_check arrayArray (by decide +kernel)
+/-- The actual original source now has a kernel-certified positive verdict. -/
+theorem arrayArray_proved : decideGoal arrayArray = .proved :=
+  sourceUIntLiteral_proved (by decide +kernel) (by decide +kernel) (by decide +kernel)
 
 
 /-- The positive `fixedBlock` block is valid by its inhabited index-one instance. -/

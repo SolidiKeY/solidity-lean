@@ -3,7 +3,7 @@ import Solidity.Examples.DecisionSourceChain
 
 /-! # Actual parameter-free source discovery controls
 Five original array fixtures reuse their already-proved chain/heap witnesses.
-Global verdict pins remain unchanged: this is a preparation-stage checkpoint.
+Global verdicts now consume the actual source route; false and miss controls remain.
 -/
 namespace Solidity.Examples.DecisionSourceDiscovery
 open Solidity.Decide Solidity.Examples.DecisionArrayGaps
@@ -113,8 +113,8 @@ theorem unused_discovered :
   decide +kernel
 
 theorem preserved_global_controls :
-    decideGoal arrayStruct = .unknown ∧ decideGoal arrayArray = .unknown ∧
-    decideGoal belowKey = .unknown ∧ decideGoal fixedBelowKey = .unknown ∧
-    decideGoal belowField = .unknown := preserved_global_unknowns
+    decideGoal arrayStruct = .proved ∧ decideGoal arrayArray = .proved ∧
+    decideGoal belowKey = .proved ∧ decideGoal fixedBelowKey = .proved ∧
+    decideGoal belowField = .proved := Solidity.Examples.DecisionSourceInstance.source_route_proved
 
 end Solidity.Examples.DecisionSourceDiscovery

@@ -1458,3 +1458,13 @@ instance-value candidate membership; bound occurrence is derived. Five original
 array fixtures and covered/false/unused-binder controls pass focused checks. Their
 global verdict pins remain unchanged, and the global Residue/bridge and full gates
 remain open. See [VA1 handoff](feature-work/after-roadmap-va1.md).
+
+
+M7-next computed source route: the five original array literal-instance fixtures
+now have actual kernel-certified coverage and proved public verdicts. The new lazy
+answer preserves previous certificates/counterstates; its source filter is complete
+for the genuine parser family. Hash freedom and no-allocation routing remain explicit.
+This is the finite recognized subclass, not global Residue/DecisionTheorem-prime or
+general array completeness. Narrow actual fixture modules remove unnecessary numeric
+and memory regression dependencies. Full/rebase gates remain open; see the
+[VA1 handoff](feature-work/after-roadmap-va1.md).
