@@ -415,6 +415,8 @@ commands; it never enters the core import graph.
 | `Semantics/Callback.lean` | The callback semantics over the typed run: `COut C H Γ` (over `Out`, the heap's growth carried), an invariant read on the global part (`StateInv`, `StateInv.at`; `StateInv.pay`: whether a `transfer` or a `send` calls back, `Stmt.callsBack`, `Stmt.forksIn`, `docs/options.md`), `ExecS`/`ExecP`/`ExecF` (no `undef` arms, no failed entries; `State.havoc` over typed storage; a call's locals given back by `TRun.callLeave`); the deterministic run is a callback run (`Prog.exec_run`, `Frames.exec_run`), the only one with no payment (`ExecP.eq_run`, `ExecP.forall_iff`). `holdsC` waits for `holds` on typed states. |
 | `Semantics/ExternalReturnBytes.lean` | Primitive return bytes: complete demanded words, existing typed binder decoding, failure classification and verbatim raw catches; no execution provenance. |
 | `Semantics/PrimitiveReturnProjection.lean` | Validate the full declared primitive return signature before binding or discarding; typed projection and actual-word/length proofs. Operational call-frame adoption is separate. |
+| `Examples/Tactics/ExternalReturnBytes.lean` | Inhabited kernel controls of the actual primitive byte decoder. |
+| `Examples/Tactics/PrimitiveReturnProjection.lean` | Inhabited primitive declaration and binder controls; no source or native frame is issued. |
 | `Semantics/CallbackFrame.lean` | A callback run within its frame (`ExecS.frame`, `ExecP.frame`): `Stmt.run_frame` for `ExecS`, a callback replacing only the storage and the ledger. |
 | `Semantics/CallbackWk.lean` | Forward callback weakening over every statement/program (`Stmt.exec_wk`, `Prog.exec_wk`), preserving extra locals, exact halts and invariant violations through heap growth; `Prog.exec_afterAlias` retains a fresh storage alias after scope exit. |
 | `Semantics/CallbackUnwk.lean` | Reverse callback weakening for the full current syntax (`Stmt.exec_unwk`, `Prog.exec_unwk`), exact correspondence (`Stmt.exec_wk_iff`, `Prog.exec_wk_iff`) and fresh-alias recovery after scope exit (`Prog.exec_withoutAlias`); used by `Semantics/DeferredCorrespondence.lean` for direct/captured deferred operands. |
@@ -539,6 +541,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `SortCheck/Parser.lean` | Token-level `.key` scanner and the `conforms` cross-check. |
 | `SortCheck/Faithfulness.lean` | Each annotation holds of what the typed run's evaluators read in every typed state, at the value's runtime sort (`Read.SortOk`, `Read.sortOk`, `Typing/Sorts.lean`), at every statement its `Taclet` rule fires on (`faithful_theorem`, the statement read off the constructor's type). |
 | `SolkeyCheck.lean` (root) | `lake exe solkeycheck`. |
+| `SolCases.lean` (root) | `lake exe solcases`: deterministic bounded cases as JSONL; the seed rotates the boundary pool. |
 | `Counterexamples/*.lean` | Three refutation modules pinning design decisions: `DeleteFamilyGenericOverlap`, `StaticRuntimeSort`, `PreFixSortAnnotations`. |
 | `Examples/Tactics/SignedCasts.lean` | Casts between `uint` and `int` and signed `unchecked`, through `int(u)`/`uint(i)`: solkey's `SolcTypesOpen`/`SolcArithmeticOpen` cases. |
 | `Examples/Tactics/SolcOpen.lean` | What solkey's `solc/open` ports needed of the elaborator: `E(x)` asserts a member, a call's value has its callee's return width under `unchecked`. |
@@ -763,7 +766,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
 | `Source/Horizon.lean` | S05 item 2: the interpreter is monotone in its horizon (`belowAt`, horizon independence `runTx_stable`, `firstDone_runTx`), only appends events (`growAt`), and a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
 | `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
-| `Source/Session.lean`, `SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
+| `Source/Session.lean`, `Source/SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
 | `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |
 | `Source/WellTyped.lean` | V04b preservation: references agree with the heap typing and the layout (`Val.RefOK`, `DataOK`, `RValOK`, `LocalsOK`, `HeapOK`, `StOK`, `EMOK`); memory operations keep it (`alloc_ok`, `allocRef_ok`, `heapPut_ok`, `heapAt_ok`). |
 | `Source/Decode.lean` | FU2-B `abi.decode`: the decoder keeps `MemOK` and is never stuck at the types it reads (`decodeArg_ok`, `decodeArgs_ok`, `abiDecodeData_ok`); the evaluation arm relative to its data (`evalE_abiDecode_ok`, `evalE_abiDecode_lit_ok`). |
@@ -809,7 +812,7 @@ TestSuite rows without Lean; `docs/corpus-parity.md` is the scoreboard.
 | `Corpus/Basic.lean` | The corpus's obligation `Diamond σ P` over the typed run (`P : Prog C [] Γ'`, `Runs`: the typed reading of `⟨ P ⟩ true` at `σ`), `corpus_decide` (`runOk`), `outcome` (how the typed run ends). |
 | `Corpus/Imported.lean` | `testSuite_agrees` (the hand-written `TestSuite`'s roots are the imported one's); a scoped `⊢` obligation of no parameters at the initial state, with its source input premise proved before the program's typed run (`Obligation.Diamond`/`Box`, `runs_of_proved`, `diamond_of_proved`, `box_of_proved`). |
 | `Corpus/TestSuite.lean` | Generated: each derived `TestSuite` obligation with no parameters at `Solkey.TestSuite.initState`. |
-| `Corpus/SolcArrays.lean`, `SolcControlFlow.lean`, `SolcExpressions.lean`, `SolcMappings.lean`, `SolcMemory.lean`, `SolcStructs.lean` | Generated: solkey's `solc/*.sol` suites, one `Diamond (State.init C) sol[C]{ body }` per function (`Corpus/Basic.lean`). |
+| `Corpus/SolcArrays.lean`, `Corpus/SolcControlFlow.lean`, `Corpus/SolcExpressions.lean`, `Corpus/SolcMappings.lean`, `Corpus/SolcMemory.lean`, `Corpus/SolcStructs.lean` | Generated: solkey's `solc/*.sol` suites, one `Diamond (State.init C) sol[C]{ body }` per function (`Corpus/Basic.lean`). |
 
 ## The solc front end
 
@@ -862,7 +865,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/Problems.lean` | `obligation` (a function's statement written on its program `N.f`: `∀x̄. wt(storage) → [m] N.f`, a constructor's from `Problem.deployUpd`); `solc_scoped_problems N [decl]` (`N.f.problem : Fml N []` per program, the entries of one kernel-checked table `N.problems`), `#solkey_problem`, `#solkey_scan` (`N.f.problem`, or the statement `obligation` writes), `#solkey_derive?` (`scopedSearch` on `⊢ N.f.problem`; the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
 | `TestSuite/Problems.lean` | Two of `Solkey.TestSuite`'s obligations pinned in solkey's syntax (`#solkey_problem`), `initState_wt`. |
 | `TestSuite/ScopedProblems.lean` | The pinned scoped obligations, `Solkey.TestSuite.f.problem : Fml Solkey.TestSuite []`, by `solc_scoped_problems … decl` (entries of one table, declared, not compiled), each on its program `Solkey.TestSuite.f`; what the `Derived` modules prove. |
-| `TestSuite/Derived1.lean` … `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, the scoped sequent (`open scoped Solidity.Scoped`, `Calculus/ProvesDerive.lean`), 40, 40, 40, 40, 40, 37, 41, 23, 40, 40, 11 and 20 (412 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
+| `TestSuite/Derived1.lean`, `TestSuite/Derived2.lean`, `TestSuite/Derived3.lean`, `TestSuite/Derived4.lean`, `TestSuite/Derived5.lean`, `TestSuite/Derived6.lean`, `TestSuite/Derived7.lean`, `TestSuite/Derived8.lean`, `TestSuite/Derived9.lean`, `TestSuite/Derived10.lean`, `TestSuite/Derived11.lean`, `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, the scoped sequent (`open scoped Solidity.Scoped`, `Calculus/ProvesDerive.lean`), 40, 40, 40, 40, 40, 37, 41, 23, 40, 40, 11 and 20 (412 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
 | `TestSuite/Derived13.lean` | `testArrayCopyClearsOldElements`, by `sol_prove`; four resurrection claims, upstream's `solc/StorageDangling.sol`, are proved in `Examples/Tactics/StorageDangling.lean`. |
 | `TestSuite/Derived14.lean` | The twenty obligations added at solkey `1b4341a303` (`send`, internal calls, `return`, tuples), each by `sol_prove`; ground splits are pruned (`Seq.refuteS`, closed by `Proves.closeFalse`). |
 | `TestSuite/Derived15.lean` | 53 migration derivations for returns, overloads, modifiers, helpers, storage shapes, fresh arrays and push operands; the report counts only kernel-checked declarations. |
@@ -1041,7 +1044,7 @@ the scoped calculus (`open scoped Solidity.Scoped`):
 | `Examples/Chains/Arithmetic.lean` | The compound storage update. |
 | `Examples/Chains/Memory.lean`, `Examples/Chains/MemoryDelete.lean`, `Examples/Chains/MemoryArrays.lean` | Memory aliasing, writes and reads; memory `delete`; memory arrays. |
 | `Examples/Chains/MemoryCoverage.lean` | One chain per memory rule, from a concrete state. |
-| `Examples/Chains/StorageToMemory.lean`, `MemoryToStorage.lean` | The copies between the two, with lazy reads. |
+| `Examples/Chains/StorageToMemory.lean`, `Examples/Chains/MemoryToStorage.lean` | The copies between the two, with lazy reads. |
 | `Examples/Chains/Payment.lean` | `transfer` under the box: a literal amount, a nonsimple amount, a storage receiver. |
 | `Examples/Tactics/CheckedBlock.lean` | `checked { … }`: an underflow refuted inside the block and valid outside it, what the block writes, guards discharged by the closer, `&&` and a loop's condition in evaluation order, a narrow type's `assert`; `ignoringOverflow { … }`: a diamond that holds only with the overflow assumed away. |
 | `Examples/Tactics/Bytes.lean` | `bytesN`, `bytes` and `string` as solc runs them, on the elaborator's reading (`docs/semantic-gaps.md`, "Bytes and strings"): literals left-aligned, comparison, bitwise operators, indexing (out of range reverts), `.length`, conversions between sizes and to `uintM`, implicit widening; in state variables, mapping keys and values, parameters and returns. |
@@ -1074,18 +1077,18 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/SliceCopiesImport.lean` | Pinned modern Solidity 0.8.38 source regression for slice copies, calldata locations and non-array aliases. |
 | `Examples/Tactics/SliceReferenceCopies.lean` | Both-pipeline source certificates for fixed primitive-row slice copying, independent aliases, rebinding, widths, lazy branches, bounds and nominal refusals. |
 | `Examples/Tactics/StorageSteps.lean` | One storage statement form at a time, as `apply` walks. |
-| `Examples/Tactics/StorageSuite.lean`, `Examples/Tactics/StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
-| `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert` (a check: `[ assert(false); ] true` is not valid). |
+| `Examples/Tactics/StorageSuite.lean`, `Examples/Tactics/StorageDelete.lean`, `Examples/Tactics/LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
+| `Examples/Tactics/Branch.lean`, `Examples/Tactics/Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert` (a check: `[ assert(false); ] true` is not valid). |
 | `Examples/Tactics/Join.lean` | The join after a conditional (`ifElseJoin`): `n` sequential `if (c) { x = x + 1; }` in `5n + 3` nodes and one leaf, pinned; the M6 family proved. |
 | `Examples/Tactics/LoopNotices.lean` | Located literal-loop warnings with annotation/nesting/callee/import controls and unchanged diamond-result/refutation certificates; a pinned constructor-only source fixture. |
 | `Examples/Tactics/JoinControls.lean` | Conditional-term notation, lazy branch evaluation, signed-offset reader controls and inhabited false bounds (AU03). |
 | `Examples/Tactics/LongContext.lean` | Kernel long-array certificate with a supplied local in a nonempty peeled context; true supplied-candidate and missing-argument refusal controls. |
 | `Examples/Tactics/PolySize.lean` | The size of symbolic execution (`docs/automation.md`, M8): `#proof_size` (nodes, branches, open goals, the largest leaf in `Fml.tmSize`) of sequential `if`s that both assign, literal-bounded loops under their invariants, and the two combined, pinned for small `k`. |
 | `Examples/Tactics/CallSummary.lean` | A call by its callee's summary (`internalCallSummary`): the family `f₀(x) = x + 1`, `fₖ(x) = fₖ₋₁(fₖ₋₁(x))`, its walk pinned (one node per call, where inlining made `7·2^(k+1) − 3`), proved for `k = 1…6`; a callee whose body drops an owed value is inlined; the checked family `f₀(x) = x * 3` proved for `k = 1…5`, its leaf one call site at a time (`Calculus/LeafShare.lean`), a false leaf failing within the heartbeats, and the leaf of sixteen products evaluated whole (`triplingFourWhole`). |
-| `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` and `send` as `⊢` walks with checked sequents; the frame, the ledger's postconditions and the runs, a refused send's included. |
+| `Examples/Tactics/Payment.lean`, `Examples/Tactics/Net.lean` | `transfer` and `send` as `⊢` walks with checked sequents; the frame, the ledger's postconditions and the runs, a refused send's included. |
 | `Examples/Tactics/Values.lean`, `Examples/Tactics/Operators.lean`, `Examples/Tactics/Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |
 | `Examples/Tactics/LocalBindings.lean` | Binding-local width/ABI metadata under shadowing, captures and parallel updates; nearest-binding refinement and metadata-independent formula binders. |
-| `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Examples/Tactics/Callback.lean`, `TryCatch.lean`, `Contracts.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`, calls by contract (`useContract`). |
+| `Examples/Tactics/Calls.lean`, `Examples/Tactics/CallOperands.lean`, `Examples/Tactics/Callback.lean`, `Examples/Tactics/TryCatch.lean`, `Examples/Tactics/Contracts.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`, calls by contract (`useContract`). |
 | `Examples/Tactics/CallExceptions.lean` | Source positive/negative regressions for eager error operands, failure priority, exact enum/unset-function panic payloads and rollback; ordinary and symbolic catch proofs plus admitted-state unset-alias counterexamples. |
 | `Examples/Tactics/Recursion.lean` | Recursive functions (`Stmt.callRec`): a countdown, a recursive sum and two mutually recursive functions elaborated and run (`decide +kernel`); the countdown's box without panic and `add(x, y) == x + y` by contract, proved by induction over the frames (`rec_contract_by`, `RecContract.unroll`, `sol_symex_rec`); under the callback reading, a countdown after a value call and a recursion that calls back (`rec_auto_c`, `ProvesC.recContract`). |
 | `Examples/Tactics/SelfCall.lean` | A `try` of the contract itself (`tryCallSelfBox`): the callee's writes and return seen on success, refuted under the oracle reading by a typed run; no code at address `0`. |
@@ -1095,11 +1098,11 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/ContractWorldSource.lean` | Restricted complete source new/try-new and linked storage-field mutation fragments, with environment-admission and positive/negative regressions. |
 | `Examples/Tactics/TransientWorld.lean` | Kernel controls for delegate-owned transient cells, distinct instances, transaction reset and rollback of successful descendants. |
 | `Examples/Tactics/TransientWorldSource.lean` | Both-pipeline closed transient factory targets composed as typed frames: owner isolation, dirty-entry/exit reset, caught/uncaught and later rollback, static refusals, source false controls and axiom audits. |
-| `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Examples/Tactics/Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
+| `Examples/Tactics/Memory.lean`, `Examples/Tactics/CrossDomain.lean`, `Examples/Tactics/Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
 | `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
 | `Examples/Tactics/Dangling.lean` | Historical dangling-resurrection formulas, refuted by kernel-checked initial-state counterexamples after the resetting-push migration; longer rounds retain storage-stack capacity regressions. |
 | `Examples/Tactics/NestedArrays.lean` | Concrete storage histories closed by `sol_prove` (solkey's `Array*` shapes): a fixed matrix's row alias, its checked indices folded; thirteen pushes after a delete, past `normalizationDepth`. |
-| `Examples/Tactics/ApplySteps.lean`, `Examples/Tactics/UpdateRules.lean`, `Examples/Tactics/Decide.lean`, `TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
+| `Examples/Tactics/ApplySteps.lean`, `Examples/Tactics/UpdateRules.lean`, `Examples/Tactics/Decide.lean`, `Examples/Tactics/TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
 | `Examples/Tactics/UpdRulesScoped.lean` | The scoped update rules and merges (`Fml.updAtS`, `Fml.simpUpdsS`, `Fml.mergeAtS`) computed by the kernel on `dl!{ … }` leaves, each entry point (`Fml.Valid.of_simpUpdsS`, `Fml.Valid.of_updAtS`, `Fml.Valid.of_mergeAtS`) used on a `⊨ᶠ` goal; `applyOnRigid` under the diamond on an alias to a root's field; a rule refused under a negation, and `Upd.seqPar` refusing a memory term after a storage write that the storage merge reads. |
 | `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
 | `Examples/Tactics/Loops.lean` | `while`, `for`, `do … while`, `break`, `continue`, `return` in a loop: the lowering's shapes pinned, `#run` of loops, a concrete loop decided with fuel (`Prog.runF_approx`); loops proved by unwinding (`whileUnwind`, `loopExit`), solkey's two solc loop ports among them; by an invariant (`whileInvariantBox`, `whileInvariantDiamond`): a counting loop, a sum with a closed form, a loop with `break`, a walk and its proof tree. |
@@ -1153,7 +1156,7 @@ At the root, the notation's own tests:
 
 | Module | What it shows |
 |---|---|
-| `Examples/ChainNotation.lean`, `ChainRewrites.lean`, `ExampleNames.lean` | How a chain is written and checked, its rewrite links, the printed names of fresh variables. |
+| `Examples/ChainNotation.lean`, `Examples/ChainRewrites.lean`, `Examples/ExampleNames.lean` | How a chain is written and checked, its rewrite links, the printed names of fresh variables. |
 | `Examples/ChainExpand.lean` | The expansion links past the program (`Calculus/ExpandLaws.lean`), the closer on the expanded lines, which types expand. |
 | `Examples/ChainRewritesOpen.lean` | The rewrite links while the program is open, on the scoped line (`Calculus/RewriteScoped.lean`), a step of the strategy after them in the same chain. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
@@ -1230,6 +1233,12 @@ allocation and raw halt; `Evm/TryPanicProducer.lean` computes the source-linked
 36-byte component. `Examples/Tactics/TryPanicProducer.lean` keeps constructed-call
 controls distinct. See [bounded milestone](feature-work/diamond-try-m1.md); none
 admits physical assembly or proves target-byte/original-callee transport.
+
+| Module | Purpose |
+|---|---|
+| `Evm/TryPanicCarrier.lean` | Closed intrinsic constructed-call carrier; no original-source construction, bytecode adequacy, callback change or source admission is asserted. |
+| `Examples/Tactics/TryPanicCarrier.lean` | Nonvacuous constructed-call controls; no source or target adequacy is claimed. |
+
 | `Semantics/ContractWorldCertificates.lean` | Published paid-run/source-wrapper operation certificates, reused unchanged from origin/master cc155f36. |
 | `Semantics/PaymentWorld.lean` | Typed stipend source frames over actual world calls; send completed-failure handling, transfer exact halt transport, no-op/funding and atomic rollback laws. |
 | `Frontend/PaymentPlan.lean` | Complete declaration-resolved creation/send and initializer/receive/transfer/getter source shapes; unknown effects and full-gas calls refused. |
@@ -1629,7 +1638,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBounds.lean` | RETURNDATACOPY gate order and in-range gate, the gas-only charged state, and the out-of-range refusal lifted through `FrozenV1.api`. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBoundsControls.lean` | Populated gas, arity, range, endpoint, capacity and fuel controls; the gate does not depend on the static flag. |
 
-### P1 runtime frames ([runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
+### P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
 
 | Module | Purpose |
 |---|---|
@@ -1671,40 +1680,3 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Source/Progress/BuiltinAdmission.lean`, `Source/Progress/ArithmeticBuiltins.lean`, `Source/Progress/RecoveryBuiltin.lean`, `Source/Progress/LiteralBuiltins.lean` | `BuiltinFragment` and progress of the nine implemented builtins on scalar and literal arguments (`checked_builtin`). |
 | `Source/Progress/EmitBuiltins.lean`, `Source/Progress/BuiltinStatements.lean` | Progress of direct `emit` nodes and builtin expression statements. |
 | `Source/Progress/BuiltinControls.lean`, `Source/Progress/ScalarBuiltinControls.lean`, `Source/Progress/LiteralBuiltinControls.lean` | Builtin and event executions, argument order, zero modulus, hashes, messages and refusals. |
-
-## Additional registered modules
-
-| Module | Purpose |
-|---|---|
-| `Corpus/SolcControlFlow.lean` | solkey `solc/SolcControlFlow.sol`, ported |
-| `Corpus/SolcExpressions.lean` | solkey `solc/SolcExpressions.sol`, ported |
-| `Corpus/SolcMappings.lean` | solkey `solc/SolcMappings.sol`, ported |
-| `Corpus/SolcMemory.lean` | solkey `solc/SolcMemory.sol`, ported |
-| `Corpus/SolcStructs.lean` | solkey `solc/SolcStructs.sol`, ported |
-| `Evm/TryPanicCarrier.lean` | Closed intrinsic constructed-call carrier. No original-source construction, |
-| `Examples/ChainRewrites.lean` | The lines after the program, as chain links |
-| `Examples/Chains/MemoryToStorage.lean` | Memory-to-storage copies, as chains |
-| `Examples/ExampleNames.lean` | Printed names for the rules' fresh variables |
-| `Examples/Tactics/CallOperands.lean` | Call-valued operands: `values.push(makeValue());` |
-| `Examples/Tactics/Contracts.lean` | Calls by contract |
-| `Examples/Tactics/CrossDomain.lean` | Storage and memory: the copies between them |
-| `Examples/Tactics/ExternalReturnBytes.lean` | Inhabited kernel controls of the actual primitive byte decoder. |
-| `Examples/Tactics/LedgerDelete.lean` | A struct with a mapping, written and deleted — both layers |
-| `Examples/Tactics/Net.lean` | Payment: what a `transfer` changes |
-| `Examples/Tactics/PrimitiveReturnProjection.lean` | Inhabited primitive declaration/binder controls. No source/native frame is issued. |
-| `Examples/Tactics/Revert.lean` | The two modalities: `revert();`, `require`, `assert` |
-| `Examples/Tactics/TermTaclets.lean` | Term taclets on a sequent |
-| `Examples/Tactics/TryCatch.lean` | `try`/`catch`: an external call and a block per way it ends |
-| `Examples/Tactics/TryPanicCarrier.lean` | Nonvacuous constructed-call controls. No source or target adequacy claim. |
-| `Source/SessionExamples.lean` | Controls of sessions with unfinished transactions (S05 item 2) |
-| `TestSuite/Derived10.lean` | solkey's `TestSuite`, derived (10 of 12) |
-| `TestSuite/Derived11.lean` | solkey's `TestSuite`, derived (11 of 12) |
-| `TestSuite/Derived2.lean` | solkey's `TestSuite`, derived (2 of 12) |
-| `TestSuite/Derived3.lean` | solkey's `TestSuite`, derived (3 of 12) |
-| `TestSuite/Derived4.lean` | solkey's `TestSuite`, derived (4 of 12) |
-| `TestSuite/Derived5.lean` | solkey's `TestSuite`, derived (5 of 12) |
-| `TestSuite/Derived6.lean` | solkey's `TestSuite`, derived (6 of 12) |
-| `TestSuite/Derived7.lean` | solkey's `TestSuite`, derived (7 of 12) |
-| `TestSuite/Derived8.lean` | solkey's `TestSuite`, derived (8 of 12) |
-| `TestSuite/Derived9.lean` | solkey's `TestSuite`, derived (9 of 12) |
-| `SolCases.lean` | Deterministic bounded enumeration; seed rotates the boundary pool. stdout is JSONL. |
