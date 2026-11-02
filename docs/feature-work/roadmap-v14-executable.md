@@ -1957,3 +1957,42 @@ reused as permission. Admission is a preflight, not a continuous reservation;
 the measurement helper and hard cap remain unchanged. Proof and guard reviews
 accept, including subsequent confirmation of all16axiom pins. Exact full
 signatures/heads, raw failures, scope/doc comparisons and seals are in handoff.
+
+
+## Checkpoint28: actual receiver-history threshold and rollback worlds
+
+After the coherent reviewed threshold checkpoint, ReceiverThreshold defines
+an existing intrinsic typed Entry/Operation.call client, not another runner.
+It reads actual credited selfBalance and reverts when it equals3. First and
+second calls have exact full World results paidOne/paidTwo, derived via actual
+body/entry transport. The third still has senderfunds1 and creditedbalance3;
+actual body and whole operation return ordered dead bytes. Separate role,
+storage and paid-entry/body lemmas resolve original recursion failures without
+raising budgets; empty-storage uniqueness is the existing fixture's type, not
+a restriction on generic IterationThreshold.
+
+Actual repeated2-success/3-error execution consumes of_failure to derive k2
+and full reached paidTwo, retaining the exact error for every longer horizon.
+Prefix commit and local third-call rollback retain paidTwo; an outer checkpoint
+restores created, not that prefix world. Wrong late threshold3, substituted
+paidThree, reversed bytes and prefix-world outer rollback are rejected. Full
+World equalities are proved; balance observations only distinguish negatives.
+Twenty-two observed standard-axiom sets are guarded. Read-only finder/skeptic
+reviews accept the actual receiver history and checkpoint boundaries.
+
+No source/compiler, G43 history/stipend/send-transfer, G36.03 divergence, pinned
+decoder or kernelCALL/CREATE/JUMP transport follows. These remain finite model
+prefix/atomic-result facts and are not external compiler/EVM tests. Source/
+semantics/observations/targetpredicates/holds stay unchanged. Original goal
+remains blocked with no administration. Raw failures, fresh under-lock admission
+checks, final gates/types/sourcehashes and immutable exports are in the handoff.
+
+Checkpoint28 focused38jobs/22guardedstandardaxiomsets/root1062+262 and
+private1066+262 pass, SolKey377/131/131. ActualLean4.24.0/Lake5.0.0-src+797c613
+and KeySort2jobs precede runtime confirmation. Root/private aggregateRSS
+1717796/1716200KiB,oneworker,12GiB/noSwap/180s/writerlease/OOM0. Everyheavy
+launch has freshADMISSION; no oldmeasurement reused as permission. Separate
+proof finder/skeptic reviews accept and confirm all22pins. Raw recursion/name/
+normalization failures remain; component entry/body/storage/result proofs
+resolve them without changed statements or raised limits. Scoped/doc/type/
+source/bundle/checksum evidence and final exact seal reviews are in handoff.

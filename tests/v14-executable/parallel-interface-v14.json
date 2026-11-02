@@ -1,0 +1,80 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "prior_head": "00b92a1e7d4d75bcfc54ecf77e24ea7533a3e32c",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "owned_sources": [
+    {
+      "path": "Solidity/Backend/Executable/ReceiverThreshold.lean",
+      "blob": "dc82ca8dc50b1693e329c578bf8cacf34add30d8",
+      "sha256": "488d23c695bb4f0780e864281711e7aa6cb59a4646c54a12d1bd56a95f1fab83"
+    },
+    {
+      "path": "Solidity/Backend/Executable/IterationThreshold.lean",
+      "blob": "2aef2288be9d0c893175297c11add541985059e8",
+      "sha256": "342af6104c49861ec392f89aa4637d9d8b211af825b7997dbc794f5c0eb66c3c"
+    },
+    {
+      "path": "Solidity/Backend/Executable/IterationThresholdChecks.lean",
+      "blob": "fecb1699edd227106ac8f84c2f3b04577f252e07",
+      "sha256": "0db1eb36ed3560e92d5e1734d42adab54f3d56157604fd4ead23492bd1121676"
+    },
+    {
+      "path": "Solidity/Backend/Executable/WorldPrefixChecks.lean",
+      "blob": "1af1b418acdd87270a570789e5acb21685580c00",
+      "sha256": "d3ff08ec3a559c2c19e423e95ed0c49d02e32cb6e8d1324108497d436d03a847"
+    }
+  ],
+  "published_read_only_producers": [
+    {
+      "path": "Solidity/AST.lean",
+      "blob": "8c77ddb5a1085c2b35c1d1c47aeb30a2f5a2fd1a",
+      "sha256": "f4247aaa927e3dd13c22d4f34a019e7c534484866a5ff554084cc33cffc90e88",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Syntax/Scoped.lean",
+      "blob": "d853908512e7cdfe7a600379661e77204963f41b",
+      "sha256": "b1fa2db12fc79ad445a32658f9231b0e09ce4b34c717bc00e46d0470d9c1e098",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Semantics/Run.lean",
+      "blob": "330d8cb7aa1414d0824248c0d87ec291db08f600",
+      "sha256": "3e97c693c2bea3ea2578cda59bc9e259a3950ded6c6dd6dea8d1b0c718cab3b9",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Semantics/ContractWorld.lean",
+      "blob": "9f22396da6266fa083413689a5c2e4141e545a95",
+      "sha256": "4735cb8abc936b6cf3744756aed749ea8dacaec261368989752b9b5ded6d0554",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    }
+  ],
+  "declarations": [
+    "Solidity.Backend.Executable.ReceiverThreshold.first_agrees",
+    "Solidity.Backend.Executable.ReceiverThreshold.second_enters",
+    "Solidity.Backend.Executable.ReceiverThreshold.second_storage",
+    "Solidity.Backend.Executable.ReceiverThreshold.second_body",
+    "Solidity.Backend.Executable.ReceiverThreshold.second_agrees",
+    "Solidity.Backend.Executable.ReceiverThreshold.third_reverts",
+    "Solidity.Backend.Executable.ReceiverThreshold.third_enters",
+    "Solidity.Backend.Executable.ReceiverThreshold.third_body",
+    "Solidity.Backend.Executable.ReceiverThreshold.funded_receiver_boundary",
+    "Solidity.Backend.Executable.ReceiverThreshold.first_runs",
+    "Solidity.Backend.Executable.ReceiverThreshold.second_runs",
+    "Solidity.Backend.Executable.ReceiverThreshold.two_runs",
+    "Solidity.Backend.Executable.ReceiverThreshold.three_fail",
+    "Solidity.Backend.Executable.ReceiverThreshold.discovered",
+    "Solidity.Backend.Executable.ReceiverThreshold.all_later",
+    "Solidity.Backend.Executable.ReceiverThreshold.prefix_commits",
+    "Solidity.Backend.Executable.ReceiverThreshold.local_rollback",
+    "Solidity.Backend.Executable.ReceiverThreshold.outer_rollback",
+    "Solidity.Backend.Executable.ReceiverThreshold.no_prefix_world_rollback",
+    "Solidity.Backend.Executable.ReceiverThreshold.no_reversed_bytes",
+    "Solidity.Backend.Executable.ReceiverThreshold.no_late_threshold",
+    "Solidity.Backend.Executable.ReceiverThreshold.no_wrong_world"
+  ],
+  "signature_evidence": "interface-types.log contains complete actual intrinsic dependent signatures",
+  "clients": "Actualtypedreceiver sees creditedselfBalance==3: first2 ordinarypaidcalls returnexactpaidOne/paidTwo; thirdfundedentry hasbalance3 andbodyrevertsordereddeadbytes. Thresholdk2/fullWorld extractedfromactualfailed3horizon; all later samehalt. Prefixcommit/localrollback paidTwo differfrom outerrollbackcreated; wrongthreshold/world/rollback/reversedbytes reject.",
+  "limits": "Finite intrinsicWorldmodel only, not sourcecompiler/loopdivergence or pinnedEVM CALL/CREATE/JUMP/world/gas. Emptycontract is existingfixtureonly, not narrower generic27domain. No source/semantic/profile/budget/goal/humanhold changes; unresolvedV14sendtransferhold preserved."
+}

@@ -987,3 +987,4 @@ import Solidity.Backend.Executable.RelocationConstructor
 import Solidity.Backend.Executable.RelocationConstructorChecks
 import Solidity.Backend.Executable.IterationThreshold
 import Solidity.Backend.Executable.IterationThresholdChecks
+import Solidity.Backend.Executable.ReceiverThreshold

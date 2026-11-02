@@ -1330,3 +1330,4 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Backend/Executable/RelocationConstructorChecks.lean` | Nonzero-backedge, empty-runtime/argument and255/256 minimal-width constructor clients. |
 | `Backend/Executable/IterationThreshold.lean` | Derived unique first-error iteration/full world and all earlier/later repeated-operation horizons. |
 | `Backend/Executable/IterationThresholdChecks.lean` | Genuine repeated paid calls, first/zero boundary and exact wrong-threshold/world/ordered-halt controls. |
+| `Backend/Executable/ReceiverThreshold.lean` | Actual balance-dependent repeated receiver threshold, ordered body error and exact prefix/local/outer rollback worlds. |
