@@ -4,21 +4,21 @@
  "batch": "fu2-20261102",
  "branch": "cloud/fu2-20261102/fu2-calldata-access",
  "baseCommit": "84a2a4beedcb72c99570e8d03751f0ddd06d9609",
- "recordedAt": "2026-11-02T02:40:00Z",
+ "recordedAt": "2026-11-02T05:05:00Z",
  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
- "command": "scripts/abi-entry-fixtures.sh SOLJSON fu2c; scripts/abi-entry-collect.py --keep-before OLD.json .lake/upstream/cf1-fu2c OUT.json META.json",
+ "command": "scripts/abi-entry-fixtures.sh SOLJSON fu2c2; scripts/abi-entry-collect.py --keep-before OLD.json .lake/upstream/cf1-fu2c2 OUT.json META.json",
  "runtimePolicy": "unchanged: 120000 ms per pipeline, 1000 loop fuel, every required pipeline",
  "before": "base Solidity/Tools/Upstream.lean (byte-identical gate), model and runner at aaa9db5c",
- "after": "typed entry decoder with access-time calldata reads (Semantics/AbiAccess.lean: cpart, cat, verdictA; Tools/UpstreamEntry.lean guarded bodies), calldata parameters as slice origins (974dd1de reapplied)",
- "note": "Observations are complete and in order (byte lists hex-encoded). Fixture list: tests/upstream/cf1-abi-entry-fixtures.txt. The before column is CF1's (copied with --keep-before); the after column is cf1-fu2c, rerun on lane FU2-C.",
+ "after": "typed entry decoder with access-time calldata reads (Semantics/AbiAccess.lean: cpart, cat, verdictA; Tools/UpstreamEntry.lean guarded bodies), calldata parameters as slice origins (974dd1de reapplied); ABI coder v1 value parameters cleaned (UpstreamEntry.v1Plan); calldata slice index checked at the view (#sliceIndex)",
+ "note": "Observations are complete and in order (byte lists hex-encoded). Fixture list: tests/upstream/cf1-abi-entry-fixtures.txt. The before column is CF1's (copied with --keep-before); the after column is cf1-fu2c2, rerun on lane FU2-C.",
  "counts": {
   "before": {
    "blocked": 29,
    "working": 13
   },
   "after": {
-   "working": 23,
-   "blocked": 19
+   "working": 30,
+   "blocked": 12
   }
  },
  "fixtures": [
@@ -171,9 +171,9 @@
     }
    },
    "after": {
-    "reportSha256": "3a8d21ff05107e95e2f92cd450c729f49cc76bd3e89022baec9aabff85a6f26d",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/1",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "16616d5898d24f69e41d7e784b647178ef88bbc55d2733e968895632942bf0a2",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/1",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_length_v2.sol",
@@ -610,9 +610,9 @@
     }
    },
    "after": {
-    "reportSha256": "249fdc2b0b7f4f932fae72c180d67cc1ddd5bebc51eb70841d61fa7d36a92c20",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/2",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "8f6af5a7fadc96dd2ca79c8668b78117cded26558864015509e9a7d84d506f52",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/2",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_1d_2d_v2.sol",
@@ -921,9 +921,9 @@
     }
    },
    "after": {
-    "reportSha256": "e1604ac603d717115188f73825666710c739814698c5d33d7abe0d38ae099bed",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/3",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "2ed5f02e6d52e86bff0b728a8d0cd0b8425ccc5bb89c7ad4c339a6a44b857214",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/3",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol",
@@ -1102,9 +1102,9 @@
     }
    },
    "after": {
-    "reportSha256": "89d8d2009dbe33416f7d0cfe82e9ac0c4af00491e8906a766789d4ed2c58df4c",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/4",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "52fe6e34db56164e77a4ff7d6ffd5d6142d59db651fec0dd77e6aa1da4714668",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/4",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol",
@@ -1365,9 +1365,9 @@
     }
    },
    "after": {
-    "reportSha256": "776933cdeeacb29192545a85cf1748069a20650bba38753d54db4222926cca85",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/5",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "9ae27a85bf360ff541e9be5c3c9358c0757f7d558d79fc2a7f22fcfba6eaeb34",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/5",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/validation/array_exceeds_calldatasize_no_revert_string.sol",
@@ -1482,9 +1482,9 @@
     }
    },
    "after": {
-    "reportSha256": "46de8f9670c285fa0b886789768998cab0f54daff727156dfc1d96531d7d83d2",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/6",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "0948d7bfab5c21cf35ec9f29e0ac3ecba3f69a83814741f6851e4e382b3a9986",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/6",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/array/calldata_array_bounds_check_nested_bytes.sol",
@@ -1599,9 +1599,9 @@
     }
    },
    "after": {
-    "reportSha256": "43ff3052ab0cde987006edcaa6a7e360d2801f85bde0bea6d493d9c9bc9de844",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/7",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "af625695d248356de455cfb4379b50edf10ecf54ada3e2180facb00be5aa704b",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/7",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/array/concat/bytes_concat_nested.sol",
@@ -1684,9 +1684,9 @@
     }
    },
    "after": {
-    "reportSha256": "e832d61e6f07b7f0ec9f3451d5f74ace1d9ad08e51d3d850effa738758d3e182",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/8",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "73dcc6e50d148d495bef1d15d4341833415ab79cfd2c4d524d1cc0e24520e3a8",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/8",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory_2.sol",
@@ -1785,9 +1785,9 @@
     }
    },
    "after": {
-    "reportSha256": "43d362d45db28331f7e3452321f4ae74beedfa59915a49fbf1192b331bb460fb",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/9",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "6df14589f427f650d1d5030875ee96f7b2dc3dec3cd4917d8aa7819f94542c20",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/9",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/nested_array_calldata_to_memory.sol",
@@ -2016,9 +2016,9 @@
     }
    },
    "after": {
-    "reportSha256": "7a59ec32beeda8313d38ecfadf8f0f0db2c775dc432460da45a67cdf8e2d900c",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/10",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "b188eba3f692b0986a4794f426311da727fe23ec917c449d817d57bb2a391266",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/10",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/nested_array_element_memory_to_memory.sol",
@@ -2199,9 +2199,9 @@
     }
    },
    "after": {
-    "reportSha256": "2630e87621084abdbb7747970b0c77dabec45836c30f59af3782534ece1e8699",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/11",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "e19a498359c134e94b421aee24dbc0c605cc4a20cdbbd6b58a89c1424a9339e4",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/11",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/array/indexAccess/arrays_complex_memory_index_access.sol",
@@ -2284,9 +2284,9 @@
     }
    },
    "after": {
-    "reportSha256": "78bf98acd4d912ecfa7689d47644d45050dd4191d34a2009506554393c39a916",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/12",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "6ab77709c15972bf2d835313d8757ab2c81dca9ce15ce7b1cdd5c2a217f2e037",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/12",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/smoke/bytes_and_strings.sol",
@@ -2401,9 +2401,9 @@
     }
    },
    "after": {
-    "reportSha256": "36e831f5e2e24f47db26abc120778657b310b3c2f438dcad162cc0efc96472ee",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/13",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "2e554ee4a3eb66eac5fc2283fa5536e611b3016cbaa46cbdea135418dd09e00a",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/13",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/strings/concat/string_concat_nested.sol",
@@ -2466,9 +2466,9 @@
     }
    },
    "after": {
-    "reportSha256": "2c4ec98987b1a28890326c3f7b83b666214d9ea02bc749ee0cedd57086b18eae",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/14",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "21ca710ca4327d497af786044ddc3c735f6a785f409b5f81dd09db990a8f504e",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/14",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/cleanup/enum_v1.sol",
@@ -2493,9 +2493,9 @@
     }
    },
    "after": {
-    "reportSha256": "151b84cabc2391e14d8952549d847b178a298c6a234a988877f9e7b98491f401",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/15",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "ce5c93fce9b6e21ccdf6f6c47fde35fc592438470dead789455c1e305b053637",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/15",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/cleanup/enum_v2.sol",
@@ -2541,22 +2541,22 @@
     }
    },
    "after": {
-    "reportSha256": "bda74683437c92665a2796770cceadc36344cc44c46fcaac4829098e7a08e2db",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/16",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "7c78a0f2450179722ccf427cc73557b11b4d7558159799f8849d59ebaed3cbd0",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/16",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v1.sol",
        "observed": [
@@ -2567,6 +2567,30 @@
          "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000fffe",
          "failed": false,
          "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000fffe0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(uint16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(uint16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000ffff",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ffff0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(uint16,uint16)",
+         "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ffff0000000000000000000000000000000000000000000000000000000000000001"
         }
        ]
       }
@@ -2675,9 +2699,9 @@
     }
    },
    "after": {
-    "reportSha256": "21aa6eeb6e2c130b60af7e337b84c9a0357297a6720241b6b9ad873da5b987a5",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/17",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "4a8d1f7dcd222b53ceef00becd1416f0368f5ad9d0fb803211fdd6073d565cb1",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/17",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v2.sol",
@@ -2800,25 +2824,42 @@
     }
    },
    "after": {
-    "reportSha256": "a84b31f8ae01190a7efb671cd8059de609b2aa1b17d15bc51ea3cae9289b78c6",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/18",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "493d345d66a358a7b4c1e063b62611dbc5ec1ea9f6f2163c1c1883370e8a1074",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/18",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(address)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000ffff1234567890123456789012345678901234567890"
+        },
+        {
+         "values": [],
+         "signature": "g(address)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000ffff1234567890123456789012345678901234567890"
+        }
+       ]
       }
      ]
     }
@@ -2893,9 +2934,9 @@
     }
    },
    "after": {
-    "reportSha256": "209bd6b5c31cb3ef04ae5f9693afcf165db2fde8bf2cf002877097cbceb78ce7",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/19",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "c939e70503317a3d28725cb355d622346032aaf6ac05f32495fde85b1970c11e",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/19",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v2.sol",
@@ -2986,25 +3027,34 @@
     }
    },
    "after": {
-    "reportSha256": "acb0e75a83adfb9ffbad4152b5285790ecc0359776d40fa345a63490cda223c6",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/20",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "260a9bcb7473b3163d6ff945b75a1271cf6ba3c1e3e1d2e1d43113d78535d4d2",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/20",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_bytes_types_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/cleanup/cleanup_bytes_types_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(bytes2,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x61626300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040102"
+        }
+       ]
       }
      ]
     }
@@ -3025,9 +3075,9 @@
     }
    },
    "after": {
-    "reportSha256": "880d8d2e6d0eb6073dac828d2d14f98bd2927d091f10a652cfd47552fcca80d9",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/21",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "5802ffcb6383561982bf3c7149cee4e5a56544492fbb95de73ad6854e87387eb",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/21",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/enums/enum_with_256_members.sol",
@@ -3218,9 +3268,9 @@
     }
    },
    "after": {
-    "reportSha256": "32a35cf099e6ed3488c3a16004100bd5efce071f4c564c473a7cf590bf8a1787",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/22",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "414c64c4f68e3dc5ac6a4a7f9fe4f24af9013c098b5e944502ea32192b88db24",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/22",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_signed_v1.sol",
@@ -3245,9 +3295,9 @@
     }
    },
    "after": {
-    "reportSha256": "e2da566032b378a6e28c87de4bf01a999c566dab9aea148fdf89846132d31194",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/23",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "86840deab3fd1bef67f34b2af39ca989660961419f272525dbdcf575d12d5280",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/23",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_signed_v2.sol",
@@ -3272,9 +3322,9 @@
     }
    },
    "after": {
-    "reportSha256": "fc02dea7c74d8da8cb88736e9e4de55ffc990fd1e3be1ef8bf893ecf4d2a619f",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/24",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "05584ad34c34eeb647587c0c461ed666bf23e235b2280ea12e5c7c4a8f235e62",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/24",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_v1.sol",
@@ -3299,9 +3349,9 @@
     }
    },
    "after": {
-    "reportSha256": "d9b66179428c1d3ccd423a58d51d15d1fa18f089323cac470e1a42b7f3b22f27",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/25",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "17e659756687992b56119e76d5ce14a078f6af48b76750e69f46ea9984c9aef1",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/25",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_v2.sol",
@@ -3338,25 +3388,66 @@
     }
    },
    "after": {
-    "reportSha256": "2b105bea31043cf5cdcf743bd1ba9cf6dfd4cd17132cb747d07e34d8d4e57008",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/26",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "720dcc11c0ccc7d9452decacb7af551ca04fb1c241d5a1811d9f2aaf1dcd874e",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/26",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff99",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcc",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe6",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000008"
+        }
+       ]
       }
      ]
     }
@@ -3479,9 +3570,9 @@
     }
    },
    "after": {
-    "reportSha256": "613fcc8d8af7b431682afcf0968213bef76327f3785f80024e3b0290e40c7196",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/27",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "c023b6af07f28c94da7272249363b3d3126e702a9c97c375f7050251a8ee7a70",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/27",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v2.sol",
@@ -3620,25 +3711,66 @@
     }
    },
    "after": {
-    "reportSha256": "60d54fe3d0be85d8720f43696b5a973aee1141f3d088a3108b5ec24a9ce3b96b",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/28",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "5f09ae5acd6d43ed63509c3edb6d8499677cb25ec2bbed659ceff7c2885fbf40",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/28",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff99",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcc",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe6",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000008"
+        }
+       ]
       }
      ]
     }
@@ -3761,9 +3893,9 @@
     }
    },
    "after": {
-    "reportSha256": "bd73580252160ebf61ff6c00529cd0a6ddd9efad627ee6940255e461b3bd8a4a",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/29",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "ae0116c23b9e4cd8b88255b9324ac670b7f84ead9aa58a34c05c472bf2ce51ab",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/29",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v2.sol",
@@ -3902,25 +4034,66 @@
     }
    },
    "after": {
-    "reportSha256": "a77df04ddfc937ce36dc0399d6ff0204dcd0d01d819e4820a04de655fb110b5f",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/30",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "cb455f31c260612feb41a03aedf8a7cea15b3a9dc526fab0da4c746d2083b79a",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/30",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff99",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcc",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe6",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000008"
+        }
+       ]
       }
      ]
     }
@@ -4043,9 +4216,9 @@
     }
    },
    "after": {
-    "reportSha256": "660c365a939074d7ee9ca43aec9157599cf0dfab798c677f44792987a6e3d36a",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/31",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "5c50c6b610a189ae3459336b9eed01829c35599d1756cddd5f6279df541ad461",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/31",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v2.sol",
@@ -4226,9 +4399,9 @@
     }
    },
    "after": {
-    "reportSha256": "c31d009662a5483bcb29a7230f76dbbee2df8b4a59947d70b1c6fa0739cdd5b0",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/32",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "89c3025da70f23824b6286a096467b02d3b0f6d5fbb68cc85b959b4c7e5400cb",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/32",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_underflow_negative_rvalue.sol",
@@ -4307,9 +4480,9 @@
     }
    },
    "after": {
-    "reportSha256": "d73e910fb03875e15c3ac5ed50a0a3d3419c968244279e077ccd1a1f1c5ace10",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/33",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "fd6f4bfa7a420dfb52b8970c7c6dc8f44b868760cc126048f18ed8bbee8e8814",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/33",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup.sol",
@@ -4334,9 +4507,9 @@
     }
    },
    "after": {
-    "reportSha256": "a1650e830a23b5dd82182fd87d051d382d6417125fa1904537115069224ba602",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/34",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "6e0c461892ba940eb5c4657928ee80b6eb3aa69e818442dd396219f4c2faab88",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/34",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup_abicoderv1.sol",
@@ -4767,9 +4940,9 @@
     }
    },
    "after": {
-    "reportSha256": "27ede7fe5294ab236f47cb1f41ab096011c38b55cb3196b36cad2d025914595b",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/35",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "a8aac10561d493ee1a9d321cf6d6649f22d235b3badf13bc21726205a18048ca",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/35",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion.sol",
@@ -5293,22 +5466,22 @@
     }
    },
    "after": {
-    "reportSha256": "fd013808c349e5be24b6fdf687cba3725bb52aff49ff780ed6679e62fc2c1954",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/36",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "8828fbbd2cf52d71c72b4040e3b4142fcf69b4ddd6b44b9160b8bb6adc59104c",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/36",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion_abicoderv1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion_abicoderv1.sol",
        "observed": [
@@ -5391,6 +5564,118 @@
          "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
          "failed": false,
          "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "h(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
+        },
+        {
+         "values": [],
+         "signature": "i(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000fa",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000fa"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
         }
        ]
       }
@@ -5413,9 +5698,9 @@
     }
    },
    "after": {
-    "reportSha256": "e1cec7aea1f114c5b9fc2dbfd8db7f3e69a17912493d23ebd7315ed5bf0a3b31",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/37",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "030c118cc672c2867e587b8a8c06587c6790fcfbf1b4be3e60126ee8ab2c7c26",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/37",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/parameter.sol",
@@ -5574,9 +5859,9 @@
     }
    },
    "after": {
-    "reportSha256": "e024f4bc1a9e05a9e3d4bb3347172f53ddf56ca84d231de5e8727d6b4a10a9d4",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/38",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "d95b95a3c8e5516c36af95f46820eac103ab0767b7516888f21f984329460e62",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/38",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
@@ -5965,9 +6250,9 @@
     }
    },
    "after": {
-    "reportSha256": "a031df3b2dd1ed2a4e8cf821d4c844a8cd6eb0ad55d0350d398c7482c98163e5",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/39",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "2ec937917579a62f53fae6594f93bda79f5a11114ac9b6baf6aa8364abb7646b",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/39",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_div_overflow.sol",
@@ -6660,9 +6945,9 @@
     }
    },
    "after": {
-    "reportSha256": "2d75e02766b27bacfbfbe60ef229327959369d3a5e0490644742cc0e8c15d7c1",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/40",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
+    "reportSha256": "668c84a1c4415a8b75d7d99359b0b3a88921e13eec74dd8500c5cf3b63713212",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/40",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
     "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_mul_overflow.sol",
@@ -7125,15 +7410,15 @@
     }
    },
    "after": {
-    "reportSha256": "612f30196a3359b20685558d5550b252c472b93d8bb17503795c22b48e5f22ba",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/41",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
-    "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
+    "reportSha256": "45f681d76480f0b839a9ed5cdf20f78a78097ec6a90bc56a10276a1e1d93c22a",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/41",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/function_entry_checks.sol",
      "stage": "lean-runtime",
      "status": "blocked",
-     "reason": "noncanonical ABI input requires ABI decoder replay"
+     "reason": "unsupported runtime expectation: h(), 1 ether -> 0"
     }
    }
   },
@@ -7152,10 +7437,10 @@
     }
    },
    "after": {
-    "reportSha256": "ce9ddc6ca855ce97e3ba4f32973a792f7310a934ce2c6eca34300d2fc7c092d4",
-    "outputDirectory": ".lake/upstream/cf1-fu2c/42",
-    "modelSha256": "67d513837bf9801ead59341e8c230683cf530b34b4197bf7eb1b46fc5179eea2",
-    "runnerSha256": "601170a2d06275d73267ff2f2f696876daa0ba1075ae115804b18a2bfeb7658d",
+    "reportSha256": "219dad4fca36cf1a0fb7402e976033ae7855cebac3be0ebc8db0c7b4bb7dc2cd",
+    "outputDirectory": ".lake/upstream/cf1-fu2c2/42",
+    "modelSha256": "64c5841f1266e35fa17032ec2af4990002ac156ec420b695ff7b3343ab7fbdf6",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/unary_operations.sol",
      "stage": "lean-runtime",
