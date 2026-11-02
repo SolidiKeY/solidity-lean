@@ -34,6 +34,37 @@ namespace Solidity.Frontend
 
 open Lean Elab Command Meta
 
+register_option sol.benchmark : Bool := {
+  defValue := false
+  descr := "emit wall-clock phase timings for imported Solidity verification"
+}
+
+register_option sol.benchmark.tactics : Bool := {
+  defValue := false
+  descr := "profile specification tactics (adds stack frames; prefer native diagnostics)"
+}
+
+private def benchmarkStart : CoreM (Option Nat) := do
+  if sol.benchmark.get (← getOptions) then return some (← IO.monoNanosNow)
+  return none
+
+private def benchmarkEnd (phase function : String) (start : Option Nat) : CoreM Unit := do
+  if let some start := start then
+    IO.eprintln ("SOLKEY_BENCH " ++ (Json.mkObj [
+      ("phase", toJson phase), ("function", toJson function),
+      ("nanos", toJson ((← IO.monoNanosNow) - start))]).compress)
+
+/-- Time a frontend command without changing its options or admission checks. -/
+elab "#solkey_benchmark " phase:str " in " cmd:command : command => do
+  let start ← liftCoreM benchmarkStart
+  try elabCommand cmd
+  finally liftCoreM <| benchmarkEnd phase.getString "" start
+
+elab "sol_benchmark " phase:str " in " tac:tactic : tactic => do
+  let start ← benchmarkStart
+  try Tactic.evalTactic tac
+  finally benchmarkEnd phase.getString "" start
+
 private def ImportRow.displayName (r : ImportRow) : String :=
   if r.sourceName.isEmpty then r.name else r.sourceName
 
@@ -67,6 +98,27 @@ private def elabClosed (t : Term) : TermElabM Expr := do
   let e ← Term.elabTerm t none
   Term.synthesizeSyntheticMVarsNoPostponing
   instantiateMVars e
+
+/-- A successful transitive audit of immutable imported declarations. Keeping
+its environment alive ties the memo to the same loaded module regions. Source
+and proof declarations are always traversed anew, even when their names recur. -/
+private initialize importedAudit : IO.Ref (Option (Environment × NameSet)) ← IO.mkRef none
+
+/-- Check the standard-axiom policy, reusing only successful imported closures.
+This returns a policy decision, not a complete axiom inventory. -/
+def usesOnlyStandardAxioms (name : Lean.Name) : CoreM Bool := do
+  let env ← getEnv
+  let cached ← importedAudit.get
+  let visited := match cached with
+    | some (old, visited) =>
+      if !env.header.moduleData.isEmpty && (unsafe ptrEq env.header.moduleData old.header.moduleData) then visited else {}
+    | none => {}
+  let (_, state) := ((CollectAxioms.collect name).run env).run { visited }
+  if state.axioms.all (standardAxioms.contains ·) then
+    let imported := state.visited.foldl (fun names n =>
+      if env.isImportedConst n && (env.checked.get.find? n).isSome then names.insert n else names) ({} : NameSet)
+    importedAudit.set (some (env.importEnv?.getD env, imported))
+  return state.axioms.all (standardAxioms.contains ·)
 
 /-- Whether the obligation `p` may hand control to a callee that calls back
 under `transferSemantics:noCallback` (`Fml.callsBack false`), run as compiled
@@ -220,6 +272,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
       let usedShared ← IO.mkRef false
       let attempt (share : Bool) : TermElabM (String × String × TailMode) :=
         withOptions (·.setBool `sol.prove.sharedResidues false) <| tryCatchRuntimeEx (do
+        let prepared ← benchmarkStart
         let C := mkConst N
         -- a specification's obligation, scoped
         let spec? ← if r.tag == .specified then do
@@ -240,9 +293,13 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
           | none => hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
         -- the callback reading (O7): a recursive call's frames read off one
         -- (`sol_no_callback`), not unrolled by `whnf`
+        benchmarkEnd "specification" r.name prepared
+        let callback ← benchmarkStart
         let obligation := spec?.getD (mkConst (f ++ `problem))
         let cb ← if recursive then pure !(← noCallbackRecE N obligation)
           else callsBackE N obligation
+        benchmarkEnd "callback" r.name callback
+        let prepared ← benchmarkStart
         let callbackTy (φ : Expr) : TermElabM Expr := do
           elabClosed (← `(ValidT (C := $(mkCIdent N))
             (.noCallback invariant[$(mkCIdent N)]) $(← Term.exprToSyntax φ)))
@@ -264,7 +321,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
           if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
           let name := f ++ `tested
           addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
-          unless (← collectAxioms name).all (standardAxioms.contains ·) do
+          unless ← usesOnlyStandardAxioms name do
             return ("pending", pendingMsg, .solc)
           return ("proved", "", .solc)
         if recursive then
@@ -285,7 +342,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
           if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
           let name := f ++ `tested
           addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
-          unless (← collectAxioms name).all (standardAxioms.contains ·) do
+          unless ← usesOnlyStandardAxioms name do
             return ("pending", pendingMsg, .solc)
           return ("proved", "", .solc)
         -- the clean-tails reading (O6): a plain obligation of a contract whose
@@ -313,6 +370,8 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
             pure (ty, ty)
         let g ← mkFreshExprSyntheticOpaqueMVar goalTy
         let selectedShare := share && testingShares goalTy.appArg!
+        benchmarkEnd "goal" r.name prepared
+        let search ← benchmarkStart
         trace[Solidity.Frontend.testingStrategy] "{r.name}: cb={cb} mode={repr mode} shared={selectedShare} head={goalTy.appArg!.getAppFn.constName?}"
         let goals ← if cb then do
             usedShared.set selectedShare
@@ -322,7 +381,9 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
                 |>.setBool `sol.prove.sharedResidues selectedShare) <|
               Tactic.run g.mvarId! (Tactic.evalTactic tac)
           else if r.tag == .specified then do
-            let tac ← `(tactic| sol_spec_try)
+            let tac ← if sol.benchmark.tactics.get (← getOptions) then
+                `(tactic| ((sol_benchmark "symbolic-execution" in sol_symex); all_goals ((sol_benchmark "closing-preparation" in sol_spec_prep); all_goals try (sol_benchmark "closing-solver" in sol_spec_finish))))
+              else `(tactic| sol_spec_try)
             Tactic.run g.mvarId! (Tactic.evalTactic tac)
           else do
             usedShared.set selectedShare
@@ -344,6 +405,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
             else
               let some s ← out.get | throwError "search did not run"
               pure s.open_
+        benchmarkEnd "search" r.name search
         unless goals.isEmpty do
           if r.tag == .specified && !cb then
             if let some output := counterexampleOutput then
@@ -355,12 +417,19 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
               pure ("open proof goals\n" ++ "\n\n".intercalate messages)
             else pure "open proof goals"
           return ("pending", detail, mode)
+        let instantiated ← benchmarkStart
         let proof ← instantiateMVars g
+        benchmarkEnd "instantiate" r.name instantiated
         if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", mode)
         let name := f ++ `tested
+        let checked ← benchmarkStart
         withOptions (Elab.async.set · false) <|
           addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
-        unless (← collectAxioms name).all (standardAxioms.contains ·) do
+        benchmarkEnd "kernel" r.name checked
+        let audited ← benchmarkStart
+        let standard ← usesOnlyStandardAxioms name
+        benchmarkEnd "axioms" r.name audited
+        unless standard do
           return ("unsupported", "proof uses nonstandard axioms", mode)
         return ("proved", "", mode))
         fun e => return ("error", ← e.toMessageData.toString, ← modeRef.get)
@@ -433,7 +502,9 @@ def elabSolkeyTest : CommandElab := fun stx => do
       auditFields "notRun" "contract run interrupted")
   IO.FS.writeFile output (Json.arr results).pretty
   -- the tails reading (O6): clean where every function exposes nothing
+  let tailStart ← liftCoreM benchmarkStart
   let tail ← contractTailMode N allRows
+  liftCoreM <| benchmarkEnd "tails" "" tailStart
   for r in rows, i in [:rows.length] do
     let t0 ← IO.monoMsNow
     let witnessOutput ← IO.mkRef (none : Option Json)

@@ -35,7 +35,8 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
     const output='/output/result-'+(++sequence)+'-'+contract.id+'.json',namespace=`SolTests.«${contract.name}»`;
     const command=`#solkey_test ${namespace}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
-    const wrapper=`import Solidity.Frontend.Testing\nsolc_import "source.ast.json" hash ${compiled.hash} as ${namespace} testing\nsolc_scoped_problems ${namespace} decl\n${command}\n`;
+    const timed=(phase,command)=>options.benchmark?`#solkey_benchmark ${JSON.stringify(phase)} in ${command}`:command;
+    const wrapper=`import Solidity.Frontend.Testing\n${options.benchmark?'set_option sol.benchmark true\n':''}${timed('import',`solc_import "source.ast.json" hash ${compiled.hash} as ${namespace} testing`)}\n${timed('obligations',`solc_scoped_problems ${namespace} decl`)}\n${timed('test',command)}\n`;
     let timer;
     const checked=await Promise.race([
       request('check',{source:wrapper,files:{'/workspace/source.ast.json':compiled.text},outputs:[output]}),

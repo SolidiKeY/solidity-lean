@@ -9,6 +9,7 @@ let hasher;
 let inflate=bytes=>gunzipSync(bytes);
 const diagnostics=[];
 const stderr=[];
+const phases=[];
 const metrics={reads:0,cacheHits:0,compressedBytes:0,inflatedBytes:0,fetchMs:0,hashMs:0,inflateMs:0,prefetchMs:0,prefetchedBytes:0,directReads:0,fallbacks:0};
 const syncDigest=bytes=>hasher.init().update(bytes).digest('hex');
 const sha256=async bytes=>globalThis.crypto?.subtle?Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join(''):syncDigest(bytes);
@@ -44,7 +45,7 @@ async function boot(){
       instantiateWasm(imports,receive){WebAssembly.instantiate(wasm,imports).then(({instance,module})=>{wasm=undefined;receive(instance,module);}).catch(reject);return {};},
       onRuntimeInitialized:()=>resolve(globalThis.Module),onAbort:message=>reject(new Error(String(message))),
       print:line=>{try{const row=JSON.parse(line);if(row.severity)diagnostics.push(row);}catch{}},
-      printErr:line=>{stderr.push(String(line).slice(-2000));if(stderr.length>20)stderr.shift();postMessage({method:'log',message:String(line).slice(-2000)});}};
+      printErr:line=>{if(String(line).startsWith('SOLKEY_BENCH '))phases.push(JSON.parse(String(line).slice(13)));stderr.push(String(line).slice(-2000));if(stderr.length>20)stderr.shift();postMessage({method:'log',message:String(line).slice(-2000)});}};
     try{(0,eval)(new TextDecoder().decode(js));}catch(error){reject(error);}finally{js=undefined;}
   });
   if(Module.ccall('browser_identity','string',[],[])!=='4.24.0|797c613eb9b6d4ec95db23e3e00af9ac6657f24b|64|64')throw new Error('Loaded kernel identity or library layout does not match the pin');
@@ -133,7 +134,7 @@ onmessage=async event=>{
     const started=performance.now();
     const previous={...metrics};
     await prepareLibraries();
-    diagnostics.length=0;stderr.length=0;
+    diagnostics.length=0;stderr.length=0;phases.length=0;
     for(const [path,text]of Object.entries(params.files||{})){
       if(!path.startsWith('/workspace/')||path.includes('..')||typeof text!=='string')throw new Error('Invalid proof input');
       mkdir(Module.FS,path);Module.FS.writeFile(path,text);
@@ -143,7 +144,7 @@ onmessage=async event=>{
     try{code=Module.ccall('browser_check','number',['string','string'],[params.source,'/workspace/BrowserCheck.lean']);}finally{releasePrefetched();}
     const outputs={};for(const path of params.outputs||[])if(Module.FS.analyzePath(path).exists){try{outputs[path]=Module.FS.readFile(path,{encoding:'utf8'});}finally{Module.FS.unlink(path);}}
     const libraries=Object.fromEntries(Object.entries(metrics).map(([key,value])=>[key,value-previous[key]]));
-    postMessage({id,result:{code,diagnostics:diagnostics.splice(0),stderr:stderr.splice(0),outputs,timings:{checkMs:performance.now()-started,libraries}}});
+    postMessage({id,result:{code,diagnostics:diagnostics.splice(0),stderr:stderr.splice(0),outputs,timings:{checkMs:performance.now()-started,libraries,phases:phases.splice(0)}}});
   }catch(error){
     const stackLimit=(error instanceof RangeError||error instanceof WebAssembly.RuntimeError)&&/maximum call stack|call stack exhausted|too much recursion/i.test(error.message);
     postMessage({id,error:{message:stackLimit?'Browser proof checking exceeded its call-stack limit. No proof result was accepted.':error.message||String(error),code:stackLimit?'BROWSER_STACK_LIMIT':undefined,stack:error.stack,stderr:stderr.slice()}});

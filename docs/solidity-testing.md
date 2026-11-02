@@ -242,3 +242,12 @@ contracts, true and false specifications, box versus diamond on revert,
 internal/skip tags, unsupported assembly, omitted initializers (an error, not
 a silent omission), function-level invariants refused, `payable` kept,
 checkpointing on timeout, selection and listing.
+
+## Performance measurement
+
+`set_option sol.benchmark true` emits wall-clock phase events, including proof
+search, kernel checking and axiom audit. See the [matched simple-program
+measurements](browser-simple-benchmarks.md) for timings, cache boundaries and
+reproduction commands. The audit policy reuses only successfully checked imported
+closures from the same loaded modules; source and proof declarations remain
+freshly audited. Exact counterexample axiom inventories are not memoized.

@@ -8,6 +8,7 @@ require(path.join(path.dirname(require.resolve('playwright-core/package.json')),
 const {createStaticServer}=require('../tools/serve-static.cjs');
 const single=process.argv.includes('--single'),artifacts=path.resolve(__dirname,'../artifacts');
 const calldataProofs=process.argv.includes('--calldata-proofs');
+const benchmark=process.argv.includes('--benchmark');
 async function main(){
   const app=createStaticServer({port:0,...(single?{root:path.resolve(__dirname,'../single-file')}:{} )}),url=await app.listen();
   fs.mkdirSync(path.join(artifacts,'browser-profiles'),{recursive:true});
@@ -28,8 +29,9 @@ async function main(){
     await page.evaluate(()=>solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel()));
     const expected=[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','pending']];
     async function verify(label,expected,options={}){
-      const start=performance.now();const result=await page.evaluate(options=>solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId(),...options}),options);
+      const start=performance.now();const result=await page.evaluate(options=>solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId(),...options}),{benchmark,...options});
       assert.deepEqual(result.errors,[]);const statuses=result.results.map(r=>[r.function,r.status]);assert.deepEqual(statuses,expected);
+      if(benchmark&&!options.listing)assert.equal(result.timings.kernelChecks.flatMap(check=>check.phases.filter(phase=>phase.phase==='search')).length,expected.filter(([,status])=>status==='proved'||status==='pending').length,'keep every function timing beyond the diagnostic log tail');
       const elapsedMs=performance.now()-start;
       const sourceHash=createHash('sha256').update(await page.evaluate(()=>solidityIDE.editor.getValue())).digest('hex');
       for(const row of result.results)assert.equal(row.sourceHash,sourceHash,'each result must belong to the exact edited source');

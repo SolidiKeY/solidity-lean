@@ -137,3 +137,10 @@ selects the probe's JSON output. `node web/test/compare.cjs REFERENCE.png WEB.pn
 creates a side-by-side image and measured diff.
 
 See [the design and comparison record](../docs/web-ide.md).
+
+Small-program measurements against the actual pinned Java SolKey prover, native
+Lean, and this browser build are recorded in
+[the detailed comparison](../docs/browser-simple-benchmarks.md).
+`node web/test/measure-simple.cjs --single` performs fresh checks with phase
+timings. `node web/test/performance.cjs --single --benchmark` also verifies
+that multi-function phase events survive the bounded diagnostic log.

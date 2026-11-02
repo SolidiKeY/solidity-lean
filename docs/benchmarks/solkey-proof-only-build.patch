@@ -1,0 +1,74 @@
+diff --git a/keyext.solidity.core/build.gradle b/keyext.solidity.core/build.gradle
+index 1bbfb6f..5716ae8 100644
+--- a/keyext.solidity.core/build.gradle
++++ b/keyext.solidity.core/build.gradle
+@@ -39,8 +39,6 @@ dependencies {
+ 
+     // The in-process EVM the `runtime` package drives: `--solc` runs a function on it, and
+     // SolidityRuntimeExecutionTest cross-checks every example against it.
+-    implementation('org.hyperledger.besu:evm:24.12.2')
+-    implementation('org.hyperledger.besu:besu-datatypes:24.12.2')
+     implementation('io.tmio:tuweni-bytes:2.4.2')
+     implementation('io.tmio:tuweni-units:2.4.2')
+     implementation('org.bouncycastle:bcprov-jdk18on:1.78.1')
+@@ -380,3 +378,5 @@ tasks.named('shadowJar') {
+     finalizedBy('stageGraalCompiler')
+ }
+ 
++
++sourceSets.main.java.exclude("org/key_project/solidity/runtime/**")
+diff --git a/keyext.solidity.core/src/main/java/org/key_project/solidity/CLI.java b/keyext.solidity.core/src/main/java/org/key_project/solidity/CLI.java
+index 7d076f0..97b5341 100644
+--- a/keyext.solidity.core/src/main/java/org/key_project/solidity/CLI.java
++++ b/keyext.solidity.core/src/main/java/org/key_project/solidity/CLI.java
+@@ -26,7 +26,6 @@ import org.key_project.solidity.proof.init.SolidityProblemSynthesizer;
+ import org.key_project.solidity.proof.io.LoadErrors;
+ import org.key_project.solidity.proof.io.OutputStreamProofSaver;
+ import org.key_project.solidity.proof.io.ProofSaver;
+-import org.key_project.solidity.runtime.SolidityRuntimeCheck;
+ 
+ import picocli.CommandLine;
+ import picocli.CommandLine.Option;
+@@ -417,41 +416,7 @@ public class CLI {
+ 
+     /// Runs the selected functions on an EVM and prints one line each, `N/M ok` last.
+     private static boolean runOnEvm(CLI cli, Path f) {
+-        final List<SolidityRuntimeCheck.Verdict> verdicts;
+-        try {
+-            verdicts = SolidityRuntimeCheck.run(f, cli.contract, cli.function);
+-        } catch (Exception e) {
+-            cli.reportError("running", e);
+-            return false;
+-        }
+-        if (verdicts.isEmpty()) {
+-            System.out.println("no function to run");
+-            return true;
+-        }
+-        int skipped = 0;
+-        List<String> failures = new ArrayList<>();
+-        for (SolidityRuntimeCheck.Verdict verdict : verdicts) {
+-            boolean good = verdict.outcome() == SolidityRuntimeCheck.Outcome.OK;
+-            final String label;
+-            if (good) {
+-                label = "OK   ";
+-            } else if (verdict.outcome() == SolidityRuntimeCheck.Outcome.SKIPPED) {
+-                skipped++;
+-                label = "SKIP ";
+-            } else {
+-                failures.add(verdict.function() + " (" + verdict.describe() + ")");
+-                label = "FAIL ";
+-            }
+-            if (!cli.quiet || !good) {
+-                System.out.println(label + verdict.function()
+-                        + (good ? "" : " — " + verdict.describe()));
+-            }
+-        }
+-        int ran = verdicts.size() - skipped;
+-        System.out.println((ran - failures.size()) + "/" + ran + " ran without a failing assert"
+-            + (skipped > 0 ? " (" + skipped + " not run)" : ""));
+-        printFailures(failures);
+-        return failures.isEmpty();
++        throw new UnsupportedOperationException("EVM execution is absent from this proof-only benchmark build");
+     }
+ 
+     private static void printFailures(List<String> failures) {
