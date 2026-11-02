@@ -9,12 +9,15 @@ def main():
     env=os.environ; status=env.get("HANDOFF_STATUS","partial")
     if status not in ("done","partial","blocked"): raise ValueError("invalid status")
     root=git("rev-parse","--show-toplevel"); base=git("rev-parse","--verify",env.get("HANDOFF_BASE","origin/master")+"^{commit}"); head=git("rev-parse","HEAD"); merge=git("merge-base",base,head)
-    gates=[]
+    gates=[]; stale=[]
     for d in filter(None,env.get("HANDOFF_GATES","").split(":")):
+        h=pathlib.Path(d)/"HEAD"
+        if h.is_file() and h.read_text().strip()!=head: stale.append(d)
         for row in (pathlib.Path(d)/"gates.tsv").read_text().splitlines():
             st,name,seconds,evidence,command=row.split("\t",4)
             if st not in ("PASS","FAIL"): raise ValueError("invalid gate status")
             gates.append(dict(gate=name,command=command,status=st.lower(),seconds=float(seconds),evidence=evidence))
+    if status=="done" and stale: raise ValueError("done refused: gates ran on another commit: "+" ".join(stale))
     if status=="done" and (not gates or any(g["status"]!="pass" for g in gates) or git("status","--porcelain","--untracked-files=no")): raise ValueError("done requires passing gates and a clean tracked tree")
     changed=[]; deleted=[]
     for row in git("diff","--name-status","--no-renames",merge,head).splitlines():
@@ -27,8 +30,8 @@ def main():
     checkpoints=[]
     for item in filter(None,env.get("HANDOFF_CHECKPOINTS","").split(",")):
         name,st=item.split("=",1); checkpoints.append(dict(name=name,status=st))
-    out=pathlib.Path(env.get("HANDOFF_OUT",root)).resolve(); out.mkdir(parents=True,exist_ok=True); md=out/"HANDOFF.md"
-    notes=pathlib.Path(sys.argv[1]).read_text() if len(sys.argv)==2 else ""
+    out=pathlib.Path(env.get("HANDOFF_OUT") or pathlib.Path(env.get("TMPDIR","/tmp"))/("coord-handoff-"+head[:12])).resolve(); out.mkdir(parents=True,exist_ok=True); md=out/"HANDOFF.md"
+    notes=pathlib.Path(sys.argv[1]).read_bytes().decode() if len(sys.argv)==2 else ""
     result=dict(batch=env.get("HANDOFF_BATCH",""),slug=env.get("HANDOFF_SLUG",""),status=status,branch=git("branch","--show-current"),base=base,head=head,repository=root,commits=commits,modules_changed=sorted(changed),modules_deleted=sorted(deleted),checkpoints=checkpoints,gates=gates,notes=notes,questions=[],artifacts=dict(handoff=str(md)))
     body=json.dumps(result,indent=2,ensure_ascii=False)+"\n"
     md.write_text("# Handoff\n\n"+"\n".join(c["sha"]+" "+c["subject"] for c in commits)+"\n\n```json\n"+body+"```\n\n"+notes)
