@@ -1697,7 +1697,7 @@ expectation, outside this lane).
 | `abicoder/cleanup/enum_v2.sol`, `operators/shifts/shift_right_garbled{,_signed}_v{1,2}.sol`, `userDefinedValueType/{cleanup,cleanup_abicoderv1,parameter}.sol`, `viaYul/unary_operations.sol` | raw ABI replay with physical calldata/memory assembly not adapted | exclusion: inline assembly building raw calldata |
 | `viaYul/function_entry_checks.sol` | unsupported runtime expectation: `h(), 1 ether -> 0` | runner: call values in runtime expectations |
 
-### Handoff (lane FU2-C → `fu2-testsuite-closer`)
+### Handoff (withdrawn: closed in FU2-C round 2, see `docs/assurance.md`, test 31)
 
 Test 31's slice rows after FU2-C: `slicePast` proves; `sliceRead` and
 `sliceOfSlice` reach `sol_close` with valid leaves but exceed its budget.
@@ -1747,3 +1747,16 @@ blocked on its next reason. `enums/enum_with_256_members.sol` ended once
 with "Lean process ended before checkpoint" while other Lean tests ran on
 the same machine; rerun alone into the same directory with the same runner
 it is working, as before.
+
+### Lane FU2-C, round 2 (coordinator follow-up)
+
+* **Test 31 slice rows prove** within the default budget: `#sliceIndex`
+  reads a literal or `uint256` name index without a copy, and `sliceOpen`
+  drops the always-true `len <= len` check of a view to the end; record in
+  `docs/assurance.md` (test 31). Lowering only; outcomes unchanged (the
+  dropped check holds by construction, the index is evaluated once).
+* **`smoke/bytes_and_strings.sol` works** (both pipelines): the entry return
+  adapter (`Tools/EntryReturn.lean`, `admitted`, `byteRets`) admits any mix
+  of primitive and `bytes`/`string` memory returns, each with its byte
+  markers; `serialize` already encoded every return local in order
+  (`(string, string)`, `(string, uint, string)`).

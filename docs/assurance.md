@@ -269,8 +269,15 @@ and CI showed the same failures without them).
   prove within budget, so do a view at offset 0 and a view read at a literal
   index; a view at offset 1 or 2 read at a symbolic index times out
   (`xs[1:]`, `t[q] == xs[1 + q]`), and so does `t.length == xs.length - 1`.
-  Handed to `fu2-testsuite-closer` (closer cost through the view's base
-  alias), see `docs/feature-work/abi-hashes.md`, "Handoff".
+  **Closed within the default budget (FU2-C round 2):** profiling the leaf
+  with slice-free stand-ins showed two lowering artefacts, each harmless
+  alone and together too costly for `sol_close_eval`: the copy of the view's
+  index (`se2 := k`) beside the bounds premises, and the trivially true check
+  `len <= len` of a view to the end (`xs[1:]`). `#sliceIndex` now reads a
+  literal or `uint256` name index as it stands (nothing is evaluated between
+  the check and the read), and `sliceOpen` (`Syntax/Elab/Context.lean`) does
+  not emit `e <= len` when `e` is the outer length. Test 31: `sliceRead`,
+  `sliceOfSlice`, `slicePast` prove (no heartbeat change, no closer change).
 * **44** (`a48fd85f`): in the testing import a specification that does not
   parse became a `solidity.specificationSyntax` scope rejection, raised
   before the named refusal "ledger locations in assignable clauses are not
