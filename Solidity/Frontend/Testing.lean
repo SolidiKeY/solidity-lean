@@ -99,9 +99,10 @@ private def elabClosed (t : Term) : TermElabM Expr := do
   Term.synthesizeSyntheticMVarsNoPostponing
   instantiateMVars e
 
-/-- A successful transitive audit of immutable imported declarations. Keeping
-its environment alive ties the memo to the same loaded module regions. Source
-and proof declarations are always traversed anew, even when their names recur. -/
+/-- A successful transitive audit of immutable imported declarations. The memo
+is reused only for the same imports (equal module names and imported-constant
+count), which a process cannot change. Source and proof declarations are always
+traversed anew, even when their names recur. -/
 private initialize importedAudit : IO.Ref (Option (Environment × NameSet)) ← IO.mkRef none
 
 /-- Check the standard-axiom policy, reusing only successful imported closures.
@@ -111,7 +112,8 @@ def usesOnlyStandardAxioms (name : Lean.Name) : CoreM Bool := do
   let cached ← importedAudit.get
   let visited := match cached with
     | some (old, visited) =>
-      if !env.header.moduleData.isEmpty && (unsafe ptrEq env.header.moduleData old.header.moduleData) then visited else {}
+      if !env.header.moduleNames.isEmpty && env.header.moduleNames == old.header.moduleNames
+          && env.constants.map₁.size == old.constants.map₁.size then visited else {}
     | none => {}
   let (_, state) := ((CollectAxioms.collect name).run env).run { visited }
   if state.axioms.all (standardAxioms.contains ·) then
