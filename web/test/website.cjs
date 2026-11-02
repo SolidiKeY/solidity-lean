@@ -1,13 +1,13 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
-// Retain at most 1,000 old protocol objects instead of 10,000. Offline imports
+// Retain at most 100 old protocol objects instead of 10,000. Offline imports
 // generate thousands of asset requests; assertions consume their events live.
-require(path.join(path.dirname(require.resolve('playwright-core/package.json')),'lib/coreBundle.js')).server.setMaxDispatchersForTest(1000);
+require(path.join(path.dirname(require.resolve('playwright-core/package.json')),'lib/coreBundle.js')).server.setMaxDispatchersForTest(100);
 const {createStaticServer}=require('../tools/serve-static.cjs');
 const artifacts=path.resolve(__dirname,'../artifacts');
 const withProofs=process.argv.includes('--proofs');
-const report={proofs:withProofs,startedAt:new Date().toISOString(),checks:[],webSockets:[],requests:[],errors:[]};
+const report={proofs:withProofs,startedAt:new Date().toISOString(),assetBuild:JSON.parse(fs.readFileSync(path.resolve(__dirname,'../dist/asset-manifest.json'),'utf8')).build,protocolHistoryLimit:100,checks:[],webSockets:[],requests:[],errors:[]};
 async function main(){
   const app=createStaticServer({port:0}),url=await app.listen();let serverClosed=false;
   // Private contexts keep CacheStorage in RAM. Use a disposable disk-backed
@@ -49,7 +49,7 @@ async function main(){
     });
     if(!withProofs)await check('compiler success never silently claims a kernel proof',async()=>{await page.evaluate(()=>solidityIDE.openFile('Counter.sol'));if(!fs.existsSync(path.resolve(__dirname,'../dist/lean/manifest.json'))){const proof=await page.evaluate(async()=>{try{return await solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId()});}catch(error){return {error:error.message};}});assert.match(proof.error,/proof runtime is not installed/);}assert.equal(await page.evaluate(()=>solidityIDE.state.reports.size),0);});
     if(withProofs){
-      await check('the exact Lean kernel boots entirely in a browser worker',async()=>{await page.waitForFunction(()=>solidityIDE.state.runtime.proofReady,{timeout:600000});assert.equal(await page.evaluate(()=>solidityIDE.state.runtime.lean),'4.24.0');});
+      await check('the exact Lean kernel boots entirely in a browser worker',async()=>{await page.waitForFunction(()=>solidityIDE.state.runtime.proofReady||solidityIDE.state.runtime.error,{timeout:600000});report.runtime=await page.evaluate(()=>solidityIDE.state.runtime);assert.equal(report.runtime.proofReady,true,report.runtime.error);assert.equal(report.runtime.lean,'4.24.0');});
       await check('real browser proofs match the extension and a false specification stays pending',async()=>{
         await page.evaluate(()=>solidityIDE.openFile('Counter.sol'));report.proofTrials=[];
         for(let trial=0;trial<2;trial++){const start=performance.now();const result=await page.evaluate(()=>solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId()}));report.proofTrials.push({elapsedMs:+(performance.now()-start).toFixed(1),report:result});assert.deepEqual(result.errors,[]);assert.deepEqual(result.results.map(r=>[r.function,r.status]),[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','pending']]);}

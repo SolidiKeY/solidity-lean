@@ -66,8 +66,8 @@ replay an explicit cancellation or a failing job indefinitely.
 is development tooling and is excluded from deployment. Static builds force
 browser mode even for a URL containing `?backend=native`.
 
-The tested artifact contains 773.6 MiB of assets, including 1,822 proof-library
-modules (2,445.1 MiB serialized, compressed per module). The first visit caches
+The tested artifact contains 773.7 MiB of assets, including 1,822 proof-library
+modules (2,445.3 MiB serialized, compressed per module). The first visit caches
 the complete manifest before opening Monaco. A missing manifest, failed asset
 or storage quota error prevents an incomplete cache from announcing readiness.
 Installation failures surface visibly rather than waiting forever. Build-specific
@@ -92,6 +92,9 @@ WebAssembly tail calls and 64-bit integer operations.
 
 ## Measured validation
 
+Validation uses the `c6c33c90` frontend baseline after a fresh 264-job rebuild.
+Reports record both the static artifact and proof-runtime hashes.
+
 Fourteen real Chromium checks pass with every WebSocket constructor forbidden,
 zero external requests and zero uncaught page errors. They cover compilation,
 rename/formatting, imported definitions, closed sibling refactoring, missing
@@ -108,15 +111,15 @@ regressions also passed during implementation.
 
 | Observation | Real VS Code extension | Browser website |
 |---|---:|---:|
-| First measured verification | 8,175.2 ms | 74,894.9 ms |
-| Repeated checked-result lookup | 173.4 / 147.1 ms | 146.5 ms |
+| First measured verification | 8,957.6 ms | 85,463.9 ms |
+| Repeated checked-result lookup | 162.5 / 152.8 ms | 73.5 ms |
 | `increment()`, `reset()`, `one()` | proved | proved |
 | `openGoal()` | pending | pending |
 | Pending diagnostic and source range | identical | identical |
 
 Browser cold verification includes the first library import. Fresh verification
-after stopping the server and reloading offline took 74,139 ms. Editor readiness
-was 8,676.3 ms in the functional run and 11,753.4 ms in the comparison run,
+after stopping the server and reloading offline took 80,353.2 ms. Editor readiness
+was 9,580.2 ms in the functional run and 12,100.6 ms in the comparison run,
 including complete first-visit asset caching. Native scripted editor-readiness
 includes navigation and is not used as a startup benchmark. These are observations
 from one local environment with prepared artifacts, not performance guarantees.
@@ -150,5 +153,5 @@ The writer lock is held throughout changes and checks. Heavy jobs run sequential
 This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap
 and an available-memory guard; browser QA uses an owned-process RSS/available-memory
 watchdog with the required 12-GiB host reserve. The complete browser run peaked
-at 4.82 GiB aggregate RSS. Task-owned profiles/reference files were moved off the
+at 4.69 GiB aggregate RSS. Task-owned profiles/reference files were moved off the
 RAM disk. Interrupted resource/stack-overflow attempts are not passing checks.

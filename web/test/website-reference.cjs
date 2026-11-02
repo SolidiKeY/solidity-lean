@@ -2,7 +2,7 @@
 // Capture a fresh, real browser-only proof state matching the isolated extension.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
-require(path.join(path.dirname(require.resolve('playwright-core/package.json')),'lib/coreBundle.js')).server.setMaxDispatchersForTest(1000);
+require(path.join(path.dirname(require.resolve('playwright-core/package.json')),'lib/coreBundle.js')).server.setMaxDispatchersForTest(100);
 const {createStaticServer}=require('../tools/serve-static.cjs');
 const artifacts=path.resolve(__dirname,'../artifacts');
 async function main(){
@@ -19,6 +19,7 @@ async function main(){
     const start=performance.now();await page.goto(url);
     await page.waitForFunction(()=>window.solidityIDE?.state.connected&&(solidityIDE.state.runtime.proofReady||solidityIDE.state.runtime.error),{timeout:600000});
     assert.equal(await page.evaluate(()=>solidityIDE.state.runtime.proofReady),true,await page.evaluate(()=>solidityIDE.state.runtime.error));
+    result.runtime=await page.evaluate(()=>solidityIDE.state.runtime);result.assetBuild=JSON.parse(fs.readFileSync(path.join(__dirname,'../dist/asset-manifest.json'),'utf8')).build;
     await page.evaluate(()=>solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel()));
     result.startupMs=+(performance.now()-start).toFixed(1);
     result.source=await page.evaluate(()=>solidityIDE.editor.getValue());

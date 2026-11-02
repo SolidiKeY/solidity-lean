@@ -48,7 +48,7 @@ invalidates displayed results.
 `SOLIDITY_BROWSER_LEAN` may point to an existing packaged browser runtime.
 The proof runtime needs a modern desktop browser with WebAssembly tail calls and
 64-bit integer operations. Its linear-memory limit is 4 GiB; the complete QA tree
-peaked at 4.82 GiB aggregate RSS. The browser does not need the Memory64 proposal.
+peaked at 4.69 GiB aggregate RSS. The browser does not need the Memory64 proposal.
 A compiler-only development build is possible without Lean assets; it explicitly
 disables proof controls and never treats Solidity compilation as a proof.
 
@@ -72,9 +72,9 @@ requests were recorded. The actual extension and browser produce the same three
 proved functions, pending function, and positioned diagnostic. The captured
 workbenches differ by 2.09% overall and 0.02% in the code region.
 
-Cold verification took 8.18 seconds in the extension and 74.9 seconds in the
+Cold verification took 8.96 seconds in the extension and 85.5 seconds in the
 browser, including its first proof-library import. Repeated checked-result
-lookups took about 0.15 seconds in both. These are local observations with
+lookups took under 0.2 seconds in both. These are local observations with
 prepared artifacts, not general performance guarantees.
 
 The browser port also runs 3,500 differential expression-traversal cases against
