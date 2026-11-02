@@ -181,3 +181,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SingletonCopyInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Evm/MemoryLoopHorizonControls.lean` | Populated aliased-memory interface witness at arbitrary horizons; zero/one-turn exit and pending-versus-divergence controls. |
 | `Evm/MemoryLoopHorizonAllocControls.lean` | Reached allocation and allocation-before-revert horizon witnesses using the existing owner allocator fixture. |
+| `Evm/MemoryLoopFiniteHorizonControls.lean` | Forever-allocating loop with real finite room but impossible all-prefix room; exact cursor/count, false-exit and full-cursor preparation controls. |
