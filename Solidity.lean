@@ -801,6 +801,7 @@ import Solidity.Calculus.DecisionNumericStages
 import Solidity.Calculus.DecisionNumericCompiler
 import Solidity.Calculus.DecisionHaltingOrReason
 import Solidity.Calculus.DecisionHaltingOrBoundary
+import Solidity.Calculus.DecisionHaltingOrCertificate
 import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericNormalization
 import Solidity.Calculus.DecisionResidueReasons
@@ -893,6 +894,7 @@ import Solidity.Examples.DecisionNumericFlatten
 import Solidity.Examples.DecisionNumericStages
 import Solidity.Examples.DecisionNumericCompiler
 import Solidity.Examples.DecisionHaltingOrReason
+import Solidity.Examples.DecisionHaltingOrCertificate
 import Solidity.Examples.DecisionNumericTraversal
 import Solidity.Examples.DecisionNumericNormalization
 import Solidity.Examples.DecisionResidueReasons

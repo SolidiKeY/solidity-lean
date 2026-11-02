@@ -4241,3 +4241,53 @@ inventory changes. No new finding or expected-inventory edit is introduced.
 Bounded KeySort passes in 1.023272s with the actual 377/131 output and the pinned
 Lean/Lake versions. The full goal remains incomplete. Exact-head packaging
 is pending the following source commit.
+
+
+### Positive-key partial-OR source certificate increment (2026-11-02)
+
+Parent `6d601aa8e20e76e894a32cdea4d86be2ab567c87`; integration base remains
+`a3205e6a1a1be1471fa0dc91688eca032d8acd85`. This is an independently useful
+AU01 source-certificate increment, not the full Residue theorem or an AU02
+pipeline improvement. No walk, guard recognizer or verdict route changes.
+
+`Solidity/Calculus/DecisionHaltingOrCertificate.lean` proves, for every
+contract C, typed PartialOrRoots C, binder names, value and strictly positive
+uint key, validity of the actual sourceClaim whose result equals its block
+value. `sourceGuard_positive` chooses the second binder zero: key <= 0 is
+false, AND bypasses checked scalar subtraction, and OR evaluates key <= key.
+`sourceClaim_positive_valid`, `PartialOrBlockAt.valid_positive` and
+`PartialOrBlockAt.validH_positive` retain the exact source equation and
+matching result literal. Hash transport uses existing hashFree and holdsH_iff;
+there is no scalar-definedness or extra hash-model premise.
+
+`Solidity/Examples/DecisionHaltingOrCertificate.lean` supplies generic clients,
+keys one/two, and initial_block: the antecedent holds in an actual intrinsic
+initial state for every binder pair. The zero-key guard halts at the stated
+initial-state assignment. That is neither invalidity of the zero-key claim
+nor a proof that positivity is necessary. The original false-claim countermodel,
+unknown controls and APF refusal proofs remain byte-for-byte unchanged.
+
+Before implementation, the exact source-shaped baseline reproduced target=true,
+Covered=false and interpreted unknown (5.295853s). Two failed draft probes
+(wrong Surface path, then insufficient rfl reduction of Covered/verdict) remain
+raw evidence. Final core MCP passes 3.155464s/build 2.093133s; finalized client
+build passes 8.608177s after observed private read-only cache aliases were
+materialized, MCP passes 12.113983s without errors/warnings. Earlier failed
+diagnostics/builds and the unsuccessful direct initial-map rfl remain raw.
+The twelve public axiom reports pass 3.189104s, only propext/Classical.choice/
+Quot.sound. KeySort passes 1.015942s with the actual pinned Lean/Lake versions.
+All runs retain explicit -j1/thread1, 12 GiB child hard cap/no swap, 12 GiB host
+reserve, aggregate RSS samples and original writer lock; no LSP/build overlap.
+
+Independent read-only finder and skeptic used no Lean/server/build and found
+no logical issue. The skeptic requested explicit antecedent inhabitance; the
+added initial_block was reviewed without findings. Shared root/module-map
+registrations are narrow additive hunks. Evidence directory and intended
+exact-head export location: `/workspace/va1-evidence/partial-or-next`.
+
+Per H12, this increment uses touched-module diagnostics/builds and public axiom
+reports. Full build/TestSuite/docs/strict/trust/cumulative gates are deferred
+to the next lane checkpoint, not rerun each turn. Earlier full resource failures,
+86 documentation findings and 438 unrecorded axiom-inventory changes remain
+unresolved prior checkpoint results, not current passes. All original open
+AU01/AU02/backfill obligations above remain open. No AU05, publication or push.
