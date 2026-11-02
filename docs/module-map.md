@@ -1659,10 +1659,15 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Lowering/P9/ProgramAdmission.lean` | `WholeProgram.check` and `check_sound`: a closed allowlist checked against the elaborated program derives `CallsOK`. |
 | `Lowering/P9/FunctionCatalog.lean` | `functions`/`checkFunctions`: the complete function catalogue of a unit. |
 | `Lowering/P9/CallControls.lean`, `Lowering/P9/AdmissionControls.lean`, `Lowering/P9/ProgramControls.lean`, `Lowering/P9/GraphControls.lean`, `Lowering/P9/RecursiveControls.lean`, `Lowering/P9/ReturnControls.lean`, `Lowering/P9/CatalogControls.lean` | Inhabited admission, two-function and recursive graphs, horizon timeouts, and refusals (no body, wrong return, missing leaf). |
+| `Lowering/P9/OverrideControls.lean` | An elaborated inherited override: dispatch of the base declaration selects the derived body. |
 | `Source/Preservation/Frames.lean`, `Source/Preservation/LocalFrames.lean`, `Source/Preservation/StatementFrames.lean`, `Source/Preservation/CallFrames.lean` | `MemOK` across `EM.sub`, scope and call frames; caller locals restored. |
 | `Source/Preservation/Reads.lean`, `Source/Preservation/ValueConversions.lean`, `Source/Preservation/ResultValidity.lean` | Reads, implicit conversions and result references preserve the invariant. |
 | `Source/Preservation/AllocationSites.lean`, `Source/Preservation/MemberPacking.lean`, `Source/Preservation/Encoding.lean`, `Source/Preservation/ArrayLiterals.lean` | Allocating string, struct, `abi.encode` and inline-array arms. |
 | `Source/Preservation/Combinators.lean`, `Source/Preservation/Expressions.lean`, `Source/Preservation/Statements.lean`, `Source/Preservation/Fragment.lean` | Joint all-horizon memory preservation (`fragMemAt`) for the existing call value fragment under `CallsOK`. |
+| `Source/Preservation/EncodingVariants.lean` | Preservation for every `abi.encode*` kind (`evalE_abiKind_mem`). |
 | `Source/Preservation/Controls.lean` and its `*Controls.lean` | Allocation, frame, caller-reference, storage-copy, array-literal and fragment controls. |
 | `Source/Progress/CheckedPrograms.lean` | Progress and memory preservation for elaborated programs with a checked complete catalogue. |
 | `Source/Progress/Controls.lean` | Contract-backed admission, memory-prefix consumer and refusal controls. |
+| `Source/Progress/BuiltinAdmission.lean`, `Source/Progress/ArithmeticBuiltins.lean`, `Source/Progress/RecoveryBuiltin.lean`, `Source/Progress/LiteralBuiltins.lean` | `BuiltinFragment` and progress of the nine implemented builtins on scalar and literal arguments (`checked_builtin`). |
+| `Source/Progress/EmitBuiltins.lean`, `Source/Progress/BuiltinStatements.lean` | Progress of direct `emit` nodes and builtin expression statements. |
+| `Source/Progress/BuiltinControls.lean`, `Source/Progress/ScalarBuiltinControls.lean`, `Source/Progress/LiteralBuiltinControls.lean` | Builtin and event executions, argument order, zero modulus, hashes, messages and refusals. |

@@ -24,7 +24,9 @@ return types to agree (`Elaborated.callInternal_call_ns`). With internal
 calls inside expressions, expressions, statements, bodies and calls are
 proved together by induction on the horizon (`FragAt`, `fragAt`), for a
 program whose allowed functions are fragment bodies (`CallsOK`, a
-hypothesis: nothing derives it for elaborated programs):
+hypothesis; for a checked elaborated program and the allowlist of its
+complete catalogue it is derived by
+`Solidity.Lowering.P9.WholeProgram.functions_from_elaborate`):
 `evalE_callFrag_ns`.
 
 The scope facts it needs are structural: a statement's output context
@@ -864,7 +866,8 @@ of contract `c`: for every declaration `A` allows with a signature, virtual
 dispatch from `c` finds a body without modifiers, in the statement fragment
 with calls to `A` and in the operations' domains, whose locals are the
 frame the call builds and whose return types have defaults. It is
-assumed: no lemma derives it for an elaborated program. -/
+derived for a checked elaborated program and its complete catalogue by
+`Solidity.Lowering.P9.WholeProgram.functions_from_elaborate`. -/
 def CallsOK (A : Decl → Prop) (G : Glob E) (c : String) : Prop :=
   ∀ (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → A d →
     ∃ b, G.prog.body (G.dispatchFn c d) = some b ∧ b.mods = [] ∧

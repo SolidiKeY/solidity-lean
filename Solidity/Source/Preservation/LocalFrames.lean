@@ -56,12 +56,12 @@ theorem retVals_ok {Γ : RCtx} (l : Locals E.layout Γ) (base : Nat) :
     intro out hl hr
     simp only [retVals] at hr
     cases hg : l.getAt (base + ts.length) t with
-    | error e => simp only [hg, Except.bind] at hr; cases hr
+    | error e => simp only [hg] at hr; cases hr
     | ok v =>
       cases ht : retVals l base ts with
-      | error e => simp only [hg, ht, Except.bind] at hr; cases hr
+      | error e => simp only [hg, ht] at hr; cases hr
       | ok vs =>
-        simp only [hg, ht, Except.bind] at hr
+        simp only [hg, ht] at hr
         cases hr
         exact ⟨localsGetAt_ok _ l t v hl hg, ih vs hl ht⟩
 

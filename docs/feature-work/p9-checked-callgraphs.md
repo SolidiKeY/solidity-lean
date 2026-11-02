@@ -35,9 +35,13 @@ outcomes: returns, reverts and timeouts remain. Modifiers, unsupported
 expressions and memory operations, and unavailable return defaults are still
 refused. No `SourceSpec`, compiler-lowering, ABI/EVM or termination result
 follows. Admission is relative to the supplied dispatch contract, not to every
-contract at once. `checkFunctions` refuses a unit that contains an interface or
-abstract function anywhere, since that function has no body. No positive
-control yet dispatches to an override other than the called declaration.
+contract at once. `checkFunctions` checks the body that dispatch from the
+contract selects for every function of the unit, so a function whose selected
+implementation has no body (an interface function, or an abstract function
+with no implementation along that contract's hierarchy, including one in an
+unrelated contract) refuses the whole unit. The code accepts an abstract base
+declaration that dispatches to a concrete derived implementation, but no
+positive control covers that case.
 
 ## Controls
 
@@ -57,6 +61,14 @@ control yet dispatches to an override other than the called declaration.
   source elaborator still accepts (recorded in
   [solc-alignment.md](../solc-alignment.md)). Both the local and whole-program checks
   refuse it. This is a negative control, not a new override policy.
+- `OverrideControls` elaborates a virtual Boolean function in Base and its
+  override in Derived. The complete catalogue is admitted for Derived,
+  dispatch of the base declaration selects the distinct derived declaration,
+  and the call returns true rather than the base body's false. The resolution
+  uses the legacy pipeline; execution is observed in both pipelines. The base
+  is virtual with a body, not abstract, and the call node is built directly
+  on the base declaration rather than elaborated from a call site. This is
+  Source elaboration and execution, not a WellFormed/static-checker result.
 - `CatalogControls` runs `checkFunctions` on the complete catalogues of the
   two-function and recursive programs.
 

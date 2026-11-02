@@ -24,7 +24,7 @@ allocation inputs and halt policies are unchanged.
 - `Encoding` preserves memory through byte reads and encoders, including
   storage reads. `evalE_abiEncode_mem` covers `.encode`, relative to argument
   preservation. Every existing halt is kept; encoding is not claimed to always
-  succeed. The other `abi.encode*` arms are not yet proved.
+  succeed. `EncodingVariants.lean` covers the remaining encoding arms below.
 - `ArrayLiterals.evalE_inlineArray_mem`: converted arguments become matching
   bare elements through `inlineData` before allocation. Reference elements keep
   the constructor's `oneWord` type-level gate.
@@ -60,7 +60,18 @@ allocating arms above are not part of it.
   catalogue; the recursive call uses `RecursiveControls`' allowlist. Both nested
   success and a recursive timeout preserve that memory prefix.
 
-`Controls` is the aggregate root of these controls.
+`Controls` is the aggregate root of the original controls.
+
+`Preservation.evalE_abiKind_mem` in `EncodingVariants.lean` covers all four existing encoding kinds
+(`abi.encode`, packed, selector and signature), under the original `argsOK`
+and an argument-evaluation MemOK triple. Success retains MemOK and returns a
+valid reference; every halt retains MemOK. Selector conversion uses the original
+implicit bytes4 condition. This proves preservation, not encoding success or ABI
+correctness. `EncodingVariantControls` observes actual typed encodings in both
+pipelines over a nonempty heap, including exact allocation/caller state and
+missing-head refusals. Its preservation triples are stated for an arbitrary
+heap typing, not instantiated at that nonempty heap. The signature digest
+stays parameterized by Fixed.
 
 Not covered: reference arguments and returns in the expression fragment,
 allocating expressions inside the fragment, termination,

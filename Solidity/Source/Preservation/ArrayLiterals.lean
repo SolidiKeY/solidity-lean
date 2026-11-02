@@ -10,8 +10,8 @@ variable {E : Env} {H : HeapTy}
 theorem nthRep_ok {s : STy} : ∀ {m : Nat} (vs : Vals E.layout (List.replicate m s)) (i : Fin m),
     RValsOK E H vs.toR → (vs.nthRep i).RefOK E H
   | 0, _, i, _ => i.elim0
-  | m + 1, .cons v vs, ⟨0, hi⟩, h => h.1
-  | m + 1, .cons v vs, ⟨j + 1, hi⟩, h => nthRep_ok vs ⟨j, Nat.lt_of_succ_lt_succ hi⟩ h.2
+  | m + 1, .cons _v _vs, ⟨0, _hi⟩, h => h.1
+  | m + 1, .cons _v vs, ⟨j + 1, hi⟩, h => nthRep_ok vs ⟨j, Nat.lt_of_succ_lt_succ hi⟩ h.2
 
 theorem inlineData_ok {s : STy} {m : Nat} (vs : Vals E.layout (List.replicate m s))
     (h : RValsOK E H vs.toR) : DataOK E H (inlineData vs) :=

@@ -1209,3 +1209,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2
 import Solidity.Lowering.P9.ProgramControls
 import Solidity.Source.Preservation.Controls
 import Solidity.Source.Progress.Controls
+import Solidity.Lowering.P9.OverrideControls
+import Solidity.Source.Preservation.EncodingVariantControls
+import Solidity.Source.Progress.BuiltinStatements
+import Solidity.Source.Progress.LiteralBuiltinControls
