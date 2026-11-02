@@ -272,3 +272,32 @@ No Solidity.lean hand edit: registration waits for H14 generator, toolkit still
 absent. Standard combined validation is pending exact V07 incorporation;
 original full124/docsraw1/frozenno-new1 and all queue obligations remain open.
 No new external compiler/EVM tests or whole-lane completion claim.
+
+
+### Integer-array total validation adapter increment
+
+`IntegerArrays.lowerCopy` now executes the full actual ordered decodeWord
+validator at every supported Source.IntTy, allocating only in its successful
+branch with capacity derived from the actual entry/validation. The new
+`error_iff_copy_error` proves BOTH directions of exact Source.Halt agreement
+with actual Source.cdToMem, including the unchanged complete original state
+on validation failure. The actual successful ABI-entry and frame/input
+consistency equations remain explicit. This is not a machine revert/stipend/
+resource/world relation and does not discharge G43.
+
+Six scratch candidates and two failed dependent normalizations are retained.
+Splitting the actual adapter match and projecting constructor equalities
+closes the soundness proof, without assuming the desired result. Scoped
+standard3 axioms/private per-file check passes2.04s, peak797472KiB, oneLean,
+cgroup435388416bytes, noOOM/swap. Exact private V07 producer stays unchanged;
+standard combined checking remains pending producer incorporation. Finder
+requested precise wording: failure precedes allocation, so the result says
+unchanged original state, not an executed rollback operation; corrected.
+
+H14 routine successful/error match equations are now recorded for Terra.
+Actual Source argument-header/decode/conversion composition without an
+entry-success premise remains Sol work, as do general source/frame admission
+and physical realization. Inhabited width/order/dirty/empty/populated-alias
+controls, generated registration and checkpoint closure remain unfinished.
+Master88d68150 was fetched/inspected unchanged; no reserved edits, goal changes,
+full failed-gate repetition, expected-verdict or budget changes occurred.

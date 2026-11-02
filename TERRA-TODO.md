@@ -126,10 +126,24 @@ Routine lemmas to add after producer validation:
   unsigned8 word256 and signed8 non-sign-extended word255 rejection controls,
   empty input and swapped-order negatives. These are UNPROVED requested
   controls, not asserted outputs; inspect actual decodeWord before choosing
-  fixtures and retain source-specific failure bytes/rollback. Do not alter
+  fixtures and retain source-specific failure bytes and unchanged original
+  state on validation failure. Do not alter
   expected verdicts. No source dispatch/fetched-EVM claim.
 
-Sol retains total actual Source error/target adapter composition beyond the
-successful validation theorem. Independent typed Source/frame admission,
+`lowerCopy` and `error_iff_copy_error` now execute all actual word validation
+branches and reflect exact Source errors/unchanged full original state on validation failure over certified ABI
+entry. Sol retains actual Source argument header/decode/conversion composition
+without an entry-success premise. Independent typed Source/frame admission,
 recursive shapes/location copies and physical runtime realization remain open.
 Registration for new modules must be generated under H14.
+
+
+Routine integer validation equations for Terra:
+- `lowerCopy_success`: with the same arguments as copy_related and actual
+  `validation = .ok values`, prove `lowerCopy target t frame selector data ...
+  entry = .ok (lower target t values (capacity t frame selector data ... entry
+  validation))`. Reason: split the actual dependent validator match.
+- `lowerCopy_failure`: with actual `validation = .error halt`, prove the
+  corresponding `lowerCopy ... = .error halt`. Reason: same actual match.
+These are not hypothetical simulation premises; exact definitions and
+error_iff_copy_error already constrain them. Controls remain unproved.

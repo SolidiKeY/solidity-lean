@@ -77,4 +77,52 @@ theorem copy_related {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ct
   rw [Heap.get_alloc_self]
   simp only [object, MObj.wk, MObj.elems_dyn, List.map_map]
   rfl
+
+
+/-- Total validation adapter over an actual successful ABI entry. Errors are
+Source.Halt diagnostics; this is not machine execution or a gas model. -/
+def lowerCopy {E : Source.Env} {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (t : Source.IntTy) (frame : Source.Fr) (selector data : Roadmap.Bytes)
+    (selector_length : selector.length = 4) (input : frame.cd = selector ++ data)
+    {index offset length : Nat} (entry : Source.cdTail data index 32 = .ok (offset,length)) :
+    Except Source.Halt (State C (.mem (runtimeTy t) :: Γ)) :=
+  match validation : (List.range length).mapM (fun j => Source.decodeWord E.layout
+      (Source.cdWordAt frame (offset+32*j)) (.int t)) with
+  | .error halt => .error halt
+  | .ok values => .ok (lower target t values
+      (capacity t frame selector data selector_length input entry validation))
+
+/-- Reflect exact Source diagnostics in both directions, retaining the unchanged
+full original state on validation failure.
+ABI entry is certified; no target halt/resource/world claim is made. -/
+theorem error_iff_copy_error {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (source : Source.EMState E Λ) (target : State C Γ) (t : Source.IntTy)
+    (frame : Source.Fr) (selector data : Roadmap.Bytes)
+    (selector_length : selector.length = 4) (input : frame.cd = selector ++ data)
+    {index offset length : Nat} (entry : Source.cdTail data index 32 = .ok (offset,length))
+    (halt : Source.Halt) :
+    lowerCopy (E := E) target t frame selector data selector_length input entry = .error halt ↔
+      (Source.cdToMem frame (sourceTy t) offset length).run source = (.error halt,source) := by
+
+  rw [Source.cdToMem_array_run]
+  unfold lowerCopy
+  split
+  · rename_i actual observed
+    rw [observed]
+    constructor
+    · intro same
+      cases same
+      rfl
+    · intro same
+      have equality := Except.error.inj (congrArg Prod.fst same)
+      cases equality
+      rfl
+  · rename_i values observed
+    constructor
+    · intro impossible
+      cases impossible
+    · intro impossible
+      have wrong := congrArg Prod.fst impossible
+      rw [observed] at wrong
+      cases wrong
 end Solidity.Backend.Aggregates.IntegerArrays
