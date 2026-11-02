@@ -17,8 +17,11 @@
 # --strict: it is the hazard this repository is most prone to, since the
 # reader cannot tell which file is meant either.
 #
-# References into the sibling repositories (`SolKey/`, `EvmYul/`, `Decode/`, `Mathlib/`)
-# are not ours to resolve and are listed in EXTERNAL below.
+# References into the sibling repositories (`SolKey/`, `EvmYul/`, `Decode/`)
+# and into Mathlib (cited as attribution; only `Bridge/` depends on it) are not
+# ours to resolve and are listed in EXTERNAL below. Captured tool output
+# (`*.log`, `*validation.json` records) is skipped: it quotes earlier runs
+# verbatim, including their findings.
 #
 # Exit 0 = every reference resolves, 1 = at least one does not.
 set -euo pipefail
@@ -31,6 +34,7 @@ strict=0
 # Prefixes naming a file in another repository, plus the one deliberate
 # placeholder (`PartNN` stands for Part01..Part11).
 EXTERNAL='^(SolKey/|EvmYul/|Decode/|Mathlib/)|PartNN'
+CAPTURED='(\.log|validation\.json)$'
 
 lean_files=$(git ls-files '*.lean')
 
@@ -40,6 +44,7 @@ ambiguous=0
 while IFS=$'\t' read -r src ref; do
   [ -z "$ref" ] && continue
   [[ "$ref" =~ $EXTERNAL ]] && continue
+  [[ "$src" =~ $CAPTURED ]] && continue
 
   dir=$(dirname "$src")
   if [ -f "$dir/$ref" ] || [ -f "Solidity/$ref" ] || [ -f "$ref" ]; then
@@ -55,7 +60,7 @@ while IFS=$'\t' read -r src ref; do
     ambiguous=$((ambiguous + 1))
   fi
 done < <(
-  git ls-files -z -- '*.md' '*.lean' \
+  git ls-files -z \
     | xargs -0 grep -o -n '`[A-Za-z][A-Za-z0-9_/.-]*\.lean`' \
     | sed 's/`//g' \
     | awk -F: '{print $1"\t"$3}' \
