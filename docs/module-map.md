@@ -1322,3 +1322,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/PaymentArtifact.lean` | Actual payment-assembly width fixpoint and321-byte runtime, derived18-byte constructor placement, exact terminal/data slices and selected runtime/image coordinate separation; creation slice distinct from runtime execution |
 | `Backend/Executable/PaymentArtifactChecks.lean` | Inhabited constructor return/revert and wrapper-entry tail, argument/empty-output negatives, standalone12/prefixed18 origins, link-free and actual selected-target controls |
+
+| `Backend/Executable/Relocation.lean` | Linked backward operands, actual relocated layout and PUSH-data exclusion consumers. |
+| `Backend/Executable/RelocationChecks.lean` | Nonzero-prefix PUSH20 linking/backedge, payload negatives and protected numeric stack-tail controls. |

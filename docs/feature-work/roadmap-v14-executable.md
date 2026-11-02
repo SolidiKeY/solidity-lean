@@ -1741,3 +1741,47 @@ Scope/guard regressions/layers/orphans/trust/automatic/whitespace pass. Raw
 docs exit1 still48missing37ambiguous, complete findings equal checkpoint21;
 strict frozen comparison FAIL+2 inherited missing, published comparison PASS0.
 No semantic profile, resource budget, producer or reserved file changes.
+
+
+## Checkpoint23: linked nonzero-prefix backward destination
+
+Relocation.linked_backedge consumes published assemble_layout, link_patch,
+assemble_ref/assemble_pushTag and validJumpdest_encode_prefix read-only.
+Actual successful assembly, exact tagIndex/reference and j<k are retained;
+byte offset ordering is derived from positive instruction lengths. Linking
+preserves offsets and the actual backward PUSH, resolves all link sites,
+derives target word fit and relocates destination scanning through any encoded
+prefix and arbitrary suffix. All PUSH-data positions remain excluded.
+
+The new RelocationChecks fixture has a nonempty3-byte prefix with0x5b in
+PUSH1 data, a30-byte fragment, actual unresolved PUSH20 reference5, nonempty
+3-byte suffix and genuine backedge target3 before referencePC30/JUMPPC32.
+Real fixpoint widening selects PUSH1 at base3. The linked20-byte address is
+all0x5b; every one is rejected as PUSH data. Local target0 versus relocated3,
+PUSH2 payloads, suffix destination33 and one-past-code36 are discriminating
+controls. Exact linking bytes and full encoder roundtrip are proved.
+
+Actual straight-line operand setup after JUMPDEST/before JUMP preserves
+protected17/29 and pushes3. Its capacity is derived iff tail.length≤1023,
+including every successful prefix; empty/populated and over-capacity controls
+are inhabited. Neither control opcode is executed by Scalar.run. Its numeric
+slice and encoder roundtrip are not fetched-byte execution or decoder agreement.
+Fourteen guarded headline/control reports retain standard Lean axioms. Raw
+normalization/recursion failures are preserved; published component equations
+resolve them with no budget, representation, profile or producer changes.
+
+This advances independently owned Backfill A/G45.03 preparation, not parent
+closure. Payment/world-history, V12/G37 effectful loops, general source/runtime
+frames, pinned decoder and fetched-byte/resource obligations remain OPEN.
+Parallel-interface-v9 binds actual source/dependency hashes and full signatures.
+Independent read-only finder/skeptic reviews, bounded root/private checks and
+raw documentation failures are retained in the checkpoint23 handoff.
+
+Checkpoint23 separate finder/skeptic reviews accept actual proofs and limits.
+Finder's pending concrete axiom-pin item was fixed: all12 observed concrete
+sets and2 generic sets are now guarded; no remaining findings. Focused14jobs,
+root1056+262 and exact private1060+262 pass, SolKey377/131/131. Actual
+Lean4.24.0/Lake5.0.0-src+797c613 and successfulKeySort2jobs precede runtime
+confirmation. Exact resource samples, raw normalization failures, commands and
+independent immutable-seal review are retained in checkpoint23 artifacts.
+The original goal/objective and all prior seals remain unchanged.

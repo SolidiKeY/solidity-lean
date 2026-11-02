@@ -980,3 +980,5 @@ import Solidity.Backend.Executable.SendResultChecks
 
 import Solidity.Backend.Executable.PaymentArtifact
 import Solidity.Backend.Executable.PaymentArtifactChecks
+import Solidity.Backend.Executable.Relocation
+import Solidity.Backend.Executable.RelocationChecks

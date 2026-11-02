@@ -1,0 +1,65 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "prior_head": "6abe4ab401d154ad2760c8b0773ee2232bcf46d7",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "owned_sources": [
+    {
+      "path": "Solidity/Backend/Executable/Relocation.lean",
+      "blob": "65cbc66c2ceeb1bd65d4b58a106cab48def3b9ab",
+      "sha256": "87dc8aa08ef4a1d6cf84b13dcfce6141d5755159160ec88e4f3c682776c1bc08"
+    },
+    {
+      "path": "Solidity/Backend/Executable/RelocationChecks.lean",
+      "blob": "33a27dfe95a450bf174713efd398eb8b43c55502",
+      "sha256": "9abef602f86cacbc1ef516ea68c2f9a9c8bc2b1938c0976be1289815d3d81c69"
+    }
+  ],
+  "published_read_only_producers": [
+    {
+      "path": "Solidity/Backend/Assembler.lean",
+      "blob": "990ae3a90639260b93a2a5e5a64771c8b0e9e80b",
+      "sha256": "d0991b737f9a65416829c5850edca4bbb3f8fe7193ad104dd5aaeac92803f9d0",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Jumpdest.lean",
+      "blob": "c4e3cba782a737ec4931045220d6c0e758b8ad2c",
+      "sha256": "e5fc894e1b3470311a90887aa9f663c0536c3703f41195e7e04491a2b58dc3b2",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Scalar/Heights.lean",
+      "blob": "42bc345cb040c6d9d9eabbe896e3cf9883288f8f",
+      "sha256": "778d4abad2f2b688a3ff6449830d8ce27b7bc3d6f8fcba7542d227913eec5351",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Scalar/Slice.lean",
+      "blob": "587f891c1bcc165f8e8c2eee0ffb4a86af08cc62",
+      "sha256": "69e2138972d979cbad32d299178a7fc53887ac81c9cb5d7c0595815c15e9b0a9",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Artifact.lean",
+      "blob": "625fe0ae34b6cdf4064482974e1d5e53729197fc",
+      "sha256": "4dfdb7c95f914dd06ef0ec6b603c46d41eda4674e0a303225252740b93bdb947",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    }
+  ],
+  "declarations": [
+    "Solidity.Backend.Executable.Relocation.offset_before",
+    "Solidity.Backend.Executable.Relocation.linked_backedge",
+    "Solidity.Backend.Executable.RelocationChecks.assembled",
+    "Solidity.Backend.Executable.RelocationChecks.client",
+    "Solidity.Backend.Executable.RelocationChecks.layout",
+    "Solidity.Backend.Executable.RelocationChecks.address_payload",
+    "Solidity.Backend.Executable.RelocationChecks.setup_tail",
+    "Solidity.Backend.Executable.RelocationChecks.setup_capacity",
+    "Solidity.Backend.Executable.RelocationChecks.setup_prefix_capacity",
+    "Solidity.Backend.Executable.RelocationChecks.inhabited_tail",
+    "Solidity.Backend.Executable.RelocationChecks.roundtrip"
+  ],
+  "signatures": "Full actual #check outputs in interface-types.log; generic linked_backedge retains assemble success, exact tagIndex/reference, j<k; no simulation premise",
+  "invariants": "Actual prefix size3, section size30, linkref5, target3 precedes referencePC30/JUMPPC32, PUSH20 contains20 apparent0x5b targets excluded. Protected numeric tail17/29, setup peak+1 and tail\u22641023 derived. No JD/JUMP/CALL execution.",
+  "limits": "Kernel byte/layout/linking and numeric setup only; no pinned decoder, fetched JUMP, source payment/world/history or V12 loop closure. All original queues remain partial/open; no reserved edits."
+}
