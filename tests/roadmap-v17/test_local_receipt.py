@@ -2,6 +2,8 @@ import gzip
 import hashlib
 import importlib.util
 import io
+import json
+import os
 from pathlib import Path
 import tarfile
 import unittest
@@ -107,6 +109,137 @@ class CapsuleGuards(unittest.TestCase):
     def test_payload_limit(self):
         raw=wire(lambda files:files.update({"payload1.json":bytes(201*1024)}))
         with self.assertRaisesRegex(ValueError,"bound"):x.capsule(raw,hashlib.sha256(raw).hexdigest())
+
+
+@unittest.skipUnless(os.environ.get("V17_FAILURE_CAPSULE"),"exact external failure capsule not supplied")
+class ActualFailure(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.raw=Path(os.environ["V17_FAILURE_CAPSULE"]).read_bytes()
+        cls.integrity,cls.original=x.capsule(cls.raw)
+        cls.request=Path(os.environ["V17_FAILURE_REQUEST"]).read_bytes()
+
+    def setUp(self):self.members=dict(self.original)
+    def mutate(self,name,change):
+        value=json.loads(self.members[name]);change(value);self.members[name]=json.dumps(value).encode()
+    def result(self):return x.account_members(self.members,self.request)
+    def rejected(self):
+        value=self.result();self.assertEqual(value["accountingStatus"],"REJECTED_INCOMPLETE")
+        self.assertTrue(value["accountingErrors"])
+        for key in x.FLAGS:self.assertIs(value[key],False)
+        return value
+
+    def test_actual_failure_and_missing_not_zero(self):
+        value,_=x.normalize(self.raw,self.request)
+        self.assertEqual(value["accountingStatus"],"CONSISTENT_FAILURE_ACCOUNTING")
+        self.assertEqual(value["evidenceStatus"],"INCOMPLETE_FAILURE")
+        self.assertEqual(value["reportedServiceExitCode"],125)
+        self.assertEqual(value["reportedWrapperExitCode"],1)
+        self.assertEqual(value["phaseExits"]["preflight"],0)
+        for phase in ("build","postflight","metadata","axioms","replay"):
+            self.assertIsNone(value["phaseExits"][phase])
+        self.assertEqual(value["reportedElapsedIncludingCleanupSeconds"],300.3127422609832)
+        self.assertTrue(value["intake"]["byteIntegrityVerified"])
+        self.assertIsNone(value["originalPreExecutionRunnerSha256"])
+        self.assertFalse(value["historicalRunnerAuthenticated"])
+        self.assertFalse(value["processUsageAuthenticated"])
+        self.assertFalse(value["configuredSwapLimitAuthenticated"])
+        for key in x.FLAGS:self.assertIs(value[key],False)
+
+    def test_corrupt_truncated_whole_capsule(self):
+        for raw in (self.raw[:-1],self.raw[:30]+bytes([self.raw[30]^1])+self.raw[31:]):
+            with self.assertRaisesRegex(ValueError,"hash mismatch"):x.normalize(raw,self.request)
+
+    def test_wrong_request_bytes_and_command_binding(self):
+        value=x.account_members(self.members,self.request+b" ")
+        self.assertIn("wrong original request bytes",value["accountingErrors"])
+        for name in ("v09-diagnostic-a-spec.json","v09-diagnostic-a-result.json"):
+            self.mutate(name,lambda data:data["command"].__setitem__(-1,"0"*64))
+        value=self.rejected();self.assertEqual(value["reportedServiceExitCode"],125)
+        self.assertFalse(value["reportedSpecCommandMatchesOriginalPaths"])
+
+    def test_malformed_request_shapes_preserve_known_failure(self):
+        for raw in (b'{"generatedFiles": []}',b'[]',b'null',b'{'):
+            value=x.account_members(self.members,raw)
+            self.assertEqual(value["accountingStatus"],"REJECTED_INCOMPLETE")
+            self.assertEqual(value["reportedServiceExitCode"],125)
+            self.assertIsNone(value["expectedPayloadSha256"])
+
+    def test_malformed_nested_digest_cannot_leak_promotion_flags(self):
+        raw=b'{"generatedFiles":{"payload.sh":{"kernelValidated":true}}}'
+        value=x.account_members(self.members,raw)
+        self.assertIsNone(value["expectedPayloadSha256"])
+        self.assertFalse(value["kernelValidated"])
+        self.assertEqual(value["reportedServiceExitCode"],125)
+
+    def test_huge_elapsed_does_not_crash_or_overwrite_exit(self):
+        self.mutate("v09-diagnostic-a-result.json",lambda data:data.update(elapsedSeconds=10**1000))
+        value=self.rejected();self.assertEqual(value["reportedServiceExitCode"],125)
+        self.assertIsNone(value["reportedElapsedIncludingCleanupSeconds"])
+
+    def test_wrong_budget_in_both_spec_and_outcome(self):
+        for name in ("v09-diagnostic-a-spec.json","v09-diagnostic-a-result.json"):
+            self.mutate(name,lambda data:data.update(timeout=600))
+        value=self.rejected();self.assertEqual(value["reportedServiceExitCode"],125)
+
+    def test_bool_budget_not_integer(self):
+        self.mutate("v09-diagnostic-a-intent.json",lambda data:data.update(cumulativePriorExecutionSeconds=False))
+        self.rejected()
+
+    def test_wrong_ledger_historical_approval(self):
+        self.mutate("v09-validation-budget-state.json",lambda data:data.update(additionalApproval="APPROVED",initialConsumedSeconds=0))
+        self.rejected()
+
+    def test_unsupported_success_never_accepted(self):
+        self.mutate("v09-diagnostic-a-result.json",lambda data:data.update(exitCode=0,status="PASS",resourceStop=None))
+        value=self.rejected();self.assertEqual(value["reportedServiceExitCode"],0)
+        self.assertFalse(value["nativeReceiptAccepted"])
+
+    def test_raw_exit_not_inferred_124_or_137(self):
+        for code in (124,137):
+            self.members=dict(self.original)
+            self.mutate("v09-diagnostic-a-result.json",lambda data:data.update(exitCode=code))
+            self.assertEqual(self.rejected()["reportedServiceExitCode"],code)
+
+    def test_phase_omission_and_forged_zero(self):
+        self.members.pop("phase-preflight.exit");value=self.rejected()
+        self.assertIsNone(value["phaseExits"]["preflight"])
+        self.members=dict(self.original);self.members["phase-build.exit"]=b"0\n"
+        value=self.rejected();self.assertIsNone(value["phaseExits"]["build"])
+        self.mutate("PROVENANCE.json",lambda data:data.update(missingPhaseMarkers=[]))
+        self.assertEqual(self.rejected()["reportedMissingMarkers"],[])
+
+    def test_truncated_json_does_not_lose_known_raw_failure(self):
+        self.members["v09-diagnostic-a-intent.json"]=self.members["v09-diagnostic-a-intent.json"][:-5]
+        self.assertEqual(self.rejected()["reportedServiceExitCode"],125)
+
+    def test_missing_result_yields_unknown_exit(self):
+        self.members.pop("v09-diagnostic-a-result.json")
+        self.assertIsNone(self.rejected()["reportedServiceExitCode"])
+
+    def test_tampered_current_runner_rejected_by_capsule_identity(self):
+        self.members["observed-current-runner.py"]=b'raise RuntimeError("must never execute")\n'
+        self.members["SHA256SUMS"]="".join(hashlib.sha256(body).hexdigest()+"  "+name+"\n"
+            for name,body in self.members.items() if name!="SHA256SUMS").encode()
+        out=io.BytesIO()
+        with tarfile.open(fileobj=out,mode="w",format=tarfile.USTAR_FORMAT) as t:
+            for name,body in self.members.items():
+                info=tarfile.TarInfo(name);info.size=len(body);t.addfile(info,io.BytesIO(body))
+        with self.assertRaisesRegex(ValueError,"hash mismatch"):x.normalize(gzip.compress(out.getvalue()),self.request)
+
+    def test_no_historical_runner_promotion(self):
+        self.mutate("PROVENANCE.json",lambda data:data.update(historicalRunnerAuthenticated=True))
+        value=self.rejected();self.assertFalse(value["historicalRunnerAuthenticated"])
+
+    def test_wrong_spec_path_even_when_outcome_agrees(self):
+        for name in ("v09-diagnostic-a-spec.json","v09-diagnostic-a-result.json"):
+            self.mutate(name,lambda data:data.update(cwd="/different/root"))
+        self.rejected()
+
+    def test_wrapper_exit_not_substituted_for_service_exit(self):
+        self.members["v09-diagnostic-a.log"]=self.members["v09-diagnostic-a.log"].replace(b"status=1/FAILURE",b"status=0/FAILURE")
+        value=self.rejected();self.assertEqual(value["reportedWrapperExitCode"],0)
+        self.assertEqual(value["reportedServiceExitCode"],125)
 
 
 if __name__=="__main__":unittest.main()

@@ -1165,3 +1165,53 @@ The guard now validates every raw512-byte header, admits only regular payloads
 and timestamp-only PAX metadata, and rejects mixed PAX/GNU long-name/link or
 sparse/device extensions before logical TAR parsing. A combined-extension
 negative control preserves this format fence.
+
+
+### Actual original local failure accounting (2026-11-02)
+
+INPUT-CAPSULE is resolved as byte access only. The exact original10874-byte
+archive at the persistent shared audit-receipts path matches fa950fce1a634b69
+c5dc5d4ffb534b14542181bc9cdc8458fc2240aae6147c5d (one continuous SHA256).
+All16 original members pass the existing bounded gzip/TAR/checksum guard.
+The earlier transcription failures remain immutable; no past success is inferred.
+
+The owned local-receipt consumer now normalizes this actual narrow failure
+schema. It cross-checks the original694d1f2d request bytes, spec/result identity
+and command/cwd/tool/output paths, intent, original300s/12GiB/local-reserve
+claims, historical budget ledger, provenance missing-marker list, compact unit
+log, wrapper exit and terminal-state text. All parsed claims remain reported
+fields, not proof of real process usage. The observed current runner source
+is retained only as bytes/hash, never imported, executed or substituted for
+an unavailable pre-execution hash.
+
+Actual normalized accounting preserves service exit125, wrapper exit1,
+preflight exit0 and elapsed300.3127422609832 including cleanup. Build,
+postflight, metadata, axiom and replay exits remain null. Existing empty
+postflight streams are not a completion marker; missing files are never zero.
+The evidence status is INCOMPLETE_FAILURE, and the CLI returns2 independently
+of the service125 and wrapper1. It neither infers124/137 nor invents a Docker
+record or calls the fixed-ten Derived17 consumer. Unsupported success schemas
+remain rejected. No semantic counterexample is inferred from parse errors.
+
+Historical ledger PENDING is preserved as its original snapshot. The later
+human-approved additional300s is coordinator-local and shared, reported about
+49s consumed at the update; it changes neither this historical receipt nor
+worker budgets. No native/version/setup/LSP/container/replay/admission action,
+source repair, counter reset or goal administration occurs here.
+
+Twenty-eight bounded host-only controls pass, including actual failure bytes
+and wrong hash/request/path/budget, malformed/truncated JSON, contradictory
+success, omitted/forged phase markers, tampered source and unknown historical
+runner cases. Malformed nested request values and huge numeric values return
+rejected accounting while preserving known raw failure fields. Whole capsule
+integrity is distinct from the pure semantic-mutation test helper; only the
+fixed-hash production wrapper authenticates input bytes.
+
+Independent read-only finder/skeptic reviews inspected the actual16 members,
+normalizer schema and extracted evidence. A malformed generatedFiles shape was
+fixed; source/artifact confirmation grants no successful native/kernel/replay
+validation. Actual pre-execution runner, payload/source/object/cache/selector/
+env/cap/lease authentication remains unknown. All proof/authentication/release
+flags remain false. All457 rows, ten Derived17 structural rows and every
+original source-chain/strict/corpus/TestSuite/default/full/clean-cache/final
+trust/release obligation remain incomplete; all unrelated human holds persist.
