@@ -65,3 +65,6 @@ import SolidityBridge.RoadmapV15.P10.StorageReadControls
 
 import SolidityBridge.RoadmapV15.P10.BalanceEnvironmentConsumer
 import SolidityBridge.RoadmapV15.P10.BalanceEnvironmentControls
+
+import SolidityBridge.RoadmapV15.P10.DecoderAgreement
+import SolidityBridge.RoadmapV15.P10.DecoderAgreementControls

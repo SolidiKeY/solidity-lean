@@ -134,3 +134,5 @@ P10 fetched CALL/RETURNDATA/JUMP helper: [interface and handoff](feature-work/ro
 - [V15 storage-read consumers](feature-work/roadmap-v15-storage-read-consumers.md): charged persistent/transient reads and explicit typed finite coverage.
 
 - [V15 balance environment consumers](feature-work/roadmap-v15-balance-environment-consumers.md): actual charged BALANCE and explicit account-ledger realization.
+
+- [V15 decoder agreement](feature-work/roadmap-v15-decoder-agreement.md): actual reference decode targets, with explicit Osaka CLZ mismatch.
