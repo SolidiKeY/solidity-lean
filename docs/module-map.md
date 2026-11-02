@@ -1364,3 +1364,5 @@ four-mode upstream EVM observations and refusal controls;
 
 | `Solidity/Backend/InternalFlow/ProgramComposition.lean` | Whole-program typed memory-call certificate composition via published Prog.join; exact reached allocation cost, max frame, stack, BaseExtends/GrowsAllocator and bare failure absorption. |
 | `Solidity/Backend/InternalFlow/WorldProgramTarget.lean` | Actual ordinary world entry/body success or bare failure coupled to a genuinely certified target body with explicit representation/capacity; no target world-entry/settlement implementation. |
+
+| `Solidity/Backend/InternalFlow/ProgramAssociation.lean` | Exact existing intrinsic join association and actual three-program certificate code/fragment/max-frame/reached-cost association, including failure short-circuiting. |

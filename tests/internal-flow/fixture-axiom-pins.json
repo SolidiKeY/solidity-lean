@@ -4709,5 +4709,98 @@
         "propext"
       ]
     }
+  },
+  "ProgramAssociationChecks": {
+    "guard": "tests/internal-flow/check-program-association-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.ProgramComposition.syntax_association": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramComposition.association": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.suffix_execution": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.suffix_admitted": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.source_left": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.source_right": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.associated_fields": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.exact_costs": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.rooms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.capacity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.source_observations": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.both_target_endpoints": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.complete_target_vector": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.right_target_vector": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.wrong_cursor": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.wrong_new_alias": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.failure_association": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.ProgramAssociationChecks.wrong_included_failed_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }

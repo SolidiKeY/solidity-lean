@@ -3898,3 +3898,46 @@ and early-control loops, live byte-journal and transient/world applications
 still require the precise original producers. The source unbounded recursion
 semantics already exists; its faithful runtime/target lowering is still separate.
 Goal identity/status is unchanged. No publication/peer transfer is authorized.
+
+
+## C53 — three actual programs, shared frame and reached cost
+
+After C52, independent review identified an available original BackfillA prefix
+composition leaf rather than a reason to stop at whole-program binary joining.
+ProgramAssociation proves exact structural equality over existing Prog.join and
+code/final-fragment/max-frame/reached-cost association for THREE genuine checked
+Calls.Program certificates. Actual first/middle success and failure are split
+using published join_run. No source cutoff, new syntax/evaluator or desired
+simulation premise is introduced; no public compiler selector is changed.
+
+The new ProgramAssociationChecks client keeps C52 untouched and adds a real
+publicly memory-compiled third stage: allocate length1 then write19. Its actual
+source endpoint has heap4, new reference3[19], returned reference2[0,0], both old
+aliases0[7,11] and caller scalar42. Both intrinsic association orders succeed.
+Exact frame/capacity are derived; both target code associations yield the SAME
+reached represented state and stack/BaseExtends/GrowsAllocator with totalcost9.
+The complete22-value target observation includes cursor265, private/default and
+old physical cells, new pointer263 and object words1/19. The earlier C52
+20-element observation is not changed: this is a different subsequent program.
+Wrong new/returned identity, cursor and included failed cost reject. A failed
+middle stage, reassociated with the admitted allocating continuation, still
+reverts and has cost3 rather than5; errors provide no failed State/frontier or
+absence-of-side-effects conclusion. No Heap.Keeps is inferred from address
+preservation; only the actual observed contents of this real client are pinned.
+
+Deep cost rewriting hit the unchanged200000-heartbeat ceiling in a retained
+failed probe. Small typed equality composition fixes the proof without changing
+statements, observations or limits. No speedup claim follows. A contract-specific
+old contents observer could not be used at this client's C; the new fixture
+reads its existing intrinsic typed heap directly, not a substitute semantics.
+Final fixture exit0/9.418s, sampledRSS1048480KiB;18 actual builtin axiom reports
+strictly guarded with missing/duplicate/reorder/axiom/diagnostic controls.
+Previous34fixtures/937maps/order/sourcebytes remain unchanged; now35/955.
+The genuinely required C52 fixture import was kernel checked unchanged with its
+33 original guards, not rebound from metadata. Focused import/structural/runtime
+outcomes and exact source/axiom/resource evidence are in the immutable handoff.
+Independent source finder/skeptic reviews pass; committed artifacts are reviewed
+separately. All original Work1–6/BackfillsA–B and held aggregate/raw/full/docs
+gates remain PARTIAL/failed or pending as recorded. This association component
+is not general recursive frame execution, full dispatch, early-control/world/
+byte-journal/transient correctness or a validation performance repair.

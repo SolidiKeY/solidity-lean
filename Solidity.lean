@@ -1027,3 +1027,5 @@ import Solidity.Backend.InternalFlow.WorldResultEmission
 import Solidity.Backend.InternalFlow.ProgramComposition
 
 import Solidity.Backend.InternalFlow.WorldProgramTarget
+
+import Solidity.Backend.InternalFlow.ProgramAssociation
