@@ -95,7 +95,7 @@ constructor without a wildcard and gives each typed one a derivation
   `metaType`, `new`, `inlineArray`) are exactly the constructors S01
   defers (`elemType` left the list with lane FU2-B: it is an operand of
   `abi.decode` and conversions, `exprCoverage_operand`);
-- among statements, `declTuple` and `try` are gaps, and `assembly` is
+- among statements, `try` is a gap (`declTuple` is typed since lane FU2-B), and `assembly` is
   excluded apart from the canonical rethrow.
 
 "Evaluated" is a classification, not progress. An arm can be `stuck` on
@@ -446,5 +446,5 @@ fragment, which must first be delimited (`stuck` is told apart from
 divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
 rule); calldata references, `abi.decode` beyond the decoder's types (lane FU2-B), `new`, slices, inline arrays,
-`try`, tuple declarations, `fallback` with parameters (the decoder's
+`try`, progress of tuple declarations (typed and evaluated by lane FU2-B), `fallback` with parameters (the decoder's
 dynamic-length `Panic(0x41)` is modelled since lane V04b).

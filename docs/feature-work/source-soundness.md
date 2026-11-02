@@ -1109,9 +1109,10 @@ model), and the controls here use the same encodings the CF1 fixtures do
 (`Solidity/Source/Typing.lean`) types `(, , T x, , U y) = e;`: the slots
 (`Ctx.tupleSlots`: leading holes, then each declared name with its type
 under solc's location rule for an initialized declaration, `locOK … true`,
-or a hole) are as many as `e`'s tuple components (a call with several
-returns, a tuple expression, `abi.decode` of several types), and each
-declared slot's component converts implicitly to its type (`slotsFit`);
+or a hole) are as many as `e`'s tuple components (any tuple-typed `e`; the
+controls cover a tuple expression, by `w_declTuple`, and `abi.decode` of
+several types), each declared slot's component converts implicitly to its
+type, and a hole's component is not the empty tuple (`slotsFit`);
 the locals are pushed left to right, the last declared innermost
 (`pushSlots`). `RStmt.declTuple` keeps the slots' types; `StmtD.toR` casts
 the output context along `pushSlots_tys`. The interpreter evaluates `e`,
@@ -1121,15 +1122,33 @@ converted (`pushVals`, outside the mutual block; `pushVals_below`,
 is evaluated (and, for `abi.decode`, validated) and discarded. Both
 statement checkers have the rule (`StmtD.inferSimple`; G13's `simpleRes`
 with its completeness case, so `stmtOK_iff` holds), uniqueness of meaning
-covers it (`StmtD.unique`), `OpsOK` too (`RStmt.opsOK_cast`), and the
-statement walk sees it as outside the value fragment (`RStmt.ext` with
-`pushTys_suffix`). `stmtCoverage` classifies it `typed` (witness
+covers it (`StmtD.unique`), `OpsOK` too (`RStmt.opsOK_cast`), `RStmt.ext` extends the scope by
+`pushTys_suffix`, and the statement is outside the value fragment
+(`RStmt.ValFragC`'s wildcard). `stmtCoverage` classifies it `typed` (witness
 `w_declTuple`: `(uint256 p, ) = (a, b);`). Controls in
 `Solidity/Source/DecodeExamples.lean` (`w`, `v`): destructuring
 `abi.decode` with holes, a hole's invalid component reverting. Not proved:
-progress of the statement (its expression is not in the value fragment);
-solc's refusal of a declaration whose names repeat is not checked (S01's
-`declVar` does not check shadowing either).
+progress of the statement (the whole statement is outside the value
+fragment, so value-fragment results do not cover a body containing one;
+its `stuck` arity and non-tuple branches are unreachable under typing but
+not proved so). No control runs a multi-return call or a converted
+component.
+
+Review (finder and skeptic, read-only):
+- fixed: a hole accepted an empty-tuple component (`(, uint a) = (g(), 1)`
+  with `g` returning nothing, refused by solc); `slotsFit` now requires
+  `STy.nonEmpty` (control `slotsFit_hole_empty`);
+- fixed: stale gap entries in `semantic-gaps.md`, `source-s05.md`,
+  `source-s00-s01.md`, `source-s02.md`, `assurance.md`; the value-fragment
+  wording above;
+- recorded, not changed (`docs/solc-alignment.md`): a literal component is
+  typed at its mobile type before `slotsFit`, so `(int8 a, uint b) = (1, 2)`
+  or `(bytes1 c, ) = (0x01, 1)` is refused though solc accepts it; a
+  one-component declaration with a non-tuple initializer (`(uint a) = f();`)
+  is refused; repeated names (`(uint a, uint a) = …`) are accepted, the later
+  one innermost (S01's `declVar` does not check shadowing either);
+- checking cost: `pushVals_*` joined every Horizon lemma list; Horizon was
+  rechecked through the Lean server without heartbeat changes.
 
 **Inline arrays, `new`, `try`/`catch`, `fallback` with parameters: not
 started** (time; each is a typing rule, an interpreter arm and its

@@ -588,6 +588,15 @@ stronger obligation, not an additional assumption available to its proofs.
   nested arrays, fixed point, external function types) have no
   `abi.decode` derivation
   ([source-soundness.md](feature-work/source-soundness.md#lane-fu2-b-fu2-20261102-abidecode-and-calldata-references)).
+- **Tuple declarations** (lane FU2-B, `StmtD.declTuple`): a literal
+  component of the initializer is typed at its mobile type before the
+  per-slot conversion, so `(int8 a, uint b) = (1, 2);`,
+  `(bytes1 c, ) = (0x01, 1);` and `(bytes32 h, ) = ("abc", 1);` are refused
+  where solc converts each literal to its slot's type; a one-component
+  declaration with a non-tuple initializer (`(uint a) = f();`) is refused;
+  repeated names (`(uint a, uint a) = (1, 2);`, a `DeclarationError` in
+  solc) are accepted, the later one innermost
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).

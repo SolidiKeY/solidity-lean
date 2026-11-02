@@ -1093,11 +1093,19 @@ theorem pushTys_suffix : ∀ (slots : List (Option STy)) (Γ : List STy), ∃ ys
     obtain ⟨ys, h⟩ := pushTys_suffix ss (τ :: Γ)
     exact ⟨ys ++ [τ], by simp only [pushTys, h, List.append_assoc, List.singleton_append]⟩
 
+/-- A component that is not the empty tuple `()`: solc refuses
+`(, uint a) = (g(), 1)` for a `g` without returns ("Tuple component
+cannot be empty"), holes included. -/
+def STy.nonEmpty : STy → Bool
+  | .tuple [] => false
+  | _ => true
+
 /-- **Each declared slot's component converts implicitly** to its type;
-a hole takes any component; the slots are as many as the components. -/
+a hole takes any non-empty component; the slots are as many as the
+components. -/
 def slotsFit (B : DeclName → DeclName → Bool) : List (Option STy) → List STy → Bool
   | [], [] => true
-  | Option.none :: ss, _ :: σs => slotsFit B ss σs
+  | Option.none :: ss, σ :: σs => σ.nonEmpty && slotsFit B ss σs
   | Option.some τ :: ss, σ :: σs => σ.implicit B τ && slotsFit B ss σs
   | _, _ => false
 

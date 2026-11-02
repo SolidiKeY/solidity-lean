@@ -218,7 +218,8 @@ extended to refute the new constructors, and `Typed.ident_builtin_not_struct`
 was added. Every existing S01 control still passes.
 
 Not closed: `new`, inline arrays, slices, named arguments, calldata
-references, and tuple destructuring (`declTuple`). The ledger in
+references, and tuple destructuring (`declTuple`; typed and evaluated since
+lane FU2-B). The ledger in
 [source-s05.md](source-s05.md) records these as gaps. (`abi.decode` at the
 decoder's types was closed by lane FU2-B,
 [source-soundness.md](source-soundness.md).)

@@ -561,8 +561,8 @@ rooted at it. 6 are deferred with a stage and a reason:
 | `elemType` | operand of `call` | a type name read by another rule, never a value of its own: the callee of an elementary conversion (`convElem`) and a type expression of `abi.decode` (`abiDecode`, lane FU2-B, [source-soundness.md](source-soundness.md)); `exprCoverage_operand` |
 
 `stmtCoverage` does the same for statements (`stmtCoverage_total`,
-`simpleCoverage_total`): 13 typed; `declTuple` (S02, tuple destructuring of
-call results), `try` (S03, external calls) and `assembly` (excluded by S00;
+`simpleCoverage_total`): 14 typed (`declTuple` since lane FU2-B,
+[source-soundness.md](source-soundness.md)); `try` (S03, external calls) and `assembly` (excluded by S00;
 only the canonical rethrow is typed) deferred.
 
 ### Settings, resolutions, well-formedness

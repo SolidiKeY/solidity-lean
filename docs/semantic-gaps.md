@@ -86,7 +86,10 @@ proof uses it, never derived from a machine model.
 - **Source semantics** (`Solidity/Source`, the S02–S05 reference
   interpreter): the constructor ledger's gaps are `callOptions` beyond
   `value`, `metaType`, `new` and `inlineArray` (`semExprGaps`), and among
-  statements `declTuple` and `try`; since lane FU2-B `abi.decode` is typed
+  statements `try` (tuple declarations are typed and evaluated since lane
+  FU2-B, without a progress theorem; a non-tuple initializer, a literal
+  component typed at its own type and repeated names are not modelled:
+  `docs/solc-alignment.md`); since lane FU2-B `abi.decode` is typed
   and evaluated at the decoder's types (static arrays, structs, nested
   arrays, fixed point and external function types are refused), and
   `calldata` references (`bytes`, `string`, one-word-element dynamic
