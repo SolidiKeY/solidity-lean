@@ -1,0 +1,26 @@
+import Solidity.Backend.Aggregates.ByteParameterControls
+
+#check Solidity.Backend.Aggregates.ByteParameters.entry_length
+#check Solidity.Backend.Aggregates.ByteParameters.entry_region
+#check Solidity.Backend.Aggregates.ByteParameters.entry_payload_exact
+#check Solidity.Backend.Aggregates.ByteParameters.entry_capacity
+#check Solidity.Backend.Aggregates.ByteParameters.source_copy
+#check Solidity.Backend.Aggregates.ByteParameters.target_contents
+#check Solidity.Backend.Aggregates.ByteParameters.target_old_heap
+#check Solidity.Backend.Aggregates.ByteParameters.copy_related
+#check Solidity.Backend.Aggregates.ByteParameters.old_local
+#check Solidity.Backend.Aggregates.ByteParameters.new_local
+#check Solidity.Backend.Aggregates.ByteParameterControls.entry
+#check Solidity.Backend.Aggregates.ByteParameterControls.exact_extent
+#check Solidity.Backend.Aggregates.ByteParameterControls.related
+#check Solidity.Backend.Aggregates.ByteParameterControls.old_aliases
+#check Solidity.Backend.Aggregates.ByteParameterControls.fresh_contents
+#check Solidity.Backend.Aggregates.ByteParameterControls.old_contents
+#check Solidity.Backend.Aggregates.ByteParameterControls.distinct_source_target_ids
+#check Solidity.Backend.Aggregates.ByteParameterControls.truncated_entry
+#check Solidity.Backend.Aggregates.ByteParameterControls.omitted_selector_wrong
+#check Solidity.Backend.Aggregates.ByteParameterControls.empty_contents
+#check Solidity.Backend.Aggregates.ByteParameterControls.runtime_input_matters
+#check Solidity.Backend.Aggregates.ByteParameters.entry_value
+#check Solidity.Backend.Aggregates.ByteParameters.raw_parameter_related
+#check Solidity.Backend.Aggregates.ByteParameterControls.entry_reference
