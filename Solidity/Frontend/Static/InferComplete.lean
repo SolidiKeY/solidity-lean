@@ -613,6 +613,43 @@ theorem abiDecode_mem {g : String} {x ts : Syn .expr} {σ : STy} {τs : List STy
     · rename_i hd'; rw [hd] at hd'; cases hd'
   · rename_i hn; exact absurd hr hn
 
+theorem slice_mem {a s e : Syn .expr} {τ σ ρ : STy} {da : Typed Γ a τ} {ds : Typed Γ s σ}
+    {de : Typed Γ e ρ} (ha : Res.expr da ∈ infer Γ a) (hs' : Res.expr ds ∈ infer Γ s)
+    (he' : Res.expr de ∈ infer Γ e) (hτ : τ.sliceable = true) (hs : σ.isIndex = true)
+    (he : ρ.isIndex = true) :
+    Res.expr (Typed.slice da hτ ds hs de he) ∈ infer Γ (.slice a (.some s) (.some e)) := by
+  refine List.mem_append_right _ ?_
+  show _ ∈ sliceBoth Γ (infer Γ a) (infer Γ s) (infer Γ e)
+  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨σ, ds⟩, mem_tysOf' hs',
+    List.mem_flatMap.mpr ⟨⟨ρ, de⟩, mem_tysOf' he', ?_⟩⟩⟩
+  rw [dif_pos ⟨hτ, hs, he⟩]; exact List.mem_singleton.mpr rfl
+
+theorem sliceFrom_mem {a s : Syn .expr} {τ σ : STy} {da : Typed Γ a τ} {ds : Typed Γ s σ}
+    (ha : Res.expr da ∈ infer Γ a) (hs' : Res.expr ds ∈ infer Γ s) (hτ : τ.sliceable = true)
+    (hs : σ.isIndex = true) :
+    Res.expr (Typed.sliceFrom da hτ ds hs) ∈ infer Γ (.slice a (.some s) .none) := by
+  refine List.mem_append_right _ ?_
+  show _ ∈ sliceFromRes Γ (infer Γ a) (infer Γ s)
+  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨σ, ds⟩, mem_tysOf' hs', ?_⟩⟩
+  rw [dif_pos ⟨hτ, hs⟩]; exact List.mem_singleton.mpr rfl
+
+theorem sliceTo_mem {a e : Syn .expr} {τ ρ : STy} {da : Typed Γ a τ} {de : Typed Γ e ρ}
+    (ha : Res.expr da ∈ infer Γ a) (he' : Res.expr de ∈ infer Γ e) (hτ : τ.sliceable = true)
+    (he : ρ.isIndex = true) :
+    Res.expr (Typed.sliceTo da hτ de he) ∈ infer Γ (.slice a .none (.some e)) := by
+  refine List.mem_append_right _ ?_
+  show _ ∈ sliceToRes Γ (infer Γ a) (infer Γ e)
+  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, List.mem_flatMap.mpr ⟨⟨ρ, de⟩, mem_tysOf' he', ?_⟩⟩
+  rw [dif_pos ⟨hτ, he⟩]; exact List.mem_singleton.mpr rfl
+
+theorem sliceAll_mem {a : Syn .expr} {τ : STy} {da : Typed Γ a τ}
+    (ha : Res.expr da ∈ infer Γ a) (hτ : τ.sliceable = true) :
+    Res.expr (Typed.sliceAll da hτ) ∈ infer Γ (.slice a .none .none) := by
+  refine List.mem_append_right _ ?_
+  show _ ∈ sliceAllRes Γ (infer Γ a)
+  refine List.mem_flatMap.mpr ⟨⟨τ, da⟩, mem_tysOf' ha, ?_⟩
+  rw [dif_pos hτ]; exact List.mem_singleton.mpr rfl
+
 theorem extCallValue_mem {c v : Syn .expr} {f : String} {es : Syn (.list .expr)} {σs ps rs : List STy}
     {dn : DeclName} {d : Decl} {dc : Typed Γ c (.contract dn)} (hc : Res.expr dc ∈ infer Γ c)
     {dv : Typed Γ v σ} (hv' : Res.expr dv ∈ infer Γ v)
@@ -856,6 +893,22 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
     obtain ⟨dl', hl⟩ := exists_lval (lval_complete dl)
     obtain ⟨db', hb⟩ := exists_expr (typed_complete db)
     exact mem_tysOf (assignCopy_mem hl hb h hn)
+  | _, _, .slice da hτ ds hs de he => by
+    obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
+    obtain ⟨ds', hs'⟩ := exists_expr (typed_complete ds)
+    obtain ⟨de', he'⟩ := exists_expr (typed_complete de)
+    exact mem_tysOf (slice_mem ha hs' he' hτ hs he)
+  | _, _, .sliceFrom da hτ ds hs => by
+    obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
+    obtain ⟨ds', hs'⟩ := exists_expr (typed_complete ds)
+    exact mem_tysOf (sliceFrom_mem ha hs' hτ hs)
+  | _, _, .sliceTo da hτ de he => by
+    obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
+    obtain ⟨de', he'⟩ := exists_expr (typed_complete de)
+    exact mem_tysOf (sliceTo_mem ha he' hτ he)
+  | _, _, .sliceAll da hτ => by
+    obtain ⟨da', ha⟩ := exists_expr (typed_complete da)
+    exact mem_tysOf (sliceAll_mem ha hτ)
   | _, _, .abiDecode hr dx hs hd hok => by
     obtain ⟨dx', hx⟩ := exists_expr (typed_complete dx)
     exact mem_tysOf (abiDecode_mem hx hr hs hd hok)

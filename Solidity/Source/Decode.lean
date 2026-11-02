@@ -267,7 +267,7 @@ theorem bytesOfRV_mem_ok (F : Fr) (n : Nat) {H : HeapTy} (v : RVal E.layout (.by
       · exact ⟨_, .inl hσ⟩
       · exact ⟨_, .inr hσ⟩
     | storRef h _ => simp only [STy.loc?, Option.some.injEq, reduceCtorEq] at h
-    | cdRef _ _ => exact Hoare.of_false fun _ hy => hy.2
+    | cdRef h _ _ => simp only [STy.loc?, Option.some.injEq, reduceCtorEq] at h
 
 /-- **The `abi.decode` arm on `bytes memory` data** keeps `MemOK` and is
 never stuck, relative to the data expression's triple (gap-relative

@@ -297,6 +297,24 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     let ⟨σ, d⟩ ← Typed.inferN n Γ x
     if he : σ.explicit Γ.isBase (el.ty σ.convLoc) = true then pure ⟨_, .convElem d rfl he⟩
     else Option.none
+  | .slice a o o' => do
+    let ⟨τ, da⟩ ← Typed.inferN n Γ a
+    if hτ : τ.sliceable = true then
+      match o, o' with
+      | .some s, .some e => do
+        let ⟨σ, ds⟩ ← Typed.inferN n Γ s
+        let ⟨ρ, de⟩ ← Typed.inferN n Γ e
+        if h1 : σ.isIndex = true then
+          if h2 : ρ.isIndex = true then pure ⟨_, .slice da hτ ds h1 de h2⟩ else Option.none
+        else Option.none
+      | .some s, .none => do
+        let ⟨σ, ds⟩ ← Typed.inferN n Γ s
+        if h1 : σ.isIndex = true then pure ⟨_, .sliceFrom da hτ ds h1⟩ else Option.none
+      | .none, .some e => do
+        let ⟨ρ, de⟩ ← Typed.inferN n Γ e
+        if h2 : ρ.isIndex = true then pure ⟨_, .sliceTo da hτ de h2⟩ else Option.none
+      | .none, .none => pure ⟨_, .sliceAll da hτ⟩
+    else Option.none
   | .payableConv (.positional (.cons x .nil)) => do
     let ⟨σ, d⟩ ← Typed.inferN n Γ x
     if hp : σ.isPayableArg = true then

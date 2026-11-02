@@ -164,6 +164,10 @@ theorem zero_u256 (B : DeclName → DeclName → Bool) :
     STy.implicit B (.rational (Q.ofInt 0)) (.int IntTy.u256) = true :=
   decide_eq_true (p := (Q.ofInt 0).FitsInt IntTy.u256) (by decide)
 
+/-- The constant `0` is an index (an absent slice bound). -/
+theorem zero_isIndex : STy.isIndex (.rational (Q.ofInt 0)) = true :=
+  decide_eq_true (p := (Q.ofInt 0).FitsInt IntTy.u256) (by decide)
+
 mutual
 
 /-- **Resolved expressions** over environment `E`, intrinsically typed. -/
@@ -233,6 +237,10 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   /-- `abi.decode`: the data, decoded at types the decoder reads. -/
   | abiDecode {σ : STy} {τs : List STy} (data : RExpr E Γ σ) (hs : σ.decodeSrc = true)
       (hd : τs.all (STy.decodable E) = true) : RExpr E Γ (STy.ret τs)
+  /-- A slice of a `calldata` array or `bytes`: the start and end indices
+  (an absent start is `0`; an absent end is the length, `toEnd`). -/
+  | slice {τ σ ρ : STy} (a : RExpr E Γ τ) (hτ : τ.sliceable = true) (s : RExpr E Γ σ) (hs : σ.isIndex = true)
+      (e : RExpr E Γ ρ) (he : ρ.isIndex = true) (toEnd : Bool) : RExpr E Γ τ
 
 /-- Resolved argument lists. -/
 inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
@@ -350,6 +358,10 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .abiEncode (k := k) _ _ da _ => .abiEncode k da.toR
   | .assignCopy l db h _ => .assignCopy l.toR db.toR h
   | .abiDecode _ dx hs _ hd => .abiDecode dx.toR hs hd
+  | .slice da hτ ds hs de he => .slice da.toR hτ ds.toR hs de.toR he false
+  | .sliceFrom da hτ ds hs => .slice da.toR hτ ds.toR hs (.const (Q.ofInt 0)) zero_isIndex true
+  | .sliceTo da hτ de he => .slice da.toR hτ (.const (Q.ofInt 0)) zero_isIndex de.toR he false
+  | .sliceAll da hτ => .slice da.toR hτ (.const (Q.ofInt 0)) zero_isIndex (.const (Q.ofInt 0)) zero_isIndex true
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :

@@ -121,6 +121,7 @@ def bytesOfRV {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} : RVal E.layout τ → E
     match ← loadMem F n (.bytes .memory) p with
     | .bytes bs => pure bs
     | _ => halt (.stuck "bytes in storage")
+  | .val (.cdRef _ off len) => pure ((F.cd.drop off).take len)
   | _ => halt (.stuck "not a byte array")
 
 /-- The packed width of a value type. -/
@@ -233,6 +234,27 @@ def tailBytes {Γ : RCtx} (data : Bytes) (i : Nat) : EM E Γ Bytes := do
     if 2 ^ 64 ≤ len then lift (panic .alloc)
     else if off + 32 + len ≤ data.length then pure ((data.drop (off + 32)).take len) else halt (.revert [])
 
+/-- **A dynamic `calldata` argument at entry** (lane FU2-B), whose head is
+the `i`-th word, elements of `stride` bytes: solc's
+`abi_decode_t_*_calldata_ptr` checks, all reverting with no data: the
+length word within the data (`offset + 0x1f < end`), a length below
+`2^64`, the elements within the data. Its elements are not read here: a
+reference keeps their offset (`data` follows the four selector bytes) and
+length, and each is validated when read. -/
+def cdTail (data : Bytes) (i stride : Nat) : R (Nat × Nat) :=
+  let off := wordAt data i
+  if data.length < off + 32 then .error (.revert [])
+  else
+    let len := wordAt (data.drop off) 0
+    if 2 ^ 64 ≤ len then .error (.revert [])
+    else if off + 32 + stride * len ≤ data.length then pure (4 + off + 32, len) else .error (.revert [])
+
+/-- A `calldata` reference to a dynamic argument at entry. -/
+def cdArg (D : Layout) (data : Bytes) (i stride : Nat) {τ : STy} (h : τ.loc? = some .calldata) :
+    R (Val D τ) := do
+  let (o, len) ← cdTail data i stride
+  pure (.cdRef h o len)
+
 /-- **Decoding one argument** at head word `i`: a static value from its
 word; `bytes`, `string` and a dynamic array of value types (in memory) from
 their tail, into a new memory object. -/
@@ -241,10 +263,12 @@ def decodeArg {Γ : RCtx} (data : Bytes) (i : Nat) (τ : STy) : EM E Γ (Val E.l
   | .bytes l =>
     match l with
     | .memory => do allocRef (Data.bytes (D := E.layout) (l := .memory) (← tailBytes data i))
+    | .calldata => lift (cdArg E.layout data i 1 rfl)
     | _ => lift (decodeWord E.layout (wordAt data i) _)
   | .string l =>
     match l with
     | .memory => do allocRef (Data.string (D := E.layout) (l := .memory) (← tailBytes data i))
+    | .calldata => lift (cdArg E.layout data i 1 rfl)
     | _ => lift (decodeWord E.layout (wordAt data i) _)
   | .array l σ len =>
     match l, len with
@@ -261,6 +285,9 @@ def decodeArg {Γ : RCtx} (data : Bytes) (i : Nat) (τ : STy) : EM E Γ (Val E.l
             (fun k => .val (xs.get k)))
         else halt (.revert [])
       else halt (.stuck "dynamic ABI decoding of this type is not modelled")
+    | .calldata, none =>
+      if σ.isValueTy then lift (cdArg E.layout data i 32 rfl)
+      else halt (.stuck "calldata arrays of this type are not modelled")
     | _, _ => lift (decodeWord E.layout (wordAt data i) _)
   | τ => lift (decodeWord E.layout (wordAt data i) τ)
 
@@ -295,6 +322,48 @@ def abiDecodeData {Γ : RCtx} (data : Bytes) (τs : List STy) : EM E Γ (RVal E.
     let vs ← decodeArgs data τs 0
     pure (mkRet τs vs.toR)
 
+/-- The word at byte offset `off` of the frame's call data (zeros past its
+end, as `calldataload`). -/
+def cdWordAt (F : Fr) (off : Nat) : Nat := beValue (fitBytes 32 (F.cd.drop off))
+
+/-- **A copy of `calldata` into memory** (lane FU2-B): `bytes`/`string` as
+their bytes; an array of one-word values decoded element by element, each
+validated (an invalid element reverts with no data, as solc's
+`abi_decode_available_length` copy); a `calldata` target keeps the
+reference. -/
+def cdToMem {Γ : RCtx} (F : Fr) (τ : STy) (off len : Nat) : EM E Γ (RVal E.layout τ) :=
+  if h : τ.loc? = some .calldata then return .val (.cdRef h off len) else
+  match τ with
+  | .bytes .memory => do
+    return .val (← allocRef (Data.bytes (D := E.layout) (l := .memory) ((F.cd.drop off).take len)))
+  | .string .memory => do
+    return .val (← allocRef (Data.string (D := E.layout) (l := .memory) ((F.cd.drop off).take len)))
+  | .array .memory σ none => do
+    let xs ← (List.range len).mapM fun j => lift (decodeWord E.layout (cdWordAt F (off + 32 * j)) σ)
+    return .val (← allocRef (Data.array (D := E.layout) (l := .memory) (n := none) xs.length
+      (fun _ h => nomatch h) (fun k => .val (xs.get k))))
+  | _ => halt (.stuck "calldata conversion")
+
+/-- **A slice `a[s:e]` of a `calldata` array or `bytes`** (lane FU2-B):
+solc's `calldata_array_index_range_access`: a start past the end, or an end
+past the length, reverts with no data; the slice is the reference moved by
+the start, of length `e - s` (`toEnd`: `a[s:]`). -/
+def sliceR {D : Layout} {τ : STy} (a : Val D τ) (s e : Nat) (toEnd : Bool) : R (Val D τ) :=
+  match a with
+  | .cdRef h off len =>
+    let e := if toEnd then len else e
+    let stride := match τ with | .bytes _ | .string _ => 1 | _ => 32
+    if e < s then .error (.revert [])
+    else if len < e then .error (.revert [])
+    else pure (.cdRef h (off + stride * s) (e - s))
+  | _ => stuck "slice of a non-calldata value"
+
+/-- Byte `k` of `calldata` `bytes` at `off` of length `len`: past the length,
+Panic `0x32`. -/
+def cdByte {D : Layout} (F : Fr) (off len k : Nat) : R (Val D (.fixedBytes 1 (by decide))) :=
+  if k < len then pure (Val.fixedBytes (n := 1) (h := by decide) [(F.cd.drop (off + k)).headD 0] rfl)
+  else panic .index
+
 /-! ## Conversions with state -/
 
 /-- **An implicit conversion** (`RExpr.conv`): a constant at its target
@@ -316,6 +385,7 @@ def convRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layo
     else return .val (← storRef τ p)
   | _, τ, .val (.memRef _ a) =>
     if h : τ.loc? = some .memory then return .val (.memRef h a) else halt (.stuck "memory to non-memory")
+  | _, τ, .val (.cdRef _ off len) => cdToMem F τ off len
   | _, τ, .val x => return .val (← lift (convVal τ x))
   | _, _, _ => halt (.stuck "implicit conversion")
 
@@ -354,6 +424,9 @@ inductive Loc (D : Layout) (Γ : RCtx) : STy → Type where
   | mem {τ : STy} (a i : Nat) : Loc D Γ τ
   /-- Byte `i` of the memory `bytes` at `a`. -/
   | memByte (a i : Nat) : Loc D Γ (.fixedBytes 1 (by decide))
+  /-- The one-word value at byte offset `off` of the frame's call data (an
+  element of a `calldata` array, lane FU2-B); read only. -/
+  | cd {τ : STy} (off : Nat) : Loc D Γ τ
 
 /-- The element or member `i` of a memory object, at type `τ`. -/
 def memElem {Γ : RCtx} (a i : Nat) (τ : STy) : EM E Γ (Val E.layout τ) := do
@@ -379,6 +452,7 @@ def readLoc {Γ : RCtx} (F : Fr) {τ : STy} : Loc E.layout Γ τ → EM E Γ (Va
     match bs[i]? with
     | some b => return Val.fixedBytes (n := 1) (h := by decide) [b] rfl
     | none => lift (panic .index)
+  | .cd off => lift (decodeWord E.layout (cdWordAt F off) τ)
 
 /-- Replacing element `i` of a memory object. -/
 def memSet {Γ : RCtx} (a i : Nat) {τ : STy} (v : Val E.layout τ) : EM E Γ Unit := do
@@ -410,6 +484,7 @@ def writeLoc {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ
     | ⟨_, .string (l := l') bs⟩ =>
       if i < bs.length then heapPut a ⟨.string l', .string (bs.set i b)⟩ else lift (panic .index)
     | _ => halt (.stuck "not bytes")
+  | .cd _ => halt (.stuck "calldata is read only")
 
 /-- **Deleting a location**: the default value, a fresh zeroed memory
 object, or storage reset below the path. -/
@@ -425,6 +500,7 @@ def lengthOf {Γ : RCtx} (F : Fr) {τ : STy} (v : Val E.layout τ) : EM E Γ Nat
   match τ, v with
   | .array _ _ (some m), _ => pure m
   | _, .storRef _ p => readLen F p
+  | _, .cdRef _ _ len => pure len
   | _, .memRef _ a => do
     match ← heapObj a with
     | ⟨_, .array len _ _⟩ => pure len
@@ -441,7 +517,7 @@ def indexLoc {Γ : RCtx} (F : Fr) {l : DataLoc} {σ : STy} {k : Option Nat}
     match a with
     | .storRef _ p => pure (.stor (p.go (.index i)))
     | .memRef _ addr => pure (.mem addr i)
-    | _ => halt (.stuck "calldata arrays are not modelled")
+    | .cdRef _ off _ => pure (.cd (off + 32 * i))
   else lift (panic .index)
 
 /-- The contents of a mapping key, as its path step. -/
@@ -804,6 +880,7 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
     | .val (.storRef _ p) =>
       if k < (← readLen F p) then return .val (← readAt F (p.go (.index k)) (.fixedBytes 1 (by decide)))
       else lift (panic .index)
+    | .val (.cdRef _ off len) => return .val (← lift (cdByte F off len k))
     | _ => halt (.stuck "byte index")
   | .length (ρ := ρ) a _ => do
     let k ← lengthOf F (← getV (← evalE G F n a))
@@ -885,6 +962,11 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
   | .abiDecode (τs := τs) data _ _ => do
     let v ← evalE G F n data
     abiDecodeData (← bytesOfRV F n v) τs
+  | .slice a _ s _ e _ toEnd => do
+    let av ← getV (← evalE G F n a)
+    let si ← indexNat (← evalE G F n s)
+    let ei ← indexNat (← evalE G F n e)
+    return .val (← lift (sliceR av si ei toEnd))
 termination_by structural n
 
 /-- Two operands in the pipeline's order: right first under legacy, left
@@ -1319,7 +1401,7 @@ def enterInstance (G : Glob E) (n : Nat) (a sender : Address) (v : Word) (input 
   match n with
   | 0 => halt .timeout
   | n + 1 => do
-    let F' : Fr := { this := a, sender := sender, value := v, static := static, contract := c, depth := depth }
+    let F' : Fr := { this := a, sender := sender, value := v, static := static, contract := c, depth := depth, cd := input }
     modSt fun s => { s with heap := Heap.empty }
     let r ← attempt (dispatch G F' n input)
     modSt fun s => { s with heap := m.2.2 }

@@ -77,21 +77,21 @@ theorem Val.eq_int {t : IntTy} (x : Val D (.int t)) : ∃ v h, x = .int v h := b
   | int v h => exact ⟨v, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_fixed {t : FixTy} (x : Val D (.fixed t)) : ∃ v h, x = .fixed v h := by
   cases x with
   | fixed v h => exact ⟨v, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_bool (x : Val D .bool) : ∃ b, x = .bool b := by
   cases x with
   | bool b => exact ⟨b, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_fixedBytes {n : Nat} {hn : 1 ≤ n ∧ n ≤ 32} (x : Val D (.fixedBytes n hn)) :
     ∃ bs h, x = .fixedBytes bs h := by
@@ -99,7 +99,7 @@ theorem Val.eq_fixedBytes {n : Nat} {hn : 1 ≤ n ∧ n ≤ 32} (x : Val D (.fix
   | fixedBytes bs h => exact ⟨bs, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 /-! ## Arithmetic -/
 
@@ -180,14 +180,14 @@ theorem Val.eq_address {p : Bool} (x : Val D (.address p)) : ∃ a, x = .address
   | address a => exact ⟨a, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_enum {d : DeclName} (x : Val D (.enum d)) : ∃ i, x = .enum i := by
   cases x with
   | enum i => exact ⟨i, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_extFn {ps rs : List STy} {m : Option Mutability} (x : Val D (.fn true ps rs m)) :
     ∃ a sel h, x = .externalFn a sel h := by
@@ -195,7 +195,7 @@ theorem Val.eq_extFn {ps rs : List STy} {m : Option Mutability} (x : Val D (.fn 
   | externalFn a sel h => exact ⟨a, sel, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 /-! ## Comparisons -/
 
@@ -298,14 +298,14 @@ theorem amount_ok {σ : STy} (hσ : σ.isAmount = true) (v : RVal D σ) : NotStu
       cases x with
       | memRef hl _ => cases hl
       | storRef hl _ => cases hl
-      | cdRef hl _ => cases hl
+      | cdRef hl _ _ => cases hl
     | const _ => cases h
   · cases v with
     | val x =>
       cases x with
       | memRef hl _ => cases hl
       | storRef hl _ => cases hl
-      | cdRef hl _ => cases hl
+      | cdRef hl _ _ => cases hl
     | hex _ _ => cases h
 
 /-! ## Elaborated terms stay in the domains -/
@@ -344,6 +344,7 @@ def RExpr.OpsOK {E : Env} {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .abiEncode _ args => RArgs.OpsOK args
   | _, .assignCopy l e _ => RLVal.OpsOK l ∧ RExpr.OpsOK e
   | _, .abiDecode d _ _ => RExpr.OpsOK d
+  | _, .slice a _ s _ e _ _ => RExpr.OpsOK a ∧ RExpr.OpsOK s ∧ RExpr.OpsOK e
 
 def RArgs.OpsOK {E : Env} {Γ : RCtx} : {τs : List STy} → RArgs E Γ τs → Prop
   | _, .nil => True
@@ -435,6 +436,10 @@ theorem Typed.toR_opsOK {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → (d : Typ
   | _, _, .abiEncode _ _ da _ => TypedArgs.toR_opsOK da
   | _, _, .assignCopy l db _ _ => And.intro (LVal.toR_opsOK l) (Typed.toR_opsOK db)
   | _, _, .abiDecode _ dx _ _ _ => Typed.toR_opsOK dx
+  | _, _, .slice da _ ds _ de _ => And.intro (Typed.toR_opsOK da) (And.intro (Typed.toR_opsOK ds) (Typed.toR_opsOK de))
+  | _, _, .sliceFrom da _ ds _ => And.intro (Typed.toR_opsOK da) (And.intro (Typed.toR_opsOK ds) trivial)
+  | _, _, .sliceTo da _ de _ => And.intro (Typed.toR_opsOK da) (And.intro trivial (Typed.toR_opsOK de))
+  | _, _, .sliceAll da _ => And.intro (Typed.toR_opsOK da) (And.intro trivial trivial)
 
 theorem TypedArgs.toR_opsOK {Γ : Ctx} : {es : Syn (.list .expr)} → {τs : List STy} →
     (d : TypedArgs Γ es τs) → RArgs.OpsOK d.toR
@@ -691,7 +696,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
         | contract a => exact ⟨a, rfl⟩
         | memRef h _ => cases h
         | storRef h _ => cases h
-        | cdRef h _ => cases h
+        | cdRef h _ _ => cases h
       rw [show convVal (D := D) (.contract d') (Val.contract (d := d) a) = pure (.contract a) from rfl]
       exact NotStuckR.pure _
     · rename_i e ps rs m e' ps' rs' m'
@@ -742,7 +747,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
         | contract a => exact ⟨a, rfl⟩
         | memRef h _ => cases h
         | storRef h _ => cases h
-        | cdRef h _ => cases h
+        | cdRef h _ _ => cases h
       rw [show convVal (D := D) (.contract d) (Val.contract (d := d) a) = pure (.contract a) from rfl]
       exact NotStuckR.pure _
     · cases x <;> exact convVal_self_ok _ rfl

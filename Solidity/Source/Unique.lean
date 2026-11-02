@@ -1284,6 +1284,70 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-- **Slices** (`a[s:e]`, FU2-B). -/
+theorem uniqE_slice {Γ : Ctx} {a : Syn .expr} {o o' : Syn (.opt .expr)}
+    (ih : Uniq Γ (sizeOf (Syn.slice a o o'))) : UniqE Γ (.slice a o o') := by
+  intro τ τ' d d'
+  have hce : (Syn.slice a o o').const = Option.none := rfl
+  have hbo : (Syn.slice a o o').binOp? = Option.none := rfl
+  have ha : sizeOf a < sizeOf (Syn.slice a o o') := by simp only [Syn.slice.sizeOf_spec]; omega
+  cases d with
+  | @slice _ s e _ _ _ da _ ds _ de _ =>
+    cases d' with
+    | slice da' _ ds' _ de' _ =>
+      have hs : sizeOf s < sizeOf (Syn.slice a (.some s) (.some e)) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      have he : sizeOf e < sizeOf (Syn.slice a (.some s) (.some e)) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e s hs ds ds'
+      cases h2
+      obtain ⟨h3, e3⟩ := ih.e e he de de'
+      cases h3
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2, eq_of_heq e3]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @sliceFrom _ s _ _ da _ ds _ =>
+    cases d' with
+    | sliceFrom da' _ ds' _ =>
+      have hs : sizeOf s < sizeOf (Syn.slice a (.some s) .none) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e s hs ds ds'
+      cases h2
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @sliceTo _ e _ _ da _ de _ =>
+    cases d' with
+    | sliceTo da' _ de' _ =>
+      have he : sizeOf e < sizeOf (Syn.slice a .none (.some e)) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e e he de de'
+      cases h2
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | sliceAll da _ =>
+    cases d' with
+    | sliceAll da' _ =>
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-- **Conversions to an elementary type** (`T(x)`). -/
 theorem uniqE_callElem {Γ : Ctx} {el : Elem} {hel : el ≠ .addressPayable} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.elemType el hel) A))) : UniqE Γ (.call (.elemType el hel) A) := by
@@ -1473,6 +1537,7 @@ theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ
   | unarySuffix op x => exact uniqE_suffix ih
   | payableConv A => exact uniqE_payable ih
   | index a o => exact uniqE_index ih
+  | slice a o o' => exact uniqE_slice ih
   | assign op a b => exact uniqE_assign ih
   | member a x => exact uniqE_member ih
   | call f A =>

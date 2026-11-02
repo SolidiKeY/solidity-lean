@@ -84,12 +84,14 @@ proof uses it, never derived from a machine model.
   to the precompile ([feature-work/abi-hashes.md](feature-work/abi-hashes.md)).
 
 - **Source semantics** (`Solidity/Source`, the S02–S05 reference
-  interpreter): the constructor ledger's gaps are `slice`, `callOptions`
-  beyond `value`, `metaType`, `new` and `inlineArray` (`semExprGaps`), and
-  among statements `declTuple` and `try`; `abi.decode` is typed and
-  evaluated at the decoder's types since lane FU2-B (static arrays,
-  structs, nested arrays, fixed point, external function types and
-  `bytes calldata` data are refused); calldata references are not built
+  interpreter): the constructor ledger's gaps are `callOptions` beyond
+  `value`, `metaType`, `new` and `inlineArray` (`semExprGaps`), and among
+  statements `declTuple` and `try`; since lane FU2-B `abi.decode` is typed
+  and evaluated at the decoder's types (static arrays, structs, nested
+  arrays, fixed point and external function types are refused), and
+  `calldata` references (`bytes`, `string`, one-word-element dynamic
+  arrays) and their slices are read with access-time checks; `calldata`
+  structs, static and nested `calldata` arrays are not
   ([feature-work/source-soundness.md](feature-work/source-soundness.md)).
 
 ## Closed

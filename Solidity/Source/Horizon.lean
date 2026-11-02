@@ -1014,8 +1014,10 @@ theorem decodeArg_grow (data : Bytes) (i : Nat) (τ : STy) : Grow (decodeArg (E 
   · split
     · exact Grow.bind (tailBytes_grow data i) fun _ => allocRef_grow _
     · exact Grow.lift _
+    · exact Grow.lift _
   · split
     · exact Grow.bind (tailBytes_grow data i) fun _ => allocRef_grow _
+    · exact Grow.lift _
     · exact Grow.lift _
   · split
     · split
@@ -1027,6 +1029,9 @@ theorem decodeArg_grow (data : Bytes) (i : Nat) (τ : STy) : Grow (decodeArg (E 
           · split
             · exact Grow.bind (List.mapM_grow _ (fun _ => Grow.lift _) _) fun _ => allocRef_grow _
             · exact Grow.halt _
+      · exact Grow.halt _
+    · split
+      · exact Grow.lift _
       · exact Grow.halt _
     · exact Grow.lift _
   · exact Grow.lift _
@@ -1059,9 +1064,19 @@ theorem encodeParts_grow (F : Fr) (n : Nat) (packed : Bool) :
 theorem encodeVals_grow (F : Fr) (n : Nat) (packed : Bool) {τs : List STy} (vs : RVals E.layout τs) :
     Grow (encodeVals (Γ := Γ) F n packed vs) := by
   unfold encodeVals; grow_go [encodeParts_grow]
+theorem cdToMem_grow (F : Fr) (τ : STy) (off len : Nat) : Grow (cdToMem (E := E) (Γ := Γ) F τ off len) := by
+  unfold cdToMem
+  split
+  · exact Grow.pure _
+  · split
+    · exact Grow.bind (allocRef_grow _) fun _ => Grow.pure _
+    · exact Grow.bind (allocRef_grow _) fun _ => Grow.pure _
+    · exact Grow.bind (List.mapM_grow _ (fun _ => Grow.lift _) _) fun _ =>
+        Grow.bind (allocRef_grow _) fun _ => Grow.pure _
+    · exact Grow.halt _
 theorem convRV_grow (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
     Grow (convRV (Γ := Γ) F n τ v) := by
-  unfold convRV; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+  unfold convRV; grow_go [cdToMem_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
 theorem convExplicitRV_grow (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
     Grow (convExplicitRV (Γ := Γ) F n τ v) := by
   unfold convExplicitRV; grow_go [convRV_grow, bytesOfRV_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
@@ -1609,8 +1624,10 @@ theorem decodeArg_const (data : Bytes) (i : Nat) (τ : STy) : Const (decodeArg (
   · split
     · exact Const.bind (tailBytes_const data i) fun _ => allocRef_const _
     · exact Const.lift _
+    · exact Const.lift _
   · split
     · exact Const.bind (tailBytes_const data i) fun _ => allocRef_const _
+    · exact Const.lift _
     · exact Const.lift _
   · split
     · split
@@ -1622,6 +1639,9 @@ theorem decodeArg_const (data : Bytes) (i : Nat) (τ : STy) : Const (decodeArg (
           · split
             · exact Const.bind (List.mapM_const _ (fun _ => Const.lift _) _) fun _ => allocRef_const _
             · exact Const.halt _
+      · exact Const.halt _
+    · split
+      · exact Const.lift _
       · exact Const.halt _
     · exact Const.lift _
   · exact Const.lift _
@@ -1648,9 +1668,19 @@ theorem encodeParts_const (F : Fr) (n : Nat) (packed : Bool) :
 theorem encodeVals_const (F : Fr) (n : Nat) (packed : Bool) {τs : List STy} (vs : RVals E.layout τs) :
     Const (encodeVals (Γ := Γ) F n packed vs) := by
   unfold encodeVals; const_go [encodeParts_const]
+theorem cdToMem_const (F : Fr) (τ : STy) (off len : Nat) : Const (cdToMem (E := E) (Γ := Γ) F τ off len) := by
+  unfold cdToMem
+  split
+  · exact Const.pure _
+  · split
+    · exact Const.bind (allocRef_const _) fun _ => Const.pure _
+    · exact Const.bind (allocRef_const _) fun _ => Const.pure _
+    · exact Const.bind (List.mapM_const _ (fun _ => Const.lift _) _) fun _ =>
+        Const.bind (allocRef_const _) fun _ => Const.pure _
+    · exact Const.halt _
 theorem convRV_const (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
     Const (convRV (Γ := Γ) F n τ v) := by
-  unfold convRV; const_go [heapPut_const, alloc_const, readCell_const, readAt_const, applyOp_const, setCell_const, writeAt_const, readLen_const, writeLen_const, heapObj_const, heapAt_const, heapBytes_const, allocRef_const, storRef_const, getV_const, zeroVal_const, zeroData_const, loadMem_const, deleteStor_const, storeData_const, storeVal_const, memSet_const]
+  unfold convRV; const_go [cdToMem_const, heapPut_const, alloc_const, readCell_const, readAt_const, applyOp_const, setCell_const, writeAt_const, readLen_const, writeLen_const, heapObj_const, heapAt_const, heapBytes_const, allocRef_const, storRef_const, getV_const, zeroVal_const, zeroData_const, loadMem_const, deleteStor_const, storeData_const, storeVal_const, memSet_const]
 theorem convExplicitRV_const (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
     Const (convExplicitRV (Γ := Γ) F n τ v) := by
   unfold convExplicitRV; const_go [convRV_const, bytesOfRV_const, heapPut_const, alloc_const, readCell_const, readAt_const, applyOp_const, setCell_const, writeAt_const, readLen_const, writeLen_const, heapObj_const, heapAt_const, heapBytes_const, allocRef_const, storRef_const, getV_const, zeroVal_const, zeroData_const, loadMem_const, deleteStor_const, storeData_const, storeVal_const, memSet_const]

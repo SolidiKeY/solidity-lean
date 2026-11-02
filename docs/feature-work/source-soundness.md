@@ -848,8 +848,8 @@ model, (4) checkpoint 4's remaining gaps; backfill checkpoint 5.
 **Typing** (`Solidity/Source/Typing.lean`). `Typed.abiDecode` types
 `abi.decode(data, ts)` when `abi` resolves to the builtin, the data has a
 type `STy.decodeSrc` admits (`bytes` in memory or storage, a string
-literal: what solc's "implicitly convertible to `bytes memory`" leaves once
-calldata is set aside), and `Ctx.decodeTys ts = some τs` with every `τ`
+literal; since item 2 also `bytes calldata`: solc's "implicitly
+convertible to `bytes memory` or `bytes calldata`"), and `Ctx.decodeTys ts = some τs` with every `τ`
 `STy.decodable Γ.env`; its type is `STy.ret τs` (one type: its value;
 otherwise a tuple), as solc's. The second argument is read, not typed:
 `Ctx.decodeTys` takes the components of a parenthesized list (`(T)`,
@@ -868,8 +868,7 @@ array of one-word values. **Named refusals** (no derivation, outside the
 proved fragment, each a recorded gap): static arrays, structs, nested
 arrays, external function types (the decoder does not read them; the
 assignment's "as the decoder supports"), fixed point (solc's ABI coder does
-not implement it), qualified names (`L.S`), `bytes calldata` data (needs
-item 2), `abi.decode(data, ())`, a doubly parenthesized component
+not implement it), qualified names (`L.S`), `abi.decode(data, ())`, a doubly parenthesized component
 (`((uint))`).
 
 **Checkers.** The G13 checker (`Solidity/Frontend/Static/Infer.lean`)
@@ -966,3 +965,90 @@ validators, the type-name resolution (a local shadows a type), uniqueness,
 offset word of `2^64` or more before its bounds check; here such an offset
 is past any data held in memory, so it reverts by the bounds check (the
 same outcome for every memory object shorter than `2^64` bytes).
+
+### Item 2: `calldata` references (done for the fragment below)
+
+**Representation.** `Val.cdRef h off len` (`Solidity/Source/State.lean`)
+is a reference into the frame's call data, `Fr.cd`
+(`Solidity/Source/Machine.lean`, set by `enterInstance` and `runTx` to the
+call's input): the absolute offset of its data and its length (elements
+of an array, bytes of `bytes`/`string`). The call data is read only:
+`Loc.cd off` (an element) has no write (`writeLoc` is `stuck` on it, and
+S01 types no `calldata` lvalue), and `Val.RefOK` of a reference is `True`
+under every heap typing.
+
+**Entry** (`decodeArg`, `Solidity/Source/Eval.lean`). A `bytes calldata`,
+`string calldata` or one-word-element `T[] calldata` parameter is kept as a
+reference after solc's `abi_decode_t_*_calldata_ptr` checks (`cdTail`): the
+length word within the data, a length below `2^64`, the elements within the
+data; each failure reverts with no data (a calldata length of `2^64` or
+more reverts, it does not panic: nothing is allocated). The elements are
+not read.
+
+**Access** (all in helpers outside the interpreter's mutual block, so
+Horizon's step proofs take them without new lemmas, except
+`cdToMem`):
+
+- `x.length` reads the reference (`lengthOf`);
+- `x[i]`: past the length, Panic `0x32`; otherwise the element is read and
+  validated **at the read** (`readLoc` on `Loc.cd`: an invalid word reverts
+  with no data, `decodeWord`), so an element that fails only when read
+  fails at the read, not at entry;
+- `b[i]` on `bytes calldata` (`cdByte`): past the length, Panic `0x32`;
+- `x[s:e]`, `x[s:]`, `x[:e]`, `x[:]` (`Typed.slice`, `sliceFrom`,
+  `sliceTo`, `sliceAll`; `RExpr.slice`; `sliceR`): on `bytes calldata` and
+  one-word-element dynamic `calldata` arrays (`STy.sliceable`; solc refuses
+  `string` slices); after evaluating the base, the start and the end (in
+  that order, as solc), `e < s` or a length below `e` reverts with no data
+  (solc's `calldata_array_index_range_access`); the slice is a reference at
+  the base's type (solc's slice type converts implicitly to it);
+- copies into memory (`convRV` → `cdToMem`): `bytes`/`string` as their
+  bytes; an array element by element, each validated (an invalid element
+  reverts with no data at the copy, as solc's
+  `abi_decode_available_length` copy); a `calldata` target keeps the
+  reference;
+- `abi.decode(b, …)` on `bytes calldata` (`STy.decodeSrc` now admits it;
+  `bytesOfRV` reads the reference).
+
+**Typing and checkers.** The four slice rules have arms in both checkers
+(`sliceBoth`, `sliceFromRes`, `sliceToRes`, `sliceAllRes` with
+`slice_mem`, … in `InferComplete.lean`, keeping `hasType_iff`; the Option
+checker's `.slice` arm), uniqueness of meaning (`uniqE_slice`), `toR`
+(absent bounds elaborate to the constant `0`, an absent end with `toEnd`)
+and `OpsOK`. `x[i]`, `x.length` and copies were already typed by S01.
+
+**Preservation and progress** (`Solidity/Source/Calldata.lean`):
+
+| Theorem | Statement |
+|---|---|
+| `cdTail_ok`, `cdArg_ok` | the entry checks are never `stuck` |
+| `decodeArg_cd_ok`, `decodeArg_entry_ok`, `decodeArgs_entry_ok` | every type dispatch decodes (`STy.entryDecodable`: the decoder's and `calldata` references) keeps `MemOK`, agrees, and is never `stuck` |
+| `readLoc_cd_ok`, `cdByte_ok`, `sliceR_ok` | element reads, byte reads and slices are never `stuck` |
+| `cdToMem_ok` | a copy into memory keeps `MemOK`; the copy agrees |
+| `evalE_cdLength_ok`, `evalE_cdIndex_ok`, `evalE_cdSlice_ok` | the `x.length`, `x[j]` and `x[s:e]` nodes on `calldata` locals (index locals) keep `MemOK` and are never `stuck` (closed) |
+
+**Ledger.** `.slice` is typed (`exprCoverage` classifies it `typed`, witness
+`w_slice`: `cd[1:]` on a `bytes calldata` local of the S01 example context);
+`semExprGaps` is `[callOptions, metaType, new, inlineArray]`. The
+`stuck` sites "calldata arrays are not modelled" (`indexLoc`) are gone;
+"member of calldata" (structs) stays.
+
+**Controls** (`Solidity/Source/CalldataExamples.lean`, elaborated from
+syntax, run through dispatch): `xs = [1, 300]` as `uint8[] calldata`:
+`xs[0]` runs, `xs[1]` reverts only when read, `xs[2]` panics `0x32`, and
+`xs.length` is 2 without reading the elements; a length `2^64`, elements
+past the data and an offset past the data revert at entry; `"abcd"[1:3][1]`
+is `c`, `[1:3]` has length 2, `[3:1]` and `[1:5]` revert; a copy of
+`[1, 2]` into memory runs, of `[1, 300]` reverts; `abi.decode(b[4:],
+(uint256))` decodes past a four-byte prefix.
+
+**Not modelled** (named, outside the fragment): `calldata` structs
+(`member of calldata` stays `stuck`, dispatch refuses them), static and
+nested `calldata` arrays (dispatch `stuck` as before), `calldata` arrays of
+function types, a `calldata` local without an initializer (the
+uninitialised-calldata gap of the census), encoding a `calldata`
+reference (external-call arguments, returns, `abi.encode`: array encoding
+is not modelled), a `calldata` parameter of a constructor (solc refuses
+one; here its offset would be relative to the arguments, which no program
+reaches). Progress of the arms is closed for locals; for other operand
+expressions it is the walk's.

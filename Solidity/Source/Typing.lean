@@ -705,11 +705,24 @@ def Ctx.decodeTys (Γ : Ctx) (e : Syn .expr) : Option (List STy) :=
    | e => e.typeExprs Γ).map (fun τs : List STy => τs.map STy.payableTop)
 
 /-- The data `abi.decode` reads: `bytes` in memory or storage, or a string
-literal (all implicitly `bytes memory`, as solc requires). `bytes calldata`
-is refused here: calldata references are not modelled in the source
-semantics. -/
+literal (all implicitly `bytes memory`), or `bytes calldata` (lane FU2-B,
+read through its reference), as solc requires. -/
 def STy.decodeSrc : STy → Bool
-  | .bytes .memory | .bytes .storage | .stringLit _ => true
+  | .bytes .memory | .bytes .storage | .bytes .calldata | .stringLit _ => true
+  | _ => false
+
+/-- A one-word value type (an ABI head word): `STy.isValue` without
+function types. -/
+def STy.oneWord : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | _ => false
+
+/-- **A sliceable type** (`a[s:e]`, lane FU2-B): `bytes` or a dynamic array
+of one-word values in `calldata` (solc: index range access only for
+dynamic calldata arrays). -/
+def STy.sliceable : STy → Bool
+  | .bytes .calldata => true
+  | .array .calldata σ none => σ.oneWord
   | _ => false
 
 /-- A one-word ABI value the decoder reads (`decodeElemWord`), other than
@@ -949,6 +962,18 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   literal; the target is a storage location, not a local `storage` pointer. -/
   | assignCopy {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ → σ.copiesTo τ = true →
       Γ.namesLocal a = false → Typed Γ (.assign .assign a b) τ
+  /-- `a[s:e]`, `a[s:]`, `a[:e]`, `a[:]` (lane FU2-B): a slice of a
+  `calldata` `bytes` or dynamic array, at the array's type (solc's slice
+  type converts implicitly to it), the bounds unsigned indices. -/
+  | slice {a s e : Syn .expr} {τ σ ρ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ s σ → σ.isIndex = true → Typed Γ e ρ → ρ.isIndex = true →
+      Typed Γ (.slice a (.some s) (.some e)) τ
+  | sliceFrom {a s : Syn .expr} {τ σ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ s σ → σ.isIndex = true → Typed Γ (.slice a (.some s) .none) τ
+  | sliceTo {a e : Syn .expr} {τ ρ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ e ρ → ρ.isIndex = true → Typed Γ (.slice a .none (.some e)) τ
+  | sliceAll {a : Syn .expr} {τ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ (.slice a .none .none) τ
   /-- `abi.decode(data, (T₁, …, Tₙ))` (FU2-B): the values the ABI decoder
   reads from `bytes` data, at the named types in `memory`, each one the
   decoder reads (`STy.decodable`); one type is its value, more a tuple. -/

@@ -34,7 +34,8 @@ def unitC : Syn .unit :=
 
 /-- The body context of `function f(uint256 a, bool b, address o) returns (uint256)`. -/
 def Γ : Ctx :=
-  { env := unitC.env, scope := some "C", locals := [("o", .address false), ("b", .bool), ("a", .int IntTy.u256)],
+  { env := unitC.env, scope := some "C",
+    locals := [("o", .address false), ("b", .bool), ("a", .int IntTy.u256), ("cd", .bytes .calldata)],
     rets := [.int IntTy.u256] }
 
 def a : Syn .expr := .ident "a"
@@ -75,6 +76,9 @@ def w_abiDecode : Typed Γ (.call (.member (.ident "abi") "decode") (.positional
       (.cons (.some (.elemType .bool (by decide))) .nil)) .nil))))
     (.tuple [.int IntTy.u8, .bool]) :=
   .abiDecode (τs := [.int IntTy.u8, .bool]) rfl (.hexStr _) rfl rfl rfl
+/-- `cd[1:]` on a `bytes calldata` parameter (FU2-B). -/
+def w_slice : Typed Γ (.slice (.ident "cd") (.some one) .none) (.bytes .calldata) :=
+  .sliceFrom (.loc rfl rfl) rfl ty_one rfl
 def w_payableConv : Typed Γ (.payableConv (.positional (.cons (.ident "o") .nil))) (.address true) :=
   .payable ty_o rfl
 def w_unaryPrefix : Typed Γ (.unaryPrefix .not (.ident "flag")) .bool := .not ty_flag
@@ -219,8 +223,7 @@ for constructors of other categories (`exprCoverage_total`). -/
 def exprCoverage : Ctor → Option Coverage
   | .index | .member | .call | .payableConv | .unaryPrefix | .unarySuffix | .exp | .mulDivMod
   | .addSub | .shift | .bitAnd | .bitXor | .bitOr | .order | .equality | .and | .or | .cond
-  | .assign | .tuple | .ident | .lit | .litUnit => some .typed
-  | .slice => some (.deferred "S02" "calldata slices are typed with the calldata references of S02")
+  | .assign | .tuple | .ident | .lit | .litUnit | .slice => some .typed
   | .callOptions => some (.deferred "S02" "call options belong to external calls and creation (S02/S03)")
   | .metaType => some (.deferred "S04.02" "type(T) members read the artifact table and ABI identities")
   | .new => some (.deferred "S03" "creation and memory allocation are typed with their semantics")
@@ -261,6 +264,7 @@ theorem exprCoverage_typed (k : Ctor) (ht : exprCoverage k = some .typed) :
     | exact ⟨_, _, rfl, ⟨w_ident⟩⟩
     | exact ⟨_, _, rfl, ⟨w_lit⟩⟩
     | exact ⟨_, _, rfl, ⟨w_litUnit⟩⟩
+    | exact ⟨_, _, rfl, ⟨w_slice⟩⟩
 
 /-- **Coverage of operands**: every constructor classified as an operand
 occurs in a typed expression whose root is its parent. -/

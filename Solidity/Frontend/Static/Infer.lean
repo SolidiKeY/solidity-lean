@@ -458,6 +458,29 @@ def decodeRes (g : String) (x ts : Syn .expr) (rx : Unit → List (Res Γ .expr 
     | Option.none => []
   | _ => []
 
+/-- `a[s:e]` (FU2-B), from the operands' results. -/
+def sliceBoth {a s e : Syn .expr} (ra : List (Res Γ .expr a)) (rs : List (Res Γ .expr s))
+    (re : List (Res Γ .expr e)) : List (Res Γ .expr (.slice a (.some s) (.some e))) :=
+  (tysOf Γ ra).flatMap fun pa => (tysOf Γ rs).flatMap fun ps => (tysOf Γ re).flatMap fun pe =>
+    if h : pa.1.sliceable = true ∧ ps.1.isIndex = true ∧ pe.1.isIndex = true then
+      [.expr (.slice pa.2 h.1 ps.2 h.2.1 pe.2 h.2.2)] else []
+
+/-- `a[s:]`. -/
+def sliceFromRes {a s : Syn .expr} (ra : List (Res Γ .expr a)) (rs : List (Res Γ .expr s)) :
+    List (Res Γ .expr (.slice a (.some s) .none)) :=
+  (tysOf Γ ra).flatMap fun pa => (tysOf Γ rs).flatMap fun ps =>
+    if h : pa.1.sliceable = true ∧ ps.1.isIndex = true then [.expr (.sliceFrom pa.2 h.1 ps.2 h.2)] else []
+
+/-- `a[:e]`. -/
+def sliceToRes {a e : Syn .expr} (ra : List (Res Γ .expr a)) (re : List (Res Γ .expr e)) :
+    List (Res Γ .expr (.slice a .none (.some e))) :=
+  (tysOf Γ ra).flatMap fun pa => (tysOf Γ re).flatMap fun pe =>
+    if h : pa.1.sliceable = true ∧ pe.1.isIndex = true then [.expr (.sliceTo pa.2 h.1 pe.2 h.2)] else []
+
+/-- `a[:]`. -/
+def sliceAllRes {a : Syn .expr} (ra : List (Res Γ .expr a)) : List (Res Γ .expr (.slice a .none .none)) :=
+  (tysOf Γ ra).flatMap fun pa => if h : pa.1.sliceable = true then [.expr (.sliceAll pa.2 h)] else []
+
 /-- `a.transfer(v)`, `a.send(v)` on an `address payable`, one argument. -/
 def payOne : (m : String) → {a v : Syn .expr} → Typed Γ a (.address true) → (σ : STy) → Typed Γ v σ →
     List (Res Γ .expr (.call (.member a m) (.positional (.cons v .nil))))
@@ -578,7 +601,12 @@ def infer : {c : Cat} → (s : Syn c) → List (Res Γ c s)
        | _, _ => []) ++
       (infer a).flatMap (callRes Γ f (infer f))
   | _, .payableConv a => constRes Γ _ ++ (infer a).flatMap (payableConvRes Γ)
-  | _, .slice a o o' => constRes Γ (.slice a o o')
+  | _, .slice a o o' => constRes Γ (.slice a o o') ++
+      (match o, o' with
+       | .some s, .some e => sliceBoth Γ (infer a) (infer s) (infer e)
+       | .some s, .none => sliceFromRes Γ (infer a) (infer s)
+       | .none, .some e => sliceToRes Γ (infer a) (infer e)
+       | .none, .none => sliceAllRes Γ (infer a))
   | _, .callOptions f n ns =>
     let rn := infer n
     constRes Γ (.callOptions f n ns) ++ (infer f).flatMap fun r => rn.flatMap fun r' => optsOne Γ ns r r'
