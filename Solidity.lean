@@ -1022,3 +1022,5 @@ import Solidity.Backend.AbiWorld.ReferenceFields
 import Solidity.Backend.AbiWorld.RawEntryTransport
 
 import Solidity.Backend.AbiWorld.SeqPrefix
+
+import Solidity.Backend.AbiWorld.RawFreeTransport

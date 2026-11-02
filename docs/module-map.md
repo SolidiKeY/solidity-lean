@@ -1363,3 +1363,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/SiblingReadback.lean` | Indexed recursive sibling-prefix byte windows and actual decoder/entry/body noninterference. |
 
 | `Backend/AbiWorld/{ReferenceFields,RawEntryTransport,SeqPrefix}.lean` | Canonical raw-entry/reference identity and actual indexed decoder sibling-prefix transport; sufficient guards only. |
+
+| `Backend/AbiWorld/RawFreeTransport.lean` | Actual raw-entry free-bound transport for calldata or word-copy parameters; body admission remains separate. |
