@@ -447,3 +447,18 @@ All24 obligations/six full Source combinations/G01/compiler/world/V16 remain
 pending; original five native journal FAILs, historical docs/G03 EXIT1 and
 unanswered semantic holds remain unchanged. Exact sealed incremental handoff:
 `/workspace/vy5-composition/return-consumer-20261102/final/`.
+
+### VY5 actual unchecked/while constructors (2026-11-02)
+
+The [VY5 lane](inline-assembly-vy5.md#actual-unchecked-and-while-constructors-2026-11-02)
+adds24 selected Source kernel component laws: actual unchecked alias/rethrow,
+normal scope restoration/rest under original frame, actual false/true while,
+break and all-horizon literal-true/continue timeout. Existing represented source
+state/raw companion and journals are retained explicitly, not a new rollback.
+44ordered actual Source cases/two pipelines match a pre-execution frozen oracle;
+56script mutation/receipt tests pass. Correct complete-input joint gate EXIT0
+includes KeySort, full1284/TestSuite262, signatures/axioms/strict/trust. No native
+execution or frozen unchecked-add decision. All24 ORIGINAL full obligations and
+six general Source combinations remain pending; five original native journal
+FAILs and historical docs/G03 EXIT1 remain unchanged. Immutable handoff:
+`/workspace/vy5-composition/unchecked-loop-20261102/final/`.

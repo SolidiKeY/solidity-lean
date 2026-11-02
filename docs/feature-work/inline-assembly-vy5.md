@@ -2338,3 +2338,109 @@ goal unchanged; get_goal unavailable, no reset/reactivation/completion. Historic
 docs/G03 EXIT1 exact-base equality is zero regression ONLY and not rerun for
 activity. Immutable checkpoint/peer-input/signatures/evidence/checksums:
 `/workspace/vy5-composition/return-consumer-20261102/final/`.
+
+## Actual unchecked and while constructors (2026-11-02)
+
+[UncheckedLoopPhysical](../../Solidity/Yul/Composition/UncheckedLoopPhysical.lean)
+adds24 kernel component laws over the actual existing Source evaluator; these
+are NOT the24 original full Y10 obligations, which all remain pending. No owner
+Source bodies, intrinsic AST/state, arithmetic policy, admission or interpreter
+were changed. The existing alias body has SCtx false/false, while unchecked and
+loop bodies require different intrinsic indices. `items` builds the SAME
+`.declInit (.local index)` / `.rethrow .here` leaves at their actual R/M/SCtx/RCtx
+indices; `existing_items` proves equality with RuntimeBlockPhysical.aliasItems
+at its original specialization. No untyped recontextualization is introduced.
+
+`unchecked_run` executes actual Source.execItems.unchecked at fuel+4 for arbitrary
+well-typed rest, nps/ph, Globals/frame, return/modifier types, input locals and
+Source.St. Real reference equality and exact bytes heap lookup are explicit.
+Inner evaluation uses the actual frame with checked=false; actual full-byte
+revert stops arbitrary rest. Exact evaluator locals and entire Source.St are
+retained, including heap/fnLocals/log/world/journal fields. `unchecked_decl_rest`
+separately proves the real NORMAL path restores the old local context and runs
+arbitrary rest under ORIGINAL F, using a constructive dependent Locals.restore
+law. It does not decide frozen unchecked-add compiler behavior.
+
+Actual Source.EM.sub and EM.attempt then transport that execution to arbitrary
+outer typed locals and existing raw LocalValues, WITHOUT runClean/ofClean or
+cleaning/resuming dirty locals. `carry_run` retains exact raw companion plus
+supplied residual and Bool journals. Those journals are explicit boundary data,
+not a new world rollback operation. The inhabited sample uses the actual
+LocalPhysicalControls.firstPhysical represented source action and BOTH its real
+journals, existing raw1793/dirtybool2/function-field cells, real Heap.alloc
+post-state, old nonword heap alias0 and caller-prefix55. DEAD, empty, full assert
+panic, poison-rest and same-length wrong old-alias AABB controls preserve full
+payload distinctions. Source rethrow here retains state; frame rollback is not
+inferred from this canonical-rethrow constructor.
+
+The independently ready while child is also implemented: `while_false` evaluates
+actual `.bool false`/EM.sub/getV and exits normally at fuel+2, before body access.
+`while_true` evaluates actual true and executes the contextual alias/rethrow
+block at fuel+5. `while_break` executes the real break branch and preserves
+locals/state. `while_continue_step` proves the real literal-true/continue loop
+consumes one horizon; induction proves timeout at EVERY horizon with identical
+locals/state. This is not divergence for arbitrary loops or generic assembly
+coverage. Low unchecked horizons0..3 and true-loop horizons0..4 are exact
+state-preserving timeouts. No fuel/heartbeat/node/test budget was raised.
+
+[UncheckedLoopDriver](../../tests/yul-composition/UncheckedLoopDriver.lean) runs44
+ordered ACTUAL SOURCE cases (22per Source pipeline) against
+[expectations frozen before execution](../../tests/yul-composition/unchecked-loop-expectations.json).
+Full selected observations include return/revert/panic/stuck/timeout bytes,
+raw words, both byte objects, heap extent, saved fnLocals, restored outer alias,
+caller prefix, reconstructed persistent word2868903938 and full selected
+residual/owned journals. The whole Source.St/carrier preservation theorem is
+kernel evidence; finite JSON observations do not enumerate the entire world.
+Actual bad logical reference99 is stuck, not silently empty; no logical heap
+index is identified with an EVM pointer. Both legacy/viaIR Source settings match;
+this is ZERO fresh solc/EVM/native comparisons, not four native compiler profiles.
+All original ordered native observations and five strict optimized-viaIR journal
+FAILs/original EXIT1 remain unchanged.
+
+[unchecked-loop-source.mjs](../../scripts/yul-composition/unchecked-loop-source.mjs)
+pins module/driver/oracle/ledger and actual private bodies; prior modifier/runtime
+and complete verified producer closures remain validated. It checks exact
+command/dependency/exit/stdout/stderr and actual execution receipt, full selected
+case/profile ordering, every expected field and selected registration. Final56
+JS tests pass, including44-case receipt replay, wrong full bytes/old alias/panic
+tail, false branch/continue, dirty reset/nonword/frame/outer restore, prefix and
+journal/high-bit/owner/slot loss despite equal return bytes, stale bindings and
+missing/malformed receipt/output. Finder and skeptic found no actionable issue;
+optional runner-SHA traceability is covered by the sealed artifact identity,
+not claimed as an existing original execution-receipt field.
+
+Per-file MCP after module/driver edits passes. One initial repeated recursive
+expression hit default200000 heartbeats; factored ACTUAL condition/getV/body
+execution fixed it without increasing budgets. Explicit type inference, scope
+restore and Pipeline namespace failures remain in raw logs. Required final
+joint command EXIT0: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613, KeySort2jobs, library1284jobs/TestSuite262, scoped24 exact
+signatures/standard axiom sets, core200/0elaborator,1299reachable/0orphan/0notallowed,
+strict491automatic/61budgeted/0manual/11refuted/0pending and correct COMPLETE-input
+trust1314sources/252sites/0findings. The previous Returning joint EXIT1 and separate
+corrected trust pass remain their original outcomes. Historical docs/G03 EXIT1
+with exact-base equality remains global FAILURE, not rerun for activity; only new
+handoff links are checked. No axiom/sorry/admit/native-proof shortcut or semantic
+weakening. Full gate commands/raw failures/resources are sealed separately.
+
+Resource plan:233070592initialfree -178450432comparable container layer -8388608
+conservative incremental allowance =46231552projected remainder. No new dependency
+closure, native archive regeneration, quota/guard reduction or protected-data
+cleanup. Existing writer lock, serial Lean-j1/LEAN_NUM_THREADS1, hard12GiB/no-swap,
+CPU1/12GiB OS-available reserve and caches unchanged. Before each check, only this
+step's verified exited SizeRw0 directory-only mount metadata containers were
+retired after retaining logs/inspect/directory receipts; images/mounts/evidence/
+history protected. No resource stop or ENOSPC; final measurements in handoff.
+
+Work1/2/3 and BackfillA/B remain PARTIAL. All24 original obligations/six general
+Source combinations/fullProofGate remain pending: frontend derivation/admission,
+general raw operators/functions/sessions, Source try selector and ordinary
+nonempty-revert producer, allocation/refinement/G01/compiler/world/V16 and final
+whole-tree adequacy. Existing immutable producer request is unchanged at
+`/workspace/vy5-composition/runtime-block-20261102/final/producer-request.json`.
+No new packet or active-producer contact assumed. LIB1/library-viaIR1834, frozen
+unchecked-add, strict journal and optional-vendor decisions remain unanswered.
+Original BLOCKED goal identity/objective/status unchanged; get_goal not exposed,
+no reset/reactivation/completion. Reviewed incremental source/signatures/patch/
+bundles/provenance/evidence/checksums:
+`/workspace/vy5-composition/unchecked-loop-20261102/final/`.
