@@ -640,3 +640,5 @@ VY2 [actual source balance inputs](inline-assembly-vy2.md#actual-source-balance-
 VY2 storage-effect/input checkpoint: validator-derived persistent/transient packed writes preserve actual source code/balance/history observations and constructed target funds; actual static errors and complete resulting state retained. See [lane accounting](inline-assembly-vy2.md). Independent target-ledger/Yul/compiler/full-lane closure remains open.
 
 VY2 actual effectful balance operand equations and exact halt-prefix controls: [lane checkpoint](inline-assembly-vy2.md). Conditional actual-run premises remain explicit; no global producer or target-ledger adequacy claimed.
+
+VY2 constructive scratch-copy/whole-heap view and computed source writeback transport: [lane checkpoint](inline-assembly-vy2.md). General output-memory and compiler/call adequacy remain open.

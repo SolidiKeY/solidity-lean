@@ -203,3 +203,5 @@ VY2 [actual source balance inputs](feature-work/inline-assembly-vy2.md#actual-so
 VY2 storage/balance input stability: [lane checkpoint](feature-work/inline-assembly-vy2.md).
 
 VY2 effectful balance input proofs: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 scratch-copy physical frame laws: [lane checkpoint](feature-work/inline-assembly-vy2.md).
