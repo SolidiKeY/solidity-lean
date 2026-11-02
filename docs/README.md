@@ -33,6 +33,7 @@ history is in git.
 | [semantic-gaps.md](semantic-gaps.md) | What of Solidity's semantics is still open, and the chain facts an obligation assumes: the work list. |
 | [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why; the remaining deltas. |
 | [solidity-upstream-tests.md](solidity-upstream-tests.md) | The pinned solc test snapshot, its runner and the working/broken/blocked lists. |
+| [feature-work/assembly-correctness-instances.md](feature-work/assembly-correctness-instances.md) | VY5-owned conditional V16/G01 stage, public-record and specification-transfer constructors; concrete assembly instances pending. |
 | [feature-work/host1-transaction-finalization.md](feature-work/host1-transaction-finalization.md) | HOST1 external message finalization/observation producer for V17/G52; finite API boundary and validation. |
 | [solc-validation.md](solc-validation.md) | What is checked against solc, and the checks still to build. |
 | [feature-work/integration.md](feature-work/integration.md) | Index of the per-feature documents in `feature-work/` (source admission, declarations, operators, aggregates, recursive types, ABI and hashes, transient storage, contract world, calls and exceptions, finite dispatch) and their shared decisions. |
