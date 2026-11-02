@@ -90,10 +90,11 @@ theorem new_sources_refuted :
 /-- Mapping-bearing sources remain outside this map-free fallback. -/
 theorem mapping_global_unknown : decideGoal mappingReversed = .unknown := by rfl
 
-/-- The compound-field gap remains unknown; the exact given-heap source is now proved. -/
-theorem supported_and_remaining_controls : decideGoal memStructBuried = .unknown ∧
-    decideGoal memParamSame = .proved := by
-  exact ⟨DecisionGapCensus.buriedStruct_unknown, DecisionGapCensus.hiddenParameter_proved⟩
+/-- Both independently certified memory routes now have actual global results. -/
+theorem certified_memory_controls :
+    (∃ σ : State StandardExample [], decideGoal memStructBuried = .refuted σ ∧ ¬ Fml.holdsH σ memStructBuried) ∧
+    decideGoal memParamSame = .proved :=
+  ⟨DecisionGapCensus.buriedStruct_refuted, DecisionGapCensus.hiddenParameter_proved⟩
 
 /-- Existing supported syntax is not reclassified as this gap reason. -/
 theorem covered_control : memStructSame.Covered = true ∧

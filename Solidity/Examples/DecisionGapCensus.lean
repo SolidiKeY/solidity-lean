@@ -7,8 +7,7 @@ import Solidity.Calculus.DecisionMemoryCoverage
 These reuse the integrated fixtures and certify the assigned reversed-field improvement. They do
 not define `Fml.Residue` or claim a target-to-coverage theorem. The hidden
 parameter now has an all-heap source certificate, while the finite candidate
-checker remains a countermodel-only component. The reversed equation now reaches a certified fallback; a literal buried in
-an operator remains outside the direct field/literal schema.
+checker remains a countermodel-only component. The reversed equation now reaches a certified fallback; the compound-RHS equation now reaches its separate certified countermodel route.
 -/
 namespace Solidity.Examples.DecisionGapCensus
 open Solidity.Decide Solidity.Examples.Decision
@@ -38,8 +37,9 @@ theorem reversedStruct_returned_refutesH : ¬ Fml.holdsH gapMemStruct_state memS
 /-- A literal below addition is admitted syntax, outside the direct literal schema. -/
 theorem buriedStruct_target : memStructBuried.inTarget {} = true := by decide +kernel
 
-/-- The existing classifier does not silently treat an operator as a literal. -/
-theorem buriedStruct_unknown : decideGoal memStructBuried = .unknown := by rfl
+/-- A pure compound RHS reaches its own source certificate, without becoming a literal. -/
+theorem buriedStruct_refuted : ∃ σ : State StandardExample [],
+    decideGoal memStructBuried = .refuted σ ∧ ¬ Fml.holdsH σ memStructBuried := memStructBuried_refuted
 
 /-- The recognized positive field equation remains an inhabited target control. -/
 theorem sameStruct_target : memStructSame.inTarget {} = true := by decide +kernel
@@ -50,7 +50,7 @@ theorem hiddenParameter_covered : memParamSame.Covered = true := memParamSame_co
 /-- The exact reversed-side source now has a certified coverage route. -/
 theorem reversedStruct_covered : memStructReversed.Covered = true := reversedWitness.covered
 
-/-- The nonliteral RHS near miss is likewise outside current coverage. -/
-theorem buriedStruct_notCovered : memStructBuried.Covered = false := by decide +kernel
+/-- The recognized compound RHS is now in the certified memory fragment. -/
+theorem buriedStruct_covered : memStructBuried.Covered = true := memStructBuried_covered
 
 end Solidity.Examples.DecisionGapCensus

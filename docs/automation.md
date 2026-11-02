@@ -1246,9 +1246,9 @@ public names/types and the generated Decidable instance remain. Original
 Grammar/Shape modules retain translation/coverage compatibility APIs. The
 compound source reason now imports the lower recognizer, removing its Decision
 cycle without duplicating arithmetic or changing classifications/budgets.
-Compatibility/affected gates and27 public type/axiom checks pass. A generic
-optional-denotation/countermodel proof and actual compound pipeline integration
-remain open; this prerequisite alone is not broader memory completion.
+Compatibility/affected gates and27 public type/axiom checks pass. The later
+certificate and pipeline checkpoints below discharge the closed compound route;
+this prerequisite alone is not broader memory completion.
 
 
 VA1 compound countermodel certificate (2026-11-01): optional Theory denotation
@@ -1257,9 +1257,27 @@ memory-only context, including partial expressions. Every closed nonliteral-UInt
 fresh-field source member has a typed refuted Answer at the existing producer
 child heap before parent allocation, handling both some RHS and none without
 halting/default premises. Concrete some1/some5/none readings, exact state reuse,
-ordinary/hash countermodels and targets pass kernel checks. Global verdicts
-remain unknown until the actual pipeline consumes this Answer. No broader
-memory or full Residue/theorem completion is claimed.
+ordinary/hash countermodels and targets pass kernel checks. This certificate
+checkpoint left global verdicts unknown; the subsequent integration below
+consumes its Answer. No broader memory or full Residue completion is claimed.
+
+
+VA1 compound pipeline (2026-11-02): DecisionCompoundExtension preserves every
+successful original/reversed struct Answer exactly, then lazily uses the closed
+nonliteral-UInt fresh-field certificate. The real cut-first memory route consumes
+this helper; existing completeness signatures remain. DecisionCompoundCoverage
+proves source-derived preparation, all-waiver target admission, Covered, global
+non-unknown and actual returned-state holdsH refutation for every closed member.
+No coverage/verdict premise is supplied by the client. Original buried0+1,
+another2+3 and partial0-1 now return certified refutations, with optional
+some1/some5/none controls retained. Constructed-state equality remains a separate
+control; the generic returned-state theorem is existential. Mapping/computed-key
+unknowns, given-heap proved results and old exact countermodels remain.
+The391-job affected build, ten final per-file diagnostics and54 public axiom
+checks pass under unchanged300s per-module guards and hard12GiB/no-swap bounds.
+Four frozen direct declarations and exact hash premises remain unchanged;
+memCovered intentionally recognizes the new certified class. Global Residue/
+DecisionTheorem-prime, wider memory and full gates remain open.
 
 
 ## Guarded symmetric cancellation

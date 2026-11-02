@@ -206,6 +206,8 @@ import Solidity.Examples.DecisionGivenHeapReason
 import Solidity.Calculus.DecisionCompoundFieldReason
 import Solidity.Calculus.DecisionUIntConstant
 import Solidity.Calculus.DecisionCompoundCertificate
+import Solidity.Calculus.DecisionCompoundExtension
+import Solidity.Calculus.DecisionCompoundCoverage
 import Solidity.Examples.DecisionCompoundCertificate
 import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FixedArrayRoot

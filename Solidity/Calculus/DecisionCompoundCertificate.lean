@@ -57,7 +57,7 @@ theorem NonliteralUIntFreshField.counterState_refutesH {C : Contract} {φ : Fml 
     (w : NonliteralUIntFreshField φ) (σ : State C []) : ¬ Fml.holdsH (w.counterState σ) φ :=
   fun h => w.counterState_refutes σ ((Fml.holdsH_iff (w.counterState σ) φ w.hashFree).mp h)
 
-/-- A real closed-leaf Answer, ready for later lazy pipeline composition. -/
+/-- An independently usable closed-leaf Answer, consumed by the lazy struct extension. -/
 def NonliteralUIntFreshField.answer {C : Contract} {φ : Fml C []}
     (w : NonliteralUIntFreshField φ) : MemoryWitness.Answer φ :=
   .refuted w.counterState w.counterState_refutes

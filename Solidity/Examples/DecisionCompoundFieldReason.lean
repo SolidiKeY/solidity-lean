@@ -88,8 +88,10 @@ theorem original_notValid : ¬ Fml.Valid memStructBuried := by
 
 theorem original_target : memStructBuried.inTarget {} = true := DecisionGapCensus.buriedStruct_target
 
-theorem original_global_unknown : decideGoal memStructBuried = .unknown := DecisionGapCensus.buriedStruct_unknown
+theorem original_global_refuted : ∃ σ : State StandardExample [],
+    decideGoal memStructBuried = .refuted σ ∧ ¬ Fml.holdsH σ memStructBuried :=
+  DecisionGapCensus.buriedStruct_refuted
 
-theorem original_notCovered : memStructBuried.Covered = false := DecisionGapCensus.buriedStruct_notCovered
+theorem original_covered : memStructBuried.Covered = true := DecisionGapCensus.buriedStruct_covered
 
 end Solidity.Examples.DecisionCompoundFieldReason

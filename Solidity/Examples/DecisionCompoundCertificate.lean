@@ -3,7 +3,7 @@ import Solidity.Examples.DecisionCompoundFieldReason
 
 /-! # Defined and partial compound-field countermodel controls
 The generic certificate uses full optional Theory readings and the existing
-producer child heap. The global pipeline is deliberately still unchanged here.
+producer child heap. The real global route now consumes the typed Answer.
 -/
 namespace Solidity.Examples.DecisionCompoundCertificate
 open Solidity.Decide Solidity.Decide.ResidueReason
@@ -49,7 +49,7 @@ theorem hash_countermodels :
   ⟨originalWitness.counterState_refutesH _, anotherWitness.counterState_refutesH _,
     partialWitness.counterState_refutesH _⟩
 
-/-- Real typed Answers are ready without changing a global observation. -/
+/-- Real typed Answer components are consumed by the certified global route. -/
 theorem answer_components : Nonempty (MemoryWitness.Answer memStructBuried) ∧
     Nonempty (MemoryWitness.Answer anotherSum) ∧ Nonempty (MemoryWitness.Answer partialRhs) :=
   ⟨⟨originalWitness.answer⟩, ⟨anotherWitness.answer⟩, ⟨partialWitness.answer⟩⟩
@@ -58,9 +58,16 @@ theorem answer_components : Nonempty (MemoryWitness.Answer memStructBuried) ∧
 theorem targets : memStructBuried.inTarget {} = true ∧ anotherSum.inTarget {} = true ∧
     partialRhs.inTarget {} = true := by decide +kernel
 
-/-- Until the actual pipeline consumes the Answer, all three global pins remain unknown. -/
-theorem current_unknowns : decideGoal memStructBuried = .unknown ∧
-    decideGoal anotherSum = .unknown ∧ decideGoal partialRhs = .unknown := by
-  exact ⟨rfl, rfl, rfl⟩
+/-- All three assigned sources now reach the actual certified global refutation. -/
+theorem actual_refuted :
+    (∃ σ : State StandardExample [], decideGoal memStructBuried = .refuted σ ∧ ¬ Fml.holdsH σ memStructBuried) ∧
+    (∃ σ : State StandardExample [], decideGoal anotherSum = .refuted σ ∧ ¬ Fml.holdsH σ anotherSum) ∧
+    (∃ σ : State StandardExample [], decideGoal partialRhs = .refuted σ ∧ ¬ Fml.holdsH σ partialRhs) :=
+  ⟨originalWitness.refuted, anotherWitness.refuted, partialWitness.refuted⟩
+
+/-- Coverage comes from the exact source class, without a supplied coverage premise. -/
+theorem actual_covered : memStructBuried.Covered = true ∧ anotherSum.Covered = true ∧
+    partialRhs.Covered = true :=
+  ⟨originalWitness.covered, anotherWitness.covered, partialWitness.covered⟩
 
 end Solidity.Examples.DecisionCompoundCertificate

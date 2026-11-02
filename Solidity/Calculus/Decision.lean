@@ -11,6 +11,7 @@ import Solidity.Calculus.MemHoist
 import Solidity.Calculus.MemNegPrep
 import Solidity.Calculus.MemStructCut
 import Solidity.Calculus.DecisionMemoryExtension
+import Solidity.Calculus.DecisionCompoundExtension
 import Solidity.Calculus.DecisionGivenHeapExtension
 import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
@@ -360,7 +361,7 @@ def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
 /-- Decide the certified fresh-struct field schema. Refutations carry the
 realized child heap, rather than reusing the arithmetic pipeline's state. -/
 def decideStruct (φ : Fml C []) : LeafVerdict C :=
-  match structAnswerWithReversed φ with
+  match structAnswerWithCompound φ with
   | some (.proved _) => .proved
   | some (.refuted state _) => .refuted (state (State.init C))
   | none => .unknown
@@ -386,12 +387,17 @@ theorem decideStruct_refutes {φ : Fml C []} {σ : State C []}
   · cases h
 
 /-- Every recognized certified answer produces an actual verdict. -/
-theorem decideStruct_complete_merged {φ : Fml C []}
-    (h : (structAnswerWithReversed φ).isSome = true) : decideStruct φ ≠ .unknown := by
+theorem decideStruct_complete_combined {φ : Fml C []}
+    (h : (structAnswerWithCompound φ).isSome = true) : decideStruct φ ≠ .unknown := by
   unfold decideStruct
-  cases ha : structAnswerWithReversed φ with
+  cases ha : structAnswerWithCompound φ with
   | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
   | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
+
+/-- The prior reversed-composition completeness signature is retained. -/
+theorem decideStruct_complete_merged {φ : Fml C []}
+    (h : (structAnswerWithReversed φ).isSome = true) : decideStruct φ ≠ .unknown :=
+  decideStruct_complete_combined (structAnswerWithCompound_original h)
 
 /-- The original public completeness signature is retained. -/
 theorem decideStruct_complete {φ : Fml C []}
@@ -637,7 +643,7 @@ The given-heap branch never promotes truth at one candidate heap to validity. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
   (φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
-    | none => (structAnswerWithReversed φ).isSome) || φ.givenHeapLiteralReadReflexive
+    | none => (structAnswerWithCompound φ).isSome) || φ.givenHeapLiteralReadReflexive
 
 /-- **The fragment with binders of KeY's `int`**: the leaf binds one where
 `Fml.zT` reads it, is in `Fml.zOK`, and its rewriting is in `Fml.CoveredA`. -/
@@ -670,7 +676,7 @@ theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMe
     rw [if_pos ha]
     split at hc
     · exact decideLeafA_complete hc
-    · exact decideStruct_complete_merged hc
+    · exact decideStruct_complete_combined hc
   · obtain ⟨w⟩ := ResidueReason.givenHeapLiteralRead_witness hgiven
     unfold decideMem
     rw [w.noAlloc]

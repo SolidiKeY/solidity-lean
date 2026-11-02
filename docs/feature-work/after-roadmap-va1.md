@@ -2688,3 +2688,71 @@ Residue/DecisionTheorem-prime/hash bridge, arrays, wider memory, halting OR,
 broader revised M4 boundary, formula-derived runtime fuel, performance/backfill
 and final/full gates remain incomplete. Held VA1-Q2/producer TypeExamples repair
 is untouched. No goal reset/completion or publication.
+
+
+## Closed compound-field pipeline integration (2026-11-02)
+
+After sealed27b3e854, DecisionCompoundExtension lazily composes the actual closed
+nonliteral-UInt fresh-field Answer after every original/reversed struct Answer.
+The exact existing Answer and state transformer are preserved on success.
+Decision uses the combined helper in both decideStruct and memCovered; old
+decideStruct_complete/complete_merged signatures remain and a combined lemma is
+added. Fresh-array cut-first and given-heap routes are unchanged.
+DecisionCompoundCoverage derives preparation/hoist/cut, no-given overlap,
+all-waiver target, Covered and actual global returned refutation from each closed
+source witness. No supplied coverage/verdict/route premise; holdsH refutation
+uses unchanged hash-free completeness and soundness. Generic returned-state
+certificates are existential, not equality to a separately chosen counterstate.
+
+Original buried0+1, another2+3 and partial0-1 improve from unknown to certified
+refuted. The assigned Memory tuple becomes three refuted results; all controls
+have matching kernel certificates. Exact constructed producer-state equalities,
+optional some1/some5/none, ordinary/hash countermodels and target pins remain.
+Mapping/computed-key unknowns, given-heap proved results, prior reversed exact
+returned state and existing negative candidate states remain unchanged. The
+517-node uncovered-but-proved control is retained. Four direct frozen
+declarations Covered/inTarget/Waivers/DecisionTheorem match the exact base;
+memCovered behavior intentionally expands through the helper. No producer,
+semantic observation, hash/validity premise, dependency or proof budget changes.
+Two root imports/two module-map rows are narrow additive registrations.
+
+Raw commands/source hashes in /workspace/va1-evidence/compound-integration-next.
+Final ten per-file MCP checks pass: helper4.313, Decision34.051, certificate4.163,
+coverage4.242, reversed coverage4.263, Memory71.147, census5.284, compound reason
+5.246, compound controls4.339 and reversed controls5.283 seconds. Repaired
+affected build passes391jobs in1038.366s; every module retains the300s guard.
+All edited Lean files are explicitly emitted before the public54-declaration
+axiom/type audit46.881s and actual verdict profile3.109s, both passing. Axiom
+sets contain only existing propext/Classical.choice/Quot.sound subsets. Profile
+(target,Covered,tag): compound three=(true,true,refuted); literal/reversed same;
+given=(true,true,proved); mapping/computed=(true,false,unknown); existing negative/
+alias=(true,false,refuted). Verdict evaluation including printing ranges
+0.304–3.545ms. These are interpreted local observations and kernel certificates,
+not EVM tests or full import-closure completion.
+
+Original writer lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, threads1/Lean-j1,
+one job/container with actual memory.max12884901888 and swap.max0 plus12GiB host
+reserve are retained. Initial affected build was intentionally stopped after
+confirmed stale comments: Docker137,86.821s, resource_stop=false; exact stop and
+raw failure remain. Comments were corrected before repaired build; no unchanged
+failed build was repeated. Final sampled aggregate RSS5316616KiB, cgroup peak4431269888bytes and minimum
+host available13346336768bytes are recorded in resources.json, retaining22
+unsuccessful measurement samples. No runtime/full-gate pass follows merely from these subset gates.
+
+Reachability1111/layers180core/strict automatic491/61budgets/11refuted/trust1126
+sources/248sites and whitespace pass. Same85 doc findings (48 missing/37
+ambiguous) and404 inventory differences remain FAIL, retained against frozen
+base analysis. Earlier full-run/TypeExamples resource failures remain failures;
+VA1-Q2 is held and its source is untouched. Independent read-only finder/skeptic
+source reviews are recorded in this evidence directory; committed export/package
+review remains pending until the immutable export exists. Neither reviewer runs
+Lean/server/builds or edits. Their two confirmed
+stale-comment findings were corrected before final checks.
+
+Global meaningful Residue union, DecisionTheorem-prime/exhaustive target/hash
+bridge, keyed/field/struct/nested arrays, wider memory, halting OR, broader revised
+program-free M4 boundary, formula-derived runtime fuel, remaining performance/
+backfill and full gates remain incomplete. Existing standalone fixed-array,
+numeric and source-work components remain delivered. Ready owned work includes
+actual keyed-array syntax/coverage and exact formula-normalizer work; VA2 sharing
+is not a prerequisite to those. No whole-goal completion/reset or publication.

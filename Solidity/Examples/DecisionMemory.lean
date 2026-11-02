@@ -1,6 +1,7 @@
 import Solidity.Examples.Decision
 import Solidity.Examples.MemoryStructWitness
 import Solidity.Calculus.DecisionGivenHeapBoundary
+import Solidity.Calculus.DecisionCompoundCoverage
 
 /-!
 # Fresh memory arrays and given-heap parameter witnesses (M7)
@@ -311,7 +312,19 @@ example : memStructSigned =
   (.eq (MemoryWitness.fieldRead (p := .int) (f := "b") (by decide))
     (.app0 (.lit (p := .int) ⟨-7, by decide⟩))) := rfl
 
-/-- info: ["refuted", "unknown", "refuted"] -/
+/-- Exact source recognition supplies the closed compound countermodel. -/
+def memStructBuried_source : ResidueReason.NonliteralUIntFreshField memStructBuried :=
+  (ResidueReason.nonliteralUIntFreshField? memStructBuried).get (by decide +kernel)
+
+/-- The actual certified compound route is complete for this original pin. -/
+theorem memStructBuried_covered : memStructBuried.Covered = true := memStructBuried_source.covered
+
+/-- Certify the actual returned refutation without assuming its chosen state. -/
+theorem memStructBuried_refuted : ∃ σ : State StandardExample [],
+    decideGoal memStructBuried = .refuted σ ∧ ¬ Fml.holdsH σ memStructBuried :=
+  memStructBuried_source.refuted
+
+/-- info: ["refuted", "refuted", "refuted"] -/
 #guard_msgs in #eval [verdict memStructReversed, verdict memStructBuried, verdict memStructSigned]
 
 /-- Every recognized control has a kernel-checked coverage certificate. -/
