@@ -1736,5 +1736,8 @@ See [component metadata checkpoint](feature-work/p8a-source-metadata.md).
 
 | `Lowering/P8/SourceAllSettings.lean` | Acceptance closure of the exact component chain under every admitted settings value; not execution equivalence or full SourceSpec.AllPipelines. |
 | `Lowering/P8/ProducerAssembly.lean` | Generated frozen H14D AdmissionHalf/AssemblyType/PendingGlue signatures; VY5 fields remain typed parameters; no witness. |
+| `Lowering/P8b/Frozen.lean`, `Lowering/P8b/P8aInterface.lean` | Frozen P8b consumer signatures over G01 `Lowering` and the exact P8a `Producer`; no inhabitant. |
+| `Lowering/P8b/Domain.lean` | Structural G01 pass/dom/agrees for a provided emitter; `assemble` from a supplied `Cert`; wrong-emitter refutation. |
+| `Lowering/P8b/Controls.lean` | Toy-model identity certificate, wrong-emitter refusal and loop divergence controls. |
 
-See [admission settings and assembly boundary](feature-work/p8a-all-settings.md).
+See [admission settings and assembly boundary](feature-work/p8a-all-settings.md) and [P8b frozen interface](feature-work/p8b-frozen-interface.md).

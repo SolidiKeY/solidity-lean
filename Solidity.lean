@@ -1236,6 +1236,10 @@ import Solidity.Lowering.P8.SourceResolutionControls
 import Solidity.Lowering.P8.SourceResolutions
 import Solidity.Lowering.V07.DeclarationGraph
 import Solidity.Lowering.V07.Scalar
+import Solidity.Lowering.P8b.Controls
+import Solidity.Lowering.P8b.Domain
+import Solidity.Lowering.P8b.Frozen
+import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Source.Preservation.EncodingVariantControls
 import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.LiteralBuiltinControls
