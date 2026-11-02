@@ -3044,6 +3044,141 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.compilation_reframed_reached_fault_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.compilation_reframed_reached_revert_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.compilation_reframed_revert_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.canonical_completion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.complete_final_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.corrupt_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.final_new_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.insufficient_consumer_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.old_references_and_zero_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.selected_final_base": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.shared_completion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedCompletion.stale_final_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.after_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.after_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.before_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.before_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.before_target_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.complete_wrong_order_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.corrupt_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.insufficient_guard_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.joined_source_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.ordinary_revert_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.reached_prefix_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.stale_guard_input_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerProofChecks.lean:Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Calculus/ArrayBlock.lean:Solidity.Decide.arrayBlockReduction?_isSome": [
   "Classical.choice",
   "Quot.sound",
