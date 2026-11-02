@@ -422,7 +422,8 @@ and 15, or one of the pipelines' fragments: `Fml.quantCovered` (3, 6, 7,
 
 Each extends the fragment with its completeness proved through every stage
 (recognizer, lifting, flattening, compilers).  Pins: `Examples/Decision.lean`
-(the former `gap*` leaves of every feature), `Examples/DecisionHashes.lean`
+(the former `gap*` leaves of every feature; their checks in
+`Examples/DecisionGaps.lean` and `Examples/DecisionGapOperators.lean`), `Examples/DecisionHashes.lean`
 (11, 12, 27–29), `Examples/DecisionMemory.lean` (13, 23, 24),
 `Examples/DecisionKInt.lean` (30, 31), `Examples/DecisionArrays.lean` (32):
 a proved and a refuted leaf per shape, coverage kernel-checked
@@ -622,12 +623,14 @@ Costs that guide work:
   741 s: the arithmetic over conversion and remainder atoms), so they are
   pinned by coverage, not evaluated in the build; `Examples/DecisionKInt.lean`
   records its verdicts in a comment for the same reason.
-* `Examples/Decision.lean` took 282–284 s single-threaded (`-j1`) before
-  its split of 2026-11-02; with `LEAN_NUM_THREADS=1` the pieces build in
+* `Examples/Decision.lean` took 282–284 s in a standalone `-j1` elaboration
+  before its split of 2026-11-02; as jobs of `LEAN_NUM_THREADS=1
+  ./run-lean.sh` (one job at a time) the pieces build in
   27 s (`Decision`, formulas and storage arrays), 58 s
   (`DecisionFeatures`), 105 s (`DecisionGaps`) and 90 s
-  (`DecisionGapOperators`).  Interpreted `#eval` verdicts dominate
-  (`set_option profiler true`, language server):
+  (`DecisionGapOperators`): 280 s of work in all, now in parallel and off
+  the importers' path, the longest piece 105 s.  Interpreted `#eval`
+  verdicts dominate (`set_option profiler true`, language server):
   `gapLedgerWrite` … `payBalanceBad` 58 s, `gapIntDiv` … `gapMulW` 45 s,
   `gapColumn` … `gapPositiveForall` 30 s, `netSwap` 19 s, and three
   `hashCovered` kernel checks 32 s.  `Examples/DecisionArrays.lean`, once
@@ -959,7 +962,9 @@ not proved", the plan); `docs/module-map.md`.  The modules:
 pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
 `LedgerBlock`, `KIntBinder`, `KIntEncode`, `MemSwap`, `MemHoist`,
 `HashKinds`, `HashKinds3`, `HashMove`), and the pins in
-`Examples/Decision.lean`, `Examples/DecisionHashes.lean`,
+`Examples/Decision.lean` (checks in `Examples/DecisionFeatures.lean`,
+`Examples/DecisionGaps.lean`, `Examples/DecisionGapOperators.lean`),
+`Examples/DecisionHashes.lean`,
 `Examples/DecisionMemory.lean`, `Examples/DecisionKInt.lean`,
 `Examples/DecisionArrays.lean`.
 
@@ -975,8 +980,9 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
    later milestones may only shrink `Fml.Residue`.
 3. **Split `Examples/Decision.lean`** (and `Examples/DecisionArrays.lean`)
    into modules that each build in under 300 s; profile interpreted verdict
-   evaluation first. `Examples/Decision.lean` was split on 2026-11-02 (times
-   under "Running time"); `Examples/DecisionArrays.lean` built in 19 s then. Group 07 measured the `DecisionArrays` coverage pins at
+   evaluation first.  `Examples/Decision.lean` was split on 2026-11-02
+   (times under "Running time"); `Examples/DecisionArrays.lean` built in
+   19 s then. Group 07 measured the `DecisionArrays` coverage pins at
    about one second each, with the final verdict `#eval` as its slow stage.
 4. **Tag** the result `milestone-m7-next`, record it here, push to master,
    and stop for the user's next instruction.

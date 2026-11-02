@@ -17,7 +17,7 @@ through those, `&`, `|`, `^`, `*%` with any literal, `**` by `0` or `1`,
 `/` and `%` at `int`.  Each has a
 proved and a refuted verdict pinned and a kernel-checked covered leaf.  The
 verdicts are the compiled ones, except `sortedLe`, whose exact verdict is
-kernel-certified and replayed below: the kernel's arithmetic decision over
+kernel-certified and replayed in `Examples/DecisionFeatures.lean`: the kernel's arithmetic decision over
 256-bit codes is too deep for the language server (as in
 `Examples/AutoComplete.lean`); the theorems' fragment checks are the
 kernel's, the `#eval` pins the compiled ones.
@@ -202,7 +202,7 @@ def netWrite : Fml Bank [] :=
 def netDistinct : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; net(a) < net(b) → a != b }
 /-- Four reads: in the fragment (`netSwap_covered`), each read two codes and
 each pair of reads a consistency premise; decided by the walk, the slowest
-pin here (`docs/automation.md`, M7). -/
+pin of `Examples/DecisionFeatures.lean` (`docs/automation.md`, M7). -/
 def netSwap : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; net(a) + net(b) = net(b) + net(a) }
 
 /-- Guards outside the fragment: a disequality, arithmetic on the index. -/
@@ -278,7 +278,7 @@ local instance : InContract := ⟨Gaps⟩
 /-! ### Quantifiers over contents
 
 Outside `apfPrep`'s shapes once; all decided since (features 16 to 21,
-pinned below; `gapArrayBlock` by feature 32, `Examples/DecisionArrays.lean`). -/
+pinned in `Examples/DecisionGaps.lean`; `gapArrayBlock` by feature 32, `Examples/DecisionArrays.lean`). -/
 
 /-- A block whose bound index is not the last of its path (`m[i][3]`). -/
 def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
@@ -302,7 +302,7 @@ def gapPartialGuard : Fml Gaps [] :=
 def gapPositiveForall : Fml Gaps [] :=
   dl!{ ∀ uint x; balances[x] == 0 → (balances[x] == 0 && (∀ uint k; balances[k] == balances[k])) }
 
-/-- False variants of the shapes decided since (features 16 to 19, below):
+/-- False variants of the shapes decided since (features 16 to 19, pinned in `Examples/DecisionGaps.lean`):
 another column, another row, the other `bool`, another member, a guard
 that halts or bounds at most `1`, a positive `∀` that fails. -/
 def columnBad : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][4] == 0 }
@@ -317,7 +317,7 @@ def positiveForallBad : Fml Gaps [] :=
   dl!{ ∀ uint x; balances[x] == 0 → (balances[x] == 0 && (∀ uint k; balances[k] == 0)) }
 
 /-- False variants of the blocks over `int` keys and over the ledger
-(features 20 and 21, below): a key the guard leaves free, an address past
+(features 20 and 21, pinned in `Examples/DecisionGaps.lean`): a key the guard leaves free, an address past
 the guard's bound. -/
 def intKeyedBad : Fml Gaps [] := dl!{ (∀ int k; k > 0 → ibal[k] == 0) → ibal[0] == 0 }
 def ledgerBlockBad : Fml Gaps [] := dl!{ (∀ uint a; a <= 4 → net(a) >= 0) → net(5) >= 0 }
@@ -326,7 +326,7 @@ large: in every state refuting `intTwoSides`, `ibal` holds `1` at each
 negative key and `2` at each positive one, so it lists at least
 `2^255 - 1` entries; in every state refuting `ledgerFar`, the ledger holds
 `1` at each address past `5`, `2^256 - 6` entries.  Decided by the
-theorem, their refuting states terms that no evaluation builds (below). -/
+theorem, their refuting states terms that no evaluation builds (`Examples/DecisionGaps.lean`). -/
 def intTwoSides : Fml Gaps [] :=
   dl!{ (∀ int k; k < 0 → ibal[k] == 1) → (∀ int k; k > 0 → ibal[k] == 2) → ibal[0] == 3 }
 def ledgerFar : Fml Gaps [] := dl!{ (∀ uint a; a > 5 → net(a) = 1) → net(3) = 1 }
@@ -421,7 +421,7 @@ def gapAnd : Fml Gaps [] := allU (isT (.app2 (.binop .le rfl) (.app2 (.binop .ba
 def gapPow : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 1)) xU)
 def gapMulW : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) xU (litU 3)) (litU 0)))
 
-/-- Counterexamples once (decided since feature 22, below): `&` at `int`
+/-- Counterexamples once (decided since feature 22, `Examples/DecisionGapOperators.lean`): `&` at `int`
 with a literal (two's complement), and `addmod` with a literal modulus. -/
 def gapIntAnd : Fml Gaps [] := allI (isT (.app2 (.binop .le rfl) (.app2 (.binop .band rfl) xI (litI 6)) (litI 6)))
 def gapAddmod : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app3 (.modular .addmod) xU xU (litU 7)) (litU 7)))
@@ -456,14 +456,14 @@ open Solidity.Examples.DecisionHashes
 open Solidity.Examples.Tactics.Hashing (Names)
 
 /-- Three kinds of hash of one string: a counterexample once, decided since
-feature 28 (`Fml.tk3`, below). -/
+feature 28 (`Fml.tk3`, `Examples/DecisionGapOperators.lean`). -/
 def gapThreeKinds : Fml Names [] :=
   strings (.imp (.eq hS hT) (.imp (.eq shaS shaT)
     (.eq (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI (.there .here)))
       (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI .here)))))
 /-- Two kinds, no string hashed by both: no kind to read the other's words
 against.  A counterexample once, decided since feature 27 (one string of
-the second kind needs no link, below). -/
+the second kind needs no link, `Examples/DecisionGapOperators.lean`). -/
 def gapMixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
 /-- Two kinds each hashing two strings, no string hashed by both:
@@ -471,7 +471,7 @@ def gapMixedKinds : Fml Names2 [] :=
 the second kind's strings have no word of the first to link with, and
 there are two of them (feature 27 takes one).  A counterexample once,
 decided since feature 29 (the unlinked words moved, `Fml.tk_complete_move`,
-below). -/
+`Examples/DecisionGapOperators.lean`). -/
 def gapMixedPairs : Fml Names [] :=
   strings4 (.imp (.eq (h4 .keccak sA) (h4 .keccak sB)) (.eq (h4 .sha256 sC) (h4 .sha256 sD)))
 /-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
