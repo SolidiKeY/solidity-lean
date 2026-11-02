@@ -17,5 +17,5 @@ function createStaticServer({root=path.resolve(__dirname,'../dist'),port=4173}={
   });
   return {server,async listen(){await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});return 'http://127.0.0.1:'+server.address().port;},async close(){await new Promise(resolve=>server.close(resolve));}};
 }
-if(require.main===module){const app=createStaticServer({port:Number(process.env.PORT||4173)});app.listen().then(url=>console.log('Browser-only website: '+url)).catch(error=>{console.error(error);process.exitCode=1;});for(const signal of ['SIGINT','SIGTERM'])process.once(signal,async()=>{await app.close();process.exit();});}
+if(require.main===module){const app=createStaticServer({port:Number(process.env.PORT||4173),...(process.argv.includes('--single')?{root:path.resolve(__dirname,'../single-file')}:{} )});app.listen().then(url=>console.log('Browser-only website: '+url)).catch(error=>{console.error(error);process.exitCode=1;});for(const signal of ['SIGINT','SIGTERM'])process.once(signal,async()=>{await app.close();process.exit();});}
 module.exports={createStaticServer};

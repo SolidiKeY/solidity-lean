@@ -2,7 +2,9 @@
 'use strict';
 import {gunzipSync} from 'fflate';
 import {sha256 as digest} from '@noble/hashes/sha256';
+import {prepareBrotli,inflateBrotli} from './brotli.mjs';
 let runtimePromise;
+let inflate=bytes=>gunzipSync(bytes);
 const diagnostics=[];
 const stderr=[];
 const sha256=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
@@ -14,7 +16,7 @@ async function asset(entry){
 }
 async function binary(entry){
   const bytes=new Uint8Array(entry.size);let offset=0;
-  for(const chunk of entry.chunks){const part=gunzipSync(await asset(chunk));bytes.set(part,offset);offset+=part.length;}
+  for(const chunk of entry.chunks){const part=inflate(await asset(chunk));bytes.set(part,offset);offset+=part.length;}
   if(offset!==entry.size||await sha256(bytes)!==entry.sha256)throw new Error('Invalid Lean runtime binary');return bytes;
 }
 function mkdir(FS,path){const parts=path.split('/');parts.pop();let current='';for(const part of parts.filter(Boolean)){current+='/'+part;try{FS.mkdir(current);}catch(error){if(!FS.analyzePath(current).exists)throw error;}}}
@@ -22,6 +24,9 @@ async function boot(){
   const response=await fetch('/lean/manifest.json');if(!response.ok)throw new Error('Pinned Lean browser runtime is missing');
   const manifest=await response.json();
   if(manifest.version!=='4.24.0'||manifest.commit!=='797c613eb9b6d4ec95db23e3e00af9ac6657f24b'||manifest.wordSize!==64||manifest.gmpBits!==64)throw new Error('Incompatible Lean browser runtime');
+  if(manifest.compression==='brotli'){
+    prepareBrotli(await (await fetch('/brotli-dec.wasm')).arrayBuffer());inflate=inflateBrotli;
+  }else if(manifest.compression&&manifest.compression!=='gzip')throw new Error('Unsupported Lean library compression');
   let js=await binary(manifest.javascript),wasm=await binary(manifest.wasm);
   // One instance owns this dedicated worker. Global script execution permits
   // Emscripten's compact export loop instead of 160,000 individual JS variables.
@@ -45,7 +50,7 @@ async function boot(){
     const compressed=new Uint8Array(request.response);
     const actual=Array.from(digest(compressed),b=>b.toString(16).padStart(2,'0')).join('');
     if(actual!==chunk.sha256)throw new Error('Lean library checksum mismatch: '+chunk.url);
-    const bytes=gunzipSync(compressed);if(bytes.length!==chunk.size)throw new Error('Invalid Lean library size');
+    const bytes=inflate(compressed,chunk.size);if(bytes.length!==chunk.size)throw new Error('Invalid Lean library size');
     if(!loadedLibraries.has(chunk.url)){loadedLibraries.add(chunk.url);postMessage({method:'progress',loaded:loadedLibraries.size,total:manifest.libraries.length,module:chunk.files[0].path});}
     libraryCache.set(chunk.url,bytes);libraryBytes+=bytes.length;
     while(libraryBytes>64*1024*1024&&libraryCache.size>1){const oldest=libraryCache.keys().next().value;libraryBytes-=libraryCache.get(oldest).length;libraryCache.delete(oldest);}

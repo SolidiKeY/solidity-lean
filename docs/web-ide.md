@@ -1,10 +1,12 @@
 # Offline browser IDE
 
-`web/` builds a static website matching the Solidity Lean VS Code extension.
+`web/` builds a [single-file static website](https://solidikey.github.io/solidity-lean/ide/)
+matching the Solidity Lean VS Code extension.
 Monaco, Solidity compilation, language services and Lean proof checking run in
 browser workers. After its first complete asset preparation, the website works
 with its host stopped and the browser disconnected. Application source stays
 in browser storage; no proof backend or WebSocket is required.
+Use **File → Download Offline IDE** to save the original HTML and reopen it offline.
 
 ## Runtime and correspondence
 
@@ -62,6 +64,42 @@ replay an explicit cancellation or a failing job indefinitely.
 
 ## Offline preparation and limits
 
+The Pages artifact, `web/single-file/index.html`, embeds the entire website in
+one file (about 856 MB). Its 1,851 embedded
+assets include ESM Monaco, solc, Lean, all proof-library variants, icons, fonts
+and license notices. Brotli transport reduces the embedded asset payload to
+612 MiB before base64 encoding. Repacking checks that every decoded byte matches
+the existing checksum-verified gzip input; the runtime and JS whole-file hashes
+remain unchanged. Cached Brotli output is also decoded and compared on every build.
+
+The parser consumes small base64 data blocks, removes their DOM nodes and commits
+one Blob at a time to IndexedDB. Databases are isolated by build ID. The completion
+marker waits for the editor and actual compiler worker to start; loading failures
+invalidate it so reopening retries the original embedded data. The closed asset
+broker maps fetch, synchronous library XHR, scripts and nested workers to Blob URLs.
+CSP permits no HTTP runtime connections. No service worker or backend is required.
+The Brotli decoder streams through 64-KiB input and 1-MiB output buffers so a
+large decoded module does not leave a second whole-module allocation in Wasm
+memory. Its boundary/size/truncation tests compare against Node's native decoder
+and check that 40-MiB output leaves less than 64 MiB of decoder linear memory.
+
+The single HTML supports continued use in a disconnected tab; reopening a hosted
+URL offline depends on the browser's document cache. Download and reopen the HTML
+for durable offline access. Browser Save Page is unsuitable because embedded data
+nodes have already been removed. Original HTML downloads retain those nodes.
+IndexedDB and source storage can be cleared or evicted; Export backs up sources.
+Allow several GiB of free disk space for tools and temporary browser storage.
+
+`.github/workflows/pages.yml` builds and tests this exact file before publication,
+adds it under `/ide/` alongside the existing examples viewer, checks the total
+site budget and deploys to GitHub Pages. A second job tests the published URL and
+compares its embedded build ID with the generated artifact. The pre-publication
+test opens the downloaded file in a fresh offline profile, reopens it using its
+stored assets and checks fresh proofs. Local managed Chromium blocks `file://`
+navigation; that boundary is tested on the unrestricted GitHub runner instead.
+
+The alternative multi-file development build retains its service-worker cache:
+
 `web/dist` contains only static assets. The optional native comparison server
 is development tooling and is excluded from deployment. Static builds force
 browser mode even for a URL containing `?backend=native`.
@@ -77,7 +115,7 @@ Hashed libraries are immutable same-origin assets. A lazy filesystem verifies
 compressed hashes and retains at most 64 MiB of inflated modules, or one larger
 module. It does not preload the entire library into linear memory. CSP limits
 application connections to the website origin. HTTPS or localhost is required;
-opening `index.html` as a local file is unsupported.
+opening the multi-file build's `index.html` as a local file is unsupported.
 
 Files/settings use browser storage. Save identifies the named versioned buffer;
 typing or switching tabs cannot mark a different snapshot clean. Failed persistence
@@ -101,6 +139,10 @@ rename/formatting, imported definitions, closed sibling refactoring, missing
 imports, failed saves, real kernel proofs, active cancellation, a changed false
 specification, certified opt-in counterexamples and fresh compilation/proofs
 following a disconnected reload with the static asset server stopped.
+The single-file suite also verifies that the only HTTP document requests are
+the HTML launch/reopen, that every embedded data node is released and that the
+download command is reachable. Its final disconnected check restarts both
+workers; the local-file CI variant reopens the HTML instead.
 
 Five protocol tests cover partial nonzero outputs, missing checkpoints, wrong
 declarations, timeout causes and cancellation. These explicitly use a mock worker
@@ -108,33 +150,40 @@ and are not evidence of kernel proof success. Two additional Chromium cases
 verify visible failure for a missing asset manifest or required worker asset.
 The native frontend build passed 264 jobs; 66 extension/LSP/backend/web transport
 regressions also passed during implementation.
+This milestone additionally passed the two streaming-decoder tests and ten
+native transport regressions. The final single-file comparison artifact is
+`f020402da107…`, with Brotli manifest `16ba39b77198…`; JSON evidence records
+the full hashes. The ported Wasm bytes retain their original whole-file digest.
 
 | Observation | Real VS Code extension | Browser website |
 |---|---:|---:|
-| First measured verification | 8,957.6 ms | 85,463.9 ms |
-| Repeated checked-result lookup | 162.5 / 152.8 ms | 73.5 ms |
+| First measured verification | 8,942.3 ms | 67,219.6 ms |
+| Repeated checked-result lookup | 185.5 / 170.6 ms | 172.2 ms |
 | `increment()`, `reset()`, `one()` | proved | proved |
 | `openGoal()` | pending | pending |
 | Pending diagnostic and source range | identical | identical |
 
 Browser cold verification includes the first library import. Fresh verification
-after stopping the server and reloading offline took 80,353.2 ms. Editor readiness
-was 9,580.2 ms in the functional run and 12,100.6 ms in the comparison run,
-including complete first-visit asset caching. Native scripted editor-readiness
+after stopping the server and restarting workers offline took 64,691.2 ms in
+the first complete single-file run. Editor readiness was 12,832.3 ms there and
+16,194.0 ms in the final comparison run, including first-visit embedded-tool
+preparation. Reopening using stored tools took 6,684.4 ms. Native scripted editor-readiness
 includes navigation and is not used as a startup benchmark. These are observations
 from one local environment with prepared artifacts, not performance guarantees.
 
-The final Testing/Problems screenshots differ in 27,025 pixels (2.09%) at
+The final Testing/Problems screenshots differ in 27,061 pixels (2.09%) at
 pixelmatch's 0.1 threshold with antialiasing ignored. The separate 1000 × 540 code
-region differs by 0.02%. Both images were inspected directly. Visible differences
+region differs by 0.03%. Both images were inspected directly. Visible differences
 include title/menu controls, native test-run history/filter chrome, some panel
 labels and the browser/offline status. Pixel similarity describes these captures,
 not complete VS Code feature parity.
 
-Evidence is generated under `web/artifacts/`: `website-report.json`,
-`website-reference-report.json`, `native-report.json`, `replace-differential.log`,
-`native-problems.png`, `website-problems.png`, `website-offline-proofs.png`,
-`side-by-side.png`, `visual-diff.png` and `visual-comparison.json`.
+Evidence is generated under `web/artifacts/`: `single-file-report.json`,
+`single-file-reference-report.json`, `native-report.json`, `replace-differential.log`,
+`native-problems.png`, `single-file-problems.png`, `website-offline-proofs.png`,
+and `single-file-comparison/{side-by-side.png,visual-diff.png,visual-comparison.json}`.
+The earlier multi-file runs remain in `website-report.json` and
+`website-reference-report.json`.
 See [web/README.md](../web/README.md) for commands. The reference probe calls the
 production extension API and never injects fixture results.
 
@@ -148,10 +197,16 @@ exceptions. They separately reviewed the iterative replacement's reference
 counts, cache decisions, scope offsets, child order and result lifetimes. Final
 reviews found no remaining actionable implementation issue and confirmed the
 stopped-host offline proof artifact. Neither review used the Lean server.
+The single-file reviews resolved per-build storage isolation, delayed compiler
+readiness, retry invalidation, cached Brotli integrity, bounded decoding,
+file-origin test APIs, exact published-build assertions and the complete Pages
+site budget. Focused Chromium experiments reproduced Blob failures when a
+runtime's decoded buffers were queued together; decoding inside the serial
+write queue fixed that path. Both final reviews found no further actionable issue.
 
 The writer lock is held throughout changes and checks. Heavy jobs run sequentially.
 This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap
 and an available-memory guard; browser QA uses an owned-process RSS/available-memory
 watchdog with the required 12-GiB host reserve. The complete browser run peaked
-at 4.69 GiB aggregate RSS. Task-owned profiles/reference files were moved off the
+at 4.80 GiB aggregate RSS in the first complete single-file run. Task-owned profiles/reference files were moved off the
 RAM disk. Interrupted resource/stack-overflow attempts are not passing checks.

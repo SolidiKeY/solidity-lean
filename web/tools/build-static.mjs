@@ -24,6 +24,8 @@ fs.cpSync(path.join(root,'vscode/media'),path.join(dist,'media'),{recursive:true
 fs.cpSync(path.join(web,'licenses'),path.join(dist,'licenses'),{recursive:true});
 fs.copyFileSync(path.join(root,'LICENSE'),path.join(dist,'licenses/Solidity-Lean.txt'));
 fs.copyFileSync(path.join(web,'THIRD_PARTY_NOTICES.md'),path.join(dist,'THIRD_PARTY_NOTICES.md'));
+fs.copyFileSync(path.join(web,'node_modules/brotli-dec-wasm/pkg/brotli_dec_wasm_bg.wasm'),path.join(dist,'brotli-dec.wasm'));
+for(const name of fs.readdirSync(path.join(web,'node_modules/brotli-dec-wasm')).filter(name=>name.startsWith('LICENSE-')))fs.copyFileSync(path.join(web,'node_modules/brotli-dec-wasm',name),path.join(dist,'licenses/Brotli-Decoder-'+name));
 for(const [name,file]of [['Monaco','monaco-editor/LICENSE'],['Monaco-ThirdParty','monaco-editor/ThirdPartyNotices.txt'],['Noble-Hashes','@noble/hashes/LICENSE'],['Buffer','buffer/LICENSE'],['Path-Browserify','path-browserify/LICENSE'],['Fflate','fflate/LICENSE']])fs.copyFileSync(path.join(web,'node_modules',file),path.join(dist,'licenses',name+'.txt'));
 fs.mkdirSync(path.join(dist,'compiler'),{recursive:true});fs.copyFileSync(compilerPath,path.join(dist,'compiler',compilerName));
 const leanAssets=process.env.SOLIDITY_BROWSER_LEAN;

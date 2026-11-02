@@ -1,7 +1,10 @@
 node_modules/
 dist/
+single-file/
+.single-file-assets/
 .lean-browser-build/
 artifacts/*.png
 artifacts/*.json
 artifacts/*.log
 artifacts/browser-profiles/
+artifacts/single-file-comparison/

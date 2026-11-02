@@ -23,6 +23,67 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 
 jobs:
+  ide:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      LEAN_NUM_THREADS: '1'
+      LEAN_BROWSER_WORK: ${{ github.workspace }}/.cache/browser-kernel
+      SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Build the native serialized proof libraries
+        uses: leanprover/lean-action@v1
+        with:
+          build-args: Solidity.Frontend.Testing
+          use-mathlib-cache: 'false'
+          test: 'false'
+          lint: 'false'
+      - name: Cache the pinned browser kernel and libraries
+        id: kernel
+        uses: actions/cache@v4
+        with:
+          path: .cache/browser-kernel/assets
+          key: browser-lean-v1-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'Solidity/**/*.lean', 'web/browser/BrowserFrontend.lean', 'web/browser/bridge.cpp', 'web/tools/lean-wasm/**', 'web/tools/build-lean-browser.sh', 'web/tools/package-lean.mjs') }}
+      - name: Build Lean and GMP for WebAssembly
+        if: steps.kernel.outputs.cache-hit != 'true'
+        run: bash web/tools/build-lean-browser.sh
+      - name: Prepare the pinned Solidity compiler
+        run: |
+          mkdir -p "$SOLKEY_ROOT/keyext.solidity.core/build/soljson"
+          curl --fail --location --retry 3 https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js --output "$SOLKEY_ROOT/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js"
+      - name: Build the self-contained offline HTML
+        env:
+          SOLIDITY_BROWSER_LEAN: ${{ github.workspace }}/.cache/browser-kernel/assets
+        run: |
+          npm ci --prefix web --no-audit --no-fund
+          npm run build --prefix web
+          npm run build:single --prefix web
+          rm -rf web/dist web/.single-file-assets
+          node web/test/compression.test.mjs
+      - name: Test a fresh offline file launch, proofs and offline reopening
+        run: |
+          npx --prefix web playwright install --with-deps chromium
+          export CHROMIUM_PATH="$(node -p 'require("./web/node_modules/playwright").chromium.executablePath()')"
+          node --max-old-space-size=192 web/test/website.cjs --single --file --proofs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: offline-ide-test-evidence
+          path: |
+            web/artifacts/*.json
+            web/artifacts/*.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-offline-ide
+          path: web/single-file
+          if-no-files-found: error
+
   solidity:
     runs-on: ubuntu-latest
     timeout-minutes: 300
@@ -86,8 +147,8 @@ jobs:
   # A project whose job failed is published as not recorded; a cancelled run
   # publishes nothing, so it cannot replace the site with an empty project.
   assemble:
-    needs: [solidity, velvet]
-    if: ${{ !cancelled() }}
+    needs: [solidity, velvet, ide]
+    if: ${{ !cancelled() && needs.ide.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -96,11 +157,24 @@ jobs:
           pattern: site-data-*
           merge-multiple: true
           path: _site
+      - uses: actions/download-artifact@v4
+        with:
+          name: site-offline-ide
+          path: _site/ide
       - name: Add the viewer
         run: |
           cp site/index.html site/app.js site/style.css site/examples.json _site/
           touch _site/.nojekyll
           find _site -maxdepth 3 -name index.json -print
+      - name: Check the complete Pages deployment budget
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          size = sum(p.stat().st_size for p in Path('_site').rglob('*') if p.is_file())
+          print(f'Complete Pages site: {size:,} bytes')
+          if size >= 1_000_000_000:
+              raise SystemExit('The IDE plus examples exceed the GitHub Pages 1 GB site budget')
+          PY
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
@@ -115,6 +189,38 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  check-published-ide:
+    needs: deploy
+    if: ${{ !cancelled() && needs.deploy.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: site-offline-ide
+          path: web/single-file
+      - name: Check the deployed single-file website and disconnected proofs
+        env:
+          SOLIDITY_IDE_URL: ${{ needs.deploy.outputs.page_url }}ide
+        run: |
+          npm ci --prefix web --no-audit --no-fund
+          npx --prefix web playwright install --with-deps chromium
+          export CHROMIUM_PATH="$(node -p 'require("./web/node_modules/playwright").chromium.executablePath()')"
+          node --max-old-space-size=192 web/test/website.cjs --single --proofs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: published-ide-test-evidence
+          path: |
+            web/artifacts/*.json
+            web/artifacts/*.png
