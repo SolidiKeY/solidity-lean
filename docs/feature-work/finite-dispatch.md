@@ -186,7 +186,8 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   after an earlier operand's capture. A memory reference is captured as a
   memory local (`fnRefElem?`, `fnRefStruct?`): a memory operand is the
   reference itself, so the callee's writes are visible to the caller; a
-  storage operand is copied at its position. A storage reference is captured
+  storage operand is copied at its position (legacy; after every argument
+  under `binaryLeftToRight`, solc's IR order). A storage reference is captured
   as a storage alias of its path, so the callee writes the caller's storage.
   Each branch is the ordinary internal call of its candidate on the captured
   names (`hoistCallArgs` keeps the stable capture without a second copy).
@@ -267,11 +268,24 @@ Enum and `bytes1` elements stay unspelled (refused in both scripts).
   halt only for those two storage vectors.
 - Under viaIR, solc copies a storage argument to memory after all arguments
   ran (`argumentOrder`: `901`, legacy `101`); this holds for storage
-  structs passed to memory struct parameters too. The model copies at the
-  argument's position in both schedules, for direct calls
-  (`argumentOrderDirect`, pre-existing) and dispatched calls alike. The
-  viaIR replay leaves the two order vectors out, so the model's viaIR copy
-  point is unpinned.
+  structs passed to memory struct parameters too. Since lane FU2-A the
+  model follows both schedules: under the source-order schedule
+  (`binaryLeftToRight`, set by `EvalOrder.viaIR`; a contract may also set
+  the flag alone, `tests/upstream/ModifierFrames.lean`) a storage operand of a memory parameter is captured
+  as a storage alias at its position and copied after the last argument,
+  for direct calls (`hoistCallArgs`) and dispatched calls
+  (`dispatchCaptures`) alike; kernel-checked against the EVM-observed
+  values in `FunctionTypes.lean` (`memOrderIR_run`,
+  `memOrderDirectIR_run`: `901, 9`; `memOrder_run`, `memOrderDirect_run`:
+  legacy `101, 9`). The import replay's viaIR run now expects the two order
+  vectors at `901, 9` (`scripts/finite-dispatch.test.mjs`, from the EVM
+  script's values; not rerun here: it compiles through solc). Open: in
+  `dispatchCaptures` an operand the synthesiser cannot type (a call
+  returning a storage reference, `h(getRef(), setFirst())`) is not
+  recognised as storage and is copied at its position under both schedules
+  (as before the change); a struct constructor's field copies keep their
+  own schedule (`Arms.lean`, unchanged); a storage operand passed to a
+  calldata parameter is admitted (pre-existing; solc rejects it).
 - A callee that is not a name (`fs[i](…)`, `s.f(…)`, `choose(b)(…)`) is
   evaluated before the arguments in both schedules (`callValue`, and the
   tuple path's capture in `elabTuple`,
@@ -324,12 +338,9 @@ Enum and `bytes1` elements stay unspelled (refused in both scripts).
   reference return").
 - **Narrow array elements.** Resolved in lane FU1 (see "Narrow and byte
   elements" under "Reference arguments").
-- **viaIR storage-to-memory copy order.** solc's IR pipeline copies a
-  storage argument after every argument ran (`argumentOrder`: 901); the
-  model copies at the argument's position for direct calls
-  (`hoistCallArgs`) and dispatched calls alike (101). A viaIR replay vector
-  would pin a mismatch; changing the ordinary call's copy point under
-  `evalOrder .viaIR` is outside this lane.
+- **viaIR storage-to-memory copy order.** Resolved in lane FU2-A (the
+  copy after the last argument under `binaryLeftToRight`, "Recorded
+  deviations" above).
 
 ## Dispatch correctness
 
@@ -818,3 +829,32 @@ TryConditions}.lean` (a `RetBinders` literal; `Binders.toRet` in three
 `Syntax/Contract.lean` (per-return location check). No file under
 `Solidity/Evm/**`, `Backend/**`, `Storage/**`, `Precompiles/**`, `Roadmap/**`,
 `Source/**`, `Frontend/SolcJson/**` or TestSuite `Derived*` changed.
+
+### Backfill: viaIR copy order (lane FU2-A)
+
+CF2 blocker 3: under the source-order schedule (`binaryLeftToRight`, set by
+`EvalOrder.viaIR`) a storage operand of a memory parameter is captured as a
+storage alias at its position and copied after the last argument, for
+direct calls (`hoistCallArgs`) and calls through function values
+(`dispatchCaptures`); legacy keeps the copy at the position. Kernel-checked
+in `FunctionTypes.lean`: `memOrderIR_run` and `memOrderDirectIR_run` (`901,
+9`, the EVM-observed `argumentOrder`/`argumentOrderDirect` values of
+`scripts/check-function-value-references.mjs`), `memOrder_run` and
+`memOrderDirect_run` (legacy `101, 9`). No proof changes: the copy point is
+the elaborator's lowering. The import replay (`scripts/finite-dispatch.test.mjs`)
+now expects the order vectors under viaIR too; it was not run here (solc).
+
+Review (read-only finder and skeptic). Fixed: the late copy was declared at
+the parameter's raw type and lost the operand's ABI markers (`#string`,
+`#enum`); it now takes the operand's shape (`exprShape`, as `captureRef`
+does). Stale docstrings (`hoistCallArgs`, `dispatchCaptures`, the §6 module
+doc of `FunctionTypes.lean`), `options.md` (O9) and the replay comment
+corrected; the claim that the flag is set exactly by `.viaIR` reworded
+(`tests/upstream/ModifierFrames.lean` sets `binaryLeftToRight` alone).
+Recorded, not changed: `dispatchCaptures` cannot recognise a storage
+operand the synthesiser does not type (a call returning a storage
+reference) and copies it at its position; struct-constructor field copies
+keep their own schedule; the `EvalOrder` docstring in `Syntax/Raw.lean`
+("calls … keep their existing sequencing") is stale but left, since editing
+that module rebuilds the library; the constructor-statement path and the
+admitted storage-to-calldata conversion are pre-existing.

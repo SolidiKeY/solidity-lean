@@ -444,10 +444,12 @@ const referenceSource = readFileSync('tests/solc/FunctionValueReferences.sol', '
 const panic51 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x51];
 const panic01 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x01];
 function referenceVectors(viaIR) {
-  // viaIR copies a storage argument after every argument (901); the model
-  // copies at the argument's position for direct and dispatched calls alike
-  // (finite-dispatch.md, "Recorded deviations"), so only legacy replays it.
-  const order = viaIR ? [] : [['argumentOrder()', [], ['101', '9']],
+  // viaIR copies a storage argument after every argument (901), legacy at
+  // its position (101); the model follows both schedules for direct and
+  // dispatched calls (finite-dispatch.md, "Recorded deviations"), the values
+  // those of check-function-value-references.mjs
+  const order = viaIR ? [['argumentOrder()', [], ['901', '9']],
+    ['argumentOrderDirect()', [], ['901', '9']]] : [['argumentOrder()', [], ['101', '9']],
     ['argumentOrderDirect()', [], ['101', '9']]];
   const callee = viaIR ? ['402'] : ['4002'];
   const calleeScalar = viaIR ? ['11'] : ['12'];

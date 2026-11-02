@@ -204,7 +204,9 @@ partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Opt
   abiEncodeWith C (elabRec ()) std strs args marks sel
 
 /-- Prepare a reference call in argument order. Storage-to-memory conversion
-copies at the argument's evaluation point; every reference's identity and
+copies at the argument's evaluation point under the legacy schedule, after
+the last argument under the source-order one (`binaryLeftToRight`, solc's
+IR pipeline); every reference's identity and
 each scalar read are held before a later argument can change them. Calls
 with only value parameters retain the ordinary capture policy. -/
 partial def hoistCallArgs (f : String) (args : List RawExpr) :
@@ -227,6 +229,13 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
     throw s!"{f} takes {d.params.length} arguments, not {args.length}"
   let mut P : SProg C := []
   let mut prepared : List RawExpr := []
+  -- solc's IR pipeline copies a storage operand of a memory parameter after
+  -- every argument ran (`tests/solc/FunctionValueReferences.sol`,
+  -- `argumentOrderDirect`: legacy 101, viaIR 901): under the source-order
+  -- schedule the operand's alias is captured at its position, its copy made
+  -- after the last argument
+  let late := C.evalOrder.binaryLeftToRight
+  let mut copies : List (String × RefTy × List (String × Nat) × List (String × Nat) × Var) := []
   for ((n, T), a) in d.params.zip args do
     -- a reference argument's narrow positions, on the expression as written,
     -- before a capture names it (`elabCallRet` checks the capture again)
@@ -263,11 +272,24 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
         | some .memory | some .calldata =>
           let rhs ← ElabM.lift (elabMRhs C Γ R a)
           if stable && (rhs matches .alias _) then pure ([], a) else do
+          if late && (rhs matches .copy ..) then do
+            let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
+            -- the operand's own shape, ABI markers included (`captureRef`)
+            let ws := exprShape C (← ctx) a
+            let x ← captureRef C "sp" (.alias R) a
+            let y := toString (← freshCapture "mv")
+            copies := copies ++ [(y, R, shapeUnder d.widths n, ws, x)]
+            pure ([.of Γ (.declStorage R x (some (.path sp)))], .name y)
+          else
           let x ← captureRef C "mv" (.mem R) a
           pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
         | none => throw s!"{f}: reference parameter {n} needs a data location"
     P := P ++ Q
     prepared := prepared ++ [a]
+  -- the late copies, in argument order
+  for (y, R, ws, shape, x) in copies do
+    P := P ++ (← elabStmtsP [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
+    declareShape y shape
   pure (P, prepared)
 
 /-- The captures before an internal dispatch: the callee's tag first under
@@ -279,7 +301,9 @@ a later argument can change and failing member reads; the formal type
 supplies the contextual type of a literal expression. A memory-array argument
 is captured as a memory local: the reference itself for a memory operand (the
 callee's writes reach the caller, as Solidity passes memory by reference), a
-copy of a storage operand. A storage-array argument is a storage alias of its
+copy of a storage operand, taken at its position under the legacy schedule
+and after every capture under the source-order one (`binaryLeftToRight`,
+solc's IR pipeline: its alias at its position). A storage-array argument is a storage alias of its
 path. A struct argument (`fnRefStruct?`) is captured likewise at its location. Returns the statements, the tag's name and the captured arguments. -/
 partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (args : List RawExpr) :
     ElabM (List RawStmt × RawExpr × List RawExpr) := do
@@ -290,8 +314,26 @@ partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (arg
     pre := [.decl (.named ty) t (some h)]
     tag := .name t
   let mut as : List RawExpr := []
+  -- under the source-order schedule a storage operand of a memory parameter
+  -- is copied after every argument ran (solc's IR pipeline; `argumentOrder`:
+  -- legacy 101, viaIR 901): its alias at its position, the copy after
+  let late := C.evalOrder.binaryLeftToRight
+  let mut post : List RawStmt := []
   for (a, c) in args.zip ps do
     let y := toString (← freshCapture "se")
+    let memTy : Option RawTy := match fnRefElem? C c, fnRefStruct? C c with
+      | some (e, false), _ => some (.array (.named e))
+      | none, some (st, false) => some (.named st)
+      | _, _ => none
+    let fromStorage ← if late && memTy.isSome then
+        (try pure ((← synthM C a).2 matches .path _ _) catch _ => pure false)
+      else pure false
+    if let (some T, true) := (memTy, fromStorage) then
+      let z := toString (← freshCapture "sp")
+      pre := pre ++ [.declStorage T z (some a)]
+      post := post ++ [.declMemory T y (some (.name z))]
+      as := as ++ [.name y]
+      continue
     pre := pre ++ [match fnRefElem? C c, fnRefStruct? C c with
       | some (e, false), _ => .declMemory (.array (.named e)) y (some a)
       | some (e, true), _ => .declStorage (.array (.named e)) y (some a)
@@ -299,7 +341,7 @@ partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (arg
       | none, some (st, true) => .declStorage (.named st) y (some a)
       | none, none => .decl (.named c) y (some a)]
     as := as ++ [.name y]
-  pure (pre, tag, as)
+  pure (pre ++ post, tag, as)
 
 /-- **A call through a function value** `h(a)`, `h` of the function type
 `ty` (`fnTyOf?`): its arguments captured once, left to right,
