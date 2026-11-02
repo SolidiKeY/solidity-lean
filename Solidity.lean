@@ -50,6 +50,8 @@ import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.Aggregates.BoolArrayControls
 import Solidity.Backend.Aggregates.BoolArrayEntry
 import Solidity.Backend.Aggregates.BoolArrayEntryControls
+import Solidity.Backend.Aggregates.BoolArrayExpression
+import Solidity.Backend.Aggregates.BoolArrayExpressionControls
 import Solidity.Backend.Aggregates.BoolArrays
 import Solidity.Backend.Aggregates.ByteParameterControls
 import Solidity.Backend.Aggregates.ByteParameters
