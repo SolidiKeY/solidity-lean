@@ -337,3 +337,19 @@ decoding unchecked in `sol{}` — the struct table has no `#enum` row
 (`StructEnc.valueRowsOf`), so the member is a plain `uint` either way (the
 recorded limitation). Recorded, not changed: enum-typed mapping keys of a
 public getter get no `paramEnums`.
+
+**Gates on the lane head.** `./run-lean.sh` (69m32s): default target 1041
+jobs and `SolkeyTestSuite` 286 jobs built, solkeycheck at its baseline 37.
+Lean server clean on `TrustAudit.lean` and `scripts/AxiomAudit.lean`; no new
+`sorry`, axiom, `native_decide`, `implemented_by` or heartbeat change, and no
+new headline theorem (no pin added). Node: `test-solidity.test.mjs` tests for
+rows 30, 57 and 60 and the new `EnumArrayDecode` pin pass, row 43's fails on
+`tryScopeExit` (above); `finite-dispatch.test.mjs` 34/34;
+`solidity-upstream.test.mjs` 25/25; `check-g07` at its baselines (axiom-pin
+drift, `check-doc-paths` 48); `check-automatic --strict` 491 / 61 / 11
+refuted / 0 pending; `roadmap-g03-ledger.py --check` clean after `--write`
+and its `abiDecode` sentence updated. Elaboration of the touched modules did
+not slow (`Syntax/Elab/Arms` 130 s → 89 s, `Examples/Tactics/Bytes` 105 s →
+108 s, `RevertData` 206 s → 232 s, within run-to-run noise); the core edits
+(`Calculus/RuleSyntax`, `Calculus/PrintTerm`) are syntax and printer rows,
+undoing no speed-motivated change.
