@@ -634,9 +634,7 @@ def copyInto {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v
   -- `calldata` (lane FU2-B): through a memory copy (`cdToMem`, which
   -- validates each element), as solc copies calldata into storage.
   | .val (.cdRef _ off len) => do
-    match ← cdToMem F (σ.withLoc .memory) off len with
-    | .val x => storeVal F n τ p x
-    | _ => halt (.stuck "copy source")
+    storeVal F n τ p (← getV (← cdToMem F (σ.withLoc .memory) off len))
   | .val x => storeVal F n τ p x
   | _ => halt (.stuck "copy source")
 

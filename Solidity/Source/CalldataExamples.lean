@@ -69,7 +69,7 @@ def unitCd : Syn .unit :=
       (.cons (ext "u" (.cons (cdParam (.elem .bytes) "b") .nil)
           (.cons (stmt (.assign .assign (.ident "sb") (.ident "b")))
           (.cons (setX (.member (.ident "sb") "length")) .nil)))
-      .nil))))))))))))
+      .nil)))))))))))))
     .nil)
 
 def elabCd : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitCd)
