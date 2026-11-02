@@ -1,0 +1,54 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "prior_head": "15039776ad28f19656e86cf120a02ef29adcab7e",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "owned_sources": [
+    {
+      "path": "Solidity/Backend/Executable/WorldPrefixes.lean",
+      "blob": "158c89b8c516cf6535a6e7cb54d83c2be15d99f5",
+      "sha256": "cd40b17ebe08f6caea20bc6af7642f57b9e2a5cd962c488a9ccf7f6a0b900a66"
+    },
+    {
+      "path": "Solidity/Backend/Executable/WorldPrefixChecks.lean",
+      "blob": "1af1b418acdd87270a570789e5acb21685580c00",
+      "sha256": "d3ff08ec3a559c2c19e423e95ed0c49d02e32cb6e8d1324108497d436d03a847"
+    },
+    {
+      "path": "Solidity/Backend/Executable/PaymentCheckpointChecks.lean",
+      "blob": "41d861cbfb6894cbed14c2b8fad4cf6b0525a819",
+      "sha256": "e47d22cfd71bab3f72c2d4ab3c30767f5342256f41d78c36d23efb275c216221"
+    }
+  ],
+  "published_read_only_producers": [
+    {
+      "path": "Solidity/Semantics/ContractWorld.lean",
+      "blob": "9f22396da6266fa083413689a5c2e4141e545a95",
+      "sha256": "4735cb8abc936b6cf3744756aed749ea8dacaec261368989752b9b5ded6d0554",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Semantics/ContractWorldCertificates.lean",
+      "blob": "0fa975f2afad4be5f35b06a7a53bbbc3fb538461",
+      "sha256": "66db990b890b04773f01e6eced951584fcdc75c5d8583ff076ab83214233a4d7",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Semantics/PaymentWorld.lean",
+      "blob": "4ec04782f251ab84282451600ca5dfef69572a23",
+      "sha256": "2abdb370c0dd297f91d9b42961e7d7ae6b49bdc58b741e14c34783babbd612d1",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    }
+  ],
+  "declarations": [
+    "Solidity.Backend.Executable.WorldPrefixes.failure_cut_unique",
+    "Solidity.Backend.Executable.WorldPrefixChecks.funding_cut_identified",
+    "Solidity.Backend.Executable.WorldPrefixChecks.extracted_cut_identified",
+    "Solidity.Backend.Executable.WorldPrefixChecks.no_early_cut",
+    "Solidity.Backend.Executable.WorldPrefixChecks.no_wrong_world_cut",
+    "Solidity.Backend.Executable.WorldPrefixChecks.empty_cut_identified"
+  ],
+  "signature_evidence": "interface-types.log contains complete actual dependent cut/run/shape signatures",
+  "derived_facts": "Two actual successful-prefix/failing-operation cuts of the same list have identical prefix, operation, suffix, full middle world and exact THalt. No simulation premise.",
+  "clients": "Actual installation+3fundedcalls\u2192paidThree\u2192fundingrefusal; all extractedcuts identify prefixlength4/fullpaidThree and exactrevert. Reject length3 and paidTwo. Separate inhabitedempty-prefix fundedreceiver preserves dead errorbytes.",
+  "limits": "Finite existing Operation.run/List.foldlM algebra only. Not first internal caught failure, completed resource-stop transaction, loop/divergence, general payment/history or source/compiler/EVM correspondence. All original queues/goal/holds unchanged."
+}

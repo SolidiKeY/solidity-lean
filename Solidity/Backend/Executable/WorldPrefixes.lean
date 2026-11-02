@@ -79,6 +79,56 @@ theorem failure_iff (ops : List (Operation contracts)) (before : World contracts
     exact suffix_failure first (op :: rest) before middle e prefixRan (by
       simp only [List.foldlM_cons, badRun, bind, Except.bind])
 
+/-- Two actual successful-prefix/failing-operation cuts of the same list
+have the same prefix, failing operation, unexecuted suffix, reached world and
+original halt. First means top-level Operation, not a caught internal failure. -/
+theorem failure_cut_unique (first second : List (Operation contracts))
+    (op1 op2 : Operation contracts) (rest1 rest2 : List (Operation contracts))
+    (before middle1 middle2 : World contracts) (e1 e2 : THalt)
+    (shape : first ++ op1 :: rest1 = second ++ op2 :: rest2)
+    (ran1 : first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) before = .ok middle1)
+    (ran2 : second.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) before = .ok middle2)
+    (failed1 : op1.run middle1 = .error e1) (failed2 : op2.run middle2 = .error e2) :
+    first = second ∧ op1 = op2 ∧ rest1 = rest2 ∧ middle1 = middle2 ∧ e1 = e2 := by
+  induction first generalizing before second with
+  | nil =>
+    have same1 : before = middle1 := Except.ok.inj ran1
+    cases same1
+    cases second with
+    | nil =>
+      have same2 : middle1 = middle2 := Except.ok.inj ran2
+      cases same2
+      obtain ⟨sameOp,sameRest⟩ := List.cons.inj shape
+      cases sameOp
+      cases sameRest
+      exact ⟨rfl,rfl,rfl,rfl,Except.error.inj (failed1.symm.trans failed2)⟩
+    | cons x xs =>
+      have sameOp : op1 = x := (List.cons.inj shape).1
+      subst x
+      simp only [List.foldlM_cons,failed1,bind,Except.bind] at ran2
+      cases ran2
+  | cons x xs ih =>
+    cases second with
+    | nil =>
+      have same2 : before = middle2 := Except.ok.inj ran2
+      cases same2
+      have sameOp : x = op2 := (List.cons.inj shape).1
+      subst x
+      simp only [List.foldlM_cons,failed2,bind,Except.bind] at ran1
+      cases ran1
+    | cons y ys =>
+      obtain ⟨sameHead,sameTail⟩ := List.cons.inj shape
+      subst y
+      cases step : x.run before with
+      | error e =>
+        simp only [List.foldlM_cons,step,bind,Except.bind] at ran1
+        cases ran1
+      | ok next =>
+        simp only [List.foldlM_cons,step,bind,Except.bind] at ran1 ran2
+        obtain ⟨samePrefix,sameOp,sameRest,sameWorld,sameHalt⟩ :=
+          ih (before := next) (second := ys) sameTail ran1 ran2
+        exact ⟨congrArg (List.cons x) samePrefix,sameOp,sameRest,sameWorld,sameHalt⟩
+
 /-- Exact cuts at every list position, including empty/whole prefixes. -/
 theorem cut_success_iff (ops : List (Operation contracts)) (n : Nat)
     (before after : World contracts) :
@@ -125,4 +175,8 @@ theorem atomic_prefix_success (first : List (Operation contracts)) (before middl
 #guard_msgs (whitespace := lax) in #print axioms atomic_suffix_failure
 /-- info: 'Solidity.Backend.Executable.WorldPrefixes.failure_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms failure_iff
+/-- info: 'Solidity.Backend.Executable.WorldPrefixes.failure_cut_unique' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms failure_cut_unique
 end Solidity.Backend.Executable.WorldPrefixes

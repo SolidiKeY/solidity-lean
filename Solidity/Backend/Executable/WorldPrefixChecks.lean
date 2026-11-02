@@ -158,6 +158,67 @@ theorem cut_rollback (rest : List (Operation contracts)) :
   rw [funding_cut]
   rfl
 
+/-- Every real failure cut of this paid sequence identifies the same four
+successful operations, exact unexecuted suffix and full paidThree world. -/
+theorem funding_cut_identified (rest first : List (Operation contracts))
+    (op : Operation contracts) (last : List (Operation contracts)) (middle : World contracts) (e : THalt)
+    (shape : ((create :: List.replicate 3 pay) ++ failPaid :: rest) = first ++ op :: last)
+    (ran : first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) initial = .ok middle)
+    (failed : op.run middle = .error e) :
+    first = create :: List.replicate 3 pay ∧ op = failPaid ∧ last = rest ∧
+      middle = paidThree ∧ e = .revert :=
+  failure_cut_unique first (create :: List.replicate 3 pay) op failPaid last rest
+    initial middle paidThree e .revert shape.symm ran installed_paid_prefix failed unfunded_failure
+
+/-- Existing existential extraction is strengthened by the independent
+uniqueness law; the extracted middle is now identified, not postulated. -/
+theorem extracted_cut_identified (rest : List (Operation contracts)) :
+    ∃ first op last middle,
+      ((create :: List.replicate 3 pay) ++ failPaid :: rest) = first ++ op :: last ∧
+      first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) initial = .ok middle ∧
+      op.run middle = .error .revert ∧ first.length = 4 ∧ middle = paidThree := by
+  obtain ⟨first,op,last,middle,shape,ran,failed⟩ := extracted_cut rest
+  obtain ⟨samePrefix,_,_,sameWorld,_⟩ := funding_cut_identified rest first op last middle .revert shape ran failed
+  refine ⟨first,op,last,middle,shape,ran,failed,?_,sameWorld⟩
+  rw [samePrefix]
+  rfl
+
+/-- A claimed earlier cut cannot hide a different failed call in the paid
+prefix. The canonical prefix's length4 is derived from its actual contents. -/
+theorem no_early_cut (rest : List (Operation contracts)) :
+    ¬ ∃ first op last middle e,
+      ((create :: List.replicate 3 pay) ++ failPaid :: rest) = first ++ op :: last ∧
+      first.length = 3 ∧
+      first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) initial = .ok middle ∧
+      op.run middle = .error e := by
+  rintro ⟨first,op,last,middle,e,shape,short,ran,failed⟩
+  have same := (funding_cut_identified rest first op last middle e shape ran failed).1
+  rw [same] at short
+  cases short
+
+/-- An intermediate world with one remaining sender word cannot be substituted
+for the exhausted actual cut world, even if the same operation list is claimed. -/
+theorem no_wrong_world_cut (rest : List (Operation contracts)) :
+    ¬ ∃ first op last e,
+      ((create :: List.replicate 3 pay) ++ failPaid :: rest) = first ++ op :: last ∧
+      first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) initial = .ok paidTwo ∧
+      op.run paidTwo = .error e := by
+  rintro ⟨first,op,last,e,shape,ran,failed⟩
+  have same := (funding_cut_identified rest first op last paidTwo e shape ran failed).2.2.2.1
+  have different : (paidTwo.funds sender).val ≠ (paidThree.funds sender).val := by decide +kernel
+  exact different (congrArg (fun w : World contracts => (w.funds sender).val) same)
+
+/-- Empty successful prefix is independently inhabited by the funded receiver
+failure; it preserves nonempty original error bytes rather than funding refusal. -/
+theorem empty_cut_identified (first : List (Operation contracts))
+    (op : Operation contracts) (last : List (Operation contracts)) (middle : World contracts) (e : THalt)
+    (shape : [failPaid,pay] = first ++ op :: last)
+    (ran : first.foldlM (fun (w : World contracts) (op : Operation contracts) => op.run w) paidTwo = .ok middle)
+    (failed : op.run middle = .error e) :
+    first = [] ∧ op = failPaid ∧ last = [pay] ∧ middle = paidTwo ∧ e = .revertWith [0xde,0xad] :=
+  failure_cut_unique first [] op failPaid last [pay] paidTwo middle paidTwo e (.revertWith [0xde,0xad])
+    shape.symm ran rfl failed funded_failure
+
 /-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.actual_iteration_cut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms actual_iteration_cut
 /-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.failed_prefix_stops_successful_tail' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -174,4 +235,22 @@ theorem cut_rollback (rest : List (Operation contracts)) :
 #guard_msgs (whitespace := lax) in #print axioms no_late_receiver_bytes
 /-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.cut_rollback' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms cut_rollback
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.funding_cut_identified' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms funding_cut_identified
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.extracted_cut_identified' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms extracted_cut_identified
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.no_early_cut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms no_early_cut
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.no_wrong_world_cut' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms no_wrong_world_cut
+/-- info: 'Solidity.Backend.Executable.WorldPrefixChecks.empty_cut_identified' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_cut_identified
 end Solidity.Backend.Executable.WorldPrefixChecks

@@ -1877,3 +1877,40 @@ aggregateRSS1726172/1723248KiB, one worker,12GiB/noSwap/180s/writerlease,
 OOM0; hostminimum17275188/17232288KiB exceeds12GiB reserve. Source/toolchain
 cache reused. Scope/trust/doc comparisons and exact-head immutable exports
 retain actual commands, failed raw receipts and complete parent obligations.
+
+
+## Checkpoint26: unique actual finite failure cuts
+
+After the reviewed generic constructor checkpoint, WorldPrefixes.failure_cut_unique
+proves a genuinely missing BackfillB law: two actual successful-prefix/failing-
+operation cuts of the same existing list have identical prefix, operation,
+unexecuted suffix, full reached world and original THalt. The proof inducts
+on the actual list and Operation.run result. Contradictory earlier failures
+are excluded by the original Except constructors, not a simulation premise.
+Checkpoint22 existence/decomposition is reused unchanged, not duplicated.
+
+WorldPrefixChecks.funding_cut_identified/extracted_cut_identified now derive
+canonical prefixlength4 and exact paidThree from any actual extraction of the
+installation-plus-three-paid-calls sequence. Wrong index3 and paidTwo world
+are rejected; the latter uses actual sender funds1 versus0. A separate real
+empty-prefix funded receiver case preserves nonempty dead error bytes rather
+than replacing them by the later funding refusal. Six new observed standard-
+axiom reports are guarded; separate read-only finder/skeptic reviews accept.
+
+This is finite top-level Operation-result algebra, not uniqueness of caught
+internal failures or a claim that divergence/resource stops are completed
+transactions. No new runner, AST, world/source semantics or observations are
+introduced. Original G43, V12/G37 loops/G36.03 divergence, source/frame/world,
+pinned decoder and fetched-byte/resource obligations remain OPEN. Exact source/
+producer bindings, full signatures, raw gates and all original Work/Backfill
+accounting are in the checkpoint26 handoff. Goal and human holds unchanged.
+
+Checkpoint26 independent finder/skeptic accept the actual induction and
+inhabited positive/negative controls; six new exact standard-axiom pins are
+independently confirmed. Focused35jobs, root1059+262/private1063+262 and
+SolKey377/131/131 pass. Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs
+precede runtime confirmation. Root/private aggregateRSS1717692/1717252KiB,
+one worker,12GiB/noSwap/180s/writerlease/OOM0. Measured hostavailable minima
+17032348/17282444KiB are above12GiB, a measurement rather than an extra VM
+reservation. Full raw exits, scoped gates, doc multiset comparisons and exact
+committed source/bundle/interface seals are recorded in checkpoint26 handoff.
