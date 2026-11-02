@@ -1494,3 +1494,15 @@ checked-subtraction companions improve with exact certificates. Old literal
 answers, returned negative candidate states, read-definedness observations and
 source refusals remain unchanged. General memory/prefix/fixed-array coverage
 and the exhaustive Residue/DecisionTheorem-prime bridge remain open.
+
+
+AU02 fixed given-heap progress (2026-11-02): a separate exact source class now
+handles a box-bound fixed uint array with identical direct reads at a UIntLinear
+index (literal or computed). Its intrinsic length and both full operands are
+checked. All-heap validity and hash freedom supply real coverage/proved results,
+after every old answer and exact counterstate has been preserved. Literal,
+computed, partial, out-of-bounds and intrinsic zero-length controls are certified;
+real fixed-object unequal reads and halted program equality remain false controls.
+The dynamic source classifiers and their fixed-binder refusals are unchanged.
+This closes the reproduced fixed given-heap reflexive-read gap, not general fixed
+arrays, prefixes or the exhaustive Residue theorem. See the VA1 handoff.

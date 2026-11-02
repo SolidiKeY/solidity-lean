@@ -56,7 +56,7 @@ theorem GivenHeapLinearReadReflexive.target {C : Contract} {φ : Fml C []}
 /-- Actual source recognition supplies the new memory coverage branch. -/
 theorem GivenHeapLinearReadReflexive.memCovered {C : Contract} {φ : Fml C []}
     (w : GivenHeapLinearReadReflexive φ) : φ.memCovered = true := by
-  simp only [Fml.memCovered, givenHeapLinearRead_complete w, Bool.or_true]
+  simp only [Fml.memCovered, givenHeapLinearRead_complete w, Bool.or_true, Bool.true_or]
 
 /-- The frozen Covered body receives the certified family through its helper. -/
 theorem GivenHeapLinearReadReflexive.covered {C : Contract} {φ : Fml C []}

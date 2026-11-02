@@ -796,6 +796,10 @@ import Solidity.Calculus.DecisionSourceChain
 import Solidity.Calculus.DecisionSourceDiscovery
 import Solidity.Calculus.DecisionSourceAnswer
 import Solidity.Calculus.DecisionGivenHeapComputedExtension
+import Solidity.Calculus.DecisionGivenHeapFixedReason
+import Solidity.Calculus.DecisionGivenHeapFixedExtension
+import Solidity.Calculus.DecisionGivenHeapFixedBoundary
+import Solidity.Examples.DecisionGivenHeapFixed
 import Solidity.Calculus.DecisionArrayReasons
 import Solidity.Calculus.DecisionNumericFlatten
 import Solidity.Calculus.DecisionNumericStages

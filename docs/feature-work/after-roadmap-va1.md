@@ -4375,3 +4375,89 @@ Evidence directory and intended exact-head export:
 `/workspace/va1-evidence/computed-read-pipeline`. New large exports will use
 owned `/tmp` storage with a stable delivery symlink, preserving all old files
 and avoiding checkout disk pressure.
+
+
+### AU02 fixed-array given-heap increment (2026-11-02)
+
+Parent `7053d076b96be101f3249494f85270726ac7badc`; original branch, base and
+goal unchanged. Fresh `git fetch origin master` in the private bare audit
+store succeeds at `1db639a2239195365250c26fe8d054c89b8507b5`. Its Decision and
+MemoryWitness are byte-identical to the integrated a320 base, and the fixed
+source route is absent. Existing storage fixed-array and fresh fixed-memory
+work is reused; this is the separately reproduced given-heap gap.
+
+Before edits, an intrinsic box-bound fixed uint[3] read-at-one reflexive leaf
+is target=true, Covered=false, unknown, yet valid over every heap (5.384699s).
+`DecisionGivenHeapFixedReason` states its exact source class for any intrinsic
+length and UIntLinear key (literal or computed). The constructive parser
+retains the fixed length and checks both complete reads through the bound
+pointer. Sound/complete membership, iff/Decidable, all-heap validity and
+hashFree/validH are proved without inspecting coverage or a verdict.
+
+`DecisionGivenHeapFixedExtension` runs only after every prior computed/source
+answer misses. Generic preservation retains all old Answers and exact negative
+state functions. Decision adds the fixed branch to the memory helper, derives
+no-allocation from its source equation and keeps every old completeness signature.
+The original Fml.Covered, Fml.inTarget and DecisionTheorem declarations are byte
+identical to both 8bd and the parent. Old literal/computed classifiers, answer
+producers and HashPremise remain byte-identical; the computed boundary needs
+only one extra Bool.true_or simplification. No rule/walk/observation/default or
+proof, time, fuel, node, source-profile or expected-old-verdict change.
+
+`DecisionGivenHeapFixedBoundary` derives actual admission under every waiver,
+no-allocation, memory coverage and global proved verdicts from the actual source
+witness, with no supplied target or coverage premise. Existing hashFree transport
+keeps the original hash reading. This supports exactly box-bound fixed primitive
+uint arrays and identical direct UIntLinear reads, not general fixed-array
+closure, nested/struct arrays or arbitrary prefixes.
+
+`Examples/DecisionGivenHeapFixed` certifies literal, computed, partial-index,
+out-of-bounds and intrinsic zero-length controls: all five actual interpreted
+results are (true,true,proved). Zero length is an intrinsic model control, not
+Solidity-source acceptance. A real State.alloc object [1,2,3] proves defined
+reads and supplies the unequal-read countermodel. Unset/bounds/partial evaluator
+failures remain none. Program == at an unset read is separately refuted, so
+Theory reflexivity is not confused with successful program evaluation.
+Actual diamond/fresh/dynamic/non-read/unequal-read sources are refused by this
+classifier; contextual uint keys classify, valid nonlinear ones do not. Same-type
+and different-length outer pointers are refused by complete address matching.
+No existing unknown expectation is edited in this increment.
+
+Focused warm private-cache checks, all at the unchanged 300s cap:
+- Reason MCP/build pass5.353211s/2.087987s; extension MCP/build3.183807s/2.088852s.
+- Decision MCP/build36.645824s/39.880308s.
+- Fixed boundary MCP/build4.244007s/2.097308s; controls MCP/build5.385056s/3.138099s.
+- Edited computed compatibility MCP4.286391s; previous computed controls build3.177496s.
+- Old literal/negative consumer closure passes83.707117s; DecisionMemory itself73s.
+- Public probe passes33.368531s:48 standard-only axiom reports and five actual
+  interpreted verdict triples. Bounded KeySort passes1.021121s with actual
+  Lean4.24.0/Lake5.0.0-src+797c613 and parsed377/read-bearing131/covered131.
+
+Initial lower-layer noAlloc name failure, stale-dependency diagnostics and the
+boundary's leftover dynamic-context annotation/unused simp warning are retained
+raw, with their exact draft sources. The allocation fact now resides in the high
+boundary, preserving acyclic imports; no premise or expected result was weakened.
+Independent read-only finder and skeptic used no Lean/server/build and found no
+source/control issue. Registration/whitespace checks pass. Every check preserves
+original writer lock, one thread/explicit -j1, hard12GiB/no swap,12GiB host reserve
+and no LSP/build overlap. Passing-check maximum sampled aggregate RSS2426136KiB,
+maximum measured cgroup peak1298989056bytes, minimum host available13418770432bytes.
+No fresh full-tree cache/timing pass is claimed.
+
+Checkout disk fell below the existing full-wrapper32MiB floor. A journaled,
+byte-for-byte relocation of VA1's sealed partial-OR bundle to owned /tmp preserves
+its original access path, exact SHA256 and both original manifests; no cache,
+source or other task was removed. Available checkout space rose32309248 to
+35471360bytes. Exact receipt: /workspace/va1-evidence/fixed-given-next/disk-recovery.json.
+New large exports use owned /tmp storage through a stable delivery link.
+
+Per H12, full run-lean/TestSuite/docs/strict/trust/cumulative gates are reserved
+for a lane checkpoint, with prior failed gates retained. Remaining original
+AU01 exhaustive Residue/DecisionTheorem-prime/hash bridge, profiling/splits,
+AU02 general arrays/memory/halting-OR/prefix children, wider revised program-free
+boundary and formula-derived fuel/backfill remain open. Next ready constructive
+bridge candidate is two positive uint prefixes over an intrinsic QFUIntLinear
+body; the existing one-prefix facts can be generalized without changing budgets.
+That candidate is not implemented or claimed proved here. No AU05/AU06,
+push/merge/PR/tag, goal reset or whole-lane completion.
+Evidence and intended exact-head export: /workspace/va1-evidence/fixed-given-next.
