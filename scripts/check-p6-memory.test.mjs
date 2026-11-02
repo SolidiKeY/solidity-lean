@@ -21,3 +21,6 @@ test('renamed observed declaration rejected',()=>assert.ok(mutated(x=>x.sources[
 
 test('weakened reached Source world frame rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalUintWrite.lean'));x.sources[f]=x.sources[f].replace('z.2={y.2 with heap := z.2.heap}','z.2=z.2');}).length));
 test('wrong indexed target operation rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalUintWrite.lean'));x.sources[f]=x.sources[f].replace('Evm.Memory.writeArrayCode','Evm.Memory.readArrayCode');}).length));
+
+test('dropped invocation key frame rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalFrameImage.lean'));x.sources[f]=x.sources[f].replace('(store32 μ a w).key=μ.key','(store32 μ a w).key=(store32 μ a w).key');}).length));
+test('wrong unaligned span offset rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalFrameImageControls.lean'));x.sources[f]=x.sources[f].replace('lenU 31','lenU 32');}).length));

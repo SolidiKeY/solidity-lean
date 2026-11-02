@@ -162,6 +162,71 @@
       "declarations": [
         "UintArrayAt.write_cell"
       ]
+    },
+    "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean": {
+      "sha256": "b7c8bbc5cdb91572de6419b9a1e9afd0dbc5e3b7484e62526ab720e62a99678e",
+      "namespace": "Solidity.Backend.MemoryOps.Physical",
+      "declarations": [
+        "frame_wordByte",
+        "frameBytes_store32",
+        "frame_store32_target",
+        "frame_snapshot_read",
+        "frameBytes_expandZero",
+        "WordFrame.frame_store"
+      ],
+      "pins": {
+        "Solidity.Backend.MemoryOps.Physical.frame_wordByte": [
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.frameBytes_store32": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.frame_store32_target": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.frame_snapshot_read": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.frameBytes_expandZero": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.WordFrame.frame_store": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    },
+    "Solidity/Backend/MemoryOps/PhysicalFrameImageControls.lean": {
+      "sha256": "9bdf2eba7d08c1ef6c518d16af2cf2ba5e1aaa59dd9187bb3c88c6d3734ff90d",
+      "namespace": "Solidity.Backend.MemoryOps.Physical.FrameControls",
+      "declarations": [
+        "unaligned_store",
+        "empty_endpoint_growth",
+        "insufficient_capacity"
+      ],
+      "pins": {
+        "Solidity.Backend.MemoryOps.Physical.FrameControls.unaligned_store": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.FrameControls.empty_endpoint_growth": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.FrameControls.insufficient_capacity": [
+          "Quot.sound",
+          "propext"
+        ]
+      }
     }
   }
 }
