@@ -1064,6 +1064,16 @@ a larger literal source folds to 27 nodes and stays Covered. These preserve
 why neither a size threshold nor noncoverage defines Residue/unknown.
 Separate cut/lift/resource and exhaustive coverage/fuel obligations stay open.
 
+`Calculus/DecisionNumericCompiler.lean` derives the unchanged arithmetic
+compiler's operand-depth premises from numeric syntax and a computable maximum
+equation-operand depth. It reaches the actual cut/read-layout/compiler producer
+with a budget derived from structural leaf nodes, independently of aggregate
+511-node admission. Concrete517-node optional-failure and original source
+clients compile; strict-false encoding and shallow nonlinear rejection remain
+separate controls. The positive prefix is retained and its body is compiled.
+No compiler fuel, global coverage/default/verdict, storage-read reconstruction
+or complete Decision theorem is changed or claimed by this read-free stage.
+
 `Calculus/DecisionHaltingOrReason.lean` supplies an independently decidable
 exact nested partial-OR source class, parameterized by actual typed roots and
 literals. Its complete source equation does not inspect coverage or verdicts.

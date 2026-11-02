@@ -3478,3 +3478,80 @@ proof-budget increase, goal mutation, push/merge/PR/tag publication occurred.
 
 This increment is kernel proof evidence only; no EVM/external-test validation
 is claimed. Interpreted timings are observations, not a semantic oracle.
+
+
+## Numeric compiler and actual read-free stages (2026-11-02)
+
+Parent35608a543e4f85b7037b105c8aef10bd7c85eb36 and every earlier seal/decision,
+original VM/thread/branch/base/goal are preserved. This advances the original
+AU02 formula-derived-fuel work independently of held VA1-Q2 and VA2 ownership.
+No producer/compiler source is edited. Speed history inspected:0cfcf368,
+744d0966,361b389c; this is a new consumer proof module, not a producer refactor.
+
+Calculus/DecisionNumericCompiler defines a computable maximum equation-operand
+depth on existing LFml syntax. UIntQF plus that depth≤1023 derives the existing
+LFml.Arith constructor premises and actual leafArithmetic? success over its
+actual collected typed parameters/environment. Fuel1024 is unchanged. Neither
+aggregate formula nodes≤511 nor an assumed compiler equation is a premise.
+The real returned certificate gives validity equivalence over states/atoms.
+
+The proof also reaches actual readFlatten? and flattenedArithmetic? outputs.
+Existing numeric cut identity is proved, the actual cut formula's intrinsic
+index is retained, structural formula nodes supply traversal resources, and
+the genuinely empty read layout discharges alias requirements. The arithmetic
+encoding's semantic equivalence comes from its actual checked producer output.
+No general storage-read/path reconstruction is assumed or claimed. Optional
+failure and strict equality semantics remain distinct. Source-stage theorems
+compose actual ground/positive-prefix discovery; the positive prefix remains
+present and only its actual numeric body is compiled. Source weight≤1023 is
+a sufficient theorem premise, not a runtime-budget change or necessary class.
+
+The exact existing517-node optional-failure body has equation depth2 and an
+actual valid LeafArithmetic/FlattenedArithmetic output; its exactBounded stays
+false. Strict failed equality yields actual encodings proved not valid. The
+unchanged2048 producer call succeeds on the same large body. The original517
+source also reaches its real body's arithmetic and full flattened certificates.
+A shallow symbolic nonlinear product is actually refused by the direct compiler
+and outside the inductive grammar despite equation depth2, with an inhabited
+countermodel. Old target/Covered/hashCovered/proved pins are unchanged. These
+results do not turn noncoverage into unknown or assert whole decision completion.
+
+Final bounded MCP core/client6.568/5.472s PASS, affected build4.147s PASS;
+28 public signature/axiom reports13.778s PASS, standard axioms only. Interpreted
+profile3.096s PASS: optional517 5.394082ms, original517-source-body 11.781751ms,
+strict-failed 0.137898ms, repeated optional517 4.107623ms, including printing.
+All observed stages match expected controls. Checkout inputs/oleans warm;
+previously repaired task-owned artifact cache reused. No cold-source build claim.
+Raw failed alias rewrites/Option normalization/dependent-cut rewrite and exact
+source snapshot remain retained; no checking budget or expected pin was changed.
+Sampled aggregate RSS 1508188 KiB; cgroup peak 511741952 bytes; minimum host available 15712313344 bytes; 12 unsuccessful samples retained.
+Actual hard12GiB/no swap, threads1/-j1, writer lock and12GiB host reserve applied.
+
+Finder/skeptic independent read-only source/docs reviews found no issue; neither
+used Lean/server/builds. Two additive root imports/two module-map rows register
+owned modules. Strict automatic/layer/trust/whitespace pass. Strict docs still
+FAIL with exactly85 frozen-base findings; axiom inventory still FAIL404 changes.
+Earlier full/TypeExamples stops remain failures, Q2 held and source untouched.
+This is kernel evidence; no EVM/external-test or final combined/full gate claim.
+
+Planned export, pending checks at source commit:
+/workspace/va1-evidence/numeric-compiler-next/PARALLEL-INTERFACE.json and bundle
+will carry actual committed modules, dependent signatures, unchanged producer
+facts, nontrivial clients and unresolved premises. Cumulative original.patch /
+va1.bundle, committed handoff, delta evidence and prior archive checksums must
+be reconstructed/audited before delivery success. Root disk measured approximately3.4MiB free before packaging;
+no prior files/caches/seals are deleted. Parallel and delivery bundle paths may
+hard-link the same immutable committed bundle; the evidence archive references
+that separate source package by hash rather than storing a redundant copy.
+All original files remain available; the supported cache still lives on the
+existing VM tmpfs as previously documented. Final manifest binds exact head.
+
+Whole original queue remains partial: exhaustive meaningful Residue/reasons,
+DecisionTheorem-prime and target/coverage/hash bridge; fixed/nested-array decision
+integration; broader memory and partial-OR reconstruction; broader approved M4
+boundary; remaining nonnumeric/path/read-layout formula-derived fuel, baseline/
+backfill/performance and full checks. Q1 boundary revision is approved, Q2 held.
+Numeric read-free compiler composition is now independently proved; it does not
+remove the broader producer's511 premise or alter global Covered/inTarget.
+No new exclusion/premise/model/default, axiom/sorry/native shortcut, budget/pin
+change, goal mutation, push/merge/PR or tag publication occurs.

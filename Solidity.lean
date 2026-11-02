@@ -204,6 +204,7 @@ import Solidity.Calculus.DecisionNumericGroundSource
 import Solidity.Calculus.DecisionSourceInstance
 import Solidity.Calculus.DecisionNumericFlatten
 import Solidity.Calculus.DecisionNumericStages
+import Solidity.Calculus.DecisionNumericCompiler
 import Solidity.Calculus.DecisionHaltingOrReason
 import Solidity.Calculus.DecisionHaltingOrBoundary
 import Solidity.Calculus.DecisionNumericTraversal
@@ -291,6 +292,7 @@ import Solidity.Examples.DecisionNumericGroundSource
 import Solidity.Examples.DecisionSourceInstance
 import Solidity.Examples.DecisionNumericFlatten
 import Solidity.Examples.DecisionNumericStages
+import Solidity.Examples.DecisionNumericCompiler
 import Solidity.Examples.DecisionHaltingOrReason
 import Solidity.Examples.DecisionNumericTraversal
 import Solidity.Examples.DecisionNumericNormalization
