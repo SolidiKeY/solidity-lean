@@ -1000,3 +1000,6 @@ import Solidity.Backend.AbiWorld.TripleReadback
 
 import Solidity.Backend.AbiWorld.WordListReadback
 import Solidity.Backend.AbiWorld.StaticAggregateReadback
+
+import Solidity.Backend.AbiWorld.DynamicListReadback
+import Solidity.Backend.AbiWorld.DynamicAggregateReadback

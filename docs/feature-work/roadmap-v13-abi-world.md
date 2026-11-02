@@ -1989,3 +1989,88 @@ runtime; hard12GiB/swap0, peak1470836736bytes/no OOM. All292prior entries/22immu
 manifests verify, untouched. Independent source and owning-roadmap finder/skeptic
 PASS/no findings; final committed-artifact/seal reviews recorded in NEW export.
 No original queue, mandatory failed gate or blocked goal is declared complete.
+
+
+## Mixed dynamic list and tuple recovery (parent 69f142bf)
+
+`DynamicListReadback` extends canonical readback beyond WordShapes by actual
+indexed Param/Vals induction for arbitrary lists of validated words and byte
+strings. LeafShapes is an auxiliary sufficient constructor case, not a new
+admitted profile or exclusion. `go_word`, `go_bytes`, `head_fold`, `head_length`,
+`encoded` and `encoded_length` derive the actual assemble.go heads/tails.
+`go_append` advances the suffix offset by the actual ordered prefix tail byte
+length; `prefix_noninterference` fixes the starting offset and therefore does
+not cover a change to the total number/extent of heads. `tail_aligned` proves
+alignment of the actual byte extent, without identifying natural offsets with
+modulo word arithmetic. Size bounds, not list length alone, justify loads.
+
+`window` and `roundtrip` derive actual enter/entry/bodyValues/verdict results
+from those real byte windows, with arbitrary selector of length four, suffix,
+free pointer, existing locations/readsOnly and validated full-word kinds. The
+actual location-dependent `spent` cursor omits calldata entry allocations; the
+sufficient allocation bound includes all dynamic bytes for eager body copies.
+Original parameter recursion reuses fuel f with sufficient f>=2, not constant
+CPU/gas. No desired decoder result, body-success oracle or simulation premise
+is assumed. Existing enter_append/body composition are reused unchanged.
+
+`DynamicAggregateReadback.members_window` and `mdec_tuple` consume the actual
+recursive Shape.tuple constructor on arbitrary word/bytes members. The outer
+allocation is members.length*32 in addition to the real byte-object tails;
+mmembers consumes original fuel N+2, mdec N+3 and top entry N+4. Tuple-relative
+offsets use the real tuple base. `tuple_roundtrip` proves actual memory/calldata
+entry and typed body/verdict identity for a genuinely dynamic tuple, using
+published eager_cref. Static tuples retain the earlier consumer. This advances
+a recursive constructor, not arbitrary recursive nesting or fixed/array bytes.
+
+New controls include an inhabited arbitrary-length byte/word client, full max
+uint values, nominal enum, two distinct byte strings and actual dynamic tuple;
+empty/zero/255 and31/32/33 boundaries; exact/one-over allocation and nonzero
+incoming cursor; wrong offsets/relative base/typed shape, truncation, fuel
+before validation, allocation before short payload, and accepted unpadded bytes.
+An initial control normalization exceeded the original recursion limit; the
+repair rewrites only a proved numeric cost instead of unfolding typed values.
+No limit was raised; raw diagnostics/build errors are retained.
+
+Remaining ready owned proofs: extend LeafShapes to genuine recursive aggregate
+values with derived per-shape cost/fuel, actual Seq mseq and nested mmembers
+canonical readback; fixed/array dynamic bytes remain unproved. The actual
+definitions exist. A whole upstream lane is not the blocker for these leaves.
+G40/G41/BackfillA progress is intrinsic canonical preparation only. Existing
+noncanonical/lazy/refusal/failure order and all profiles remain unchanged.
+Unknown-memory runtime encoding, all-profile Source/native/compiler dispatch,
+CALL/RETURNDATA, O1 declared-demand/raw same-invocation/static-frame and arbitrary
+callee/callback/library/world/physical-resource producers remain open/reserved.
+PacketEmission, ReturnedBytes and Failure.Slice are not widened or counted as
+runtime memory reading. Every original Work/Backfill item remains partial or
+blocked as in the preceding handoff; persistent goal unchanged/blocked.
+
+Validation, complete old/new observations, scoped axioms, exact private-nine
+input hashes, independent source/artifact reviews and real failed gates are
+recorded in the new immutable recovery export. Historical docs/frozen, Suite,
+full/cold and initial body export failures remain failures; complete prior and
+publication documentation multiset equality is a separate check. No push,
+merge, PR, new peer input or goal administration. Proposed G03 reconciliation
+only: G40/G41/BackfillA mixed canonical constructor progress, no parent closure.
+
+Independent source finder/skeptic found no proof defect. Their two precision
+findings were fixed: spent is explicitly allocation-correct only for LeafShapes;
+take210 is accurately a second length-header truncation. A new take240 payload
+truncation and free=lim-100 control distinguish successful first allocation,
+second allocation Panic before short payload, and second header REVERT before
+that second allocation. Original expectations and budgets are unchanged.
+
+Final recovery validation: strict per-file new list/aggregate/control/root MCP
+PASS; focused modules/controls and registered changed import closure PASS1077
+jobs.242complete ordered vectors/103scalars preserve all203/87prior unchanged;
+76actual scoped standard-only axiom sets. No new owned proof/control warnings.
+Static imports/layers/orphans/trust/whitespace PASS; docs raw1/current86 versus
+frozen83comparison1 remain FAIL. Complete prior/publication finding-multiset
+equality separately PASS. Historical Suite124/181.061s,full1/5038.87s,
+cold124/5400.579s and initialbodyexport1 retained; no unchangedfailed heavy retry.
+Lean4.24.0/Lake5.0.0-src+797c613; actual KeySort2jobs PASS before
+RUNTIME_GATE_PASS(runtime only). Hard12GiB/swap0, observed peak3325009920bytes,
+OOM0, original serial-j1/thread1/cache.316prior entries/23seals verified
+immutable. Independent finder/skeptic source/roadmap review PASS after the two
+precision fixes; final committed artifact/seal reviews recorded separately.
+No whole-lane/goal closure, source/native/EVM/runtime encoding claim or
+ready-work-exhaustion claim. All original queues remain explicitly open.

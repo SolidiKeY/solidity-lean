@@ -1345,3 +1345,6 @@ four-mode upstream EVM observations and refusal controls;
 
 | `Backend/AbiWorld/WordListReadback.lean` | Uniform typed canonical entry/body induction over arbitrary existing validated-word Param/Vals lists, exact head bounds/cursor and original fuel; sufficient constructor case only. |
 | `Backend/AbiWorld/StaticAggregateReadback.lean` | Actual tuple/fixed/dynamic-array consumers over validated-word Vals/Seq, real allocator/member-fuel/header conditions and tuple eager/lazy agreement. |
+
+| `Backend/AbiWorld/DynamicListReadback.lean` | Actual assemble head/tail concatenation and uniform typed word/bytes parameter-list admission with exact dynamic offsets, allocation cursor and original fuel. |
+| `Backend/AbiWorld/DynamicAggregateReadback.lean` | Arbitrary mixed word/bytes tuple member and constructor decoding, real outer allocation, original decreasing fuel and memory/calldata entry/body identity. |
