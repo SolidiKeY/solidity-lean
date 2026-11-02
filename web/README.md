@@ -7,7 +7,7 @@ WebSocket or account is required.
 
 Open the [GitHub Pages IDE](https://solidikey.github.io/solidity-lean/ide/).
 **File → Download Offline IDE** saves the complete website as one HTML file
-(about 838 MB). Reopen that file in a modern desktop browser for offline use,
+(about 873 MB). Reopen that file in a modern desktop browser for offline use,
 including fresh proof checking. Keep the original download: the live page removes
 embedded data nodes after preparing tools, so the browser's Save Page command
 does not produce the original self-contained artifact. A disconnected hosted
@@ -113,10 +113,10 @@ requests were recorded. The actual extension and browser produce the same three
 proved functions, pending function, and positioned diagnostic. The captured
 workbenches differ by 2.09% overall and 0.03% in the code region.
 
-The performance update measured 23.49 seconds for the first proof request,
+The performance update measured 26.56 seconds for the first proof request,
 including library import, versus 63.25 seconds in the baseline. Fresh navigation
-through the first result took 40.93 seconds. Real edited-source checks took
-7.55–9.42 seconds; an unchanged cached-result lookup took 7.55 ms and does not
+through the first result took 44.89 seconds. Real edited-source checks took
+7.33–9.84 seconds; an unchanged cached-result lookup took 19.45 ms and does not
 execute a new proof. Warm checks still need substantial improvement. The original
 native extension comparison measured 8.94 seconds and is historical. See
 [the design record](../docs/web-ide.md#performance-follow-up) for phases and
