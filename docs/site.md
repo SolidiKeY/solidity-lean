@@ -51,6 +51,8 @@ by hand (`workflow_dispatch`) on any branch:
    progress instead of cancelling it (the core's build is longer than the
    gap between pushes); on another branch the newer run cancels the older,
    and the site is uploaded as the run's `github-pages` artifact instead.
+   `pages-recovery.yml` lets a newer push replace an older run whose IDE job
+   already failed; a healthy default-branch build keeps its place in the queue.
 6. **Check the published IDE** in Chromium against the generated build ID,
    then disconnect networking and restart its compiler/kernel before more proofs.
    Reports and screenshots are retained as workflow artifacts.
