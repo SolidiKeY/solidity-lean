@@ -81,6 +81,13 @@ register_option sol.prove.pruneFalse : Bool := {
   descr := "sol_prove with callbacks: prune contradictory callback-free contexts"
 }
 
+/-- Internal Testing policy: retain exact residue and scoped-closer certificates
+as typed proof checkpoints for the final synchronous check. Ordinary callers check now. -/
+register_option sol.prove.sharedResidues : Bool := {
+  defValue := false
+  descr := "Testing: share the final kernel context for exact ordinary certificates"
+}
+
 /-- Use one bounded compiled walk on ordinary `Proves` residues reached
 through the callback calculus's existing `plain` rule. -/
 register_option sol.prove.compiledPlain : Bool := {
@@ -324,7 +331,8 @@ def compiledPlain (g : MVarId) (steps : Nat) :
       let_expr Proves C R Γ₀ Γ H φ := ty | return none
       unless (← whnfR Γ₀).isAppOf ``List.nil do return none
       -- `some steps` is a single stage, never Seq.prove's increasing search.
-      some <$> Seq.prove g C R Γ H φ (some steps) (oneCheck := steps))
+      some <$> Seq.prove g C R Γ H φ (some steps) (oneCheck := steps)
+        (shareCheck := sol.prove.sharedResidues.get (← getOptions)))
     fun _ => pure none
   if result.isNone then saved.restore
   return result
@@ -340,6 +348,431 @@ def refutePrefix {C : Contract} : Nat → {Γ : Ctx} → Hyps C [] Γ → Bool
   | n + 1, _, .upd H _ _ | n + 1, _, .havoc H | n + 1, _, .all H _ _
   | n + 1, _, .bind H _ _ _ | n + 1, _, .anon H _
   | n + 1, _, .allocAll H _ _ | n + 1, _, .grow H => refutePrefix n H
+
+/-- Untrusted proposal of the first winning prefix, under the SAME depth
+bound as refutePrefix. Every constructor consumes one unit. -/
+private def refutingDepth {C : Contract} : Nat → {Γ : Ctx} → Hyps C [] Γ → Option Nat
+  | 0, _, _ => none
+  | _ + 1, _, .nil => none
+  | n + 1, _, .pre H c =>
+      if Seq.refuteS H c then some 0 else (refutingDepth n H).map Nat.succ
+  | n + 1, _, .upd H _ _ | n + 1, _, .havoc H | n + 1, _, .all H _ _
+  | n + 1, _, .bind H _ _ _ | n + 1, _, .anon H _
+  | n + 1, _, .allocAll H _ _ | n + 1, _, .grow H =>
+      (refutingDepth n H).map Nat.succ
+
+private def prefixProbe {C : Contract} (fuel : Nat) {Γ : Ctx}
+    (H : Hyps C [] Γ) : Bool × Option Nat :=
+  let eligible := refutePrefix fuel H
+  (eligible, if eligible then refutingDepth fuel H else none)
+
+private theorem refutePrefix_head {C : Contract} {Γ : Ctx} (n : Nat)
+    (H : Hyps C [] Γ) (c : Fml C Γ) (h : Seq.refuteS H c = true) :
+    refutePrefix (n + 1) (H.pre c) = true := by
+  simp only [refutePrefix, h, Bool.true_or]
+
+private theorem refutePrefix_tail {C : Contract} {Γ : Ctx} (n : Nat)
+    (H : Hyps C [] Γ) (c : Fml C Γ) (h : refutePrefix n H = true) :
+    refutePrefix (n + 1) (H.pre c) = true := by
+  simp only [refutePrefix, h, Bool.or_true]
+
+open Decide in
+private def prefixReduction {C : Contract} (ψ : Fml C []) : Option (LFml C) :=
+  ψ.toLS true SymS.init
+
+open Decide in
+private def prefixDecision {C : Contract} (ψ : Fml C []) (r : LFml C) : Bool :=
+  r.refuteOk && bif ψ.assumesCT then r.decideMemCT || r.decideMem else r.decideMem
+
+open Decide in
+private def prefixClose {C : Contract} (ψ : Fml C []) (r : LFml C) : Bool :=
+  bif ψ.assumesCT then r.decideMemCT || r.decideMem else r.decideMem
+
+open Decide in
+private theorem prefixDecision_parts {C : Contract} (ψ : Fml C []) (r : LFml C)
+    (hg : r.refuteOk = true) (hc : prefixClose ψ r = true) :
+    prefixDecision ψ r = true := by
+  change (r.refuteOk && prefixClose ψ r) = true
+  simp only [hg, hc, Bool.true_and]
+
+open Decide in
+private def memoryStage {C : Contract} (stage : Nat) (r : LFml C) : LFml C :=
+  match stage with
+  | 0 => r.nfE
+  | 1 => r.elimF {}
+  | 2 => r.memRes
+  | _ => r.memElim
+
+open Decide in
+private def quoteMemoryStage {C : Contract} (c : Expr) (stage : Nat) (r : LFml C) : Expr :=
+  ((memoryStage stage r).quote).go c
+
+open Decide in
+private theorem memoryStages_checked {C : Contract} (r n e m p : LFml C)
+    (hn : memoryStage 0 r = n) (he : memoryStage 1 n = e)
+    (hm : memoryStage 2 e = m) (hp : memoryStage 3 m = p)
+    (hc : LFml.closeMem.closeTwice p = true) : r.decideMem = true := by
+  change r.nfE = n at hn
+  change n.elimF {} = e at he
+  change e.memRes = m at hm
+  change m.memElim = p at hp
+  unfold LFml.decideMem
+  rw [hn, he]
+  unfold LFml.closeMem
+  rw [hm, hp]
+  exact hc
+
+open Decide in
+private theorem prefixClose_mem {C : Contract} (ψ : Fml C []) (r : LFml C)
+    (h : r.decideMem = true) : prefixClose ψ r = true := by
+  unfold prefixClose
+  cases ψ.assumesCT <;> simp only [Bool.cond_false, Bool.cond_true, h, Bool.or_true]
+
+private def rawList (ty : Expr) (xs : List Expr) : Expr :=
+  xs.foldr (fun x tail => mkApp3 (mkConst ``List.cons [0]) ty x tail)
+    (mkApp (mkConst ``List.nil [0]) ty)
+
+open Decide in
+private def emptyPrefixFacts {C : Contract} : Facts C := {}
+
+open Decide in
+private def quotePremises {C : Contract} (c : Expr) (F : Facts C) : Option Expr := do
+  unless F.nes.isEmpty && F.rets.isEmpty && F.bnds.isEmpty do none
+  let eqs := F.eqs.map fun e =>
+    mkAppN (mkConst ``EqF.mk) #[c, toExpr e.p, e.l.quote.go c, e.r.quote.go c]
+  let es := rawList (mkApp (mkConst ``EqF) c) eqs
+  return mkAppN (mkConst ``Facts.mk) #[c, es,
+    rawList (mkApp (mkConst ``EqF) c) [],
+    rawList (mkApp2 (mkConst ``Sigma [0, 0]) (mkConst ``Srt)
+      (mkLambda `s .default (mkConst ``Srt) (mkApp2 (mkConst ``LTm) c (mkBVar 0)))) [],
+    rawList (mkApp (mkConst ``RangeB) c) []]
+
+open Decide in
+private theorem elim_not (a a' : LFml C) (F : Facts C) (h : a.elimF F = a') :
+    (LFml.not a).elimF F = .not a' := by
+  change LFml.not (a.elimF F) = .not a'
+  rw [h]
+
+open Decide in
+private theorem elim_and (a b a' b' : LFml C) (F : Facts C)
+    (ha : a.elimF F = a') (hb : b.elimF F = b') :
+    (LFml.and a b).elimF F = .and a' b' := by
+  change LFml.and (a.elimF F) (b.elimF F) = .and a' b'
+  rw [ha, hb]
+
+open Decide in
+private theorem elim_imp (a b a' b' : LFml C) (F F' : Facts C)
+    (ha : a.elimF F = a') (hF : F.addEqs a'.factsOf = F')
+    (hb : b.elimF F' = b') : (LFml.imp a b).elimF F = .imp a' b' := by
+  change LFml.imp (a.elimF F) (b.elimF (F.addEqs (a.elimF F).factsOf)) = .imp a' b'
+  rw [ha, hF, hb]
+
+open Decide in
+private theorem elim_all (k : Nat) (p : PrimTy) (a a' : LFml C) (F F' : Facts C)
+    (hF : F.drop k = F') (ha : a.elimF F' = a') :
+    (LFml.all k p a).elimF F = .all k p a' := by
+  change LFml.all k p (a.elimF (F.drop k)) = .all k p a'
+  rw [hF, ha]
+
+private def retainTyped (ty value : Expr) : MetaM Expr := do
+  let name ← mkFreshUserName `prefix_elimination
+  addAndCompile <| .defnDecl {
+    name, levelParams := [], type := ty, value := ShareCommon.shareCommon value,
+    hints := .regular 0, safety := .safe }
+  return mkConst name
+
+/-- Untrusted quotations of existing typed LFml/Facts values, used only by
+kernel-checked equality reconstruction. Interior nodes need no value quote.
+No source semantics or model representation is interpreted over these Exprs. -/
+private abbrev PrefixProposal := List Nat × Option Expr × Expr
+
+open Decide in
+private partial def buildEliminationProposals {C : Contract} (cn : Expr)
+    (r : LFml C) (F : Facts C) (path : List Nat) :
+    Option (LFml C × List PrefixProposal) := do
+  let fq ← quotePremises cn F
+  match r with
+  | .not a =>
+    let (a', rows) ← buildEliminationProposals cn a F (path ++ [0])
+    return (.not a', (path, none, fq) :: rows)
+  | .and a b =>
+    let (a', left) ← buildEliminationProposals cn a F (path ++ [0])
+    let (b', right) ← buildEliminationProposals cn b F (path ++ [1])
+    return (.and a' b', (path, none, fq) :: (left ++ right))
+  | .imp a b =>
+    let (a', left) ← buildEliminationProposals cn a F (path ++ [0])
+    let (b', right) ← buildEliminationProposals cn b (F.addEqs a'.factsOf) (path ++ [1])
+    return (.imp a' b', (path, none, fq) :: (left ++ right))
+  | .all k p a =>
+    let (a', rows) ← buildEliminationProposals cn a (F.drop k) (path ++ [0])
+    return (.all k p a', (path, none, fq) :: rows)
+  | _ =>
+    let value := r.elimF F
+    return (value, [(path, some (value.quote.go cn), fq)])
+
+open Decide in
+private def eliminationProposals {C : Contract} (cn : Expr)
+    (r : LFml C) (F : Facts C) (path : List Nat) :
+    Option (List PrefixProposal × Expr × Expr) := do
+  let (e, plan) ← buildEliminationProposals cn r F path
+  let m := e.memRes
+  return (plan, m.quote.go cn, m.memElim.quote.go cn)
+
+open Decide in
+private theorem elimination_input_eq (r n e : LFml C) (F : Facts C)
+    (h : r = n) (he : n.elimF F = e) : r.elimF F = e := by
+  rw [h]
+  exact he
+
+private def proposalAt (plan : List PrefixProposal) (path : List Nat) : MetaM PrefixProposal := do
+  let some row := plan.find? (fun row => row.1 == path)
+    | throwError "missing typed elimination proposal"
+  return row
+
+private def retainProofInput (ty value : Expr) : MetaM Expr := do
+  let name ← mkFreshUserName `prefix_checked_selector
+  addDecl <| .defnDecl {
+    name, levelParams := [], type := ty, value,
+    hints := .regular 0, safety := .safe }
+  return mkConst name
+
+/-- Internal equality proposals are checked together at refuteAtom's original
+synchronous Boolean certificate. Typed data, terminal decisions, and the atom
+and prefix guards remain immediately checked under the original budget. -/
+private def prefixStageLemma (type value : Expr) : MetaM Expr := do
+  if sol.prove.sharedResidues.get (← getOptions) && !type.hasFVar && !type.hasMVar then
+    return mkApp2 (mkConst ``id [0]) type value
+  Derive.kernelLemma type value
+
+private def retainPremises (C F value : Expr) : MetaM (Expr × Expr) := do
+  let result ← retainProofInput (mkApp (mkConst ``Decide.Facts) C) value
+  let cert ← prefixStageLemma (← mkEq F result) (← mkEqRefl result)
+  return (result, cert)
+
+private partial def sharePrefixFormula (C : Expr) (value : Expr)
+    (cache : IO.Ref (Std.HashMap Expr Expr)) : MetaM Expr := do
+  if let some result := (← cache.get)[value]? then return result
+  let args := value.getAppArgs
+  let node ← if value.isAppOf ``Decide.LFml.not then do
+      pure <| mkApp2 (mkConst ``Decide.LFml.not) C (← sharePrefixFormula C args[1]! cache)
+    else if value.isAppOf ``Decide.LFml.and || value.isAppOf ``Decide.LFml.imp then do
+      pure <| mkApp3 value.getAppFn C
+        (← sharePrefixFormula C args[1]! cache) (← sharePrefixFormula C args[2]! cache)
+    else if value.isAppOf ``Decide.LFml.all then do
+      pure <| mkAppN (mkConst ``Decide.LFml.all)
+        #[C, args[1]!, args[2]!, ← sharePrefixFormula C args[3]! cache]
+    else pure value
+  let result ← retainProofInput (mkApp (mkConst ``Decide.LFml) C) node
+  cache.modify (·.insert value result)
+  return result
+
+private partial def eliminationCertificate (C cn r : Expr) (path : List Nat) (F : Expr) (plan : List PrefixProposal) : MetaM (Expr × Expr) := do
+  let .defnInfo info ← getConstInfo r.constName! | throwError "expected checked formula node"
+  let shape := info.value
+  let args := shape.getAppArgs
+  let lfTy := mkApp (mkConst ``Decide.LFml) C
+  let elim := mkAppN (mkConst ``Decide.LFml.elimF) #[C, r, F]
+  let (value, proof) ← if shape.isAppOf ``Decide.LFml.not then do
+      let left := args[if shape.isAppOf ``Decide.LFml.all then 3 else 1]!
+      let (a, ha) ← eliminationCertificate C cn left (path ++ [0]) F plan
+      pure (mkApp2 (mkConst ``Decide.LFml.not) C a,
+        mkAppN (mkConst ``elim_not) #[C, left, a, F, ha])
+    else if shape.isAppOf ``Decide.LFml.and then do
+      let left := args[if shape.isAppOf ``Decide.LFml.all then 3 else 1]!
+      let (a, ha) ← eliminationCertificate C cn left (path ++ [0]) F plan
+      let right := args[2]!
+      let (b, hb) ← eliminationCertificate C cn right (path ++ [1]) F plan
+      pure (mkApp3 (mkConst ``Decide.LFml.and) C a b,
+        mkAppN (mkConst ``elim_and) #[C, left, right, a, b, F, ha, hb])
+    else if shape.isAppOf ``Decide.LFml.imp then do
+      let left := args[if shape.isAppOf ``Decide.LFml.all then 3 else 1]!
+      let (a, ha) ← eliminationCertificate C cn left (path ++ [0]) F plan
+      let facts := mkApp2 (mkConst ``Decide.LFml.factsOf) C a
+      let (F', hF) ← retainPremises C (mkApp3 (mkConst ``Decide.Facts.addEqs) C F facts) (← proposalAt plan (path ++ [1])).2.2
+      let right := args[2]!
+      let (b, hb) ← eliminationCertificate C cn right (path ++ [1]) F' plan
+      pure (mkApp3 (mkConst ``Decide.LFml.imp) C a b,
+        mkAppN (mkConst ``elim_imp) #[C, left, right, a, b, F, F', ha, hF, hb])
+    else if shape.isAppOf ``Decide.LFml.all then do
+      let (F', hF) ← retainPremises C (mkApp3 (mkConst ``Decide.Facts.drop) C F args[1]!) (← proposalAt plan (path ++ [0])).2.2
+      let left := args[if shape.isAppOf ``Decide.LFml.all then 3 else 1]!
+      let (a, ha) ← eliminationCertificate C cn left (path ++ [0]) F' plan
+      pure (mkAppN (mkConst ``Decide.LFml.all) #[C, args[1]!, args[2]!, a],
+        mkAppN (mkConst ``elim_all) #[C, args[1]!, args[2]!, left, a, F, F', hF, ha])
+    else do
+      let some value := (← proposalAt plan path).2.1
+        | throwError "missing terminal formula quotation"
+      pure (value, ← mkEqRefl value)
+  let result ← retainProofInput lfTy value
+  let cert ← prefixStageLemma (← mkEq elim result) proof
+  return (result, cert)
+
+private def memoryCertificate (C cn r : Expr) : MetaM Expr := do
+  let lfTy := mkApp (mkConst ``Decide.LFml) C
+  let mut prev := r
+  let mut remainder : Array Expr := #[]
+  let mut forms : Array Expr := #[]
+  let mut certs : Array Expr := #[]
+  for stage in [:4] do
+    let (form, eq) ← if stage == 1 then do
+        let F ← retainTyped (mkApp (mkConst ``Decide.Facts) C)
+          (mkApp (mkConst ``emptyPrefixFacts) C)
+        let exprTy := mkConst ``Expr
+        let listNatTy := mkApp (mkConst ``List [0]) (mkConst ``Nat)
+        let rowTy := mkApp2 (mkConst ``Prod [0, 0]) listNatTy
+          (mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``Option [0]) exprTy) exprTy)
+        let batchTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) rowTy)
+          (mkApp2 (mkConst ``Prod [0, 0]) exprTy exprTy)
+        let planTy := mkApp (mkConst ``Option [0]) batchTy
+        let plan ← unsafe evalExpr (Option (List PrefixProposal × Expr × Expr)) planTy
+          (mkAppN (mkConst ``eliminationProposals) #[C, cn, prev, F, toExpr ([] : List Nat)])
+        let some (plan, qm, qp) := plan | throwError "unsupported typed premise proposal"
+        remainder := #[qm, qp]
+        let .defnInfo info ← getConstInfo prev.constName!
+          | throwError "expected quoted formula root"
+        let cache ← IO.mkRef ({} : Std.HashMap Expr Expr)
+        let shared ← sharePrefixFormula C info.value cache
+        let eqShared ← prefixStageLemma (← mkEq prev shared) (← mkEqRefl shared)
+        let (result, cert) ← eliminationCertificate C cn shared [] F plan
+        let cert := mkAppN (mkConst ``elimination_input_eq)
+          #[C, prev, shared, result, F, eqShared, cert]
+        pure (result, cert)
+      else do
+        let value ← if stage == 0 then
+            unsafe evalExpr Expr (mkConst ``Expr)
+              (mkAppN (mkConst ``quoteMemoryStage) #[C, cn, toExpr stage, prev])
+          else pure remainder[stage - 2]!
+        let name ← mkFreshUserName `prefix_memory_stage
+        let decl := Declaration.defnDecl {
+          name := name, levelParams := [], type := lfTy,
+          value := ShareCommon.shareCommon value, hints := .regular 0, safety := .safe }
+        addDecl decl
+        if stage == 0 then compileDecl decl
+        let form := mkConst name
+        let eq ← prefixStageLemma
+          (← mkEq (mkAppN (mkConst ``memoryStage) #[C, toExpr stage, prev]) form)
+          (← mkEqRefl form)
+        pure (form, eq)
+    forms := forms.push form
+    certs := certs.push eq
+    prev := form
+  let hc ← Decide.trueLemma (mkApp2 (mkConst ``Decide.LFml.closeMem.closeTwice) C prev)
+  pure <| mkAppN (mkConst ``memoryStages_checked) (#[C, r] ++ forms ++ certs ++ #[hc])
+
+open Decide in
+private def quotePrefixReduction {C : Contract} (c : Expr) (ψ : Fml C []) : Option Expr :=
+  (prefixReduction ψ).map fun l => (l.quote).go c
+
+open Decide in
+private def prefixForm {C : Contract} (l : LFml C) : LFml C := l.refuteForm
+
+open Decide in
+private def quotePrefixForm {C : Contract} (c : Expr) (l : LFml C) : Expr :=
+  ((prefixForm l).quote).go c
+
+open Decide in
+private theorem refuteCore_reduced {C : Contract} (ψ : Fml C []) (l r : LFml C)
+    (hReduce : prefixReduction ψ = some l) (hForm : prefixForm l = r)
+    (hCheck : prefixDecision ψ r = true) : Seq.refuteCore ψ = true := by
+  change ψ.toLS true SymS.init = some l at hReduce
+  change l.refuteForm = r at hForm
+  unfold Seq.refuteCore
+  rw [hReduce]
+  change prefixDecision ψ l.refuteForm = true
+  rw [hForm]
+  exact hCheck
+
+private theorem refuteS_parts {C : Contract} {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ)
+    (hm : ((H.pre c).wrap .ff).modalFree = true)
+    (hr : Seq.refuteCore ((H.pre c).wrap .ff) = true) : Seq.refuteS H c = true := by
+  simp only [Seq.refuteS, hm, hr, Bool.true_and]
+
+/-- Retain checked typed normal forms, not Boolean verdicts. Every reduction,
+form-selection and final decision remains a synchronous kernel certificate. -/
+private def refuteAtom (C Γ H c : Expr) : MetaM Expr := do
+  let atom := mkAppN (mkConst ``Seq.refuteS) #[C, Γ, H, c]
+  let saved ← saveState
+  tryCatchRuntimeEx (do
+      let some cn := C.constName? | throwError "prefix reduction needs a named contract"
+      let nilCtx := ctxE []
+      let hc := mkAppN (mkConst ``Hyps.pre) #[C, nilCtx, Γ, H, c]
+      let ff := mkApp2 (mkConst ``Fml.ff) C Γ
+      let ψ := mkAppN (mkConst ``Hyps.wrap) #[C, nilCtx, Γ, hc, ff]
+      let lfTy := mkApp (mkConst ``Decide.LFml) C
+      let optTy := mkApp (mkConst ``Option [0]) lfTy
+      let quoted ← unsafe evalExpr (Option Expr) (mkApp (mkConst ``Option [0]) (mkConst ``Expr))
+        (mkAppN (mkConst ``quotePrefixReduction) #[C, quoteConstName cn, ψ])
+      let some quoted := quoted | throwError "prefix reduction is outside the existing fragment"
+      let ln ← mkFreshUserName `prefix_normal
+      addAndCompile <| .defnDecl {
+        name := ln, levelParams := [], type := lfTy,
+        value := ShareCommon.shareCommon quoted, hints := .regular 0, safety := .safe }
+      let l := mkConst ln
+      let someL := mkApp2 (mkConst ``Option.some [0]) lfTy l
+      let hReduce ← Derive.kernelLemma
+        (mkApp3 (mkConst ``Eq [1]) optTy (mkAppN (mkConst ``prefixReduction) #[C, ψ]) someL)
+        (mkApp2 (mkConst ``Eq.refl [1]) optTy someL)
+      let form ← unsafe evalExpr Expr (mkConst ``Expr)
+        (mkAppN (mkConst ``quotePrefixForm) #[C, quoteConstName cn, l])
+      let rn ← mkFreshUserName `prefix_refute_form
+      addAndCompile <| .defnDecl {
+        name := rn, levelParams := [], type := lfTy,
+        value := ShareCommon.shareCommon form, hints := .regular 0, safety := .safe }
+      let r := mkConst rn
+      let hForm ← Derive.kernelLemma
+        (mkApp3 (mkConst ``Eq [1]) lfTy (mkAppN (mkConst ``prefixForm) #[C, l]) r)
+        (mkApp2 (mkConst ``Eq.refl [1]) lfTy r)
+      let hGuard ← Decide.trueLemma (mkApp2 (mkConst ``Decide.LFml.refuteOk) C r)
+      let hm ← memoryCertificate C (quoteConstName cn) r
+      let hClose := mkAppN (mkConst ``prefixClose_mem) #[C, ψ, r, hm]
+      let hCheck := mkAppN (mkConst ``prefixDecision_parts) #[C, ψ, r, hGuard, hClose]
+      let hr := mkAppN (mkConst ``refuteCore_reduced) #[C, ψ, l, r, hReduce, hForm, hCheck]
+      let hm ← Decide.trueLemma (mkApp3 (mkConst ``Fml.modalFree) C nilCtx ψ)
+      let proof := mkAppN (mkConst ``refuteS_parts) #[C, Γ, H, c, hm, hr]
+      let checked ← Derive.kernelLemma (← mkEq atom (mkConst ``Bool.true)) proof
+      pure checked)
+    fun _ => do
+      saved.restore
+      Decide.trueLemma atom
+
+/-- Construct a proof of the unchanged checker statement. Only the winning
+atom is evaluated by the kernel; OR introduction skips losing operands. -/
+private partial def prefixProof (C : Expr) (fuel : Nat) (Γ H : Expr)
+    (depth : Nat) : MetaM Expr := do
+  if fuel == 0 then throwError "prefix witness exceeds its original bound"
+  let shape ← whnfR H
+  if shape.isAppOfArity ``Hyps.pre 5 then
+    let before := shape.getArg! 3
+    let c := shape.getArg! 4
+    if depth == 0 then
+      let atom ← refuteAtom C Γ before c
+      return mkAppN (mkConst ``refutePrefix_head)
+        #[C, Γ, toExpr (fuel - 1), before, c, atom]
+    let tail ← prefixProof C (fuel - 1) Γ before (depth - 1)
+    return mkAppN (mkConst ``refutePrefix_tail)
+      #[C, Γ, toExpr (fuel - 1), before, c, tail]
+  if depth == 0 then throwError "prefix witness does not select a premise"
+  let before? := if shape.isAppOfArity ``Hyps.upd 7 then some (shape.getArg! 4)
+    else if shape.isAppOfArity ``Hyps.havoc 4 || shape.isAppOfArity ``Hyps.all 6 ||
+        shape.isAppOfArity ``Hyps.bind 7 || shape.isAppOfArity ``Hyps.anon 5 ||
+        shape.isAppOfArity ``Hyps.allocAll 6 || shape.isAppOfArity ``Hyps.grow 4 then
+      some (shape.getArg! 3)
+    else none
+  let some before := before? | throwError "prefix witness has no checked premise"
+  prefixProof C (fuel - 1) (shape.getArg! 2) before (depth - 1)
+
+private def refutePrefixLemma (C : Expr) (fuel : Nat) (Γ H : Expr) (depth : Nat) : MetaM Expr := do
+  let probe := mkAppN (mkConst ``refutePrefix) #[C, toExpr fuel, Γ, H]
+  let saved ← saveState
+  tryCatchRuntimeEx (do
+      unless depth < fuel do throwError "prefix witness exceeds its original bound"
+      let proof ← prefixProof C fuel Γ H depth
+      -- This exact original proposition is kernel checked, including the
+      -- original fuel, full context and every skipped constructor.
+      Derive.kernelLemma (← mkEq probe (mkConst ``Bool.true)) proof)
+    fun _ => do
+      saved.restore
+      Decide.trueLemma probe
 
 /-- A checked contradictory prefix proves every continuation under its entire
 context. In particular, a prefix update under the diamond must still land:
@@ -384,7 +817,7 @@ theorem refutePrefix_sound {C : Contract} {R : RuleSet} {Γ : Ctx}
 Seq.leafValid/Seq.prove do. All dependent arguments are supplied explicitly;
 no tactic elaboration or dependent-context inference is needed to build it.
 Every equality is checked synchronously before assigning the final proof. -/
-def closePrefixFalse (g : MVarId) (fuel : Nat) : MetaM Unit := g.withContext do
+def closePrefixFalse (g : MVarId) (fuel : Nat) (depth? : Option Nat := none) : MetaM Unit := g.withContext do
   unless fuel ≤ 8 do throwError "sol_prefix_false: at most eight context layers"
   let ty ← instantiateMVars (← g.getType)
   let_expr ProvesC C I pay Γ₀ Γ H φ := ty
@@ -394,7 +827,9 @@ def closePrefixFalse (g : MVarId) (fuel : Nat) : MetaM Unit := g.withContext do
   let probe := mkAppN (mkConst ``refutePrefix) #[C, mkNatLit fuel, Γ, H]
   if probe.hasFVar || probe.hasMVar then
     throwError "sol_prefix_false: the certificate is not closed"
-  let hc ← Decide.trueLemma probe
+  let hc ← match depth? with
+    | some depth => refutePrefixLemma C fuel Γ H depth
+    | none => Decide.trueLemma probe
   let ff := mkApp2 (mkConst ``Fml.ff) C Γ
   let wrapped := mkAppN (mkConst ``Hyps.wrap) #[C, Γ₀, Γ, H, ff]
   let mf := mkApp3 (mkConst ``Fml.modalFree) C Γ₀ wrapped
@@ -432,11 +867,14 @@ def pruneFalse (g : MVarId) : TacticM (Option (Array String)) := do
       unless H.isAppOf ``Hyps.pre do return none
       let probe := mkAppN (mkConst ``refutePrefix) #[C, mkNatLit 8, Γ, H]
       if probe.hasFVar || probe.hasMVar then return none
-      let refuted ← unsafe evalExpr Bool (mkConst ``Bool) probe
+      let probePair := mkAppN (mkConst ``prefixProbe) #[C, mkNatLit 8, Γ, H]
+      let pairTy := mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Bool)
+        (mkApp (mkConst ``Option [0]) (mkConst ``Nat))
+      let (refuted, depth?) ← unsafe evalExpr (Bool × Option Nat) pairTy probePair
       unless refuted do return none
       let replay ← `(tactic| sol_prefix_false 8)
       let closed ← Budget.bounded 16384 do
-        closePrefixFalse g 8
+        closePrefixFalse g 8 depth?
         return true
       unless closed == some true do return none
       return some (← ProofTree.tacLines replay))

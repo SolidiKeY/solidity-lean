@@ -5,6 +5,9 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {runSolidityTests} from './test-solidity.mjs';
+import {solkeyTestOptions} from './test-compiler.mjs';
+
+const compilerOptions = solkeyTestOptions();
 
 // Uses the pinned compiler and the actual declaration reader/admission scan.
 // No build is started: rebuild the modified frontend before running this file.
@@ -16,7 +19,8 @@ function scopeCheck(source, body, mutate = '') {
     const check = join(dir, 'Check.lean');
     writeFileSync(input, '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n' + source);
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source', input,
-      '--out', fixture, '--no-wrapper'], {stdio:'pipe'});
+      '--out', fixture, '--no-wrapper', '--solkey', compilerOptions.solkey,
+      '--soljson', compilerOptions.soljson], {stdio:'pipe'});
     writeFileSync(check, `import Solidity.Frontend.SolcJson
 open Lean Solidity.Frontend
 private def put (j : Json) (key : String) (value : Json) : Json :=
@@ -50,7 +54,8 @@ function productionCheck(source, body, viaIR = false) {
     const check = join(dir, 'Check.lean');
     writeFileSync(input, '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n' + source);
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source', input,
-      '--out', fixture, '--no-wrapper', ...(viaIR ? ['--via-ir'] : [])], {stdio:'pipe'});
+      '--out', fixture, '--no-wrapper', '--solkey', compilerOptions.solkey,
+      '--soljson', compilerOptions.soljson, ...(viaIR ? ['--via-ir'] : [])], {stdio:'pipe'});
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
@@ -85,7 +90,7 @@ function diagnostic(name, code) {
 }
 
 test('finite dispatch preserves the original FunctionTypes positive and negative verdicts', () => {
-  const report = runSolidityTests(['tests/solc/FunctionTypes.sol'], {build:false});
+  const report = runSolidityTests(['tests/solc/FunctionTypes.sol'], {...compilerOptions, build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(row => [row.function, row.status]));
   for (const name of ['applyAndCompose','localValue','storedByFlag','returnedValue',
@@ -219,7 +224,7 @@ test('private candidates cannot become self external targets through native type
   }`, diagnostic('entry', 'solidity.functionDispatch'));
 });
 
-test('external inherited selector renaming is an explicit boundary', () => {
+test('external inherited selector renaming uses retained source ABI identity', () => {
   scopeCheck(`contract Base {
     function target(uint x) external pure returns(uint) { return x; }
   }
@@ -228,7 +233,9 @@ test('external inherited selector renaming is an explicit boundary', () => {
       function(uint) external pure returns(uint) h = this.target;
       h(1);
     }
-  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone && !r.calls.isEmpty) do
+    throw (IO.userError "renamed external target was not admitted")`);
 });
 
 test('initializer dispatch is deployment scope and does not leak into ordinary entry points', () => {

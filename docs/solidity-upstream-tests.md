@@ -114,6 +114,183 @@ The source tests require built Lean artifacts; the resume test invokes the
 runner's prerequisite build. Keep such checks serial with Lean `-j1` under
 the repository's resource bounds.
 
+The entry-point source regression, `scripts/entry-points-left.test.mjs`, also
+uses `solkeyTestOptions()` for the verified frozen SolKey snapshot and its exact
+0.8.34 compiler. Its separate fixture check retains both 0.8.38 pipeline pins.
+This removes the sibling-checkout assumption that stopped combined integration
+validation at the compiler stage; all source verdicts and refusal checks remain
+unchanged.
+
+For the 2026-10-30 integration repair, local read-only finder and skeptic passes
+confirmed the helper verifies both snapshot and compiler hashes, and the retained
+`GetterKernelSharing.lean` review finding already has the required explicit
+`annotate` result type. The fixture check and real source compilation passed.
+The end-to-end retry reached Lean for all 21 source cases but stopped at stale
+`Solidity.Language.Features` artifacts under `--no-build`; it did not establish
+their verdicts. The coordinator owns rebuilding and rerunning the combined gates.
+
+The 2026-10-31 combined integration retry exposed the same sibling-checkout
+assumption in `scripts/finite-dispatch.test.mjs`. That suite, plus the two
+remaining source-compiling getter suites (`scripts/getter-dispatch.test.mjs`
+and `scripts/public-getters.test.mjs`), now passes `solkeyTestOptions()` to
+both direct compiler invocations and `runSolidityTests`. Snapshot verification,
+compiler hashes, source fixtures, expected verdicts and budgets are unchanged.
+The retained `annotate` result-type finding was already resolved; this repair
+changes no Lean source.
+
+Serial focused retries under the 12 GiB/no-swap cap, a 12 GiB OS reserve guard
+and Lean `-j1` pass 21/22 finite-dispatch, 6/9 getter-dispatch and 1/7
+public-getter tests. The ten remaining tests reach the no-build Lean invocation
+but cannot check their assertions with the current artifacts. A complete
+FunctionTypes error capture identifies out-of-date `Solidity.Calculus.DecideComplete`
+and `Solidity.Calculus.Callback` targets. No missing sibling-path error remains.
+These are incomplete verdicts, not passing combined gates; the coordinator owns
+rebuilding and rerunning them. Read-only finder and skeptic reviews checked every
+compiler call and confirmed that the patch only changes compiler/snapshot location
+wiring; no admission, observation, target predicate or proof budget changes.
+
+The next combined retry (attempt 4, gate 23) exposed the sibling-checkout
+assumption in `scripts/test-solidity.test.mjs`: 62 of 68 tests failed at source
+compilation. That suite now applies the same verified `solkeyTestOptions()`
+through a local API wrapper and passes its paths to both direct compiler calls.
+Read-only finder and skeptic reviews found no missed compiler call or changed
+assertion, timeout, batch size, semantic check or proof budget. The retained
+`annotate : Expr` fix is already present; no Lean source changed in this repair.
+JavaScript syntax and whitespace checks pass. A serial four-case retry with the
+12 GiB/no-swap cap, 12 GiB OS reserve guard and Lean `-j1` passed compilation
+in every case and the library-annotation test passed. The editor-report, Runner
+proof-search and nominal-renaming tests stopped at out-of-date
+`Solidity.Calculus.DecideComplete` and `Solidity.Calculus.Callback` artifacts
+under `--no-build`; their assertions remain unverified. Logs are retained locally
+in `.lake/entrypoints-repair/test-solidity-focused-host.log` and
+`.lake/entrypoints-repair/test-solidity-focused-details.log`. The coordinator owns
+rebuilding and rerunning the combined gates.
+
+Attempt 5 reached all source tests (57 passed, 11 failed). The modern full-source
+TestSuite import failed while compiling its source-declaration metadata as one
+large literal, followed by missing-executable-code errors. `Frontend/Import.lean`
+now applies the existing bounded list segmentation to that metadata before
+native compilation, as it already does for function tables and reports.
+A temporary probe in that edited file imported the exact pinned 0.8.34 modern
+TestSuite AST, including `Triple => FixedTriple`; MCP diagnostics completed
+without errors and evaluating the report length returned 617. The probe was
+removed, and final per-file MCP diagnostics are empty. This checks import and
+compilation; it does not establish the full source-suite gate. An attempted
+no-build proof probe stopped at the edited Import artifact being out of date.
+Other failed source assertions remain unchanged; the retained declarations
+record documents the separate proof/admission gaps and stale pending-copy
+expectation. No status, input, observation, invariant or budget was relaxed.
+Read-only finder and skeptic reviews confirmed that segmentation preserves
+list heads, order and lookup behavior. The coordinator owns artifact rebuilding
+and combined validation; the retained `annotate : Expr` finding is already fixed.
+
+The next attempt-5 repair preserves standalone testing calldata origins after
+the synthetic parameter declarations. It uses the original slice/local-alias
+macro trigger set and the existing lexical slice pass; the read-only
+`calldataCheck` and original parameter premises remain unchanged. A temporary
+probe of the exact modern Calldata fixture now elaborates `localAlias`, while
+`writesCopy` retains its original refusal. This is admission evidence, not a
+proof of the complete Calldata source test.
+
+Ledger assignable clauses now retain their specific missing-implementation
+diagnostic instead of a storage-frame parser error. Per-clause parser results
+still preserve independent malformed nonledger clauses as
+`solidity.specificationSyntax`. A probe of the exact NetAssignable source
+checks all three ledger refusals, both alone and with an independent simulated
+ensures-parser error. Final per-file MCP diagnostics pass for both edited
+modules. Temporary probes were removed from production source; local diagnostic
+logs remain in `.lake/entrypoints-repair/`.
+
+Read-only finder and skeptic reviews found a diagnostic-masking defect in the
+first ledger patch; the per-clause treatment above fixes it. Both final reviews
+have no remaining findings. No semantic rule, observation, input premise,
+invariant, test assertion or proof budget changed. This does not close gate 23:
+its expected-proved bounds/try/catch failures still require proof repairs, and
+the retained stronger copy proof and policy/admission status mismatches need an
+explicit decision about their stale assertions. No such assertion changes were
+made. The coordinator owns rebuilding and the complete combined rerun.
+
+Before the proof repair below, a focused `indexOutOfRange` probe using the
+original testing strategy and budgets left an open leaf: `i >= 4` preceded
+`se9 := i < 4`, `se8 := (se9 ? 1 : 0)` and `se3 := se4 / se8`. The retained
+failure is `.lake/entrypoints-repair/fixed-bytes-probe-diagnostics.log`.
+
+The subsequent gate-23 proof repair changes three implementation paths.
+`Closer/Bytes.lean` recognizes signed/unsigned literal zero divisors and
+normalizes division to the numerator evaluated before failure. The existing
+`Facts.seqN` removes that evaluation only when its returns check justifies it;
+`zeroDivisor_eval` proves equality of the complete existing term evaluation.
+Neither the interpreter nor its halt/exhaustion distinction changes.
+`CallbackDerive.lean` classifies the reduced formula head before scanning for
+control syntax. The exact `tryScopeExit` residual exposed an `invPost … none`
+whose discarded continuation contained callback syntax: the raw expression
+blocked every move although the reduced equality had no callback. The existing
+`ProvesC.plain` side condition still checks the full wrapped sequent.
+
+Per-file MCP diagnostics pass for both edited modules and
+[`Gate23ProofRepair.lean`](../tests/upstream/Gate23ProofRepair.lean). Its kernel
+controls cover symbolic and partial numerators, a failing denominator, signed
+zero, divisor one, and a discarded havoc continuation. Their printed axioms,
+and those of `zeroDivisor_eval`, are subsets of the standard three. Exact
+source probes now report `indexOutOfRange` proved under its original clean-tail
+reading and `tryScopeExit` proved under its original callback/solc-tail reading.
+The original source digests, programs, strategies and budgets are unchanged;
+logs are `fixed-bytes-repaired.log` and `try-scope-repaired.log` in
+`.lake/entrypoints-repair/`. Fresh read-only finder and skeptic reviews found
+no production or control defects. These are focused results; the coordinator
+still owns the full combined gates.
+
+The retained `reasonBytes` budget failure also masked a lost literal payload.
+The imported hex representation of `"boom"` took the dynamic reason path:
+eager memory allocation/writes/aliasing preceded a `RevPart.mem`, leaving
+`CatchKind.reason.datas` unknown and the catch's length/byte assertions open.
+`Syntax/Elab/Arms.lean` now retains a direct valid UTF-8 literal's exact Error
+payload in frames that retain failure data. All existing eager prefixes,
+condition captures, allocations and writes remain in their original order;
+dynamic reasons and ordinary frames keep their existing paths. The exact
+original `reasonBytes` probe now reports proved under its original callback
+reading and budgets, with only the standard three axioms
+(`.lake/entrypoints-repair/revert-repaired.log`).
+
+[`LiteralReasonRetention.lean`](../tests/upstream/LiteralReasonRetention.lean)
+passes per-file MCP diagnostics. Its kernel controls retain the first allocator
+for true/false require and direct revert, expose the exact literal payload,
+keep a named memory reason conservative, and prove normal self-call execution
+through the Error handler's length/byte assertions. Both success and fallback
+branches assert false, so neither they nor exhaustion can satisfy that normal
+witness. Finder and skeptic reviews identified and fixed the initial witness's
+empty-fallback loophole; both final reviews have no remaining findings. These
+are structural controls and a concrete run, not a general compiler-equivalence
+theorem. The production file's per-file diagnostics also pass, retaining only
+its pre-existing unrelated unused-variable warning. No budget or semantic rule
+was changed, and the temporary diagnostic edit to `Frontend/Testing.lean` was
+removed.
+An optional aggregate probe of `reasonOfBranch`, `reasonPastCustom` and
+`externalReason` did not finish; its partial record is
+`.lake/entrypoints-repair/revert-nearby-partial.log`, and no pass is claimed for
+those additional cases. The standalone repaired-row probe is separate; the
+coordinator must still run the complete original source gate.
+
+The human has authorized a readonly/static model correction for the unpinned
+`SolcPaymentsOpen.tryArgumentSideEffect` expectation at
+`scripts/test-solidity.test.mjs:939`. Its retained completed probe reported pending
+with an external-success `{havoc}` before the read of `ix`
+(`.lake/entrypoints-repair/payments-current.log`). Under the documented callback
+reading, even pure external calls permit arbitrary invariant-preserving storage:
+`Semantics/Callback.lean`'s `ExecS.tryOk` can choose a different `ix` when
+`address(this) != 0xDeaDBeef`. Capturing `postinc()` before the call does not
+protect the later storage read. The independent skeptic found no sound proof
+path for this expectation under the current assumptions. This is source-level
+counterexample reasoning, not a kernel-checked refutation or an EVM failure.
+No assertion, source fixture, invariant, call predicate, observation or budget
+was changed. The correction remains unfinished: the current interfaces erase
+static invocation provenance and supply no adequacy bridge for unknown code.
+The fresh probe did not finish; no new passing validation is claimed.
+The bounded interface/ownership proposal and current check limits are recorded
+in [the static-boundary handoff](feature-work/entrypoints-static-boundary.md).
+The modifier-only assertion correction was separately approved and applied;
+it does not resolve this semantic gap.
+
 ```sh
 # Verify and extract all files into the ignored .lake/upstream/solidity/.
 node scripts/solidity-upstream.mjs verify

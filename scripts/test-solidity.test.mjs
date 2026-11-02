@@ -5,8 +5,15 @@ import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
-import { runSolidityTests, runTool, solidityFiles, testsPassed } from "./test-solidity.mjs";
+import { runSolidityTests as runSourceTests, runTool, solidityFiles, testsPassed } from "./test-solidity.mjs";
 import { sourceHash } from './source-locations.mjs';
+import { solkeyTestOptions } from './test-compiler.mjs';
+
+const compilerOptions = solkeyTestOptions();
+// Keep every API case on the verified snapshot and compiler, including temp sources.
+function runSolidityTests(paths, options) {
+  return runSourceTests(paths, {...compilerOptions, ...options});
+}
 
 test('editor reports retain exact overload identities, source hashes and UTF-16 ranges', () => {
   const dir = mkdtempSync(join(tmpdir(), 'solidity-editor-'));
@@ -370,7 +377,8 @@ test("imported library helper annotations retain their defining enum scope", () 
   try {
     const ast = join(dir, "source.ast.json");
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source',
-      'tests/solc/EnumSpecs.sol', '--out', ast, '--no-wrapper']);
+      'tests/solc/EnumSpecs.sol', '--out', ast, '--no-wrapper',
+      '--solkey', compilerOptions.solkey, '--soljson', compilerOptions.soljson]);
     const check = join(dir, "Check.lean");
     writeFileSync(check, `import Solidity.Frontend.SolcJson
 open Lean Solidity.Frontend
@@ -1087,7 +1095,8 @@ test("finite nominal declarations avoid explicit renaming collisions", () => {
   try {
     const fixture = join(dir, 'source.ast.json');
     runTool(process.execPath, ['scripts/solc-ast.mjs', '--source',
-      'tests/solc/FiniteTypeLowering.sol', '--out', fixture, '--no-wrapper'], 300000);
+      'tests/solc/FiniteTypeLowering.sol', '--out', fixture, '--no-wrapper',
+      '--solkey', compilerOptions.solkey, '--soljson', compilerOptions.soljson], 300000);
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);

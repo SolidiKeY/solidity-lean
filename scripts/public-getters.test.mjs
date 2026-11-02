@@ -2,6 +2,9 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runSolidityTests} from './test-solidity.mjs';
+import {solkeyTestOptions} from './test-compiler.mjs';
+
+const compilerOptions = solkeyTestOptions();
 
 const source = 'tests/solc/PublicGetters.sol';
 const fixture = JSON.parse(readFileSync(new URL('../tests/solc/PublicGetters.ast.json', import.meta.url)));
@@ -23,7 +26,7 @@ test('getter fixture retains compiler identities and real name collisions', () =
 });
 
 test('getters execute through imported self calls; a false assertion stays pending', () => {
-  const report = runSolidityTests([source], {build:false, contract:'PublicGetters'});
+  const report = runSolidityTests([source], {...compilerOptions, build:false, contract:'PublicGetters'});
   assert.deepEqual(report.errors, []);
   // Inherited public functions are testing entries too. Pin names and verdicts
   // together so missing, unexpected and duplicate rows cannot hide in a count.
@@ -40,7 +43,7 @@ test('getters execute through imported self calls; a false assertion stays pendi
 });
 
 test('reference returns fail closed without changing struct omissions', () => {
-  const report = runSolidityTests([source], {build:false, contract:'GetterReferences'});
+  const report = runSolidityTests([source], {...compilerOptions, build:false, contract:'GetterReferences'});
   assert.deepEqual(report.errors, []);
   assert.equal(report.results.length, 3);
   for (const row of report.results) {
@@ -53,7 +56,7 @@ test('reference returns fail closed without changing struct omissions', () => {
 });
 
 test('dynamic byte prefixes preserve padding, single evaluation and lazy branches', () => {
-  const report = runSolidityTests([source], {build:false, contract:'GetterBytePrefixes'});
+  const report = runSolidityTests([source], {...compilerOptions, build:false, contract:'GetterBytePrefixes'});
   assert.deepEqual(report.errors, []);
   const expected = ['emptyPrefix','shortPrefix','leadingZeroPrefix','longPrefix',
     'evaluateOnce','lazyPrefix'];
@@ -67,7 +70,7 @@ test('dynamic byte prefixes preserve padding, single evaluation and lazy branche
 
 test('constructor helper collisions preserve deployment and reject a false constructor assertion', () => {
   for (const [name, expected] of [['GetterCtorCollision','proved'], ['GetterCtorFalse','pending']]) {
-    const report = runSolidityTests([source], {build:false, contract:name});
+    const report = runSolidityTests([source], {...compilerOptions, build:false, contract:name});
     assert.deepEqual(report.errors, []);
     assert.equal(report.results.find(row => row.function === 'constructor')?.status, expected, name);
   }
@@ -75,14 +78,14 @@ test('constructor helper collisions preserve deployment and reject a false const
 
 test('printed struct aliases also reserve constructor helper names', () => {
   const baseCtor = contract('GetterReturnBase').nodes.find(node => node.kind === 'constructor');
-  const report = runSolidityTests([source], {build:false, contract:'GetterCtorStructAlias',
+  const report = runSolidityTests([source], {...compilerOptions, build:false, contract:'GetterCtorStructAlias',
     renaming:{GetterBox:`solcCtorBody${baseCtor.id}`}});
   assert.deepEqual(report.errors, []);
   assert.equal(report.results.find(row => row.function === 'constructor')?.status, 'proved');
 });
 
 test('a public function-valued slot is distinct from its synthesized getter selector', () => {
-  const report = runSolidityTests([source], {build:false, contract:'GetterFunctionSlot'});
+  const report = runSolidityTests([source], {...compilerOptions, build:false, contract:'GetterFunctionSlot'});
   assert.deepEqual(report.errors, []);
   assert.equal(report.results.find(row => row.function === 'falseStoredSelector')?.status, 'pending');
   assert.equal(report.results.find(row => row.function === 'getterSelector')?.status, 'proved');

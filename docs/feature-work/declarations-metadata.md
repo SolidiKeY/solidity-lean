@@ -43,8 +43,10 @@ declaration selector inside its contract) are left to solc.
   become results; a terminal struct keeps its non-mapping, non-array fields in
   order. Supported types are elementary bool, address, integer and fixed bytes.
   Primitive UDVT inputs/results resolve through their declared elementary
-  underlying type. Enum mapping keys use canonical `uint8` plus an empty-revert
-  cardinality guard before storage access; enum-valued results remain refused.
+  underlying type. Enum results use a validated named conversion retaining
+  cardinality and the uint8 ABI marker; contract results retain address ABI kind. Enum mapping keys use canonical `uint8` plus an empty-revert
+  cardinality guard before storage access. Nominal getter input/result signatures
+  remain conservative dynamic-dispatch refusals.
   Explicit `uint256`/`int256` indexes are canonicalized.
 - Getter plans pair each generated input with its source key and ABI type, and
   each result with its expression. A completed plan has a required first result;
@@ -90,8 +92,8 @@ declaration selector inside its contract) are left to solc.
 
 ## Refused, and why
 
-- Enum-valued results, contract/function values, dynamic `bytes`/`string` keys
-  or results, and nested aggregate results. Primitive UDVT values and enum
+- Function-valued results, dynamic `bytes`/`string` keys or results, and nested
+  aggregate results. Primitive UDVT values and enum
   mapping keys have the supported cases above. An unsupported returned field
   refuses the whole getter: `bytes`/`string` are not silently omitted as arrays.
   Narrow integer constants use declaration-based inlining and checked source
@@ -111,13 +113,13 @@ compilation.
 
 - Import/remapping resolution across source units.
 - Reference-valued getters (they need the world's return-value interface) and
-  general tuple external returns; enum/contract/function getter results;
-  struct omissions in exact getters.
-- Inherited external function values with renamed model declarations (the
-  function-value packer hashes model names): one shared ABI identity for
-  source declarations and model functions.
+  general reference-valued tuple external returns and function getter results.
+  Exact array/mapping struct omissions are retained for the supported results.
+- Nominal getter function-value signatures and native/source erasure collisions
+  retain named dispatch refusals. Renamed external values now share the existing
+  source ABI identity (see the coverage-step continuation below).
 - Broader `using for`, qualified custom-error reverts, receive/fallback/world
-  registration, remaining constructor/immutable/visibility distinctions,
+  transaction/raw-calldata dispatch, remaining constructor/immutable/visibility distinctions,
   and the erasure of mutability in function types.
 - `#verify`, `#counterexample` and `#difftest` may still show generated helper
   obligations; the source testing API does not.
@@ -1881,3 +1883,626 @@ foreign error reached through another method. Conflicting nominal signatures
 still need a separate adapter. See the coverage-step-2 section of
 [source-admission.md](source-admission.md) and its per-fixture evidence.
 No getter dispatch, general ABI codec, or recursive-type migration is changed.
+
+## Coverage step 1: executable nominal getters and inherited payment entries (2026-10-27)
+
+This isolated branch starts at current origin/master
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`. Historical groups 01–10 and their
+reports above are preserved. The runtime was actually checked in the attached
+cloud clone: Lean 4.24.0, Lake 5.0.0-src+797c613, and `Solidity.KeySort` built
+successfully. The saved environment label was not used as runtime evidence.
+
+### Implemented boundary
+
+Enum scalar, mapping and retained struct-field getter results lower through the
+existing named enum conversion, preserving cardinality and uint8 ABI metadata.
+Contract results and contract mapping keys use the existing address carrier.
+The getter plan still omits only ordinary array and mapping struct fields;
+bytes/string and unsupported returned fields refuse the entire getter.
+The native typed return interface is unchanged. General reference/function
+getter results and reference-valued tuple external returns remain refused.
+
+Finite dispatch now uses the ABI identity already shared by `fnPure`,
+`fnSelector?` and external dispatch. The stale equality between source and model
+helper names is removed; visibility, exact source signatures, candidate and
+override identities remain checked. Nominal getter signatures include mapping
+keys as well as results and conservatively refuse dynamic calls; a lowered
+contract key must not silently become an ordinary address source signature.
+A public uint overload with an internal bool companion is executable; the
+address/uint native-erasure collision remains refused.
+
+Empty-data full self value calls select receive across the entire validated C3
+lineage, then a no-argument/no-return payable fallback only when no receive
+exists anywhere in that lineage. The selected body is registered under the
+existing model receive entry and retains its original receive/fallback source
+role. Its dependency joins both function and initializer closure. Existing own
+receive registration/dependencies are preserved. A newly selected handler missing
+its declaration identity refuses the malformed contract before the optional
+admission scan, including historical unchecked headers. Newly registered handlers with
+modifiers, user-helper calls, nonpayable/byte-oriented fallback shapes, or
+send/transfer stipend calls retain `solidity.selfPayment`. This is not general
+contract-world or arbitrary raw-calldata dispatch.
+
+### Kernel and refusal evidence
+
+`tests/solc/EntryPointsLeft.sol` has separately pinned modern 0.8.38 legacy and
+viaIR fixtures. `tests/upstream/EntryPointsLeft.lean` checks 42 certificates:
+32 normal executions, eight real false-observation panics and two invalid-enum
+Panic(0x21) controls. Nonzero-value handler tests use self address 7, external
+caller 9, outer msg.value 13 and available balance 5 in a raw-body environment: the handler sees value 1
+and sender 7. The unchanged new source funds premise is retained. A
+write-then-revert receiver preserves the caller's prior storage. Own receive
+helper behavior, receive precedence, overrides, renamed values and valid
+overload selection have concrete normal-return witnesses. Twenty-two refusal
+guards and four ABI-kind guards accompany these certificates.
+
+All 42 theorem axiom outputs are the standard `propext`, `Classical.choice`,
+`Quot.sound` set. Per-file MCP diagnostics pass for both production files and
+both test files. The MCP scratch verifier initially lost relative fixture
+paths; an untracked identical-source mirror with absolute data paths verifies
+the headline theorem cleanly. The original direct-file axiom outputs remain
+the authoritative checks. These are kernel-checked model executions, not a
+compiler-correctness or EVM-equivalence theorem.
+
+`tests/upstream/EntryPointsAdmission.lean` checks malformed/empty/oversized and
+duplicate enum metadata, absent native enum identity, nominal contract keys and
+malformed inherited selector propagation. Missing own/inherited fallback identities
+are tested under both modern and unchecked admission callbacks. Mutated compiler metadata is labeled
+as refusal testing, not authentic compiler output. No statement/rule, untyped
+representation, core dependency, new axiom or raised heartbeat/fuel/search limit
+is introduced. Small frontend helper extraction keeps `readContract` within
+its unchanged 200,000-heartbeat limit.
+
+### Upstream observations and remaining refusals
+
+Fresh before/after replays restore the exact starting frontend within this same
+clone, then restore the saved implementation; they never use another cloud
+checkout. The original fixture source and expectations are unchanged. Primitive
+`getters/value_types.sol` matches all nine observations in both modes.
+`getters/struct_with_bytes_simple.sol` remains broken on reference return
+admission in both modes. `receive/inherited.sol` remains adapter-blocked on
+`() ->`; `fallback/inherited.sol` remains adapter-blocked on `(): 42 ->`.
+`types/mapping_contract_key_getter.sol` remains host-adapter-blocked. None of
+these remaining rows is reclassified as passing because the new source controls
+execute. The inventory rows therefore remain partial, with no corpus pass-count
+increase claimed. Exact reports and final gate metrics are recorded in the
+step's new evidence record; all older reports remain intact.
+
+### Independent review
+
+Read-only finder and skeptic reviews used no Lean worker. Confirmed findings
+were fixed: preserve own-receive helper dependencies; include nominal mapping
+keys in dispatch refusal; use a compiler-valid overload control; and establish
+nonzero sender/value framing, rollback, exact enum ABI kind and Panic(0x21).
+A further finder pass pins named refusal diagnostics and adds a static contract-key getter success witness. Final source/API, upstream, trust and structural gate outcomes are appended
+when complete, with resource stops kept distinct from passing evidence.
+
+
+### Sealed step-1 validation (2026-10-28)
+
+The [validation record](../../tests/upstream/entry-points-left-validation.json)
+contains exact source/compiler hashes, all 42 theorem axiom outputs, 21 full
+source API reports, complete original upstream result objects, commands,
+resource measurements and retained failed/interrupted attempts.
+
+| Final check | Actual result |
+|---|---|
+| Combined frontend roots | Pass, 262 jobs, 47.198 seconds after cached recovery |
+| Kernel certificates | 42 pass, 26.578 seconds, standard axioms only |
+| Admission controls | Pass, 1.824 seconds, including unchecked missing identities |
+| New source/API suite | 22 pass, 342.912 seconds |
+| Existing affected suite | 61 pass, one aggregate timeout; 664.142 seconds; blocked |
+| Original getter rows separately | All 16 unchanged expectations match, 451.040 seconds |
+| Final MCP | Both production and both test files pass diagnostics; headline axioms clean |
+| Original upstream fixtures | Same complete before/after objects; no pass-count increase |
+
+The source/API suite recompiles with the separately pinned 0.8.34 compiler
+(SHA-256 c8649f8d…61d8), using its default legacy pipeline. The 42 proof
+certificates instead use the pinned 0.8.38 legacy/viaIR fixtures. Both consume
+the same final Solidity source bytes.
+
+The full 43-row new source reports retain 21 proved, six internal, five pending
+and 11 unsupported rows. Four pending rows are deliberately false observations;
+the separate untagged ExternalOverride.target row also remains pending and is
+not counted as a proved property.
+
+The original aggregate PublicGetters source test reaches its unchanged
+300-second job bound. Its entire original expectation table then matches in
+one-row batches with the same per-job limit. No assertion or expectation was
+changed and no heartbeat, fuel or search limit was raised. The focused result
+does not relabel the original aggregate timeout as passing or as an expected
+semantic failure; the combined affected suite remains blocked on that run.
+
+Trust passes with zero findings (714 sources, 240 inventoried sites), module
+reachability passes (700 reachable, zero orphans), layering passes (152 core
+modules, no elaborator reachability), strict automation passes (491 automatic,
+61 budgeted, 11 refuted, zero pending), and generated inventory is current.
+The static frozen TestSuite audit passes (552 derived, 11 refuted, one excluded,
+two skipped), using the repository snapshot and its adjacent pin explicitly.
+The setup-path attempts failed because that copy lacks its pin. Documentation
+path auditing retains exactly the starting findings and is not claimed passing.
+
+The first combined attempt remains blocked: 1,267.685 seconds and 3.37 GiB peak
+descendant RSS, with the unchanged TermSize module failing to create a thread.
+Even -j1 allowed auxiliary elaboration threads. The untracked check configuration
+additionally sets Elab.async=false; TermSize then passes in 32 seconds and the
+final reader in 29 seconds within its original 200,000-heartbeat budget. No
+limit was raised. The JSON records each final phase and the separate focused
+check, including failed attempts rather than treating them as passing evidence.
+
+The container exposes no systemd scope bus or writable delegated cgroup.
+Checks use a hard inherited 12 GiB address-space limit per process, a 12 GiB
+descendant-RSS supervisor and 2 GiB available-memory reserve under the executor
+kernel 16 GiB cap. This is not a delegated hard 12 GiB aggregate cgroup guarantee.
+No OOM or RSS-guard stop occurred. Heavy checks were sequential, with
+LEAN_NUM_THREADS=1, explicit -j1 and no concurrent Lean server/build. No core
+syntax, semantics, rule or soundness module was edited; full default-library,
+run-lean.sh and Corpus builds were not run.
+
+Final read-only finder and skeptic reviews confirm the direct identity guard
+precedes optional admission, exact named refusals are pinned, static contract
+keys execute, and all fixture/import hashes match. They opened no Lean workers
+and found no remaining confirmed implementation issue. All four inventory rows
+remain partial. Reference/function return frames, nominal dynamic signatures,
+unsupported handler shapes, raw transaction dispatch and the aggregate source
+test timeout remain explicit handoff limits. Kernel model certificates and
+typed-interpreter observations are not compiler/EVM equivalence proofs.
+
+### Aggregate-gate audit continuation (2026-10-28, dc0ac441)
+
+The [new audit record](../../tests/upstream/entry-points-left-aggregate-audit.json)
+preserves the original `c5bab5e3` evidence and adds a same-VM bounded diagnosis.
+The original affected-suite invocation still exits 1: its unchanged 300-second
+PublicGetters aggregate gate remains **blocked**. The individually replayed 16
+rows do not pass that gate. No expectations, observations, proof premises or
+search budgets changed; no feature code or catalog status changed.
+
+Existing Docker support supplies a real hard cgroup v2 cap: `memory.max` is
+12884901888 and `memory.swap.max` is 0, measured inside the container. No daemon,
+credential or managed configuration changed. The local runtime image uses
+existing binaries, no network, UID 1000 and a read-only host root with this
+workspace writable. Host PID visibility fixes chroot executable discovery.
+Checks use one Lean thread and explicit `-j1`; no Lean server runs alongside.
+The initial container launcher failures are recorded separately and establish
+no successful validation. Earlier per-process/watchdog measurements remain
+historical; the new cap does not retroactively certify those runs.
+
+Only this clone's two saved frontend files were temporarily restored to starting
+master `f4dee4a2`, then restored in `finally`; the implementation commit remains
+intact. The baseline frontend build passed in 41.849 seconds. Its reconstructed
+original aggregate wrapper, with profiling enabled, timed out at 300.002 seconds
+and retained seven proved rows, one internal row and eight notRun rows. Baseline
+`primitives` cost 112.234 seconds and `arrays` 73.625 seconds; historical final
+individual costs were 115.918 and 78.093 seconds. These observations reproduce
+the large proof cost before this lane. They do not establish a same-environment
+full-proof timing equivalence or an aggregate pass. Import/obligation/listing
+cost was 4.380 seconds on baseline and 3.575 seconds after restoration; all 16
+listing objects match apart from timing. No actionable importer/callee-sharing
+regression was identified in this lane. The unchanged final aggregate was not
+blindly rerun. Diagnostic peak cgroup memory was 2260283392 bytes, with no OOM
+or memory-limit events. The diagnostic driver exits 0 when diagnosis completes;
+its recorded baseline timeout remains blocked.
+
+A separate hard-cap run passed KeySort (0.201 seconds), all 42 existing kernel
+certificates with standard axiom sets (26.482 seconds), and admission controls
+(1.811 seconds), peak 880435200 bytes, zero OOM/limit events. Earlier source/API,
+legacy/viaIR, upstream and static results remain precisely as sealed above; no
+new compiler/EVM or full-library claim follows from this documentation audit.
+
+Independent read-only finder and skeptic reviews ran without Lean workers. Both
+found no concrete lane sharing regression. The skeptic found that the diagnostic
+headroom guard's `os._exit` could bypass restoration; the saved reusable driver
+now propagates a stop through child cleanup and `finally` instead. That guard
+did not fire; both exact used and corrected drivers are retained. The finder
+also requested raw cgroup snapshots and a narrower headroom claim; the record
+now includes exact tool-output snapshots and claims no continuously measured
+available-memory minimum. Final read-only reviews found no remaining overclaim.
+
+Required action outside this lane: the owner of shared proof-search/callee
+evaluation must provide an authorized optimization preserving all original rows,
+assertions, premises and budgets, or demonstrate a suitable execution allocation
+in this same environment. Then run the exact original affected command from the
+audit record under the demonstrated Docker cap and unchanged 300-second jobs.
+This task does not enter general closer/step-13 work. Reference/function results
+and broader dispatch remain explicit unsupported shapes; the aggregate timeout
+is separate missing validation. All four catalog entries remain partial/model.
+
+### Validation-driver sharing investigation (2026-10-28)
+
+The [sharing evidence](../../tests/upstream/entry-points-left-sharing-validation.json)
+and executable [probe](../../tests/upstream/GetterEvaluationSharing.lean) continue
+the same branch at `12f773b5`. All original implementation, failed attempts and
+historical hashes are preserved. No feature semantics, production driver,
+manifest status, observations, expected results, proof premises or search budgets
+changed. The production Testing source was restored byte-for-byte after measuring
+two rejected experiments; experiment wrappers, patch and logs remain in the new evidence.
+
+The existing compiled-obligation-table path passed `primitives` but took 141.213
+seconds (133.268 seconds in the row, 112 seconds type checking). It is not a safe
+drop-in driver change: compiled table references can make bounded recursion
+inspection visit unrelated rows. A narrower selected-program compilation kept
+original classification and theorem types, but took 148.270 seconds including
+build (138.072 seconds in the row, 116 seconds type checking). Both showed about
+7.8 seconds of compiler work. Neither establishes a useful sharing repair.
+Earlier declaration-table batching and callee hash-consing choices were inspected
+in history (`75b6e489`, `1a7d5b0e`) and remain intact.
+
+The small probe imports the original hash-pinned modern 0.8.38 legacy-pipeline fixture and uses
+the actual typed `primitives` and `arrays` formulas. Within one command it evaluates
+the identical callback-classification expression twice, then safely compiles that
+exact expression once and reads its retained declaration twice. It checks all four
+Boolean observations agree, kernel-checks retained-definition equality and prints
+the actual transitive axiom set (`propext` only). Final direct execution exits 0
+in 9.042 seconds. Fresh calls cost 116/127 ms for primitives and 111/98 ms for
+arrays; checked retention setup costs 343/305 ms, then reads cost 10/5 and 9/7 ms.
+The setup measurement includes the environment-count check, fresh-name generation
+and checked declaration compilation; fresh calls include their full check, compile
+and evaluation lifecycle. This demonstrates the missing native helper lifetime boundary in Lean's
+`evalExprCore` (`withoutModifyingEnv`, fresh temporary, `addAndCompile` each call),
+not the number of identical expressions encountered in proof search. Two reads
+do not repay retention setup here, and this boundary does not resolve the much
+larger measured kernel-checking cost. No general closer/step-13 work was entered.
+
+All checks were serial under the existing Docker cgroup hard 12 GiB/no-swap cap,
+with explicit `-j1`, `LEAN_NUM_THREADS=1` and measured host-available-memory minima.
+Source/dependency/settings hashes were matched before reusing imported artifacts;
+there is no persisted proof/verdict cache. The maximum measured cgroup peak was
+2128048128 bytes; final direct probe peak was 242532352 bytes, with zero OOM/limit
+events. Per-file lean-verify diagnostics passed after fixing retained failed
+development attempts.
+
+The original 62-test affected invocation remains **blocked**, actual historical
+exit 1 on the unchanged 300-second aggregate PublicGetters job. The independent
+starting-master wrapper also timed out at 300 seconds as recorded above. No
+unchanged full-suite retry followed these rejected experiments; individual probes
+do not replace that gate. The full original roster, false observations, refusal
+controls and legacy/viaIR evidence remain intact. Reference/function results and
+broader dispatch remain separate unsupported shapes; all four catalog rows remain
+partial/model. The exact remaining boundary is repeated temporary native helper
+compilation versus expensive kernel-checked walk/residue certificates; no measured
+driver-local retention repair is justified by these results.
+
+Final read-only finder and skeptic reviews verified restored production hashes,
+fixture identity, observations, axiom outputs and the original blocked full gate.
+They found a measurement-label issue: retention timing includes environment-count
+checks and fresh-name generation. Labels now say **retained setup**, with overhead
+explicit; the corrected source passed sealed diagnostics plus direct execution
+serially in 18.600 seconds, cgroup peak 908361728 bytes, no OOM/limit events. The
+sealed CLI reports fresh/setup/read timings of 166/118, 372, 10/8 ms for primitives
+and 115/95, 340, 12/7 ms for arrays. No remaining production integrity finding was
+reported.
+
+Final static checks: trust has zero findings (after correcting the checker
+invocation), orphan/layer/strict automatic checks pass, generated inventory is
+current, and staged whitespace checks pass. Documentation paths retain exactly
+the baseline 20 findings and remain failed; raw historical reports are unchanged.
+
+
+### Proof-performance continuation, 2026-10-29 (validation ongoing)
+
+Continued in the same saved VM and branch from `daf3981c`; no pin, rules,
+source observations or expected verdicts changed. The original five-script
+62-test command was rerun after a measured exact-residue sharing increment:
+61 passed and the original unsplit PublicGetters test still timed out at its
+unchanged 300-second limit. Its AST SHA-256 remains
+`8d5cfe12f1c13f8814200bbfce1cc1310273f135cb3c27828b0f2de5793678e7`.
+This is failed aggregate evidence, not a passing split replay.
+
+The increment retains each original residue equality and reflexivity value as
+a closed typed let in Testing's final proof. Default tactic callers still
+check immediately. Testing synchronously kernel-checks the complete theorem
+and audits its axioms before reporting proved. Rejection/open proposals restore
+state and retry the original policy inside the original absolute heartbeat
+deadline. Read-only finder/skeptic reviews identified and corrected recursive
+scope leakage and a deadline-sampling discrepancy; the integrity control also
+keeps final fallback checking inside its capped reader and excludes duplicate
+names as a possible malformed-proof rejection cause.
+
+Narrow arrays and primitives runs improved from 88.374 to 70.495 seconds and
+117.505 to 83.595 seconds respectively. These are narrow results only. The full
+62-test run exited 1 in 655.164 seconds, with cgroup peak 3259453440 bytes under
+hard memory.max 12884901888 and memory.swap.max 0; all cgroup limit/OOM events
+were zero. Measured enclosing-VM headroom remained at least 10984767488 bytes.
+Raw logs, source/dependency/settings seals and all failed candidates remain in
+`.lake/upstream/entry-points-left/proof-repair-20261028/`.
+
+The next measured bottleneck is inheritedGetters: 17 retained checkCore
+certificates cost 47.154 seconds, while its final theorem check cost 9.447
+seconds. A further candidate shares these exact scoped-closer equalities under
+the same Testing-only policy. It preserves native evaluation, false/fragment/
+bounds refusal code, premises and every search/resource limit. Per-file Lean
+diagnostics pass, including real closer valid/malformed/rollback/default-mode
+controls and unchanged false/fragment outcomes. Its runtime gain and the original
+aggregate pass are not yet established. All four catalog statuses remain
+partial/model; this performance work adds no feature-coverage claim.
+
+
+### Proof-performance repair milestone, 2026-10-29
+
+The original complete affected command now passes, without changing its test
+files, full getter roster, observations, expected statuses, pipelines or
+300000 ms Lean subprocess timeout:
+
+```sh
+node --test --test-concurrency=1 scripts/finite-dispatch.test.mjs scripts/public-getters.test.mjs scripts/getter-dispatch.test.mjs scripts/getter-plans.test.mjs scripts/solidity-upstream.test.mjs
+```
+
+`final-full-affected-direct-rec.log` records 62/62 tests and exit 0; the original
+aggregate getter subtest takes 293225.435338 ms. The bounded supervisor takes
+651.349694 s. Its observed Docker cgroup has memory.max 12884901888,
+memory.swap.max 0, peak 3282722816 bytes and zero limit/OOM events. Minimum
+available memory in the enclosing 16 GiB VM is 10683834368 bytes. The source,
+settings, test and compiled-dependency seal is
+`.lake/upstream/entry-points-left/proof-repair-20261028/final-full-affected-direct-rec-inputs.json`.
+These are kernel/model and compiler/import checks, not EVM equivalence.
+
+The final checking policy retains the exact original equality premises as
+closed typed `id` annotations in large nonrecursive callback and ordinary
+unspecified testing proofs. A synchronous final theorem check and standard-axiom
+check precede every proved result. Every nonproved shared attempt restores state
+and retries the original immediate policy under the same absolute remaining
+heartbeat deadline. A bounded 8192-node syntax inspection chooses the original
+policy up front for small formulas; it adds no admission rule or search budget.
+The ordinary chunked fallback, recursive paths and noncallback specification
+paths retain their previous policy. Public tactics retain immediate checking by default.
+
+Prefix reconstruction shares internal elimination equalities at the original
+immediate atom check. The atom, prefix and whole-context guards remain checked
+before pruning, with the original depth, fuel and heartbeat caps. The stronger
+`GetterKernelSharing.lean` controls reject corrupted production reduction and
+terminal premises at the actual original atom boundary and check bounded
+fallback. They also pin exact residue/closer equality types, malformed-proof
+rejection, original-policy retry and both sides of the strategy threshold.
+
+Actual kernel unfolding counters identified 94399 `Facts.rwWith` and 115091
+`List.brecOn` unfoldings in the primitives final certificate. `Closer/Facts.lean`
+now uses an explicit list recursor and preserves the original short-circuiting
+compiled implementation as `rwWithM`. The universal theorem
+`Facts.rwWith_eq_rwWithM` proves exact agreement at every contract, sort, input
+and fact list (axioms: propext only); the existing lookup soundness statement
+and premises are unchanged. `FactsLookupSharing.lean` checks first-match order,
+wrong-sort heads, no match, no chaining, empty lists and non-value sorts in the
+kernel and native evaluation. No model datatype, dependency, statement, ABI
+identity, source observation or proof/search limit changed.
+
+The matched profiling settings measure primitives at 75403 ms and arrays at
+63561 ms; the primitives final kernel check falls from 14.020663 to 11.210693 s.
+The final full-suite observations are retained separately from these profiles.
+Independent read-only finder and skeptic reviews found no semantic defect in
+the exact certificates, retry/deadline handling or universal lookup agreement.
+
+All unsuccessful attempts remain historical evidence. These include the
+300-second full-suite failures, rejected atom-local data cache, proof-node
+sharing, named-goal, remaining-atom-check batching and structural-walk
+experiments. The threshold-zero profile was explicitly interrupted and is not
+passing evidence. A preparation assertion accidentally reran a newly generated
+baseline and replaced its first raw log; the saved first result, separate repeat
+log and `stage-batch-preparation-error.json` record this exactly. Earlier
+published reports and commits remain intact. Diagnostic transport exit zero is
+not treated as Lean success: strict diagnostic jobs require structured success
+and no errors. Failed stage-control contexts and syntax attempts remain failed.
+
+This milestone establishes the original affected gate and new internal proofs.
+Fresh 42-certificate, 22-API/admission, upstream, static and full core validation
+are still pending at this commit. Feature inventory statuses and the previously
+named reference/function-return, wider dispatch and transaction-adapter refusals
+remain unchanged; this performance repair claims no extra feature coverage.
+
+
+#### API budget follow-up on the same repair
+
+Fresh full API validation exposed a real regression in the 8192-node policy:
+21/22 passed, while `RenamedExternal.falseObservation` exhausted the shared
+attempt's original heartbeat budget and reported error rather than the required
+pending result. That failed run is retained as `final-entrypoints-api.log`.
+No error or resource stop was reclassified as passing evidence.
+
+The captured runtime AST measures 10121 expression nodes for that false
+observation, 13545 for its positive companion, and at least 13945 for the large
+getter cases that benefit from sharing. The generic opt-in threshold is now
+12288 nodes, so the failing size category uses the original immediate policy
+from the start. This raises no proof/search limit, grants no extra allowance,
+and does not inspect fixture names or expected results. Boundary controls pin
+12287 to the original policy and 12288 to sharing; every shared-selected
+nonproved attempt still has its original-budget retry.
+
+The unchanged targeted subtest returns pending correctly. The complete original
+22-test API command then passes in 351.779453 s (peak 2066546688 bytes, hard
+12 GiB/no-swap cgroup, zero limit/OOM events). Trust inventory changes record the
+five reviewed native quotation/probe sites and the universally proved runtime
+lookup override; no forbidden-token or kernel-audit policy changed. Trust,
+orphan, layer, automatic and regenerated-inventory checks pass. The existing
+20 missing/ambiguous documentation citations remain a failed baseline gate;
+historical reports were not altered to remove them.
+
+All five assigned upstream fixtures were rerun in new output directories.
+Complete observation results, required pipelines and compiler/budget settings
+are identical to the retained historical results. Primitive value types remain
+working, the reference-valued struct getter remains broken, and contract-key
+and raw receive/fallback adapter cases remain blocked. These refusals and
+feature inventory statuses are unchanged. The complete 62-test command and
+full core check remain to be repeated on this final policy at this commit.
+
+
+#### Preserved payment admission boundary (2026-10-29)
+
+The original full-library check found two real regressions in the bounded
+handler increment: the unchanged `SourceAdmissionImport` guards for
+`PaymentFallback.pay` and `InheritedPayment.pay` lost their named
+`solidity.selfPayment` refusals. The original expectations and fixtures are
+unchanged. New inherited receive and fallback registration now requires the
+value-call receiver's canonical `address payable` source type string; an
+optional type identifier must be exactly `t_address_payable` when supplied.
+Bare address receivers, missing required metadata and malformed supplied
+identifiers retain the named refusal. This is a conservative importer profile,
+not a Solidity restriction: ordinary addresses can legally use `.call`.
+Historical own-receive admission remains unchanged. New handler refusals also
+survive the historical optional-scanner bypass, preserving the scanner's
+existing diagnostic priority for functions, modifiers and deployment roots.
+
+[Paired source controls](../../tests/solc/EntryPointsReceiverProfile.sol) and
+[their importer checks](../../tests/upstream/EntryPointsReceiverProfile.lean)
+exercise both receiver types and the own-receive path in legacy and viaIR
+compiler pipelines, with source scanning enabled and bypassed. All 24 paired
+receiver and 32 malformed-metadata checks pass. The exact 0.8.38 compiler SHA
+is unchanged; both fixture headers match source SHA
+`d7f9139e29cfcb1cf017708cf8835a6935e211474c47a5ff2809423cd4906cce`.
+Strict per-file diagnostics report success without errors or incomplete work,
+and the original admission module builds successfully. Independent read-only
+finder and skeptic reviews found and closed a malformed optional-identifier
+loophole; numeric and null mutations now refuse. Failed annotation attempts
+and the interrupted failing library run remain separately recorded.
+
+The recovered earlier core command actually reached its 1800-second bound;
+its transport failure is distinct from the saved exit -9. A later command
+stopped on its OS-headroom guard, not OOM. Both remain blocked evidence.
+The supervisor's availability measurement now conservatively credits only
+clean inactive file cache, with raw counters retained, an unchanged 2 GiB
+reserve, hard 12 GiB aggregate cap and zero swap. No memory/cgroup/cache
+configuration was mutated. Both reviewers examined this measurement change.
+The exact unchanged OpenLoops component then passes in 533.257 seconds,
+peak 9259114496 bytes, minimum conservative headroom 2855940096 bytes and
+zero limit/OOM events. This component pass is not the whole core gate.
+
+The code's earlier 62/62 and 22/22 passes remain tied to their recorded
+configuration/artifact hashes. Fresh full gates and the final closure seal
+are still pending after this scoped admission repair. No feature inventory
+status or proof/search budget is raised; reference/function returns and
+broader dispatch remain partial.
+
+
+#### Kernel lookup performance continuation (2026-10-29)
+
+The original complete PublicGetters aggregate now terminates successfully in
+299.765 seconds under its unchanged 300-second limit. All sixteen original
+observations, including both original pending controls, are retained. The margin
+is narrow; this is not yet the final combined affected-suite/core pass. The
+[new milestone report](../../tests/upstream/entry-points-left-proof-performance-validation.json)
+records exact commands, rows, hashes, hard 12 GiB/zero-swap resource evidence,
+and outstanding final gates. Peak aggregate memory was 3223416832 bytes, with
+zero limit/OOM events. Original observations and budgets are unchanged.
+
+The typed implementation now passes the rewrite input after the list recursor,
+passes Facts after the normalization recursor, and eliminates the sort before
+ElimM rewriting. Universal agreement with the original compiled implementations
+and all original soundness premises remain kernel-checked. Facts.rw additionally
+skips impossible nonvalue-sort scans while leaving its value lookup unchanged;
+Facts.rw_eq_rwWith proves exact agreement for every contract, Facts, sort and
+input. Its native computation also retains identical results. The existing
+trust inventory records the exact ElimM.rwFM override; no axiom is introduced.
+
+Independent read-only finder and skeptic reviews found two executable-control
+weaknesses: a chaining case without a second applicable rewrite and nonvalue
+cases using only err. The controls now use a true 0-to-1-to-2 chain, nonerror
+storage/memory/integer inputs and a path input. Six original and six new wrapper
+kernel/native controls pass; printed axiom sets contain only propext. Strict
+per-file diagnostics distinguish Lean success from transport exit status.
+
+Inclusive profiling identified actual synchronous kernel costs; exclusive
+profiler categories must not be read as inclusive timing. Typed Facts verdict
+checkpointing, curried returns, whole-proof object sharing and an opt-in single
+kernel-boundary verdict prototype did not improve cost and were rejected.
+Failed and budget-stopped attempts remain diagnostic evidence, not gate passes.
+Their sources are archived with hashes outside production. All three temporary
+profiling hooks are restored byte-for-byte. One accidental duplicate diagnostic
+launch overwrote its newly created prior same-name diagnostic log/result;
+duplicate-diagnostic-launch-record.json identifies the partial reconstruction
+from the tool transcript. Earlier audit reports and commits remain intact, and
+exclusive result/log/resource creation now prevents recurrence.
+
+The skeptic independently matched all sixteen full observations (apart from
+timing), all 3879 aggregate input hashes and all 257 actual imported artifacts.
+The 62-test suite, 22 API checks, 42-certificate audit, whole core gate and final
+export still require a current combined refresh. Feature statuses and remaining
+reference/function-return and broader-dispatch refusals remain unchanged.
+
+The current combined certificate/admission bundle subsequently passes in
+68.854 seconds, peak 877375488 bytes with zero limit/OOM events. It checks all
+42 original certificate names, the stage-corruption and original-budget
+fallback controls, twelve lookup/wrapper kernel and native cases, both receiver
+pipelines, and unchanged SourceAdmissionImport. Universal rwWith, rw, nf and
+elimF agreement/soundness axiom audits use only propext, Classical.choice and
+Quot.sound. Full-suite/API/core/upstream/static final gates remain pending.
+
+
+#### Finite primitive lookup continuation (2026-10-29)
+
+The original aggregate passes in 293.905 seconds standalone and 294.862 seconds
+inside the complete affected suite: all 62 tests pass in 653.703 seconds. The
+unchanged API suite passes 22/22 in 338.387 seconds, retaining 21 authoritative
+reports and 43 complete rows. The fresh 42-certificate and control bundle passes
+in 68.307 seconds with standard axioms only, including staged corruption,
+original-budget fallback, lookup and receiver/admission controls. The linked
+performance report records exact commands, resource results and current hashes.
+
+The kernel lookup now selects the primitive type once and scans intrinsically
+typed Bool, Uint or Int cells. It preserves first-match lookup on the original
+input, including mixed primitive types and nonvalue identity. A universal proof
+agrees with the unchanged compiled lookup; all soundness premises remain. The
+wrapper delegates directly, avoiding a duplicate dependent sort dispatch. Nine
+primitive combinations have both kernel and native controls. Independent finder
+and skeptic reviews matched all sixteen aggregate observations except timing,
+all 3880 sealed inputs and 257 imported artifacts, with no integrity finding.
+The aggregate margin remains limited; no budget or observation changed.
+
+Whole-core validation is still pending. Original-policy rebuilds stopped once
+at the 1800-second bound on Hashing, once on conservative OS headroom during
+OpenLoops, and then at 1800 seconds on the general Decision example. These are
+blocked evidence, not passes or OOM claims. Hashing subsequently passes in
+130.550 seconds and OpenLoops in 523.370 seconds at unchanged settings. A
+fresh artifact seal preceded advisory release of this checkout's clean
+generated regular-file cache; bytes, limits and configuration were unchanged.
+The initial stale pre-build seal refusal is separately preserved. No baseline
+documentation findings or component passes substitute for the whole gate.
+The rejected named-value candidate is archived: it misclassified the existing
+clean-tail sharing branch, and production Testing was restored. Feature statuses
+and reference/function-return and broader-dispatch refusals remain unchanged.
+
+
+#### Final bounded proof-performance acceptance (2026-10-29)
+
+The original whole `./run-lean.sh` gate now terminates with exit 0 in
+320.661 seconds under its unchanged 1800-second bound: 685 main jobs, 259
+suite jobs, and all 131 read-bearing sort annotations pass. The original
+complete getter aggregate is rerun after that build and passes in 279.091
+seconds under the unchanged 300-second limit. All sixteen full observations
+match the historical complete report except elapsed times. Peak memory is
+5925699584 bytes for the whole gate and 3165024256 bytes for the aggregate,
+with hard 12 GiB cap, zero swap and zero limit/OOM events.
+
+A fresh 42-certificate/control audit passes in 67.249 seconds. All 257 actual
+imported artifact modules match the passing 62-test and 22-API closures exactly;
+1759 selected source/settings inputs per retained gate differ only in this
+document and its performance report. Compiler/upstream observations are
+refreshed separately in both required pipelines, preserving every result and
+source provenance. Trust, orphan, layer, strict automatic, inventory generation
+and check, and suite static gates pass. The documentation-path gate still
+fails with precisely the same historical 20 missing and six ambiguous paths;
+it is not counted passing. Generated inventory and feature statuses are unchanged.
+
+Later whole rebuild attempts and their component checks remain separately
+recorded: Decision passes in 583.451 seconds, Derived17 in 131.101 seconds.
+Derived17 peaks at 11261718528 bytes; raw VM availability briefly reaches zero,
+but conservative clean-inactive-file headroom stays above 2461335552 bytes.
+The unchanged hard cap and OS reserve remain enforced; no OOM or limit event
+occurs. Whole runs stopped on time or headroom remain blocked evidence.
+Read-only finder and skeptic confirmed actual final performance, kernel proof
+integrity and retained hashes. The report now labels the earlier pending list
+as historical, closing the reviewer's stale-label finding. No unsupported
+reference/function-return or broader-dispatch shape is promoted by this repair.
+
+#### Integration control repair (2026-10-30)
+
+The retained review's missing result type on `annotate` is now explicit as
+`Expr`. Per-file Lean MCP checking also exposed two staged-prefix controls
+falling back: asynchronous theorem elaboration restricts generated declaration
+names to the theorem's prefix, rejecting the production stage declarations.
+Those two controls now elaborate synchronously. Their stage-count assertions,
+proof bodies, observations and original budgets are unchanged.
+
+Complete diagnostics for `tests/upstream/GetterKernelSharing.lean` pass without
+errors or warnings; its printed axiom sets contain only the standard three.
+Read-only finder review confirmed both stage assertions and the explicit type;
+skeptic review compared against the baseline and confirmed that the scoped
+scheduling options and type annotation are the only source changes. Combined
+gates remain the integration coordinator's responsibility.
