@@ -22,7 +22,7 @@ async function main(){
   if(localFile)await context.setOffline(true);
   await context.addInitScript(()=>{globalThis.WebSocket=class{constructor(){throw new Error('This test forbids all WebSocket/backend connections');}};});
   context.on('request',request=>{if(!/^(blob:|data:)/.test(request.url())&&new URL(request.url()).origin!==new URL(url).origin)report.requests.push(request.url());if(single&&/^(https?:|file:)/.test(request.url())){report.documentRequests??=[];report.documentRequests.push(request.url());}});
-  const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.stack));page.on('websocket',socket=>report.webSockets.push(socket.url()));
+  const page=context.pages()[0]||await context.newPage();page.on('pageerror',e=>report.errors.push(e.stack));page.on('websocket',socket=>report.webSockets.push(socket.url()));
   page.on('console',message=>{if(message.type()==='error')console.log('Browser:',message.text().slice(0,1200));});
   async function check(name,run){const start=performance.now();await run();report.checks.push({name,elapsedMs:+(performance.now()-start).toFixed(1)});console.log('PASS',name);}
   try{

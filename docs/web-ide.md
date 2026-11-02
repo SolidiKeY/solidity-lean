@@ -369,6 +369,17 @@ guards; Lean MCP diagnostics were clean for the importer and regression file.
 Pages runs the guards before checking the kernel cache. Finder and skeptic
 reviews accepted the fix, test controls and CI placement without using Lean.
 
+The subsequent `a3205e6a` integration made `LinearDecision` reachable through
+call sharing. Its existing umbrella `Lean` import expanded the browser graph to
+1,871 modules and 2,537.9 MiB, producing a 955-MB HTML. The arithmetic helper now
+imports `Lean.Elab.Tactic`, retaining `omega` and `grind`; its declarations and
+proofs are unchanged. Both the parsed graph tool and packager reject umbrella
+`Lean` imports so this regression fails before an expensive Wasm build. Per-file
+diagnostics and the rebuilt 313-job frontend plus calldata guards passed. The
+browser harness reuses Chromium's initial tab, matching a single IDE tab without
+retaining an unused blank renderer. Finder and skeptic reviews accepted the
+import and graph guards without using Lean.
+
 The writer lock is held throughout changes and checks. Heavy jobs run sequentially.
 This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap
 and an available-memory guard; browser QA uses an owned-process RSS/available-memory

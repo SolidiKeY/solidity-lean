@@ -22,6 +22,7 @@ const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const graphFile=process.env.SOLIDITY_BROWSER_IMPORT_GRAPH;
 const needed=graphFile?new Set(Object.keys(JSON.parse(fs.readFileSync(graphFile,'utf8')).modules)):null;
 if(needed&&['Init','Lean.Elab.Frontend','Solidity.Frontend.Testing'].some(name=>!needed.has(name)))throw new Error('Incomplete browser import graph');
+if(needed?.has('Lean'))throw new Error('Browser import graph includes the umbrella Lean module; narrow its importing dependency');
 function asset(bytes,extension){if(bytes.length>24*1024*1024)throw new Error('Browser asset exceeds 24 MiB');const sha256=digest(bytes),url='/lean/assets/'+sha256+'.'+extension;fs.writeFileSync(path.join(destination,'assets',sha256+'.'+extension),bytes);return {url,sha256};}
 function binary(file){const bytes=fs.readFileSync(file),chunks=[];for(let offset=0;offset<bytes.length;offset+=16*1024*1024)chunks.push(asset(gzipSync(bytes.subarray(offset,offset+16*1024*1024),{level:6}),'gz'));return {chunks,size:bytes.length,sha256:digest(bytes)};}
 const manifest={version:'4.24.0',commit:'797c613eb9b6d4ec95db23e3e00af9ac6657f24b',wordSize:64,gmpBits:64,

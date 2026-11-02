@@ -18,7 +18,7 @@ async function main(){
     context=await chromium.launchPersistentContext(profile,{executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox'],viewport:{width:1440,height:900}});
     await context.addInitScript(()=>{globalThis.WebSocket=class{constructor(){throw new Error('No proof backend is permitted');}};});
     context.on('request',request=>{if(!/^(blob:|data:)/.test(request.url())&&new URL(request.url()).origin!==url)report.external.push(request.url());});
-    page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));
+    page=context.pages()[0]||await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));
     const start=performance.now();await page.goto(url,{timeout:300000});
     await page.waitForFunction(()=>window.solidityIDE?.state.connected&&(solidityIDE.state.runtime.proofReady||solidityIDE.state.runtime.error),null,{timeout:600000});
     assert.equal(await page.evaluate(()=>solidityIDE.state.runtime.proofReady),true);

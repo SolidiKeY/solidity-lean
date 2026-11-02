@@ -27,5 +27,7 @@ def main (args : List String) : IO Unit := do
     let imports : Array String := (Elab.headerToImports header).map fun i => i.module.toString (escape := false)
     modules := modules.insert name imports
     pending := pending ++ imports
+  if modules.contains "Lean" then
+    throw (IO.userError "Browser dependencies include the umbrella Lean module; narrow the responsible import")
   let entries : List (String × Json) := modules.toList.map fun (name, imports) => (name, toJson imports)
   IO.println (Json.mkObj [("version", toJson (1 : Nat)), ("modules", Json.mkObj entries)]).compress

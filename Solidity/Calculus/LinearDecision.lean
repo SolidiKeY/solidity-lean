@@ -1,4 +1,4 @@
-import Lean
+import Lean.Elab.Tactic
 import Solidity.Calculus.VisitedSet
 
 /-!
