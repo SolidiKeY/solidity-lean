@@ -1345,3 +1345,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Backend/InternalFlow/LocalStoreLoop.lean` | Local-only scoped loop step/prefix/success rules derived from typed body plans; no heap/liveness inference. |
 
 | `Solidity/Backend/InternalFlow/LoopLocalTarget.lean` | Actual LoopCert result/protected-local adapters, reached source-prefix Room/cost and compiler construction boundaries. |
+
+| `Solidity/Backend/InternalFlow/LoopCallerPrefix.lean` | Protected caller views for actual healthy source horizons; public condition/body error boundaries. Concrete all-N target witnesses in owned CallerPrefix fixtures. |

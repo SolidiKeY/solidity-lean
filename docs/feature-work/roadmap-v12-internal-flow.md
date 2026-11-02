@@ -3119,3 +3119,72 @@ strict cached121.091/120, raw124 and full124/300 failures. Raw docs normal/stric
 stay failures, with complete prior/publication comparison separate. All eight
 original Work/Backfill items remain partial; no independent-work-exhaustion,
 goal reactivation/reset/completion or publication claim follows.
+
+
+## C40 — concrete caller preservation at every reached horizon (partial)
+
+`LoopCallerPrefix.captured` consumes C38's typed per-binding plans and the
+actual running/successful source horizon to preserve the complete protected
+thinned environment. `represented` eliminates a genuinely reached StateRepr
+and BaseExtends into old memory-address and primitive ReprV observations; it
+does not produce target execution or representation. Public condition/body
+error eliminators preserve ordinary bare revert only.
+
+The new CallerPrefixFacts fixture executes the unchanged C38 mixed body from
+C39's REAL compiled prefix/caller (not the older hand-built initial State).
+`first_reached` executes the actual public compiled body, drops iteration
+locals using StateRepr.drop and real fragment stability, and identifies its
+machine with C39's checked horizon1. `second_reached` derives remaining input2
+from first growth2 and actual input4, executes the same body again, and uses
+the actual false condition/checked horizon3 to identify the second machine.
+No desired midpoint, target run, allocation cursor or heap preservation is a
+hypothesis. The SAME entry base transports through both steps.
+
+`reached_all` quantifies EVERY Nat horizon: 0/1/2 are running at source/target
+start/first/final, cost0/2/4; horizon3 and every later horizon are completed at
+the same final source/target state. The existing public stopped-horizon laws
+supply absorption, not a new admission cutoff. `protected_all` strengthens
+these SAME reached pairs with complete caller environment, old alias addresses
+and primitive word observations. All C39 complete ordered vectors, old
+contents[7,11]→[9,11]→[10,11], private allocations/markers, roots and protected
+stack remain unchanged. No Heap.Keeps or unconditional fragile liveness follows.
+
+CallerPrefixControls includes an actual always-running true/nil source/target
+loop on the populated represented caller for EVERY horizon. Actual condition
+failure and an admitted mixed mutating/allocating body followed by bare revert
+are absorbed at every positive horizon, using real checked body cost2/frame
+and actual reached input4. Neither error exposes a successful State or rollback.
+Horizon2 completion, horizon1 final-state/cursor, old-alias/private-reference,
+protected scalar and old-content countercontrols derive from full positive
+snapshots. Existing panic/payload/exhaustion/refusal distinctions are untouched.
+
+Finder confirmed an initial generic target-turn/iterator draft overlapped the
+reserved producer. It is removed from deliverables and retained as failed scope
+review evidence. The replacement contains no generic iterator reconstruction.
+For a GENERAL represented-prefix consumer the precise read-only producer
+boundary remains: MemoryLoop's MemoryTurn, loopBody and memory_loop_iter are
+private. A public supported paired-horizon eliminator (or public relation plus
+iterator theorem) preserving that exact LoopPrefix/StateRepr/stack/BaseExtends/
+GrowsAllocator contract would permit composition with captured/represented.
+The request is additive API exposure by that owner, NOT a semantic exclusion
+or assumed future theorem. The concrete all-N consumer above is discharged
+without it; it is not general target-prefix simulation.
+
+New36 exact builtin reports are additive to all25 old fixture entries/703pins;
+current inventory is27fixtures/739reports. Original542 mathematical types,
+85tuple types and C32–C39 inventories remain intact. Failed C40 generic-scope,
+type/definitional/projection/heartbeat probes and wrong object output path are
+retained. Sealing the checked failing-body object BEFORE shallow code projection
+fixes demonstrated repeated normalization; no budget is raised and no whole-gate
+speed improvement is claimed. Source and final artifact finder/skeptic reviews
+and actual per-file/import/axiom/resource outputs accompany the sealed handoff.
+
+All Work1–6 and Backfills A/B stay partial. Original full124/300s (TestSuite/sort
+unreached), raw124, strict cached121.091/120 and docs normal/strict1 remain
+failures; expanded raw/cached/full validation is pending. Semantic progress is
+not a repair authorizing unchanged failed heavy retries. Complete previous/
+publication doc equality is separate from frozen historical +2 findings and
+global failure. General runtime/unbounded recursion/full-signature dispatch,
+early-control/general-loop producers and word-frame/live-byte-journal/world/
+transient/callback transport remain open. No goal write/reactivation/completion,
+publication, peer transfer or independent-work-exhaustion claim follows.

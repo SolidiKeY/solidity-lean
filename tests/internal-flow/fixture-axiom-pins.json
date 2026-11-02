@@ -3546,5 +3546,195 @@
         "propext"
       ]
     }
+  },
+  "CallerPrefixFacts": {
+    "guard": "tests/internal-flow/check-caller-prefix-facts-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.LoopCallerPrefix.condition_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopCallerPrefix.captured": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopCallerPrefix.represented": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.first_scoped": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.second_scoped": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.source_one": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.source_two": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.source_stopped": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.source_captured": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.body_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.body_code": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.body_need": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.body_frag": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.first_reached": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.second_reached": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.reached_all": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.protected_all": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopCallerPrefix.condition_revert": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopCallerPrefix.program_revert": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  },
+  "CallerPrefixControls": {
+    "guard": "tests/internal-flow/check-caller-prefix-controls-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.spin_turn": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.spin_target_all": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.spin_represented_all": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.condition_failure_all": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.body_failed": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.failure_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.failure_need": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.body_failure_all": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.not_complete_at_two": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.wrong_one_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.first_snapshot": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.wrong_one_cursor": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.wrong_final_old_alias": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.failure_not_fault": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.protected_scalar_not_private": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.old_contents_change": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.CallerPrefixes.failure_code": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }
