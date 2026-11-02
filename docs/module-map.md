@@ -1534,3 +1534,8 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Lowering/V08/SourceTransientSameOwnerPayment.lean` | Same-owner identity and affordability versus distinct-owner draining transfer. |
 | `Lowering/V08/SourceTransientZeroPayment.lean` | Zero distinct-owner transfer retains world but adds two journal entries. |
 | `Lowering/V08/CallableReflection.lean` | Exact typed callable success reflection under injective observation, with funded and lossy counterexamples. |
+
+| Module | Purpose |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/P10/Interface.lean` | Typed backend opcode sites, complete emitted bytes, pinned decoder and on-demand fetched step facts. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/Controls.lean` | Inhabited nonzero prefix/immediate/context and actual decoder/fuel controls; fourteen scoped axiom reports. |

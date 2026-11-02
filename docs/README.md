@@ -116,3 +116,5 @@ V08's partial world-lowering checkpoint is recorded in
 intrinsic world/callable adapters and one-step Source-boundary components
 (custom errors, ABI, emit, Keccak, transient journals, payments). No theorem
 yet links Source executions to the intrinsic world or to bytecode.
+
+P10 fetched CALL/RETURNDATA/JUMP helper: [interface and handoff](feature-work/roadmap-v15-p10-fetched-call.md).
