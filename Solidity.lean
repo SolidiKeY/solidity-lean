@@ -196,6 +196,7 @@ import Solidity.Calculus.DecisionFixedArrayPair
 import Solidity.Calculus.DecisionBoundedUInt
 import Solidity.Calculus.DecisionBoundedInstance
 import Solidity.Calculus.DecisionBoundedInstanceSource
+import Solidity.Calculus.DecisionBoundedInstanceSearch
 import Solidity.Calculus.DecisionUIntShape
 import Solidity.Calculus.DecisionNumericLogic
 import Solidity.Calculus.DecisionNumericTraversal
@@ -275,6 +276,7 @@ import Solidity.Examples.DecisionFixedArrayStorage
 import Solidity.Examples.DecisionFixedArrayPair
 import Solidity.Examples.DecisionBoundedUInt
 import Solidity.Examples.DecisionBoundedInstance
+import Solidity.Examples.DecisionBoundedInstanceSearch
 import Solidity.Examples.DecisionUIntShape
 import Solidity.Examples.DecisionNumericLogic
 import Solidity.Examples.DecisionNumericTraversal

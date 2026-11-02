@@ -3066,3 +3066,69 @@ memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511 bound,
 remaining performance/backfill and full gates remain open. Kernel/Lean evidence
 only, no EVM claim. Goal/VM/branch/prior seals/failures preserved; no publication
 or whole-goal completion.
+
+
+## Formula-derived bounded literal search (2026-11-02)
+
+After sealed4040f2ad, owned DecisionBoundedInstanceSearch derives candidate
+literals from the actual uint guard bound. It checks the unchanged existing
+boundedUIntEstimate bound (imp guard body)≤511 BEFORE uintSamples allocation.
+Each candidate is rechecked by the exact supplied-literal recognizer and each
+hit retains its complete source witness. BoundedLiteralHit.valid is universal
+validity from that schema, not promotion of finite-state checks. Generic
+boundedUIntLiteralSearch_complete proves discovery for every in-range exact
+instance witness whose original source estimate fits. No all-target completeness,
+new fuel/node budget, default or observation change.
+
+BoundedUIntSourceHit retains real SourceReduction/UniversalPrefix outputs and
+the found witness; boundedUIntSource? computes those existing producers. Valid
+and ValidH follow through the checked prior transport, with the unchanged
+explicit hash-free premise. No assertion that arbitrary SourceHit values are
+recognized or decidable. SourceReduction and prefix limits remain unchanged.
+Actual keyed/field hits select literal1 after candidate0; generic completeness
+is instantiated on the actual key witness. Optional equality finds0 while the
+mismatched consequent refuses. Fixed-below-key remains outside this helper.
+Zero produces an empty candidate search; maximum uint fails the estimate
+before allocation. Their explicit true formulas remain valid. Existing three global unknown pins remain unchanged.
+Two root imports/two map rows are narrow additive registrations.
+
+Raw /workspace/va1-evidence/bounded-search-next. Five final gates pass: core
+MCP5.274s, clients MCP5.242s, explicit affected emission4.178s,15 public
+type/axiom reports9.424s, interpreted profile3.107s. Existing standard axiom
+subsets only. Profile key/field/optional=true; fixed/mismatch/zero/maximum=false.
+Times including printing3.294/.701/.159/.753/.135/.056/.089ms respectively.
+The maximum bound demonstrates early operational rejection, not a larger sample
+allocation. No EVM or global decision/performance completion claim.
+Initial intrinsic-contract inference/dependent-branch/keyword errors4.278s
+and budget rewrite attempts4.502/5.304s remain FAIL with exact sources/raw output.
+Final branch proof exposes the same source estimate and splits its actual check;
+no premise or budget was weakened. No source sorry/admit/new axiom.
+
+Original lock, Lean4.24.0/Lake5.0.0-src+797c613, threads1/Lean-j1, actual hard
+memory.max12884901888/swap.max0 and12GiB host reserve remain enforced. Sampled
+aggregate RSS1682260KiB, cgroup peak612401152bytes, minimum host available
+17084649472bytes;12 unsuccessful measurements retained. Reachability1122,
+layers180core, strict automatic491/61budgets/11refuted, trust1137sources/248sites
+and whitespace pass. Same broad85 docs/404 inventory findings remain FAIL
+against frozen-base analysis. Prior full/TypeExamples stops remain failures;
+VA1-Q2 remains held and no unchanged stopped full build is repeated.
+
+Root disk was measured at236MiB free after prior sealed exports; all old files/
+caches are preserved. Subsequent intermediate delivery uses a prerequisite Git
+bundle against the exact frozen8bd8742a base, plus an explicit pointer/checksum
+to the preserved standalone bundle at
+/workspace/va1-evidence/bounded-instance-next/delivery/va1.bundle. The task-owned
+incremental sealer verifies reconstruction in a fresh temporary bare repository
+and full object fsck, then removes only its own temporary verification directory.
+The original sealer and every prior standalone bundle remain unchanged. This is
+a packaging/resource choice, not a theorem, guard, goal or scope revision.
+Exact reconstruction/export checks remain pending until actually performed.
+
+Independent read-only finder/skeptic source reviews find no issues and distinguish
+estimate-qualified discovery/actual source transport from collector/decision
+integration; neither runs Lean/server/builds or edits. Final docs/export reviews
+and committed seal remain pending. Full original goal remains incomplete:
+global Residue/DecisionTheorem-prime/exhaustive target/hash bridge, general array
+collector/decision integration, wider memory, halting OR, broader revised M4
+boundary, whole-pipeline fuel/511 bound, remaining performance/backfill/full gates
+and held VA1-Q2 remain open. No goal/VM/branch reset or publication.

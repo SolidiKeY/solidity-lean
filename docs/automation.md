@@ -1335,6 +1335,18 @@ self-comparison lemmas move verbatim below the facade for this low API. The
 integration and global Residue remain open.
 
 
+VA1 formula-derived literal search (2026-11-02): DecisionBoundedInstanceSearch
+finds a literal from the actual guard bound after checking the existing
+boundedUIntEstimate≤511 before allocating samples. Each hit carries the exact
+instance witness and universal validity proof; no finite-state result is promoted.
+Schema completeness retains that original estimate premise. Actual keyed/field
+source hits select nonfirst literal1; optional mismatch, fixed source, zero and
+maximum-uint bounds refuse. Valid-but-refused controls separate refusal from
+invalidity. Existing hash-free premise and global unknown/Covered pins remain
+unchanged. This supplies ready source certificates; decision integration and
+the full global Residue/bridge remain open.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.
