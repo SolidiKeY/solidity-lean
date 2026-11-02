@@ -1350,3 +1350,6 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/AbiWorld/DynamicAggregateReadback.lean` | Arbitrary mixed word/bytes tuple member and constructor decoding, real outer allocation, original decreasing fuel and memory/calldata entry/body identity. |
 
 | `Backend/AbiWorld/ByteSequenceReadback.lean` | Actual arbitrary-count dynamic-byte Seq/mseq canonical readback, fixed/array constructors and typed memory/calldata entry/body identity with exact outer/inner allocations and original fuel/header guards. |
+
+| `Backend/AbiWorld/NestedByteReadback.lean` | Actual recursive Seq(array.bytes) codec/decoder induction, derived allocation and original sufficient fuel, nested fixed/array typed memory/calldata entry/body identity. |
+| `Backend/AbiWorld/NestedByteListReadback.lean` | Generic heterogeneous nested byte-array/validated-word canonical entry/body composition beyond LeafShapes, with actual head/offset/cursor observations. |

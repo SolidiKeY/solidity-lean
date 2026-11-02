@@ -2160,3 +2160,103 @@ immutable. Independent finder/skeptic source/roadmap PASS after the count-header
 coverage fix; committed artifact/first-seal reviews recorded separately. Original
 full assignment remains partial and goal blocked unchanged; all ready recursive
 Shape/Param proofs and real reserved producer/final gate obligations stay open.
+
+
+## Recursive nested byte-array and heterogeneous recovery (parent 03029891)
+
+`NestedByteReadback` consumes actual Seq(.array .bytes)n, preserving each
+inner Val.array's own dependent count and byte values. `inner_length` derives
+that an inner canonical bytes[] encoding has the SAME byte extent as its real
+decoder allocation (count+element pointers+rounded byte objects). go_cons,
+tail_cons/head_fold/head_length/fixed_encoded/fixed_length derive actual
+Seq.parts/assemble.go heads, ordered dynamic tails and exact tailCost.
+`element_at` applies the published owned byte-array decoder, whose own inner
+head offsets are relative to AFTER its count word. No decoder-success oracle
+or second codec/allocator/evaluator is introduced.
+
+`sequence_window` is typed induction over arbitrary actual outer/inner counts,
+base/index/cursor and byte windows. Recursively derived sufficient fuelNeed
+(nil=0, cons=max(innerCount+4,remainingNeed)+1) matches ORIGINAL mseq fuel
+decrements and sufficient inner decoder fuel. It is NOT a raised default,
+minimality or CPU/gas assertion. Actual input/prefix extents and allocation
+bounds justify offsets/counts/nonwrap; array length<W alone does not.
+`mdec_array` and `mdec_fixed` add the actual outer n*32+32 or n*32 allocation;
+both need fuelNeed+1. Outer dynamic offsets use the true post-count head base,
+each inner array uses its OWN post-count base. Fixed retains p+31<inputsize
+even n0, before allocation. `array_roundtrip`/`fixed_roundtrip` derive real
+enter/entry/body/verdict for memory and calldata, selectorlen4/arbitrary suffix/
+free/actual input+allocator bounds/fuelNeed+2; fixed also retains67<inputsize.
+Private conditional single-parameter composition is discharged by the actual
+constructor proofs, never counted as general recursive coverage.
+
+`NestedByteListReadback.roundtrip` additionally proves a generic heterogeneous
+[nested byte array, validated Word k] client beyond LeafShapes, not another
+fixed evaluated fixture. Arbitrary actual nested Seq and full Word.valid/lt
+are retained; scalar comes from the SAME actual codec input, no ByteRange
+restriction. Real assemble head offset64/marker word, reached allocation and
+same original parameter fuel derive through enter_append/body composition.
+This does NOT prove arbitrary recursive heterogeneous parameter lists.
+
+Inhabited controls include empty/multiple nested arrays/empty byte strings,
+zero/255/31/32/33 payloads; actual typed nested-array512 versus nested-fixed480
+allocation and full-word mixed marker; outer/inner offsets96/128/320 and64/96
+and32 at distinct post-count bases; exact-limit/oneover, incomingcursor17→529,
+actual fragment base68/index1/cursor13→365, and typed empty-fixed with real
+32-byte suffix/header. Shared offsets at outer and inner levels are ACCEPTED
+with exact DIFFERENT ordered values/cursors672/544, not rejected or silently
+equated. Wrong relative base/offset/count, truncated top/count/inner-count/
+element-head/byte-header/payload, outer/inner allocation before head-region
+validation, last-byte allocation before short payload versus header first,
+fuel9 failure versus sufficient10, and lazy-entry/body/readsOnly refusal
+controls retain the actual semantics. Intrinsic zero-fixed controls do not
+extend admitted Source signatures. None supplies machine/caller-frame origin.
+
+Raw initial failures are retained: wrapper namespace ambiguity produced a
+failed focused build before repair; narrower opened names fixed it without
+changing limits. The initial combined new-control file timed out at the
+UNCHANGED45-second MCP bound (partial=true, not a pass). New uncommitted tests
+were partitioned into typed fixtures and focused layout/failure/boundary/alias/
+head/fixture modules, preserving ALL expected statements and constants. This
+repair adds imports but no budget/trust/semantic shortcut; test speed history
+was inspected. Every module gets strict per-file diagnostics, and ONE serial
+raw driver checks the ENTIRE set under the original180-second aggregate bound.
+
+Remaining READY owned proofs: arbitrary recursive Shape element/tuple/fixed/
+array mseq/mmembers/mdec/melem with derived canonical extents/cost/fuel, and
+uniform recursive heterogeneous Param/Vals composition beyond the new generic
+two-parameter client. Actual definitions exist, no whole-lane wait excuse and
+no future success premise counted discharged. Full Source/native/runtime ABI
+decoding/dispatch, unknown-memory read/loop/encoder representation, raw return
+demand/same-invocation/static-frame/O1, CALL/RETURNDATA and arbitrary callee/
+callback/library/world/physical-resource producers remain reserved/open.
+PacketEmission/ReturnedBytes/fixed Failure.Slice are not widened or runtime
+encoding. All original Work/Backfill items partial/blocked, persistent goal
+blocked unchanged/no administration. Old caller proposal remains unadopted.
+
+Exact complete old/new vectors, actual axiom guards, raw failures, original
+resource caps/budgets/cache, import/static/docs gates and independent read-only
+source/committed-artifact/seal reviews are recorded in the new immutable export.
+Raw docs/frozen comparisons and historical Suite/full/cold/bodyexport failures
+remain FAIL; complete prior/publication doc finding equality is separate. No
+new native/EVM agreement/profile/Panic-control/fixture/pin/budget change, new
+peer input/VM/thread, push/merge/PR or ready-work-exhaustion claim. Proposed G03
+reconciliation only: original G40/G41/BackfillA recursive canonical progress.
+
+Final nested-byte recovery validation: strict per-file core/fixture/layout/
+failure/boundary/alias/head/case/root/aggregate MCP PASS, focused and registered
+changed closure PASS1080jobs. Entire final guarded control set passes ONE
+original180-second serial gate in75.325s; final367FULLvectors/141scalars
+preserve all300/120prior and initial export unchanged,143actual scoped
+standard-only axiom records. New core/control warnings0. Initialcombined
+45sMCPpartialtimeout and initial focusedbuild1 remain FAIL with raw source/logs;
+partition repair preserves expectations and all limits. Static imports/layers/
+orphans/trust/whitespace PASS. Rawdocs1/frozen86vs83comparison1 FAILretained;
+complete prior/publication finding-multiset equality separatelyPASS. Historical
+Suite124/181.061s,full1/5038.87s,cold124/5400.579s and initialbodyexport1 remain
+FAIL; no unchanged failed heavy retry. Actual Lean4.24.0/Lake5.0.0-src+797c613
+and KeySort2jobs before RUNTIME_GATE_PASS(runtimeonly). Hard12GiB/swap0/
+thread1/-j1/cache unchanged, cgrouppeak6522720256bytes/OOM0.364prior entries/
+25seals reverified immutable. Independent source/roadmap finder/skeptic PASS;
+committed artifact/firstseal reviews recorded separately. Whole original
+assignment partial/goalblocked unchanged; ready arbitrary recursive and
+heterogeneous-list proofs plus real Source/runtime/world/final gates remain.
