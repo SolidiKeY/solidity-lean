@@ -1914,3 +1914,46 @@ one worker,12GiB/noSwap/180s/writerlease/OOM0. Measured hostavailable minima
 17032348/17282444KiB are above12GiB, a measurement rather than an extra VM
 reservation. Full raw exits, scoped gates, doc multiset comparisons and exact
 committed source/bundle/interface seals are recorded in checkpoint26 handoff.
+
+
+## Checkpoint27: exact repeated-operation first-failure threshold
+
+IterationThreshold.of_failure consumes an actual finite error from the existing
+List.replicate/foldlM/Operation.run. Existing failure_iff and replicate shape
+extract k below the horizon and its full reached World; k is not a premise.
+All prefixes through k succeed, the actual next operation returns the identical
+THalt, and every longer horizon retains that exact error. cut_unique embeds
+two candidate repeated cuts in one actual list and consumes failure_cut_unique
+to derive global index/fullWorld/halt uniqueness, not merely horizon-local
+uniqueness. No new runner, loop, trace, world semantics or preservation oracle.
+
+The genuinely repeated existing paid call succeeds3times, with exact full
+World results created/paidOne/paidTwo/paidThree and observed balances3→0/0→3,
+then the same operation fails for funding at iteration index3. The threshold
+and world are extracted from the failed4-horizon and identified by real runs.
+Wrong threshold2, substituted paidTwo and wrong halt are rejected. A separate
+funded receiver fails at its first operation with ordered dead bytes; zero
+horizon succeeds and everypositive horizon preserves those bytes, rejecting
+the reversed order. Sixteen observed standard-axiom sets are guarded.
+
+Fresh admission now records actual host and parentcgroup headroom, disk/swap
+inside the existing writer lease before each Docker/Lean launch, refusing75
+before heavy work if insufficient. Original12GiB/noSwap/container/thread/cache/
+network/time settings remain unchanged. This preflight is not a future memory
+reservation; actual runtime samples and cgroup enforcement remain evidence.
+Independent read-only proof and admission-helper finder/skeptic reviews accept
+without findings. Kernel/model finite-prefix facts remain distinct from source
+loops/divergence, general payment/history/stipend and fetchedCALL/CREATE/JUMP.
+Original goal stays blocked/unchanged; no administration or humanhold change,
+including the unresolved V14send/transfer hold. Raw failures and doc comparisons
+remain separate in the exact-head checkpoint27 handoff and immutable export.
+
+Checkpoint27 all16guarded sets/focused37jobs/root1061+262/private1065+262
+pass, SolKey377/131/131. ActualLean4.24.0/Lake5.0.0-src+797c613 and
+KeySort2jobs precede runtime confirmation. Root/private aggregateRSS
+1716072/1713840KiB, one worker,12GiB/noSwap/180s/OOM0. Each heavy launch
+has a fresh under-lease ADMISSION receipt; no static audit measurement was
+reused as permission. Admission is a preflight, not a continuous reservation;
+the measurement helper and hard cap remain unchanged. Proof and guard reviews
+accept, including subsequent confirmation of all16axiom pins. Exact full
+signatures/heads, raw failures, scope/doc comparisons and seals are in handoff.

@@ -1,0 +1,69 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "prior_head": "261092cb571cf419abc6f9aa68f4d0a7f989cea0",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "owned_sources": [
+    {
+      "path": "Solidity/Backend/Executable/IterationThreshold.lean",
+      "blob": "2aef2288be9d0c893175297c11add541985059e8",
+      "sha256": "342af6104c49861ec392f89aa4637d9d8b211af825b7997dbc794f5c0eb66c3c"
+    },
+    {
+      "path": "Solidity/Backend/Executable/IterationThresholdChecks.lean",
+      "blob": "fecb1699edd227106ac8f84c2f3b04577f252e07",
+      "sha256": "0db1eb36ed3560e92d5e1734d42adab54f3d56157604fd4ead23492bd1121676"
+    },
+    {
+      "path": "Solidity/Backend/Executable/WorldPrefixes.lean",
+      "blob": "158c89b8c516cf6535a6e7cb54d83c2be15d99f5",
+      "sha256": "cd40b17ebe08f6caea20bc6af7642f57b9e2a5cd962c488a9ccf7f6a0b900a66"
+    },
+    {
+      "path": "Solidity/Backend/Executable/WorldPrefixChecks.lean",
+      "blob": "1af1b418acdd87270a570789e5acb21685580c00",
+      "sha256": "d3ff08ec3a559c2c19e423e95ed0c49d02e32cb6e8d1324108497d436d03a847"
+    }
+  ],
+  "published_read_only_producers": [
+    {
+      "path": "Solidity/Semantics/ContractWorld.lean",
+      "blob": "9f22396da6266fa083413689a5c2e4141e545a95",
+      "sha256": "4735cb8abc936b6cf3744756aed749ea8dacaec261368989752b9b5ded6d0554",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Semantics/ContractWorldCertificates.lean",
+      "blob": "0fa975f2afad4be5f35b06a7a53bbbc3fb538461",
+      "sha256": "66db990b890b04773f01e6eced951584fcdc75c5d8583ff076ab83214233a4d7",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Semantics/PaymentWorld.lean",
+      "blob": "4ec04782f251ab84282451600ca5dfef69572a23",
+      "sha256": "2abdb370c0dd297f91d9b42961e7d7ae6b49bdc58b741e14c34783babbd612d1",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    }
+  ],
+  "declarations": [
+    "Solidity.Backend.Executable.IterationThreshold.cut_unique",
+    "Solidity.Backend.Executable.IterationThreshold.earlier_success",
+    "Solidity.Backend.Executable.IterationThreshold.later_failure",
+    "Solidity.Backend.Executable.IterationThreshold.of_failure",
+    "Solidity.Backend.Executable.IterationThresholdChecks.fourth_payment",
+    "Solidity.Backend.Executable.IterationThresholdChecks.four_fail",
+    "Solidity.Backend.Executable.IterationThresholdChecks.intermediate_worlds",
+    "Solidity.Backend.Executable.IterationThresholdChecks.balance_observations",
+    "Solidity.Backend.Executable.IterationThresholdChecks.discovered",
+    "Solidity.Backend.Executable.IterationThresholdChecks.every_later",
+    "Solidity.Backend.Executable.IterationThresholdChecks.no_wrong_threshold",
+    "Solidity.Backend.Executable.IterationThresholdChecks.no_wrong_world",
+    "Solidity.Backend.Executable.IterationThresholdChecks.no_wrong_halt",
+    "Solidity.Backend.Executable.IterationThresholdChecks.first_failure",
+    "Solidity.Backend.Executable.IterationThresholdChecks.zero_horizon",
+    "Solidity.Backend.Executable.IterationThresholdChecks.no_reversed_bytes"
+  ],
+  "signature_evidence": "interface-types.log contains complete actual dependent signatures",
+  "derivation": "From actual replicate-n error, cut extraction +replicate append shape derives k<n/fullWorld/nextactualerror; all earlier\u2264k prefixes succeed, everylater horizon fails with identicalTHalt. Two candidatecuts are embedded in sameactualreplicatedlist to derive global k/world/halt uniqueness. No threshold or preservation oracle input.",
+  "clients": "Same existing paidOperation3successworlds created/paidOne/paidTwo/paidThree, fundingfailure4, fullworld results+orderedbalances3\u21920 and0\u21923; actualfirst-failure0 withfundedreceiver deadbytes andzerohorizonsuccess; wrongthreshold2/worldpaidTwo/halt/reversedbytes reject.",
+  "limits": "Finite intrinsic/model world-operation prefixes only, not loop/trace/divergence/G43history/pinneddecoder/kernelCALLCREATEJUMP correspondence. Goal unchanged and blocked; V14send/transfer and all other humanholds untouched."
+}

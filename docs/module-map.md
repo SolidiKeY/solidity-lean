@@ -1328,3 +1328,5 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Backend/Executable/RelocationCreation.lean` | Constructor/link-table consumer of whole relocated runtime, exact intervals and omitted-prefix negatives. |
 | `Backend/Executable/RelocationConstructor.lean` | Generic actual assembly/typed-link-to-constructor runtime equality, layout, targets and refusal consumers. |
 | `Backend/Executable/RelocationConstructorChecks.lean` | Nonzero-backedge, empty-runtime/argument and255/256 minimal-width constructor clients. |
+| `Backend/Executable/IterationThreshold.lean` | Derived unique first-error iteration/full world and all earlier/later repeated-operation horizons. |
+| `Backend/Executable/IterationThresholdChecks.lean` | Genuine repeated paid calls, first/zero boundary and exact wrong-threshold/world/ordered-halt controls. |
