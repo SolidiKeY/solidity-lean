@@ -4,7 +4,12 @@ source /emsdk/emsdk_env.sh >/dev/null 2>&1
 mkdir -p /work/gmp-build64
 cd /work/gmp-build64
 emconfigure ../gmp/configure --host=none --build=x86_64-pc-linux-gnu --disable-assembly --disable-shared --enable-static --prefix=/work/gmp-wasm64 CC='emcc -sMEMORY64=1' CFLAGS='-O2 -sMEMORY64=1 -flto -fwasm-exceptions' CC_FOR_BUILD=gcc
-make -j2 libgmp.la
+# Automake's default target generates BUILT_SOURCES (fib_table.h and the
+# other limb tables) before compiling the library. The direct libgmp.la target
+# skips those prerequisites in a fresh Git checkout.
+# Only libgmp and its headers are packaged; the SDK does not need texinfo or
+# a regenerated Info manual. Propagate the override through recursive make.
+make -j2 MAKEINFO=true
 mkdir -p /work/gmp-wasm64/lib /work/gmp-wasm64/include
 cp .libs/libgmp.a /work/gmp-wasm64/lib/
 cp gmp.h /work/gmp-wasm64/include/

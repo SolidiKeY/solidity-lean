@@ -204,6 +204,13 @@ site budget. Focused Chromium experiments reproduced Blob failures when a
 runtime's decoded buffers were queued together; decoding inside the serial
 write queue fixed that path. Both final reviews found no further actionable issue.
 
+The first clean Pages build exposed GMP's missing generated limb tables: invoking
+the library target alone skipped Automake's `BUILT_SOURCES`. The build now uses
+the default target, with unused Info-manual generation disabled. A fresh empty
+Docker build passed all layout assertions and the `2^256` arithmetic probe.
+The recovery workflow only replaces a failed-IDE run whose commit is an ancestor
+of the new push, so a delayed helper cannot cancel a newer build.
+
 The writer lock is held throughout changes and checks. Heavy jobs run sequentially.
 This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap
 and an available-memory guard; browser QA uses an owned-process RSS/available-memory
