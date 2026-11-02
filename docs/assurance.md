@@ -265,9 +265,9 @@ and CI showed the same failures without them).
   xs`, `se1 := read(memory, xs[1 + k])`, `se2 := k`: valid, and `sol_close`
   closes it with ten times the default heartbeats (diagnosis only, not
   committed), so what is left is the closer's cost, not a missing fact.
-  Probes (scratch, not committed): the same reads on the parameter itself
-  prove within budget, so do a view at offset 0 and a view read at a literal
-  index; a view at offset 1 or 2 read at a symbolic index times out
+  Probes at the time (scratch, not committed): the same reads on the parameter itself
+  proved within budget, so did a view at offset 0 and a view read at a literal
+  index; a view at offset 1 or 2 read at a symbolic index timed out
   (`xs[1:]`, `t[q] == xs[1 + q]`), and so does `t.length == xs.length - 1`.
   **Closed within the default budget (FU2-C round 2):** profiling the leaf
   with slice-free stand-ins showed two lowering artefacts, each harmless

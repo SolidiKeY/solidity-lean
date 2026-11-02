@@ -23,7 +23,8 @@ def byteRets (d : FunDecl) : Bool :=
         lookupBy (n ++ "[]") d.widths == some 8
 
 /-- Deliberately bounded admission: no function/reference arguments, storage
-results, recursive source entry or general mixed reference tuple forwarding. -/
+results or recursive source entry; reference results only `bytes`/`string`
+memory values (`byteRets`). -/
 def admitted (C : Contract) (f : String) (d : FunDecl) : Bool :=
   d.params.all (fun (_, T) => T matches .prim _) &&
   !(d.widths.any (fun (n, _) => (n.splitOn "#function").length > 1)) &&
@@ -102,7 +103,8 @@ def serialize (C : Contract) (d : FunDecl) : ElabM FunDecl := do
     body := declarations ++ original ++
       [.ret (some (.call "abi.encode" (d.rets.map fun (n, _) => .name n)))] }
 
-/-- The existing memory-only entry admission remains unchanged. -/
+/-- The memory entry admission (`admitted`, widened by lane FU2-C to every
+primitive/bytes/string mix). -/
 def prepare (C : Contract) (f : String) : ElabM FunDecl := do
   let some d := lookupBy f C.funs | throw "entry return bridge has no exact source declaration"
   unless admitted C f d do throw "entry return bridge needs primitive and bytes/string memory results only"

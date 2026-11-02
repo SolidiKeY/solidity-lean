@@ -33,6 +33,7 @@ private def C : Contract := contract!{
   function add16(uint16 a, uint16 b) returns (uint16) { return a + b; }
   function sx(int8 a, bool c) returns (int) { if (c) { return a; } return 0; }
   function v1arr(uint[] memory xs) returns (uint) { return xs.length; }
+  function sliceK(uint[] calldata xs, uint k) returns (uint) { uint[] calldata t = xs[0:]; return t[k] + (k = 5); }
   function shadow(uint8[] calldata x) returns (uint) { { uint[] memory x = new uint[](1); return x[0]; } }
   function bump() returns (uint) { counter++; return counter; }
 }
@@ -51,7 +52,7 @@ private def rows : List ImportRow :=
    ("copy", "copy(uint256[][])"), ("narrowAt", "narrowAt(uint8[],uint256)"),
    ("element", "element(uint256[][],uint256,uint256)"), ("enc", "enc(uint256[][])"),
    ("encIf", "encIf(uint256[][],uint256)"), ("reencode", "reencode(uint256[][3])"),
-   ("order", "order(uint8[],uint256)"), ("shadow", "shadow(uint8[])"),
+   ("order", "order(uint8[],uint256)"), ("shadow", "shadow(uint8[])"), ("sliceK", "sliceK(uint256[],uint256)"),
    ("add16", "add16(uint16,uint16)"), ("sx", "sx(int8,bool)"), ("v1arr", "v1arr(uint256[])"),
    ("bump", "bump()")].map fun (name, sig) =>
     { name, sourceSignature := sig, tag := .diamond, params := [], status := .elaborated, reason := "" }
@@ -146,6 +147,19 @@ private def panic12 : List Nat := (Semantics.encodePanic 0x12).map UInt8.toNat
 #eval (do
   let report := replay { C with evalOrder := EvalOrder.viaIR } rows (Json.mkObj [("vectors", toJson [
     vector "order(uint8[],uint256)" ["uint8[]", "uint256"] (words [0x40, 0, 1, 0x100]) [] true])])
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)
+
+-- A slice read whose index another operand reassigns (round-2 skeptic,
+-- pinned solc): `t[k] + (k = 5)` with `t = [100, 200, 300]`, `k = 1` reads
+-- `t[5]` (`Panic(0x32)`) in legacy (right operand first) and returns
+-- `200 + 5` under via-IR; the view's check and read see the same `k`.
+private def panic32 : List Nat := (Semantics.encodePanic 0x32).map UInt8.toNat
+#eval check [vector "sliceK(uint256[],uint256)" ["uint256[]", "uint256"]
+  (words [0x40, 1, 3, 100, 200, 300]) panic32 true] "working" 1
+#eval (do
+  let report := replay { C with evalOrder := EvalOrder.viaIR } rows (Json.mkObj [("vectors", toJson [
+    vector "sliceK(uint256[],uint256)" ["uint256[]", "uint256"] (words [0x40, 1, 3, 100, 200, 300]) (words [205])])])
   unless (report.getObjValAs? String "status").toOption == some "working" do
     throw (IO.userError report.pretty) : IO Unit)
 

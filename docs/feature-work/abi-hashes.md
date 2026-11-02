@@ -1699,8 +1699,9 @@ expectation, outside this lane).
 
 ### Handoff (withdrawn: closed in FU2-C round 2, see `docs/assurance.md`, test 31)
 
-Test 31's slice rows after FU2-C: `slicePast` proves; `sliceRead` and
-`sliceOfSlice` reach `sol_close` with valid leaves but exceed its budget.
+(History.) Before round 2, test 31's slice rows after FU2-C: `slicePast`
+proved; `sliceRead` and `sliceOfSlice` reached `sol_close` with valid leaves
+but exceeded its budget.
 The cost appears with a calldata view at a nonzero offset read at a
 symbolic index through the view's base alias (`#slice$t$view$base := xs`,
 `ie := 1 + se`): offset 0, literal indices, or the same reads on the
@@ -1754,7 +1755,10 @@ it is working, as before.
   reads a literal or `uint256` name index without a copy, and `sliceOpen`
   drops the always-true `len <= len` check of a view to the end; record in
   `docs/assurance.md` (test 31). Lowering only; outcomes unchanged (the
-  dropped check holds by construction, the index is evaluated once).
+  dropped check holds by construction; nothing is evaluated between the
+  view's check and its read, and a later operand's effect captures the
+  read first, `captureBefore`; control `sliceK` in
+  `tests/upstream/AbiEntryReplay.lean`, both operand orders).
 * **`smoke/bytes_and_strings.sol` works** (both pipelines): the entry return
   adapter (`Tools/EntryReturn.lean`, `admitted`, `byteRets`) admits any mix
   of primitive and `bytes`/`string` memory returns, each with its byte
