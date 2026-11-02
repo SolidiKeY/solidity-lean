@@ -1110,3 +1110,58 @@ Both independent read-only finder/skeptic reviews confirmed the corrected
 non-vacuity and complete-request comparison boundaries; neither ran Lean/builds.
 All selector/kernel/replay/premise/release flags remain false, all457 rows remain
 open, and every original Work/Backfill/release obligation and human hold persists.
+
+
+### Receipt capsule transport guard — incomplete intake (2026-11-02)
+
+The new requested actual local failure consumer is NOT implemented yet. V17's
+local transcription of the inline capsule has invalid base64 padding and does
+not authenticate to the required fa950fce archive SHA256. The failed copy is
+preserved separately; it is not evidence that the coordinator's original binary
+is corrupt. No payload was extracted, no actual receipt/schema was consumed,
+and no observed runner source was executed or imported. An exact binary relay
+into the persistent inbox was requested; this is evidence transport, not a
+semantic decision or execution-budget request.
+
+Independent read-only transport investigation tried bounded single-omission
+and distinct single-substitution SHA searches (931562/917126 candidates,
+4.48/4.33 seconds); neither produced the required digest. No candidate is
+accepted. These are host-only transport checks, not native validation attempts.
+
+The owned `scripts/roadmap-v17-local-receipt.py` now provides a bounded512MiB/
+60s wire-integrity guard: fixed production whole-archive SHA, single bounded
+gzip stream, canonical regular TAR payload members, duplicates/traversal/
+link/device rejection, 200KiB bounds, post-payload end blocks, exactly15 payload
+members plus SHA256SUMS and complete payload checksum verification. Test-only
+wire fixtures supply their independent expected digest; production has no
+self-derived expected-hash option. Only authenticated bytes may be extracted
+to a new external directory. Even successful byte intake returns exit2 with
+CAPSULE_BYTES_ONLY_NORMALIZER_PENDING and all proof/authentication flags false.
+Unsupported receipt schemas, including potential success schemas, are never
+accepted as native evidence by this guard.
+
+Ten synthetic wire controls pass, including link/device/duplicate/truncation/
+zero-payload end-block and corruption cases. Separate read-only finder/skeptic
+reviews accepted only this guard and CLI scope; actual capsule/schema/receipt
+reviews remain unfinished. No test substitutes for the requested actual-failure
+controls or normalization. The earlier13 selector controls remain retained,
+without repeated native/admission/version/setup/server/container invocation.
+
+User-reported service125, wrapper1 and preflight0 remain reported facts, not
+locally parsed capsule outcomes. Missing build/postflight markers stay unknown
+and are not filled with zero. Historical runner-before hash, actual selectors,
+source/object/cache/env/process provenance remain unauthenticated; the observed
+current runner must not be substituted for historical execution. Additional
+shared300s remains pending; original budget exhaustion, all457 rows, ten
+Derived17 structural rows, all original queues and human holds remain unchanged.
+
+Timestamp-only PAX metadata is tolerated and ignored as metadata; path, size,
+link or sparse overrides and other extended headers remain unsupported.
+Logical payload members must still be regular and match the complete checksum
+manifest. This format support is not authentication of the unavailable capsule.
+
+A final review caught timestamp metadata masking another hidden extension.
+The guard now validates every raw512-byte header, admits only regular payloads
+and timestamp-only PAX metadata, and rejects mixed PAX/GNU long-name/link or
+sparse/device extensions before logical TAR parsing. A combined-extension
+negative control preserves this format fence.
