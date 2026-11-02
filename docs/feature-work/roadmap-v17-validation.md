@@ -921,3 +921,67 @@ Raw docs remain exit 1 (48 current versus 46 frozen-base findings), with two
 reserved inline-assembly additions and zero new V17 findings. An earlier draft
 doc run's three missing-module path citations were corrected to module names;
 its raw 51-finding failure is retained separately. No final gate is waived.
+
+
+### Durable V09/V11 draft and dependency intake (2026-11-02)
+
+The new persistent coordinator inbox supplies independently pinned V09/V11
+UNVALIDATED draft archives and an exact V11 committed dependency archive.
+`scripts/roadmap-v17-drafts.py` adapts their actual manifests to the existing
+owned dependency consumer. It verifies complete candidate/source/module
+mappings and all dependency SHA256/Git-blob identities, preserves source-only
+signature claims, and keeps configurations inert. Supplementary archive
+lookup is explicit and hash-addressed, never an adopted branch or compiler
+assumption. Combined intake remains bounded to 16 MiB compressed, 32 MiB raw,
+256 members, 512 MiB address space and 60 seconds, with local serialization.
+Missing/extra source, wrong SHA/blob/module/size/head, corrupt providers and
+source receipts promoted as proof remain rejection controls. Unused provider
+files are reported separately from required consumer imports.
+
+All **245** V11 dependency files now match their requested SHA256 and Git blob;
+including three draft modules, actual lexical traversal reaches **248** modules
+with no missing source/hash assertions. This clears the earlier source-byte
+availability blocker only. Source signatures, every original representation,
+frame/world/allocator/arithmetic/fuel premise and complete ordered observations
+remain producer claims pending kernel/replay. No ancestry, declaration, axiom,
+source/compiler/EVM or release theorem follows from this inventory.
+
+The coordinator's actual V11 draft check remains **failed**: command exit 1,
+118.037 seconds, observed peak 891,924,480 bytes, no resource stop. Its exact
+archive digest, original command, raw syntax error at line 114 and standard
+axiom-guard mismatch at line 118 are retained. The owner is repairing the
+source; V17 did not edit it or repeat the known failed draft.
+
+Actual V09 traversal stops at three unavailable direct imports: ReframedSequence,
+ReframedLoops and LoopScopeTerminal. Separate availability accounting over all
+189 producer-listed dependencies identifies 26 unavailable/mismatched byte
+versions, including dependencies behind those missing roots. The external
+`V09-EXACT-SOURCE-REQUEST.json` lists every required path, Git blob, SHA256 and
+original producer head; no compatible replacement is assumed. Unreached
+inventory entries remain explicit rather than being silently counted checked.
+
+One fresh production admission probe found no Lean/Lake job and refused the
+unchanged effective-memory guard. No process was closed and no heavy query,
+container or build launched. The external probe failed to catch the guard's
+structured exception, so its original numeric observations were not retained;
+subsequent raw telemetry is explicitly separate and is not a second admission
+or permission to launch. V14 replay/V13 remain queued. Existing structured
+production collectors and resource policies were not weakened or changed.
+All457 rows, all ten incomplete Derived17 structural rows and every original
+G52-G55/Backfill obligation remain binding. The corrected compiler-readiness
+human-review hold and optional-vendor hold remain unchanged.
+
+The same exact dependency provider also clears the original committed C74
+reference packet's source-byte inventory: 246 required modules now match,
+including its original controls. Its earlier three missing files/four missing
+hash bindings remain historical NONPASS receipts; the new source-only result
+is separate. No original C74 kernel/replay check ran under refused admission.
+
+Independent read-only reviews found and fixed contradictory producer proof
+flags, omitted local byte-size checks and eager availability reads omitted
+from byte accounting. Full signature/required-declaration/constraint claims
+remain hash-linked to their complete source documents; none are treated as
+kernel metadata. Seventeen draft controls and 36 existing packet controls pass.
+The raw docs checker still exits 1 with 48 findings versus frozen-base 46;
+two reserved inline-assembly findings remain, with zero new V17 findings.
+Source-only layers/orphans/trust checks pass; final trust closure is not run.

@@ -75,7 +75,7 @@ def interface_request(packet, expected):
             "roots": roots, "sources": sources}
 
 
-def reconcile(packet, expected, request, directories):
+def reconcile(packet, expected, request, directories, supplementary=None):
     receipt, bodies = p._inspect(packet, expected)
     p.require(isinstance(request, dict) and set(request) ==
               {"schema", "producerHead", "producerBase", "packetSha256", "roots", "sources"},
@@ -108,6 +108,23 @@ def reconcile(packet, expected, request, directories):
         p.require(directory.is_absolute() and directory.is_dir() and
                   directory.resolve() == directory, "noncanonical source directory")
     active, done, used, issues, toolchain = set(), {}, set(), [], set()
+    supplementary = supplementary or []
+    p.require(isinstance(supplementary, list) and len(supplementary) <= 4, "supplementary archive count")
+    p.require(receipt["compressedBytes"]+sum(x["receipt"]["compressedBytes"] for x in supplementary) <= p.COMPRESSED,
+              "aggregate compressed archive bound")
+    p.require(receipt["rawBytes"]+sum(x["receipt"]["rawBytes"] for x in supplementary) <= p.RAW,
+              "aggregate raw archive bound")
+    p.require(len(receipt["members"])+sum(len(x["receipt"]["members"]) for x in supplementary) <= 256,
+              "aggregate archive member bound")
+    for item in supplementary:
+        p.require(isinstance(item, dict) and set(item) == {"receipt", "bodies"}, "supplementary shape")
+        p.require(item["receipt"].get("status") == "source-bytes-only", "supplementary source receipt")
+        for flag in ("kernelValidated", "replayValidated", "releaseClosed", "semanticPremisesDischarged"):
+            p.require(item["receipt"].get(flag) is False, "supplementary proof promotion")
+        p.require(set(item["bodies"]) == set(item["receipt"]["members"]), "supplementary member linkage")
+        for path, body in item["bodies"].items():
+            p.require(isinstance(body, bytes) and hashlib.sha256(body).hexdigest() ==
+                      item["receipt"]["members"][path], "supplementary source bytes changed")
     reads = []
     measured = {"bytes": 0, "edges": 0}
 
@@ -124,6 +141,13 @@ def reconcile(packet, expected, request, directories):
                 return None
             return data, "packet"
         candidates = []
+        for item in supplementary:
+            if path not in item["bodies"]: continue
+            data = item["bodies"][path]; account(data)
+            digest = hashlib.sha256(data).hexdigest()
+            origin = "archive:"+item["receipt"]["packetSha256"]
+            candidates.append({"path": origin+":"+path, "actualSha256": digest})
+            if digest == sha: return data, origin
         for directory in directories:
             candidate = directory/path
             if not candidate.exists() and not candidate.is_symlink(): continue
@@ -185,7 +209,12 @@ def reconcile(packet, expected, request, directories):
     return {"schema": 1, "status": "NONPASS" if issues else "lexical-source-match-only",
             "packetReceipt": receipt, "requestSha256": digest(request),
             "producerHeadClaim": request["producerHead"], "producerBaseClaim": request["producerBase"],
-            "modules": done, "issues": issues, "measurements": measured, "sourceInventorySha256": digest(sources),
+            "modules": done, "issues": issues, "measurements": measured,
+            "supplementaryArchives": [x["receipt"] for x in supplementary],
+            "unusedSupplementarySources": {x["receipt"]["packetSha256"]:sorted(path for path in x["bodies"]
+                if path.endswith(".lean") and not any(v.get("path")==path and
+                    v.get("origin")=="archive:"+x["receipt"]["packetSha256"] for v in done.values()))
+                for x in supplementary}, "sourceInventorySha256": digest(sources),
             "toolchainImportsPendingBinding": sorted(toolchain),
             "anchorValidated": False, "kernelValidated": False, "replayValidated": False,
             "semanticPremisesDischarged": False, "releaseClosed": False,
