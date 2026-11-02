@@ -1307,6 +1307,18 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.invalid_bool_refused": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.noncanonical_error_classified": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.short_word_refused": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.signed_then_bool": [
+  "propext"
+ ],
  "Solidity/Examples/Tactics/FilteredSets.lean:Solidity.Examples.Tactics.FilteredSets.one_correct": [
   "Classical.choice",
   "Quot.sound",
@@ -1360,6 +1372,42 @@
  "Solidity/Examples/Tactics/Nonvacuity.lean:Solidity.Examples.Tactics.Nonvacuity.good_provable": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.canonical_int_bind": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.canonical_int_discard": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.empty_rejected_before_discard": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.incomplete_suffix_still_ignored": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.integer_is_not_a_zero_return_signature": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.invalid_bool_rejected_even_if_discarded": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.nil_decoder_unchanged": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.one_byte_rejected_before_discard": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.signed_then_bool_kept": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.wrong_caller_type_has_no_projection": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.zero_return_accepts_empty": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.zero_return_ignores_extra_bytes": [
   "propext"
  ],
  "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.addSum": [
@@ -2309,6 +2357,12 @@
  "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Digests.identity_list": [
   "propext"
  ],
+ "Solidity/Semantics/ExternalReturnBytes.lean:Solidity.ExternalReturnBytes.decode_error": [
+  "propext"
+ ],
+ "Solidity/Semantics/ExternalReturnBytes.lean:Solidity.ExternalReturnBytes.decode_ok": [
+  "propext"
+ ],
  "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.Certificate.valid": [
   "Classical.choice",
   "Quot.sound",
@@ -2322,6 +2376,25 @@
  "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.SourceCertificate.valid": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.declared_failure": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.declared_success": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.decode_names": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.success_complete_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.success_reads_actual_words": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.success_validates_declaration": [
   "propext"
  ],
  "Solidity/Semantics/Termination.lean:Solidity.Stmt.loop_terminates_of_wellFounded": [

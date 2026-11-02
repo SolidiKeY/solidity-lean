@@ -948,3 +948,8 @@ import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.SignedPower
 import Solidity.Backend.Scalar.SignedPowerPost
 import Solidity.Backend.Scalar.SignedPowerPrefix
+
+import Solidity.Semantics.ExternalReturnBytes
+import Solidity.Semantics.PrimitiveReturnProjection
+import Solidity.Examples.Tactics.ExternalReturnBytes
+import Solidity.Examples.Tactics.PrimitiveReturnProjection
