@@ -101,3 +101,11 @@ class DifferentialControls(unittest.TestCase):
   for group,key in [('node','path'),('node','sha256'),('compiler','version'),('compiler','path'),('compiler','bytes')]:
    bad=copy.deepcopy(native);bad[group][key]='changed'
    with self.subTest(group=group,key=key),self.assertRaises(ValueError):d.check_native_identity(bad,current,{str(d.NODE):'c'*64})
+
+ def test_guard_refusal_keeps_numeric_observations(self):
+  with tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+   snapshot={'revision':'a'*40};observed={'hostMemAvailableBytes':20*1024**3,'enclosingCgroupLimitBytes':16*1024**3,'enclosingCgroupCurrentBytes':13*1024**3,'headroomBytes':3*1024**3}
+   with patch.object(d.p,'ensure_no_unresolved'),patch.object(d.e,'snapshot',return_value=snapshot),patch.object(d.subprocess,'check_output',side_effect=lambda argv,**kwargs:(d.ROOT/argv[-1].split(':',1)[1]).read_bytes()),patch.object(d,'input_files',return_value={}),patch.object(d.p,'resource_snapshot',return_value=observed),patch.object(d.p,'collect') as launch:
+    result=d.collect(Path(tmp)/'new')
+   launch.assert_not_called();self.assertEqual(result['preflightResources'],observed)
+   self.assertEqual(result['exit'],2);self.assertIsNone(result['rawCommandExit'])

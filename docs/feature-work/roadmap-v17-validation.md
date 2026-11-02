@@ -1310,8 +1310,44 @@ The wrapper records raw command, collector, verification and post-input phases
 separately. Recovery of a receipt after transport failure retains reported raw
 exit bytes without authenticating them. Malformed/truncated/nonobject receipts
 cannot bypass finalization. Passing requires every mandatory phase explicitly0.
-Thirteen host-only controls cover missing phases, raw124, transport exceptions,
+Fourteen host-only controls cover missing phases, raw124, transport exceptions,
 malformed receipts, changed inputs/Node/compiler, occupied output and original
 mount/cap/budget identity. Independent read-only finder/skeptic findings were
 fixed before execution. Any actual attempt and exact consumer revision are
 recorded separately; this paragraph is implementation evidence, not a run pass.
+
+At exact execution consumer47444a387ee634601ef912c28d950990288d0e84, the
+reusable differential collector PASSED in37.843s: all160 ordered records,
+ten original grammar families, four legacy/viaIR+optimizer settings and640
+agreements, zero mismatches/blocked. Collector/raw command/verification/post
+exits are all0. Measured native memory peak958967808bytes, cap12884901888,
+swap0, LEAN_NUM_THREADS1. Full approved compiler identity, generator replay,
+deployment, ABI/revert/storage/rollback observations and output hashes are
+retained; this is bounded external compiler/EVM evidence, not a kernel proof.
+The native input/source revision remains47444a38 even after this handoff commit.
+An additional actual-data test rejects reordered/truncated/partial matrix,
+changed source/compiler/generator/runtime/deployment identity, missing/duplicate
+manifest and corrupted return bytes without rerunning the producer.
+
+The existing complete component aggregator now consumes the actual five V13
+and four V14 retained checked declarations plus their live replays. Both narrow
+component evidence sets are consistent and have no conflicting import-source
+hashes. Their different producer revisions remain distinct, proposition inputs
+remain obligations, and all457 rows remain OPEN. No joint tree/native semantic
+closure is inferred from retained metadata.
+
+Exact remaining inputs are exported as BLOCKING-INPUTS.json: selected473da894
+strict/corpus/TestSuite receipts (historical048a74de report lacks Lean revision
+binding); a same-statement smaller Derived17 theorem value within100000nodes;
+actual clean/default/compiler/frontend/suite/cache-pair receipts; concrete G01
+StateExport/PublicCorrectness fields over the approved source/intrinsic/EVM
+interfaces; and callback/wider-combination witnesses from the reserved published
+runner. Each request binds existing source/input hashes, actual contracts or
+failed receipts. No new theorem/premise/exclusion is invented. Whole-source and
+Compiler9 unchanged timeouts are not retried, inherited warm caches are not
+called clean, and final G54.03/G55 gates remain unlaunched.
+
+The final failure-accounting refinement also retains numeric preflight resource
+observations before guard refusal; a3GiB effective-headroom control proves no
+collector launch. This and the stronger host comparator controls postdate the
+actual47444a38 native run and do not relabel it as a later-head run.

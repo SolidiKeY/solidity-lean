@@ -144,7 +144,7 @@ def collect(out):
             e.require((ROOT/name).read_bytes()==subprocess.check_output(['git','show',current['revision']+':'+name],cwd=ROOT,timeout=60),
                       'uncommitted execution consumer')
         before=input_files()
-        measurements=p.resource_snapshot();p.check_headroom(measurements)
+        measurements=p.resource_snapshot();result['preflightResources']=measurements;p.check_headroom(measurements)
         stat=os.statvfs(ROOT);disk=stat.f_bavail*stat.f_frsize
         e.require(disk>=p.resources.MIN_FREE_DISK,'disk admission refused')
         wrapper=out/'git-wrapper';wrapper.write_bytes(git_wrapper());wrapper.chmod(0o755)
