@@ -46,7 +46,7 @@ stack=list(out)
 while stack:
     for m in rev.get(stack.pop(),()):
         if m not in out: out.add(m); stack.append(m)
-print(" ".join(sorted(out & mods.keys())))
+print(" ".join(sorted(m for m in out if pathlib.Path(m.replace(".","/")+".lean").is_file())))
 PY
 ) || return 1
   echo "targets: ${targets:-none}"
