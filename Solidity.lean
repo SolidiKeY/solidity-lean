@@ -75,6 +75,7 @@ import Solidity.Backend.Aggregates.G18Storage
 import Solidity.Backend.Aggregates.G18StorageCellControls
 import Solidity.Backend.Aggregates.G18StorageClient
 import Solidity.Backend.Aggregates.G18StorageValues
+import Solidity.Backend.Aggregates.MemoryLocalDeleteControls
 import Solidity.Backend.Aggregates.NestedCalldataControls
 import Solidity.Backend.Assembler
 import Solidity.Backend.CalldataPackets.RawAddress.Controls
@@ -2537,6 +2538,7 @@ import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger
 import Solidity.Source.Machine
+import Solidity.Source.MemoryLocalDelete
 import Solidity.Source.Observe
 import Solidity.Source.Overloads
 import Solidity.Source.Preservation.AllocationControls
