@@ -1594,3 +1594,32 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Examples/Tactics/CallFunctionShareControls.lean` | Parsed countermodels and transactional profile/no-shrink refusal controls |
 | `Calculus/CloseCallSharing.lean` | Bounded default leaf consumer; synchronous internal profile certificates and disjoint plain/joined routes |
 | `Examples/Tactics/CallSharingDefault.lean` | Closer-only import, default source proofs, named leaf and joined-call controls |
+
+### V15 P10 fetched execution step (Bridge)
+
+| Module | Purpose |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/P10/Interface.lean` | Typed backend opcode sites, complete emitted bytes, pinned decoder and on-demand fetched step facts. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/Controls.lean` | Inhabited nonzero prefix/immediate/context and actual decoder/fuel controls; fourteen scoped axiom reports. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/Execution.lean` | Exact charged fetched CALL/return-data/jump operations and X continuation; no assumed execution result. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ExecutionControls.lean` | Funded/underfunded/static account execution, complete18-field outcomes, copy opacity and jump/resource negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/Modular.lean` | Full-precision ADDMOD/MULMOD scalar representation, actual fetched charged State and X continuation with explicit gas/stack bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ModularControls.lean` | Complete-State overflow-sensitive modular, zero/max modulus,1024-stack and fetched combination controls; actual error-order negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ExponentConsumer.lean` | Scalar/reference EXP representation, actual fetched charged execution and proved1610 local gas bound. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PowerControls.lean` | Whole-State nonzero, wrap, maximal-exponent, stack, charge and actual EXP→ADDMOD controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StackFamilyConsumer.lean` | All legal typed DUP/SWAP indices against actual emitted decoding, charged checks and fetched State/X. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StackFamilyControls.lean` | Populated every-index clients, exact capacity boundaries, actual gas/arity/fuel/index/order negatives and fetched combination. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedDivisionConsumer.lean` | Bounded signed word transport and actual emitted/charged/fetched SDIV/SMOD State/X with explicit gas/stack bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedDivisionControls.lean` | All sign combinations, raw zero/minimum wrap, narrow cleanup, full stack, ordered errors and complete fetched negative sequence. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ArithmeticShiftConsumer.lean` | Actual SAR/BitVec/Scalar word transport, emitted decoding and charged fetched State/X, including saturation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ArithmeticShiftControls.lean` | Full-State signed/count/boundary/resource negatives and actual fetched SAR→SMOD; no huge saturated powers. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadConsumer.lean` | Actual charged/fetched SLOAD/TLOAD, exact warm/cold resource bounds and existing finite typed source-observation transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadControls.lean` | Populated root/transient/source witnesses, exact two-insertion warming states and gas/fuel/permission/coverage negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentConsumer.lean` | Actual charged fetched BALANCE and explicit G31 account-ledger observation transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentControls.lean` | Populated complete-state balance, alias, warm/cold, ordered failure and ledger-origin controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean` | All117 non-immediate Backend/reference decoder targets and fetched dispatch, exposing CLZ→INVALID. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean` | Populated family, ordered byte/state and real fallback/PC/opcode decoder controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderAgreement.lean` | Every intrinsic PUSH0..32 payload versus actual reference extraction/reader/fetched dispatch, with explicit bounds and modulo. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderControls.lean` | All-width nonuniform payloads, endian/length/truncation controls and arbitrary-seed whole-State PUSH client. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean` | H12 FROZEN V1: eighteen exact decode/charged/continuation proof-field signatures, no axioms or placeholders. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/FrozenWitness.lean` | Concrete frozen API inhabitant from existing checked P10 laws; no new execution proof. |
