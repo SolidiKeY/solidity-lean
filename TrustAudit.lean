@@ -63,6 +63,8 @@ import Solidity.Source.Session
 import Solidity.Source.SoundnessExamples
 import Solidity.Source.DecodeExamples
 import Solidity.Source.CalldataExamples
+import Solidity.Source.Decode
+import Solidity.Source.Calldata
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.Dispatch
 import Solidity.Examples.Tactics.FunctionTypes
