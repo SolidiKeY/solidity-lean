@@ -205,3 +205,5 @@ VY2 storage/balance input stability: [lane checkpoint](feature-work/inline-assem
 VY2 effectful balance input proofs: [lane checkpoint](feature-work/inline-assembly-vy2.md).
 
 VY2 scratch-copy physical frame laws: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 residual memory-window preparation and retained-tail laws: [lane checkpoint](feature-work/inline-assembly-vy2.md).

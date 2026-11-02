@@ -999,3 +999,7 @@ import Solidity.Yul.Views.StorageBalanceControls
 import Solidity.Yul.Views.SourceBalanceOperandControls
 
 import Solidity.Yul.Views.ScratchHeapControls
+
+import Solidity.Yul.Views.ResidualWindowControls
+
+import Solidity.Yul.Views.RetainedWindowControls

@@ -642,3 +642,5 @@ VY2 storage-effect/input checkpoint: validator-derived persistent/transient pack
 VY2 actual effectful balance operand equations and exact halt-prefix controls: [lane checkpoint](inline-assembly-vy2.md). Conditional actual-run premises remain explicit; no global producer or target-ledger adequacy claimed.
 
 VY2 constructive scratch-copy/whole-heap view and computed source writeback transport: [lane checkpoint](inline-assembly-vy2.md). General output-memory and compiler/call adequacy remain open.
+
+VY2 checked residual-window/real retained-tail ownership and actual source writeback: [lane checkpoint](inline-assembly-vy2.md). No new admission or full memory safety/call/compiler claim.
