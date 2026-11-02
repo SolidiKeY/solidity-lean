@@ -3384,3 +3384,36 @@ All original Work1–6/Backfills A/B stay partial. Cached124/120.820, raw124,
 full124/300/TestSuite-sort unreached and normal/strict docs1 remain failed.
 No unchanged heavy retry, goal administration, publication, peer transfer,
 exclusion/premise change or independent-work-exhaustion claim follows.
+
+
+### C44 — invocation-scoped exact-byte digest experiment (partial)
+
+Production `fixture-cache.mjs` is unchanged. New host-only
+`tests/internal-flow/profile-byte-digests.mjs` runs the exact committed key body
+for all 27 actual closures, using `exact-byte-digest.mjs` only in its candidate
+hash wrapper. Every original object read remains. A hit requires exact fresh
+Buffer equality with a private copy. The final candidate bounds retained payload
+to 512 MiB and entries to 4096; these are not a total RSS guarantee. Cache lifetime
+is one experiment sweep, never persisted or used by production or Lean.
+
+One paired instrumented run preserved complete ordered inputs and exact outcomes
+(22 stale errors and five returned helpers each, neither cache authentication).
+Both variants read 5038 objects / 9,349,966,680 bytes. Key totals were
+10.929s versus 6.837s; measured candidate hashed 399,039,856 bytes, compared
+8,950,926,824 bytes, and retained 399,039,856 bytes. Whole experiment24.779s,
+sampled peak914068 KiB. Warm order/GC/instrumentation limit attribution; this is
+not combined Lean/report/postcheck timing or proof of aggregate headroom.
+The measured helper preceded the metadata entry cap; its exact bytes are retained
+in evidence. No affected gate was retried and no candidate was installed.
+
+Host controls cover private-copy mutation, same-size/same-mtime real-file changes,
+changes between reads/calls/owners, oversized bypass, eviction/zero-byte entry
+bounds, malformed bytes, original two-read manifest interleaving, source/object/
+guard/config/manifest mutations and report corruption/order. Existing27fixtures,
+739pins, all mathematical types/observations and production authentication remain
+unchanged. Finder/skeptic require authenticating the helper and explicitly
+clearing lifetime before any future production adoption; both remain adoption
+requirements, not discharged runtime claims. All Work1–6/BackfillA–B remain
+partial. Cached124/120.820s, raw124, full124/300s (TestSuite/sort unreached),
+and docs1 remain failures. No Lean/cache preparation or aggregate/raw/full gate
+was run in C44. The original blocked goal is untouched.
