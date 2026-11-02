@@ -2765,8 +2765,8 @@ No feature cell, by reason: G00: scope freeze (integrated, wave 0); G02: build m
 ## Integration steps (for the coordinator)
 
 These change shared lines this group may not rewrite. Steps 1, 3 and 4 landed
-on 2026-11-02 (Terra pilot); `PROPOSED_PACKAGES` is gone from the script, which
-now reads the G24 children from the manifest. Step 2 is still open: its VM
+on 2026-11-02; `PROPOSED_PACKAGES` is gone from the script, which now reads
+the G24 children from the manifest. Step 2 is still open: its VM
 numbering is stale and waits on G02, and with it V23's share of step 3.
 
 1. **Manifest (`coverage-plan.md`, "Proof work-package manifest").** Insert
