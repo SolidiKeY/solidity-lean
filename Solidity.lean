@@ -1220,6 +1220,19 @@ import Solidity.Backend.InternalFlow.RuntimeFrameResult
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveProducer
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind
+import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducer
+import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerControls
+import Solidity.Backend.InternalDispatch
+import Solidity.Backend.InternalDispatch.Agreement
+import Solidity.Backend.InternalDispatch.Chain
+import Solidity.Backend.InternalDispatch.Controls
+import Solidity.Backend.InternalDispatch.FrozenV1
+import Solidity.Backend.InternalDispatch.FrozenV1Controls
+import Solidity.Backend.InternalDispatch.FrozenV2
+import Solidity.Backend.InternalDispatch.FrozenV2Controls
+import Solidity.Backend.InternalDispatch.FrozenV3
+import Solidity.Backend.InternalDispatch.FrozenV3Controls
+import Solidity.Backend.InternalDispatch.Typed
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
