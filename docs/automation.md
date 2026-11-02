@@ -1280,6 +1280,18 @@ memCovered intentionally recognizes the new certified class. Global Residue/
 DecisionTheorem-prime, wider memory and full gates remain open.
 
 
+VA1 formula-work normalization (2026-11-02): Fml.normalizationWork counts real
+formula visits separately from arithmetic source size. The existing actual
+normalizer is proved to consume exactly this shared node work on QFUIntLinear
+inputs, visiting both children before smart truth collapse. Public by_work/
+at_work and positive-prefix theorems construct real normalization certificates
+at formula-derived budgets without a supplied normalizer equation. Tests retain
+5-versus4 truth-collapse refusal, counts3/9/11 and the extra prefix visit, plus
+existing proved/refuted/unknown controls. Generalized indexed recursion follows
+G0. Runtime2048 and the later511-node cut remain unchanged; the broader runtime
+fuel/cut obligation and global Residue theorem are still open.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

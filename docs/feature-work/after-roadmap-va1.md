@@ -2756,3 +2756,68 @@ backfill and full gates remain incomplete. Existing standalone fixed-array,
 numeric and source-work components remain delivered. Ready owned work includes
 actual keyed-array syntax/coverage and exact formula-normalizer work; VA2 sharing
 is not a prerequisite to those. No whole-goal completion/reset or publication.
+
+
+## Exact formula-work normalization component (2026-11-02)
+
+After sealed4b8bf63f, owned DecisionNumericNormalization defines intrinsic
+Fml.normalizationWork with generalized Fml.casesOn/structural recursion: truth/
+equality1, not/positive prefix add1, conjunction/implication add both child work
+plus1. Other constructors receive a fallback number without any success theorem.
+The exact real private normalizer view already linked to ProgramNormalization
+now has a proved shared-state invariant: for all C/Γ/φ.QFUIntLinear and fuel/
+budget each at least φ.normalizationWork, an actual reduction d and remainder
+rest satisfy actualNormalization fuel φ budget=some(d,rest) and
+rest+φ.normalizationWork=budget. Aggregate work is a sufficient depth bound,
+not a separately computed minimal height. Both children consume visits before
+smart truth collapse; term arithmetic does not consume extra formula visits.
+
+Public qfUIntLinear_normalization_by_work accepts only syntax evidence and a
+source-work budget inequality. qfUIntLinear_normalization_at_work removes that
+inequality by choosing actual computed work. qfUIntPrefix_normalization_by_work
+constructs a real equivalent DeclarationReduction for one positive uint binder
+at body-work+1. No supplied output/certificate/normalizer premise, new axiom,
+model change or trust shortcut. This certifies real normalization, not the later
+source translation/cut/exhaustive decision theorem. Runtime2048 and511-node cut
+remain unchanged; deriving the whole requested formula-dependent decision bound
+is still open. Existing weight-based APIs/proofs stay unchanged.
+
+Inhabited clients pin counts collapsed5/short3/positiveBody9/negativeBody11;
+actual generic certificates for collapsed and both positive-prefix formulas;
+5-versus4 truth-collapse consumption; arithmetic weight strictly above visits;
+prefix10-versus9 and12-versus11 successes/refusals. Existing positive proved,
+negative returned refutation and below-key unknown controls remain unchanged.
+No new verdict/default/refusal/profile/pin changes. No imports/registrations or
+producer files change in this checkpoint; four frozen direct definitions and
+exact hash premises remain intact.
+
+Raw evidence /workspace/va1-evidence/normalizer-work-next. Final current-tree
+core MCP12.801s, client MCP7.413s, explicitly emitted affected client/build6.305s
+and public11-declaration type/axiom audit9.507s pass. All edited files are emitted
+before audit. Existing standard axiom subsets only. Initial recursor positivity
+proof used looping simp and failed11.659s; explicit definitional constructor
+proofs fix it without budget changes. Initial client all-conjunction decide
+failed6.397s because equality of optional proof certificates has no Decidable
+instance; exact definitional equalities fix it. Both failure sources and raw
+outputs are retained. Neither failed attempt counts as pass.
+
+Same original writer lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, threads1/
+Lean-j1, one bounded job and actual memory.max12884901888/swap.max0 plus12GiB
+host reserve. Final measured aggregate RSS2245356KiB, cgroup peak1289093120bytes,
+minimum host available16426991616bytes;9 failed measurement samples retained.
+Strict automatic/layers/trust/reachability/whitespace pass; broad docs85 and
+inventory404 differences remain FAIL against frozen base. Existing full-gate/
+TypeExamples resource failures remain failures and VA1-Q2 remains held.
+
+Independent read-only finder/skeptic reviews verify real shared-state accounting,
+both-branch collapse controls and unchanged later budgets. Skeptic identified
+ordinary indexed pattern matching; generalized recursor fixes G0 before final
+checks. No final source findings. Reviewers run no Lean/server/build or edits.
+Committed package review/export seal remains pending until actual export.
+
+All original global Residue/DecisionTheorem-prime/target/hash completeness,
+keyed/field/struct/nested arrays, broader memory, halting OR, broader revised M4
+boundary, full formula-derived runtime fuel, remaining performance/backfill and
+final/full gates remain open. This independent fuel component does not consume
+VA2 sharing ownership or TypeExamples repair. Prior seals/failures and original
+goal identity are preserved; no push/merge/tag or whole-goal completion.

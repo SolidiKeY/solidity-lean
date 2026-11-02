@@ -214,6 +214,125 @@ private theorem qfUIntLinear_normalizer_state {C : Contract} (fuel budget : Nat)
         · change budget + 1 ≤ rest + (φ.uintQFWeight + ψ.uintQFWeight + 1)
           omega
 
+/-- Formula visits in the existing normalizer. Arithmetic operands are not
+visited by this traversal. Unsupported constructors are not certified here. -/
+def _root_.Solidity.Fml.normalizationWork {C : Contract} {Γ : Ctx} (φ : Fml C Γ) : Nat := by
+  apply @Fml.casesOn C (fun Γ φ => Nat) Γ φ
+  · intro Γ; exact 1
+  · intro Γ p a b; exact 1
+  · intros; exact 1
+  · intro Γ φ; exact φ.normalizationWork + 1
+  · intro Γ φ ψ; exact φ.normalizationWork + ψ.normalizationWork + 1
+  · intro Γ φ ψ; exact φ.normalizationWork + ψ.normalizationWork + 1
+  · intros; exact 1
+  · intros; exact 1
+  · intros; exact 1
+  · intro Γ x p φ; exact φ.normalizationWork + 1
+  all_goals intros; exact 1
+termination_by structural φ
+
+theorem qfUIntLinear_work_positive {C : Contract} {Γ : Ctx} {φ : Fml C Γ}
+    (h : φ.QFUIntLinear) : 0 < φ.normalizationWork := by
+  cases h with
+  | tt => exact Nat.zero_lt_succ 0
+  | eq => exact Nat.zero_lt_succ 0
+  | @not φ hφ =>
+    change 0 < φ.normalizationWork + 1
+    exact Nat.zero_lt_succ _
+  | @and φ ψ hφ hψ | @imp φ ψ hφ hψ =>
+    change 0 < φ.normalizationWork + ψ.normalizationWork + 1
+    exact Nat.zero_lt_succ _
+
+/-- Exact consumption of the real shared node budget, before smart formulas
+collapse truth branches. The aggregate work is also a sufficient depth bound. -/
+private theorem qfUIntLinear_normalizer_work {C : Contract} (fuel budget : Nat)
+    {Γ : Ctx} {φ : Fml C Γ} (h : φ.QFUIntLinear)
+    (hf : φ.normalizationWork ≤ fuel) (hb : φ.normalizationWork ≤ budget) :
+    ∃ (d : DeclarationReduction φ) (rest : Nat),
+      actualNormalization fuel φ budget = some (d, rest) ∧
+      rest + φ.normalizationWork = budget := by
+  induction fuel generalizing Γ φ budget with
+  | zero => exact False.elim (Nat.not_lt_of_ge hf (qfUIntLinear_work_positive h))
+  | succ fuel ih =>
+    cases budget with
+    | zero => exact False.elim (Nat.not_lt_of_ge hb (qfUIntLinear_work_positive h))
+    | succ budget =>
+      cases h with
+      | tt => exact ⟨DeclarationReduction.keep .tt, budget, actual_truth fuel budget, rfl⟩
+      | @eq a b ha hb' =>
+        exact ⟨DeclarationReduction.keep (.eq a b), budget, actual_eq fuel budget a b, rfl⟩
+      | @not φ hφ =>
+        have hfφ : φ.normalizationWork ≤ fuel := by
+          change φ.normalizationWork + 1 ≤ fuel + 1 at hf
+          omega
+        have hbφ : φ.normalizationWork ≤ budget := by
+          change φ.normalizationWork + 1 ≤ budget + 1 at hb
+          omega
+        obtain ⟨d, rest, hd, hc⟩ := ih budget hφ hfφ hbφ
+        refine ⟨DeclarationReduction.not d, rest, ?_, ?_⟩
+        · rw [actual_not, hd]
+          rfl
+        · change rest + (φ.normalizationWork + 1) = budget + 1
+          omega
+      | @and φ ψ hφ hψ | @imp φ ψ hφ hψ =>
+        have hfφ : φ.normalizationWork ≤ fuel := by
+          change φ.normalizationWork + ψ.normalizationWork + 1 ≤ fuel + 1 at hf
+          omega
+        have hfψ : ψ.normalizationWork ≤ fuel := by
+          change φ.normalizationWork + ψ.normalizationWork + 1 ≤ fuel + 1 at hf
+          omega
+        have hbφ : φ.normalizationWork ≤ budget := by
+          change φ.normalizationWork + ψ.normalizationWork + 1 ≤ budget + 1 at hb
+          omega
+        obtain ⟨d, middle, hd, hc⟩ := ih budget hφ hfφ hbφ
+        have hbψ : ψ.normalizationWork ≤ middle := by
+          change φ.normalizationWork + ψ.normalizationWork + 1 ≤ budget + 1 at hb
+          omega
+        obtain ⟨e, rest, he, ec⟩ := ih middle hψ hfψ hbψ
+        first
+        | refine ⟨DeclarationReduction.and d e, rest, ?_, ?_⟩
+        | refine ⟨DeclarationReduction.imp d e, rest, ?_, ?_⟩
+        · first | rw [actual_and, hd] | rw [actual_imp, hd]
+          change (actualNormalization fuel ψ middle).map _ = _
+          rw [he]
+          rfl
+        · change rest + (φ.normalizationWork + ψ.normalizationWork + 1) = budget + 1
+          omega
+
+/-- A source-derived sufficient budget for actual normalization; no fixed2048
+premise or supplied normalization certificate. This is not the later511-node cut. -/
+theorem qfUIntLinear_normalization_by_work {C : Contract} {Γ : Ctx}
+    {φ : Fml C Γ} (h : φ.QFUIntLinear) (budget : Nat)
+    (hb : φ.normalizationWork ≤ budget) :
+    ∃ d : DeclarationReduction φ, ProgramNormalization.ofFormula? budget φ = some d := by
+  obtain ⟨d, rest, hd, hc⟩ := qfUIntLinear_normalizer_work budget budget h hb hb
+  refine ⟨d, ?_⟩
+  change (actualNormalization budget φ budget).map Prod.fst = some d
+  rw [hd]
+  rfl
+
+/-- Formula-derived aggregate work itself suffices, with no fixed budget
+hypothesis. This does not assert completeness of any later decision route. -/
+theorem qfUIntLinear_normalization_at_work {C : Contract} {Γ : Ctx}
+    {φ : Fml C Γ} (h : φ.QFUIntLinear) :
+    ∃ d : DeclarationReduction φ,
+      ProgramNormalization.ofFormula? φ.normalizationWork φ = some d :=
+  qfUIntLinear_normalization_by_work h φ.normalizationWork (Nat.le_refl _)
+
+/-- One positive binder adds exactly one visit to the source-derived budget. -/
+theorem qfUIntPrefix_normalization_by_work {C : Contract} (name : Var)
+    {φ : Fml C [.val .uint]} (h : φ.QFUIntLinear) :
+    ∃ d : DeclarationReduction (.all name .uint φ),
+      ProgramNormalization.ofFormula? (φ.normalizationWork + 1) (.all name .uint φ) =
+        some d := by
+  obtain ⟨d, rest, hd, hc⟩ := qfUIntLinear_normalizer_work
+    φ.normalizationWork φ.normalizationWork h (Nat.le_refl _) (Nat.le_refl _)
+  refine ⟨DeclarationReduction.all name .uint d, ?_⟩
+  change (actualNormalization (φ.normalizationWork + 1) (.all name .uint φ)
+    (φ.normalizationWork + 1)).map Prod.fst = _
+  rw [actual_all, hd]
+  rfl
+
 /-- The public computation returns an actual equivalent certificate on the
 whole logical numeric grammar. Smart truth reductions may change its syntax. -/
 theorem qfUIntLinear_normalization {C : Contract} {Γ : Ctx} (budget : Nat)

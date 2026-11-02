@@ -108,6 +108,40 @@ theorem sufficient_not_minimal : shortBody.uintQFWeight > 3 ∧
 
 theorem zero_budget_refusal : ProgramNormalization.ofFormula? 0 positive = none := by rfl
 
+/-- Formula work counts actual visits, separately from arithmetic/source weights. -/
+theorem exact_work_counts : collapsed.normalizationWork = 5 ∧
+    shortBody.normalizationWork = 3 ∧ positiveBody.normalizationWork = 9 ∧
+    negativeBody.normalizationWork = 11 := by decide +kernel
+
+/-- The formula-derived theorem supplies real certificates, not an assumed output. -/
+theorem derived_work_certificates :
+    (∃ d : DeclarationReduction collapsed,
+      ProgramNormalization.ofFormula? collapsed.normalizationWork collapsed = some d) ∧
+    (∃ d : DeclarationReduction positive,
+      ProgramNormalization.ofFormula? (positiveBody.normalizationWork + 1) positive = some d) ∧
+    (∃ d : DeclarationReduction negative,
+      ProgramNormalization.ofFormula? (negativeBody.normalizationWork + 1) negative = some d) :=
+  ⟨qfUIntLinear_normalization_at_work collapsed_grammar,
+    qfUIntPrefix_normalization_by_work (.user "x") positive_grammar,
+    qfUIntPrefix_normalization_by_work (.user "x") negative_grammar⟩
+
+/-- Both truth branches are visited even when the output collapses to one node. -/
+theorem exact_work_boundary :
+    ProgramNormalization.ofFormula? (collapsed.normalizationWork - 1) collapsed = none ∧
+    (ProgramNormalization.ofFormula? collapsed.normalizationWork collapsed).map (·.formula) =
+      some .tt := ⟨shared_budget_refusal, shared_budget_sufficient⟩
+
+/-- Term complexity does not consume these formula visits, while the real
+prefix does. This does not change any later arithmetic source/cut bound. -/
+theorem arithmetic_and_prefix_controls :
+    shortBody.normalizationWork < shortBody.uintQFWeight ∧
+    (ProgramNormalization.ofFormula? shortBody.normalizationWork shortBody).isSome = true ∧
+    ProgramNormalization.ofFormula? positiveBody.normalizationWork positive = none ∧
+    (ProgramNormalization.ofFormula? (positiveBody.normalizationWork + 1) positive).isSome = true ∧
+    ProgramNormalization.ofFormula? negativeBody.normalizationWork negative = none ∧
+    (ProgramNormalization.ofFormula? (negativeBody.normalizationWork + 1) negative).isSome = true := by
+  exact ⟨by decide +kernel, by rfl, by rfl, by rfl, by rfl, by rfl⟩
+
 /-- info: ["proved", "refuted"] -/
 #guard_msgs in #eval [positive, negative].map (fun φ => match decideGoal φ with
   | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")
