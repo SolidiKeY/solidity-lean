@@ -3739,3 +3739,109 @@ split is authorized next; there are no unanswered VA1-Q1/Q2 choices. Other scope
 holds remain authoritative. No new premise/exclusion/model/default/test-budget,
 axiom/sorry/native shortcut, expected-verdict change, goal mutation, push/merge/
 PR or tag publication occurs.
+
+## H6 TypeExamples performance repair — checked owned progress, full lane partial
+
+Human receipt: H6 (VA1-Q2), **“VA1 splits it”**, received from the coordinator on
+2026-11-02. This authorizes the narrow TypeExamples performance split only. The
+exact receipt/setup record was committed in7162b5990cb3c1ff27123f3149ee8bb5609613a8.
+AQ1/AQ2 and the earlier Q1 boundary revision remain as recorded; there is no new
+semantic choice or publication authorization. Parent7162b5990cb3c1ff27123f3149ee8bb5609613a8,
+frozen base8bd8742ad987d566f7ba7624372cec1c020be07c, repository
+`/workspace/solidity-lean`, assigned branch unchanged. Export identity records the
+full new committed head.
+
+The compatibility facade retains the original G09 module documentation and both
+original axiom guards. Nineteen new local modules divide shared helpers, type names,
+constructor certificates, corpus membership/observations, declarations and printing.
+The ten original helper definitions and all nineteen theorem signatures are exact;
+fifteen proof bodies are exact. Only `declCorpus_accepted`, `declCtors_covered`,
+`declCorpus_in_profile` and `print_roundtrip` change proof bodies. Each consumes
+actual kernel-checked equations about the same two original corpus members.
+Constructor-list facts support only acceptance/coverage; separate unchanged profile
+and printing observations supply their stronger controls. Named copies of the
+original predicates avoid closed-match elaboration, without altering observations.
+No parser/render/compiler/model/predicate/default/pin/budget change is made.
+Source imports remain acyclic; shared root/module-map edits are19 additive imports
+and19 corresponding rows. Speed history de018add/4da9ace6 was inspected and cache
+invalidation was warned before moving declarations.
+
+Exact evidence: `/workspace/va1-evidence/typeexamples-split`. Its
+`final-preservation.json` independently locates every original public signature and
+helper body; `source-reviews-final.json` records finder/skeptic no-findings reviews,
+without Lean/server/build use. All40 final per-file MCP/build gates pass. Maximum
+module diagnostic17.042351 s; maximum module build14.878989 s, all below unchanged
+300 s. Diagnostics use fresh LSP sessions with existing dependency oleans; builds
+use the preserved input-keyed artifact cache. No clean whole-tree/cache-restore
+measurement is claimed. Existing whole-tree cold/stopped evidence is retained.
+The unchanged ExprExamples consumer also passes diagnostics33.418695 s and
+build30.100227 s. Both facade guards pass. Forty public axiom reports contain only
+standard axioms. Strict automatic, trust, orphan, layer and whitespace gates pass;
+strict docs retain the exact frozen85 failures and inventory retains the existing
+404-pin drift. These failures are not waived or relabeled.
+
+Runtime identity: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake5.0.0-src+797c613. Repaired runner KeySort passes2.085986 s with actual
+`KEYSORT_PASS` output. Every selected job asserts cgroup memory.max12884901888 and
+swap.max0 before Lean, uses user1000, threads1, explicit-j1, one file/job at a time
+and12GiB host reserve. Selected sampled aggregate RSS3196268KiB, cgroup peak
+3161939968 bytes, minimum host available12904087552 bytes;48 unsuccessful sampling
+attempts are retained. Setup runtime success is not whole-goal success.
+
+The useful interpreted profile reads runtime strings from files and checks equality
+with the original corpus before measuring. Timings include forced result printing:
+acceptance25.667343 ms, constructor coverage193.022090 ms, profile20.178848 ms,
+roundtrip65.422621 ms, repeated coverage189.768514 ms. The earlier constant-foldable
+microtimings are preserved but not used as parser-cost evidence. The FilePath type
+error and failed closed-match/recursion/snippet attempts retain their actual raw
+failures and source snapshots. No recursion or heartbeat limit was increased.
+
+Full closure is unfinished. TrustAudit first fails because PaymentSource.olean is
+missing. After the demonstrated TypeExamples repair, unchanged `./run-lean.sh`
+under the bounded runner builds additional imports, then is explicitly stopped for
+root disk exhaustion: exit137,68.471818 s; the automatic memory stop flag is false.
+This is an operator disk stop, not an OOM/pass assertion. Only one Lean process was
+observed. Native output relocation alone did not cover library growth. The tracked
+run script/lakefile and all proof budgets remain unchanged; a package-wide binDir
+candidate was not used, because the original checker requires its original path.
+Further full checks require a demonstrated output/storage repair, not an unchanged
+retry. Whole-lane strict/full gates remain failed or pending.
+
+Storage preservation: a task-owned minimal Docker image with read-only existing
+host tools removes the old VFS Debian-image copy cost. Initial missing-awk probe127
+and fixed probe0 are retained. No daemon restart/install/privilege/policy change.
+The generated checker executable's distinct private copy and original path retain
+its exact SHA; its immutable canonical cache copy remains on root. `restore-binary-view.py`
+reconstructs that executable view after tmpfs loss. This lower-layer
+file relocation recovered zero space, as recorded, and is not called a repair.
+Eighteen immutable raw source archives,164341760 bytes across19 paths, already have
+byte-exact members in unchanged persistent sealed root archives. Verified/fsynced
+private views preserve their original paths; lossless duplicate representation
+removal recovered142229504 bytes. All original archives/seals remain unchanged.
+`restore-raw-views.py --check` verifies all18 groups. Raw views are ephemeral and
+need restoration after tmpfs loss; their bytes remain durably archived on root.
+The independent finder streamed all members/views/targets and found zero mismatches.
+No cache or work payload is discarded, and no mutable build/cache inode is shared.
+
+Original queue accounting: baseline/backfill census remains partial; global
+decidable Residue/DecisionTheorem-prime/exhaustive target/hash bridge remain open.
+The independently checked numeric, array-source and fuel components are not those
+global claims. AU02 general fixed/nested/key/field/struct array integration, broader
+memory, halting-OR reconstruction, broader certified program-free boundary and
+general formula-derived511-node fuel obligations remain open. Both frozen predicates
+and the8bbd5606 counterexample remain intact. Full validation is incomplete, so this
+is not a locally eligible milestone-m7-next or a publication/whole-goal claim.
+A ready next owned child is finite source-literal parameter discovery using actual
+SourceUIntLiteralChain witnesses; occurrence premises cannot be omitted when a
+quantified body ignores its variable. It needs no VA2 prerequisite and is not yet
+implemented or claimed as coverage/exhaustiveness.
+
+Evidence boundary: the H6 results are kernel parser/control facts and external
+runtime/resource/build measurements. They do not establish EVM execution or solc
+equivalence, or the unfinished global Decision/residue theorem.
+
+Final checkpoint reviews: independent read-only finder and skeptic both report
+no source or handoff findings. They verified the45-gate/40-report census, exact
+source preservation and stated partial/full-storage limits; neither used Lean,
+a server or a build. The finder additionally streamed every durable raw member
+and view. Review records are in the checkpoint evidence, not assumed passes.
