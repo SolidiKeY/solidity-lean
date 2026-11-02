@@ -462,3 +462,18 @@ execution or frozen unchecked-add decision. All24 ORIGINAL full obligations and
 six general Source combinations remain pending; five original native journal
 FAILs and historical docs/G03 EXIT1 remain unchanged. Immutable handoff:
 `/workspace/vy5-composition/unchecked-loop-20261102/final/`.
+
+### VY5 actual Source for-loop (2026-11-02)
+
+The [VY5 lane](inline-assembly-vy5.md#actual-source-for-loop-composition-2026-11-02)
+adds30 selected actual Source.forLoop/forIter component laws: typed init/false
+scope exit, full-byte rethrow/post/rest suppression, real break/bodytail versus
+AFTER-loop rest, actual continue/post bool changes/next test and all-horizon
+missing-post timeout. Old raw callers/journals remain explicit companions.
+56ordered Source cases/two pipelines and72script mutation/receipt tests pass;
+ZERO new native comparisons. Private joint KeySort/full1285/TestSuite262/scoped
+axioms/strict/complete-trust EXIT0. All24 ORIGINAL full obligations/six general
+Source combinations and missing raw/selector/producer/G01/compiler/world/V16
+adequacy stay pending; original native5FAILs/docs/G03 EXIT1 and semantic holds
+unchanged. Immutable reviewed incremental handoff:
+`/workspace/vy5-composition/for-loop-20261102/final/`.

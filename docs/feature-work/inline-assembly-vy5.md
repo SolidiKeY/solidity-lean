@@ -2444,3 +2444,110 @@ Original BLOCKED goal identity/objective/status unchanged; get_goal not exposed,
 no reset/reactivation/completion. Reviewed incremental source/signatures/patch/
 bundles/provenance/evidence/checksums:
 `/workspace/vy5-composition/unchecked-loop-20261102/final/`.
+
+## Actual Source for-loop composition (2026-11-02)
+
+[ForPhysical](../../Solidity/Yul/Composition/ForPhysical.lean) adds30 component
+kernel laws using existing Source.execS.forLoop/forIter, not LoopPhysical's Yul
+`.for_` runner. These30 laws do not discharge the24 ORIGINAL full obligations
+or six general Source combinations, all still pending. No Source producer,
+Yul interpreter/AST, expected compiler result, admission or resource/proof budget
+was changed. Existing private committed inputs were reused; no active VY4
+checkout/package was inspected, fetched, contacted or assumed.
+
+Actual initializer execution creates a fresh typed bool above arbitrary clean
+callee locals. Actual indexed condition evaluation and getV read that local.
+`for_false` proves normal exit at fuel+3 for arbitrary typed body/post and
+removes the initializer scope using the real Locals.restore. `for_revert` at
+fuel+6 runs init/first condition and the existing contextual alias/rethrow leaves
+with exact reference and heap lookup premises; arbitrary post is unreached.
+`revert_skips_rest` at fuel+7 also suppresses arbitrary AFTER-loop items on the
+full-byte halt. Entire Source.St and evaluator locals are retained, not projected
+bytes/length alone. No desired execution result is a theorem premise.
+
+`for_break` at fuel+3 skips arbitrary post; `for_break_body` at fuel+5 executes
+actual block/items BREAK and skips remaining BODY items as well. Importantly,
+`break_runs_after_loop` executes statements AFTER the loop: a body BREAK is not
+a function revert. The concrete poison post indexes byte100 of length2 and,
+when actually reached by CONTINUE, emits the full existing panic.index0x32 data.
+Its refusal is checked separately, not supplied as an outcome premise.
+
+`post_run` executes real nested Source.assign operations: fresh loop condition
+and existing CLEAN callee flag both become false. `for_continue` at fuel+5
+executes CONTINUE, this post, and the NEXT actual false test, then removes only
+the init local and returns changed clean callee locals. Missing post is not a
+vacuous variant: actual forIter horizon-step and induction prove timeout at
+EVERY finite horizon, including full init/forLoop execution. Exact low rethrow
+horizons0..5 and continue horizons0..4, wrong init-control (`stuck for initializer`)
+and dangling99 controls remain distinct. This is a deliberately selected runtime
+initializer negative, not a claimed frontend-admitted program.
+
+Actual EM.sub restores arbitrary old evaluator/caller locals while returning
+changed clean loop locals as typed Out DATA; EM.attempt captures the real halt.
+`carry_revert`/`carry_continue` retain existing raw LocalValues and BOTH residual/
+Bool journals as explicit companions over identical full Source.St. Clean callee
+bool changes are NOT written into the separate dirty raw caller, and no runClean,
+ofClean resumption or missing raw Source hook is invented. Actual firstPhysical
+represented source/journal execution plus real Heap.alloc supplies a nontrivial
+inhabited sample with rawbool2/function fields/small1793/nonword alias0, prefix55
+and full represented word0xab000002. Retention is not a new world/frame rollback.
+
+[ForDriver](../../tests/yul-composition/ForDriver.lean) executes56 ordered SOURCE
+cases (28per actual Source pipeline), matched against
+[expectations frozen before execution](../../tests/yul-composition/for-expectations.json).
+Full selected observations include complete DEAD/empty/assert/index panic bytes,
+AABB same-length wrong alias, clean input/result scopes, inittrue/false values,
+changed clean bool, restored EM outer reference, all dirty/function/nonword cells,
+heap byte objects/extent, saved fnLocals, prefix, reconstructed word and selected
+complete residual/owned journal lists. Whole Source.St equality is kernel evidence;
+finite observations are not world enumeration or source/EVM correspondence.
+Normal false condition does not read an invalid body reference. After-loop AABB
+rethrow runs after break but is suppressed by the actual DEAD body revert.
+
+[for-source.mjs](../../scripts/yul-composition/for-source.mjs) binds actual module,
+driver, oracle, ledger, transitive immutable producer/private bodies AND current
+runner SHA before execution. Exact command/dependency/exit/stdout/stderr/execution
+receipt/fieldsets/ordered profiles/cases and summary are checked fail closed.
+72JS tests pass: post/next-test omission, skipped body/outside-rest confusion,
+full panic tail/wrong bytes, scope and refs, clean/raw flag confusion, same-type
+function aliasing, prefix/frame/high physical bits/owner/slot/journal loss despite
+equal return bytes, stale identities and missing/malformed actual evidence.
+Finder/skeptic read-only reviews accepted all proofs/controls without findings.
+ZERO fresh native/compiler/EVM comparisons; original complete ordered native
+observations and all five strict optimized-viaIR journal FAILs/EXIT1 unchanged.
+No LIB1/library-viaIR1834, frozen unchecked-add, journal or optional-vendor semantic
+question was answered.
+
+Per-file MCP after module/driver edits and affected build pass. Raw equation,
+joinpoint/bind/guard failures and one default200000-heartbeat no-post reflexivity
+failure are preserved. Exact actual condition/getV/pure/continue transitions fixed
+that proof without budget increases; no sorry/admit/axiom/native shortcut.
+Final JOINT command EXIT0: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613; KeySort2jobs then ./run-lean.sh library1285/TestSuite262,
+scoped30 signatures/standard axiom sets; core201/0elaborator,1300reachable/0orphan/
+0notallowed, strict491automatic/61budgeted/0manual/11refuted/0pending, correct
+complete-file-list trust1315sources/252sites/0findings and72tests. This validates
+the exact private staged tree, not publication or a default-branch build. Prior
+Returning combined EXIT1 and separate corrected trust pass remain their actual
+outcomes. Historical docs/G03 EXIT1 exact-base equality is zero regression ONLY;
+unchanged failing gates were not rerun. New links are checked separately.
+
+Resources:225857536initialfree -178450432comparable layer -8388608conservative
+incremental allowance =39018496projected remaining bytes. Before joint check,
+222347264free with3510272actualincrementalbytes measured; no new dependency closure
+or broad native output. Unchanged writer lock, serial-j1/LEAN_NUM_THREADS1, hard
+12GiB/no-swap/CPU1 and12GiB OS-available reserve. Only current exited verified
+SizeRw0 directory metadata was retired AFTER inspect/log/directory receipts;
+images/caches/mounts/history/evidence protected. No resource stop, ENOSPC or guard
+reduction. Exact final measurements/raw commands and all failures are sealed.
+
+Work1/2/3 and BackfillA/B remain PARTIAL. All24 original full obligations and six
+general combinations/fullProofGate stay pending: frontend derivation/admission,
+general loops/raw operators/functions/sessions, Source try selector and ordinary
+nonempty-revert producer, allocation/refinement/G01/compiler/world/V16/final joint
+adequacy. The original immutable producer request remains unchanged at
+`/workspace/vy5-composition/runtime-block-20261102/final/producer-request.json`.
+No new VY4 packet is assumed. Original BLOCKED goal identity/status/objective/
+counters unchanged; get_goal read support absent, no reset/reactivation/completion.
+Reviewed incremental patch/bundles/exact source/signatures/evidence/checksums:
+`/workspace/vy5-composition/for-loop-20261102/final/`.
