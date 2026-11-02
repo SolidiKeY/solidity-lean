@@ -120,3 +120,5 @@ yet links Source executions to the intrinsic world or to bytecode.
 P10 fetched CALL/RETURNDATA/JUMP helper: [interface and handoff](feature-work/roadmap-v15-p10-fetched-call.md).
 
 - [V15 modular consumers](feature-work/roadmap-v15-modular-consumers.md): full-precision scalar/fetched ADDMOD and MULMOD clauses.
+
+- [V15 completion fence](feature-work/roadmap-v15-runtime-completion.md): strict observed-workload completion and terminal-status checks.
