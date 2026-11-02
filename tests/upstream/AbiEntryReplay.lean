@@ -29,6 +29,8 @@ private def C : Contract := contract!{
     return abi.encode(x).length;
   }
   function reencode(uint[][3] calldata a) { counter++; abi.encode(a); }
+  function order(uint8[] calldata x, uint k) returns (uint) { return x[0] + 1 / k; }
+  function shadow(uint8[] calldata x) returns (uint) { { uint[] memory x = new uint[](1); return x[0]; } }
   function bump() returns (uint) { counter++; return counter; }
 }
 
@@ -46,6 +48,7 @@ private def rows : List ImportRow :=
    ("copy", "copy(uint256[][])"), ("narrowAt", "narrowAt(uint8[],uint256)"),
    ("element", "element(uint256[][],uint256,uint256)"), ("enc", "enc(uint256[][])"),
    ("encIf", "encIf(uint256[][],uint256)"), ("reencode", "reencode(uint256[][3])"),
+   ("order", "order(uint8[],uint256)"), ("shadow", "shadow(uint8[])"),
    ("bump", "bump()")].map fun (name, sig) =>
     { name, sourceSignature := sig, tag := .diamond, params := [], status := .elaborated, reason := "" }
 
@@ -129,6 +132,23 @@ private def vec0 (sig : String) (inputs : List String) (data : List Nat) (failur
   vec0 "reencode(uint256[][3])" ["uint256[][3]"] (words [0x20, 0x60, 0x60, 0x60, 3, 1, 2]) true,
   vec0 "reencode(uint256[][3])" ["uint256[][3]"] (words [0x20, 0x60, 0x60, 0x60, 3, 1, 2, 3]) false,
   vector "bump()" [] [] (words [7])] "working" 4
+
+-- The guard sits where solc reads: `x[0] + 1 / k` with `k = 0` and a dirty
+-- `x[0]` is `Panic(0x12)` in legacy (right operand first) and an empty revert
+-- under via-IR (left first), as pinned solc (`AccessEntry` probe `order`).
+private def panic12 : List Nat := (Semantics.encodePanic 0x12).map UInt8.toNat
+#eval check [vector "order(uint8[],uint256)" ["uint8[]", "uint256"] (words [0x40, 0, 1, 0x100]) panic12 true,
+  vector "order(uint8[],uint256)" ["uint8[]", "uint256"] (words [0x40, 1, 1, 0x100]) [] true] "working" 2
+#eval (do
+  let report := replay { C with evalOrder := EvalOrder.viaIR } rows (Json.mkObj [("vectors", toJson [
+    vector "order(uint8[],uint256)" ["uint8[]", "uint256"] (words [0x40, 0, 1, 0x100]) [] true])])
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)
+
+-- A local shadowing the parameter (legal in solc, a warning) is not
+-- guarded by name: the body is not admitted for access-time reads.
+#eval check [vector "shadow(uint8[])" ["uint8[]"] (words [0x20, 1, 0x100]) (words [0])] "blocked" 0
+  (some "calldata element fails only on access: needs access-time calldata semantics")
 
 -- The replay checks the guarded outcome: a wrong expectation is broken.
 #eval check [vector "enc(uint256[][])" arr (words [0x20, 1, 0x1000]) (words [0x60])] "broken" 1

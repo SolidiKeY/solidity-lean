@@ -14,5 +14,9 @@ contract AccessEntry {
   function encP(uint256[][] calldata x) external pure returns (uint256) { return abi.encodePacked(x[0]).length; }
   function cp(uint256[][] calldata x) external pure returns (uint256) { uint256[][] memory m = x; return m.length; }
   function cpAt(uint256[][] calldata x, uint256 i) external pure returns (uint256) { uint256[] memory m = x[i]; return m.length; }
+  function encPw(uint8[] calldata x) external pure returns (uint256) { return abi.encodePacked(x).length; }
+  function enc8nL(uint8[][] calldata x) external pure returns (uint256) { return abi.encode(x).length; }
+  function encBL(bytes[] calldata x) external pure returns (uint256) { return abi.encode(x).length; }
+  function order(uint8[] calldata x, uint256 k) external pure returns (uint256) { return x[0] + 1 / k; }
   function encReq(uint256[][] calldata x, uint256 i) external pure returns (uint256) { require(i != 0, "m"); return abi.encode(x).length; }
 }

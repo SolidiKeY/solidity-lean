@@ -233,8 +233,22 @@ and CI showed the same failures without them).
   `SolcJson/Body.lean`), which `tests/upstream/AggregateErrorControls.lean`
   and `AggregateErrorBoundary.lean` pin as refused ("without a known calldata
   origin"), with no replay evidence for the admitted path; and test 31 still
-  fails on its slice rows. Master keeps the refusal; reapply together with
-  replayed error-encoding vectors and updated pins.
+  fails on its slice rows. Master kept the refusal until it was reapplied with
+  replayed error-encoding vectors and updated pins (next item).
+* **31, reapplied (lane FU2-C, 2026-11-02):** `974dd1de` reapplied unchanged.
+  The two admitted calldata named-argument reverts (`arrayCalldata`,
+  `pairCalldata` of `tests/upstream/AggregateErrorControls.sol`) are replayed
+  on raw calldata (canonical, a noncanonical offset, trailing data, an empty
+  array and string) with the error data pinned solc produces in all four
+  configurations (`tests/abi-0.8.38/AggregateCalldataErrors.vectors.json`,
+  `scripts/abi-entry-probe.mjs --aggregate`); wrong payloads are `broken`
+  (`tests/upstream/AggregateErrorControls.lean`); `AggregateErrorBoundary.lean`
+  now pins that no row is refused. Test 31 locally: every listed row proves
+  except `sliceRead`, `sliceOfSlice`, `slicePast`, which now reach the prover
+  and stay `pending` ("open proof goals", the closer gap below), and
+  `sliceHashed`, which ends in a heartbeat timeout of the compiled walk
+  (`error`; the test accepts `proved`/`pending`). `sliceHashed` has no
+  calldata alias, so the reapply does not reach it; not bisected.
 * **44** (`a48fd85f`): in the testing import a specification that does not
   parse became a `solidity.specificationSyntax` scope rejection, raised
   before the named refusal "ledger locations in assignable clauses are not

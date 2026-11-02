@@ -2,13 +2,16 @@
 /** Pinned-solc/EVM observations of ABI entry decoding (lane CF1).
  *
  * Usage:
- *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--access] [--inherited] [--out FILE]
+ *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--access] [--aggregate] [--inherited] [--out FILE]
  *
  * `--fixtures` replays the retained Group 10 entry-decoding fixtures from the
  * verified upstream snapshot (`.lake/upstream/solidity`, see
  * `scripts/solidity-upstream.mjs verify`) with their exact calldata bytes.
  * `--access` runs `tests/abi-0.8.38/AccessEntry.sol` (lane FU2-C): when a calldata
  * element that fails only on access is read, encoded or copied.
+ * `--aggregate` runs the calldata named-argument reverts of
+ * `tests/upstream/AggregateErrorControls.sol` (lane FU2-C, the pins of
+ * `tests/upstream/AggregateErrorControls.lean`).
  * `--inherited` checks `tests/abi-0.8.38/InheritedSelectors.sol` (inherited and
  * renamed function values) against its pinned selectors.
  * `--probes` runs `tests/abi-0.8.38/LazyEntry.sol`, whose vectors pin when
@@ -173,8 +176,8 @@ async function fixtures() {
   return report;
 }
 
-async function probes(name = 'LazyEntry') {
-  const file = join(ROOT, `tests/abi-0.8.38/${name}.sol`);
+async function probes(name = 'LazyEntry', source = `tests/abi-0.8.38/${name}.sol`) {
+  const file = join(ROOT, source);
   const sources = {[`${name}.sol`]: {content: readFileSync(file, 'utf8')}};
   const spec = JSON.parse(readFileSync(join(ROOT, `tests/abi-0.8.38/${name}.vectors.json`), 'utf8'));
   const report = [];
@@ -183,6 +186,14 @@ async function probes(name = 'LazyEntry') {
     const summary = summarize(results);
     summary.forEach((o, i) => {
       const want = group.vectors[i].expect;
+      // A vector whose outcome depends on the pipeline's operand order pins
+      // each pipeline (both optimizer settings) separately.
+      const byPipeline = group.vectors[i].expectByPipeline;
+      if (byPipeline) for (const config of Object.keys(results)) {
+        const w = byPipeline[config.startsWith('viaIR') ? 'viaIR' : 'legacy'];
+        assert.equal(results[config][i].failed, w.failed, `${group.contract} ${o.label} ${config}: failure`);
+        assert.equal(results[config][i].data, w.data, `${group.contract} ${o.label} ${config}: data`);
+      }
       if (want) {
         assert.equal(o.agree, true, `${group.contract} ${o.label}: configurations disagree`);
         assert.equal(o.failed, want.failed, `${group.contract} ${o.label}: failure`);
@@ -229,5 +240,6 @@ if (flag('--inherited')) output.inherited = await inherited();
 if (flag('--fixtures')) output.fixtures = await fixtures();
 if (flag('--probes')) output.probes = await probes();
 if (flag('--access')) output.access = await probes('AccessEntry');
+if (flag('--aggregate')) output.aggregate = await probes('AggregateCalldataErrors', 'tests/upstream/AggregateErrorControls.sol');
 const text = JSON.stringify(output, null, 2) + '\n';
 if (outFile) writeFileSync(outFile, text); else process.stdout.write(text);

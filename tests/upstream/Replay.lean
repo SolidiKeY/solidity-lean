@@ -169,10 +169,15 @@ private def abiCheck (vectors : List Json) (status : String) (count : Nat) : IO 
 -- Output mismatches cannot guide admission or become passes.
 #eval abiCheck [abiVector "decode(bytes)" ["bytes"] ["uint256[]"]
   (abiWords [32,192,32,4,3,4,5,6]) (abiWords [32,4,3,4,5,99])] "broken" 1
--- A malformed element of a calldata array must stay blocked even when failure
--- is expected: solc's calldata decoder defers element checks to each access.
+-- A malformed element of a calldata array is checked only where it is read
+-- (solc's calldata decoder defers element checks to each access; lane FU2-C,
+-- `Semantics/AbiAccess.lean`): a body that never reads it returns 7, as solc
+-- does (`LazyEntry` probe "dirty narrow element, not accessed"), so an
+-- expected failure is broken rather than certified.
+#eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"] (abiWords [32,1,256]) (abiWords [7])]
+  "working" 1
 #eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"] (abiWords [32,1,256]) [] true]
-  "blocked" 0
+  "broken" 1
 -- The outermost length and offset are entry checks (`Semantics/AbiEntry.lean`,
 -- `AbiEntry.verdict_revert_iff`): an empty revert before the body, as solc.
 #eval (do
@@ -343,7 +348,9 @@ private def FreshControls : Contract := contract!{
 #eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"]
   (abiWords [32,2,1,255,999]) [] true] "broken" 1
 #eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"]
-  (abiWords [32,3,1,255,999]) [] true] "blocked" 0
+  (abiWords [32,3,1,255,999]) [] true] "broken" 1
+#eval abiCheck [abiVector "unused(uint8[])" ["uint8[]"] ["uint256"]
+  (abiWords [32,3,1,255,999]) (abiWords [7])] "working" 1
 
 #eval (do
   let data := abiWords [32,2,1,255] ++ [170,187,255]

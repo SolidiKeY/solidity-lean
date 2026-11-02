@@ -207,6 +207,15 @@ finds no marker.
   the callee writes. What is left only reads, where sharing and copying agree.
   Slices `b[i:j]` are views (`RawStmt.sliceViews`) with primitive copies where
   a whole value is needed: [calldata-slice-copies.md](calldata-slice-copies.md).
+- **External calldata validation timing** (upstream replay only): solc
+  checks a nested calldata element when it is read. The replay models it for
+  a parameter whose body only indexes it, takes lengths, or passes it whole
+  to `abi.encode`/`abi.encodePacked` (`Semantics/AbiAccess.lean`,
+  `UpstreamEntry.accessOnly`); copies to memory, aliases, passing, slices,
+  struct members and modifiers keep the named refusal ("calldata element
+  fails only on access"). The calculus is unaffected: there, calldata values
+  are the decoded ones ([feature-work/abi-hashes.md](feature-work/abi-hashes.md),
+  "Lane FU2-C").
 - A storage array copied to memory keeps its length: `len` of a copy of
   `sfind(s, p)` is `len(s, p)` (`lenAtN`, `LTm.sfindLen?`,
   `SVal.copyStToM_array_len`; Lean only).

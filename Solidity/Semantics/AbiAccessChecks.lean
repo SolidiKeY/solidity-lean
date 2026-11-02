@@ -98,6 +98,17 @@ example : fails (cd [0x20, 0x60, 0x60, 0x60, 3, 1, 2, 3]) fix3 = some [] := by d
 example : observe (cd [0x20, 0x60, 0x60, 0x60, 3, 1]) [{ shape := fix3, loc := .calldata }] =
     ("run", [[[0], [1], [2]]]) := by decide +kernel
 
+/-! Lazy-only layouts nested one level down (`enc8nL`, `encBL` probes): a
+`-32` element offset of a `uint8[][]` reads the outer length's neighbour as
+a `uint8` element, which is dirty, so encoding reverts; of a `bytes[]` it
+reads bytes, never validated, so encoding succeeds. -/
+
+example : fails (cd [0x20, 1, neg 32]) (.array (.array u8)) = some [[0, 0]] := by decide +kernel
+example : fails (cd [0x20, 1, neg 32]) (.array .bytes) = some [] := by decide +kernel
+-- `encPw`: the packed encoding of a whole dirty `uint8[]` reverts.
+example : fails (cd [0x20, 2, 1, 0x100]) (.array u8) = some [[1]] := by decide +kernel
+example : fails (cd [0x20, 2, 1, 0xff]) (.array u8) = some [] := by decide +kernel
+
 /-! Without access-time reads the verdict is CF1's refusal (`verdictA_off`). -/
 
 example : (match verdictA (cd [0x20, 1, 0x1000]) 64 (fun _ => false) [{ shape := arr2, loc := .calldata }] with

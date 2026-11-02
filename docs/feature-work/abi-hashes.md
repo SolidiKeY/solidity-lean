@@ -1575,3 +1575,81 @@ level's failure precedes a later index's evaluation. Copies, aliases,
 passing, slices, returns, member paths and modifiers keep CF1's refusals;
 the guard name is reserved; constructors and the typed multi-return adapter
 refuse guards by name.
+
+**A local of the parameter's name** (legal in solc, a shadowing warning) is
+not admitted: `accessOnly` refuses a body that declares or binds the name
+anywhere, since the guards are placed by name (review finding, below).
+
+**Changed controls.** CF1's replay controls that pinned "fails only on
+access" for bodies that never read the failing element now run, as solc does
+(`LazyEntry` probes "not accessed"): `outer`, `narrow` in
+`tests/upstream/AbiEntryReplay.lean`, `unused(uint8[])` in
+`tests/upstream/Replay.lean` (an expected failure there is now `broken`).
+New replay controls: indexed and length reads of a failing element (revert,
+counter rolled back) and of the others (read); `abi.encode` of a failing,
+a lazy-only and a `2^64`-length array; `encIf` both ways; the fixture's
+`f(uint256[][3])`; the operand-order split `x[0] + 1 / k` (legacy
+`Panic(0x12)`, via-IR empty revert, as pinned solc); a shadowing local
+(refused). Copies keep the lazy-only refusal.
+
+**Fixture results** (`tests/upstream/cf1-abi-entry-results.json`, all 42
+rerun with `scripts/abi-entry-fixtures.sh SOLJSON fu2c`, collected with
+`abi-entry-collect.py --keep-before`): **23 working / 19 blocked** (FU1:
+22 / 20). The only change: `calldata_nested_array_static_reencode_v2.sol`
+blocked → working in both pipelines. Of item 2's rows, every calldata row is
+working except `smoke/bytes_and_strings.sol`, still blocked on "entry return
+bridge needs a primitive prefix and one final bytes/string memory result"
+(`g()` returns two references: the retained typed return adapter, not
+calldata); the memory rows were already working.
+
+**974dd1de reapplied** (calldata parameters as slice origins of obligation
+bodies, `Frontend/Import.lean`), with the error-encoding evidence recorded in
+`docs/assurance.md` (test 31) and pinned in
+`tests/upstream/AggregateErrorControls.lean`.
+
+**Review** (read-only finder and skeptic, no Lean server). Skeptic: about
+110 vectors over 8 probe contracts against pinned solc in all four
+configurations (dirty `uint8`/`int16`/`bool`/`bytes3`/`address` at every
+depth, `bytes[]`, fixed arrays of dynamic arrays, negative and huge offsets,
+`2^64 - 1` lengths, encoder ordering after other arguments, level-by-level
+index order, short-circuit, ternary, `require` with error arguments,
+assignments): no counterexample. It found the pipeline split of binary
+operand order (legacy right-first, via-IR left-first) unexercised: added the
+`order` probe (`expectByPipeline`) and replay controls in both orders.
+Finder: no unsound admission; confirmed and fixed: the aggregate pins lacked
+a recorded solc probe (now `--aggregate`), stale docs (`assurance.md`, this
+section, `UpstreamEntry`'s docstring), `abi.encodePacked(x)` of a whole
+array unprobed (`encPw`), nested lazy-only layouts unprobed (`enc8nL`,
+`encBL`, with kernel controls). Both raised parameter shadowing as a doubt;
+solc accepts a shadowing local, so the refusal above was added with a
+control. Recorded, not changed: the guard condition grows with the number of
+failing paths (one conjunct each); a narrow index compared with a recorded
+index above its range may not elaborate (blocked, not unsound); several
+access-time parameters at once and guards under `&&`/`?:` have no replay
+vector (the skeptic's EVM probes cover the solc side).
+
+**Validation** (lane head before this record):
+
+* `./run-lean.sh` (43m50s wall, warm after a container restart interrupted
+  the first run, so no clean before/after timing): default target "Build
+  completed successfully (1043 jobs)", `SolkeyTestSuite` "Build completed
+  successfully (286 jobs)", `check-solkey.sh` the baseline 37 mismatches.
+  No core module changed (`AbiAccess` is a new leaf importing only
+  `AbiEntry`); `Frontend/Import.lean` rebuilds its importers.
+* Lean server, clean: `AbiAccess`, `AbiAccessChecks`, `UpstreamEntry`,
+  `Upstream`, `tests/upstream/{AbiEntryReplay,Replay,AggregateErrorControls,AggregateErrorBoundary}.lean`.
+  No `sorry`, axiom, `native_decide`, `implemented_by` or heartbeat change;
+  seven headline theorems pinned and registered in `TrustAudit.lean`.
+* Node: `solidity-upstream.test.mjs` 25/25, `finite-dispatch.test.mjs`
+  34/34, `abi-entry-probe.mjs --probes --access --aggregate` pass;
+  `check-automatic --strict` 491 / 61 / 11 refuted / 0 pending; `check-g07`
+  at its baselines (axiom-pin drift, `check-doc-paths` 48 = 46 + 2); G03
+  ledger regenerated (line numbers of `Import.lean`).
+
+**Limitations.** Copies of a failing calldata parameter to memory, aliases,
+passing it, slices, struct members and modifiers keep the refusal (copies
+decode with the eager rules, `Panic(0x41)` included). `Panic(0x32)` and the
+other panics are produced by the existing model, not certified here. The
+agreement theorems are about the model; that it is solc's decoder rests on
+the probes. Gas is outside the model (CF1's 4× bound, on the substituted
+value).

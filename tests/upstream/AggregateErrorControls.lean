@@ -65,8 +65,10 @@ private def pairPayload (n a : Nat) (bs : List Nat) :=
       check C [failure "pairEmpty()" [] wrong] "broken"
     -- Calldata arguments of a named-argument revert (lane FU2-C): replayed on
     -- raw calldata, canonical, with a noncanonical offset and with trailing
-    -- data; the error data is pinned solc 0.8.38's (legacy and via-IR,
-    -- optimizer off and on: `ArrayError(v, 3)`, `PairError(3, v, -1)`).
+    -- data. The error data is pinned solc 0.8.38's, legacy and via-IR,
+    -- optimizer off and on (`ArrayError(v, 3)`, `PairError(3, v, -1)`):
+    -- `tests/abi-0.8.38/AggregateCalldataErrors.vectors.json`, checked by
+    -- `scripts/abi-entry-probe.mjs --aggregate`.
     let raw (sig : String) (inputs : List String) (data bs : List Nat) := Json.mkObj [
       ("signature",toJson sig),("inputTypes",toJson inputs),("outputTypes",toJson ([] : List String)),
       ("calldata",toJson data),("expectedBytes",toJson bs),("failure",toJson true)]

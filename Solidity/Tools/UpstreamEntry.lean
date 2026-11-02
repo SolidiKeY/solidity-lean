@@ -24,11 +24,16 @@ the actual calldata (selector included) and decides, for ABI coder v2:
   so it reads the same eager value.
 * `run` also for a calldata layout only lazy reads accept (negative
   relative offsets), when the body reads that parameter only through complete
-  index paths and lengths (`readsOnly`): each read is one lazy access of the
-  value given to the body.
+  index paths and lengths (`readsOnly`), or only by the access-time reads
+  below (`accessOnly`, which also admits `abi.encode(x)`).
+* `run` with a guarded body (lane FU2-C) for a calldata parameter with an
+  element that fails only when read, under `accessOnly`: each admitted read
+  and encoding reverts where solc's accessor does (`guardDecl`,
+  `AbiEntry.cat_cpart`, `AbiEntry.cpart_agree`).
 * `blocked`: a named refusal (a lazily accepted layout an eager copy rejects,
-  an element failing only on access, a possible `Panic(0x41)`, or decoded
-  arguments more than four times the calldata, where solc may run out of gas).
+  an element failing only on access in a body outside `accessOnly`, a
+  possible `Panic(0x41)`, or decoded arguments more than four times the
+  calldata, where solc may run out of gas).
 * `legacy`: a parameter outside the typed shapes (function values, enums
   nested in arrays or structs, an enum without its declared bound); the
   previous gate applies unchanged. A top-level enum parameter decodes at its
@@ -184,7 +189,10 @@ def accessExprs : RawStmt → List RawExpr
 
 /-- The body reads `x` of shape `s` only through admitted accesses. -/
 def accessOnly (d : FunDecl) (x : String) (s : Shape) : Bool :=
-  d.mods.isEmpty && match readDepth s with
+  -- A local of the same name (solc only warns) would be guarded by name:
+  -- a body that declares or binds `x` anywhere is not admitted.
+  d.mods.isEmpty && !(d.body.any fun st => (RawStmt.decls st).contains x) &&
+  match readDepth s with
     | none => false
     | some depth =>
       let stmts := d.body.flatMap (RawStmt.flatMapDeep fun st => [st])
