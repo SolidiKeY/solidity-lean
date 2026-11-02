@@ -73,6 +73,7 @@ import Solidity.Backend.Aggregates.G18Storage
 import Solidity.Backend.Aggregates.G18StorageCellControls
 import Solidity.Backend.Aggregates.G18StorageClient
 import Solidity.Backend.Aggregates.G18StorageValues
+import Solidity.Backend.Aggregates.NestedCalldataControls
 import Solidity.Backend.Assembler
 import Solidity.Backend.CalldataPackets.RawAddress.Controls
 import Solidity.Backend.CalldataPackets.RawAddress.Execution
@@ -2507,7 +2508,9 @@ import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Faithfulness
 import Solidity.SortCheck.Parser
 import Solidity.Source.Calldata
+import Solidity.Source.CalldataAggregates
 import Solidity.Source.CalldataExamples
+import Solidity.Source.CalldataLayout
 import Solidity.Source.Const
 import Solidity.Source.ConstCheck
 import Solidity.Source.Ctor

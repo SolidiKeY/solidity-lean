@@ -183,3 +183,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Evm/MemoryLoopHorizonAllocControls.lean` | Reached allocation and allocation-before-revert horizon witnesses using the existing owner allocator fixture. |
 | `Evm/MemoryLoopFiniteHorizonControls.lean` | Forever-allocating loop with real finite room but impossible all-prefix room; exact cursor/count, false-exit and full-cursor preparation controls. |
 | `Backend/Aggregates/ByteSlices.lean`, `Backend/Aggregates/ByteSliceControls.lean` | H10 G18 exact typed Source slice expression, preserved full caller state, entry-derived slice extent/index/object bounds and runtime value import; partial. |
+| `Source/CalldataLayout.lean`, `Source/CalldataAggregates.lean`, `Backend/Aggregates/NestedCalldataControls.lean` | H10 S02/G18.04 actual nested calldata reads, string/static-reference slices, typed read-only locations and exact Source state/region/exception controls; partial lowering. |

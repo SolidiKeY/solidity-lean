@@ -217,9 +217,7 @@ def decodeVals (D : Layout) (data : Bytes) : (τs : List STy) → Nat → R (Val
   | τ :: τs, i => do pure (.cons (← decodeWord D (wordAt data i) τ) (← decodeVals D data τs (i + 1)))
 
 /-- A value type: one ABI word (a getter's result, a dynamic array's element). -/
-def STy.isValueTy : STy → Bool
-  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
-  | _ => false
+def STy.isValueTy (τ : STy) : Bool := τ.oneWord
 
 /-- The contents of a dynamic argument whose head is the `i`-th word: its
 offset, then its length and bytes there. A length word past the data
@@ -248,6 +246,22 @@ def cdTail (data : Bytes) (i stride : Nat) : R (Nat × Nat) :=
     let len := wordAt (data.drop off) 0
     if 2 ^ 64 ≤ len then .error (.revert [])
     else if off + 32 + stride * len ≤ data.length then pure (4 + off + 32, len) else .error (.revert [])
+
+/-- Dynamic calldata element shapes supported by the actual indirect-head
+reader. Represented positive-width static arrays are included; structs and
+unrepresented fixed shapes remain open. -/
+def STy.cdElement (τ : STy) : Bool :=
+  τ.isValueTy || match τ with
+    | .bytes .calldata | .string .calldata => true
+    | .array .calldata σ none => σ.cdElement
+    | .array .calldata σ (some _) => σ.cdElement && (0 < τ.cdStaticWords)
+    | _ => false
+
+/-- Read a nested ABI tail relative to its actual array head. Dynamically
+encoded base types are not admitted to range slicing by STy.sliceable (solc2148). -/
+def cdNested (F : Fr) (base index stride : Nat) : R (Nat × Nat) := do
+  let (offset,length) ← cdTail (F.cd.drop base) index stride
+  pure (base+offset-4,length)
 
 /-- A `calldata` reference to a dynamic argument at entry. -/
 def cdArg (D : Layout) (data : Bytes) (i stride : Nat) {τ : STy} (h : τ.loc? = some .calldata) :
@@ -286,7 +300,7 @@ def decodeArg {Γ : RCtx} (data : Bytes) (i : Nat) (τ : STy) : EM E Γ (Val E.l
         else halt (.revert [])
       else halt (.stuck "dynamic ABI decoding of this type is not modelled")
     | .calldata, none =>
-      if σ.isValueTy then lift (cdArg E.layout data i 32 rfl)
+      if σ.cdElement then lift (cdArg E.layout data i σ.cdHeadBytes rfl)
       else halt (.stuck "calldata arrays of this type are not modelled")
     | _, _ => lift (decodeWord E.layout (wordAt data i) _)
   | τ => lift (decodeWord E.layout (wordAt data i) τ)
@@ -352,10 +366,10 @@ def sliceR {D : Layout} {τ : STy} (a : Val D τ) (s e : Nat) (toEnd : Bool) : R
   match a with
   | .cdRef h off len =>
     let e := if toEnd then len else e
-    let stride := match τ with | .bytes _ | .string _ => 1 | _ => 32
+    let stride := τ.cdStride
     if e < s then .error (.revert [])
     else if len < e then .error (.revert [])
-    else pure (.cdRef h (off + stride * s) (e - s))
+    else pure (.cdRef h (off+stride*s) (e-s))
   | _ => stuck "slice of a non-calldata value"
 
 /-- Byte `k` of `calldata` `bytes` at `off` of length `len`: past the length,
@@ -469,6 +483,12 @@ inductive Loc (D : Layout) (Γ : RCtx) : STy → Type where
   /-- The one-word value at byte offset `off` of the frame's call data (an
   element of a `calldata` array, lane FU2-B); read only. -/
   | cd {τ : STy} (off : Nat) : Loc D Γ τ
+  /-- An indirect dynamic element of a calldata reference array, retaining
+  the original head coordinate through any reference-element slice. -/
+  | cdBytes (base index : Nat) : Loc D Γ (.bytes .calldata)
+  | cdString (base index : Nat) : Loc D Γ (.string .calldata)
+  | cdArray {σ : STy} (base index : Nat) : Loc D Γ (.array .calldata σ none)
+  | cdFixedArray {σ : STy} (length offset : Nat) : Loc D Γ (.array .calldata σ (some length))
 
 /-- The element or member `i` of a memory object, at type `τ`. -/
 def memElem {Γ : RCtx} (a i : Nat) (τ : STy) : EM E Γ (Val E.layout τ) := do
@@ -495,6 +515,16 @@ def readLoc {Γ : RCtx} (F : Fr) {τ : STy} : Loc E.layout Γ τ → EM E Γ (Va
     | some b => return Val.fixedBytes (n := 1) (h := by decide) [b] rfl
     | none => lift (panic .index)
   | .cd off => lift (decodeWord E.layout (cdWordAt F off) τ)
+  | .cdBytes base index => do
+    let (offset,length) ← lift (cdNested F base index 1)
+    pure (.cdRef rfl offset length)
+  | .cdString base index => do
+    let (offset,length) ← lift (cdNested F base index 1)
+    pure (.cdRef rfl offset length)
+  | .cdArray (σ := σ) base index => do
+    let (offset,length) ← lift (cdNested F base index σ.cdHeadBytes)
+    pure (.cdRef rfl offset length)
+  | .cdFixedArray length offset => pure (.cdRef rfl offset length)
 
 /-- Replacing element `i` of a memory object. -/
 def memSet {Γ : RCtx} (a i : Nat) {τ : STy} (v : Val E.layout τ) : EM E Γ Unit := do
@@ -527,6 +557,10 @@ def writeLoc {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ
       if i < bs.length then heapPut a ⟨.string l', .string (bs.set i b)⟩ else lift (panic .index)
     | _ => halt (.stuck "not bytes")
   | .cd _ => halt (.stuck "calldata is read only")
+  | .cdBytes _ _ => halt (.stuck "calldata is read only")
+  | .cdString _ _ => halt (.stuck "calldata is read only")
+  | .cdArray _ _ => halt (.stuck "calldata is read only")
+  | .cdFixedArray _ _ => halt (.stuck "calldata is read only")
 
 /-- **Deleting a location**: the default value, a fresh zeroed memory
 object, or storage reset below the path. -/
@@ -559,7 +593,16 @@ def indexLoc {Γ : RCtx} (F : Fr) {l : DataLoc} {σ : STy} {k : Option Nat}
     match a with
     | .storRef _ p => pure (.stor (p.go (.index i)))
     | .memRef _ addr => pure (.mem addr i)
-    | .cdRef _ off _ => pure (.cd (off + 32 * i))
+    | .cdRef _ off _ =>
+      if σ.isValueTy then pure (.cd (off + 32 * i)) else
+      match σ with
+      | .bytes .calldata => pure (.cdBytes off i)
+      | .string .calldata => pure (.cdString off i)
+      | .array .calldata _ none => pure (.cdArray off i)
+      | .array .calldata _ (some length) =>
+        if 0 < σ.cdStaticWords then pure (.cdFixedArray length (off+σ.cdHeadBytes*i))
+        else pure (.cd (off+32*i))
+      | _ => pure (.cd (off + 32 * i))
   else lift (panic .index)
 
 /-- The contents of a mapping key, as its path step. -/

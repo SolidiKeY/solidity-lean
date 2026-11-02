@@ -2,8 +2,8 @@ import re,sys,json
 from pathlib import Path
 text=Path(sys.argv[1]).read_text()
 expected=re.findall(r"^#print axioms (\S+)$",Path(__file__).with_name('ByteAxioms.lean').read_text(),re.M)
-if len(expected)!=42 or len(set(expected))!=42:
-    raise SystemExit('FAIL: expected exactly 42 distinct headline/control queries')
+if len(expected)!=91 or len(set(expected))!=91:
+    raise SystemExit('FAIL: expected exactly 91 distinct headline/control queries')
 records=[(n,set(filter(None,re.split(r"[,\s]+",a)))) for n,a in
     re.findall(r"'([^']+)' depends on axioms: \[(.*?)\]",text,re.S)]
 records += [(n,set()) for n in re.findall(r"'([^']+)' does not depend on any axioms",text)]

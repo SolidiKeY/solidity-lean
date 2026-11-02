@@ -47,7 +47,7 @@ theorem slice_success (D : Source.Layout) (offset length first last : Nat)
     (ordered : first ≤ last) (bounded : last ≤ length) :
     Source.sliceR (Source.Val.cdRef (D := D) (τ := .bytes .calldata) rfl offset length)
       first last false = .ok (.cdRef rfl (offset+first) (last-first)) := by
-  simp only [Source.sliceR, Bool.false_eq_true, if_false, Nat.not_lt.mpr ordered,
+  simp only [Source.sliceR, Source.STy.cdStride, Bool.false_eq_true, if_false, Nat.not_lt.mpr ordered,
     Nat.not_lt.mpr bounded, Nat.one_mul]
   rfl
 
