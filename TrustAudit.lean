@@ -64,6 +64,7 @@ import Solidity.Source.SoundnessExamples
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.Dispatch
 import Solidity.Examples.Tactics.FunctionTypes
+import Solidity.Semantics.AbiAccess
 
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
@@ -1815,3 +1816,22 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} lane FU1 dispatch theorems use only the standard axioms"
+
+/-! Lane FU2-C: access-time calldata reads agree with the lazy decoder (model only). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.AbiEntry.cpart_agree,
+    ``Solidity.AbiEntry.cpart_of_cval,
+    ``Solidity.AbiEntry.cval_revert_of_cpart,
+    ``Solidity.AbiEntry.cat_cpart,
+    ``Solidity.AbiEntry.verdictA_off,
+    ``Solidity.AbiEntry.verdictA_revert_iff,
+    ``Solidity.AbiEntry.verdictA_run_entry]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} access-time calldata theorems use only the standard axioms"

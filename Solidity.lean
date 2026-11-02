@@ -41,6 +41,8 @@ import Solidity.Semantics.RevertData
 import Solidity.Semantics.AbiEntry
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.AbiEntryChecks
+import Solidity.Semantics.AbiAccess
+import Solidity.Semantics.AbiAccessChecks
 import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.Lifetime

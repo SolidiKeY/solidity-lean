@@ -1500,3 +1500,78 @@ shape (an external function type) is now refused where the legacy path
 accepted it (fail-closed); enum returns of `canonicalOnly` vectors stay
 refused although v1 encodes them alike; public enum getters keep
 `retEnums = []` and stay refused.
+
+### Lane FU2-C (fu2-20261102): access-time calldata reads
+
+Owner: lane FU2-C (`cloud/fu2-20261102/fu2-calldata-access`). Base
+`84a2a4be`. CF1 refused, by name, every input whose calldata parameter has an
+element that fails only when read ("calldata element fails only on access").
+This item models those reads in the layer the upstream replay runs.
+
+**Evidence first** (`tests/abi-0.8.38/AccessEntry.sol`, 20 vectors in
+`AccessEntry.vectors.json`, `scripts/abi-entry-probe.mjs --access`; pinned
+solc, legacy and via-IR, optimizer off and on, all agree):
+
+* `abi.encode(x)` / `abi.encodePacked(x[0])` of calldata go through the lazy
+  accessors: a relative offset of `-32` is accepted and encoded, an inner
+  offset or length out of range, an inner length of `2^64` (not a panic), a
+  dirty `uint8` (also nested) and a short `uint256[][3]` all revert with
+  empty data.
+* A read is path dependent: `encIf` returns 7 when it does not reach the
+  encoding, and reverts when it does; `encAt(x, i)` encodes `x[0]` and
+  reverts on `x[1]`; `require(i != 0, "m")` before the encoding reverts with
+  `Error("m")` first.
+* A copy to memory decodes with the eager rules: `uint256[][] memory m = x`
+  with an inner length of `2^64` is `Panic(0x41)`; `uint256[] memory m = x[0]`
+  reaches `x[0]` lazily (a `-32` offset is read) and copies its words.
+
+**Model** (`Solidity/Semantics/AbiAccess.lean`, core, imports only
+`AbiEntry`):
+
+* `cpart`/`cseqP`/`celemP`/`cmembersP`: CF1's lazy reader `cval` with the
+  same checks, order and fuel, recording each failing node by its access
+  path (element and member indices) and putting a substitute value of its
+  shape there (`Shape.dflt?`: zero words, empty arrays) instead of stopping.
+* `cat`/`catSeq`/`catElem`/`catMembers`: one access along a path, as solc
+  performs `x[i]…[j]` (index access, `access_calldata_tail`, the word
+  validator), with `Fail.panic` for an index out of range.
+* `bodyValuesA`/`verdictA`: CF1's `bodyValues`/`verdict`, except that a
+  calldata parameter the body reads only by admitted accesses (`acc k`)
+  whose eager copy fails takes `cpart`'s value and paths.
+
+Theorems (all kernel-checked, pinned with `#guard_msgs in #print axioms`
+and in `TrustAudit.lean`):
+
+* `cpart_agree`: `cpart` and `cval` agree on every reference: no recorded
+  path and `cval`'s value, some path and `cval`'s empty revert, or both fail.
+  Corollaries `cval_of_cpart`, `cval_revert_of_cpart`, and the converse
+  `cpart_of_cval`. With the probes above this is the encoding case: an
+  `abi.encode` of the parameter reverts exactly when a path is recorded.
+* `cat_cpart`: for a reference `cpart` reads, an access along any path
+  reverts with empty data exactly when a recorded path is a prefix of it.
+* `verdictA_off`: with no access-time parameter, `verdictA` is CF1's
+  `verdict` (conservative extension); `verdictA_revert_iff`,
+  `verdictA_run_entry` as CF1's.
+
+`Solidity/Semantics/AbiAccessChecks.lean` has 20 kernel controls (both
+outcomes: covered accesses revert, others read) on the probe vectors and on
+`calldata_nested_array_static_reencode_v2.sol`'s.
+
+**Admission and replay** (`Tools/UpstreamEntry.lean`, `Tools/Upstream.lean`):
+a calldata parameter is read at access time when the declaration has no
+modifiers, its shape has no tuple, and every mention of it in the body is a
+complete word read `x[i]…[j]`, the `.length` of a shorter path (index
+expressions without calls, writes or mentions of `x`), or an argument `x` of
+`abi.encode`/`abi.encodePacked` (also as a statement); loop annotations may
+not mention it. The replay then runs the declaration with its reads guarded
+(`guardDecl`), in that call's elaboration scope only: the index at depth `m`
+becomes `accessGuard__calldata(ok, i)` (`require(ok); r = i;`), `ok` saying
+no recorded path of length `m` equals the indices so far (by `cat_cpart`,
+when solc's access at that level does not revert); an encoding of `x` with a
+recorded path gains a last argument `accessGuard__calldata(false, 0)`, which
+reverts after the other arguments are evaluated, where solc's encoder
+reverts. Each index level is guarded where solc checks it, so an earlier
+level's failure precedes a later index's evaluation. Copies, aliases,
+passing, slices, returns, member paths and modifiers keep CF1's refusals;
+the guard name is reserved; constructors and the typed multi-return adapter
+refuse guards by name.

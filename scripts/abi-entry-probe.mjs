@@ -2,11 +2,13 @@
 /** Pinned-solc/EVM observations of ABI entry decoding (lane CF1).
  *
  * Usage:
- *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--inherited] [--out FILE]
+ *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--access] [--inherited] [--out FILE]
  *
  * `--fixtures` replays the retained Group 10 entry-decoding fixtures from the
  * verified upstream snapshot (`.lake/upstream/solidity`, see
  * `scripts/solidity-upstream.mjs verify`) with their exact calldata bytes.
+ * `--access` runs `tests/abi-0.8.38/AccessEntry.sol` (lane FU2-C): when a calldata
+ * element that fails only on access is read, encoded or copied.
  * `--inherited` checks `tests/abi-0.8.38/InheritedSelectors.sol` (inherited and
  * renamed function values) against its pinned selectors.
  * `--probes` runs `tests/abi-0.8.38/LazyEntry.sol`, whose vectors pin when
@@ -171,13 +173,13 @@ async function fixtures() {
   return report;
 }
 
-async function probes() {
-  const file = join(ROOT, 'tests/abi-0.8.38/LazyEntry.sol');
-  const sources = {'LazyEntry.sol': {content: readFileSync(file, 'utf8')}};
-  const spec = JSON.parse(readFileSync(join(ROOT, 'tests/abi-0.8.38/LazyEntry.vectors.json'), 'utf8'));
+async function probes(name = 'LazyEntry') {
+  const file = join(ROOT, `tests/abi-0.8.38/${name}.sol`);
+  const sources = {[`${name}.sol`]: {content: readFileSync(file, 'utf8')}};
+  const spec = JSON.parse(readFileSync(join(ROOT, `tests/abi-0.8.38/${name}.vectors.json`), 'utf8'));
   const report = [];
   for (const group of spec.groups) {
-    const results = await observe(sources, 'LazyEntry.sol', group.contract, group.vectors);
+    const results = await observe(sources, `${name}.sol`, group.contract, group.vectors);
     const summary = summarize(results);
     summary.forEach((o, i) => {
       const want = group.vectors[i].expect;
@@ -226,5 +228,6 @@ const output = {compilerSha256: COMPILER_SHA, configs: CONFIGS};
 if (flag('--inherited')) output.inherited = await inherited();
 if (flag('--fixtures')) output.fixtures = await fixtures();
 if (flag('--probes')) output.probes = await probes();
+if (flag('--access')) output.access = await probes('AccessEntry');
 const text = JSON.stringify(output, null, 2) + '\n';
 if (outFile) writeFileSync(outFile, text); else process.stdout.write(text);
