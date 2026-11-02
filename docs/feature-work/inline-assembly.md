@@ -432,3 +432,18 @@ joint1231/TestSuite262/KeySort/signature/strict/trust gate passes. Original five
 native journal FAILs and all24/six remain open. Capacity approval rejection and
 separate safe resolution retained, no guard or protecteddata cleanup.
 Artifacts: `/workspace/vy5-composition/modifier-body-20261102/final/`.
+
+### VY5 selected returning decoder (2026-11-02)
+
+The [VY5 lane](inline-assembly-vy5.md#actual-selected-returning-callstaticcall-decoder-2026-11-02)
+adds19 actual selected CALL/STATICCALL→Source.extReturn laws using verified VY4
+`fd3da385f5e4ada7aa889821d3ae59a34833d235`, real heap inputs/full carrier and
+separate bounded output-copy decoding.23 provenance/mutation tests pass; finder
+and skeptic's coordinated-provenance finding was repaired. Private joint
+KeySort/full1283/TestSuite262/axioms/strict pass; initial combined command EXIT1
+from incomplete trust stdin remains failure, corrected full trust passes
+separately. No fresh native evidence or nonempty-revert producer inferred.
+All24 obligations/six full Source combinations/G01/compiler/world/V16 remain
+pending; original five native journal FAILs, historical docs/G03 EXIT1 and
+unanswered semantic holds remain unchanged. Exact sealed incremental handoff:
+`/workspace/vy5-composition/return-consumer-20261102/final/`.

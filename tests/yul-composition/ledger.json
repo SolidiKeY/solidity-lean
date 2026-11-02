@@ -426,5 +426,6 @@
   "nativeRethrowEvidence": "tests/yul-composition/native-rethrow-ledger.json",
   "observedNativeRethrowEvidence": "tests/yul-composition/observed-native-rethrow-ledger.json",
   "runtimeBlockEvidence": "tests/yul-composition/runtime-block-ledger.json",
-  "modifierEvidence": "tests/yul-composition/modifier-ledger.json"
+  "modifierEvidence": "tests/yul-composition/modifier-ledger.json",
+  "returningEvidence": "tests/yul-composition/returning-ledger.json"
 }

@@ -2249,3 +2249,92 @@ goal unchanged/get_goal unavailable; no reset/reactivation/completion, replaceme
 VM/thread, cross-thread message, push/merge/PR or service. Reviewed immutable
 patch/bundles/interface/full signatures/request references/evidence/checksums:
 `/workspace/vy5-composition/modifier-body-20261102/final/`.
+
+## Actual selected returning CALL/STATICCALL decoder (2026-11-02)
+
+VY5 consumes the immutable VY4 private producer
+`fd3da385f5e4ada7aa889821d3ae59a34833d235` from
+`/workspace/shared/parallel-vy4-general-returning-4d6b5b8d`.
+The bundle/archive hashes and exact 183-module actual import closure are recorded
+in `/workspace/vy5-composition/return-consumer-20261102/producer-provenance.json`.
+Existing producer bodies matched byte-for-byte; only missing imports were staged
+in the existing private tree. The producer's different Solidity.lean was NOT
+adopted. No Source owner bodies, other checkout or branch were modified.
+
+[ReturningPhysical](../../Solidity/Yul/Composition/ReturningPhysical.lean) adds19
+kernel laws. `call_decode` and `static_decode` execute the actual selected physical
+call via `GeneralReturning.call_actual`/`static_call`, then actual `Source.extReturn`
+for `[uint256]`. Full32byte data decodes to
+`0x11223344 * 2^224 + 0x55`; same-length encoded value+1 decodes differently, short
+success data becomes empty revert, and all revert bytes propagate unchanged.
+The exact returned physical completion is retained alongside actual decoder
+post-state, including source locals/St, heap, fnLocals, events/logs, ordered
+supplied trace and residual/Bool journals. No second state semantics is defined.
+`call_decode_encoded` discharges input loading from actual VY2 Placement,
+HeapByteEntry membership/Nodup and encoding. `copied_decoder` separately consumes
+actual bounded `copyOutput` on the selected success completion, then decodes the
+unchanged full returndata with the entire copied source heap retained. It is an
+output-copy/decoder component, not a new universal call/copy sequencer theorem.
+Its required shared-execution premise is explicit and definitionally discharged
+for that actual success completion; initial failed diagnostic is preserved.
+
+`sample_run`/`static_sample` inhabit the actual two-object encoded heap, two memory
+aliases/saved fnLocals, caller event/log prefix and source/residual/Bool carriers.
+Theorems quantify any supplied Glob, hence both actual pipelines. Actual transfer
+failure is consumed as empty revert; actual horizon6 timeout keeps the dirty
+transferred execution and OLD return buffer rather than rollback/normal EVM
+failure. Missing registration and invalid physical input are adapter None, not
+EVM halt. Nonempty revert decoder transport DOES NOT supply the still-requested
+ordinary-function nonempty-revert producer packet. The existing immutable request
+remains `/workspace/vy5-composition/runtime-block-20261102/final/producer-request.json`;
+no active producer was contacted/interrupted and no packet was assumed.
+
+Real premises remain: selected Finite/answer typed runtime program, receiver64
+code0, owner48, CALL value7 or STATICCALL value0, actual transfer equality,
+Fixed-derived selector, depth1/horizon10, observation execution sharing, complete
+SUPPLIED prefix, physical load or layout/ownership/bounds. Supplied observations
+are not Source emit/G01 adequacy. No gas/resource adequacy, arbitrary callee,
+frontend derivation/admission, logical-index/EVM-pointer identity, raw-to-clean
+resumption or missing Source try selector is inferred.
+
+[returning-ledger.json](../../tests/yul-composition/returning-ledger.json) and
+[returning-source.mjs](../../scripts/yul-composition/returning-source.mjs) fail closed
+on source/signature/producer identity/body/closure/path drift and false coverage,
+fresh native evidence or erased original failures. Finder and skeptic both found
+a coordinated mutable-provenance/hash vulnerability in the first guard. Exact
+verified provenance record/path are now pinned, with coordinated body+claimed-hash,
+transitive omission and redirect controls. Final23JS tests pass. No fresh native
+or solc/EVM suite was run; historical complete observations and five strict native
+optimized-viaIR journal mismatches/EXIT1 remain untouched.
+
+Per-file MCP after edits and affected closure pass. Actual versions are
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613. Required joint command ran KeySort2jobs, full1283jobs,
+TestSuite262jobs, exact19 signatures/scoped standard axioms, orphan1298/0/0 and
+strict491automatic/61budgeted/0manual/11refuted/0pending successfully, then EXIT1
+because VY5 supplied an incomplete trust stdin list. Corrected complete-list trust
+passed separately:1313sources/252sites/0findings. The original combined EXIT1
+is retained, not relabelled a pass. First unsupported Lake -j flag EXIT1 is also
+retained; corrected supported wrapper uses explicit Lean -j1 in existing TOML.
+No proof/fuel/heartbeat/node/test budget or semantic change.
+
+Resources: initial276529152free bytes; compatible source staging left275947520.
+Producer build cache grew approximately36.8MiB, exceeding the initial25MiB
+incremental estimate; post-closure capacity was remeasured239153152 before the
+next gate (178450432comparable layer plus8MiB remaining allowance). Existing hard
+12GiB/no-swap/CPU1, serial LEAN_NUM_THREADS1/-j1,12GiB OS-available reserve,
+writer lock and all capacity guards remain unchanged. Only current verified
+exited SizeRw0 directory-only metadata containers were retired AFTER preserving
+inspect/log/directory receipts. All images/caches/mounts/sealed history retained;
+no resource stop or hidden cleanup. Exact receipts/raw failures live under
+`/workspace/vy5-composition/return-consumer-20261102` and its final seal.
+
+All Work1/2/3 and BackfillA/B remain PARTIAL; all24 original obligations/six general
+Source combinations/fullProofGate remain pending. General Source try selection,
+raw operators/functions/sessions, G01/allocation/world/compiler/V16 adequacy and
+final joint closure remain open. LIB1/library-viaIR1834, frozen unchecked-add,
+strict journal and optional-vendor questions remain unanswered. Original blocked
+goal unchanged; get_goal unavailable, no reset/reactivation/completion. Historical
+docs/G03 EXIT1 exact-base equality is zero regression ONLY and not rerun for
+activity. Immutable checkpoint/peer-input/signatures/evidence/checksums:
+`/workspace/vy5-composition/return-consumer-20261102/final/`.
