@@ -1359,3 +1359,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Backend/InternalFlow/RuntimeCalls.lean` | Exact all-CallRet typed argument/body/result success and halt decomposition from actual TRun.call; no new evaluator. |
 | `Solidity/Backend/InternalFlow/RuntimeWorld.lean` | Actual world caller-prefix/internal-call frame and caller decode extraction; preserves conservative static refusal, settlement and other-account storage. |
 | `Solidity/Backend/InternalFlow/RuntimeGuardedFrame.lean` | General successful runtime-call frame/local/result consumer with genuine existing readsIn/withinM admission; not arbitrary mutating calls or effect-certified static world admission. |
+
+| `Solidity/Backend/InternalFlow/WorldResultEmission.lean` | Actual callee-prefix and caller-result failure state/parts feed existing checked byte emission/projected journals; explicit machine hooks, no world-memory representation or rollback claim. |

@@ -3762,3 +3762,85 @@ Old cached/raw/full/docs failures remain failed and are HELD until end-of-lane
 validation under coordinator scheduling, not rerun or relabeled here. All
 original Work1–6/BackfillsA–B remain partial. No push/merge/PR, peer transfer,
 new VM/thread/model or goal administration/reset/reactivation/completion.
+
+
+### C51 — actual callee and caller-result failures to checked byte emission
+
+WorldResultEmission consumes a remaining ready Work5/BackfillB composition.
+`rejectingEntry` retains the existing method body/payable flag and uses the
+EXISTING TRun.revertData evaluator as its caller-side rejecting result handler.
+`same_frame` proves actual frame execution is unchanged. `world_rejection`
+uses the REAL successful frame state and actual typed RevPart evaluation to
+produce the exact World.call halt; checked_rejection/local_rejection feed THAT
+SAME actual runtime error into the published checked emitter/local journal.
+This is result-to-component coupling, not an unrelated conjunction, new payload
+evaluator/codec, world semantics or desired simulation premise. It is a
+model-level rejecting handler, not proved frontend ABI decoder lowering.
+
+The inhabited client reuses C50's actual nonempty ordinary-world frame. Payload
+parts read returned memory13, protected caller local9, actual persistent23 and
+transient29 roots, then literal DE/00/AD. Complete ordered chunks are four
+32-byte published word encodings plus3bytes:131total with embedded zero bytes.
+Full checked emission bytes, immutable outcome, protected3-element stack and
+outside memory4/136 are pinned at nonzero offset5, with a halting ignored suffix.
+Saved7/9 and live23/29 roots are explicitly from the separately witnessed source
+states (saved source installed storage is checked). The failed world result
+itself supplies NO State. Local projected restoration proves no world rollback,
+StateRepr, byte/word memory coupling, source catch or post-error effect absence.
+A failed Fits premise is distinguished from actual over-stack checked rejection.
+Wrong order, ordinary successful World.call versus error adapter, normalized
+empty revert, and separately executed panic rejecting handler retain classes;
+THalt.data=[] is never used to invent a REVERT or panic code.
+
+All41 actual builtin reports are pinned additively:33fixtures/904reports, all
+old32/863pins/source bytes unchanged. The genuinely missing C50 fixture object
+was created by checking its exact unchanged committed source to permit import;
+all23 prior report sets pass. NO saved cache manifest was rebound or promoted.
+Initial typed-lambda/syntax and naive stack recursion failures are retained;
+stack rejection now uses the original exact length/stack guard structurally,
+with no recursion/heartbeat/fuel/time increase. Source/core/client checks pass;
+independent read-only source/artifact reviews are required. Held aggregate/raw/
+full/docs final gates remain failed/pending, not retried or implementation stops.
+
+Remaining queue review: general target runtime frames and unbounded intrinsic callRec
+runtime/target bridge remain missing (the intrinsic Stmt.callRec elaboration path
+still quotes finite recUnroll with recBase/exhaustion). Published
+Solidity.Source.callInternal/sourceLang unbounded semantics already exist; their
+bridge to this intrinsic/runtime target is a SEPARATE obligation. Full dependent dispatch still lacks the general generated
+guard/direct-candidate agreement noted in finite-dispatch, beyond existing
+concrete controls. General mixed/early-control loop and exact finite-horizon
+transport need supported body certificates/public MemoryTurn/loopBody/iter API;
+private producer implementation is not copied. Callee ABI RETURN bytes cannot
+be manufactured by substituting a byte-returning Entry.result, which is a
+CALLER decoder: a real return-lowering/representation producer is required.
+Word-frame/live byte-journal/world and target transient/transaction/callback
+correspondence remain open; logical source root projection is not EIP1153.
+All original Work1–6/BackfillsA–B remain partial. No reserved edit, new axiom,
+sorry/native trust shortcut, profile/refusal change, push/merge/PR/peer transfer,
+new VM/thread/model, goal reset/reactivation/completion or budget increase.
+
+C51 review identified and completed a SECOND ready Work5/BackfillB path rather
+than prematurely stopping: `callee_rejection` evaluates typed parts INSIDE the
+callee after a successful mutating/allocating prefix. `frame_failure` retains
+exact original world admission/storage/entry/body equations; world_callee_rejection
+composes actual caller prefix, argument evaluation, callee prefix, typed revert
+and ordinary world failure. The caller decoder is unchanged and not substituted.
+The inhabited InsideCallee client checks default entry H2/ref1, body H3 with
+private/result/old identities2/2/0, contents13/17 versus7/11, roots23/29. Typed
+parts read private17, result13, old argument11 and roots23/29, giving163bytes.
+Complete machine/output/journal observations and a131-versus163 wrong-phase
+payload control distinguish caller-result and in-callee scopes. Prefix state is
+known from ACTUAL successful prefix execution, not reconstructed from failure.
+Protected stack and outside-memory facts use shallow published byte frame laws;
+no recursion limit was raised after a deep concrete projection failed.
+
+Confirmed review correction: finite recUnroll concerns the INTRINSIC
+Stmt.callRec elaboration/runtime path, not all source semantics. Existing
+Solidity.Source.callInternal (Source/Eval.lean) and sourceLang
+(Source/Semantics.lean) provide unbounded source semantics. The source-to-intrinsic/
+runtime/TARGET bridge is the missing separate producer; it is not repaired by
+reimplementing reserved source semantics. A further ready BackfillA target
+composition candidate is whole-program prefix/certificate joining (public
+Calls.Program currently supplies statement-cons composition); inspect and consume
+published Prog.join/DeferredSource.join_run instead of duplicating an evaluator.
+No general independent-work-exhaustion or lane-completion conclusion follows.

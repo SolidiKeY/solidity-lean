@@ -1021,3 +1021,5 @@ import Solidity.Backend.InternalFlow.RuntimeCalls
 import Solidity.Backend.InternalFlow.RuntimeWorld
 
 import Solidity.Backend.InternalFlow.RuntimeGuardedFrame
+
+import Solidity.Backend.InternalFlow.WorldResultEmission

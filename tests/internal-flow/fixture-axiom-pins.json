@@ -4366,5 +4366,180 @@
         "propext"
       ]
     }
+  },
+  "WorldResultEmissionChecks": {
+    "guard": "tests/internal-flow/check-world-result-emission-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.WorldResultEmission.same_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmission.world_rejection": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmission.checked_rejection": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmission.local_rejection": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.parts_evaluate": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.complete_chunks": [],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.actual_rejection": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.exact_class": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.checked_execution": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.full_emitted_bytes": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.protected_stack": [],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.outside_interval": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.complete_machine_observation": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.source_snapshots": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.projected_local_execution": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.saved_source_is_actual": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.successful_world_not_revert": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.wrong_order": [],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.wrong_emitted_order": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.rejected_capacity_premise": [],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.rejected_stack": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.empty_rejection": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.panic_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.actual_panic": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.panic_not_revert": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmission.callee_rejection": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmission.frame_failure": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmission.world_callee_rejection": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.args_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.prefix_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.parts_evaluate": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.frame_phases": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.complete_chunks": [],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.actual_world_failure": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.checked_execution": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.full_bytes": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.projected_execution": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.complete_machine_observation": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.not_caller_payload": [],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.protected_stack": [],
+      "Solidity.Backend.InternalFlow.WorldResultEmissionChecks.InsideCallee.outside_interval": [
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }
