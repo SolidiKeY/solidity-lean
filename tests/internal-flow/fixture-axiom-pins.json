@@ -675,6 +675,40 @@
         "Classical.choice",
         "Quot.sound",
         "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.constructed_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.constructed_ordered": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.prefix_constructor_eq": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.selected_constructed": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.selected_public": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.prefix_public_fields": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.prefix_getter": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
       ]
     }
   },
@@ -4199,6 +4233,16 @@
         "propext"
       ],
       "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.shared_capacity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.constructed_argument_vector": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.constructed_wrong_alias": [
         "Classical.choice",
         "Quot.sound",
         "propext"

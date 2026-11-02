@@ -101,6 +101,23 @@ theorem shared_capacity : ∃ reached addresses,
  change AllocationInput 1 128 (prefixProducer.cost initial + 4) initial bases machine
  simpa only [costs.2.2] using good_capacity
 
+/-- The independent explicit prefix is publicly selected and preserves the
+SAME complete successful argument-call observation, not a smaller surrogate. -/
+theorem constructed_argument_vector : words
+ (Evm.run ((Calls.plain PublishedDirectCalls.Checks.prefixConstructed).code ++ publicGood.code) machine)
+ [0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262] =
+ some [77,263,99,42,256,256,260,42,11,260,260,0,0,2,7,11,0,2,0,0] := by
+ rw [← PublishedDirectCalls.Checks.prefix_constructor_eq]
+ exact emitted_success_vector
+
+/-- Original wrong-alias control transported without any target replay. -/
+theorem constructed_wrong_alias : words
+ (Evm.run ((Calls.plain PublishedDirectCalls.Checks.prefixConstructed).code ++ publicGood.code) machine)
+ [0,127,1,2,3,4,5,6,7,8,9,10,256,257,258,259,260,261,262] ≠
+ some [77,263,99,42,256,260,260,42,11,260,260,0,0,2,7,11,0,2,0,0] := by
+ rw [constructed_argument_vector]
+ decide
+
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_argument_failure
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_revert
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_success_vector
@@ -112,4 +129,6 @@ theorem shared_capacity : ∃ reached addresses,
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_metadata
 #print axioms Solidity.Backend.InternalFlow.SharedPrefixCapacity.fork
 #print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.shared_capacity
+#print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.constructed_argument_vector
+#print axioms Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.constructed_wrong_alias
 end Solidity.Backend.InternalFlow.SharedCallPrefix.Checks

@@ -3643,3 +3643,56 @@ checks pass; driver coverage/fail-fast and actual report corruption checks pass.
 Documentation normal/strict raw exits remain 1, complete outputs byte-identical
 to C47; frozen comparison retains two incoming missing paths and one incoming
 ambiguity (48 missing versus 46, 86 total findings versus 83). No owned addition.
+
+
+### C49 — explicit populated prefix certificate and public selector bridge
+
+The owned PublishedMemoryCalls fixture now supplies `prefixConstructed` from the
+five existing intrinsic statement certificates (scalar declaration, array
+allocation, two actual writes and alias declaration). Each head has its actual
+public `Memory.compileStmt` equation. `compile_attach` composes these equations
+into `selected_constructed`; `selected_public` connects the SAME certificate to
+actual `Calls.compile`. `prefix_constructor_eq`, `prefix_getter` and
+`prefix_public_fields` retain exact original compiler admission, code, fragment,
+frame need and cost FUNCTION, including arbitrary actual getter witnesses.
+The original `prefixProducer` getter body and irreducible attribute are RESTORED
+UNCHANGED. Existing public client types/statements/observations are byte-exact
+after excluding additions in memory; all831 prior ordered pins remain unchanged.
+
+`constructed_endpoint` transports the genuinely populated old prefix/call/export
+endpoint including StateRepr, stack, BaseExtends and GrowsAllocator, not a desired
+midpoint premise. `constructed_ordered` covers EVERY address list. The separate
+argument-call client retains the SAME complete20-element successful vector and
+wrong-alias control through actual public-prefix equality. No new evaluator,
+representation, admission, unsupported category, failed State, rollback, byte,
+absence-of-effects or world theorem is inferred. Nine new actual scoped reports
+are pinned additively:31fixtures/840reports; selected_constructed uses precisely
+propext/Quot.sound, the other eight use Classical.choice/propext/Quot.sound.
+
+The measured production-replacement candidate is REJECTED as a performance fix.
+UNMODIFIED Lean.collectAxioms on SAME5actual public roots x3 repetitions, with
+identical root/order/axiom outputs, took4.394313039s before versus4.647849077s
+candidate (process6.952s versus7.489s). This is one measured pair, not proof of a
+unique bottleneck or an aggregate/headroom prediction. Explicit data was checked,
+but adopting it as prefixProducer did not improve the actual affected root sample.
+No aggregate/raw/full retry or fixture-manifest rebind/preparation occurred.
+The failed whole-rfl200000-heartbeat probe (including compiler-inserted sorryAx)
+is INVALID failure evidence only; no such proof/axiom is in committed deliverables.
+Per-head constructor equations solve the link without increasing any budget.
+
+A DIFFERENT owned correctness repair closes the published-call standalone guard's
+order gap: its ORIGINAL complete27reports reordered are accepted by the old guard
+(exit0), while the strengthened guard now rejects reordering with all34 current
+reports present. Missing/duplicate/altered-axiom/diagnostic controls also reject;
+all original report order is retained. This is authentication/control correctness,
+not performance or cache/kernel/full-gate evidence. Independent READ-ONLY finder
+and skeptic source reviews PASS without builds, no confirmed finding.
+
+All original Work1–6/BackfillA–B remain partial. The aggregate is PENDING31/840
+with intentionally stale source/config bindings; cached124/121.0013827s against
+120s, raw124, full124/300s/TestSuite-sort unreached and normal/strictdocs1 remain
+failures. No optimization/gate success or independent-work-exhaustion claim.
+General runtime frames/unbounded recursion/full-signature dispatch, general mixed
+or early-control loop compilation, live byte-journal/transient/world producers
+remain open/reserved. Original blocked goal unchanged, no administration/reset/
+reactivation, push/merge/PR/peer transfer/new VM/thread/model or budget change.

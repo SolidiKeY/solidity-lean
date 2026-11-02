@@ -1,6 +1,7 @@
 import tests.«internal-flow».AxiomReports
 import Solidity.Backend.InternalFlow.TargetObservation
 import Solidity.Backend.InternalFlow.PublishedDirectCalls
+import Solidity.Backend.InternalFlow.SharedCallPrefix
 import Solidity.Evm.Compiler
 import Solidity.Syntax.Splice
 
@@ -182,8 +183,51 @@ def callerPrefix : Prog C [] Caller := (sol{
   xs[0] = 7; xs[1] = 11;
   uint[] memory same = xs;
 } : Prog C [] Caller)
+private def s0 : Stmt C [] [.val .uint] := .declLocal .uint (.user "marker") (some (.simple (.lit 42 rfl)))
+private def s1 : Stmt C [.val .uint] [.mem A,.val .uint] := .declMem A (.user "xs") (some (.newArr (.lit 2 rfl) rfl)) rfl rfl
+private def s2 : Stmt C [.mem A,.val .uint] [.mem A,.val .uint] := .assignMem (.index .dyn (.var .here rfl) (.simple (.lit 0 rfl))) (.val (.simple (.lit 7 rfl)))
+private def s3 : Stmt C [.mem A,.val .uint] [.mem A,.val .uint] := .assignMem (.index .dyn (.var .here rfl) (.simple (.lit 1 rfl))) (.val (.simple (.lit 11 rfl)))
+private def s4 : Stmt C [.mem A,.val .uint] Caller := .declMem A (.user "same") (some (.alias (.var .here rfl))) rfl rfl
+private def h0 : CompiledStmt 1 (Frag.init []) s0 := ⟨_,_,.declare _ (.user "marker") _ _ (.core _ rfl)⟩
+private def h1 : CompiledStmt 1 h0.frag s1 := ⟨_,_,.allocate _ .uint (.user "xs") (.lit 2 rfl) (by decide) rfl⟩
+private def h2 : CompiledStmt 1 h1.frag s2 := ⟨_,_,.write _ .here rfl _ _ _ _ (.core _ rfl) (.core _ rfl)⟩
+private def h3 : CompiledStmt 1 h2.frag s3 := ⟨_,_,.write _ .here rfl _ _ _ _ (.core _ rfl) (.core _ rfl)⟩
+private def h4 : CompiledStmt 1 h3.frag s4 := ⟨_,_,.declareAlias _ (.user "same") .here rfl⟩
+private theorem h0_selected : Memory.compileStmt 1 (Frag.init []) s0 = some h0 := by rfl
+private theorem h1_selected : Memory.compileStmt 1 h0.frag s1 = some h1 := by rfl
+private theorem h2_selected : Memory.compileStmt 1 h1.frag s2 = some h2 := by rfl
+private theorem h3_selected : Memory.compileStmt 1 h2.frag s3 = some h3 := by rfl
+private theorem h4_selected : Memory.compileStmt 1 h3.frag s4 = some h4 := by rfl
+private def done : CompiledProg 1 h4.frag (.nil : Prog C Caller Caller) := ⟨_,[],.nil _⟩
+def prefixConstructed : CompiledProg 1 (Frag.init []) callerPrefix :=
+ SharedCallPrefix.attach h0 (SharedCallPrefix.attach h1 (SharedCallPrefix.attach h2 (SharedCallPrefix.attach h3 (SharedCallPrefix.attach h4 done))))
+theorem selected_constructed : Memory.compileProg 1 (Frag.init []) callerPrefix = some prefixConstructed := by
+ exact SharedCallPrefix.compile_attach h0 _ h0_selected
+  (SharedCallPrefix.compile_attach h1 _ h1_selected (SharedCallPrefix.compile_attach h2 _ h2_selected
+   (SharedCallPrefix.compile_attach h3 _ h3_selected (SharedCallPrefix.compile_attach h4 _ h4_selected rfl))))
+theorem selected_public : Calls.compile 1 (Frag.init []) callerPrefix = some (Calls.plain prefixConstructed) := by
+ change (Memory.compileProg 1 (Frag.init []) callerPrefix).map Calls.plain = _
+ rw [selected_constructed]
+ rfl
 def prefixProducer : Calls.Program 1 (Frag.init []) callerPrefix :=
   (Calls.compile 1 (Frag.init []) callerPrefix).get (by decide +kernel)
+theorem prefix_constructor_eq : prefixProducer = Calls.plain prefixConstructed := by
+ unfold prefixProducer
+ exact SharedCallPrefix.get_some _ (by decide +kernel) _ selected_public
+
+/-- Exact public admission and fields remain linked to the explicit checked
+constructor data. The public compiler evidence is retained, not hidden. -/
+theorem prefix_public_fields :
+ (Calls.compile 1 (Frag.init []) callerPrefix).map
+   (fun p => (p.code,p.frag,p.need,p.cost)) =
+ some (prefixProducer.code,prefixProducer.frag,prefixProducer.need,prefixProducer.cost) := by
+ rw [selected_public,prefix_constructor_eq]
+ rfl
+
+theorem prefix_getter (h : (Calls.compile 1 (Frag.init []) callerPrefix).isSome = true) :
+ (Calls.compile 1 (Frag.init []) callerPrefix).get h = prefixProducer :=
+ (SharedCallPrefix.get_some _ h _ selected_public).trans prefix_constructor_eq.symm
+
 attribute [irreducible] prefixProducer
 def caller : Solidity.Out C [] Caller := (callerPrefix.run initial).toOption.get (by decide +kernel)
 def arguments : Args C Caller [.mem A] :=
@@ -261,6 +305,26 @@ theorem payload_source : bytesFailure.run initial = .error (.revertWith [7]) := 
 theorem memory_path : compiled.isMemoryCalls = true ∧ compiled.usesMemory = true ∧
     compiled.isMemory = false := by decide +kernel
 
+/-- Independently constructed data is the actual selected prefix, so the
+SAME populated caller/call/export endpoint is retained. No midpoint is assumed. -/
+theorem constructed_endpoint :
+    ∃ m₁ base₁ m₂ base₂,
+      Evm.run (Calls.plain prefixConstructed).code machine = .ok m₁ 0 ∧
+      StateRepr 1 1 128 (Calls.plain prefixConstructed).frag caller.st base₁ m₁ ∧
+      Evm.run callProducer.code m₁ = .ok m₂ 0 ∧
+      StateRepr 1 1 128 callProducer.frag exported.st base₂ m₂ ∧
+      m₂.stack = m₁.stack ∧ BaseExtends caller.st.H base₁ base₂ ∧
+      GrowsAllocator 1 128 (callProducer.cost caller.st) caller.st base₁ m₁ exported.st base₂ m₂ := by
+ rw [← prefix_constructor_eq]
+ exact nonempty_call_endpoint
+
+/-- The complete pre-existing ordered target observation, including private
+physical cells, is unchanged by selecting the explicit constructor prefix. -/
+theorem constructed_ordered (addresses : List Nat) :
+ words (Evm.run ((Calls.plain prefixConstructed).code ++ callProducer.code) machine) addresses =
+ words (Evm.run (prefixProducer.code ++ callProducer.code) machine) addresses := by
+ rw [← prefix_constructor_eq]
+
 #print_checked_axioms noRef,
   initial_repr,
   actual_execution,
@@ -288,4 +352,11 @@ theorem memory_path : compiled.isMemoryCalls = true ∧ compiled.usesMemory = tr
   call_endpoint,
   statement_revert,
   program_endpoint
+#print axioms Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.constructed_endpoint
+#print axioms Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.constructed_ordered
+#print axioms Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.prefix_constructor_eq
+#print axioms Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.selected_constructed
+#print axioms Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.selected_public
+#print axioms Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.prefix_public_fields
+#print axioms Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks.prefix_getter
 end Solidity.Backend.InternalFlow.PublishedDirectCalls.Checks
