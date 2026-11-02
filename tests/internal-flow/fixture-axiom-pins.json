@@ -3941,5 +3941,258 @@
         "propext"
       ]
     }
+  },
+  "SharedArgumentFacts": {
+    "guard": "tests/internal-flow/check-shared-argument-facts-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.argument_shape": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.bad_shape": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.good_shape": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.first_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.second_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.bad_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.good_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.bad_tail_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.good_tail_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.empty_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.arguments_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.bad_expansion_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.good_expansion_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.shared_decomposition": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_arguments": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_bad_expansion": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_good_expansion": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.original_arguments": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.original_bad_expansion": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.original_good_expansion": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.original_bad": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.original_good": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_bad_root": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_good_root": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.actual_bad_prefix": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.good_arguments_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_good_arguments": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.good_shared_decomposition": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.actual_good_prefix": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.selected_bad_root": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.selected_good_root": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_bad_code": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_good_code": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_good_frag": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_bad_prefix": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_good_prefix": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.c46_drop_decomposition": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_bad_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_good_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.compile_attach": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.attach_prefix": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.get_some": []
+    }
+  },
+  "SharedArgumentEndpoint": {
+    "guard": "tests/internal-flow/check-shared-argument-endpoint-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_argument_failure": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_revert": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_success_vector": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_success_repr": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_not_fault": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.emitted_not_success": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.wrong_emitted_cursor": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.distinct_emitted_programs": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.SharedCallPrefix.Checks.public_metadata": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }

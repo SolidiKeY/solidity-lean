@@ -1351,3 +1351,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Backend/InternalFlow/CallArgumentPrefix.lean` | Actual typed argument-prefix failure before call entry/body/export, with allocating successful comparison and exact failure controls; source only. |
 
 | `Solidity/Backend/InternalFlow/ArgumentFailureTarget.lean` | Actual argument failure coupled to a checked ordinary call and a genuinely reached prefix representation/capacity; exact bare target revert, no failed State or rollback claim. |
+
+| `Solidity/Backend/InternalFlow/SharedCallPrefix.lean` | Public memory-compiler constructor sharing, dependent typed continuations and code-prefix congruence; concrete actual root-selector links and emitted argument-failure clients in SharedArgument fixtures. |

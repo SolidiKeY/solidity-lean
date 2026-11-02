@@ -1011,3 +1011,5 @@ import Solidity.Backend.InternalFlow.LoopCallerPrefix
 import Solidity.Backend.InternalFlow.CallArgumentPrefix
 
 import Solidity.Backend.InternalFlow.ArgumentFailureTarget
+
+import Solidity.Backend.InternalFlow.SharedCallPrefix

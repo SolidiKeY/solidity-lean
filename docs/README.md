@@ -138,3 +138,5 @@ V12 concrete all-horizon mixed-loop caller transport and nonterminating/failure 
 V12 actual argument-prefix failure and host-only key-phase attribution: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
 
 V12 admitted argument-failure target calls with genuine populated prefixes and allocating success controls: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
+
+V12 compiler-selected shared argument prefixes and unchanged allocating success: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).

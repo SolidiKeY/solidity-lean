@@ -3540,3 +3540,64 @@ general mixed loops, live word-frame/byte-journal and transient/world coupling a
 not closed. This intrinsic finite-call client is not frontend name-resolution,
 source lowering, bytecode/gas agreement, recursive compilation or whole-lane closure.
 The original blocked goal is untouched; no administration, push, merge or peer transfer.
+
+
+### C47 — compiler-selected shared argument prefix (partial)
+
+The C46 instruction-prefix gap is now closed for its SAME inhabited bad/good pair.
+New `SharedCallPrefix.attach` packages existing `Memory.CompiledStmt`/`CompiledProg`
+with the existing `ProgFrag.cons` constructor. `compile_attach` proves the public
+`Memory.compileProg` head/tail equation; `attach_prefix` lifts an already proved
+tail decomposition through the SAME compiled head, even with differently typed
+continuations. Concrete proofs bottom out at the actual nil certificate, not a
+hypothetical prefix/simulation premise. No syntax, evaluator or machine is added.
+
+SharedArgumentFacts compiles the three actual argument declarations separately,
+then uses the same head certificates for the argument-only program and the full
+result-entry/body continuation. Exact source constructor shapes and each public
+compileStmt/compileProg selection are proved. Named small equations connect those
+shared certificates to `Calls.compile` for the expansions AND the public root
+call selectors, and to the original C46 getters/Statements. This is actual emitted
+code, not merely an alternative sound certificate. No private producer is edited
+or imported under a new name. The literal C46 drop-form equation is recovered by
+constructor decomposition plus `List.drop_left`, not deep normalization. Historical
+C46 heartbeat failures stay sealed; the original200000 limit is unchanged.
+
+`actual_bad_prefix` and `emitted_bad_prefix` prove the original/full public call
+code equals the actual old argument code followed by the compiled continuation
+and return-pointer code. The good pair has the corresponding proved decomposition.
+`emitted_argument_failure` consumes the SAME genuinely reached C46 caller and its
+actual argument-program revert, then existing `run_append_revert` proves failure
+absorption for this actual emitted prefix and prefix/call composition. Public good
+code/fragment equality transports the original represented successful endpoint and
+EXACT complete ordered vector, not a recomputed smaller witness:
+[77,263,99,42,256,256,260,42,11,260,260,0,0,2,7,11,0,2,0,0].
+Stack77, sentinel99, old aliases256, source scalar42, private/default separation,
+result object2 at260 and cursor263 are unchanged. A new negative proves the bad
+and successful public emitted programs cannot be substituted for one another;
+wrong-cursor uses the retained full vector. None yields a failed output State,
+frontier, rollback, absence of effects, payload bytes, target trace or world theorem.
+
+All51 new actual builtin axiom reports are pinned (42facts/core,9endpoint), with
+strict corruption/order controls. Removing additions preserves EXACT old29fixture/
+778report entries/order, including all39 C46 pins. Expanded31/829 aggregate remains
+PENDING; source/config bindings intentionally stale, no rebind or cached/raw/full
+retry. No semantic progress is relabeled performance repair. General runtime frames,
+recursion/divergence, dependent dispatch, mixed/early-control loops and byte-journal/
+transient/world composition remain OPEN; all Work1–6/BackfillsA–B remain partial.
+
+A real disk guard observed zero free after stopped task containers accumulated.
+Further checks paused, only stopped C47 containers verified by saved CID/name
+receipts were removed, restoring2.7GiB. No cache, old seal, other container or
+unrelated work was deleted; later checks use explicit admission and immediate own
+cleanup. Initial constructor monad/dependent-source rewrite failures are retained
+and fixed with public Option equations/definitional source shapes, no budget change.
+Existing layers/trust/profile/observations are unchanged. Original blocked goal
+untouched; no goal administration, push/merge/PR, peer transfer or new VM/thread.
+
+C47 also closes the directly available metadata consequence: public bad/good root
+cost equals its original call cost for EVERY typed caller state (nil short-circuits
+without evaluating an unreachable suffix). At the actual caller costs are0/4 and
+both selected public roots have need8. The represented successful endpoint states
+GrowsAllocator with the actual public program cost. This is constructor-derived
+metadata, not a failed-state frontier or a global frame/recursion theorem.
