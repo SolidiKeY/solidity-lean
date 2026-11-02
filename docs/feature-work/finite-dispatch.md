@@ -775,7 +775,7 @@ Confirmed and fixed:
 Recorded, not changed: the tuple *declaration* `(uint a, uint[] memory b) =
 f(x);` does not parse in `sol{}` (`solTupleDecl` takes no location; finder
 3), so only the assignment form is tested; viaIR modifier frames
-(`Lower.lean`, `modifierFrames`) now reach several returns with a memory one
+(`Syntax/Elab/Lower.lean`, `modifierFrames`) now reach several returns with a memory one
 and alias the return pointer as viaIR does, untested (finder 4); direct calls
 of such functions through the solc import reach the elaborator with no EVM
 vectors behind them (skeptic 12); `holdsC_callRecContract`'s `isValues`
