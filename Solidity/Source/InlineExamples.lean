@@ -7,7 +7,7 @@ A unit written as syntax, elaborated by `elaborate`, deployed and called
 through the semantics:
 
 ```solidity
-contract I {
+contract D {
   uint256 public x;
   function f(uint256 i) external { x = [uint8(1), 2, 3][i]; }
   function g() external { x = [1, 256][1]; }
@@ -32,7 +32,7 @@ open Solidity.Roadmap (Bytes Outcome)
 def u256T : Syn .typeName := .elem u256E
 
 def unitInl : Syn .unit :=
-  .unit (.cons (.contract false "I" .none .nil
+  .unit (.cons (.contract false "D" .none .nil
       (.cons (.stateVar u256 (some .pub) none none false "x" .none)
       (.cons (ext "f" (.cons (uParam "i") .nil)
           (.cons (setX (.index (.inlineArray (.call (ty u8) (.positional (.cons (num 1) .nil)))
@@ -44,7 +44,7 @@ def unitInl : Syn .unit :=
             (.some (.inlineArray (.ident "a") (.cons (num 1) .nil))))))
           (.cons (setX (.addSub .add (.index (.ident "c") (.some (num 0))) (.index (.ident "c") (.some (num 1)))))
             .nil)))
-      .nil))))
+      .nil)))))
     .nil)
 
 def elabInl : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitInl)

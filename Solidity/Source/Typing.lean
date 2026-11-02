@@ -718,11 +718,12 @@ def STy.oneWord : STy → Bool
   | _ => false
 
 /-- solc's `Type::commonType` of two element types of an inline array:
-`a`'s mobile type if `b` converts to it, else `b`'s if `a` converts to it
-(lane FU2-B). -/
+`a`'s mobile type if `b` converts to it, else `b`'s if `a`'s mobile type
+converts to it (lane FU2-B; solc's fold starts at the first element's
+mobile type, so `[1, -1]` has none: `uint8` and `int8`). -/
 def STy.common (B : DeclName → DeclName → Bool) (a b : STy) : Option STy :=
   if b.implicit B a.mobile then Option.some a.mobile
-  else if a.implicit B b.mobile then Option.some b.mobile else Option.none
+  else if a.mobile.implicit B b.mobile then Option.some b.mobile else Option.none
 
 /-- The common type of an inline array's element types, folded left to
 right from the first's mobile type, as solc's `TypeChecker` does. -/
