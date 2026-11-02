@@ -157,15 +157,13 @@ partial def containsTransferNormality (φ : Expr) : MetaM Bool := do
     containsTransferNormality φ.appArg!
   else return false
 
-/-- `φ` without the parts it does not run: a fresh index (`Hyps.freshC I φ`)
-quotes the formula it was taken at, a `try` already stepped over among it,
-and a loop body's end without a break test (`Fml.invPost … B`, `B` reducing
-to `none`) is its `post` alone, the rest of the program after the loop unread. Only what is
-left decides whether `plain` is worth a try. -/
+/-- `φ` without what it never reads: a loop body's end with no break test,
+`Fml.invPost m hu ω κ φ post B` with `B` reducing to `none`, is `post`
+alone (`Fml.invPost`), the rest of the program `⟨ ω κ ⟩ φ` after the loop
+unread. Only the first such end is looked at; a break test there keeps the
+whole formula. -/
 partial def liveFml (φ : Expr) : MetaM Expr := do
-  let φ := φ.replace fun e => if e.isAppOf ``Hyps.freshC then some (mkConst ``Nat.zero) else none
   let some e := φ.find? fun e => e.isAppOf ``Fml.invPost && e.getAppNumArgs == 12 | return φ
-  -- a break test left: the rest of the program is read, all of it counts
   if e.appArg!.hasLooseBVars then return φ
   unless (← whnf e.appArg!).isAppOf ``Option.none do return φ
   liveFml (φ.replace fun x => if x == e then some e.appFn!.appArg! else none)
@@ -180,7 +178,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   -- not `plain` on a recursive call (no rule of `Proves` steps over it, and
   -- `rfl` would unroll its frames) or a `{havoc}` (`Proves` has no rule for
   -- it). An explicit try calls back too, so avoid an ordinary-proof
-  -- attempt on every capture before it: the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
+  -- attempt on every capture before it: the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`).
+  -- A `try` only in a loop body's unread continuation (`liveFml`) does not count
   let φi ← instantiateMVars φ0
   let containsGuard ← containsTransferNormality φi
   let φs ← liveFml φi
