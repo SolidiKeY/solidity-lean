@@ -270,8 +270,19 @@ no rule or closer change was made. Row 43's `tryScopeExit` is a self `try`
 (`try this.externalValue()`), whose callee frame now enters through
 `Binders.toRet` (`CallRet.rets`, lane FU2-A); that path's proofs re-check and
 its behaviour is unchanged for value binders (`Binders.enterT_toRet`), but
-the row was not rerun. The sibling lane `fu2-testsuite-closer` owns the
-closer work on these rows.
+the row was not rerun. Lane FU2-D (`fu2-testsuite-closer`) found 57 passing
+on its tree and 43 failing on unreduced `(Val.wk (Thin.keepAll …) v).lower`
+terms in the try's success clause, and handed 43 to this lane. Reproduced in
+`sol{}` (scratch, not kept): the same function, a self `try this.f() returns
+(uint a)` whose success and `Panic` clauses each hold an annotated loop, then
+the annotated `while (false)`, under `requires age == 0; ensures age == 0`
+(`spec!{…}`), proves by `sol_symex`/`sol_close` on this lane's head, as do the
+direct and call-inlined forms. `sol{}` refuses the row's binder `age`, which
+shadows the state variable; the solc import renames such a local and
+rewrites the loop specification by name (`rewriteLoop`,
+`SolcJson/Body.lean`), so the stuck weakening most likely comes from that
+import-side path, which cannot be exercised here without the compiler. Not
+fixed.
 
 **Open: proof automation** (30, 31's slice rows, 43, 57, 60), each "open
 proof goals" in a `box` obligation. For `sliceRead` (`t = xs[1:]; assert(t[k]
