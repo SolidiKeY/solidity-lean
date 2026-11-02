@@ -39,6 +39,11 @@ register_option sol.benchmark : Bool := {
   descr := "emit wall-clock phase timings for imported Solidity verification"
 }
 
+register_option sol.testing.closedSpecs : Bool := {
+  defValue := false
+  descr := "try a bounded closed derivation for specifications before semantic tactics"
+}
+
 register_option sol.benchmark.tactics : Bool := {
   defValue := false
   descr := "profile specification tactics (adds stack frames; prefer native diagnostics)"
@@ -267,6 +272,49 @@ private def expressionNodesLeft : Expr → Nat → Nat
 checker from the start. This changes neither admission nor any proof budget. -/
 def testingShares (formula : Expr) : Bool := expressionNodesLeft formula 12288 == 0
 
+initialize registerTraceClass `Solidity.Frontend.specProposal
+
+/-- Propose a small, closed derivation. The compiled walk is only an oracle:
+its equality certificate remains explicitly typed in the returned proof and
+is checked by the final addDecl. Open residues do not pay for a kernel replay.
+A rejected proposal is retried by testObligation under the original deadline. -/
+private def closedSpecProof? (C formula : Expr) : TermElabM (Option Expr) := do
+  if expressionNodesLeft formula 2048 == 0 then return none
+  let saved ← Term.saveState
+  let messages ← Core.getMessageLog
+  let result ← tryCatchRuntimeEx (Budget.within 5000 do
+    Term.withoutErrToSorry do
+      let phi ← Symex.evaluable formula
+      -- Whole-leaf state normalization is the measured expensive case.
+      -- Avoid probing trivial returns and pure branches that gain nothing.
+      unless (phi.find? fun e => e.isConstOf ``Stmt.assign ||
+          e.isConstOf ``Stmt.assignMem).isSome do return none
+      let R := mkConst ``RuleSet.all
+      let H := mkApp2 (mkConst ``Hyps.nil) C (ctxE [])
+      let some ns := C.constName? | return none
+      let np ← Seq.paramCount H phi
+      let qTy := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``List [0]) (mkConst ``Expr))
+      let some [] ← unsafe Meta.evalExpr (Option (List Expr)) qTy
+        (mkAppN (mkConst ``Seq.residueQuoteWithin)
+          #[C,toExpr (128:Nat),R,quoteConstName ns,toExpr np,ctxE [],H,phi]) | return none
+      let leafTy := mkApp (mkConst ``Seq.SLeaf) C
+      let listTy := mkApp (mkConst ``List [0]) leafTy
+      let resTy := mkApp (mkConst ``Option [0]) listTy
+      let nil := mkApp (mkConst ``List.nil [0]) leafTy
+      let someNil := mkApp2 (mkConst ``Option.some [0]) listTy nil
+      let equality := mkApp3 (mkConst ``Eq [1]) resTy
+        (mkAppN (mkConst ``Seq.residueWithin) #[C,toExpr (128:Nat),R,ctxE [],H,formula]) someNil
+      let refl := mkApp2 (mkConst ``Eq.refl [1]) resTy someNil
+      let certificate := mkApp2 (mkConst ``id [0]) equality refl
+      let derivation := mkAppN (mkConst ``Proves.of_residueWithin)
+        #[C,toExpr (128:Nat),R,ctxE [],H,formula,nil,certificate,
+          mkApp2 (mkConst ``Seq.SLeaf.nil) C R]
+      let proof := mkAppN (mkConst ``Proves.fmlValid) #[C,R,formula,derivation]
+      if proof.hasMVar || proof.hasFVar || proof.hasSorry then return none
+      return some proof) (fun _ => pure none)
+  if result.isNone then saved.restore else Core.setMessageLog messages
+  return result
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
@@ -394,10 +442,20 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
                 |>.setBool `sol.prove.sharedResidues selectedShare) <|
               Tactic.run g.mvarId! (Tactic.evalTactic tac)
           else if r.tag == .specified then do
-            let tac ← if sol.benchmark.tactics.get (← getOptions) then
-                `(tactic| ((sol_benchmark "symbolic-execution" in sol_symex); all_goals ((sol_benchmark "closing-preparation" in sol_spec_prep); all_goals try (sol_benchmark "closing-solver" in sol_spec_finish))))
-              else `(tactic| sol_spec_try)
-            Tactic.run g.mvarId! (Tactic.evalTactic tac)
+            let candidate ← if share && sol.testing.closedSpecs.get (← getOptions) then
+                closedSpecProof? C obligation
+              else pure none
+            if let some proof := candidate then
+              usedShared.set true
+              trace[Solidity.Frontend.specProposal] "closed128: {r.name}"
+              g.mvarId!.assign proof
+              pure []
+            else
+              trace[Solidity.Frontend.specProposal] "semantic: {r.name}"
+              let tac ← if sol.benchmark.tactics.get (← getOptions) then
+                  `(tactic| ((sol_benchmark "symbolic-execution" in sol_symex); all_goals ((sol_benchmark "closing-preparation" in sol_spec_prep); all_goals try (sol_benchmark "closing-solver" in sol_spec_finish))))
+                else `(tactic| sol_spec_try)
+              Tactic.run g.mvarId! (Tactic.evalTactic tac)
           else do
             usedShared.set selectedShare
             let out ← IO.mkRef (none : Option Derive.Search)
@@ -461,7 +519,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
       let some deadline := deadline | return ← attempt false
       let now ← IO.getNumHeartbeats
       let remaining := deadline - now
-      if remaining == 0 then return ("error", "shared residue attempt exhausted the original heartbeat budget", ← modeRef.get)
+      if remaining == 0 then return ("error", "proof proposal exhausted the original heartbeat budget", ← modeRef.get)
       withTheReader Core.Context (fun c => { c with initHeartbeats := now, maxHeartbeats := remaining }) <|
         attempt false
 

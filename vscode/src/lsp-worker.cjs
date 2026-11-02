@@ -46,7 +46,7 @@ async function execute(task){
     rmSync(output,{force:true});
     const name=`SolTests.«${contract.name}»`;
     const command=`#solkey_test ${name}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
-    const wrapper=`import Solidity.Frontend.Testing\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
+    const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.closedSpecs ${options.closedSpecs!==false}\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
     const diagnostics=await session.check(wrapper,options.timeoutMs??60000);
     for(const diagnostic of diagnostics)if(importDiagnostic(diagnostic))
       errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});

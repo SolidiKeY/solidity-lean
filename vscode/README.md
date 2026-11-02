@@ -32,6 +32,12 @@ successful body turn. Unsupported shapes remain pending. Ordinary diamonds
 accept exhaustion; separate successful-termination certificates are described in
 [the loop notes](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/loops.md#typed-tuple-measures).
 
+Version 0.5.1 uses a bounded derivation proposal for small state-writing
+specifications. The original source obligation and every proposed proof still
+pass Lean's kernel and axiom checks. Open or rejected proposals use the existing
+verification path. Build the matching `Solidity.Frontend.Testing` backend after
+updating. [Measurements and limits](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/extension-proof-performance.md).
+
 ## Setup
 
 Install Node.js 18 or later and the Lean/Lake version in the repository's

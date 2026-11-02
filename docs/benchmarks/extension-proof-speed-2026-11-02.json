@@ -1,0 +1,1480 @@
+{
+  "capturedAt": "2026-11-02T22:58:30.177269+00:00",
+  "baseCommit": "88d68150",
+  "scope": "Actual extension lsp-worker with precompiled pinned solc AST fixtures; proof and IPC time included; compiler and editor UI excluded. Fresh source hashes/document versions; no report-cache retrieval. Separate worker/Lean process per off/on run.",
+  "sources": {
+    "Solidity/Frontend/Testing.lean": "a835d9bdd7654ef1dd9f53ee6e7653e519ad1bac4e31f1e052872039e3ee0808",
+    "vscode/src/lsp-worker.cjs": "77fab9e12d4d96b8b8aa8ac1ee8634b8443fd4a29a788101ad168afd32fd63f4",
+    "vscode/test/measure-proof-speed.cjs": "e36117d7522f28b20d3ad8d0a554f306e4acf17d09efcb17b88ccdf5b817f7da",
+    "tests/automation/ClosedSpecProposal.lean": "a907613d07f04b3fc5034cab1592bb644a055dbfa7e7b3d5d0798e36ec7d0a1e",
+    "tests/automation/ClosedSpecRejected.lean": "2c1b76b1ba0d19fcdb648e9edaee5998099b6419eb7280892910c963a5bb0357",
+    "tests/automation/ClosedSpecs.sol": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+    "tests/automation/ClosedSpecs.ast.json": "0ee494a445a18406c30e7f69cd7d049b75f1e68bf878ea60b457e6759b2a54ee",
+    "scripts/check-spec-proposal.py": "7f2d0975a61c058e9911476b94e624f1c861303a61cca05e126878607584a82b"
+  },
+  "off": {
+    "startedAt": "2026-11-02T22:52:26.285Z",
+    "closedSpecs": false,
+    "trials": [
+      {
+        "name": "constant",
+        "repeat": 0,
+        "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+        "elapsedMs": 2767.984404,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 1376,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 1
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 0,
+        "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+        "elapsedMs": 487.46228900000006,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 390,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 2
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 0,
+        "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+        "elapsedMs": 832.4994750000001,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 741,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 3
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 0,
+        "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+        "elapsedMs": 1394.821218,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 1287,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 4
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 0,
+        "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+        "elapsedMs": 1055.699853,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 939,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 5
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 0,
+        "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+        "elapsedMs": 275.9460080000008,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "pending",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 180,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 6
+        }
+      },
+      {
+        "name": "constant",
+        "repeat": 1,
+        "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+        "elapsedMs": 324.51818600000024,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 230,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 7
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 1,
+        "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+        "elapsedMs": 487.40873399999964,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 386,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 8
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 1,
+        "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+        "elapsedMs": 751.4594080000006,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 648,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 9
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 1,
+        "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+        "elapsedMs": 1491.8163879999993,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 1380,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 10
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 1,
+        "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+        "elapsedMs": 1156.4581529999996,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 1018,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 11
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 1,
+        "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+        "elapsedMs": 324.5832969999992,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "pending",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 216,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 12
+        }
+      },
+      {
+        "name": "constant",
+        "repeat": 2,
+        "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+        "elapsedMs": 400.592944,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 274,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 13
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 2,
+        "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+        "elapsedMs": 499.98281099999986,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 387,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 14
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 2,
+        "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+        "elapsedMs": 780.7331159999994,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 665,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 15
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 2,
+        "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+        "elapsedMs": 1413.2157380000008,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 1298,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 16
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 2,
+        "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+        "elapsedMs": 1084.923780000001,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 943,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 17
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 2,
+        "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+        "elapsedMs": 335.5545570000013,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "pending",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 228,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-zpWkys/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 516805,
+          "leanServerPid": 516812,
+          "leanDocumentVersion": 18
+        }
+      }
+    ],
+    "passed": true
+  },
+  "on": {
+    "startedAt": "2026-11-02T22:52:42.376Z",
+    "closedSpecs": true,
+    "trials": [
+      {
+        "name": "constant",
+        "repeat": 0,
+        "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+        "elapsedMs": 2789.942761,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 1440,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 1
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 0,
+        "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+        "elapsedMs": 437.32894699999997,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 338,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 2
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 0,
+        "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+        "elapsedMs": 1027.789214,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 914,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 3
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 0,
+        "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+        "elapsedMs": 849.2647669999997,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 728,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 4
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 0,
+        "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+        "elapsedMs": 1097.9213309999996,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 971,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 5
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 0,
+        "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+        "elapsedMs": 313.7188559999995,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "pending",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 213,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 6
+        }
+      },
+      {
+        "name": "constant",
+        "repeat": 1,
+        "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+        "elapsedMs": 364.97571999999946,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 272,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 7
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 1,
+        "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+        "elapsedMs": 481.85158500000034,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 371,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 8
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 1,
+        "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+        "elapsedMs": 470.64246,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 348,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 9
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 1,
+        "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+        "elapsedMs": 787.7650279999998,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 671,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 10
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 1,
+        "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+        "elapsedMs": 1015.3738480000011,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 896,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 11
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 1,
+        "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+        "elapsedMs": 260.6126889999996,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "pending",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 175,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 12
+        }
+      },
+      {
+        "name": "constant",
+        "repeat": 2,
+        "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+        "elapsedMs": 316.85463999999956,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 233,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 13
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 2,
+        "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+        "elapsedMs": 417.8903019999998,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 332,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 14
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 2,
+        "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+        "elapsedMs": 484.37401899999895,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 371,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 15
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 2,
+        "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+        "elapsedMs": 853.4789340000007,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 750,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 16
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 2,
+        "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+        "elapsedMs": 1020.2394359999998,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 890,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 17
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 2,
+        "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+        "elapsedMs": 257.2022770000003,
+        "results": [
+          {
+            "tag": "specified",
+            "status": "pending",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 170,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-Nd0u8Q/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 518372,
+          "leanServerPid": 518379,
+          "leanDocumentVersion": 18
+        }
+      }
+    ],
+    "passed": true
+  },
+  "corruptedOracle": "1/312 Solidity.AST\n2/312 Solidity.Calculus.AliasConstraints\n3/312 Solidity.Calculus.AllLeft\n4/312 Solidity.Calculus.AnonLocalCapture\n5/312 Solidity.Calculus.Arms\n6/312 Solidity.Calculus.BitArith\n7/312 Solidity.Calculus.Blocks\n8/312 Solidity.Calculus.Budget\n9/312 Solidity.Calculus.CallFunctionAffine\n10/312 Solidity.Calculus.CallFunctionBase\n11/312 Solidity.Calculus.CallFunctionEmit\n12/312 Solidity.Calculus.CallFunctionGraph\n13/312 Solidity.Calculus.CallFunctionLeaf\n14/312 Solidity.Calculus.CallFunctionOperationalBase\n15/312 Solidity.Calculus.CallFunctionPlan\n16/312 Solidity.Calculus.CallFunctionSearch\n17/312 Solidity.Calculus.CallFunctionTable\n18/312 Solidity.Calculus.CallFunctionTermPower\n19/312 Solidity.Calculus.CallFunctionTransform\n20/312 Solidity.Calculus.CallResultCapture\n21/312 Solidity.Calculus.CallResultRestore\n22/312 Solidity.Calculus.CallSummary\n23/312 Solidity.Calculus.Callback\n24/312 Solidity.Calculus.CallbackDerive\n25/312 Solidity.Calculus.CallbackFrameMem\n26/312 Solidity.Calculus.CallbackHolds\n27/312 Solidity.Calculus.CallbackRules\n28/312 Solidity.Calculus.CallbackSound\n29/312 Solidity.Calculus.CallbackSound.Calls\n30/312 Solidity.Calculus.CallbackSound.Payments\n31/312 Solidity.Calculus.CallbackSound.Rules\n32/312 Solidity.Calculus.CapturePayments\n33/312 Solidity.Calculus.CheckedBool\n34/312 Solidity.Calculus.CheckedLinear\n35/312 Solidity.Calculus.CheckedScalar\n36/312 Solidity.Calculus.Close\n37/312 Solidity.Calculus.CloseAll\n38/312 Solidity.Calculus.CloseCallSharing\n39/312 Solidity.Calculus.CloseFrame\n40/312 Solidity.Calculus.CloseLemmas\n41/312 Solidity.Calculus.CloseNonlin\n42/312 Solidity.Calculus.CloseScoped\n43/312 Solidity.Calculus.CloseScoped.Leaf\n44/312 Solidity.Calculus.CloseScoped.Steps\n45/312 Solidity.Calculus.Closer\n46/312 Solidity.Calculus.Closer.Bytes\n47/312 Solidity.Calculus.Closer.Facts\n48/312 Solidity.Calculus.Closer.Leaf\n49/312 Solidity.Calculus.Closer.Normal\n50/312 Solidity.Calculus.Closers\n51/312 Solidity.Calculus.Completeness\n52/312 Solidity.Calculus.CondLift\n53/312 Solidity.Calculus.Correct\n54/312 Solidity.Calculus.CorrectCallback\n55/312 Solidity.Calculus.DataIn\n56/312 Solidity.Calculus.Decide\n57/312 Solidity.Calculus.DecideCleanTail\n58/312 Solidity.Calculus.DecideComplete\n59/312 Solidity.Calculus.DecideEval\n60/312 Solidity.Calculus.DecideEval.Memory\n61/312 Solidity.Calculus.DecideEval.Readers\n62/312 Solidity.Calculus.DecideEval.Storages\n63/312 Solidity.Calculus.DecideLang\n64/312 Solidity.Calculus.DecideScoped\n65/312 Solidity.Calculus.DecideTyped\n66/312 Solidity.Calculus.DeclarationFacts\n67/312 Solidity.Calculus.Delab\n68/312 Solidity.Calculus.DelabErase\n69/312 Solidity.Calculus.DelabRules\n70/312 Solidity.Calculus.Derive\n71/312 Solidity.Calculus.ElimFacts\n72/312 Solidity.Calculus.EvalEqs\n73/312 Solidity.Calculus.ExactReduction\n74/312 Solidity.Calculus.ExactRun\n75/312 Solidity.Calculus.ExactUpdates\n76/312 Solidity.Calculus.FilteredMembership\n77/312 Solidity.Calculus.FiniteMembership\n78/312 Solidity.Calculus.FirstOrder\n79/312 Solidity.Calculus.FlattenReads\n80/312 Solidity.Calculus.Fml\n81/312 Solidity.Calculus.FunContract\n82/312 Solidity.Calculus.Graft\n83/312 Solidity.Calculus.Hyp\n84/312 Solidity.Calculus.InputLayout\n85/312 Solidity.Calculus.JoinSequence\n86/312 Solidity.Calculus.KIntBinder\n87/312 Solidity.Calculus.KeyTaclets\n88/312 Solidity.Calculus.Lands\n89/312 Solidity.Calculus.LeafDerive\n90/312 Solidity.Calculus.LeafShare\n91/312 Solidity.Calculus.LeafSplit\n92/312 Solidity.Calculus.LedgerCut\n93/312 Solidity.Calculus.LexDiamond\n94/312 Solidity.Calculus.LexVariant\n95/312 Solidity.Calculus.LexVariantSound\n96/312 Solidity.Calculus.LinearCountermodel\n97/312 Solidity.Calculus.LinearDecision\n98/312 Solidity.Calculus.LinearForms\n99/312 Solidity.Calculus.LinearHypotheses\n100/312 Solidity.Calculus.Logic\n101/312 Solidity.Calculus.LoopInvariantWk\n102/312 Solidity.Calculus.Lower\n103/312 Solidity.Calculus.LowerRun\n104/312 Solidity.Calculus.MemContract\n105/312 Solidity.Calculus.MemRead\n106/312 Solidity.Calculus.MemRead.Laws\n107/312 Solidity.Calculus.MemRead.Ok\n108/312 Solidity.Calculus.MemRead.Pass\n109/312 Solidity.Calculus.MemRead.Spine\n110/312 Solidity.Calculus.Merge\n111/312 Solidity.Calculus.NamedTerm\n112/312 Solidity.Calculus.Notation\n113/312 Solidity.Calculus.NotationResolve\n114/312 Solidity.Calculus.ParameterLayout\n115/312 Solidity.Calculus.PathGuards\n116/312 Solidity.Calculus.PaymentWitness\n117/312 Solidity.Calculus.Preconditions\n118/312 Solidity.Calculus.PremiseSound\n119/312 Solidity.Calculus.Print\n120/312 Solidity.Calculus.PrintStmt\n121/312 Solidity.Calculus.PrintTerm\n122/312 Solidity.Calculus.Problem\n123/312 Solidity.Calculus.ProofTree\n124/312 Solidity.Calculus.ProveChunked\n125/312 Solidity.Calculus.Proves\n126/312 Solidity.Calculus.ProvesDerive\n127/312 Solidity.Calculus.ProvesSound\n128/312 Solidity.Calculus.QueryArithmetic\n129/312 Solidity.Calculus.QueryReduction\n130/312 Solidity.Calculus.Quote\n131/312 Solidity.Calculus.QuotientCut\n132/312 Solidity.Calculus.ReadBounds\n133/312 Solidity.Calculus.ReadLayout\n134/312 Solidity.Calculus.ReadQuery\n135/312 Solidity.Calculus.ReadRealization\n136/312 Solidity.Calculus.ReadTrace\n137/312 Solidity.Calculus.ReadWrite\n138/312 Solidity.Calculus.Recursion\n139/312 Solidity.Calculus.RecursionCallback\n140/312 Solidity.Calculus.RefInputs\n141/312 Solidity.Calculus.RewritePast\n142/312 Solidity.Calculus.RewritePast.Apply\n143/312 Solidity.Calculus.RewritePast.Merge\n144/312 Solidity.Calculus.RewritePast.Scope\n145/312 Solidity.Calculus.RewriteScoped\n146/312 Solidity.Calculus.Rigid\n147/312 Solidity.Calculus.RuleExists\n148/312 Solidity.Calculus.RuleKit\n149/312 Solidity.Calculus.RuleShapes\n150/312 Solidity.Calculus.RuleSyntax\n151/312 Solidity.Calculus.RuleSyntax.Grammar\n152/312 Solidity.Calculus.RuleSyntax.Print\n153/312 Solidity.Calculus.RuleSyntax.Schemas\n154/312 Solidity.Calculus.Rules\n155/312 Solidity.Calculus.RunFrameMem\n156/312 Solidity.Calculus.RunFrameOwn\n157/312 Solidity.Calculus.ScalarCode\n158/312 Solidity.Calculus.SeqRewrite\n159/312 Solidity.Calculus.SequentNotation\n160/312 Solidity.Calculus.Shift\n161/312 Solidity.Calculus.SolSpec\n162/312 Solidity.Calculus.Sound\n163/312 Solidity.Calculus.Sound.JoinSequence\n164/312 Solidity.Calculus.Sound.LoopLexDiamond\n165/312 Solidity.Calculus.Sound.LoopLexErase\n166/312 Solidity.Calculus.SoundArms\n167/312 Solidity.Calculus.SoundCalls\n168/312 Solidity.Calculus.SoundCapture\n169/312 Solidity.Calculus.SoundCatch\n170/312 Solidity.Calculus.SoundControl\n171/312 Solidity.Calculus.SoundKit\n172/312 Solidity.Calculus.SoundLocal\n173/312 Solidity.Calculus.SoundLoops\n174/312 Solidity.Calculus.SoundMem\n175/312 Solidity.Calculus.SoundPush\n176/312 Solidity.Calculus.SoundStep\n177/312 Solidity.Calculus.SoundStore\n178/312 Solidity.Calculus.SoundSummary\n179/312 Solidity.Calculus.Spec\n180/312 Solidity.Calculus.StateFacts\n181/312 Solidity.Calculus.StatePartsScoped\n182/312 Solidity.Calculus.StaticLinear\n183/312 Solidity.Calculus.Step\n184/312 Solidity.Calculus.StmtSound\n185/312 Solidity.Calculus.Surface\n186/312 Solidity.Calculus.SurfaceNotation\n187/312 Solidity.Calculus.SurfaceSpec\n188/312 Solidity.Calculus.SymbolicPaths\n189/312 Solidity.Calculus.Symex\n190/312 Solidity.Calculus.SyntaxSize\n191/312 Solidity.Calculus.Taclet\n192/312 Solidity.Calculus.TacticSyntax\n193/312 Solidity.Calculus.TailMode\n194/312 Solidity.Calculus.TermAgree\n195/312 Solidity.Calculus.TermEq\n196/312 Solidity.Calculus.TermEval\n197/312 Solidity.Calculus.TermLaws\n198/312 Solidity.Calculus.TermLaws.Fresh\n199/312 Solidity.Calculus.TermLaws.Reads\n200/312 Solidity.Calculus.TermLaws.Storage\n201/312 Solidity.Calculus.TermLib\n202/312 Solidity.Calculus.TermLib.Rules\n203/312 Solidity.Calculus.TermSize\n204/312 Solidity.Calculus.TermWk\n205/312 Solidity.Calculus.TheoryRead\n206/312 Solidity.Calculus.TreeData\n207/312 Solidity.Calculus.TypedLinear\n208/312 Solidity.Calculus.UpdRuleScoped\n209/312 Solidity.Calculus.UpdateRules\n210/312 Solidity.Calculus.VisitedSet\n211/312 Solidity.Calculus.WalkSyntax\n212/312 Solidity.Calculus.WkOver\n213/312 Solidity.ERC7201\n214/312 Solidity.Eqns\n215/312 Solidity.Frontend.Import\n216/312 Solidity.Frontend.Problems\n217/312 Solidity.Frontend.SolcJson\n218/312 Solidity.Frontend.SolcJson.Admission\n219/312 Solidity.Frontend.SolcJson.Body\n220/312 Solidity.Frontend.SolcJson.Contract\n221/312 Solidity.Frontend.SolcJson.Getters\n222/312 Solidity.Frontend.Source\n223/312 Solidity.Frontend.SourceUnits\n224/312 Solidity.Frontend.Testing\n225/312 Solidity.Hashes\n226/312 Solidity.Keccak\n227/312 Solidity.KeySort\n228/312 Solidity.Language.Features\n229/312 Solidity.RevertBytes\n230/312 Solidity.Scope\n231/312 Solidity.Secp256k1\n232/312 Solidity.Semantics\n233/312 Solidity.Semantics.AllocBytes\n234/312 Solidity.Semantics.Callback\n235/312 Solidity.Semantics.CallbackCapture\n236/312 Solidity.Semantics.CallbackFrame\n237/312 Solidity.Semantics.CallbackUnwk\n238/312 Solidity.Semantics.CallbackWk\n239/312 Solidity.Semantics.DeferredCallback\n240/312 Solidity.Semantics.DeferredCorrespondence\n241/312 Solidity.Semantics.DeferredSource\n242/312 Solidity.Semantics.Ends\n243/312 Solidity.Semantics.Heap\n244/312 Solidity.Semantics.LexMetrics\n245/312 Solidity.Semantics.NativeDeferred\n246/312 Solidity.Semantics.NativeDeferredCallback\n247/312 Solidity.Semantics.NoPanic\n248/312 Solidity.Semantics.Ops\n249/312 Solidity.Semantics.RevertData\n250/312 Solidity.Semantics.RevertOnly\n251/312 Solidity.Semantics.Run\n252/312 Solidity.Semantics.RunAccel\n253/312 Solidity.Semantics.RunFrame\n254/312 Solidity.Semantics.RunFuel\n255/312 Solidity.Semantics.RunWk\n256/312 Solidity.Semantics.State\n257/312 Solidity.Semantics.Storage\n258/312 Solidity.Semantics.Storage.Anon\n259/312 Solidity.Semantics.Storage.Ops\n260/312 Solidity.Semantics.Storage.Values\n261/312 Solidity.Semantics.StorageWt\n262/312 Solidity.Semantics.Termination\n263/312 Solidity.Semantics.Value\n264/312 Solidity.Signature\n265/312 Solidity.SpecSyntax\n266/312 Solidity.Syntax\n267/312 Solidity.Syntax.Checked\n268/312 Solidity.Syntax.Contract\n269/312 Solidity.Syntax.DispatchChain\n270/312 Solidity.Syntax.Elab\n271/312 Solidity.Syntax.Elab.Arms\n272/312 Solidity.Syntax.Elab.Context\n273/312 Solidity.Syntax.Elab.Lower\n274/312 Solidity.Syntax.Elab.SliceCopy\n275/312 Solidity.Syntax.Elab.Stmt\n276/312 Solidity.Syntax.Elab.Values\n277/312 Solidity.Syntax.Grammar\n278/312 Solidity.Syntax.Inlined\n279/312 Solidity.Syntax.Join\n280/312 Solidity.Syntax.LoopWarnings\n281/312 Solidity.Syntax.Numeric\n282/312 Solidity.Syntax.PushSource\n283/312 Solidity.Syntax.Quote\n284/312 Solidity.Syntax.Raw\n285/312 Solidity.Syntax.Scoped\n286/312 Solidity.Syntax.Splice\n287/312 Solidity.Theory.Bridge.Denote\n288/312 Solidity.Theory.Segs\n289/312 Solidity.Theory.Typed.Mem\n290/312 Solidity.Theory.Typed.MemMirror\n291/312 Solidity.Theory.Typed.Obs\n292/312 Solidity.Theory.Typed.Obs.Ops\n293/312 Solidity.Theory.Typed.Obs.Paths\n294/312 Solidity.Theory.Typed.Obs.Values\n295/312 Solidity.Tools.Common\n296/312 Solidity.Tools.Counterexample\n297/312 Solidity.Tools.LazyStorage\n298/312 Solidity.Tools.Preconditions\n299/312 Solidity.Tools.Show\n300/312 Solidity.Tools.SourceCounterexample\n301/312 Solidity.Typing.CanonTest\n302/312 Solidity.Typing.CleanTail\n303/312 Solidity.Typing.CleanTailRun\n304/312 Solidity.Typing.Constructibility\n305/312 Solidity.Typing.Fits\n306/312 Solidity.Typing.HeredRun\n307/312 Solidity.Typing.Reachability\n308/312 Solidity.Typing.Soundness\n309/312 Solidity.Typing.Tight\n310/312 Solidity.Typing.TypedRunInv\n311/312 Solidity.Typing.Values\n312/312 Solidity.Update\n/workspace/solidity-lean/.lake/spec-proposal-negative/libSolidity_Frontend_Testing.so\nSPEC_PROPOSAL_ORACLE_CORRUPTED\nSPEC_PROPOSAL_ORACLE_CORRUPTED\n0 obligations declared scoped\n[Solidity.Frontend.specProposal] closed128: falseStore\n[Solidity.Frontend.specProposal] semantic: falseStore\n[Solidity.Frontend.specProposal] closed128: store\n\nPASS: corrupted native proposal rejected; fallback and later proof succeeded.\nOwned test exit 0; peak aggregate RSS 1.20 GiB\n",
+  "positiveRegression": "tests/automation/ClosedSpecProposal.lean {\"meta\":null,\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"partial\\\": false,\\n  \\\"still_elaborating_lines\\\": null,\\n  \\\"success\\\": true,\\n  \\\"timed_out\\\": false,\\n  \\\"items\\\": [],\\n  \\\"failed_dependencies\\\": []\\n}\",\"annotations\":null,\"meta\":null}],\"structuredContent\":{\"result\":{\"partial\":false,\"still_elaborating_lines\":null,\"success\":true,\"timed_out\":false,\"items\":[],\"failed_dependencies\":[]}},\"isError\":false}\ntests/automation/ClosedSpecRejected.lean {\"meta\":null,\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"partial\\\": false,\\n  \\\"still_elaborating_lines\\\": null,\\n  \\\"success\\\": true,\\n  \\\"timed_out\\\": false,\\n  \\\"items\\\": [],\\n  \\\"failed_dependencies\\\": []\\n}\",\"annotations\":null,\"meta\":null}],\"structuredContent\":{\"result\":{\"partial\":false,\"still_elaborating_lines\":null,\"success\":true,\"timed_out\":false,\"items\":[],\"failed_dependencies\":[]}},\"isError\":false}",
+  "negativeRegression": "tests/automation/ClosedSpecRejected.lean {\"meta\":null,\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"partial\\\": false,\\n  \\\"still_elaborating_lines\\\": null,\\n  \\\"success\\\": true,\\n  \\\"timed_out\\\": false,\\n  \\\"items\\\": [],\\n  \\\"failed_dependencies\\\": []\\n}\",\"annotations\":null,\"meta\":null}],\"structuredContent\":{\"result\":{\"partial\":false,\"still_elaborating_lines\":null,\"success\":true,\"timed_out\":false,\"items\":[],\"failed_dependencies\":[]}},\"isError\":false}",
+  "realLsp": "\u25b6 real Solidity LSP keeps Lean warm and verifies versioned in-memory snapshots\n  \u2714 unsaved snapshot produces a real kernel proof without changing disk (3785.911724ms)\n  \u2714 exact snapshots reuse checked reports (209.407815ms)\n  \u2714 completion, definitions, references, symbols, signatures and rename use current source (405.968102ms)\n  \u2714 incomplete edits get live-text completion and positioned compiler diagnostics (64.015998ms)\n  \u2714 changed snapshots rerun proofs in the same Lean process (577.242327ms)\n  \u2714 exact false obligations can produce certified model evidence (667.6342ms)\n  \u2714 rapid changes cancel old Lean work and suppress obsolete reports (3085.351612ms)\n  \u2714 two files can occupy separate bounded proof workers (4446.528424ms)\n  \u2714 multiple contracts retain their own proof and declaration identities (824.201963ms)\n  \u2714 a crashed native Lean server reopens its document in the replacement session (2595.421651ms)\n\u2714 real Solidity LSP keeps Lean warm and verifies versioned in-memory snapshots (16881.903843ms)\n\u2139 tests 11\n\u2139 suites 0\n\u2139 pass 11\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 16968.915348\nOwned test exit 0; peak aggregate RSS 4.93 GiB\n",
+  "unitTests": "\n> solidity-lean@0.5.1 test\n> node --test test/*.test.cjs\n\n\u2714 validates report structure and preserves pending as incomplete (1.963874ms)\n\u2714 validates precondition audit statuses and forwards auditing only for verification (127.929772ms)\n\u2714 launches backend without shell and accepts unsuccessful verification report (33.279155ms)\n\u2714 reports missing backend, executable and crash distinctly (33.487905ms)\n\u2714 rejects invalid output and bounds overall execution (167.521589ms)\n\u2714 cancellation kills detached backend descendants (85.04579ms)\n\u2714 already cancelled jobs never spawn (0.881749ms)\n\u2714 decodes split UTF-8 messages from backend pipes (180.915199ms)\n\u2714 counterexample search is opt-in and omitted from discovery (208.688614ms)\n\u2714 accepts exact typed model evidence and preserves full-width values and signed ledger amounts (3.638599ms)\n\u2714 requires certified source-goal evidence and audited certificate metadata (2.781538ms)\n\u2714 rejects lossy, out-of-range, mistyped and noncanonical model arguments (1.067785ms)\n\u2714 validates transaction, ledger, balance and limited outcome data (0.507884ms)\n\u2714 renders model labels without guessing source parameters and escapes control characters (0.399002ms)\n\u2714 does not present unvalidated transport fields as certificate observations (0.260216ms)\n\u2714 a queued dependency notification clears old UI without cancelling a fresh verification (10.480342ms)\n\u2714 model distinguishes incomplete proof, import gap, runtime error and success (0.373735ms)\n\u2714 impossible preconditions remain visible even when the postcondition is proved (2.255397ms)\n\u2714 unknown audits require attention while possible entry states preserve a pass (0.340426ms)\n\u2714 verify command registers proof status, Test Explorer function and hover (0.827688ms)\n\u2714 pending is warning, runtime errors are errors and ready is not a proof (0.914336ms)\n\u2714 function hover takes precedence over a synthesized constructor spanning the contract (0.787339ms)\n\u2714 refuses execution in untrusted workspace and unsaved virtual documents (0.758366ms)\n\u2714 saves dirty files and passes configured executable, timeout and backend (0.629965ms)\n\u2714 suppresses results from modified documents (3.051198ms)\n\u2714 an edit during completed save prevents a superseded request from launching a backend (0.972453ms)\n\u2714 an edit during interrupted save prevents a superseded request from launching a backend (2.002802ms)\n\u2714 an unsuccessful save still reports an error for a current request (0.314287ms)\n\u2714 a joined save must leave the current buffer clean before a backend starts (0.325132ms)\n\u2714 new verification requests supersede older requests still saving the same file (1.180592ms)\n\u2714 rejects stale source hashes and reports for another source (0.497328ms)\n\u2714 verify-on-save is opt-in and cancellation command aborts the job (1.104369ms)\n\u2714 Test Explorer runs one exact overloaded signature and preserves sibling statuses (0.726097ms)\n\u2714 Test Explorer respects exclusions and maps pending without counterexample claims (0.668752ms)\n\u2714 Test Explorer runs each child once when result publication replaces children (0.738285ms)\n\u2714 source hashes accept the BOM hidden by the editor without accepting other text (0.308127ms)\n\u2714 workspace discovery has no silent file cap and cancellation stops queued files (1.497612ms)\n\u2714 cancellation during document opening cannot start a delayed discovery job (0.654061ms)\n\u2714 cancellation during save cannot start a delayed verification job (0.528123ms)\n\u2714 suppresses closed documents and superseded jobs even when backend ignores cancellation (0.827277ms)\n\u2714 certified model prestates are opt-in and appear in hover, output and failed Test Explorer results (2.371089ms)\n\u2714 rejects malformed witness evidence before publishing and retains default-off option (0.341166ms)\n\u2714 late witness results cannot survive cancellation, version changes or source hash mismatch (2.407343ms)\n\u2714 refuses unsolicited witness results when search is disabled or listing (0.66682ms)\n\u2714 offline host launcher rejects stale success evidence (44.884947ms)\n\u2714 offline host launcher retains fresh evidence (36.734071ms)\n\ufe63 real Solidity LSP keeps Lean warm and verifies versioned in-memory snapshots (0.706889ms) # SKIP\n\u2714 LSP transport preserves UTF-8 framing and document/request ordering (3.67978ms)\n\u2714 incremental edits use sequential UTF-16 ranges and reject invalid changes atomically (1.544893ms)\n\u2714 proof cache requires exact source, selection, proof options and backend generation (4.608498ms)\n\u2714 backend changes during proof construction prevent publication and caching (1.270565ms)\n\u2714 late analyses and proofs cannot overwrite a newer document version (0.80192ms)\n\u2714 cancel followed by immediate same-version retry starts a live request (1.072561ms)\n\u2714 verification restarts compiler analysis cancelled during symbol discovery (0.849271ms)\n\u2714 selected verification preserves sibling failures and cached proofs restore compiler diagnostics (1.889274ms)\n\u2714 a backend change during cached analysis restoration blocks publication (1.208364ms)\n\u2714 a document closed during initialization is never opened on the server (1.261642ms)\n\u2714 language requests reject edits that arrive while compiler analysis is pending (0.775631ms)\n\u2714 an imported buffer edit cancels and reschedules an importer during its first analysis (0.894818ms)\n\u2714 a redundant filesystem notification preserves a current proof and a real dependency change invalidates it (2.514281ms)\n\u2714 contract checkpoint identities and native import warnings remain visible (0.450008ms)\n\u2714 rename rejects Solidity keywords and qualified references preserve their qualifier (1.043699ms)\n\u2714 the default sibling compiler path participates in cache invalidation (0.986193ms)\n\u2714 queued work cancels before execution and crashed workers can be replaced (451.811507ms)\n\u2714 reset stops an in-flight build and cannot clear a replacement build handle (53.803782ms)\n\u2714 LSP recorder reconstructs multibyte fragmented and coalesced messages (3.236052ms)\n\u2714 LSP recorder refuses ambiguity, truncation and unbounded payloads (0.92998ms)\n\u2714 normalization retains diagnostic severity, version, text, order and ranges (0.419462ms)\n\u2714 statistics use median and nearest-rank p95; failed trials remain visible (0.557758ms)\n\u2714 unsupported and untested capabilities cannot be marked complete (11.007224ms)\n\u2714 inventory shrinkage and invented upstream evidence fail the offline gate (5.078277ms)\n\u2714 runner rejects ambiguous options and invalid benchmark dimensions (1.46245ms)\n\u2714 real process sampler observes its own process without claiming unsupported measurements (47.03638ms)\n\u2714 solver analysis distinguishes CPU work from sleeping solvers and the frontend (0.493823ms)\n\u2714 child-process observation preserves custom promisify semantics and excludes unrelated extensions (37.914148ms)\n\u2714 offline parity launcher rejects exit zero without fresh evidence (106.260115ms)\n\u2714 offline parity launcher rejects stale success (85.85796ms)\n\u2714 a scenario timeout survives a successful editor exit in machine summaries (102.573104ms)\n\u2714 a normal editor exit cannot leave a sampled detached verifier in the next trial (485.576273ms)\n\u2714 long artifact paths do not become long editor IPC/profile paths (82.611852ms)\n\u2714 project snapshots resolve remapped cyclic imports and exact unsaved dependencies (5.810162ms)\n\u2714 imports ignore comment/string decoys and formatting preserves exact tokens and strings (2.453591ms)\n\u2714 relative imports apply context remappings and symlink aliases use the open buffer (2.23077ms)\n\u2714 incomplete member completion filters by live receiver type (1.487598ms)\n\ufe63 real project compiler and LSP support imports, project services and dependency changes (0.202781ms) # SKIP\n\u2139 tests 85\n\u2139 suites 0\n\u2139 pass 83\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 2\n\u2139 todo 0\n\u2139 duration_ms 1282.962902\nnpm notice\nnpm notice New major version of npm available! 11.9.0 -> 12.2.1\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1\nnpm notice To update run: npm install -g npm@12.2.1\nnpm notice\nOwned test exit 0; peak aggregate RSS 0.28 GiB\n",
+  "websiteRegression": {
+    "artifact": {
+      "build": "fdcfc0c1a62faff781cca14a08bc8b535976de6de206a5d1a478288f8f9ba9cd",
+      "kernelBuild": "c5003705151ba89de3e859cb170029828b0fc41a9587123212db76e22525c605",
+      "assets": 2926,
+      "assetBytes": 654153234,
+      "htmlBytes": 872889013,
+      "compression": "zstd",
+      "runtimeSha256": "f7cd91e0de1180cc701e021cbc2bef47c741b58ead6fe40c9d78932483cd16df"
+    },
+    "checks": [
+      {
+        "name": "a plain static website boots a real Solidity WASM compiler without any backend",
+        "elapsedMs": 22576.4
+      },
+      {
+        "name": "the unchanged compiler helpers produce exact source provenance and AST language services",
+        "elapsedMs": 540.4
+      },
+      {
+        "name": "Monaco rename and compiler-validated formatting run in the worker",
+        "elapsedMs": 790.9
+      },
+      {
+        "name": "compiler errors come from solc running inside the browser",
+        "elapsedMs": 368.9
+      },
+      {
+        "name": "unopened imports and cross-file definitions use the browser filesystem",
+        "elapsedMs": 588.7
+      },
+      {
+        "name": "rename includes and validates a closed sibling importer",
+        "elapsedMs": 1634.6
+      },
+      {
+        "name": "an unresolved import produces a positioned Problems error",
+        "elapsedMs": 193.2
+      },
+      {
+        "name": "failed browser storage never marks an unsaved edit clean",
+        "elapsedMs": 8.9
+      },
+      {
+        "name": "the exact Lean kernel boots entirely in a browser worker",
+        "elapsedMs": 12.4
+      },
+      {
+        "name": "real browser proofs match the extension and a false specification stays pending",
+        "elapsedMs": 20918.3
+      },
+      {
+        "name": "editing terminates an active obsolete browser proof",
+        "elapsedMs": 3136.7
+      },
+      {
+        "name": "an edited false result cannot retain a green proof",
+        "elapsedMs": 13947.9
+      },
+      {
+        "name": "opt-in counterexamples are certified by the browser kernel",
+        "elapsedMs": 1132.3
+      },
+      {
+        "name": "a fully disconnected fresh browser runtime still compiles and proves new edits",
+        "elapsedMs": 27775.8
+      }
+    ],
+    "passed": true,
+    "staticServerStopped": true
+  },
+  "vsix": {
+    "version": "0.5.1",
+    "sha256": "0d00a8933af8cad0ca3ab8c667cc14a3b0375a6f9fb07b7953edb16c92a478af",
+    "bytes": 83480,
+    "verifiedPackagedWorkerMatchesSource": true
+  },
+  "finalPositiveRegression": "tests/automation/ClosedSpecProposal.lean {\"meta\":null,\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"partial\\\": false,\\n  \\\"still_elaborating_lines\\\": null,\\n  \\\"success\\\": true,\\n  \\\"timed_out\\\": false,\\n  \\\"items\\\": [],\\n  \\\"failed_dependencies\\\": []\\n}\",\"annotations\":null,\"meta\":null}],\"structuredContent\":{\"result\":{\"partial\":false,\"still_elaborating_lines\":null,\"success\":true,\"timed_out\":false,\"items\":[],\"failed_dependencies\":[]}},\"isError\":false}"
+}
