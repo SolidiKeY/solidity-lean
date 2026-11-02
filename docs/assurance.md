@@ -234,8 +234,64 @@ and CI showed the same failures without them).
   `SolcJson/Body.lean`), which `tests/upstream/AggregateErrorControls.lean`
   and `AggregateErrorBoundary.lean` pin as refused ("without a known calldata
   origin"), with no replay evidence for the admitted path; and test 31 still
-  fails on its slice rows. Master keeps the refusal; reapply together with
-  replayed error-encoding vectors and updated pins.
+  fails on its slice rows. Master kept the refusal until it was reapplied with
+  replayed error-encoding vectors and updated pins (next item).
+* **31, reapplied (lane FU2-C, 2026-11-02):** `974dd1de` reapplied unchanged.
+  The two admitted calldata named-argument reverts (`arrayCalldata`,
+  `pairCalldata` of `tests/upstream/AggregateErrorControls.sol`) are replayed
+  on raw calldata (canonical, a noncanonical offset, trailing data, an empty
+  array and string) with the error data pinned solc produces in all four
+  configurations (`tests/abi-0.8.38/AggregateCalldataErrors.vectors.json`,
+  `scripts/abi-entry-probe.mjs --aggregate`); wrong payloads are `broken`
+  (`tests/upstream/AggregateErrorControls.lean`); `AggregateErrorBoundary.lean`
+  now pins that no row is refused. Test 31 locally: every listed row proves
+  except `sliceRead`, `sliceOfSlice`, `slicePast`, which now reach the prover
+  and stay `pending` ("open proof goals", the closer gap below), and
+  `sliceHashed`, which ends in a heartbeat timeout of the compiled walk
+  (`error`; the test accepts `proved`/`pending`). `sliceHashed` has no
+  calldata alias, so the reapply does not reach it; not bisected.
+* **31, `sliceRead` (lane FU2-C, item 4):** the view's index was lowered as
+  `base[x < len ? off + x : base.length]`, the out-of-view branch reading past
+  the base's end so that its bounds check reverts; no closer knows that such a
+  read fails, so the leaf lacked the fact that closes it. `#sliceIndex`
+  (`Syntax/Elab/Arms.lean`) now makes the view's own check where solc does,
+  after the index: `Panic(0x32)` where failure data is retained, a revert
+  elsewhere (the split `modular` uses for its zero divisor), then the plain
+  read `base[off + x]` with `x < len` a premise, KeY's `inBounds` branch. The
+  outcomes are unchanged in every mode (where failure data is retained, `withPanics`, the old branch ended in the base's `Panic(0x32)` and the new check is `Panic(0x32)`; elsewhere both are an empty revert);
+  no rule, closer or soundness proof changed. Test 31 after it: `slicePast`
+  proves (was pending); `sliceRead`, `sliceOfSlice` stay `pending`. The
+  `sliceRead` leaf is now `… se9 = true → {ie14 := 1 + se2} {se13 :=
+  read(memory, base[ie14])} {se12 := se13 == se1} se12 = true` with `base :=
+  xs`, `se1 := read(memory, xs[1 + k])`, `se2 := k`: valid, and `sol_close`
+  closes it with ten times the default heartbeats (diagnosis only, not
+  committed), so what is left is the closer's cost, not a missing fact.
+  Probes at the time (scratch, not committed): the same reads on the parameter itself
+  proved within budget, so did a view at offset 0 and a view read at a literal
+  index; a view at offset 1 or 2 read at a symbolic index timed out
+  (`xs[1:]`, `t[q] == xs[1 + q]`), and so does `t.length == xs.length - 1`.
+  **Closed within the default budget (FU2-C round 2):** profiling the leaf
+  with slice-free stand-ins showed two lowering artefacts, each harmless
+  alone and together too costly for `sol_close_eval`: the copy of the view's
+  index (`se2 := k`) beside the bounds premises, and the trivially true check
+  `len <= len` of a view to the end (`xs[1:]`). `#sliceIndex` now reads a
+  literal or `uint256` name index as it stands (nothing is evaluated between
+  the check and the read), and `sliceOpen` (`Syntax/Elab/Context.lean`) does
+  not emit `e <= len` when `e` is the outer length. Test 31: `sliceRead`,
+  `sliceOfSlice`, `slicePast` prove (no heartbeat change, no closer change).
+* **31, `sliceHashed` (bisected, FU2-C round 2):** the base commit
+  `84a2a4be` (worktree, built from the artifact cache) gives the same
+  `error`, "(deterministic) timeout at `sol_prove's compiled walk, after its
+  16384-step stage`", so it predates this lane. Cause: `keccak256(b[4:])`
+  copies the view to memory (`#sliceCopy`, `Syntax/Elab/Arms.lean`) with a
+  `while` loop of symbolic trip count (`b.length - 4`) and no invariant; the
+  compiled walk unrolls it, no stage up to 16384 steps reaches the end, and
+  `Derive.prove` (`Calculus/ProvesDerive.lean`) raises the heartbeat error
+  where the test accepts `pending`. Not fixed: either a loop specification
+  for a symbolic copy (which would also replace the unrolling the proved
+  slice-copy rows rely on) or classifying budget exhaustion as `pending` in
+  proof search; both outside slice reads. On the base the same run also has
+  `localAlias` refused and `sliceRead`, `sliceOfSlice`, `slicePast` pending.
 * **44** (`a48fd85f`): in the testing import a specification that does not
   parse became a `solidity.specificationSyntax` scope rejection, raised
   before the named refusal "ledger locations in assignable clauses are not

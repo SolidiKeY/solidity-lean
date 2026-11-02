@@ -1599,3 +1599,290 @@ refused although v1 encodes them alike; public enum getters keep
   `EnumAbiRanges.lean` clean through the Lean server; `enum-abi-probe.mjs`
   all vectors agree; `check-g07` at its baselines; `check-automatic --strict`
   0 pending; ledger regenerated.
+
+### Lane FU2-C (fu2-20261102): access-time calldata reads
+
+Owner: lane FU2-C (`cloud/fu2-20261102/fu2-calldata-access`). Base
+`84a2a4be`. CF1 refused, by name, every input whose calldata parameter has an
+element that fails only when read ("calldata element fails only on access").
+This item models those reads in the layer the upstream replay runs.
+
+**Evidence first** (`tests/abi-0.8.38/AccessEntry.sol`, 20 vectors in
+`AccessEntry.vectors.json`, `scripts/abi-entry-probe.mjs --access`; pinned
+solc, legacy and via-IR, optimizer off and on, all agree):
+
+* `abi.encode(x)` / `abi.encodePacked(x[0])` of calldata go through the lazy
+  accessors: a relative offset of `-32` is accepted and encoded, an inner
+  offset or length out of range, an inner length of `2^64` (not a panic), a
+  dirty `uint8` (also nested) and a short `uint256[][3]` all revert with
+  empty data.
+* A read is path dependent: `encIf` returns 7 when it does not reach the
+  encoding, and reverts when it does; `encAt(x, i)` encodes `x[0]` and
+  reverts on `x[1]`; `require(i != 0, "m")` before the encoding reverts with
+  `Error("m")` first.
+* A copy to memory decodes with the eager rules: `uint256[][] memory m = x`
+  with an inner length of `2^64` is `Panic(0x41)`; `uint256[] memory m = x[0]`
+  reaches `x[0]` lazily (a `-32` offset is read) and copies its words.
+
+**Model** (`Solidity/Semantics/AbiAccess.lean`, core, imports only
+`AbiEntry`):
+
+* `cpart`/`cseqP`/`celemP`/`cmembersP`: CF1's lazy reader `cval` with the
+  same checks, order and fuel, recording each failing node by its access
+  path (element and member indices) and putting a substitute value of its
+  shape there (`Shape.dflt?`: zero words, empty arrays) instead of stopping.
+* `cat`/`catSeq`/`catElem`/`catMembers`: one access along a path, as solc
+  performs `x[i]…[j]` (index access, `access_calldata_tail`, the word
+  validator), with `Fail.panic` for an index out of range.
+* `bodyValuesA`/`verdictA`: CF1's `bodyValues`/`verdict`, except that a
+  calldata parameter the body reads only by admitted accesses (`acc k`)
+  whose eager copy fails takes `cpart`'s value and paths.
+
+Theorems (all kernel-checked, pinned with `#guard_msgs in #print axioms`
+and in `TrustAudit.lean`):
+
+* `cpart_agree`: `cpart` and `cval` agree on every reference: no recorded
+  path and `cval`'s value, some path and `cval`'s empty revert, or both fail.
+  Corollaries `cval_of_cpart`, `cval_revert_of_cpart`, and the converse
+  `cpart_of_cval`. With the probes above this is the encoding case: an
+  `abi.encode` of the parameter reverts exactly when a path is recorded.
+* `cat_cpart`: for a reference `cpart` reads, an access along any path
+  reverts with empty data exactly when a recorded path is a prefix of it.
+* `verdictA_off`: with no access-time parameter, `verdictA` is CF1's
+  `verdict` (conservative extension); `verdictA_revert_iff`,
+  `verdictA_run_entry` as CF1's.
+
+`Solidity/Semantics/AbiAccessChecks.lean` has 20 kernel controls (both
+outcomes: covered accesses revert, others read) on the probe vectors and on
+`calldata_nested_array_static_reencode_v2.sol`'s.
+
+**Admission and replay** (`Tools/UpstreamEntry.lean`, `Tools/Upstream.lean`):
+a calldata parameter is read at access time when the declaration has no
+modifiers, its shape has no tuple, and every mention of it in the body is a
+complete word read `x[i]…[j]`, the `.length` of a shorter path (index
+expressions without calls, writes or mentions of `x`), or an argument `x` of
+`abi.encode`/`abi.encodePacked` (also as a statement); loop annotations may
+not mention it. The replay then runs the declaration with its reads guarded
+(`guardDecl`), in that call's elaboration scope only: the index at depth `m`
+becomes `accessGuard__calldata(ok, i)` (`require(ok); r = i;`), `ok` saying
+no recorded path of length `m` equals the indices so far (by `cat_cpart`,
+when solc's access at that level does not revert); an encoding of `x` with a
+recorded path gains a last argument `accessGuard__calldata(false, 0)`, which
+reverts after the other arguments are evaluated, where solc's encoder
+reverts. Each index level is guarded where solc checks it, so an earlier
+level's failure precedes a later index's evaluation. Copies, aliases,
+passing, slices, returns, member paths and modifiers keep CF1's refusals;
+the guard name is reserved; constructors and the typed multi-return adapter
+refuse guards by name.
+
+**A local of the parameter's name** (legal in solc, a shadowing warning) is
+not admitted: `accessOnly` refuses a body that declares or binds the name
+anywhere, since the guards are placed by name (review finding, below).
+
+**Changed controls.** CF1's replay controls that pinned "fails only on
+access" for bodies that never read the failing element now run, as solc does
+(`LazyEntry` probes "not accessed"): `outer`, `narrow` in
+`tests/upstream/AbiEntryReplay.lean`, `unused(uint8[])` in
+`tests/upstream/Replay.lean` (an expected failure there is now `broken`).
+New replay controls: indexed and length reads of a failing element (revert,
+counter rolled back) and of the others (read); `abi.encode` of a failing,
+a lazy-only and a `2^64`-length array; `encIf` both ways; the fixture's
+`f(uint256[][3])`; the operand-order split `x[0] + 1 / k` (legacy
+`Panic(0x12)`, via-IR empty revert, as pinned solc); a shadowing local
+(refused). Copies keep the lazy-only refusal.
+
+**Fixture results** (`tests/upstream/cf1-abi-entry-results.json`, all 42
+rerun with `scripts/abi-entry-fixtures.sh SOLJSON fu2c`, collected with
+`abi-entry-collect.py --keep-before`): **23 working / 19 blocked** (FU1:
+22 / 20). The only change: `calldata_nested_array_static_reencode_v2.sol`
+blocked → working in both pipelines. Of item 2's rows, every calldata row is
+working except `smoke/bytes_and_strings.sol`, still blocked on "entry return
+bridge needs a primitive prefix and one final bytes/string memory result"
+(`g()` returns two references: the retained typed return adapter, not
+calldata); the memory rows were already working.
+
+**974dd1de reapplied** (calldata parameters as slice origins of obligation
+bodies, `Frontend/Import.lean`), with the error-encoding evidence recorded in
+`docs/assurance.md` (test 31) and pinned in
+`tests/upstream/AggregateErrorControls.lean`.
+
+**Review** (read-only finder and skeptic, no Lean server). Skeptic: about
+110 vectors over 8 probe contracts against pinned solc in all four
+configurations (dirty `uint8`/`int16`/`bool`/`bytes3`/`address` at every
+depth, `bytes[]`, fixed arrays of dynamic arrays, negative and huge offsets,
+`2^64 - 1` lengths, encoder ordering after other arguments, level-by-level
+index order, short-circuit, ternary, `require` with error arguments,
+assignments): no counterexample. It found the pipeline split of binary
+operand order (legacy right-first, via-IR left-first) unexercised: added the
+`order` probe (`expectByPipeline`) and replay controls in both orders.
+Finder: no unsound admission; confirmed and fixed: the aggregate pins lacked
+a recorded solc probe (now `--aggregate`), stale docs (`assurance.md`, this
+section, `UpstreamEntry`'s docstring), `abi.encodePacked(x)` of a whole
+array unprobed (`encPw`), nested lazy-only layouts unprobed (`enc8nL`,
+`encBL`, with kernel controls). Both raised parameter shadowing as a doubt;
+solc accepts a shadowing local, so the refusal above was added with a
+control. Recorded, not changed: the guard condition grows with the number of
+failing paths (one conjunct each); a narrow index compared with a recorded
+index above its range may not elaborate (blocked, not unsound); several
+access-time parameters at once and guards under `&&`/`?:` have no replay
+vector (the skeptic's EVM probes cover the solc side).
+
+**Validation** (lane head before this record):
+
+* `./run-lean.sh` (43m50s wall, warm after a container restart interrupted
+  the first run, so no clean before/after timing): default target "Build
+  completed successfully (1043 jobs)", `SolkeyTestSuite` "Build completed
+  successfully (286 jobs)", `check-solkey.sh` the baseline 37 mismatches.
+  No core module changed (`AbiAccess` is a new leaf importing only
+  `AbiEntry`); `Frontend/Import.lean` rebuilds its importers.
+* Lean server, clean: `AbiAccess`, `AbiAccessChecks`, `UpstreamEntry`,
+  `Upstream`, `tests/upstream/{AbiEntryReplay,Replay,AggregateErrorControls,AggregateErrorBoundary}.lean`.
+  No `sorry`, axiom, `native_decide`, `implemented_by` or heartbeat change;
+  seven headline theorems pinned and registered in `TrustAudit.lean`.
+* Node: `solidity-upstream.test.mjs` 25/25, `finite-dispatch.test.mjs`
+  34/34, `abi-entry-probe.mjs --probes --access --aggregate` pass;
+  `check-automatic --strict` 491 / 61 / 11 refuted / 0 pending; `check-g07`
+  at its baselines (axiom-pin drift, `check-doc-paths` 48 = 46 + 2); G03
+  ledger regenerated (line numbers of `Import.lean`).
+
+**Limitations.** Copies of a failing calldata parameter to memory, aliases,
+passing it, slices, struct members and modifiers keep the refusal (copies
+decode with the eager rules, `Panic(0x41)` included). `Panic(0x32)` and the
+other panics are produced by the existing model, not certified here. The
+agreement theorems are about the model; that it is solc's decoder rests on
+the probes. Gas is outside the model (CF1's 4× bound, on the substituted
+value).
+
+### Lane FU2-C, item 4 and backfill
+
+**Item 4 (test 31 `sliceRead`)**: the view index lowering checks the view's
+bound where solc does (`#sliceIndex`, `Syntax/Elab/Arms.lean`; record and
+evidence in `docs/assurance.md`, test 31). `slicePast` now proves;
+`sliceRead` and `sliceOfSlice` stay pending on closer cost (valid at ten
+times the heartbeats; not committed). This is a lowering change, not a new
+rule: no rule-map row, closer clause or soundness proof was needed, since
+the check is an ordinary `require`/`Panic(0x32)` statement.
+
+**Backfill: ABI coder v1 value parameters** (`UpstreamEntry.v1Plan`). v1
+cleans a value word instead of validating it; pinned solc, legacy with the
+optimizer off and on (`tests/abi-0.8.38/V1Entry.sol`, 14 vectors (trailing data and a lone `address` included),
+`scripts/abi-entry-probe.mjs --v1`, whose expectations are an independent
+port of the cleanup): `uintN` masked, `intN` sign-extended from its low `N`
+bits, `bool` 1 for any nonzero word, `bytesN` its high `N` bytes, `address`
+its low 160 bits; calldata shorter than the head is an empty revert;
+trailing data ignored. A v1 entry whose parameters are all such values runs
+on the cleaned words (the byte-identical cross-check on them); enums (v1
+masks them to `uint8`), function values and reference parameters keep the
+gate. Replay controls: `tests/upstream/AbiEntryReplay.lean` (`checked_add_v1`
+shape, `Panic(0x11)` after cleanup, short calldata, `int8`/`bool` cleanup, a
+`uint256[]` parameter gated), `tests/upstream/Replay.lean` (`narrow(uint8)`
+256 reads 0; expecting 256 is `broken`).
+
+**Backfill: the runner's scalar adapter** (`scripts/solidity-upstream.mjs`,
+`scalarArg`): TestFileParser writes a negative literal as its two's
+complement word, which for a 256-bit unsigned type is canonical (`-2` is
+`2^256 - 2`); the adapter refused it as noncanonical.
+`viaYul/function_entry_checks.sol` now passes `g(uint256,uint256): 1, -2`
+and blocks next on `h(), 1 ether -> 0` (a call value in the runtime
+expectation, outside this lane).
+
+**Remaining blocked rows and their reasons** (all 42 rerun,
+`cf1-abi-entry-results.json`):
+
+| Fixture | Reason | Kind |
+|---|---|---|
+| `smoke/bytes_and_strings.sol` | entry return bridge needs a primitive prefix and one final bytes/string memory result | retained interface: `g()` returns two references (`EntryReturn`) |
+| `abicoder/cleanup/enum_v1.sol` | nominal enum ABI range not adapted | exclusion: v1 masks enum words, nominal range refused for v1 |
+| `abicoder/cleanup/enum_v2.sol`, `operators/shifts/shift_right_garbled{,_signed}_v{1,2}.sol`, `userDefinedValueType/{cleanup,cleanup_abicoderv1,parameter}.sol`, `viaYul/unary_operations.sol` | raw ABI replay with physical calldata/memory assembly not adapted | exclusion: inline assembly building raw calldata |
+| `viaYul/function_entry_checks.sol` | unsupported runtime expectation: `h(), 1 ether -> 0` | runner: call values in runtime expectations |
+
+### Handoff (withdrawn: closed in FU2-C round 2, see `docs/assurance.md`, test 31)
+
+(History.) Before round 2, test 31's slice rows after FU2-C: `slicePast`
+proved; `sliceRead` and `sliceOfSlice` reached `sol_close` with valid leaves
+but exceeded its budget.
+The cost appears with a calldata view at a nonzero offset read at a
+symbolic index through the view's base alias (`#slice$t$view$base := xs`,
+`ie := 1 + se`): offset 0, literal indices, or the same reads on the
+parameter directly close within budget. Reproduction: import
+`tests/solc/Calldata.sol` (`scripts/solc-ast.mjs --source …`), then
+`sol_prove; all_goals sol_leaf; all_goals sol_close` on
+`Solc.Calldata.sliceRead.problem`. FU2-C did not edit `Calculus/**`.
+
+**Review of item 4 and the backfill** (read-only finder and skeptic, no Lean
+server). Skeptic: v1, a differential test against pinned solc (legacy,
+optimizer off and on): 547 vector pairs per setting over 47 functions,
+each dirty input against the same input with every head word cleaned by
+the rule above, comparing success, return data and logs; uses covered
+include checked and unchecked arithmetic, shifts by and of dirty words,
+`**`, bitwise operations, comparisons, conversions, all encodings and
+`keccak256`, packed storage, mapping keys, memory arrays, internal and
+external self-calls, events, modifiers with parameters, assembly reading
+the parameter, UDVTs (a `bool` UDVT included), `uint248`/`int248`/
+`bytes31`: 0 disagreements; a short head reverts, trailing data is ignored.
+It confirmed both exclusions: a v1 constructor does not clean at entry
+(assembly reads the raw word), and a v1 enum is masked to `uint8` with no
+range check. Slices: `t[k]` with `k >= t.length` is `Panic(0x32)` in all
+four configurations, after its own index and before any operand the
+pipeline evaluates later (legacy right-first, via-IR left-first, as
+`Contract.evalOrder`), and a bad slice bound reverts first. No
+counterexample. Finder: no code defect (evaluation order, `len` hoisting,
+`off + x` overflow, panic/revert choice, ternary/short-circuit placement,
+loop conditions, slices of slices, constructors/enums/function types/
+contract types/UDVTs/`address payable` in `v1Plan`, the cross-check,
+`scalarArg`). Confirmed and fixed: the probe count (now 14 vectors, with a
+trailing-data and a lone `address` vector added), the "outcomes unchanged"
+wording in `assurance.md` (per mode), `v1Plan`'s docstring (cleanup at
+decoding). Recorded, not changed: a zero-parameter v1 entry runs on `[]`
+(trailing data dropped; not observable under the `msg.data` refusal); a
+slice read directly in a failure-retaining body outside the entry call
+would now carry `Panic(0x32)` data (closer to solc; no producer found).
+
+**Fixtures, final** (`tests/upstream/cf1-abi-entry-results.json`, all 42
+rerun with `scripts/abi-entry-fixtures.sh SOLJSON fu2c3`, one runner hash,
+collected with `abi-entry-collect.py --keep-before`): **30 working / 12
+blocked / 0 broken** (FU1: 22 / 20). Changes against FU1: the access-time
+fixture and the seven ABI v1 rows blocked → working; `function_entry_checks`
+blocked on its next reason. `enums/enum_with_256_members.sol` ended once
+with "Lean process ended before checkpoint" while other Lean tests ran on
+the same machine; rerun alone into the same directory with the same runner
+it is working, as before.
+
+### Lane FU2-C, round 2 (coordinator follow-up)
+
+* **Test 31 slice rows prove** within the default budget: `#sliceIndex`
+  reads a literal or `uint256` name index without a copy, and `sliceOpen`
+  drops the always-true `len <= len` check of a view to the end; record in
+  `docs/assurance.md` (test 31). Lowering only; outcomes unchanged (the
+  dropped check holds by construction; nothing is evaluated between the
+  view's check and its read, and a later operand's effect captures the
+  read first, `captureBefore`; control `sliceK` in
+  `tests/upstream/AbiEntryReplay.lean`, both operand orders).
+* **`smoke/bytes_and_strings.sol` works** (both pipelines): the entry return
+  adapter (`Tools/EntryReturn.lean`, `admitted`, `byteRets`) admits any mix
+  of primitive and `bytes`/`string` memory returns, each with its byte
+  markers; `serialize` already encoded every return local in order
+  (`(string, string)`, `(string, uint, string)`).
+* **Fixtures after round 2** (all 42 rerun, `fu2c4`, one runner hash,
+  collected with `--keep-before`): **31 working / 11 blocked / 0 broken**;
+  the only change from round 1 is `smoke/bytes_and_strings.sol` blocked →
+  working. The 11 left are the exclusions in the table above (assembly ×8,
+  v1 enum, a call value in `function_entry_checks`).
+* **`sliceHashed`** (test 31's last failing row) predates this lane
+  (bisected on the base commit) and is recorded with its cause in
+  `docs/assurance.md` (test 31): a symbolic slice-copy loop the walk unrolls
+  past its budget, reported as a heartbeat error rather than `pending`.
+* **Review of round 2** (read-only finder and skeptic). Skeptic, pinned solc
+  in four configurations: slice bound checks over 1694 cases × 4 configs
+  (`xs[i:]`, `xs[i:j]`, nested views, `bytes`, huge and empty bounds), 0
+  mismatches, a view to the end checks only its start; several
+  `bytes`/`string` returns in any order, aliased, unassigned or swapped are
+  `abi.encode` of the return locals in declaration order. It showed that an
+  operand reassigning the index (`t[k] + (k = 5)`) is pipeline-dependent;
+  the model captures the read before a later operand's effect
+  (`captureBefore`), pinned by the `sliceK` replay control in both orders.
+  Finder: no semantic defect; fixed: `EntryReturn` docstrings, stale
+  present-tense notes. Recorded, not changed: `intTyOf` defaults a
+  non-integer name (a `bytes32` local) to `uint256`, so such an index (which
+  solc rejects at compile time) would skip the copy; a literal index above
+  `2^256` likewise (also rejected by solc).

@@ -1,7 +1,8 @@
 import Solidity.Syntax.Elab
 
-/-! Entry-only serialization of a primitive prefix and one bytes/string memory
-return, over the existing single-memory-result call. Original source lowering
+/-! Entry-only serialization of primitive and bytes/string memory returns, in
+any order (lane FU2-C: `smoke/bytes_and_strings.sol`'s `(string, string)` and
+`(string, uint, string)`), over the existing single-memory-result call. Original source lowering
 runs once; encoding reads its actual return locals in declaration order.
 The original contract, self-call lookup and source obligation remain unchanged. -/
 namespace Solidity.Tools.EntryReturn
@@ -11,18 +12,24 @@ open Semantics
 def wrapperName : String := "__upstream_encoded_entry"
 def resultName : String := "__upstream_encoded_result"
 
+/-- Every return is a primitive or a `bytes`/`string` memory value (its
+byte markers retained), and at least one is the latter. -/
+def byteRets (d : FunDecl) : Bool :=
+  d.rets.any (fun (_, T) => T matches .ref _) &&
+  d.rets.all fun (n, T) => match T with
+    | .prim _ => true
+    | .ref R => R == bytesR &&
+        lookupBy (n ++ "[]#bytes") d.widths == some 1 &&
+        lookupBy (n ++ "[]") d.widths == some 8
+
 /-- Deliberately bounded admission: no function/reference arguments, storage
-results, recursive source entry or general mixed reference tuple forwarding. -/
+results or recursive source entry; reference results only `bytes`/`string`
+memory values (`byteRets`). -/
 def admitted (C : Contract) (f : String) (d : FunDecl) : Bool :=
   d.params.all (fun (_, T) => T matches .prim _) &&
   !(d.widths.any (fun (n, _) => (n.splitOn "#function").length > 1)) &&
   d.rets.length > 1 && d.retMem && !d.retStorage &&
-  (match d.rets.reverse with
-    | (n, .ref R) :: rest => R == bytesR &&
-        lookupBy (n ++ "[]#bytes") d.widths == some 1 &&
-        lookupBy (n ++ "[]") d.widths == some 8 &&
-        rest.all (fun (_, T) => T matches .prim _)
-    | _ => false) &&
+  byteRets d &&
   !isRecursiveC C f &&
   !(C.funs.any (fun (n, _) => n == wrapperName || n == resultName)) &&
   !(C.vars.any (fun (n, _) => n == wrapperName || n == resultName)) &&
@@ -38,15 +45,9 @@ theorem admitted_arguments (C : Contract) (f : String) (d : FunDecl)
   exact h
 
 /-- Intrinsic array shape alone is insufficient: successful admission retains
-actual source bytes/string markers, byte width and the primitive prefix. -/
+actual source bytes/string markers and byte width for every reference result. -/
 theorem admitted_result (C : Contract) (f : String) (d : FunDecl)
-    (h : admitted C f d = true) :
-    (match d.rets.reverse with
-    | (n, .ref R) :: rest => R == bytesR &&
-        lookupBy (n ++ "[]#bytes") d.widths == some 1 &&
-        lookupBy (n ++ "[]") d.widths == some 8 &&
-        rest.all (fun (_, T) => T matches .prim _)
-    | _ => false) = true := by
+    (h : admitted C f d = true) : byteRets d = true := by
   simp only [admitted, Bool.and_eq_true] at h
   exact h.1.1.1.1.1.2
 
@@ -102,10 +103,11 @@ def serialize (C : Contract) (d : FunDecl) : ElabM FunDecl := do
     body := declarations ++ original ++
       [.ret (some (.call "abi.encode" (d.rets.map fun (n, _) => .name n)))] }
 
-/-- The existing memory-only entry admission remains unchanged. -/
+/-- The memory entry admission (`admitted`, widened by lane FU2-C to every
+primitive/bytes/string mix). -/
 def prepare (C : Contract) (f : String) : ElabM FunDecl := do
   let some d := lookupBy f C.funs | throw "entry return bridge has no exact source declaration"
-  unless admitted C f d do throw "entry return bridge needs a primitive prefix and one final bytes/string memory result"
+  unless admitted C f d do throw "entry return bridge needs primitive and bytes/string memory results only"
   serialize C d
 
 /-- The additional output-only fragment: one no-argument external-void function

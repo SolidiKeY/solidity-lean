@@ -90,14 +90,17 @@ to choose a panic code. Call arguments here are ABI-decoded locals or checked
 scalar literals; arbitrary effectful top-level argument expressions are outside
 this adapter. Ordinary calculus entry points remain unchanged. -/
 def entryProgParts (C : Contract) (pre body post : List RawStmt)
-    (encoded : Option (String × EntryReturn.Plan) := none) : Except String (Blk C []) := do
+    (encoded : Option (String × EntryReturn.Plan) := none)
+    (funs : Option (List (String × FunDecl)) := none) : Except String (Blk C []) := do
+  if funs.isSome && encoded.isSome then
+    throw "access-time calldata guards through a typed multi-return adapter are not admitted"
   let all := pre ++ body ++ post
   let k := RawStmt.maxIdxs all + 1
   let ss ← freshenBlocks (C.vars.map (·.1)) [] all
   unless ss.length == all.length do throw "entry statement boundaries changed during freshening"
   let action : ElabM (SProg C) := do
     let funs ← match encoded with
-      | none => pure C.funs
+      | none => pure (funs.getD C.funs)
       | some (f, plan) => EntryReturn.scope C f plan
     withReader (fun sc => { sc with funs }) do
       let P ← elabStmtsP C (ss.take pre.length)
@@ -233,7 +236,7 @@ def validate (d : FunDecl) (inputs outputs : List String) (topEnums : List Strin
 /-- Build both the canonical input probe and the once-only source execution from
 existing typed ABI operations. Source calls retain their ordinary admission. -/
 def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
-    (bytes : List Nat) : Except String (Blk C []) := do
+    (bytes : List Nat) (funs : Option (List (String × FunDecl)) := none) : Except String (Blk C []) := do
   if bytes.any (· >= 256) then throw "invalid calldata byte"
   let reserved := [dataName, outputName] ++ (List.range d.params.length).map argName ++
     (List.range d.rets.length).map retName
@@ -257,13 +260,13 @@ def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
     return ← entryProgParts C
       ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
       [.declMemory (.named "bytes") outputName
-        (some (.call EntryReturn.wrapperName args))] [] (some (f, .memory))
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .memory)) funs
   if !probe && !ctor && d.rets.length > 1 &&
       d.rets.any (fun (n, _) => (fnRow? d.widths n).isSome) then
     return ← entryProgParts C
       ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
       [.declMemory (.named "bytes") outputName
-        (some (.call EntryReturn.wrapperName args))] [] (some (f, .functionTuple))
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .functionTuple)) funs
   let captures ← if probe then pure [] else if ctor then pure (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [RawStmt.call (.name "constructor") args])
     else if d.rets.length == 1 then do
       let [(x,T)] := d.rets | throw "single return shape mismatch"
@@ -281,7 +284,7 @@ def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
   let returns := if probe then args else
     (List.range d.rets.length).map fun i => RawExpr.name (retName i)
   entryProgParts C ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
-    captures [.declMemory (.named "bytes") outputName (some (.call "abi.encode" returns))]
+    captures [.declMemory (.named "bytes") outputName (some (.call "abi.encode" returns))] none funs
 
 private def findBytes (x : Var) : (Γ : Ctx) → List Var → Option (Idx Γ (.mem bytesR))
   | [], _ => none
@@ -471,8 +474,19 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       match entryPlan with
       | .legacy =>
         if nominal then throw "nominal enum ABI range needs a declaration adapter"
-        ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
-        ABI.program C d (function.getD "constructor") ctor false bytes
+        -- ABI coder v1 value parameters are cleaned, not validated
+        -- (`UpstreamEntry.v1Plan`); everything else keeps the gate.
+        match (if canonicalOnly && !ctor then UpstreamEntry.v1Plan d bytes else .gate) with
+        | .revert =>
+          discard <| ABI.program C d (function.getD "constructor") ctor false bytes
+          entryProg C [.revert]
+        | .run cleaned =>
+          match ABI.canonical C d (function.getD "constructor") cleaned state true with
+          | .error reason => throw s!"generated decoder disagrees with the v1 cleanup: {reason}"
+          | .ok () => ABI.program C d (function.getD "constructor") ctor false cleaned
+        | .gate =>
+          ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
+          ABI.program C d (function.getD "constructor") ctor false bytes
       | .blocked reason => throw reason
       -- An entry check fails: an empty revert before the body.
       | .revert => do
@@ -480,11 +494,23 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
         -- building it runs nothing.
         discard <| ABI.program C d (function.getD "constructor") ctor false bytes
         entryProg C [.revert]
-      | .run canonicalBytes =>
+      | .run canonicalBytes guarded =>
         -- Cross-check: the generated decoder reproduces the typed values.
         match ABI.canonical C d (function.getD "constructor") canonicalBytes state true with
         | .error reason => throw s!"generated decoder disagrees with the typed entry decoder: {reason}"
-        | .ok () => ABI.program C d (function.getD "constructor") ctor false canonicalBytes
+        | .ok () =>
+          -- Access-time calldata (`UpstreamEntry.guardDecl`): the body with
+          -- its reads guarded, and the guard, in this call's scope only.
+          let funs ← match guarded, function with
+            | none, _ => pure none
+            | some g, some name =>
+              if ctor then throw "access-time calldata guards for a constructor are not admitted"
+              if C.funs.any (·.1 == UpstreamEntry.accessGuardName) then
+                throw "reserved access guard name collision"
+              pure (some ((UpstreamEntry.accessGuardName, UpstreamEntry.accessGuardDecl) ::
+                C.funs.map fun (n, e) => if n == name then (n, g) else (n, e)))
+            | some _, none => throw "access-time calldata guards need a source function"
+          ABI.program C d (function.getD "constructor") ctor false canonicalBytes funs
     if raw then
       if let .error reason := rawProgram then return stopped "blocked" reason
     let program := if raw then rawProgram else if ctor then entryProg C (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [.call (.name "constructor") args]) else do

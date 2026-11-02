@@ -368,15 +368,34 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let sh : RawExpr := .binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i)
     let (R, e) ← hoist (.binop .mod (.binop .shr b sh) (.num 256))
     pure (P ++ Pb ++ Q ++ Pi ++ [.of Γ check] ++ R, e)
-  | .call "#sliceIndex" [off, len, k, past] => do
+  | .call "#sliceIndex" [off, len, k, _past] => do
     let (P, k) ← hoist k
-    let x := toString (← freshCapture "se")
-    let Q ← elabStmtsP [.decl (.named "uint") x (some k)]
-    -- The addition is evaluated only for an in-range relative index.
-    -- The base's own bounds check supplies Panic(0x32) otherwise.
-    let ix := RawExpr.ternary (.binop .lt (.name x) len) (sliceAdd off (.name x)) past
-    let (R, ix) ← hoist ix
-    pure (P ++ Q ++ R, ix)
+    -- A literal or a `uint256` name is read as it stands (nothing is
+    -- evaluated between the check and the read); another index is held
+    -- once in a fresh `uint`. A copy beside the bounds premises costs the
+    -- closer a whole evaluation (test 31, `sliceRead`).
+    let Γk ← ctx
+    let direct : Bool := match k with
+      | .num _ => true
+      | .name _ => (intTyOf C Γk k).any fun (p, n) => p == .uint && n == 256
+      | _ => false
+    let (Q, xv) ← if direct then pure ([], k) else do
+      let x := toString (← freshCapture "se")
+      pure (← elabStmtsP [.decl (.named "uint") x (some k)], RawExpr.name x)
+    -- The view's own bounds check where solc makes it (after the index):
+    -- `Panic(0x32)` where failure data is retained, a revert elsewhere, as
+    -- the base's check past its end did before. The addition is evaluated
+    -- only for an in-range relative index, and the read is then the plain
+    -- `base[off + x]` with `x < len` a premise (KeY's `inBounds` branch),
+    -- so no closer has to know that a read past the end fails (test 31,
+    -- `sliceRead`; lane FU2-C).
+    let (R, len) ← hoist len
+    let Γ ← nctx
+    let guard ← checkIn C Γ .bool (.binop .lt xv len)
+    let sc ← read
+    let check := if sc.selfFrame || sc.retainFailureData then panicStmt 0x32 guard else .require guard
+    let (S, ix) ← hoist (sliceAdd off xv)
+    pure (P ++ Q ++ R ++ [.of Γ check] ++ S, ix)
   | .call "#sliceAt" [view, k] => do
     let t := toString (← freshCapture "mv")
     let (v, pre) ← ElabM.lift (inlineSliceOpen t view)

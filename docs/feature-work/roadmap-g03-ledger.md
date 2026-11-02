@@ -502,7 +502,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`abiEncodePacked`** (model/partial)
   - admission: `Solidity.Frontend.Admission.magicMember` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:27`) — abi.encodePacked tagged
   - lowering: `Solidity.AbiKind.packedWidth` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:816`) — packed widths per kind
-  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:657`) — packed assembly, struct refused
+  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:676`) — packed assembly, struct refused
   - no existing anchor: source, backend, evm, theorem
   - missing: Packed arrays and hex-literal aggregates have only partial contextual coercions.
   - missing: No backend/EVM stage (R04). Packed collisions are only kept, never proved.
@@ -546,7 +546,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`bytesConcat`** (model/partial)
   - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1855`) — bytes.concat rendered
   - lowering: `Solidity.abiEncode` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:202`) — concat as packed byte write
-  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:657`) — argument-order byte assembly
+  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:676`) — argument-order byte assembly
   - lowering: `Solidity.bytesPure` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1663`) — bytesN argument kinds
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: No distinct admission tag (memberAccess only).
@@ -1245,7 +1245,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: Telling a parenthesised single value apart from a 1-tuple depends on the solc AST alone.
 
 - **`rangeAccess`** (model/partial)
-  - lowering: `Solidity.sliceViewOf?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1021`) — calldata slice view construction
+  - lowering: `Solidity.sliceViewOf?` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1025`) — calldata slice view construction
   - lowering: `Solidity.sliceElementCopy` (Solidity.Syntax.Elab.SliceCopy, `Solidity/Syntax/Elab/SliceCopy.lean:13`) — slice element copies
   - regression: `Solidity.Examples.Tactics.AggregateSlices.successful_run` (Solidity.Examples.Tactics.AggregateSlices, `Solidity/Examples/Tactics/AggregateSlices.lean:67`) — successful slice run
   - regression: `Solidity.Examples.Tactics.SliceReferenceCopies.legacy.invalidRange_run` (Solidity.Examples.Tactics.SliceReferenceCopies, `Solidity/Examples/Tactics/SliceReferenceCopies.lean:153`) — invalid endpoints fail
@@ -1317,8 +1317,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: No stated theorem that numeric-to-bool coercion is impossible (rests on typing)
 
 - **`comments`** (model/partial)
-  - admission: `Solidity.Frontend.scanSpecifications` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:501`) — scans NatSpec spec annotations by lexical binders
-  - lowering: `Solidity.Frontend.specCommentTokens` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:272`) — tokenizes spec comments; ordinary comments stay data
+  - admission: `Solidity.Frontend.scanSpecifications` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:520`) — scans NatSpec spec annotations by lexical binders
+  - lowering: `Solidity.Frontend.specCommentTokens` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:291`) — tokenizes spec comments; ordinary comments stay data
   - lowering: `Solidity.Frontend.docText` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:21`) — reads documentation nodes for clauses
   - regression: `Solidity.Examples.Tactics.SourceIdentifiersImport.escaped_spec_valid` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:21`) — spec with escaped identifiers is valid
   - no existing anchor: source, theorem
@@ -1344,7 +1344,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`identifiers`** (model/partial)
   - admission: `Solidity.Frontend.Admission.scan` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:425`) — admission walk; declarations keyed by compiler IDs
   - lowering: `Solidity.Frontend.identText` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:22`) — quotes raw source names, including $ names and keywords
-  - lowering: `Solidity.freshenStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1248`) — renames locals so shadowed names stay apart
+  - lowering: `Solidity.freshenStmt` (Solidity.Syntax.Elab.Context, `Solidity/Syntax/Elab/Context.lean:1252`) — renames locals so shadowed names stay apart
   - regression: `Solidity.Examples.Tactics.SourceIdentifiersImport.shadow_execution` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:12`) — imported shadowing runs correctly
   - no existing anchor: source, backend, theorem
   - missing: No general theorem that lowering keeps declaration identity or scope; only regressions
@@ -1702,7 +1702,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`expressionStatements`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — ExpressionStatement tagged
   - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2292`) — ExpressionStatement printed; prefix captures hoisted
-  - lowering: `Solidity.elabStmt1With` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:1599`) — statement elaboration incl. discarded calls
+  - lowering: `Solidity.elabStmt1With` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:1618`) — statement elaboration incl. discarded calls
   - backend: `Solidity.Evm.stmt_sim` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:985`) — per-statement simulation for admitted forms
   - no existing anchor: source, evm, theorem
   - missing: Bare `r.send(a);` with result discarded is not read (RawStmt.send docstring)
@@ -2695,7 +2695,7 @@ Planned edits of existing modules per package (`new` = new modules only). Flags:
 | G18.01 | V07 | 6 | `Solidity.TypeGraph`, `Solidity.Semantics.RecursiveStorage.Admission` | 234 | — | — |
 | G18.02 | V07 | 19 | `Solidity.Semantics.Storage`, `Solidity.Semantics.RecursiveStorage.Paths` | 184 | — | — |
 | G18.03 | V07 | 21 | `Solidity.Semantics.Heap` | 537 | — | — |
-| G18.04 | V07 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1571 | — | — |
+| G18.04 | V07 | 12 | `Solidity.Syntax.Elab.Context`, `Solidity.Syntax.Elab.SliceCopy` | 1575 | — | — |
 | G18.05 | V07 | 18 | `Solidity.Semantics.RecursiveStorage.Copy` | 187 | — | — |
 | G18.06 | V07 | 4 | new | 0 | — | — |
 | G22.01 | V08 | 13 | `Solidity.Semantics.ContractWorld` | 461 | — | — |

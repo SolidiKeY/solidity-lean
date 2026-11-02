@@ -1,0 +1,136 @@
+{
+ "legacyOnly": true,
+ "groups": [
+  {
+   "contract": "V1Entry",
+   "vectors": [
+    {
+     "label": "k: dirty words",
+     "signature": "k(uint8,int16,bool,bytes3,address)",
+     "calldata": "0x00000000000000000000000000000000000000000000000000000000000001ff00000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000000002abcdef00000000000000000000000000000000000000000000000000000000550000000000000100000000000000000000000000000000000000000000001234",
+     "expect": {
+      "failed": false,
+      "data": "0x00000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80000000000000000000000000000000000000000000000000000000000000000001abcdef00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001234"
+     }
+    },
+    {
+     "label": "k: all ones",
+     "signature": "k(uint8,int16,bool,bytes3,address)",
+     "calldata": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+     "expect": {
+      "failed": false,
+      "data": "0x00000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000001ffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffff"
+     }
+    },
+    {
+     "label": "uint16 masked",
+     "signature": "u(uint16)",
+     "calldata": "0x0000000000000000000000000000000000000000000000000000000000010005",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000005"
+     }
+    },
+    {
+     "label": "short calldata reverts",
+     "signature": "u(uint16)",
+     "calldata": "0x00000000000000000000000000000000000000000000000000000000000100",
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    },
+    {
+     "label": "no arguments reverts",
+     "signature": "u(uint16)",
+     "calldata": "0x",
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    },
+    {
+     "label": "int8 positive",
+     "signature": "s(int8)",
+     "calldata": "0x000000000000000000000000000000000000000000000000000000000000007f",
+     "expect": {
+      "failed": false,
+      "data": "0x000000000000000000000000000000000000000000000000000000000000007f"
+     }
+    },
+    {
+     "label": "int8 sign bit",
+     "signature": "s(int8)",
+     "calldata": "0x0000000000000000000000000000000000000000000000000000000000000080",
+     "expect": {
+      "failed": false,
+      "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80"
+     }
+    },
+    {
+     "label": "int8 high bits",
+     "signature": "s(int8)",
+     "calldata": "0x00000000000000000000000000000000000000000000000000000000000001ff",
+     "expect": {
+      "failed": false,
+      "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+     }
+    },
+    {
+     "label": "int8 dirty negative",
+     "signature": "s(int8)",
+     "calldata": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeff",
+     "expect": {
+      "failed": false,
+      "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+     }
+    },
+    {
+     "label": "bool 2",
+     "signature": "bo(bool)",
+     "calldata": "0x0000000000000000000000000000000000000000000000000000000000000002",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000007"
+     }
+    },
+    {
+     "label": "bool 0",
+     "signature": "bo(bool)",
+     "calldata": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000003"
+     }
+    },
+    {
+     "label": "bool high bit",
+     "signature": "bo(bool)",
+     "calldata": "0x8000000000000000000000000000000000000000000000000000000000000000",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000007"
+     }
+    },
+    {
+     "label": "trailing data ignored",
+     "signature": "u(uint16)",
+     "calldata": "0x0000000000000000000000000000000000000000000000000000000000010005ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000005"
+     }
+    },
+    {
+     "label": "address masked to 160 bits",
+     "signature": "ad(address)",
+     "calldata": "0x00000000000000000000ffff0000000000000000000000000000000000001234",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000001234"
+     }
+    }
+   ]
+  }
+ ]
+}
