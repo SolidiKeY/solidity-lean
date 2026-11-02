@@ -2933,3 +2933,112 @@ pending committed VY1 implementation/evidence, not human decisions. No new goal,
 reset/status/counter/objective change; no get_goal read tool is exposed.
 Exact source/signatures/patch/bundles/raw diagnostics/receipts/reviews/checksums:
 `/workspace/vy5-composition/nested-modifier-20261102/final/`.
+
+
+## VY5 indexed write and emit (2026-11-02)
+
+Consumed four previously unused, immutable VY4 modules from private producer
+`5a4678a0733702d5b74abffce9c7c6a2c3e45c28`, delivered in
+`/workspace/shared/parallel-vy4-indexed-emit-dce09d8e`. The recursively checked
+198-file closure has no conflicting producer bodies. Private dependency commit
+`2a6b5b790f7e613190c8e72cfa1d93f81f5ab8d5` contains those exact four bodies with explicit provenance. The owned implementation is
+private commit `621cb8fa4eb7de45961d26dac243719bde1599c3`; the main assigned
+checkpoint contains only VY5 code, ledger/validator and documentation. Foreign
+producer modules and the `Solidity.lean` import registration remain in the
+provenance-bound private tree. No owner source body or master was changed.
+
+[IndexedWritePhysical.lean](../../Solidity/Yul/Composition/IndexedWritePhysical.lean)
+adds 31 kernel component facts. The actual representedSourceStep writes
+`0xab000002` into a newly typed singleton bool registry at owner48/slot7 in
+ScalarEmitPort.env. This registry is a represented fragment, not a complete
+layout of inherited fields. The resulting SAME caller executes actual
+IndexedEmitPort.executeCaller/Source.execS at horizon5, selecting a non-head
+uint256 full word. MemOK transport has its real initial MemOK premise;
+reconstruction retains the persistent-bank/separation premises, and public
+representedFrameWrite? binding retains successful preparation and owner equality.
+The concrete preparation, caller/input vector, old source/residual/owned journals,
+nonempty mixed observation prefix and Glob are inhabited for both pipelines and
+all indexed/anonymous event flags.
+
+`outer_revert` starts the actual PhysicalCompletion.finish mark BEFORE both
+write and emit. It restores the COMPLETE initial EMState, complement and owned
+journals, drops the new legacy/full logs, preserves the entire ordered prefix,
+and returns the complete supplied revert bytes. `run_fields` retains locals,
+heap, function locals and events; `witness_heap_log` uses the SAME actual heap
+with VY2 HeapByteEntry/Placement, including nonindexed 32-byte payloads and full
+indexed topics. A logical heap id is never asserted equal to an EVM pointer.
+Generic observation transport explicitly rebases execution via shifted; the
+concrete observed witness shares actual entry execution. The common-log wrapper
+is VY4's explicit extension, not a joint G01 theorem. finish's enclosing Outcome
+is a supplied boundary, not a newly proved callee/Source.try dispatch result.
+
+Operational negatives execute actual other-slot/other-owner public writes:
+slot8 is a legal residual request and leaves slot7's logical flag absent; owner32
+updates its own flag and leaves owner48 absent. Stale owned-byte journals
+reconstruct `0xab000001` rather than `0xab000002`; lost-padding word2 is rejected.
+Static write refuses with unchanged full carrier. Actual static emit refusal
+leaves the earlier dynamic write pending until explicit pre-write completion.
+A late mark provably restores a different carrier. Wrong non-head selection and
+full indexed-topic controls retain high bits. These are physical bool dirty-byte
+facts, not raw VY1 LocalValues cleanup/resumption facts.
+
+Per-file MCP success/partial=false, actual Lean4.24.0/Lake5.0.0-src+797c613,
+KeySort2 jobs then ./run-lean.sh library1300/TestSuite262 pass. Joint gate EXIT0:
+206 core/0 elaborator,1315 reachable/0 orphan/0 notallowed, strict491 automatic/
+61 budgeted/0 manual/11 refuted/0 pending, complete-input trust1330 sources/
+252 inventoried sites/0 findings. All31 scoped axiom sets are subsets of
+propext/Classical.choice/Quot.sound. 92 relevant existing script regressions and
+35 new actual-receipt/source/producer/resource/axiom/ledger mutation tests pass.
+Initial proof diagnostics and the joint invocation with unsupported pp.width
+(EXIT1 after successful builds) remain raw failures; corrected gates are separate.
+No heartbeat/fuel/node/test budget changed. No new finite Source driver cases or
+native comparisons: the new receipt validator checks real kernel evidence, never
+turning it into compiler correctness. Finder/skeptic reviewed read-only without
+Lean/server/build/test execution; operational-control findings were fixed, and
+'child failure' wording was corrected to 'static refusal'. The reader's initial
+four-file provenance check was insufficient: final review found and fixed it.
+The canonical manifest now pins all257 actual component imports, including
+198 producer bodies, canonical raw receipt identity and original producer
+provenance; real transitive-body and coordinated substitution mutants fail.
+
+Work1 and Work3 are BLOCKED at final composition: all24 ORIGINAL obligations and
+six full Source combinations remain pending. Work2/BackfillA/B remain PARTIAL;
+all227 working upstream profiles/458 ordered calls over73 sources already have
+finite independent assertions, with21 older-fork profiles unexecuted. Untouched
+world/native API domains and five runCall-versus-transaction-finalization
+boundaries remain explicit. No new total-state/native/Source correspondence is
+inferred. Following the additional indexed-emit leaf, both independent reviewers
+found no further necessary ready kernel leaf in the inspected immutable inputs.
+Existing Source runtime loops/modifiers/heap/function/emit leaves do not supply
+an admitted assembly Source constructor, general raw sessions or compilation.
+
+Exact remaining inputs: VY1 runLocalBlock→actual RStmt/JSON admission and raw
+ordinary operators/functions/sessions, plus committed H3 LIB1/unchecked results;
+VY2 joint allocation/Placement refinement/MemOK/G01 integration; VY4 unified full
+log/emit G01 and general raw-world/session/physical carrier coupling; VY3 actual
+admitted-Yul source/target stack/frame/state relation/pass/opcode simulations;
+V16 assembly instances of Roadmap admission/lowering/execution/public correctness,
+constructor installation/transactions/spec transfer and final joint closure.
+The selected ordinary success/nonempty-revert producer is RESOLVED and consumed.
+H1 storage and H3 trace/LIB1/unchecked decisions are answered, not pending human
+questions; VY1 still owns its implementation. General Source.try selection is
+absent from the current resolved evaluator. Fresh published master
+`9968442b8fbda4378d608282545d4eb444ab8429` was fetched by EXACT object read-only:
+no Yul modules, canonical rethrow-only InlineAssembly dispatch. Existing general
+Source memory/runtime and component correctness work is acknowledged and reused;
+no whole-lane-publication wait or duplicate producer implementation is imposed.
+
+Historical docs/G03 EXIT1 with exact-base byte equality remains FAILURE/zero new
+regressions only. Original strict native rethrow report EXIT1/five optimized-viaIR
+journal mismatches remains unchanged at SHA256
+`c0e8e6cd7f2f62865135b57ab395b3d256f3d0b474d20c17f88957e8d702f660`;
+the separately approved H3 per-pipeline fresh36-call evidence remains earlier.
+H1 4GiB OS reserve, hard12GiB/no-swap, CPU1, serial Lean-j1/LEAN_NUM_THREADS1 and
+writer lock were retained. No goal read tool is exposed; original blocked goal
+was untouched. No push/merge/PR, peer interruption or new VM/thread occurred.
+
+The immutable incremental patch, dependency bundles, exact31 signatures,
+producer hashes, reviews, raw gates/resource receipts, previous-manifest checks
+and complete Work/Backfill handoff are under
+`/workspace/vy5-composition/indexed-write-20261102/final/`. This checkpoint is
+partial; the entire assignment remains blocked on the exact producer inputs.

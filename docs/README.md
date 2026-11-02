@@ -107,4 +107,4 @@ history is in git.
 
 | Assembly lane | Document |
 |---|---|
-| VY5 raw-local/physical composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
+| VY5 raw-local/physical, indexed-write/emit composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |

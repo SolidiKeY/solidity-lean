@@ -520,3 +520,13 @@ obligations/six general combinations pending. H3LIB1/unchecked decisions are
 answered; VY1 committed inputs still required, no re-ask/duplicate implementation.
 See [lane handoff](inline-assembly-vy5.md#vy5-actual-nested-modifiers-and-answered-vy1-h3-inputs-2026-11-02)
 and `/workspace/vy5-composition/nested-modifier-20261102/final/`.
+
+
+VY5 (2026-11-02): actual represented write→indexed caller-local Source.emit→
+pre-write outer rollback adds31 component facts, real full heap/log agreement,
+three-journal restoration and operational wrong-owner/slot/encoding/mark controls.
+Private joint gate EXIT0;35 new receipt mutation tests/92 relevant regressions;
+no new native comparisons. All24 original obligations/six full combinations remain
+pending. Remaining ready-input audit is blocked on explicit producer contracts,
+not whole-lane publication. See [lane handoff](inline-assembly-vy5.md#vy5-indexed-write-and-emit-2026-11-02)
+and `/workspace/vy5-composition/indexed-write-20261102/final/`.

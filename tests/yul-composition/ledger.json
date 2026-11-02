@@ -435,5 +435,6 @@
   "modifierPostEvidence": "tests/yul-composition/modifier-post-ledger.json",
   "pipelineRethrowEvidence": "tests/yul-composition/pipeline-rethrow-ledger.json",
   "nestedModifierEvidence": "tests/yul-composition/nested-modifier-ledger.json",
-  "vy1H3InputObligations": "tests/yul-composition/vy1-h3-input-obligations.json"
+  "vy1H3InputObligations": "tests/yul-composition/vy1-h3-input-obligations.json",
+  "indexedWriteEvidence": "tests/yul-composition/indexed-write-ledger.json"
 }
