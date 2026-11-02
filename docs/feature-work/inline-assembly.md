@@ -494,3 +494,11 @@ Source cases and74 mutation tests. No fresh native comparison; all24 original
 obligations/six full combinations stay pending. See [lane handoff](inline-assembly-vy5.md#vy5-actual-source-dowhile-consumer-2026-11-02)
 and `/workspace/vy5-composition/do-while-20261102/final/` for exact premises,
 source signatures, resource receipts and retained failures.
+
+
+VY5 (2026-11-02): the earlier real ModifierPhysical placeholder branch was
+already complete. New actual bytes-parameter/alias/postlude consumer adds37
+component facts,48 ordered Source cases and80 mutation tests, distinguishing
+normal/return postludes from body-revert suppression. Native comparisons0; all24
+original obligations/six combinations pending. See [lane handoff](inline-assembly-vy5.md#vy5-actual-modifier-argument-and-postlude-consumer-2026-11-02)
+and `/workspace/vy5-composition/modifier-post-20261102/final/`.

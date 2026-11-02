@@ -431,5 +431,6 @@
   "uncheckedLoopEvidence": "tests/yul-composition/unchecked-loop-ledger.json",
   "forEvidence": "tests/yul-composition/for-ledger.json",
   "failureEvidence": "tests/yul-composition/failure-ledger.json",
-  "doWhileEvidence": "tests/yul-composition/do-while-ledger.json"
+  "doWhileEvidence": "tests/yul-composition/do-while-ledger.json",
+  "modifierPostEvidence": "tests/yul-composition/modifier-post-ledger.json"
 }

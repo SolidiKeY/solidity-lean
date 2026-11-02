@@ -2687,3 +2687,94 @@ failed global gates with zero new regressions. No unchanged failing global
 command was rerun. Original BLOCKED goal unchanged; get_goal read tool remains
 unavailable, no goal mutation. Incremental artifacts/signatures/evidence:
 `/workspace/vy5-composition/do-while-20261102/final/`.
+
+
+### VY5 actual modifier argument and postlude consumer (2026-11-02)
+
+Inspection found the requested real single-placeholder branch already proved by
+`ModifierPhysical.one_modifier`/`internal_revert`; it was not repeated as a new
+milestone. `Solidity/Yul/Composition/ModifierPostPhysical.lean` instead adds the
+missing selected bytes-parameter/alias-prefix/placeholder/rethrow-postlude leaf.
+Actual evalConvArgs, dispatchMod/body lookup and parameter equality install the
+function frame, execute the modifier and restore the arbitrary saved fnLocals
+through attempt, including errors. A body revert skips the entire postlude even
+when its argument is dangling. Actual normal OR return completion of the body
+makes the placeholder normal, so the postlude really rethrows its own full byte
+buffer. A real empty .nil modifier suppresses the body altogether. The prefix is
+an actual local alias declaration; no heap allocation or hidden postlude omission
+is assumed. Missing body, wrong parameters and low horizons are distinguished.
+
+37 checked component facts include short actual placeholder-entry/timeout stages
+and the original generic eight-horizon timeout law. Initial whole-list reduction
+hit unchanged200000heartbeats; a later per-file45s partial result also remains a
+failure. Both are retained. Factoring into direct typed execution stages checked
+without budget increases, axioms/sorry/native shortcuts or weaker statements.
+The new nonempty modifier-local placeholder transport does not change Source.
+
+A constructive firstPhysical Source carrier retains complete Source.St, saved
+boolean fnLocals, heap aliases, dirty raw/function/nonword LocalValues and real
+Source/residual/owned-byte journal companions. Source outer evaluator scope is
+restored through actual EM.sub/attempt. Complete retention is not new world
+rollback, representation validity, physical placement or clean raw resumption.
+The selected actual code has explicit reference/heap lookup/frame premises,
+not a supplied desired execution. The supplied resolved runtime body contains
+alias/postlude while its declaration syntax record identifies the placeholder;
+no frontend Derived/admission claim is made. Pipeline uses rs=[] only, without
+answering any return-slot/library/unchecked semantic hold.
+
+Frozen BEFORE execution, the independent oracle matched48 ordered Source cases
+under both actual Source pipeline contexts. Full error bytes, same-length AABB
+versus DEAD, panic tail, empty failure, reachable/unreachable dangling references,
+normal/return postludes, empty modifiers, missing/wrong frames and fuels0..7 are
+checked. Every selected field is compared: input/returned local references,
+heap extents/full objects, saved frame/outer scope, dirty raw words, log prefix,
+ordered supplied credit1:9 then1:17, the whole Source journal entry LIST with
+explicitly selected old account/c-path fields, current account/transient c-path,
+and residual/owned journals/full physical word. These finite storage views do
+not enumerate the infinite world; complete Source state equality is a separate
+kernel law. Supplied credits/log prefix are not a new G01/log-emit theorem.
+
+80 focused mutation/provenance tests pass, including equal-return wrong journal
+owner/old nonce/storage/current/transient, high bits, aliases, prefix order and
+missing/stale/malformed exact execution evidence. The reader binds the direct
+ModifierPhysical body and transitive existing private producer closure as well
+as new source/oracle/ledger/current runner. Initial readback-v1 EXIT1 from an
+unused-variable warning before JSON remains raw. The variable was fixed instead
+of filtering stdout; separate readback-v2 EXIT0 matched the UNCHANGED oracle.
+There are ZERO fresh native/compiler/EVM comparisons.
+
+Final registered joint EXIT0: actual Lean4.24.0 commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake5.0.0-src+797c613;
+KeySort2jobs then ./run-lean.sh library1294/TestSuite262;204core/0elaborator,
+1309reachable/0orphan/0notallowed; strict491automatic/61budgeted/0manual/11refuted/
+0pending; complete-input trust1324sources/252sites/0findings.37 exact signatures
+and scoped axiom reports use only propext/Classical.choice/Quot.sound. Separate
+read-only finder/skeptic reviews found no findings and ran no Lean/server/build.
+All earlier diagnostic exits, partial output and MCP shutdown stderr are kept.
+
+Initial measured195403776bytesfree -178450432 comparable container layer
+-10485760 complete conservative allowance =6467584projected bytes remaining.
+Before joint190500864bytesfree; after verified metadata retirement189407232.
+No new dependency closure or broad native runs. Existing hard12GiB/no-swap/CPU1,
+serial-j1/LEAN_NUM_THREADS1,12GiBOSreserve/writerlock and all proof/test budgets
+remain unchanged. Only current exited SizeRw0 directory metadata was retired
+AFTER receipts; images/caches/mounts/history/evidence protected. No resource stop
+or ENOSPC. The incremental seal references exact prior bundles and compresses
+the full original patch rather than duplicating large historical data; no old
+artifact is changed. Final capacity receipts state actual growth separately.
+
+Work1/2/3 and BackfillA/B remain PARTIAL; all24 ORIGINAL obligations and six full
+Source combinations/fullProofGate remain pending. Frontend/admission, general
+modifiers/loops/functions/raw sessions/operators, Source try/error selector,
+allocation/refinement/G01/compiler/world/V16/final adequacy remain open. The
+specific ordinary nonempty-revert producer is already resolved and consumed,
+not reopened as missing. LIB1, unchecked-add and optimized-viaIR strict-journal
+holds remain unanswered. Original native SHA
+`c0e8e6cd7f2f62865135b57ab395b3d256f3d0b474d20c17f88957e8d702f660`
+retains all36calls/four profiles/five mismatches(calls0,1,2,3,6)/EXIT1; this turn
+checks preservation hash only. Historical docs/G03 EXIT1 with exact-base-equal
+findings remains failed global gates/zero regression only, not rerun for activity.
+Original BLOCKED goal identity/status/objective/counters unchanged; no get_goal
+read tool exposed and no goal mutation. Exact incremental source/signatures/
+patch/bundles/raw evidence/checksums:
+`/workspace/vy5-composition/modifier-post-20261102/final/`.
