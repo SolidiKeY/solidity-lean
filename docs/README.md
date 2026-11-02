@@ -130,3 +130,5 @@ history is in git.
 V12 local-only structured store frames and their reached target allocator interface: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
 
 V12 syntax-derived local-only loop framing and mixed allocating controls: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
+
+V12 represented mixed allocating loop endpoints and exact source/target controls: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).

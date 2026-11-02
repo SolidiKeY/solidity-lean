@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+"""Exact builtin kernel axiom inventory; not a complete source or full gate."""
+import json
+from pathlib import Path
+import re
+import sys
+PINS = {'Solidity.Backend.InternalFlow.LoopTargetChecks.prefix_actual': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.first_target_horizon': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.final_target_horizon': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.loop_target_actual': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.ordered_target_words': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.ordered_target_roots': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.final_cells': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.final_cursor': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_cursor': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_alias_identity': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_private_frame': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.omitted_old_mutation': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.premature_reset': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_scalar_destination': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_fresh_order': ['Classical.choice', 'Quot.sound', 'propext'], 'Solidity.Backend.InternalFlow.LoopTargetChecks.pointer_not_slot': ['Classical.choice', 'Quot.sound', 'propext']}
+NAMES = ['Solidity.Backend.InternalFlow.LoopTargetChecks.prefix_actual', 'Solidity.Backend.InternalFlow.LoopTargetChecks.first_target_horizon', 'Solidity.Backend.InternalFlow.LoopTargetChecks.final_target_horizon', 'Solidity.Backend.InternalFlow.LoopTargetChecks.loop_target_actual', 'Solidity.Backend.InternalFlow.LoopTargetChecks.ordered_target_words', 'Solidity.Backend.InternalFlow.LoopTargetChecks.ordered_target_roots', 'Solidity.Backend.InternalFlow.LoopTargetChecks.final_cells', 'Solidity.Backend.InternalFlow.LoopTargetChecks.final_cursor', 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_cursor', 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_alias_identity', 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_private_frame', 'Solidity.Backend.InternalFlow.LoopTargetChecks.omitted_old_mutation', 'Solidity.Backend.InternalFlow.LoopTargetChecks.premature_reset', 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_scalar_destination', 'Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_fresh_order', 'Solidity.Backend.InternalFlow.LoopTargetChecks.pointer_not_slot']
+def check(text):
+    if re.search(r"(?:^|\n).*?(?:error:|error\(|sorryAx)",text):
+        raise ValueError("Lean diagnostic or untrusted axiom")
+    rows = [(n,sorted(x.strip()for x in a.split(',')if x.strip()))
+        for n,a in re.findall(r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)",text)]
+    if rows != [(n,PINS[n])for n in NAMES]:
+        raise ValueError("missing, extra, duplicate, reordered or changed axiom report")
+    return len(rows)
+log = Path(sys.argv[1]).read_text()
+print(json.dumps({'status':'pass','reports':check(log)}))

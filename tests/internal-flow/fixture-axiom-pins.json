@@ -3108,5 +3108,443 @@
         "propext"
       ]
     }
+  },
+  "LoopTargetFacts": {
+    "guard": "tests/internal-flow/check-loop-target-facts-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.captured": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.outcome": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.two_turn_prefixes": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.room_two_turns": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.compile_loop_equation": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.storage_prefix": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.two_turn_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.room_initial_not_true": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.storage_grows": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.revert_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopLocalTarget.diverge_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.noRef": [],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.initial_repr": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.actual_storage": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.actual_memory": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.condition_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.body_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.body_stable": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.selector_code": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.public_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.storage_reached": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.first_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.second_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.conditions": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.source_horizon": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.source_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.source_vectors": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.allocation_costs": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.before_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.before_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.body_frame": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.prefix_capacity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.reached_room": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.counter_values": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.final_different_start": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.final_different_first": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.exact_loop_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.source_new_objects": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.public_program_selected": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.checked_code": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.checked_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.program_room": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.checked_result": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.program_need": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  },
+  "LoopTargetMachineFacts": {
+    "guard": "tests/internal-flow/check-loop-target-machine-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.prefix_actual": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.first_target_horizon": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.final_target_horizon": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.loop_target_actual": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.ordered_target_words": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.ordered_target_roots": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.final_cells": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.final_cursor": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_cursor": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_alias_identity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_private_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.omitted_old_mutation": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.premature_reset": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_scalar_destination": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_fresh_order": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.pointer_not_slot": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  },
+  "LoopTargetEndpoint": {
+    "guard": "tests/internal-flow/check-loop-target-endpoint-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.actual_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.represented_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.whole_target_actual": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_loop_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.complete_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.compiler_input_agrees": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  },
+  "LoopTargetControls": {
+    "guard": "tests/internal-flow/check-loop-target-controls-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.bad_condition_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.bad_loop_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.condition_revert_target": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.spin_horizon": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.spin_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.divergence_target": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.revert_not_fault": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.divergence_not_revert": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.skipped_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.skipped_room": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.skipped_target": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_capacity": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.wrong_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.assert_refused": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.bytes_refused": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.panic_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.bytes_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LoopTargetChecks.bytes_not_bare": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }

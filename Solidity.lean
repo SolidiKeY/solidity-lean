@@ -1003,3 +1003,5 @@ import Solidity.Backend.InternalFlow.LocalStoreFlow
 import Solidity.Backend.InternalFlow.LocalStoreTarget
 
 import Solidity.Backend.InternalFlow.LocalStoreLoop
+
+import Solidity.Backend.InternalFlow.LoopLocalTarget

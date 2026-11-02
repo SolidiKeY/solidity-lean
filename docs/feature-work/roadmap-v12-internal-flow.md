@@ -3039,3 +3039,83 @@ Current complete aggregate/raw/full validation remains pending with the actual
 old strict cached/raw/full/prerequisite failures and raw docs1 retained. New
 semantic progress alone does not authorize an unchanged heavy retry. Goal
 identity/status and all original resource/proof/test bounds remain unchanged.
+
+
+### C39 — actual represented mixed allocating loop after a real prefix
+
+`Solidity/Backend/InternalFlow/LoopLocalTarget.lean` consumes published
+LoopCert.correct unchanged. Its outcome/endpoint retain actual LoopPrefix cost,
+StateRepr, stack, BaseExtends and GrowsAllocator, adding the protected thinned
+environment and target pointer/primitive facts DERIVED from C38 typed body plans.
+Real certificate, initial representation, frame and source-prefix LoopRoom are
+explicit generic premises; there is no desired simulation/frame equation field.
+The actual producer's bare revert and divergence→abstract fault cases stay
+distinct, with no failed State. Two-turn prefix classification derives Room and
+exact reached cost from actual body executions, actual stopping condition and
+summed allocation input. It does not impose a loop admission/unrolling cutoff.
+Storage-only prefix/zero-growth and public compiler-construction helpers reuse
+actual compile_exact, source frame and target memory laws; they are proof
+boundaries, not replacement compiler/machine semantics.
+
+Both public admission probes for the unchanged C38 body and loop are true.
+The new client starts with an empty heap and concrete nonzero transaction and
+balance matching C38, runs REAL compiled storage assignments/two pushes, then
+REAL checked memory prefix code that creates old[7,11], two aliases and caller
+scalars9/17. Its derived input runs the same C38 body/condition twice. Exact
+ordered source observations equal C38's zero/one/two vectors. No equality with
+C38's separately hand-built entire State is assumed or claimed: a definitional
+State-equality probe failed and is retained; that is not a counterexample or a
+missing-producer assertion. All representations and input ownership are derived
+from actual prefix execution, not supplied as a populated midpoint premise.
+
+The public Loops statement/program selector/code equations are closed using
+actual Memory.compileVal/compileProg results and real fragment stability.
+Compiler.Compilation.memoryLoops Input/Agrees is derived via memoryLoops_input
+and correct, separately from actual Evm.run; no runC/run identification or global
+Compiler.compile admission repair is asserted. LoopRoom comes from real nextInput
+and all reached LoopPrefixes. Per-turn finite cost2 accumulates to exact loop4,
+not the legacy whole-loop allocationCost0. The SAME represented endpoint composes
+storage0+prefix3+loop4=total7, with capacity4 at loop entry, need6/frame128,
+StateRepr at entry/end, BaseExtends, protected locals and stack[77].
+
+Actual target finite horizons are projections of existing exec/loopIterN; their
+success tags rule out every fallback. loopRun_of_iterN connects the observed
+finish to the original unbounded target run. Determinism identifies these SAME
+machines with the producer's represented endpoint. Full ordered word/root
+snapshots cover prefix/turn1/final, caller and private physical cells, sentinel99,
+all three objects and roots. Cursor259→261→263; old aliases stay256; private
+object pointers259/261 and scalar77 remain physical but are dropped from source
+locals; old contents[7,11]→[9,11]→[10,11], fresh contents[10]/[11], roots(p,t)
+(7,9)→(8,11)→(9,13), unrelated root/array data preserved in the snapshots.
+Negative cursor/alias/destination/fresh order/private frame/old mutation/word-kind
+and early-reset observations follow from these complete positive snapshots.
+
+Actual compiled bounds-condition failure yields bare revert. A nonallocating
+true nil loop yields source divergence/target fault. A false guard skips the
+allocating body successfully and has no reached allocation demand. Wrong frame
+and capacity are STATIC premise failures, not runtime rejections. Actual source
+panic and nonempty de-00-ad payload baselines remain compiler refusals; they are
+not reinterpreted as supported target panic/payload preservation. Root1's word
+update is the published abstract word-store relation, not a separate target
+transient/transaction/callback world or EIP1153/bytecode/gas adequacy theorem.
+No Heap.Keeps, unconditional alias liveness, rollback or general loop closure is
+claimed. General early-control, nested/call/recursive loop bodies and full
+runtime/dispatch/world/byte/transient producers remain original obligations.
+
+Concrete dependent elimination initially hit unchanged heartbeat limits (one
+failed check sampled about10GiB); raw failures remain. Checked abstract result,
+cost and construction boundaries fixed those proof obligations without raised
+budgets. Exact compiler result projections fixed a separate Input type mismatch.
+The failed definitional State equality, parser/type setup failures, all old137/
+124/heartbeat/recursion receipts and all previous seals remain preserved. No
+unique cause for historical failures or whole-gate performance repair is claimed.
+
+New exact85 builtin reports are additive: old21 fixture entries/618 pins,
+including original542 types/85 tuple types and C32–C38 inventories, stay intact.
+Current inventory is25 fixtures/703 reports. Scoped/per-file/import/guard/runtime
+and independent read-only source/artifact reviews are recorded in continuation-39;
+complete current aggregate/raw/full validation remains pending with retained
+strict cached121.091/120, raw124 and full124/300 failures. Raw docs normal/strict1
+stay failures, with complete prior/publication comparison separate. All eight
+original Work/Backfill items remain partial; no independent-work-exhaustion,
+goal reactivation/reset/completion or publication claim follows.

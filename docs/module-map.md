@@ -1343,3 +1343,5 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Backend/InternalFlow/LocalStoreTarget.lean` | Actual finite certificate composition with reached allocator input and both frames. |
 
 | `Solidity/Backend/InternalFlow/LocalStoreLoop.lean` | Local-only scoped loop step/prefix/success rules derived from typed body plans; no heap/liveness inference. |
+
+| `Solidity/Backend/InternalFlow/LoopLocalTarget.lean` | Actual LoopCert result/protected-local adapters, reached source-prefix Room/cost and compiler construction boundaries. |
