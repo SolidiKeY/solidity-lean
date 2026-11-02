@@ -4148,3 +4148,96 @@ Its expected inventory is not rewritten to hide drift. These failed gates
 remain explicit unfinished obligations despite the 14 passing public proof
 audits; see boundary-static-gates.json and boundary-docs-vs-frozen-base.json
 in the external evidence directory.
+
+## AU01 nonliteral given-heap reason census (2026-11-02)
+
+Parent: `f61970a33f464a2c89136af94130ab60e02f8633`, on the original assigned
+branch after the verified a3205e6a rebase. Before implementation, an external
+probe copied the existing computed-index declaration and unknown pin byte
+for byte, preserving the namespace, contract and scoped notation while
+importing only their actual core/surface/contract data. It kernel reproduces
+`(target=true, Covered=false, verdict=unknown)` and ordinary validity in
+5.349083s. The unchanged original fixture stays in its existing module.
+Provenance and the probe are in `/workspace/va1-evidence/computed-read-next`.
+
+### Precise new syntax and unchanged observations
+
+`GivenHeapLinearReadReflexive φ` records one box-bound dynamic uint-array
+declaration, an original intrinsically typed index in Tm.UIntLinear, its
+nonliteral-root check, and the full equation identifying φ with two identical
+direct reads at that index. The independent Boolean recognizer reuses
+Tm.uintLinearEvidence/uintLinearShape and the existing mxReadView/mxAddressView;
+it does not add a numeric decoder or inspect target/coverage/verdicts.
+Recognition is sound and complete for this exact family, yielding a constructive
+Decidable instance. The one-line reason states that the current positive
+given-heap schema accepts literal indices rather than this nonliteral family.
+
+Validity is Theory equality of identical denotations, over every original
+heap and optional binder value. It assumes no index-definedness premise and
+does not reinterpret program equality. Hash freedom follows the unchanged
+UIntLinear theorem; ValidH uses the existing exact hash-free transport.
+For arbitrary C and every Waivers value, each closed member is proved in
+the frozen inTarget predicate using existing uint admission and map-key
+lemmas. The old literal family is disjoint and its public API is unchanged.
+Generic literal/fixed/fresh/actual-diamond source exclusions are also proved.
+
+No decision function, coverage helper, original unknown pin, predicate,
+observation or budget changes in this checkpoint. In particular the original
+computed-index shape is still unknown and uncovered. No claim that every
+member is unknown is made, and no AU02 global closing route is registered.
+This supplies an actual remaining syntactic reason, not the complete global
+Residue union, exhaustive target bridge or DecisionTheorem-prime.
+
+### Witnesses, gates and independent review
+
+The three new modules are
+`Solidity/Calculus/DecisionGivenHeapComputedReason.lean`,
+`Solidity/Calculus/DecisionGivenHeapComputedBoundary.lean` and
+`Solidity/Examples/DecisionGivenHeapComputedReason.lean`. Their controls
+include the exact original computed-index source body, a folded-zero index,
+checked subtraction failure, a contextual uint local, valid nonlinear syntax
+refused by the class, full-term unequal-read refusal, and real binder-mode
+refusals. A concrete nonempty heap distinguishes defined read, bounds failure,
+checked-index failure and unset reference; a separate typed two-cell heap
+provides two defined unequal values for the countermodel.
+
+The first negative-control draft tried to reduce evaluator failure directly
+to a Theory denotation. MCP rejected that change. The raw failure and draft
+are retained; the same unequal-read formula now uses two defined cells and
+the existing holds_eq_of_eval bridge. No existing expected result was edited.
+
+All checks use the original writer lock and bounded serial runner: explicit
+Lean -j1/LEAN_NUM_THREADS=1, child memory.max=12884901888 and swap.max=0,
+12 GiB host reserve, measured aggregate RSS and no LSP/build overlap.
+
+- Reason MCP: pass 4.229635s, no errors/warnings; focused build pass 3.162756s.
+- Boundary focused build: pass 2.112224s; MCP pass 4.264515s after an import
+  dependency failure was retained and its precise closure built.
+- Controls MCP: pass 5.325998s, no errors/warnings; build pass 3.102458s.
+- Public axiom audit: 30 reports, pass 6.408368s; only propext, Classical.choice
+  and Quot.sound. No sorry/admit/new axiom/native shortcut or budget increase.
+
+Read-only finder and skeptic, neither using Lean/server/build, both report
+no source findings. They separately confirm exact syntax, all-heap reflexivity,
+derived admission, preserved observations, contextual and partial-index
+controls, scoped refusals and the defined-read countermodel bridge. Final
+registration/static checks and the exact committed export follow separately;
+no global/full-gate completion is asserted.
+
+The H6 split also now has post-master aggregate evidence on this same parent:
+MCP pass 3.169910s and focused build pass 1.023226s. All 20 split modules are
+byte-identical to the preserved original 16409976 split. The checksummed
+receipt is `/workspace/va1-evidence/source-route-next/H6-post-a320`; these
+are warm aggregate/import checks, not the full memory consumer gates.
+
+All original remaining AU01/AU02/backfill/full-gate obligations listed above
+remain open. AU05 has not started. No publication, push, merge, PR or tag.
+
+Final checkpoint static gates: orphan/layer/strict automatic/static trust and
+staged whitespace pass. Strict documentation and axiom inventory remain
+failed, with outputs byte-identical to the preceding reviewed checkpoint:
+86 documentation findings versus frozen 85, and 1858 pins/0 errors/438 unrecorded
+inventory changes. No new finding or expected-inventory edit is introduced.
+Bounded KeySort passes in 1.023272s with the actual 377/131 output and the pinned
+Lean/Lake versions. The full goal remains incomplete. Exact-head packaging
+is pending the following source commit.

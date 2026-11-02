@@ -4271,3 +4271,7 @@ import Solidity.Examples.DecisionVerdictData
 
 import Solidity.Calculus.DecisionSourceBoundary
 import Solidity.Examples.DecisionSourceBoundary
+
+import Solidity.Calculus.DecisionGivenHeapComputedReason
+import Solidity.Calculus.DecisionGivenHeapComputedBoundary
+import Solidity.Examples.DecisionGivenHeapComputedReason

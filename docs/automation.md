@@ -1480,3 +1480,13 @@ source family; no global verdict is asserted for that negative control.
 This does not establish target membership, the exhaustive Residue/DecisionTheorem-prime
 bridge or the wider Q1 program-free boundary. The rebased Decision import
 closure passes; full-lane gates remain open. See the VA1 handoff.
+
+The AU01 reason census additionally names a decidable nonliteral linear-index
+given-heap reflexive-read family. Recognition reuses the intrinsic uint
+evidence producer and memory address views; it checks the complete source
+equation rather than a coverage or unknown result. Global theory validity,
+hash freedom, closed-source admission under every waiver setting and
+disjointness from the original literal-only family are kernel proved.
+The actual computed-index pin remains uncovered/unknown. This is an AU01
+source-reason component, with no AU02 pipeline integration or exhaustive
+Residue/DecisionTheorem-prime claim.
