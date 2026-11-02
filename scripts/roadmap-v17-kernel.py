@@ -190,11 +190,19 @@ def validate_expr(tree):
 
 def check_axiom_text(data, rows):
     found={}
-    for line in data.decode('utf-8').splitlines():
-        if not line.strip(): continue
-        match=re.fullmatch(r"'([^']+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])",line.strip())
+    text=data.decode('utf-8'); position=0
+    pattern=re.compile(r"'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])")
+    while position<len(text):
+        while position<len(text) and text[position].isspace(): position+=1
+        if position==len(text): break
+        match=pattern.match(text,position)
         e.require(match is not None and match[1] not in found,'unexpected/duplicate actual axiom output')
-        found[match[1]]=sorted(x.strip() for x in (match[2] or '').split(',') if x.strip())
+        body=match[2]
+        atoms=[] if body is None or not body.strip() else [x.strip() for x in body.split(',')]
+        e.require(all(re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*',x) for x in atoms)
+                  and len(atoms)==len(set(atoms)), 'malformed/duplicate printed axiom')
+        found[match[1]]=sorted(atoms);position=match.end()
+        e.require(position==len(text) or text[position] in '\r\n', 'missing axiom record boundary')
     e.require(found=={row['name']:row['axioms'] for row in rows}, 'actual printed axioms disagree')
 
 

@@ -50,6 +50,12 @@ class KernelControls(unittest.TestCase):
         k.check_axiom_text(raw,[row])
         for bad in [b'',raw+raw,raw.replace(b'propext',b'sorryAx'),raw[:-3]]:
             with self.subTest(bad=bad),self.assertRaises(ValueError): k.check_axiom_text(bad,[row])
+    def test_wrapped_axioms_and_rejections(self):
+        row=self.row();row['axioms']=['Classical.choice','Quot.sound','propext']
+        raw=b"'Solidity.KeySort.le_trans' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n"
+        k.check_axiom_text(raw,[row])
+        for bad in (raw[:-2],raw+raw,raw.replace(b'Quot.sound',b''),raw.replace(b'Quot.sound',b'propext'),raw.replace(b'Quot.sound',b'Quot.sound garbage'),raw+b'garbage',raw.replace(b'Classical.choice',b'sorryAx')):
+            with self.subTest(bad=bad),self.assertRaises(ValueError):k.check_axiom_text(bad,[row])
     def test_query_binds_request(self):
         r=self.req(); raw=k.query_bytes(r)
         self.assertIn(b'import Solidity.KeySort',raw); self.assertIn(b'le_trans',raw)

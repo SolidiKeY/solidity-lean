@@ -1242,3 +1242,17 @@ for invariantForCountsArrayLength.proved within100000nodes. V17 does not edit
 the reserved proof or raise limits; actual structural validation remains open
 and must run once a changed concrete proof is available. Ready independent
 V13/V14 validation leaves can now proceed under the new admission policy.
+
+### H1-admitted ABI-entry collector finding
+
+At consumer544e717369809b808c592128e42d1b9bf16010b6, the first actual
+five-declaration V13 EntryTransport query completed with commandExit0.
+Its collection nevertheless FAILED exit125: actual #print axioms output for
+verdict_revert_exec wrapped over three lines and the single-line parser refused
+it. The original receipt remains unchanged at
+/workspace/scratch/v17-H1-H4-20261102/v13-entry/extract/record.json.
+The owned parser now accepts complete wrapped lists while requiring exact
+requested declaration/axiom sets, unique valid axiom identifiers, complete
+brackets and record boundaries. Nineteen host-only kernel controls pass;
+truncation, duplicate output/axioms, garbage and changed axioms are rejected.
+This parser repair does not itself supply successful collection or live replay.
