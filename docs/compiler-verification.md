@@ -30,7 +30,9 @@ describe the core path.
 
 `Compiler.compile` selects one compiler for the whole program, trying the core,
 first memory, reference-array, full-object, construction, direct-loop, scoped-loop
-and internal memory-call paths in order.
+and internal memory-call paths in order, then the memory-to-storage copy,
+fixed-array and copy-construction paths (`compileCopies`; eleven
+`Compilation` constructors).
 Each has its own input and output relation. The core path's output relation is
 `Sim` only; using it as a prefix to memory compilation needs separate
 preservation evidence. The finite struct defaults below use the first memory
@@ -293,6 +295,23 @@ iteration), loops, `assert`, calls, payments and compound storage writes in a
 mixed memory program. The later fallbacks accept their separately documented
 array/object fragments; they do not compose those representations with this
 path's finite struct construction.
+`StorageCopy.compileStmt` (`Evm/MemoryStorageCopyCompile.lean`) still accepts
+only primitive-member struct defaults and deletions, so a program combining a
+memory-to-storage copy with a reference-member default remains refused.
+
+**Regressions** (each runs the actual source program and the public
+compiler's code, with an inhabited public input):
+`Evm/MemoryCompileExamples.lean`, `Evm/MemoryExprExamples.lean`,
+`Evm/MemoryAllocExamples.lean`, `Evm/MemoryAllocSourceExamples.lean`,
+`Evm/MemoryStructDefaultExamples.lean`, `Evm/MemoryPathExamples.lean`,
+`Evm/MemoryStructReferenceDefaultExamples.lean`,
+`Evm/MemoryStructReferenceDefaultModes.lean`,
+`Evm/MemoryStructReferenceDefaultLiterals.lean`,
+`Evm/MemoryStructReferenceDefaultBoundaries.lean`. The
+large computed compiler results there are marked irreducible for
+elaboration; kernel checks still unfold them, and the pointer compiler
+recurses structurally so acceptance reduces in the kernel (no native
+reduction is trusted).
 
 ## Ordinary internal calls with memory
 
@@ -1756,6 +1775,7 @@ and precise documentation of the sequential composition boundary. Those modules
 and theorem heads are registered. The source-level kernel checks pass under the
 unchanged guard; final integrated global checks and original completion remain
 pending until their actual terminal evidence is recorded.
+
 ### Finite reference-struct validation (2026-10-28–29)
 
 The memory-reference-structs task uses the published Lean 4.24.0 toolchain.
@@ -2332,7 +2352,7 @@ instructed for controller integration and original adequacy review.
 The same saved worker VM integrated published `5f6a75b6` (containing the
 `22073f44` memory-loop publication), preserving checkpoints `8276936e` and
 `2cfb116c`. The task's Lean implementation and its original observations are
-unchanged. The eight public dispatch paths and the separate first-memory versus
+unchanged. The eight memory dispatch paths before the copy fallbacks and the separate first-memory versus
 construction-fallback refusal boundaries were reconciled in the owning docs.
 No recursive graph copying, reference-element array representation, source
 struct admission, intrinsic representation or optional Bridge import was added.
@@ -2409,3 +2429,31 @@ this does not substitute for the remaining whole-assignment gates. Cumulative
 commits, original immutable checkpoints, terminal logs, resource traces, review
 records and checksums are exported in
 `/workspace/solidity-compiler10-memory-reference-structs-22073-compat`.
+
+### Master integration review: reference structs and memory-call record (2026-11-02)
+
+memory-reference-structs head `50604cf0` merged onto master `a3205e6a`
+(conflicts only in this file and `docs/module-map.md`, both sides kept; the
+duplicated `Evm/MemoryCompile.lean` row was reduced to the lane's), and the
+docs-only memory-internal-calls record `5099168d` was cherry-picked; that
+lane's sources were already byte-identical on master. On the host,
+`./run-lean.sh` builds (1320 jobs, SolkeyTestSuite) pass, as do TrustAudit,
+pinned `solkeycheck`, check-testsuite/corpus, check-automatic `--strict`,
+check-trust, orphans, layers and axiom pins (0 errors); doc paths equal
+master's 48 findings.
+
+The VMs' 300-second timeouts on `Examples/Decision.lean` and
+`Examples/Tactics/OpenLoops.lean` are not caused by these lanes: no lane
+file is in either import closure, both artifacts were fetched unchanged, and
+fresh single-thread (`-j1`) elaborations take 283.73 s / 245.56 s on
+`febf70a6` and 282.29 s / 245.02 s on the merged tree, close to the limit
+on any slower machine.
+
+Finder and skeptic reviews (read-only, no Lean server) found no soundness
+defect. Fixed: the dispatch sentence now names the copy fallbacks, the
+dropped **Regressions** list is restored with the new example modules, and
+the copy backend's primitive-only struct defaults are stated. Not changed:
+the model allocates struct children before their parent with separate empty
+array headers, which need not match solc's memory layout (no address claim
+is made); `docs/assurance.md` M23 and `docs/kernel-port.md` still say
+"primitive-member struct construction".
