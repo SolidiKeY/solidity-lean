@@ -1,4 +1,4 @@
-import Solidity.Source.Progress.BuiltinAdmission
+import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.Controls
 import Solidity.Source.Preservation.EncodingVariantControls
 
@@ -71,6 +71,19 @@ theorem checked_call_argument (fixed : Roadmap.Fixed) (n : Nat) :
     .require (.cons protectedCall .nil) (.tuple []) rfl
     (.require _ (.cons (.checked _ Controls.fragment trivial) .nil))
 
+open Solidity.Lowering.P9 in
+/-- The public statement adapter consumes the actual nonempty call catalogue. -/
+theorem checked_call_statement (fixed : Roadmap.Fixed) (n : Nat) :
+    NS (execS (Solidity.Lowering.P9.glob fixed) caller (n+1) 0 none
+      (.expr (R := []) (M := false) (k := .body)
+        (.builtin .require (.cons protectedCall .nil) rfl))
+      (.cons (.bool false) .nil)) :=
+  checked_builtin_statement resolution (Solidity.Lowering.P9.glob fixed) "P9"
+    AdmissionControls.truth_accepted rfl (Controls.admitted fixed) caller rfl n 0 none
+    .require (.cons protectedCall .nil) (.tuple []) rfl
+    (.require _ (.cons (.checked _ Controls.fragment trivial) .nil))
+    (.cons (.bool false) .nil)
+
 def eventUnit : Syn .unit := .unit (.cons (.contract false "Events" .none .nil
   (.cons (.event "Flag" (.cons (.eventParam (.elem .bool) false (some "v")) .nil) false) .nil)) .nil)
 def eventCtx : Ctx := {env := eventUnit.env, scope := some "Events", locals := []}
@@ -96,6 +109,32 @@ theorem event_progress (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (static : 
   exact execS_emit_ns _ _ n 0 none eventDecl rfl eventArgs l rfl
     (Source.evalConvArgs_ns _ _ eventArgs n ⟨rfl, rfl, .inl rfl, trivial⟩ ⟨trivial, trivial⟩)
 
+def eventResolution := Source.resolveUnit {pipeline := .legacy} eventUnit
+
+theorem event_elaborates : (Source.elaborate eventResolution).isSome = true := by
+  have hb : (Source.elabBaseArgs eventResolution.env "Events").isSome = true :=
+    Solidity.Lowering.P9.InferenceCuts.base_some _ _
+      (by rw [show eventResolution.env.inheritOf "Events" = .nil from rfl, Syn.inheritList]) rfl
+  have he : Source.elaborates eventResolution.env = true := by
+    change ((true && true) &&
+      ((Source.elabBaseArgs eventResolution.env "Events").isSome && true)) = true
+    rw [hb]
+    rfl
+  simp only [Source.elaborate, he, ↓reduceIte, Option.isSome_some]
+
+theorem event_catalogue (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
+    Solidity.Lowering.P9.WholeProgram.checkFunctions eventResolution (eventGlob p fixed) "Events" = true := rfl
+
+/-- Consume checked_emit with an actual event-only elaborated source unit.
+The function catalogue is empty; the emitted Boolean and locals are inhabited. -/
+theorem checked_event (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (static : Bool)
+    (n : Nat) (l : Locals eventUnit.env.layout [.bool]) :
+    NS (execS (eventGlob p fixed) (eventFrame static) (n+1) 0 none eventStmt l) := by
+  rw [event_eq]
+  exact checked_emit eventResolution (eventGlob p fixed) "Events"
+    event_elaborates rfl (event_catalogue p fixed) (eventFrame static) rfl n 0 none
+    eventDecl rfl eventArgs l rfl ⟨rfl, rfl, .inl rfl, trivial⟩ ⟨trivial, trivial⟩
+
 theorem event_run (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (s : St eventUnit.env) :
     (execS (eventGlob p fixed) (eventFrame false) 10 0 none eventStmt (.cons (.bool true) .nil)).run
       (.nil, s) =
@@ -109,6 +148,8 @@ theorem event_static (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (s : St even
       (.nil, s) =
       (.error (.revert []), (.nil, s)) := by cases p <;> rfl
 
+#print axioms checked_event
+#print axioms checked_call_statement
 #print axioms checked_call_argument
 #print axioms hash_run
 #print axioms event_progress

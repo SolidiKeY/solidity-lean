@@ -39,9 +39,8 @@ contract at once. `checkFunctions` checks the body that dispatch from the
 contract selects for every function of the unit, so a function whose selected
 implementation has no body (an interface function, or an abstract function
 with no implementation along that contract's hierarchy, including one in an
-unrelated contract) refuses the whole unit. The code accepts an abstract base
-declaration that dispatches to a concrete derived implementation, but no
-positive control covers that case.
+unrelated contract) refuses the whole unit. An abstract base declaration is accepted when dispatch selects a concrete
+derived implementation; `AbstractOverrideControls` supplies a positive control.
 
 ## Controls
 
@@ -69,6 +68,12 @@ positive control covers that case.
   is virtual with a body, not abstract, and the call node is built directly
   on the base declaration rather than elaborated from a call site. This is
   Source elaboration and execution, not a WellFormed/static-checker result.
+- `AbstractOverrideControls` (in `OverrideControls.lean`) has a bodyless virtual
+  base function and a concrete override. Actual elaboration and complete-catalogue
+  admission select the derived body. The base body is proved absent, dispatch
+  differs from the called declaration, and the call returns true in both
+  evaluator pipelines. Resolution is legacy and the intrinsic call is built
+  directly, as in the concrete-base control.
 - `CatalogControls` runs `checkFunctions` on the complete catalogues of the
   two-function and recursive programs.
 

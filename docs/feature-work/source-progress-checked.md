@@ -62,8 +62,12 @@ precompile with one that halts (`none`); the pinned Osaka `ecrecover` never
 halts (an invalid signature returns empty output), so that control exercises
 the evaluator's halt branch only. The event log is the model's: the selector
 and every parameter as data, with indexed and anonymous flags ignored.
-No control consumes `checked_emit` or `checked_builtin_statement` yet, and no
-admitted callee body contains a builtin or emit statement.
+`BuiltinControls.checked_event` consumes `checked_emit` using an actually
+elaborated event-only unit: its function catalogue is empty, while its Boolean
+argument and locals are inhabited. `checked_call_statement` consumes
+`checked_builtin_statement` with the nonempty P9 catalogue and an internal
+call as the require argument. No admitted callee body contains a builtin or
+emit statement.
 
 These are direct-node progress adapters. They do not extend the existing
 callee-body catalogue checker to builtin/emit-containing bodies. Arbitrary

@@ -77,6 +77,17 @@ theorem signature_mem (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (H : HeapTy
   rw [ha]
   exact Hoare.pure' fun _ h => h
 
+/-- The arbitrary-heap-typing triple has an inhabited nonempty-heap client. -/
+theorem packed_inhabited (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
+    MemOK E (Heap.empty : Heap E.layout).ty
+      ((evalE (glob p fixed) frame 10 packed).run (.cons (.bool false) .nil, initial)).2 ∧
+    RValOK E
+      ((evalE (glob p fixed) frame 10 packed).run (.cons (.bool false) .nil, initial)).2.2.heap.ty
+      (.val (.memRef rfl 1) : RVal E.layout (.bytes .memory)) := by
+  have h := packed_mem p fixed (Heap.empty : Heap E.layout).ty _ initial_mem
+  rw [packed_run] at h ⊢
+  exact h
+
 theorem missing_selector (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     (evalE (glob p fixed) frame 3 (.abiEncode .encodeWithSelector (.nil : RArgs E [.bool] []))).run
       (.cons (.bool false) .nil, initial) = (.error (.stuck "abi arguments"), (.cons (.bool false) .nil, initial)) := by cases p <;> rfl
@@ -85,6 +96,7 @@ theorem missing_signature (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     (evalE (glob p fixed) frame 3 (.abiEncode .encodeWithSignature (.nil : RArgs E [.bool] []))).run
       (.cons (.bool false) .nil, initial) = (.error (.stuck "abi arguments"), (.cons (.bool false) .nil, initial)) := by cases p <;> rfl
 
+#print axioms packed_inhabited
 #print axioms packed_mem
 #print axioms selector_mem
 #print axioms signature_mem
