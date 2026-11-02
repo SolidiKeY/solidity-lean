@@ -798,9 +798,10 @@ Items 1–3 done (above); item 4 and the backfill not done (blocked, see
 `docs/assurance.md`, "Lane FU2-A", and the "Open" paragraph above). Gates on
 the lane head:
 
-- `./run-lean.sh`: `lake build` "Build completed successfully (1042 jobs)",
-  `lake build SolkeyTestSuite` "Build completed successfully (286 jobs)"
-  (no OOM kill on this run), `check-solkey` 37 mismatches (the baseline).
+- `./run-lean.sh` (final run, with the viaIR backfill; 61m16s):
+  `lake build` "Build completed successfully (1042 jobs)", `lake build
+  SolkeyTestSuite` "Build completed successfully (286 jobs)" (no OOM kill
+  on this run), `check-solkey` 37 mismatches (the baseline).
 - Lean server: every touched file clean; `TrustAudit.lean` "trust: 25 lane
   FU2-A frame theorems use only the standard axioms"; `scripts/AxiomAudit.lean`
   "115263 declarations under Solidity, 6 exempt unsafe implementations, 0
