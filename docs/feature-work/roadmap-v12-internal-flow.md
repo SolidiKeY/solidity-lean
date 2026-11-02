@@ -3454,3 +3454,25 @@ bound, no Lean. This does not repair cached124/120.820s, raw124, full124/300s,
 TestSuite/sort unreached or docsnormal/strict1. All Work1–6/BackfillsA–B remain
 partial; original blocked goal untouched. No unchanged raw/full retry or broader
 semantic admission is authorized by this host repair.
+
+
+C45 validation outcome (supersedes the pending validation above): all 27 genuine
+kernel source preparations and exact guards passed, 739 registered reports total,
+helper included in every binding. Longest preparation51.362s outer at unchanged
+120s. Runtime Lean4.24.0/Lake5.0.0-src+797c613 and KeySort2jobs pass; focused current
+owned/fixture imports pass. Exactly ONE complete cached attempt then FAILED124,
+strict outer121.001s at unchanged120s. Actual27authenticated preflight keys
+completed in5.578s. The unchanged792-line/27-import/739-builtin-report harness was
+byte-identical to C41. Child spawn and later SIGTERM are recorded, with111.111s
+wall interval; no child-close/complete report/postcheck/final toolchain receipt.
+Available child stdout/stderr are empty. This does not identify lock/import/
+report/CPU root cause; no completed stage is invented. Resource peak sampled
+1592692KiB; hard cap/no-swap retained. No retry, raw/full rerun or deadline change.
+
+Thus the authenticated, reviewed code repair and genuine individual preparations
+are partial progress; complete cached validation STILL FAILS. Actual postflight
+is not reached by this failed aggregate (its invariants have host controls only).
+Original raw/full/TestSuite/sort/docs obligations and all eight original queues
+remain partial. All Lean/fixture sources and739pins are byte unchanged; earlier
+542/85 type inventories retained, not a new separate type audit. Exact committed
+artifact reviews accompany the seal. Original blocked goal is untouched.
