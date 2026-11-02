@@ -502,7 +502,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`abiEncodePacked`** (model/partial)
   - admission: `Solidity.Frontend.Admission.magicMember` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:27`) — abi.encodePacked tagged
   - lowering: `Solidity.AbiKind.packedWidth` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:816`) — packed widths per kind
-  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:641`) — packed assembly, struct refused
+  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:650`) — packed assembly, struct refused
   - no existing anchor: source, backend, evm, theorem
   - missing: Packed arrays and hex-literal aggregates have only partial contextual coercions.
   - missing: No backend/EVM stage (R04). Packed collisions are only kept, never proved.
@@ -546,7 +546,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`bytesConcat`** (model/partial)
   - lowering: `Solidity.Frontend.call` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:1824`) — bytes.concat rendered
   - lowering: `Solidity.abiEncode` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:202`) — concat as packed byte write
-  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:641`) — argument-order byte assembly
+  - lowering: `Solidity.abiEncodeWith` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:650`) — argument-order byte assembly
   - lowering: `Solidity.bytesPure` (Solidity.Syntax.Elab.Values, `Solidity/Syntax/Elab/Values.lean:1639`) — bytesN argument kinds
   - no existing anchor: source, admission, backend, evm, theorem
   - missing: No distinct admission tag (memberAccess only).
@@ -1702,7 +1702,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
 - **`expressionStatements`** (model/partial)
   - admission: `Solidity.Frontend.Admission.nodeFeatures` (Solidity.Frontend.SolcJson.Admission, `Solidity/Frontend/SolcJson/Admission.lean:116`) — ExpressionStatement tagged
   - lowering: `Solidity.Frontend.stmt1` (Solidity.Frontend.SolcJson.Body, `Solidity/Frontend/SolcJson/Body.lean:2250`) — ExpressionStatement printed; prefix captures hoisted
-  - lowering: `Solidity.elabStmt1With` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:1546`) — statement elaboration incl. discarded calls
+  - lowering: `Solidity.elabStmt1With` (Solidity.Syntax.Elab.Arms, `Solidity/Syntax/Elab/Arms.lean:1555`) — statement elaboration incl. discarded calls
   - backend: `Solidity.Evm.stmt_sim` (Solidity.Evm.Correct, `Solidity/Evm/Correct.lean:985`) — per-statement simulation for admitted forms
   - no existing anchor: source, evm, theorem
   - missing: Bare `r.send(a);` with result discarded is not read (RawStmt.send docstring)
