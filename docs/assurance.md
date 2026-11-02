@@ -366,6 +366,27 @@ those values would read as empty arrays: a bridge from these relations to
 `Source.evalE` must first carry the child's real length
 (`(MObj.elems .dyn (hp.get r)).length`).
 
+**Integration review notes (batch fu2-20261102).** Recorded from the
+read-only finder and skeptic on the combined merge; none is a soundness
+defect.
+- A call with a memory return among several is never summarised by a
+  callee contract (`RetBinders.all` puts `ff` under a memory binder, so
+  `holds_callRets` discharges that case by absurdity): such calls are always
+  inlined, and a recursive function with such a return is refused. A
+  completeness gap, not a premise.
+- `CallbackWalk.liveFml` narrows `7a6120d`'s speed guard (only under a loop
+  body's end without a break test); no timing was measured for it.
+- Lane FU2-A's backfill `c583e274` changes viaIR evaluation order: a storage
+  operand of a memory parameter is copied after the last argument, for
+  direct and dispatched calls, and `scripts/finite-dispatch.test.mjs`
+  expects solc's viaIR vector for `argumentOrder` (901).
+- `#bytesIndex` is a `.call`, so a symbolic `bytesN` index counts as an
+  effect and is captured; a path that does not hoist meets it as an unknown
+  call and refuses (fail-closed; not checked for specifications over `b[i]`).
+- Entry proof obligations do not yet assume nested enum ranges
+  (`Problem.callPre` reads `paramRanges`/`elemRanges` only): incomplete, not
+  unsound (lane FU2-D).
+
 ### Lane FU2-D (fu2-20261102): the five rows diagnosed, 30 and 60 fixed
 
 Bisecting by rebuilding is not affordable here (each step is a 45–70 min
