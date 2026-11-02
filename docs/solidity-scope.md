@@ -365,3 +365,20 @@ outside this authorized extension. Authorization does not establish support.
 Affected manifest exclusion rows describe actual admission until reviewed
 implementation supplies its evidence. VY5's [composition backfill](feature-work/inline-assembly-vy5.md)
 changes no admission, observations, feature status, proof budget or prerequisite.
+
+
+### VY5 human amendments relayed 2026-11-02
+
+H1, resources (verbatim): **“Free disk + 4 GiB reserve”**. The human permits
+removal of VY5-owned stopped containers/regenerable duplicate data; latest sealed
+handoff and all commits remain preserved. RAM reserve is4GiB; hard12GiB cap and
+no-swap remain. Disk headroom is assessed after cleanup, without single-MB holds.
+
+H3, optimized-rethrow-journal-contract (verbatim): **“Per-pipeline”**. Implement a
+reviewed pinned compiler-aware per-pipeline trace contract and validate fresh:
+optimized viaIR omits reverted persistent99/8 stores; record the difference,
+consistent with YQ4. This does not waive bytes/world/log/memory/rollback checks,
+approve compiler-dependent source observations or prove G01/compiler adequacy.
+Original strict report/validator and failed exits remain immutable. See
+`tests/yul-composition/rethrow-trace-contract.json` and the VY5 lane handoff.
+VY5-DISK1 is resolved by H1; no filesystem growth/migration requested.

@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "id": "VY5-H3-pinned-rethrow-trace-v1",
+  "authorization": {
+    "H1": "Free disk + 4 GiB reserve",
+    "H3": "Per-pipeline",
+    "date": "2026-11-02",
+    "source": "Human decisions relayed verbatim by current Claude Code coordinator in this same task"
+  },
+  "compilerCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "evmVersion": "osaka",
+  "optimizerRuns": 200,
+  "source": "tests/yul-composition/NativeRethrowControls.sol",
+  "sourceSha256": "bffeb7f8f8672b9643b18f97d8b45f33fff66a06df06ff49f954ef0f91367191",
+  "scope": "External finite compiler-aware operational trace only. Source success/failure/fullbytes/world/log/memory/rollback comparisons unchanged. Not compiler-independent source observations or a G01/refinement/compiler correctness theorem.",
+  "derivation": "Source writes persistent7 before external call, persistent99 before child revert and persistent8 before outer rethrow. H3 authorizes pinned compiler-dependent trace: optimized viaIR eliminates reverted99/8 while preserving7. Other three profiles retain all three. Transient17/51/34 and two rollback frames remain exact in all profiles. Old immutable report and pinned compiler output are prior diagnostic evidence, NOT freshly regenerated oracle values. This contract is frozen and independently reviewed BEFORE fresh execution.",
+  "profiles": [
+    {
+      "pipeline": "legacy",
+      "optimized": false,
+      "caughtPersistentWrites": [
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          99
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "caughtTransientWrites": [
+        [
+          0,
+          17
+        ],
+        [
+          1,
+          51
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "rollbackFrames": [
+        1,
+        0
+      ]
+    },
+    {
+      "pipeline": "legacy",
+      "optimized": true,
+      "caughtPersistentWrites": [
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          99
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "caughtTransientWrites": [
+        [
+          0,
+          17
+        ],
+        [
+          1,
+          51
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "rollbackFrames": [
+        1,
+        0
+      ]
+    },
+    {
+      "pipeline": "viaIR",
+      "optimized": false,
+      "caughtPersistentWrites": [
+        [
+          0,
+          7
+        ],
+        [
+          1,
+          99
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "caughtTransientWrites": [
+        [
+          0,
+          17
+        ],
+        [
+          1,
+          51
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "rollbackFrames": [
+        1,
+        0
+      ]
+    },
+    {
+      "pipeline": "viaIR",
+      "optimized": true,
+      "caughtPersistentWrites": [
+        [
+          0,
+          7
+        ]
+      ],
+      "caughtTransientWrites": [
+        [
+          0,
+          17
+        ],
+        [
+          1,
+          51
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "rollbackFrames": [
+        1,
+        0
+      ]
+    }
+  ]
+}

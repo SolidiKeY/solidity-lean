@@ -2778,3 +2778,74 @@ Original BLOCKED goal identity/status/objective/counters unchanged; no get_goal
 read tool exposed and no goal mutation. Exact incremental source/signatures/
 patch/bundles/raw evidence/checksums:
 `/workspace/vy5-composition/modifier-post-20261102/final/`.
+
+
+### VY5 H1 resource recovery and H3 per-pipeline traces (2026-11-02)
+
+Human H1 **“Free disk + 4 GiB reserve”** resolves VY5-DISK1. Removed99 own
+exited vy5-* containers after retaining inspect/exit/log/hash receipts; recovered
+20808921088bytes (188014592→20996935680available). No active container, image,
+mounted cache, evidence file or Git commit was removed. All prior sealed
+handoffs remain. Both cgroup memory.reclaim and drop_caches are read-only here;
+no bypass attempted, and MemAvailable after attempts exceeded17GiB. H1 changes
+OS-available admission reserve to4GiB; hard12GiB memory/no-swap, CPU1, serial
+-j1/LEAN_NUM_THREADS1, writer lock and every proof/fuel/gas/step budget remain.
+Old resource receipts describe their actual old reserve; only new wrapper uses4.
+
+Human H3 **“Per-pipeline”** resolves the optimized-rethrow-journal question for
+this pinned finite fixture. BEFORE fresh execution, froze and independently
+reviewed `tests/yul-composition/rethrow-trace-contract.json`. The original strict
+native-rethrow-core/source/oracle/report remain byte-identical. A separate
+versioned VY5 finite harness `pipeline-rethrow-core.mjs` reuses unchanged shared
+compiler/EVM/capture APIs; it does not copy/rewrite the shared EVM engine. Diff
+confines trace changes to exact per-profile persistent-write expectations:
+legacy off/on and viaIR off require7/99/8, optimized viaIR requires7 only. Exact
+transient17/51/34, rollback1/0, all full bytes/world/log/frame/memory/buffer checks
+remain. This is an external compiler-aware diagnostic contract, not new source
+observations or G01/compiler/refinement adequacy. Source/refusal semantics,
+fixture sources, gas100000000 and step5000000 limits are unchanged.
+
+Final fresh native-v2 EXIT0 runs actual pinned solc0.8.38 commit1835d247/Osaka
+in all4profiles and all36ordered calls, with actual code/compile/input/source
+hashes, runtime installation and full capture receipts.20 existing kernel-Source
+failure/full-byte projections match and8 executed negative projections remain
+mismatches. Native state is independently checked; the Source projection does
+not equate different logical/physical worlds or native gas with Source fuel.
+The first freshnative-v1 also passed; it is retained with its exact source
+snapshot. Added direct-helper contract-hash protection after174passing tests,
+then ran finalnative-v2 against that guarded final code, keeping the SAME frozen
+contract. No unexpected mismatch was relabelled a pass. The original strict
+original-v3 report retains its exactSHA
+`c0e8e6cd7f2f62865135b57ab395b3d256f3d0b474d20c17f88957e8d702f660`,
+original EXIT1 and five errors(calls0,1,2,3,6); unchanged regression tests assert
+those failures. New H3 pass is a separate approved contract/version.
+
+Final175tests pass, including exact optimized-only7, rejection of extra99/8 or
+missing7, required stores in other profiles, transient/rollback/world/memory
+corruption with equal bytes, missing/malformed/mislabelled profiles, stale
+source/compiler/core/contract and exact receipt/report evidence. Existing
+same-length payload/fullpanic/always-revert controls and all8negative projections
+remain. Actual pinned runtime code hashes are identical to the original in all
+four profiles. Independent read-only finder/skeptic accepted BEFORE execution
+and reviewed final guards/tests/docs; neither used Lean/server/build/tests.
+
+No Lean/import/state representation changed. Rechecked the unchanged private
+kernel tree519dbb40fb5056b51350113419c1815c5bdb66e0 under new H1 resource policy:
+actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613; KeySort2jobs, ./run-lean.sh library1294/TestSuite262,
+204core/0elaborator,1309reachable/0orphan/0notallowed, strict491automatic/
+61budgeted/0manual/11refuted/0pending, complete-input trust1324sources/252sites/
+0findings; final combined EXIT0. This is unchanged-kernel regression evidence,
+not a new Lean theorem or a kernel proof inferred from fresh EVM testing.
+Historical docs/G03 EXIT1 and exact-base equality remain failed global gates/
+zero new regressions, not rerun unchanged. New links are checked separately.
+
+Work1/2/3 and BackfillA/B remain PARTIAL. All24 ORIGINAL obligations/six full
+Source combinations/fullProofGate are pending. Remaining frontend/admission,
+general raw operators/function/session/selection, allocation/refinement/G01,
+compiler/world/V16/final composition facts remain mandatory. The selected
+nonempty ordinary-function producer is already resolved. LIB1 and unchecked-add
+holds remain unanswered; H1/H3 answer neither. Original goal identity/status/
+objective/counters remain unchanged; get_goal read tool unavailable, no mutation.
+New evidence/cleanup/immutable contract, source and incremental artifacts:
+`/workspace/vy5-composition/pipeline-contract-20261102/final/`.

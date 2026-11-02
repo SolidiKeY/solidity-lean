@@ -432,5 +432,6 @@
   "forEvidence": "tests/yul-composition/for-ledger.json",
   "failureEvidence": "tests/yul-composition/failure-ledger.json",
   "doWhileEvidence": "tests/yul-composition/do-while-ledger.json",
-  "modifierPostEvidence": "tests/yul-composition/modifier-post-ledger.json"
+  "modifierPostEvidence": "tests/yul-composition/modifier-post-ledger.json",
+  "pipelineRethrowEvidence": "tests/yul-composition/pipeline-rethrow-ledger.json"
 }

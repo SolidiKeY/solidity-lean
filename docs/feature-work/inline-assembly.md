@@ -502,3 +502,12 @@ component facts,48 ordered Source cases and80 mutation tests, distinguishing
 normal/return postludes from body-revert suppression. Native comparisons0; all24
 original obligations/six combinations pending. See [lane handoff](inline-assembly-vy5.md#vy5-actual-modifier-argument-and-postlude-consumer-2026-11-02)
 and `/workspace/vy5-composition/modifier-post-20261102/final/`.
+
+
+VY5 (2026-11-02): H1 cleanup resolves disk admission (99own exited containers;
+commits/latest handoffs/data retained;4GiBOSreserve/12GiBcap/no swap). H3 reviewed
+pinned per-pipeline trace contract passes fresh36calls/4profiles/20Sourcebyte
+projections/8intended negatives and175tests. Original strict report remains
+FAILED, unchanged. All24original/six full combinations pending. See
+[lane handoff](inline-assembly-vy5.md#vy5-h1-resource-recovery-and-h3-per-pipeline-traces-2026-11-02)
+and `/workspace/vy5-composition/pipeline-contract-20261102/final/`.

@@ -649,3 +649,36 @@ recorded in [solidity-upstream-tests.md](solidity-upstream-tests.md#group-01-via
 This lowering uses existing typed statements and sound rules. Runtime/EVM
 agreement and the fixed-program proof controls do not constitute a universal
 compiler-correctness theorem.
+
+
+### VY5 H3: pinned canonical-rethrow operational traces (2026-11-02)
+
+Human decision H3 **“Per-pipeline”** authorizes the versioned finite trace
+contract in `tests/yul-composition/rethrow-trace-contract.json`. The unchanged
+NativeRethrowControls fixture, solc0.8.38 commit
+1835d247de183f23e7b0e2bc4a50732af525b77c, Osaka, optimizer runs200 and exact
+four settings have these required caught-call persistent-write sequences:
+
+| Pipeline | Optimizer | Required persistent writes (frame,value) |
+|---|---|---|
+| legacy | off | (0,7), (1,99), (0,8) |
+| legacy | on | (0,7), (1,99), (0,8) |
+| viaIR | off | (0,7), (1,99), (0,8) |
+| viaIR | on | (0,7) |
+
+Optimized viaIR removes reverted persistent99/8 stores. All four profiles still
+require exact transient writes (0,17),(1,51),(0,34), rollback frame order1,0,
+full error/return bytes, logs, buffers, caller/child memory windows, account
+world/storage/transient state and restoration. No arbitrary write subset is
+accepted. Each call validator requires an explicit exact pipeline/optimizer
+identity; report provenance binds the actual settings/source/compiler/code.
+
+This is a compiler-aware external operational trace contract, consistent with
+recording pipeline differences under YQ4. It is NOT a compiler-independent source
+observation/G01 contract or a proof that any optimizer may erase arbitrary
+operations. The original strict validator, fixture, semantic-result oracle and
+original36-call report remain unchanged and FAILED with five optimized-viaIR
+journal mismatches. The separate H3 validator passed fresh36calls/4profiles,
+20actual Source failure/full-byte projections and8intended negative projections;
+those projections are not Source/world/compiler correspondence. LIB1 and frozen
+unchecked-add decisions are unaffected. See the VY5 handoff for full evidence.
