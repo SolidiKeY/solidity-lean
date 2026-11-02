@@ -25,7 +25,7 @@ No earlier excluded Terra tasks or completed work are restored here.
 # H14 cascade — G18.05 local bool-array deletion
 
 Producer module: `Solidity.Backend.Aggregates.BoolArrayDelete`.
-`default_heap`, `run_var`, and `delete_related` are proved; the following are NOT proved claims.
+`default_heap`, `run_var`, `delete_related`, and `delete_preserves_related` are proved; the following are NOT proved claims.
 Do not add axioms, `sorry`, higher budgets, or an assumed lowering simulation.
 Use the actual `TRun.deleteMem`, Source `deleteLocal_array_run`, and existing
 `BoolArrays.Related`; Source ids and intrinsic heap ids remain independent.
@@ -75,9 +75,22 @@ Try automation first; retain strict scoped axiom outputs.
 ## Soundness work retained by Sol
 
 `delete_related` now derives the actual post-deletion `BoolArrays.Related`
-for independent fresh references at Source budget n+2. Caller/alias preservation
+for independent fresh references at Source budget n+2. Old heap contents are now protected by `delete_preserves_related`, deriving
+Source freshness from actual occupancy. Caller-local/alias-binding preservation
 and populated joint controls remain unfinished. Cover Source budgets 0/1
 as timeout with original full state; logical target success does not imply
 Source fuel sufficiency. Do not count the new-content relation as general
 frame/history preservation. General Source/frame lowering,
 physical execution/gas, general recursive copy/delete and G18.05 remain OPEN.
+
+## Additional routine consequence
+
+5. `delete_preserves_related_any_budget` in BoolArrayDelete: same parameters
+and `before : Related source.2.heap address target.heap reference` as
+`delete_preserves_related`, but replace `(n+2)` with arbitrary `(budget : Nat)`
+in the Source operation and retain its exact target postheap and weakened
+old reference. Routine: cases budget 0/1 versus n+2 using actual
+Source.deleteLocal_array_run; exhausted branches keep the original Source
+heap while intrinsic allocation keeps old target objects. This would observe
+only old contents, NOT synchronize Source timeouts with logical target success.
+Do not infer matching verdicts or general frame simulation from it.

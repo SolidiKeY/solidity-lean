@@ -202,3 +202,31 @@ finder/skeptic review this delta; no Source/Frontend/Static/reserved changes.
 Registration remains pending the H14 generator; Solidity.lean untouched.
 This remains an incremental partial result, not completed checkpoint10.
 Original full/docs failures and all outstanding queue obligations remain.
+
+
+### H14 old-object deletion preservation increment
+
+`BoolArrayDelete.delete_preserves_related` now consumes an actual prior
+Related object and derives that its Source cell is distinct from the fresh
+allocation using Source.Heap boundedness. It then preserves that same object's
+contents through actual n+2 Source deletion and the actual intrinsic default
+allocation/local-rebinding result. Target references are weakened by the real
+heap extension; Source/target identities are independent. No freshness,
+old-contents preservation or desired simulation premise is assumed.
+
+Six scratch candidates were checked before the manual witness/freshness steps;
+the failed exit1 is retained. The scoped signature/axiom check passes with
+propext, Classical.choice, Quot.sound. Changed-module closure passes72jobs
+in1.89s, peak aggregate832580KiB, oneLean, cgroup539639808bytes, noOOM/swap.
+All original fixed budgets and writer lease remain. Masterfcd5ba31 is unchanged
+and supplies no duplicate helper deletion consumer. The coordinator reported a
+capacity interruption during review; source, raw logs and branch were verified
+intact, with no surviving Lean/Lake job or competing continuation.
+
+Old heap-content preservation is not caller-local alias binding preservation,
+world/history correspondence or synchronized verdicts. Routine controls,
+local/heap projections and a total-budget old-content corollary remain in
+TERRA-TODO. Populated inhabited joint controls, registration generator and
+checkpoint10 gates remain unfinished. No full/docs failed gate is rerun or
+relabelled, no Source/Static/reserved implementation is changed, and the
+original queue/goal remains incomplete.
