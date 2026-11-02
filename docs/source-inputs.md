@@ -60,5 +60,8 @@ for ABI coder v2 external entries: an input either fails solc's entry checks
 (an empty revert before the body) or yields typed values, which for calldata
 parameters are exactly what lazy reads return (`AbiEntry.eager_cref`).
 Layouts only lazy reads accept, and elements that fail only when read, are
-refused there; they need calldata references in the source semantics.
+refused there; they need calldata references in the source semantics
+(lane FU2-B added them there for `bytes`, `string` and dynamic arrays of
+one-word values, with access-time validation:
+[source-soundness.md](feature-work/source-soundness.md)).
 

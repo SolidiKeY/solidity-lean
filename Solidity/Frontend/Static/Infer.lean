@@ -443,6 +443,76 @@ def abiRes : (c : Syn .expr) → (m : String) → {es : Syn (.list .expr)} → (
     | _ => []
   | _, _, _, _, _ => []
 
+/-- `abi.decode(x, ts)` (FU2-B), from the data's results: the type
+expressions are read, not typed. -/
+def decodeRes (g : String) (x ts : Syn .expr) (rx : Unit → List (Res Γ .expr x)) :
+    List (Res Γ .expr (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil))))) :=
+  match hr : Γ.resolve g with
+  | Option.some (.builtin .abi) =>
+    match hd : Γ.decodeTys ts with
+    | Option.some τs =>
+      if hok : τs.all (STy.decodable Γ.env) = true then
+        (tysOf Γ (rx ())).filterMap fun p =>
+          if hs : p.1.decodeSrc = true then Option.some (.expr (.abiDecode hr p.2 hs hd hok)) else Option.none
+      else []
+    | Option.none => []
+  | _ => []
+
+/-- `a[s:e]` (FU2-B), from the operands' results. -/
+def sliceBoth {a s e : Syn .expr} (ra : List (Res Γ .expr a)) (rs : List (Res Γ .expr s))
+    (re : List (Res Γ .expr e)) : List (Res Γ .expr (.slice a (.some s) (.some e))) :=
+  (tysOf Γ ra).flatMap fun pa => (tysOf Γ rs).flatMap fun ps => (tysOf Γ re).flatMap fun pe =>
+    if h : pa.1.sliceable = true ∧ ps.1.isIndex = true ∧ pe.1.isIndex = true then
+      [.expr (.slice pa.2 h.1 ps.2 h.2.1 pe.2 h.2.2)] else []
+
+/-- `a[s:]`. -/
+def sliceFromRes {a s : Syn .expr} (ra : List (Res Γ .expr a)) (rs : List (Res Γ .expr s)) :
+    List (Res Γ .expr (.slice a (.some s) .none)) :=
+  (tysOf Γ ra).flatMap fun pa => (tysOf Γ rs).flatMap fun ps =>
+    if h : pa.1.sliceable = true ∧ ps.1.isIndex = true then [.expr (.sliceFrom pa.2 h.1 ps.2 h.2)] else []
+
+/-- `a[:e]`. -/
+def sliceToRes {a e : Syn .expr} (ra : List (Res Γ .expr a)) (re : List (Res Γ .expr e)) :
+    List (Res Γ .expr (.slice a .none (.some e))) :=
+  (tysOf Γ ra).flatMap fun pa => (tysOf Γ re).flatMap fun pe =>
+    if h : pa.1.sliceable = true ∧ pe.1.isIndex = true then [.expr (.sliceTo pa.2 h.1 pe.2 h.2)] else []
+
+/-- `a[:]`. -/
+def sliceAllRes {a : Syn .expr} (ra : List (Res Γ .expr a)) : List (Res Γ .expr (.slice a .none .none)) :=
+  (tysOf Γ ra).flatMap fun pa => if h : pa.1.sliceable = true then [.expr (.sliceAll pa.2 h)] else []
+
+/-- A present slot's derivations as the expression's. -/
+def unslot {s : Syn .expr} (r : List (Res Γ (.opt .expr) (.some s))) : List (Res Γ .expr s) :=
+  r.filterMap fun x =>
+    match x with
+    | .slot d => Option.some (.expr d)
+    | _ => Option.none
+
+/-- `a[o:o']`, by which bounds are present, from the operands' results. -/
+def sliceRes {a : Syn .expr} {o o' : Syn (.opt .expr)} (ra : List (Res Γ .expr a))
+    (ro : List (Res Γ (.opt .expr) o)) (ro' : List (Res Γ (.opt .expr) o')) :
+    List (Res Γ .expr (.slice a o o')) :=
+  match o, o', ro, ro' with
+  | .some _, .some _, ro, ro' => sliceBoth Γ ra (unslot Γ ro) (unslot Γ ro')
+  | .some _, .none, ro, _ => sliceFromRes Γ ra (unslot Γ ro)
+  | .none, .some _, _, ro' => sliceToRes Γ ra (unslot Γ ro')
+  | .none, .none, _, _ => sliceAllRes Γ ra
+
+/-- `[x, xs…]` (FU2-B) at one derivation of each: the common type, one
+word, every element converting to it. -/
+def inlineOne {x : Syn .expr} {xs : Syn (.list .expr)} (τ : STy) (d : Typed Γ x τ) (τs : List STy)
+    (ds : TypedArgs Γ xs τs) : List (Res Γ .expr (.inlineArray x xs)) :=
+  match hc : STy.commonOf Γ.isBase τ τs with
+  | Option.some σ =>
+    if h : σ.oneWord = true ∧ argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
+      [.expr (.inlineArray d ds hc h.1 h.2)] else []
+  | Option.none => []
+
+/-- `[x, xs…]`, from the elements' results. -/
+def inlineRes {x : Syn .expr} {xs : Syn (.list .expr)} (rx : List (Res Γ .expr x))
+    (rxs : List (Res Γ (.list .expr) xs)) : List (Res Γ .expr (.inlineArray x xs)) :=
+  (tysOf Γ rx).flatMap fun p => (argsOf Γ rxs).flatMap fun q => inlineOne Γ p.1 p.2 q.1 q.2
+
 /-- `a.transfer(v)`, `a.send(v)` on an `address payable`, one argument. -/
 def payOne : (m : String) → {a v : Syn .expr} → Typed Γ a (.address true) → (σ : STy) → Typed Γ v σ →
     List (Res Γ .expr (.call (.member a m) (.positional (.cons v .nil))))
@@ -503,6 +573,16 @@ def convElemRes (el : Elem) (h : el ≠ .addressPayable) {es : Syn (.list .expr)
     then [.expr (.convElem dx rfl hx)] else []
   | _, _, _ => []
 
+/-- `new T[](n)`, `new bytes(n)`, `new string(n)` (FU2-B). -/
+def newRes (t : Syn .typeName) {es : Syn (.list .expr)} (σs : List STy) (ds : TypedArgs Γ es σs) :
+    List (Res Γ .expr (.call (.new t) (.positional es))) :=
+  match es, σs, ds with
+  | .cons _ .nil, [σ], .cons dx .nil =>
+    match ht : t.ty Γ.env Γ.scope .memory with
+    | Option.some τ => if h : τ.newable = true ∧ σ.isIndex = true then [.expr (.newArray ht h.1 dx h.2)] else []
+    | Option.none => []
+  | _, _, _ => []
+
 /-- `payable(e)`. -/
 def payableRes {es : Syn (.list .expr)} (σs : List STy) (ds : TypedArgs Γ es σs) :
     List (Res Γ .expr (.payableConv (.positional es))) :=
@@ -517,6 +597,7 @@ def callRes : (f : Syn .expr) → List (Res Γ .expr f) → {a : Syn .callArgs} 
     List (Res Γ .expr (.call f a))
   | .ident n, _, _, .pos ds => callIdentRes Γ n _ ds
   | .elemType el h, _, _, .pos ds => convElemRes Γ el h _ ds
+  | .new t, _, _, .pos ds => newRes Γ t _ ds
   | .member c m, rf, _, .pos ds => abiRes Γ c m _ ds ++ rf.flatMap (memberCallOne Γ _ ds)
   | .callOptions (.member _ _) (.namedArg "value" _) .nil, rf, _, .pos ds => rf.flatMap (valueCallOne Γ _ ds)
   | _, _, _, _ => []
@@ -557,16 +638,20 @@ def infer : {c : Cat} → (s : Syn c) → List (Res Γ c s)
   | _, .member a m =>
     let ra := infer a
     constRes Γ _ ++ memberRes Γ m ra ++ magicFor Γ a m ++ structMemberRes Γ m ra ++ recvRes Γ m ra
-  | _, .call f a => constRes Γ _ ++ (infer a).flatMap (callRes Γ f (infer f))
+  | _, .call f a => constRes Γ _ ++
+      (match f, a with
+       | .member (.ident g) "decode", .positional (.cons x (.cons ts .nil)) => decodeRes Γ g x ts (fun _ => infer x)
+       | _, _ => []) ++
+      (infer a).flatMap (callRes Γ f (infer f))
   | _, .payableConv a => constRes Γ _ ++ (infer a).flatMap (payableConvRes Γ)
-  | _, .slice a o o' => constRes Γ (.slice a o o')
+  | _, .slice a o o' => constRes Γ (.slice a o o') ++ sliceRes Γ (infer a) (infer o) (infer o')
   | _, .callOptions f n ns =>
     let rn := infer n
     constRes Γ (.callOptions f n ns) ++ (infer f).flatMap fun r => rn.flatMap fun r' => optsOne Γ ns r r'
   | _, .namedArg _ v => namedRes Γ (infer v)
   | _, .metaType t => constRes Γ (.metaType t)
   | _, .new t => constRes Γ (.new t)
-  | _, .inlineArray x xs => constRes Γ (.inlineArray x xs)
+  | _, .inlineArray x xs => constRes Γ (.inlineArray x xs) ++ inlineRes Γ (infer x) (infer xs)
   | _, .elemType el h => constRes Γ (.elemType el h)
   | _, _ => []
 

@@ -84,6 +84,26 @@ proof uses it, never derived from a machine model.
 - **`ecrecover`**: no general proof of the curve arithmetic or of equivalence
   to the precompile ([feature-work/abi-hashes.md](feature-work/abi-hashes.md)).
 
+- **Source semantics** (`Solidity/Source`, the S02–S05 reference
+  interpreter): the constructor ledger's gaps are `callOptions` beyond
+  `value`, `metaType` and `new` (`semExprGaps`; `new` as contract creation;
+  `new T[](n)` of one-word `T`, `new bytes(n)` and `new string(n)` run since lane FU2-B; inline arrays of one-word
+  elements are typed and evaluated since lane FU2-B, reference and
+  fractional elements refused; `fallback(bytes calldata) returns (bytes
+  memory)` runs since lane FU2-B), and among
+  statements `try` beyond one plain or `bytes memory` clause without
+  value (lane FU2-B; out of gas in the callee is not modelled, solc
+  catches it; tuple declarations are typed and evaluated since lane
+  FU2-B, without a progress theorem; a non-tuple initializer, a literal
+  component typed at its own type and repeated names are not modelled:
+  `docs/solc-alignment.md`); since lane FU2-B `abi.decode` is typed
+  and evaluated at the decoder's types (static arrays, structs, nested
+  arrays, fixed point and external function types are refused), and
+  `calldata` references (`bytes`, `string`, one-word-element dynamic
+  arrays) and their slices are read with access-time checks; `calldata`
+  structs, static and nested `calldata` arrays are not
+  ([feature-work/source-soundness.md](feature-work/source-soundness.md)).
+
 ## Closed
 
 Each has focused fixtures in `tests/solc/` and `Examples/Tactics/`.

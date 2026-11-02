@@ -553,16 +553,17 @@ rooted at it. 6 are deferred with a stage and a reason:
 
 | Constructor | Stage | Reason |
 |---|---|---|
-| `slice` | S02 | calldata slices are typed with S02's calldata references |
+| `slice` | S02 | calldata slices are typed with S02's calldata references (typed since lane FU2-B, [source-soundness.md](source-soundness.md)) |
 | `callOptions` | S02/S03 | call options belong to external calls and creation |
 | `metaType` | S04.02 | `type(T)` members read the artifact table and ABI identities |
 | `new` | S03 | creation and memory allocation |
-| `inlineArray` | S02 | the mobile type of its elements |
-| `elemType` | S02 | a type name as a value (`abi.decode`, `type(T)`); S01 types it only as a conversion callee (`convElem`) |
+| `inlineArray` | S02 | the mobile type of its elements (typed since lane FU2-B for one-word elements, [source-soundness.md](source-soundness.md)) |
+| `elemType` | operand of `call` | a type name read by another rule, never a value of its own: the callee of an elementary conversion (`convElem`) and a type expression of `abi.decode` (`abiDecode`, lane FU2-B, [source-soundness.md](source-soundness.md)); `exprCoverage_operand` |
 
 `stmtCoverage` does the same for statements (`stmtCoverage_total`,
-`simpleCoverage_total`): 13 typed; `declTuple` (S02, tuple destructuring of
-call results), `try` (S03, external calls) and `assembly` (excluded by S00;
+`simpleCoverage_total`): 14 typed (`declTuple` since lane FU2-B,
+[source-soundness.md](source-soundness.md)); `try` (S03, external calls; typed for one plain or `bytes memory` clause
+since lane FU2-B) and `assembly` (excluded by S00;
 only the canonical rethrow is typed) deferred.
 
 ### Settings, resolutions, well-formedness

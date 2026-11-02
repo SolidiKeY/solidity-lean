@@ -584,6 +584,58 @@ stronger obligation, not an additional assumption available to its proofs.
   external function types: such an argument is `stuck` (user-defined value
   types are decoded as their underlying type since lane V04b)
   ([source-soundness.md](feature-work/source-soundness.md#the-stuck-census)).
+  `abi.decode` (lane FU2-B) reuses this decoder on `bytes` data, so the
+  same `finalize_allocation` band applies; solc also reverts on an offset
+  word of `2^64` or more before its bounds check, where the source
+  semantics reverts by the bounds check (the same outcome for data shorter
+  than `2^64` bytes). The decoder's refused types (static arrays, structs,
+  nested arrays, fixed point, external function types) have no
+  `abi.decode` derivation
+  ([source-soundness.md](feature-work/source-soundness.md#lane-fu2-b-fu2-20261102-abidecode-and-calldata-references)).
+- **Tuple declarations** (lane FU2-B, `StmtD.declTuple`): a literal
+  component of the initializer is typed at its mobile type before the
+  per-slot conversion, so `(int8 a, uint b) = (1, 2);`,
+  `(bytes1 c, ) = (0x01, 1);` and `(bytes32 h, ) = ("abc", 1);` are refused
+  where solc converts each literal to its slot's type; a one-component
+  declaration with a non-tuple initializer (`(uint a) = f();`) is refused;
+  repeated names (`(uint a, uint a) = (1, 2);`, a `DeclarationError` in
+  solc) are accepted, the later one innermost
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
+- **Inline arrays** (lane FU2-B, `Typed.inlineArray`): only one-word
+  element types are typed; `["a", "b"]` (`string memory[2]`), nested inline
+  arrays, struct elements and `[1/3]` (`ufixed256x77` in solc) are refused
+  where solc accepts them; storing one into storage (`uint[] public a =
+  [1, 2, 3];`, `s = [1, 2, 3]` for `uint[3] s`) is refused, since a memory
+  array copies to storage only at the same type (`STy.copiesTo`); each
+  element must also convert to the common type (`argsFit`), a check solc
+  does not make, so `[bytes1(x), 0x12, bytes2(y)]` is refused; fixed-point
+  elements are typed and evaluated, where solc's code generator stops; the
+  array is allocated after its elements are evaluated (solc's IR order;
+  the legacy code generator allocates first, unobservable without
+  assembly)
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
+- **`new` of memory arrays** (lane FU2-B, `Typed.newArray`): a length of
+  `2^64` or more panics `0x41`, solc's `array_allocation_size` check; solc
+  also panics when the free memory pointer would pass `2^64 - 1`
+  (`finalize_allocation`, e.g. a `uint256[]` of about `2^59` elements) or
+  runs out of gas, where the model succeeds; only one-word elements,
+  `bytes` and `string` are modelled (`new string[](n)` and function-type
+  elements are refused, solc accepts them; fixed-point elements are
+  accepted, solc's code generator stops); contract creation is not
+  modelled.
+- **`try`/`catch`** (lane FU2-B, `StmtD.tryCall`): only an external call
+  without value and one `catch { … }` or `catch (bytes memory r) { … }`
+  clause are typed; `Error(string)`/`Panic(uint)` clauses, several
+  clauses, `{value: v}` and `try new C(…)` are refused, where solc accepts
+  them; given `returns` types must equal the function's (`STy.sameList`);
+  dynamic returns are typed but `stuck` at run time; a target without code
+  reverts the caller before any call, where solc ≥ 0.8.10 makes the call
+  when there are returns to decode (the same revert, without the call).
+- **`fallback` with parameters** (lane FU2-B): the source semantics runs
+  `fallback(bytes calldata input) returns (bytes memory output)`, `input`
+  all of the call data and `output` returned unencoded, as solc; other
+  signatures, which solc refuses, elaborate and are `stuck` at run time
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).

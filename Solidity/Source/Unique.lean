@@ -1175,7 +1175,11 @@ theorem uniqE_callIdent {Γ : Ctx} {n : String} {A : Syn .callArgs}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Calls through a member**: external calls, payments, ABI encoding. -/
+/-- `decode` is no encoding function. -/
+theorem AbiKind.ofMember_decode : AbiKind.ofMember "decode" = Option.none := by decide
+
+/-- **Calls through a member**: external calls, payments, ABI encoding and
+decoding. -/
 theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.member c n) A))) : UniqE Γ (.call (.member c n) A) := by
   intro τ τ' d
@@ -1203,6 +1207,7 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
     | transfer da' _ _ => cases (ih.e c hsz.1 dc da').1
     | send da' _ _ => cases (ih.e c hsz.1 dc da').1
     | abiEncode hr _ _ _ => cases Typed.ident_builtin hr dc
+    | abiDecode hr _ _ _ _ => cases Typed.ident_builtin hr dc
     | _ => first
       | exact (no_const hce ‹_›).elim
       | (exfalso; apply no_binOp hbo; assumption)
@@ -1253,6 +1258,114 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
       obtain ⟨h1, e1⟩ := ih.a args hsz da da'
       cases h1
       exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | abiDecode _ _ _ _ _ =>
+      cases (eq_of_beq hn)
+      rw [AbiKind.ofMember_decode] at hk; cases hk
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @abiDecode g x ts σ τs hr dx hs hd hok =>
+    cases d' with
+    | extCall dc' _ _ _ => cases Typed.ident_builtin hr dc'
+    | abiEncode _ hk' _ _ =>
+      cases (eq_of_beq hn)
+      rw [AbiKind.ofMember_decode] at hk'; cases hk'
+    | abiDecode _ dx' _ hd' _ =>
+      have hsz : sizeOf x < sizeOf (Syn.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) := by
+        simp only [Syn.call.sizeOf_spec, Syn.member.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e x hsz dx dx'
+      cases h1
+      rw [hd] at hd'; cases hd'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- `[x, xs…]` (lane FU2-B): the elements' types fix the common type. -/
+theorem uniqE_inline {Γ : Ctx} {x : Syn .expr} {xs : Syn (.list .expr)}
+    (ih : Uniq Γ (sizeOf (Syn.inlineArray x xs))) : UniqE Γ (.inlineArray x xs) := by
+  intro τ τ' d d'
+  have hce : (Syn.inlineArray x xs).const = Option.none := rfl
+  have hbo : (Syn.inlineArray x xs).binOp? = Option.none := rfl
+  have hx : sizeOf x < sizeOf (Syn.inlineArray x xs) := by simp only [Syn.inlineArray.sizeOf_spec]; omega
+  have hxs : sizeOf xs < sizeOf (Syn.inlineArray x xs) := by simp only [Syn.inlineArray.sizeOf_spec]; omega
+  cases d with
+  | inlineArray dx ds hc _ _ =>
+    cases d' with
+    | inlineArray dx' ds' hc' _ _ =>
+      obtain ⟨h1, e1⟩ := ih.e x hx dx dx'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.a xs hxs ds ds'
+      cases h2
+      rw [hc] at hc'; cases hc'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **Slices** (`a[s:e]`, FU2-B). -/
+theorem uniqE_slice {Γ : Ctx} {a : Syn .expr} {o o' : Syn (.opt .expr)}
+    (ih : Uniq Γ (sizeOf (Syn.slice a o o'))) : UniqE Γ (.slice a o o') := by
+  intro τ τ' d d'
+  have hce : (Syn.slice a o o').const = Option.none := rfl
+  have hbo : (Syn.slice a o o').binOp? = Option.none := rfl
+  have ha : sizeOf a < sizeOf (Syn.slice a o o') := by simp only [Syn.slice.sizeOf_spec]; omega
+  cases d with
+  | @slice _ s e _ _ _ da _ ds _ de _ =>
+    cases d' with
+    | slice da' _ ds' _ de' _ =>
+      have hs : sizeOf s < sizeOf (Syn.slice a (.some s) (.some e)) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      have he : sizeOf e < sizeOf (Syn.slice a (.some s) (.some e)) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e s hs ds ds'
+      cases h2
+      obtain ⟨h3, e3⟩ := ih.e e he de de'
+      cases h3
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2, eq_of_heq e3]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @sliceFrom _ s _ _ da _ ds _ =>
+    cases d' with
+    | sliceFrom da' _ ds' _ =>
+      have hs : sizeOf s < sizeOf (Syn.slice a (.some s) .none) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e s hs ds ds'
+      cases h2
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | @sliceTo _ e _ _ da _ de _ =>
+    cases d' with
+    | sliceTo da' _ de' _ =>
+      have he : sizeOf e < sizeOf (Syn.slice a .none (.some e)) := by
+        simp only [Syn.slice.sizeOf_spec, Syn.some.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      obtain ⟨h2, e2⟩ := ih.e e he de de'
+      cases h2
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1, eq_of_heq e2]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | sliceAll da _ =>
+    cases d' with
+    | sliceAll da' _ =>
+      obtain ⟨h1, e1⟩ := ih.e a ha da da'
+      cases h1
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
     | _ => first
       | exact (no_const hce ‹_›).elim
       | (exfalso; apply no_binOp hbo; assumption)
@@ -1275,6 +1388,29 @@ theorem uniqE_callElem {Γ : Ctx} {el : Elem} {hel : el ≠ .addressPayable} {A 
       obtain ⟨h1, e1⟩ := ih.e x hsz dx dx'
       cases h1
       subst hτ hτ'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
+/-- **`new T[](n)`** (lane FU2-B): the type name fixes the type. -/
+theorem uniqE_callNew {Γ : Ctx} {t : Syn .typeName} {A : Syn .callArgs}
+    (ih : Uniq Γ (sizeOf (Syn.call (.new t) A))) : UniqE Γ (.call (.new t) A) := by
+  intro τ τ' d d'
+  have hce : (Syn.call (.new t) A).const = Option.none := rfl
+  have hbo : (Syn.call (.new t) A).binOp? = Option.none := rfl
+  cases d with
+  | @newArray _ x _ _ ht _ dx _ =>
+    cases d' with
+    | newArray ht' _ dx' _ =>
+      have hsz : sizeOf x < sizeOf (Syn.call (.new t) (.positional (.cons x .nil))) := by
+        simp only [Syn.call.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e x hsz dx dx'
+      cases h1
+      rw [ht] at ht'; cases ht'
       exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
     | _ => first
       | exact (no_const hce ‹_›).elim
@@ -1449,6 +1585,8 @@ theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ
   | unarySuffix op x => exact uniqE_suffix ih
   | payableConv A => exact uniqE_payable ih
   | index a o => exact uniqE_index ih
+  | slice a o o' => exact uniqE_slice ih
+  | inlineArray x xs => exact uniqE_inline ih
   | assign op a b => exact uniqE_assign ih
   | member a x => exact uniqE_member ih
   | call f A =>
@@ -1456,6 +1594,7 @@ theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ
     | ident n => exact uniqE_callIdent ih
     | member c n => exact uniqE_callMember ih
     | elemType el h => exact uniqE_callElem ih
+    | new t => exact uniqE_callNew ih
     | callOptions f o os => exact uniqE_callOpts ih
     | _ =>
       apply uniqE_empty
@@ -1536,6 +1675,11 @@ theorem argsFit_single {B : DeclName → DeclName → Bool} {σ τ : STy} {σs :
   | nil => exact hne rfl
   | cons _ _ => simp only [argsFit, List.length_cons, List.length_nil, Bool.and_eq_true, beq_iff_eq] at h; omega
 
+/-- A `catch` clause fixes its binding and block (lane FU2-B). -/
+theorem CatchD.unique {k : SCtx} {cl : Syn (.catchClause k)} {x x' : Option String} {cb cb' : Syn (.list (.item k))}
+    (h : CatchD cl x cb) (h' : CatchD cl x' cb') : x = x' ∧ cb = cb' := by
+  cases h <;> cases h' <;> exact ⟨rfl, rfl⟩
+
 mutual
 
 /-- **Statement derivations agree**: the locals a statement leaves and its
@@ -1565,6 +1709,13 @@ theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {
       obtain ⟨e, hd⟩ := Typed.unique d d₂
       subst e
       exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hd]⟩
+  | _, _, .declTuple hs de hf, d' => by
+    cases d' with
+    | declTuple hs' de' hf' =>
+      rw [hs] at hs'; cases hs'
+      obtain ⟨e, h⟩ := Typed.unique de de'
+      cases e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
   | _, _, .block b, d' => by
     cases d' with
     | block b' =>
@@ -1650,6 +1801,23 @@ theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {
       subst e
       cases filter_single hf hf'
       exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
+  | _, _, .tryCall dc da ho hs _ ht _ dok hcb dcb, d' => by
+    cases d' with
+    | tryCall dc' da' ho' hs' _ ht' _ dok' hcb' dcb' =>
+      obtain ⟨e1, h1⟩ := Typed.unique dc dc'
+      cases e1
+      obtain ⟨e2, h2⟩ := TypedArgs.unique da da'
+      subst e2
+      rw [ho] at ho'; cases ho'
+      rw [hs] at hs'; cases hs'
+      rw [ht] at ht'; cases ht'
+      obtain ⟨ex, ecb⟩ := CatchD.unique hcb hcb'
+      subst ex ecb
+      obtain ⟨e3, h3⟩ := ItemsD.unique dok dok'
+      subst e3
+      obtain ⟨e4, h4⟩ := ItemsD.unique dcb dcb'
+      subst e4
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h1, eq_of_heq h2, eq_of_heq h3, eq_of_heq h4]⟩
   | _, _, .rethrow _ hr _ hp, d' => by
     cases d' with
     | rethrow _ hr' _ hp' =>

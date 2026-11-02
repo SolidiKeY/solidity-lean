@@ -278,8 +278,9 @@ condition is also a proof gap only.
 Progress proofs must use `heapPut_ok`, which keeps the halt detail
 `heapPut_pres` drops. `delete` of a local or memory location keeps
 `MemOK` (`deleteLoc_mem`, below); locals holding calldata references are
-not covered (`Val.RefOK` of a `cdRef` is
-`False`; the semantics creates none).
+not covered (`Val.RefOK` of a `cdRef` was
+`False`; the semantics created none. Since lane FU2-B it is `True`, and
+`deleteLoc` of a local covers them; see "Item 2").
 
 **The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
 top-level object is a `Data.val` only at a type without a location) is
@@ -551,7 +552,8 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   calldata explicitly; the other four were not re-checked by the review; all shadowed by the decoder's
   refusal: no `cdRef` is ever built);
 - getters of non-value types (`string public s`);
-- `fallback` with parameters;
+- `fallback` with parameters (lane FU2-B runs
+  `fallback(bytes calldata) returns (bytes memory)`; other signatures);
 - the default of function-typed variables (a function-typed state
   variable read before written; function-typed locals, fields, returns);
 - **storage-pointer and calldata return slots and uninitialised calldata
@@ -758,7 +760,8 @@ for `storeVal`'s `storRef` arm; preservation of `EMOK`/`MemOK` for
   from the elaboration;
 - the run-time gaps not on the ledger
   (storage-pointer and calldata return slots, function-typed defaults,
-  getters of non-value types, `fallback` with parameters, dynamic ABI
+  getters of non-value types, `fallback` signatures other than solc's
+  `(bytes calldata) returns (bytes memory)`, dynamic ABI
   decoding and encoding of aggregates, calldata references).
 
 **Deriving the frame for elaborated programs.** `Elaborated.bodies_typed`
@@ -819,7 +822,8 @@ evaluates the loop and storage witnesses in the kernel in seconds.
 
 ## Lane FU1 (followup-20261101): checkpoint 4's first two items
 
-**Not started in `Solidity/Source`.** `abi.decode` (the `.elemType`
+**Not started in `Solidity/Source`** (item 1 since done by lane FU2-B,
+below). `abi.decode` (the `.elemType`
 constructor, "type names as values (abi.decode) are not typed",
 `Ledger.lean`) and calldata references (`.slice`; `Eval.lean`'s "calldata
 arrays are not modelled" and "member of calldata" `stuck` arms) keep their
@@ -835,3 +839,477 @@ parameter/return positions the fixture is working in both pipelines; see
 [abi-hashes.md](abi-hashes.md), "Lane FU1". `calldata_nested_array_static_reencode_v2`
 (an element that fails only when read inside `abi.encode`) needs
 access-time calldata reads in the elaborated model and stays blocked.
+
+## Lane FU2-B (fu2-20261102): `abi.decode` and calldata references
+
+Owner of `Solidity/Source/**` in batch fu2-20261102. Work queue: (1)
+`abi.decode`, (2) calldata references, (3) agreement with the elaborated
+model, (4) checkpoint 4's remaining gaps; backfill checkpoint 5.
+
+### Item 1: `abi.decode` (done)
+
+**Typing** (`Solidity/Source/Typing.lean`). `Typed.abiDecode` types
+`abi.decode(data, ts)` when `abi` resolves to the builtin, the data has a
+type `STy.decodeSrc` admits (`bytes` in memory or storage, a string
+literal; since item 2 also `bytes calldata`: solc's "implicitly
+convertible to `bytes memory` or `bytes calldata`"), and `Ctx.decodeTys ts = some τs` with every `τ`
+`STy.decodable Γ.env`; its type is `STy.ret τs` (one type: its value;
+otherwise a tuple), as solc's. The second argument is read, not typed:
+`Ctx.decodeTys` takes the components of a parenthesized list (`(T)`,
+`(T, U)`, every component present) or a single type expression, and
+`Syn.typeExprs` reads elementary type names, user-defined types by an
+unqualified name (`Ctx.typeNameOf`: a struct, enum, UDVT, contract or
+interface; a local is never a type), and arrays of them (`T[]`, `T[k]` with
+a positive constant `k`), all in `memory`.
+
+`STy.decodable` is exactly what the S02/S04 decoder (`decodeArgs`) reads:
+one-word values (`STy.wordElem`: integers, `bool`, `address`, `bytesN`,
+enums at their member count, contracts), a user-defined value type whose
+underlying type is one of those (`Env.udvtUnderlying`, the layout's reading,
+`Env.layout_underlying`), `bytes`/`string` in memory, and a dynamic memory
+array of one-word values. **Named refusals** (no derivation, outside the
+proved fragment, each a recorded gap): static arrays, structs, nested
+arrays, external function types (the decoder does not read them; the
+assignment's "as the decoder supports"), fixed point (solc's ABI coder does
+not implement it), qualified names (`L.S`), `abi.decode(data, ())`, a doubly parenthesized component
+(`((uint))`).
+
+**Checkers.** The G13 checker (`Solidity/Frontend/Static/Infer.lean`)
+offers `decodeRes` at every call whose syntax is `g.decode(x, ts)`, from
+`x`'s results; completeness (`abiDecode_mem`, the `typed_complete` case)
+keeps `hasType_iff`, and `stmtOK_iff`/`wellFormed_iff` are unchanged (they
+reach expressions through it). The new arm matches on the call's
+arguments, which stops smart unfolding of `infer` at an abstract call:
+`call_sub` unfolds it through the structural recursor
+(`set_option smartUnfolding false in`, one lemma; no heartbeat option).
+The elaborator's checker (`Solidity/Source/Infer.lean`, `inferDecode`)
+tries the rule before the other member-call rules and falls back to them.
+Uniqueness of meaning (`Typed.unique`, `uniqE_callMember`) covers it:
+`decode` is no encoding function (`AbiKind.ofMember_decode`), and `abi` is
+never a typed receiver (`Typed.ident_builtin`).
+
+**Evaluation** (`Solidity/Source/Eval.lean`). `RExpr.abiDecode data hs hd`
+evaluates the data, reads its bytes (`bytesOfRV`) and runs `abiDecodeData`:
+data shorter than one head word per type reverts with no data (solc's
+`abi_decode_tuple` head check), then `decodeArgs` decodes as at a call's
+entry: an invalid word (a narrow integer out of range, a `bool` other than
+0/1, an `address` or `bytesN` with dirty bits, an enum at or past its member
+count) reverts with no data, an offset or length word past the data or a
+tail past the data reverts with no data, a length of `2^64` or more panics
+with `0x41`. `abiDecodeData` is a helper outside the interpreter's mutual
+block, with `abiDecodeData_grow` in Horizon's lists, so the `Below`,
+`Grow` and `Approx` step proofs take the new arm without new heartbeats
+(the earlier getter attempt failed on exactly that, Checkpoint 4).
+
+**Preservation and progress** (`Solidity/Source/Decode.lean`):
+
+| Theorem | Statement |
+|---|---|
+| `decodeElemWord_ok`, `decodeWord_ok` | a one-word value's decoder is never `stuck` (`NotStuckR`) at a decodable type |
+| `tailBytes_ok` | a dynamic argument's tail keeps any invariant and halts only without `stuck` |
+| `decodeArg_ok`, `decodeArgs_ok` | the decoder keeps `MemOK` (the heap well typed, shaped, with bare-value elements); its values agree with the grown heap typing; halts are not `stuck` |
+| `abiDecodeData_ok` | the same for `abi.decode`'s helper (`RValOK` of the result) |
+| `evalE_abiDecode_ok` | the `abi.decode` node on `bytes memory` data keeps `MemOK` and is not `stuck`, given the data expression's own triple (gap-relative: the data is any typed expression, whose progress is the walk's) |
+| `evalE_local_ok`, `evalE_abiDecode_local_ok` | a local's value agrees with the heap typing; so the node on a `bytes memory` local is closed (no hypothesis on the data) |
+| `evalE_abiDecode_lit_ok` | the same on a string literal, unconditionally |
+| `Hoare.memGrowX`, `allocRef_memX`, `List.mapM_ok`, `Hoare.lift_ns` | `Hoare.memGrow`/`allocRef_mem` with halts that carry `NotStuck`; `mapM` and `lift` |
+
+Not covered by a theorem: `bytes storage` data (`bytesOfRV` reads it with
+`loadMem`, whose progress is not proved; a control runs it); data given by
+any other memory expression is covered only relative to that expression's
+triple, which the walk does not yet give for memory expressions. Which
+halt a malformed payload gives (empty revert, Panic `0x41`) is shown by
+the controls, not by a theorem (`NotStuck` only). `tailBytes`' check
+`data.length < off + 32` is solc's `offset + 0x1f < end` negated
+(`off + 31 ≥ len` iff `off + 32 > len`).
+
+**Ledger.** `.elemType` is no longer a gap: S01's coverage classifies it as
+an operand of `call` (`Coverage.operand`), typed inside the conversion rule
+and `abi.decode` (`exprCoverage_operand`, `elemType_decode_operand`: a typed
+`g.decode(x, ts)` with an `elemType` node), and the ledger reads an operand
+as evaluated (`semExprCoverage_of_operand`); `semExprGaps` is `[slice,
+callOptions, metaType, new, inlineArray]` (`semExprGaps_spec` unchanged).
+`exprCoverage_operand` is witnessed by the conversion `uint8(a)`;
+`elemType_decode_operand` by `abi.decode(hex"0001", (uint8, bool))`. The
+operand classification says where `elemType` is typed, not that every
+type `abi.decode` names is decoded: the refusals above stay gaps (here and
+in `docs/semantic-gaps.md`).
+
+**Controls** (`Solidity/Source/DecodeExamples.lean`, `#guard`, elaborated
+from syntax and run through dispatch): `uint8` (7 decodes; 300 and 31 bytes
+revert with no data), an enum of two members (1 decodes; 2 reverts),
+`uint256[]` (`[5, 6]` has length 2; length `2^64` panics `0x41`; a tail and
+an offset past the data revert), `bytes` (`"ab"`), `(uint8, bool)` (`(1, 2)`
+reverts before the next statement), `bytes storage` data; refused: a struct, `uint256[2]`,
+`fixed` (the `uint256` neighbour elaborates).
+
+**Review (finder and skeptic, read-only, on 022f21a).** Confirmed and
+fixed: a top-level `address` component is `address payable`, as solc forces
+it (`STy.payableTop` in `Ctx.decodeTys`; arrays keep `address`); the
+docstrings of `abiDecodeData` and the module overstated Panic `0x41` (solc's
+`finalize_allocation` band is recorded in `docs/solc-alignment.md`) and
+which halts a theorem proves (`NotStuck` only; the halt's kind is the
+controls'); `bytes storage` data had neither a control nor a statement (now
+a control, `runDF`, and stated unproved); the arm's progress was only
+relative (now closed for a local, `evalE_abiDecode_local_ok`); no lemma read
+an operand as evaluated (`semExprCoverage_of_operand`); both checkers
+inferred the data operand eagerly for every `g.decode(x, ts)` (now a thunk,
+forced only when `g` is the `abi` builtin); stale docs (`source-s00-s01.md`,
+`source-s02.md`, `source-s05.md`, `coverage-plan.md`). Recorded, not
+changed: a doubly parenthesized component (`abi.decode(b, ((uint)))`, which
+solc accepts) is refused; the elaborator's checker still infers `x` a
+second time when `abi.decode` does not type and the call falls through to
+the other member-call rules. Accepted by both: the head, offset, length and
+tail checks and their order against solc's generated decoder, the
+validators, the type-name resolution (a local shadows a type), uniqueness,
+`hasType_iff`, the `smartUnfolding` option on `call_sub`.
+
+**Recorded deviation** (`docs/solc-alignment.md`): solc reverts on an
+offset word of `2^64` or more before its bounds check; here such an offset
+is past any data held in memory, so it reverts by the bounds check (the
+same outcome for every memory object shorter than `2^64` bytes).
+
+### Item 2: `calldata` references (done for the fragment below)
+
+**Representation.** `Val.cdRef h off len` (`Solidity/Source/State.lean`)
+is a reference into the frame's call data, `Fr.cd`
+(`Solidity/Source/Machine.lean`, set by `enterInstance` and `runTx` to the
+call's input): the absolute offset of its data and its length (elements
+of an array, bytes of `bytes`/`string`). The call data is read only:
+`Loc.cd off` (an element) has no write (`writeLoc` is `stuck` on it, and
+S01 types no `calldata` element, byte or member lvalue; a `calldata` local
+is rebound, not written through), and `Val.RefOK` of a reference is `True`
+under every heap typing: no invariant ties the offset and length to
+`Fr.cd` (reads past the data return zeros, as `calldataload`; entry
+decoding builds only references within the data).
+
+**Entry** (`decodeArg`, `Solidity/Source/Eval.lean`). A `bytes calldata`,
+`string calldata` or one-word-element `T[] calldata` parameter is kept as a
+reference after solc's `abi_decode_t_*_calldata_ptr` checks (`cdTail`): the
+length word within the data, a length below `2^64`, the elements within the
+data; each failure reverts with no data (a calldata length of `2^64` or
+more reverts, it does not panic: nothing is allocated). The elements are
+not read.
+
+**Access** (all in helpers outside the interpreter's mutual block, so
+Horizon's step proofs take them without new lemmas, except
+`cdToMem`):
+
+- `x.length` reads the reference (`lengthOf`);
+- `x[i]`: past the length, Panic `0x32`; otherwise the element is read and
+  validated **at the read** (`readLoc` on `Loc.cd`: an invalid word reverts
+  with no data, `decodeWord`), so an element that fails only when read
+  fails at the read, not at entry;
+- `b[i]` on `bytes calldata` (`cdByte`): past the length, Panic `0x32`;
+- `x[s:e]`, `x[s:]`, `x[:e]`, `x[:]` (`Typed.slice`, `sliceFrom`,
+  `sliceTo`, `sliceAll`; `RExpr.slice`; `sliceR`): on `bytes calldata` and
+  one-word-element dynamic `calldata` arrays (`STy.sliceable`; `string
+  calldata` slices, and slices of arrays of static multi-word elements,
+  are refused here; solc may accept them, not checked against solc); after evaluating the base, the start and the end (in
+  that order, as solc), `e < s` or a length below `e` reverts with no data
+  (solc's `calldata_array_index_range_access`); the slice is a reference at
+  the base's type (solc's slice type converts implicitly to it);
+- copies into memory (`convRV` → `cdToMem`): `bytes`/`string` as their
+  bytes; an array element by element, each validated (an invalid element
+  reverts with no data at the copy, as solc's
+  `abi_decode_available_length` copy); a `calldata` target keeps the
+  reference;
+- `abi.decode(b, …)` on `bytes calldata` (`STy.decodeSrc` now admits it;
+  `bytesOfRV` reads the reference).
+
+**Typing and checkers.** The four slice rules have arms in both checkers
+(`sliceBoth`, `sliceFromRes`, `sliceToRes`, `sliceAllRes` with
+`slice_mem`, … in `InferComplete.lean`, keeping `hasType_iff`; the Option
+checker's `.slice` arm), uniqueness of meaning (`uniqE_slice`), `toR`
+(absent bounds elaborate to the constant `0`, an absent end with `toEnd`)
+and `OpsOK`. `x[i]`, `x.length` and copies were already typed by S01.
+
+**Preservation and progress** (`Solidity/Source/Calldata.lean`):
+
+| Theorem | Statement |
+|---|---|
+| `cdTail_ok`, `cdArg_ok` | the entry checks are never `stuck` |
+| `decodeArg_cd_ok`, `decodeArg_entry_ok`, `decodeArgs_entry_ok` | every type dispatch decodes (`STy.entryDecodable`: the decoder's and `calldata` references) keeps `MemOK`, agrees, and is never `stuck` |
+| `readLoc_cd_ok`, `cdByte_ok`, `sliceR_ok` | element reads, byte reads and slices are never `stuck` |
+| `cdToMem_ok` | a copy into memory keeps `MemOK`; the copy agrees |
+| `evalE_cdLength_ok`, `evalE_cdIndex_ok`, `evalE_cdSlice_ok` | the `x.length`, `x[j]` and `x[s:e]` nodes on `calldata` locals (index locals) keep `MemOK` and are never `stuck` (closed) |
+
+**Ledger.** `.slice` is typed (`exprCoverage` classifies it `typed`, witness
+`w_slice`: `cd[1:]` on a `bytes calldata` local of the S01 example context);
+`semExprGaps` is `[callOptions, metaType, new, inlineArray]`. The
+`stuck` sites "calldata arrays are not modelled" (`indexLoc`) are gone;
+"member of calldata" (structs) stays.
+
+**Controls** (`Solidity/Source/CalldataExamples.lean`, elaborated from
+syntax, run through dispatch): `xs = [1, 300]` as `uint8[] calldata`:
+`xs[0]` runs, `xs[1]` reverts only when read, `xs[2]` panics `0x32`, and
+`xs.length` is 2 without reading the elements; a length `2^64`, elements
+past the data and an offset past the data revert at entry; `"abcd"[1:3][1]`
+is `c`, `[1:3]` has length 2, `[3:1]` and `[1:5]` revert; a copy of
+`[1, 2]` into memory runs, of `[1, 300]` reverts; `abi.decode(b[4:],
+(uint256))` decodes past a four-byte prefix.
+
+**Not modelled** (named, outside the fragment): `calldata` structs
+(`member of calldata` stays `stuck`, dispatch refuses them), static and
+nested `calldata` arrays (dispatch `stuck` as before), `calldata` arrays of
+function types, a `calldata` local without an initializer (the
+uninitialised-calldata gap of the census), encoding a `calldata`
+reference (external-call arguments, returns, `abi.encode`: array encoding
+is not modelled), a `calldata` parameter of a constructor (solc refuses
+one; here its offset would be relative to the arguments, which no program
+reaches). Progress of the arms is closed for locals; for other operand
+expressions it is the walk's.
+
+**Review (finder and skeptic, read-only, on d7291b7).** Confirmed and
+fixed: a typed copy of `calldata` into storage (`s = b`, `STy.copiesTo`
+admits it) reached `storeVal` with a reference and was `stuck`; it now goes
+through `cdToMem` (each element validated) and the memory-to-storage copy
+(`copyInto`; control `u`); `bytesN(b)` of `calldata` `bytes`
+(`bytes4(data[:4])`) was `stuck` in `convExplicitRV`; it now takes the
+first bytes, as the memory arm (control `t`); stale text (`Val.RefOK` of a
+reference was `False`, `bytes calldata` among `abi.decode`'s refusals in
+`Ledger.lean`/`Decode.lean`, `coverage-plan.md`, `source-inputs.md`, the
+S00/S01 table, the example context's docstring, the "no calldata lvalue"
+wording, the `Calldata.lean` header's "bounded" wording, `assurance.md`);
+the documented reason for refusing `string` slices (solc may accept them;
+now "not checked against solc"); untested 32-byte slice strides and `[:e]`
+(controls `q`, `r`). Recorded, not changed: the arm theorems cover locals
+with index locals (`Typed.toR` emits constant bounds for `a[s:]`, `a[:e]`,
+`a[:]`, and byte reads, `bytes` length, `abi.decode` of `calldata` and the
+conversions have no arm theorem); `Semantics/AbiEntry.lean`'s refusal
+message still names the source semantics (another lane's file). Accepted
+by both: the entry checks and absolute offsets against solc, validation at
+the read, the slice checks and their order, read-only access, the
+`RefOK` change (no proof relied on `False`), `hasType_iff`, `uniqE_slice`.
+
+### Item 3: agreement with the elaborated model (not stated; why)
+
+The assignment asks for the source/elaborated relation "as far as the
+existing relation reaches". No semantic relation between the source
+interpreter (`Solidity/Source`, `evalE`/`runTx`) and the elaborated model
+(`Solidity/Syntax/Elab`, lowered to `Solidity/Semantics`) exists in the
+repository: no Lean module outside `Solidity/Source` imports the
+interpreter (`Solidity/Frontend/**` imports only S01's syntax and typing),
+and `docs/source-inputs.md` describes the elaborated model's own entry
+decoder (`Semantics/AbiEntry.lean`) against solc, not against the source
+interpreter. The two share only S01's typing (`Frontend/Static` checks it,
+`hasType_iff`). Stating agreement for `abi.decode` and `calldata`
+references would first need a value correspondence (source `Val`/`RVal`
+and heaps against the elaborated model's typed states and memory), a
+state correspondence for storage and call data, and a simulation over the
+whole interpreter step, which is a lane of its own (S05 lists it with the
+whole-program progress theorem as open). What is aligned instead: both
+decoders follow solc's generated decoder (head check, offset and length
+checks, Panic `0x41`, validators; access-time validation for calldata in
+the source model, which lane `fu2-calldata-access` brings to the elaborated
+model), and the controls here use the same encodings the CF1 fixtures do
+(`tests/upstream/cf1-abi-entry-results.json`, not changed by this lane).
+
+### Item 4: checkpoint 4's remaining gaps
+
+**Tuple declarations (done).** `StmtD.declTuple`
+(`Solidity/Source/Typing.lean`) types `(, , T x, , U y) = e;`: the slots
+(`Ctx.tupleSlots`: leading holes, then each declared name with its type
+under solc's location rule for an initialized declaration, `locOK … true`,
+or a hole) are as many as `e`'s tuple components (any tuple-typed `e`; the
+controls cover a tuple expression, by `w_declTuple`, and `abi.decode` of
+several types), each declared slot's component converts implicitly to its
+type, and a hole's component is not the empty tuple (`slotsFit`);
+the locals are pushed left to right, the last declared innermost
+(`pushSlots`). `RStmt.declTuple` keeps the slots' types; `StmtD.toR` casts
+the output context along `pushSlots_tys`. The interpreter evaluates `e`,
+takes its components (`RVal.untuple`) and pushes each declared one
+converted (`pushVals`, outside the mutual block; `pushVals_below`,
+`pushVals_grow`, `pushVals_const` in Horizon's lists); a hole's component
+is evaluated (and, for `abi.decode`, validated) and discarded. Both
+statement checkers have the rule (`StmtD.inferSimple`; G13's `simpleRes`
+with its completeness case, so `stmtOK_iff` holds), uniqueness of meaning
+covers it (`StmtD.unique`), `OpsOK` too (`RStmt.opsOK_cast`), `RStmt.ext` extends the scope by
+`pushTys_suffix`, and the statement is outside the value fragment
+(`RStmt.ValFragC`'s wildcard). `stmtCoverage` classifies it `typed` (witness
+`w_declTuple`: `(uint256 p, ) = (a, b);`). Controls in
+`Solidity/Source/DecodeExamples.lean` (`w`, `v`): destructuring
+`abi.decode` with holes, a hole's invalid component reverting. Not proved:
+progress of the statement (the whole statement is outside the value
+fragment, so value-fragment results do not cover a body containing one;
+its `stuck` arity and non-tuple branches are unreachable under typing but
+not proved so). No control runs a multi-return call or a converted
+component.
+
+Review (finder and skeptic, read-only):
+- fixed: a hole accepted an empty-tuple component (`(, uint a) = (g(), 1)`
+  with `g` returning nothing, refused by solc); `slotsFit` now requires
+  `STy.nonEmpty` (control `slotsFit_hole_empty`);
+- fixed: stale gap entries in `semantic-gaps.md`, `source-s05.md`,
+  `source-s00-s01.md`, `source-s02.md`, `assurance.md`; the value-fragment
+  wording above;
+- recorded, not changed (`docs/solc-alignment.md`): a literal component is
+  typed at its mobile type before `slotsFit`, so `(int8 a, uint b) = (1, 2)`
+  or `(bytes1 c, ) = (0x01, 1)` is refused though solc accepts it; a
+  one-component declaration with a non-tuple initializer (`(uint a) = f();`)
+  is refused; repeated names (`(uint a, uint a) = …`) are accepted, the later
+  one innermost (S01's `declVar` does not check shadowing either);
+- checking cost: `pushVals_*` joined every Horizon lemma list; Horizon was
+  rechecked through the Lean server without heartbeat changes.
+
+**Inline arrays (done for one-word elements).** `Typed.inlineArray`
+(`Solidity/Source/Typing.lean`) types `[e₁, …, eₙ]` as `T[n] memory`: `T`
+is solc's common type, `Type::commonType` folded left to right from the
+first element's mobile type (`STy.common`, `STy.commonOf`), it is one word
+(`STy.oneWord`), and every element converts implicitly to it (`argsFit`).
+`RExpr.inlineArray` carries the elements converted (`RConvArgs` at
+`List.replicate n T`); the interpreter evaluates them left to right
+(`evalConvArgs`) and allocates the array (`inlineData`, `allocRef`), so no
+new Horizon lemma is needed (the new constructor falls in the last
+`ctorIdx` range of every split proof). Both checkers have the rule
+(`Typed.inferN`; G13's `inlineRes`/`inlineOne` with `inlineArray_mem`, so
+`hasType_iff` holds), uniqueness of meaning covers it (`uniqE_inline`),
+`OpsOK` too. `exprCoverage` classifies it `typed` (witness
+`w_inlineArray`: `[a, 1]`), and `semExprGaps` loses it. Controls in
+`Solidity/Source/InlineExamples.lean`: `[uint8(1), 2, 3][i]` reads and
+panics `0x32` past the length, `[1, 256]` is `uint16[2]`, `[a, 1]` into a
+declared `uint256[2] memory`; `[1, -1]` (no common type) is refused, as by
+solc. Not modelled (refused): reference elements (`["a", "b"]`,
+`string memory[2]`; nested inline arrays; structs), fractional elements
+(`[1/3]`, which solc types `ufixed256x77`), function-type elements, and a
+copy into storage (`uint[] public a = [1, 2, 3];`: `STy.copiesTo` needs the
+same type). No arm theorem.
+
+Review (finder and skeptic, read-only):
+- fixed: `[1, -1]` was accepted (the fold compared the element itself, not
+  its mobile type, before converting); `STy.common` now starts from the
+  mobile type, and a refusal control checks it;
+- fixed: the `uint16[2]` claim was not tested; `[1, 256][1] * 256` now
+  panics `0x11`; `uint256[2] memory c = [1, 2]` is refused (control);
+- fixed: stale gap entries in `source-s02.md`, `frontend-static.md`,
+  `fixed-point-semantics.md`, and the wording in `assurance.md`;
+- recorded in `docs/solc-alignment.md`: the storage refusal, the
+  per-element `argsFit` check (`[bytes1(x), 0x12, bytes2(y)]` refused),
+  fixed-point elements accepted, allocation after the elements (solc's IR
+  order).
+
+**`fallback` with parameters (done).** `dispatch`
+(`Solidity/Source/Eval.lean`) runs `fallback(bytes calldata input) returns
+(bytes memory output)` (the one signature with parameters solc allows):
+`input` is a `calldata` reference to all of the call data (`Val.cdRef` at
+offset 0, no selector stripped), `output` starts empty, and its bytes are
+returned as they are, not ABI-encoded (`bytesOfRV`); the value check and
+modifiers are as for `fallback()`. Any other locals shape stays `stuck`
+("fallback with this signature is not modelled"). The branch uses only
+functions in Horizon's lemma lists (`zeroVals`, `runMods`, `retVals`,
+`bytesOfRV`), so the split `dispatch` proofs stand without new lemmas.
+Controls in `Solidity/Source/CalldataExamples.lean` (`unitFb`): input
+`0xaabbccdd` returns `0xbbcc` unencoded and stores the length 4; a slice
+past the input reverts. No theorem about the branch. Checked: Horizon
+rechecked through the Lean server after the branch, without new lemmas
+or heartbeat changes. The feature inventory's `rawCalldata` exclusion
+(`docs/solidity-feature-inventory.md`) is the G00 profile's, for the
+compiled pipeline; this is the source semantics' model.
+
+Review (finder and skeptic, read-only): the semantics needed no fix;
+fixed: stale "stuck"/open entries (`source-s03.md`, `coverage-plan.md`,
+the census above, `Ledger.lean`'s docstring), the Horizon claim now cites
+its check; recorded in `docs/solc-alignment.md`: other fallback
+signatures elaborate and are `stuck` at run time (solc refuses them);
+untested paths (a named output assigned, an output never assigned, empty
+call data reaching the fallback, value to a non-`payable` one, modifiers).
+
+**`new` of memory arrays (done; contract creation not started).**
+`Typed.newArray` types `new T[](n)`, `new bytes(n)` and `new string(n)`
+(`STy.newable`: `bytes`, `string`, a dynamic memory array of one-word
+elements; `n` an index, as a slice bound). `RExpr.newArray` evaluates `n`
+(`indexNat`), panics `0x41` for `2^64` or more (the decoder's band: solc
+panics already when the free memory pointer would pass `2^64 - 1`), and
+allocates `n` zeroed elements (`newData`, a pure `R` function used through
+`lift`, so the Horizon proofs need no new lemma). Both checkers have the
+rule (`Typed.inferN`; G13's `newRes` in `callRes`, `newArray_mem` in
+`typed_complete`), uniqueness of meaning covers it (`uniqE_callNew`),
+`OpsOK` too. `.new` stays a deferred constructor in `exprCoverage`/the
+ledger (contract creation is its other use). Controls in
+`Solidity/Source/InlineExamples.lean` (`unitNew`): `new uint8[](3)`
+stores and reads, `a[1]` of `new uint8[](1)` panics `0x32`,
+`new bytes(5).length` is 5, `new bytes(2^64)` panics `0x41`, elements are
+zero; `new uint256[2](3)` and a signed length are refused (as by solc),
+`new string[](2)` is refused (reference elements, not modelled), `new
+string(4)` elaborates. Checked: Horizon rechecked through the Lean server
+after the arm, without new lemmas.
+
+Review (finder and skeptic, read-only): no correctness fix; fixed: the
+`Eval.lean` comment on the bound (the model has solc's
+`array_allocation_size` check, `length > 2^64 - 1`, not the later
+`finalize_allocation` one), controls for `new string(n)` and a signed
+length, wording in `semantic-gaps.md`/`assurance.md`, stale entries in
+`source-s02.md`/`source-s03.md`/`source-s05.md`; recorded in
+`docs/solc-alignment.md`: lengths from about `2^59` (`uint256[]`) succeed
+where solc's `finalize_allocation` panics (or gas runs out), function-type
+elements refused, fixed-point elements accepted.
+
+**`try`/`catch` (done for one clause).** `StmtD.tryCall`
+(`Solidity/Source/Typing.lean`) types `try c.f(args) returns (T₁ x₁, …)
+{ … } catch … { … }` for an external call without value (`extOverloads`,
+as `Typed.extCall`), the `returns` types, when given, equal to the
+function's (`STy.sameList`), the returns bound in the success block
+(`tryLocals`, unnamed without `returns`), and one
+clause of the two shapes `CatchD` admits: `catch { … }` or
+`catch (bytes memory r) { … }`. `RStmt.tryCall` carries the call and
+both blocks; `execS` evaluates the target and arguments and checks the
+target's code outside the `try` (a call to an address without code
+reverts the caller: solc's `extcodesize` check; solc from 0.8.10 skips
+that check when there are returns to decode, makes the call, and its
+decoding fails the same way), then on success
+decodes the returns (data too short reverts the caller, not caught) and
+runs the success block with them pushed, on a revert runs the clause
+(the revert data allocated as `bytes memory` when bound); each block's
+outcome is lifted back to the statement's locals (`Out.up`, `close`).
+Both checkers have the rule (`StmtD.inferN` with one arm per clause
+shape; G13's `tryRes`, and its case in `stmt_complete`, so `stmtOK_iff`
+holds), uniqueness covers it (`CatchD.unique`, `StmtD.unique`), `OpsOK`
+too (`RItems.opsOK_castIn`). `stmtCoverage` keeps `tryStmt` deferred
+(other clauses are not typed). Controls in
+`Solidity/Source/TryExamples.lean`: success binds the return, a
+`require` failure runs the plain clause, a `try` without `returns`
+succeeds, the `bytes memory` clause sees empty revert data, no code at the
+target reverts the caller, returns that do not decode revert the caller.
+Not modelled (refused): `Error(string)`/`Panic(uint)` clauses, several
+clauses, `{value: v}`, `try new C(…)`; dynamic returns are typed but
+`stuck` at run time, as `extCall`'s (a progress gap); out of gas in the
+callee is not modelled (solc catches it; here the horizon's `timeout`
+halts). Horizon rechecked through the Lean server after the arm, without
+new lemmas. No arm theorem.
+
+Review (finder and skeptic, read-only): fixed: the "no code" control ran
+with every address having code (it tested short returns); it now runs
+with none, and the short-returns case has its own control; a `try`
+without `returns` was refused, and is now typed (control `h`); stale
+entries (`source-s00-s01.md`, the `new` paragraph below); recorded in
+`docs/solc-alignment.md`: `{value: v}`, other clauses, dynamic returns
+`stuck`, the code check made where solc ≥ 0.8.10 calls.
+
+**Contract creation (`new C(…)`): not started; why.** What it needs
+exists in part: accounts carry a nonce (`Account.nonce`,
+`Solidity/Source/World.lean`), and `Fixed.createAddress`
+(`Solidity/Roadmap/Contracts.lean`) gives the CREATE address from the
+creator and its nonce, reachable through `Glob.fixed`. What blocks it is
+where construction lives: `construct`, `runInits`, `collectArgs`,
+`giveArgs` and `runCtorBody` are in `Solidity/Source/Semantics.lean`,
+which imports `Eval.lean`, and they call the interpreter's mutual
+functions (`evalE`, `evalConvArgs`, `runMods`) at a given fuel. An `evalE`
+arm for `new C(…)` needs them either inside the mutual block (a new
+member, so a new field in `BelowAt`, `GrowAt` and `ApproxAt` and in every
+split proof's lemma list, `Solidity/Source/Horizon.lean`) or abstracted
+over the mutual functions as oracles (new `_below`/`_grow`/`_const`/
+`Approx` lemmas for the construction loops, and `HorizonDeploy.lean`'s
+proofs about `construct` re-proved over the abstraction). Either is a
+refactor of the heartbeat-sensitive Horizon proofs, which AGENTS.md asks
+to warn about before starting, and it did not fit the lane's remaining
+time. The nonce increment, the address collision rule, the creation
+value and the init-code size limit are further work on top.
+
+**Backfill (checkpoint 5): not started.** Its parts that do not need
+G16+ are `hashed` (a recorded-preimage component of `St`, threaded
+through every interpreter step and re-proved in `belowAt`/`growAt`/
+`approxAt`) and the failure points of `Failures`/`withFailures` (a choice
+at every call site); both change `Machine.lean`/`Eval.lean` and every
+split Horizon proof, a lane of their own
+([source-s05.md](source-s05.md), "Why `SourceSpec` and `Failures` stay
+open"). `Parses`/`Resolves` belong to the front end.
