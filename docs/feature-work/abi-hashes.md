@@ -1653,3 +1653,58 @@ other panics are produced by the existing model, not certified here. The
 agreement theorems are about the model; that it is solc's decoder rests on
 the probes. Gas is outside the model (CF1's 4× bound, on the substituted
 value).
+
+### Lane FU2-C, item 4 and backfill
+
+**Item 4 (test 31 `sliceRead`)**: the view index lowering checks the view's
+bound where solc does (`#sliceIndex`, `Syntax/Elab/Arms.lean`; record and
+evidence in `docs/assurance.md`, test 31). `slicePast` now proves;
+`sliceRead` and `sliceOfSlice` stay pending on closer cost (valid at ten
+times the heartbeats; not committed). This is a lowering change, not a new
+rule: no rule-map row, closer clause or soundness proof was needed, since
+the check is an ordinary `require`/`Panic(0x32)` statement.
+
+**Backfill: ABI coder v1 value parameters** (`UpstreamEntry.v1Plan`). v1
+cleans a value word instead of validating it; pinned solc, legacy with the
+optimizer off and on (`tests/abi-0.8.38/V1Entry.sol`, 13 vectors,
+`scripts/abi-entry-probe.mjs --v1`, whose expectations are an independent
+port of the cleanup): `uintN` masked, `intN` sign-extended from its low `N`
+bits, `bool` 1 for any nonzero word, `bytesN` its high `N` bytes, `address`
+its low 160 bits; calldata shorter than the head is an empty revert;
+trailing data ignored. A v1 entry whose parameters are all such values runs
+on the cleaned words (the byte-identical cross-check on them); enums (v1
+masks them to `uint8`), function values and reference parameters keep the
+gate. Replay controls: `tests/upstream/AbiEntryReplay.lean` (`checked_add_v1`
+shape, `Panic(0x11)` after cleanup, short calldata, `int8`/`bool` cleanup, a
+`uint256[]` parameter gated), `tests/upstream/Replay.lean` (`narrow(uint8)`
+256 reads 0; expecting 256 is `broken`).
+
+**Backfill: the runner's scalar adapter** (`scripts/solidity-upstream.mjs`,
+`scalarArg`): TestFileParser writes a negative literal as its two's
+complement word, which for a 256-bit unsigned type is canonical (`-2` is
+`2^256 - 2`); the adapter refused it as noncanonical.
+`viaYul/function_entry_checks.sol` now passes `g(uint256,uint256): 1, -2`
+and blocks next on `h(), 1 ether -> 0` (a call value in the runtime
+expectation, outside this lane).
+
+**Remaining blocked rows and their reasons** (all 42 rerun,
+`cf1-abi-entry-results.json`):
+
+| Fixture | Reason | Kind |
+|---|---|---|
+| `smoke/bytes_and_strings.sol` | entry return bridge needs a primitive prefix and one final bytes/string memory result | retained interface: `g()` returns two references (`EntryReturn`) |
+| `abicoder/cleanup/enum_v1.sol` | nominal enum ABI range not adapted | exclusion: v1 masks enum words, nominal range refused for v1 |
+| `abicoder/cleanup/enum_v2.sol`, `operators/shifts/shift_right_garbled{,_signed}_v{1,2}.sol`, `userDefinedValueType/{cleanup,cleanup_abicoderv1,parameter}.sol`, `viaYul/unary_operations.sol` | raw ABI replay with physical calldata/memory assembly not adapted | exclusion: inline assembly building raw calldata |
+| `viaYul/function_entry_checks.sol` | unsupported runtime expectation: `h(), 1 ether -> 0` | runner: call values in runtime expectations |
+
+### Handoff (lane FU2-C → `fu2-testsuite-closer`)
+
+Test 31's slice rows after FU2-C: `slicePast` proves; `sliceRead` and
+`sliceOfSlice` reach `sol_close` with valid leaves but exceed its budget.
+The cost appears with a calldata view at a nonzero offset read at a
+symbolic index through the view's base alias (`#slice$t$view$base := xs`,
+`ie := 1 + se`): offset 0, literal indices, or the same reads on the
+parameter directly close within budget. Reproduction: import
+`tests/solc/Calldata.sol` (`scripts/solc-ast.mjs --source …`), then
+`sol_prove; all_goals sol_leaf; all_goals sol_close` on
+`Solc.Calldata.sliceRead.problem`. FU2-C did not edit `Calculus/**`.

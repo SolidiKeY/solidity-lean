@@ -249,6 +249,28 @@ and CI showed the same failures without them).
   `sliceHashed`, which ends in a heartbeat timeout of the compiled walk
   (`error`; the test accepts `proved`/`pending`). `sliceHashed` has no
   calldata alias, so the reapply does not reach it; not bisected.
+* **31, `sliceRead` (lane FU2-C, item 4):** the view's index was lowered as
+  `base[x < len ? off + x : base.length]`, the out-of-view branch reading past
+  the base's end so that its bounds check reverts; no closer knows that such a
+  read fails, so the leaf lacked the fact that closes it. `#sliceIndex`
+  (`Syntax/Elab/Arms.lean`) now makes the view's own check where solc does,
+  after the index: `Panic(0x32)` where failure data is retained, a revert
+  elsewhere (the split `modular` uses for its zero divisor), then the plain
+  read `base[off + x]` with `x < len` a premise, KeY's `inBounds` branch. The
+  outcomes are unchanged (the old branch ended in the base's `Panic(0x32)`);
+  no rule, closer or soundness proof changed. Test 31 after it: `slicePast`
+  proves (was pending); `sliceRead`, `sliceOfSlice` stay `pending`. The
+  `sliceRead` leaf is now `… se9 = true → {ie14 := 1 + se2} {se13 :=
+  read(memory, base[ie14])} {se12 := se13 == se1} se12 = true` with `base :=
+  xs`, `se1 := read(memory, xs[1 + k])`, `se2 := k`: valid, and `sol_close`
+  closes it with ten times the default heartbeats (diagnosis only, not
+  committed), so what is left is the closer's cost, not a missing fact.
+  Probes (scratch, not committed): the same reads on the parameter itself
+  prove within budget, so do a view at offset 0 and a view read at a literal
+  index; a view at offset 1 or 2 read at a symbolic index times out
+  (`xs[1:]`, `t[q] == xs[1 + q]`), and so does `t.length == xs.length - 1`.
+  Handed to `fu2-testsuite-closer` (closer cost through the view's base
+  alias), see `docs/feature-work/abi-hashes.md`, "Handoff".
 * **44** (`a48fd85f`): in the testing import a specification that does not
   parse became a `solidity.specificationSyntax` scope rejection, raised
   before the named refusal "ledger locations in assignable clauses are not
