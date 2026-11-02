@@ -3132,3 +3132,43 @@ global Residue/DecisionTheorem-prime/exhaustive target/hash bridge, general arra
 collector/decision integration, wider memory, halting OR, broader revised M4
 boundary, whole-pipeline fuel/511 bound, remaining performance/backfill/full gates
 and held VA1-Q2 remain open. No goal/VM/branch reset or publication.
+
+
+### Ground numeric leaf interface checkpoint (partial)
+
+Added `Calculus/DecisionNumericGround.lean`: `uintLinear_ground_sourceBound`
+proves actual closed-term translation with numeric grammar and structural size;
+`LFml.UIntQF.ground_exact_tests` discharges the real zero-prefix exact tests,
+with no local/environment parameters and the unchanged actual nodes≤511 premise.
+`qfUIntGround_Covered_of_leaf` requires the explicit actual `leafOf?` equation;
+it supplies neither source discovery nor arbitrary target/hash/answeredness.
+This is an independently usable AU01/approved-boundary component, not global
+Residue, DecisionTheorem-prime or unconditional Covered→inTarget.
+
+`Examples/DecisionNumericGround.lean` checks actual tt/nottt leaves and coverage,
+inhabited optional None/None equality, an actual None/Some countermodel, and
+free-parameter nonmembership. No old source, predicate, verdict or budget changes.
+Two additive root imports and two module-map rows register only these modules.
+Owned M7-next prose now distinguishes initial census results from later fixed
+array/compound memory closures. Finder found no issues. Skeptic's confirmed
+prose finding (the census file itself is absent at the frozen base) was fixed
+by saying initial VA1 census; no source findings. Both reviews were read-only,
+without Lean/server/builds. Exact raw evidence: /workspace/va1-evidence/ground-next.
+
+Final per-file MCP core4.175s/client4.176s, affected import-closure build3.094s
+and nine public signature/axiom reports5.236s pass; only existing propext,
+Classical.choice and Quot.sound, no sorryAx. Initial stripAll projection and
+implicit primitive-type diagnostic failures are retained as failures.
+Sampled aggregate RSS1382108KiB; cgroup peak436056064bytes; minimum host available17320701952bytes, actual hard12GiB/no swap and12GiB host reserve. 8 unsuccessful measurement samples retained.
+
+Static gate commands/exits are saved in static-gates.json. Existing axiom-pin
+inventory/docs findings remain failures, not hidden passes. Earlier full and
+TypeExamples resource stops remain failures and VA1-Q2 remains held. No unchanged
+failed heavy full gate is rerun as a completion endpoint. Full original queue
+remains incomplete: closed formula source discovery, global meaningful decidable
+Residue/DecisionTheorem-prime/exhaustive target/hash bridge, five general array
+routes, wider memory, negative halting-OR, broader revised program-free boundary,
+whole-pipeline fuel/511 derivation, remaining profiling/backfill and full gates.
+AQ1/AQ2/Q1 decisions and all old seals/failures remain. No goal mutation or
+publication. Parallel package and cumulative prerequisite bundle export follow
+this checked source commit; final concrete integration remains open.

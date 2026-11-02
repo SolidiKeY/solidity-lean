@@ -976,8 +976,10 @@ remain unchanged, with the original requirement/counterexample retained. This is
 The kernel gap census in `Examples/DecisionGapCensus.lean` reuses three
 inhabited existing memory fixtures: each is in target. The given-heap parameter
 now has certified coverage/proved from an all-heap source certificate; the
-nonliteral RHS remains unknown/noncovered. The reversed equation has certified
-coverage and an exact returned-state refutation described below. This
+nonliteral RHS now has certified coverage/refutation through the compound-field
+route, with an existential returned-state theorem and a separately constructed
+countermodel. The reversed equation has certified coverage and an exact
+returned-state refutation described below. This
 census is not a Residue definition or bridge proof. Integrated memory,
 ledger-quantifier and written-memory sources replayed successfully on the VA1 VM.
 A first precise supported-family boundary is now kernel-proved in
@@ -988,10 +990,12 @@ separate coverage, admission and proved/refuted semantics, and the retained
 counterexample is linked by exact equality. This is not the unrestricted
 program-free inclusion; other shapes and the broader M4 source characterization
 remain open, as do Residue/DecisionTheorem-prime/AU02/full gates.
-The separate `Examples/DecisionArrayGaps.lean` census reproduces seven
+The initial VA1 `Examples/DecisionArrayGaps.lean` census reproduced seven
 admitted, noncovered unknown array shapes, with six semantic validity proofs
-and one explicit false fixed-array countermodel. It changes no decision
-pipeline. The full gate currently stops at the required host reserve in the
+and one explicit false fixed-array countermodel. Subsequent fixed-array
+integration certifies the fixed positive/negative pair; the other five shapes
+remain global unknowns. Standalone key/field source certificates do not yet
+change those global verdicts. The full gate currently stops at the required host reserve in the
 unchanged frontend TypeExamples module; ownership question VA1-Q2 is pending,
 while independent VA1 proof work continues.
 DecisionArrays is now also a compatibility facade over separate fixture/coverage
@@ -1004,9 +1008,13 @@ premise, with pushed-local, partial-arithmetic and certified verdict controls.
 For one positive uint binder over an equation in this grammar, the next
 `Calculus/DecisionUIntPrefix.lean` increment proves actual normalization,
 source reduction and `leafOf?` success. The source fact describes the body
-before preparation. Prepared-body grammar, parameter closure, bounds, broader
-prefixes and the exhaustive Residue/target bridge remain open; this grammar's
-complement is not Residue.
+before preparation. Later numeric logical/normalization increments discharge
+prepared grammar, parameter closure and actual source-derived bounds for the
+stated one-prefix QFUIntLinear family of weight at most 511. Broader prefixes
+and the exhaustive Residue/target bridge remain open; this grammar's complement
+is not Residue. The ground numeric leaf interface separately discharges
+zero-prefix exact tests and coverage when supplied an actual leaf equation;
+closed source discovery remains open.
 `Examples/DecisionHaltingOrGaps.lean` separates already-covered partial
 Boolean lowering from the actual open APF guard-floor case. A nested halting
 `||` guard in a negative two-key mapping block has certified target/unknown/
