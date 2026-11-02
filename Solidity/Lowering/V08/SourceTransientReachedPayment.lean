@@ -1,8 +1,8 @@
 import Solidity.Lowering.V08.SourceTransientErrorCallerRollback
 
-/-! UNVALIDATED DRAFT: actual successful nonzero Source transfer at a reached
+/-! Source-only component, kernel-checked by the build: actual successful nonzero Source transfer at a reached
 transient state, distinct inner/outer rollback, and end WITHOUT payment rollback.
-ALL imported source-only drafts remain UNVALIDATED. The Op witness below is
+The Op witness below is
 proved to be the ACTUAL transfer Option result, never an assumed paid state or
 another interpreter. Supplied marks do not establish admitted payment dispatch,
 external calls, SourceSpec, intrinsic frames or compiler/EVM adequacy. -/

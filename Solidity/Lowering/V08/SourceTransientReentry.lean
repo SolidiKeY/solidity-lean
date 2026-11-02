@@ -1,6 +1,6 @@
 import Solidity.Lowering.V08.SourceTransientBytesEmitControls
 
-/-! UNVALIDATED DRAFT: G23 / Backfill B repeated source end/re-entry application.
+/-! Source-only component, kernel-checked by the build: G23 / Backfill B repeated source end/re-entry application.
 No source transaction interpreter is introduced. Each end is the explicit
 published endTx adapter; evalE is the independent published source execution.
 A caller must still justify that a real transaction reaches these boundaries.

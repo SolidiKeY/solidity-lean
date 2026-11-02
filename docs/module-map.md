@@ -1490,9 +1490,9 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Lowering/V08/NestedControls.lean` | Two populated atomic rollback boundaries with real creation-continuation failure and complete observation controls. |
 | `Lowering/V08/HandlerControls.lean` | Completed constructor failure, paid catch-handler failure, exact payload and ancestor rollback controls. |
 | `Lowering/V08/LibraryHandlerControls.lean` | Real caller-context library work inside failed creation-handler rollback and exact context/payload controls. |
-| `Lowering/V08/CreationSuccessControls` | Successful creation, caller-library continuation, exact failure and rollback controls |
-| `Lowering/V08/TransactionPrefixes` | Arbitrary finite prefixes of actual transactions with ordered exact histories |
-| `Lowering/V08/PrefixControls` | Funded commit, real post-commit failures and reads with complete boundary observations |
+| `Lowering/V08/CreationSuccessControls.lean` | Successful creation, caller-library continuation, exact failure and rollback controls |
+| `Lowering/V08/TransactionPrefixes.lean` | Arbitrary finite prefixes of actual transactions with ordered exact histories |
+| `Lowering/V08/PrefixControls.lean` | Funded commit, real post-commit failures and reads with complete boundary observations |
 | `Lowering/V08/SourceEnvironment.lean` | Actual independent resolved environment execution and intrinsic observation transport; explicit positive/zero horizons. |
 | `Lowering/V08/SourceEnvironmentControls.lean` | Populated source state, both pipelines and actual paid target context controls. |
 | `Lowering/V08/SourceFailures.lean` | Actual resolved literal-reason failure execution and exact intrinsic payload transport. |
@@ -1507,10 +1507,10 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Lowering/V08/SourceDispatchControls.lean` | Actual free/internal-library ambient context calls, real competing body, repeated reached calls, full state and independent intrinsic observations. |
 | `Lowering/V08/SourceCustomErrors.lean` | Actual custom-error execution and selector transport with explicit independent signature input-byte equality. |
 | `Lowering/V08/SourceCustomErrorControls.lean` | Populated exact custom-error payload/order/static/panic/timeout controls and concrete UTF-8 signature checks. |
-| `Solidity/Lowering/V08/SourceCustomErrorFailures.lean` | Actual custom-error argument/encoding failure boundaries. |
-| `Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean` | Populated source panic, rethrow and aggregate-encoding-gap controls. |
-| `Solidity/Lowering/V08/SourceAbi.lean` | Actual source ABI expression allocation and existing byte observations. |
-| `Solidity/Lowering/V08/SourceAbiControls.lean` | Populated binary/dynamic/static ABI argument and allocation controls. |
+| `Lowering/V08/SourceCustomErrorFailures.lean` | Actual custom-error argument/encoding failure boundaries. |
+| `Lowering/V08/SourceCustomErrorFailureControls.lean` | Populated source panic, rethrow and aggregate-encoding-gap controls. |
+| `Lowering/V08/SourceAbi.lean` | Actual source ABI expression allocation and existing byte observations. |
+| `Lowering/V08/SourceAbiControls.lean` | Populated binary/dynamic/static ABI argument and allocation controls. |
 | `Lowering/V08/SourceTransient.lean` | Actual typed source transient write/static/read/endTx/undo observations and selected intrinsic reset; canonical layout/frame relation remains open. |
 | `Lowering/V08/SourceAbiEntryControls.lean` | Actual Source ABI allocation bytes and published eager/lazy entry decoding controls; no general calldata/body adequacy. |
 | `Lowering/V08/SourceRethrow.lean` | Actual packed-literal allocation, reached-reference canonical rethrow and independent intrinsic byte observation. |

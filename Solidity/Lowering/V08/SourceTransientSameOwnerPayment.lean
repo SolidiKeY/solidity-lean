@@ -1,8 +1,7 @@
 import Solidity.Lowering.V08.SourceTransientRejectedPayment
 
-/-! UNVALIDATED DRAFT: same-owner transfer affordability/identity at actual
-paid88/12, contrasted with distinct-owner full-balance transfer. ALL imported
-source-only drafts remain UNVALIDATED. Option.none supplies NO state or Source
+/-! Source-only component, kernel-checked by the build: same-owner transfer affordability/identity at actual
+paid88/12, contrasted with distinct-owner full-balance transfer. Option.none supplies NO state or Source
 halt/refund. Record maps below observe actual Some results without inventing
 call/transaction semantics. No admitted dispatch/intrinsic/bytecode adequacy. -/
 namespace Solidity.Lowering.V08.SourceTransientSameOwnerPayment

@@ -1,7 +1,7 @@
 import Solidity.Lowering.V08.SourceTransientOwnerRollback
 
-/-! UNVALIDATED DRAFT: explicit inner commit, actual later source write, then
-outer rollback. BOTH imported source-only drafts remain UNVALIDATED. Supplied
+/-! Source-only component, kernel-checked by the build: explicit inner commit, actual later source write, then
+outer rollback. Supplied
 Source frames/marks/end operations do not prove call or transaction admission,
 body dispatch, intrinsic frame preservation or compiler/bytecode adequacy.
 Only existing Source.evalE executes syntax; Op lists below certify its actual

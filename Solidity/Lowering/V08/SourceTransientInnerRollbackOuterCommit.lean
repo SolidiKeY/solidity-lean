@@ -1,8 +1,7 @@
 import Solidity.Lowering.V08.SourceTransientOwnerCommit
 
-/-! UNVALIDATED DRAFT: actual inner writes/rollback, later actual owner write,
-then explicit outer commit/end. ALL imported source-only drafts remain
-UNVALIDATED. Supplied Source frames and marks do not establish admitted calls,
+/-! Source-only component, kernel-checked by the build: actual inner writes/rollback, later actual owner write,
+then explicit outer commit/end. Supplied Source frames and marks do not establish admitted calls,
 body dispatch, funded entry or source-to-intrinsic/bytecode adequacy.
 Existing Source.evalE alone executes syntax. Operation lists certify the
 resulting journal updates; they do not replace expression execution. -/

@@ -1,6 +1,6 @@
 import Solidity.Lowering.V08.SourceTransientSameOwnerPayment
 
-/-! UNVALIDATED DRAFT; all imported source-only drafts ALSO UNVALIDATED.
+/-! Source-only component, kernel-checked by the build.
 Actual distinct-owner zero Source transfer preserves WORLD but journals TWO
 account updates. Same-owner zero is exact identity. No admitted call/payment,
 SourceSpec, intrinsic-frame, compiler/EVM or observed-axiom claim. -/

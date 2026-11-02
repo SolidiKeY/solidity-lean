@@ -1,8 +1,8 @@
 import Solidity.Lowering.V08.SourceTransientInnerRollbackOuterCommit
 
-/-! UNVALIDATED DRAFT: actual static-revert/timeout observations, EXPLICIT
+/-! Source-only component, kernel-checked by the build: actual static-revert/timeout observations, EXPLICIT
 caller rollback, then published end/reset and fresh entry marks/reads.
-ALL imported source-only drafts remain UNVALIDATED. No automatic unwinding,
+No automatic unwinding,
 try/catch rule, admitted call/transaction or compiler/intrinsic-frame adequacy
 is inferred from a Source error. Existing typed Source operations only. -/
 namespace Solidity.Lowering.V08.SourceTransientErrorCallerRollback

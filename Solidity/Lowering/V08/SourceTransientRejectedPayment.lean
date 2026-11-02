@@ -1,7 +1,7 @@
 import Solidity.Lowering.V08.SourceTransientReachedPayment
 
-/-! UNVALIDATED DRAFT: rejected second Source transfer at an ACTUALLY reached
-paid prefix. ALL imported source-only drafts remain UNVALIDATED. Option.none
+/-! Source-only component, kernel-checked by the build: rejected second Source transfer at an ACTUALLY reached
+paid prefix. Option.none
 has NO state output and is NOT a Source halt/call-dispatch or automatic-refund
 rule. Existing paid input is observed separately; rollback/end are explicit
 published operations applied to that input. No replacement interpreter/state

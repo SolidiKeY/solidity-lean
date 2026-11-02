@@ -1,7 +1,7 @@
 import Solidity.Lowering.V08.SourceTransientReentry
 
-/-! UNVALIDATED DRAFT: owner-isolated source checkpoint/rollback application.
-The imported re-entry module is ALSO UNVALIDATED. No checked dependency or
+/-! Source-only component, kernel-checked by the build: owner-isolated source checkpoint/rollback application.
+No checked dependency or
 intrinsic target preservation is claimed. Frames and explicit transaction ends
 are supplied Source operations, not proof that a call/transaction is admitted.
 No evaluator, encoder, decoder or alternate world representation is introduced. -/

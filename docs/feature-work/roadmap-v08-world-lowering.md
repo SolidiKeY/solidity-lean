@@ -3704,3 +3704,30 @@ rollback versus timeout, heap clearing and constructor pipeline order, then
 relate only genuinely supplied intrinsic/frame/layout facts. No such new
 application is claimed checked by this checkpoint. Canonical constructor/try-new/
 SourceSpec/V07/bytecode adequacy and all mandatory final gates remain open.
+
+## Master integration review (2026-11-02)
+
+Head `a7c42a2d` (canonical `7c3c8274`, the checked public099 adapters
+`c6d3aa15` and the G20 reflection commit) was merged onto master. A read-only
+finder and skeptic found no trust hole, vacuous statement, orphan or layer
+violation. Confirmed findings and their resolution:
+
+- Nine `SourceTransient*` headers still said "UNVALIDATED DRAFT" although the
+  default build kernel-checks them; the headers now say so.
+- The skeptic's reading of the claims, recorded here instead of upgraded:
+  `CallableReflection.success_iff` is an intrinsic `World.call` fact
+  (injective `observeEntry`), not a Source relation; the Source modules are
+  one-step unfolding equations over the published semantics with
+  sub-executions as premises; no V08 module runs `Source.runTx`
+  (`SourceTransient.endExecution` restates its end-of-transaction step); some
+  expected ABI payloads are computed with the same `Source.abiLayout` helpers;
+  Source fixtures and intrinsic entries are written to match, with no theorem
+  linking them. The docs/README.md entry states this boundary.
+- The `scripts/v08-*` validators and their `.test.py` files read VM-only
+  paths (`/workspace/v08-*`) and are not wired into CI, so the
+  `scripts/v08-*axiom-pins.json` pins are checked only in the lane VM;
+  `scripts/AxiomAudit.lean` and `check-axiom-pins.mjs` (unchanged count) still
+  cover the axiom whitelist. The 1,577 `#print axioms` lines are unguarded
+  and pin nothing in the Lean build.
+- Module-map rows were normalized; the stale counts at the top of this file
+  are historical.
