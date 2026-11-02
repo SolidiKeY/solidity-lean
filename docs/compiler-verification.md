@@ -1932,3 +1932,79 @@ New evidence is saved separately in
 `/workspace/memory-storage-copy-import-chunks-20261102-evidence`; earlier source,
 failed checks, capacity-failure records, caches and sealed artifacts are retained.
 Work remains blocked; the persistent goal remains incomplete.
+
+
+### H1 native validation and published parser certificates (2026-11-02)
+
+The human authorized "Free disk + 4 GiB reserve": only the available-host
+admission floor changes from 12 GiB to 4 GiB. The build-group cap remains
+12 GiB, swap remains disabled, and checking remains serial with
+`LEAN_NUM_THREADS=1` and explicit `-j1`. No proof, search, node, parser-fuel or
+existing time budget is reset or raised. Owned exited containers were
+snapshotted before reclamation; source, caches, every commit and the latest
+sealed handoff were retained. Read-only page-cache reclamation hints preceded
+admission after direct reclaim writes proved unavailable.
+
+All eight original resource-failed targets now pass on unchanged source under
+H1: PreFixSortAnnotations, DecisionHashes, OpenLoops, RevertData, UnitExamples,
+Faithfulness, Horizon and Derived21. The serial group exits 0 in 1,872.87 s,
+peak aggregate RSS 9,146,687,488 bytes, with no OOM or reserve stop. Horizon and
+strategy source were not edited. These new results do not relabel any older
+failure as passed.
+
+The acceptance-only private UnitExamples experiment remains UNVALIDATED: its
+old-reserve check stopped at 47.33 s. Its complete plain-source packet, original
+and candidate sources, 21 identical public headers, 13 unchanged inputs,
+24-module producer closure, failed receipts and budget/admission metadata are
+sealed separately. Source-reviewed preservation commit `be2dd1e9f` was explicitly
+reverted before adopting the published repair; it is not in the task branch.
+The packet discloses the producer's older function-type canonicalization body
+rather than claiming untested current-master compatibility.
+
+Published `60dd172d` supplies 13 private acceptance certificates and 59 exact
+kernel-checked constructor-list equalities, assembling aggregate equalities
+before rewriting coverage lambdas. Its exact source hash is
+`7ce56ab95b0085c2bfabaa726db4ad6f6f72064d6be4d90682877b725a60e832`.
+The local private per-file check passes in 166.97 s, peak RSS 1,845,415,936 bytes;
+this is separate from the coordinator's check. Public statements, definition
+bodies, inputs, controls and propext-only pins remain unchanged. Commit
+`b471d1785` consumes only this published source and its owning documentation.
+No native value is used as an unchecked proof oracle.
+
+Current-task native results after that consumption:
+
+| Gate | Actual result |
+| --- | --- |
+| `./run-lean.sh` | Exit 0, 1,006.30 s, peak aggregate RSS 5,535,825,920 bytes; default/core 1,053 jobs, compiled TestSuite 285 jobs, frozen sort check 377 taclets/131 read-bearing/131 covered. |
+| Explicit root import | Exit 0, 2.66 s. |
+| Combined TrustAudit | Exit 0, 258.05 s. |
+| Full corpus script | Exit 0, 91.00 s; unchanged pinned verdicts and generated outputs. |
+| Task axiom audit | All 93 headlines pass; only propext, Classical.choice and Quot.sound. |
+| Four-mode EVM observations | All four legacy/viaIR × optimizer modes pass 15 complete ordered calls each, exact return/revert bytes and wrong-observation controls. |
+| Source gates | Pin, inventory, orphans, layers, strict automatic, static trust, trust-script tests and complete inventory all exit 0. |
+
+The post-full serial validation group exits 0 in 386.29 s, peak RSS
+2,204,094,464 bytes, without OOM or reserve stop. The earlier fresh original
+24-module Derived17 receipt remains 281.90 s within its unchanged 300 s;
+its source/dependency inputs are unchanged by this test-only parser-proof fix,
+and that workload was not rerun or given a new allowance.
+
+Independent read-only finder and skeptic reviews found no missing owned copy
+implementation/proof obligation within the documented finite primitive fragment.
+The loops and source simulations are generic, with inhabited lifecycle,
+independence, replacement/tail, failure, bounds and refusal controls; heap and
+memory preservation are derived. Explicit representation/capacity premises are
+not presented as emitted runtime checks. The kernel result is source-interpreter
+to EVM-style-machine correctness; four-mode solc/EVM runs are distinct bounded
+observations, not universal bytecode/world refinement. No source-coverage or
+excluded-layout claim is promoted.
+
+Current strict documentation checking still exits 1: 48 missing references and
+37 ambiguities, identical ordered findings to the published baseline and zero
+new findings. This historical failure is not called passed.
+
+Current evidence is retained in
+`/workspace/memory-storage-copy-h1-20261102-evidence`. All historical failures
+and earlier seals remain available. No default-branch integration, push, goal
+transition or VM archival is performed. The original goal remains open as
+instructed for controller integration and original adequacy review.

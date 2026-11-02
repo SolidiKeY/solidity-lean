@@ -169,6 +169,17 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 
 ## Memory-to-storage copy recovery
 
+Latest local checkpoint (2026-11-02, H1): full/default build, explicit root
+import, combined TrustAudit, complete compiled TestSuite, full corpus, frozen
+sort alignment and all source gates pass. The dated failure records below are
+historical and remain failed; H1 explicitly authorized a 4 GiB host reserve
+while retaining the hard 12 GiB/no-swap cap. Published parser-proof repair
+`60dd172d` was locally checked and consumed without changing public statements,
+inputs or proof budgets. The original goal has not been marked complete or the
+VM archived. Controller integration and adequacy review remain separate from
+these local gate results; no universal bytecode/world refinement is claimed.
+
+
 The checked compiler admits runtime-length primitive-array and primitive-member
 struct copies through represented finite paths. Actual loops copy the heap
 snapshot, clear the discarded live destination tail and replace dynamic length
