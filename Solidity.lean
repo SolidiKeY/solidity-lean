@@ -51,6 +51,7 @@ import Solidity.Backend.Aggregates.ByteParameterControls
 import Solidity.Backend.Aggregates.ByteParameters
 import Solidity.Backend.Aggregates.ByteSliceControls
 import Solidity.Backend.Aggregates.ByteSlices
+import Solidity.Backend.Aggregates.CalldataCopyAccessControls
 import Solidity.Backend.Aggregates.CalldataCopyControls
 import Solidity.Backend.Aggregates.G18ArrayAccess
 import Solidity.Backend.Aggregates.G18ArrayAccessControls
@@ -2511,6 +2512,7 @@ import Solidity.SortCheck.Parser
 import Solidity.Source.Calldata
 import Solidity.Source.CalldataAggregates
 import Solidity.Source.CalldataCopy
+import Solidity.Source.CalldataCopyAccess
 import Solidity.Source.CalldataExamples
 import Solidity.Source.CalldataLayout
 import Solidity.Source.Const
