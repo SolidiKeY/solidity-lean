@@ -406,6 +406,10 @@ def convExplicitRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVa
     match τ with
     | .fixedBytes k hk => return .val (mkBytes (n := k) (h := hk) (← bytesOfRV F n v))
     | τ => if h : τ.loc? = some .storage then return .val (.storRef h p) else convRV F n τ v
+  | _, .val (.cdRef _ off len) =>
+    match τ with
+    | .fixedBytes k hk => return .val (mkBytes (n := k) (h := hk) ((F.cd.drop off).take len))
+    | τ => convRV F n τ v
   | _, .val x =>
     if τ.byRef then convRV F n τ v else return .val (← lift (convExplicitVal τ x))
   | _, _ => convRV F n τ v
@@ -627,6 +631,12 @@ def copyInto {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v
     EM E Γ Unit :=
   match v with
   | .strLit bs => storeData F n τ p (Data.bytes (D := E.layout) (l := .memory) bs)
+  -- `calldata` (lane FU2-B): through a memory copy (`cdToMem`, which
+  -- validates each element), as solc copies calldata into storage.
+  | .val (.cdRef _ off len) => do
+    match ← cdToMem F (σ.withLoc .memory) off len with
+    | .val x => storeVal F n τ p x
+    | _ => halt (.stuck "copy source")
   | .val x => storeVal F n τ p x
   | _ => halt (.stuck "copy source")
 

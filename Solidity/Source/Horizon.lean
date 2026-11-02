@@ -1097,7 +1097,7 @@ theorem zeroInner_grow (n : Nat) : ∀ (k : Nat) {Γ' : RCtx} (l : Locals E.layo
   | k + 1, _, .cons _ r => Grow.bind (zeroVal_grow n _) fun _ => Grow.bind (zeroInner_grow n k r) fun _ => Grow.pure _
 theorem copyInto_grow (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v : RVal E.layout σ) :
     Grow (copyInto (Γ := Γ) F n τ p v) := by
-  unfold copyInto; grow_go [heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
+  unfold copyInto; grow_go [cdToMem_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow]
 theorem extReturn_grow (rs : List STy) (o : Outcome) : Grow (extReturn (E := E) (Γ := Γ) rs o) := by
   unfold extReturn; grow_go [reraise_grow]
 theorem getterPath_grow (F : Fr) (n : Nat) (data : Solidity.Roadmap.Bytes) : ∀ (τ : STy) (p : SPath) (i : Nat),
@@ -1701,7 +1701,7 @@ theorem zeroInner_const (n : Nat) : ∀ (k : Nat) {Γ' : RCtx} (l : Locals E.lay
   | k + 1, _, .cons _ r => Const.bind (zeroVal_const n _) fun _ => Const.bind (zeroInner_const n k r) fun _ => Const.pure _
 theorem copyInto_const (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v : RVal E.layout σ) :
     Const (copyInto (Γ := Γ) F n τ p v) := by
-  unfold copyInto; const_go [heapPut_const, alloc_const, readCell_const, readAt_const, applyOp_const, setCell_const, writeAt_const, readLen_const, writeLen_const, heapObj_const, heapAt_const, heapBytes_const, allocRef_const, storRef_const, getV_const, zeroVal_const, zeroData_const, loadMem_const, deleteStor_const, storeData_const, storeVal_const, memSet_const]
+  unfold copyInto; const_go [cdToMem_const, heapPut_const, alloc_const, readCell_const, readAt_const, applyOp_const, setCell_const, writeAt_const, readLen_const, writeLen_const, heapObj_const, heapAt_const, heapBytes_const, allocRef_const, storRef_const, getV_const, zeroVal_const, zeroData_const, loadMem_const, deleteStor_const, storeData_const, storeVal_const, memSet_const]
 theorem extReturn_const (rs : List STy) (o : Outcome) : Const (extReturn (E := E) (Γ := Γ) rs o) := by
   unfold extReturn; const_go [reraise_const]
 theorem getterPath_const (F : Fr) (n : Nat) (data : Solidity.Roadmap.Bytes) : ∀ (τ : STy) (p : SPath) (i : Nat),

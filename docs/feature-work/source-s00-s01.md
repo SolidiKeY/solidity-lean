@@ -553,7 +553,7 @@ rooted at it. 6 are deferred with a stage and a reason:
 
 | Constructor | Stage | Reason |
 |---|---|---|
-| `slice` | S02 | calldata slices are typed with S02's calldata references |
+| `slice` | S02 | calldata slices are typed with S02's calldata references (typed since lane FU2-B, [source-soundness.md](source-soundness.md)) |
 | `callOptions` | S02/S03 | call options belong to external calls and creation |
 | `metaType` | S04.02 | `type(T)` members read the artifact table and ABI identities |
 | `new` | S03 | creation and memory allocation |

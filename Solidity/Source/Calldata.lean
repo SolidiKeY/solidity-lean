@@ -29,7 +29,9 @@ This module proves, for that fragment:
   `evalE_cdSlice_ok` (`x[s:e]`) keep `MemOK` and halt only without `stuck`.
 
 A `calldata` reference agrees with every heap typing (`Val.RefOK`): the
-call data is read only and its reads are bounded by the reference's length.
+call data is read only, and reads past its end return zeros (as
+`calldataload`); no invariant ties a reference's offset and length to
+`Fr.cd`, which entry decoding respects but the theorems do not need.
 
 Not modelled (named, `stuck` or refused): `calldata` structs, static
 arrays and nested arrays (dispatch refuses them as before), a `calldata`

@@ -32,7 +32,9 @@ def unitC : Syn .unit :=
     (.cons (.stateVar (.elem (.int false 8 (by decide))) none none none false "small" .none)
       .nil)))))) .nil)
 
-/-- The body context of `function f(uint256 a, bool b, address o) returns (uint256)`. -/
+/-- The body context of `function f(uint256 a, bool b, address o, bytes calldata cd) returns (uint256)`
+(`cd` for the slice witness, lane FU2-B; appended outermost, so the other
+locals keep their positions). -/
 def Γ : Ctx :=
   { env := unitC.env, scope := some "C",
     locals := [("o", .address false), ("b", .bool), ("a", .int IntTy.u256), ("cd", .bytes .calldata)],

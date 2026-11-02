@@ -23,8 +23,8 @@ every constructor without a wildcard):
   `elemType`, the callee of a conversion and a type expression of
   `abi.decode`, lane FU2-B) is evaluated inside that rule's node
   (`semExprCoverage_of_operand`); the types `abi.decode` refuses (static
-  arrays, structs, nested arrays, fixed point, external function types,
-  `bytes calldata` data) have no derivation and are recorded in
+  arrays, structs, nested arrays, fixed point, external function types)
+  have no derivation and are recorded in
   `docs/feature-work/source-soundness.md`.
 
 `semExprCoverage_of_typed` and `semStmtCoverage_of_typed` prove the first

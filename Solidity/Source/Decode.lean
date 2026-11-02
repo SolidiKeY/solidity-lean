@@ -36,7 +36,9 @@ This module proves, for that fragment:
 
 Named refusals outside the fragment (no derivation): static arrays,
 structs, nested arrays, fixed point, external function types, qualified
-type names (`L.S`), `bytes calldata` data, `abi.decode(data, ())`.
+type names (`L.S`), `abi.decode(data, ())`. (`bytes calldata` data is
+read through its reference since item 2, `Solidity/Source/Calldata.lean`;
+no arm theorem covers it.)
 -/
 
 namespace Solidity.Source

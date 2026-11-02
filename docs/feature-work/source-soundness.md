@@ -278,8 +278,9 @@ condition is also a proof gap only.
 Progress proofs must use `heapPut_ok`, which keeps the halt detail
 `heapPut_pres` drops. `delete` of a local or memory location keeps
 `MemOK` (`deleteLoc_mem`, below); locals holding calldata references are
-not covered (`Val.RefOK` of a `cdRef` is
-`False`; the semantics creates none).
+not covered (`Val.RefOK` of a `cdRef` was
+`False`; the semantics created none. Since lane FU2-B it is `True`, and
+`deleteLoc` of a local covers them; see "Item 2").
 
 **The shape invariant, first use.** `HeapShaped h` (`Data.Top`: a
 top-level object is a `Data.val` only at a type without a location) is
@@ -974,8 +975,11 @@ is a reference into the frame's call data, `Fr.cd`
 call's input): the absolute offset of its data and its length (elements
 of an array, bytes of `bytes`/`string`). The call data is read only:
 `Loc.cd off` (an element) has no write (`writeLoc` is `stuck` on it, and
-S01 types no `calldata` lvalue), and `Val.RefOK` of a reference is `True`
-under every heap typing.
+S01 types no `calldata` element, byte or member lvalue; a `calldata` local
+is rebound, not written through), and `Val.RefOK` of a reference is `True`
+under every heap typing: no invariant ties the offset and length to
+`Fr.cd` (reads past the data return zeros, as `calldataload`; entry
+decoding builds only references within the data).
 
 **Entry** (`decodeArg`, `Solidity/Source/Eval.lean`). A `bytes calldata`,
 `string calldata` or one-word-element `T[] calldata` parameter is kept as a
@@ -997,8 +1001,9 @@ Horizon's step proofs take them without new lemmas, except
 - `b[i]` on `bytes calldata` (`cdByte`): past the length, Panic `0x32`;
 - `x[s:e]`, `x[s:]`, `x[:e]`, `x[:]` (`Typed.slice`, `sliceFrom`,
   `sliceTo`, `sliceAll`; `RExpr.slice`; `sliceR`): on `bytes calldata` and
-  one-word-element dynamic `calldata` arrays (`STy.sliceable`; solc refuses
-  `string` slices); after evaluating the base, the start and the end (in
+  one-word-element dynamic `calldata` arrays (`STy.sliceable`; `string
+  calldata` slices, and slices of arrays of static multi-word elements,
+  are refused here; solc may accept them, not checked against solc); after evaluating the base, the start and the end (in
   that order, as solc), `e < s` or a length below `e` reverts with no data
   (solc's `calldata_array_index_range_access`); the slice is a reference at
   the base's type (solc's slice type converts implicitly to it);
@@ -1052,6 +1057,28 @@ is not modelled), a `calldata` parameter of a constructor (solc refuses
 one; here its offset would be relative to the arguments, which no program
 reaches). Progress of the arms is closed for locals; for other operand
 expressions it is the walk's.
+
+**Review (finder and skeptic, read-only, on d7291b7).** Confirmed and
+fixed: a typed copy of `calldata` into storage (`s = b`, `STy.copiesTo`
+admits it) reached `storeVal` with a reference and was `stuck`; it now goes
+through `cdToMem` (each element validated) and the memory-to-storage copy
+(`copyInto`; control `u`); `bytesN(b)` of `calldata` `bytes`
+(`bytes4(data[:4])`) was `stuck` in `convExplicitRV`; it now takes the
+first bytes, as the memory arm (control `t`); stale text (`Val.RefOK` of a
+reference was `False`, `bytes calldata` among `abi.decode`'s refusals in
+`Ledger.lean`/`Decode.lean`, `coverage-plan.md`, `source-inputs.md`, the
+S00/S01 table, the example context's docstring, the "no calldata lvalue"
+wording, the `Calldata.lean` header's "bounded" wording, `assurance.md`);
+the documented reason for refusing `string` slices (solc may accept them;
+now "not checked against solc"); untested 32-byte slice strides and `[:e]`
+(controls `q`, `r`). Recorded, not changed: the arm theorems cover locals
+with index locals (`Typed.toR` emits constant bounds for `a[s:]`, `a[:e]`,
+`a[:]`, and byte reads, `bytes` length, `abi.decode` of `calldata` and the
+conversions have no arm theorem); `Semantics/AbiEntry.lean`'s refusal
+message still names the source semantics (another lane's file). Accepted
+by both: the entry checks and absolute offsets against solc, validation at
+the read, the slice checks and their order, read-only access, the
+`RefOK` change (no proof relied on `False`), `hasType_iff`, `uniqE_slice`.
 
 ### Item 3: agreement with the elaborated model (not stated; why)
 
