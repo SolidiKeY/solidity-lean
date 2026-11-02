@@ -77,3 +77,35 @@ import SolidityBridge.RoadmapV15.P10.FrozenWitness
 
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBounds
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBoundsControls
+
+import SolidityBridge.RoadmapV15.P10.MachineObservation
+import SolidityBridge.RoadmapV15.P10.MachineObservationControls
+
+import SolidityBridge.RoadmapV15.P10.CodeExtent
+import SolidityBridge.RoadmapV15.P10.CodeExtentControls
+
+import SolidityBridge.RoadmapV15.P10.SignExtensionConsumer
+import SolidityBridge.RoadmapV15.P10.SignExtensionControls
+
+import SolidityBridge.RoadmapV15.P10.ExternalCodeExtent
+import SolidityBridge.RoadmapV15.P10.ExternalCodeExtentControls
+
+import SolidityBridge.RoadmapV15.P10.ByteObservation
+import SolidityBridge.RoadmapV15.P10.ByteObservationControls
+
+import SolidityBridge.RoadmapV15.P10.CalldataExtent
+import SolidityBridge.RoadmapV15.P10.CalldataExtentControls
+
+import SolidityBridge.RoadmapV15.P10.EnvironmentTasksV1
+import SolidityBridge.RoadmapV15.P10.EnvironmentObservationProducer
+import SolidityBridge.RoadmapV15.P10.EnvironmentObservationWitness
+
+import SolidityBridge.RoadmapV15.P10.SignExtensionPositive
+import SolidityBridge.RoadmapV15.P10.SignExtensionPositiveWitness
+
+import SolidityBridge.RoadmapV15.P10.SignExtensionResidueWitness
+
+import SolidityBridge.RoadmapV15.P10.SignExtensionAllWitness
+
+import SolidityBridge.RoadmapV15.P10.UnsignedDivisionConsumer
+import SolidityBridge.RoadmapV15.P10.UnsignedDivisionControls

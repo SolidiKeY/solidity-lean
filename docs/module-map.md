@@ -1637,6 +1637,27 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/FrozenWitness.lean` | `FrozenV1.api` from existing P10 theorems; no new fact. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBounds.lean` | RETURNDATACOPY gate order and in-range gate, the gas-only charged state, and the out-of-range refusal lifted through `FrozenV1.api`. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnCopyBoundsControls.lean` | Populated gas, arity, range, endpoint, capacity and fuel controls; the gate does not depend on the static flag. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/MachineObservation.lean` | Actual fetched PC/GAS/MSIZE whole-State and X agreement with explicit gas/capacity bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/MachineObservationControls.lean` | Populated machine observations, raw-word/stack/gas/fuel negatives and ordered three-opcode regression. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CodeExtent.lean` | Native fetched CODESIZE whole-State and X agreement with explicit gas/capacity bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CodeExtentControls.lean` | Complete code-buffer observations, populated states and gas/fuel/stack/extent negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionConsumer.lean` | Native fetched SIGNEXTEND and proved Scalar/reference out-of-range byte-index transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionControls.lean` | Populated signed/narrow/boundary values, complete code and ordered fuel/gas/stack refusals. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ExternalCodeExtent.lean` | Actual fetched EXTCODESIZE account-code lookup, warm/cold charge and whole-State transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ExternalCodeExtentControls.lean` | Populated distinct account code, low160 alias, warm/static/resource and source-refusal controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ByteObservation.lean` | Fetched BYTE, exact big-endian arithmetic and intrinsic typed word-byte image transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ByteObservationControls.lean` | Complete ordered bytes, typed-image client, endian/index and stack/gas/fuel refusal controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CalldataExtent.lean` | Arbitrary fetched CALLDATASIZE site and explicit Source.Calldata.input byte installation transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CalldataExtentControls.lean` | Nonzero-PC/source-input clients, decoded-object separation and exact size/resource observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentTasksV1.lean` | Generated unproved environment producer statements and separate routine cost/arity/expansion/refusal claims. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentObservationProducer.lean` | Actual fetched ORIGIN/GASPRICE/CHAINID whole-State and X clauses from explicit finite local facts. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentObservationWitness.lean` | Concrete local-fact witnesses and populated producer clients with native resource/origin negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionPositive.lean` | Actual mask/sign-bit arithmetic and intrinsic/fetched SIGNEXTEND agreement below each byte-width sign bit. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionPositiveWitness.lean` | Nonzero 8/16/256-bit clients, strict-bound and byte-index negatives, complete State/code observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionResidueWitness.lean` | High-bit and negative-fullword truncation clients, clear-sign-residue and ordered State controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionAllWitness.lean` | Unified all-index/sign SIGNEXTEND clients, full-width/large-index boundaries and wrong-unsigned/wrap controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedDivisionConsumer.lean` | Arbitrary emitted-site DIV/MOD word/Scalar/charged fetched-State and X transport, plus actual output-capacity refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedDivisionControls.lean` | Populated unsigned high-word, zero, maximum, stack-capacity and ordered refusal/observation controls. |
 
 ### P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
 
