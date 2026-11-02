@@ -1313,7 +1313,9 @@ admits physical assembly or proves target-byte/original-callee transport.
 | Module | Purpose |
 |---|---|
 | `Calculus/CallFunctionAffine.lean` | Checked affine power coefficients, early-overflow preservation and exact shared-leaf cases |
-| `Tools/CallFunctionShare.lean` | Kernel-checked explicit sharing/closure and original-walk versus whole-leaf measurements |
+| `Tools/CallFunctionShare.lean` | Stable explicit API aliases and original-walk versus whole-leaf measurements |
 | `Examples/Tactics/CallFunctionAffine.lean` | Inhabited order, zero, word-edge, overflow and false-result controls |
 | `Examples/Tactics/CallFunctionShare.lean` | Actual parsed non-offset call-family source proofs and old/new leaf pins |
 | `Examples/Tactics/CallFunctionShareControls.lean` | Parsed countermodels and transactional profile/no-shrink refusal controls |
+| `Calculus/CloseCallSharing.lean` | Bounded default leaf consumer; synchronous internal profile certificates and disjoint plain/joined routes |
+| `Examples/Tactics/CallSharingDefault.lean` | Closer-only import, default source proofs, named leaf and joined-call controls |

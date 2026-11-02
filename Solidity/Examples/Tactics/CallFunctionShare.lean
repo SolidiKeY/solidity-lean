@@ -38,11 +38,11 @@ The open count belongs to the original walk, before this optional consumer. -/
 #guard_msgs in
 #proof_share_size dl!{ a < 1000 → ⟨ uint y = f1(a); ⟩ y >= a }
 
-/-- info: 5 node(s), 1 branch(es), 1 original open, old largest leaf 274, shared largest leaf 269 term node(s) -/
+/-- info: 5 node(s), 1 branch(es), 0 original open, old largest leaf 274, shared largest leaf 269 term node(s) -/
 #guard_msgs in
 #proof_share_size dl!{ a < 1000 → ⟨ uint y = f6(a); ⟩ y >= a }
 
-/-- info: 5 node(s), 1 branch(es), 1 original open, old largest leaf 530, shared largest leaf 302 term node(s) -/
+/-- info: 5 node(s), 1 branch(es), 0 original open, old largest leaf 530, shared largest leaf 302 term node(s) -/
 #guard_msgs in
 #proof_share_size dl!{ a < 1000 → ⟨ uint y = f7(a); ⟩ y >= a }
 

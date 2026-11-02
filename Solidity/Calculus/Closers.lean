@@ -2,6 +2,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.UpdRuleScoped
+import Solidity.Calculus.CloseCallSharing
 
 /-!
 # The closers on a scoped leaf

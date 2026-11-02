@@ -10,7 +10,7 @@
     "code": "@[implemented_by transformM]"
   },
   {
-    "file": "Solidity/Tools/CallFunctionShare.lean",
+    "file": "Solidity/Calculus/CloseCallSharing.lean",
     "kind": "unsafe",
     "code": "let (quoted, shrunk) \u2190 unsafe evalExpr (Expr \u00d7 Bool)"
   },

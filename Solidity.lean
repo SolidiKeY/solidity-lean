@@ -971,3 +971,5 @@ import Solidity.Tools.CallFunctionShare
 import Solidity.Examples.Tactics.CallFunctionAffine
 import Solidity.Examples.Tactics.CallFunctionShare
 import Solidity.Examples.Tactics.CallFunctionShareControls
+import Solidity.Calculus.CloseCallSharing
+import Solidity.Examples.Tactics.CallSharingDefault
