@@ -1023,3 +1023,7 @@ import Solidity.Backend.InternalFlow.RuntimeWorld
 import Solidity.Backend.InternalFlow.RuntimeGuardedFrame
 
 import Solidity.Backend.InternalFlow.WorldResultEmission
+
+import Solidity.Backend.InternalFlow.ProgramComposition
+
+import Solidity.Backend.InternalFlow.WorldProgramTarget

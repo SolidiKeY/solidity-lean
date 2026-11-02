@@ -3844,3 +3844,57 @@ composition candidate is whole-program prefix/certificate joining (public
 Calls.Program currently supplies statement-cons composition); inspect and consume
 published Prog.join/DeferredSource.join_run instead of duplicating an evaluator.
 No general independent-work-exhaustion or lane-completion conclusion follows.
+
+
+## C52 — whole-program target frames and actual world-body endpoints
+
+Owned `ProgramComposition.join` constructs a real Calls.Program for existing
+Prog.join from two genuinely checked program certificates. It derives, rather
+than assumes, actual intermediate StateRepr, next AllocationInput, complete stack,
+composed BaseExtends and GrowsAllocator. Need is max of the actual constituent
+frame needs. Cost is first cost plus second cost at the ACTUAL successful source
+prefix output, or zero suffix cost after a first failure. Published
+DeferredSource.join_run supplies execution algebra; no evaluator/syntax, private
+producer access, public selector change or source judgment is introduced.
+
+The populated ProgramCompositionChecks client uses the unchanged published-style
+prefix and actual public bad/good memory-result call selectors. Initial capacity
+is discharged, not supplied at an arbitrary midpoint. Good total cost7 reaches
+cursor263; bad total cost3 reverts. Complete original20-element ordered target
+observation remains `[77,263,99,42,256,256,260,42,11,260,260,0,0,2,7,11,0,2,0,0]`,
+including protected stack/sentinel, old object and both aliases, scalar42/argument11,
+private default object and returned object2. Wrong alias/cursor and included-cost
+controls retain successful baselines. Independent read-only review requested an
+actual failing FIRST constituent with nonempty allocating suffix: the admitted
+suffix has real cost2 at the separate successful baseline; actual source/target
+failure absorbs it, joined cost remains3 rather than5. This metadata comparison
+is not a failed-state/frontier or absence-of-side-effects claim.
+
+`WorldProgramTarget.frame_endpoint` extracts actual body execution and settlement
+from successful World.callFrame, identifies the represented initial state by
+actual lookup/entry determinism, then consumes the real checked body certificate.
+Only the BODY has target execution/StateRepr/stack/BaseExtends/GrowsAllocator;
+world entry and settlement do not thereby have target implementations. The
+fixture discharges every premise at an actual ordinary zero-payment world entry
+and successful settlement, retaining the same complete populated endpoint.
+`frame_revert` uses the SAME actual bare body error to derive ordinary world
+failure and checked body revert; it consumes C51 frame_failure unchanged. Its
+concrete bad client is inhabited. Arbitrary world errors cannot be inverted to
+body errors; panic, payload failures, exhaustion and divergence are not collapsed
+to bare revert. Error-valued results contain no failed state. There is no ABI,
+gas/physical EVM, byte/journal/world rollback, callback, target transient/EIP1153
+or general source-lowering claim.
+
+Source reviews pass after the requested first-failure control. Failed syntax and
+dependent-rewrite probes are retained; no proof/recursion/time/resource bound was
+raised. New imports are checked through bounded focused closure and actual
+builtin axiom guards. Original fixture source/type/axiom order is preserved;
+registry additions are additive. Final counts and exact command outcomes are in
+the immutable handoff and raw evidence, not inferred from cache inventory.
+All original Work1–6/BackfillsA–B remain PARTIAL, and mandatory cached/raw/full/docs
+failures remain held to lane end under coordinator scheduling, not relabeled.
+General target runtime/uncapped recursion/full-signature dispatch, mixed nested
+and early-control loops, live byte-journal and transient/world applications
+still require the precise original producers. The source unbounded recursion
+semantics already exists; its faithful runtime/target lowering is still separate.
+Goal identity/status is unchanged. No publication/peer transfer is authorized.

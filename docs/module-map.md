@@ -1361,3 +1361,6 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Backend/InternalFlow/RuntimeGuardedFrame.lean` | General successful runtime-call frame/local/result consumer with genuine existing readsIn/withinM admission; not arbitrary mutating calls or effect-certified static world admission. |
 
 | `Solidity/Backend/InternalFlow/WorldResultEmission.lean` | Actual callee-prefix and caller-result failure state/parts feed existing checked byte emission/projected journals; explicit machine hooks, no world-memory representation or rollback claim. |
+
+| `Solidity/Backend/InternalFlow/ProgramComposition.lean` | Whole-program typed memory-call certificate composition via published Prog.join; exact reached allocation cost, max frame, stack, BaseExtends/GrowsAllocator and bare failure absorption. |
+| `Solidity/Backend/InternalFlow/WorldProgramTarget.lean` | Actual ordinary world entry/body success or bare failure coupled to a genuinely certified target body with explicit representation/capacity; no target world-entry/settlement implementation. |
