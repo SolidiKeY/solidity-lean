@@ -114,7 +114,7 @@ The independent task branch starts at `006fcd59`; no master merge or push is
 part of this work.
 
 The runtime gate ran in the attached managed executor, with
-`/workspace/.setup/activate.sh` sourced: Lean 4.24.0 (`797c613e`), Lake
+VM location `.setup/activate.sh` sourced: Lean 4.24.0 (`797c613e`), Lake
 5.0.0-src+797c613, and a successful `lake build Solidity.KeySort`.
 `node scripts/solidity-upstream.mjs verify` verified all 11,622 archived files.
 The exact reference compiler is 0.8.38+1835d247, SHA-256
@@ -249,7 +249,7 @@ compiler: `check-abi-vectors.mjs` reports 31 EVM vectors and 5 compiler rejectio
 cases; `check-abi-hex-call.mjs` reports 18 legacy/via-IR EVM runs and 20 compiler
 rejections. These compiler rejections are reference checks, not Lean coverage.
 Their documented optional dependencies were installed only under
-`/workspace/.setup/abi-reference`; the core/package dependencies are unchanged.
+VM location `.setup/abi-reference`; the core/package dependencies are unchanged.
 The unchanged `SortCheck/Faithfulness.lean` passed both a direct configured Lean
 check and a separate Lake rebuild (337 s), after the earlier broad invocation
 reported process exit 135 without an elaboration diagnostic. No proof limit or
@@ -940,7 +940,7 @@ checked independently by the collector. The compiler remains SHA256
 runner dc97568c2597dc4cb65a4a153d21d3389f9fc5c8067b19aa70a2474efb5ea3fc,
 and archive 9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d.
 The representative command is node scripts/solidity-upstream.mjs run --compiler
-/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --filter
+VM setup: soljson/soljson-v0.8.38+commit.1835d247.js --filter
 <exact fixture path> --batch-size 1 --out <distinct reviewed-inventory directory>;
 the report's command array retains the actual separate flag/value arguments.
 The original 120000ms process limit and 1000 loop fuel remain unchanged.

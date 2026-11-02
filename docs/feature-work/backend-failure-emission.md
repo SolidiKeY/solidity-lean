@@ -2,7 +2,7 @@
 
 Assigned base: `50658f41061b366d6e503d1e8a3a324a281e9fca`.
 Branch: `codex/solidity-independent5-20261029/failure-emission`.
-Checkout: `/workspace/scratch/failure-emission-assigned`.
+Checkout: VM location `scratch/failure-emission-assigned`.
 The original clean checkout on branch `work` at
 `dedb3aee5743025aeb6d8f7219c9b6b9c1e00e5d` is preserved untouched.
 This lane imports no other new lane and edits no reserved implementation.
@@ -100,7 +100,7 @@ and `Build completed successfully (2 jobs).`, peak 158,109,696 bytes.
 RUNTIME_GATE_PASS applies only to this actual toolchain/runtime check.
 
 Exact logs and the capped runner are saved under
-`/workspace/scratch/failure-emission-evidence`.
+VM location `scratch/failure-emission-evidence`.
 The alternate lakefile changes only weak Lean arguments to add `-j1`, and
 is not a tracked package/configuration change. Full closure gates, final artifacts and later checkpoint commit IDs will be recorded as they run.
 No inherited failure is waived by historical results.
@@ -428,10 +428,10 @@ review findings/fixes remain in its saved review record. Final review follow-up
 and exact ownership/source-hash audits are saved with the external handoff.
 
 Absolute saved artifact locations:
-`/workspace/scratch/failure-emission-artifacts/original.patch`,
-`/workspace/scratch/failure-emission-artifacts/HANDOFF.md`,
-`/workspace/scratch/failure-emission-evidence`, and
-`/workspace/scratch/failure-emission-artifacts/SHA256SUMS`.
+VM location `scratch/failure-emission-artifacts/original.patch`,
+VM location `scratch/failure-emission-artifacts/HANDOFF.md`,
+VM location `scratch/failure-emission-evidence`, and
+VM location `scratch/failure-emission-artifacts/SHA256SUMS`.
 The evidence archive excludes private caches, node_modules and toolchain
 symlinks; those caches remain on this VM for reuse. The external handoff records
 actual final head, observed elapsed interval, final review results and checksums.

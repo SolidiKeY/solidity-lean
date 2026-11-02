@@ -20,7 +20,7 @@ Read-only `git fetch --no-tags origin master` and matching `ls-remote` at
 wasfb379ae20f10e2c92113453ddd9d40d8f2efbe09. No switch, merge or cherry-pick.
 Exact fetched/ref response, source blobs, SHA256, Git blob IDs, local/published
 comparisons and type headers live in
-/workspace/next10-diamond-try-evidence/post-m1-design and the JSON alongside.
+VM location: next10-diamond-try-evidence/post-m1-design and the JSON alongside.
 Source inspection is not a fresh build, axiom audit or execution receipt.
 
 The old blanket “no byte primitive is published” is outdated. Newly published

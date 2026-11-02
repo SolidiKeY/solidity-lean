@@ -9,8 +9,8 @@ Osaka EVM correspondence. Source denotation remains the existing intrinsic
 
 - Branch: `codex/solidity-independent5-20261029/environment-lowering`.
 - Exact base: `50658f41061b366d6e503d1e8a3a324a281e9fca`.
-- Repository: `/workspace/scratch/environment-lowering-assigned`.
-- Preserved original checkout: `/workspace/solidity-lean`, branch `work`,
+- Repository: VM location `scratch/environment-lowering-assigned`.
+- Preserved original checkout: `.`, branch `work`,
   head `dedb3aee5743025aeb6d8f7219c9b6b9c1e00e5d`.
 - Owned modules: `Solidity/Backend/Environment/`; this document and append-only
   imports/module-map/document registry rows. No other new/unmerged lane is imported; committed reserved interfaces are reused read-only.
@@ -116,7 +116,7 @@ code/log observation, new premise, verdict or target predicate is introduced.
 `Evm/Machine.lean` has symbolic crypto/storage operations and simplified
 transaction inputs. `Backend/Opcode.lean` has the actual Osaka bytes but no
 intrinsic environment adapter at the frozen base. The saved reproduction is
-`/workspace/scratch/environment-lowering-evidence/gap.txt`.
+VM location `scratch/environment-lowering-evidence/gap.txt`.
 Nontrivial control: BALANCE of `2^160+7` reads account 7; SELFBALANCE ignores
 an existing stack word and reads self's ledger entry. Treating them alike
 changes stack height and, on the inhabited sample, returns 73 instead of 41.
@@ -196,7 +196,7 @@ The outer VM has a 16 GiB cgroup and no host swap. The remaining VM memory is
 OS headroom, without an additional coordinator-host reserve inside this VM.
 The repository writer lock is held for writes/checks.
 
-Evidence directory: `/workspace/scratch/environment-lowering-evidence`.
+Evidence directory: VM location `scratch/environment-lowering-evidence`.
 The first KeySort attempt failed because the container's default cache path
 was unwritable. Retained as failed. The corrected task-private cache run:
 `lake -f lakefile.environment.toml build Solidity.KeySort` printed
@@ -485,7 +485,7 @@ all 13 exact-name programs pass, including the signed-bound addition. Exit 0,
 remain distinct evidence; the latter do not prove a whole EVM correspondence.
 
 The final handoff, original committed diff, gate scripts/logs and checksum
-manifest are saved under `/workspace/scratch/environment-lowering-evidence`.
+manifest are saved under VM location `scratch/environment-lowering-evidence`.
 That handoff records the final full committed head and measured recovery-work
 elapsed time, avoiding a self-referential commit hash in this document. The
 preserved original worktree is not integrated or modified. No push, merge or

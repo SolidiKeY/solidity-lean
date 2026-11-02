@@ -28,7 +28,7 @@ encoding with its unchanged side conditions and limits. No ledger cut,
 
 ## Baseline and observations
 
-Checkout `/workspace/solidity-lean`, origin
+Checkout `.`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, branch
 `codex/next10-kint-two-anchors`, published base and fetched `origin/master`
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`; ancestry confirmed. Lean 4.24.0,
@@ -59,7 +59,7 @@ Solidity coverage is claimed for these pure KeY-int logic fixtures.
 ## Validation evidence
 
 Raw logs, baseline certificate source, resource measurements and reproducible
-bounded-check helpers are in `/workspace/next10-kint-evidence`.
+bounded-check helpers are in VM location `next10-kint-evidence`.
 
 | Command/check | Exit and measurement |
 |---|---|
@@ -199,7 +199,7 @@ expected result, policy, heartbeat/fuel/node/test budget or axiom changed.
 Conditional/theorem-based exact decision certificates are not a fresh concrete
 native decision run; no Solidity compiler/EVM observation was added.
 Evidence-local configuration/replay details are in
-`/workspace/next10-kint-evidence/continuation-b4b6f3b8/README.md`.
+VM location `next10-kint-evidence/continuation-b4b6f3b8/README.md`.
 Independent finder and skeptic read-only continuation reviews found no
 confirmed defects. Neither used Lean/server/builds or wrote files; they checked
 the actual invocation, source hashes, limits, renewed checks, replay safety and

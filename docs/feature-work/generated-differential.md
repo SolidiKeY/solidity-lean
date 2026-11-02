@@ -2,7 +2,7 @@
 
 Starting point: SolidiKeY/solidity-lean `origin/master`
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`, clean attached clone
-`/workspace/solidity-lean`, branch `codex/generated-differential`, 2026-10-28.
+`.`, branch `codex/generated-differential`, 2026-10-28.
 On this commit the documented D/E harness had neither a `solcases` target nor
 a typed Stmt-to-Solidity printer. Existing `#difftest` uses the internal compiler;
 fixed EthereumJS replay vectors are separate. No existing group or semantics

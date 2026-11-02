@@ -3,7 +3,7 @@
 Producer source checkpoint: `04da7063854f2bb719e2bed9ab52c306279da4ee`.
 Frozen base: `8bd8742ad987d566f7ba7624372cec1c020be07c`.
 Branch: `codex/solidity-automation-20261031/va2-sharing`.
-Repository: `/workspace/va2-sharing`.
+Repository: VM location `va2-sharing`.
 
 This is an incremental concrete producer interface, not completion of AU03/AU04 or final combined-tree validation. The accompanying committed bundle and source archive identify immutable inputs. Module hashes and verbatim source declarations are exported alongside this document; consume those declarations, not an assumed future Residue theorem.
 

@@ -22,7 +22,7 @@ of absence under arbitrary other filenames or hidden locations.
 
 | Scope inspected | Actual evidence | What it does not establish |
 |---|---|---|
-| /workspace/.setup/tools; /workspace/.setup/cache | Lean4.24.0tool directory/archive; disk Lake/mathlib caches. No backend-named candidate. | Lean, compiler WASM and caches are not EVMC backends. No executable was run to probe engine version. |
+| VM setup: tools; VM setup: cache | Lean4.24.0tool directory/archive; disk Lake/mathlib caches. No backend-named candidate. | Lean, compiler WASM and caches are not EVMC backends. No executable was run to probe engine version. |
 | repo .lake/build/bin | solidity-lean and solkeycheck plus hash/trace artifacts. | These are existing Lean tooling, not soltest/evmone. No bytecode backend inferred from filenames. |
 | repo build,deps,.deps; retained upstream root CMake/cmake/deps/libsolidity/libevmasm/evmone/.gitmodules | Explicitly absent. Repository root .gitmodules also absent. | Cannot reconstruct full host build/dependency closure from test-only extraction. Prior supplemental GasMeter.h is not a complete build tree. |
 | /usr/local/lib,/usr/local/bin,/usr/lib/x86_64-linux-gnu,/usr/bin; /opt/evmone,/opt/solidity,/opt/soltest | Immediate native install names checked; no matching candidate; named /opt paths absent. | No global package/database or unknown-path absence claim. No binary hash/build provenance/runtime-supported-revision result exists to record. |
@@ -190,4 +190,4 @@ attempted-step semantics: dynamic gas work may precede the event, next opcode
 handler is not executed after host-limit throw. Neither reviewer certified
 runtime compatibility, backend availability, relation approval or assignment
 completion. Exact review scope/raw commands/evidence are under
-`/workspace/next10-diamond-try-evidence/backend-prerequisite`.
+VM location `next10-diamond-try-evidence/backend-prerequisite`.

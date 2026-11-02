@@ -324,7 +324,7 @@ Task branch `codex/group05-function-dispatch` starts at `origin/master`
 remain unchanged: their model hash belongs to the adapter on `cadb628c`,
 not this branch. The attached managed executor passed Lean 4.24.0, Lake
 5.0.0-src+797c613 and `lake build Solidity.KeySort` after sourcing
-`/workspace/.setup/activate.sh`. The archive verifier checked all 11,622
+VM location `.setup/activate.sh`. The archive verifier checked all 11,622
 files. Reproductions use the runner's SHA-checked Solidity 0.8.38 compiler;
 no source, expected output, archive, frozen AST or historical result is edited.
 
@@ -701,7 +701,7 @@ in the source-proof controls.
 
 ### Reproduction and provenance
 
-Source `/workspace/.setup/activate.sh` in `/workspace/solidity-lean`. The managed
+Source VM location `.setup/activate.sh` in `.`. The managed
 runtime gate passes with Lean 4.24.0, Lake 5.0.0-src+797c613 and
 `lake build Solidity.KeySort Solidity.Tools.Upstream`.
 `node scripts/solidity-upstream.mjs verify` verifies all 11,622 archived files.
@@ -709,7 +709,7 @@ For each full path recorded in the evidence, the exact pattern is:
 
 ```sh
 node scripts/solidity-upstream.mjs run \
-  --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+  --compiler ${VM_SETUP}/soljson/soljson-v0.8.38+commit.1835d247.js \
   --filter "$fixture_path" --batch-size 1 \
   --out ".lake/upstream/group06-reviewed/$fixture_name"
 ```
@@ -1302,10 +1302,10 @@ Remaining roots, without weakened expectations:
 
 ### Reproduction and validation
 
-Use the attached managed executor at `/workspace/solidity-lean`:
+Use the attached managed executor at `.`:
 
 ```sh
-source /workspace/.setup/activate.sh
+# Source the VM setup activate.sh
 lean --version
 lake --version
 lake build Solidity.KeySort
@@ -1316,13 +1316,13 @@ The concrete runtime gate passes: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613; KeySort
 build succeeds. Snapshot verification checks all 11,622 files. The runner's
 SHA-checked compiler is
-`/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js`, SHA-256
+VM location `.setup/soljson/soljson-v0.8.38+commit.1835d247.js`, SHA-256
 `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
 For every exact path in the evidence file:
 
 ```sh
 node scripts/solidity-upstream.mjs run \
-  --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+  --compiler ${VM_SETUP}/soljson/soljson-v0.8.38+commit.1835d247.js \
   --filter EXACT_PATH --batch-size 1 \
   --out .lake/upstream/group08/BASENAME-handoff
 ```

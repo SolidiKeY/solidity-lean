@@ -445,7 +445,7 @@ default build and synchronous elaboration for thread-sensitive test-suite
 modules; neither changed proof budgets. Clean page-cache reclamation retained
 all cache files on disk. Interrupted transport-supervisor attempts, failed
 checks, exact configs and all resource results are retained in
-`/workspace/solidity-compiler10-20261028-memory-internal-calls` with the handoff.
+VM location `solidity-compiler10-20261028-memory-internal-calls` with the handoff.
 
 Independent read-only finder and skeptic reviews used no Lean process/server.
 No soundness finding remains. Their confirmed fixes added successful void-call
@@ -1167,7 +1167,7 @@ The coordinator must complete the combined audit under its resource scope.
 
 The recovery base is `8445c3fc203144251b9d1fc9181f7f61a8189522`, branch
 `codex/solidity-copy-recovery-20261030/memory-storage-copy`. The isolated
-predecessor at `/workspace/memory-storage-copy-preserved` reproduces the exact
+predecessor at VM location `memory-storage-copy-preserved` reproduces the exact
 original HEAD and porcelain-v1 NUL-delimited index/worktree status. Recovery
 archive SHA256 is `5d4432ab8541e9b1669a464c9e1d350921f769a8e996308614971843f51a6f9e`;
 all five member size/hash pairs, four untracked files and 381 evidence files
@@ -1177,9 +1177,9 @@ recovery members are read-only. Other owners' broad staging remains isolated.
 Only this task's algorithms, proof/admission changes, controls and additive
 root/trust/docs integration were reconciled onto the pinned base. The complete
 source and artifact hash inventory is
-`/workspace/memory-storage-copy-evidence/restored-source-sha256.json`. Historical
-`/workspace/memorycopy-*` log references below map to preserved basenames under
-`/workspace/memory-storage-copy-recovery/evidence`; they are not fresh passes.
+VM location `memory-storage-copy-evidence/restored-source-sha256.json`. Historical
+VM location `memorycopy-*` log references below map to preserved basenames under
+VM location `memory-storage-copy-recovery/evidence`; they are not fresh passes.
 
 Fresh runtime: Lean 4.24.0 (797c613), Lake 5.0.0-src+797c613;
 `lake -f lakefile.memorycopy-recovery.toml build Solidity.KeySort` exited 0.
@@ -1195,7 +1195,7 @@ Solidity.Evm.MemoryFixedMixedExamples Solidity.Evm.MemoryStorageLifecycleExample
 exited 0 (165 jobs, 518 seconds). Peak cgroup memory: 1,153,257,472 bytes;
 sampled aggregate RSS: 1,227,550,720 bytes (shared pages may be counted twice).
 The headroom monitor observed no reserve stop. Full logs and monitor JSON live
-under `/workspace/memory-storage-copy-evidence`. Lean MCP diagnostics are not
+under VM location `memory-storage-copy-evidence`. Lean MCP diagnostics are not
 available; installed per-file Lean checks are used instead.
 
 Independent read-only finder and skeptic verified recovery bytes/status and
@@ -1223,7 +1223,7 @@ The failed batch is retained. The five legacy targets passed in 77.36 s.
 
 The independent reference test passed all four legacy/viaIR × optimizer modes,
 with exact observations and deliberately wrong-observation rejection saved in
-`/workspace/memory-storage-copy-evidence/external-observations.json` (5.54 s,
+VM location `memory-storage-copy-evidence/external-observations.json` (5.54 s,
 343,310,336-byte cgroup peak). The task-only transitive audit checks 90 theorem
 heads; its printed main axioms are exactly `propext`, `Classical.choice`,
 `Quot.sound` (14.33 s). This does not replace the pending combined TrustAudit.
@@ -1281,7 +1281,7 @@ TestSuite inventory, orphans, layers, strict automation, static trust and the
 two trust-script tests passed. Snapshot/rules/examples use the repository's
 existing `tests/migration/solkey` paths and unchanged pin
 `473da8944ca7329e6b76819863591407db26e7ec` (274 verified files). The original
-static batch's missing `/workspace/.setup/solkey.pin.json` exit 1 remains failed.
+static batch's missing VM location `.setup/solkey.pin.json` exit 1 remains failed.
 
 Actual root/import diagnostics fail because the unfinished full build has no
 `Solidity.Semantics.RecursiveStorage` artifact; combined `TrustAudit` diagnostics
@@ -1307,7 +1307,7 @@ unchanged kernel trust under synchronous scheduling, and exact-base source
 identity for UnitExamples (24 local dependencies), Derived17 and OpenLoops
 (227 each). Identity is not a baseline pass or proof of no resource regression.
 The final blocked-handoff review and checksum-bound artifact locations are
-recorded in `/workspace/memory-storage-copy-HANDOFF.json`. Resume only after
+recorded in VM location `memory-storage-copy-HANDOFF.json`. Resume only after
 a legitimate resource/dependency repair under the original constraints,
 inspecting surviving processes and the writer lock first. The owning modules
 are not silently repaired or excluded by this task.
@@ -1400,7 +1400,7 @@ Documentation checking still exits 1 with the base's 46 missing references and
 26 ambiguities, zero new/removed findings. This milestone remains **BLOCKED**.
 
 Versioned cumulative exports and the machine-readable handoff use
-`/workspace/memory-storage-copy-auditcaf9-*`; earlier checkpoint exports and
+VM location `memory-storage-copy-auditcaf9-*`; earlier checkpoint exports and
 both original checksum manifests remain unchanged. Independent finder/skeptic
 reviews approve blocked-handoff accuracy only, not all-gates completion. All
 raw attempts, failed setup/commit observations, resource measurements and safe
@@ -1792,7 +1792,7 @@ preserved the same observations and passed the examples in 7.45 s with
 1,157,050,368 bytes sampled RSS, without raising proof budgets. All failed
 attempts are retained as failures in the delivered logs.
 
-The resource guard is `/workspace/.cloudvm-solidity-compiler10/bounded.py`: a
+The resource guard is VM location `.cloudvm-solidity-compiler10/bounded.py`: a
 12 GiB inherited per-process address-space limit, 10 GiB sampled process-group
 RSS stop and 12 GiB whole-VM memory-current stop, on an existing 16 GiB hard
 VM cgroup with actual swap disabled. This is a measured guard, not a writable
@@ -1814,7 +1814,7 @@ does not replace the full build; its subsequent terminal result is recorded
 separately in the handoff.
 Full commands, exit codes, timings,
 peaks and hashes are delivered in
-`/workspace/solidity-compiler10-memory-reference-structs/`.
+VM location `solidity-compiler10-memory-reference-structs/`.
 
 Independent final read-only finder and skeptic reviews found no confirmed
 semantic defect; neither used a Lean server or ran builds. Earlier requests
@@ -1925,7 +1925,7 @@ remain **BLOCKED** while the current aggregate and source-script prerequisites,
 reruns and mandatory full TestSuite validation remain unresolved. Full logs,
 resource JSONs, original cumulative checkpoint, current-base task patch/bundle
 and checksums are exported under
-`/workspace/solidity-compiler10-memory-reference-structs-8445-compat`.
+VM location `solidity-compiler10-memory-reference-structs-8445-compat`.
 
 
 #### Completed affected checks and remaining aggregate blockers
@@ -2003,7 +2003,7 @@ is a budget-preserving repair by the appropriate proof owners/coordinator,
 followed by bounded gate confirmation. No worker push or merge of master occurred.
 The cumulative original checkpoint and current-base task export, full failed and
 passing logs, resource records, reviews and checksums are retained together in
-`/workspace/solidity-compiler10-memory-reference-structs-8445-compat`.
+VM location `solidity-compiler10-memory-reference-structs-8445-compat`.
 
 ### Historical review1 evidence (superseded)
 
@@ -2171,7 +2171,7 @@ this supports an integration checkpoint, **not assignment completion**. The
 mandatory full/import, combined trust, complete TestSuite/corpus and final
 handoff gates still require actual local terminal results. Published host
 success is not counted as this VM's pass. New evidence is retained separately
-in `/workspace/memory-storage-copy-published-20261101-evidence`.
+in VM location `memory-storage-copy-published-20261101-evidence`.
 
 Checkpoint documentation checking exits 1 on both published base and task tree:
 48 missing references and 37 ambiguities, byte-identical findings, zero delta.
@@ -2223,7 +2223,7 @@ the blocked full corpus build. The 93-headline kernel axiom audit and four-mode
 EVM observations above remain separate evidence, with unchanged inputs.
 
 All logs and the exact dependency ledger are in
-`/workspace/memory-storage-copy-published-20261101-evidence`. Old recovery inputs,
+VM location `memory-storage-copy-published-20261101-evidence`. Old recovery inputs,
 failed attempts and checksum-bound exports remain untouched. Terminal owned
 container layers were reclaimed only after preserving status, configuration,
 timestamped logs and mountpoint-only filesystem differences; source, caches,
@@ -2267,7 +2267,7 @@ retain unchanged task sources and inputs and remain separate evidence.
 The dependency-owner performance-repair question remains unanswered. This
 checkpoint does not authorize changes to other owners' proofs or sources.
 New evidence is saved separately in
-`/workspace/memory-storage-copy-import-chunks-20261102-evidence`; earlier source,
+VM location `memory-storage-copy-import-chunks-20261102-evidence`; earlier source,
 failed checks, capacity-failure records, caches and sealed artifacts are retained.
 Work remains blocked; the persistent goal remains incomplete.
 
@@ -2342,7 +2342,7 @@ Current strict documentation checking still exits 1: 48 missing references and
 new findings. This historical failure is not called passed.
 
 Current evidence is retained in
-`/workspace/memory-storage-copy-h1-20261102-evidence`. All historical failures
+VM location `memory-storage-copy-h1-20261102-evidence`. All historical failures
 and earlier seals remain available. No default-branch integration, push, goal
 transition or VM archival is performed. The original goal remains open as
 instructed for controller integration and original adequacy review.
@@ -2428,7 +2428,7 @@ kernel artifact provenance. The source milestone is implemented and validated;
 this does not substitute for the remaining whole-assignment gates. Cumulative
 commits, original immutable checkpoints, terminal logs, resource traces, review
 records and checksums are exported in
-`/workspace/solidity-compiler10-memory-reference-structs-22073-compat`.
+VM location `solidity-compiler10-memory-reference-structs-22073-compat`.
 
 ### Master integration review: reference structs and memory-call record (2026-11-02)
 

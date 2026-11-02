@@ -2,8 +2,8 @@
 
 Assigned branch: `codex/solidity-independent5-20261029/storage-values`.
 Exact base: `50658f41061b366d6e503d1e8a3a324a281e9fca`.
-Repository: `/workspace/scratch/storage-values-assigned`.
-Original `/workspace/solidity-lean` checkout is preserved on `work`.
+Repository: VM location `scratch/storage-values-assigned`.
+Original `.` checkout is preserved on `work`.
 
 This is a preparation component of G27.01–G27.05, not full source-to-bytecode
 preservation. Source reads remain the committed intrinsic `SVal.find`.
@@ -97,7 +97,7 @@ Model focused build: 21 jobs, peak 614789120 bytes. Controls focused build:
 Intermediate failed control checks were repaired using committed equation
 lemmas for opaque collection operations and explicit intrinsic field indices.
 
-Evidence directory: `/workspace/scratch/storage-values-evidence`.
+Evidence directory: VM location `scratch/storage-values-evidence`.
 The task-local `tests/storage-values/run-bounded.py` records commands, exits,
 elapsed time, sampled aggregate RSS, actual limits and cgroup peak outputs.
 The documentation same-base comparison found 46 missing references on both
@@ -362,7 +362,7 @@ The prior cold full gate is also retained; its terminal Docker exit was 0.
 | `node scripts/check-orphans.mjs` | Pass; 783 reachable, zero orphaned/not allowed. |
 | `bash scripts/check-trust.sh` | Pass; 798 sources, 241 inventoried sites, zero findings. |
 | `bash scripts/check-testsuite.sh --complete --solkey tests/migration/solkey/keyext.solidity.examples` | Pass; 564 functions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skips. |
-| `node scripts/check-automatic.mjs --strict --build-log /workspace/scratch/storage-values-evidence/full-gate-recovery3.log` | Pass; 491 automatic + 61 with a step budget, 0 manual; 11 refuted, 0 pending; all 26 timed TestSuite modules within unchanged 300 s budget. |
+| `node scripts/check-automatic.mjs --strict --build-log VM location: scratch/storage-values-evidence/full-gate-recovery3.log` | Pass; 491 automatic + 61 with a step budget, 0 manual; 11 refuted, 0 pending; all 26 timed TestSuite modules within unchanged 300 s budget. |
 | `bash scripts/check-doc-paths.sh` | Raw exit 1 on exact base and head: 46 missing plus 24 ambiguous references each, zero new findings. This inherited debt is not reported as a raw pass. |
 | Task-document relative links and staged whitespace | Checked separately in final evidence. |
 

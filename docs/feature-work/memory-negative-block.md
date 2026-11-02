@@ -13,12 +13,12 @@ integration and final evidence are at the end. No target, waiver, exclusion,
 profile or `DecisionTheorem` statement is changed. The other five original
 gap statements and all six original target certificates are preserved.
 
-Baseline: `/workspace/solidity-lean`, origin
+Baseline: `.`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, published master and branch
 base `f4dee4a29c2e208b36db4a4161a4723c735cd775`. The isolated branch is
 `codex/next10-memory-negative-block`. Fetch and ancestry checks succeeded.
 Lean 4.24.0 (`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`), Lake
-5.0.0-src+797c613. Activation is `/workspace/.setup/activate.sh`.
+5.0.0-src+797c613. Activation is VM location `.setup/activate.sh`.
 
 ## Interface
 
@@ -87,7 +87,7 @@ Final source and documentation review is recorded below.
 ## Validation
 
 Raw logs, command drivers, startup identity and original source hashes are
-exported under `/workspace/next10-memory-negative-block-evidence/`.
+exported under VM location `next10-memory-negative-block-evidence/`.
 The writer lock is
 `/tmp/solidity-lean-feature-groups-20261025/writer.lock`.
 Heavy checks run serially with `LEAN_NUM_THREADS=1` and explicit Lean
@@ -126,7 +126,7 @@ container, including cache; they are not isolated per-command RSS.
 | MCP all-severity `MemoryFloor.lean` | 3 | 543367168 | `mcp-controls-4.log` |
 | MCP all-severity `MemoryNegativeCountermodel.lean` | 3 | 632573952 | `mcp-countermodel-2.log` |
 | `lake build Solidity.Examples.MemoryFloor` (controls-build) | 2.147 | 198365184 | `controls-build.log` |
-| `lake env lean --tstack=131072 -j1 /workspace/next10-memory-negative-block-evidence/ObserveMemory.lean` (observations-after) | 27.459 | 222322688 | `observations-after.log` |
+| `lake env lean --tstack=131072 -j1 VM location: next10-memory-negative-block-evidence/ObserveMemory.lean` (observations-after) | 27.459 | 222322688 | `observations-after.log` |
 | `node scripts/check-orphans.mjs` (orphans) | 0.121 | 67735552 | `orphans.log` |
 | `node scripts/check-layers.mjs` (layers) | 0.141 | 69787648 | `layers.log` |
 | `node scripts/check-automatic.mjs --strict` (automatic-strict) | 0.042 | 69787648 | `automatic-strict.log` |
@@ -134,11 +134,11 @@ container, including cache; they are not isolated per-command RSS.
 | `python3 scripts/solidity-feature-audit.py` (inventory) | 0.045 | 169979904 | `inventory.log` |
 | `bash ./run-lean.sh` (full-run-lean) | 6267.705 | 12884901888 | `full-run-lean.log` |
 | `lake build Solidity.Examples.MemoryNegativeCountermodel` (countermodel-build) | 1.873 | 206585856 | `countermodel-build.log` |
-| `lake env lean --tstack=131072 -j1 /workspace/next10-memory-negative-block-evidence/ObserveFloor.lean` (floor-observations) | 3.411 | 206585856 | `floor-observations.log` |
+| `lake env lean --tstack=131072 -j1 VM location: next10-memory-negative-block-evidence/ObserveFloor.lean` (floor-observations) | 3.411 | 206585856 | `floor-observations.log` |
 | `bash ./run-lean.sh` (full-final-warm) | 2.714 | 451903488 | `full-final-warm.log` |
 | `node scripts/check-orphans.mjs` (orphans-final) | 0.157 | 451903488 | `orphans-final.log` |
 | `node scripts/check-layers.mjs` (layers-final) | 0.169 | 451903488 | `layers-final.log` |
-| `node scripts/check-automatic.mjs --strict --build-log /workspace/next10-memory-negative-block-evidence/full-run-lean.log` (automatic-strict-timed) | 0.068 | 451903488 | `automatic-strict-timed.log` |
+| `node scripts/check-automatic.mjs --strict --build-log VM location: next10-memory-negative-block-evidence/full-run-lean.log` (automatic-strict-timed) | 0.068 | 451903488 | `automatic-strict-timed.log` |
 | `bash scripts/check-trust.sh` (trust-final) | 5.023 | 451903488 | `trust-final.log` |
 | `python3 scripts/solidity-feature-audit.py` (inventory-final) | 0.058 | 451903488 | `inventory-final.log` |
 | `git diff --check` (diff-check) | 0.013 | 451903488 | `diff-check.log` |
@@ -234,13 +234,13 @@ lock using the same runtime and bounds:
 ```sh
 (
   flock 9
-  git -C /workspace/solidity-lean status --short
-  cp /workspace/next10-memory-negative-block-evidence/lakefile.memory-negative.toml /workspace/solidity-lean/lakefile.memory-negative.toml
+  git -C . status --short
+  cp ${VM_WORKSPACE}/next10-memory-negative-block-evidence/lakefile.memory-negative.toml lakefile.memory-negative.toml
   docker run --rm --user 1000:1000 --memory=12g --memory-swap=12g \
   --mount type=bind,src=/workspace,dst=/workspace \
   --mount type=bind,src=/usr,dst=/usr,readonly \
   --mount type=bind,src=/opt/codex/runtimes,dst=/opt/codex/runtimes,readonly \
-  -w /workspace/solidity-lean ubuntu:24.04 bash -c 'source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; export PATH=/workspace/next10-memory-negative-block-evidence/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:$PATH; bash ./run-lean.sh'
+  -w . ubuntu:24.04 bash -c ': "Source the VM setup activate.sh"; export LEAN_NUM_THREADS=1; export PATH=${VM_WORKSPACE}/next10-memory-negative-block-evidence/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:$PATH; bash ./run-lean.sh'
 ) 9>/tmp/solidity-lean-feature-groups-20261025/writer.lock
 ```
 
@@ -264,7 +264,7 @@ branch at `755c9bac0d3e39934eb1a8f7487f40d57a2e6a50` before edits, unchanged
 Lean/Lake versions, local Docker cgroup v2 usable after sandbox escalation.
 No replacement VM, network configuration, credentials, other task, or
 monitor was changed. New raw evidence is in
-`/workspace/next10-memory-negative-block-continuation/`.
+VM location `next10-memory-negative-block-continuation/`.
 
 This continuation adds proofs, not a closer implementation. The exact original
 `gapMemInnerNeg` still returns `unknown`; all six gap definitions and target
@@ -528,7 +528,7 @@ that point agreement is not reconstruction stability; the contract above now
 states this explicitly. No theorem hypothesis or verdict was weakened.
 These are Lean kernel/compiled observations, not Solidity source/compiler/EVM
 executions. Final command records, raw diagnostics, timings, peaks and axiom
-output are in `/workspace/next10-memory-negative-block-intrinsic/`.
+output are in VM location `next10-memory-negative-block-intrinsic/`.
 
 ### Intrinsic continuation validation
 
@@ -667,7 +667,7 @@ passed in 36.543 s; final verification below will supersede this checkpoint.
 ### Final validation and remaining boundaries
 
 Actual command arguments, exit codes, UTC intervals and aggregate cgroup
-peaks are in `/workspace/next10-memory-negative-block-close/final-results.json`
+peaks are in VM location `next10-memory-negative-block-close/final-results.json`
 and the matching raw logs. Every mandatory row below exited zero. The full
 confirmation is cache-assisted and rebuilt the changed dependency chain;
 TestSuite cache replays are not a clean-cache performance benchmark.

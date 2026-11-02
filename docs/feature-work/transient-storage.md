@@ -268,12 +268,12 @@ identities, and literal logical bases. Integration does not depend on another
 lane's unpublished frontend/runner changes. General source-world dispatch,
 physical packing/slots/offsets and assembly semantics remain separate work.
 
-Reproduce one fixture by sourcing `/workspace/.setup/activate.sh`, then using its
+Reproduce one fixture by sourcing VM location `.setup/activate.sh`, then using its
 recorded command (one exact path, never a broad family filter):
 
 ```sh
 node scripts/solidity-upstream.mjs verify
-node scripts/solidity-upstream.mjs run --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol --batch-size 1 --out .lake/upstream/group09/review-tuple
+node scripts/solidity-upstream.mjs run --compiler ${VM_SETUP}/soljson/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol --batch-size 1 --out .lake/upstream/group09/review-tuple
 ```
 
 The report's invocation array is authoritative for supported flags. Keep fresh
@@ -312,7 +312,7 @@ paths report 13 missing references already recorded in the previous handoff, and
 the trust-source inventory reports 25 findings, byte-for-byte identical to an
 independent audit of `origin/master`. No new findings were introduced. These are
 not recorded as passing gates. All long build logs are retained under
-`/workspace/.setup/logs`; corpus output was captured before its checker deleted
+VM location `.setup/logs`; corpus output was captured before its checker deleted
 the temporary log. Absolute timings are recorded without a baseline performance
 comparison. Lean compilation was scheduled serially within the 16 GiB executor.
 The resumed default-build attempt took 6696.727 seconds and failed only the

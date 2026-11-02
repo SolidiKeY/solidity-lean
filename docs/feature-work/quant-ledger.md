@@ -1,7 +1,7 @@
 # Ledger quantifier lane
 
 Base `f4dee4a29c2e208b36db4a4161a4723c735cd775`, branch
-`codex/next10-quant-ledger`, repository `/workspace/solidity-lean`, origin
+`codex/next10-quant-ledger`, repository `.`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`. The fetched master is exactly
 that base and its ancestry check succeeded. Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
@@ -128,7 +128,7 @@ lake env lean -j1 --tstack=131072 --run tests/quant-ledger/Run.lean
 Run builds inside the documented writer lock and hard 12 GiB / zero-swap group;
 the exported task-local `bounded.py` / `bounded.sh` and temporary TOML retain
 the exact commands, resource samples and stdout. Evidence lives in
-`/workspace/quant-ledger-runtime/` and the exported evidence index.
+VM location `quant-ledger-runtime/` and the exported evidence index.
 
 All actual new headline axiom audits report only `propext`,
 `Classical.choice`, `Quot.sound`: body exactness/verification, source reduction
@@ -236,11 +236,11 @@ Other limits are partial process sampling,
 and interrupted generic-payment performance probes already described above;
 none is represented as a passing probe or broader decision completeness.
 
-Exports are `/workspace/next10-quant-ledger.patch`,
-`/workspace/next10-quant-ledger-handoff.md`,
-`/workspace/next10-quant-ledger-evidence.json`,
-`/workspace/next10-quant-ledger-evidence.tar.gz`, and
-`/workspace/next10-quant-ledger.sha256`. The evidence index records the final
+Exports are VM location `next10-quant-ledger.patch`,
+VM location `next10-quant-ledger-handoff.md`,
+VM location `next10-quant-ledger-evidence.json`,
+VM location `next10-quant-ledger-evidence.tar.gz`, and
+VM location `next10-quant-ledger.sha256`. The evidence index records the final
 commit and every log's hash, command, exit, timing, resource samples and actual
 axiom output. The patch is cumulative from the published base.
 
@@ -253,7 +253,7 @@ only the task-owned temporary single-thread configuration. The setup script
 was inspected and preserved; its four-thread default was not used. The same
 executor and branch were reused, with no new VM, clone or implementation
 thread. The original checkpoint exports are preserved under
-`/workspace/quant-ledger-runtime/checkpoint-8b61b160/`.
+VM location `quant-ledger-runtime/checkpoint-8b61b160/`.
 
 The migration conventions require the immutable snapshot, not a sibling
 checkout. `node scripts/solkey-migration.mjs verify tests/migration/solkey`
@@ -261,7 +261,7 @@ verified commit `473da8944ca7329e6b76819863591407db26e7ec` and manifest/file
 hashes. The actual sort command was:
 
 ```sh
-SOLKEY_RULES=/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key \
+SOLKEY_RULES=tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key \
   ./scripts/check-solkey.sh
 ```
 

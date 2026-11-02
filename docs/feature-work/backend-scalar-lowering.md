@@ -9,10 +9,10 @@ preservation remains a parent integration obligation; it is not claimed here.
 
 ## Base, runtime and gap
 
-- Repository: `/workspace/scalar-lowering`; branch
+- Repository: VM location `scalar-lowering`; branch
   `codex/solidity-independent5-20261029/scalar-lowering`.
 - Exact base: `50658f41061b366d6e503d1e8a3a324a281e9fca`.
-  The original `/workspace/solidity-lean` checkout is preserved on `work`.
+  The original `.` checkout is preserved on `work`.
 - The initial compact continuation lacked the full assignment and published
   base. The full assignment was subsequently supplied; fetching origin recovered
   the exact base, and an isolated worktree was created without resetting work.
@@ -148,7 +148,7 @@ payload/branch emission, fetched-bytecode refinement, resource/capacity premises
 frontend expansion and full queue completion remain open. Final review of later
 implementation changes will still be required.
 
-Evidence directory: `/workspace/scalar-lowering-artifacts/evidence`.
+Evidence directory: VM location `scalar-lowering-artifacts/evidence`.
 The earlier handoff there describes the superseded runtime blocker and will be
 replaced with the committed checkpoint handoff. No full gate is waived based
 on historical SolKey mismatches or OOM. No unresolved scope question has been
@@ -255,7 +255,7 @@ Gate commands and outcomes:
 
 All focused checks used LEAN_NUM_THREADS=1, explicit Lean -j1, the writer lock
 and the 12 GiB/no-swap Docker cgroup. Evidence is under the absolute directory
-`/workspace/scalar-lowering-artifacts/evidence`; p1-axioms/summary.json and
+VM location `scalar-lowering-artifacts/evidence`; p1-axioms/summary.json and
 p1-static-summary.json retain outcomes and measurements. The absolute
 handoff.md, original.patch and SHA256SUMS in that artifact directory's parent
 are refreshed after committing and record the full head, exact base and branch.
@@ -350,7 +350,7 @@ new exclusions or claims that the full G25 roadmap group is complete.
 All four assigned Work items and Backfill A/B are complete within the scalar
 component boundary above. P0 and P1 are preserved reviewable commits; P2 adds
 eleven modules, for 37 owned modules total. The final full SHA, original patch,
-evidence and checksums are recorded in `/workspace/scalar-lowering-artifacts/handoff.md`;
+evidence and checksums are recorded in VM location `scalar-lowering-artifacts/handoff.md`;
 the base and branch are recorded above. No source/typed semantics, shared global
 interface, approved profile, manifest or other lane was edited.
 

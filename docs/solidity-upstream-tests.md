@@ -362,7 +362,7 @@ Task branch `fix/group01-modifier-returns` starts at current `origin/master`,
 `006fcd593f5beeb540e7adf2bc76de4638566924`. The managed executor passed the
 runtime gate with Lean 4.24.0 (`797c613`), Lake 5.0.0, and
 `lake build Solidity.KeySort`. The saved setup is activated with
-`source /workspace/.setup/activate.sh`; no scratch toolchain is involved.
+source the VM setup `activate.sh`; no scratch toolchain is involved.
 
 Both historical mismatches reproduced on this base, before editing:
 
@@ -584,7 +584,7 @@ Implementation and read-only review details are recorded in
 The additional source controls run with:
 
 ```sh
-source /workspace/.setup/activate.sh
+# Source the VM setup activate.sh
 export LEAN_NUM_THREADS=1
 lake build Solidity.Tools.Upstream
 lake env lean --tstack=131072 tests/upstream/InitializationOrder.lean

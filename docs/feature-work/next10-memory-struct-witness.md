@@ -41,7 +41,7 @@ The original gap is closed: its verdict changes from `unknown` to `refuted`
 with kernel-checked coverage and countermodel proofs. All mandatory gates
 below passed. No resource stop or incomplete diagnostic is counted as a pass.
 Full command logs and machine-readable resource/fixture records are under
-`/workspace/next10-memory-struct-evidence` (`summary.json`).
+VM location `next10-memory-struct-evidence` (`summary.json`).
 
 All heavy groups used `LEAN_NUM_THREADS=1`, explicit Lean `-j1` through a
 private temporary Lake configuration, and the repository writer lock.

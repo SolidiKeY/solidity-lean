@@ -2,7 +2,7 @@
 
 Task branch: codex/next10-memory-parameter-witness.
 Published base: f4dee4a29c2e208b36db4a4161a4723c735cd775.
-Repository: /workspace/solidity-lean; origin https://github.com/SolidiKeY/solidity-lean.git.
+Repository: .; origin https://github.com/SolidiKeY/solidity-lean.git.
 Origin/master was fetched and the base ancestry check succeeded; fetched master equals the base.
 
 ## Scope and evidence boundary
@@ -35,7 +35,7 @@ read/write laws implement the identity/index distinction in SolKey readOnWrite.
 
 ## Validation record
 
-Evidence directory: /workspace/next10-memory-parameter-evidence.
+Evidence directory: VM location: next10-memory-parameter-evidence.
 All mandatory assignment gates passed. The original given-heap gap is refuted with a kernel-certified countermodel. Broader memory decision completeness remains open.
 
 - Runtime gate: exit 0, Lean 4.24.0 (797c613), Lake 5.0.0-src+797c613.

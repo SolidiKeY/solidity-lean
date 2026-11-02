@@ -19,15 +19,15 @@ its cgroup peak is11363561472bytes. This is not a passing full gate.
 
 Base: `fb379ae20f10e2c92113453ddd9d40d8f2efbe09`.
 Branch: `codex/solidity-v07-v11-20261030/v08-world-lowering`.
-Checkout: `/workspace/v08-world-lowering-pinned`.
-Original checkout `/workspace/solidity-lean` stays on `work` at
+Checkout: VM location `v08-world-lowering-pinned`.
+Original checkout `.` stays on `work` at
 `204eb1545cbf57e436196e4cba346075515b7279`; `bridge-theorems` is preserved.
 The exact-SHA fetch from the existing GitHub origin succeeded, and its original
 checkout FETCH_HEAD equals the base. A separate worktree was created from it.
 FETCH_HEAD is worktree-local: querying it in the new worktree fails; the raw
 failed query is retained, alongside verification in the original checkout.
 
-Installed tools were discovered below `/workspace/.setup/tools` rather than
+Installed tools were discovered below VM location `.setup/tools` rather than
 in PATH: Lean 4.24.0, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
 Lake 5.0.0-src+797c613 (Lean 4.24.0). The declared toolchain agrees.
 No Lean MCP diagnostics or get_goal tool is exposed. No second goal was created.
@@ -115,7 +115,7 @@ lane status should be promoted by the coordinator.
 
 ## Validation and handoff
 
-Evidence directory: `/workspace/v08-world-lowering-evidence`.
+Evidence directory: VM location `v08-world-lowering-evidence`.
 Baseline layer check passes: 169 core modules, 0 reach the elaborator.
 Baseline orphan check passes: 866 reachable, 0 orphaned, 0 not allowed.
 The exact-base full doc-path check fails with 46 missing references; raw output
@@ -206,7 +206,7 @@ exact base only; no unpublished revision is consumed.
 ## Validation continuation
 
 The full bounded gate is being compared with a detached exact-base worktree at
-/workspace/v08-baseline-pinned. An initial baseline attempt was intentionally
+VM location: v08-baseline-pinned. An initial baseline attempt was intentionally
 stopped (exit 137) before executable targets, to ensure explicit -j1 also covers
 those targets. Its raw log is preserved, not counted as a pass. The runtime
 runner now places -j1 in every library/executable's weak arguments, without
@@ -303,7 +303,7 @@ during a build. These Python tests do not constitute kernel proofs or EVM tests.
 This is a partial implementation checkpoint on the frozen base and assigned
 branch recorded above. The exact resulting committed head, original patch,
 bundle and checksum manifest are recorded in the external handoff at
-/workspace/v08-world-lowering-artifacts/handoff.md. No parent group is complete.
+VM location: v08-world-lowering-artifacts/handoff.md. No parent group is complete.
 
 The patched serial full attempt, python3 scripts/v08-bounded.py --full,
 v08-gate-64122.log/json, also reaches the 600-second supervisory cap: exit125,
@@ -415,7 +415,7 @@ failure; zero-new comparison is separate. Full final validation and all source
 composition obligations remain open; this checkpoint is not a lane endpoint.
 Checkpoint parent12f1216519b774676dd36032494f5043fd0e352d; frozen base unchanged.
 The committed checkpoint head and patch are recorded at
-/workspace/v08-world-lowering-artifacts/metadata-checkpoint.md and .patch.
+VM location: v08-world-lowering-artifacts/metadata-checkpoint.md and .patch.
 Next independent work is the G23 source/world environment projection adapter
 and populated mixed source/intrinsic rollback observations, followed by other
 authorized independent clauses.
@@ -489,7 +489,7 @@ read theorem remains exactly a projection law. Canonical ledger, constructor
 phases, source storage/statement semantics and G16--G22 applications remain open.
 This component checkpoint is not a full-lane endpoint. Parent
 afe2a93f0387fda7c4de008eb013f4be2c04f8a7; frozen base unchanged. Final committed
-head/patch are saved at /workspace/v08-world-lowering-artifacts/projection-checkpoint.md
+head/patch are saved at VM location: v08-world-lowering-artifacts/projection-checkpoint.md
 and .patch. Next independent work is erased-emit effects/selector observation
 controls, followed by bounded cache warming and required final validation.
 
@@ -557,7 +557,7 @@ and raw documentation failure/zero-new comparison are retained as selector-*.
 No source signature derivation, independent source effect execution, general
 ABI/reference lowering or full source-unit composition is claimed. Parent
 961ec71a659e0c4ba7522ddab191a96f24b8b90b; frozen base unchanged. Exact committed
-head/patch: /workspace/v08-world-lowering-artifacts/selector-emit-checkpoint.md
+head/patch: VM location: v08-world-lowering-artifacts/selector-emit-checkpoint.md
 and .patch. Next independent work investigates the published Keccak byte-output
 bound needed to transport fixed source crypto observations; no hash implementation
 or precompile/backend owner work will be duplicated. Full validation follows
@@ -605,7 +605,7 @@ explicit, toyFixed is used solely for its real hash pin, and no other crypto/
 precompile/source execution claim follows. Static/raw doc comparison logs are
 crypto-*; source/profile/composition and final full gates remain open.
 Parent56db11be40e0f37edb8314c328ded74504dcc824; exact checkpoint committed head
-and patch are saved at /workspace/v08-world-lowering-artifacts/crypto-checkpoint.md
+and patch are saved at VM location: v08-world-lowering-artifacts/crypto-checkpoint.md
 and .patch. Next independent G20 work consumes callable payable/receive/fallback
 metadata before final cache-warmed validation; no reserved body/getter/function
 reference or readonly implementation is taken over.
@@ -663,7 +663,7 @@ sampledRSS835645440bytes/cgroup224149504bytes. Finder and skeptic independently
 confirmed comment/fixture limits and exact source hashes without Lean/server/
 builds; no further finding. Static/raw-doc comparison logs are header-*.
 Parent395ea6818f11bc0af0738a9596a6992635601a44; exact committed head/patch at
-/workspace/v08-world-lowering-artifacts/header-checkpoint.md and .patch.
+VM location: v08-world-lowering-artifacts/header-checkpoint.md and .patch.
 This remains partial component coverage, not a parent/lane completion.
 
 Next required validation: warm published import closures serially using the
@@ -789,7 +789,7 @@ and .patch under the artifact root. Parents/groups/lane remain incomplete.
 
 Code checkpoint8230f88cf703841f1e12b4755a350d95289ee604, frozen base
 fb379ae20f10e2c92113453ddd9d40d8f2efbe09, actual worktree
-/workspace/v08-world-lowering-pinned. Entire frozen assignment remains PARTIAL;
+VM location: v08-world-lowering-pinned. Entire frozen assignment remains PARTIAL;
 source composition and full validation BLOCKED. No G parent or lane is complete.
 The existing blocked persistent goal is unchanged. No goal creation/reset/
 reactivation/completion, push/merge/PR or other-owner source edit occurred.
@@ -863,7 +863,7 @@ trusted-context limitation remains recorded and was not reset/retried.
 
 Coordinator reconciliation proposal is EVIDENCE ONLY: add the owned adapter/
 control theorem references as local component evidence for the exact feature IDs
-in /workspace/v08-world-lowering-evidence/feature-ids.json. G20 evidence maps to
+in VM location: v08-world-lowering-evidence/feature-ids.json. G20 evidence maps to
 Callable/CallableMetadata/PayableMetadata/DeclarationRoles/InheritedMetadata;
 G21 to AbiObservations/SelectorObservations; G22.01 to Callable/Controls,
 G22.02 to Transactions/CallbackControls/ProjectionControls, G22.03 to
@@ -875,7 +875,7 @@ getter/decoder applications. No global status, manifest, G03 ledger or reserved
 TrustAudit pin was edited. Exact feature-ID lists are copied into final handoff.
 
 Final original patch, incremental bundle, copied committed feature, handoff,
-full evidence archive and SHA256SUMS are at /workspace/v08-world-lowering-artifacts.
+full evidence archive and SHA256SUMS are at VM location: v08-world-lowering-artifacts.
 Exact final committed head is recorded in handoff.md and repository-state.json,
 with base/branch/absolute paths. Patch applicability against the exact base,
 bundle verification and checksums are required and retained as separate gates.
@@ -1014,7 +1014,7 @@ remaining mathematical/nonvacuity/ownership finding. Finder wording precision
 fixed: this is the complete listed observation vector, not every world field;
 the generic law separately proves exact world equality. No Lean/server/build by
 reviewers. New scoped commit/export and final artifact reviews are saved under
-/workspace/v08-world-lowering-artifacts/checkpoint-nested-20261030 and
+VM location: v08-world-lowering-artifacts/checkpoint-nested-20261030 and
 nested-reviews.md, without overwriting any prior sealed export/checksum. Every
 queue item's source applications and mandatory full validation remain unfinished.
 Further independent repeated-failure backfill was completed beyond the suggested
@@ -1198,7 +1198,7 @@ persistent fixture directories retain each run. Runtime controls PASS, layers
 exits1/1 with14StorageSlots notes/613pins/0errors. Separate exact-base NEW0 PASS;
 raw failures stay FAILED. New original/checkpoint patches,bundle,handoff,full
 command/evidence archive and checksum manifest use fresh export directory
-/workspace/v08-world-lowering-artifacts/checkpoint-handler-20261030. Prior64-entry
+VM location: v08-world-lowering-artifacts/checkpoint-handler-20261030. Prior64-entry
 root and10-entry nested seals remain unchanged;all raw prior gate records/logs
 and failed developmental checks are retained. Exact new committed head is recorded
 in the external handoff/repository-state evidence,not guessed in this document.
@@ -1370,7 +1370,7 @@ Neither raw global gate is called passed. No reserved global pins/docs rewritten
 
 Separate bash scripts/check-testsuite.sh inventory attempt FAILED1 because its
 default ../solkey examples directory is absent;parity suffix was UNREACHED. Existing
-supported --solkey root /workspace/.setup/solkey/keyext.solidity.examples was then
+supported --solkey root VM setup: solkey/keyext.solidity.examples was then
 discovered read-only. Inspection also found its EXIT trap removes its OWN newly
 allocated scratch directory: that cleanup ran in the failed invocation. No
 preserved checkout/cache/seal path was removed. This process deviation under the
@@ -1393,7 +1393,7 @@ builds,no findings. Source/build/Git/export writer-lock coverage in this continu
 is retained through completion. Historical earlier lock gaps remain recorded.
 
 New reviewed commit/export uses
-/workspace/v08-world-lowering-artifacts/checkpoint-library-handler-20261030;
+VM location: v08-world-lowering-artifacts/checkpoint-library-handler-20261030;
 original patch,checkpoint patch,named branch bundle,current/inherited handoffs,
 full120+record evidence archive and checksums use NEW paths. Prior64root/10nested/
 11handler seals remain. Head/base/branch/path and every original queue item are
@@ -1433,7 +1433,7 @@ and library-handler-inventory-audit.mjs plus persistent output directory.
 
 The prepared df2f9b4f export is retained unchanged. Final documentation followup
 and all source fingerprints are recorded at a NEW final export path:
-/workspace/v08-world-lowering-artifacts/checkpoint-library-handler-final-20261030.
+VM location: v08-world-lowering-artifacts/checkpoint-library-handler-final-20261030.
 No Lean/script/proof/pin/budget changes in this followup. All original queues,
 reserved prerequisites,failed125/full suffixes and pending literalrun-lean remain
 unfinished. Original persistent blocked goal unchanged.
@@ -1554,7 +1554,7 @@ that full run were unreached. Current mandatory full and literal run-lean
 confirmation remain unresolved. Existing blocked goal was not changed;
 get_goal and Lean MCP diagnostics are unavailable. Final artifacts and
 independent artifact reviews are recorded in the new owning handoff at
-/workspace/v08-world-lowering-artifacts/checkpoint-creation-success-20261030.
+VM location: v08-world-lowering-artifacts/checkpoint-creation-success-20261030.
 Every original Work/Backfill source queue and reserved dependency stays partial.
 
 
@@ -2203,10 +2203,10 @@ that only source journal operations existed describe the frozen base, not this
 published revision. V04/V05/V06 remain partial in the published coverage plan;
 there is still no published V07 lowering namespace in this tree.
 
-The sealed old checkout `/workspace/v08-world-lowering-pinned` remains detached
+The sealed old checkout VM location `v08-world-lowering-pinned` remains detached
 at `e7d2c06046a22cf46ccbcc23882f7e31f429fd53`; its files, caches and sealed exports
 are preserved. The assigned branch continues in the separate
-`/workspace/v08-world-lowering-published` worktree. The published merge's three
+VM location `v08-world-lowering-published` worktree. The published merge's three
 registration conflicts retain all incoming imports/docs entries and append all
 V08 entries. Independent review verified every incoming owner file against the
 exact publication. No unpublished branches or owner implementations were taken.
@@ -3724,7 +3724,7 @@ violation. Confirmed findings and their resolution:
   Source fixtures and intrinsic entries are written to match, with no theorem
   linking them. The docs/README.md entry states this boundary.
 - The `scripts/v08-*` validators and their `.test.py` files read VM-only
-  paths (`/workspace/v08-*`) and are not wired into CI, so the
+  paths (VM location `v08-*`) and are not wired into CI, so the
   `scripts/v08-*axiom-pins.json` pins are checked only in the lane VM;
   `scripts/AxiomAudit.lean` and `check-axiom-pins.mjs` (unchanged count) still
   cover the axiom whitelist. The 1,577 `#print axioms` lines are unguarded

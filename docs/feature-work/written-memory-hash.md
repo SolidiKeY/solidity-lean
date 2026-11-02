@@ -97,7 +97,7 @@ language inventory support classifications remain unchanged.
 
 ## Runtime, failures and recovery
 
-The retained checkout is `/workspace/solidity-lean`, branch
+The retained checkout is `.`, branch
 `codex/next10-written-memory-hash`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, based on published master
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`. Startup/reconnect verified the
@@ -210,14 +210,14 @@ configuration, repository script, hash semantics or external VM/monitor was
 modified. The inventory is regenerated with its audit script, without hand
 editing generated files or inflating support.
 
-Evidence is under `/workspace/next10-written-memory-hash-evidence`, including
+Evidence is under VM location `next10-written-memory-hash-evidence`, including
 full ordered observations, source preservation, recovery/process traces,
 commands/exit codes/timings/peaks and reviews. Original b813 exports are
-preserved separately in `/workspace/next10-written-memory-hash-checkpoint-b813`.
+preserved separately in VM location `next10-written-memory-hash-checkpoint-b813`.
 Final cumulative patch, handoff, archive and SHA256 manifest are refreshed
-at `/workspace/next10-written-memory-hash.{patch,sha256}`,
-`/workspace/next10-written-memory-hash-handoff.md` and
-`/workspace/next10-written-memory-hash-evidence.tar.gz` after final checks.
+at VM location `next10-written-memory-hash.{patch,sha256}`,
+VM location `next10-written-memory-hash-handoff.md` and
+VM location `next10-written-memory-hash-evidence.tar.gz` after final checks.
 The temporary `lakefile.next10.toml` is exported inside the evidence directory
 and removed from the checkout before commit. To reproduce, copy it back,
 activate the saved setup, override `LEAN_NUM_THREADS=1`, and use the retained

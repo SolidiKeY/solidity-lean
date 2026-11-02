@@ -67,7 +67,7 @@ Solidity obligation proofs or compiler/EVM equivalence. In particular,
 
 ## Baseline and runtime evidence
 
-Repository `/workspace/solidity-lean`, origin
+Repository `.`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, base
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`, branch
 `codex/next10-diamond-try`. Initial fetch brought `origin/master` to that exact
@@ -80,7 +80,7 @@ KeySort passed before code edits, with actual output retained before
 `RUNTIME_GATE_PASS`. Chronology limitation: the assigned fixture comparison was
 performed later from a pristine detached worktree at the pin, not before the
 first proof edit. It does not retroactively satisfy the pre-edit fixture gate.
-The comparison worktree is `/workspace/next10-diamond-try-baseline`; it shares the
+The comparison worktree is VM location `next10-diamond-try-baseline`; it shares the
 on-disk artifact cache, and both runs use the same pinned compiler and budgets.
 
 All writes and checks use the documented writer lock. Heavy checks are
@@ -159,14 +159,14 @@ C++ harness. No fresh physical-EVM execution is claimed by this increment.
 
 ## Validation and review
 
-Evidence directory: `/workspace/next10-diamond-try-evidence/`.
+Evidence directory: VM location `next10-diamond-try-evidence/`.
 
 - `runtime-gate.log`, `RUNTIME_GATE_PASS`: actual KeySort gate.
 - `proofs.log`, `mcp-final.log`, `mcp-source.log`: successful focused checks.
 - `full.log`, `validation.tsv`, `full-cgroup-snapshot.log`: initial full gate,
   timings, aggregate memory accounting and limits.
 - `fixtures.tsv`, `source-build.log`, `trust-fixed.log`: component and trust gates.
-- `axioms-and-observations.log`, [Axioms audit](/workspace/next10-diamond-try-evidence/Axioms.lean): actual audits and observations.
+- `axioms-and-observations.log`, Axioms audit (VM evidence: next10-diamond-try-evidence/Axioms.lean): actual audits and observations.
 - `upstream-before/`, `upstream-after/`, `fixture-comparison.json`: every retained
   classification row, source snapshot hashes and strict blocked results.
 - `final-gates.tsv`, `full-final.log`: final checks after the last import change.
@@ -315,7 +315,7 @@ open, outside what these kernel component controls establish.
 
 ### Continuation validation and reviews
 
-Evidence is `/workspace/next10-diamond-try-evidence/continuation/`. Owning-file
+Evidence is VM location `next10-diamond-try-evidence/continuation/`. Owning-file
 MCP diagnostics are retained, including failed attempts, and successful final
 results must be read from structured `success: true`, not the Python exit code.
 A payload equality initially exceeded unchanged 200,000 heartbeats; instead of
@@ -324,7 +324,7 @@ a kernel-checked normal-completion certificate. Postconditions use kernel
 checking separately. A source quotation's retained-local context mismatch was
 also repaired explicitly; it was not papered over by dropping a frame.
 
-[Axioms audit](/workspace/next10-diamond-try-evidence/continuation/Axioms.lean) audits all 28 new public helper/control theorems. Actual output in
+Axioms audit (VM evidence: next10-diamond-try-evidence/continuation/Axioms.lean) audits all 28 new public helper/control theorems. Actual output in
 `axioms-observations.log`: 27 depend exactly on `[propext, Classical.choice,
 Quot.sound]`; `malformed_reason` has no axioms. There are no new axioms or
 `sorry`. Ordered payload observations are `(2,38)` and `(2,66)`. These remain
@@ -492,7 +492,7 @@ errors or failed dependencies for the new owning file. Early failed attempts,
 line-wrapping repair remain retained. The two earlier implementation commits
 and their evidence are preserved unchanged.
 
-[Axioms audit](/workspace/next10-diamond-try-evidence/universal/Axioms.lean) / `axioms.log` audit all six new public theorems: each depends
+Axioms audit (VM evidence: next10-diamond-try-evidence/universal/Axioms.lean) / `axioms.log` audit all six new public theorems: each depends
 exactly on `[propext, Classical.choice, Quot.sound]`. `previous-axioms.log`
 rechecks the previous 28 proofs and complete payload observations. The original
 20-proof audit remains retained separately. No new axiom or `sorry`.
@@ -717,7 +717,7 @@ All new/changed Lean owning-file diagnostics report structured `success: true`,
 `partial: false`, no errors or failed dependencies. Final root diagnostics are
 also clean. Early failed proof/decoder/parser attempts remain retained and are
 not counted as passes. New theorem signatures and full outputs are audited in
-[conditional axiom audit](/workspace/next10-diamond-try-evidence/conditional/Axioms.lean) and `axioms-expanded.log`: 23 new proofs, of which 13
+conditional axiom audit (VM evidence: next10-diamond-try-evidence/conditional/Axioms.lean) and `axioms-expanded.log`: 23 new proofs, of which 13
 use exactly `[propext, Classical.choice, Quot.sound]`, five use `[propext]`, and
 five use no axioms. Together with the preserved/rechecked earlier 20, 28 and six
 proof audits, **77 distinct named proofs** have actual axiom evidence. No new
@@ -745,7 +745,7 @@ return_function, try_catch_library_call. The driver loop's exit zero is not a
 passing family gate; the individual blocked exits are retained. Final native
 family driver exit 1 is likewise retained. `final-gates.tsv`, `confirmation.tsv`,
 per-fixture reports, script logs and cgroup outputs are in
-`/workspace/next10-diamond-try-evidence/conditional/`. The full build includes
+VM location `next10-diamond-try-evidence/conditional/`. The full build includes
 695 library and 259 TestSuite jobs and the 377-taclet/131-read-bearing check.
 Trust reports 724 sources, 240 inventoried sites, zero findings. Automatic
 counts remain 491/61 budgeted/11 refuted/zero pending. The inventory was
@@ -793,7 +793,7 @@ no base integration, unpublished import, callback change or global world rewrite
 was needed. The pre-edit KeySort gate actually passed in one second with
 24,825,856-byte cgroup peak, before the runtime pass marker was written.
 All detailed commands, failed attempts, diagnostics and reports live in
-[/workspace/next10-diamond-try-evidence/return-bridge](/workspace/next10-diamond-try-evidence/return-bridge).
+VM location: next10-diamond-try-evidence/return-bridge (VM evidence: `next10-diamond-try-evidence/return-bridge`).
 
 The first original row was structured.sol, selected from the retained conditional
 fixture account. Its native entry mixed two uint results with a string memory
@@ -880,7 +880,7 @@ The remaining native blockers have specific boundaries:
   self call. Current Osaka reports remain blocked. Both legacy and viaIR compile
   under the same pinned compiler for historical targets, as the retained profile
   probes show. A concrete separate-runner proposal is retained in
-  [profile-proposal.md](/workspace/next10-diamond-try-evidence/return-bridge/profile-proposal.md);
+  profile-proposal.md (VM evidence: `next10-diamond-try-evidence/return-bridge/profile-proposal.md`);
   historical EVM execution is not claimed, and the current profile is unchanged.
 
 Final full library/TestSuite, Corpus, frozen TestSuite, source-admission,
@@ -921,12 +921,12 @@ Current confirmation evidence is `confirm.tsv`: all nine owning-file structured
 MCP results are clean; `confirm-script-tests.log` records **93/93** current-helper
 tests passing. The earlier missing-default-compiler-path test exit 1 remains in
 `latest-script-tests.log`; it is not a current passing result. The checked
-[fixture account](/workspace/next10-diamond-try-evidence/return-bridge/fixture-account.md)
-and [full-byte parity manifest](/workspace/next10-diamond-try-evidence/return-bridge/fixture-parity.json)
+fixture account (VM evidence: `next10-diamond-try-evidence/return-bridge/fixture-account.md`)
+and full-byte parity manifest (VM evidence: `next10-diamond-try-evidence/return-bridge/fixture-parity.json`)
 verify 54 complete native/reference observations and 128 frozen/reference
 observations in order, with current helper/compiler hashes and all twenty source
 hashes. Four reference exclusions are explicitly historical, not fresh passes.
-The [actual axiom account](/workspace/next10-diamond-try-evidence/return-bridge/axiom-account.json)
+The actual axiom account (VM evidence: `next10-diamond-try-evidence/return-bridge/axiom-account.json`)
 contains all 123 audited names. Corrected doc-path checks actually exit 1 for
 both current checkout and pinned baseline, with the same twenty missing-reference
 lines; two task-own external evidence citations were repaired. The earlier
@@ -977,7 +977,7 @@ world-call refinement. In particular, stale caller funds must not be used to
 model arbitrary constructor payments. No global world semantics is changed.
 
 The published prerequisite inspection is retained in
-[/workspace/next10-diamond-try-evidence/creation-source/published-prerequisites.log](/workspace/next10-diamond-try-evidence/creation-source/published-prerequisites.log).
+VM location: next10-diamond-try-evidence/creation-source/published-prerequisites.log (VM evidence: `next10-diamond-try-evidence/creation-source/published-prerequisites.log`).
 Published origin/master was `dedb3aee5743025aeb6d8f7219c9b6b9c1e00e5d`;
 its ContractWorld blob was `9f22396da6266fa083413689a5c2e4141e545a95` and
 WorldImport blob `8c5f0e05c9c5a4976612b05112a357e4e4d333ef`.
@@ -1031,8 +1031,8 @@ installation flags and full failed-constructor Error bytes. Its legacy and IR
 kernel certificates independently compute the same original ordered outputs.
 
 The full row-by-row before/after account and complete byte evidence are retained
-at [/workspace/next10-diamond-try-evidence/creation-source/fixture-account.md](/workspace/next10-diamond-try-evidence/creation-source/fixture-account.md)
-and [/workspace/next10-diamond-try-evidence/creation-source/fixture-parity.json](/workspace/next10-diamond-try-evidence/creation-source/fixture-parity.json).
+at VM location: next10-diamond-try-evidence/creation-source/fixture-account.md (VM evidence: `next10-diamond-try-evidence/creation-source/fixture-account.md`)
+and VM location: next10-diamond-try-evidence/creation-source/fixture-parity.json (VM evidence: `next10-diamond-try-evidence/creation-source/fixture-parity.json`).
 Actual transitive audits cover **151 distinct declarations**: 28 new creation
 statements/generated correspondences and all 123 retained task declarations.
 Only `propext`, `Classical.choice` and `Quot.sound` occur; no new proof axiom is
@@ -1171,7 +1171,7 @@ scalar/storage try-and-return composition. No commit/base integration was needed
 Original base f4dee4a and all prior checkpoints/exports/failures are preserved.
 
 Evidence is retained at
-[/workspace/next10-diamond-try-evidence/library-source](/workspace/next10-diamond-try-evidence/library-source).
+VM location: next10-diamond-try-evidence/library-source (VM evidence: `next10-diamond-try-evidence/library-source`).
 The six physical-assembly/nonprimitive-ABI rows, two historical profile rows,
 and 36-byte versus trailing256-byte Panic review item are not changed here.
 The original assignment is not complete while its remaining source rows/gates
@@ -1242,9 +1242,9 @@ setup/cache files were preserved; no new VM, unpublished import, push or merge.
 
 Per-fixture before/after/full-byte evidence, actual axiom sets, diagnostic
 records, gate exits/timings/resources and repaired review findings are retained in
-[/workspace/next10-diamond-try-evidence/library-source/fixture-account.md](/workspace/next10-diamond-try-evidence/library-source/fixture-account.md),
-[/workspace/next10-diamond-try-evidence/library-source/fixture-parity.json](/workspace/next10-diamond-try-evidence/library-source/fixture-parity.json),
-[/workspace/next10-diamond-try-evidence/library-source/axiom-account.json](/workspace/next10-diamond-try-evidence/library-source/axiom-account.json)
+VM location: next10-diamond-try-evidence/library-source/fixture-account.md (VM evidence: `next10-diamond-try-evidence/library-source/fixture-account.md`),
+VM location: next10-diamond-try-evidence/library-source/fixture-parity.json (VM evidence: `next10-diamond-try-evidence/library-source/fixture-parity.json`),
+VM location: next10-diamond-try-evidence/library-source/axiom-account.json (VM evidence: `next10-diamond-try-evidence/library-source/axiom-account.json`)
 and the linked task evidence directory. Independent finder/skeptic reviews were
 read-only, with neither Lean server nor checks/writes. Confirmed total-extractor,
 linked-context and receipt-retention findings were fixed with controls.
@@ -1287,7 +1287,7 @@ no fixture may be promoted merely because its decoder discrepancy is repaired.
 Historical-profile investigation compiled both original gas8000 fixtures in
 both pipelines for five target forks and queried the existing pinned EVM opcode
 tables. No historical fixture was executed and no historical runner was enabled.
-See [/workspace/next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md](/workspace/next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md)
+See VM location: next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md (VM evidence: `next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md`)
 and exact compiler inputs/outputs/compatibility.json. The current profile's
 blocked results and frozen observations remain unchanged. Runtime compatibility
 is not established by compilation or opcode-table membership alone.
@@ -1399,13 +1399,13 @@ configuration was added. Exact runtime configuration is retained externally.
 Actual command footers distinguish command time from host driver/writer-lock
 queue time and sampled aggregate RSS from physical cgroup peak. Evidence and
 per-fixture before/after account:
-[/workspace/next10-diamond-try-evidence/panic-decoder/fixture-account.md](/workspace/next10-diamond-try-evidence/panic-decoder/fixture-account.md),
-[parity](/workspace/next10-diamond-try-evidence/panic-decoder/fixture-parity.json),
-[axioms](/workspace/next10-diamond-try-evidence/panic-decoder/axiom-account.json),
-[gates](/workspace/next10-diamond-try-evidence/panic-decoder/gate-account.json),
-[diagnostics](/workspace/next10-diamond-try-evidence/panic-decoder/diagnostics-final.json),
-[actual child receipts](/workspace/next10-diamond-try-evidence/panic-decoder/panic-original-receipts.json)
-and [compatibility proposal](/workspace/next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md).
+VM location: next10-diamond-try-evidence/panic-decoder/fixture-account.md (VM evidence: `next10-diamond-try-evidence/panic-decoder/fixture-account.md`),
+parity (VM evidence: `next10-diamond-try-evidence/panic-decoder/fixture-parity.json`),
+axioms (VM evidence: `next10-diamond-try-evidence/panic-decoder/axiom-account.json`),
+gates (VM evidence: `next10-diamond-try-evidence/panic-decoder/gate-account.json`),
+diagnostics (VM evidence: `next10-diamond-try-evidence/panic-decoder/diagnostics-final.json`),
+actual child receipts (VM evidence: `next10-diamond-try-evidence/panic-decoder/panic-original-receipts.json`)
+and compatibility proposal (VM evidence: `next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md`).
 
 Independent finder/skeptic reviews are read-only, with neither Lean server nor
 checks/writes. Confirmed hash-label, representative-tail description and exact

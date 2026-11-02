@@ -63,7 +63,7 @@ existing destination or destination inside original tree, validates the complete
 original tree/patch hashes, copies then applies the fixed patch, checks every
 original/new file and re-enumerates the original tree. It never modifies the
 original installation. The current derived artifact is
-/workspace/next10-diamond-try-evidence/carrier-budget/patched-v1/node_modules;
+VM location: next10-diamond-try-evidence/carrier-budget/patched-v1/node_modules;
 its exact mapping/provenance is patched-v1/attempt-budget-derivation.json.
 The failed initial artifact and all failed logs remain retained.
 

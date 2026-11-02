@@ -277,7 +277,7 @@ proposal from these concrete differences; no whole-assignment completion follows
 
 Exact entry sources, supplemental pinned gas header, data/script hashes, raw
 commands/resource footers and independent reviews are retained under
-`/workspace/next10-diamond-try-evidence/setup-frontier`. This increment uses only
+VM location `next10-diamond-try-evidence/setup-frontier`. This increment uses only
 static reads, byte counts, arithmetic and pure address hashes. Proportionate
 integrity/inventory/doc checks and reviews are recorded after completion; prior
 full/MCP/axiom/source-fixture results remain retained, not freshly run.

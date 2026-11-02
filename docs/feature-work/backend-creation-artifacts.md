@@ -3,8 +3,8 @@
 This lane supplies component proofs, not whole-contract source-to-bytecode
 preservation. Base: `50658f41061b366d6e503d1e8a3a324a281e9fca`; branch:
 `codex/solidity-independent5-20261029/creation-artifacts`.
-The checkout is `/workspace/scratch/creation-artifacts-assigned`; the original
-`/workspace/solidity-lean` checkout remains untouched.
+The checkout is VM location `scratch/creation-artifacts-assigned`; the original
+`.` checkout remains untouched.
 
 ## Scope and prerequisites
 
@@ -39,7 +39,7 @@ Docker's actual child cgroup reports `memory.max=12884901888` and
 The original gap control (`tests/creation-artifacts/gap-before.lean.txt`)
 checks an inhabited 20-byte assembler placeholder and then fails on the absent
 `Solidity.Backend.Creation.installs_runtime` identifier. Its exact output is
-`/workspace/scratch/creation-artifacts-evidence/gap.log`.
+VM location `scratch/creation-artifacts-evidence/gap.log`.
 
 `lake -f creation-runtime.lakefile.toml build Solidity.KeySort` passed:
 `Built Solidity.KeySort (1.7s)` and `Build completed successfully (2 jobs).`

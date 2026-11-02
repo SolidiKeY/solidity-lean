@@ -71,8 +71,8 @@ Ordinary Lean runs assert only failure, not the panic code.
 
 This independent repair starts from `origin/master` at
 `006fcd593f5beeb540e7adf2bc76de4638566924` on branch
-`codex/group03-operators`. The managed executor is `/workspace/solidity-lean`;
-`/workspace/.setup/activate.sh` supplies Lean 4.24.0 and Lake
+`codex/group03-operators`. The managed executor is `.`;
+VM location `.setup/activate.sh` supplies Lean 4.24.0 and Lake
 5.0.0-src+797c613. `lake build Solidity.KeySort` succeeded both before and after
 switching to the requested base. The runner verified all 11,622 pinned archive
 files. The first runner invocation hit its five-minute cold dependency-build
@@ -177,14 +177,14 @@ and unchanged runner SHA-256
 ### Reproduction and review
 
 ```sh
-cd /workspace/solidity-lean
-source /workspace/.setup/activate.sh
+cd .
+# Source the VM setup activate.sh
 lean --version
 lake --version
 lake build Solidity.KeySort
 node scripts/solidity-upstream.mjs verify
 node scripts/solidity-upstream.mjs run \
-  --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+  --compiler ${VM_SETUP}/soljson/soljson-v0.8.38+commit.1835d247.js \
   --filter test/libsolidity/semanticTests/operators/userDefined/all_possible_operators.sol \
   --batch-size 1 --out .lake/upstream/group03-recheck/all_possible_operators
 node --test --test-isolation=none scripts/solidity-upstream.test.mjs
@@ -479,7 +479,7 @@ remain preserved; implementation commit `0cd7a473` extends the existing lane.
 Useful exact commands, after activation, include:
 
 ```sh
-source /workspace/.setup/activate.sh
+# Source the VM setup activate.sh
 LEAN_NUM_THREADS=1 lake build Solidity.Examples.Decision
 scripts/check-native-arithmetic.sh build Solidity.Examples.DecisionArrays
 scripts/check-native-arithmetic.sh build Solidity.Examples.DecisionMemory
@@ -593,7 +593,7 @@ Exact commands (after activation):
 
 ```sh
 node scripts/solidity-upstream.mjs verify
-node scripts/solidity-upstream.mjs run --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol --batch-size 1 --out .lake/upstream/group03-recursion-trace/exact
+node scripts/solidity-upstream.mjs run --compiler ${VM_SETUP}/soljson/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol --batch-size 1 --out .lake/upstream/group03-recursion-trace/exact
 node .lake/upstream/group03-recursion-trace/prepare.mjs
 LEAN_NUM_THREADS=1 lake env lean --tstack=131072 .lake/upstream/group03-recursion-trace/Trace.lean
 LEAN_NUM_THREADS=1 lake env lean --tstack=131072 .lake/upstream/group03-recursion-trace/Graph.lean
@@ -694,8 +694,8 @@ extension panics through its arithmetic guard. Large runtime observations are no
 theorems. The reference-only rejection checks are reproducible with:
 
 ```sh
-source /workspace/.setup/activate.sh
-node scripts/check-signed-numeric.mjs /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js
+# Source the VM setup activate.sh
+node scripts/check-signed-numeric.mjs ${VM_SETUP}/soljson/soljson-v0.8.38+commit.1835d247.js
 ```
 
 These check two accepted compilations and eight exact diagnostic rejections:
