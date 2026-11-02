@@ -223,3 +223,148 @@ theorem no_wrong_world : ¬ ∃ k e,
  Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms no_wrong_world
 end Solidity.Backend.Executable.ReceiverThreshold
+
+namespace Solidity.Backend.Executable.ReceiverThreshold
+open ContractWorld WorldPrefixChecks
+open PaymentCheckpointChecks (contracts sender reference)
+
+private theorem operation_receive (w : World contracts) : op.run w = (do
+    let (next,_) ← w.receiveRun reference receiver sender one
+    pure next) := rfl
+
+private theorem receive_success (w next : World contracts) (ran : op.run w = .ok next) :
+    w.receiveRun reference receiver sender one = .ok (next,()) := by
+  rw [operation_receive] at ran
+  cases h : w.receiveRun reference receiver sender one with
+  | error e => simp only [h,bind,Except.bind] at ran; cases ran
+  | ok pair =>
+    rcases pair with ⟨actual,⟨⟩⟩
+    simp only [h,bind,Except.bind,pure,Except.pure] at ran
+    cases Except.ok.inj ran
+    rfl
+
+private theorem receive_error (w : World contracts) (e : THalt) (ran : op.run w = .error e) :
+    w.receiveRun reference receiver sender one = .error e := by
+  rw [operation_receive] at ran
+  cases h : w.receiveRun reference receiver sender one with
+  | error original =>
+    simp only [h,bind,Except.bind] at ran
+    cases Except.error.inj ran
+    rfl
+  | ok pair => cases pair with | mk next u => cases u; simp only [h,bind,Except.bind,pure,Except.pure] at ran; cases ran
+
+/-- Exact failure of the actual history-dependent receive. -/
+theorem stipend_receive_failure : paidTwo.receiveRun reference receiver sender one =
+    .error (.revertWith [0xde,0xad]) := receive_error _ _ third_reverts
+
+theorem stipend_admitted : (paidTwo.isLibrary () || (paidTwo.storage? reference).isNone) = false := by
+  decide +kernel
+
+/-- Caught send retains the whole reached world, not just its balance. -/
+theorem stipend_send_failure : paidTwo.stipend .send reference receiver sender one =
+    .ok (paidTwo,false) := by
+  simp only [World.stipend,stipend_admitted,Bool.false_eq_true,↓reduceIte,
+    stipend_receive_failure,sendResult,catchable]
+
+/-- Transfer preserves the original nested bytes. -/
+theorem stipend_transfer_failure : paidTwo.stipend .transfer reference receiver sender one =
+    .error (.revertWith [0xde,0xad]) :=
+  World.stipend_transfer_failure paidTwo reference receiver sender one _
+    stipend_admitted stipend_receive_failure
+
+/-- Arbitrarily many caught retries retain the full world and ordered results.
+This uses the existing fold and stipend, without a new loop semantics. -/
+theorem caught_retries (n : Nat) (observed : List Bool) :
+    (List.replicate n ()).foldlM
+      (fun (pair : World contracts × List Bool) (_ : Unit) => do
+        let (next,result) ← pair.1.stipend .send reference receiver sender one
+        pure (next,pair.2 ++ [result])) (paidTwo,observed) =
+      .ok (paidTwo,observed ++ List.replicate n false) := by
+  induction n generalizing observed with
+  | zero => simp only [List.replicate_zero,List.foldlM_nil,List.append_nil,pure,Except.pure]
+  | succ n ih =>
+    simp only [List.replicate_succ,List.foldlM_cons,stipend_send_failure,bind,Except.bind,pure,Except.pure]
+    simpa only [bind,Except.bind,pure,Except.pure,List.replicate_succ,List.append_assoc,List.singleton_append] using ih (observed ++ [false])
+
+private theorem send_success (w next : World contracts) (ran : op.run w = .ok next)
+    (admitted : (w.isLibrary () || (w.storage? reference).isNone) = false) :
+    w.stipend .send reference receiver sender one = .ok (next,true) := by
+  simp only [World.stipend,admitted,Bool.false_eq_true,↓reduceIte,
+    receive_success w next ran,sendResult]
+
+theorem first_send : created.stipend .send reference receiver sender one = .ok (paidOne,true) :=
+  send_success _ _ first_runs (by decide +kernel)
+theorem second_send : paidOne.stipend .send reference receiver sender one = .ok (paidTwo,true) :=
+  send_success _ _ second_runs (by decide +kernel)
+
+/-- Both true observations come from actual stipend executions, followed by
+all caught retries in their original order and the exact full reached world. -/
+theorem prefix_then_send (n : Nat) :
+    (do
+      let (first,a) ← created.stipend .send reference receiver sender one
+      let (middle,b) ← first.stipend .send reference receiver sender one
+      (List.replicate n ()).foldlM
+        (fun (pair : World contracts × List Bool) (_ : Unit) => do
+          let (next,result) ← pair.1.stipend .send reference receiver sender one
+          pure (next,pair.2 ++ [result])) (middle,[a,b])) =
+      .ok (paidTwo,[true,true] ++ List.replicate n false) := by
+  rw [first_send]
+  simp only [bind,Except.bind]
+  rw [second_send]
+  simpa only [bind,Except.bind,pure,Except.pure] using caught_retries n [true,true]
+
+/-- The same successful prefix followed by transfer failure rolls back to the
+outer checkpoint, preserving the original halt rather than returning false. -/
+theorem prefix_then_transfer : atomic created (do
+    let middle ← (List.replicate 2 op).foldlM
+      (fun (w : World contracts) (operation : Operation contracts) => operation.run w) created
+    middle.stipend .transfer reference receiver sender one) =
+      (created,.error (.revertWith [0xde,0xad])) := by
+  rw [two_runs]
+  simp only [bind,Except.bind]
+  rw [stipend_transfer_failure]
+  rfl
+
+theorem no_transfer_false : paidTwo.stipend .transfer reference receiver sender one ≠
+    .ok (paidTwo,false) := by rw [stipend_transfer_failure]; intro bad; cases bad
+
+private theorem different_world_results (a b : World contracts)
+    (different : (a.funds sender).val ≠ (b.funds sender).val) :
+    (Except.ok (a,false) : TRes (World contracts × Bool)) ≠ .ok (b,false) := by
+  intro wrong
+  exact different (congrArg (fun p : World contracts × Bool => (p.1.funds sender).val) (Except.ok.inj wrong))
+
+theorem no_send_changed_world : paidTwo.stipend .send reference receiver sender one ≠
+    .ok (paidThree,false) := by
+  rw [stipend_send_failure]
+  exact different_world_results paidTwo paidThree (by decide +kernel)
+
+theorem no_transfer_reversed_bytes : paidTwo.stipend .transfer reference receiver sender one ≠
+    .error (.revertWith [0xad,0xde]) := by
+  rw [stipend_transfer_failure]; intro wrong; cases wrong
+
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.stipend_receive_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms stipend_receive_failure
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.stipend_admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms stipend_admitted
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.stipend_send_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms stipend_send_failure
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.stipend_transfer_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms stipend_transfer_failure
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.caught_retries' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms caught_retries
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.first_send' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms first_send
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.second_send' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms second_send
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.prefix_then_send' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms prefix_then_send
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.prefix_then_transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms prefix_then_transfer
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.no_transfer_false' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms no_transfer_false
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.no_send_changed_world' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms no_send_changed_world
+/-- info: 'Solidity.Backend.Executable.ReceiverThreshold.no_transfer_reversed_bytes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms no_transfer_reversed_bytes
+end Solidity.Backend.Executable.ReceiverThreshold

@@ -1996,3 +1996,43 @@ proof finder/skeptic reviews accept and confirm all22pins. Raw recursion/name/
 normalization failures remain; component entry/body/storage/result proofs
 resolve them without changed statements or raised limits. Scoped/doc/type/
 source/bundle/checksum evidence and final exact seal reviews are in handoff.
+
+
+## Checkpoint29: caught stipend retries after a real paid history
+
+The 2026-11-02 coordinator relays human approval item3: the prior V14
+send/transfer hold is stale and cleared. Historical hold statements above are
+superseded by that authorization. Other semantic decisions and the optional
+vendor hold remain unchanged. H1 permits a 4 GiB free-RAM reserve, while the
+12 GiB process-group cap, no swap, one Lean worker and 180-second limits remain.
+No goal administration, cleanup, upstream merge or reserved edits occurred.
+
+ReceiverThreshold now derives actual receive results from its existing
+Operation.call executions. Two actual stipend sends yield true and exact
+paidOne/paidTwo worlds. At that same third receive, send returns false with the
+whole paidTwo world; transfer preserves the original ordered dead revert bytes.
+Caught retries use the existing List.foldlM and actual World.stipend for every
+iteration: arbitrary n retains the whole world and appends exactly n false
+observations. prefix_then_send obtains both initial true values from actual
+stipend executions; n=0 retains those two observations. prefix_then_transfer
+restores the outer created world, not the paid prefix, with the same halt.
+Wrong-world, transfer-false and reversed-byte controls reject. No new execution
+semantics or simulation premise is introduced.
+
+Separate finder and skeptic found that the initial draft seeded success
+markers; both accepted the corrected actual-send composition. Normalization
+failures are retained, resolved with abstract operation/receive projections and
+explicit component reductions, without raising any proof budget. Twelve new
+headline/control axiom guards admit only standard axioms. Focused38 and full
+1062+262 checks pass; SolKey377/131/131 and actual Lean4.24.0/Lake5.0.0/KeySort
+pass. Final private/static/docs evidence and immutable checkpoint29 handoff
+record exact commands, exits, resource measurements and independent reviews.
+
+This is intrinsic unmetered payment-world evidence, not fetched CALL/CREATE/
+JUMP, gas adequacy, a general pending-caller/history relation, source lowering
+or G36.03 divergence. All original Work/Backfill parents remain partial/open.
+Reading current published master failed HTTPS authentication with exit128; no
+new upstream source was fetched or adopted. Existing published4165 and sealed
+private V13 inputs retain their earlier scope. Raw documentation failures and
+strict frozen-baseline findings remain failures, separate from published/prior
+complete-multiset equality.
