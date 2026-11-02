@@ -11,6 +11,7 @@ history is in git.
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
 | [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |
+| [generated-c-performance.md](generated-c-performance.md) | Generated C call paths, native walk/certificate timings and optimization limits. |
 | [simp-performance.md](simp-performance.md) | Simplifier profiles, guarded joined preparation, measured gains and completeness limits. |
 | [browser-simple-benchmarks.md](browser-simple-benchmarks.md) | Matched small-program SolKey/native/browser timings, audit optimization and remaining cold/simplifier costs. |
 | [web-ide.md](web-ide.md) | Offline static browser workbench, WASM runtime, storage contract and real-editor comparison. |

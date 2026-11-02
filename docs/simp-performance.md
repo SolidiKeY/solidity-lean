@@ -177,3 +177,7 @@ and a result assertion that allowed duplicate rows. Both were corrected;
 the rollback control also ensures focus is inside the saved bounded state.
 Neither review found a remaining trust bypass in the final code. The completeness limit
 above is explicit.
+
+The follow-up [generated C inspection](generated-c-performance.md) separates
+the native walk from its kernel-checked residue certificate and records the
+limited hot-unit optimization comparison.
