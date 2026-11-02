@@ -1890,3 +1890,45 @@ failed attempts and checksum-bound exports remain untouched. Terminal owned
 container layers were reclaimed only after preserving status, configuration,
 timestamped logs and mountpoint-only filesystem differences; source, caches,
 base image and recovery bytes were retained.
+
+
+### Published importer prerequisite checkpoint (2026-11-02)
+
+Commit `b8160cd5e` consumes only published `9ff01fd7`, which defines the
+source-declaration metadata table in chunks of 64 and appends them in order.
+No additional owner source or newer backend work was imported. Independent
+read-only finder and skeptic reviews found no source, compatibility or ownership
+defect. This is a published recursion-depth repair; it did not clear the local
+resource failures.
+
+Runtime remains Lean 4.24.0 / Lake 5.0.0-src+797c613; KeySort exits 0. The edited
+importer passes its per-file fallback check in 9.31 s (no Lean MCP available).
+OpenLoops then exits 137 at the unchanged OS-reserve guard after 233.73 s,
+peak aggregate RSS 5,771,780,096 bytes; Derived21 exits 137 at that guard after
+110.28 s, peak 5,156,323,328 bytes. Neither is an OOM or a pass. All prior failed
+receipts remain preserved.
+
+All 70 planned independent regression targets affected by this importer change
+pass, with exact target/log reconciliation: 1,987.60 s, peak aggregate RSS
+4,004,704,256 bytes, no OOM or resource stop. These cover 115 affected eligible
+modules. The other 954 eligible modules retain source-identical earlier evidence;
+the combined coverage of 1,069 modules is not a successful full build. The same
+eight failed prerequisites still block 27 modules. Full/root/import, combined
+TrustAudit, complete compiled TestSuite and full corpus remain mandatory and
+blocked; unchanged failed closures were not retried.
+
+The eight source gates, both executable targets, frozen taclet-sort alignment,
+timing-validator tests and corpus source/generated-output comparisons pass.
+The fresh original 24-module Derived17 workload passes in 281.90 s under the
+unchanged cumulative 300 s limit; its validator passes. The guarded outer run
+is 282.31 s, peak aggregate RSS 2,305,978,368 bytes. Original group 12 GiB/no swap,
+OS reserve 12 GiB, single-thread checking, profiles and proof/test budgets remain
+unchanged. The prior 93-headline kernel audit and four-mode 15-call EVM evidence
+retain unchanged task sources and inputs and remain separate evidence.
+
+The dependency-owner performance-repair question remains unanswered. This
+checkpoint does not authorize changes to other owners' proofs or sources.
+New evidence is saved separately in
+`/workspace/memory-storage-copy-import-chunks-20261102-evidence`; earlier source,
+failed checks, capacity-failure records, caches and sealed artifacts are retained.
+Work remains blocked; the persistent goal remains incomplete.
