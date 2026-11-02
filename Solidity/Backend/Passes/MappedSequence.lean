@@ -46,8 +46,18 @@ def MappedOutput (result : Compilation b F P) (L frame : Nat)
   | .memoryCalls out _ => Memory.StateRepr L b frame out.frag τ outBase m ∧
       Memory.BaseExtends entry.H base outBase ∧
       Memory.GrowsAllocator b frame (out.cost entry) entry base initial τ outBase m
+  | .memoryCopy out => Memory.StateRepr L b frame out.frag τ outBase m ∧
+      Memory.BaseExtends entry.H base outBase ∧
+      Memory.GrowsAllocator b frame (out.cert.cost entry) entry base initial τ outBase m
+  | .fixedMemory out => outBase = base ∧
+      Memory.FixedStateRepr L b frame out.frag τ outBase m ∧
+      m.mem = initial.mem ∧ τ.H = entry.H ∧ HEq τ.heap entry.heap
+  | .copyConstruction out => Memory.Objects.StateRepr L b frame out.frag τ outBase m ∧
+      Memory.BaseExtends entry.H base outBase ∧
+      Memory.Objects.GrowsAllocator b frame
+        (Memory.Construction.allocationCostProg P entry) entry base initial τ outBase m
 
-/-- All eight existing output relations are retained exactly. -/
+/-- All eleven existing output relations are retained exactly. -/
 theorem mapped_output_iff (result : Compilation b F P) (L frame : Nat)
     (base : Nat → Fin W) (entry : State C Γ) (initial : Machine)
     (τ : State C Δ) (m : Machine) :
@@ -77,6 +87,14 @@ theorem mapped_output_iff (result : Compilation b F P) (L frame : Nat)
   | memoryLoops out => rfl
   | memoryLoopScopes out => rfl
   | memoryCalls out pushFree => rfl
+  | memoryCopy out => rfl
+  | fixedMemory out =>
+    constructor
+    · intro h
+      exact ⟨base, rfl, h⟩
+    · rintro ⟨_, rfl, h⟩
+      exact h
+  | copyConstruction out => rfl
 
 def MappedBoundaryLink (left : Compilation b F P) (right : Compilation b left.frag Q)
     (L frame : Nat) (base : Nat → Fin W) (σ : State C Γ) (m : Machine) : Prop :=

@@ -38,7 +38,7 @@ private theorem object_state_stack {σ : State C Γ}
     Memory.Objects.StateRepr L b frame F σ base {m with stack := tail} :=
   ⟨h.core.stack tail, h.heap.stack tail, h.pointers, h.locals⟩
 
-/-- All eight constructor-specific input relations admit an arbitrary saved
+/-- All eleven constructor-specific input relations admit an arbitrary saved
 stack, retaining their original frame, allocator and typed-value premises. -/
 theorem compilation_input_stack (result : Compilation b F P)
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
@@ -60,6 +60,13 @@ theorem compilation_input_stack (result : Compilation b F P)
     exact ⟨hi.1.stack tail, hi.2.1, fun amount hd => allocation_stack (hi.2.2 amount hd) tail⟩
   | memoryCalls out pushFree =>
     exact ⟨hi.1.stack tail, hi.2.1, allocation_stack hi.2.2 tail⟩
+  | memoryCopy out =>
+    exact ⟨hi.1.stack tail, hi.2.1, allocation_stack hi.2.2.1 tail, hi.2.2.2⟩
+  | fixedMemory out =>
+    exact ⟨⟨hi.1.legacy.stack tail, hi.1.fixed.mem_eq rfl⟩, hi.2⟩
+  | copyConstruction out =>
+    exact ⟨object_state_stack hi.1 tail, hi.2.1, object_allocation_stack hi.2.2.1 tail,
+      hi.2.2.2⟩
 
 /-- Replacing a tail changes neither admissibility nor resource requirements. -/
 theorem compilation_input_stack_iff (result : Compilation b F P)

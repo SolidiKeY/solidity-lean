@@ -170,7 +170,7 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 
 | Area | Still due |
 |---|---|
-| Memory compiler | Copies outside the nonrecursive primitive fragment below, reference-bearing construction/layouts and mixed operations beyond their owning APIs. Published finite-body loops and enclosing scopes retain their reached-prefix certificates; copy/producer integration remains separately checked. The core path compiles loops (`Instr.loop`, `loop_sim`). |
+| Memory compiler | Copies outside the nonrecursive primitive fragment of [Memory-to-storage copy recovery](#memory-to-storage-copy-recovery) (reference-element arrays and paths, reference-bearing structs), reference-bearing construction/layouts and defaults, nested loop bodies, remaining mixed operations. Finite-body memory loops, including enclosing blocks/branches, have typed reached-prefix capacity certificates and public simulation (`docs/compiler-verification.md`, Checked memory loops). The core path compiles loops (`Instr.loop`, `loop_sim`). |
 | Loop automation | Two `SolcLoopsOpen` functions (`docs/semantic-gaps.md`, `docs/loops.md`). Support sound invariant use where missing; keep a missing invariant distinct from a false specification. |
 | Quantifier instantiation | Broaden ground terms and larger loops only with bounded, checked instances. |
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
@@ -179,18 +179,16 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 | Source semantics | The ledger's remaining gaps and the whole-program progress theorem (`docs/feature-work/source-soundness.md`; `abi.decode` at the decoder's types and `calldata` references to `bytes`/`string`/one-word arrays, tuple declarations (no progress theorem), inline arrays of one-word elements, `new T[](n)` and `try`/`catch` with one plain or `bytes memory` clause (no arm theorem) added by lane FU2-B, with arm theorems for locals only, `Solidity/Source/Decode.lean`, `Solidity/Source/Calldata.lean`). |
 
 
+Memory-loop compiler follow-up: the full original 24-module Derived17 workload
+now passes its unchanged cumulative 300-second gate (262.03 s in the original
+worktree; all group outputs fresh). Scoped compiler simulations, inhabited
+allocation/divergence/drop controls and actual four-mode upstream executions
+pass their dedicated checks. The final full-repository `./run-lean.sh` confirmation passed (377.01 s),
+including the pinned TestSuite and SolKey annotation checks.
+Historical timing/resource failures and the unchanged documentation-path debt
+remain explicit; sampled EVM observations do not promote source coverage.
+
 ## Memory-to-storage copy recovery
-
-Latest local checkpoint (2026-11-02, H1): full/default build, explicit root
-import, combined TrustAudit, complete compiled TestSuite, full corpus, frozen
-sort alignment and all source gates pass. The dated failure records below are
-historical and remain failed; H1 explicitly authorized a 4 GiB host reserve
-while retaining the hard 12 GiB/no-swap cap. Published parser-proof repair
-`60dd172d` was locally checked and consumed without changing public statements,
-inputs or proof budgets. The original goal has not been marked complete or the
-VM archived. Controller integration and adequacy review remain separate from
-these local gate results; no universal bytecode/world refinement is claimed.
-
 
 The checked compiler admits runtime-length primitive-array and primitive-member
 struct copies through represented finite paths. Actual loops copy the heap
@@ -200,7 +198,7 @@ support same-size, padded-fixed and dynamic destinations. The public
 `Compilation.memory_copy_input`, `fixed_input` and `copyConstruction_input`
 helpers expose the existing representation bound and reached copy demand;
 failed destinations and unreachable suffixes demand zero. Copy-free memory
-inputs retain their original premises.
+inputs retain their original premises (`memory_copy_free_input`).
 
 The additive lifecycle route reuses published construction/mutation certificates
 and preserves complete object ownership, allocator growth and reached capacity.
@@ -208,33 +206,16 @@ It composes construction and copies in a top-level sequence; mixed
 construction/copy blocks or branches, reference-element copies, whole
 reference-bearing structs and recursive-copy layouts remain refused.
 These are compiler refinements, not universal source coverage or bytecode
-refinement. The source semantics, expected observations and proof budgets are
-unchanged; no Bridge import or new axiom is added.
+refinement. Target-side example observations are `#eval` checks of the
+compiled code, not kernel proofs. The source semantics, expected observations
+and proof budgets are unchanged; no Bridge import or new axiom is added.
 
-Recovery validation: the four concrete copy/example targets kernel-built
-successfully on the pinned new base in 518 seconds under a verified hard
-12 GiB cgroup with zero swap. The peak cgroup usage was 1,153,257,472 bytes.
-Task-only axiom checks, per-file diagnostics, static gates, sort alignment and all four external modes now pass. Full/import, combined trust and TestSuite/corpus kernel gates remain pending;
-this checkpoint does not complete the assignment. See the
+Integration (2026-11-02): merged on master with the three new `Compilation`
+branches added to the Backend pass case analyses (`Stack`, `MappedSequence`,
+`CoreBoundary`, `MappedTail`); `./run-lean.sh`, `TrustAudit.lean` and the
+corpus check pass on the integration commit. The lane's dated failure records
+stay in the
 [owning record](compiler-verification.md#memory-storage-copy-recovery-checkpoint).
-
-
-Recovery terminal status (2026-10-30): **blocked, not complete**. Reattached
-TestSuite supervision recovered an actual reserve-stop exit during Derived17;
-the orphaned supervision interval is explicit. A fresh isolated UnitExamples
-check also stopped under the unchanged reserve. Root/import and combined trust
-checks lack prerequisites from the unfinished full build. Corpus probes and
-comparisons pass separately from its blocked kernel target. Source gates pass
-with the unchanged repository pin; earlier failed attempts stay failed. See the
-owning recovery record and machine-readable handoff for exact evidence.
-Memory-loop compiler follow-up: the full original 24-module Derived17 workload
-now passes its unchanged cumulative 300-second gate (262.03 s in the original
-worktree; all group outputs fresh). Scoped compiler simulations, inhabited
-allocation/divergence/drop controls and actual four-mode upstream executions
-pass their dedicated checks. The final full-repository `./run-lean.sh` confirmation passed (377.01 s),
-including the pinned TestSuite and SolKey annotation checks.
-Historical timing/resource failures and the unchanged documentation-path debt
-remain explicit; sampled EVM observations do not promote source coverage.
 
 ### CI regression step after the audit fix (lane FU1, 2026-11-01)
 

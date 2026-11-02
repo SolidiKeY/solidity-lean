@@ -267,7 +267,7 @@ theorem StmtFrag.correct {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
     (h : FixedStateRepr L b frame F σ base m) (hb : copyBoundStmt s σ ≤ L) :
     FixedResult L b frame G σ base m (s.run σ) (run code m) := stmt_sound hs h hb
 
-theorem ProgFrag.correct {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
+private theorem ProgFrag.sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
     {P : Prog C Γ Δ} {code : List Instr} (hp : ProgFrag b F G P code) :
     ProgSound L b frame F G P code := by
   induction hp using ProgFrag.rec
@@ -287,6 +287,13 @@ theorem ProgFrag.correct {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
     intro σ base m h hb
     exact .inl ⟨⟨σ, List.prefix_refl _⟩, m, rfl, rfl, h, rfl, rfl, rfl, HEq.rfl⟩
   | cons hs hp ihs ihp => exact cons_sound ihs ihp
+
+/-- The program certificate exposes its actual source/machine simulation. -/
+theorem ProgFrag.correct {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag Δ}
+    {P : Prog C Γ Δ} {code : List Instr} (hp : ProgFrag b F G P code)
+    {σ : State C Γ} {base : Nat → Fin W} {m : Machine}
+    (h : FixedStateRepr L b frame F σ base m) (hb : copyBoundProg P σ ≤ L) :
+    FixedResult L b frame G σ base m (P.run σ) (run code m) := ProgFrag.sound hp h hb
 
 private def compileCopy (b : Nat) {Γ : Ctx} (F : Frag Γ) :
     {R : RefTy} → (dst : Loc C Γ (.ref R)) → (src : MPath C Γ (.ref R)) →

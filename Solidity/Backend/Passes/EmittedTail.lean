@@ -2,7 +2,7 @@ import Solidity.Backend.Passes.TailLoop
 import Solidity.Backend.Passes.Stack
 
 /-!
-# Exact saved-tail independence for all eight Compilation constructors
+# Exact saved-tail independence for all eleven Compilation constructors
 
 The prior payment-freedom premise is retained. Nonfault target execution
 transports suffixes by nested instruction induction; compiler correctness

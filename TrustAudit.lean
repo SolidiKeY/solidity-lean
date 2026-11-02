@@ -344,6 +344,8 @@ run_cmd do
     ``Solidity.Evm.Memory.copiedStruct_rebind_correct,
     ``Solidity.Evm.Memory.copyRange_run,
     ``Solidity.Evm.Memory.clearRange_run,
+    ``Solidity.Evm.Compiler.Compilation.memory_copy_input,
+    ``Solidity.Evm.Compiler.Compilation.memory_copy_free_input,
     ``Solidity.Evm.Compiler.Compilation.fixed_input,
     ``Solidity.Evm.Memory.memoryFixedCopy_run,
     ``Solidity.Evm.Memory.primitiveFixed_copy_repr,

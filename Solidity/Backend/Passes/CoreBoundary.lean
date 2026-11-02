@@ -1,6 +1,6 @@
 import Solidity.Backend.Passes.MappedSequence
 
-/-! Physical projection into an existing core suffix, for all eight actual
+/-! Physical projection into an existing core suffix, for all eleven actual
 Compilation branches. This does not upgrade core Sim into heap ownership. -/
 namespace Solidity.Backend.Passes
 open Solidity.Evm Solidity.Evm.Compiler
@@ -24,6 +24,9 @@ theorem mapped_output_core (result : Compilation b F P)
     rcases h with ⟨_,_,_,state,_,_⟩
     exact state.core
   | memoryCalls out pushFree => exact h.1.core
+  | memoryCopy out => exact h.1.core
+  | fixedMemory out => exact h.2.1.legacy.core
+  | copyConstruction out => exact h.1.core
 
 theorem compilation_rep_core (result : Compilation b F P)
     {base : Nat → Fin W} {σ : State C Γ} {initial m : Machine} {τ : State C Δ}

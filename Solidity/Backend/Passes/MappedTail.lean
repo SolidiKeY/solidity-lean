@@ -48,6 +48,17 @@ theorem mapped_output_stack (result : Compilation b F P)
     refine ⟨h.1.stack resultTail, h.2.1, ?_⟩
     intro cursor hb ha hs
     exact (h.2.2 cursor hb (ha.mem_eq rfl) hs).mem_eq rfl
+  | memoryCopy result =>
+    refine ⟨h.1.stack resultTail, h.2.1, ?_⟩
+    intro cursor hb ha hs
+    exact (h.2.2 cursor hb (ha.mem_eq rfl) hs).mem_eq rfl
+  | fixedMemory result =>
+    exact ⟨h.1, ⟨h.2.1.legacy.stack resultTail, h.2.1.fixed.mem_eq rfl⟩, h.2.2.1, h.2.2.2⟩
+  | copyConstruction result =>
+    refine ⟨⟨h.1.core.stack resultTail, h.1.heap.stack resultTail,
+      h.1.pointers, h.1.locals⟩, h.2.1, ?_⟩
+    intro cursor hb ha hs
+    exact (h.2.2 cursor hb (ha.mem_eq rfl) hs).mem_eq rfl
 
 
 /-- One canonical non-stack machine AND one fixed selected output map work
