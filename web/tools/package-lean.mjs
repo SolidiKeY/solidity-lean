@@ -21,7 +21,7 @@ fs.cpSync(path.join(leanPrefix,'LICENSES'),path.join(destination,'LICENSES'),{re
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const graphFile=process.env.SOLIDITY_BROWSER_IMPORT_GRAPH;
 const needed=graphFile?new Set(Object.keys(JSON.parse(fs.readFileSync(graphFile,'utf8')).modules)):null;
-if(needed&&['Init','Lean','Solidity.Frontend.Testing'].some(name=>!needed.has(name)))throw new Error('Incomplete browser import graph');
+if(needed&&['Init','Lean.Elab.Frontend','Solidity.Frontend.Testing'].some(name=>!needed.has(name)))throw new Error('Incomplete browser import graph');
 function asset(bytes,extension){if(bytes.length>24*1024*1024)throw new Error('Browser asset exceeds 24 MiB');const sha256=digest(bytes),url='/lean/assets/'+sha256+'.'+extension;fs.writeFileSync(path.join(destination,'assets',sha256+'.'+extension),bytes);return {url,sha256};}
 function binary(file){const bytes=fs.readFileSync(file),chunks=[];for(let offset=0;offset<bytes.length;offset+=16*1024*1024)chunks.push(asset(gzipSync(bytes.subarray(offset,offset+16*1024*1024),{level:6}),'gz'));return {chunks,size:bytes.length,sha256:digest(bytes)};}
 const manifest={version:'4.24.0',commit:'797c613eb9b6d4ec95db23e3e00af9ac6657f24b',wordSize:64,gmpBits:64,
@@ -35,9 +35,10 @@ for(const name of ['Init','Std','Lean']){visit(path.join(standard,name));for(con
 const setup=JSON.parse(fs.readFileSync(path.join(root,'.lake/build/ir/Solidity/Frontend/Testing.setup.json'),'utf8'));
 for(const [name,artifacts]of Object.entries(setup.importArts))for(const file of artifacts){const suffix=file.match(/(\.olean(?:\.private|\.server)?|\.ir)$/)?.[1];if(suffix)add(name.replaceAll('.','/')+suffix,file);}
 add('Solidity/Frontend/Testing.olean',path.join(root,'.lake/build/lib/lean/Solidity/Frontend/Testing.olean'));
-// Group each module's environment and interpreter data. A single module is
-// inflated on demand; the browser never keeps the whole library in linear RAM.
-const groups=new Map();for(const entries of modules.values())for(const [file,source]of entries){const key=file.replace(/\.(?:olean(?:\.private|\.server)?|ir)$/,'');if(!groups.has(key))groups.set(key,[]);groups.get(key).push({path:file,source});}
+// Import reads environment parts together, then reads IR in a second pass.
+// Keep IR separate so the second pass cannot reinflate every environment after
+// it has left the bounded cache. Preserve the original bytes and part offsets.
+const groups=new Map();for(const entries of modules.values())for(const [file,source]of entries){const key=file.endsWith('.ir')?file:file.replace(/\.olean(?:\.private|\.server)?$/,'');if(!groups.has(key))groups.set(key,[]);groups.get(key).push({path:file,source});}
 if(needed)for(const name of needed)if(!groups.has('/lib/lean/'+name.replaceAll('.','/')))throw new Error('Missing transitive browser library: '+name);
 let rawBytes=0,compressedBytes=0;
 for(const [,entries]of [...groups].sort(([a],[b])=>a.localeCompare(b))){
@@ -55,4 +56,5 @@ manifest.build=digest(JSON.stringify(manifest));
 fs.writeFileSync(path.join(destination,'manifest.json.tmp'),JSON.stringify(manifest)+'\n');fs.renameSync(path.join(destination,'manifest.json.tmp'),path.join(destination,'manifest.json'));
 const referenced=new Set([...manifest.javascript.chunks,...manifest.wasm.chunks,...manifest.libraries].map(entry=>path.basename(entry.url)));
 for(const name of fs.readdirSync(path.join(destination,'assets')))if(/^[a-f0-9]{64}\.gz$/.test(name)&&!referenced.has(name))fs.unlinkSync(path.join(destination,'assets',name));
-console.log(`Packaged ${groups.size} Lean modules: ${(rawBytes/1048576).toFixed(1)} MiB serialized, ${(compressedBytes/1048576).toFixed(1)} MiB compressed; build ${manifest.build}`);
+const moduleCount=needed?.size??new Set([...groups.keys()].map(name=>name.replace(/\.ir$/,''))).size;
+console.log(`Packaged ${moduleCount} Lean modules in ${groups.size} library assets: ${(rawBytes/1048576).toFixed(1)} MiB serialized, ${(compressedBytes/1048576).toFixed(1)} MiB compressed; build ${manifest.build}`);

@@ -1,4 +1,5 @@
-import Lean
+import Lean.Elab.Deriving.ToExpr
+import Lean.Data.Json
 import Solidity.Language.Features
 
 /-!

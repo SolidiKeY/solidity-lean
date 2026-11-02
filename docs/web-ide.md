@@ -29,7 +29,7 @@ A disposable worker hosts Lean 4.24.0, upstream commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, with explicit browser-port patches.
 Emscripten 4.0.15 and GMP 6.2.1 preserve the native 64-bit Lean object/integer
 layout while lowering memory access to ordinary WebAssembly. WebAssembly tail
-calls prevent compiled frontend call chains from exhausting the browser stack.
+calls reduce stack growth along compiled frontend call chains.
 The browser does not require the Memory64 proposal or a thread pool.
 
 The port replaces the C++ expression-replacement recursion with an explicit
@@ -48,6 +48,12 @@ every symbol lookup. Export membership uses direct lookup; new function-table
 entries use a cached symbol index. Build scripts pin and check upstream sources,
 GMP layout, native serialized-library version and compiler checksum. The full
 patch, traversal oracle and build tools are under `web/tools/lean-wasm/`.
+The linked, memory64-lowered module also receives a pinned Binaryen `-O1`
+postpass with tail calls and exception handling enabled. This changes generated
+code, not Lean algorithms or proof budgets. A content-checked stamp prevents
+reoptimizing an unchanged output; relocation, corruption and optimizer failures
+are regression-tested. A failed pass preserves the input and removes its partial
+output. The measured pass peaked at 3.76 GiB RSS within the build limit.
 
 `BrowserFrontend.lean` reuses immutable imported environments, then creates fresh
 synchronous command state and a unique main module per check. Unique names keep
@@ -57,6 +63,22 @@ checks. Only fresh checkpoints matching the selected AST declarations produce
 results. Nonzero exits and missing checkpoints are errors. Solidity compilation
 alone never produces a proved status.
 
+The performance update replaces broad `Lean` imports in the AST, equation
+attributes, budget helpers and source frontend with their required modules.
+Tactic clients explicitly import assertion, clearing and suggestion helpers.
+Declarations, proof bodies and the axiom policy are unchanged. The browser graph
+now starts from Testing plus the parsed imports of `BrowserFrontend.lean`, rather
+than forcing the umbrella `Lean` module into every package. The pinned parser
+finds 1,556 modules instead of 1,822. The first narrowed-import package contained
+2,183.4 MiB of serialized libraries instead of 2,445.3 MiB; the final package
+with the newer upstream frontend contains 2,185.5 MiB.
+
+The same native build supplies the rebuilt serialized libraries and interpreter
+data. Compiling the project importer into additional Wasm was evaluated and
+excluded from the release because its memory cost exceeded the available-memory
+reserve. The final runtime retains the existing project interpreter and compiled
+Lean kernel; the performance changes do not add a second proof implementation.
+
 Proof jobs are serialized. Source/dependency changes terminate obsolete active
 workers and invalidate their epochs; late results cannot update the editor.
 Cancel, timeout and restart clear owned work. Automatic verification does not
@@ -65,12 +87,12 @@ replay an explicit cancellation or a failing job indefinitely.
 ## Offline preparation and limits
 
 The Pages artifact, `web/single-file/index.html`, embeds the entire website in
-one file (about 856 MB). Its 1,851 embedded
-assets include ESM Monaco, solc, Lean, all proof-library variants, icons, fonts
-and license notices. Brotli transport reduces the embedded asset payload to
-612 MiB before base64 encoding. Repacking checks that every decoded byte matches
-the existing checksum-verified gzip input; the runtime and JS whole-file hashes
-remain unchanged. Cached Brotli output is also decoded and compared on every build.
+one file. `build.json` records its byte size, fingerprint and runtime hashes.
+Its assets include ESM Monaco, solc, Lean, all required proof-library variants,
+icons, fonts and license notices. Zstandard replaces the earlier release's
+Brotli transport. Repacking checks that every decoded byte matches the existing
+checksum-verified gzip input, including cached compression output. Transport
+changes preserve the input runtime's and JS loader's whole-file hashes.
 
 The parser consumes small base64 data blocks, removes their DOM nodes and commits
 one Blob at a time to IndexedDB. Databases are isolated by build ID. The completion
@@ -84,10 +106,22 @@ bootstrap queues messages until its embedded entry script has loaded, then repla
 them to the installed handler. Checksums use the same SHA-256 implementation when
 an opaque worker lacks Web Crypto. Compiler startup errors terminate the owned
 worker before reconnecting, including partially initialized workers.
-The Brotli decoder streams through 64-KiB input and 1-MiB output buffers so a
-large decoded module does not leave a second whole-module allocation in Wasm
-memory. Its boundary/size/truncation tests compare against Node's native decoder
-and check that 40-MiB output leaves less than 64 MiB of decoder linear memory.
+The proof worker reads its owned Blobs with `FileReaderSync`; asynchronous
+startup reads use `Blob.arrayBuffer()`. This avoids URL/network machinery and
+bulk compressed prefetching in the single-file build. Environment parts and IR
+are separate compressed assets: Lean reads IR in a second pass, which formerly
+reinflated environments after cache eviction. One last-file view avoids repeated
+subarray allocations during small native reads. The decoded cache retains at
+most 8 MiB or one larger asset. The HTTP alternative uses authenticated prefetch
+with eight in-flight reads, a 768 MiB retention cap, and release after checking.
+
+The pinned Zstandard decoder checks declared frame sizes, error codes and exact
+output lengths before copying; native allocations are released in `finally`.
+Its tests compare against Node compression, reject malformed streams and verify
+retained decoder memory after a 40-MiB output. A Wasm SHA-256 implementation
+preserves checksum checks in opaque workers without Web Crypto. Opaque/file
+worker smoke tests exercise decoder startup and direct asynchronous/synchronous
+reads under the production broker and CSP. Legacy Brotli decoding remains tested.
 
 The single HTML supports continued use in a disconnected tab; reopening a hosted
 URL offline depends on the browser's document cache. Download and reopen the HTML
@@ -110,15 +144,14 @@ The alternative multi-file development build retains its service-worker cache:
 is development tooling and is excluded from deployment. Static builds force
 browser mode even for a URL containing `?backend=native`.
 
-The tested artifact contains 773.7 MiB of assets, including 1,822 proof-library
-modules (2,445.3 MiB serialized, compressed per module). The first visit caches
+The multi-file artifact's manifest records its complete asset list. The first visit caches
 the complete manifest before opening Monaco. A missing manifest, failed asset
 or storage quota error prevents an incomplete cache from announcing readiness.
 Installation failures surface visibly rather than waiting forever. Build-specific
 cache names support updates and remove obsolete application caches.
 
 Hashed libraries are immutable same-origin assets. A lazy filesystem verifies
-compressed hashes and retains at most 64 MiB of inflated modules, or one larger
+compressed hashes and retains at most 8 MiB of inflated modules, or one larger
 module. It does not preload the entire library into linear memory. CSP limits
 application connections to the website origin. HTTPS or localhost is required;
 opening the multi-file build's `index.html` as a local file is unsupported.
@@ -134,9 +167,18 @@ The prototype supports four open documents, 128 flat workspace filenames and
 at a time with a 4 GiB linear-memory limit. Use a modern desktop browser with
 WebAssembly tail calls and 64-bit integer operations.
 
+The browser's machine-call stack is a separate limit. Complex calldata alias/slice
+proof search currently exceeds it during recursive simplification, despite the
+same bodies importing successfully. The failed job reports `BROWSER_STACK_LIMIT`
+and accepts no proof result. `node web/test/performance.cjs --single --calldata-proofs`
+reproduces that known limitation; ordinary listing returns `ready` for both
+functions and retains the writable-copy refusal. Listing establishes admission,
+not proof success. The default performance test uses listing for this additional
+control. General native proof-search parity remains incomplete.
+
 ## Measured validation
 
-Validation uses the `c6c33c90` frontend baseline after a fresh 264-job rebuild.
+The original comparison used the `c6c33c90` frontend baseline after a fresh 264-job rebuild.
 Reports record both the static artifact and proof-runtime hashes.
 
 Fourteen real Chromium checks pass with every WebSocket constructor forbidden,
@@ -156,10 +198,10 @@ and are not evidence of kernel proof success. Two additional Chromium cases
 verify visible failure for a missing asset manifest or required worker asset.
 The native frontend build passed 264 jobs; 66 extension/LSP/backend/web transport
 regressions also passed during implementation.
-This milestone additionally passed the two streaming-decoder tests and ten
-native transport regressions. The final single-file comparison artifact is
+That milestone additionally passed the two streaming-decoder tests and ten
+native transport regressions. Its final single-file comparison artifact was
 `f020402da107…`, with Brotli manifest `16ba39b77198…`; JSON evidence records
-the full hashes. The ported Wasm bytes retain their original whole-file digest.
+the full hashes. Its transport repacking retained the input Wasm whole-file digest.
 
 | Observation | Real VS Code extension | Browser website |
 |---|---:|---:|
@@ -193,6 +235,83 @@ The earlier multi-file runs remain in `website-report.json` and
 See [web/README.md](../web/README.md) for commands. The reference probe calls the
 production extension API and never injects fixture results.
 
+## Performance follow-up
+
+The final measurement includes upstream `febf70a6`, the narrowed imports and
+calldata integration repair, and the optimized browser runtime. A fresh native
+`Solidity.Frontend.Testing` build passed all 264 jobs and the four calldata
+import-status guards. The nine initial Lean edits had clean per-file diagnostics;
+after integration the changed importer and new regression file were checked
+again with clean Lean MCP diagnostics. Project serialized artifacts were refreshed
+alongside the pinned native standard library before packaging.
+
+The measured HTML is `d21fc01ffc52…`, kernel manifest `b3a70f6bc704…`, with runtime
+SHA-256 `f7cd91e0de1180cc701e021cbc2bef47c741b58ead6fe40c9d78932483cd16df`.
+It contains 2,877 embedded assets and is 837,616,302 bytes. The Binaryen pass
+reduced the linked module from 163,947,747 to 148,152,933 bytes. Static comparison
+preserved 170,753 exports and their function signatures, 389 imports and the
+32-bit memory contract (4,096 initial / 65,536 maximum pages). The production
+helper reproduced the benchmarked output byte for byte and verified a repeat
+cache hit. Its guarded production pass peaked at 3.65 GiB aggregate RSS.
+
+A fresh Chromium profile produced these measurements on the managed host:
+
+| Measurement | Time |
+|---|---:|
+| Editor/compiler/kernel readiness, including initial tool preparation | 17.43 s |
+| First proof request, including library import | 23.49 s |
+| Page navigation through first proof result | 40.93 s |
+| Unchanged cached-result retrieval | 7.55 ms |
+| Real proof after a comment edit | 8.81 s |
+| Real proof after changing `return 1` to `return 2` | 7.55 s |
+| Real proof after updating the postcondition to match `2` | 9.42 s |
+| Calldata admission/listing, without executing its proof search | 0.43 s |
+
+The baseline audit measured 63.25 s for its cold proof request and 16.68 s for
+fresh startup. Cold proof latency fell by about 63%; navigation through the first
+result fell from roughly 80 s to 41 s. Before integrating the newer upstream
+frontend and the post-link optimization, the narrower-import/transport update
+alone measured 29.08 s for the cold request and 49.11 s through the first result;
+that evidence remains in `performance-before-integration-report.json`. These
+observations include multiple changes and normal run-to-run variation. Warm
+rechecks remain slow; they do not establish parity with Dafny or SolKey. The
+original 8.94-s native extension comparison above is historical. Measurements use
+locally prepared artifacts and exclude the initial Internet download.
+
+The false-result edit stayed pending; updating its specification made it prove.
+Every result matched the exact edited source's SHA-256. The unchanged-source
+control retrieved a cached report; its retained kernel timings describe the
+original check and are not new execution. All three edited Counter trials ran
+new kernel checks with zero library reads. The cold import decoded
+2,282,434,832 bytes from the 2,291,674,968-byte package, with no second environment
+inflation pass. It used 2,839 direct Blob reads, zero bulk-prefetched bytes and
+zero XHR fallbacks. Measured phases included 1.80 s of synchronous reads, 2.39 s
+of checksum work and 4.54 s of decompression. Peak aggregate benchmark RSS was
+3.89 GiB; the 12-GiB available-memory reserve remained intact. No external
+requests, WebSockets or uncaught page errors were recorded.
+
+`node web/test/performance.cjs --single` reproduces the five Counter timing
+controls plus the explicitly named calldata admission/listing control. Its report
+is `web/artifacts/performance-single-report.json`. Listing returns `ready` for
+aliases and slices and `unsupported` for writable copies; those rows are not
+proof successes. `--calldata-proofs` remains a known failing deep-simplification
+stack diagnostic. The actual stack-limit boundary is also checked separately
+for its explicit error and rejection of a proof report.
+
+Focused checks passed for six protocol boundaries, two legacy Brotli cases,
+two Zstandard cases, browser SHA-256 without Web Crypto or Node APIs, and optimizer
+cache reuse, relocation, corruption and failure cleanup. Opaque-worker lifecycle
+coverage passed as well. Full browser evidence is written to
+`web/artifacts/single-file-report.json`: all 14 checks passed on this exact HTML,
+with zero external requests, WebSockets or page errors. A semantically changed
+program (`return 3` with its updated postcondition) proved after both workers
+restarted with the server stopped and Chromium disconnected. That fresh offline
+check took 26.88 s. The full suite peaked at 4.26 GiB aggregate RSS and preserved
+the available-memory reserve. The separate real stack-error boundary passed at
+3.99 GiB, retained `BROWSER_STACK_LIMIT`, and accepted no proof report. CI
+additionally runs fresh file-origin launch/reopening and verifies the published
+build after deployment.
+
 ## Milestone review and resource bounds
 
 Read-only finder and skeptic reviews identified and resolved closed-importer
@@ -221,6 +340,34 @@ opaque-iframe regression now checks nested imports, fetch, synchronous XHR and
 early messages after revoking the parent's URLs; a second case verifies that
 heartbeat activity stops after partial startup fails. Completed kernel assets
 are cached before browser validation, so a later UI failure preserves that build.
+
+The performance follow-up's read-only finder and skeptic reviews found no
+remaining actionable implementation issue. They confirmed the parsed import
+closure, removal of the importer-compilation experiment, unchanged file bytes
+and offsets after splitting IR, checksum verification on direct Blob reads,
+bounded decoder/cache lifetime, preserved cancellation and exact source hashes.
+Earlier review findings led to disjoint I/O/hash counters, bounded/released HTTP
+prefetch, and a semantically changed program/specification in the final offline
+proof test. Neither review ran the Lean server or a heavy build.
+The final suite exposed a retained HTTP connection postponing the development
+server's shutdown. Closing existing connections after stopping acceptance fixed
+that harness boundary; a paused, unfinished HTML response also passed a focused
+shutdown check. Both reviews accepted the change. The interrupted attempt is
+recorded separately and is not counted as a passing run. Final suite evidence
+was refreshed to the exact performance artifact before committing. Changed
+documentation links resolve; the repository-wide path scan still reports 48
+existing missing references in external citations and older records.
+
+Integration brought in upstream `febf70a6`, including frontend and closer
+changes. A read-only review identified an inherited calldata regression:
+the importer generated `sol_raw_calldata!` but a new branch matched only
+`sol_raw!`, refusing aliases and slices. Two native guards reproduced those
+failures while an ordinary parameter and writable-copy refusal remained correct.
+Removing the redundant branch leaves the existing origin-preserving macro in
+control. The final native frontend build passed all 264 jobs and all four
+guards; Lean MCP diagnostics were clean for the importer and regression file.
+Pages runs the guards before checking the kernel cache. Finder and skeptic
+reviews accepted the fix, test controls and CI placement without using Lean.
 
 The writer lock is held throughout changes and checks. Heavy jobs run sequentially.
 This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap

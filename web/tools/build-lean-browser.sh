@@ -30,6 +30,7 @@ cp web/tools/lean-wasm/build-runtime.sh "$work/build-lean.sh"
 cp web/tools/lean-wasm/build-gmp.sh "$work/build-gmp.sh"
 cp web/tools/lean-wasm/internalize-runner.py "$work/internalize-runner.py"
 cp web/tools/lean-wasm/optimize-runtime.py "$work/optimize-runtime.py"
+cp web/tools/lean-wasm/optimize-wasm.sh "$work/optimize-wasm.sh"
 build_args=()
 run_args=()
 if [[ -n ${LEAN_BROWSER_CA_FILE:-} ]]; then

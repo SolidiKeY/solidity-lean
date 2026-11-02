@@ -4,7 +4,7 @@ export const prepareBrotli=module=>initSync({module});
 
 // A whole-module Rust Vec leaves its peak allocation in Wasm linear memory.
 // Bound decoder input/output buffers instead; only the returned library bytes
-// and the existing 64-MiB filesystem cache remain resident between imports.
+// and the bounded filesystem cache remain resident between imports.
 export function inflateBrotli(compressed,size){
   const decoder=new BrotliDecStream(),parts=[];
   const output=size===undefined?null:new Uint8Array(size);

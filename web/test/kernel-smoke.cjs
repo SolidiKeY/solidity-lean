@@ -17,7 +17,7 @@ async function main(){
     });
     report.startupMs=+(performance.now()-start).toFixed(1);console.log('PASS pinned Lean kernel startup',report.startupMs,'ms');
     if(process.argv.includes('--boot-only')){report.passed=true;return;}
-    const header=process.argv.includes('--solidity')?'import Solidity.Frontend.Testing\n':process.argv.includes('--init-only')?'':'import Lean\n';
+    const header=process.argv.includes('--solidity')?'import Solidity.Frontend.Testing\n':process.argv.includes('--init-only')?'':'import Lean.Elab.Tactic\n';
     report.trueProof=await page.evaluate(header=>kernelRequest(2,'check',{source:header+'example : (1 : Nat) + 1 = 2 := by decide\n'}),header);
     assert.equal(report.trueProof.code,0,JSON.stringify(report.trueProof));console.log('PASS real arithmetic proof');
     report.falseProof=await page.evaluate(header=>kernelRequest(3,'check',{source:header+'example : False := by trivial\n'}),header);

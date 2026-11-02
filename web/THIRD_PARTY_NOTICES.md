@@ -16,6 +16,9 @@ license notices are included in `licenses/` and in the bundled source headers.
   Source: https://github.com/emscripten-core/emscripten/tree/4.0.15
 - `@noble/hashes` 1.8.0, `buffer` 6.0.3, `path-browserify` 1.0.1 and
   `fflate` 0.8.2: MIT.
+- `hash-wasm` 4.12.0: MIT. Source: https://github.com/Daninet/hash-wasm
+- `zstddec` 0.1.0: MIT AND BSD-3-Clause. Embedded Zstandard decoder.
+  Source: https://github.com/donmccurdy/zstddec
 
 The Lean/GMP port, complete build instructions and pinned toolchain/source
 references are in this repository's `web/tools/lean-wasm/`,
