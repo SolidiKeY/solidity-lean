@@ -371,3 +371,37 @@ inhabited signed/unsigned/dirty/truncated/empty/populated-alias controls remain
 in TERRA-TODO. Generated registration, standard combined checking and original
 checkpoint10 closure remain pending. Original failed full/docs gates and all
 original Work/Backfill obligations remain unchanged, no lane closure claimed.
+
+
+### Generic integer actual copy/index observations
+
+copy_read_related consumes published actual Source cdToMem/readLoc execution
+and actual intrinsic Heap.readAddr on the independently freshly allocated
+array. Real entry and ordered validation derive values.length, capacity and
+exact uint index representability; no desired read or integer-width oracle is
+assumed. The returned typed value and its actual numeric observation agree
+with the Source positional value through V07.value_related at every IntTy.
+The native Source final state is the actual complete copied state.
+
+copy_first_out consumes the first invalid index length. Its uint conversion
+is still derived from real ABI extent, including extent0. Actual Source
+returns the exact published panicData.index bytes on the grown copied state;
+heap.next is derived to be original+1. Actual intrinsic readAddr returns none.
+These are distinct native/logical carriers, not a machine-panic, gas or byte
+execution relation. Original-state validation failure remains distinguished
+from successful copy followed by read failure; no rollback mechanism is added.
+
+Six scratch candidates for each goal fail1 and remain raw. A scratch capacity
+witness application syntax error is fixed without changing statements or
+budgets. Final private per-file/two-scoped-axiom/signature check passes4.59s,
+peak843700KiB,oneLean,cgroup476295168bytes,noOOM/swap; both axioms standard3.
+Independent read-only finder and skeptic find no issue. No Source, primitive
+memory, scalar producer or reserved implementation is reimplemented/edited;
+actual published laws and exact private V07 binding are consumed read-only.
+
+H14 routine target-contents extraction and inhabited signed/unsigned/order/
+wrong-handle/dirty/empty/first-bad-index controls remain TERRA-TODO. No control
+or whole-profile completion is asserted. Generated registration, combined
+validation, low-budget/scoped success glue, original checkpoint10 and all
+original Work/Backfill final obligations remain open. Master147eeb0c was
+fetched/inspected unchanged; no unchanged failed full/docs gates repeated.

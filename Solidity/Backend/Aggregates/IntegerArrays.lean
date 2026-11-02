@@ -266,4 +266,88 @@ theorem scopedCopy_run {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy
     cases (List.range length).mapM (fun j => Source.decodeWord E.layout
       (Source.cdWordAt frame (offset+32*j)) (.int t)) <;> rfl
 end Expression
+
+/-- Consume actual copy/read executions and V07 numeric transport. Both
+object capacity and exact uint index are derived from real ABI validation;
+no desired read result or representability premise is supplied. -/
+theorem copy_read_related {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (t : Source.IntTy) (frame : Source.Fr) (selector data : Roadmap.Bytes)
+    (selector_length : selector.length = 4) (input : frame.cd = selector ++ data)
+    {entryIndex offset length : Nat} (entry : Source.cdTail data entryIndex 32 = .ok (offset,length))
+    (source : Source.EMState E Λ) (target : State C Γ)
+    {values : List (Source.Val E.layout (.int t))}
+    (validation : (List.range length).mapM (fun j => Source.decodeWord E.layout
+      (Source.cdWordAt frame (offset+32*j)) (.int t)) = .ok values) (index : Fin length) :
+    let room := capacity t frame selector data selector_length input entry validation
+    ∃ bound : index.val < values.length,
+      ((do let _ ← Source.cdToMem frame (sourceTy t) offset length
+           Source.readLoc frame (.mem (τ := .int t) source.2.heap.next index.val)) : Source.EM E Λ _).run source =
+        (.ok (values.get ⟨index.val,bound⟩),((Source.cdToMem frame (sourceTy t) offset length).run source).2) ∧
+      (lower target t values room).heap.readAddr
+        (.index (target.alloc (object target.H t values room)).2 ArrTy.dyn (uintOfNat index.val)) =
+          some (value t (values.get ⟨index.val,bound⟩)) ∧
+      ((lower target t values room).heap.readAddr
+        (.index (target.alloc (object target.H t values room)).2 ArrTy.dyn (uintOfNat index.val))).bind
+        PrimTy.num? = (values.get ⟨index.val,bound⟩).key := by
+
+  dsimp only
+  obtain ⟨bound,_,_,actual⟩ := Source.cdToMem_array_read_run frame (.int t) offset length source validation index
+  have small : index.val < 2^256 := Nat.lt_trans
+    (Nat.lt_trans index.isLt (BoolArrays.entry_geometry frame selector data selector_length input entry).1)
+    (by decide)
+  have contents : MObj.elems ArrTy.dyn
+      ((lower target t values (capacity t frame selector data selector_length input entry validation)).heap.get (target.alloc (object target.H t values (capacity t frame selector data selector_length input entry validation))).2) =
+        values.map (value t) := by
+    unfold lower
+    rw [State.allocPush_get]
+    simp only [object, MObj.wk, MObj.elems_dyn, List.map_map]
+    rfl
+  have read : (lower target t values (capacity t frame selector data selector_length input entry validation)).heap.readAddr
+      (.index (target.alloc (object target.H t values (capacity t frame selector data selector_length input entry validation))).2 ArrTy.dyn (uintOfNat index.val)) =
+        some (value t (values.get ⟨index.val,bound⟩)) := by
+    simp only [Heap.readAddr, Heap.index, contents, uintOfNat_val small, Int.toNat_natCast,
+      List.getElem?_map, List.getElem?_eq_getElem bound, Option.map_some, List.get_eq_getElem]
+  refine ⟨bound,actual,read,?_⟩
+  rw [read]
+  exact (value_related t (values.get ⟨index.val,bound⟩)).symm
+
+/-- At the first invalid index, actual Source retains its newly allocated
+copy and exact index-panic bytes; logical intrinsic readAddr returns none.
+These distinct carriers do not assert a fetched-machine panic relation. -/
+theorem copy_first_out {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (t : Source.IntTy) (frame : Source.Fr) (selector data : Roadmap.Bytes)
+    (selector_length : selector.length = 4) (input : frame.cd = selector ++ data)
+    {entryIndex offset length : Nat} (entry : Source.cdTail data entryIndex 32 = .ok (offset,length))
+    (source : Source.EMState E Λ) (target : State C Γ)
+    {values : List (Source.Val E.layout (.int t))}
+    (validation : (List.range length).mapM (fun j => Source.decodeWord E.layout
+      (Source.cdWordAt frame (offset+32*j)) (.int t)) = .ok values) :
+    let room := capacity t frame selector data selector_length input entry validation
+    ((do let _ ← Source.cdToMem frame (sourceTy t) offset length
+         Source.readLoc frame (.mem (τ := .int t) source.2.heap.next length)) : Source.EM E Λ _).run source =
+      (.error (.revert (Source.panicData .index)),
+        ((Source.cdToMem frame (sourceTy t) offset length).run source).2) ∧
+    (lower target t values room).heap.readAddr
+      (.index (target.alloc (object target.H t values room)).2 ArrTy.dyn (uintOfNat length)) = none ∧
+    ((Source.cdToMem frame (sourceTy t) offset length).run source).2.2.heap.next = source.2.heap.next+1 := by
+
+  dsimp only
+  refine ⟨Source.cdToMem_array_read_out_run frame (.int t) offset length source validation length
+    (Nat.le_refl _), ?_, ?_⟩
+  · have small : length < 2^256 := Nat.lt_trans
+      (BoolArrays.entry_geometry frame selector data selector_length input entry).1 (by decide)
+    have contents : MObj.elems ArrTy.dyn
+        ((lower target t values (capacity t frame selector data selector_length input entry validation)).heap.get (target.alloc (object target.H t values (capacity t frame selector data selector_length input entry validation))).2) =
+          values.map (value t) := by
+      unfold lower
+      rw [State.allocPush_get]
+      simp only [object, MObj.wk, MObj.elems_dyn, List.map_map]
+      rfl
+    simp only [Heap.readAddr, Heap.index, contents, uintOfNat_val small, Int.toNat_natCast,
+      List.getElem?_map]
+    rw [List.getElem?_eq_none (Nat.le_of_eq
+      (Source.cdToMem_array_length frame (.int t) offset length validation))]
+    rfl
+  · rw [Source.cdToMem_array_run, validation]
+    rfl
 end Solidity.Backend.Aggregates.IntegerArrays

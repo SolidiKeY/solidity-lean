@@ -197,3 +197,34 @@ Routine lemmas for Terra:
   counting Source.Halt phase reflection as fuel/gas/machine adequacy.
 All remain unproved TODO statements; no whole profile or completed checkpoint
 follows. Sol retains general source/frame/compiler adequacy beyond this client.
+
+
+# H14 cascade — integer copy/index consumers
+
+copy_read_related and copy_first_out are proved. The former consumes actual
+Source copied-element reads and actual intrinsic Heap.readAddr, including
+exact numeric observation via V07. The latter covers first invalid index
+length, with real Source index-panic bytes and grown heap.next, versus actual
+intrinsic readAddr=none. Index representability follows from real ABI extent;
+no desired read or bounds oracle was introduced.
+
+Routine extraction `target_contents`: for target,t,values,room, prove
+`MObj.elems ArrTy.dyn ((lower target t values room).heap.get
+  (target.alloc (object target.H t values room)).2) = values.map (value t)`.
+Reason: published allocPush_get and primitive weakening. Identical local
+facts in both proved consumers are available to extract; no broad refactor
+or budget increase. Keep the exact source-keyed private producer unchanged.
+
+Routine controls in IntegerArrayControls remain UNPROVED:
+- Actual signed8 and unsigned8 canonical two-word ABI copies, then actual
+  Source second-element read and intrinsic second-element Heap.readAddr;
+  prove exact [-1,-128] and [255,0] numeric/order observations respectively.
+- At index2, prove exact Source index-panic bytes/full grown state and target
+  none. Prove heap.next grew once, rejecting rollback to original heap or a
+  fabricated successful read. Include empty extent/index0.
+- Dirty validation followed by an invalid read must fail at validation and
+  retain the original full state, unlike successful copy then bad index.
+- Preserve populated caller aliases/old objects; reject swapped order,
+  signed truncation, wrong source address or wrong target reference.
+These instantiate actual existing definitions; inspect decoder canonicality
+before fixtures. They are not external EVM or general frame/compiler tests.
