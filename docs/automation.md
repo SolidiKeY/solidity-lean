@@ -1037,3 +1037,12 @@ records the deviation.
   overflowing and false cases. False cases may be `refuted` or `pending`,
   never `proved`. `externalValue == proved` is a hard gate; do not relax it to
   `pending`.
+
+M7-next H6 performance progress: the original `Solidity/Frontend/Checked/TypeExamples.lean`
+entry point now fronts a twenty-module bounded control split. Its ten helpers, nineteen
+public statements, original data and two axiom guards are unchanged; four aggregate
+proofs reuse actual kernel-certified per-corpus observations. All twenty files pass
+individual diagnostics/builds below the unchanged 300 s bound. This closes that
+focused performance repair, not AU01/AU02 or the full build: the full attempt
+stopped for disk exhaustion, and the general Residue/target/hash and remaining
+pipeline obligations stay open. See [VA1 handoff](feature-work/after-roadmap-va1.md).
