@@ -1293,3 +1293,102 @@ four-mode upstream EVM observations and refusal controls;
 `scripts/check-memory-loop-timing.py` freshly checks the entire original
 `Derived17` group; `scripts/check-memory-loop-timing.mjs` validates cumulative
 300-second evidence, with negative controls in its `.test.mjs` companion.
+
+## Memory operation proof components
+
+These modules retain explicit Source/heap/word representation premises. Their
+presence does not establish frontend admission or physical EVM correspondence;
+see [the checkpoint boundary](feature-work/memory-operation-proofs.md).
+
+| Module | Holds |
+|---|---|
+| `Backend/MemoryOps/CalldataAgreementChildren.lean` | Refine actual child footprint transport with INITIAL computed-payload |
+| `Backend/MemoryOps/CalldataArrayRead.lean` | Structural observations of every published decoded calldata array type, |
+| `Backend/MemoryOps/CalldataChildExtension.lean` | Context/heap extension of actual child-table correspondence. The initial |
+| `Backend/MemoryOps/CalldataChildren.lean` | Actual decoded child correspondence at the output heap. Separation is a |
+| `Backend/MemoryOps/CalldataNestedChildren.lean` | Compose existing typed child-table observations for reference-containing |
+| `Backend/MemoryOps/CalldataRead.lean` | Published decoded calldata objects and typed memory slice reads |
+| `Backend/MemoryOps/CalldataSequence.lean` | Option composition of actual immutable decoded transfers. No payload is an |
+| `Backend/MemoryOps/CalldataSequenceChildren.lean` | Existing immutable child-table correspondence at actual sequence outputs. |
+| `Backend/MemoryOps/CalldataSequenceFixtures.lean` | Concrete decoded primitive fixture tables only; no ABI decoder or Source |
+| `Backend/MemoryOps/CalldataSequenceLaws.lean` | Actual decoded-transfer observations and local same-object interval |
+| `Backend/MemoryOps/CalldataTransfer.lean` | Actual immutable decoded Boolean array transfer. This consumes the existing |
+| `Backend/MemoryOps/CalldataTransport.lean` | Initial element correspondence transports actual immutable decoded reads to |
+| `Backend/MemoryOps/CalldataUintTransfer.lean` | Actual immutable decoded uint256 array transfer. This consumes the existing |
+| `Backend/MemoryOps/CheckedSnapshot.lean` | Checked bounds around the existing actual-heap captureOverwrite operation. |
+| `Backend/MemoryOps/ContextTransport.lean` | Existing locals and slice views across context and heap extension |
+| `Backend/MemoryOps/CopyMirrorFrame.lean` | Frame the published recursive typed storage-copy mirror across writes to |
+| `Backend/MemoryOps/CopyMirrorSchedule.lean` | Arbitrary finite reached-heap schedules preserve published recursive |
+| `Backend/MemoryOps/DisjointOverwrite.lean` | Disjoint overwrite composition on the actual intrinsic heap |
+| `Backend/MemoryOps/HeapSnapshot.lean` | Snapshot overwrite adapter over the published intrinsic heap |
+| `Backend/MemoryOps/InterstageBuilders.lean` | Actual published multi-object storage/default growth between captures. |
+| `Backend/MemoryOps/InterstageCorrespondence.lean` | Existing typed child correspondence across an actual first snapshot, |
+| `Backend/MemoryOps/InterstageGrowth.lean` | Growth after an actual first snapshot, before the second capture. |
+| `Backend/MemoryOps/IntervalOverwrite.lean` | Captured writes to separated intervals of the same typed object commute. |
+| `Backend/MemoryOps/MixedCalldataSequence.lean` | Mixed decoded Boolean/uint transfers compose existing operations only. |
+| `Backend/MemoryOps/OverwriteAgreement.lean` | Pointwise agreement with INITIAL contents makes an actual overwrite an |
+| `Backend/MemoryOps/OverwriteAgreementExact.lean` | Exact local footprint observations. Actual successful operations provide |
+| `Backend/MemoryOps/OverwriteRestoration.lean` | Exact two-write restoration from INITIAL reads. The last write controls its |
+| `Backend/MemoryOps/RecaptureRestoration.lean` | Actual memory-to-memory recapture restoration. The second payload comes |
+| `Backend/MemoryOps/SequentialSnapshot.lean` | Ordered composition of existing snapshots. The second payload is captured |
+| `Backend/MemoryOps/SequentialTransport.lean` | Compose ordered writes/snapshots with real old-footprint growth and child |
+| `Backend/MemoryOps/SliceBounds.lean` | Bounds for typed heap slice adapters |
+| `Backend/MemoryOps/SliceExtension.lean` | Slice reads across published heap extension |
+| `Backend/MemoryOps/Snapshot.lean` | Snapshot and overlap laws for existing typed element lists |
+| `Backend/MemoryOps/SnapshotExtension.lean` | Naturality of the actual heap overwrite adapter under preserving growth. |
+| `Backend/MemoryOps/SnapshotProvenance.lean` | Backwards index provenance is observation data only. It neither copies |
+| `Backend/MemoryOps/SnapshotReferenceSchedules.lean` | Nonprimitive and fixed-array schedule witnesses. Snapshots retain old HRef |
+| `Backend/MemoryOps/SnapshotSchedule.lean` | Finite List/Option composition of existing checkedCaptureOverwrite calls. |
+| `Backend/MemoryOps/SnapshotScheduleControls.lean` | Runtime schedules and actual intrinsic witnesses. restoreCycles constructs |
+| `Backend/MemoryOps/SnapshotScheduleGrowth.lean` | Operation-side finite-schedule growth, consuming published checked-step |
+| `Backend/MemoryOps/SourceAlias.lean` | Actual existing Source local assignment and published intrinsic/word memory |
+| `Backend/MemoryOps/SourceAssignment.lean` | Supported resolved Source indexed assignment consumes the existing RHS-first |
+| `Backend/MemoryOps/SourceDeclaration.lean` | Actual resolved Source default declaration through the published constructor |
+| `Backend/MemoryOps/SourceDefault.lean` | Actual published independent Source zero-default construction and existing |
+| `Backend/MemoryOps/SourceDelete.lean` | Existing independent Source delete and actual intrinsic memory-address clear. |
+| `Backend/MemoryOps/SourceDeleteTarget.lean` | Compose the independent Source primitive delete with the PUBLISHED symbolic |
+| `Backend/MemoryOps/SourceIndexedDelete.lean` | Existing resolved Source delete syntax, actual location evaluation and the |
+| `Backend/MemoryOps/SourceMemory.lean` | Operation-side observations of the independent published source machine. |
+| `Backend/MemoryOps/SourceNestedAssignment.lean` | Actual resolved nested assignment over existing Source syntax, intrinsic |
+| `Backend/MemoryOps/SourceNestedDelete.lean` | Existing resolved nested Source delete and published symbolic-word clear. |
+| `Backend/MemoryOps/SourceNestedMemory.lean` | INITIAL correspondence of the supported dynamic reference-array -> Boolean |
+| `Backend/MemoryOps/SourceNestedMutation.lean` | A selected-child write frame for the existing finite nested observer. |
+| `Backend/MemoryOps/SourceNestedSelect.lean` | Actual Source parent indexing followed by local child-reference assignment, |
+| `Backend/MemoryOps/SourceReferenceAssignment.lean` | RHS-first resolved parent-element redirection to an existing Boolean |
+| `Backend/MemoryOps/SourceReferenceSequence.lean` | Parent redirection followed by deletion through the ACTUAL reached pointer. |
+| `Backend/MemoryOps/SourceReferenceWrite.lean` | Existing parent reference slots are redirected to an existing represented |
+| `Backend/MemoryOps/SourceSequence.lean` | Actual reached-state composition of published Source statements, intrinsic |
+| `Backend/MemoryOps/SourceStructAlias.lean` | Actual local alias rebinding FROM an initially represented struct member. |
+| `Backend/MemoryOps/SourceStructAssignment.lean` | Actual resolved named struct-member pointer assignment. Published pointer, |
+| `Backend/MemoryOps/SourceStructChild.lean` | Actual named-member-selected Boolean child indexing and mutation. |
+| `Backend/MemoryOps/SourceStructDeclaration.lean` | Real context-changing Source default declaration followed by reached named |
+| `Backend/MemoryOps/SourceStructDelete.lean` | Actual deletion through the INITIAL named struct's selected Boolean child. |
+| `Backend/MemoryOps/SourceStructGrowth.lean` | Paired REAL Source/intrinsic heap allocation for the existing finite named |
+| `Backend/MemoryOps/SourceStructMemory.lean` | A finite INITIAL two-field struct correspondence. Source declaration names |
+| `Backend/MemoryOps/SourceUintAssignment.lean` | Actual uint256 indexed Source assignment and whole published word program. |
+| `Backend/MemoryOps/SourceUintCompound.lean` | A checked numeric update reads the actual reached cell. Existing Source, |
+| `Backend/MemoryOps/SourceUintDelete.lean` | Real uint256 primitive deletion, not copying. Actual Source default/unit, |
+| `Backend/MemoryOps/SourceUintFixedAlias.lean` | Existing fixed-reference local rebinding, now carrying the INITIAL fixed |
+| `Backend/MemoryOps/SourceUintFixedAliasProgram.lean` | Rebinding selects the SAME represented fixed reference, then actual reached |
+| `Backend/MemoryOps/SourceUintFixedAssignment.lean` | Actual uint256 indexed Source assignment and whole published word program. |
+| `Backend/MemoryOps/SourceUintFixedBumpSequence.lean` | A genuine two-statement Source Items and intrinsic Prog application, not |
+| `Backend/MemoryOps/SourceUintFixedCompound.lean` | Whole existing read/binary/write code over genuine fixed Source arrays and |
+| `Backend/MemoryOps/SourceUintFixedCompoundSource.lean` | Genuine fixed uint Source compound syntax. The actual old cell is obtained |
+| `Backend/MemoryOps/SourceUintFixedDeclaration.lean` | Positive fixed uint Source declaration and the EXISTING typed declaration/ |
+| `Backend/MemoryOps/SourceUintFixedDeclareAlias.lean` | Actual fixed declaration then OLD-local rebinding to the NEW root and reached |
+| `Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean` | Typed proof component for SourceUintFixedDeclareAliasControls |
+| `Backend/MemoryOps/SourceUintFixedDecrement.lean` | Existing prefix/postfix fixed uint decrement. The independent Source result |
+| `Backend/MemoryOps/SourceUintFixedDecrementBounds.lean` | Fixed-array bounds: the actual indexed location |
+| `Backend/MemoryOps/SourceUintFixedDecrementBoundsControls.lean` | Fixed-array bounds controls. Populated1,8,1 array, separate9,10,9 child and11,12 |
+| `Backend/MemoryOps/SourceUintFixedDecrementLate.lean` | Reached-state fixed-array decrement and checked failure. |
+| `Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean` | Reached-state decrement controls. Populated original fixture schema, initial LEFT |
+| `Backend/MemoryOps/SourceUintFixedDecrementLateTiming.lean` | Reached-state timeout companion: the actual first prefix succeeds but the second |
+| `Backend/MemoryOps/SourceUintFixedDefault.lean` | Genuine fixed Source uint defaults. Existing Data/Heap/typed fixed objects and |
+| `Backend/MemoryOps/SourceUintFixedDelete.lean` | Real uint256 primitive deletion, not copying. Actual Source default/unit, |
+| `Backend/MemoryOps/SourceUintFixedFuel.lean` | Caller-fuel slack for the actual fixed Source default evaluator. Fuel is |
+| `Backend/MemoryOps/SourceUintFixedIncrement.lean` | Existing prefix/postfix fixed uint increment. The independent Source result |
+| `Backend/MemoryOps/SourceUintFixedWrite.lean` | Genuine fixed Source element mutation. Existing typed Data, Heap and Source |
+| `Backend/MemoryOps/SourceUintMemory.lean` | Existing Source memory uint256 arrays observed against intrinsic typed arrays. |
+| `Backend/MemoryOps/SourceUintSequence.lean` | Actual reached-state numeric assignment/deletion sequencing. Existing |
+| `Backend/MemoryOps/SourceUintWrite.lean` | Actual numeric Source memSet/writeLoc and intrinsic address updates. |
+| `Backend/MemoryOps/SourceWrite.lean` | Independent Source location writes and existing intrinsic singleton copies. |

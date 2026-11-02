@@ -485,6 +485,2565 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.boolTransfer_frame_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.checkedReverse_as_forward": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.mixedTransfer_frame_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.mixedSequence_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.reverseMixedSequence_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataArrayRead.lean:Solidity.Backend.MemoryOps.decodedArrayRead_iff": [],
+ "Solidity/Backend/MemoryOps/CalldataArrayRead.lean:Solidity.Backend.MemoryOps.decodedArrayRead_overrun": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataArrayRead.lean:Solidity.Backend.MemoryOps.decodedArraySlice_compose": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataArrayRead.lean:Solidity.Backend.MemoryOps.decodedArraySlice_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataArrayRead.lean:Solidity.Backend.MemoryOps.decodedArraySlice_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildExtension.lean:Solidity.Backend.MemoryOps.BoolChildRepr.grow": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildExtension.lean:Solidity.Backend.MemoryOps.decodedChildRefs_wk": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildExtension.lean:Solidity.Backend.MemoryOps.RefChildRepr.grow": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.boolChild_parent_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.alias": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.alias_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.read_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.decodedBoolChildren_overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.referenceSlice_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.decodedRefChildren_overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.refChild_leaf_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.refChild_parent_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.index": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.index_bool": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.index_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolRead_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolRead_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolSlice_overwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolSlice_transport": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_none_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_none_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_result_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_none_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_none_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_none_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_none_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_result_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.boolTransfer_frame_or_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.mixedTransfer_frame_or_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.primitiveTransfer_ref_root_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.mixedSequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.uintTransfer_frame_or_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceFixtures.lean:Solidity.Backend.MemoryOps.SequenceFixtures.bool_repr": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceFixtures.lean:Solidity.Backend.MemoryOps.SequenceFixtures.bool_values": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceFixtures.lean:Solidity.Backend.MemoryOps.SequenceFixtures.uint_repr": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_first_exterior": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_other_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_other_comm": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_same_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_same_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_same_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_second_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_first_exterior": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_other_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_other_comm": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_same_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_same_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_same_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_second_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.calldataBool_exact": [],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.calldataBools_lookup": [],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.calldataBools_slice_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_no_payload": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_some": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransport.lean:Solidity.Backend.MemoryOps.decodedArray_overwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransport.lean:Solidity.Backend.MemoryOps.decodedArray_overwrite_transport": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUint_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUint_sourceUint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUint_values": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUints_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUints_slice_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_no_payload": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_some": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.captureOverwrite_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.adopt_local_slice": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.allocDefault_old_ne_fresh": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.copyStToM_old_ne_fresh": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.local_slice_push_wk": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.sliceElems_allocDefault": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.sliceElems_copyStToM": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.captureAfterCopy_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.captureAfterDefault_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.fields_mirrors_frame": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.mirrors_frame": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.vec_mirrors_frame": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.copy_schedule_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.copy_schedule_none_first": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.copy_schedule_transport": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.default_schedule_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_end_replicate": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.two_builder_schedules_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/DisjointOverwrite.lean:Solidity.Backend.MemoryOps.overwriteSlice_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/DisjointOverwrite.lean:Solidity.Backend.MemoryOps.overwriteTwo_comm": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/DisjointOverwrite.lean:Solidity.Backend.MemoryOps.overwriteTwo_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.captureOverwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_inside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterCopy": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.captureAfterCopy_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.captureAfterCopy_fresh": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.captureAfterCopy_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.captureAfterCopy_new_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.copy_interstage_alias": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.copy_interstage_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.copy_interstage_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.copy_interstage_success": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.default_interstage_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageBuilders.lean:Solidity.Backend.MemoryOps.RefChildRepr.captureAfterCopy": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterFirstAlloc": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.BoolChildRepr.checkedCapture": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.BoolChildRepr.interstage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.RefChildRepr.checkedCapture": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.RefChildRepr.interstage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_fresh": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_fresh_index": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checked_interstage_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checked_interstage_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checked_interstage_success": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.overwriteIntervals_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.overwriteIntervals_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.overwriteSlice_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.replaceSlice_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.bool_uint_transfer_ne": [],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_comm": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_none_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolUintSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_none_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintBoolSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.BoolChildRepr.self_agrees": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.boolTransfer_eq_self_of_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.BoolTransferAgrees.keeps_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.overwriteSlice_eq_self_of_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.overwriteSlice_ne_of_disagrees": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.replaceSlice_eq_self_of_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.alias_transfer_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.at_heap_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixed_alias_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.object_eq": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.boolTransfer_target_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.ExactAgreementControls.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.ExactAgreementControls.mixed_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.ExactAgreementControls.rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.overwriteSlice_target_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.overwriteIntervals_eq_self_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.overwriteIntervals_path_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.overwriteIntervals_target_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.replaceSlice_twice_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.captureTwice_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.actual_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.criterion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.frozen_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.payloads": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.reached_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.recapturedPayload_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureOverwrite_source_apart": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_frozen": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_inside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.BoolChildRepr.overwriteIntervals": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.captureTwice_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.overwriteIntervals_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.RefChildRepr.overwriteIntervals": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.SliceBounds.compose": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.SliceBounds.index": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.sliceElems_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.sliceElems_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.alias_iff_wk": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.old_ne_fresh": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.sliceBounds_keeps": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.sliceElems_alloc": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.sliceElems_keeps": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.checkedSnapshotCopy_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.checkedSnapshotCopy_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.overlap_controls": [],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.replaceSlice_after": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.snapshotCopy_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.snapshotCopy_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotExtension.lean:Solidity.Backend.MemoryOps.overwriteSlice_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotExtension.lean:Solidity.Backend.MemoryOps.withElems_wk": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.BoolChildRepr.schedule_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.captureOrigin_append": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.captureOrigin_in_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.captureOrigin_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.checkedCapture_origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.runCaptures_heap_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.runCaptures_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.runCaptures_target_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.snapshotOrigin_in_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.boundary33": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.fixed_cycles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.fixed_intermediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.reference_cycles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.reference_final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.reference_intermediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_associative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_cons_some": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_none_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_none_first": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_none_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_reached": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_singleton": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_split_some": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_success_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_two": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycle_origin": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycle_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycles_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycles_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.endpoints": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.frozen_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.frozen_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.invalid_later": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_cycles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_intermediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_provenance": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.reversed_negative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.three_meaningful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.touching": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_alloc": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_interstage_alloc": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_none_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.ScheduleGrowthControls.allocated_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.ScheduleGrowthControls.interstage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.ScheduleReferenceGrowthControls.reference_allocated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_local_alias_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_local_alias_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_local_alias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_locals_get_set": [],
+ "Solidity/Backend/MemoryOps/SourceAssignment.lean:Solidity.Backend.MemoryOps.resolved_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAssignment.lean:Solidity.Backend.MemoryOps.resolved_assign_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_assign_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_assign_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_bool_declaration_timeouts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_bool_declaration_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_decl_statement_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_decl_statement_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_lowfuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.default_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.word_empty_allocator_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.source_bool_delete_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.source_bool_delete_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.clearT": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.delete_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.write_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeleteTarget.lean:Solidity.Backend.MemoryOps.source_delete_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeleteTarget.lean:Solidity.Backend.MemoryOps.source_delete_word_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.resolved_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.resolved_delete_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.source_expr_statement_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.source_index_ops": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.source_local_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_delete_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_index_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_index_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.indexLoc_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.indexLoc_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.length_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_alloc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_alloc_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_heapObj_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy_schedule": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.schedule_read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.source_nested_assign_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_assign_of_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_loc_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_loc_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_assign_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_assign_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.resolved_nested_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.source_nested_delete_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_delete_of_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_delete_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_delete_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.resolved_nested_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.child_address_ne": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.child_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.child_read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_parent_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.indexLoc_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.indexLoc_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.length_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.parent_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.same_heaps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.word_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.word_observe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.word_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMutation.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.parent_ne_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMutation.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMutation.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.source_selected_alias_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.reference_assign_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.reference_slot_allocator": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_reference_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.reference_assign_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.resolved_reference_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceSequence.lean:Solidity.Backend.MemoryOps.resolved_reference_delete_late_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceSequence.lean:Solidity.Backend.MemoryOps.resolved_reference_delete_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceWrite.lean:Solidity.Backend.MemoryOps.source_refs_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_reference_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.indexedWrite_elems": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.indexedWrite_frame": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.intrinsic_heap_pair_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.intrinsic_heap_pair_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.resolved_assign_delete_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.resolved_assign_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.resolved_delete_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.source_expr_statement_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.source_indexed_delete_horizon_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.source_items_cons_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.source_items_pair_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceSequence.lean:Solidity.Backend.MemoryOps.source_items_pair_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.source_struct_select_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_selected_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.same_heaps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.selected_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAssignment.lean:Solidity.Backend.MemoryOps.source_struct_assign_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAssignment.lean:Solidity.Backend.MemoryOps.source_struct_member_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.resolved_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.source_struct_child_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.assign_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_child_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_child_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.parent_ne_leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.read_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.write_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.source_items_context_pair_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.source_items_context_pair_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.recontext": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.declare_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.recontext": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.source_struct_delete_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.allocatedSourceAddress_old": [],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.alloc_bool": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.alloc_select_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.default_word_growth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.source_struct_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_member_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_member_tag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.read_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.read_tag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.write_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.child_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.source_child_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.source_tag_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.source_types": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.tag_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAssignment.lean:Solidity.Backend.MemoryOps.resolved_uint_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAssignment.lean:Solidity.Backend.MemoryOps.resolved_uint_assign_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAssignment.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_assign_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAssignment.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_assign_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAssignment.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_index_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAssignment.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_index_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.resolved_uint_add_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.source_uint_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.source_uint_add_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.compound_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.compound_add_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.resolved_uint_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.resolved_uint_delete_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.delete_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_delete_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean:Solidity.Backend.MemoryOps.fixed_alias_scalar_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean:Solidity.Backend.MemoryOps.source_locals_get_set_other": [],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean:Solidity.Backend.MemoryOps.source_uint_fixed_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAliasProgram.lean:Solidity.Backend.MemoryOps.source_uint_fixed_alias_program_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_assign_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_assign_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_assign_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_index_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_index_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedBumpSequence.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_bump_pair_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean:Solidity.Backend.MemoryOps.fixed_uint_add_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_add_overflow_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_add_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.source_uint_fixed_add_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.compound_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.compound_add_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.compound_add_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclaration.lean:Solidity.Backend.MemoryOps.source_uint_fixed_alloc_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclaration.lean:Solidity.Backend.MemoryOps.source_uint_fixed_declaration_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclaration.lean:Solidity.Backend.MemoryOps.source_uint_fixed_declaration_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAlias.lean:Solidity.Backend.MemoryOps.source_uint_fixed_declare_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.early_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.initial_views": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.reached_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.reached_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.word_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean:Solidity.Backend.MemoryOps.fixed_uint_decrement_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_decrement_underflow_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_decrement_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean:Solidity.Backend.MemoryOps.source_uint_sub_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean:Solidity.Backend.MemoryOps.source_uint_sub_one_underflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBounds.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_decrement_bounds_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBoundsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementBoundsControls.exact_endpoint_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBoundsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementBoundsControls.stale_valid_index_is_not_endpoint_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBoundsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementBoundsControls.valid_index_changes_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLate.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_decrement_late_underflow_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLate.lean:Solidity.Backend.MemoryOps.source_uint_fixed_decrement_horizon_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.changed_prefix_late_underflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.changed_prefix_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.frozen_initial_is_not_late_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.wrong_expression_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateTiming.lean:Solidity.Backend.MemoryOps.source_uint_fixed_decrement_prefix_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_declaration": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_old_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroData": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroData_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroVal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroVal_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_zeroElems_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_zeroElems_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.sourceUintFixedObject_wk": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.sourceUintFixedObject_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDelete.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDelete.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_delete_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDelete.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.delete_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDelete.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDelete.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_delete_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedFuel.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroVal_slack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedFuel.lean:Solidity.Backend.MemoryOps.source_uint_zeroElems_slack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedIncrement.lean:Solidity.Backend.MemoryOps.fixed_uint_increment_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedIncrement.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_increment_overflow_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedIncrement.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_increment_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.source_uint_fixed_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.write_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.write_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.write_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_alloc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_alloc_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.copy_schedule": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.indexLoc_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.indexLoc_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.length_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.read_nat_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.schedule_read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSequence.lean:Solidity.Backend.MemoryOps.resolved_uint_assign_delete_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSequence.lean:Solidity.Backend.MemoryOps.resolved_uint_assign_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSequence.lean:Solidity.Backend.MemoryOps.resolved_uint_delete_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintWrite.lean:Solidity.Backend.MemoryOps.source_uint_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintWrite.lean:Solidity.Backend.MemoryOps.source_uint_write_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintWrite.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.write_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintWrite.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.write_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.capture_singleton_elems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.source_bool_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.source_bool_write_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Calculus/ArrayBlock.lean:Solidity.Decide.arrayBlockReduction?_isSome": [
   "Classical.choice",
   "Quot.sound",
