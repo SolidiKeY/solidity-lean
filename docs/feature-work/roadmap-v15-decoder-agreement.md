@@ -61,3 +61,62 @@ Lake5.0.0-src+797c613, guardnull. Layers/orphans/trust/whitespace PASS.
 Raw docs exit1 retained; helper complete equality PASS0, frozen equality FAIL1
 with same three inherited findings. Independent finder/skeptic source reviews
 cleared; count wording corrected to six laws covering117 instructions.
+
+## PUSH increment after761ce3e4
+
+Owned `Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderAgreement.lean` adds six
+checked laws: push_parser, push_width, exact_payload, decode_push, payload_word,
+fetched_push. Existing Fin33 and Vector UInt8 n.val carry width0..32 and EXACT
+ordered payload length. Arbitrary Backend prefixes/suffixes are encoded by the
+actual emitter, with pcFits length<UInt256.size explicit. Native parsing and
+arg width are derived for every width. exact_payload proves BOTH actual extract'
+branches (bounded ByteArray.extract and large-Nat pure drop/take), preserving
+increasing bytes and excluding the suffix. No resource/allocator/PaddingCorrect
+premise is assumed. The actual word reader observes existing fromBytesBigEndian
+modulo UInt256.size; no second encoding or machine semantics is introduced.
+PUSH0 has no argument, rather than a fabricated width-zero argument packet.
+
+Owned `Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderControls.lean` adds17
+controls. Every legal width has nonuniform bytes1..n and exact extracted list;
+complete two-byte code is[0x60,0x1e,0x50,0x61,0x01,0x02,0x5b,0x00]. Values258
+versus reversed513, zero width, full32-byte maximal word, wrong width/length and
+suffix exclusion are checked. Raw truncated PUSH2 [0x61,0x01] is ACCEPTED by the
+pin as value1/width2 while Backend.decode refuses it. This concrete difference
+is retained, not assumed away: general agreement is for actual complete emitted
+intrinsic payloads. Undefined bytes/CLZ continue mapping to INVALID as above.
+
+fetched_push preserves arbitrary native seed/state/fuel/cost behavior. A reviewer
+requested a stronger client; arbitrary_seed_step now instantiates it and proves
+a complete actual PUSH2 State with gas9→6, PC3→6, exec41→42, word258 pushed onto
+unchanged tail. Populated client tail513,1025 retains memory aa,bb, returnData
+cc,dd, H_return ee,ff, calldata11,22,33, owner7/source11/static permission.
+Zero fuel actually refuses. Cost3 is SUPPLIED to step; no driverGate/stack/resource
+adequacy is claimed, and arbitrary tail does not expand the admitted profile.
+
+Focused decoder02 PASS17.62s/six standard-only reports; controls08 PASS5.63s/17
+reports, guardnull. Initial unknown/unused rewrite, reserved identifier and record
+layout errors are retained. Whole-State rfl required explicit closed UInt word
+arithmetic; a broad dsimp diagnostic failed kernel recursion under the ORIGINAL
+limit. It was replaced by the modular native state-shape method and two bounded
+kernel arithmetic facts, never a recursion/heartbeat/time increase. No failed
+check is promoted. Exact ten exited own receipt-bound containers were released
+under H1; sources/caches/builds/logs/commits/prior seals preserved. An earlier
+write attempted during an owned check failed to acquire the lease and made no
+source change; no second Lean job was launched.
+
+Finder and skeptic independently cleared exact current source/controls without
+Lean/server/build/tests, including arbitrary-seed observation and supplied-cost
+boundary. New registered/structural/docs gates and artifacts are in the next
+exact-head handoff. All150 full opcode rows remain OPEN. These decoder targets
+and valid-byte payload laws do not discharge actual Osaka semantics, scanner,
+charged resource/physical/compiler/source/world/transaction/trace obligations.
+The G45.03 execution-meaning packet QG45 remains pending; no such API was found
+in the fetched Backend/Bridge sources. Existing original Work/Backfill and frozen
+holds remain; goal unchanged, no fresh external compiler/EVM tests.
+
+PUSH final registered01 PASS27.21s/2187Bridgejobs, KeySort2jobs, Lean4.24.0/
+Lake5.0.0-src+797c613, guardnull; cap12884901888/swap0. Layers/orphans/trust/
+whitespace PASS. Raw docs1 retained, helper complete equality0/frozen equality1
+with the unchanged three inherited findings. Final source snapshots match all
+six plus17 scoped standard-only axiom reports. Both independent reviews cleared
+source, populated/fuel clients and documentation without Lean/server/build/tests.

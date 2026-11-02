@@ -68,3 +68,6 @@ import SolidityBridge.RoadmapV15.P10.BalanceEnvironmentControls
 
 import SolidityBridge.RoadmapV15.P10.DecoderAgreement
 import SolidityBridge.RoadmapV15.P10.DecoderAgreementControls
+
+import SolidityBridge.RoadmapV15.P10.PushDecoderAgreement
+import SolidityBridge.RoadmapV15.P10.PushDecoderControls

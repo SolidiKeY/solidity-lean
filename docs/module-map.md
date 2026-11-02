@@ -1557,3 +1557,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentControls.lean` | Populated complete-state balance, alias, warm/cold, ordered failure and ledger-origin controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean` | All117 non-immediate Backend/reference decoder targets and fetched dispatch, exposing CLZ→INVALID. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean` | Populated family, ordered byte/state and real fallback/PC/opcode decoder controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderAgreement.lean` | Every intrinsic PUSH0..32 payload versus actual reference extraction/reader/fetched dispatch, with explicit bounds and modulo. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderControls.lean` | All-width nonuniform payloads, endian/length/truncation controls and arbitrary-seed whole-State PUSH client. |
