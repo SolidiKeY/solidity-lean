@@ -1294,3 +1294,24 @@ exact replay driver and actual artifacts. H1/H4 do not discharge semantic
 premises. All457 rows, ten Derived17 structural rows, original G52-G55 and
 both backfills remain incomplete; clean/full/cache-equivalence, strict/corpus/
 TestSuite, source-chain and final integration/trust/release gates remain open.
+
+### Reusable published differential orchestration
+
+The owned scripts/roadmap-v17-differential.py replaces the historical external
+one-off launch recipe with a committed reusable consumer. It invokes the same
+published generated runner through the existing hard12GiB/no-swap serial300s
+collector, retains all160 ordered records and four pipeline/optimizer settings,
+and verifies the native output manifest, report identity and before/after
+source/tool/dependency/compiler hashes. The approved full0.8.38 compiler and
+actual Node executable are bound; no generator, fixture or reference engine is
+changed. Original60s/16MiB generator/comparator bounds remain unchanged.
+
+The wrapper records raw command, collector, verification and post-input phases
+separately. Recovery of a receipt after transport failure retains reported raw
+exit bytes without authenticating them. Malformed/truncated/nonobject receipts
+cannot bypass finalization. Passing requires every mandatory phase explicitly0.
+Thirteen host-only controls cover missing phases, raw124, transport exceptions,
+malformed receipts, changed inputs/Node/compiler, occupied output and original
+mount/cap/budget identity. Independent read-only finder/skeptic findings were
+fixed before execution. Any actual attempt and exact consumer revision are
+recorded separately; this paragraph is implementation evidence, not a run pass.
