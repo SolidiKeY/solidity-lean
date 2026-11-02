@@ -128,3 +128,5 @@ history is in git.
 - [Mixed-store alias frame](../Solidity/Backend/InternalFlow/MixedStoreAliasFrame.lean) — operational alias preservation across actual mutations.
 
 V12 local-only structured store frames and their reached target allocator interface: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).
+
+V12 syntax-derived local-only loop framing and mixed allocating controls: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).

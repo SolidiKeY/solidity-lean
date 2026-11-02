@@ -2976,3 +2976,66 @@ repair authorizing an unchanged heavy retry. Raw docs normal/strict1 remain
 failures; complete previous/publication equality and frozen historical debt are
 separate findings. Runtime, scoped checks, exact identities, reviews and resource
 receipts are recorded in the checkpoint handoff, not inferred from this prose.
+
+
+### C38 — source local-only loop frames from actual typed body plans
+
+`Solidity/Backend/InternalFlow/LocalStoreLoop.lean` consumes C37 ProgPlan without
+changing C37 constructors, proofs, withinM or observations. `scoped_step` applies
+the typed body plan to actual scopedLoopBody execution, drops iteration locals
+and composes genuine heap extensions. `loop_prefix` inducts the existing iterN
+for every finite horizon, including running and successful termination. It does
+not identify an error with a state. `loop_success` builds the protected-binding
+invariant internally from the body plan and applies published TLoop.run_induct:
+condition false returns the current binding, condition/body failure remains an
+error and divergence has no output state. `loop_statement` connects the same
+law to the actual Stmt.loop constructor. No whole-loop preservation equation is
+a premise, and no fresh evaluator, loop cutoff, global Heap.Keeps or fragile
+alias liveness theorem is introduced. Existing ScopedLoopFrame/CompletedLoopFrame
+require withinM and assert stronger heap framing; they cannot discharge this
+old-object-writing client's guard, so their laws are reused unchanged elsewhere.
+
+The actual new LoopLocalFrameChecks client starts from the published owned
+nonempty caller with two aliases to object0 and protected scalar17. Two true
+turns increment persistent/transient values (7,9)→(8,11)→(9,13), write old object0
+[7,11]→[9,11]→[10,11], increment counter9→10→11, allocate private objects1/2
+containing [10]/[11], and create private scalar77. Every turn drops both private
+binders. Exact complete ordered observations pin heap sizes1/2/3, both aliases0,
+the counter and protected scalar, storage array[13,17], caller transaction and
+balance. The false third test terminates. Both prefix and completed-loop local
+frames are derived from actual body plans, including the full thinned protected
+environment and actual source statement execution. The same client proves
+withinM is false and Heap.Keeps is false: reference identity is preserved while
+old contents actually change. A plan protecting the written scalar yields the
+false actual10=9 equation and is rejected. Wrong alias/private marker/old-content
+controls have the complete positive observations as baselines. Unconditional
+storage-reference liveness is rejected using the existing actual shrink/dead
+export witness read only, not by duplicating that producer or changing refusals.
+
+A second actual body asserts after allocation/local creation: its first turn
+succeeds and has the exact first observation; turn two halts with THalt.panic.
+Ordered horizons retain the original class and failure absorption uses existing
+iterN_done_le. Panic is distinguished from bare revert, exhaustion and divergence.
+An actual out-of-bounds memory-read condition has the model's bare-revert class
+before any turn. A false initial condition succeeds without allocation; a real
+nil-body true-condition loop has every horizon running and the published prefix
+law yields divergence. No failed State is reconstructed, no panic code/bytes
+are inferred from an empty data projection, and no rollback/world conclusion is
+claimed. The failing variant's first Out is obtained from its own real execution,
+not assumed equal to another program's Out. An attempted definitional equality
+failed and is retained as raw evidence; ordinary typed-index/beta-rewrite and
+closed-condition proof errors were corrected without any budget change.
+
+All C37 files/declarations/542 original pins and its32 new reports remain
+preserved; the new fixture and exact scoped reports are additive. Runtime,
+per-file/import checks, actual axiom guards, controls, source preservation and
+separate independent finder/skeptic reviews are recorded in continuation-38.
+All Work1–6 and BackfillsA/B remain partial. This is source/kernel local framing,
+not a target loop certificate/Room/Cost/StateRepr endpoint, general mixed-loop
+compilation, early return/break/continue, unbounded recursive target execution,
+full dependent dispatch or byte/journal/transient/callback/world transport.
+No assertion is made that independently ready target/client work is exhausted.
+Current complete aggregate/raw/full validation remains pending with the actual
+old strict cached/raw/full/prerequisite failures and raw docs1 retained. New
+semantic progress alone does not authorize an unchanged heavy retry. Goal
+identity/status and all original resource/proof/test bounds remain unchanged.

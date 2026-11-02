@@ -1001,3 +1001,5 @@ import Solidity.Backend.InternalFlow.MixedStoreAliasFrame
 
 import Solidity.Backend.InternalFlow.LocalStoreFlow
 import Solidity.Backend.InternalFlow.LocalStoreTarget
+
+import Solidity.Backend.InternalFlow.LocalStoreLoop
