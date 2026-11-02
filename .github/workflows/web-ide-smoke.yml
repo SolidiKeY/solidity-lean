@@ -1,0 +1,36 @@
+name: web-ide-smoke
+
+on:
+  pull_request:
+    paths: ['web/**', '.github/workflows/web-ide-smoke.yml']
+  push:
+    branches: [main, master]
+    paths: ['web/**', '.github/workflows/web-ide-smoke.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  embedded-workers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix web --no-audit --no-fund
+      - run: npx --prefix web playwright install --with-deps chromium
+      - name: Check transport, decoder and worker lifecycle
+        run: |
+          export CHROMIUM_PATH="$(node -p 'require("./web/node_modules/playwright").chromium.executablePath()')"
+          node web/test/proofs.test.cjs
+          node web/test/compression.test.mjs
+          node web/test/embedded-assets.cjs
+          node web/test/embedded-assets.cjs --file
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: embedded-worker-evidence
+          path: web/artifacts/embedded-assets*-report.json
