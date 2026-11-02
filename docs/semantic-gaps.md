@@ -62,8 +62,9 @@ proof uses it, never derived from a machine model.
 - **Function types**: reference signatures outside the internal fragment in
   [finite-dispatch.md](feature-work/finite-dispatch.md) (memory/storage
   arrays of a word of any width, a `bytesN`, `bool` or `address`, and
-  nonrecursive structs as arguments, one memory return; not several returns
-  with a memory one), and
+  nonrecursive structs as arguments, one memory return, several returns with
+  full-word memory ones in `sol{}`, not through the solc import; a direct
+  call also admits narrow elements of the target's width), and
   calldata passed to a function value's memory parameter; a value
   of an external function this contract does not declare (`I(a).g`), and
   `abi.encodeCall` of one: its signature is unknown to `sol{}`.

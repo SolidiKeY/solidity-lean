@@ -745,7 +745,7 @@ the memory or storage return `r`. -/
 inductive RetKind where
   | none
   | val (p : PrimTy) (r : Var)
-  | rets (rs : List (PrimTy × Var))
+  | rets (rs : List (LTy × Var))
   | mem (R : RefTy) (r : Var)
   | storage (R : RefTy) (r : Var)
 

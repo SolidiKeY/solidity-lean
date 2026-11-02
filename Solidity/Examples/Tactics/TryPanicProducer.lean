@@ -225,7 +225,7 @@ theorem constructed_return (p : Pipeline) (n depth : Nat) (σ : State C Input)
   rw [raw_halt] at hc
   have hs : (call7.addr.evalT σ).val = σ.tx.selfAddress.val := hself.symm
   have hzero : σ.tx.selfAddress.val ≠ 0 := by rw [hself]; decide
-  simp only [constructedTry, TRun.tryCall, hs, decide_true,
+  simp only [constructedTry, TRun.tryCall, Binders.toRet, hs, decide_true,
     Bool.true_and, hc, no_error_decode, computed36_decode, if_neg hzero, if_true]
   rfl
 

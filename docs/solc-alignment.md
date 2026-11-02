@@ -56,7 +56,11 @@ how these claims are tested against solc is `docs/solc-validation.md`.
 ## Evaluation order
 
 The default below models legacy codegen. `Contract.evalOrder := .viaIR`
-selects source-order binary expressions and `addmod`/`mulmod` arguments;
+selects source-order binary expressions and `addmod`/`mulmod` arguments,
+and the IR pipeline's copy point for a storage operand of a memory
+parameter (after every argument ran, `tests/solc/FunctionValueReferences.sol`
+`argumentOrder`/`argumentOrderDirect`: `901`, legacy `101`; `hoistCallArgs`,
+`dispatchCaptures`);
 [options.md](options.md#o9-expression-evaluation-order) gives the configuration
 and its limits. This choice is retained by the named contract, including when
 its callees are inlined or its source is imported.

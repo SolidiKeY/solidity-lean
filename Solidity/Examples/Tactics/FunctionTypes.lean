@@ -366,8 +366,10 @@ functions whose parameter is an array of that element at that location are
 candidates. A storage operand of a storage parameter is captured as an alias. The dispatch captures each
 argument once, left to right (`fnDispatch`): a memory operand as the
 reference itself, so the callee's writes reach the caller, and a storage
-operand as a copy taken at its position, before a later argument runs. The
-tag is read after the arguments, as solc's legacy pipeline reads the callee. -/
+operand as a copy taken at its position, before a later argument runs
+(under the legacy schedule; under the source-order one, solc's IR pipeline,
+after every argument, `memOrderIR_run`). The tag is read after the
+arguments, as solc's legacy pipeline reads the callee. -/
 
 def MemArgs : Contract := contract!{
   uint calls;
@@ -494,6 +496,48 @@ private def memOrder := sol[MemArgs]{
 
 /-- `h(values, setFirst())`: `values` is copied before `setFirst()` writes it, `r == 101`. -/
 theorem memOrder_run : (Prog.run (State.init MemArgs) memOrder).toOption.isSome = true := by
+  decide +kernel
+
+/-- The same contract under solc's IR pipeline (`EvalOrder.viaIR`). -/
+private def MemArgsIR : Contract := { MemArgs with evalOrder := .viaIR }
+
+/-- viaIR copies a storage operand of a memory parameter after every
+argument ran (`tests/solc/FunctionValueReferences.sol`, `argumentOrder`,
+EVM-observed `901, 9`): `setFirst()`'s write is in the copy. -/
+private def memOrderIR := sol[MemArgsIR]{
+  values.push(1);
+  function (uint[] memory, uint) returns (uint) h = pair;
+  uint r = h(values, setFirst());
+  assert(r == 901); assert(values[0] == 9);
+}
+
+/-- `h(values, setFirst())` under viaIR: the copy follows `setFirst()`, `r == 901`. -/
+theorem memOrderIR_run :
+    (Prog.run (State.init MemArgsIR) memOrderIR).toOption.isSome = true := by
+  decide +kernel
+
+/-- The direct call under viaIR, alike (`argumentOrderDirect`, `901, 9`). -/
+private def memOrderDirectIR := sol[MemArgsIR]{
+  values.push(1);
+  uint r = pair(values, setFirst());
+  assert(r == 901); assert(values[0] == 9);
+}
+
+/-- `pair(values, setFirst())` under viaIR: `r == 901`. -/
+theorem memOrderDirectIR_run :
+    (Prog.run (State.init MemArgsIR) memOrderDirectIR).toOption.isSome = true := by
+  decide +kernel
+
+/-- The legacy pipeline's order is kept for the direct call (`101, 9`). -/
+private def memOrderDirect := sol[MemArgs]{
+  values.push(1);
+  uint r = pair(values, setFirst());
+  assert(r == 101); assert(values[0] == 9);
+}
+
+/-- `pair(values, setFirst())` under the legacy schedule: `r == 101`. -/
+theorem memOrderDirect_run :
+    (Prog.run (State.init MemArgs) memOrderDirect).toOption.isSome = true := by
   decide +kernel
 
 /-- Both branches of a stored value, and a value passed as a parameter. -/

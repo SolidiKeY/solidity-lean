@@ -96,7 +96,7 @@ theorem alias_identity {H H' : HTy} (ext : H <+: H') (r : HRef H R) :
     (r.wk ext).id = r.id := rfl
 
 /-- A capture/return projection keeps the primitive tuple's full typed order. -/
-theorem primitive_order {H : HTy} {ρ : Ctx} (bs : Binders ρ)
+theorem primitive_order {H : HTy} {ρ : Ctx} (bs : RetBinders ρ)
     (caller : TEnv C H Γ) (returns : TEnv C H ρ) :
     (CallRet.rets bs).leaveT caller returns = TEnv.append ρ returns caller := rfl
 

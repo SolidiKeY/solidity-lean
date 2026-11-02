@@ -316,12 +316,23 @@ theorem OpLoc.bumpT_frame {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (d : Nat
     simp only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.and_false, Bool.or_self,
       Bool.false_eq_true] at hl
 
+/-- Several returns entered, none of them memory: the caller's global part,
+nothing allocated (`uint a; bool b;` on the frame's parameters). -/
+theorem RetBinders.enterT_frame {ps : Ctx} : {ρ : Ctx} → (bs : RetBinders ρ) →
+    bs.noMem = true → (σ : State C ps) → TGFrame μ σ (bs.enterT σ).st
+  | _, .nil, _, σ => TGFrame.refl σ
+  | _, .snoc bs p _, h, σ =>
+    (RetBinders.enterT_frame bs h σ).trans
+      (TGFrame.push (μ := μ) (bs.enterT σ).st (t := .val p) (PrimTy.dflt p))
+  | _, .snocMem .., h, _ => absurd h Bool.false_ne_true
+
 /-- A call's frame entered, with no memory return: the caller's global part,
 nothing allocated. -/
 theorem CallRet.enterT_frame {Γ' rs ps : Ctx} (ret : CallRet Γ rs Γ') (hm : ret.noMem = true)
     (σ : State C ps) : TGFrame μ σ (ret.enterT σ).st := by
   cases ret with
-  | none | val | rets | storage => exact ⟨rfl, HEq.rfl, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
+  | none | val | storage => exact ⟨rfl, HEq.rfl, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
+  | rets bs => exact RetBinders.enterT_frame bs hm σ
   | mem => exact absurd hm Bool.false_ne_true
 
 
@@ -612,19 +623,19 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
         unfold TRun.callFrom at hc
         obtain ⟨o₂, hb, hc⟩ := tbind_ok_inv hc
         cases hc
-        have he := CallRet.enterT_frame (μ := μ) (CallRet.rets (Γ := Γ) rets) rfl
+        have he := CallRet.enterT_frame (μ := μ) (CallRet.rets (Γ := Γ) rets.toRet) rets.toRet_noMem
           (σ.withEnv a)
         obtain ⟨hg, -⟩ := Prog.run_frame sbody hsb 0 hb
         have hg' := ((TGFrame.env σ a).trans he).trans hg
-        have hl := CallRet.leaveT_frame (CallRet.rets (Γ := Γ) rets) rfl
-          (((CallRet.rets rets).enterT (σ.withEnv a)).ext.trans o₂.ext) hg'.H σ.env
+        have hl := CallRet.leaveT_frame (CallRet.rets (Γ := Γ) rets.toRet) rets.toRet_noMem
+          (((CallRet.rets rets.toRet).enterT (σ.withEnv a)).ext.trans o₂.ext) hg'.H σ.env
           (TEnv.take ρ (TEnv.drop sbody.ext o₂.st.env)) d
         obtain ⟨hg₂, ha₂⟩ := Prog.run_frame ok hok (d + (Ext.append Γ ρ).depth) h'
         refine ⟨((hg'.withEnv _).trans hg₂).withEnv _, ?_⟩
         show TLocAgree d (_ ++ _ ++ _ ++ _) σ.env (TEnv.drop ((Ext.append Γ ρ).trans ok.ext) _)
         rw [TEnv.drop_trans]
         have hl' : TLocAgree d (Prog.writesAt (d + (Ext.append Γ ρ).depth) ok) σ.env
-            (TEnv.drop (Ext.append Γ ρ) (CallRet.leaveT (TEnv.wk _ Γ σ.env) (CallRet.rets rets)
+            (TEnv.drop (Ext.append Γ ρ) (CallRet.leaveT (TEnv.wk _ Γ σ.env) (CallRet.rets rets.toRet)
               (TEnv.take ρ (TEnv.drop sbody.ext o₂.st.env)))) :=
           TLocAgree.mono (W := []) (fun _ h => absurd h List.not_mem_nil) hl
         exact (hl'.trans (TLocAgree.drop (Ext.append Γ ρ) ha₂)).left.left.left

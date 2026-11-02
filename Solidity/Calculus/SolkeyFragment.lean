@@ -485,6 +485,13 @@ theorem Binders.declsThen_inSolkey (m : Modality) {Γ Δ : Ctx} {ρ : Ctx} (bs :
   | nil => intro _; rfl
   | snoc bs p x ih => intro rest; exact ih _
 
+theorem RetBinders.declsThen_inSolkey (m : Modality) {Γ Δ : Ctx} {ρ : Ctx} (bs : RetBinders ρ) :
+    ∀ rest : Prog C (ρ ++ Γ) Δ, Prog.inSolkey m (bs.declsThen (Γ := Γ) rest) = Prog.inSolkey m rest := by
+  induction bs with
+  | nil => intro _; rfl
+  | snoc bs p x ih => intro rest; exact ih _
+  | snocMem bs R x hd hm ih => intro rest; exact (ih _).trans (Bool.true_and _)
+
 /-- A call's expansion is in the fragment when its body is. -/
 theorem Premise.expandCall_inSolkey (m : Modality) (k : Nat) {Γ Γ' ps rs Γf : Ctx}
     (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf)
@@ -504,7 +511,7 @@ theorem Premise.expandCall_inSolkey (m : Modality) (k : Nat) {Γ Γ' ps rs Γf :
     cases res <;> rfl
   | rets bs =>
     show Prog.inSolkey m (args.declsThen _) = true
-    rw [Args.declsThen_inSolkey m args ha, Binders.declsThen_inSolkey]
+    rw [Args.declsThen_inSolkey m args ha, RetBinders.declsThen_inSolkey]
     show (Prog.inSolkey m (body.wk _).2.2 && true) = true
     rw [Prog.inSolkey_wk, h]; rfl
   | mem R r hd hm =>

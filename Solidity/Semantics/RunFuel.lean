@@ -152,7 +152,7 @@ theorem tryCall_approx {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (ec : ExtCal
   split
   · exact .refl _
   split
-  · rcases call_approx sargs (.rets rets) hs hsb σ with h | h
+  · rcases call_approx sargs (.rets rets.toRet) hs hsb σ with h | h
     · rw [h]; exact .inl rfl
     · rw [← h]
       split
@@ -215,7 +215,7 @@ theorem catchData_approx {ρ ps Γf Γ₁ : Ctx} (ec : ExtCall C Γ) (rets : Bin
     split
     · exact .refl _
     split
-    · rcases call_approx sargs (.rets rets) hs hsb σ with h | h
+    · rcases call_approx sargs (.rets rets.toRet) hs hsb σ with h | h
       · rw [h]; exact .inl rfl
       · rw [h]; exact .refl _
     · exact .refl _
