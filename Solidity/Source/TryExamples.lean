@@ -16,7 +16,7 @@ contract D {
     try t.g(k) returns (uint256 v) { x = v; } catch { x = 99; }
   }
   function h(T t, uint256 k) external {
-    try t.g(k) returns (uint256) { x = 1; } catch (bytes memory r) { x = r.length + 1000; }
+    try t.g(k) { x = 1; } catch (bytes memory r) { x = r.length + 1000; }
   }
 }
 ```
@@ -58,7 +58,7 @@ def unitTry : Syn .unit :=
           (.cons (tryG (.cons (.param u256 none (some "v")) .nil) (.cons (setX (.ident "v")) .nil)
             (.catchPlain (.block (.cons (setX (num 99)) .nil)))) .nil))
       (.cons (ext "h" (.cons tParam (.cons (uParam "k") .nil))
-          (.cons (tryG u256R (.cons (setX (num 1)) .nil)
+          (.cons (tryG .nil (.cons (setX (num 1)) .nil)
             (.catchSig none (.param (.elem .bytes) (some .memory) (some "r")) .nil
               (.block (.cons (setX (.addSub .add (.member (.ident "r") "length") (num 1000))) .nil)))) .nil))
       .nil))))
@@ -71,9 +71,11 @@ def elabTry : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy 
 /-- `T`'s address. -/
 def tAddr : Solidity.Roadmap.Address := addr 2
 
-/-- Deploy `T` at `tAddr` and `D` at `thisC`, then run each call data on `D`. -/
-def runTry (el : Elaborated) (inputs : List Bytes) : List (Option Outcome) :=
-  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
+/-- Deploy `T` at `tAddr` and `D` at `thisC`, then run each call data on `D`;
+`code` says whether an address without an instance has code (the
+environment's accounts). -/
+def runTry (el : Elaborated) (inputs : List Bytes) (code : Bool := true) : List (Option Outcome) :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => code,
     fun _ => .answer (.success []), word 0⟩
   let go : Nat → EM el.res.env [] (List Outcome) := fun n => do
     let t ← deploy G n "T" tAddr ElaborateExamples.user (word 0) []
@@ -92,10 +94,17 @@ def runTry (el : Elaborated) (inputs : List Bytes) : List (Option Outcome) :=
 -- **Caught revert**: `g(12)` reverts; the plain clause sets 99.
 #guard (elabTry.map fun el => runTry el [callW "f(address,uint256)" [2, 12], selOf "x()"]) ==
   some [some (.success []), some (.success []), some (.success []), some (.success (arg 99))]
+-- **Without `returns`**: `g(4)` succeeds, its return unnamed; `x = 1`.
+#guard (elabTry.map fun el => runTry el [callW "h(address,uint256)" [2, 4], selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success []), some (.success (arg 1))]
 -- **The revert data bound**: `require` reverts with no data, `r.length` is 0.
 #guard (elabTry.map fun el => runTry el [callW "h(address,uint256)" [2, 12], selOf "x()"]) ==
   some [some (.success []), some (.success []), some (.success []), some (.success (arg 1000))]
 -- **No code at the target**: not caught, the caller reverts.
+#guard (elabTry.map fun el => runTry el [callW "f(address,uint256)" [9, 4]] false) ==
+  some [some (.success []), some (.success []), some (.revert [])]
+-- **Returns that do not decode**: an environment account (code, no
+-- instance) answers with no data; not caught, the caller reverts.
 #guard (elabTry.map fun el => runTry el [callW "f(address,uint256)" [9, 4]]) ==
   some [some (.success []), some (.success []), some (.revert [])]
 

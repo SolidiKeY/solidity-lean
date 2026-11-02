@@ -679,7 +679,7 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
           if hf : argsFit C.isBase σs ps = true then
             match ht : rets.tys C.env C.scope .memory with
             | Option.some tys =>
-              if hsame : STy.sameList tys rs = true then
+              if hsame : (tys.isEmpty || STy.sameList tys rs) = true then
                 (ItemsD.inferN n C ((tryLocals rets.paramNames rs).reverse ++ L) okb).bind fun ⟨_, dok⟩ =>
                 (ItemsD.inferN n C (catchLocals Option.none L) cb).map fun ⟨_, dcb⟩ =>
                   ⟨L, .tryCall dc da ho hs hf ht hsame dok (.plain cb) dcb⟩
@@ -700,7 +700,7 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
           if hf : argsFit C.isBase σs ps = true then
             match ht : rets.tys C.env C.scope .memory with
             | Option.some tys =>
-              if hsame : STy.sameList tys rs = true then
+              if hsame : (tys.isEmpty || STy.sameList tys rs) = true then
                 (ItemsD.inferN n C ((tryLocals rets.paramNames rs).reverse ++ L) okb).bind fun ⟨_, dok⟩ =>
                 (ItemsD.inferN n C (catchLocals (Option.some (y.getD "")) L) cb).map fun ⟨_, dcb⟩ =>
                   ⟨L, .tryCall dc da ho hs hf ht hsame dok (.bytes y cb) dcb⟩

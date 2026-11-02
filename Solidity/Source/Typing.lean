@@ -1265,8 +1265,9 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
   /-- `try c.f(args) returns (T₁ x₁, …) { … } catch … { … }` (lane FU2-B):
   an external call without value whose revert runs the one `catch` clause
-  (`CatchD`); the `returns` types are the function's (`STy.sameList`),
-  bound in the success block. -/
+  (`CatchD`); the `returns` types, when given, are the function's
+  (`STy.sameList`); the returns are bound in the success block (unnamed
+  without `returns`). -/
   | tryCall {k : SCtx} {L L₁ L₂ : List (String × STy)} {c : Syn .expr} {f : String}
       {args : Syn (.list .expr)} {rets : Syn (.list .param)} {okb : Syn (.list (.item k))}
       {cl : Syn (.catchClause k)} {dn : DeclName} {d : Decl} {ps rs σs tys : List STy}
@@ -1274,7 +1275,7 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       Typed (C.at L) c (.contract dn) → TypedArgs (C.at L) args σs →
       extOverloads C.env C.isBase dn f σs = [d] → d.fnSig C.env = Option.some (ps, rs) →
       argsFit C.isBase σs ps = true →
-      rets.tys C.env C.scope .memory = Option.some tys → STy.sameList tys rs = true →
+      rets.tys C.env C.scope .memory = Option.some tys → (tys.isEmpty || STy.sameList tys rs) = true →
       ItemsD C ((tryLocals rets.paramNames rs).reverse ++ L) okb L₁ →
       CatchD cl x cb → ItemsD C (catchLocals x L) cb L₂ →
       StmtD C L (.tryStmt (.call (.member c f) (.positional args)) rets (.block okb) cl .nil) L

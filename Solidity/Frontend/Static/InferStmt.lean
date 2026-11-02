@@ -189,7 +189,7 @@ def tryRes {k : SCtx} (L : Locals) (c : Syn .expr) (f : String) (args : Syn (.li
         if hf : argsFit C.isBase pa.1 ps = true then
           match ht : rets.tys C.env C.scope .memory with
           | Option.some tys =>
-            if hsame : STy.sameList tys rs = true then
+            if hsame : (tys.isEmpty || STy.sameList tys rs) = true then
               (rok ((tryLocals rets.paramNames rs).reverse ++ L)).flatMap fun r =>
               match r with
               | .block dok => rc.map fun q => .stmt (.tryCall dc pa.2 ho hs hf ht hsame dok hcb q.2)

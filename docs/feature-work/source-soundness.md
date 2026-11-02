@@ -1247,13 +1247,16 @@ elements refused, fixed-point elements accepted.
 **`try`/`catch` (done for one clause).** `StmtD.tryCall`
 (`Solidity/Source/Typing.lean`) types `try c.f(args) returns (T₁ x₁, …)
 { … } catch … { … }` for an external call without value (`extOverloads`,
-as `Typed.extCall`), the `returns` types equal to the function's
-(`STy.sameList`) and bound in the success block (`tryLocals`), and one
+as `Typed.extCall`), the `returns` types, when given, equal to the
+function's (`STy.sameList`), the returns bound in the success block
+(`tryLocals`, unnamed without `returns`), and one
 clause of the two shapes `CatchD` admits: `catch { … }` or
 `catch (bytes memory r) { … }`. `RStmt.tryCall` carries the call and
 both blocks; `execS` evaluates the target and arguments and checks the
 target's code outside the `try` (a call to an address without code
-reverts the caller, as solc's `extcodesize` check), then on success
+reverts the caller: solc's `extcodesize` check; solc from 0.8.10 skips
+that check when there are returns to decode, makes the call, and its
+decoding fails the same way), then on success
 decodes the returns (data too short reverts the caller, not caught) and
 runs the success block with them pushed, on a revert runs the clause
 (the revert data allocated as `bytes memory` when bound); each block's
@@ -1264,17 +1267,28 @@ holds), uniqueness covers it (`CatchD.unique`, `StmtD.unique`), `OpsOK`
 too (`RItems.opsOK_castIn`). `stmtCoverage` keeps `tryStmt` deferred
 (other clauses are not typed). Controls in
 `Solidity/Source/TryExamples.lean`: success binds the return, a
-`require` failure runs the plain clause, the `bytes memory` clause sees
-empty revert data, no code at the target reverts the caller. Not
-modelled (refused): `Error(string)`/`Panic(uint)` clauses, several
-clauses, `{value: v}`, `try new C(…)`; dynamic returns decode as
-`extCall`'s (value types only). No arm theorem.
+`require` failure runs the plain clause, a `try` without `returns`
+succeeds, the `bytes memory` clause sees empty revert data, no code at the
+target reverts the caller, returns that do not decode revert the caller.
+Not modelled (refused): `Error(string)`/`Panic(uint)` clauses, several
+clauses, `{value: v}`, `try new C(…)`; dynamic returns are typed but
+`stuck` at run time, as `extCall`'s (a progress gap); out of gas in the
+callee is not modelled (solc catches it; here the horizon's `timeout`
+halts). Horizon rechecked through the Lean server after the arm, without
+new lemmas. No arm theorem.
+
+Review (finder and skeptic, read-only): fixed: the "no code" control ran
+with every address having code (it tested short returns); it now runs
+with none, and the short-returns case has its own control; a `try`
+without `returns` was refused, and is now typed (control `h`); stale
+entries (`source-s00-s01.md`, the `new` paragraph below); recorded in
+`docs/solc-alignment.md`: `{value: v}`, other clauses, dynamic returns
+`stuck`, the code check made where solc ≥ 0.8.10 calls.
 
 **Contract creation (`new C(…)`): not
-started** (time; it is a typing rule, an interpreter arm and its
-Horizon lemmas, both checkers, uniqueness and controls as above; `new` and
-`try`/`catch` also need contract creation and external-call failure
-handling in `Solidity/Source`: Checkpoint 4).
+started** (time; it is a typing rule, an interpreter arm, both checkers,
+uniqueness and controls as above, and contract creation from a running
+instance in `Solidity/Source`: Checkpoint 4).
 
 **Backfill (checkpoint 5): not started.** Its parts that do not need
 G16+ are `hashed` (a recorded-preimage component of `St`, threaded

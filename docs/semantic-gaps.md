@@ -91,7 +91,8 @@ proof uses it, never derived from a machine model.
   fractional elements refused; `fallback(bytes calldata) returns (bytes
   memory)` runs since lane FU2-B), and among
   statements `try` beyond one plain or `bytes memory` clause without
-  value (lane FU2-B; tuple declarations are typed and evaluated since lane
+  value (lane FU2-B; out of gas in the callee is not modelled, solc
+  catches it; tuple declarations are typed and evaluated since lane
   FU2-B, without a progress theorem; a non-tuple initializer, a literal
   component typed at its own type and repeated names are not modelled:
   `docs/solc-alignment.md`); since lane FU2-B `abi.decode` is typed

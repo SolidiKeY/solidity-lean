@@ -622,8 +622,11 @@ stronger obligation, not an additional assumption available to its proofs.
 - **`try`/`catch`** (lane FU2-B, `StmtD.tryCall`): only an external call
   without value and one `catch { … }` or `catch (bytes memory r) { … }`
   clause are typed; `Error(string)`/`Panic(uint)` clauses, several
-  clauses and `try new C(…)` are refused, where solc accepts them; the
-  `returns` types must equal the function's (`STy.sameList`).
+  clauses, `{value: v}` and `try new C(…)` are refused, where solc accepts
+  them; given `returns` types must equal the function's (`STy.sameList`);
+  dynamic returns are typed but `stuck` at run time; a target without code
+  reverts the caller before any call, where solc ≥ 0.8.10 makes the call
+  when there are returns to decode (the same revert, without the call).
 - **`fallback` with parameters** (lane FU2-B): the source semantics runs
   `fallback(bytes calldata input) returns (bytes memory output)`, `input`
   all of the call data and `output` returned unencoded, as solc; other

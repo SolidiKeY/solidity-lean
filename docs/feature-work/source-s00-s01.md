@@ -562,7 +562,8 @@ rooted at it. 6 are deferred with a stage and a reason:
 
 `stmtCoverage` does the same for statements (`stmtCoverage_total`,
 `simpleCoverage_total`): 14 typed (`declTuple` since lane FU2-B,
-[source-soundness.md](source-soundness.md)); `try` (S03, external calls) and `assembly` (excluded by S00;
+[source-soundness.md](source-soundness.md)); `try` (S03, external calls; typed for one plain or `bytes memory` clause
+since lane FU2-B) and `assembly` (excluded by S00;
 only the canonical rethrow is typed) deferred.
 
 ### Settings, resolutions, well-formedness
