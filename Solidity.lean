@@ -1008,3 +1008,7 @@ import Solidity.Backend.AbiWorld.ByteSequenceReadback
 
 import Solidity.Backend.AbiWorld.NestedByteReadback
 import Solidity.Backend.AbiWorld.NestedByteListReadback
+
+import Solidity.Backend.AbiWorld.RecursiveLayout
+import Solidity.Backend.AbiWorld.RecursiveReadback
+import Solidity.Backend.AbiWorld.RecursiveEntry

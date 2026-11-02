@@ -1353,3 +1353,7 @@ four-mode upstream EVM observations and refusal controls;
 
 | `Backend/AbiWorld/NestedByteReadback.lean` | Actual recursive Seq(array.bytes) codec/decoder induction, derived allocation and original sufficient fuel, nested fixed/array typed memory/calldata entry/body identity. |
 | `Backend/AbiWorld/NestedByteListReadback.lean` | Generic heterogeneous nested byte-array/validated-word canonical entry/body composition beyond LeafShapes, with actual head/offset/cursor observations. |
+
+| `Backend/AbiWorld/RecursiveLayout.lean` | Recursive canonical allocation, fuel and actual codec extents. |
+| `Backend/AbiWorld/RecursiveReadback.lean` | Mutual actual recursive decoder/window readback. |
+| `Backend/AbiWorld/RecursiveEntry.lean` | Uniform indexed canonical parameter entry/body identity. |
