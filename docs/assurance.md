@@ -170,7 +170,7 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 
 | Area | Still due |
 |---|---|
-| Memory compiler | Copies outside the nonrecursive primitive fragment of [Memory-to-storage copy recovery](#memory-to-storage-copy-recovery) (reference-element arrays and paths, reference-bearing structs), reference-bearing construction/layouts and defaults, nested loop bodies, remaining mixed operations. Finite-body memory loops, including enclosing blocks/branches, have typed reached-prefix capacity certificates and public simulation (`docs/compiler-verification.md`, Checked memory loops). The core path compiles loops (`Instr.loop`, `loop_sim`). |
+| Memory compiler | Other storage paths, copies outside the nonrecursive primitive fragment of [Memory-to-storage copy recovery](#memory-to-storage-copy-recovery) (reference-element copies, reference-bearing structs), reference-bearing construction/layouts and defaults, fixed and reference-element arrays and paths beyond fixed primitive copy sources, nested loop bodies, remaining mixed operations. Finite-body memory loops, including enclosing blocks/branches, have typed reached-prefix capacity certificates and public simulation (`docs/compiler-verification.md`, Checked memory loops). The core path compiles loops (`Instr.loop`, `loop_sim`). |
 | Loop automation | Two `SolcLoopsOpen` functions (`docs/semantic-gaps.md`, `docs/loops.md`). Support sound invariant use where missing; keep a missing invariant distinct from a false specification. |
 | Quantifier instantiation | Broaden ground terms and larger loops only with bounded, checked instances. |
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
@@ -188,7 +188,7 @@ including the pinned TestSuite and SolKey annotation checks.
 Historical timing/resource failures and the unchanged documentation-path debt
 remain explicit; sampled EVM observations do not promote source coverage.
 
-## Memory-to-storage copy recovery
+### Memory-to-storage copy recovery
 
 The checked compiler admits runtime-length primitive-array and primitive-member
 struct copies through represented finite paths. Actual loops copy the heap
@@ -210,10 +210,13 @@ refinement. Target-side example observations are `#eval` checks of the
 compiled code, not kernel proofs. The source semantics, expected observations
 and proof budgets are unchanged; no Bridge import or new axiom is added.
 
-Integration (2026-11-02): merged on master with the three new `Compilation`
-branches added to the Backend pass case analyses (`Stack`, `MappedSequence`,
-`CoreBoundary`, `MappedTail`); `./run-lean.sh`, `TrustAudit.lean` and the
-corpus check pass on the integration commit. The lane's dated failure records
+Integration (2026-11-02, merge `71e3b6aa`): `f27d07ba` adds the three new
+`Compilation` branches to the Backend pass case analyses (`Stack`,
+`MappedSequence`, `CoreBoundary`, `MappedTail`). On `f27d07ba`, the Lean build
+and TestSuite of `./run-lean.sh`, the pinned (`473da8944c`) sort check,
+`TrustAudit.lean`, `check-corpus.sh`, `check-testsuite.sh`, the static gates and
+the four-mode copy reference test pass; `check-doc-paths.sh` keeps master's 48
+findings. The lane's dated failure records
 stay in the
 [owning record](compiler-verification.md#memory-storage-copy-recovery-checkpoint).
 
