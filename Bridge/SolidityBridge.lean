@@ -50,3 +50,6 @@ import SolidityBridge.RoadmapV15.P10.ModularControls
 
 import SolidityBridge.RoadmapV15.P10.ExponentConsumer
 import SolidityBridge.RoadmapV15.P10.PowerControls
+
+import SolidityBridge.RoadmapV15.P10.StackFamilyConsumer
+import SolidityBridge.RoadmapV15.P10.StackFamilyControls
