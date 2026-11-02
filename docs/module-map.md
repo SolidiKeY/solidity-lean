@@ -1553,3 +1553,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/ArithmeticShiftControls.lean` | Full-State signed/count/boundary/resource negatives and actual fetched SAR→SMOD; no huge saturated powers. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadConsumer.lean` | Actual charged/fetched SLOAD/TLOAD, exact warm/cold resource bounds and existing finite typed source-observation transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadControls.lean` | Populated root/transient/source witnesses, exact two-insertion warming states and gas/fuel/permission/coverage negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentConsumer.lean` | Actual charged fetched BALANCE and explicit G31 account-ledger observation transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentControls.lean` | Populated complete-state balance, alias, warm/cold, ordered failure and ledger-origin controls. |

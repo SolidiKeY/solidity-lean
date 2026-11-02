@@ -62,3 +62,6 @@ import SolidityBridge.RoadmapV15.P10.ArithmeticShiftControls
 
 import SolidityBridge.RoadmapV15.P10.StorageReadConsumer
 import SolidityBridge.RoadmapV15.P10.StorageReadControls
+
+import SolidityBridge.RoadmapV15.P10.BalanceEnvironmentConsumer
+import SolidityBridge.RoadmapV15.P10.BalanceEnvironmentControls
