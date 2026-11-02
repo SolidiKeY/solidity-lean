@@ -1,3 +1,12 @@
+import Solidity.Lowering.V08.SourceTransientBytesEmitControls
+import Solidity.Lowering.V08.SourceTransientEmitPanicControls
+import Solidity.Lowering.V08.SourceTransientEmitControls
+import Solidity.Lowering.V08.SourceTransientMixedRethrowControls
+import Solidity.Lowering.V08.SourceTransientRethrowControls
+import Solidity.Lowering.V08.SourcePrefixedRethrowControls
+import Solidity.Lowering.V08.SourceStandardRethrowControls
+import Solidity.Lowering.V08.SourceRethrowControls
+import Solidity.Lowering.V08.SourceAbiEntryControls
 import Solidity.Lowering.V08.SourceAbiControls
 import Solidity.Lowering.V08.SourceCustomErrorFailureControls
 import Solidity.Lowering.V08.SourceCustomErrorControls

@@ -1,0 +1,132 @@
+{
+ "Solidity.Lowering.V08.SourceStandardRethrow.execution_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrow.expression_statement_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrow.literal_allocation_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrow.literal_argument_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrow.literal_bytes_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrow.literal_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrow.literal_statement_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.allocation_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.argument_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.empty_not_raw_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.exact_size": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.full_offset_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.intrinsic_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.literal_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.literal_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.literal_payload_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.literal_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.reversed_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.reversed_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.stale_hash_pointer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.stale_not_standard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.standard_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.standard_not_packed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.standard_not_reversed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.standard_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceStandardRethrowControls.statement_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

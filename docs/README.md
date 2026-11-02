@@ -107,3 +107,14 @@ V08's partial independent adapter checkpoint and its open prerequisites are
 recorded in [roadmap-v08-world-lowering](feature-work/roadmap-v08-world-lowering.md).
 
 V08 custom-error failure boundaries and controls are recorded in [the owning roadmap](feature-work/roadmap-v08-world-lowering.md).
+
+- [V08 source/ABI entry component](feature-work/roadmap-v08-world-lowering.md): populated source allocation and published decoder applications.
+- [V08 allocated-byte rethrow](feature-work/roadmap-v08-world-lowering.md): actual Source allocation/rethrow composition and complete-state controls.
+- [V08 standard ABI rethrow](feature-work/roadmap-v08-world-lowering.md): actual Source standard allocation, exact offsets and reached-state controls.
+- [V08 reference-signature rethrow](feature-work/roadmap-v08-world-lowering.md): real string/hash/result allocations and exact payload/state distinctions.
+- [V08 transient/rethrow source application](feature-work/roadmap-v08-world-lowering.md).
+- [V08 mixed transient/ABI argument application](feature-work/roadmap-v08-world-lowering.md).
+- [V08 reached transient/emit application](feature-work/roadmap-v08-world-lowering.md).
+- [V08 reached transient/event-panic application](feature-work/roadmap-v08-world-lowering.md).
+- [V08 valid dynamic-memory event application](feature-work/roadmap-v08-world-lowering.md).
+- [V08 source transaction boundary and funded journal controls](feature-work/roadmap-v08-world-lowering.md).

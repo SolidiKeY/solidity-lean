@@ -1,0 +1,87 @@
+{
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.distinct_machine_allocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.drop_prefix_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.identical_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_allocation_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_argument_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_intrinsic_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_payload_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_stale_not_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_stale_pointer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_statement_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.memory_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.selector_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.selector_not_signature": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.selector_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.signature_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourcePrefixedRethrowControls.signature_drop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

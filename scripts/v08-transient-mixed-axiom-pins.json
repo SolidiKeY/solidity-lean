@@ -1,0 +1,72 @@
+{
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.argument_timeout": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.arguments_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.complete_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.declaration_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.encoding_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.end_fields": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.expression_reached": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.rollback_complete_state": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.sequence_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.sequence_timeout": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.static_before_arguments": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.transient_reads": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.wrong_original_base": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientMixedRethrowControls.wrong_reversed_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}

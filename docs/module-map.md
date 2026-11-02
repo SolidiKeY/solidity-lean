@@ -1272,3 +1272,25 @@ At the root, the notation's own tests:
 | `Solidity/Lowering/V08/SourceAbiControls.lean` | Populated binary/dynamic/static ABI argument and allocation controls. |
 
 | `Lowering/V08/SourceTransient.lean` | Actual typed source transient write/static/read/endTx/undo observations and selected intrinsic reset; canonical layout/frame relation remains open. |
+
+| `Lowering/V08/SourceAbiEntryControls.lean` | Actual Source ABI allocation bytes and published eager/lazy entry decoding controls; no general calldata/body adequacy. |
+| `Lowering/V08/SourceRethrow.lean` | Actual packed-literal allocation, reached-reference canonical rethrow and independent intrinsic byte observation. |
+| `Lowering/V08/SourceRethrowControls.lean` | Populated complete-machine, neighboring-object, caller-local and horizon controls. |
+| `Lowering/V08/SourceStandardRethrow.lean` | Actual standard ABI allocation/rethrow and distinct source timeout boundaries. |
+| `Lowering/V08/SourceStandardRethrowControls.lean` | Full populated standard/reversed execution,320-byte payload, offset words and negative controls. |
+| `Lowering/V08/SourcePrefixedRethrowControls.lean` | Actual selector/signature and string-reference allocation/rethrow, complete heap/state controls. |
+| `Lowering/V08/SourceTransientRethrowControls.lean` | Actual transient statement / ABI declaration / canonical rethrow sequence; explicit rollback/reset controls. |
+| `Lowering/V08/SourceTransientMixedRethrowControls.lean` | Actual mixed effecting ABI arguments after a transient-writing statement prefix, exact rethrow and explicit rollback. |
+| `Lowering/V08/SourceTransientEmitControls.lean` | Actual effecting emit after a reached transient/caller prefix; exact log erasure, static order and explicit journal rollback/end. |
+| `Lowering/V08/SourceTransientEmitPanicControls.lean` | Actual event argument panic after transient/hash prefixes; precise bytes, existing decoder observation and explicit rollback/end. |
+| `Lowering/V08/SourceTransientBytesEmitControls.lean` | Valid dynamic-memory RawBytes event at reached transient/caller prefix; exact allocation, payload and boundary controls. |
+| `Lowering/V08/H1Audit.lean` | V08 exact axiom inventory including finite-prefix and source-boundary controls. |
+| `Lowering/V08/SourceTransientReentry.lean` | Explicit event execution, end and fresh transient reentry. |
+| `Lowering/V08/SourceTransientOwnerRollback.lean` | Owner-isolated reached writes and explicit nested rollback. |
+| `Lowering/V08/SourceTransientOwnerCommit.lean` | Reached inner commit, later write and outer rollback. |
+| `Lowering/V08/SourceTransientInnerRollbackOuterCommit.lean` | Inner rollback, later owner write and outer commit. |
+| `Lowering/V08/SourceTransientErrorCallerRollback.lean` | Exact raw errors followed by explicit caller rollback and end. |
+| `Lowering/V08/SourceTransientReachedPayment.lean` | Actual funded Source transfer at the reached event/transient state. |
+| `Lowering/V08/SourceTransientRejectedPayment.lean` | Actual unaffordable second transfer preserves its paid input. |
+| `Lowering/V08/SourceTransientSameOwnerPayment.lean` | Same-owner identity and affordability versus distinct-owner draining transfer. |
+| `Lowering/V08/SourceTransientZeroPayment.lean` | Zero distinct-owner transfer retains world but adds two journal entries. |

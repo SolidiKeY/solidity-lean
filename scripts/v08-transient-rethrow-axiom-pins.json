@@ -1,0 +1,97 @@
+{
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.assignment_statement": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.block_execution": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.complete_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.declaration_statement": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.end_preserves_fields": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.end_reads": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.literal_cases": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.other_owner_read": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.other_path_read": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.prefix_timeout": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.rollback_complete_state": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.rollback_execution_component": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.rollback_vector": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.same_invocation_read": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.sequence_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.static_before_allocation": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.wrong_automatic_rollback": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.wrong_payload": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Lowering.V08.SourceTransientRethrowControls.zero_timeout": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}

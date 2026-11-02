@@ -3115,3 +3115,528 @@ current/public byte equality remains separate NEW0, frozen+11doc/+345pin debt
 unchanged. No Decision/default/full/literal retry or waived mandatory gate.
 Finder/skeptic accepted proof semantics, selected-cell boundaries and revised
 serial certificate. Exact19newaxiomsets and measured logs are in the handoff.
+
+
+## Published099 ABI-entry application (2026-11-01)
+
+Consumed public prerequisite `099bfbe185731c354b12a40f28ccf5d98534c779`,
+retaining frozen ancestor `fb379ae20f10e2c92113453ddd9d40d8f2efbe09` and checked
+V08 predecessor `7c3c8274eeafe908a1e96709d0491c02b306e03f`. The old absolute-path
+checkout and seals are preserved. Incoming owners' implementations remain unchanged.
+The approved same-VM application container is
+`47c5808627ffeadf7d11884f8c37dd554eae2ed7bc5d55756781500b6ecf9a20`;
+no further container was created, and no old runtime was replaced.
+
+`SourceAbiEntryControls.binary_source_entry` connects actual independent
+`Source.evalE` ABI allocation (both pipelines and static modes, full locals/St)
+to the exact published `AbiEntry.eager` result and `eager_cref` application.
+Empty, binary and 33-byte inputs have actual input sizes 68/100/132 including
+the supplied selector. These concrete size proofs discharge the existing decoder
+premise; they introduce no Source admission bound. Exact lazy reference `(68,3)`,
+truncation, shifted-head and wrong-byte controls discriminate actual runs.
+`observeResult_injective` and `observeBytes_injective` retain complete successes
+and exact decoder failures; kernel computation reflects back to typed results.
+
+`mixed_effects_and_entry` reuses actual Source argument execution: binary,
+write-false, read-false, 33-byte value, then the fixed hash. It retains the whole
+reached machine and links heap object 2 to the supplied decoder input.
+`mixed_entry` observes every decoded argument's canonical bytes and preserves
+run/revert/refusal branches; it is explicitly not a general injectivity theorem.
+`mixed_second_reference` proves `(260,33)`. Wrong order and packed encoding are
+actual negative controls. Every previous populated-state/vector theorem remains.
+The published panic decoder now ignores trailing bytes; four new controls retain
+canonical panic bytes, reject short/wrong-selector inputs and distinguish codes.
+
+All 832 predecessor axiom sets are unchanged; 26 new standard-only sets bring
+the inventory to 858. No axioms, sorry, native shortcuts, representation changes
+or proof-budget increases were introduced. Direct reduction first failed with
+recursion/Decidable errors; the observer reflection fixed it. A later combined
+heap theorem hit the original 200000-heartbeat limit; small heap/input lemmas
+fixed that without changing the limit. Raw failed outputs remain evidence.
+
+The cold bounded closure failed125 at600s after106 completed target calls.
+Measured source/config/toolchain-keyed output reuse justified subsequent checks;
+final closure passed in80.582s, peak aggregate RSS2414825472bytes and cgroup
+peak1958014976bytes. The enforced aggregate12GiB/no-swap/CPU1/serial Lean-j1,
+cache-off, OS headroom and original600s guards were preserved. The original
+805306368-byte admission estimate and540000000-byte reserve remain enforced.
+A proposed smaller admission was auto-review rejected and was not executed.
+Finder caught cumulative Docker log attribution before reuse; the runner now
+binds the archived prefix and checks only each new suffix, preserving full logs.
+
+All Work G20/G21/G22.01-.05/G23 and Backfill A/B parents remain PARTIAL.
+G20 still needs canonical Source/V07 signature/argument/body/Entry application;
+G21 still needs general nested/reference/slice/calldata and exact catch/frame
+applications; G22 still needs actual Source external/self/callback/creation/
+library/world composition; G23 still needs general effecting arguments and
+canonical source-unit/transaction/environment/emit composition. Published ABI
+entry and function-reference components are partial prerequisites, not those
+missing bridges. Supplied-body intrinsic backfills are not Source execution.
+
+Mandatory full/default/Decision/literal-wrapper/executable refresh remain open.
+The new Decision closure is322 local modules (old321), with one added module
+and eight changed sources; inspection found no demonstrated repair of the warm
+Decision600s failure. No unsupported repeat was made. Historical failed125 and
+raw global docs/pin exit1 records remain failures. Public/frozen comparisons and
+scoped checks are distinct. Kernel component proofs are not pinned solc/EVM or
+bytecode adequacy. The persistent blocked goal identity/objective is untouched.
+
+
+## Allocated canonical rethrow application (2026-11-01)
+
+Independent G21 work continues while Q-ANCESTRY-099 remains pending. No branch,
+HEAD, ancestry, goal or runtime configuration changed. Before the overlay,
+the exact staged tree63b18705af46bb692f5d388892c873fecf5ac6be, binary index,
+index entries and92 owned source/blob identities were saved in the additive
+rethrow evidence directory. The old7c checkout and all prior sealed packages
+remain unchanged. The default prepared index remains its original snapshot.
+
+The generic canonical rethrow and zero-horizon laws already existed in
+`SourceCustomErrorFailures`; they are consumed, not restated as new progress.
+New `SourceRethrow` composes actual SourceAbi packed-literal evaluation, getV,
+its returned reference, and actual execS rethrow through existing EM.sub.
+The fresh object's bytes are proved by Heap.alloc_get, so no whole execution
+result or desired lowering equality is assumed. Complete caller locals and
+reached St survive the exact revert, including the allocated object. Timeout
+before allocation retains the original state; statement timeout after successful
+allocation retains the new state. These are distinct actual execution paths.
+
+Controls cover empty/binary/33-byte data, both pipelines and static modes,
+a real assignment prefix retaining false rather than restoring true, old
+object0 versus fresh object1, every existing populated field, exact payloads,
+and wrong payload/state/local/pointer negatives. The supplied intrinsic existing
+revertData constructor executes independently: empty bytes give plain revert,
+nonempty bytes give revertWith. There is no new payload emitter, catch selection,
+compiler-choice proof, memory-layout relation or inferred target rollback.
+
+First literal-application closure:880 exact standard axiom sets, all858 prior sets unchanged
+(including832 predecessor sets). The original858 pin file, native checker and
+bounded runtime runner are byte-exact. New22 pins and an additive checker enforce
+both their prior SHA bindings and every native guard, adding the new core root.
+Raw failed attempts are retained: initial missing monadic reductions, control
+abbreviation/reserved identifier, and duplicate declaration insertion; all were
+fixed without changing statements or budgets. Final check passed54.959s with
+peak aggregate RSS1298812928 and cgroup628375552bytes, confirmed stopped, all
+sources/config and108 prior container records unchanged. Lean4.24.0/Lake5.0.0-src
+and actual KeySort2-job output remain decisive runtime evidence.
+
+No new container, cleanup, cache copy, budget/profile/exclusion change or goal
+mutation occurred. All original Work G20-G23 and Backfill A/B remain partial.
+Canonical SourceSpec/V07/type/layout/ABI/body/linkage/runtime-frame/bytecode/
+admission and reserved-owner applications and mandatory full/default/Decision/
+Suite/literal-wrapper/executable-refresh checks remain open. Kernel component
+execution is distinct from pinned compiler/EVM adequacy. Integration-dependent
+commit and committed handoff remain held by the existing ancestry question.
+
+
+The same checkpoint additionally applies real effecting Source ABI arguments to
+rethrow. `expression_rethrow` has only individual actual Source evaluation and
+reached heap lookup premises; `mixed_complete` discharges them from checked
+SourceAbi execution and allocation, rather than assuming whole preservation.
+All three objects (old0/hash1/result2), next3, full local/state and every prior
+vector field are retained. Exact packed70-byte data reaches the independently
+supplied intrinsic revertWith; wrong320-byte canonical data is discriminated.
+An actual horizon6 failure retains the argument local write and prevents both
+hash/allocation and rethrow. There is still no compiler selection/catch claim.
+Final extended closure passed57.032s,887 standard sets: all858 base and first22
+sets unchanged,29 new sets total. Peak aggregate RSS1306865664, cgroup636301312
+bytes. An additional missing pure reduction failure is preserved and fixed
+without any budget change. A separate alternate index records the new overlay;
+the original default staged tree63b and its binary identity remain preserved.
+
+
+## Standard ABI rethrow application (2026-11-01)
+
+Independent G21/Backfill work while existing Q-ANCESTRY-099 remains pending.
+Default tree63b/index bytes and prior alternate tree51141/index bytes, all prior
+97source/blob bindings and old sealed packages were verified/saved first. A third
+index records this overlay; no commit/ref/ancestry/goal/runtime change occurred.
+
+New SourceStandardRethrow consumes actual SourceAbi.literal_execution(false),
+SourceRethrow.fromExpression/expression_rethrow and Heap.alloc_get. Populated
+standard5-argument execution consumes SourceAbiControls.mixed_complete(false):
+actual returned address2, complete320-byte payload, reached caller-false locals
+and whole Source state. Old0/hash1/result2, allocator3 and all existing balances,
+storage/transient/journal/heap/events/logs/fnLocals observations remain. Reversed
+execution consumes its producer. Full32-byte words160/224 vs reversed256 are
+transported from actual rethrow payloads. Actual packed/reversed/stale-pointer
+runs differ by checked bytes/lengths/order, without hash/profile premises.
+Empty/binary/33-byte standard literals yield64/96/128-byte payloads:empty input
+is not raw empty revert. Exact allocation/argument/statement timeouts retain
+untouched state/reached local effects/completed allocation respectively.
+
+First run FAIL1 on two rewrite details; actual failed source bytes/raw log are
+retained. Revised closure PASS55.396s,913 standard sets:all887 prior sets unchanged,
+26new (7core/19controls). Peak RSS1293131776,cgroup619921408bytes; confirmed stopped,
+source/config/108prior-container metadata unchanged. No proof/fuel/node/test/time/
+resource-budget change/newaxiom/sorry/native shortcut. Original858/29pin files,
+native/887checkers and runtime runner/config remain byte-exact. New SHA-bound
+additive checker retains every native guard, adding26disjoint standard-only
+scoped sets/new core root. Original81 case intents remain with new corruption
+controls. Initial checker construction had a quoting failure, retained and fixed
+without changing production guards. Same12GiB/no-swap,CPU1/serial-j1/cache-off,
+600s,805306368admission/540000000reserve remain. All original queues and canonical
+SourceSpec/V07/type/layout/ABI/body/linkage/frame/bytecode/admission/reserved-owner
+applications remain partial; mandatory and raw-global failures are not waived.
+Supplied intrinsic revertData is not compiler/catch/frame/ABI adequacy, nor target
+world rollback. Goal and integration holds remain untouched.
+
+
+## Continued G21 reference-signature rethrow (2026-11-01)
+
+After sealing/reviewing the standard checkpoint, a further independent
+application consumes actual selector/signature/memory-signature producers.
+All previous indices/seals/102source bindings were verified/saved first. No
+new primitive, decoder, emitter, interpreter or goal/ref/ancestry change.
+The memory signature really allocates STRING1,hash-inputBYTES2,resultBYTES3,
+allocator4. Actual returned pointer3 reaches canonical rethrow; complete Source
+locals/world/heap/journal/transient/events/logs/fnLocals are retained. Literal
+and memory signatures have identical324-byte payloads but different complete
+machines; pointer/heap identities are not projected away. Literal-selector and
+empty-signature prefixes differ by checked exact bytes, not a collision premise.
+Stale pointer2 reads actual binary input, not output324. Argument horizon7
+retains string allocation and localfalse before hash/result; statement0 retains
+all allocations; expression0 none. Removing4prefix bytes is ONLY an observation
+matching actual standard-rethrow body, never full-state equality. Independently
+supplied intrinsic revertData is not compiler/catch/frame/rollback adequacy.
+
+First check FAIL1 from reserved prefix identifier and combined-goal reduction;
+source/raw retained. Renaming and a small byte-list lemma fixed it without
+changing budgets. Final closure PASS57.462s,930standard sets:all913 prior exact
+sets unchanged,17new. Peak RSS1261473792,cgroup593342464bytes, sources/config/
+108prior-container records unchanged, runtime confirmed stopped. Same runtime,
+12GiB/no-swap/CPU1/serial-j1/cacheoff/600s/805306368admission/540000000reserve.
+New additive checker binds unchanged913checker/26pin bytes, retains the entire
+prior native guard chain and adds17strict disjoint standard-only namespace pins.
+Prior91case intents retained with8new negative controls. Four task-owned index
+snapshots are distinguished; integration/Q/blockedgoal and all original queue/
+mandatory/source-prerequisite holds remain. No new compiler/EVM test or whole
+lowering/independent-exhaustion claim.
+
+Finder/skeptic review confirmed guarded-import logic; skeptic identified possible
+bytecode writes outside supplied environment. Import now temporarily suppresses
+bytecode and restores caller state; an actual false-caller-flag/no-local-bytecode
+positive probe exercises it. No existing cache file is removed or changed.
+
+
+## Actual transient statement / ABI declaration / rethrow (2026-11-01)
+
+Independent G21/G23/Backfill A-B application, Q-ANCESTRY-099 still held. Prior930
+exact sets/99test intents/four indices/seals/source bindings verified/preserved;
+separate fifth index only, no commit/ref/goal operations. Actual RItems executes
+expr(setScratch), declInit(ABI literal), rethrow(here), with nps1 and explicit
+bool→bytes-memory/bool frame. Actual enclosing execS block also executes it.
+Individual steps are proved, no desired whole-execution premise/new interpreter/
+emitter/decoder. Both pipelines/packed-standard/arbitrary literal bytes;
+fuel+10(items)/fuel+11(block) are syntax horizons, not admission cutoffs.
+
+Opening retains populated balances/persistent world/oldheap/events/logs/fnLocals,
+uses published transaction end, then records OTHER-owner sender transient write
+as caller prefix. Actual self assignment adds journal entry2. ABI returns ref1,
+old0/result1/next2 and WHOLE reached Source.St retained. Outer EM error frame is
+L0; explicit declaration result separately proves inner bool parameter/reference
+locals. Full16-field vector/empty,binary,33-byte cases preserve exact bytes.
+Actual self read, other-owner preexisting prefix read and persistent saved-path
+read retain complete state. Static refusal BEFORE allocation; horizon5 timeout
+retains self write only; zero untouched. Draft horizon6 was actually sufficient
+to continue: failed claim/raw diagnostics retained and corrected honestly.
+
+Raw rethrow retains self transient write. Explicit published enter-mark rollback
+removes ONLY that journal operation, preserving sender caller prefix/journal1
+and BOTH heap objects. Separate endExecution clears both owners/journal while
+preserving wholeworld/heap/events/logs/fnLocals. Wrong automatic rollback and
+binary payload negatives discriminate actual executions. No source halt→rollback,
+compiler/catch/frame/bytecode or SourceSpec adequacy inference.
+
+Check1FAIL1 on monadic/frame/nps rewrites and horizon6. Check2PASS18new sets, then
+unused simp arguments removed. Actual enclosing block check3FAIL1 final pure-error
+reduction; check4PASS55.921s,949exact standard sets(all930prior unchanged,19new),
+no newmodule warnings. AggregateRSS1279332352,cgroup605085696bytes; source/config/
+108priorcontainer records unchanged, stopped. Same12GiB/no-swap/CPU1/serial-j1/
+threads1/cacheoff/600s and proof/fuel/node/test budgets. Forecast192→256→320MiB
+revised BEFORE extra checks to disclose retained cumulative logs; original
+805306368admission/540000000reserve unchanged. No newruntime/deletion.
+
+SHA-bound additive checker preserves every prior930checker/pin/resource guard,
+adds19strict disjoint standard-only scoped sets. All99priorcase intents with8new
+negatives(107total), plus helper positives. Reviewer recommended bytecode probe
+cover ALL imported checker cache files; implemented without touching old scripts.
+Initial pin extractor omitted the empty-axiom print branch; diagnostic and failed
+positive retained, grammar corrected to production grammar before generating pins.
+Independent finder/skeptic source/script reviews found no remaining semantic or
+guard issue. All G20/G21/G22.01-.05/G23 and BOTH backfills PARTIAL; canonical
+SourceSpec/V07/type/layout/ABI/body/linkage/runtime-frame/bytecode/admission/
+reserved-owner applications and mandatory gates remain open. No unchanged failed
+Decision/full retry, no goal/reactivation/ancestry integration. Final gate/review
+outcomes and exact commands in additive handoff.
+
+
+## Continued mixed effecting ABI after transient prefix (2026-11-01)
+
+After independent source/artifact reviews and sealing prior949/107 checkpoint,
+continued original G21/G23/Backfill A-B application in separate sixth index.
+Prior110sourcebindings/indices/seals preserved first. Actual evalArgs at WRITTEN
+state performs literalbinary,localfalsewrite,localreadfalse,33-byte literal and
+hash allocation1, not a fixed-populated equation applied at a changed world.
+Existing typed encode_fixed_bytes32/digest laws discharge encoding at that reached
+state; SourceAbi.execute yields ref2/localfalse and old0/hash1/result2/next3.
+Actual resolved RItems expr(transient assignment),declInit(mixedABI),rethrowhere
+executes at horizon20,nps1. Full17-field vector and WHOLE Source.St preserve
+balances93/7, code0/nonce1, persistentsavedtrue, self transientfalse→true,
+preexisting sendertrue, journal1→2, every allocated byte/object,events/logs/fnLocals.
+Both pipelines and packed70/standard320 exact complete ordered data. Declaration
+separately exposes ref2/falsebool; outer Source error frame remainsL0.
+
+Static prefix refuses BEFORE argument effects. Actual argument6timeout retains
+inner falsebool+written state before hash/allocation; item9timeout retains
+written state but discards inner locals through published sub boundary.
+Source rawhalt retains transient write. Explicit marked rollback preserves sender
+prefix/journal1 and all3heapobjects. Separate transaction end preserves whole
+world/heap/events/logs/fnLocals; actual self readtrue then end self/senderfalse.
+Wrong original fixed-base snapshot(journal3 versus actual2) and reversedpayload
+negatives discriminate reached input and exact argument order without hash or
+profile premises. No new encoder/decoder/interpreter/payload emitter; no whole
+execution preservation premise, compiler/catch/frame/bytecode or SourceSpec claim.
+
+Check1FAIL1: ambiguous unqualified values rewrite and200000-heartbeat failure
+from cases on a large payload equality. Qualified existing definition and used
+existing revert/error constructor injectivity, no budget increase. Check2PASS
+56.059386157s,963exact standard sets(all949prior unchanged,14new), no newmodule
+warnings. AggregateRSS1294794752,cgroup624480256bytes; source/config/prior108
+container records unchanged andstopped. Same existing runtime,12GiB/no-swap/CPU1/
+Lean-j1/threads1/cacheoff/600s,805306368admission/540000000reserve, all original
+proof/fuel/node/test budgets. Forecast256MiB based on warm closure/log/export
+sizes recordedbeforewrites. No newruntime/cachecopy/cleanup/ref/goal operations.
+
+SHA-bound checker preserves all949guards/pins and107priorcase intents; adds14
+strict disjoint scopedstandardsets and8negative controls(115intents), plushelper
+positives and fullchain bytecodefalsecallerprobe. Independent finder/skeptic
+source/script reviews and finalartifact review recordedseparately. All original
+Work/Backfill parents remainPARTIAL with canonical SourceSpec/V07/type/layout/ABI/
+body/linkage/runtime-frame/bytecode/admission/reserved-owner and mandatory gates
+open; rawfailures/publiccomparisons separate. Q-ANCESTRY-099 stillunanswered,
+not resubmitted; original blockedgoal unchanged, no completion/exhaustion claim.
+
+
+## Actual effecting emit at reached transient/caller state (2026-11-01)
+
+Independent G23/Backfill application; Q-ANCESTRY-099/blockedgoal unchanged. All963
+prior exactsets/115caseintents/114sourcebindings/sixindices/seals verified before
+writes; separate seventhindex. One consistent EXISTING SourceEmitControls.E with
+actual event/state declarations is reused. Opening uses published endExecution
+then actual sender transient journal operation as callerprefix; actual typed
+expr(setScratch) writes self before event. Actual evalConvArgs and encodeVals are
+proved ATWRITTEN, not by applying an old fixed-populated equation to anotherinput.
+Actual RItems assignment→emit→nil runs with nps1,horizonfuel+13, returnsfalsebool
+locals and WHOLE reached Source.St. Sufficient syntaxhorizon is not an admission
+cutoff. Hash binary object1/old0/next2,balances93/7,code0/nonce1,persistentsavedtrue,
+selfscratchfalse→true,preexisting sendertrue,journal1→2,events/fnLocals retained;
+complete16-field vector includes exact selector+fullordered3worddata logprepend
+ANDoldlogs. No new encoder/decoder/interpreter/payload emitter or wholeexecution
+preservation premise.
+
+Both pipelines. Actual reordered localread-beforewrite produces hash,true,false
+rather than hash,false,false; full actual event executions differ by complete
+payload using existing byte-inequality/prefix-cancellation laws, no hash
+noncollision/profile premise. Approved eraseLogs projection retains returnedfalse
+locals,completeworld/transient/heap/events/fnLocals; erased result is NOT opening.
+Raw machines with different logs are not identified. Direct static emit executes
+actual arguments and encoding before emptyrevert, retaining hashheap/localstep
+observations. Entire static sequence refuses FIRSTtransientwrite before event:
+allocator1 versus directstatic2, distinct error-state boundary. Zero and actual
+argument-timeout/item4 cases retain exact opening/written state.
+
+Explicit enter-mark journal rollback removes ONLYselfoperation preserving sender
+prefix/journal1 andheap. After normal emit it ALSO retains the newly prepended
+SOURCElog; this is published execution-component rollback, NOT EVMlog/frame
+adequacy. Directstatic rollback retainsoldlogs. Separate endExecution clears both
+owners/journal and preservesworld/heap/events/logs/fnLocals; real endreads false.
+Wrong automaticrollback and erasedopening controls discriminate actual runs.
+
+Check1FAIL1: typedUInt8binary versus intrinsicListInt observer mismatch and
+200000-heartbeat reduction of erasedtuple. Switched to existing exact integer
+byte observer and consumed logged_erasure instead of forcing fullreduction;
+no budget changes. Check2PASS26newsets with2unusedsimp warnings. Actualemit
+constructor madeexplicit so itemproof consumes its eventstep; check3PASS58.5955s,
+989exactstandardsets(all963prior unchanged,26new), no newmodulewarnings.
+AggregateRSS1306808320,cgroup613330944bytes; source/config/prior108containers
+unchanged,stopped. Same12GiB/no-swap/CPU1/serialLean-j1/threads1/cacheoff/600s and
+original proof/fuel/node/test budgets,805306368admission/540000000reserve. Entire
+320MiB forecast measuredbeforewrites; no cleanup/newruntime/cachecopy.
+
+SHA-bound additive checker preserves all963priorguard/pinbytes and115caseintents,
+26strictdisjointscopedstandardsets/8newnegatives(123intents), plushelperpositives
+and fullchain bytecodefalsecallerprobe. Independent read-only finder/skeptic
+source/script/artifact reviews and final outcomes recorded in additive handoff.
+All WorkG20-G23 and BackfillA/B remainPARTIAL; canonical SourceSpec/V07/type/layout/
+ABI/body/linkage/runtime-frame/bytecode/admission/reserved-owner applications and
+mandatorydefault/Suite/full/literal/executablegates remainOPEN. Historical125,
+rawglobaldocs/pins1/frozenwhitespace2 notwaived; publicequalityseparate. No goal
+reactivation/reset/ref/commit/ancestry operation or universal exhaustion claim.
+
+
+## Continued actual event argument panic at reached prefix (2026-11-01)
+
+After independent reviews/sealing of emitcheckpoint, continued originalG21/G23/
+Backfill application in separate eighthindex. Existing ONE SourceEmitControls.E
+is reused; old118sourcebindings/seventhindex/seals preserved. Real Source
+convertedarguments atWRITTEN execute hashbinary allocation1 then actual division0
+panic, BEFORE encoding/staticguard/logprepend. Both pipelines/directstaticmodes.
+Actual RItems uses the published transientexpr→failingemit sequence,nps1,horizon13,
+consuming individually proved steps; no desiredwholeexecution premise. Inner
+argumentlocals remaintrue (failure before localwrite), outererrorframeL0; complete
+16-field vector balances/code/nonce/persistentsaved/transientself+sender/journal/
+old0/hash1/next2/events/OLDlogs/fnLocals andWHOLE Source.St retained.
+
+Exactsourcepanicbytes transport to existing Semantics.encodePanic0x12, and the
+published intrinsic decodePanic observes code0x12 on ACTUAL producedbytes. This
+is lossy byteobservation only, not Sourcecatchselection/ABI/compiler/body/frame/
+bytecode/admission adequacy; RStmt atthispin has no suppliedtry/catchinterface.
+No new decoder/encoder/error emitter/hashpremise. Empty/assertpayload and skipped
+hashsnapshot negatives distinguish realfailure. Directstaticpanic still follows
+hashprefix; entirestaticsequence rejectsFIRSTstore with emptyrevert beforeargs.
+Zero timeout separate. Explicit markedjournalrollback preserves callerprefix/
+heap/oldlogs; rawpanic doesNOTrollback. Transactionend separately resets both
+owners/journal and preservesworld/heap/events/logs/fnLocals; actualreadsfalse.
+ApprovederaseLogs observation retains sameexacterror and nonlogeffects.
+
+FirstclosurePASS56.595432746s,1004exactstandardsets(all989prior unchanged,15new;
+original963 also unchanged),no newmodulewarnings. AggregateRSS1301069824,
+cgroup622845952bytes; source/config/prior108containers unchanged,stopped. Same
+existing12GiB/no-swap/CPU1/serialLean-j1/threads1/cacheoff/600s,allproof/fuel/node/
+testbudgets,805306368admission/540000000reserve. Entire256MiBforecast recorded
+beforewrites withheadroom. No cleanup/newruntime/cachecopy/ref/goal operation.
+
+SHA-bound checker preserves all989guards/pins/123caseintents;15strictdisjoint
+scopedstandardsets plus8newnegativecontrols(131intents),helperpositives/fullchain
+bytecodefalsecallerprobe. Independent read-only finder/skeptic source/script and
+artifact reviews recordedseparately. All G20-G23/BOTHbackfills remainPARTIAL;
+canonicalSourceSpec/V07/type/layout/ABI/body/linkage/runtimeframe/bytecode/admission/
+reserved-owner andmandatorygates open. Historical125/rawdocs-pins1/frozenWS2
+retained,publicequality separate. Q-ANCESTRY-099 unanswered/notresubmitted; blocked
+goal identity/objective unchanged, no wholelane/independent-exhaustion claim.
+
+
+## Valid dynamic-memory RawBytes emit at reached prefix (2026-11-01)
+
+Independent originalG21/G23/Backfill application, separate ninthindex. All1004
+prior exactsets/131caseintents/eightindices/122sourcebindings/seals preserved
+beforewrites. SAME SourceEmitControls.E/bytesEvent and published transient/caller
+opening/written used. Actual literal→bytesmemory implicit conversion allocates
+freshobject1 via real evalConvArgs, values expose typedmemRef1; encodeVals reads
+that REACHED object via bytesOfRV/heapBytes. Individual argument/encoder steps
+proved, then actual execS and RItems transientexpr→RawBytes emit,nps1,fuel+13,
+returnedboollocalsTRUE and WHOLE Source.St. No assumed wholeexecution relation,
+newencoder/decoder/interpreter or sourcepayload/admissionbound. Arbitrarybytes
+proof; empty,binary0/255/128,33-byteboundary instantiated.
+
+Exactselector+entireSource.abiLayout[(true,bytes)] logprepend retainsoldtail.
+Published SourceAbi.single_dynamic_bytes transports full offsetword32,lengthword
+and entirepad32bytes with NO lengthpremise. Full16-field vector retains balances
+93/7,code0/nonce1,persistentsavedtrue,selfscratchfalse→true,preexisting sendertrue,
+journal1→2,old0bytes[0,255],fresh1content,next2,events/logs/fnLocals. Boundarydata
+lengths64/96/128. Actualvalidstale0 emits oldtwo-bytepayload (not malformed);
+freshbinary differs by FULLpayload; pointeridentity negative independently
+refutes1=0 evenwhencontentcouldcoincide. Actual reversedbinary execution and
+wronglengthword/padding perturbations discriminate fullpayloads without hash
+noncollision. Deliberately malformed99 yields realencodingstuckbeforestatic,
+not an admittedSourceSpec state or EVMrevert.
+
+Directstatic VALID emit allocates/encodes before emptyrevert; whole staticprefix
+refusesFIRSTstore beforeallocation. Zero anditem4 argumenttimeout retainexact
+opening/written respectively. ApprovederaseLogs observation preservesreturned
+locals/world/heap/nonlogfields. Explicitmarkedjournalrollback restoresonlyex,
+retainscallerprefix/heap/newSOURCElog; transactionend separately clearsbothowners/
+journal,preserveswholeworld/heap/events/logs/fnLocals,actualendreadsfalse. No
+Sourcehalt→rollback, compilerselection/catch/body/frame/ABI-bytecode/admission or
+externalEVM adequacy inferred; unsupportedaggregateencoding not invented.
+
+Check1FAIL1 onlyidentitynegative rwframe versusstaticfalseframeupdate. Fixedby
+specializing actualtypedproducer equality to exactframe-shaped leftside, without
+changing itsstatement orbudgets. Check2PASS59.224314939s,1032exactstandardsets,
+ALL1004prior unchanged/28new,no newmodulewarnings. AggregateRSS1292259328,
+cgroup613130240bytes; same existingruntime/source/config/prior108containers
+unchanged,stopped. Lean4.24.0/Lake5.0.0-src+797c613/KeySort2-jobPASS recorded.
+Original12GiB/no-swap/CPU1/Lean-j1/threads1/cacheoff/600s/allproof-fuel-node-test
+budgets and805306368heavyadmission/540000000reserve unchanged. Whole256MiBforecast
+recordedbeforewrites, withinoriginal805MBallocation. Aftersecondbuild freespace
+fallsBELOW nextheavybuildadmission; NO furtherbuild attempted. File-only checks/
+metadata/export remainwithinrecordedwholeforecast andpreservereserve; no guard
+lowering/cleanup/newruntime/cachecopy. Actualfloor/shortfall inadditiveevidence.
+
+SHA-bound newchecker preservesall1004guards/pins/131caseintents,28strictdisjoint
+scopedstandardsets plus8newnegatives(139intents),helperpositives/fullchain
+bytecodefalsecallerprobe. Finder/skepticsource/script/artifactreviews recorded
+separately. All WorkG20-G23/BothBackfills remainPARTIAL withcanonical SourceSpec/
+V07/type/layout/ABI/body/linkage/runtimeframe/bytecode/admission/reserved-owner
+andmandatorygates open. Historical125/rawdocs-pins1/frozenWS2 failures retained,
+completepublicequality separate. Q-ANCESTRY-099 stillunanswered/notresubmitted;
+goalunchangedblocked,no ref/commit/merge/push or wholelane/exhaustion claim.
+
+
+## H1/H5 checked source-boundary delivery (2026-11-02)
+
+H1 supersedes the former source-only storage allowance: the two extra frozen
+checkouts' regenerable `.lake/build` directories were removed under the writer
+lease. Sources, commits, current warm outputs and sealed handoffs remain.
+Actual disk availability increased from 1246228480 to 4216299520 bytes. Page-cache
+reclaim returned permission denied; measured RAM nonetheless exceeded the new
+4 GiB reserve throughout. The aggregate 12 GiB/no-swap cap, CPU1, Lean `-j1`,
+threads1, disabled optional artifact cache, 600-second wall and every proof,
+fuel, node and TestSuite budget remain unchanged.
+
+Nine historical source-only drafts now kernel-check in their concrete public099
+application tree. The statement-preserving repairs add explicit intrinsic Bool/
+Nat types, unfold the existing paid state, and consume its checked other-account
+frame law. They do not change any expected observation or add premises. Actual
+163-module H1Audit closure passes, including all old finite-prefix declarations:
+1209 exact standard-only axiom sets, all 1032 predecessor sets unchanged, 177
+new sets. Its complete theorem inventory agrees with actual `#print axioms`
+output. Actual Lean 4.24.0 and Lake 5.0.0-src+797c613 plus passing two-job KeySort
+output precede the closure. This is component evidence, not the mandatory full
+build or compiler/EVM adequacy.
+
+The checked clients cover event execution/end/reentry; owner-isolated nested
+rollback/commit and later writes; exact static/timeout followed by explicit
+caller rollback; actual reached nonzero, rejected, same-owner and zero transfers.
+In particular zero distinct-owner transfer retains the complete world while
+adding two journal entries; same-owner zero is complete ExecState identity.
+Both pipelines, arbitrary complete event payloads and existing empty/binary/
+33-byte controls remain. Raw halts never imply automatic rollback, and supplied
+CallFrames never establish admitted external calls.
+
+Independent finder and skeptic reviewed the actual proof repairs and evidence
+checker. Confirmed checker defects were fixed: exact source/control/pin
+inventories; actual runtime image, user, cwd, name, complete environment, mounts
+and labels; framed log decoding and prefix/cumulative hashes; sample extrema,
+600-second observations, cgroup peak and exact tool/target order. One positive
+and 34 corruption controls pass. Layer/orphan/strict automatic and correctly
+invoked NUL-inventory trust gates pass. Initial legacy-test invocations missing
+required fixture arguments, plus incompatible historical root-specific fixtures,
+remain recorded failures; no legacy guard was relaxed or historical seal edited.
+Raw docs/global pins remain exit1. Complete public099 lists are equal (86 docs
+findings, 410 pin notes); frozen comparisons still add 14 docs findings and 396
+pin notes. Owned whitespace passes separately from historical incoming failures.
+
+H5 resolves ancestry delivery: the owned checked099 patch is committed onto the
+canonical 7c branch without merging histories. Its concrete validation prerequisite
+is public099 `099bfbe185731c354b12a40f28ccf5d98534c779`; in particular canonical7c
+lacks the published `Semantics/AbiEntry.lean` consumed by the adapter. Reserved
+producer code is not copied into this patch. Coordinator integrates and performs
+combined-tree gates. Published master observed this turn is
+`469acaced9d0d24959d247365e685f687367eea5`; Source execution and native Decision
+producer code are unchanged from099, so no supported repair justifies repeating
+the fully-warm Decision timeout. Browser-only wasm GMP changes are not a native
+repair. Historical full/Decision exit125 and current default/full/Suite/literal
+wrapper/executable-refresh boundaries remain unresolved.
+
+H10 transfers G22.01 typed source calls and G22.02 source callbacks to
+compiler10/readonly-external. This worker does not start those clauses and will
+consume exact coordinator-relayed checked packets. Existing intrinsic controls
+remain evidence only. G20, G21, G22.03 creation, G22.04 library context, G22.05
+world composition and G23 all remain partial; Backfill A/B have additional checked
+components but remain partial at their actual source/target applications.
+Canonical SourceSpec/V07/type/layout/ABI/body/heap/linkage/runtime-frame/bytecode/
+admission and reserved-owner premises remain open. No whole-lane completion,
+source-call/callback application or external solc/EVM adequacy is claimed. The
+existing blocked goal identity/objective is untouched.
