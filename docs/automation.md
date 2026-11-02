@@ -1018,6 +1018,14 @@ zero-prefix exact tests and conditional leaf coverage. The subsequent
 source discovery/normalization for QFUIntLinear formulas of source weight≤511,
 with all-waiver target membership, hash freedom and actual certified verdicts.
 This supported family does not establish exhaustive Residue or broader M4 coverage.
+A separate `Calculus/DecisionSourceInstance.lean` increment recognizes actual
+intrinsic bounded literal instances using existing `Fml.instLit` substitution,
+then lifts certificates through original universal prefixes. Concrete clients
+certify all five remaining array source fixtures, including arrays of structs
+and arrays whose leaf translation refuses. The literal/bound are supplied
+classification parameters; global decision/coverage integration remains open,
+and all original unknown pins are preserved. This is no compiler replacement
+or finite-sample promotion.
 `Examples/DecisionHaltingOrGaps.lean` separates already-covered partial
 Boolean lowering from the actual open APF guard-floor case. A nested halting
 `||` guard in a negative two-key mapping block has certified target/unknown/

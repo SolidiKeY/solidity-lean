@@ -3219,3 +3219,57 @@ wider memory, halting-OR guard, broader revised M4 boundary, whole-pipeline
 fuel/511 derivation, remaining baseline/backfill/performance and affected/full
 final gates. Original8bb counterexample/AQ1/AQ2/Q1 decisions and all previous
 failures/seals preserved. No goal/VM/thread reset, no push/merge/PR/tag.
+
+
+### Intrinsic source-instance checkpoint (partial)
+
+`Calculus/DecisionSourceInstance.lean` certifies actual `Fml.instLit` guarded
+literal instances before LFml translation, using the existing AllLeft declaration
+landing and `substU_holds` theorem. `SourceUIntLiteralInstance φ bound value`
+retains the entire source equation and actual computed substitution equation;
+its parser is sound/complete and membership constructively decidable at the
+supplied bound/literal. The consequent is a primitive equation; arbitrary
+source formulas are not asserted to be recognized. The body retains arbitrary
+typed partial observations; this is not a semantic oracle or finite-test lift.
+`SourceUIntLiteralChain` lifts real certificates through original primitive
+universal binders with structural recursion and no new fuel. Hash transport
+requires unchanged explicit `hasHash=false`; no general chain-completeness or
+global decision/coverage integration is claimed.
+
+Concrete clients construct actual parser witnesses for all five original open
+array shapes: below key, fixed below key, below field, array of structs and array
+of arrays. The last two still have actual leafOf?=none; the source certificates
+supply ValidH without assuming a repaired compiler. In-range mismatched RHS and
+out-of-range literals are refused. The original false fixed-array countermodel
+proves that false source cannot inhabit the certificate chain. Original global
+unknown pins and every existing observation remain unchanged. Target/Covered
+integration and general array realization remain open; no AU02 completion claim.
+
+Finder/skeptic confirmed a G0 issue in initial ordinary indexed matches. After
+warning and inspecting normalizer e645/e757 and MemStructCut view history, new
+views and chain dispatch now use generalized Fml.casesOn; structural recursion
+is retained. Both reviewers confirmed repair, semantic soundness/noncircularity
+and exact supplied-parameter scope, without Lean/server/builds. Failed guard
+proof, dependent-view transport, congruence-name, completeness and pre-G0 attempts
+are retained raw. After adding the actual three-zero-cell storage state, original-antecedent
+equality and all in-range read proofs, final core/client MCP4.240/5.284s,
+affected closure build4.160s and18public signature/axiom reports6.277s PASS; no sorryAx/new axiom/native trust.
+Raw commands/results: /workspace/va1-evidence/source-instance-next. Two owned
+root imports/two rows register modules; only owned M7-next status prose changes.
+Measured aggregate RSS1586756KiB, cgroup peak707776512bytes, minimum host available17141420032bytes; actual hard12GiB/no swap, threads1/-j1,12GiB host reserve. 6 failed measurements retained.
+
+Required static automatic/import/trust gates pass; existing inventory/docs
+failures remain recorded. Prior full/TypeExamples stops and held VA1-Q2 remain.
+Disk measured about63MiB free: no existing files/caches/artifacts are removed.
+This intermediate evidence archive contains this checkpoint's raw delta plus
+an exact path/SHA256 prerequisite to the preserved cumulative ground-source-next
+archive. Both are checksum-bound; the full evidence directory remains intact.
+The prior full-archive helper is preserved. Final concrete whole-lane closure,
+final full validation and final full handoff remain open; this is incremental
+packaging, not an assignment-completion certificate or relaxed resource guard.
+Remaining queue: global meaningful Residue/DecisionTheorem-prime/exhaustive target
+and hash bridge; actual array decision/collector integration; broader memory,
+halting-OR, broader approved program-free boundary, whole-pipeline fuel/node
+bound, remaining profiling/backfill and full gates. No other lane's producer,
+predicate/default/pin/budget is changed. Original decisions, counterexample,
+seals and failed gates preserved; no goal reset/mutation, push, merge or PR.
