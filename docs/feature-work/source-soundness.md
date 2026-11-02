@@ -819,7 +819,8 @@ evaluates the loop and storage witnesses in the kernel in seconds.
 
 ## Lane FU1 (followup-20261101): checkpoint 4's first two items
 
-**Not started in `Solidity/Source`.** `abi.decode` (the `.elemType`
+**Not started in `Solidity/Source`** (item 1 since done by lane FU2-B,
+below). `abi.decode` (the `.elemType`
 constructor, "type names as values (abi.decode) are not typed",
 `Ledger.lean`) and calldata references (`.slice`; `Eval.lean`'s "calldata
 arrays are not modelled" and "member of calldata" `stuck` arms) keep their
@@ -835,3 +836,133 @@ parameter/return positions the fixture is working in both pipelines; see
 [abi-hashes.md](abi-hashes.md), "Lane FU1". `calldata_nested_array_static_reencode_v2`
 (an element that fails only when read inside `abi.encode`) needs
 access-time calldata reads in the elaborated model and stays blocked.
+
+## Lane FU2-B (fu2-20261102): `abi.decode` and calldata references
+
+Owner of `Solidity/Source/**` in batch fu2-20261102. Work queue: (1)
+`abi.decode`, (2) calldata references, (3) agreement with the elaborated
+model, (4) checkpoint 4's remaining gaps; backfill checkpoint 5.
+
+### Item 1: `abi.decode` (done)
+
+**Typing** (`Solidity/Source/Typing.lean`). `Typed.abiDecode` types
+`abi.decode(data, ts)` when `abi` resolves to the builtin, the data has a
+type `STy.decodeSrc` admits (`bytes` in memory or storage, a string
+literal: what solc's "implicitly convertible to `bytes memory`" leaves once
+calldata is set aside), and `Ctx.decodeTys ts = some τs` with every `τ`
+`STy.decodable Γ.env`; its type is `STy.ret τs` (one type: its value;
+otherwise a tuple), as solc's. The second argument is read, not typed:
+`Ctx.decodeTys` takes the components of a parenthesized list (`(T)`,
+`(T, U)`, every component present) or a single type expression, and
+`Syn.typeExprs` reads elementary type names, user-defined types by an
+unqualified name (`Ctx.typeNameOf`: a struct, enum, UDVT, contract or
+interface; a local is never a type), and arrays of them (`T[]`, `T[k]` with
+a positive constant `k`), all in `memory`.
+
+`STy.decodable` is exactly what the S02/S04 decoder (`decodeArgs`) reads:
+one-word values (`STy.wordElem`: integers, `bool`, `address`, `bytesN`,
+enums at their member count, contracts), a user-defined value type whose
+underlying type is one of those (`Env.udvtUnderlying`, the layout's reading,
+`Env.layout_underlying`), `bytes`/`string` in memory, and a dynamic memory
+array of one-word values. **Named refusals** (no derivation, outside the
+proved fragment, each a recorded gap): static arrays, structs, nested
+arrays, external function types (the decoder does not read them; the
+assignment's "as the decoder supports"), fixed point (solc's ABI coder does
+not implement it), qualified names (`L.S`), `bytes calldata` data (needs
+item 2), `abi.decode(data, ())`, a doubly parenthesized component
+(`((uint))`).
+
+**Checkers.** The G13 checker (`Solidity/Frontend/Static/Infer.lean`)
+offers `decodeRes` at every call whose syntax is `g.decode(x, ts)`, from
+`x`'s results; completeness (`abiDecode_mem`, the `typed_complete` case)
+keeps `hasType_iff`, and `stmtOK_iff`/`wellFormed_iff` are unchanged (they
+reach expressions through it). The new arm matches on the call's
+arguments, which stops smart unfolding of `infer` at an abstract call:
+`call_sub` unfolds it through the structural recursor
+(`set_option smartUnfolding false in`, one lemma; no heartbeat option).
+The elaborator's checker (`Solidity/Source/Infer.lean`, `inferDecode`)
+tries the rule before the other member-call rules and falls back to them.
+Uniqueness of meaning (`Typed.unique`, `uniqE_callMember`) covers it:
+`decode` is no encoding function (`AbiKind.ofMember_decode`), and `abi` is
+never a typed receiver (`Typed.ident_builtin`).
+
+**Evaluation** (`Solidity/Source/Eval.lean`). `RExpr.abiDecode data hs hd`
+evaluates the data, reads its bytes (`bytesOfRV`) and runs `abiDecodeData`:
+data shorter than one head word per type reverts with no data (solc's
+`abi_decode_tuple` head check), then `decodeArgs` decodes as at a call's
+entry: an invalid word (a narrow integer out of range, a `bool` other than
+0/1, an `address` or `bytesN` with dirty bits, an enum at or past its member
+count) reverts with no data, an offset or length word past the data or a
+tail past the data reverts with no data, a length of `2^64` or more panics
+with `0x41`. `abiDecodeData` is a helper outside the interpreter's mutual
+block, with `abiDecodeData_grow` in Horizon's lists, so the `Below`,
+`Grow` and `Approx` step proofs take the new arm without new heartbeats
+(the earlier getter attempt failed on exactly that, Checkpoint 4).
+
+**Preservation and progress** (`Solidity/Source/Decode.lean`):
+
+| Theorem | Statement |
+|---|---|
+| `decodeElemWord_ok`, `decodeWord_ok` | a one-word value's decoder is never `stuck` (`NotStuckR`) at a decodable type |
+| `tailBytes_ok` | a dynamic argument's tail keeps any invariant and halts only without `stuck` |
+| `decodeArg_ok`, `decodeArgs_ok` | the decoder keeps `MemOK` (the heap well typed, shaped, with bare-value elements); its values agree with the grown heap typing; halts are not `stuck` |
+| `abiDecodeData_ok` | the same for `abi.decode`'s helper (`RValOK` of the result) |
+| `evalE_abiDecode_ok` | the `abi.decode` node on `bytes memory` data keeps `MemOK` and is not `stuck`, given the data expression's own triple (gap-relative: the data is any typed expression, whose progress is the walk's) |
+| `evalE_local_ok`, `evalE_abiDecode_local_ok` | a local's value agrees with the heap typing; so the node on a `bytes memory` local is closed (no hypothesis on the data) |
+| `evalE_abiDecode_lit_ok` | the same on a string literal, unconditionally |
+| `Hoare.memGrowX`, `allocRef_memX`, `List.mapM_ok`, `Hoare.lift_ns` | `Hoare.memGrow`/`allocRef_mem` with halts that carry `NotStuck`; `mapM` and `lift` |
+
+Not covered by a theorem: `bytes storage` data (`bytesOfRV` reads it with
+`loadMem`, whose progress is not proved; a control runs it); data given by
+any other memory expression is covered only relative to that expression's
+triple, which the walk does not yet give for memory expressions. Which
+halt a malformed payload gives (empty revert, Panic `0x41`) is shown by
+the controls, not by a theorem (`NotStuck` only). `tailBytes`' check
+`data.length < off + 32` is solc's `offset + 0x1f < end` negated
+(`off + 31 ≥ len` iff `off + 32 > len`).
+
+**Ledger.** `.elemType` is no longer a gap: S01's coverage classifies it as
+an operand of `call` (`Coverage.operand`), typed inside the conversion rule
+and `abi.decode` (`exprCoverage_operand`, `elemType_decode_operand`: a typed
+`g.decode(x, ts)` with an `elemType` node), and the ledger reads an operand
+as evaluated (`semExprCoverage_of_operand`); `semExprGaps` is `[slice,
+callOptions, metaType, new, inlineArray]` (`semExprGaps_spec` unchanged).
+`exprCoverage_operand` is witnessed by the conversion `uint8(a)`;
+`elemType_decode_operand` by `abi.decode(hex"0001", (uint8, bool))`. The
+operand classification says where `elemType` is typed, not that every
+type `abi.decode` names is decoded: the refusals above stay gaps (here and
+in `docs/semantic-gaps.md`).
+
+**Controls** (`Solidity/Source/DecodeExamples.lean`, `#guard`, elaborated
+from syntax and run through dispatch): `uint8` (7 decodes; 300 and 31 bytes
+revert with no data), an enum of two members (1 decodes; 2 reverts),
+`uint256[]` (`[5, 6]` has length 2; length `2^64` panics `0x41`; a tail and
+an offset past the data revert), `bytes` (`"ab"`), `(uint8, bool)` (`(1, 2)`
+reverts before the next statement), `bytes storage` data; refused: a struct, `uint256[2]`,
+`fixed` (the `uint256` neighbour elaborates).
+
+**Review (finder and skeptic, read-only, on 022f21a).** Confirmed and
+fixed: a top-level `address` component is `address payable`, as solc forces
+it (`STy.payableTop` in `Ctx.decodeTys`; arrays keep `address`); the
+docstrings of `abiDecodeData` and the module overstated Panic `0x41` (solc's
+`finalize_allocation` band is recorded in `docs/solc-alignment.md`) and
+which halts a theorem proves (`NotStuck` only; the halt's kind is the
+controls'); `bytes storage` data had neither a control nor a statement (now
+a control, `runDF`, and stated unproved); the arm's progress was only
+relative (now closed for a local, `evalE_abiDecode_local_ok`); no lemma read
+an operand as evaluated (`semExprCoverage_of_operand`); both checkers
+inferred the data operand eagerly for every `g.decode(x, ts)` (now a thunk,
+forced only when `g` is the `abi` builtin); stale docs (`source-s00-s01.md`,
+`source-s02.md`, `source-s05.md`, `coverage-plan.md`). Recorded, not
+changed: a doubly parenthesized component (`abi.decode(b, ((uint)))`, which
+solc accepts) is refused; the elaborator's checker still infers `x` a
+second time when `abi.decode` does not type and the call falls through to
+the other member-call rules. Accepted by both: the head, offset, length and
+tail checks and their order against solc's generated decoder, the
+validators, the type-name resolution (a local shadows a type), uniqueness,
+`hasType_iff`, the `smartUnfolding` option on `call_sub`.
+
+**Recorded deviation** (`docs/solc-alignment.md`): solc reverts on an
+offset word of `2^64` or more before its bounds check; here such an offset
+is past any data held in memory, so it reverts by the bounds check (the
+same outcome for every memory object shorter than `2^64` bytes).

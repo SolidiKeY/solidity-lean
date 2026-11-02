@@ -580,6 +580,14 @@ stronger obligation, not an additional assumption available to its proofs.
   external function types: such an argument is `stuck` (user-defined value
   types are decoded as their underlying type since lane V04b)
   ([source-soundness.md](feature-work/source-soundness.md#the-stuck-census)).
+  `abi.decode` (lane FU2-B) reuses this decoder on `bytes` data, so the
+  same `finalize_allocation` band applies; solc also reverts on an offset
+  word of `2^64` or more before its bounds check, where the source
+  semantics reverts by the bounds check (the same outcome for data shorter
+  than `2^64` bytes). The decoder's refused types (static arrays, structs,
+  nested arrays, fixed point, external function types) have no
+  `abi.decode` derivation
+  ([source-soundness.md](feature-work/source-soundness.md#lane-fu2-b-fu2-20261102-abidecode-and-calldata-references)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).

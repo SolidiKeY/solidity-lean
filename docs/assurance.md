@@ -176,6 +176,7 @@ allocation (`catchDataBox`), not the exact callee-memory relation.
 | Arithmetic | Broader nonlinear coverage stays outside the exact verifier's fragment (`docs/automation.md`, M6 decisions). |
 | Revert semantics | Exact symbolic catch relationships; literal data outside self-call frames; broader panic-code alignment (self-calls already fail with solc's `Panic` codes, `Prog.withPanics`). |
 | Exact verification | `docs/automation.md`, M7 "What is not proved". |
+| Source semantics | The ledger's remaining gaps and the whole-program progress theorem (`docs/feature-work/source-soundness.md`; `abi.decode` at the decoder's types closed by lane FU2-B, `Solidity/Source/Decode.lean`). |
 
 
 Memory-loop compiler follow-up: the full original 24-module Derived17 workload

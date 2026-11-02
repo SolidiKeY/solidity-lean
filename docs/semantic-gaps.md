@@ -83,6 +83,15 @@ proof uses it, never derived from a machine model.
 - **`ecrecover`**: no general proof of the curve arithmetic or of equivalence
   to the precompile ([feature-work/abi-hashes.md](feature-work/abi-hashes.md)).
 
+- **Source semantics** (`Solidity/Source`, the S02–S05 reference
+  interpreter): the constructor ledger's gaps are `slice`, `callOptions`
+  beyond `value`, `metaType`, `new` and `inlineArray` (`semExprGaps`), and
+  among statements `declTuple` and `try`; `abi.decode` is typed and
+  evaluated at the decoder's types since lane FU2-B (static arrays,
+  structs, nested arrays, fixed point, external function types and
+  `bytes calldata` data are refused); calldata references are not built
+  ([feature-work/source-soundness.md](feature-work/source-soundness.md)).
+
 ## Closed
 
 Each has focused fixtures in `tests/solc/` and `Examples/Tactics/`.

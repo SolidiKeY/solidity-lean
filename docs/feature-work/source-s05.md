@@ -92,8 +92,9 @@ constructor without a wildcard and gives each typed one a derivation
   `RExpr`/`RStmt`, and the interpreter has an arm for every constructor of
   those (no wildcard; Lean's exhaustiveness check);
 - `semExprGaps_spec`: the gaps (`slice`, `callOptions` beyond `value`,
-  `metaType`, `new`, `inlineArray`, `elemType`) are exactly the
-  constructors S01 defers;
+  `metaType`, `new`, `inlineArray`) are exactly the constructors S01
+  defers (`elemType` left the list with lane FU2-B: it is an operand of
+  `abi.decode` and conversions, `exprCoverage_operand`);
 - among statements, `declTuple` and `try` are gaps, and `assembly` is
   excluded apart from the canonical rethrow.
 
@@ -444,6 +445,6 @@ but would make `forward_iff`/`guard_iff` vacuous, so none is given.
 fragment, which must first be delimited (`stuck` is told apart from
 divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
-rule); calldata references, `abi.decode`, `new`, slices, inline arrays,
+rule); calldata references, `abi.decode` beyond the decoder's types (lane FU2-B), `new`, slices, inline arrays,
 `try`, tuple declarations, `fallback` with parameters (the decoder's
 dynamic-length `Panic(0x41)` is modelled since lane V04b).

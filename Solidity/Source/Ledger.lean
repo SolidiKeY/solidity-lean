@@ -18,7 +18,14 @@ every constructor without a wildcard):
   parameters, nested-array copies): `semExprCoverage_of_typed` is a
   classification, not a progress theorem;
 - a constructor S01 defers stays a recorded gap with its stage, never an
-  exclusion (G00's profile still contains it).
+  exclusion (G00's profile still contains it);
+- a constructor S01 reads as another rule's operand (`Coverage.operand`:
+  `elemType`, the callee of a conversion and a type expression of
+  `abi.decode`, lane FU2-B) is evaluated inside that rule's node
+  (`semExprCoverage_of_operand`); the types `abi.decode` refuses (static
+  arrays, structs, nested arrays, fixed point, external function types,
+  `bytes calldata` data) have no derivation and are recorded in
+  `docs/feature-work/source-soundness.md`.
 
 `semExprCoverage_of_typed` and `semStmtCoverage_of_typed` prove the first
 point; `semExprCoverage_total` and `semStmtCoverage_total` that the ledger
@@ -78,6 +85,11 @@ theorem semExprCoverage_of_typed (k : Ctor) (h : exprCoverage k = some .typed) :
 theorem semStmtCoverage_of_typed (k : Ctor) (h : stmtCoverage k = some .typed) :
     semStmtCoverage k = some .evaluated := by
   simp only [semStmtCoverage, h]
+
+/-- **Every operand constructor is evaluated** inside its parent. -/
+theorem semExprCoverage_of_operand (k p : Ctor) (r : String) (h : exprCoverage k = some (.operand p r)) :
+    semExprCoverage k = some .evaluated := by
+  simp only [semExprCoverage, h]
 
 /-- The expression constructors still without semantics. -/
 def semExprGaps : List Ctor :=

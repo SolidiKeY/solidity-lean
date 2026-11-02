@@ -688,13 +688,21 @@ def Syn.typeExprs (Γ : Ctx) : {c : Cat} → Syn c → Option (List STy)
     | _, _ => Option.none
   | _, _ => Option.none
 
+/-- A top-level `address` component of `abi.decode` is `address payable`
+(solc: "We force address payable for address types"); an array's elements
+keep their type. -/
+def STy.payableTop : STy → STy
+  | .address _ => .address true
+  | τ => τ
+
 /-- The types `abi.decode`'s second argument names: the components of a
 parenthesized list of type expressions (`(T)` and `(T, U)`, every
-component present), or a single type expression. -/
+component present, none itself parenthesized), or a single type
+expression; a top-level `address` is `address payable`. -/
 def Ctx.decodeTys (Γ : Ctx) (e : Syn .expr) : Option (List STy) :=
-  match e with
-  | .tuple o s => (Syn.cons o s).typeExprs Γ
-  | e => e.typeExprs Γ
+  (match e with
+   | .tuple o s => (Syn.cons o s).typeExprs Γ
+   | e => e.typeExprs Γ).map (fun τs : List STy => τs.map STy.payableTop)
 
 /-- The data `abi.decode` reads: `bytes` in memory or storage, or a string
 literal (all implicitly `bytes memory`, as solc requires). `bytes calldata`

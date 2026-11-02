@@ -286,7 +286,9 @@ def unRet {D : Layout} : (rs : List STy) → RVal D (STy.ret rs) → R (RVals D 
 reverts with no data (solc's `abi_decode_tuple` head check), then the
 values are decoded as a call's arguments are (`decodeArgs`): an invalid
 word, an offset or length word past the data, or a tail past the data
-reverts with no data, a length of `2^64` or more panics with `0x41`. -/
+reverts with no data, a length of `2^64` or more panics with `0x41` (solc
+also panics on lengths just below, through `finalize_allocation`; that
+band reverts here: `docs/solc-alignment.md`). -/
 def abiDecodeData {Γ : RCtx} (data : Bytes) (τs : List STy) : EM E Γ (RVal E.layout (STy.ret τs)) :=
   if data.length < 32 * τs.length then halt (.revert [])
   else do

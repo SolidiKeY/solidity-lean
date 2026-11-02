@@ -1830,7 +1830,9 @@ run_cmd do
     ``Solidity.Source.decodeArgs_ok,
     ``Solidity.Source.abiDecodeData_ok,
     ``Solidity.Source.evalE_abiDecode_ok,
-    ``Solidity.Source.evalE_abiDecode_lit_ok]
+    ``Solidity.Source.evalE_abiDecode_lit_ok,
+    ``Solidity.Source.evalE_abiDecode_local_ok,
+    ``Solidity.Source.Ledger.semExprCoverage_of_operand]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

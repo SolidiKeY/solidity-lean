@@ -21,12 +21,18 @@ This module proves, for that fragment:
   well typed, shaped, with bare-value elements) and every value it returns
   agrees with the grown heap typing (`decodeArg_ok`, `decodeArgs_ok`,
   `abiDecodeData_ok`);
-- **progress**: no decoding step is `stuck`; every halt is a revert with no
-  data or Panic `0x41` (`NotStuck`), as solc's decoder;
-- **the evaluation arm** (`evalE_abiDecode_ok`, `evalE_abiDecode_lit_ok`):
-  relative to the data expression's own triple (gap-relative: the data
-  expression is any typed expression, whose progress is the walk's), the
-  `abi.decode` node keeps `MemOK` and halts only without `stuck`.
+- **progress**: no decoding step is `stuck` (`NotStuck`); which halt it
+  is (a revert with no data, Panic `0x41`) is shown by the controls
+  (`Solidity/Source/DecodeExamples.lean`), not by a theorem;
+- **the evaluation arm** (`evalE_abiDecode_ok`): relative to the data
+  expression's own triple (gap-relative: the data is any typed `bytes
+  memory` expression), the `abi.decode` node keeps `MemOK` and halts only
+  without `stuck`; closed for data held in a local
+  (`evalE_abiDecode_local_ok`) and for a string literal
+  (`evalE_abiDecode_lit_ok`).
+
+`bytes storage` data is typed and evaluated (`bytesOfRV` reads it with
+`loadMem`) but no theorem covers it: `loadMem`'s progress is not proved.
 
 Named refusals outside the fragment (no derivation): static arrays,
 structs, nested arrays, fixed point, external function types, qualified
@@ -276,6 +282,26 @@ theorem evalE_abiDecode_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {τs : L
   simp only [evalE]
   exact Hoare.bind hdata fun v => Hoare.bind (bytesOfRV_mem_ok F n v) fun bs => abiDecodeData_ok bs hd
 
+/-- **A local's value agrees with the heap typing** under `MemOK`, and
+reading it never halts. -/
+theorem evalE_local_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {τ : STy} (i : Idx Γ τ) :
+    Hoare (MemOK E H) (evalE G F (n + 1) (.local i))
+      (fun v y => MemOK E H y ∧ RValOK E y.2.heap.ty v) (fun e y => MemOK E H y ∧ NotStuck e) := by
+  simp only [evalE]
+  refine Hoare.bind (Hoare.locals' (Q := fun l y => MemOK E H y ∧ y.1 = l) fun _ hx => ⟨hx, rfl⟩) fun l => ?_
+  refine Hoare.pure' fun y ⟨hy, hl⟩ => ⟨hy, ?_⟩
+  subst hl
+  exact LocalsOK.get y.1 i hy.1.2
+
+/-- **The `abi.decode` arm on a `bytes memory` local** keeps `MemOK` and is
+never stuck (closed: no hypothesis on the data). -/
+theorem evalE_abiDecode_local_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {τs : List STy}
+    (i : Idx Γ (.bytes .memory)) (hs : STy.decodeSrc (.bytes .memory) = true)
+    (hd : τs.all (STy.decodable E) = true) :
+    Hoare (MemOK E H) (evalE G F (n + 1 + 1) (.abiDecode (.local i) hs hd))
+      (fun v y => MemOK E H y ∧ RValOK E y.2.heap.ty v) (fun e y => MemOK E H y ∧ NotStuck e) :=
+  evalE_abiDecode_ok G F (n + 1) (.local i) hs hd (evalE_local_ok G F n i)
+
 /-- **The `abi.decode` arm on a string literal** keeps `MemOK` and is never
 stuck. -/
 theorem evalE_abiDecode_lit_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {τs : List STy}
@@ -295,5 +321,7 @@ theorem evalE_abiDecode_lit_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {τs
 #guard_msgs in #print axioms Solidity.Source.evalE_abiDecode_ok
 /-- info: 'Solidity.Source.evalE_abiDecode_lit_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.evalE_abiDecode_lit_ok
+/-- info: 'Solidity.Source.evalE_abiDecode_local_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.evalE_abiDecode_local_ok
 
 end Solidity.Source

@@ -558,7 +558,7 @@ rooted at it. 6 are deferred with a stage and a reason:
 | `metaType` | S04.02 | `type(T)` members read the artifact table and ABI identities |
 | `new` | S03 | creation and memory allocation |
 | `inlineArray` | S02 | the mobile type of its elements |
-| `elemType` | S02 | a type name as a value (`abi.decode`, `type(T)`); S01 types it only as a conversion callee (`convElem`) |
+| `elemType` | operand of `call` | a type name read by another rule, never a value of its own: the callee of an elementary conversion (`convElem`) and a type expression of `abi.decode` (`abiDecode`, lane FU2-B, [source-soundness.md](source-soundness.md)); `exprCoverage_operand` |
 
 `stmtCoverage` does the same for statements (`stmtCoverage_total`,
 `simpleCoverage_total`): 13 typed; `declTuple` (S02, tuple destructuring of

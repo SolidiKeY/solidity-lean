@@ -217,10 +217,11 @@ Controls: `TypingExamples.gasleft_untyped` and `msgValue_refused` were
 extended to refute the new constructors, and `Typed.ident_builtin_not_struct`
 was added. Every existing S01 control still passes.
 
-Not closed: `abi.decode` and other type names as values, `new`, inline
-arrays, slices, named arguments, calldata references, and tuple
-destructuring (`declTuple`). The ledger in [source-s05.md](source-s05.md)
-records these as gaps.
+Not closed: `new`, inline arrays, slices, named arguments, calldata
+references, and tuple destructuring (`declTuple`). The ledger in
+[source-s05.md](source-s05.md) records these as gaps. (`abi.decode` at the
+decoder's types was closed by lane FU2-B,
+[source-soundness.md](source-soundness.md).)
 
 ### Typing decisions (2026-10-30, lane V04b)
 
@@ -446,8 +447,8 @@ These items are also listed under `limitations:`.
   external function types and arrays of non-value types are not
   (`decodeArgs` is `stuck` on them).
 - **Call options other than `value`.** Not modelled, and neither are
-  function-type values or calls through them, `new`, `abi.decode`,
-  `type(T)`, slices or inline arrays.
+  function-type values or calls through them, `new`, `type(T)`, slices
+  or inline arrays (`abi.decode` at the decoder's types: lane FU2-B).
 - **Nested arrays.** `uint[][]` keeps the inner location in S01's type
   elaboration, so storage-to-memory conversion of nested arrays is not
   typable, and the copy helpers move inner element types with `withLoc`.

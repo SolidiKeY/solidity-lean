@@ -600,7 +600,7 @@ theorem abiDecode_mem {g : String} {x ts : Syn .expr} {σ : STy} {τs : List STy
     Res.expr (Typed.abiDecode hr dx hs hd hok) ∈
       infer Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) := by
   refine List.mem_append_left _ (List.mem_append_right _ ?_)
-  show _ ∈ decodeRes Γ g x ts (infer Γ x)
+  show _ ∈ decodeRes Γ g x ts (fun _ => infer Γ x)
   simp only [decodeRes]
   split
   · rename_i hr'

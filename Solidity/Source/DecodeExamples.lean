@@ -18,6 +18,8 @@ contract D {
   function h(bytes memory b) public { x = abi.decode(b, (uint256[])).length; }
   function k(bytes memory b) public { x = abi.decode(b, (bytes)).length; }
   function p(bytes memory b) public { abi.decode(b, (uint8, bool)); x = 9; }
+  bytes sb;
+  function s() public { sb = hex"00…05"; x = abi.decode(sb, (uint8)); }
 }
 ```
 
@@ -56,7 +58,12 @@ def unitDec : Syn .unit :=
       (.cons (fn "k" (.cons (setX (.member (decodeOf (one (ty .bytes))) "length")) .nil))
       (.cons (fn "p" (.cons (stmt (decodeOf (.tuple (.some (ty u8)) (.cons (.some (ty .bool)) .nil))))
           (.cons (setX (num 9)) .nil)))
-      .nil))))))))
+      (.cons (.stateVar (.elem .bytes) none none none false "sb" .none)
+      (.cons (.function (.ident "s") .nil (some .pub) none .nil false none .nil (.some (.block
+          (.cons (stmt (.assign .assign (.ident "sb") (.lit (.hexStr (List.replicate 31 0 ++ [5])))))
+          (.cons (setX (.call (.member (.ident "abi") "decode") (.positional (.cons (.ident "sb")
+            (.cons (one (ty u8)) .nil))))) .nil)))))
+      .nil))))))))))
     .nil)
 
 def elabDec : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitDec)
@@ -113,6 +120,34 @@ def words (ws : List Nat) : Bytes := (ws.map argN).flatten
 #guard (elabDec.map fun el => runD el 0 [callB "p(bytes)" (words [1, 2]), selOf "x()"]) ==
   some [some (.success []), some (.revert []), some (.success (arg 0))]
 
+/-- `runD` at a larger horizon: reading `bytes` from storage spends one
+unit of fuel per byte (`loadBytes`), past `runD`'s 40. -/
+def runDF (el : Elaborated) (fuel : Nat) (inputs : List Bytes) : List (Option Outcome) :=
+  let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
+    fun _ => .answer (.success []), word 0⟩
+  let go : Nat → EM el.res.env [] (List Outcome) := fun n => do
+    let d ← deploy G n "D" ElaborateExamples.thisC ElaborateExamples.user (word 0) []
+    let mut outs := [d]
+    for i in inputs do
+      outs := outs ++ [← runTx G n ⟨ElaborateExamples.user, ElaborateExamples.thisC, word 0, word 0, i⟩]
+    pure outs
+  match (runAt go (s0 : St el.res.env) fuel).1 with
+  | .ok os => os.map some
+  | _ => []
+
+-- **`bytes storage` data**: `sb = hex"00…05"; x = abi.decode(sb, (uint8));`
+-- stores 5 (typed and run; no theorem covers storage data). At `runD`'s
+-- horizon the 32-byte read times out.
+#guard (elabDec.map fun el => runD el 0 [selOf "s()"]) == some []
+#guard (elabDec.map fun el => runDF el 200 [selOf "s()", selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success (arg 5))]
+
+-- A top-level `address` is `address payable`, as solc forces it; an
+-- array's elements are not.
+example : TypingExamples.Γ.decodeTys (one (ty .address)) = some [.address true] := rfl
+example : TypingExamples.Γ.decodeTys (one (.index (ty .address) .none)) =
+    some [.array .memory (.address false) none] := rfl
+
 /-! ## Refusals (named, outside the proved fragment) -/
 
 /-- `abi.decode(b, (S))` for a struct `S`, `(uint256[2])` and `(fixed)`
@@ -132,3 +167,4 @@ def unitRefused (ts : Syn .expr) : Syn .unit :=
 #guard (elaborate (resolveUnit { pipeline := .legacy } (unitRefused (one (ty u256E))))).isSome
 
 end Solidity.Source.DecodeExamples
+
