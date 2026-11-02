@@ -1339,3 +1339,6 @@ four-mode upstream EVM observations and refusal controls;
 
 | `Backend/AbiWorld/EntryComposition.lean` | Unconditional indexed entry concatenation, exact head/cursor/fuel and ordered failures; actual dynamic codec window laws. |
 | `Backend/AbiWorld/BytesArrayReadback.lean` | Actual canonical bytes/uint-array entry/body identities in both orders and all memory/calldata combinations, real rounded allocation and sufficient original bounds. |
+
+| `Backend/AbiWorld/BodyComposition.lean` | Unconditional indexed bodyValues concatenation, actual tail head position and ordered eager/lazy failures with the original fuel. |
+| `Backend/AbiWorld/TripleReadback.lean` | Generic actual typed bytes/uint-array/scalar entry/body identity for four memory/calldata combinations, codec-derived three-head layout and actual calldata-only entry origins. |

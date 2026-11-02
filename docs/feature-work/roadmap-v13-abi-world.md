@@ -1789,3 +1789,98 @@ this runtime check. Hard12GiB/no swap, peak2103234560bytes and no OOM. Independe
 source/owning-roadmap finder and skeptic PASS; comment precision finding CLOSED.
 All245prior checksum entries/19manifests verify, untouched. Final committed-artifact
 reviews/seals and the narrow caller-phase availability packet are in the export.
+
+
+## 2026-11-02 actual body composition and generic typed triple readback
+
+NEW `Solidity/Backend/AbiWorld/BodyComposition.lean` proves UNCONDITIONAL
+body_append over actual bodyValues and arbitrary indexed Param/Entries lists.
+appendValues reuses existing ArrayPairPacket.append, transporting ONLY the index
+along List.map_append; no new value representation, decoder or evaluator. The
+transport_cons/appendValues_cons facts preserve actual value order and contents.
+Tail body starts at pos+headsOf prefix, with SAME input/original fuel. All actual
+.val/.ref/eager fuel/nonfuel/cvalRef/readsOnly success/refusal String branches are
+preserved in order. body_success/body_prefix_failure/body_tail_failure are direct
+consequences. This is recursion equality, not proof of arbitrary body admission,
+entry-origin, source/native/target simulation, physical allocation or remaining-
+fuel consumption. Existing body copies each calldata parameter from cursor0.
+
+NEW `Solidity/Backend/AbiWorld/TripleReadback.lean` CONSUMES enter_append and
+body_success to prove generic actual [bytes,uint[],uint256] typed entry/body/
+verdict identity for all FOUR bytes/array memory/calldata combinations; scalar
+is the original value location. No successful entry/body is an assumed premise.
+Existing byte/array/scalar windows discharge actual prefix and tail successes.
+The REAL three-word codec head96, second offset96+actual bytes payload length
+and full scalar word are derived through existing Vals.parts/assemble/encodeArgs,
+not reused from the old two-head64 layout or supplied as desired bytes.
+
+Explicit auxiliary sufficient bounds: arbitrary selector length4/suffix; actual
+complete input.size≤lim; original free+costBytes+costArray≤lim; array.length+4≤f.
+Natural offsets/ranges follow complete encoded input/allocation bounds, not len<W.
+Full uint300/max/zero values retain all32bytes with no ByteRange restriction.
+Entry cursor is spentBytes+spentArray, scalar allocates0; each calldata body eager
+copy separately starts0 as the existing definition specifies. These sufficient
+canonical bounds do NOT redefine admission/profile/default fuel or change lazy/
+noncanonical refusals. calldata_entry proves actual all-calldata entry with only
+original fuel≥2 (for scalar) and size/selector bounds, WITHOUT memory-copy capacity
+or array body fuel. bytes_prefix derives actual typed prefix success independently
+of a later array fuel failure. Neither weaker lemma assumes whole-body acceptance.
+
+NEW `tests/v13-abi-world/BodyTripleControls.lean` strengthens EXACT retained
+BytesArrayControls.triple input/values to typed entry/body identity via old_input,
+old_values and generic roundtrip; old finite observation and all old sources stay
+unchanged. Empty,31/32/33/full-word/different selector/suffix/all4location clients
+have actual typed witnesses. Unequal96/64costs give refs132/228, heads96/192/42,
+entrycursors160/96/64/0. Exact allocation limit accepts; one-byte-over and an actual
+wrong second cursor96→97 Panic are distinguished. Positive correct cursor/head
+baselines precede wrong-cursor/head/offset and malformed/globalhead/header/tail
+negatives. Prefix allocation precedes invalid later offset; short header reverts
+before even minimum allocation could succeed. No wrong byte equality is called
+a classified decoder failure, and no symbolic word-cell/physical-byte equivalence.
+
+Most critically, calldata_origins supplies actual typed entries at fuel2 for
+BOTH body failure controls. With adequate bytes capacity the actual bytes prefix
+succeeds and independently failing array tail fuel propagates via body_tail_failure.
+With tight capacity, first bytes' eager Panic followed by original lazy-only refusal
+precedes that independently failing tail fuel via body_prefix_failure. Same input,
+fuel and actual entered references retained. These are body String classifications,
+not callee catch/revert or world rollback. Wrong tail head position64 versus correct32
+is checked on the same retained references. No invented well-typed frame is counted
+as an entry witness. The generic body law is arbitrary-list; successful typed triple
+admission covers this declared family, not all aggregates or native code.
+
+All176FULL ordered vectors preserve ALL160prior byte-identical;64scalar observations
+preserve ALL47prior. Scoped29actual standard-only axiom guards. No new external
+compiler/EVM/native pipelines. Failed early simplifier depth and codec heartbeat
+attempts are retained; shallow equations/explicit codec parts repair them without
+ANY budget increase. Initial export failed only for three UInt8 binder annotations;
+raw exit/source retained separately, corrected changed export passes. Independent
+read-only source finder/skeptic PASS; byte-unit comment finding CLOSED, proof unchanged.
+
+Original queues remain G40partial,G41partial,G42.01/.02/.03/.05blocked,G42.04/.06partial,
+BackfillA/Bpartial. Arbitrary signature admission/emitted unknown-memory encoder,
+source/native/runtime selector/receive/fallback, CALL/RETURNDATA, arbitrary callee/
+callback/library/world/physical-resource and mandatory final closure remain OPEN.
+O1 retains its primitive declared-demand consumer; Source/raw same-invocation/static
+Frame producer remains missing locally. Prior caller packet is missing-contract
+triage with old proposal UNADOPTED, untouched; no new semantic choice or approval
+request. Approved local Panic controls/profile/pins/fixtures/verdicts/fuel/proof/node/
+process budgets unchanged. Mainalone still lacks exact9private V12 inputs7881cb3a;
+combined checks are development evidence, not standalone/publication. Goal blocked
+unchanged, no administration/reactivation/completion. Ready work is not declared
+exhausted. Raw docs1/frozen86vs83 and Suite124/181.061s/full1/5038.87s/cold124/5400.579s
+remain FAILURES, not repeated unchanged; prior/publication complete finding equality
+is separate. Only G03 reconciliation proposal: G40/G41/BackfillA compositional typed
+readback preparation, not parent closure. No reserved edits, push/merge/PR/new peer.
+
+Final recovery evidence: strict per-file body/triple/control/root diagnostics PASS;
+focused guarded modules/controls and registered changed closure PASS1073jobs;
+176FULL vectors/64scalars preserve160/47prior;29standard-only actual scoped axiom
+guards PASS. Static import/layer/orphan/trust/whitespace PASS; raw docs1 and frozen
+comparison1 remain failed, complete prior/publication finding equality0 separately.
+Lean4.24.0/Lake5.0.0-src+797c613; actual KeySort “Build completed successfully (2 jobs).”
+RUNTIME_GATE_PASS only for runtime. Hard12GiB/swap0, peak2077908992bytes/no OOM.
+All270prior entries/21immutable manifests verify, including unchanged caller packet.
+Independent source and owning-roadmap finder/skeptic PASS, byte-unit comment finding
+CLOSED with proof unchanged. Final committed-artifact/seal reviews are in the NEW
+immutable export. No whole-lane, native/runtime/world or automatic-goal completion.
