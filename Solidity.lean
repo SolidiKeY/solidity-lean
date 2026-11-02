@@ -1030,3 +1030,19 @@ import Solidity.Backend.MemoryOps.SourceUintFixedIncrementControls
 import Solidity.Backend.MemoryOps.SourceUintFixedDecrement
 import Solidity.Backend.MemoryOps.SourceUintFixedBumpSequence
 import Solidity.Backend.MemoryOps.SourceUintFixedDecrementControls
+
+import Solidity.Backend.MemoryOps.DisjointSnapshotSchedules
+
+import Solidity.Backend.MemoryOps.DisjointSnapshotScheduleControls
+
+import Solidity.Backend.MemoryOps.DisjointSnapshotPathApplications
+
+import Solidity.Backend.MemoryOps.SourceUintFixedDecrementBounds
+
+import Solidity.Backend.MemoryOps.SourceUintFixedDecrementBoundsControls
+
+import Solidity.Backend.MemoryOps.SourceUintFixedDecrementLate
+
+import Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls
+
+import Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateTiming

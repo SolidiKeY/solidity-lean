@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "original_head": "e11335bb3405fe44e9cfe83af960e732d21e76a2",
+  "scope": "Original RAM theorem statements and complete ordered observations; no proof validation substitute",
+  "files": {
+    "Solidity/Backend/MemoryOps/DisjointSnapshotSchedules.lean": {
+      "runCaptures_none_after_run": {
+        "sha256": "5dd05018a11dab8d56136931503811c0963a4587c2e355eb4b890a04373a02f3",
+        "statement": "theorem runCaptures_none_after_run {H : HTy} {R Q : RefTy} {E F : Ty} (hp mid : Heap H) (r : HRef H R) (a : ArrTy R E) (xs : List SnapshotArgs) (q : HRef H Q) (b : ArrTy Q F) (ys : List SnapshotArgs) (hq : runCaptures hp q b ys=some mid) : runCaptures mid r a xs=none \u2194 runCaptures hp r a xs=none",
+        "pinName": "Solidity.Backend.MemoryOps.runCaptures_none_after_run",
+        "axioms": [
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "runCaptures_target_eq_of_input_eq": {
+        "sha256": "4f53c8d136b50b844409f96882e755af160cd5399a53edd5ed5f02d77f3420ac",
+        "statement": "theorem runCaptures_target_eq_of_input_eq {H : HTy} {R : RefTy} {E : Ty} (hp hq out out' : Heap H) (r : HRef H R) (a : ArrTy R E) (xs : List SnapshotArgs) (hin : hp.get r=hq.get r) (ho : runCaptures hp r a xs=some out) (ho' : runCaptures hq r a xs=some out') : out.get r=out'.get r",
+        "pinName": "Solidity.Backend.MemoryOps.runCaptures_target_eq_of_input_eq",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "runCaptures_disjoint_outputs_eq": {
+        "sha256": "65eefb52131ca2e5b04b48fc1cc36d57d7cafedeac373a6ee57621907bd32ce4",
+        "statement": "theorem runCaptures_disjoint_outputs_eq {H : HTy} {R Q : RefTy} {E F : Ty} (hp mr mq left right : Heap H) (r : HRef H R) (a : ArrTy R E) (xs : List SnapshotArgs) (q : HRef H Q) (b : ArrTy Q F) (ys : List SnapshotArgs) (hne : r.id\u2260q.id) (hr : runCaptures hp r a xs=some mr) (hq : runCaptures hp q b ys=some mq) (hl : runCaptures mr q b ys=some left) (ht : runCaptures mq r a xs=some right) : left=right",
+        "pinName": "Solidity.Backend.MemoryOps.runCaptures_disjoint_outputs_eq",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "runCaptures_disjoint_comm": {
+        "sha256": "c973e233ceb428a6a49089c684591fb61dd8a9d6ad582b3d6641983001c98396",
+        "statement": "theorem runCaptures_disjoint_comm {H : HTy} {R Q : RefTy} {E F : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (xs : List SnapshotArgs) (q : HRef H Q) (b : ArrTy Q F) (ys : List SnapshotArgs) (hne : r.id\u2260q.id) : (runCaptures hp r a xs).bind (fun mid => runCaptures mid q b ys)= (runCaptures hp q b ys).bind (fun mid => runCaptures mid r a xs)",
+        "pinName": "Solidity.Backend.MemoryOps.runCaptures_disjoint_comm",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "runCaptures_disjoint_success": {
+        "sha256": "f0f59022382441e379dec3c97dd175297aa93f546b007eff63c562eccd179ae6",
+        "statement": "theorem runCaptures_disjoint_success {H : HTy} {R Q : RefTy} {E F : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (xs : List SnapshotArgs) (q : HRef H Q) (b : ArrTy Q F) (ys : List SnapshotArgs) (hne : r.id\u2260q.id) (hvr : CapturesValid (hp.len r a) xs) (hvq : CapturesValid (hp.len q b) ys) : \u2203 mr mq out, runCaptures hp r a xs=some mr \u2227 runCaptures hp q b ys=some mq \u2227 runCaptures mr q b ys=some out \u2227 runCaptures mq r a xs=some out \u2227 (\u2200 k,(MObj.elems a (out.get r))[k]?=(MObj.elems a (hp.get r))[captureOrigin xs k]?) \u2227 (\u2200 k,(MObj.elems b (out.get q))[k]?=(MObj.elems b (hp.get q))[captureOrigin ys k]?) \u2227 (\u2200 {T : RefTy} (t : HRef H T),r.id\u2260t.id \u2192 q.id\u2260t.id \u2192 out.get t=hp.get t)",
+        "pinName": "Solidity.Backend.MemoryOps.runCaptures_disjoint_success",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "runCaptures_disjoint_path": {
+        "sha256": "176f1481ebf170dd5c217af7b6ca52a818f2f1225d047e28f8534101bf223406",
+        "statement": "theorem runCaptures_disjoint_path {C : Contract} {\u0393 : Ctx} {R Q : RefTy} {E F T : Ty} (\u03c3 : State C \u0393) (r : HRef \u03c3.H R) (a : ArrTy R E) (xs : List SnapshotArgs) (q : HRef \u03c3.H Q) (b : ArrTy Q F) (ys : List SnapshotArgs) (hne : r.id\u2260q.id) (mr mq left right : Heap \u03c3.H) (hr : runCaptures \u03c3.heap r a xs=some mr) (hq : runCaptures \u03c3.heap q b ys=some mq) (hl : runCaptures mr q b ys=some left) (ht : runCaptures mq r a xs=some right) (path : MPath C \u0393 T) : path.mvalT (\u03c3.withHeap left)=path.mvalT (\u03c3.withHeap right)",
+        "pinName": "Solidity.Backend.MemoryOps.runCaptures_disjoint_path",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    },
+    "Solidity/Backend/MemoryOps/DisjointSnapshotScheduleControls.lean": {
+      "runtime_schedules": {
+        "sha256": "1af97dc1e19739fc0871791f148545ecbeabd1ab42f0033ec74be11a653e8e15",
+        "statement": "theorem runtime_schedules (n : Nat) (hn : n+3<2^256) (xs ys : List SnapshotArgs) (hx : CapturesValid (n+3) xs) (hy : CapturesValid (n+3) ys) : \u2203 mr mq out : Heap H, runCaptures (hp n hn) parent0 .dyn xs=some mr \u2227 runCaptures (hp n hn) parent1 .dyn ys=some mq \u2227 runCaptures mr parent1 .dyn ys=some out \u2227 runCaptures mq parent0 .dyn xs=some out \u2227 MObj.elems .dyn (mr.get parent1)=old1 n \u2227 MObj.elems .dyn (mq.get parent0)=old0 n \u2227 (\u2200 k,(MObj.elems .dyn (out.get parent0))[k]?=(old0 n)[captureOrigin xs k]?) \u2227 (\u2200 k,(MObj.elems .dyn (out.get parent1))[k]?=(old1 n)[captureOrigin ys k]?) \u2227 [MObj.elems .dyn ((hp n hn).get leaf0),MObj.elems .dyn ((hp n hn).get leaf1), MObj.elems .dyn (mr.get leaf0),MObj.elems .dyn (mr.get leaf1), MObj.elems .dyn (mq.get leaf0),MObj.elems .dyn (mq.get leaf1), MObj.elems .dyn (out.get leaf0),MObj.elems .dyn (out.get leaf1),MObj.elems .dyn (out.get neighbor)]= [[true,false],[false,true],[true,false],[false,true],[true,false],[false,true],[true,false],[false,true],[true,false,true]]",
+        "pinName": "Solidity.Backend.MemoryOps.DisjointReferenceScheduleControls.runtime_schedules",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "both_material": {
+        "sha256": "35fd4aed2faa2142790cee6c03fbde84a40503d6721b3a3a97cdee467cdb8d9e",
+        "statement": "theorem both_material (n : Nat) (hn : n+3<2^256) : \u2203 mr mq out : Heap H, runCaptures (hp n hn) parent0 .dyn [first]=some mr \u2227 runCaptures (hp n hn) parent1 .dyn [first]=some mq \u2227 runCaptures mr parent1 .dyn [first]=some out \u2227 runCaptures mq parent0 .dyn [first]=some out \u2227 [MObj.elems .dyn ((hp n hn).get parent0),MObj.elems .dyn ((hp n hn).get parent1), MObj.elems .dyn (mr.get parent0),MObj.elems .dyn (mr.get parent1), MObj.elems .dyn (mq.get parent0),MObj.elems .dyn (mq.get parent1), MObj.elems .dyn (out.get parent0),MObj.elems .dyn (out.get parent1)]= [old0 n,old1 n,[leaf0,leaf0,leaf1]++List.replicate n leaf0,old1 n, old0 n,[leaf1,leaf1,leaf0]++List.replicate n leaf1, [leaf0,leaf0,leaf1]++List.replicate n leaf0,[leaf1,leaf1,leaf0]++List.replicate n leaf1] \u2227 MObj.elems .dyn (out.get leaf0)=[true,false] \u2227 MObj.elems .dyn (out.get leaf1)=[false,true] \u2227 MObj.elems .dyn (out.get neighbor)=[true,false,true] \u2227 (MObj.elems .dyn (out.get parent0)).map HRef.id=[0,0,1]++List.replicate n 0 \u2227 (MObj.elems .dyn (out.get parent1)).map HRef.id=[1,1,0]++List.replicate n 1",
+        "pinName": "Solidity.Backend.MemoryOps.DisjointReferenceScheduleControls.both_material",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "late_rejection": {
+        "sha256": "027c107bab72f98bd9125151cc50a9a12642a63e3205acf13a49db361ea91c5a",
+        "statement": "theorem late_rejection (n : Nat) (hn : n+3<2^256) : \u2203 mr mq : Heap H, runCaptures (hp n hn) parent0 .dyn [first]=some mr \u2227 runCaptures (hp n hn) parent1 .dyn [first]=some mq \u2227 checkedCaptureOverwrite mr parent0 .dyn parent0 .dyn 1 0 0=none \u2227 runCaptures (hp n hn) parent0 .dyn [first,(1,0,0)]=none \u2227 runCaptures mq parent0 .dyn [first,(1,0,0)]=none \u2227 (runCaptures (hp n hn) parent0 .dyn [first,(1,0,0)]).bind (fun mid => runCaptures mid parent1 .dyn [first])= (runCaptures (hp n hn) parent1 .dyn [first]).bind (fun mid => runCaptures mid parent0 .dyn [first,(1,0,0)])",
+        "pinName": "Solidity.Backend.MemoryOps.DisjointReferenceScheduleControls.late_rejection",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "empty_endpoints": {
+        "sha256": "651628c8e48044e88830760b3248f4150de454aa2f280089d6369cb2be315894",
+        "statement": "theorem empty_endpoints (n : Nat) (hn : n+3<2^256) : runCaptures (hp n hn) parent0 .dyn [(n+3,n+3,n+3)]=some (hp n hn) \u2227 runCaptures (hp n hn) parent1 .dyn [(n+3,n+3,n+3)]=some (hp n hn)",
+        "pinName": "Solidity.Backend.MemoryOps.DisjointReferenceScheduleControls.empty_endpoints",
+        "axioms": [
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "same_parent_negative": {
+        "sha256": "bb43b546f42d1fb352d19d2115e01a021022c597fc6302472408ec3876ddcf77",
+        "statement": "theorem same_parent_negative (n : Nat) (hn : n+3<2^256) : \u2203 out : Heap H, runCaptures (hp n hn) parent0 .dyn [first,repair]=some (hp n hn) \u2227 runCaptures (hp n hn) parent0 .dyn [repair,first]=some out \u2227 MObj.elems .dyn (out.get parent0)=[leaf1,leaf1,leaf1]++List.replicate n leaf0 \u2227 out\u2260hp n hn",
+        "pinName": "Solidity.Backend.MemoryOps.DisjointReferenceScheduleControls.same_parent_negative",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "boundary33": {
+        "sha256": "ac29a6e0e05d18b46c31786032ec03f0a1a4a1dcff133c35ee7ba7f8d27a7358",
+        "statement": "theorem boundary33 : \u2203 mr mq out : Heap H, runCaptures (hp 30 (by decide)) parent0 .dyn [first]=some mr \u2227 runCaptures (hp 30 (by decide)) parent1 .dyn [first]=some mq \u2227 runCaptures mr parent1 .dyn [first]=some out \u2227 runCaptures mq parent0 .dyn [first]=some out \u2227 (MObj.elems .dyn (out.get parent0))[32]?=some leaf0 \u2227 (MObj.elems .dyn (out.get parent1))[32]?=some leaf1",
+        "pinName": "Solidity.Backend.MemoryOps.DisjointReferenceScheduleControls.boundary33",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "material_primitive": {
+        "sha256": "ce2e4478579645bf3aa9507a61855997816105566d0cd2a73071fcaa2d567c5b",
+        "statement": "theorem material_primitive : \u2203 mr mq out : Heap H, runCaptures hp r .dyn [first]=some mr \u2227 runCaptures hp q .dyn [first]=some mq \u2227 runCaptures mr q .dyn [first]=some out \u2227 runCaptures mq r .dyn [first]=some out \u2227 [MObj.elems .dyn (hp.get r),MObj.elems .dyn (hp.get q), MObj.elems .dyn (mr.get r),MObj.elems .dyn (mr.get q), MObj.elems .dyn (mq.get r),MObj.elems .dyn (mq.get q), MObj.elems .dyn (out.get r),MObj.elems .dyn (out.get q),MObj.elems .dyn (out.get neighbor)]= [[true,false,false],[false,true,true],[true,true,false],[false,true,true], [true,false,false],[false,false,true],[true,true,false],[false,false,true],[true,false]]",
+        "pinName": "Solidity.Backend.MemoryOps.DisjointPrimitiveScheduleControls.material_primitive",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    },
+    "Solidity/Backend/MemoryOps/DisjointSnapshotPathApplications.lean": {
+      "fixed_shared_paths": {
+        "sha256": "0e8a1b00e82424b7e59fa023e2511e5b4d4bd99b0d42b4fc4bf5ba4854f6154f",
+        "statement": "theorem fixed_shared_paths (n : Nat) : \u2203 mr mq left right : Heap (H n), runCaptures (hp n) (parent0 n) .fixed [first]=some mr \u2227 runCaptures (hp n) (parent1 n) .fixed [first]=some mq \u2227 runCaptures mr (parent1 n) .fixed [first]=some left \u2227 runCaptures mq (parent0 n) .fixed [first]=some right \u2227 [MObj.elems .fixed ((hp n).get (parent0 n)),MObj.elems .fixed ((hp n).get (parent1 n)), MObj.elems .fixed (mr.get (parent0 n)),MObj.elems .fixed (mr.get (parent1 n)), MObj.elems .fixed (mq.get (parent0 n)),MObj.elems .fixed (mq.get (parent1 n)), MObj.elems .fixed (left.get (parent0 n)),MObj.elems .fixed (left.get (parent1 n)), MObj.elems .fixed (right.get (parent0 n)),MObj.elems .fixed (right.get (parent1 n))]= [old0 n,old1 n,changed0 n,old1 n,old0 n,changed1 n,changed0 n,changed1 n,changed0 n,changed1 n] \u2227 (selected0 n).mvalT (state n)=.ok (leaf1 n) \u2227 (selected1 n).mvalT (state n)=.ok (leaf0 n) \u2227 (selected0 n).mvalT ((state n).withHeap left)=.ok (leaf0 n) \u2227 (selected0 n).mvalT ((state n).withHeap right)=.ok (leaf0 n) \u2227 (selected1 n).mvalT ((state n).withHeap left)=.ok (leaf1 n) \u2227 (selected1 n).mvalT ((state n).withHeap right)=.ok (leaf1 n) \u2227 (nested0 n).mvalT (state n)=.ok false \u2227 (nested1 n).mvalT (state n)=.ok true \u2227 (nested0 n).mvalT ((state n).withHeap left)=.ok true \u2227 (nested0 n).mvalT ((state n).withHeap right)=.ok true \u2227 (nested1 n).mvalT ((state n).withHeap left)=.ok false \u2227 (nested1 n).mvalT ((state n).withHeap right)=.ok false \u2227 (selected0 n).mvalT ((state n).withHeap left)=(selected0 n).mvalT ((state n).withHeap right) \u2227 (nested1 n).mvalT ((state n).withHeap left)=(nested1 n).mvalT ((state n).withHeap right) \u2227 [MObj.elems .dyn (left.get (leaf0 n)),MObj.elems .dyn (left.get (leaf1 n)), MObj.elems .dyn (left.get (neighbor n)),MObj.elems .dyn (right.get (leaf0 n)), MObj.elems .dyn (right.get (leaf1 n)),MObj.elems .dyn (right.get (neighbor n))]= [[true,false],[false,true],[true,false,true],[true,false],[false,true],[true,false,true]] \u2227 ((state n).withHeap left).env=(state n).env \u2227 ((state n).withHeap right).storage=(state n).storage",
+        "pinName": "Solidity.Backend.MemoryOps.FixedDisjointPathApplications.fixed_shared_paths",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "stale_initial_path_negative": {
+        "sha256": "0cfc095f7e1d39824748a33402fffddf071f8cfa4f61776c3749ed447affe318",
+        "statement": "theorem stale_initial_path_negative (n : Nat) : \u2203 mr mq left right : Heap (H n), runCaptures (hp n) (parent0 n) .fixed [first]=some mr \u2227 runCaptures (hp n) (parent1 n) .fixed [first]=some mq \u2227 runCaptures mr (parent1 n) .fixed [first]=some left \u2227 runCaptures mq (parent0 n) .fixed [first]=some right \u2227 (selected0 n).mvalT ((state n).withHeap left)\u2260(selected0 n).mvalT (state n) \u2227 (nested0 n).mvalT ((state n).withHeap right)\u2260(nested0 n).mvalT (state n)",
+        "pinName": "Solidity.Backend.MemoryOps.FixedDisjointPathApplications.stale_initial_path_negative",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "length33": {
+        "sha256": "46a3dd7d8511ef1843733343ab5d6803238229a8a1c9047e0f1b31f98b7e19b8",
+        "statement": "theorem length33 : \u2203 mr mq left right : Heap (H 30), runCaptures (hp 30) (parent0 30) .fixed [first]=some mr \u2227 runCaptures (hp 30) (parent1 30) .fixed [first]=some mq \u2227 runCaptures mr (parent1 30) .fixed [first]=some left \u2227 runCaptures mq (parent0 30) .fixed [first]=some right \u2227 (hp 30).len (parent0 30) .fixed=33 \u2227 (selected0 30).mvalT ((state 30).withHeap left)=.ok (leaf0 30)",
+        "pinName": "Solidity.Backend.MemoryOps.FixedDisjointPathApplications.length33",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "literal_empty_endpoints": {
+        "sha256": "e9a91d43c7d554913f5029f5629eeb4ab4c78aa25648a26169c1306de3ffd23c",
+        "statement": "theorem literal_empty_endpoints : MObj.elems .fixed (hp.get fixedEmpty)=[] \u2227 MObj.elems .dyn (hp.get dynamicEmpty)=[] \u2227 runCaptures hp fixedEmpty .fixed [(0,0,0)]=some hp \u2227 runCaptures hp dynamicEmpty .dyn [(0,0,0)]=some hp \u2227 (runCaptures hp fixedEmpty .fixed [(0,0,0)]).bind (fun mid => runCaptures mid dynamicEmpty .dyn [(0,0,0)])=some hp \u2227 (runCaptures hp dynamicEmpty .dyn [(0,0,0)]).bind (fun mid => runCaptures mid fixedEmpty .fixed [(0,0,0)])=some hp \u2227 (runCaptures hp fixedEmpty .fixed [(0,0,0)]).bind (fun mid => runCaptures mid dynamicEmpty .dyn [(0,0,0)])= (runCaptures hp dynamicEmpty .dyn [(0,0,0)]).bind (fun mid => runCaptures mid fixedEmpty .fixed [(0,0,0)]) \u2227 MObj.elems .dyn (hp.get leaf)=[true,false]",
+        "pinName": "Solidity.Backend.MemoryOps.EmptyDisjointPathApplications.literal_empty_endpoints",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      },
+      "literal_empty_bounds": {
+        "sha256": "2cd4ecec16f809ca03e2d6ba7c1fac330ed4e8b4e945517855d8f38871a42922",
+        "statement": "theorem literal_empty_bounds : checkedCaptureOverwrite hp fixedEmpty .fixed fixedEmpty .fixed 0 1 0=none \u2227 checkedCaptureOverwrite hp dynamicEmpty .dyn dynamicEmpty .dyn 0 1 0=none \u2227 runCaptures hp fixedEmpty .fixed [(0,1,0)]=none \u2227 runCaptures hp dynamicEmpty .dyn [(0,1,0)]=none \u2227 hp.index fixedEmpty .fixed zero=none \u2227 hp.index dynamicEmpty .dyn zero=none \u2227 fixedPath.mvalT state=.error .revert \u2227 dynamicPath.mvalT state=.error .revert",
+        "pinName": "Solidity.Backend.MemoryOps.EmptyDisjointPathApplications.literal_empty_bounds",
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ]
+      }
+    }
+  },
+  "axiom_scope": "Exact observed standard-only new headline pins, checked by focused closure c79-combined-01. Additive owned fixture; not the reserved global registry."
+}

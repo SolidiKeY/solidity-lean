@@ -6152,3 +6152,86 @@ byte-identical to consumed public; frozen72rows+11incoming comparison FAIL1,
 separate public zero-new comparison PASS0. Warmstrict0newtimedSuite; all262current/
 C31source-fixture-toolchainhashes+actualruntimeversions match retained cold26/
 max160s<300 only, not new timing coverage. Artifact reviews follow actual commit.
+
+
+## Checkpoint C79: checked schedule composition and H1 runtime recovery
+
+H1 authorizes “Free disk + 4 GiB reserve”: the Lean cap remains 12 GiB with
+zero swap, CPU0/LEAN_NUM_THREADS=1/-j1 and the original 600-second gate ceiling.
+The cache-reclaim controls are not writable. One own exited regenerable
+node-version probe was backed up and removed, reclaiming 170651648 bytes; the
+running session and every previous commit/latest seal remain intact. No source
+profile, target predicate, observation, premise or proof budget changed.
+
+`DisjointSnapshotSchedules` proves arbitrary actual reached-schedule commutation
+for distinct logical objects, rejection transport, complete initial-read
+provenance, and existing typed-path transport. Its separation premise is a local
+theorem case, not a source exclusion or descendant/address injectivity premise.
+`DisjointSnapshotScheduleControls` supplies primitive and shared-child reference
+witnesses with ordered initial/intermediate/final vectors, alias noncommutation,
+late rejection, endpoint and element32 observations.
+`DisjointSnapshotPathApplications` adds actual fixed(n+3) parents, explicitly
+constructed reference/Boolean MPaths with changed selections, and literal
+intrinsic fixed0/dynamic-empty endpoint success and out-of-bounds path failure.
+The fixed0 witness does not admit zero-length Source fixed arrays. Its length33
+instance observes interior index1; it is not an additional element32/byte claim.
+
+The actual combined 78-job focused closure passes all 18 exact standard-only
+axiom guards. Fixes reduce proof beta/tuple projections, make closed bounds and
+logical IDs explicit, remove unused simplifications, and annotate all 27 new
+`have` types. The original RAM theorem statements and ordered observations are
+frozen by `tests/v11-disjoint-schedules-statements.json`; the scoped checker and
+corruption tests protect those original signatures without replacing Lean.
+
+The five already-published C75/C76 modules are consumed byte-for-byte from
+`c6c33c90ad710ede662ef8d343532ec8de242881`; all 85 existing owned dependencies
+match that public commit exactly. Their actual local 251-job closure passes,
+including first 1→0 then reached underflow and retained-prefix timeout/bounds.
+No published repair or reserved Source/Evm/Bridge implementation was duplicated.
+
+Kernel/intrinsic and symbolic-word certificates remain separate from external
+compiler/EVM testing. Global documentation and inventory debt are still raw
+failures until their real gates say otherwise; additive owned proposals and
+public/base no-new comparisons do not turn them green.
+
+All original queues remain open: G32/G33/G34/G35.01/.03/.04/.05 and Backfill A/B
+are partial; G35.02 and G35.06 retain reserved-copy/final-composition dependencies.
+Physical bytes, all-profile construction/allocation failures, general paths and
+recursive graphs, ABI/storage/deep-copy/liveness and full Source/V10/target
+composition are not established by this checkpoint.
+
+C79 independent source finder/skeptic review confirmed statement/vector parity
+and resource/ownership boundaries. Both found the same structural-checker gap:
+total pin count alone admitted a duplicate target hiding a missing headline.
+The checker now requires the exact target multiset, printed theorem name and
+observed per-headline standard axiom set; three added mutation cases exercise
+those defects. This changes no Lean claim and no reserved global inventory.
+
+C79 measured final source results: full wrapper 1157 default jobs, 262
+TestSuite jobs, SolKey 377 parsed/131 read-bearing; focused authored closure
+78 jobs and byte-exact published late/bounds closure 251 jobs pass. The owned
+checker finds 1188 standard pins across 176 modules. Complete fixtures pass;
+270 corruption tests include the 13 new disjoint tests. Strict automation
+finds zero newly timed TestSuite modules; retained source/toolchain-keyed C31
+cold evidence (26 modules, max160s under300s) is not new timing coverage.
+
+Raw global inventory remains FAIL1: 1547 unrecorded changes and zero unsafe
+axiom errors. Raw strict docs remains FAIL1 with 83 findings. Its complete
+checker output is byte-identical to C74; exact consumed-public c6c33c90 has
+86 findings, so public comparison has zero new findings and three fewer,
+but complete byte equality is FALSE. Frozen baseline has72 and11incoming
+findings remain FAIL1. No unrelated docs, vendor decisions or global pins
+were edited. All raw logs and complete lists are retained separately.
+
+The minimal Lean container lacked Git; task-private host Git/loader libraries
+repair only those static checks, without replacing container or Lean system
+libraries. All failed missing-tool/ABI probes are retained. A runner completion
+race returned null for one baseline-docs exit; the actual exit was recovered
+as1, never a pass. The preserved v2 runner requires finished output plus an
+integer completed exit, with an explicit exit1 negative control. Historical
+OOM counters remain five; current checks show zero new OOM events.
+
+Further independent original work is not exhausted: exact same-object
+two-schedule commutation can be characterized from composed captureOrigin
+reads, beyond C79's sufficient distinct-object case. No such next proof is
+claimed complete here. Every original parent and final composition stays open.
