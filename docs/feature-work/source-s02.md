@@ -449,7 +449,9 @@ These items are also listed under `limitations:`.
   (`decodeArgs` is `stuck` on them).
 - **Call options other than `value`.** Not modelled, and neither are
   function-type values or calls through them, `new`, `type(T)`, slices
-  or inline arrays (`abi.decode` at the decoder's types: lane FU2-B).
+  or inline arrays of reference or fractional elements (`abi.decode` at the
+  decoder's types, `calldata` slices and inline arrays of one-word elements:
+  lane FU2-B).
 - **Nested arrays.** `uint[][]` keeps the inner location in S01's type
   elaboration, so storage-to-memory conversion of nested arrays is not
   typable, and the copy helpers move inner element types with `withLoc`.

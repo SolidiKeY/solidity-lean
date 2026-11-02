@@ -140,4 +140,41 @@ def abcd : Bytes := [97, 98, 99, 100] ++ List.replicate 28 0
 #guard (elabCd.map fun el => runD el 0 [selOf "u(bytes)" ++ words [32, 4] ++ abcd, selOf "x()"]) ==
   some [some (.success []), some (.success []), some (.success (arg 4))]
 
+/-! ### `fallback` with parameters
+
+```solidity
+contract D {
+  uint256 public x;
+  fallback(bytes calldata input) external returns (bytes memory) {
+    x = input.length;
+    return input[1:3];
+  }
+}
+```
+
+`input` is all of the call data (no selector stripped), `output` is
+returned as it is, not ABI-encoded (solc's `fallback` with parameters). -/
+
+def unitFb : Syn .unit :=
+  .unit (.cons (.contract false "D" .none .nil
+      (.cons (.stateVar u256 (some .pub) none none false "x" .none)
+      (.cons (.fallback (.fbParams (cdParam (.elem .bytes) "input") .nil
+            (.cons (.param (.elem .bytes) (some .memory) none) .nil)) true none .nil false none
+          (.some (.block (.cons (setX (.member (.ident "input") "length"))
+            (.cons (.stmtItem (.returnStmt (.some (.slice (.ident "input") (.some (num 1)) (.some (num 3))))))
+            .nil)))))
+      .nil)))
+    .nil)
+
+def elabFb : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitFb)
+
+#guard elabFb.isSome
+
+-- **Raw input and output**: `0xaabbccdd` (no function's selector) runs the
+-- fallback; it returns `0xbbcc` unencoded and stores the length 4.
+#guard (elabFb.map fun el => runD el 0 [[0xaa, 0xbb, 0xcc, 0xdd], selOf "x()"]) ==
+  some [some (.success []), some (.success [0xbb, 0xcc]), some (.success (arg 4))]
+-- A slice past the input reverts with no data.
+#guard (elabFb.map fun el => runD el 0 [[0xaa, 0xbb]]) == some [some (.success []), some (.revert [])]
+
 end Solidity.Source.CalldataExamples

@@ -599,8 +599,16 @@ stronger obligation, not an additional assumption available to its proofs.
   ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **Inline arrays** (lane FU2-B, `Typed.inlineArray`): only one-word
   element types are typed; `["a", "b"]` (`string memory[2]`), nested inline
-  arrays and `[1/3]` (`ufixed256x77` in solc) are refused where solc
-  accepts them
+  arrays, struct elements and `[1/3]` (`ufixed256x77` in solc) are refused
+  where solc accepts them; storing one into storage (`uint[] public a =
+  [1, 2, 3];`, `s = [1, 2, 3]` for `uint[3] s`) is refused, since a memory
+  array copies to storage only at the same type (`STy.copiesTo`); each
+  element must also convert to the common type (`argsFit`), a check solc
+  does not make, so `[bytes1(x), 0x12, bytes2(y)]` is refused; fixed-point
+  elements are typed and evaluated, where solc's code generator stops; the
+  array is allocated after its elements are evaluated (solc's IR order;
+  the legacy code generator allocates first, unobservable without
+  assembly)
   ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's

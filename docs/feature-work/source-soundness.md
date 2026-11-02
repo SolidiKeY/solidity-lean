@@ -1168,14 +1168,42 @@ new Horizon lemma is needed (the new constructor falls in the last
 panics `0x32` past the length, `[1, 256]` is `uint16[2]`, `[a, 1]` into a
 declared `uint256[2] memory`; `[1, -1]` (no common type) is refused, as by
 solc. Not modelled (refused): reference elements (`["a", "b"]`,
-`string memory[2]`; nested inline arrays), fractional elements (`[1/3]`,
-which solc types `ufixed256x77`), function-type elements. No arm theorem.
+`string memory[2]`; nested inline arrays; structs), fractional elements
+(`[1/3]`, which solc types `ufixed256x77`), function-type elements, and a
+copy into storage (`uint[] public a = [1, 2, 3];`: `STy.copiesTo` needs the
+same type). No arm theorem.
 
-**`new`, `try`/`catch`, `fallback` with parameters: not
+Review (finder and skeptic, read-only):
+- fixed: `[1, -1]` was accepted (the fold compared the element itself, not
+  its mobile type, before converting); `STy.common` now starts from the
+  mobile type, and a refusal control checks it;
+- fixed: the `uint16[2]` claim was not tested; `[1, 256][1] * 256` now
+  panics `0x11`; `uint256[2] memory c = [1, 2]` is refused (control);
+- fixed: stale gap entries in `source-s02.md`, `frontend-static.md`,
+  `fixed-point-semantics.md`, and the wording in `assurance.md`;
+- recorded in `docs/solc-alignment.md`: the storage refusal, the
+  per-element `argsFit` check (`[bytes1(x), 0x12, bytes2(y)]` refused),
+  fixed-point elements accepted, allocation after the elements (solc's IR
+  order).
+
+**`fallback` with parameters (done).** `dispatch`
+(`Solidity/Source/Eval.lean`) runs `fallback(bytes calldata input) returns
+(bytes memory output)` (the one signature with parameters solc allows):
+`input` is a `calldata` reference to all of the call data (`Val.cdRef` at
+offset 0, no selector stripped), `output` starts empty, and its bytes are
+returned as they are, not ABI-encoded (`bytesOfRV`); the value check and
+modifiers are as for `fallback()`. Any other locals shape stays `stuck`
+("fallback with this signature is not modelled"). The branch uses only
+functions in Horizon's lemma lists (`zeroVals`, `runMods`, `retVals`,
+`bytesOfRV`), so the split `dispatch` proofs stand without new lemmas.
+Controls in `Solidity/Source/CalldataExamples.lean` (`unitFb`): input
+`0xaabbccdd` returns `0xbbcc` unencoded and stores the length 4; a slice
+past the input reverts. No theorem about the branch.
+
+**`new`, `try`/`catch`: not
 started** (time; each is a typing rule, an interpreter arm and its
 Horizon lemmas, both checkers, uniqueness and controls as above; `new` and
 `try`/`catch` also need contract creation and external-call failure
-handling in `Solidity/Source`, and `fallback` with parameters a branch in
-`dispatch`, whose Horizon proofs are heartbeat-sensitive: Checkpoint 4).
+handling in `Solidity/Source`: Checkpoint 4).
 
 **Backfill (checkpoint 5): not started.**

@@ -102,8 +102,8 @@ constructor without a wildcard and gives each typed one a derivation
 some inputs:
 
 - ABI decoding of static arrays, structs and arrays of non-value types;
-- calldata references;
-- `fallback` with parameters;
+- calldata references (lane FU2-B models `bytes`/`string`/one-word arrays);
+- `fallback` with parameters (modelled by lane FU2-B);
 - nested-array copies;
 - the ABI of external function types (user-defined value types are
   decoded as their underlying type since lane V04b);
@@ -446,5 +446,5 @@ fragment, which must first be delimited (`stuck` is told apart from
 divergence by `txFate`, `stuck_not_diverges`, but not ruled out); gas/frame failure points and G01's `Failures`;
 `SourceSpec` (needs `Parses`, recorded preimages for `hashed`, the stipend
 rule); calldata references, `abi.decode` beyond the decoder's types (lane FU2-B), `new`, slices, inline arrays beyond one-word elements (lane FU2-B),
-`try`, progress of tuple declarations (typed and evaluated by lane FU2-B), `fallback` with parameters (the decoder's
+`try`, progress of tuple declarations (typed and evaluated by lane FU2-B), a theorem for `fallback` with parameters (run by lane FU2-B) (the decoder's
 dynamic-length `Panic(0x41)` is modelled since lane V04b).

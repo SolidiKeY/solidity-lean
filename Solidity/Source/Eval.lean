@@ -1527,7 +1527,16 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) : EM E [] Bytes :=
           if h : b.locals = [] then
             let _ ← runMods G F n b b.mods (h ▸ L0 E)
             pure []
-          else halt (.stuck "fallback with parameters is not modelled")
+          else if h' : b.locals = [.bytes .memory, .bytes .calldata] then
+            -- `fallback(bytes calldata input) returns (bytes memory output)`
+            -- (lane FU2-B): `input` is all of the call data, `output` is
+            -- returned as it is, not ABI-encoded.
+            let out ← zeroVals n [.bytes .memory]
+            let cd : Vals E.layout [.bytes .calldata] := .cons (.cdRef rfl 0 input.length) .nil
+            let l' ← runMods G F n b b.mods (h' ▸ out.onto (cd.onto (L0 E)))
+            match ← lift (retVals l' 0 [.bytes .memory]) with
+            | .cons r .nil => bytesOfRV F n r
+          else halt (.stuck "fallback with this signature is not modelled")
         | none => halt (.stuck "special function without a body")
       | none => halt (.revert [])
 termination_by structural n

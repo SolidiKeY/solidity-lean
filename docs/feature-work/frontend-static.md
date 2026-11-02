@@ -842,7 +842,8 @@ fractional one rational (a type no value has).
   conditional rules still take `STy.mobile`, so `(1/3, 2)` keeps a rational
   component and `c ? 0.5 : 0.25` meets at a rational common type, if any;
   `STy.standalone` does not recurse into tuples.
-- **Inline arrays, `abi.encode` calls.** S01 types neither; the rule is
+- **Inline arrays, `abi.encode` calls.** S01 typed neither (lane FU2-B
+  added inline arrays of one-word elements, refusing `[1/3]`); the rule is
   stated for their arguments, not for the calls (lane-semantics is adding
   `abi.*`).
 - **Packed encoding** (`abi.encodePacked(0.1)`): not stated; the reference

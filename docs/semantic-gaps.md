@@ -87,7 +87,8 @@ proof uses it, never derived from a machine model.
   interpreter): the constructor ledger's gaps are `callOptions` beyond
   `value`, `metaType` and `new` (`semExprGaps`; inline arrays of one-word
   elements are typed and evaluated since lane FU2-B, reference and
-  fractional elements refused), and among
+  fractional elements refused; `fallback(bytes calldata) returns (bytes
+  memory)` runs since lane FU2-B), and among
   statements `try` (tuple declarations are typed and evaluated since lane
   FU2-B, without a progress theorem; a non-tuple initializer, a literal
   component typed at its own type and repeated names are not modelled:

@@ -82,4 +82,24 @@ def unitOf (e : Syn .expr) : Syn .unit :=
 #guard (elaborate (resolveUnit { pipeline := .legacy }
   (unitOf (.inlineArray (num 1) (.cons (num 2) .nil))))).isSome
 
+/-- A one-function unit `f()` with body `body`. -/
+def unitBody (body : Syn (.list (.item .body))) : Syn .unit :=
+  .unit (.cons (.contract false "D" .none .nil
+      (.cons (.stateVar u256 (some .pub) none none false "x" .none)
+      (.cons (ext "f" .nil body) .nil)))
+    .nil)
+
+-- **The element type is `uint16`, not `uint256`**: `[1, 256][1] * 256`
+-- overflows `uint16` and panics `0x11`.
+#guard (elaborate (resolveUnit { pipeline := .legacy } (unitBody (.cons (setX (.mulDivMod .mul
+    (.index (.inlineArray (num 1) (.cons (num 256) .nil)) (.some (num 1))) (num 256))) .nil)))).map
+    (fun el => runD el 0 [callW "f()" []]) ==
+  some [some (.success []), some (.revert (panicData .arithmetic))]
+
+-- **No conversion between static array types**: `uint256[2] memory c = [1, 2]`
+-- is refused (`uint8[2]` does not convert to `uint256[2]`), as by solc.
+#guard (elaborate (resolveUnit { pipeline := .legacy } (unitBody (.cons
+    (.stmtItem (.simpleStmt (.declVar (.varDecl (.array u256T (.some (num 2))) (some .memory) "c")
+      (.some (.inlineArray (num 1) (.cons (num 2) .nil)))))) .nil)))).isNone
+
 end Solidity.Source.InlineExamples
