@@ -124,6 +124,10 @@ theorem LeanTaclet.not_inSolkey {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stm
     have h : (!Prog.joinShape thn els) = false := by
       rw [Upd.ifJoin?_shape hj]; rfl
     simp only [Stmt.inSolkey, h, Bool.and_false]
+  | @ifElseJoinSequence _ _ thn _ els _ se _ hj =>
+    have h : (!Prog.joinShape thn els) = false := by
+      rw [Upd.ifJoin?_shape hj]; rfl
+    simp only [Stmt.inSolkey, h, Bool.and_false]
   | _ => rfl
 
 /-- **On the fragment, the rule the strategy fires is solkey's.** -/
@@ -335,11 +339,30 @@ theorem Prog.isNil_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {Γ₁ : Ctx} (P : Prog C �
 theorem Prog.isNil_cons {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (ω : Prog C Γ₁ Γ₂) :
     (Prog.cons s ω).isNil = false := rfl
 
+/-- The exact Solidity short-circuit AND expansion keeps its SolKey split. -/
+theorem Prog.joinShape_shortAnd {Γ : Ctx} (i : Idx Γ (.val .bool))
+    (r : Val C Γ .bool) (hn : r.isSimple = false) :
+    Prog.joinShape (.cons (.assignLocal i (r)) (.cons (.assignLocal i (.binop (p := .bool) (q := .bool) .and rfl rfl (.simple (.local i)) (.simple (.bool true)))) (.nil))) (.cons (.assignLocal i (.simple (.bool false))) (.nil)) = false := by
+  change (!JoinBoundary.boundary [⟨.bool, i, r⟩, ⟨.bool, i, .binop (p := .bool) (q := .bool) .and rfl rfl (.simple (.local i)) (.simple (.bool true))⟩] [⟨.bool, i, .simple (.bool false)⟩]) = false
+  rw [JoinBoundary.and_boundary i r hn]
+  rfl
+
+/-- The exact Solidity short-circuit OR expansion keeps its SolKey split. -/
+theorem Prog.joinShape_shortOr {Γ : Ctx} (i : Idx Γ (.val .bool))
+    (r : Val C Γ .bool) (hn : r.isSimple = false) :
+    Prog.joinShape (.cons (.assignLocal i (.simple (.bool true))) (.nil)) (.cons (.assignLocal i (r)) (.cons (.assignLocal i (.binop (p := .bool) (q := .bool) .or rfl rfl (.simple (.local i)) (.simple (.bool false)))) (.nil))) = false := by
+  change (!JoinBoundary.boundary [⟨.bool, i, .simple (.bool true)⟩] [⟨.bool, i, r⟩, ⟨.bool, i, .binop (p := .bool) (q := .bool) .or rfl rfl (.simple (.local i)) (.simple (.bool false))⟩]) = false
+  rw [JoinBoundary.or_boundary i r hn]
+  rfl
+
 theorem Prog.joinShape_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) :
     Prog.joinShape (thn.wk h).2.2 (els.wk h).2.2 = Prog.joinShape thn els := by
-  unfold Prog.joinShape
-  rw [Prog.joinArm?_wk_isSome, Prog.joinArm?_wk_isSome]
+  unfold Prog.joinShape Prog.joinSingleShape
+  rw [Prog.joinArm?_wk_isSome, Prog.joinArm?_wk_isSome,
+    Prog.localWrites?_wk, Prog.localWrites?_wk]
+  cases thn.localWrites? <;> cases els.localWrites? <;>
+    simp only [Option.map_none, Option.map_some, JoinBoundary.boundary_wk]
 
 /-- Weakening keeps the arguments simple values. -/
 theorem Args.simpleVals_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {ps : Ctx} (args : Args C Γ ps) :
@@ -590,9 +613,9 @@ theorem loopUnwindStep_inSolkey (m : Modality) (u : LoopUnwind) {Γ Γ₁ : Ctx}
     have hc : c.keyValue = true := (Bool.and_eq_true _ _ ▸ h).1
     have hb : body.inSolkey m = true := (Bool.and_eq_true _ _ ▸ h).2
     simp only [loopUnwindStep, Premise.inSolkey, Prog.inSolkey, Stmt.inSolkey,
-      LoopUnwind.after, hc, hb, Bool.and_self, Prog.joinShape, Prog.joinArm?_cons_cons,
-      Option.isSome_none, Bool.false_and, Bool.and_false, Bool.not_false, Prog.isNil_cons,
-      Bool.false_or]
+      LoopUnwind.after, hc, hb, Bool.and_self, Prog.joinShape, Prog.joinSingleShape,
+      Prog.localWrites?_cons, Stmt.prependLocalWrites?, Prog.joinArm?_cons_cons,
+      Option.isSome_none, Bool.false_and, Bool.not_false,       Bool.false_or]
 
 namespace FragmentProof
 open Lean Meta Elab Tactic
@@ -646,7 +669,7 @@ elab "#check_fragment_rules" : command => do
         OpLoc.keyValue, Src.isMemory, Src.keyPushSource, SPath.isSimple_wk, MPath.isSimple_wk,
         Bool.and_eq_true, Bool.not_eq_true, Bool.true_and, Bool.and_true, Bool.false_and,
         Bool.and_false, Bool.false_eq_true, Bool.true_eq_false, Option.elim,
-        Prog.joinShape, Prog.joinArm?_cons_cons, Option.isSome_none, Bool.not_false,
+        Prog.joinShape_shortAnd, Prog.joinShape_shortOr, Prog.joinArm?_cons_cons, Option.isSome_none, Bool.not_false,
         Prog.isNil_cons, Bool.false_or])
     | exact absurd h Bool.false_ne_true
     | (cases ‹NewLhs _ _ _› <;> simp_all only [NewLhs.fill, NewLhs.keyValue,

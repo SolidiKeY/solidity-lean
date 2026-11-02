@@ -17,6 +17,8 @@ const CORE = [
   /^Solidity\.(Semantics|Typing|Theory)\./,
   /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Preconditions|FiniteMembership|FilteredMembership|Hyp|Correct|FirstOrder|Transient|Lifetime|ContractWorld|PaymentWitness|PaymentConditions)$/,
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
+  // Owned intrinsic capture/join producers: their imports stay below elaborators.
+  /^Solidity\.Calculus\.(AnonLocalCapture|CallResultCapture|CallResultRestore|JoinSequence|JoinSequenceSize)$/,
   /^Solidity\.Calculus\.RuleSyntax\./,
   /^Solidity\.Roadmap\./, // The roadmap's contracts are statements below the elaborator.
   /^Solidity\.Hash\.CollisionBound$/,

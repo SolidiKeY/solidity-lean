@@ -107,8 +107,8 @@ What a name is:
 A type where a term stands — what `addM(m, T)` and `newArr(T, n)` allocate —
 is written as Solidity writes it: `Person`, `uint[]`, `Token[3]`.
 
-What does not read back: `‹…›` in a term or an update (a Lean term, which is also how a
-conditional and an operator other than `+`, `-`, `/` print), the operator schema variables
+What does not read back: `‹…›` in a term or an update (a Lean term, which is also how an
+operator other than `+`, `-`, `/` may print), the operator schema variables
 `⊕ ⊖ ± ⊕⊕` (taclets only), and `defVal(T)` for a non-primitive `T`, whose
 printing drops the type.  A concrete `defVal(uint)` reads as the default value
 itself.  The gaps a line leaves are filled a statement at a time: a statement
@@ -280,6 +280,8 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
     `(RawTerm.cmp BinOp.gt $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| ( $a:dl_term == $b:dl_term )) => do
     `(RawTerm.cmp BinOp.eqB $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| ( $c:dl_term ? $a:dl_term : $b:dl_term )) => do
+    `(RawTerm.app "ite" [$(← expandTerm c), $(← expandTerm a), $(← expandTerm b)])
   | `(dl_term| ( $t:dl_term )) => expandTerm t
   | `(dl_term| ! $t:dl_term) => do `(RawTerm.app "!" [$(← expandTerm t)])
   | `(dl_term| select(net, at($a))) => do `(RawTerm.app "net" [$(← expandTerm a)])
@@ -304,6 +306,8 @@ partial def expandOperand : TSyntax `dl_term → MacroM Lean.Term
       `(RawExpr.binop .add $(← expandOperand a) $(← expandOperand b))
   | `(dl_term| $a:dl_term - $b:dl_term) => do
       `(RawExpr.binop .sub $(← expandOperand a) $(← expandOperand b))
+  | `(dl_term| ( $c:dl_term ? $a:dl_term : $b:dl_term )) => do
+    `(RawExpr.ternary $(← expandOperand c) $(← expandOperand a) $(← expandOperand b))
   | `(dl_term| ( $t:dl_term )) => expandOperand t
   | stx => Macro.throwErrorAt stx
       "`==` compares program expressions: names, `e.f`, `e[e]`, `a + b`, `a - b`, numbers"
@@ -766,6 +770,7 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NTerm C)
   | .app "toInt" [a] => do
     let a ← R.val a
     pure (NTm.app1 .toInt a s!"toInt({a.text})")
+  | .app "ite" [c, a, b] => do pure (.ite (← R.val c) (← R.val a) (← R.val b))
   | .app "!" [t] => do pure (.unop .not (← R.val t))
   | .app "defVal" [.name "uint"] => pure (.lit (PrimTy.dflt .uint))
   | .app "defVal" [.name "int"] => pure (.lit (PrimTy.dflt .int))

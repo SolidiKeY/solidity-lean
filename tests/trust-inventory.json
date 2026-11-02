@@ -1,5 +1,30 @@
 [
   {
+    "file": "Solidity/Calculus/CallFunctionSearch.lean",
+    "kind": "override",
+    "code": "@[implemented_by subtermsM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallFunctionTransform.lean",
+    "kind": "override",
+    "code": "@[implemented_by transformM]"
+  },
+  {
+    "file": "Solidity/Calculus/CloseCallSharing.lean",
+    "kind": "unsafe",
+    "code": "let (quoted, shrunk) \u2190 unsafe evalExpr (Expr \u00d7 Bool)"
+  },
+  {
+    "file": "Solidity/Tools/CallFunctionShare.lean",
+    "kind": "unsafe",
+    "code": "let oldN \u2190 unsafe evalExpr Nat (mkConst ``Nat) (\u2190 mkAppM ``Fml.tmSize #[\u03c6])"
+  },
+  {
+    "file": "Solidity/Tools/CallFunctionShare.lean",
+    "kind": "unsafe",
+    "code": "let newN \u2190 unsafe evalExpr Nat (mkConst ``Nat) (\u2190 mkAppM ``Fml.tmSize #[\u03c8])"
+  },
+  {
     "file": "Solidity/Calculus/ChainGen.lean",
     "kind": "recovery",
     "code": "g.admit"
@@ -1075,7 +1100,7 @@
     "code": "let quotedValues \u2190 unsafe evalExpr (List (Var \u00d7 Semantics.CallValue))"
   },
   {
-    "file": "Solidity/Examples/Tactics/PolySize.lean",
+    "file": "Solidity/Tools/ProofTree.lean",
     "kind": "unsafe",
     "code": "unsafe evalExpr Nat (mkConst ``Nat) (\u2190 mkAppM ``Fml.tmSize #[ty.appArg!])"
   },

@@ -30,7 +30,9 @@ elaborator.
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;
 - what those import: `Calculus.{TermEval,TermEq,TermWk,LoopInvariantWk,Lower,LowerRun,Shift,
   WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
-  CallSummary,KIntTwoAnchors}`.
+  CallSummary,KIntTwoAnchors}`;
+- intrinsic sharing/join foundations: `Calculus.{AnonLocalCapture,CallResultCapture,
+  CallResultRestore,JoinSequence,JoinSequenceSize}`.
 - the hash bound and hashed layout: `Hash.{CollisionBound,Adaptive}`,
   `Storage.{HashedLayout,HashedKeccak,HashedSeparation}`;
 - the backend: `Backend.{Opcode,Jumpdest,Assembler,Control}`.

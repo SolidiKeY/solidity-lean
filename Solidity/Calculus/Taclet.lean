@@ -308,6 +308,17 @@ theorem Taclet.ifElseSplit.toStep {Γ₁ Γ₂ : Ctx} {thn : Prog C Γ Γ₁} {e
 theorem LeanTaclet.ifElseJoin.toStep {Γ₁ Γ₂ : Ctx} {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂}
     {se : Simple C Γ .bool} {u : Upd C Γ Γ} (hj : Upd.ifJoin? se.lower thn els = some u) :
     Stmt.step k m (.ite (.simple se) thn els) = .update u := by
+  change Upd.ifJoin? se.lower thn els = some (.inl u) at hj
+  dsimp only [Stmt.step]
+  simp only [iteStep, hj]
+
+/-- Ordered Solidity writes `if (se) { x = a; y = x; }` capture the guard once. -/
+theorem LeanTaclet.ifElseJoinSequence.toStep {Γ₁ Γ₂ : Ctx}
+    {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂} {se : Simple C Γ .bool}
+    {body : Prog C (.val .bool :: Γ) (.val .bool :: Γ)}
+    (hj : Upd.ifJoin? se.lower thn els = some (.inr body)) :
+    Stmt.step k m (.ite (.simple se) thn els) =
+      .capture .bool (fse k) (.simple se) (.block body) := by
   dsimp only [Stmt.step]
   simp only [iteStep, hj]
 

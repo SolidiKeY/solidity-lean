@@ -179,7 +179,10 @@ theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C �
     simp only [Stmt.keyStep, Option.elim, Src.keyPushSource, hnmp, hsp,
       Bool.not_true, Bool.false_or]
   | whileClose hf => simp only [Stmt.keyStep, hf, Option.isSome_none, Bool.false_and]
-  | ifElseJoin hj => simp only [Stmt.keyStep, hj, Option.isNone_some]
+  | ifElseJoin hj =>
+    simp only [Stmt.keyStep, hj]
+    rfl
+  | ifElseJoinSequence hj => simp only [Stmt.keyStep, hj, Option.isNone_some]
   | internalCallSummary _ _ hs =>
     show ((Args.capture _).isNone && !(CallRet.sumOK _ _ _)) = false
     rw [← CallRet.summary?_isSome, hs]; simp only [Option.isSome_some, Bool.not_true, Bool.and_false]

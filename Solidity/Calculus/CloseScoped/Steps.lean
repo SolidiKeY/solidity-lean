@@ -1,5 +1,6 @@
 import Solidity.Calculus.CloseScoped.Leaf
 import Solidity.Calculus.LeafShare
+import Solidity.Calculus.AnonLocalCapture
 import Solidity.Calculus.LeafSplit
 
 /-!
@@ -694,9 +695,14 @@ def assertH (g : MVarId) (n : Lean.Name) (p e : Expr) : MetaM (FVarId × MVarId)
   (← g.assert n p e).intro1P
 
 /-- `t` as a base and an integer offset (`b + k`, `b - k`, a literal `k`,
-else `t + 0`). -/
+else `t + 0`). Normalized `Int.ofNat` and `Int.negSucc` literals
+are read as literals too, so signed joins retain their offsets. -/
 def affine (t : Expr) : Option Expr × Int :=
   let lit? (e : Expr) : Option Int := do
+    if e.isAppOfArity ``Int.ofNat 1 then
+      return Int.ofNat (← e.appArg!.rawNatLit?)
+    if e.isAppOfArity ``Int.negSucc 1 then
+      return Int.negSucc (← e.appArg!.rawNatLit?)
     if e.isAppOfArity ``OfNat.ofNat 3 then
       return ((← (e.getArg! 1).rawNatLit?) : Int)
     if e.isAppOfArity ``Neg.neg 3 && (e.getArg! 2).isAppOfArity ``OfNat.ofNat 3 then
@@ -734,13 +740,66 @@ def valuesOf (a : Expr) (e : Expr) : Array Expr := Id.run do
       out := out.push (x.getArg! 1)
   return out
 
-/-- From a defining fact `hX : X = some a`, the interval its cases give
-when they are offsets of one base (KeY's join with the conditional's bounds
-in the antecedent): relative to the base (`hint`) and, where the base's own
-is known, absolute (`hintA`, recorded in `bounds`); when they are offsets of
-one base and literals (`c ? x + 1 : 0`), absolute only, where the base's is
-known.  Each by `omega` from
-the fact alone.  `none` where reading the fact closed the goal. -/
+-- A compact, bounded Boolean-case fallback, attempted only after omega refuses.
+private def omegaCasesIn (keep : Array FVarId) (p : Expr) : TacticM (Option Expr) := do
+  if let some e ← omegaIn keep p then return some e
+  let saved ← saveState
+  let attempt : TacticM (Option Expr) := do
+    let lctx ← getLCtx
+    let mut need : FVarIdSet := {}
+    let mut todo := keep ++ (collectFVars {} (← instantiateMVars p)).fvarIds
+    while !todo.isEmpty do
+      let f := todo.back!
+      todo := todo.pop
+      if need.contains f then continue
+      need := need.insert f
+      let some d := lctx.find? f | continue
+      todo := todo ++ (collectFVars {} (← instantiateMVars d.type)).fvarIds
+      if let some v := d.value? then
+        todo := todo ++ (collectFVars {} (← instantiateMVars v)).fvarIds
+    let lctx' := lctx.foldl (init := lctx) fun l d =>
+      if need.contains d.fvarId then l else l.erase d.fvarId
+    let mut bools := #[]
+    for d in lctx' do
+      if !d.isLet && (← whnfD d.type).isConstOf ``Bool then
+        bools := bools.push d.fvarId
+    if bools.isEmpty then return none
+    let mut branches := 1
+    for _ in bools do
+      if branches > joinMaxCases / 2 then return none
+      branches := branches * 2
+    let insts := (← getLocalInstances).filter fun i => need.contains i.fvar.fvarId!
+    let m ← mkFreshExprMVarAt lctx' insts p
+    try
+      let mut goals := [m.mvarId!]
+      for f in bools do
+        let mut next := []
+        for g in goals do
+          if !(← g.withContext <| pure ((← getLCtx).contains f)) then
+            next := next ++ [g]
+          else
+            let subgoals ← g.withContext <| g.cases f
+            next := next ++ subgoals.toList.map (·.mvarId)
+        goals := next
+      for g in goals do
+        let [] ← runOn g (← `(tactic| (simp_all only [Bool.false_eq_true,
+          Bool.true_eq_false, not_false_eq_true, not_true_eq_false,
+          true_implies, false_implies, and_true, true_and]; omega))) | return none
+      let e ← instantiateMVars m
+      if e.hasMVar || e.hasSorry then return none
+      return some e
+    catch _ => return none
+  let result ← tryCatchRuntimeEx attempt fun _ => pure none
+  if result.isNone then saved.restore
+  return result
+
+private theorem zeroUIntVal : (uintOfNat 0).val = (0 : Int) := by
+  exact uintOfNat_val (Nat.two_pow_pos 256)
+
+/-- Infer an interval from a defining fact, retaining its proved normalized
+copy so the final arithmetic check does not repeat that normalization.
+Existing one-base paths come first; a multi-base hull uses only current
+certified bounds, and every endpoint is proved from the actual fact. -/
 def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
     TacticM (Option (MVarId × Bounds)) := g.withContext do
   let ty ← instantiateMVars (← hX.getType)
@@ -749,17 +808,46 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
   unless rhs.isAppOfArity ``Option.some 2 && rhs.appArg!.isFVar do return some (g, bounds)
   let a := rhs.appArg!
   -- a copy of the fact, read as `omega` reads it
-  let (_, g₂) ← assertH g `hjoin ty (mkFVar hX)
-  let gs ← runOn g₂ (← `(tactic| sol_close_join_fact $(mkIdent `hjoin)))
+  let name ← mkFreshUserName `hjoin
+  let (_, g₂) ← assertH g name ty (mkFVar hX)
+  let gs ← runOn g₂ (← `(tactic| sol_close_join_fact $(mkIdent name)))
+  let gs ← gs.flatMapM fun g => g.withContext do
+    let some h := (← getLCtx).findFromUserName? name | return [g]
+    if (h.type.find? (·.isConstOf ``uintOfNat)).isNone then return [g]
+    runOn g (← `(tactic| try simp only [zeroUIntVal] at $(mkIdent name):ident))
   let [g₃] := gs | if gs.isEmpty then return none else throwError "sol_close_join_steps: a fact split"
   g₃.withContext do
-    let some hkD := (← getLCtx).findFromUserName? `hjoin | return some (g₃, bounds)
+    let some hkD := (← getLCtx).findFromUserName? name | return some (g₃, bounds)
     let hk := hkD.fvarId
     let done (g : MVarId) (b : Bounds) : MetaM (Option (MVarId × Bounds)) := do
-      return some (← g.tryClear hk, b)
+      return some (g, b)
     let vs := valuesOf a (← instantiateMVars hkD.type)
     if vs.isEmpty then return ← done g₃ bounds
     let ps := vs.map affine
+    -- Only already certified bounds of every distinct base are admitted.
+    -- The actual normalized defining fact and bound proofs certify the hull.
+    let absolute : TacticM (Option (MVarId × Bounds)) := do
+      let mut hull : Option (Int × Int) := none
+      let mut keep : Array FVarId := #[hk]
+      for q in ps do
+        let mut lo := q.2
+        let mut hi := q.2
+        if let some base := q.1 then
+          unless base.isAppOfArity ``Subtype.val 3 && base.appArg!.isFVar do
+            return ← done g₃ bounds
+          let some (L, H, hb) := bounds.get? base.appArg!.fvarId! | return ← done g₃ bounds
+          unless (← getLCtx).contains hb do return ← done g₃ bounds
+          lo := L + q.2
+          hi := H + q.2
+          keep := keep.push hb
+        hull := some (match hull with
+          | none => (lo, hi)
+          | some (L, H) => (min L lo, max H hi))
+      let some (lo, hi) := hull | return ← done g₃ bounds
+      let pA ← intervalP a (toExpr lo) (toExpr hi)
+      let some eA ← omegaCasesIn keep pA | return ← done g₃ bounds
+      let (hA, g₄) ← assertH g₃ `hintA pA eA
+      done g₄ (bounds.insert a.fvarId! (lo, hi, hA))
     -- one base with literal offsets and literals (`c ? x + 1 : 0`): the
     -- absolute interval from the base's, by `omega` from the fact and it
     let lits := ps.filter (·.1.isNone)
@@ -768,7 +856,7 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
       let some b := based[0]!.1 | return ← done g₃ bounds
       for q in based do
         let some x := q.1 | return ← done g₃ bounds
-        unless ← withReducible (isDefEq x b) do return ← done g₃ bounds
+        unless ← withReducible (isDefEq x b) do return ← absolute
       let some (L, H, hb) := (if b.isAppOfArity ``Subtype.val 3 && b.appArg!.isFVar then
           bounds.get? b.appArg!.fvarId! else none) | return ← done g₃ bounds
       let offs := based.map (·.2)
@@ -783,8 +871,8 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
     for q in ps do
       match q.1, base with
       | none, none => pure ()
-      | some x, some y => unless ← withReducible (isDefEq x y) do return ← done g₃ bounds
-      | _, _ => return ← done g₃ bounds
+      | some x, some y => unless ← withReducible (isDefEq x y) do return ← absolute
+      | _, _ => return ← absolute
     let (iLo, iHi) := Id.run do
       let mut lo := 0
       let mut hi := 0
@@ -794,7 +882,9 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
       return (lo, hi)
     let (cLo, cHi) := (ps[iLo]!.2, ps[iHi]!.2)
     let p ← intervalP a vs[iLo]! vs[iHi]!
-    let some e ← omegaIn #[hk] p | return ← done g₃ bounds
+    -- Literal or same-base endpoints can be guarded by a bare Boolean local.
+    -- Keep omega first; only its refusal pays for the existing bounded cases.
+    let some e ← omegaCasesIn #[hk] p | return ← done g₃ bounds
     match base with
     | none =>
       let (h, g₄) ← assertH g₃ `hintA p e
@@ -809,11 +899,12 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
         let (hA, g₅) ← assertH g₄ `hintA pA eA
         done g₅ (bounds.insert a.fvarId! (L + cLo, H + cHi, hA))
 
+
 /-- A value that must return (`X.isSome = true`): a case per condition
 (`CloseS.isSome_cond`, `CloseS.isSome_ite`), a halting case refuted by
 `omega` from its conditions and the absolute intervals of the values they
 read. -/
-partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]) :
+partial def closeSideCore (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]) :
     TacticM Bool := g.withContext do
   let t ← instantiateMVars (← g.getType)
   unless t.isAppOfArity ``Eq 3 && (t.getArg! 1).isAppOfArity ``Option.isSome 2 do return false
@@ -822,20 +913,52 @@ partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]
     let gs ← try g.apply (← mkConstWithFreshMVarLevels lem) catch _ => return false
     for g' in gs do
       let (h, g'') ← g'.intro1P
-      unless ← closeSide g'' bounds (hyps.push h) do return false
+      unless ← closeSideCore g'' bounds (hyps.push h) do return false
     return true
   if X.isAppOfArity ``cond 4 then return ← cases ``CloseS.isSome_cond
   if X.isAppOfArity ``ite 5 then return ← cases ``CloseS.isSome_ite
   if X.isAppOfArity ``Option.some 2 then return (← observing? g.refl).isSome
   if X.isAppOfArity ``Option.none 1 then
+    -- A sibling side goal does not inherit binders introduced in the main
+    -- branch by `introFront`. Only facts in this goal may be read.
+    let hyps := hyps.filter (← getLCtx).contains
     let mut keep := hyps
     for h in hyps do
       for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
         if let some (_, _, hb) := bounds.get? f then keep := keep.push hb
-    let some e ← omegaIn keep (mkConst ``False) | return false
-    g.assign (← mkFalseElim t e)
-    return true
+    keep := keep.filter (← getLCtx).contains
+    if let some e ← omegaIn keep (mkConst ``False) then
+      g.assign (← mkFalseElim t e)
+      return true
+    -- Only a failed arithmetic check pays for Boolean-decision normalization.
+    let mut goal := g
+    let mut normalized : Array FVarId := #[]
+    for h in keep do
+      let result ← goal.withContext do
+        let ht ← instantiateMVars (← h.getType)
+        if (ht.find? (·.isConstOf ``decide)).isNone then return some (goal, h)
+        let name ← mkFreshUserName `hcase
+        let (_, gN) ← assertH goal name ht (mkFVar h)
+        let gs ← runOn gN (← `(tactic| try simp only [decide_eq_true_eq,
+          decide_eq_false_iff_not, Bool.not_eq_true] at $(mkIdent name):ident))
+        let [gN] := gs | if gs.isEmpty then return none else throwError "case normalization split"
+        let some d := (← gN.withContext getLCtx).findFromUserName? name | throwError "missing normalized case"
+        return some (gN, d.fvarId)
+      let some (gN, hN) := result | return true
+      goal := gN
+      normalized := normalized.push hN
+    return ← goal.withContext do
+      let some e ← omegaIn normalized (mkConst ``False) | return false
+      goal.assign (← mkFalseElim (← goal.getType) e)
+      return true
   return false
+
+def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]) : TacticM Bool := do
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (closeSideCore g bounds hyps) fun _ => pure false
+  unless result do saved.restore
+  return result
+
 
 /-- What one step of evaluation leaves in front, opened: binders, premises,
 landed states (`CloseS.LandedAll`), a checked value's two cases
@@ -886,10 +1009,16 @@ def closeArith (g : MVarId) (bounds : Bounds) (prems : Array FVarId) : TacticM B
   if ← g.isAssigned then return false
   let (hs, g) ← g.intros
   g.withContext do
+    let prems := prems.filter (← getLCtx).contains
     let mut keep := prems ++ hs
+    let mut reads := (collectFVars {} (← instantiateMVars (← g.getType))).fvarIds
     for h in hs do
-      for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
-        if let some (_, _, hb) := bounds.get? f then keep := keep.push hb
+      reads := reads ++ (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds
+    -- A conjunct can leave a comparison with no new hypotheses: its target
+    -- still reads the value whose interval was certified by an earlier update.
+    for f in reads do
+      if let some (_, _, hb) := bounds.get? f then
+        if (← getLCtx).contains hb then keep := keep.push hb
     let some e ← omegaIn keep (← g.getType) | return false
     g.assign e
     return true
@@ -902,7 +1031,7 @@ def settle (gs : List MVarId) (hs : List FVarId) (bounds : Bounds) (prems : Arra
   let some gMain := gs.getLast? | throwError "sol_close_join_steps: no goal"
   for gS in gs.dropLast do
     unless (← closeSide gS bounds prems) || (← closeArith gS bounds prems) do
-      throwError "sol_close_join_steps: a value is not shown to return"
+      throwError "sol_close_join_steps: a value is not shown to return\n{MessageData.ofGoal gS}"
   let mut gM := gMain
   let mut bounds := bounds
   for h in hs do
@@ -971,6 +1100,85 @@ partial def termNodes (e : Expr) (cap : Nat) : Nat :=
 /-- The most distinct subterms a summary's term may have for `redexOf?`
 to hand it to the kernel. -/
 def shareNodes : Nat := 20000
+
+/-- Decode primitive anonymous positions without dropping repetitions.
+The existing kernel-input cap also bounds this optional leaf transformation. -/
+def primitivePositions? (Γ xs₀ : Expr) : MetaM (Option (Expr × Nat)) := do
+  unless termNodes xs₀ shareNodes < shareNodes do return none
+  let family ← withLocalDeclD `p (mkConst ``PrimTy) fun p =>
+    mkLambdaFVars #[p] (mkApp2 (mkConst ``Idx) Γ (mkApp (mkConst ``LTy.val) p))
+  let elemTy := mkApp2 (mkConst ``Sigma [.zero, .zero]) (mkConst ``PrimTy) family
+  let mut xs := xs₀
+  let mut items : Array Expr := #[]
+  for _ in [0:shareNodes] do
+    xs ← whnfR xs
+    if xs.isAppOfArity ``List.nil 1 then return some (← mkListLit elemTy items.toList, items.size)
+    unless xs.isAppOfArity ``List.cons 3 do return none
+    let key ← whnfR (xs.getArg! 1)
+    unless key.isAppOfArity ``Sigma.mk 4 do return none
+    let ty ← whnfR (key.getArg! 2)
+    unless ty.isAppOfArity ``LTy.val 1 do return none
+    items := items.push (mkApp4 (mkConst ``Sigma.mk [.zero, .zero])
+      (mkConst ``PrimTy) family ty.appArg! (key.getArg! 3))
+    xs := xs.getArg! 2
+  return none
+
+/-- A reachable nonempty primitive anonymous frame, through only the prefix
+constructors read by `peel`. Nonprimitive frames retain the old path. -/
+def hasPrimitiveAnon (φ₀ : Expr) : MetaM Bool := do
+  let mut φ := φ₀
+  for _ in [0:shareNodes] do
+    φ ← whnfR φ
+    if φ.isAppOfArity ``Fml.anon 4 then
+      let xs ← whnfR (φ.getArg! 2)
+      if !xs.isAppOfArity ``List.cons 3 then return false
+      return (← primitivePositions? (φ.getArg! 1) xs).isSome
+    if φ.isAppOfArity ``Fml.upd 6 || φ.isAppOfArity ``Fml.bind 6 then
+      φ := φ.getArg! 5
+    else if φ.isAppOfArity ``Fml.all 5 then φ := φ.getArg! 4
+    else if φ.isAppOfArity ``Fml.imp 4 then φ := φ.getArg! 3
+    else return false
+  return false
+
+/-- A bounded, conservative modal-free shape check for this leaf-only entry.
+Unknown formula heads refuse the optimization. Terms need no traversal. -/
+def modalFreeShape (φ₀ : Expr) : MetaM Bool := do
+  let mut todo := [φ₀]
+  let mut seen : Std.HashSet Expr := {}
+  for _ in [0:shareNodes] do
+    let φ₀ :: rest := todo | return true
+    todo := rest
+    let φ ← whnfD φ₀
+    if seen.contains φ then continue
+    seen := seen.insert φ
+    if φ.isAppOf ``Fml.modal then return false
+    if φ.isAppOf ``Fml.tt || φ.isAppOf ``Fml.eq || φ.isAppOf ``Fml.wellFormed then continue
+    if φ.isAppOf ``Fml.and || φ.isAppOf ``Fml.imp then
+      todo := φ.getArg! 2 :: φ.getArg! 3 :: todo
+    else if φ.isAppOf ``Fml.not || φ.isAppOf ``Fml.upd || φ.isAppOf ``Fml.havoc ||
+        φ.isAppOf ``Fml.all || φ.isAppOf ``Fml.bind || φ.isAppOf ``Fml.anon ||
+        φ.isAppOf ``Fml.allocAll || φ.isAppOf ``Fml.grow then
+      todo := φ.appArg! :: todo
+    else return false
+  return todo.isEmpty
+
+/-- Apply the kernel-proved fresh-local plan to the exact anon target. -/
+def anonStep (g : MVarId) (k : Nat) : TacticM (Option (MVarId × Nat)) := g.withContext do
+  let target ← instantiateMVars (← g.getType)
+  unless target.isAppOfArity ``Solidity.holds 4 do return none
+  let φ ← whnfR target.appArg!
+  unless φ.isAppOfArity ``Fml.anon 4 do return none
+  let some (positions, count) ← primitivePositions? (φ.getArg! 1) (φ.getArg! 2) | return none
+  let names := mkLambda `k .default (mkConst ``Nat)
+    (mkApp2 (mkConst ``Var.fresh) (toExpr "anon") (mkBVar 0))
+  let lemma ← mkAppM ``AnonLocalCapture.sound #[mkConst ``Modality.box,
+    names, toExpr k, positions, φ.getArg! 3, target.getArg! 2]
+  let [goal] ← g.apply lemma | throwError "anonymous capture changed leaf count"
+  let [goal] ← runOn goal (← `(tactic| dsimp only [AnonLocalCapture.plan, CallResultCapture.restore]))
+    | throwError "anonymous plan expansion changed leaf count"
+  unless termNodes (← goal.getType) shareNodes < shareNodes do
+    throwError "anonymous capture: expanded kernel-input cap"
+  return some (goal, count)
 
 /-- `t`'s innermost strict redex (`Tm.redex?`, by the kernel, `tmNF`): the
 redex, the term reading it from a fresh local, and the equation, which
@@ -1080,6 +1288,7 @@ partial def peel (g : MVarId) (bounds : Bounds) (prems : Array FVarId) (k : Nat)
     match ← shareStep g k with
     | some g' => g := g'; k := k + 1
     | none => break
+  if let some (next, count) ← anonStep g k then return ← peel next bounds prems (k+count)
   g.withContext do
   let t ← instantiateMVars (← g.getType)
   unless t.isAppOfArity ``Solidity.holds 4 do return some (g, bounds, prems)
@@ -1115,7 +1324,15 @@ partial def peelHead (g : MVarId) (t φ rest : Expr) (bounds : Bounds) (prems : 
     throwError "sol_close_join_steps: a step split the goal"
   let (gs, hs, ps) ← introFront g₂
   let prems := prems ++ ps.toArray
+  let mark ← match gs.getLast? with
+    | some main => main.withContext do pure (← getLCtx).numIndices
+    | none => pure 0
   let some (gM, bounds) ← settle gs hs bounds prems | return none
+  -- Keep the normalized defining facts even when no absolute interval exists.
+  -- Visit only declarations appended by this step, not the growing old context.
+  let prems ← gM.withContext do
+    (← getLCtx).foldlM (init := prems) (start := mark) fun keep d => do
+      if ← isProp d.type then pure (keep.push d.fvarId) else pure keep
   -- the rest back, by its equation
   let gM ← gM.withContext do
     let tgt ← whnfR (← instantiateMVars (← gM.getType))
@@ -1126,6 +1343,29 @@ partial def peelHead (g : MVarId) (t φ rest : Expr) (bounds : Bounds) (prems : 
   peel gM bounds prems k
 
 end
+
+-- A local arithmetic negation only refuses this tactic goal. A global
+-- refuted verdict still requires its own inhabited countermodel certificate.
+private def refuteIntComparison (g : MVarId) : TacticM Bool := g.withContext do
+  let p ← instantiateMVars (← g.getType)
+  let comparison := ((p.isAppOfArity ``LT.lt 4 || p.isAppOfArity ``LE.le 4) &&
+    (p.getArg! 0).isConstOf ``Int) || p.isAppOfArity ``Int.lt 2 || p.isAppOfArity ``Int.le 2
+  unless comparison do return false
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (do
+    let goal ← mkFreshExprSyntheticOpaqueMVar (mkNot p)
+    let [] ← runOn goal.mvarId! (← `(tactic| omega)) | return false
+    let proof ← instantiateMVars goal
+    return !proof.hasMVar && !proof.hasSorry) fun e => do
+      if e.isMaxHeartbeat || e.isMaxRecDepth then throw e
+      pure false
+  unless result do saved.restore
+  return result
+
+elab "sol_close_join_finish" : tactic => do
+  if ← refuteIntComparison (← getMainGoal) then
+    throwError "sol_close_join_steps: arithmetic comparison negated"
+  evalTactic (← `(tactic| sol_close_finish))
 
 /-- The leaf (`Fml.Valid ψ`) closed one update at a time (`peel`), the post
 read as the updates were, then `omega` on the intervals, the defining facts'
@@ -1141,7 +1381,7 @@ def closeSteps : TacticM Unit := do
     let (gs', hs, ps) ← introFront g
     if let some (g', _) ← settle gs' hs bounds (prems ++ ps.toArray) then rest := rest.push g'
   setGoals rest.toList
-  evalTactic (← `(tactic| all_goals first | omega | sol_skip_after 20000 sol_close_finish))
+  evalTactic (← `(tactic| all_goals first | omega | sol_skip_after 20000 sol_close_join_finish))
   unless (← getGoals).isEmpty do throwError "sol_close_join_steps: goals left"
 
 /-- `sol_close_join_steps`'s budget, in thousands of heartbeats, within the
@@ -1338,6 +1578,34 @@ def evalSolCloseFewJoins : Tactic := fun _ => withMainContext do
     throwError "sol_close_few_joins: more than {CloseJ.wholeMax} joined updates"
   if CloseJ.countShare ty (CloseJ.shareWholeMax + 1) > CloseJ.shareWholeMax then
     throwError "sol_close_few_joins: a summary of more than {CloseJ.shareWholeMax} operations"
+
+/-- Shared implementation; the automatic route targets joined leaves while
+an explicit caller can request the general primitive-anon transformation. -/
+private def closeAnonSteps (joinedOnly : Bool) : TacticM Unit := withMainContext do
+  let ty ← instantiateMVars (← getMainTarget)
+  unless ty.isAppOf ``Solidity.Fml.Valid do throwUnsupportedSyntax
+  let saved ← saveState
+  let failure ← tryCatchRuntimeEx (Budget.within CloseJ.budget do
+      if joinedOnly && CloseJ.countJoins ty 0 1 == 0 then
+        throwError "automatic anon sharing requires a joined update"
+      unless ← CloseJ.hasPrimitiveAnon ty.appArg! do
+        throwError "no reachable nonempty primitive anonymous frame"
+      unless ← CloseJ.modalFreeShape ty.appArg! do
+        throwError "expected a modal-free anonymous leaf"
+      Term.withoutErrToSorry <| withoutRecover CloseJ.closeSteps
+      pure (none : Option MessageData)) fun ex => do
+        if ex.isMaxHeartbeat then return some m!"heartbeat stop: {ex.toMessageData}"
+        if ex.isMaxRecDepth then return some m!"recursion stop: {ex.toMessageData}"
+        return some ex.toMessageData
+  if let some reason := failure then
+    saved.restore
+    throwError "sol_close_anon_steps: {reason}"
+
+@[tactic Solidity.tacticSol_close_anon_steps]
+def evalSolCloseAnonSteps : Tactic := fun _ => closeAnonSteps false
+
+@[tactic Solidity.tacticSol_close_joined_anon_steps]
+def evalSolCloseJoinedAnonSteps : Tactic := fun _ => closeAnonSteps true
 
 @[tactic Solidity.tacticSol_close_join_steps]
 def evalSolCloseJoinSteps : Tactic := fun _ => withMainContext do

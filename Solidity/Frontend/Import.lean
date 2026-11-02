@@ -839,8 +839,20 @@ def elabSolcImport : CommandElab := fun stx => do
   let val := mkApp4 (mkConst ``Prod.mk [0, 0]) (mkConst ``Contract)
     (mkApp (mkConst ``List [0]) rawTy) (mkConst N) (← liftTermElabM <| mkListLit rawTy (raws.map (·.2.2.2)).toList)
   let (C, bodies) ← liftTermElabM <| unsafe evalExpr (Contract × List (List RawStmt)) pairTy val
+  -- The source loop names must be collected before lowering inserts flags.
+  -- One notice per body/path even if several exported functions call it.
+  let mut warnedLoops : List String := []
   -- the typed elaborator on each, the program quoted back and checked
   for ((k, f, ss, _), raw) in raws.toList.zip bodies do
+    -- Uncalled row bodies need not be retained in C.funs. Scan their original
+    -- statements before lowering, dropping only the row's synthetic parameter
+    -- and return declarations so their paths agree with callable source bodies.
+    let sourceRaw := raw.drop (f.params.length + (retNames f).length)
+    let loopNames := (literalLoopPaths sourceRaw).map (s!"{f.name}/{·}") ++ calledLiteralLoops C raw
+    for name in loopNames do
+      unless warnedLoops.contains name do
+        warnedLoops := warnedLoops ++ [name]
+        logWarning m!"unannotated literal-bounded loop in imported source `{name}`; keeping symbolic unrolling"
     let fail (msg : String) : Array ImportRow :=
       rows.set! k { rows[k]! with status := .unsupported, reason := msg }
     -- its loops, then its `return`s lowered, which moves statements: an
@@ -884,6 +896,10 @@ def elabSolcImport : CommandElab := fun stx => do
     if f.tag == .skip then
       ctorRow := some (row .skipped (at_ f 0 "tagged `@custom:key skip`"))
     else
+      for name in calledLiteralLoops C [.call (.name "constructor") []] do
+        unless warnedLoops.contains name do
+          warnedLoops := warnedLoops ++ [name]
+          logWarning m!"unannotated literal-bounded loop in imported source `{name}`; keeping symbolic unrolling"
       let raw : List RawStmt := [.call (.name "constructor") (f.params.map fun (x, _) => RawExpr.name x)]
       match (C.ctor.getD { params := [], body := [] }).paramCtx with
       | .error m => ctorRow := some (row .unsupported (at_ f 0 m))
