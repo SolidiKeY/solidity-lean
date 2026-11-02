@@ -1674,6 +1674,15 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameContext.lean` | Whole caller-context capture/restore around a checked body. |
 | `Backend/InternalFlow/RuntimeFrameInterfaceV1.lean` | Frozen v1 signatures: `Emission`, `Entry`, `Returned` and the unproved `Pending*` premise structures. |
 | `Backend/InternalFlow/RuntimeFrameInterfaceV2.lean` | Frozen v2 `Pending*` structures: each needs an entry whose source run succeeds (`SuccessfulEntry`) or bare-reverts (`RevertingEntry`); v1 relations unchanged. |
+| `Backend/InternalFlow/RuntimeFrameInterfaceV3.lean` | Frozen v3: explicit external admission domain, exact-input/index `EntryCoverage`, `AdmissionAgreement` duty and independently witnessed admitted success and bare revert in every `Pending*` structure. |
+| `Backend/InternalFlow/RuntimeFrameRestoredRepresentation.lean` | Implements the v1 full restored representation from the source-tail equation and alias-flag transport. |
+| `Backend/InternalFlow/RuntimeFrameCapturedProgram.lean` | Capture, checked body and restore with full representation; captured bare-revert absorption. |
+| `Backend/InternalFlow/RuntimeFrameReference.lean`, `Backend/InternalFlow/RuntimeFrameResult.lean` | Reached memory-reference and primitive-result export into caller bindings with the full reached representation. |
+| `Backend/InternalFlow/RuntimeFrameCapturedReference.lean` | Capture/body/restore followed by typed reference export and caller use; older-frame and allocator transport. |
+| `Backend/InternalFlow/RuntimeFrameCallAgreement.lean` | Inversion of an actual typed call into arguments, body frame and exported caller result (void and memory returns). |
+| `Backend/InternalFlow/RuntimeFrameNoneProducer.lean` | v2 void-call, fixed-thunk and failure producers built from checked certificates and real entry witnesses. |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3RecursiveUnwind.lean` | Runtime descent prefixes at every horizon and LIFO return loop with captured caller recovery (target side only). |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean` | Actual `callRec` countdown family: all-horizon execution and `RecursiveReturnCoherence`; no v3 recursive instance. |
 
 ### P9 checked call graphs and Source preservation/progress
 

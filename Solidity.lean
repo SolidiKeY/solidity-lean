@@ -1209,6 +1209,17 @@ import Solidity.Backend.InternalFlow.RuntimeFrameRestore
 import Solidity.Backend.InternalFlow.RuntimeFrameContext
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2
+import Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement
+import Solidity.Backend.InternalFlow.RuntimeFrameCapturedProgram
+import Solidity.Backend.InternalFlow.RuntimeFrameCapturedReference
+import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3
+import Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer
+import Solidity.Backend.InternalFlow.RuntimeFrameReference
+import Solidity.Backend.InternalFlow.RuntimeFrameRestoredRepresentation
+import Solidity.Backend.InternalFlow.RuntimeFrameResult
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveProducer
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
