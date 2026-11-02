@@ -1348,3 +1348,5 @@ four-mode upstream EVM observations and refusal controls;
 
 | `Backend/AbiWorld/DynamicListReadback.lean` | Actual assemble head/tail concatenation and uniform typed word/bytes parameter-list admission with exact dynamic offsets, allocation cursor and original fuel. |
 | `Backend/AbiWorld/DynamicAggregateReadback.lean` | Arbitrary mixed word/bytes tuple member and constructor decoding, real outer allocation, original decreasing fuel and memory/calldata entry/body identity. |
+
+| `Backend/AbiWorld/ByteSequenceReadback.lean` | Actual arbitrary-count dynamic-byte Seq/mseq canonical readback, fixed/array constructors and typed memory/calldata entry/body identity with exact outer/inner allocations and original fuel/header guards. |

@@ -1003,3 +1003,5 @@ import Solidity.Backend.AbiWorld.StaticAggregateReadback
 
 import Solidity.Backend.AbiWorld.DynamicListReadback
 import Solidity.Backend.AbiWorld.DynamicAggregateReadback
+
+import Solidity.Backend.AbiWorld.ByteSequenceReadback

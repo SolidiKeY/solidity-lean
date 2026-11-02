@@ -2074,3 +2074,89 @@ immutable. Independent finder/skeptic source/roadmap review PASS after the two
 precision fixes; final committed artifact/seal reviews recorded separately.
 No whole-lane/goal closure, source/native/EVM/runtime encoding claim or
 ready-work-exhaustion claim. All original queues remain explicitly open.
+
+
+## Byte sequence and fixed/array constructor recovery (parent 388ea85d)
+
+`ByteSequenceReadback.sequence_window` proves actual mseq for arbitrary existing
+Seq.bytes count, base, nonzero original index and incoming allocation cursor.
+The byte windows come from Seq.parts/assemble.go; head offsets, ordered tails
+and padded lengths are the existing codec, never desired successful execution.
+`go_cons`, `tail_cons`, `head_fold`, `head_length`, `fixed_encoded` and
+`fixed_length` derive the actual layout and byte-object extent. The proof
+reuses DynamicListReadback.tails_independent and the actual byte decoder window
+consumer. Size-derived offset bounds retain natural/modulo distinctions.
+
+`mdec_fixed` and `mdec_array` consume the real fixed/array constructors.
+Fixed outer allocation is n*32, dynamic array n*32+32, each plus all actual
+rounded byte-object allocations. The dynamic element-head/offset base is AFTER
+the count word. Original sufficient fuel is n+2 for mseq, n+3 for mdec and n+4
+for top entry; no CPU/gas/default-budget claim. `zero` separately proves n=0
+mseq uses no fuel/allocation. Fixed retains its ORIGINAL p+31<size guard even
+for n=0, before allocation; empty encoding alone cannot discharge it.
+
+`array_roundtrip` and `fixed_roundtrip` derive actual indexed memory/calldata
+enter, entry, bodyValues and verdict.run identity for arbitrary Seq.bytes,
+selector length4/suffix/free, exact actual input-size/allocation bounds and
+original fuel. Fixed top also retains the zero-count header bound67<inputsize.
+A private reusable dynamic-single composition premise is discharged by both
+actual constructor proofs; it is not a generic decoder-success certificate.
+Published eager_cref is reused unchanged. These are sufficient canonical
+consequences, never a new admitted profile, Source constructor mapping or
+coverage of arbitrary recursive Shape.
+
+Controls use existing intrinsic Seq constructors: arbitrary list-of-bytes
+client; empty and multiple strings including zero/255/31/32/33 bytes; real
+array/fixed typed body identity, separate outer allocations320vs288, actual
+array count3 and post-length-relative offsets96/128/192; exact free limits and
+one-over; nonzero incoming cursor17 and actual sequence fragment base68/index1/
+cursor13 yielding173. A shared noncanonical offset is accepted with the exact
+different ordered result, not rejected or silently equated to canonical bytes.
+Truncated count/head/element-header/payload, invalid offsets/count, allocation
+before last short payload versus last header before allocation, and fuel-before-
+validation controls retain original order. Empty fixed memory REVERT versus
+calldata reference entry, named lazy-only body refusal and readsOnly body
+acceptance remain distinct. Intrinsic zero-fixed controls do not extend Source.
+
+Remaining ready owned proofs: actual recursive array/fixed/tuple element
+correctness beyond bytes/validated-word leaves, plus arbitrary mixed Param/Vals
+containing those recursive shapes with derived cost/fuel/head/tail relations.
+No success/simulation premise discharges them. General Source/native/runtime
+decoding/dispatch, unknown-memory encoder, CALL/RETURNDATA, declared-demand/raw
+same-invocation/static-frame and arbitrary callee/world/physical-resource
+producers remain reserved/open. PacketEmission, ReturnedBytes and fixed
+Failure.Slice are not widened or relabeled. All original Work/Backfill items
+remain partial/blocked; original goal blocked unchanged/no administration.
+
+Actual diagnostics/closure/controls/complete old observations/axioms, raw failed
+attempts, full gate outcomes and independent read-only source/artifact reviews
+are recorded in the new immutable recovery export. Historical Suite/full/cold/
+initialbodyexport/docs/frozen failures remain failures; complete prior and
+publication finding equality is a separate gate. No new native/EVM claim,
+profile/Panic-control/fixture/pin/budget change, peer input, push/merge/PR or
+ready-work-exhaustion claim. G03 reconciliation proposal only: original
+G40/G41/BackfillA byte sequence constructor preparation, not parent closure.
+
+Source finder found one documentation coverage mismatch: invalid count was
+initially described as truncated count. Added actual take50 count-header
+truncation controls, distinguishing header-before-outer-allocation from fuel0;
+take20 top-head truncation separately REVERTs before fuel. Full-input fuel6
+exhausts while sufficient7 succeeds; calldata reference entry ignores that
+fuel but body validation blocks at fuel0. Empty fixed typed identity is proved
+with its real extra32-byte suffix/header. No original guard or budget changed.
+
+Final byte-sequence recovery checks: strict per-file sequence/control/root MCP
+PASS, focused and registered changed closure PASS1078jobs; raw final controls
+and final complete export PASS.300FULLvectors/120scalars preserve all242/103
+prior unchanged;108actual scoped standard-only axiom sets. New module/control
+has no warnings. Static imports/layers/orphans/trust/whitespace PASS. Raw docs1
+and frozen86versus83comparison1 remain FAIL; complete prior/publication finding
+multiset equality separatelyPASS. Historical Suite124/181.061s,full1/5038.87s,
+cold124/5400.579s, initialbodyexport1 and all prior local failures retained. No
+unchanged failed heavy retry. Lean4.24.0/Lake5.0.0-src+797c613; actual KeySort
+2jobs before RUNTIME_GATE_PASS(runtime only); hard12GiB/swap0/thread1/-j1, peak
+3197374464bytes/OOM0, one original cache.340prior entries/24seals verify
+immutable. Independent finder/skeptic source/roadmap PASS after the count-header
+coverage fix; committed artifact/first-seal reviews recorded separately. Original
+full assignment remains partial and goal blocked unchanged; all ready recursive
+Shape/Param proofs and real reserved producer/final gate obligations stay open.
