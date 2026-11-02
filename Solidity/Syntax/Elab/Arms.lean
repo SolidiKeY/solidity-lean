@@ -352,6 +352,22 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let x ← captureRef C "mv" (.mem R) (.newArr T n)
     pure (P ++ Q ++ [.of Γ (.declMem R x (some (.newArr se hR)) rfl
       (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
+  | .call "#bytesIndex" [b, i, .num n] => do
+    -- `b[i]` of a `bytesN` at a symbolic index (`bytesAt`): the base, then
+    -- the index, each held; the bounds check, a revert (`Panic(0x32)`'s data
+    -- where a `catch` reads it, as an array index's); then the byte, its
+    -- shift in range
+    let (P, b) ← hoist b
+    let (Pb, b) ← captureExpr C b
+    let (Q, i) ← hoist i
+    let (Pi, i) ← captureExpr C i
+    let Γ ← nctx
+    let guard ← checkIn C Γ .bool (.binop .lt i (.num n))
+    let sc ← read
+    let check := if sc.selfFrame || sc.retainFailureData then panicStmt 0x32 guard else .require guard
+    let sh : RawExpr := .binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i)
+    let (R, e) ← hoist (.binop .mod (.binop .shr b sh) (.num 256))
+    pure (P ++ Pb ++ Q ++ Pi ++ [.of Γ check] ++ R, e)
   | .call "#sliceIndex" [off, len, k, past] => do
     let (P, k) ← hoist k
     let x := toString (← freshCapture "se")
@@ -1147,7 +1163,10 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   let hoistArgs := @ElabRec.hoistArgs C rc
   let hoistCallArgs := @ElabRec.hoistCallArgs C rc
   match s0 with
+  -- a literal reason (`"m"`, `hex"…"`, as the solc import prints every
+  -- string literal): its bytes, nothing allocated (`elabStmt1`)
   | .revertReason m => do
+    if m.bytesLit?.isSome then return ([], .revertReason m)
     let (P, m) ← hoist m
     pure (P, .revertReason m)
   | .revertRaw m => do
@@ -1157,6 +1176,7 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
     -- The condition must finish before the reason's allocation or effects.
     let (P, c) ← hoist c
     let (Pc, c) ← forceArg C c
+    if m.bytesLit?.isSome then return (P ++ Pc, .requireReason c m)
     let (Q, m) ← hoist m
     let x := toString (← freshCapture "mv")
     let R ← rc.elabStmtsP [.declMemory (.named "string") x (some m)]
@@ -1928,7 +1948,14 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
     if (← read).selfFrame || (← read).retainFailureData then
       pure [.of (← nctx) (.revertData [.bytes (Semantics.encodeError m.toUTF8.toList)])]
     else pure [.of (← nctx) .revert]
-  | .revertReason m => memoryRevert .reason m
+  -- a literal reason (`hex"…"`, as the solc import prints a string
+  -- literal): `Error(string)`'s data of its bytes, literal, nothing
+  -- allocated; the data a memory reason carries (`memoryRevert`), in every
+  -- frame, so a self-call's `catch` reads it (`CatchKind.datas`)
+  | .revertReason m => do
+    if let some bs := m.bytesLit? then
+      return [.of (← nctx) (.revertData [.bytes (Semantics.encodeError (bs.map UInt8.ofNat))])]
+    memoryRevert .reason m
   | .revertRaw d => memoryRevert .raw d
   | .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])
   | .requireMsg c m => do

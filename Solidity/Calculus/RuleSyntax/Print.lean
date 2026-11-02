@@ -255,15 +255,17 @@ def mkBinTerm (sym : String) (a b : TSyntax `dl_term) : MetaM (TSyntax `dl_term)
   match sym with
   | "+" => `(dl_term| $a + $b) | "-" => `(dl_term| $a - $b) | "/" => `(dl_term| $a / $b)
   | "*" => `(dl_term| $a * $b) | "%" => `(dl_term| $a % $b)
+  | "+%" => `(dl_term| $a +% $b) | "-%" => `(dl_term| $a -% $b) | "*%" => `(dl_term| $a *% $b)
+  | ">>" => `(dl_term| $a >> $b) | "<<" => `(dl_term| $a << $b)
   | "&&" => `(dl_term| $a && $b) | "||" => `(dl_term| $a || $b)
   | "==" => `(dl_term| ($a == $b))
   | "±" => `(dl_term| $a ± $b)
   | _ => `(dl_term| $a ⊕ $b)
 
-/-- The term of `t ⊕ u` with a concrete operator: `+`, `-`, `*`, `/` have
-term syntax at `uint`, `&&`, `||` at `bool` and `==` at any type (the types
-they read back at: `ppTermS` escapes the others); the other operators escape
-(`‹…›`). -/
+/-- The term of `t ⊕ u` with a concrete operator: `+`, `-`, `*`, `/`, `%`,
+the wrapping `+%`, `-%`, `*%` and the shifts `>>`, `<<` have term syntax at
+`uint`, `&&`, `||` at `bool` and `==` at any type (the types they read back
+at: `ppTermS` escapes the others); the other operators escape (`‹…›`). -/
 def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   if (← fvarName? op).isSome then return some "⊕"
   if op.isAppOfArity ``IncDec.binOp 1 then
@@ -274,6 +276,11 @@ def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   | BinOp.div => return "/"
   | BinOp.mul => return "*"
   | BinOp.mod => return "%"
+  | BinOp.addW => return "+%"
+  | BinOp.subW => return "-%"
+  | BinOp.mulW => return "*%"
+  | BinOp.shr => return ">>"
+  | BinOp.shl => return "<<"
   | BinOp.and => return "&&"
   | BinOp.or => return "||"
   | BinOp.eqB => return "=="

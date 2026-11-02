@@ -286,7 +286,7 @@ ignored `Hyps.freshC` indices and was dropped as unneeded); only the first
 such end is inspected, which can keep `plain` skipped where it could run,
 never the reverse; full build and SolkeyTestSuite green.
 
-**Open: proof automation** (30, 31's slice rows, 60; 43 and 57 pass since lane FU2-A), each "open
+**Open: proof automation** (31's slice rows; 30 and 60 fixed by lane FU2-D, 43 and 57 pass since lane FU2-A), each "open
 proof goals" in a `box` obligation. For `sliceRead` (`t = xs[1:]; assert(t[k]
 == xs[1 + k])`) the CLI's goal dump (`action: inspect`, `show: goals`) leaves
 `read(memory, base[(k < len - 1 ? 1 + k : len)]) == read(memory, xs[1 + k])`
@@ -297,3 +297,84 @@ closer gap, not an admission change. For `indexOutOfRange` (`bytes4 b =
 update `se3 := se4 / se8` and ends at `false = true`: the zero divisor's
 revert branch is not taken by the search (the leaf also prints raw `‹Tm…›`
 escapes for `subW`/`mulW`, a printer gap). Not bisected (see above).
+
+### Lane FU2-D (fu2-20261102): the five rows diagnosed, 30 and 60 fixed
+
+Bisecting by rebuilding is not affordable here (each step is a 45–70 min
+full rebuild; the last green CI run, `292a4681`, is about 1,300 commits back).
+Instead each row's first open goal was reproduced with the CLI goal dump
+(`node scripts/solidity-lean.mjs inspect FILE --function F --show goals
+--no-build`, `SOLKEY_ROOT` set) and its cause traced to the commit that
+introduced it, from the history of the code it names (`git log -S`).
+
+| # | Row | Cause | First failing commit | Owner | State |
+|---|---|---|---|---|---|
+| 30 | `indexOutOfRange` | `bytesAt` (`Syntax/Elab/Values.lean`) lowered `b[i]` of a `bytesN` at a symbolic index to `uint8(((b >> 8 *% ((N-1) -% i)) % 256) / (i < N ? 1 : 0))`. The walk keeps the division as an update; behind the symbolic shift the closer does not refute it: in a scratch reproduction `sol_close_eval` times out on the leaf, while the same zero divisor without the shift closes. A missing reading, not a refactor. | not identified: the function was added in `4dd2d9d0` and its row in `f9a1cf42` (2026-10-20, both after the last green CI run), asserting `proved`, so it presumably closed when written; the lowering is `1789394d`'s, unchanged since (`63ac4b63` only moved it), so a later closer or walk change stopped it closing, not identified without rebuilds | FU2-D | fixed: `#bytesIndex` (below) |
+| 31 | `sliceRead` | see "Open: proof automation" above | — | `fu2-calldata-access` | not this lane's |
+| 43 | `tryScopeExit` | still pending on the lane head. Its open goals are the loop invariants inside the `try`'s success clause (`age >= 0 && i <= 1`, `age` the `returns (uint age)` binder): they reach the leaf as unreduced `(Val.wk (Thin.keepAll …) v).lower` terms (printed as `‹…›` escapes), which the closer does not evaluate, so even `se3 < 1 ⟹ se3 + 1 <= 1` stays open. A binder weakening in the try's frame, not a closer rule. | not identified (the row is in the last green run, `1f02521b`) | `fu2-frame-returns` | handed over |
+
+| 57 | `tryArgumentSideEffect` | proved on the lane head with the test's `--self-address 0x…DeaDBeef` (every row of that test passes, `trySuccessKeepsStorageUnsound` and `callKeepsStorageUnsound` pending as pinned). Its callee has no literal reason and no `bytesN` index, so this lane's changes do not reach it: most likely fixed on master before the base, plausibly by `48db830` (the revert of the calldata-root import change that FU1's run carried). | not identified | `fu2-frame-returns` | passes here; not rerun at the base |
+| 60 | `reasonBytes` (also `reasonOfBranch`, `reasonPastCustom`) | `ea06b814` ("Solidity features", 2026-10-26) made the solc import print every string literal that has a `hexValue` as `hex"…"` (`byteLiteralText`, `SolcJson/Body.lean`), where it printed the quoted `value` before. `require(false, "boom")` then parses as `requireReason` (a reason expression) instead of `requireMsg`, so the self-call's callee reverts with the reason in a fresh memory `bytes` (`revertData [.mem …]`); `CatchKind.datas` knows no data of a memory part, and `catchDataStep` binds the reason as any bytes (`Fml.allocAll`). A refactor regression, inferred from `ea06b814`'s diff (not rebuilt at `ea06b814^`; nothing else in it touches the require/revert path). The test (`75dc97b4`, `aa47a432`, 2026-10-21) is after the last green CI run, so it never ran green in CI; it asserted `proved` when written. | `ea06b814` (inferred) | FU2-D | fixed: literal reasons (below) |
+
+Not a cause: every self-call `try` is read under the callback reading
+(`Fml.callsBack` is `true` for any `tryCall`, since `1a10f08b`); this is as
+designed, and the rows close under it once the data is literal.
+
+**Row 30, `#bytesIndex`.** A symbolic index of a `bytesN` is now
+`uint8(#bytesIndex(b, i, N))`, which `hoist` (`Syntax/Elab/Arms.lean`) reads
+as `b` and `i` held in fresh locals, `require(se < N);` (in a self-call's
+callee, or a frame that keeps failure data, `Panic(0x32)`'s data, the code
+of an array index, `Checked.idxPG`; the old divisor panicked with `0x12`),
+then the byte `(b >> 8 *% ((N-1) -% se)) % 256`. The `require` rule's
+branches are KeY's `inBounds`/`outOfBounds` (`docs/lean-key-rule-map.md`); no
+calculus rule was added. A literal index is unchanged (checked by the
+elaborator). The printer gap is closed: `dl{}`/`tm{}` print and read `+%`,
+`-%`, `*%`, `>>`, `<<` at `uint` (`Calculus/RuleSyntax/{Grammar,Schemas,Print}.lean`,
+`Calculus/SurfaceNotation.lean`), so the leaf has no `‹Tm…›` escape.
+
+**Row 60, literal reasons.** `revertReason`/`requireReason` of a literal
+(`"m"` or `hex"…"`, `RawExpr.bytesLit?`) is elaborated as `Error(string)`'s
+literal data (`revertData [.bytes (encodeError bytes)]`), nothing allocated,
+in every frame, as the memory reason carried its data in every frame
+(`memoryRevert`); `requireReason c m` is `if (c) {} else { revert … }`. The
+callee's data is literal again, `CatchKind.datas` lists it, and the `catch`
+reads the reason. Pinned by `Examples/Tactics/ComputedRevert.lean`
+(`unicode_hex_reason_exact`, unchanged) and the RevertData rows.
+
+**Results on the lane head** (`runSolidityTests`, `SOLKEY_ROOT` and
+`LEAN_NUM_THREADS=1` as CI sets them): `tests/solc/Bytes.sol` every row proved
+(`indexOutOfRange` included); `tests/solc/RevertData.sol` every row proved
+(before: `reasonBytes`, `reasonOfBranch`, `reasonPastCustom` pending);
+`SolcPaymentsOpen.sol` (row 57) as pinned; `SpecBindings.sol` (row 43) all
+as pinned but `tryScopeExit`.
+
+**Reviews** (read-only finder and skeptic, no Lean server). Confirmed and
+fixed: the record above now says that rows 30 and 60 never ran green in CI
+and that `ea06b814` is inferred; `docs/semantic-gaps.md` ("Revert data") now
+says that a byte-literal reason carries its data in every frame while a
+quoted `"m"` keeps the empty-data lowering outside a self-call (one source,
+two readings, differing only in data no modality reads; the existing pin
+`unicode_hex_reason_exact` needs the former); under `pp.sol.pushArithmetic`
+an `int` shift printed as `>>` would read back as the `uint` one, so the
+shifts and wrapping operators now print only at `uint`
+(`Calculus/PrintTerm.lean`). Not confirmed: a flat struct with an enum member
+decoding unchecked in `sol{}` — the struct table has no `#enum` row
+(`StructEnc.valueRowsOf`), so the member is a plain `uint` either way (the
+recorded limitation). Recorded, not changed: enum-typed mapping keys of a
+public getter get no `paramEnums`.
+
+**Gates on the lane head.** `./run-lean.sh` (69m32s): default target 1041
+jobs and `SolkeyTestSuite` 286 jobs built, solkeycheck at its baseline 37.
+Lean server clean on `TrustAudit.lean` and `scripts/AxiomAudit.lean`; no new
+`sorry`, axiom, `native_decide`, `implemented_by` or heartbeat change, and no
+new headline theorem (no pin added). Node: `test-solidity.test.mjs` tests for
+rows 30, 57 and 60 and the new `EnumArrayDecode` pin pass, row 43's fails on
+`tryScopeExit` (above); `finite-dispatch.test.mjs` 34/34;
+`solidity-upstream.test.mjs` 25/25; `check-g07` at its baselines (axiom-pin
+drift, `check-doc-paths` 48); `check-automatic --strict` 491 / 61 / 11
+refuted / 0 pending; `roadmap-g03-ledger.py --check` clean after `--write`
+and its `abiDecode` sentence updated. Elaboration of the touched modules did
+not slow (`Syntax/Elab/Arms` 130 s → 89 s, `Examples/Tactics/Bytes` 105 s →
+108 s, `RevertData` 206 s → 232 s, within run-to-run noise); the core edits
+(`Calculus/RuleSyntax`, `Calculus/PrintTerm`) are syntax and printer rows,
+undoing no speed-motivated change.

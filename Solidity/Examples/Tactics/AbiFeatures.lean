@@ -249,6 +249,41 @@ returns (1, 7) -/
 /-- info: revert -/
 #guard_msgs in #run EnumDecode.decodePair(5)
 
+/-- **`abi.decode` of an array of enums** (`(E[])`, `(E[2])`, lane FU2-D):
+each element's word as a `uint8`, then solc's validator, an empty revert
+unless it is below the member count (`abiReadGen`), as a top-level enum's.
+The vectors are `tests/abi-0.8.38/EnumArrays.vectors.json`'s, observed on the
+EVM (`scripts/enum-abi-probe.mjs`): `decodeArr(2, 1)` returns `21`,
+`decodeArr(0, 3)` and `decodeArr(256, 0)` revert, `decodeFixed(1, 2)`
+returns `12`, `decodeFixed(3, 0)` reverts. -/
+def EnumArrayDecode : Contract := contract!{
+  enum E { A, B, C }
+  function decodeArr(uint a, uint b) returns (uint r) {
+    uint[] memory xs = new uint[](2);
+    xs[0] = a;
+    xs[1] = b;
+    E[] memory es = abi.decode(abi.encode(xs), (E[]));
+    r = uint(es[0]) * 10 + uint(es[1]);
+  }
+  function decodeFixed(uint a, uint b) returns (uint r) {
+    E[2] memory es = abi.decode(abi.encode(a, b), (E[2]));
+    r = uint(es[0]) * 10 + uint(es[1]);
+  }
+}
+
+/-- info: ok
+returns 21 -/
+#guard_msgs in #run EnumArrayDecode.decodeArr(2, 1)
+/-- info: revert -/
+#guard_msgs in #run EnumArrayDecode.decodeArr(0, 3)
+/-- info: revert -/
+#guard_msgs in #run EnumArrayDecode.decodeArr(256, 0)
+/-- info: ok
+returns 12 -/
+#guard_msgs in #run EnumArrayDecode.decodeFixed(1, 2)
+/-- info: revert -/
+#guard_msgs in #run EnumArrayDecode.decodeFixed(3, 0)
+
 local instance : InContract := ⟨Codec⟩
 
 /-- `abi.decode(abi.encode(x), (uint8)) == x` for every in-range byte. -/

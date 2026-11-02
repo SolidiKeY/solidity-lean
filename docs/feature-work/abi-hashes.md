@@ -1500,3 +1500,102 @@ shape (an external function type) is now refused where the legacy path
 accepted it (fail-closed); enum returns of `canonicalOnly` vectors stay
 refused although v1 encodes them alike; public enum getters keep
 `retEnums = []` and stay refused.
+
+### Lane FU2-D (fu2-20261102): enums nested in ABI types
+
+* **`abi.decode` of an array of enums in `sol{}`** (`(E[])`, `(E[k])`,
+  nested arrays). Before, `sol{}` refused it with "abi.decode at E[]: a value
+  type, a byte string, an array or a struct" (`abiDecodeTy?` dropped every
+  flat type and `decodeKind?` knows no enum element), so nothing decoded
+  unchecked. Now `abiDecodeTy?` routes an array whose element is a contract
+  enum to the nested decoder, and `abiReadGen`'s value case, at a declared
+  enum element, reads the word as a `uint8` and `require`s it below the
+  member count before `E(w)`: solc's `validator_revert_t_enum_*`, an empty
+  revert. Pinned by `EnumArrayDecode` in `Examples/Tactics/AbiFeatures.lean`
+  (`#run`, five vectors) against the EVM observations below.
+* **The import keeps the refusal** — superseded by the second pass below.
+* **Public enum getters** (`SolcJson/Contract.lean`): a synthesized getter
+  whose value, past its mapping keys and array indexes, is an enum gets
+  `retEnums := [0]`, so the replay reads its return at the ABI type `uint8`,
+  as a source function's top-level enum return.
+* **EVM observations** (`scripts/enum-abi-probe.mjs`, solc 0.8.38 at the
+  repository's pinned SHA-256, `@ethereumjs/vm` 10.1.3, four configurations,
+  all agreeing; `tests/abi-0.8.38/EnumArrays.{sol,vectors.json}`):
+  `decodeArr(2, 1)` returns 21, `decodeArr(0, 3)` and `decodeArr(256, 0)`
+  revert with empty data; `decodeFixed(1, 2)` returns 12, `decodeFixed(3, 0)`
+  reverts empty; at the external entry `entryArr([2, 0])` returns 202,
+  `entryArr([2, 3])` and a raw element word `256` revert empty;
+  `entryStruct((2, 5))` returns 2005, `entryStruct((3, 5))` reverts empty;
+  the getter `stored()` returns 0, then 2 after `setStored(2)`, and still 2
+  after `setStored(3)` reverted with `Panic(0x21)`.
+
+#### Second pass (coordinator follow-up, same lane)
+
+* **A carrier-preserving decode marker.** The import declares every
+  enum-typed local at a carrier (`uint`, `uint8` for an enum a struct uses),
+  so `sol{}`'s nominal `E[]` cannot be its target. `abi.decode` components
+  with nested enums are now printed as `solcEnumBelow(T, "k", n, …)`
+  (`abiEnumBelowName`, `Syntax/Elab/Values.lean`): `T` at its carriers,
+  each enum position `k` (`""` the value, `k[]` an element, `k.f` a member,
+  at any depth: `abiEnumPositions`, `SolcJson/Body.lean`) with its member
+  count `n`. `abiTyExpr?` reads through it (shapes and types are `T`'s), and
+  `abiReadGen` decodes the word at its carrier kind and `require`s it below
+  `n` before the element or member is stored: solc's validator, an empty
+  revert. Enum arrays and structs with enum members, nested, are admitted.
+* **The external entry.** Import rows carry `paramEnumPositions` (the same
+  keys, per parameter); the replay (`Tools/Upstream.lean`) spells those
+  positions `uint8` in the ABI check (`ABI.shapeEnum`) and the typed entry
+  decoder reads them as `Kind.enumBelow n` words (`UpstreamEntry.shapeAt`),
+  so an out-of-range element or member is an empty revert before the body.
+  The import's "an ABI composite parameter requires recursive enum
+  cardinality checks" refusal now applies only where a position is not
+  readable (a mapping, an unknown declaration).
+* **Getters.** An enum-valued public getter is admitted at its carrier
+  (`SolcJson/Getters.lean`, `getterValueType`) with `retEnums := [0]`. Its
+  enum mapping keys keep the membership guard of the getter body
+  (`getterWalk`'s `enumSize`) and get no `paramEnums`: the review found that
+  a nominal row blocks the ABI v1 replay (`canonicalOnly`), which such a
+  getter passes today through the legacy path.
+* **No position is dropped.** Every listed position must name a word of the
+  decoded type (`AbiTy.valKeys`): `abiDecodeWith` refuses "an enum position
+  outside the type", and the replay's `UpstreamEntry.params` falls back to the
+  refused legacy path, so a key mismatch (a renamed member) fails closed.
+* **Pins changed with the boundary**: `tests/upstream/RemainingDeclarations.lean`
+  (`EnumDecodeRefusal.decode` and `EnumInputRefusal`'s `direct`, `records`,
+  `nested` now elaborate, the latter with `paramEnumPositions`),
+  `tests/upstream/Entrypoints.lean` (the enum getter is admitted with
+  `retEnums = [0]`), `scripts/test-solidity.test.mjs` (EnumArrayDecode).
+* **Replay control** (`tests/upstream/EnumArrays.lean`, checked through the
+  Lean server): `tests/abi-0.8.38/EnumArrays.sol` imported with
+  `testing entrypoints` from its 0.8.38 AST (`EnumArrays.ast.json`), each
+  sequence of `EnumArrays.vectors.json` replayed on its raw calldata against
+  the EVM's bytes (return or revert data, `Panic(0x21)` included): all five
+  `working` (enum arrays in `abi.decode`, `E[]` and an enum struct member at
+  the entry with their reverts, the getter before and after a failed
+  `setStored(3)`); with every expected outcome flipped, all five `broken`
+  (pinned, `#guard_msgs`). This is the lane's own results file; the CF1
+  fixture file was not edited.
+* **Not done**: proof obligations do not yet assume the nested enum ranges
+  at entry (`Problem.callPre` reads `paramRanges` and `elemRanges` only), so
+  a claim that needs them stays open (incomplete, not unsound); the replay
+  control covers `E[]`, `E[2]`, a flat struct and a getter, not nested
+  structs, arrays of structs or `E[][]` (the import admits them; the key
+  guard above fails closed on a mismatch); the CF1 fixture set
+  (`tests/upstream/cf1-abi-entry-results.json`, `scripts/abi-entry-probe.mjs
+  --fixtures`) was not rerun, since it needs the upstream snapshot
+  (`.lake/upstream/solidity`); `sol{}` written by hand still reads a struct's
+  enum member as a plain `uint` (the struct table has no enum identity), so a
+  hand-written `abi.decode(b, (S))` there checks only the carrier's range.
+* **Reviews and gates of the second pass.** Read-only finder and skeptic:
+  confirmed and fixed four pins still asserting the old refusals (listed
+  above), the ABI v1 getter regression (enum-key `paramEnums` dropped), and
+  the missing key-consumption guard (`AbiTy.valKeys`); the skeptic confirmed
+  the control's encoding, that the replay compares return and revert bytes,
+  and the carrier-width equivalence (`require(w < n)` after a `uint8` or a
+  full-word read is solc's `lt(value, n)`); its suggestion to corrupt one
+  return byte in a further negative control is not done. Recorded: obligations
+  lack the nested ranges (above). Gates: `./run-lean.sh` default 1041 jobs;
+  `EnumArrays.lean`, `RemainingDeclarations.lean`, `Entrypoints.lean`,
+  `EnumAbiRanges.lean` clean through the Lean server; `enum-abi-probe.mjs`
+  all vectors agree; `check-g07` at its baselines; `check-automatic --strict`
+  0 pending; ledger regenerated.

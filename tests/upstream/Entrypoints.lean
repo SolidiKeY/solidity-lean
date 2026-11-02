@@ -102,9 +102,12 @@ solc_import "Entrypoints.ast.json" hash 0xce96ed60b7a47884 as Controls.Entrypoin
 #eval check "{\"vectors\":[{\"signature\":\"negative()\",\"args\":[],\"failure\":false,\"expected\":[\"115792089237316195423570985008687907853269984665640564039457584007913129639919\"]}]}" "working"
 
 solc_import "Entrypoints.ast.json" hash 0xce96ed60b7a47884 as Controls.EntrypointEnumRefusal testing entrypoints
+-- Lane FU2-D: an enum-valued getter is admitted at its carrier, its return
+-- read at the ABI type `uint8` (`retEnums`); EVM agreement for such a getter
+-- is `tests/upstream/EnumArrays.lean`'s.
 #eval (do
-  unless Controls.EntrypointEnumRefusal.report.any (·.status == .unsupported) do
-    throw (IO.userError "enum result getter was silently admitted") : IO Unit)
+  unless Controls.EntrypointEnumRefusal.report.any (fun r => r.status == .elaborated && r.retEnums == [0]) do
+    throw (IO.userError "enum result getter not admitted with its uint8 return") : IO Unit)
 
 -- Type metadata cannot redirect an elementary key to a nominal declaration.
 -- Missing nominal identities and declarations also fail closed.

@@ -1095,6 +1095,14 @@ def AbiTy.flat : AbiTy → Bool
   | .tuple _ ms => ms.all (·.2 matches .val _)
   | _ => false
 
+/-- The keys of a type's words (`""` the value, `k[]` an element, `k.f` a
+member), as `solcEnumBelow` names its positions (`abiEnumBelow?`). -/
+partial def AbiTy.valKeys (key : String) : AbiTy → List String
+  | .val _ => [key]
+  | .bytes => []
+  | .arr t | .fixed t _ => t.valKeys (key ++ "[]")
+  | .tuple _ ms => ms.flatMap fun (f, t) => t.valKeys (key ++ "." ++ f)
+
 /-- The ABI type of a `Ty` whose rows (`placeShape`, `structWidths`) are
 keyed below `k`: `none` for a mapping. -/
 partial def AbiTy.of (T : Ty) (ws : List (String × Nat)) (k : String) : Option AbiTy :=
@@ -1338,12 +1346,30 @@ def abiWordAt (d : ByteSrc) (k : AbiKind) (o : RawExpr) : ElabM (List RawStmt ×
 mutual
 
 /-- `abi.decode` of a value of `t` declared `T` whose encoding starts at `p`
-in `d`: its statements, ending in `put` of it. -/
+in `d`: its statements, ending in `put` of it.  `below` lists the enum
+positions of a `solcEnumBelow` component by key (`abiEnumBelow?`), `key`
+this value's. -/
 partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
-    (put : RawExpr → RawStmt) : ElabM (List RawStmt) := do
+    (put : RawExpr → RawStmt) (below : List (String × Nat) := []) (key : String := "") :
+    ElabM (List RawStmt) := do
   match t with
   | .val k =>
     let (ss, v) ← abiWordAt d k p
+    -- an enum position of a `solcEnumBelow` component, at its carrier: the
+    -- word in the carrier's range, then below the member count
+    if let some n := lookupBy key below then
+      let w ← abiFresh
+      return ss ++ [.decl (.named k.tyName) w (some v),
+        .require (.binop .lt (.name w) (.num n)), put (.name w)]
+    -- an enum element (`E[]`, `E[k]`, declared at `E`): its word as a
+    -- `uint8`, then solc's validator (`validator_revert_t_enum_*`), an empty
+    -- revert unless below the member count, as a top-level enum's
+    -- (`abiDecodeWith`); `AbiTy.of` reads it as `uint8` alone
+    if let .named E := T then
+      if let some ms := lookupBy E C.enums then
+        let w ← abiFresh
+        return ss ++ [.decl (.named "uint") w (some v),
+          .require (.binop .lt (.name w) (.num ms.length)), put (.call E [.name w])]
     pure (ss ++ [put v])
   | .bytes =>
     let (s1, L) ← abiWordAt d (.uint 256) p
@@ -1365,12 +1391,14 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
     pure (s1 ++ [.decl (.named "uint") n (some L)] ++
       abiSeqBounds d e.headSize (.name n) (p.addN 32) ++ [
       .declMemory T x (some (.newArr T (.name n)))] ++
-      (← abiSeqReadGen d e T.elem (.name n) (p.addN 32) fun i v => .assign (.index (.name x) i) v) ++
+      (← abiSeqReadGen d e T.elem (.name n) (p.addN 32) (fun i v => .assign (.index (.name x) i) v)
+        below (key ++ "[]")) ++
       [put (.name x)])
   | .fixed e m =>
     let x := toString (← freshCapture "mv")
     pure (abiSeqBounds d e.headSize (.num m) p ++ [.declMemory T x none] ++
-      (← abiSeqReadGen d e T.elem (.num m) p fun i v => .assign (.index (.name x) i) v) ++
+      (← abiSeqReadGen d e T.elem (.num m) p (fun i v => .assign (.index (.name x) i) v)
+        below (key ++ "[]")) ++
       [put (.name x)])
   | .tuple s ms =>
     let x := toString (← freshCapture "mv")
@@ -1385,27 +1413,28 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
         let at0 ← abiFresh
         ss := ss ++ s1 ++ abiBounds d p off ++
           [.decl (.named "uint") at0 (some (.binop .add p off))] ++
-          (← abiReadGen d mt (abiMemberTy s f) (.name at0) putF)
+          (← abiReadGen d mt (abiMemberTy s f) (.name at0) putF below (key ++ "." ++ f))
       else
-        ss := ss ++ (← abiReadGen d mt (abiMemberTy s f) hpos putF)
+        ss := ss ++ (← abiReadGen d mt (abiMemberTy s f) hpos putF below (key ++ "." ++ f))
       hp := hp + mt.headSize
     pure (ss ++ [put (.name x)])
 
 /-- `L` elements from `q`, each in place if static, else at the offset its
 head word holds from `q`; `put i v` stores the `i`-th. -/
 partial def abiSeqReadGen (d : ByteSrc) (e : AbiTy) (T : RawTy) (L q : RawExpr)
-    (put : RawExpr → RawExpr → RawStmt) : ElabM (List RawStmt) := do
+    (put : RawExpr → RawExpr → RawStmt) (below : List (String × Nat) := []) (key : String := "") :
+    ElabM (List RawStmt) := do
   let i ← abiFresh
   let pos ← abiFresh
   let qn ← abiFresh
   let next := RawStmt.assign (.name i) (.binop .add (.name i) (.num 1))
   let posE : RawExpr := .binop .add (.name qn) (.binop .mul (.num e.headSize) (.name i))
-  let body ← if !e.dynamic then abiReadGen d e T (.name pos) (put (.name i)) else do
+  let body ← if !e.dynamic then abiReadGen d e T (.name pos) (put (.name i)) below key else do
     let (s1, off) ← abiWordAt d (.uint 256) (.name pos)
     let at0 ← abiFresh
     pure (s1 ++ abiBounds d (.name qn) off ++
       [.decl (.named "uint") at0 (some (.binop .add (.name qn) off))] ++
-      (← abiReadGen d e T (.name at0) (put (.name i))))
+      (← abiReadGen d e T (.name at0) (put (.name i)) below key))
   pure ([.decl (.named "uint") qn (some q)] ++ abiSeqBounds d e.headSize L (.name qn) ++
     [.decl (.named "uint") i (some (.num 0)), .whileLoop {} (.binop .lt (.name i) L)
       ([.decl (.named "uint") pos (some posE)] ++ body ++ [next])])
@@ -1418,7 +1447,13 @@ def abiDecodeTy? (Te : RawExpr) : Option (AbiTy × RawTy) := do
   let T ← abiTyExpr? Te
   let (ty, ws) ← (elabTyW C T).toOption
   let t ← AbiTy.of ty ws ""
-  if t.flat then none else some (t, T)
+  -- an array of an enum (`E[]`, `E[k]`) is flat, but only the nested
+  -- decoder checks each element against the member count (`abiReadGen`)
+  let rec enumElem : RawTy → Bool
+    | .named E => (lookupBy E C.enums).isSome
+    | .array T | .fixed T _ => enumElem T
+    | _ => false
+  if t.flat && !enumElem T && (abiEnumBelow? Te).isNone then none else some (t, T)
 
 /-- The kind of `abi.decode`'s component written `T` that is not a value
 type or a byte string: `T[]`, `T[k]` of a value type `T`, a struct of value
@@ -1435,6 +1470,7 @@ def decodeKind? (T : RawExpr) : Option AbiKind :=
 
 /-- The words a component written `T` takes in the head. -/
 def decodeHeadWords (T : RawExpr) : Nat :=
+  let T := ((abiEnumBelow? T).map (·.1)).getD T
   match decodeKind? C T, abiDecodeTy? C T with
   | some k, _ => k.headWords
   | none, some (t, _) => t.headSize / 32
@@ -1517,18 +1553,23 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
         throw s!"abi.decode at {T}: only value types are decoded"
       let R ← elabStmtsP ([enough] ++ reads ++ [.decl (.named T) x (some v)])
       return (P ++ Q ++ R, .name x)
+  -- a `solcEnumBelow` component's checked enum positions (`abiEnumBelow?`)
+  let below := ((abiEnumBelow? Te).map (·.2)).getD []
   let some k := decodeKind? C Te | do
     -- a nested type: head and tail recursively (`abiReadGen`)
     let some (t, T) := abiDecodeTy? C Te |
       throw s!"abi.decode at {Te.toStr}: a value type, a byte string, an array or a struct"
+    -- every listed enum position is a word of the type: none is dropped
+    unless below.all (fun (k, _) => (t.valKeys "").contains k) do
+      throw s!"abi.decode at {Te.toStr}: an enum position outside the type"
     let x := toString (← freshCapture "mv")
     let p : RawExpr := .num (32 * i)
     let S ← if t.dynamic then do
         let (s1, off) ← abiWordAt d (.uint 256) p
         let at0 ← abiFresh
         pure (s1 ++ [.decl (.named "uint") at0 (some off)] ++
-          (← abiReadGen d t T (.name at0) fun v => .declMemory T x (some v)))
-      else abiReadGen d t T p fun v => .declMemory T x (some v)
+          (← abiReadGen C d t T (.name at0) (fun v => .declMemory T x (some v)) below))
+      else abiReadGen C d t T p (fun v => .declMemory T x (some v)) below
     return (P ++ Q ++ (← elabStmtsP ([enough] ++ S)), .name x)
   let x := toString (← freshCapture "mv")
   -- the word at `o` read at the kind `kk` into a fresh local, then `put` of it

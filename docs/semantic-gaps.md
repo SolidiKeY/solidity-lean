@@ -209,8 +209,10 @@ finds no marker.
   What differs is rewritten before the statement (`bytesPure`):
   `bytesM(b)` keeps the left bytes or pads on the right, as an implicit
   widening does; `b.length` is `N`; `b[i]` is
-  `uint8((b >> 8((N-1) -% i)) % 256)`, divided by `i < N ? 1 : 0` so an
-  index out of range reverts as an array's does; a literal at `bytesN` is
+  `uint8((b >> 8((N-1) -% i)) % 256)` behind `require(i < N)`, `i` held
+  first (`#bytesIndex`), so an index out of range reverts as an array's
+  does (`Panic(0x32)`'s data where a self-call's `catch` reads it); a
+  literal index is checked by the elaborator; a literal at `bytesN` is
   left-aligned. A marker row beside the width says which positions are bytes
   (`k#bytes ↦ N`, `valueRows?`).
 - `bytes` and `string` are `bytes1[]`: a `uint[]` of 8-bit elements in
@@ -295,9 +297,14 @@ a fresh memory `bytes` with the array writes the model has:
   (`ByteSrc`). A top-level enum component (`abi.decode(b, (E, uint))`) is
   read as a `uint8` and reverts unless below the member count, as solc's
   `validator_revert_t_enum_*` (lane FU1; `EnumDecode` in
-  `Examples/Tactics/AbiFeatures.lean`); an enum inside an array or a struct
-  is still refused by the import ("ABI decoding of enum values requires
-  nominal cardinality checks").
+  `Examples/Tactics/AbiFeatures.lean`); an array of enums (`(E[])`,
+  `(E[2])`) checks each element the same way (`abiReadGen`, lane FU2-D;
+  `EnumArrayDecode`, EVM vectors `tests/abi-0.8.38/EnumArrays.vectors.json`);
+  the import prints a component with nested enums (arrays, struct members,
+  any depth) as `solcEnumBelow(T, "k", n, …)`, decoded at its carriers and
+  checked at each position (lane FU2-D, `tests/upstream/EnumArrays.lean`);
+  in hand-written `sol{}` a struct's enum member is a plain `uint`, its enum
+  lost, so only the carrier's range is checked there.
 
 **`sha256`, `ripemd160`, `ecrecover`.** `Hashes.lean` computes SHA-256 and
 RIPEMD-160 as `Keccak.lean` does, checked against standard vectors.
@@ -371,6 +378,12 @@ and its code; `revert E(a, b)` with `E`'s selector and `abi.encode(a, b)`.
   data, literal and custom-error data are emitted only in the callee a
   self-call `try` runs (`selfFrame`) and its calls; elsewhere
   `require(c, "m")` is `require(c)`, so no other proof changes shape.
+  A reason written as a byte literal (`hex"6d"`, and every string literal
+  of the solc import, which prints them so: `byteLiteralText`) is
+  `Error(string)`'s literal data in every frame, as a computed reason's
+  memory bytes are, with nothing allocated (lane FU2-D; `requireReason` is
+  `if (c) {} else { revert … }` there). The two readings of one source
+  differ only in data no modality reads outside a self-call's `catch`.
   Computed memory operands keep their bytes everywhere (`RevPart.mem`,
   `Semantics/RevertMemory.lean`); the importer accepts the whole-buffer
   rethrow `assembly { revert(add(d, 32), mload(d)) }` and no other assembly.
@@ -424,4 +437,5 @@ out by one lemma (`stmt_sim_outside`). Checking times did not move otherwise.
   reflective closer; not added.
 - A raw datum always includes the empty one (an evaluator's revert), so a
   `catch (bytes memory d)` goal holds for `d` empty too.
-- Literal errors outside a self-call frame keep the empty-data lowering.
+- Literal errors (`"m"`, a custom error) outside a self-call frame keep the
+  empty-data lowering; a byte-literal reason keeps its data (above).

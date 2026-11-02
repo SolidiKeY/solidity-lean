@@ -930,12 +930,33 @@ partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
       let (tb, k, .prim _) ← widthPath? C Γ e | none
       (fnRow? tb k).map canon
 
+/-- `solcEnumBelow(T, "k₁", n₁, …)`, a component of `abi.decode` the solc
+import writes for a type with nested enums (lane FU2-D): `T` at its carriers
+(`uint`, `uint8`), each enum position `kᵢ` (`""` the value, `k[]` an element
+of `k`, `k.f` a member `f` of `k`) checked below its member count `nᵢ`, as
+solc's validator (`abiReadGen`). -/
+def abiEnumBelowName : String := "solcEnumBelow"
+
+/-- The type and the checked positions of a `solcEnumBelow(…)` component. -/
+def abiEnumBelow? : RawExpr → Option (RawExpr × List (String × Nat))
+  | .call f (t :: rest) => do
+    guard (f == abiEnumBelowName)
+    let rec pairs : List RawExpr → Option (List (String × Nat))
+      | [] => some []
+      | k :: .num n :: more => do
+        let bs ← k.bytesLit?
+        pure ((String.mk (bs.map Char.ofNat), n) :: (← pairs more))
+      | _ => none
+    pure (t, ← pairs rest)
+  | _ => none
+
 /-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
 partial def abiTyExpr? : RawExpr → Option RawTy
   | .name t =>
     if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array else some (.named t)
   | .index t (.num m) => (abiTyExpr? t).map (.fixed · m)
   | .call "#abiArrayType" [t] => (abiTyExpr? t).map .array
+  | e@(.call ..) => (abiEnumBelow? e).bind fun (t, _) => abiTyExpr? t
   | _ => none
 
 /-- The narrow positions of a value of reference type: a place's
@@ -1607,10 +1628,16 @@ def toBytesAt? (Γ : ECtx) (n : Option Nat) (o e : RawExpr) : Except String RawE
   | some n => toBytesAt C Γ n o e
   | none => pure e
 
+/-- The internal call `#bytesIndex(b, i, N)`: the byte `i` of the
+`bytesN` `b` at a symbolic index, which `hoist` reads (`Elab/Arms.lean`). -/
+def bytesIndexName : String := "#bytesIndex"
+
 /-- The byte `i` of the `bytesN` `b`, a `bytes1`: `b`'s byte counted from the
-left, `b >> 8((N-1) -% i)` cut to 8 bits, divided by `i < N ? 1 : 0` so that
-an index out of range reverts, as an array's does (`Storage.checkIndex`); a
-literal index is checked here. -/
+left, `b >> 8((N-1) -% i)` cut to 8 bits.  A literal index is checked here
+(solc's compile error); a symbolic one is `uint8(#bytesIndex(b, i, N))`,
+whose inner call `hoist` reads as `i` captured, then its bounds check
+(`i < N`, a revert, `Panic(0x32)`'s data where a `catch` reads it, as an
+array index's, `Checked.idxPG`), then the byte. -/
 def bytesAt (n : Nat) (b i : RawExpr) : Except String RawExpr :=
   match i.litVal? with
   | some k =>
@@ -1618,10 +1645,7 @@ def bytesAt (n : Nat) (b i : RawExpr) : Except String RawExpr :=
     if 0 ≤ k && k < n then
       pure (.call "uint8" [.binop .mod (.binop .shr b (.num (8 * (n - 1 - k.toNat)))) (.num 256)])
     else throw s!"index {k} out of range of a bytes{n}"
-  | none =>
-    let sh : RawExpr := .binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i)
-    pure (.call "uint8" [.binop .div (.binop .mod (.binop .shr b sh) (.num 256))
-      (.ternary (.binop .lt i (.num n)) (.num 1) (.num 0))])
+  | none => pure (.call "uint8" [.call bytesIndexName [b, i, .num n]])
 
 /-- The mark of a `bytesN` argument of `abi.encode`/`encodePacked`/
 `bytes.concat`, put by `bytesPure` (which rewrites the value to a `uint`)
