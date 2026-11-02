@@ -4291,3 +4291,87 @@ to the next lane checkpoint, not rerun each turn. Earlier full resource failures
 86 documentation findings and 438 unrecorded axiom-inventory changes remain
 unresolved prior checkpoint results, not current passes. All original open
 AU01/AU02/backfill obligations above remain open. No AU05, publication or push.
+
+
+### AU02 computed-index given-heap pipeline increment (2026-11-02)
+
+Parent `0909c50a6424c170c99a18f0f2387ea1780e10d7`; frozen base and original
+branch/goal unchanged. Before this item, `git fetch origin master` succeeded
+in a task-owned private bare audit store on `/tmp`; published master was
+`eba99fe7c2e00926d0c830e56af34e0699d804c4`. Its Decision/old-extension files
+match the integrated a320 base and contain no competing computed-source
+route. This is a published-source audit, not a claim of rebasing onto eba99.
+The checkout remains rebased on a320 and preserves the prior checkpoint seals.
+
+The actual original computed-index formula was reproduced before edits at
+0909: target=true, Covered=false, verdict=unknown, with all-heap validity
+already proved (5.340749s). `DecisionGivenHeapComputedExtension` now appends
+its independently recognized all-heap source certificate after every old
+source answer. Generic preservation theorems retain the complete old Answer
+and exact counterstate function. No candidate-state success becomes validity.
+Decision consumes the new wrapper; both old completeness signatures remain.
+An additive memCovered disjunct uses exact source membership and derives
+no-allocation from its source equation. Fml.Covered, Fml.inTarget and
+DecisionTheorem declarations are byte-identical to the frozen 8bd base and
+parent; old source/literal producers, low classifier and HashPremise are
+byte-identical to the parent.
+
+Supported closed class: a box-bound dynamic uint array with identical direct
+reads at a nonliteral UIntLinear index. Generic memCovered/covered/proved
+lemmas have no supplied coverage or target premise. Existing hashFree plus
+all-heap validity retains the original hash reading. Fixed/fresh/diamond
+binders, unequal reads and nonlinear indices remain outside this source
+classifier; no general prefix, fixed-array or broad-memory completion follows.
+The previous AU01 source-reason entry above is historical: this increment
+closes its assigned concrete computed-index gap, not the global Residue union.
+
+Exactly three obsolete assigned assertions improve transparently, using real
+parser witnesses and proof certificates: the old computed_index_unknown and
+retained_computed_unknown become proved assertions; retained_computed_uncovered
+becomes covered. Their source formulas are unchanged. The computed 0+1,
+in-bounds 0+0 and checked-subtraction 0-1 companions now each evaluate to
+(target=true,Covered=true,proved). Theory reflexivity includes undefined
+optional readings; no program-equality or EVM observation has changed.
+Original unequal-read/two-defined-cell countermodels, literal-family positives,
+nonlinear and actual binder refusals, defined/bounds/partial/unset observations,
+and exact parameter/alias negative candidate states remain checked. No unrelated
+expected verdict is edited. Two old coverage proofs needed only Boolean
+normalization and a left-disjunction lift; signatures and original certificates
+are unchanged. Their raw failed change-pattern diagnostics and the initial
+incorrect Bool lemma projection remain retained.
+
+Focused verification (unchanged 300s cap, warm private post-a320 cache):
+- Extension MCP/build pass 4.333120s/2.141194s.
+- Decision MCP/build pass 39.671163s/39.757047s.
+- Computed boundary build/MCP pass 2.133153s/4.278327s after retained dependency diagnostics.
+- Computed controls MCP/build pass 4.233966s/3.130652s.
+- Reversed/compound compatibility MCP pass 4.237175s/3.160721s.
+- Old consumer closure: DecisionMemory passes in 72s; total 76.395288s
+  first attempt fails only on the reported private GapCensus read-only cache
+  alias. After the verified 44KiB private materialization, build passes
+  3.128546s; final consumer MCP passes 4.297389s.
+- Public axiom/verdict probe passes 32.083359s: 33 reports, only propext,
+  Classical.choice and Quot.sound; actual three interpreted results printed.
+- Bounded KeySort passes 1.016087s: parsed377/read-bearing131/covered131,
+  actual Lean4.24.0 and Lake5.0.0-src+797c613. No whole-tree runtime pass claimed.
+
+Every check uses original writer lock, explicit Lean-j1/thread1, child hard
+memory.max12884901888/swap.max0, 12GiB host reserve and no overlapping LSP/build.
+Passing-check maximum sampled aggregate RSS2426264KiB, maximum measured
+cgroup peak1297518592bytes, minimum sampled host available13498638336bytes.
+These are actual samples, not another VM's timings or a cold full-tree gate.
+Independent read-only finder/skeptic used no Lean/server/build and report no
+source findings. They checked old-answer preservation, exact certificate
+improvements, unchanged negative controls and necessary compatibility lifts.
+
+Per H12 only focused checks and narrow registration/whitespace checks run for
+this increment. Full run-lean/TestSuite/docs/strict/trust/cumulative gates remain
+for a lane checkpoint; prior failed gates and full raw resource failures stay
+retained. Remaining original AU01 theorem/exhaustive Residue/hash bridge,
+profiling/splits, AU02 array/memory/halting-OR/prefix children, wider revised
+program-free boundary and general formula-derived fuel/backfill remain open.
+No AU05/AU06, push, merge, PR, tags or goal reset/completion.
+Evidence directory and intended exact-head export:
+`/workspace/va1-evidence/computed-read-pipeline`. New large exports will use
+owned `/tmp` storage with a stable delivery symlink, preserving all old files
+and avoiding checkout disk pressure.

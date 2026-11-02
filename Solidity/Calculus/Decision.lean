@@ -13,6 +13,7 @@ import Solidity.Calculus.MemStructCut
 import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.DecisionCompoundExtension
 import Solidity.Calculus.DecisionSourceAnswer
+import Solidity.Calculus.DecisionGivenHeapComputedExtension
 import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
@@ -413,7 +414,7 @@ theorem ResidueReason.GivenHeapLiteralReadReflexive.noAlloc {Γ : Ctx} {φ : Fml
 
 /-- Existing given-heap countermodels first, then an exact global source certificate. -/
 def decideGiven (φ : Fml C []) : LeafVerdict C :=
-  match givenHeapAnswerWithSources φ with
+  match givenHeapAnswerWithComputed φ with
   | some (.proved _) => .proved
   | some (.refuted state _) => .refuted (state (State.init C))
   | none => .unknown
@@ -439,12 +440,17 @@ theorem decideGiven_refutes {φ : Fml C []} {σ : State C []}
   · cases h
 
 /-- Every actual certified answer yields an answered verdict. -/
-theorem decideGiven_complete_sources {φ : Fml C []}
-    (h : (givenHeapAnswerWithSources φ).isSome = true) : decideGiven φ ≠ .unknown := by
+theorem decideGiven_complete_computed {φ : Fml C []}
+    (h : (givenHeapAnswerWithComputed φ).isSome = true) : decideGiven φ ≠ .unknown := by
   unfold decideGiven
-  cases ha : givenHeapAnswerWithSources φ with
+  cases ha : givenHeapAnswerWithComputed φ with
   | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
   | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
+
+/-- Preserve the previous source-answer completeness interface. -/
+theorem decideGiven_complete_sources {φ : Fml C []}
+    (h : (givenHeapAnswerWithSources φ).isSome = true) : decideGiven φ ≠ .unknown :=
+  decideGiven_complete_computed (givenHeapAnswerWithComputed_old_complete h)
 
 /-- Compatibility: every previously recognized given-heap answer still receives
 an answered verdict through the extended lazy route. -/
@@ -457,7 +463,7 @@ theorem decideGiven_preserves_countermodel {φ : Fml C []}
     (w : {σ : State C [] // ¬ holds σ φ}) (h : MemoryWitness.countermodel? φ = some w) :
     decideGiven φ = .refuted w.1 := by
   unfold decideGiven
-  rw [givenHeapAnswerWithSources_preserves_countermodel w h]
+  rw [givenHeapAnswerWithComputed_preserves_countermodel w h]
 
 /-- Exact negative-block preparation and fresh-array cutting, with a certified
 fresh-struct fallback or a given-heap answer. Global positive answers carry
@@ -645,13 +651,15 @@ theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf �
 
 /-- **The complete memory fragment**: a covered fresh-array cut, a certified
 fresh-struct answer, the exact given-heap literal-read source certificate, or
-a discovered source chain without fresh allocation. These source routes never
+a discovered source chain without fresh allocation, or an exact computed-index
+reflexive given-heap read. These source routes never
 promote truth at one candidate heap to validity. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
   (φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
     | none => (structAnswerWithCompound φ).isSome) || φ.givenHeapLiteralReadReflexive ||
-    (!φ.hasAllocAll && sourceUIntLiteralSkeleton φ && (sourceUIntLiteralDiscovery? φ).isSome)
+    (!φ.hasAllocAll && sourceUIntLiteralSkeleton φ && (sourceUIntLiteralDiscovery? φ).isSome) ||
+    φ.givenHeapLinearReadReflexive
 
 /-- **The fragment with binders of KeY's `int`**: the leaf binds one where
 `Fml.zT` reads it, is in `Fml.zOK`, and its rewriting is in `Fml.CoveredA`. -/
@@ -677,7 +685,7 @@ def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
 theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
   unfold Fml.memCovered at h
   simp only [Bool.or_eq_true] at h
-  rcases h with (hfresh | hgiven) | hsource
+  rcases h with ((hfresh | hgiven) | hsource) | hcomputed
   · simp only [Bool.and_eq_true] at hfresh
     obtain ⟨ha, hc⟩ := hfresh
     unfold decideMem
@@ -698,6 +706,13 @@ theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMe
       rw [halloc]
       exact decideGiven_complete_sources (givenHeapAnswerWithSources_source hs)
     | true => rw [halloc] at ha; cases ha
+
+  · obtain ⟨w⟩ := ResidueReason.givenHeapLinearRead_witness hcomputed
+    have ha : φ.hasAllocAll = false :=
+      (congrArg (fun ψ : Fml C [] => ψ.hasAllocAll) w.equation).trans rfl
+    unfold decideMem
+    rw [ha]
+    exact decideGiven_complete_computed (givenHeapAnswerWithComputed_source hcomputed)
 
 /-- Actual finite source discovery supplies coverage on the existing no-fresh-allocation
 route. This is a syntactic hit premise, not an arbitrary supplied validity proof. -/

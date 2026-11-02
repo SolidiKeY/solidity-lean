@@ -2,8 +2,8 @@ import Solidity.Calculus.DecisionGivenHeapComputedReason
 import Solidity.Calculus.DecisionUIntGrammar
 
 /-! # Frozen target admission for the nonliteral given-heap source family
-These are source facts, not global coverage or decision registration. The
-existing computed-index unknown observation remains unchanged.
+Admission is derived from source syntax. The independently checked computed
+source extension now supplies actual coverage and a globally certified verdict.
 -/
 namespace Solidity.Decide.ResidueReason
 
@@ -52,5 +52,24 @@ theorem GivenHeapLinearReadReflexive.target {C : Contract} {φ : Fml C []}
   unfold Fml.inTarget
   rw [htarget, hkeys, hneg]
   rfl
+
+/-- Actual source recognition supplies the new memory coverage branch. -/
+theorem GivenHeapLinearReadReflexive.memCovered {C : Contract} {φ : Fml C []}
+    (w : GivenHeapLinearReadReflexive φ) : φ.memCovered = true := by
+  simp only [Fml.memCovered, givenHeapLinearRead_complete w, Bool.or_true]
+
+/-- The frozen Covered body receives the certified family through its helper. -/
+theorem GivenHeapLinearReadReflexive.covered {C : Contract} {φ : Fml C []}
+    (w : GivenHeapLinearReadReflexive φ) : φ.Covered = true := by
+  simp only [Fml.Covered, w.memCovered, Bool.or_true, Bool.true_or]
+
+/-- The returned global positive verdict has an all-heap source certificate. -/
+theorem GivenHeapLinearReadReflexive.proved {C : Contract} {φ : Fml C []}
+    (w : GivenHeapLinearReadReflexive φ) : decideGoal φ = .proved := by
+  have hd : decideGoal φ ≠ .unknown := decideGoal_complete w.covered w.hashFree
+  cases he : decideGoal φ with
+  | proved => rfl
+  | refuted σ => exact False.elim ((decideGoal_refutes he) (w.validH σ))
+  | unknown => exact False.elim (hd he)
 
 end Solidity.Decide.ResidueReason

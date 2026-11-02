@@ -1487,6 +1487,10 @@ evidence producer and memory address views; it checks the complete source
 equation rather than a coverage or unknown result. Global theory validity,
 hash freedom, closed-source admission under every waiver setting and
 disjointness from the original literal-only family are kernel proved.
-The actual computed-index pin remains uncovered/unknown. This is an AU01
-source-reason component, with no AU02 pipeline integration or exhaustive
-Residue/DecisionTheorem-prime claim.
+The AU02 computed-source extension now consults this all-heap certificate only
+after every old answer misses. Closed members gain actual memory coverage and
+proved global verdicts; the assigned computed-index pin and its in-bounds and
+checked-subtraction companions improve with exact certificates. Old literal
+answers, returned negative candidate states, read-definedness observations and
+source refusals remain unchanged. General memory/prefix/fixed-array coverage
+and the exhaustive Residue/DecisionTheorem-prime bridge remain open.

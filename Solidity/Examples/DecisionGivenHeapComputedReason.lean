@@ -3,9 +3,9 @@ import Solidity.Calculus.Surface
 import Solidity.Examples.DecisionGapData
 
 /-! # Actual nonliteral given-heap gap controls
-The first formula has the exact body of the existing computed-index unknown
-pin, using the same contract and scoped notation. Classification does not
-register a closer or change that observation. All original fixtures stay intact.
+The first formula retains the original computed-index gap syntax and contract.
+The all-heap source certificate now reaches actual coverage and proved verdicts;
+read-definedness, unequal-read and syntactic refusal controls remain intact.
 -/
 namespace Solidity.Examples.DecisionGivenHeapComputedReason
 open Solidity.Decide Solidity.Decide.ResidueReason Solidity.Examples.Decision
@@ -43,10 +43,16 @@ theorem actual_targets (waivers : Waivers) : computedIndex.inTarget waivers = tr
     presentIndex.inTarget waivers = true ∧ partialIndex.inTarget waivers = true :=
   ⟨computedWitness.target waivers, presentWitness.target waivers, partialWitness.target waivers⟩
 
-/-- Original public unknown remains unchanged while the source reason is classified. -/
-theorem retained_computed_unknown : decideGoal computedIndex = .unknown := by rfl
+/-- The reproduced assigned gap now has a global kernel-certified verdict. -/
+theorem computed_proved : decideGoal computedIndex = .proved := computedWitness.proved
 
-theorem retained_computed_uncovered : computedIndex.Covered = false := by rfl
+theorem computed_covered : computedIndex.Covered = true := computedWitness.covered
+
+theorem companion_proved : decideGoal presentIndex = .proved ∧
+    decideGoal partialIndex = .proved := ⟨presentWitness.proved, partialWitness.proved⟩
+
+theorem companion_covered : presentIndex.Covered = true ∧ partialIndex.Covered = true :=
+  ⟨presentWitness.covered, partialWitness.covered⟩
 
 theorem new_old_family_disjoint : computedIndex.givenHeapLiteralReadReflexive = false ∧
     literalIndex.givenHeapLiteralReadReflexive = true ∧

@@ -39,6 +39,9 @@ theorem ReversedFreshField.memCovered {C : Contract} {φ : Fml C []}
     rfl
   unfold Fml.memCovered
   rw [w.hasAllocAll, w.cut_none, hgiven, Bool.or_false]
+  simp only [Bool.not_true, Bool.false_and, Bool.or_false, Bool.true_and]
+  rw [Bool.or_eq_true]
+  apply Or.inl
   change (structAnswerWithCompound φ).isSome = true
   exact structAnswerWithCompound_original
     (structAnswerWithReversed_reversed (reversedFreshField_complete w))

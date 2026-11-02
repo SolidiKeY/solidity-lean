@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecisionGivenHeapBoundary
+import Solidity.Calculus.DecisionGivenHeapComputedBoundary
 import Solidity.Examples.DecisionGapCensus
 
 /-! # Inhabited given-heap source certificates and refusal controls
@@ -82,8 +83,13 @@ theorem original_covered : memParamSame.Covered = true := originalWitness.covere
 
 theorem another_covered : anotherIndex.Covered = true := anotherWitness.covered
 
-/-- The computed-index near miss remains outside the exact source extension. -/
-theorem computed_index_unknown : decideGoal nonliteralIndex = .unknown := by rfl
+/-- The literal classifier still refuses this assigned gap; the new typed route proves it. -/
+def computedWitness : GivenHeapLinearReadReflexive nonliteralIndex :=
+  (givenHeapLinearRead? nonliteralIndex).get (by decide +kernel)
+
+theorem computed_index_proved : decideGoal nonliteralIndex = .proved := computedWitness.proved
+
+theorem computed_index_covered : nonliteralIndex.Covered = true := computedWitness.covered
 
 /-- The existing nonempty-heap and alias countermodels remain certified. -/
 theorem retained_countermodels :

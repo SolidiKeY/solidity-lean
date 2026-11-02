@@ -795,6 +795,7 @@ import Solidity.Calculus.DecisionSourceInstance
 import Solidity.Calculus.DecisionSourceChain
 import Solidity.Calculus.DecisionSourceDiscovery
 import Solidity.Calculus.DecisionSourceAnswer
+import Solidity.Calculus.DecisionGivenHeapComputedExtension
 import Solidity.Calculus.DecisionArrayReasons
 import Solidity.Calculus.DecisionNumericFlatten
 import Solidity.Calculus.DecisionNumericStages
