@@ -2128,3 +2128,124 @@ blocked goal unchanged/get_goal unavailable; no reset/reactivation/completion,
 new VM/thread/producer retrieval, push/merge/PR/service. Reviewed exact committed
 heads/signatures/request/patch/bundles/raw evidence/checksums:
 `/workspace/vy5-composition/runtime-block-20261102/final/`.
+
+
+## Actual modifier and internal-call rethrow (2026-11-02)
+
+[ModifierPhysical](../../Solidity/Yul/Composition/ModifierPhysical.lean) adds30
+kernel laws consuming ACTUAL `Source.runMods`, `.placeholder`, `execItems` and
+`callInternal`. No Source/** implementation, AST, frame evaluator or world/callAddr
+semantics is copied or changed. `body` uses the already proved alias declaration/
+rethrow items, parameters Γ.reverse, no returns, intrinsically indexed context Γ
+and actual `RModInv`. `no_modifiers` proves its real runMods[] execution for
+arbitrary appropriate typed locals and complete reverted bytes/state at fuel+4.
+Only actual local.get-reference and heap.get-full-byte premises remain.
+
+The actual `aroundBody` has ONE real typed placeholder. `withAround` supplies an
+explicit resolved program lookup; `lookup_around` computes actual dispatch/body
+lookup rather than assuming an execution result. `placeholder_revert` checks
+BOTH actual pipeline branches: legacy uses current typed parameter locals;
+viaIR runs real zeroInner0 on original locals. This selected function has ZERO
+return slots, so no reset/return-value difference or unanswered library/unchecked
+result is inferred. `one_modifier` executes actual argument evaluation, dispatch,
+frame installation, placeholder/body entry, attempt/error capture, saved-frame
+restoration and halt re-raise at EVERY fuel+7. The original saved fnLocals may be
+ANY intrinsically typed sigma frame; complete Source.St, heap, source journals,
+logs/events and full revert bytes are retained. Scope/frame-local restoration
+is NOT world rollback. No desired execution outcome or assumed agreement appears.
+
+The next ready leaf also advances: selected `callInternal` execution through
+real function signature, dispatch/body lookup, zero return values, actual
+parameter `.onto`, exact return/parameter frame equality and checked-frame entry.
+Parameters are two bytes-memory references: arguments old/current become actual
+locals current/old. `internal_revert` proves full bytes and complete state at
+EVERY fuel+8.0–7 are actual timeouts, including cases AFTER temporary frame
+installation; the saved frame is restored even then. `parameters_onto` and
+`function_frame` prove exact order/type equality, not a fabricated frame oracle.
+No callAddr/world implementation or external ordinary-function packet is assumed.
+
+These are explicit SELECTED RESOLVED runtime program inputs, not a theorem that
+the frontend derived/admitted their declaration/body records. Source declaration
+keys and runtime program lookup are provided as data; RBody.Derived, source
+resolution/typing/admission and general modifier/assembly coverage remain open.
+The selected runtime function/placeholder execution itself is concrete and uses
+existing semantics. It does not close the original general modifier combination
+or any G48–G51 obligation. Source.Resolved still has no general try selector;
+none is invented. The VY4 callAddr packet request from the prior checkpoint
+remains pending, and its active producer was not contacted or interrupted.
+
+Inhabited `sample` reuses the actual prior physical/raw caller with seven dirty
+cells (including bool2/small1793/function fields), nonword alias0/AABB and prefix
+log55. Its heap already contains the complete caught bytes at logical index1.
+Saved fnLocals is deliberately a DIFFERENT booltrue frame, unlike installed
+function locals [current1,old0]. Full actual sample result/state/raw/frame are
+proved, with no clean resumption. Wrong alias returns AABB instead of DEAD despite
+equal length2; new heap object1 stays DEAD. Low-fuel, missing modifier/function
+body, wrong modifier parameter metadata, bad call frame, placeholder outside a
+modifier and invalid placeholder frame are real existing API guards. Deliberately
+incoherent API-input controls are not claimed to be admitted source programs.
+Logical indices never identify physical EVM addresses; actual physical placement/
+MemOK/refinement/G01/compiler/world premises remain open.
+
+[Driver](../../tests/yul-composition/ModifierDriver.lean) executes42 actual Source
+cases across legacy/viaIR and two direct-placeholder controls. An alternate saved
+ONE-memory-reference frame must also be restored, preventing hardcoded boolframe
+restoration. The direct placeholder leaves the installed TWO-reference frame on
+error; outer runMods is what actually restores the saved frame. Full bytes,
+panic tail, wrong alias, all0–7 horizons, raw/nonword/heap/prefix and exact frame
+shape/value/reference order are frozen independently in
+[expectations](../../tests/yul-composition/modifier-expectations.json) BEFORE
+execution. Generic kernel laws prove complete Source.St equality; finite driver
+serialization does not claim whole-world enumeration or source/compiler adequacy.
+
+[Reader](../../scripts/yul-composition/modifier-source.mjs) and
+[mutations](../../scripts/yul-composition/modifier-source.test.mjs) bind exact
+current main/private Source Decls/Syntax/Types/Value/Elaborated/Machine/Eval/
+Resolved/State/Hoare, prior producer/consumer chain, current module/driver/ledger/
+oracle, selected registration and actual Lean command/output/exit.138 new/affected
+JS tests pass, including same-length full-byte, frame type/value/order, alternate
+versus installed frame, low-fuel finally restoration, missing/invalid APIs,
+raw/high-bit/nonword/heap/prefix and stale/missing/reordered evidence. ZERO new
+native comparisons/execution; old24call historical evidence remains historical,
+and the five strict original optimized-viaIR native journal FAILs are SHA-bound
+unchanged, pending their separate decision. Prior expected outputs/profiles are
+not changed. No new native fixture is used instead of kernel composition.
+
+Actual joint policy gate exits0: Lean4.24.0 commit797c613/Lake5.0.0-src+797c613;
+KeySort2jobs; library1231/TestSuite262;377taclets/131annotations;198core/
+0elaborator;1246reachable/0orphan; strict491automatic/61budgeted/11refuted/
+0pending; trust1261sources/252sites/0findings. All30 exact signatures/scoped
+transitive axiom reports use standard axioms/subsets, no new axiom/sorry/admit/
+native-proof shortcut or raised budget. Final per-file MCP and exact committed
+identities are recorded in the handoff. All failed proof-reduction/name/typing
+attempts are retained and corrected with real equations, not new assumptions.
+Both independent read-only finder/skeptic accepted kernel/sample/driver/reader/
+mutations with no findings and no Lean/server/build/edit. Main standalone producer
+closure is not claimed; private root gets only the narrow new import.
+
+Initial285388800byte disk was measured against178450432byte comparable container
+layer and8MiB conservative source/build/Git/evidence allowance (~98.5MB remainder).
+No surviving job existed. One combined edit/retirement/check action was REJECTED
+by automatic approval review BEFORE execution when current free space was110MB
+with an exited current-step layer still present. No bypass/indirect heavy check
+ran. Read-only probes established stopped/SizeRw0/directory-only changes and
+retained receipts; separate review APPROVED the already user-authorized current
+metadata-only retirement after preservation. Disk returned to285MB before any
+heavy retry. Subsequent operations separately retire/measure then admit checks.
+No old container/cache/image/mount/history/evidence was deleted; no guard lowered.
+Exact rejection/probes/recovery are in approval-capacity-receipt.json. All heavy
+checks preserve the real writer lock, hard12GiB/no-swap/CPU1,12GiB available reserve,
+serial-j1/LEAN_NUM_THREADS=1 and original proof/fuel/node/test limits. No resource
+stop occurred. No broad native regeneration or foreign package/branch adoption.
+
+Historical docs/G03 EXIT1 and exact pinned-base equality remain FAILURES; unchanged
+failing global gates are not rerun for activity. New handoff links are checked
+separately. All Work1/2/3 and BackfillA/B remain PARTIAL: all24 original obligations
+and six general Source combinations, frontend derivation/general modifiers, raw
+Source hooks, real Source try selection, physical placement/refinement/G01 and
+concrete compiler/world/V16/final joint adequacy remain open. LIB1/library-viaIR1834,
+unchecked-add and optional-vendor decisions remain unanswered. Original blocked
+goal unchanged/get_goal unavailable; no reset/reactivation/completion, replacement
+VM/thread, cross-thread message, push/merge/PR or service. Reviewed immutable
+patch/bundles/interface/full signatures/request references/evidence/checksums:
+`/workspace/vy5-composition/modifier-body-20261102/final/`.

@@ -419,3 +419,16 @@ controls;130JS, joint1230/TestSuite262/signatures/strict/trust/MCP pass.
 Exact VY4 ordinary typed-function packet requested, not assumed. No new native
 fixture/comparison, five native strictFAILs retained. All24/six/fulladequacy pending.
 Artifacts: `/workspace/vy5-composition/runtime-block-20261102/final/`.
+
+
+### VY5 actual modifier/internal rethrow (2026-11-02)
+
+[Lane handoff](inline-assembly-vy5.md#actual-modifier-and-internal-call-rethrow-2026-11-02):
+30kernel laws consume real runMods/placeholder/callInternal, fullbyte alias-body
+rethrow and arbitrary savedframe restoration across both Sourcepipelines.
+42Sourcecases/two directplaceholders/138JS; selected resolvedprogram ONLY, not
+frontendderived/generalmodifier/Source.try/compiler/world adequacy. Actual
+joint1231/TestSuite262/KeySort/signature/strict/trust gate passes. Original five
+native journal FAILs and all24/six remain open. Capacity approval rejection and
+separate safe resolution retained, no guard or protecteddata cleanup.
+Artifacts: `/workspace/vy5-composition/modifier-body-20261102/final/`.
