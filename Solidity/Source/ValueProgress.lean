@@ -494,6 +494,7 @@ def RStmt.OpsOK {E : Env} {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : R
   | _, _, _, .retTuple es => RConvArgs.OpsOK es
   | _, _, _, .emit _ _ args | _, _, _, .revertError _ _ args => RConvArgs.OpsOK args
   | _, _, _, .declTuple _ e _ => e.OpsOK
+  | _, _, _, .tryCall t _ _ args ok _ cat => t.OpsOK ∧ RConvArgs.OpsOK args ∧ RItems.OpsOK ok ∧ RItems.OpsOK cat
 
 def RItems.OpsOK {E : Env} {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} → RItems E R M k Γ Γ' → Prop
   | _, _, _, .nil => True
@@ -506,6 +507,11 @@ theorem TypedArgs.ofSlots_opsOK {Γ : Ctx} : {es : Syn (.list (.opt .expr))} →
     (d : TypedSlots Γ es τs) → RArgs.OpsOK (TypedArgs.ofSlots d)
   | _, _, .nil => trivial
   | _, _, .cons d ds => And.intro (Typed.toR_opsOK d) (TypedArgs.ofSlots_opsOK ds)
+
+/-- A cast of a block's input context keeps `OpsOK`. -/
+theorem RItems.opsOK_castIn {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ₁ Γ₂ Γ' : RCtx} (h : Γ₁ = Γ₂)
+    (b : RItems E R M k Γ₁ Γ') (hb : b.OpsOK) : (cast (congrArg (fun Γ => RItems E R M k Γ Γ') h) b).OpsOK := by
+  subst h; exact hb
 
 mutual
 
@@ -539,6 +545,10 @@ theorem StmtD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)}
     RArgs.convert_opsOK _ _ _ (And.intro (Typed.toR_opsOK d) (TypedArgs.ofSlots_opsOK ds))
   | _, _, _, _, .emit da _ => RArgs.convert_opsOK _ _ _ (TypedArgs.toR_opsOK da)
   | _, _, _, _, .revertError da _ => RArgs.convert_opsOK _ _ _ (TypedArgs.toR_opsOK da)
+  | _, L, _, _, .tryCall (rs := rs) (rets := rets) (x := x) dc da _ _ _ _ _ dok _ dcb =>
+    And.intro (Typed.toR_opsOK dc) (And.intro (RArgs.convert_opsOK _ _ _ (TypedArgs.toR_opsOK da))
+      (And.intro (RItems.opsOK_castIn (tryOk_tys rets.paramNames rs L) _ (ItemsD.toR_opsOK dok))
+        (RItems.opsOK_castIn (catchLocals_tys x L) _ (ItemsD.toR_opsOK dcb))))
 
 theorem ItemsD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)} → {b : Syn (.list (.item k))} →
     (d : ItemsD C L b L') → d.toR.OpsOK

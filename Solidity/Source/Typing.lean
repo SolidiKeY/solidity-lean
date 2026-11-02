@@ -1094,6 +1094,44 @@ def Ctx.tupleSlots (C : Ctx) (holes : Nat) (d : Syn .varDecl) (ds : Syn (.list (
   | Option.some a, Option.some b => Option.some (List.replicate holes Option.none ++ a :: b)
   | _, _ => Option.none
 
+/-- **The success clause's locals of a `try`** (lane FU2-B): the
+function's return types, named by the `returns` parameters (`""` when
+unnamed), left to right. -/
+def tryLocals : List (Option String) → List STy → List (String × STy)
+  | n :: ns, τ :: τs => (n.getD "", τ) :: tryLocals ns τs
+  | [], τ :: τs => ("", τ) :: tryLocals [] τs
+  | _, [] => []
+
+theorem tryLocals_tys : (ns : List (Option String)) → (rs : List STy) → (tryLocals ns rs).map Prod.snd = rs
+  | _ :: ns, _ :: τs => by simp only [tryLocals, List.map_cons, tryLocals_tys ns τs]
+  | [], _ :: τs => by simp only [tryLocals, List.map_cons, tryLocals_tys [] τs]
+  | _ :: _, [] => rfl
+  | [], [] => rfl
+
+/-- **A `catch` clause the source semantics runs** (lane FU2-B), with the
+name it binds and its block: `catch { … }` (no binding) or
+`catch (bytes memory r) { … }` (the revert data); `Error(string)` and
+`Panic(uint)` clauses are not modelled. -/
+inductive CatchD {k : SCtx} : Syn (.catchClause k) → Option String → Syn (.list (.item k)) → Prop where
+  | plain (b : Syn (.list (.item k))) : CatchD (.catchPlain (.block b)) Option.none b
+  | bytes (x : Option String) (b : Syn (.list (.item k))) :
+      CatchD (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) x) .nil (.block b))
+        (Option.some (x.getD "")) b
+
+/-- A `catch` clause's locals: the revert data's, if bound. -/
+def catchLocals : Option String → List (String × STy) → List (String × STy)
+  | Option.none, L => L
+  | Option.some x, L => (x, .bytes .memory) :: L
+
+/-- A `catch` clause's local types. -/
+def catchCtx : Bool → List STy → List STy
+  | true, Γ => .bytes .memory :: Γ
+  | false, Γ => Γ
+
+theorem catchLocals_tys (x : Option String) (L : List (String × STy)) :
+    (catchLocals x L).map Prod.snd = catchCtx x.isSome (L.map Prod.snd) := by
+  cases x <;> rfl
+
 /-- The locals a tuple declaration adds onto `L`, left to right (the last
 declared innermost). -/
 def pushSlots : List (Option (String × STy)) → List (String × STy) → List (String × STy)
@@ -1225,6 +1263,21 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       {σs : List STy} : TypedArgs (C.at L) args σs →
       ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) = [d] →
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
+  /-- `try c.f(args) returns (T₁ x₁, …) { … } catch … { … }` (lane FU2-B):
+  an external call without value whose revert runs the one `catch` clause
+  (`CatchD`); the `returns` types are the function's (`STy.sameList`),
+  bound in the success block. -/
+  | tryCall {k : SCtx} {L L₁ L₂ : List (String × STy)} {c : Syn .expr} {f : String}
+      {args : Syn (.list .expr)} {rets : Syn (.list .param)} {okb : Syn (.list (.item k))}
+      {cl : Syn (.catchClause k)} {dn : DeclName} {d : Decl} {ps rs σs tys : List STy}
+      {x : Option String} {cb : Syn (.list (.item k))} :
+      Typed (C.at L) c (.contract dn) → TypedArgs (C.at L) args σs →
+      extOverloads C.env C.isBase dn f σs = [d] → d.fnSig C.env = Option.some (ps, rs) →
+      argsFit C.isBase σs ps = true →
+      rets.tys C.env C.scope .memory = Option.some tys → STy.sameList tys rs = true →
+      ItemsD C ((tryLocals rets.paramNames rs).reverse ++ L) okb L₁ →
+      CatchD cl x cb → ItemsD C (catchLocals x L) cb L₂ →
+      StmtD C L (.tryStmt (.call (.member c f) (.positional args)) rets (.block okb) cl .nil) L
   /-- The canonical rethrow, of the `bytes memory` local it names
   (`rethrowVar?`). -/
   | rethrow {k : SCtx} {L : List (String × STy)} {fl : List String} {body : Syn (.list .yulStmt)}

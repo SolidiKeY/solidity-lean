@@ -619,6 +619,11 @@ stronger obligation, not an additional assumption available to its proofs.
   elements are refused, solc accepts them; fixed-point elements are
   accepted, solc's code generator stops); contract creation is not
   modelled.
+- **`try`/`catch`** (lane FU2-B, `StmtD.tryCall`): only an external call
+  without value and one `catch { … }` or `catch (bytes memory r) { … }`
+  clause are typed; `Error(string)`/`Panic(uint)` clauses, several
+  clauses and `try new C(…)` are refused, where solc accepts them; the
+  `returns` types must equal the function's (`STy.sameList`).
 - **`fallback` with parameters** (lane FU2-B): the source semantics runs
   `fallback(bytes calldata input) returns (bytes memory output)`, `input`
   all of the call data and `output` returned unencoded, as solc; other

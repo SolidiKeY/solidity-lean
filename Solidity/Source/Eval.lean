@@ -1317,6 +1317,36 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
     match l.get i with
     | .memRef _ a => halt (.revert (← heapBytes a))
     | _ => halt (.stuck "rethrow")
+  | .tryCall (rs := rs) target d _ args ok cbind cat => do
+    -- `try` (lane FU2-B): the target and arguments are evaluated, and a
+    -- call to an address without code reverts, outside the `try`; the
+    -- call's revert runs the `catch` clause; returns that do not decode
+    -- revert outside it, as solc's.
+    let (out, l1) ← sub l (do
+      let a ← match ← getV (← evalE G F n target) with
+        | .contract x => pure x
+      let vs ← evalConvArgs G F n args
+      let ps := match d.fnSig E with | some (ps, _) => ps | none => []
+      let input := G.selector (sigOf E.layout d.name ps) ++ (← encodeVals F n false vs.toR)
+      if (← instanceAt G a).isNone && !G.hasCode (← st).events a then halt (.revert [])
+      let (out, _) ← sub (L0 E) (callAddr G F n a ⟨0, by decide⟩ input
+        (d.fnMut == some .view || d.fnMut == some .pure))
+      pure out)
+    match out with
+    | .success data => do
+      if data.length < 32 * rs.length then halt (.revert [])
+      let vs ← lift (decodeVals E.layout data rs 0)
+      let o ← execItems G F n nps ph ok (vs.onto l1)
+      lift (← lift (o.up Γ)).close
+    | .revert data =>
+      match cbind, cat with
+      | true, cat => do
+        let r ← allocRef (Data.bytes (D := E.layout) (l := .memory) data)
+        let o ← execItems G F n nps ph cat (.cons r l1)
+        lift (← lift (o.up Γ)).close
+      | false, cat => do
+        let o ← execItems G F n nps ph cat l1
+        lift o.close
 termination_by structural n
 
 /-- The iterations of a `for` loop: condition, body, step. -/

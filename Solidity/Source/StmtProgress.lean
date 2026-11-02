@@ -48,6 +48,7 @@ theorem RStmt.ext {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} →
   | _, _, _, .declVar τ => ⟨[τ], rfl⟩
   | _, _, _, .declInit (τ := τ) _ _ => ⟨[τ], rfl⟩
   | _, _, _, .declTuple slots _ _ => pushTys_suffix slots _
+  | _, _, _, .tryCall _ _ _ _ _ _ _ => ⟨[], rfl⟩
   | _, _, _, .expr _ | _, _, _, .placeholder _ | _, _, _, .block _ | _, _, _, .ifThen _ _
   | _, _, _, .ifElse _ _ _ | _, _, _, .whileLoop _ _ | _, _, _, .doWhile _ _ | _, _, _, .forLoop _ _ _ _
   | _, _, _, .skip | _, _, _, .brk | _, _, _, .cont | _, _, _, .ret _ | _, _, _, .retVal _ _ _

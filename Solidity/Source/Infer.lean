@@ -669,6 +669,47 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
     match hf : ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) with
     | [_] => Option.some ⟨L, .revertError da hf⟩
     | _ => Option.none
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets (.block okb) (.catchPlain (.block cb)) .nil =>
+    match Typed.infer (C.at L) c, TypedArgs.infer (C.at L) args with
+    | Option.some ⟨.contract dn, dc⟩, Option.some ⟨σs, da⟩ =>
+      match ho : extOverloads C.env C.isBase dn f σs with
+      | [d] =>
+        match hs : d.fnSig C.env with
+        | Option.some (ps, rs) =>
+          if hf : argsFit C.isBase σs ps = true then
+            match ht : rets.tys C.env C.scope .memory with
+            | Option.some tys =>
+              if hsame : STy.sameList tys rs = true then
+                (ItemsD.inferN n C ((tryLocals rets.paramNames rs).reverse ++ L) okb).bind fun ⟨_, dok⟩ =>
+                (ItemsD.inferN n C (catchLocals Option.none L) cb).map fun ⟨_, dcb⟩ =>
+                  ⟨L, .tryCall dc da ho hs hf ht hsame dok (.plain cb) dcb⟩
+              else Option.none
+            | Option.none => Option.none
+          else Option.none
+        | Option.none => Option.none
+      | _ => Option.none
+    | _, _ => Option.none
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets (.block okb)
+      (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) y) .nil (.block cb)) .nil =>
+    match Typed.infer (C.at L) c, TypedArgs.infer (C.at L) args with
+    | Option.some ⟨.contract dn, dc⟩, Option.some ⟨σs, da⟩ =>
+      match ho : extOverloads C.env C.isBase dn f σs with
+      | [d] =>
+        match hs : d.fnSig C.env with
+        | Option.some (ps, rs) =>
+          if hf : argsFit C.isBase σs ps = true then
+            match ht : rets.tys C.env C.scope .memory with
+            | Option.some tys =>
+              if hsame : STy.sameList tys rs = true then
+                (ItemsD.inferN n C ((tryLocals rets.paramNames rs).reverse ++ L) okb).bind fun ⟨_, dok⟩ =>
+                (ItemsD.inferN n C (catchLocals (Option.some (y.getD "")) L) cb).map fun ⟨_, dcb⟩ =>
+                  ⟨L, .tryCall dc da ho hs hf ht hsame dok (.bytes y cb) dcb⟩
+              else Option.none
+            | Option.none => Option.none
+          else Option.none
+        | Option.none => Option.none
+      | _ => Option.none
+    | _, _ => Option.none
   | _, .assembly false _ body =>
     if hb : isRethrow body = true then
       match hv : rethrowVar? body with

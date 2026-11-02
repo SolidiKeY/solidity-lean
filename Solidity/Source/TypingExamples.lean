@@ -290,7 +290,7 @@ theorem elemType_decode_operand :
 def stmtCoverage : Ctor → Option Coverage
   | .blockStmt | .simpleStmt | .declVar | .exprStmt | .ifStmt | .forStmt | .whileStmt | .doWhile
   | .continueStmt | .breakStmt | .returnStmt | .emit | .revert | .declTuple => some .typed
-  | .tryStmt => some (.deferred "S03" "try/catch is an external call's")
+  | .tryStmt => some (.deferred "S03" "try/catch is an external call's; typed and evaluated for a call without value and one plain or bytes memory catch clause (tryCall, FU2-B), other clauses not")
   | .assembly => some (.deferred "S00" "inline assembly is excluded; only the canonical rethrow is typed (rethrow)")
   | _ => none
 

@@ -451,6 +451,13 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
   the declared slots' types and pushed, holes discarded. -/
   | declTuple {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs))
       (h : slotsFit E.isBase slots σs = true) : RStmt E R M k Γ (pushTys slots Γ)
+  /-- `try` (lane FU2-B): an external call without value; on success its
+  returns are pushed and `ok` runs, on a revert `cat` runs (the revert data
+  pushed as `bytes memory` when `cbind`). -/
+  | tryCall {k : SCtx} {Γ Γ₁ Γ₂ : RCtx} {dn : DeclName} {ps rs : List STy} (target : RExpr E Γ (.contract dn))
+      (d : Decl) (h : d.fnSig E = some (ps, rs)) (args : RConvArgs E Γ ps)
+      (ok : RItems E R M k (rs.reverseAux Γ) Γ₁) (cbind : Bool) (cat : RItems E R M k (catchCtx cbind Γ) Γ₂) :
+      RStmt E R M k Γ Γ
 
 /-- Resolved blocks. -/
 inductive RItems (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx → Type where
@@ -475,6 +482,11 @@ def OptExpr.toR {Γ : Ctx} {c : Syn (.opt .expr)} : OptExpr Γ c → ROptExpr Γ
   | .none => .none
   | .some d => .some d.toR
 
+/-- The success block's local types of a `try` (lane FU2-B). -/
+theorem tryOk_tys (ns : List (Option String)) (rs : List STy) (L : List (String × STy)) :
+    tysOf ((tryLocals ns rs).reverse ++ L) = rs.reverseAux (tysOf L) := by
+  simp only [tysOf, List.map_append, List.map_reverse, tryLocals_tys, List.reverseAux_eq]
+
 mutual
 
 /-- **Elaboration of statements.** -/
@@ -489,6 +501,13 @@ def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt
       (RStmt.declTuple (E := C.env) (R := C.rets) (M := C.inModifier) (k := k) (Γ := tysOf L)
         (slots.map (Option.map Prod.snd)) d.toR h)
   | .block b => .block b.toR
+  | .tryCall (rs := rs) (rets := rets) (x := x) (L := L) (L₁ := L₁) (L₂ := L₂) dc da _ hd hf _ _ dok _ dcb =>
+    .tryCall dc.toR _ hd (RArgs.convert _ da.toR hf)
+      (cast (congrArg (fun Γ' => RItems C.env C.rets C.inModifier k Γ' (tysOf L₁))
+        (tryOk_tys rets.paramNames rs L)) dok.toR)
+      x.isSome
+      (cast (congrArg (fun Γ' => RItems C.env C.rets C.inModifier k Γ' (tysOf L₂)) (catchLocals_tys x L))
+        dcb.toR)
   | .ifThen dc _ ds => .ifThen dc.toR ds.toR
   | .ifElse dc _ _ ds dt => .ifElse dc.toR ds.toR dt.toR
   | .whileLoop dc _ ds => .whileLoop dc.toR ds.toR

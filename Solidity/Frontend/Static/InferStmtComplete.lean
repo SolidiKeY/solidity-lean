@@ -221,6 +221,32 @@ theorem stmt_complete {C : Ctx} : {k : SCtx} → {L : Locals} → {s : Syn (.stm
       cases e'
       exact List.mem_singleton.mpr rfl
     · rename_i hn; exact absurd hf (hn _)
+  | _, L, _, _, .tryCall dc da ho hs hf ht hsame dok hcb dcb => by
+    obtain ⟨dc', hc⟩ := expr_exists dc
+    obtain ⟨da', ha⟩ := exists_args (args_complete da)
+    obtain ⟨dok', hok⟩ := exists_items (items_complete dok)
+    obtain ⟨dcb', hcb'⟩ := exists_items (items_complete dcb)
+    cases hcb <;>
+    · refine mem_stmts (d := .tryCall dc' da' ho hs hf ht hsame dok' (by constructor) dcb') ?_
+      refine List.mem_flatMap.mpr ⟨⟨_, dc'⟩, mem_tysOf' hc, ?_⟩
+      refine List.mem_flatMap.mpr ⟨⟨_, da'⟩, ha, ?_⟩
+      split
+      · rename_i d' ho'
+        have e' := ho.symm.trans ho'
+        cases e'
+        split
+        · rename_i ps' rs' hs'
+          rw [hs] at hs'; cases hs'
+          rw [dif_pos hf]
+          split
+          · rename_i tys' ht'
+            rw [ht] at ht'; cases ht'
+            rw [dif_pos hsame]
+            exact List.mem_flatMap.mpr ⟨SRes.block dok', List.mem_map.mpr ⟨_, hok, rfl⟩,
+              List.mem_map.mpr ⟨⟨_, dcb'⟩, hcb', rfl⟩⟩
+          · rename_i hn; rw [ht] at hn; cases hn
+        · rename_i hn; rw [hs] at hn; cases hn
+      · rename_i hn; exact absurd ho (hn _)
   | _, L, _, _, .rethrow (d := x) hb hr ht hp => by
     refine mem_stmts (d := .rethrow hb hr ht hp) ?_
     show _ ∈ rethrowRes C L _ _

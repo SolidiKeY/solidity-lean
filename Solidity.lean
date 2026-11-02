@@ -504,6 +504,7 @@ import Solidity.Source.DecodeExamples
 import Solidity.Source.Calldata
 import Solidity.Source.CalldataExamples
 import Solidity.Source.InlineExamples
+import Solidity.Source.TryExamples
 import Solidity.Precompiles.Field
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Basic

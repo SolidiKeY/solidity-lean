@@ -1675,6 +1675,11 @@ theorem argsFit_single {B : DeclName → DeclName → Bool} {σ τ : STy} {σs :
   | nil => exact hne rfl
   | cons _ _ => simp only [argsFit, List.length_cons, List.length_nil, Bool.and_eq_true, beq_iff_eq] at h; omega
 
+/-- A `catch` clause fixes its binding and block (lane FU2-B). -/
+theorem CatchD.unique {k : SCtx} {cl : Syn (.catchClause k)} {x x' : Option String} {cb cb' : Syn (.list (.item k))}
+    (h : CatchD cl x cb) (h' : CatchD cl x' cb') : x = x' ∧ cb = cb' := by
+  cases h <;> cases h' <;> exact ⟨rfl, rfl⟩
+
 mutual
 
 /-- **Statement derivations agree**: the locals a statement leaves and its
@@ -1796,6 +1801,23 @@ theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {
       subst e
       cases filter_single hf hf'
       exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
+  | _, _, .tryCall dc da ho hs _ ht _ dok hcb dcb, d' => by
+    cases d' with
+    | tryCall dc' da' ho' hs' _ ht' _ dok' hcb' dcb' =>
+      obtain ⟨e1, h1⟩ := Typed.unique dc dc'
+      cases e1
+      obtain ⟨e2, h2⟩ := TypedArgs.unique da da'
+      subst e2
+      rw [ho] at ho'; cases ho'
+      rw [hs] at hs'; cases hs'
+      rw [ht] at ht'; cases ht'
+      obtain ⟨ex, ecb⟩ := CatchD.unique hcb hcb'
+      subst ex ecb
+      obtain ⟨e3, h3⟩ := ItemsD.unique dok dok'
+      subst e3
+      obtain ⟨e4, h4⟩ := ItemsD.unique dcb dcb'
+      subst e4
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h1, eq_of_heq h2, eq_of_heq h3, eq_of_heq h4]⟩
   | _, _, .rethrow _ hr _ hp, d' => by
     cases d' with
     | rethrow _ hr' _ hp' =>

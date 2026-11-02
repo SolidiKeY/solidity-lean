@@ -1244,8 +1244,34 @@ length, wording in `semantic-gaps.md`/`assurance.md`, stale entries in
 where solc's `finalize_allocation` panics (or gas runs out), function-type
 elements refused, fixed-point elements accepted.
 
-**Contract creation (`new C(…)`), `try`/`catch`: not
-started** (time; each is a typing rule, an interpreter arm and its
+**`try`/`catch` (done for one clause).** `StmtD.tryCall`
+(`Solidity/Source/Typing.lean`) types `try c.f(args) returns (T₁ x₁, …)
+{ … } catch … { … }` for an external call without value (`extOverloads`,
+as `Typed.extCall`), the `returns` types equal to the function's
+(`STy.sameList`) and bound in the success block (`tryLocals`), and one
+clause of the two shapes `CatchD` admits: `catch { … }` or
+`catch (bytes memory r) { … }`. `RStmt.tryCall` carries the call and
+both blocks; `execS` evaluates the target and arguments and checks the
+target's code outside the `try` (a call to an address without code
+reverts the caller, as solc's `extcodesize` check), then on success
+decodes the returns (data too short reverts the caller, not caught) and
+runs the success block with them pushed, on a revert runs the clause
+(the revert data allocated as `bytes memory` when bound); each block's
+outcome is lifted back to the statement's locals (`Out.up`, `close`).
+Both checkers have the rule (`StmtD.inferN` with one arm per clause
+shape; G13's `tryRes`, and its case in `stmt_complete`, so `stmtOK_iff`
+holds), uniqueness covers it (`CatchD.unique`, `StmtD.unique`), `OpsOK`
+too (`RItems.opsOK_castIn`). `stmtCoverage` keeps `tryStmt` deferred
+(other clauses are not typed). Controls in
+`Solidity/Source/TryExamples.lean`: success binds the return, a
+`require` failure runs the plain clause, the `bytes memory` clause sees
+empty revert data, no code at the target reverts the caller. Not
+modelled (refused): `Error(string)`/`Panic(uint)` clauses, several
+clauses, `{value: v}`, `try new C(…)`; dynamic returns decode as
+`extCall`'s (value types only). No arm theorem.
+
+**Contract creation (`new C(…)`): not
+started** (time; it is a typing rule, an interpreter arm and its
 Horizon lemmas, both checkers, uniqueness and controls as above; `new` and
 `try`/`catch` also need contract creation and external-call failure
 handling in `Solidity/Source`: Checkpoint 4).
