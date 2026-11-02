@@ -156,7 +156,7 @@ interface, but cannot pass its final check until actual prerequisites merge.
 | 0 | G03 and G05/G06 follow G00/G01; G07 follows G02–G06 and closes with current-fragment/checker controls only; G49.03 owns future whole-pipeline controls. |
 | 1 | G11 follows G08–G10; G15 follows G11–G14. |
 | 2 | G23's whole-source composition follows G16–G22. |
-| 3 | G25–G31 follow G24.04; G28 follows G27; G29/G30 follow G28. |
+| 3 | G25–G31 follow G24; G28 follows G27; G29/G30 follow G28. |
 | 4 | G33/G34/G38/G39 follow G32; G35 follows G33/G34; G36's call cases follow G37. |
 | 5 | G42 follows G40/G41; G43/G44 follow G42; G47 follows G42–G46. |
 | 6 | G49 follows G48; G50 follows G49; G51 follows G50; G54 follows G48–G53; G55 follows G54. G52/G53 can start at the phase boundary. |
@@ -225,7 +225,7 @@ Integration notes (2026-10-29):
 - **G03 checker follow-ups** (review of the merge): `FROZEN` also silences
   parallel shared writes; `ACK_MODULES` silences findings by module whatever
   their kind; refusal anchors count as stage coverage; some definition
-  anchors are tagged `theorem`; G24 children are labelled
+  anchors are tagged `theorem`; proposed G24 children are labelled
   `roadmap`. The discharge parser now reads only the G04 restriction table.
 - **Decision-impact follow-ups:** `Storage.full`'s verdict should cite G04
   R24 (solc's `Panic(0x41)` past 2^64 elements); the Lean docstrings of

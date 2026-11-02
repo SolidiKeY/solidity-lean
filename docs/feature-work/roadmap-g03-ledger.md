@@ -2764,8 +2764,10 @@ No feature cell, by reason: G00: scope freeze (integrated, wave 0); G02: build m
 
 ## Integration steps (for the coordinator)
 
-These change shared lines this group may not rewrite; the checker applies
-them from its own data until they land.
+These change shared lines this group may not rewrite. Steps 1, 3 and 4 landed
+on 2026-11-02 (Terra pilot); `PROPOSED_PACKAGES` is gone from the script, which
+now reads the G24 children from the manifest. Step 2 is still open: its VM
+numbering is stale and waits on G02, and with it V23's share of step 3.
 
 1. **Manifest (`coverage-plan.md`, "Proof work-package manifest").** Insert
    these rows before `G27.01`, and change "There are **115 proof work
@@ -2778,17 +2780,17 @@ them from its own data until they land.
    | G24.04 — Unified entry | Unify the core/memory compiler entry on the frozen interfaces so mixed programs compose; restate T1/T12/T13/T15 without the unreachable payment disjunct. |
    ```
 
-   When they land, delete `PROPOSED_PACKAGES` from the script: `--check` asks
-   for that.
+   Applied; `PROPOSED_PACKAGES` was then deleted from the script.
 2. **VM table.** V14 keeps "G24, G25, G26". G24 now names its four children,
    which run first in listed order. The nine schedule conflicts above propose
    added VM prerequisites (V09 → V11, V10 → V11 and V12, V15 → V17, V20 → V21,
    V24 and V26 → V25, V28 → V30), and V23 gains G39's deferred final check.
 3. **Deferred checks.** The "Groups and dependencies" preamble and the
    paragraph after the manifest name G36.03 as the only deferred check. Add
-   G39 ← G42.01/G42.03, with its final check in V23.
+   G39 ← G42.01/G42.03, with its final check in V23. Applied, except V23,
+   which belongs to step 2.
 4. **Wave 3 prerequisite row.** "G25–G31 follow G24" stays: it now means
-   G24.04.
+   G24.04. Applied: the row is unchanged.
 
 ## Remaining child obligations
 
@@ -2849,9 +2851,8 @@ roadmap's rule is to split cyclic interfaces into shared-foundation
 children. The question offered three options: foundation children of G24,
 freezing within G24 with rebase obligations, or new modules only. **The user
 chose foundation children** (relayed by the coordinator, 2026-10-29). They
-are applied as `PROPOSED_PACKAGES` and `FROZEN`. Integration step 1 below
-lists the exact rows coverage-plan.md needs, since this group may not
-rewrite those lines.
+are manifest rows in coverage-plan.md (integration step 1 below, applied
+2026-11-02) and the checker's `FROZEN` table.
 
 ## Review
 
