@@ -1250,4 +1250,11 @@ Horizon lemmas, both checkers, uniqueness and controls as above; `new` and
 `try`/`catch` also need contract creation and external-call failure
 handling in `Solidity/Source`: Checkpoint 4).
 
-**Backfill (checkpoint 5): not started.**
+**Backfill (checkpoint 5): not started.** Its parts that do not need
+G16+ are `hashed` (a recorded-preimage component of `St`, threaded
+through every interpreter step and re-proved in `belowAt`/`growAt`/
+`approxAt`) and the failure points of `Failures`/`withFailures` (a choice
+at every call site); both change `Machine.lean`/`Eval.lean` and every
+split Horizon proof, a lane of their own
+([source-s05.md](source-s05.md), "Why `SourceSpec` and `Failures` stay
+open"). `Parses`/`Resolves` belong to the front end.
