@@ -217,7 +217,7 @@ Controls: `TypingExamples.gasleft_untyped` and `msgValue_refused` were
 extended to refute the new constructors, and `Typed.ident_builtin_not_struct`
 was added. Every existing S01 control still passes.
 
-Not closed: `new`, inline arrays (one-word elements closed by lane FU2-B), slices, named arguments, calldata
+Not closed: `new` (memory arrays closed by lane FU2-B), inline arrays (one-word elements closed by lane FU2-B), slices (calldata slices closed by lane FU2-B), named arguments, calldata
 references, and tuple destructuring (`declTuple`; typed and evaluated since
 lane FU2-B). The ledger in
 [source-s05.md](source-s05.md) records these as gaps. (`abi.decode` at the

@@ -1229,8 +1229,20 @@ ledger (contract creation is its other use). Controls in
 `Solidity/Source/InlineExamples.lean` (`unitNew`): `new uint8[](3)`
 stores and reads, `a[1]` of `new uint8[](1)` panics `0x32`,
 `new bytes(5).length` is 5, `new bytes(2^64)` panics `0x41`, elements are
-zero; `new uint256[2](3)` is refused (as by solc), `new string[](2)` is
-refused (reference elements, not modelled).
+zero; `new uint256[2](3)` and a signed length are refused (as by solc),
+`new string[](2)` is refused (reference elements, not modelled), `new
+string(4)` elaborates. Checked: Horizon rechecked through the Lean server
+after the arm, without new lemmas.
+
+Review (finder and skeptic, read-only): no correctness fix; fixed: the
+`Eval.lean` comment on the bound (the model has solc's
+`array_allocation_size` check, `length > 2^64 - 1`, not the later
+`finalize_allocation` one), controls for `new string(n)` and a signed
+length, wording in `semantic-gaps.md`/`assurance.md`, stale entries in
+`source-s02.md`/`source-s03.md`/`source-s05.md`; recorded in
+`docs/solc-alignment.md`: lengths from about `2^59` (`uint256[]`) succeed
+where solc's `finalize_allocation` panics (or gas runs out), function-type
+elements refused, fixed-point elements accepted.
 
 **Contract creation (`new C(…)`), `try`/`catch`: not
 started** (time; each is a typing rule, an interpreter arm and its

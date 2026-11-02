@@ -611,10 +611,14 @@ stronger obligation, not an additional assumption available to its proofs.
   assembly)
   ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **`new` of memory arrays** (lane FU2-B, `Typed.newArray`): a length of
-  `2^64` or more panics `0x41`; solc panics from a lower length, where the
-  free memory pointer passes `2^64 - 1` (the decoder's band, above); only
-  one-word elements, `bytes` and `string` are modelled (`new string[](n)`
-  is refused, solc accepts it); contract creation is not modelled.
+  `2^64` or more panics `0x41`, solc's `array_allocation_size` check; solc
+  also panics when the free memory pointer would pass `2^64 - 1`
+  (`finalize_allocation`, e.g. a `uint256[]` of about `2^59` elements) or
+  runs out of gas, where the model succeeds; only one-word elements,
+  `bytes` and `string` are modelled (`new string[](n)` and function-type
+  elements are refused, solc accepts them; fixed-point elements are
+  accepted, solc's code generator stops); contract creation is not
+  modelled.
 - **`fallback` with parameters** (lane FU2-B): the source semantics runs
   `fallback(bytes calldata input) returns (bytes memory output)`, `input`
   all of the call data and `output` returned unencoded, as solc; other

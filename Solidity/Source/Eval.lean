@@ -1012,8 +1012,8 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
     let vs ← evalConvArgs G F n args
     return .val (← allocRef (inlineData vs))
   | .newArray (τ := τ) _ len _ => do
-    -- a length of `2^64` or more panics `0x41`, as the decoder's (the same
-    -- band below solc's `finalize_allocation` bound applies)
+    -- a length of `2^64` or more panics `0x41` (solc's `array_allocation_size`
+    -- check); solc's later `finalize_allocation` panic is not modelled
     let k ← indexNat (← evalE G F n len)
     if 2 ^ 64 ≤ k then lift (panic .alloc)
     else return .val (← allocRef (← lift (newData τ k)))

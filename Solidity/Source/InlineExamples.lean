@@ -163,7 +163,12 @@ def elabNew : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy 
   (unitOf (newOf (.array u256T (.some (num 2))) (num 3))))).isNone
 #guard (elaborate (resolveUnit { pipeline := .legacy }
   (unitOf (newOf (.array (.elem .string) .none) (num 2))))).isNone
--- The same frame accepts `new uint256[](3)`.
+-- A signed length is refused (solc: no implicit conversion to `uint256`).
+#guard (elaborate (resolveUnit { pipeline := .legacy }
+  (unitOf (newOf (.array u256T .none) (.call (ty (.int true 256 (by decide))) (.positional (.cons (num 3) .nil))))))).isNone
+-- The same frame accepts `new uint256[](3)` and `new string(4)`.
+#guard (elaborate (resolveUnit { pipeline := .legacy }
+  (unitOf (newOf (.elem .string) (num 4))))).isSome
 #guard (elaborate (resolveUnit { pipeline := .legacy }
   (unitOf (newOf (.array u256T .none) (num 3))))).isSome
 

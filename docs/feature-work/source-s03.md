@@ -169,7 +169,9 @@ These items are also listed under `limitations:`.
   G01 says they behave as their definitions.
 - **Library calls through `DELEGATECALL`.** External library functions
   are not modelled; internal and library calls run as internal calls.
-- **`try`/`catch` and `new`.** Untyped in S01, so absent.
+- **`try`/`catch` and `new`.** Untyped in S01, so absent (lane FU2-B
+  types and runs `new` of memory arrays; contract creation and `try`/`catch`
+  remain absent).
 - **Horizon independence.** Not proved generally (see Horizons).
 
 ## Review
