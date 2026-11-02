@@ -1,0 +1,60 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "prior_head": "622343297bf040e63cc99eeb43904b1f86d2125a",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "owned_sources": [
+    {
+      "path": "Solidity/Backend/Executable/RelocationCreation.lean",
+      "blob": "913c4c3154b19d5ff378931c26d7305f96cee226",
+      "sha256": "f23ad3ce496fbc65252bc1a1a5aa47520d71f3d8088be216d6a0ed7226d67fbd"
+    },
+    {
+      "path": "Solidity/Backend/Executable/Relocation.lean",
+      "blob": "65cbc66c2ceeb1bd65d4b58a106cab48def3b9ab",
+      "sha256": "87dc8aa08ef4a1d6cf84b13dcfce6141d5755159160ec88e4f3c682776c1bc08"
+    },
+    {
+      "path": "Solidity/Backend/Executable/RelocationChecks.lean",
+      "blob": "33a27dfe95a450bf174713efd398eb8b43c55502",
+      "sha256": "9abef602f86cacbc1ef516ea68c2f9a9c8bc2b1938c0976be1289815d3d81c69"
+    }
+  ],
+  "published_read_only_producers": [
+    {
+      "path": "Solidity/Backend/Creation/Artifact.lean",
+      "blob": "625fe0ae34b6cdf4064482974e1d5e53729197fc",
+      "sha256": "4dfdb7c95f914dd06ef0ec6b603c46d41eda4674e0a303225252740b93bdb947",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Linking.lean",
+      "blob": "f82845a3e7fcc2b0cad836a03bdb8428d2f97997",
+      "sha256": "305e79d2d699cd388cc20e39fe96818f45f80f2b6d00797aabc413bdd9a5dd58",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Execution.lean",
+      "blob": "83962ac3fadf3d14f9cc953278780a705c6e3d6b",
+      "sha256": "9e2ab984d9e9116700aeb309e266aa3cae50292f8ce04b80e6f55581953f6f04",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    }
+  ],
+  "declarations": [
+    "Solidity.Backend.Executable.RelocationCreation.runtime_eq",
+    "Solidity.Backend.Executable.RelocationCreation.installs",
+    "Solidity.Backend.Executable.RelocationCreation.coordinates",
+    "Solidity.Backend.Executable.RelocationCreation.slices",
+    "Solidity.Backend.Executable.RelocationCreation.destination_coordinates",
+    "Solidity.Backend.Executable.RelocationCreation.omitted_prefix_invalid",
+    "Solidity.Backend.Executable.RelocationCreation.unresolved_refused",
+    "Solidity.Backend.Executable.RelocationCreation.resolved_ready",
+    "Solidity.Backend.Executable.RelocationCreation.missing_address",
+    "Solidity.Backend.Executable.RelocationCreation.wrong_site_refused",
+    "Solidity.Backend.Executable.RelocationCreation.no_truncated_return",
+    "Solidity.Backend.Executable.RelocationCreation.no_argument_return",
+    "Solidity.Backend.Executable.RelocationCreation.inhabited"
+  ],
+  "signature_evidence": "interface-types.log contains complete actual dependent types",
+  "witness": "Actual36byte linked runtime withprefix3/section30/suffix3, assembler site5; constructor header10, runtime target3/image13, argsaa/bb beyond46. Missing/wrongsite/unresolved/fragmentonly/empty/argleak controls.",
+  "limits": "Constructor copy/return and structural linking/coordinate proofs only; not CREATE account/world/source init/JUMP/gas/pinned decoder or parentclosure. Original fullqueue unchanged; stagedV13 remains provisional."
+}

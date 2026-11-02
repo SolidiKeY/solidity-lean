@@ -1785,3 +1785,45 @@ Lean4.24.0/Lake5.0.0-src+797c613 and successfulKeySort2jobs precede runtime
 confirmation. Exact resource samples, raw normalization failures, commands and
 independent immutable-seal review are retained in checkpoint23 artifacts.
 The original goal/objective and all prior seals remain unchanged.
+
+
+## Checkpoint24: constructor consumer of the whole linked runtime
+
+After completing checkpoint23, RelocationCreation consumes its actual assembler
+patch equality through published Creation.LinkTable/linkedArtifact, without
+editing either producer. Typed site5 bounds/origin retain the real reference;
+wrong site8 cannot satisfy that same origin. The36-byte runtime includes its
+actual3-byte enclosing prefix and3-byte suffix, not only the30-byte section.
+Constructor copy/return preserves these exact patched bytes and arguments.
+
+Actual standalone header10 and argument boundary46 are derived using the
+published minimal width law. Runtime target3, syntactically valid image13 and
+invalid runtime13 remain different coordinates. Omitting the runtime prefix
+makes operand3 land in real PUSH20 data. Actual deterministic constructor
+execution excludes fragment-only33bytes, empty output and nonempty argument
+leakage. Unresolved deploy gate and missing-address completion refuse; a typed
+link table claiming site8 is impossible. Nonempty aa/bb arguments witness the
+exact runtime/argument slices. These are concrete interface consumers, not a
+desired-output premise or another creation/linking implementation.
+
+Thirteen guarded headline/control axiom reports retain standard Lean axioms.
+Separate independent read-only finder/skeptic reviews accept the actual proof
+and non-vacuity/ownership boundaries. All constructor observations concern the
+existing narrow Creation.Exec byte-copy/return relation: no account CREATE,
+world/nonce/new/sourceconstructor, runtime JUMP or fetched decoder proof follows.
+No caller headroom or final stack beyond that relation is inferred; checkpoint23
+separately proves the real numeric operand setup and caller-tail capacity.
+All original Work/Backfill obligations remain partial/open, and the optional
+vendor interface hold is unchanged. Final exact signatures/hashes/validation
+receipts and fullqueue accounting are in the checkpoint24 handoff.
+
+Checkpoint24 focused17jobs and13guarded axiom sets pass. Root1057+262 and
+private1061+262 pass, SolKey377/131/131; Lean4.24.0/Lake5.0.0-src+797c613
+and KeySort2jobs precede runtime confirmation. Aggregate Lean/Lake RSS
+1719272/1715868KiB; one worker,12GiB/noSwap/180s/writerlease, OOM0;
+host available minimum17258212/17246724KiB, above12GiB reserve. Existing
+cache reused. Initial concrete-proof failures and a task-wrapper output-path
+typo are retained; the typo was repaired without changing any resource guard
+and before launching its affected heavy process. Final scoped/doc comparisons
+and exact-head source/bundle/interface/checksum evidence are in the handoff.
+No model, policy, pin, profile, goal/objective or optional-vendor hold change.

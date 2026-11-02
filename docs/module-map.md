@@ -1325,3 +1325,4 @@ admits physical assembly or proves target-byte/original-callee transport.
 
 | `Backend/Executable/Relocation.lean` | Linked backward operands, actual relocated layout and PUSH-data exclusion consumers. |
 | `Backend/Executable/RelocationChecks.lean` | Nonzero-prefix PUSH20 linking/backedge, payload negatives and protected numeric stack-tail controls. |
+| `Backend/Executable/RelocationCreation.lean` | Constructor/link-table consumer of whole relocated runtime, exact intervals and omitted-prefix negatives. |
