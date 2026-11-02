@@ -1764,3 +1764,8 @@ it is working, as before.
   of primitive and `bytes`/`string` memory returns, each with its byte
   markers; `serialize` already encoded every return local in order
   (`(string, string)`, `(string, uint, string)`).
+* **Fixtures after round 2** (all 42 rerun, `fu2c4`, one runner hash,
+  collected with `--keep-before`): **31 working / 11 blocked / 0 broken**;
+  the only change from round 1 is `smoke/bytes_and_strings.sol` blocked →
+  working. The 11 left are the exclusions in the table above (assembly ×8,
+  v1 enum, a call value in `function_entry_checks`).
