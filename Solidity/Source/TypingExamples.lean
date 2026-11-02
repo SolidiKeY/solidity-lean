@@ -296,7 +296,8 @@ def w_declTuple : StmtD (k := .body) Γ Γ.locals
     (.simpleStmt (.declTuple 0 (.varDecl u256 none "p") (.cons .none .nil)
       (.tuple (.some a) (.cons (.some (.ident "b")) .nil))))
     (("p", .int IntTy.u256) :: Γ.locals) :=
-  .declTuple (slots := [some ("p", .int IntTy.u256), none]) rfl w_tuple rfl
+  .declTuple (slots := [some ("p", .int IntTy.u256), none]) (by
+    simp only [Ctx.tupleSlots, Ctx.declSlot, Ctx.declSlots]; rfl) w_tuple rfl
 
 /-- **Every statement constructor is classified.** -/
 theorem stmtCoverage_total {k : SCtx} (s : Syn (.stmt k)) : (stmtCoverage s.ctor).isSome = true := by
