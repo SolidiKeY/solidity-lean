@@ -477,3 +477,12 @@ Source combinations and missing raw/selector/producer/G01/compiler/world/V16
 adequacy stay pending; original native5FAILs/docs/G03 EXIT1 and semantic holds
 unchanged. Immutable reviewed incremental handoff:
 `/workspace/vy5-composition/for-loop-20261102/final/`.
+
+
+VY5 (2026-11-02): selected actual ordinary nonempty CALL/STATICCALL failure now
+composes through full-byte decoding, heap allocation and typed alias rethrow,
+with actual refusal/timeout/copy controls. 29 component laws,30 ordered Source
+cases,107 tests; no fresh native comparisons. All24 original obligations/six
+general combinations remain pending. See [lane handoff](inline-assembly-vy5.md#vy5-selected-ordinary-failure-consumer-2026-11-02)
+and `/workspace/vy5-composition/failure-consumer-20261102/final/` for exact
+producer premises, source hashes, failed diagnostics and sealed evidence.

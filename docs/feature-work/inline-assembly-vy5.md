@@ -2551,3 +2551,67 @@ No new VY4 packet is assumed. Original BLOCKED goal identity/status/objective/
 counters unchanged; get_goal read support absent, no reset/reactivation/completion.
 Reviewed incremental patch/bundles/exact source/signatures/evidence/checksums:
 `/workspace/vy5-composition/for-loop-20261102/final/`.
+
+
+### VY5 selected ordinary failure consumer (2026-11-02)
+
+The immutable VY4 private checkpoint `5a4678a0733702d5b74abffce9c7c6a2c3e45c28`
+resolves the selected ordinary nonempty-revert producer request. Its actual
+GeneralFailure CALL/STATICCALL execution is now consumed by
+`Solidity/Yul/Composition/FailurePhysical.lean`: actual extReturn/attempt,
+allocRef/full readback, typed alias declaration/block/rethrow and caller-local
+restoration. The 29 checked laws retain the entire 36-byte Denied(uint256)
+selector/payload, Source state, saved fnLocals, raw dirty companion and both
+residual/owned-byte journals. An inhabited caller has a nonempty four-observation
+mixed prefix, saved heap aliases and persistent journal. Actual source refusal,
+missing-code/static guards, entered-child timeout with dirty transferred state
+and OLD returndata, and later consumer timeout are distinguished.
+
+The real code registration, Fixed selectors, transfer/address/static/horizon,
+shared execution/load and copy placement/ownership/bounds premises remain in the
+signatures. The selected actual CALL reaches the completion used by the two-byte
+payload copy; the subsequent catch rethrows the FULL buffer. This is a reachable
+selected composition, not universal copy sequencing. Fresh logical catch heap
+indices are not physical pointers. Represented-view retention does not establish
+arbitrary initial representation validity. The prefix is supplied boundary data,
+not a new emit/G01 theorem. Child rollback is distinct from the later catch heap
+allocation; outer-frame rollback is not inferred. Raw values never resume through
+runClean/ofClean. Known-payload decoding is not general Source try/error selection.
+
+The independent frozen oracle checks 30 ordered actual Source cases in the two
+Source pipeline contexts, two copy windows and full selected fields: bytes,
+accounts/journals, heap/fnLocals, residual/owned bytes, raw/nonword aliases and
+ordered observations. Decoder-boundary mutations are explicitly separate from
+actual reached producer cases. There are ZERO fresh native comparisons. The
+original native report retains four profiles/36 calls/five optimized-viaIR strict
+journal mismatches and EXIT1, verified unchanged by hash only. Prior native
+semantic replay is not claimed here. All prior expectations and holds remain.
+
+Final joint EXIT0: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613, actual KeySort2jobs before ./run-lean.sh library1292 and
+TestSuite262; 202 core/0 elaborator,1307 reachable/0 orphan/0 not allowed;
+strict491automatic/61budgeted/0manual/11refuted/0pending; complete-input trust
+1322sources/252sites/0findings. All29 scoped signatures use only standard
+propext/Classical.choice/Quot.sound axioms; 107 focused mutation tests pass.
+Earlier failed diagnostics remain raw failures. Independent finder and skeptic
+read-only reviews used no Lean/server/build. Historical docs/G03 EXIT1 remain
+failures with exact-base zero-regression evidence, not global passes.
+
+Resource admission retained the original writer lock, serial-j1/LEAN_NUM_THREADS1,
+hard12GiB/no-swap and OS reserve. The measured dependency cache increment was
+4993024bytes; the consumer conservative engineering allowance was10MiB, not a
+guard change. Before final joint207527936bytes were free with7114752bytes of that
+allowance remaining; after178450432 comparable container overhead the projected
+remainder was21962752bytes. Only verified exited current-step SizeRw0 directory
+metadata was retired after receipts; caches/images/mounts/evidence were retained.
+No resource stop or guard reduction occurred. Full commands/resources/failures
+and source provenance are in `/workspace/vy5-composition/failure-consumer-20261102/`.
+
+Work1/2/3 and BackfillA/B remain PARTIAL; all24 ORIGINAL full obligations and six
+general Source combinations/fullProofGate remain pending. Selected nonempty
+producer input is resolved, but frontend/Yul admission, general Source try/error
+selector, raw operators/function/session hooks, allocation/refinement/G01,
+compiler/world/V16 and final adequacy remain open. LIB1, unchecked-add and strict
+optimized-viaIR journal decisions remain unanswered. Original BLOCKED goal is
+unchanged; no get_goal read tool is exposed and no goal mutation was attempted.
+Sealed incremental artifacts: `/workspace/vy5-composition/failure-consumer-20261102/final/`.

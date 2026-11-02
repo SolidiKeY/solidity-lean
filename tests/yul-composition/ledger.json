@@ -429,5 +429,6 @@
   "modifierEvidence": "tests/yul-composition/modifier-ledger.json",
   "returningEvidence": "tests/yul-composition/returning-ledger.json",
   "uncheckedLoopEvidence": "tests/yul-composition/unchecked-loop-ledger.json",
-  "forEvidence": "tests/yul-composition/for-ledger.json"
+  "forEvidence": "tests/yul-composition/for-ledger.json",
+  "failureEvidence": "tests/yul-composition/failure-ledger.json"
 }
