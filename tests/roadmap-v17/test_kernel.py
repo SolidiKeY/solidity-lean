@@ -79,7 +79,7 @@ class BindingControls(unittest.TestCase):
         r=dict(headroomBytes=14*1024**3,hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=2*1024**3,diskFreeBytes=1024**3,freshStartAbsent=True,sampleFormat=k.p.SAMPLE_FORMAT,elapsedSeconds=1,sourceClosure={'order':[]},attachments={})
         with self.assertRaisesRegex(ValueError,'mandatory extraction attachment'): k.check_runtime(r,{},Path('/workspace/scratch/example'))
         r['headroomBytes']=0
-        with self.assertRaisesRegex(ValueError,'headroom/OS'): k.check_runtime(r,{},Path('/workspace/scratch/example'))
+        with self.assertRaisesRegex(ValueError,'available RAM'): k.check_runtime(r,{},Path('/workspace/scratch/example'))
 class RuntimeControls(unittest.TestCase):
     def test_valid_runtime_then_corruptions(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -130,7 +130,7 @@ class HeadroomControls(unittest.TestCase):
             with self.subTest(key=key),self.assertRaises(ValueError): k.check_headroom(bad)
 class PreflightObservationControls(unittest.TestCase):
     def test_failed_guard_retains_partial_numeric_evidence_and_never_launches(self):
-        cases=[('starved',str(16*1024**3),str(3*1024**3)),('unlimited','max','0'),('unavailable',None,'0')]
+        cases=[('starved',str(16*1024**3),str(13*1024**3)),('unlimited','max','0'),('unavailable',None,'0')]
         for label,limit,used in cases:
             with self.subTest(label=label),tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
                 out=Path(tmp)/'evidence'
@@ -141,15 +141,15 @@ class PreflightObservationControls(unittest.TestCase):
                     return value
                 with patch.object(k.p,'ensure_no_unresolved'),patch.object(k.e,'snapshot',return_value={'revision':'a'*40}),patch.object(k,'source_closure',return_value={}),patch.object(k,'tool_inputs',return_value={}),patch.object(Path,'read_text',read),patch.object(k.p,'docker') as docker,patch.object(k.subprocess,'Popen') as popen:
                     r=k.collect(KernelControls().req(),out)
-                self.assertEqual(r['exit'],2);self.assertEqual(r['preflightExit'],2);self.assertIsNone(r['commandExit']);self.assertFalse(r['launched'])
+                self.assertEqual(r['admissionPolicy'],k.p.resources.ADMISSION_POLICY);self.assertEqual(r['preflight']['requirements']['admissionPolicy'],k.p.resources.ADMISSION_POLICY);self.assertEqual(r['exit'],2);self.assertEqual(r['preflightExit'],2);self.assertIsNone(r['commandExit']);self.assertFalse(r['launched'])
                 docker.assert_not_called();popen.assert_not_called();self.assertFalse((out/'fresh').exists())
                 obs=r['preflight']['resourceObservations'];self.assertEqual(obs['measurements']['hostMemAvailableBytes'],20*1024**3)
-                self.assertEqual(r['preflight']['requirements']['requiredEffectiveBytes'],14*1024**3)
+                self.assertEqual(r['preflight']['requirements']['requiredEffectiveBytes'],4*1024**3)
                 if label=='starved':
-                    self.assertEqual(obs['measurements']['headroomBytes'],13*1024**3)
-                    self.assertFalse(r['preflight']['comparisons']['effectiveAtLeastCapPlusReserve'])
+                    self.assertEqual(obs['measurements']['headroomBytes'],3*1024**3)
+                    self.assertFalse(r['preflight']['comparisons']['effectiveAtLeastAdmissionFloor'])
                 else:
-                    self.assertNotIn('headroomBytes',obs['measurements']);self.assertIsNone(r['preflight']['comparisons']['effectiveAtLeastCapPlusReserve'])
+                    self.assertNotIn('headroomBytes',obs['measurements']);self.assertIsNone(r['preflight']['comparisons']['effectiveAtLeastAdmissionFloor'])
                 self.assertEqual(k.e.load(out/'record.json'),r)
     def test_disk_failure_does_not_invent_resource_observations(self):
         with tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:

@@ -273,21 +273,21 @@ def collect(req, out):
     out.mkdir(parents=True)
     (out/'request.json').write_bytes(canonical(req))
     before=None; closure=None; installed=None; resources=None; free=None
-    preflight={'requirements':{'memoryCapBytes':p.CAP,'osReserveBytes':p.resources.RESERVE,'requiredEffectiveBytes':p.CAP+p.resources.RESERVE,'diskFreeBytes':1024**3}}
+    preflight={'requirements':{'admissionPolicy':p.resources.ADMISSION_POLICY,'memoryCapBytes':p.CAP,'availableRamFloorBytes':p.resources.RESERVE,'requiredEffectiveBytes':p.resources.RESERVE,'diskFreeBytes':p.resources.MIN_FREE_DISK}}
     try:
         disk=os.statvfs(ROOT); free=disk.f_bavail*disk.f_frsize
         preflight['diskFreeBytes']=free
         before=e.snapshot(ROOT); closure=source_closure(req['module']); installed=tool_inputs(before)
         resources=resource_snapshot(); check_headroom(resources)
-        e.require(free>=1024**3,'disk guard')
+        e.require(free>=p.resources.MIN_FREE_DISK,'disk guard')
     except (OSError,ValueError,subprocess.SubprocessError) as err:
         observed=getattr(err,'observations',None)
         if observed is not None: preflight['resourceObservations']=observed
         elif resources is not None: preflight['resourceObservations']={'measurements':resources}
         measurements=preflight.get('resourceObservations',{}).get('measurements',{})
         effective=measurements.get('headroomBytes')
-        preflight['comparisons']={'effectiveAtLeastCapPlusReserve':effective>=p.CAP+p.resources.RESERVE if type(effective) is int else None,'diskAtLeastRequired':free>=1024**3 if type(free) is int else None}
-        failure={'schema':1,'exit':2,'preflightExit':2,'commandExit':None,'launched':False,'phase':'preflight','request':req,'error':str(err),'preflight':preflight,'before':before,'sourceClosure':closure,'installedInputsSha256':e.digest(canonical(installed)) if installed is not None else None,'releaseClosed':False,'semanticPremisesDischarged':False}
+        preflight['comparisons']={'effectiveAtLeastAdmissionFloor':effective>=p.resources.RESERVE if type(effective) is int else None,'diskAtLeastRequired':free>=p.resources.MIN_FREE_DISK if type(free) is int else None}
+        failure={'schema':1,'admissionPolicy':p.resources.ADMISSION_POLICY,'exit':2,'preflightExit':2,'commandExit':None,'launched':False,'phase':'preflight','request':req,'error':str(err),'preflight':preflight,'before':before,'sourceClosure':closure,'installedInputsSha256':e.digest(canonical(installed)) if installed is not None else None,'releaseClosed':False,'semanticPremisesDischarged':False}
         (out/'record.json').write_text(json.dumps(failure,indent=2)+'\n'); return failure
     e.require(not (out/'fresh').exists(),'fresh compilation directory is not empty')
     (out/'Query.lean').write_bytes(query_bytes(req))
@@ -348,7 +348,7 @@ def collect(req, out):
     record={'schema':1,'directory':str(out),'before':before,'after':after,'request':req,'sourceClosure':closure,
             'templateSha256':e.digest(TEMPLATE.read_bytes()),'querySha256':e.digest((out/'Query.lean').read_bytes()),
             'pipelineSha256':e.digest((out/'pipeline.sh').read_bytes()),'dockerArgvSha256':e.digest((out/'docker-argv.json').read_bytes()),
-            **resources,'diskFreeBytes':free,'commandExit':command_exit,'installedBefore':installed,'installedAfter':installed_after,'exit':code,'elapsedSeconds':elapsed,'containerName':container,
+            **resources,'admissionPolicy':p.resources.ADMISSION_POLICY,'diskFreeBytes':free,'commandExit':command_exit,'installedBefore':installed,'installedAfter':installed_after,'exit':code,'elapsedSeconds':elapsed,'containerName':container,
             'sampleFormat':p.SAMPLE_FORMAT,'freshStartAbsent':True,'samples':samples,'errors':errors,'result':result,'releaseClosed':False,'semanticPremisesDischarged':False}
     record['attachments']={str(path.relative_to(out)):e.digest(path.read_bytes()) for path in out.rglob('*') if path.is_file()}
     if record['exit']==0:
@@ -360,8 +360,7 @@ def collect(req, out):
 
 
 def check_runtime(r, current, out):
-    check_headroom(r)
-    e.require(r['diskFreeBytes']>=1024**3,'insufficient recorded disk')
+    p.resources.check_record_resources(r)
     e.require(r['freshStartAbsent'] is True and r['sampleFormat']==p.SAMPLE_FORMAT,'missing fresh execution/runtime evidence')
     e.require(0<r['elapsedSeconds']<=305,'execution budget exceeded')
     mandatory={'request.json','Query.lean','Axioms.lean','pipeline.sh','docker-argv.json','execution.sh','command.stdout','query.stdout','query.stderr','axioms.stdout','axioms.stderr','memoryMax','swapMax','memoryPeak','realLeanSha256','lakeSha256','leanVersion','lakeVersion','leanNumThreads'}

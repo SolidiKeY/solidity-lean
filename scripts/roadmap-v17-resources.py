@@ -2,15 +2,36 @@
 from pathlib import Path
 import re
 CAP = 12 * 1024**3
-RESERVE = 2 * 1024**3
+# H1: available-RAM admission floor; independent of the unchanged execution cap.
+RESERVE = 4 * 1024**3
+MIN_FREE_DISK = 256 * 1024**2
+ADMISSION_POLICY = {"id":"human-H1-20261102","minimumAvailableBytes":RESERVE,"minimumDiskBytes":MIN_FREE_DISK}
+LEGACY_MIN_AVAILABLE = CAP + 2 * 1024**3
 
-def check_headroom(r):
+def _check_headroom(r, minimum):
     keys=('hostMemAvailableBytes','enclosingCgroupLimitBytes','enclosingCgroupCurrentBytes','headroomBytes')
     if not all(k in r and type(r[k]) is int and r[k]>=0 for k in keys):
         raise ValueError('invalid/missing enclosing memory measurements')
     host,limit,used,available=(r[k] for k in keys)
-    if used>limit or available!=min(host,limit-used) or available<CAP+RESERVE:
-        raise ValueError('insufficient effective headroom/OS reserve')
+    if used>limit or available!=min(host,limit-used) or available<minimum:
+        raise ValueError('insufficient effective available RAM for admission')
+
+def check_headroom(r):
+    _check_headroom(r, RESERVE)
+
+
+def check_record_resources(r):
+    """Old evidence keeps its old admission policy; never relabel an old failure."""
+    if "admissionPolicy" in r:
+        if r["admissionPolicy"] != ADMISSION_POLICY:
+            raise ValueError("unsupported admission policy")
+        minimum,disk=RESERVE,MIN_FREE_DISK
+    else:
+        minimum,disk=LEGACY_MIN_AVAILABLE,1024**3
+    _check_headroom(r,minimum)
+    if type(r.get("diskFreeBytes")) is not int or r["diskFreeBytes"]<disk:
+        raise ValueError("insufficient recorded disk")
+
 
 class ResourceObservationError(ValueError):
     """A refusal with only telemetry actually obtained before it failed."""

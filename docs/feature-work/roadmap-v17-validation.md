@@ -1215,3 +1215,30 @@ env/cap/lease authentication remains unknown. All proof/authentication/release
 flags remain false. All457 rows, ten Derived17 structural rows and every
 original source-chain/strict/corpus/TestSuite/default/full/clean-cache/final
 trust/release obligation remain incomplete; all unrelated human holds persist.
+
+
+### Human H1/H4 resource/readiness decisions (2026-11-02)
+
+The coordinator relayed human H1 verbatim: "Free disk + 4 GiB reserve" and
+"Your free-RAM admission reserve is lowered from 12 GiB (or whatever larger
+floor you use) to 4 GiB; the memory cap and no-swap stay unchanged."
+V17 therefore uses a4GiB effective available-RAM admission floor, independent
+of its unchanged12GiB execution cap, and a256MiB disk floor. It does not add
+the cap to that floor. Effective availability still uses min(host available,
+enclosing cgroup limit-current), with malformed/unknown telemetry rejected.
+H1 policy identity is included in new successful and preflight-failure records;
+old records without the policy keep their original14GiB/1GiB validation and
+all old failures remain failures. No heartbeat/node/depth/process budget changes.
+
+H1 permits reclaim/cleanup of owned regenerable data. No disk cleanup was
+needed (21.96GB free); memory.reclaim returned permission denied. Actual
+post-attempt effective availability14.67GB admits under H1. No unrelated
+process or cache was removed. Existing serial hard-cap/no-swap wrappers remain.
+
+Human H4 accepts the corrected soljson0.8.38 cache evidence, resolving that
+review hold. Historical640 comparisons retain their historical revision.
+H4 requests the Derived17 owner find a smaller proof of the same statement
+for invariantForCountsArrayLength.proved within100000nodes. V17 does not edit
+the reserved proof or raise limits; actual structural validation remains open
+and must run once a changed concrete proof is available. Ready independent
+V13/V14 validation leaves can now proceed under the new admission policy.

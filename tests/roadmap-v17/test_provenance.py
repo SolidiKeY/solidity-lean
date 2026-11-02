@@ -421,13 +421,23 @@ class SharedResourceControls(unittest.TestCase):
         def snapshot(values):
             with patch.object(Path,'read_text',lambda path: values[str(path)]): return p.resource_snapshot()
         self.assertEqual(snapshot(paths)['headroomBytes'],p.CAP+2*1024**3)
-        for path,value in [('/proc/self/cgroup','0::/other'),('/sys/fs/cgroup/memory.max','max'),('/sys/fs/cgroup/memory.max','-1'),('/sys/fs/cgroup/memory.current','true'),('/sys/fs/cgroup/memory.current',str(3*1024**3)),('/proc/meminfo','MemAvailable: max kB')]:
+        for path,value in [('/proc/self/cgroup','0::/other'),('/sys/fs/cgroup/memory.max','max'),('/sys/fs/cgroup/memory.max','-1'),('/sys/fs/cgroup/memory.current','true'),('/sys/fs/cgroup/memory.current',str(13*1024**3)),('/proc/meminfo','MemAvailable: max kB')]:
             bad=copy.deepcopy(paths); bad[path]=value
             with self.subTest(path=path,value=value),self.assertRaises(ValueError): snapshot(bad)
         boundary=p.resource_snapshot.__globals__['check_headroom']
-        r=dict(hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=2*1024**3,headroomBytes=14*1024**3)
+        r=dict(hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=12*1024**3,headroomBytes=4*1024**3)
         boundary(r)
         r['enclosingCgroupCurrentBytes']+=1; r['headroomBytes']-=1
         with self.assertRaises(ValueError): boundary(r)
+
+class H1PolicyControls(unittest.TestCase):
+    def test_legacy_and_new_records_do_not_share_floors(self):
+        r=dict(hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,
+               enclosingCgroupCurrentBytes=12*1024**3,headroomBytes=4*1024**3,diskFreeBytes=256*1024**2)
+        with self.assertRaises(ValueError):p.resources.check_record_resources(r)
+        r['admissionPolicy']=copy.deepcopy(p.resources.ADMISSION_POLICY)
+        p.resources.check_record_resources(r)
+        r['headroomBytes']-=1;r['enclosingCgroupCurrentBytes']+=1
+        with self.assertRaises(ValueError):p.resources.check_record_resources(r)
 
 if __name__=='__main__': unittest.main()

@@ -228,8 +228,7 @@ def validate(record, evidence_root, current, gate, gate_row=None, live_outputs=T
     e.require(record['sampleFormat'] == SAMPLE_FORMAT, 'unsupported process sample format')
     samples = e.loads(read_bound(evidence_root, record['samples'], record['samplesSha256']))
     e.require(samples and all(type(s['rssBytes']) is int and s['rssBytes'] >= 0 and type(s['leanWorkers']) is int and 0 <= s['leanWorkers'] <= 1 and type(s['leanSupervisors']) is int and s['leanSupervisors'] >= 0 and all(type(s.get(k)) is int and s[k] >= 0 for k in ('leanZombies', 'leanTransitions')) and type(s['unclassifiedLeanWorkers']) is int and s['unclassifiedLeanWorkers'] == 0 and s.get('unknownLeanProcesses') == [] for s in samples), 'missing/parallel execution samples')
-    check_headroom(record)
-    e.require(type(record['diskFreeBytes']) is int and record['diskFreeBytes'] >= 1024**3,'insufficient recorded disk')
+    resources.check_record_resources(record)
     e.require(e.loads(read_bound(evidence_root,record['errors'],record['errorsSha256'])) == record['phaseErrors'],'changed phase errors')
     e.require(0 < record['elapsedSeconds'] <= BUDGET['processSeconds'] + 5, 'execution budget exceeded')
     execution = read_bound(evidence_root, record['executionScript'], record['executionScriptSha256'])
@@ -450,7 +449,7 @@ def collect(args):
     python_before = timing_inputs() if is_python_gate(args.gate) else None
     resource_fields = resource_snapshot(); check_headroom(resource_fields)
     disk = os.statvfs(ROOT); free = disk.f_bavail * disk.f_frsize
-    e.require(free >= 1024**3, 'disk guard')
+    e.require(free >= resources.MIN_FREE_DISK, 'disk guard')
     cfg = serial_config(ROOT); (out / 'configuration.toml').write_bytes(cfg)
     serializers = {}
     for tool in e.BUILD_TOOL_NAMES:
@@ -556,7 +555,7 @@ def collect(args):
               'runtime':'runtime.json','runtimeSha256':e.digest((out/'runtime.json').read_bytes()),
               'samples':'samples.json','samplesSha256':e.digest((out/'samples.json').read_bytes()),
               'log':'build.log','logSha256':e.digest((out/'build.log').read_bytes()),'commandExit':command_exit,'attachExit':attach_exit,'executionExit':execution_exit,'cleanupExit':cleanup_exit,'validationExit':validation_exit,'phaseErrors':errors,'errors':'execution-errors.json','errorsSha256':e.digest((out/'execution-errors.json').read_bytes()),'exit':final_exit(execution_exit,cleanup_exit,validation_exit),
-              **resource_fields,'diskFreeBytes':free,'elapsedSeconds':execution_elapsed,
+              **resource_fields,'admissionPolicy':resources.ADMISSION_POLICY,'diskFreeBytes':free,'elapsedSeconds':execution_elapsed,
               'executionScript':'execution.sh','executionScriptSha256':e.digest((out/'execution.sh').read_bytes()),
               'buildStart':start_build,'cacheStart':start_cache,'buildEnd':inventory(build),'cacheEnd':inventory(cache),
               'releaseClosed':False}
