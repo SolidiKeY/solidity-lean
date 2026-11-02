@@ -278,6 +278,19 @@ and CI showed the same failures without them).
   the check and the read), and `sliceOpen` (`Syntax/Elab/Context.lean`) does
   not emit `e <= len` when `e` is the outer length. Test 31: `sliceRead`,
   `sliceOfSlice`, `slicePast` prove (no heartbeat change, no closer change).
+* **31, `sliceHashed` (bisected, FU2-C round 2):** the base commit
+  `84a2a4be` (worktree, built from the artifact cache) gives the same
+  `error`, "(deterministic) timeout at `sol_prove's compiled walk, after its
+  16384-step stage`", so it predates this lane. Cause: `keccak256(b[4:])`
+  copies the view to memory (`#sliceCopy`, `Syntax/Elab/Arms.lean`) with a
+  `while` loop of symbolic trip count (`b.length - 4`) and no invariant; the
+  compiled walk unrolls it, no stage up to 16384 steps reaches the end, and
+  `Derive.prove` (`Calculus/ProvesDerive.lean`) raises the heartbeat error
+  where the test accepts `pending`. Not fixed: either a loop specification
+  for a symbolic copy (which would also replace the unrolling the proved
+  slice-copy rows rely on) or classifying budget exhaustion as `pending` in
+  proof search; both outside slice reads. On the base the same run also has
+  `localAlias` refused and `sliceRead`, `sliceOfSlice`, `slicePast` pending.
 * **44** (`a48fd85f`): in the testing import a specification that does not
   parse became a `solidity.specificationSyntax` scope rejection, raised
   before the named refusal "ledger locations in assignable clauses are not

@@ -1769,3 +1769,21 @@ it is working, as before.
   the only change from round 1 is `smoke/bytes_and_strings.sol` blocked →
   working. The 11 left are the exclusions in the table above (assembly ×8,
   v1 enum, a call value in `function_entry_checks`).
+* **`sliceHashed`** (test 31's last failing row) predates this lane
+  (bisected on the base commit) and is recorded with its cause in
+  `docs/assurance.md` (test 31): a symbolic slice-copy loop the walk unrolls
+  past its budget, reported as a heartbeat error rather than `pending`.
+* **Review of round 2** (read-only finder and skeptic). Skeptic, pinned solc
+  in four configurations: slice bound checks over 1694 cases × 4 configs
+  (`xs[i:]`, `xs[i:j]`, nested views, `bytes`, huge and empty bounds), 0
+  mismatches, a view to the end checks only its start; several
+  `bytes`/`string` returns in any order, aliased, unassigned or swapped are
+  `abi.encode` of the return locals in declaration order. It showed that an
+  operand reassigning the index (`t[k] + (k = 5)`) is pipeline-dependent;
+  the model captures the read before a later operand's effect
+  (`captureBefore`), pinned by the `sliceK` replay control in both orders.
+  Finder: no semantic defect; fixed: `EntryReturn` docstrings, stale
+  present-tense notes. Recorded, not changed: `intTyOf` defaults a
+  non-integer name (a `bytes32` local) to `uint256`, so such an index (which
+  solc rejects at compile time) would skip the copy; a literal index above
+  `2^256` likewise (also rejected by solc).
