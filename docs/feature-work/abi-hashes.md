@@ -1737,3 +1737,13 @@ decoding). Recorded, not changed: a zero-parameter v1 entry runs on `[]`
 (trailing data dropped; not observable under the `msg.data` refusal); a
 slice read directly in a failure-retaining body outside the entry call
 would now carry `Panic(0x32)` data (closer to solc; no producer found).
+
+**Fixtures, final** (`tests/upstream/cf1-abi-entry-results.json`, all 42
+rerun with `scripts/abi-entry-fixtures.sh SOLJSON fu2c3`, one runner hash,
+collected with `abi-entry-collect.py --keep-before`): **30 working / 12
+blocked / 0 broken** (FU1: 22 / 20). Changes against FU1: the access-time
+fixture and the seven ABI v1 rows blocked → working; `function_entry_checks`
+blocked on its next reason. `enums/enum_with_256_members.sol` ended once
+with "Lean process ended before checkpoint" while other Lean tests ran on
+the same machine; rerun alone into the same directory with the same runner
+it is working, as before.
