@@ -1102,3 +1102,40 @@ checks, Panic `0x41`, validators; access-time validation for calldata in
 the source model, which lane `fu2-calldata-access` brings to the elaborated
 model), and the controls here use the same encodings the CF1 fixtures do
 (`tests/upstream/cf1-abi-entry-results.json`, not changed by this lane).
+
+### Item 4: checkpoint 4's remaining gaps
+
+**Tuple declarations (done).** `StmtD.declTuple`
+(`Solidity/Source/Typing.lean`) types `(, , T x, , U y) = e;`: the slots
+(`Ctx.tupleSlots`: leading holes, then each declared name with its type
+under solc's location rule for an initialized declaration, `locOK … true`,
+or a hole) are as many as `e`'s tuple components (a call with several
+returns, a tuple expression, `abi.decode` of several types), and each
+declared slot's component converts implicitly to its type (`slotsFit`);
+the locals are pushed left to right, the last declared innermost
+(`pushSlots`). `RStmt.declTuple` keeps the slots' types; `StmtD.toR` casts
+the output context along `pushSlots_tys`. The interpreter evaluates `e`,
+takes its components (`RVal.untuple`) and pushes each declared one
+converted (`pushVals`, outside the mutual block; `pushVals_below`,
+`pushVals_grow`, `pushVals_const` in Horizon's lists); a hole's component
+is evaluated (and, for `abi.decode`, validated) and discarded. Both
+statement checkers have the rule (`StmtD.inferSimple`; G13's `simpleRes`
+with its completeness case, so `stmtOK_iff` holds), uniqueness of meaning
+covers it (`StmtD.unique`), `OpsOK` too (`RStmt.opsOK_cast`), and the
+statement walk sees it as outside the value fragment (`RStmt.ext` with
+`pushTys_suffix`). `stmtCoverage` classifies it `typed` (witness
+`w_declTuple`: `(uint256 p, ) = (a, b);`). Controls in
+`Solidity/Source/DecodeExamples.lean` (`w`, `v`): destructuring
+`abi.decode` with holes, a hole's invalid component reverting. Not proved:
+progress of the statement (its expression is not in the value fragment);
+solc's refusal of a declaration whose names repeat is not checked (S01's
+`declVar` does not check shadowing either).
+
+**Inline arrays, `new`, `try`/`catch`, `fallback` with parameters: not
+started** (time; each is a typing rule, an interpreter arm and its
+Horizon lemmas, both checkers, uniqueness and controls as above; `new` and
+`try`/`catch` also need contract creation and external-call failure
+handling in `Solidity/Source`, and `fallback` with parameters a branch in
+`dispatch`, whose Horizon proofs are heartbeat-sensitive: Checkpoint 4).
+
+**Backfill (checkpoint 5): not started.**

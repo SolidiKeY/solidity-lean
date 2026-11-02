@@ -1032,6 +1032,75 @@ inductive OptCond (Γ : Ctx) : Syn (.opt .expr) → Type where
   | none : OptCond Γ .none
   | some {e : Syn .expr} : Typed Γ e .bool → OptCond Γ (.some e)
 
+/-! ### Tuple declarations (lane FU2-B) -/
+
+/-- A slot of a tuple declaration: a declared name with its type (solc's
+location rule for an initialized declaration), or a hole (`none`). -/
+def Ctx.declSlot (C : Ctx) : Syn (.opt .varDecl) → Option (Option (String × STy))
+  | .none => Option.some Option.none
+  | .some (.varDecl t l x) =>
+    match t.ty C.env C.scope (l.getD .memory) with
+    | Option.some τ => if locOK τ l true then Option.some (Option.some (x, τ)) else Option.none
+    | Option.none => Option.none
+
+/-- The slots of a list of optional declarations. -/
+def Ctx.declSlots (C : Ctx) : Syn (.list (.opt .varDecl)) → Option (List (Option (String × STy)))
+  | .nil => Option.some []
+  | .cons s ss =>
+    match C.declSlot s, C.declSlots ss with
+    | Option.some a, Option.some b => Option.some (a :: b)
+    | _, _ => Option.none
+
+/-- The slots of `(, , T x, …) = e`: the leading holes, the first
+declaration, the remaining slots. -/
+def Ctx.tupleSlots (C : Ctx) (holes : Nat) (d : Syn .varDecl) (ds : Syn (.list (.opt .varDecl))) :
+    Option (List (Option (String × STy))) :=
+  match C.declSlot (.some d), C.declSlots ds with
+  | Option.some a, Option.some b => Option.some (List.replicate holes Option.none ++ a :: b)
+  | _, _ => Option.none
+
+/-- The locals a tuple declaration adds onto `L`, left to right (the last
+declared innermost). -/
+def pushSlots : List (Option (String × STy)) → List (String × STy) → List (String × STy)
+  | [], L => L
+  | Option.none :: ss, L => pushSlots ss L
+  | Option.some p :: ss, L => pushSlots ss (p :: L)
+
+/-- The types a tuple declaration adds onto a context of types. -/
+def pushTys : List (Option STy) → List STy → List STy
+  | [], Γ => Γ
+  | Option.none :: ss, Γ => pushTys ss Γ
+  | Option.some τ :: ss, Γ => pushTys ss (τ :: Γ)
+
+theorem pushSlots_tys : ∀ (slots : List (Option (String × STy))) (L : List (String × STy)),
+    (pushSlots slots L).map Prod.snd = pushTys (slots.map (Option.map Prod.snd)) (L.map Prod.snd)
+  | [], _ => rfl
+  | Option.none :: ss, L => pushSlots_tys ss L
+  | Option.some p :: ss, L => pushSlots_tys ss (p :: L)
+
+theorem pushSlots_suffix : ∀ (slots : List (Option (String × STy))) (L : List (String × STy)),
+    ∃ ys, pushSlots slots L = ys ++ L
+  | [], _ => ⟨[], rfl⟩
+  | Option.none :: ss, L => pushSlots_suffix ss L
+  | Option.some p :: ss, L => by
+    obtain ⟨ys, h⟩ := pushSlots_suffix ss (p :: L)
+    exact ⟨ys ++ [p], by simp only [pushSlots, h, List.append_assoc, List.singleton_append]⟩
+
+theorem pushTys_suffix : ∀ (slots : List (Option STy)) (Γ : List STy), ∃ ys, pushTys slots Γ = ys ++ Γ
+  | [], _ => ⟨[], rfl⟩
+  | Option.none :: ss, Γ => pushTys_suffix ss Γ
+  | Option.some τ :: ss, Γ => by
+    obtain ⟨ys, h⟩ := pushTys_suffix ss (τ :: Γ)
+    exact ⟨ys ++ [τ], by simp only [pushTys, h, List.append_assoc, List.singleton_append]⟩
+
+/-- **Each declared slot's component converts implicitly** to its type;
+a hole takes any component; the slots are as many as the components. -/
+def slotsFit (B : DeclName → DeclName → Bool) : List (Option STy) → List STy → Bool
+  | [], [] => true
+  | Option.none :: ss, _ :: σs => slotsFit B ss σs
+  | Option.some τ :: ss, σ :: σs => σ.implicit B τ && slotsFit B ss σs
+  | _, _ => false
+
 /-- An optional loop step, typed at some type. -/
 inductive OptExpr (Γ : Ctx) : Syn (.opt .expr) → Type where
   | none : OptExpr Γ .none
@@ -1056,6 +1125,13 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
   | declVar {k : SCtx} {L : List (String × STy)} {t : Syn .typeName} {l : Option DataLoc} {x : String}
       {τ : STy} : t.ty C.env C.scope (l.getD .memory) = Option.some τ → locOK τ l false = true →
       StmtD C (k := k) L (.simpleStmt (.declVar (.varDecl t l x) .none)) ((x, τ) :: L)
+  /-- `(, T x, , U y) = e;` (lane FU2-B): `e` is a tuple whose components
+  convert implicitly to the declared types; holes discard theirs. -/
+  | declTuple {k : SCtx} {L : List (String × STy)} {h : Nat} {d : Syn .varDecl}
+      {ds : Syn (.list (.opt .varDecl))} {e : Syn .expr} {slots : List (Option (String × STy))}
+      {σs : List STy} : C.tupleSlots h d ds = Option.some slots → Typed (C.at L) e (.tuple σs) →
+      slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true →
+      StmtD C (k := k) L (.simpleStmt (.declTuple h d ds e)) (pushSlots slots L)
   /-- `T l x = e;`: `e` converts implicitly to `T`. -/
   | declInit {k : SCtx} {L : List (String × STy)} {t : Syn .typeName} {l : Option DataLoc} {x : String}
       {e : Syn .expr} {τ σ : STy} : t.ty C.env C.scope (l.getD .memory) = Option.some τ →
@@ -1142,6 +1218,7 @@ theorem StmtD.locals_suffix {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {
   cases d <;> first
     | exact ⟨[], rfl⟩
     | exact ⟨[_], rfl⟩
+    | exact pushSlots_suffix _ _
 
 /-- **Constants have their value as type**: every constant expression other
 than an address literal or a bare hexadecimal literal is typed by its exact

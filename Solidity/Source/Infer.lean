@@ -541,7 +541,17 @@ def StmtD.inferSimple (C : Ctx) {k : SCtx} (L : List (String × STy)) (i : Syn .
           else Option.none
       else Option.none
     | Option.none => Option.none
-  | _ => Option.none
+  | .declTuple h d ds e =>
+    match hs : C.tupleSlots h d ds with
+    | Option.some slots =>
+      (Typed.infer (C.at L) e).bind fun ⟨σ, de⟩ =>
+        match σ, de with
+        | .tuple σs, de =>
+          if hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true then
+            Option.some ⟨_, .declTuple hs de hf⟩
+          else Option.none
+        | _, _ => Option.none
+    | Option.none => Option.none
 
 /-- `return e;` against a single return. -/
 def StmtD.inferSingle (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .expr) :

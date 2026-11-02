@@ -102,6 +102,16 @@ theorem stmt_complete {C : Ctx} : {k : SCtx} → {L : Locals} → {s : Syn (.stm
       rw [ht] at ht'; cases ht'
       rw [dif_pos hl]; exact List.mem_singleton.mpr rfl
     · rename_i ht'; rw [ht] at ht'; cases ht'
+  | _, L, _, _, .declTuple hs de hf => by
+    obtain ⟨de', h⟩ := expr_exists de
+    refine mem_stmts (d := .declTuple hs de' hf) (simple_sub ?_)
+    simp only [simpleRes]
+    split
+    · rename_i slots' hs'
+      rw [hs] at hs'; cases hs'
+      refine List.mem_filterMap.mpr ⟨_, mem_tysOf' h, ?_⟩
+      simp only [dif_pos hf]
+    · rename_i hs'; rw [hs] at hs'; cases hs'
   | _, L, _, _, .declInit ht hl d hc => by
     obtain ⟨d', h⟩ := expr_exists d
     refine mem_stmts (d := .declInit ht hl d' hc) (simple_sub ?_)

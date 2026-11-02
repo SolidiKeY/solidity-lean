@@ -286,11 +286,17 @@ theorem elemType_decode_operand :
 /-- **The coverage of every statement constructor**, explicitly. -/
 def stmtCoverage : Ctor → Option Coverage
   | .blockStmt | .simpleStmt | .declVar | .exprStmt | .ifStmt | .forStmt | .whileStmt | .doWhile
-  | .continueStmt | .breakStmt | .returnStmt | .emit | .revert => some .typed
-  | .declTuple => some (.deferred "S02" "tuple declarations destructure tuple values, typed with S02's calls")
+  | .continueStmt | .breakStmt | .returnStmt | .emit | .revert | .declTuple => some .typed
   | .tryStmt => some (.deferred "S03" "try/catch is an external call's")
   | .assembly => some (.deferred "S00" "inline assembly is excluded; only the canonical rethrow is typed (rethrow)")
   | _ => none
+
+/-- `(uint256 p, ) = (a, b);` (lane FU2-B): a tuple declaration with a hole. -/
+def w_declTuple : StmtD (k := .body) Γ Γ.locals
+    (.simpleStmt (.declTuple 0 (.varDecl u256 none "p") (.cons .none .nil)
+      (.tuple (.some a) (.cons (.some (.ident "b")) .nil))))
+    (("p", .int IntTy.u256) :: Γ.locals) :=
+  .declTuple (slots := [some ("p", .int IntTy.u256), none]) rfl w_tuple rfl
 
 /-- **Every statement constructor is classified.** -/
 theorem stmtCoverage_total {k : SCtx} (s : Syn (.stmt k)) : (stmtCoverage s.ctor).isSome = true := by

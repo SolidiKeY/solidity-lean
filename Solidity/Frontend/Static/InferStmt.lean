@@ -87,7 +87,17 @@ def simpleRes {k : SCtx} (L : Locals) : (i : Syn .simple) → List (Σ L', StmtD
           else Option.none
       else []
     | Option.none => []
-  | _ => []
+  | .declTuple h d ds e =>
+    match hs : C.tupleSlots h d ds with
+    | Option.some slots =>
+      (tysOf (C.at L) (infer (C.at L) e)).filterMap fun p =>
+        match p with
+        | ⟨.tuple σs, de⟩ =>
+          if hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true then
+            Option.some ⟨pushSlots slots L, .declTuple hs de hf⟩
+          else Option.none
+        | _ => Option.none
+    | Option.none => []
 
 /-- An optional loop condition. -/
 def condOpt (L : Locals) : (c : Syn (.opt .expr)) → List (OptCond (C.at L) c)

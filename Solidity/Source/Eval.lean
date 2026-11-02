@@ -389,6 +389,22 @@ def convRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layo
   | _, τ, .val x => return .val (← lift (convVal τ x))
   | _, _, _ => halt (.stuck "implicit conversion")
 
+/-- A tuple value's components. -/
+def RVal.untuple {D : Layout} {σs : List STy} : RVal D (.tuple σs) → R (RVals D σs)
+  | .tuple vs => pure vs
+  | _ => stuck "not a tuple"
+
+/-- **Pushing a tuple declaration's components** (lane FU2-B): each declared
+slot's component converted to its type (`convRV`), holes discarded. -/
+def pushVals {Γ' : RCtx} (F : Fr) (n : Nat) : (slots : List (Option STy)) → {σs : List STy} →
+    RVals E.layout σs → {Γ : RCtx} → Locals E.layout Γ → EM E Γ' (Locals E.layout (pushTys slots Γ))
+  | [], _, .nil, _, l => pure l
+  | Option.none :: ss, _, .cons _ vs, _, l => pushVals F n ss vs l
+  | Option.some τ :: ss, _, .cons v vs, _, l => do
+    let x ← getV (← convRV F n τ v)
+    pushVals F n ss vs (.cons x l)
+  | _, _, _, _, _ => halt (.stuck "tuple declaration arity")
+
 /-- **An explicit conversion** (`T(e)`). -/
 def convExplicitRV {Γ : RCtx} (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
     EM E Γ (RVal E.layout τ) := do
@@ -1200,6 +1216,10 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
   | .declInit (τ := τ) e _ => do
     let (v, l') ← sub l (do getV (← convRV F n τ (← evalE G F n e)))
     pure (.normal (.cons v l'))
+  | .declTuple slots e _ => do
+    let (vs, l') ← sub l (do lift (← evalE G F n e).untuple)
+    let (l'', _) ← sub l' (pushVals F n slots vs l')
+    pure (.normal l'')
   | .block b => do
     let out ← execItems G F n nps ph b l
     lift out.close

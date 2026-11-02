@@ -439,6 +439,10 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
       (args : RConvArgs E Γ ps) : RStmt E R M k Γ Γ
   /-- The canonical rethrow of a `bytes memory` local. -/
   | rethrow {k : SCtx} {Γ : RCtx} (i : Idx Γ (.bytes .memory)) : RStmt E R M k Γ Γ
+  /-- A tuple declaration (lane FU2-B): the tuple's components converted to
+  the declared slots' types and pushed, holes discarded. -/
+  | declTuple {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs))
+      (h : slotsFit E.isBase slots σs = true) : RStmt E R M k Γ (pushTys slots Γ)
 
 /-- Resolved blocks. -/
 inductive RItems (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx → Type where
@@ -472,6 +476,10 @@ def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt
   | .placeholder h => .placeholder h
   | .declVar (τ := τ) _ _ => .declVar τ
   | .declInit _ _ d h => .declInit d.toR h
+  | .declTuple (slots := slots) (L := L) _ d h =>
+    cast (congrArg (RStmt C.env C.rets C.inModifier k (tysOf L)) (pushSlots_tys slots L).symm)
+      (RStmt.declTuple (E := C.env) (R := C.rets) (M := C.inModifier) (k := k) (Γ := tysOf L)
+        (slots.map (Option.map Prod.snd)) d.toR h)
   | .block b => .block b.toR
   | .ifThen dc _ ds => .ifThen dc.toR ds.toR
   | .ifElse dc _ _ ds dt => .ifElse dc.toR ds.toR dt.toR

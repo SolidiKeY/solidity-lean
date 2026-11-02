@@ -63,7 +63,13 @@ def unitDec : Syn .unit :=
           (.cons (stmt (.assign .assign (.ident "sb") (.lit (.hexStr (List.replicate 31 0 ++ [5])))))
           (.cons (setX (.call (.member (.ident "abi") "decode") (.positional (.cons (.ident "sb")
             (.cons (one (ty u8)) .nil))))) .nil)))))
-      .nil))))))))))
+      (.cons (fn "w" (.cons (.stmtItem (.simpleStmt (.declTuple 0 (.varDecl (.elem u8) none "a")
+            (.cons .none .nil) (decodeOf (.tuple (.some (ty u8)) (.cons (.some (ty .bool)) .nil))))))
+          (.cons (setX (.ident "a")) .nil)))
+      (.cons (fn "v" (.cons (.stmtItem (.simpleStmt (.declTuple 2 (.varDecl (.elem u8) none "z") .nil
+            (decodeOf (.tuple (.some (ty .bool)) (.cons (.some (ty .bool)) (.cons (.some (ty u8)) .nil)))))))
+          (.cons (setX (.ident "z")) .nil)))
+      .nil))))))))))))
     .nil)
 
 def elabDec : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } unitDec)
@@ -147,6 +153,17 @@ def runDF (el : Elaborated) (fuel : Nat) (inputs : List Bytes) : List (Option Ou
 example : TypingExamples.Γ.decodeTys (one (ty .address)) = some [.address true] := rfl
 example : TypingExamples.Γ.decodeTys (one (.index (ty .address) .none)) =
     some [.array .memory (.address false) none] := rfl
+
+-- **Tuple declarations** (lane FU2-B, checkpoint 4): `(uint8 a, ) =
+-- abi.decode(b, (uint8, bool)); x = a;` stores 7 (the hole is decoded and
+-- validated, then discarded: `(7, 2)` reverts); `(, , uint8 z) =
+-- abi.decode(b, (bool, bool, uint8)); x = z;` stores 9.
+#guard (elabDec.map fun el => runD el 0 [callB "w(bytes)" (words [7, 1]), selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success (arg 7))]
+#guard (elabDec.map fun el => runD el 0 [callB "w(bytes)" (words [7, 2]), selOf "x()"]) ==
+  some [some (.success []), some (.revert []), some (.success (arg 0))]
+#guard (elabDec.map fun el => runD el 0 [callB "v(bytes)" (words [1, 0, 9]), selOf "x()"]) ==
+  some [some (.success []), some (.success []), some (.success (arg 9))]
 
 /-! ## Refusals (named, outside the proved fragment) -/
 

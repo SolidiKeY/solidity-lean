@@ -488,6 +488,7 @@ def RStmt.OpsOK {E : Env} {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : R
   | _, _, _, .retVal _ e _ => e.OpsOK
   | _, _, _, .retTuple es => RConvArgs.OpsOK es
   | _, _, _, .emit _ _ args | _, _, _, .revertError _ _ args => RConvArgs.OpsOK args
+  | _, _, _, .declTuple _ e _ => e.OpsOK
 
 def RItems.OpsOK {E : Env} {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} → RItems E R M k Γ Γ' → Prop
   | _, _, _, .nil => True
@@ -503,6 +504,11 @@ theorem TypedArgs.ofSlots_opsOK {Γ : Ctx} : {es : Syn (.list (.opt .expr))} →
 
 mutual
 
+/-- A cast of a statement's output context keeps `OpsOK`. -/
+theorem RStmt.opsOK_cast {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ₁ Γ₂ : RCtx} (h : Γ₁ = Γ₂)
+    (s : RStmt E R M k Γ Γ₁) (hs : s.OpsOK) : (cast (congrArg (RStmt E R M k Γ) h) s).OpsOK := by
+  subst h; exact hs
+
 /-- **Elaborated statements stay in the operations' domains.** -/
 theorem StmtD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)} → {s : Syn (.stmt k)} →
     (d : StmtD C L s L') → d.toR.OpsOK
@@ -510,6 +516,8 @@ theorem StmtD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)}
   | _, _, _, _, .placeholder _ | _, _, _, _, .declVar _ _ | _, _, _, _, .brk | _, _, _, _, .cont
   | _, _, _, _, .ret _ | _, _, _, _, .rethrow _ _ _ _ => trivial
   | _, _, _, _, .declInit _ _ d _ => Typed.toR_opsOK d
+  | _, L, _, _, .declTuple (slots := slots) _ d _ =>
+    RStmt.opsOK_cast (pushSlots_tys slots L).symm _ (Typed.toR_opsOK d)
   | _, _, _, _, .block b => ItemsD.toR_opsOK b
   | _, _, _, _, .ifThen dc _ ds => And.intro (Typed.toR_opsOK dc) (StmtD.toR_opsOK ds)
   | _, _, _, _, .ifElse dc _ _ ds dt =>

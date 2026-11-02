@@ -1654,6 +1654,13 @@ theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {
       obtain ⟨e, hd⟩ := Typed.unique d d₂
       subst e
       exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq hd]⟩
+  | _, _, .declTuple hs de hf, d' => by
+    cases d' with
+    | declTuple hs' de' hf' =>
+      rw [hs] at hs'; cases hs'
+      obtain ⟨e, h⟩ := Typed.unique de de'
+      cases e
+      exact ⟨rfl, by simp only [StmtD.toR]; rw [eq_of_heq h]⟩
   | _, _, .block b, d' => by
     cases d' with
     | block b' =>
