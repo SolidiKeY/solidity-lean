@@ -687,7 +687,7 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - lowering: `Solidity.trySelfBody` (Solidity.Syntax.Elab.Stmt, `Solidity/Syntax/Elab/Stmt.lean:659`) — self callee inlined in own frame
   - lowering: `Solidity.selfReturnAbiCompatible` (Solidity.Syntax.Elab.Lower, `Solidity/Syntax/Elab/Lower.lean:1690`) — self-return ABI kind check
   - source: `Solidity.TRun.tryCall` (Solidity.Semantics.Run, `Solidity/Semantics/Run.lean:905`) — self flag: sender=this, value 0
-  - regression: `Solidity.Examples.Tactics.TryCatch.selfCall_noCallback` (Solidity.Examples.Tactics.TryCatch, `Solidity/Examples/Tactics/TryCatch.lean:288`) — self-call example proof
+  - regression: `Solidity.Examples.Tactics.TryCatch.selfCall_noCallback` (Solidity.Examples.Tactics.TryCatch, `Solidity/Examples/Tactics/TryCatch.lean:289`) — self-call example proof
   - no existing anchor: admission, backend, evm, theorem
   - missing: Self-call frames fix msg.value to 0; value-carrying self-calls not modelled
   - missing: Only callees declared before the caller; no backend/EVM support (R07)
