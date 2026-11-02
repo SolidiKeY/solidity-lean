@@ -9,7 +9,10 @@ def main():
     if args not in ([],["--free"]): raise ValueError("usage: disk.sh [--free]")
     repo=pathlib.Path(os.environ.get("DISK_REPO",os.getcwd())).resolve(); cg=pathlib.Path(os.environ.get("DISK_CGROUP","/sys/fs/cgroup"))
     free=shutil.disk_usage(repo).free; print(f"disk: path={repo} free={free}")
-    print(f"ram: current={(cg/"memory.current").read_text().strip()} max={(cg/"memory.max").read_text().strip()}")
+    def cgread(name):
+        try: return (cg/name).read_text().strip()
+        except OSError: return "unavailable"
+    print("ram: current="+cgread("memory.current")+" max="+cgread("memory.max"))
     if not args and free>=int(os.environ.get("DISK_MIN_FREE_BYTES","2147483648")): return
     for tool in ("docker","podman"):
         if not shutil.which(tool): continue
@@ -20,15 +23,22 @@ def main():
     p=run("git","-C",str(repo),"worktree","list","--porcelain")
     if p.returncode: raise ValueError("cannot list worktrees")
     worktrees=[line[9:] for line in p.stdout.splitlines() if line.startswith("worktree ")]
+    main=pathlib.Path(worktrees[0]).resolve() if worktrees else None
     for wt in worktrees[1:]:
-        build=pathlib.Path(wt)/".lake/build"
-        if build.is_dir() and not build.is_symlink(): shutil.rmtree(build); print(f"deleted: {build}")
+        build=pathlib.Path(wt)/".lake/build"; real=build.resolve(); wtreal=pathlib.Path(wt).resolve()
+        # Only a build directory that really lies inside this worktree (no symlinked
+        # .lake into the main checkout or elsewhere).
+        if not build.is_dir() or build.is_symlink() or real!=wtreal/".lake/build": continue
+        if main and (real==main or main in real.parents): continue
+        shutil.rmtree(build); print(f"deleted: {build}")
     common=run("git","-C",str(repo),"rev-parse","--path-format=absolute","--git-common-dir").stdout.strip(); objects=str(pathlib.Path(common)/"objects")
     def valid(d):
         if not d.is_dir() or d.is_symlink() or not (d/"SHA256SUMS").is_file(): return False
         if any(p.name==".git" for p in d.rglob(".git")): return False
         if run("git","-C",str(d),"rev-parse","--is-inside-work-tree").returncode==0: return False
         if run("sha256sum","-c","--strict","SHA256SUMS",cwd=d).returncode: return False
+        listed={l.split("  ",1)[1] for l in (d/"SHA256SUMS").read_text().splitlines() if "  " in l}
+        if any(p.relative_to(d).as_posix() not in listed for p in d.rglob("*") if p.is_file() and p!=d/"SHA256SUMS"): return False
         bundles=list(d.rglob("*.bundle"))
         if not bundles: return False
         for b in bundles:
