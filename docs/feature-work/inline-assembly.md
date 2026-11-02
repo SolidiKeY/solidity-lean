@@ -644,3 +644,10 @@ VY2 actual effectful balance operand equations and exact halt-prefix controls: [
 VY2 constructive scratch-copy/whole-heap view and computed source writeback transport: [lane checkpoint](inline-assembly-vy2.md). General output-memory and compiler/call adequacy remain open.
 
 VY2 checked residual-window/real retained-tail ownership and actual source writeback: [lane checkpoint](inline-assembly-vy2.md). No new admission or full memory safety/call/compiler claim.
+
+
+VY2 chronological residual-copy handoff: [lane record](inline-assembly-vy2.md#chronological-residual-memory-copies).
+Actual typed current-memory sources, snapshot overlap, arbitrary finite
+chronological copies, whole-map/source-state identity, every-original-H
+MemOK and reserved/unknown-byte laws are additive preparation results.
+Full Y04–Y06/Y09.02 and joint producer/compiler closure remain unfinished.

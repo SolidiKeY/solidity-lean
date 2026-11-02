@@ -207,3 +207,5 @@ VY2 effectful balance input proofs: [lane checkpoint](feature-work/inline-assemb
 VY2 scratch-copy physical frame laws: [lane checkpoint](feature-work/inline-assembly-vy2.md).
 
 VY2 residual memory-window preparation and retained-tail laws: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 chronological physical `mcopy` preparation and source-state preservation: [lane record](feature-work/inline-assembly-vy2.md#chronological-residual-memory-copies).

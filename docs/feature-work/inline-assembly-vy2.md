@@ -4159,3 +4159,60 @@ Controls compute a six-root inventory/gap plan, reserved/header/payload/Word-ove
 A separate pinned0.8.38/Osaka legacy/viaIR finite fixture checks real padded bytes, shrink/write/regrowth, both aliases, full raw words/ABI/error/Panic/static/frame/storage outcomes and free-pointer equality. New strict coherent mutation controls are scoped external evidence, not kernel/source/compiler adequacy. Required final gates/reviews/results are recorded in `/workspace/vy2-evidence/residual-memory-windows` when complete. All original Y04/Y05/Y06/Y09.02/BackfillA/B remain partial: broad ownership/dirty/sharedzero/interior, reachable allocator refinement, concrete V10/V11, actual Yul/calculus/notation/printers/compiler/joint closure open; YQ1-YQ7 and goal unchanged.
 
 Completed checked-window gates: actual Lean4.24.0/Lake5.0.0-src+797c613/KeySort2jobs0; exact5perfiles/focused117/full1517default262TestSuite131annotations; strict/trust/layers/orphans0. Complete6794declarations4220theorems4102standard-only118axiom-free, missing/unexpected0. Both read-only reviewers clear after repairing explicit mutation inventory totals (initial version retained). Runtime actual aliases both recover222/173/119; computed unsupported inventory returns exactID2. External38orderedcalls/2pipelines and454negative126coherentword controls pass; first/final replay equal. All914prior call fields and18classifications unchanged; cumulative952report3f914b5eb0f86433c4e678c8e784143c049889335f511926ec6e7aac114471da. Docs actualexit1 with byte-identical pinned-base findings separately0; no-new markdown0. Private522935978d494cd3b2b63fd42705f5c85c24cd78 is unchanged and NOT a joint import of these five latest public modules. No whole-lane completion or goal mutation.
+
+
+## Chronological residual memory copies
+
+Continuation on `0bdc978f23f06c70ea776ba2304245fcfe877bdc` implements
+`Solidity/Yul/Views/ResidualMcopy.lean` and
+`Solidity/Yul/Views/ResidualMcopyControls.lean`. Existing representations,
+APIs, guards, YQ1–YQ7 decisions and budgets are unchanged. Gate G0/history
+review found no owner-state/AST/allocator rewrite; additive typed request
+inputs reuse actual `ResidualWindowPlan`, `Placement` and word interval
+bounds. Separate independent design finder/skeptic reviews accepted this
+construction and required current physical snapshots and overlap controls.
+
+`ResidualCopyRequest.apply` reads the entire current physical map, including
+actual typed object contents and residuals, once per copy. `residualCopies`
+refreshes that snapshot after every request; `residualCopies_physical` proves
+whole-map equality with the same chronological ordinary `mcopy` operations.
+The list is the actual finite request sequence, with no added length/fuel cap.
+`residualCopies_prefix_step` derives each existing actual source writeback
+from every prefix. `residualCopiesWriteback_exact` invokes the actual final
+computed-inventory writeback, including its existing Except/Option result;
+`residualCopiesWriteback_every_H` derives preparation from every original
+owner `MemOK` plus existing `InventoryTypeSupported`. It preserves the WHOLE
+source state, not only a selected heap projection. Other bytes outside all
+destinations and exact reserved/free/zero words are preserved by proved laws.
+
+Nontrivial controls use the existing six-object heterogeneous heap, source
+payload `11 22 33`, current-map forward/backward overlapping copies and a
+later copy reading an earlier destination. Initial-snapshot and reversed-order
+mutants differ. Actual final-source aliases read the original logical bytes
+at every horizon. Empty copies at the highest source word preserve memory;
+a nonempty overflowing source interval fails the actual arithmetic condition.
+These are preparation controls, not source/Yul refusal or no-op verdicts.
+
+Separate `ResidualMcopy.sol`/`residual-mcopy-reference.mjs` fixtures exercise
+actual pinned solc 0.8.38/Osaka legacy and viaIR, preserving previous fixtures
+and 952 ordered observations. Independent expectations include full raw
+padding words, two dynamic ABI aliases, forward/backward/reversed copies,
+zero-length high-source copy, exact Error/static rollback bytes, fresh calls,
+free/zero preservation and state prefixes. External finite observations do
+not imply kernel source/compiler or whole memory-safe/allocator adequacy.
+
+Validation/review results for this tested tree are recorded in the versioned
+`/workspace/vy2-evidence/residual-mcopy-sequence` handoff; no final gate is
+claimed here before its actual recorded exit. Intermediate failed dependent
+reductions and syntax/control attempts remain retained; repairs factor actual
+source-byte and region laws without raising any limit.
+
+Original queue accounting remains partial: Y04 broad mapping/storage-bytes/
+transient/dirty/general reference ownership; Y05 universal memory/shared-zero/
+interior/pointer writeback and reachable allocation/nondeterministic refinement;
+Y06 complete source/Yul input bindings; Y09.02 actual physical calculus,
+notation/printers/Lean-only registrations; concrete V10/V11 agreement and final
+source/compiler/import/joint closure. Both Backfill A/B remain partial. This
+checkpoint proves canonical residual-copy composition, not full VY2 admission
+or assembly correctness. Persistent goal unchanged; no getter exposed. No new
+semantic choice is established; questions=[].

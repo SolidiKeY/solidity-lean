@@ -1003,3 +1003,5 @@ import Solidity.Yul.Views.ScratchHeapControls
 import Solidity.Yul.Views.ResidualWindowControls
 
 import Solidity.Yul.Views.RetainedWindowControls
+
+import Solidity.Yul.Views.ResidualMcopyControls
