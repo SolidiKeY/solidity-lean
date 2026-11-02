@@ -58,6 +58,20 @@ partial def bindersS? (bs : Expr) : MetaM (Option (Array (Expr × Expr) × List 
   let x := bs.getArg! 3
   return some (xs.push (bs.getArg! 2, x), x :: names)
 
+/-- A call's several return binders (`RetBinders`), in the order they are
+bound: each one's type (a `PrimTy`, or a memory return's `RefTy`), its name,
+and whether it is a memory return. -/
+partial def retBindersS? (bs : Expr) : MetaM (Option (Array (Expr × Expr × Bool))) := do
+  let bs ← whnf bs
+  if bs.isAppOf ``RetBinders.nil then return some #[]
+  if bs.isAppOfArity ``RetBinders.snoc 4 then
+    let some xs ← retBindersS? (bs.getArg! 1) | return none
+    return some (xs.push (bs.getArg! 2, bs.getArg! 3, false))
+  if bs.isAppOfArity ``RetBinders.snocMem 6 then
+    let some xs ← retBindersS? (bs.getArg! 1) | return none
+    return some (xs.push (bs.getArg! 2, bs.getArg! 3, true))
+  return none
+
 /-- What a formula's `where` clause is read from (`Delab.ppFmlE`): the
 memory locals hidden binders put in scope, with their types, and the locals
 a copy out of storage binds (`carol = alice;`, `MRhs.copy`), each by its
@@ -530,7 +544,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     if ret.isAppOfArity ``CallRet.val 4 then
       if let some y ← optSome? (ret.getArg! 3) then res ← var? y
     else if ret.isAppOfArity ``CallRet.rets 3 then
-      if (← bindersS? (ret.getArg! 2)).isNone then return ← escape
+      if (← retBindersS? (ret.getArg! 2)).isNone then return ← escape
     else unless ret.isAppOfArity ``CallRet.none 1 || ret.isAppOfArity ``CallRet.mem 5 ||
         ret.isAppOfArity ``CallRet.storage 3 do
       return ← escape
@@ -730,9 +744,10 @@ partial def ppTupleCallS (s : SPiece) (rest : List SPiece) :
   if s.isFVar then return none
   let_expr Stmt.call _ _ _ _ _ _ f args ret _ := (← whnf s) | return none
   let_expr CallRet.rets _ _ bs := (← whnf ret) | return none
-  let some (rs, _) ← bindersS? bs | return none
-  let rvs := rs.map (·.2)
+  let some rs ← retBindersS? bs | return none
+  let rvs := rs.map (·.2.1)
   let rps := rs.map (·.1)
+  let anyMem := rs.any (·.2.2)
   let some (fe, xs) ← ppCallPartsS ns f args | return none
   let mut slots : Array (Option (TSyntax `sol_expr)) := Array.replicate rvs.size none
   let mut start := 0
@@ -763,6 +778,8 @@ partial def ppTupleCallS (s : SPiece) (rest : List SPiece) :
       let stx ← ppPieceS t
       if names.any (hasIdent · stx) then reads := true
     if reads then
+      -- a memory return among them: printed apart (the call, then each read)
+      if anyMem then return none
       let mut decls : Array Syntax := #[]
       for i in [0:rvs.size] do
         let some x ← ppVar? rvs[i]! | return none

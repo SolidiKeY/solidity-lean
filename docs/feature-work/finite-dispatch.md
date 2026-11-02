@@ -20,7 +20,8 @@ source/native simulation or of extractor completeness.
   one `bytes memory` value or one memory array of a word, `bool` or `address`
   element, beside any admitted parameters (lane CF2; before it, only
   zero-argument `bytes memory`). The signature retains that memory kind;
-  several returns with a memory one, and external memory returns, remain
+  several returns with a memory one through the solc import (the
+  elaborator admits them, lane FU2-A), and external memory returns, remain
   refused. `scripts/finite-dispatch.test.mjs` covers receiver effects,
   invalid/unused tags and inherited overrides for this fragment.
 - **Candidates.** Own, inherited and imported free/library functions, each with
@@ -316,14 +317,11 @@ Enum and `bytes1` elements stay unspelled (refused in both scripts).
 
 ### Blockers (lane CF2, after integration)
 
-- **Several returns with a memory one.** The ordinary call frame refuses a
-  reference return in any function of several returns, for direct calls too
-  (`elabCallRetCore`: "`memory` on a return of a function of several
-  returns", or "its return … has a reference type" without a location;
-  `RetKind.rets`
-  and `CallRet.rets` carry value binders only). Dispatching to it first needs
-  a reference-capable `CallRet.rets`/`Binders` in `Syntax/Scoped.lean` and
-  its run (`TRun.call`), a core change outside this lane.
+- **Several returns with a memory one.** Resolved in lane FU2-A for the
+  elaborator, direct calls and function values (`RetBinders`, "Lane FU2-A"
+  below); the solc import still refuses a function *type* with a memory
+  return among several (`SolcJson/Body.lean`, "this function type's
+  reference return").
 - **Narrow array elements.** Resolved in lane FU1 (see "Narrow and byte
   elements" under "Reference arguments").
 - **viaIR storage-to-memory copy order.** solc's IR pipeline copies a
@@ -579,3 +577,137 @@ admitted for a `uint8[]` return, which solc rejects, and aliased the narrow
 object at width 256. A narrow or `bytesN` return is refused again. Docstrings
 corrected. Open: the `AxiomAudit.lean` treatment of a constant missing from
 the environment as clean (not exploitable with a complete import).
+
+## Lane FU2-A (fu2-20261102)
+
+### Design: memory returns in the ordinary call frame
+
+CF2 blocker 1 needs a call of several returns to leave a memory return in
+the caller beside value returns (`uint a; uint[] memory b; (a, b) = f(x);`).
+Two representations were considered.
+
+1. **A new `CallRet` constructor** (`retsMem`, or a `rets` with a second
+   binder list). Every `CallRet` match gains an arm: about 40 proof arms
+   (`RunWk`, `RunFrame`, `RunFrameMem`, `RunFrameOwn`, `TypedRunInv`,
+   `WkOver`, `FunContract`, `MemContract`, `Recursion`,
+   `RecursionCallback`, `SoundCalls`, `SolkeyFragment`, `CallSummary`,
+   `TermSize`, `SoundSummary`, `Stipend`, the printers and both quoters),
+   and the exhaustive matches in `Solidity/Evm/Compile.lean`
+   (`CallRetIn`), `Evm/Correct.lean` (`cases ret with … | rets _ => …`) and
+   `Evm/MemoryCalls.lean` (`CallRet.casesOn` with five minor premises).
+   Those files belong to the Codex EVM lanes and may not be edited here, so
+   this option is ruled out.
+2. **A reference-capable binder list for `CallRet.rets`** (chosen):
+   `CallRet.rets {rs} (bs : RetBinders rs)`, where `RetBinders`
+   (`Syntax/Scoped.lean`) has `nil`, `snoc` (a value) and `snocMem` (a
+   memory return, with the `defaultOkS`/`mapFree` evidence `CallRet.mem`
+   carries). The constructor keeps its arity, so every `| rets _` arm,
+   `.rets .nil` and the five-premise `casesOn` in `Solidity/Evm/**` still
+   elaborate unchanged. `Binders` itself is not changed: `tryCall` and
+   `catchData` decode their returns with `Binders.decodeT`, and a memory
+   binder there would need an ABI decoder; the self `try` path converts
+   with `Binders.toRet`.
+
+Semantics: `CallRet.enterT (.rets bs)` is `RetBinders.enterT`, which
+declares the binders in order on the frame's parameters, a value one at
+its default and a memory one a fresh default object (`State.allocDefaultG`,
+as `CallRet.mem` does and solc does on entry); `leaveT` is unchanged (the
+binders are left above the caller's locals, and the tuple's targets read
+them: a memory target takes the callee's object, by pointer, so aliasing
+is solc's). The inline rule's premise (`functionBodyExpand`,
+`Premise.expandCall`) declares the binders with `RetBinders.declsThen`
+(`T memory r;` for a memory one), so the premise's shape and the rule map
+do not change; its soundness rests on `RetBinders.runSt_declsThen` (the
+declarations run as the frame is entered) and `RetBinders.enterT_lift`
+(entering over a lifted state). The function-contract rule
+(`holds_callRets`) keeps its premises: a memory binder makes its "post"
+false (`RetBinders.all`), so a call with a memory return among several is
+inlined, never summarised by a contract. Recursive functions with a memory
+return among several stay refused by the elaborator.
+
+Proofs touched: the arms that read `enterT` of `.rets` (`RunFrame`,
+`RunFrameMem`, `RunFrameOwn`, `TypedRunInv`, `FunContract`,
+`MemContract`, `Recursion`, `RecursionCallback`, `SoundCalls`,
+`CallbackSound`), each by an induction over `RetBinders` instead of the
+former definitional unfolding; arms that only read `leaveT` are unchanged.
+Checking speed: `enterT` of value-only binders no longer reduces to one
+`TEnv.append` by definition, so three proofs that unfolded it
+(`holds_callRets`, `Stmt.runSt_callRets`, `CallRet.enterT_snap`) rewrite
+with `Binders.enterT_toRet` / `RetBinders.enterT_lift` instead; no
+kernel-evaluated certificate unfolds `enterT` (`git log -S enterT` shows no
+earlier speed-motivated change to it).
+
+Baseline (base `84a2a4be`, `./run-lean.sh` on this lane's 4-core VM, fresh
+`.lake`): `lake build` 67m40s wall, 1039 of 1041 jobs (`Source.Horizon` and
+`Frontend.Checked.UnitExamples` OOM-killed under the 4-job build, both
+outside this lane). Elaboration of the touched modules on the base, from
+that build: `Syntax.Scoped` 13s, `Semantics.Run` 8.9s, `Semantics.RunWk`
+17s, `Semantics.RunFrame` 13s, `Typing.TypedRunInv` 2.6s,
+`Calculus.Blocks` 3.7s, `Calculus.RunFrameMem` 8.4s,
+`Calculus.RunFrameOwn` 7.0s, `Calculus.SoundCalls` 6.4s,
+`Calculus.SoundCatch` 2.2s, `Calculus.FunContract` 9.1s,
+`Calculus.MemContract` 3.3s, `Calculus.Recursion` 8.2s,
+`Calculus.RecursionCallback` 12s, `Calculus.CallbackSound.Calls` 13s,
+`Calculus.CallbackSound.Rules` 6.3s, `Calculus.SolkeyFragment` 35s,
+`Calculus.PrintStmt` 39s, `Syntax.Elab.Arms` 111s, `Syntax.Elab.Stmt` 12s,
+`Examples.Tactics.FunctionTypes` 55s.
+
+### Implementation (lane FU2-A, items 2–3)
+
+- **Frame.** `RetBinders` and `RetBinders.enterT` as designed above;
+  `Binders.toRet` for the self `try` (`TRun.tryCall`, `TRun.catchBytes`
+  and every proof of the self path, by `rets.toRet`, with
+  `Binders.toRet_noMem` where a frame lemma needs no allocation).
+- **Soundness, no new premise.** The inline rule
+  (`Stmt.runSt_callRets`, `Premise.sound_callRets`) by
+  `RetBinders.runSt_declsThen` and `RetBinders.enterT_lift`; with callbacks
+  (`ExecS.callRets_inline`, `holdsC_callRets`) by
+  `RetBinders.execP_declsThen(_eq)`; the frame lemmas
+  (`RetBinders.enterT_frame`, `enterT_frameM`, `enterT_own`,
+  `RunInv.retEnterT_env`, `RetBinders.enterT_storage`/`enterT_keeps`);
+  contracts (`RetBinders.enterT_snap`, `holds_callRets` with
+  `RetBinders.not_holds_all` for a memory binder, `FunContract.forall_rets`
+  and `FunContractC.forall_rets` by `RetBinders.enterT_eq`,
+  `FunContract.forall_mem`/`FunContractC.forall_mem` gaining the
+  `snocMem nil` case, `CallRet.isValues` of `.rets bs` now `bs.noMem`, so
+  the recursive-contract rule with callbacks does not take a memory return
+  among several). The premises of `functionBodyExpand`,
+  `functionCallArgCapture` and the contract rules are unchanged in shape:
+  `RetBinders.declsThen` writes `T memory r;` where `Binders.declsThen`
+  wrote nothing, and the rule map needs no row.
+- **Elaborator.** `elabCallRetCore` admits a memory return among several
+  (`retMem`, not `retStorage`), declared `mv…` in the frame and the caller;
+  `RetKind.rets` and the call's result list carry `LocalTy`s; a statement
+  call of such a function declares the memory return with `declMem`
+  (`.none`); a recursive function with a memory return among several is
+  refused ("is recursive and returns a memory value among several"). A
+  storage return among several keeps its refusal. A target of another
+  element width is refused by the rebinding's shape check (solc rejects
+  it); a narrow target of the same width is admitted.
+- **Function values.** `fnTupleDispatch` admits a full-word memory return
+  among several (`fnMemRet`, as for a single one); the dispatch's arms are
+  the direct tuple assignments above. The solc import still refuses the
+  function type (`SolcJson/Body.lean`, sibling lane's file; its refusal
+  cases in `scripts/finite-dispatch.test.mjs` stand).
+- **Printer, quoters.** `retBindersS?` (`PrintStmt`), `RetBinders.quote`,
+  `qRetBinders`, `RetBinders.declStrs`; a tuple declaration with a memory
+  binder prints as the call and its reads.
+
+Tests: `Examples/Tactics/MemoryReturns.lean`, kernel-checked runs
+(`decide +kernel`) `splitAssign_run`, `bothAlias_run` (a returned parameter
+aliases the argument), `untouchedDefault_run`, `omitted_run`,
+`narrowAssign_run`, `falseObservation_panics` (the false observation
+panics), through function values `valueSplit_run`, `valueTernaryT_run`,
+`valueTernaryF_run` (`(c ? split : split2)(5)`, only the chosen callee
+runs), `valueAlias_run`; calculus proofs `untouched_proved`,
+`split_proved` (`sol_symex`/`sol_close`, the value target); refusals of a
+storage return among several and of a wider target (`#guard_msgs`).
+
+Open: the closer does not resolve a memory array's length or elements after
+its allocation (`[ uint[] memory b; ] b.length == 0` stays open with no call
+at all, as does a single memory return's `b.length == 0`), so the calculus
+examples read only the value target; the reads of the returned objects are
+pinned by the runs. EVM-observed vectors were not added: running the pinned
+soljson and the EVM harness (`scripts/check-function-value-references.mjs`)
+was refused by this session's command policy, and fixture expectations may
+not be written by hand.

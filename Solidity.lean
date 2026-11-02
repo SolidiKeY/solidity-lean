@@ -283,6 +283,7 @@ import Solidity.Examples.Tactics.InheritedSelectorsImport
 import Solidity.Examples.Tactics.AbiHexCall
 import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.FunctionTypes
+import Solidity.Examples.Tactics.MemoryReturns
 import Solidity.Examples.Tactics.SignedCasts
 import Solidity.Examples.Tactics.SolcOpen
 import Solidity.Examples.Tactics.CleanTail

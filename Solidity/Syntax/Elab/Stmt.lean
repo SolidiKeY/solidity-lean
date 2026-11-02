@@ -604,7 +604,7 @@ yet in scope. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
-    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) :=
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
   elabCallRetWith C (elabRec ()) f args res resW targets ctor resNew selfFrame
 
 /-- **The body a `try` runs when its receiver is the contract itself**
@@ -807,9 +807,11 @@ partial def fnTupleDispatch (ts : List (Option RawExpr)) (h ty : String) (args :
   if let some c := ps.find? fun c =>
       (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
     throw s!"{h}(…): a function type with a {c} parameter is not modelled"
-  if let some c := rs.find? fun c => (fnCompTy? C c).isNone then
+  -- a memory return among several: full-word elements only, as a single
+  -- one (`fnMemRet`), since the target's type is compared without widths
+  if let some c := rs.find? fun c => (fnCompTy? C c).isNone && !fnMemRet C c then
     throw s!"{h}(…): a function value returning a {c} among several values is not modelled \
-      (a direct tuple call binds value returns)"
+      (a direct tuple call binds value and full-word memory returns)"
   let scope := (← read).funs
   let taken := fnTaken C
   let mut cands : List (String × Nat) := []
@@ -888,9 +890,9 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     let (P, args) ← hoistCallArgs f args
     let (Q, _, rs) ← elabCallRet f args none (targets := true)
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
-    for (p, r, w) in rs do declare C (toString r) (.val p w)
+    for (r, t) in rs do declare C (toString r) t
     let pairs := if reverseWrites then (ts.zip rs).reverse else ts.zip rs
-    let R ← elabStmtsP (pairs.filterMap fun (t, (_, r, _)) =>
+    let R ← elabStmtsP (pairs.filterMap fun (t, (r, _)) =>
       t.map fun t => .assign t (.name (toString r)))
     pure (P ++ Q ++ R)
   | .tuple es =>

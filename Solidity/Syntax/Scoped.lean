@@ -205,6 +205,48 @@ inductive Args (C : Contract) (Γ : Ctx) : Ctx → Type where
   | snocMemory {ps : Ctx} (as : Args C Γ ps) (R : RefTy) (x : Var)
       (e : MPath C Γ (.ref R)) : Args C Γ (.mem R :: ps)
 
+/-- The return variables a call of several returns leaves in its caller
+(`CallRet.rets`), in the order it declares them, the last innermost: value
+locals at their defaults and memory locals, each a fresh default object on
+entry, as solc allocates one (`function f() returns (uint a, uint[] memory
+b)` is `(nil.snoc .uint a).snocMem (.array .uint) b …`).  A storage return
+has no binder here: several returns with a storage one stay refused. -/
+inductive RetBinders : Ctx → Type where
+  | nil : RetBinders []
+  | snoc {ρ : Ctx} (bs : RetBinders ρ) (p : PrimTy) (x : Var) : RetBinders (.val p :: ρ)
+  | snocMem {ρ : Ctx} (bs : RetBinders ρ) (R : RefTy) (x : Var)
+      (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).mapFree = true) :
+      RetBinders (.mem R :: ρ)
+
+/-- Their names, innermost first, as a printer keeps them beside `ρ`. -/
+def RetBinders.names {ρ : Ctx} : RetBinders ρ → List Var
+  | .nil => []
+  | .snoc bs _ x => x :: bs.names
+  | .snocMem bs _ x _ _ => x :: bs.names
+
+/-- The binders in the order they are bound, with their local types. -/
+def RetBinders.toList {ρ : Ctx} : RetBinders ρ → List (LTy × Var)
+  | .nil => []
+  | .snoc bs p x => bs.toList ++ [(.val p, x)]
+  | .snocMem bs R x _ _ => bs.toList ++ [(.mem R, x)]
+
+/-- Value binders as a call's (a self `try`'s callee, `this.f()`, returns
+to its clause's binders). -/
+def Binders.toRet : {ρ : Ctx} → Binders ρ → RetBinders ρ
+  | _, .nil => .nil
+  | _, .snoc bs p x => .snoc bs.toRet p x
+
+/-- No memory binder: the binders of a call that allocates nothing on entry. -/
+def RetBinders.noMem {ρ : Ctx} : RetBinders ρ → Bool
+  | .nil => true
+  | .snoc bs _ _ => bs.noMem
+  | .snocMem .. => false
+
+/-- A self `try`'s binders allocate nothing. -/
+theorem Binders.toRet_noMem : {ρ : Ctx} → (bs : Binders ρ) → bs.toRet.noMem = true
+  | _, .nil => rfl
+  | _, .snoc bs _ _ => Binders.toRet_noMem bs
+
 /-- What a call does with its return variables `rs`, which its frame
 declares at their defaults on its parameters, and the context `Γ'` it
 leaves the caller in:
@@ -215,7 +257,10 @@ leaves the caller in:
   call is assigned (`y = f(a);`);
 * `rets bs`: several (or one with a target), left in the caller's context,
   where the tuple's targets read them (`(lo, hi) = f(a);` is the call and
-  `lo = r0; hi = r1;`), KeY's `functionBodyExpand`;
+  `lo = r0; hi = r1;`), KeY's `functionBodyExpand`; a memory one among them
+  is a fresh default object on entry, its pointer read by its target
+  (`(a, b) = f(x);` with `b` a `uint[] memory` is the call and `a = r0;
+  b = r1;`, `b` then the callee's object, as in solc);
 * `mem R r`: a memory return, a fresh default object (as solc allocates one
   on entry), left in the caller's context for the statement after the call
   to bind (`Person memory m = f();` is the call and `Person memory m = r;`);
@@ -224,7 +269,7 @@ leaves the caller in:
 inductive CallRet (Γ : Ctx) : Ctx → Ctx → Type where
   | none : CallRet Γ [] Γ
   | val (p : PrimTy) (r : Var) (res : Option (Idx Γ (.val p))) : CallRet Γ [.val p] Γ
-  | rets {rs : Ctx} (bs : Binders rs) : CallRet Γ rs (rs ++ Γ)
+  | rets {rs : Ctx} (bs : RetBinders rs) : CallRet Γ rs (rs ++ Γ)
   | mem (R : RefTy) (r : Var) (hd : (Ty.ref R).defaultOkS = true)
       (hm : (Ty.ref R).mapFree = true) : CallRet Γ [.mem R] (.mem R :: Γ)
   /-- A storage return is an alias, initially unset and exported by identity. -/
@@ -1254,7 +1299,7 @@ private def example₁ : Prog SE [] [.val .uint, .val .uint, .mem P, .mem P, .al
       (lit 1)) (.val .uint (.user "r") (some (.there .here))) .nil) <|
   .cons (.call "g" .nil (.mem P (.user "r") rfl rfl) .nil) <|
   .cons (.declMem P (.user "m") (some (.alias (.var .here rfl))) rfl rfl) <|
-  .cons (.call "h" .nil (.rets ((Binders.nil.snoc .uint (.user "r0")).snoc .uint (.user "r1")))
+  .cons (.call "h" .nil (.rets ((RetBinders.nil.snoc .uint (.user "r0")).snoc .uint (.user "r1")))
     .nil) <|
   .cons (.assignLocal (.there (.there (.there (.there (.there .here))))) (loc .here)) <|
   .cons (.tryCall ⟨.local (.there (.there (.there (.there (.there .here))))), "ping",

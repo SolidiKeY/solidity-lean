@@ -257,11 +257,27 @@ theorem MRhs.evalT_frame {R : RefTy} (μ : Mutability) (d : Nat) (r : MRhs C Γ 
     cases h
     exact ⟨TGFrameM.adopt σ _ (SVal.keeps_copyStToM _ _ σ.heap), TLocAgreeM.wk _ _⟩
 
+/-- Several returns entered: each memory return's object fresh
+(`uint a; uint[] memory b;` on the frame's parameters). -/
+theorem RetBinders.enterT_frameM {μ : Mutability} {ps : Ctx} : {ρ : Ctx} → (bs : RetBinders ρ) →
+    (σ : State C ps) → TGFrameM μ σ (bs.enterT σ).st (bs.enterT σ).ext
+  | _, .nil, σ => TGFrameM.ofFrame (TGFrame.refl σ) _
+  | _, .snoc bs p _, σ =>
+    (RetBinders.enterT_frameM bs σ).trans
+      (TGFrameM.ofFrame (μ := μ) (TGFrame.push (bs.enterT σ).st (t := .val p) (PrimTy.dflt p))
+        (List.prefix_refl _)) _
+  | _, .snocMem bs R _ _ hm, σ =>
+    let g := (bs.enterT σ).st.allocDefaultG R hm
+    (RetBinders.enterT_frameM bs σ).trans
+      (⟨State.keeps_allocDefaultG (bs.enterT σ).st R hm, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩ :
+        TGFrameM μ (bs.enterT σ).st (g.st.push (t := .mem R) (some g.val)) g.ext) _
+
 /-- A call's frame entered: a memory return's object fresh. -/
 theorem CallRet.enterT_frameM {μ : Mutability} {Γ' rs ps : Ctx} (ret : CallRet Γ rs Γ')
     (σ : State C ps) : TGFrameM μ σ (ret.enterT σ).st (ret.enterT σ).ext := by
   cases ret with
-  | none | val | rets | storage => exact TGFrameM.ofFrame (CallRet.enterT_frame _ rfl σ) _
+  | none | val | storage => exact TGFrameM.ofFrame (CallRet.enterT_frame _ rfl σ) _
+  | rets bs => exact RetBinders.enterT_frameM bs σ
   | mem R r hd hm =>
     exact ⟨State.keeps_allocDefaultG σ R hm, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
 
