@@ -705,6 +705,19 @@ theorem convElem_mem {el : Elem} {h : el ≠ .addressPayable} {x : Syn .expr} {d
   simp only [convElemRes]
   rw [dif_pos hx]; exact List.mem_singleton.mpr rfl
 
+theorem newArray_mem {t : Syn .typeName} {x : Syn .expr} {τ σ : STy} {dx : Typed Γ x σ}
+    (hx' : Res.expr dx ∈ infer Γ x) (ht : t.ty Γ.env Γ.scope .memory = Option.some τ) (hτ : τ.newable = true)
+    (hl : σ.isIndex = true) :
+    Res.expr (Typed.newArray ht hτ dx hl) ∈ infer Γ (.call (.new t) (.positional (.cons x .nil))) := by
+  refine List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, args1_mem hx', ?_⟩)
+  show _ ∈ newRes Γ t [σ] (.cons dx .nil)
+  simp only [newRes]
+  split
+  · rename_i τ' ht'
+    rw [ht] at ht'; cases ht'
+    rw [dif_pos ⟨hτ, hl⟩]; exact List.mem_singleton.mpr rfl
+  · rename_i ht'; rw [ht] at ht'; cases ht'
+
 theorem payable_mem {x : Syn .expr} {dx : Typed Γ x σ} (hx' : Res.expr dx ∈ infer Γ x)
     (h : payableArg σ = true) :
     Res.expr (Typed.payable dx h) ∈ infer Γ (.payableConv (.positional (.cons x .nil))) := by
@@ -936,6 +949,9 @@ theorem typed_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → Typed Γ 
     obtain ⟨dx', hx⟩ := exists_expr (typed_complete dx)
     obtain ⟨ds', h⟩ := exists_args (args_complete ds)
     exact mem_tysOf (inlineArray_mem hx h hc hσ hf)
+  | _, _, .newArray ht hτ dx hl => by
+    obtain ⟨dx', h⟩ := exists_expr (typed_complete dx)
+    exact mem_tysOf (newArray_mem h ht hτ hl)
 
 /-- **Completeness for lvalues.** -/
 theorem lval_complete {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → LVal Γ e τ →

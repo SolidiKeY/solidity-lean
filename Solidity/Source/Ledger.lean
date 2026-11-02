@@ -53,7 +53,7 @@ def semExprCoverage (k : Ctor) : Option SemStatus :=
     match k with
     | .callOptions => some (.gap "S02" "only `{value: v}` on an external call is typed and evaluated (`extCall`)")
     | .metaType => some (.gap "S04.02" "type(T) members read the artifact table")
-    | .new => some (.gap "S03" "contract creation and `new T[](n)` are not typed")
+    | .new => some (.gap "S03" "contract creation is not typed; `new T[](n)` of one-word `T`, `new bytes(n)`, `new string(n)` are (newArray, FU2-B)")
     | _ => some (.gap "S02" "deferred by S01")
   | none => none
 

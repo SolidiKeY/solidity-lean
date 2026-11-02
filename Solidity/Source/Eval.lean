@@ -400,6 +400,17 @@ def inlineData {D : Layout} {σ : STy} {m : Nat} (vs : Vals D (List.replicate m 
     Data D (.array .memory σ (some m)) :=
   .array m (fun _ h => (Option.some.inj h).symm) (fun i => .val (vs.nthRep i))
 
+/-- **A new memory object of `len` zeroed elements** (`new`, lane FU2-B). -/
+def newData {D : Layout} (τ : STy) (len : Nat) : R (Data D τ) :=
+  match τ with
+  | .bytes _ => pure (.bytes (List.replicate len 0))
+  | .string _ => pure (.string (List.replicate len 0))
+  | .array _ σ none =>
+    match Val.default D σ with
+    | some z => pure (.array len (fun _ h => nomatch h) (fun _ => .val z))
+    | none => stuck "new of this element type"
+  | _ => stuck "new of this type"
+
 /-- A tuple value's components. -/
 def RVal.untuple {D : Layout} {σs : List STy} : RVal D (.tuple σs) → R (RVals D σs)
   | .tuple vs => pure vs
@@ -1000,6 +1011,12 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
   | .inlineArray args _ => do
     let vs ← evalConvArgs G F n args
     return .val (← allocRef (inlineData vs))
+  | .newArray (τ := τ) _ len _ => do
+    -- a length of `2^64` or more panics `0x41`, as the decoder's (the same
+    -- band below solc's `finalize_allocation` bound applies)
+    let k ← indexNat (← evalE G F n len)
+    if 2 ^ 64 ≤ k then lift (panic .alloc)
+    else return .val (← allocRef (← lift (newData τ k)))
   | .slice a _ s _ e _ toEnd => do
     let av ← getV (← evalE G F n a)
     let si ← indexNat (← evalE G F n s)

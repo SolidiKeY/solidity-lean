@@ -573,6 +573,16 @@ def convElemRes (el : Elem) (h : el ≠ .addressPayable) {es : Syn (.list .expr)
     then [.expr (.convElem dx rfl hx)] else []
   | _, _, _ => []
 
+/-- `new T[](n)`, `new bytes(n)`, `new string(n)` (FU2-B). -/
+def newRes (t : Syn .typeName) {es : Syn (.list .expr)} (σs : List STy) (ds : TypedArgs Γ es σs) :
+    List (Res Γ .expr (.call (.new t) (.positional es))) :=
+  match es, σs, ds with
+  | .cons _ .nil, [σ], .cons dx .nil =>
+    match ht : t.ty Γ.env Γ.scope .memory with
+    | Option.some τ => if h : τ.newable = true ∧ σ.isIndex = true then [.expr (.newArray ht h.1 dx h.2)] else []
+    | Option.none => []
+  | _, _, _ => []
+
 /-- `payable(e)`. -/
 def payableRes {es : Syn (.list .expr)} (σs : List STy) (ds : TypedArgs Γ es σs) :
     List (Res Γ .expr (.payableConv (.positional es))) :=
@@ -587,6 +597,7 @@ def callRes : (f : Syn .expr) → List (Res Γ .expr f) → {a : Syn .callArgs} 
     List (Res Γ .expr (.call f a))
   | .ident n, _, _, .pos ds => callIdentRes Γ n _ ds
   | .elemType el h, _, _, .pos ds => convElemRes Γ el h _ ds
+  | .new t, _, _, .pos ds => newRes Γ t _ ds
   | .member c m, rf, _, .pos ds => abiRes Γ c m _ ds ++ rf.flatMap (memberCallOne Γ _ ds)
   | .callOptions (.member _ _) (.namedArg "value" _) .nil, rf, _, .pos ds => rf.flatMap (valueCallOne Γ _ ds)
   | _, _, _, _ => []

@@ -244,6 +244,8 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   /-- `[e₁, …, eₙ]`: a new memory array of the converted elements. -/
   | inlineArray {σ : STy} {n : Nat} (args : RConvArgs E Γ (List.replicate n σ)) (hσ : σ.oneWord = true) :
       RExpr E Γ (.array .memory σ (some n))
+  /-- `new T[](n)`, `new bytes(n)`, `new string(n)`: `n` zeroed elements. -/
+  | newArray {τ σ : STy} (hτ : τ.newable = true) (len : RExpr E Γ σ) (hl : σ.isIndex = true) : RExpr E Γ τ
 
 /-- Resolved argument lists. -/
 inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
@@ -367,6 +369,7 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .sliceAll da hτ => .slice da.toR hτ (.const (Q.ofInt 0)) zero_isIndex (.const (Q.ofInt 0)) zero_isIndex true
   | .inlineArray (τs := τs) d ds _ hσ hf =>
     .inlineArray (n := τs.length + 1) (RArgs.convert _ (RArgs.cons d.toR ds.toR) hf) hσ
+  | .newArray _ hτ dx hl => .newArray hτ dx.toR hl
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :

@@ -1214,7 +1214,25 @@ signatures elaborate and are `stuck` at run time (solc refuses them);
 untested paths (a named output assigned, an output never assigned, empty
 call data reaching the fallback, value to a non-`payable` one, modifiers).
 
-**`new`, `try`/`catch`: not
+**`new` of memory arrays (done; contract creation not started).**
+`Typed.newArray` types `new T[](n)`, `new bytes(n)` and `new string(n)`
+(`STy.newable`: `bytes`, `string`, a dynamic memory array of one-word
+elements; `n` an index, as a slice bound). `RExpr.newArray` evaluates `n`
+(`indexNat`), panics `0x41` for `2^64` or more (the decoder's band: solc
+panics already when the free memory pointer would pass `2^64 - 1`), and
+allocates `n` zeroed elements (`newData`, a pure `R` function used through
+`lift`, so the Horizon proofs need no new lemma). Both checkers have the
+rule (`Typed.inferN`; G13's `newRes` in `callRes`, `newArray_mem` in
+`typed_complete`), uniqueness of meaning covers it (`uniqE_callNew`),
+`OpsOK` too. `.new` stays a deferred constructor in `exprCoverage`/the
+ledger (contract creation is its other use). Controls in
+`Solidity/Source/InlineExamples.lean` (`unitNew`): `new uint8[](3)`
+stores and reads, `a[1]` of `new uint8[](1)` panics `0x32`,
+`new bytes(5).length` is 5, `new bytes(2^64)` panics `0x41`, elements are
+zero; `new uint256[2](3)` is refused (as by solc), `new string[](2)` is
+refused (reference elements, not modelled).
+
+**Contract creation (`new C(…)`), `try`/`catch`: not
 started** (time; each is a typing rule, an interpreter arm and its
 Horizon lemmas, both checkers, uniqueness and controls as above; `new` and
 `try`/`catch` also need contract creation and external-call failure

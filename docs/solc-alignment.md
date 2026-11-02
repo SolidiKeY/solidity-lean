@@ -610,6 +610,11 @@ stronger obligation, not an additional assumption available to its proofs.
   the legacy code generator allocates first, unobservable without
   assembly)
   ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
+- **`new` of memory arrays** (lane FU2-B, `Typed.newArray`): a length of
+  `2^64` or more panics `0x41`; solc panics from a lower length, where the
+  free memory pointer passes `2^64 - 1` (the decoder's band, above); only
+  one-word elements, `bytes` and `string` are modelled (`new string[](n)`
+  is refused, solc accepts it); contract creation is not modelled.
 - **`fallback` with parameters** (lane FU2-B): the source semantics runs
   `fallback(bytes calldata input) returns (bytes memory output)`, `input`
   all of the call data and `output` returned unencoded, as solc; other

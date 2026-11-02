@@ -85,7 +85,8 @@ proof uses it, never derived from a machine model.
 
 - **Source semantics** (`Solidity/Source`, the S02–S05 reference
   interpreter): the constructor ledger's gaps are `callOptions` beyond
-  `value`, `metaType` and `new` (`semExprGaps`; inline arrays of one-word
+  `value`, `metaType` and `new` (`semExprGaps`; contract creation: `new T[](n)`
+  of one-word `T`, `new bytes(n)` and `new string(n)` run since lane FU2-B; inline arrays of one-word
   elements are typed and evaluated since lane FU2-B, reference and
   fractional elements refused; `fallback(bytes calldata) returns (bytes
   memory)` runs since lane FU2-B), and among

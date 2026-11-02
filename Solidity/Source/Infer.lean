@@ -320,6 +320,14 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     if hp : σ.isPayableArg = true then
       pure ⟨_, .payable d hp⟩
     else Option.none
+  | .call (.new t) (.positional (.cons x .nil)) =>
+    match ht : t.ty Γ.env Γ.scope .memory with
+    | Option.some τ =>
+      if hτ : τ.newable = true then do
+        let ⟨σ, d⟩ ← Typed.inferN n Γ x
+        if hl : σ.isIndex = true then pure ⟨_, .newArray ht hτ d hl⟩ else Option.none
+      else Option.none
+    | Option.none => Option.none
   | .inlineArray x xs => do
     let ⟨τ, d⟩ ← Typed.inferN n Γ x
     let ⟨τs, ds⟩ ← TypedArgs.inferN n Γ xs

@@ -733,6 +733,13 @@ def STy.commonOf (B : DeclName → DeclName → Bool) (a : STy) : List STy → O
     | Option.some c => STy.commonOf B c bs
     | Option.none => Option.none
 
+/-- **A type `new` allocates with a length** (lane FU2-B): `bytes`,
+`string`, a dynamic memory array of one-word elements. -/
+def STy.newable : STy → Bool
+  | .bytes .memory | .string .memory => true
+  | .array .memory σ none => σ.oneWord
+  | _ => false
+
 /-- **A sliceable type** (`a[s:e]`, lane FU2-B): `bytes` or a dynamic array
 of one-word values in `calldata` (solc: index range access only for
 dynamic calldata arrays). -/
@@ -1004,6 +1011,11 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       Typed Γ e τ → TypedArgs Γ es τs → STy.commonOf Γ.isBase τ τs = Option.some σ → σ.oneWord = true →
       argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true →
       Typed Γ (.inlineArray e es) (.array .memory σ (Option.some (τs.length + 1)))
+  /-- `new T[](n)`, `new bytes(n)`, `new string(n)` (lane FU2-B): a new
+  memory object of `n` zeroed elements (`STy.newable`); `n` an index. -/
+  | newArray {t : Syn .typeName} {x : Syn .expr} {τ σ : STy} :
+      t.ty Γ.env Γ.scope .memory = Option.some τ → τ.newable = true → Typed Γ x σ → σ.isIndex = true →
+      Typed Γ (.call (.new t) (.positional (.cons x .nil))) τ
 
 /-- Typing of an argument list. -/
 inductive TypedArgs (Γ : Ctx) : Syn (.list .expr) → List STy → Type where

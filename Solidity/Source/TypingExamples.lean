@@ -231,7 +231,7 @@ def exprCoverage : Ctor → Option Coverage
   | .assign | .tuple | .ident | .lit | .litUnit | .slice | .inlineArray => some .typed
   | .callOptions => some (.deferred "S02" "call options belong to external calls and creation (S02/S03)")
   | .metaType => some (.deferred "S04.02" "type(T) members read the artifact table and ABI identities")
-  | .new => some (.deferred "S03" "creation and memory allocation are typed with their semantics")
+  | .new => some (.deferred "S03" "contract creation is typed with its semantics; new T[](n), new bytes(n) and new string(n) are typed as the callee of a call (newArray, FU2-B)")
   | .elemType => some (.operand .call "a type name: the callee of an elementary conversion (convElem) and a type expression of abi.decode (abiDecode, FU2-B); type(T) is metaType's")
   | _ => none
 

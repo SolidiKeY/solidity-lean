@@ -1396,6 +1396,29 @@ theorem uniqE_callElem {Γ : Ctx} {el : Elem} {hel : el ≠ .addressPayable} {A 
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
+/-- **`new T[](n)`** (lane FU2-B): the type name fixes the type. -/
+theorem uniqE_callNew {Γ : Ctx} {t : Syn .typeName} {A : Syn .callArgs}
+    (ih : Uniq Γ (sizeOf (Syn.call (.new t) A))) : UniqE Γ (.call (.new t) A) := by
+  intro τ τ' d d'
+  have hce : (Syn.call (.new t) A).const = Option.none := rfl
+  have hbo : (Syn.call (.new t) A).binOp? = Option.none := rfl
+  cases d with
+  | @newArray _ x _ _ ht _ dx _ =>
+    cases d' with
+    | newArray ht' _ dx' _ =>
+      have hsz : sizeOf x < sizeOf (Syn.call (.new t) (.positional (.cons x .nil))) := by
+        simp only [Syn.call.sizeOf_spec, Syn.positional.sizeOf_spec, Syn.cons.sizeOf_spec]; omega
+      obtain ⟨h1, e1⟩ := ih.e x hsz dx dx'
+      cases h1
+      rw [ht] at ht'; cases ht'
+      exact ⟨rfl, by simp only [Typed.toR]; rw [eq_of_heq e1]⟩
+    | _ => first
+      | exact (no_const hce ‹_›).elim
+      | (exfalso; apply no_binOp hbo; assumption)
+  | _ => first
+    | exact (no_const hce ‹_›).elim
+    | (exfalso; apply no_binOp hbo; assumption)
+
 /-- **External calls with value** (`c.f{value: v}(args)`). -/
 theorem uniqE_callOpts {Γ : Ctx} {f : Syn .expr} {o : Syn .namedArg} {os : Syn (.list .namedArg)}
     {A : Syn .callArgs} (ih : Uniq Γ (sizeOf (Syn.call (.callOptions f o os) A))) :
@@ -1571,6 +1594,7 @@ theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ
     | ident n => exact uniqE_callIdent ih
     | member c n => exact uniqE_callMember ih
     | elemType el h => exact uniqE_callElem ih
+    | new t => exact uniqE_callNew ih
     | callOptions f o os => exact uniqE_callOpts ih
     | _ =>
       apply uniqE_empty
