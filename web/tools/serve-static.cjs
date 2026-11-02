@@ -15,7 +15,12 @@ function createStaticServer({root=path.resolve(__dirname,'../dist'),port=4173}={
       res.writeHead(200,{...headers,'Content-Type':types[path.extname(file)]||'application/octet-stream'});if(req.method==='HEAD')res.end();else fs.createReadStream(file).pipe(res);
     }catch{reply(404,'Not found');}
   });
-  return {server,async listen(){await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});return 'http://127.0.0.1:'+server.address().port;},async close(){await new Promise(resolve=>server.close(resolve));}};
+  return {server,async listen(){await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});return 'http://127.0.0.1:'+server.address().port;},async close(){await new Promise(resolve=>{
+    server.close(resolve);
+    // Offline QA deliberately stops the host while the browser remains open.
+    // Do not let a retained HTTP connection postpone that disconnection.
+    server.closeAllConnections();
+  });}};
 }
 if(require.main===module){const app=createStaticServer({port:Number(process.env.PORT||4173),...(process.argv.includes('--single')?{root:path.resolve(__dirname,'../single-file')}:{} )});app.listen().then(url=>console.log('Browser-only website: '+url)).catch(error=>{console.error(error);process.exitCode=1;});for(const signal of ['SIGINT','SIGTERM'])process.once(signal,async()=>{await app.close();process.exit();});}
 module.exports={createStaticServer};

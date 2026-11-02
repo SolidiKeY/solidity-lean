@@ -75,12 +75,15 @@ jobs:
           npm run build:single --prefix web
           rm -rf web/dist web/.single-file-assets
           node web/test/compression.test.mjs
+          node web/test/zstd.test.mjs
+          node web/test/checksum.test.mjs
       - name: Test a fresh offline file launch, proofs and offline reopening
         run: |
           npx --prefix web playwright install --with-deps chromium
           export CHROMIUM_PATH="$(node -p 'require("./web/node_modules/playwright").chromium.executablePath()')"
           node web/test/embedded-assets.cjs
           node --max-old-space-size=192 web/test/website.cjs --single --file --proofs
+          node --max-old-space-size=192 web/test/performance.cjs --single
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -27,6 +27,8 @@ jobs:
           export CHROMIUM_PATH="$(node -p 'require("./web/node_modules/playwright").chromium.executablePath()')"
           node web/test/proofs.test.cjs
           node web/test/compression.test.mjs
+          node web/test/zstd.test.mjs
+          node web/test/checksum.test.mjs
           node web/test/embedded-assets.cjs
           node web/test/embedded-assets.cjs --file
       - uses: actions/upload-artifact@v4

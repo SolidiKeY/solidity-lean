@@ -94,7 +94,19 @@ async function main(){
       if(localFile)assert.equal(await page.evaluate(()=>singleFileIDE.reused),true);
       await page.evaluate(()=>solidityIDE.editor.setValue(solidityIDE.editor.getValue().replace('return 1;','return ;!;')));await page.waitForFunction(()=>(solidityIDE.state.diagnostics.get('Counter.sol')||[]).some(d=>d.severity===1));
       await page.evaluate(()=>solidityIDE.editor.setValue(solidityIDE.state.baselines['Counter.sol']));await page.waitForFunction(()=>(solidityIDE.state.diagnostics.get('Counter.sol')||[]).every(d=>d.severity!==1));
-      if(withProofs){await page.waitForFunction(()=>solidityIDE.state.runtime.proofReady,null,{timeout:600000});const start=performance.now();const result=await page.evaluate(async()=>{await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());return solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId()});});report.offlineProof={elapsedMs:+(performance.now()-start).toFixed(1),report:result};assert.deepEqual(result.errors,[]);assert.deepEqual(result.results.map(r=>[r.function,r.status]),[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','pending']]);}
+      if(withProofs){
+        await page.waitForFunction(()=>solidityIDE.state.runtime.proofReady,null,{timeout:600000});
+        // Prove a semantically new program in this fresh disconnected worker,
+        // not just the original source after checking a syntax-error edit.
+        await page.evaluate(()=>solidityIDE.editor.setValue(solidityIDE.editor.getValue().replace('return 1;','return 3;').replace('ensures \\result == 1','ensures \\result == 3')));
+        const start=performance.now();
+        const result=await page.evaluate(async()=>{await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());return solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId()});});
+        const source=await page.evaluate(()=>solidityIDE.editor.getValue()),sourceHash=require('node:crypto').createHash('sha256').update(source).digest('hex');
+        report.offlineProof={elapsedMs:+(performance.now()-start).toFixed(1),sourceHash,report:result};
+        assert.deepEqual(result.errors,[]);
+        assert.deepEqual(result.results.map(r=>[r.function,r.status]),[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','pending']]);
+        for(const row of result.results)assert.equal(row.sourceHash,sourceHash);
+      }
       await page.screenshot({path:path.join(artifacts,withProofs?'website-offline-proofs.png':'website-offline-compiler.png')});
     });
     if(single)assert.deepEqual(report.documentRequests,[documentURL,documentURL]);

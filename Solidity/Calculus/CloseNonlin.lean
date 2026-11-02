@@ -1,4 +1,6 @@
 import Solidity.Calculus.Budget
+import Lean.Meta.Tactic.Assert
+import Lean.Meta.Tactic.TryThis
 
 /-!
 # Nonlinear integer facts: `sol_close_nonlin`

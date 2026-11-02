@@ -17,20 +17,23 @@
     "test:native:proofs": "node test/browser.cjs --proofs",
     "test:website:proofs": "node test/website.cjs --proofs",
     "test:single": "node test/website.cjs --single --proofs",
+    "test:performance": "node test/performance.cjs --single",
     "test:embedded": "node test/embedded-assets.cjs",
     "test:protocol": "node test/proofs.test.cjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.15"
   },
   "dependencies": {
     "@noble/hashes": "1.8.0",
     "brotli-dec-wasm": "2.3.2",
     "buffer": "6.0.3",
     "fflate": "0.8.2",
+    "hash-wasm": "4.12.0",
     "monaco-editor": "0.55.1",
     "path-browserify": "1.0.1",
-    "ws": "8.18.3"
+    "ws": "8.18.3",
+    "zstddec": "0.1.0"
   },
   "devDependencies": {
     "esbuild": "0.25.12",

@@ -1,4 +1,5 @@
-import Lean
+import Lean.Elab.Command
+import Lean.Util.Path
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.SourceUnits
 import Solidity.Syntax.Splice

@@ -30,7 +30,7 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
   const allAsts=compiled.fixture.sourceUnits?.map(u=>u.ast)??[primary];
   const allContracts=allAsts.flatMap(a=>a.nodes).filter(n=>n.nodeType==='ContractDefinition');
   const contracts=primary.nodes.filter(n=>n.nodeType==='ContractDefinition'&&(!options.contract||n.name===options.contract));
-  const results=[],errors=[],locate=sourceLocations(primary,Buffer.from(text));
+  const results=[],errors=[],kernelChecks=[],locate=sourceLocations(primary,Buffer.from(text));
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
     const output='/output/result-'+(++sequence)+'-'+contract.id+'.json',namespace=`SolTests.«${contract.name}»`;
@@ -41,6 +41,7 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
       request('check',{source:wrapper,files:{'/workspace/source.ast.json':compiled.text},outputs:[output]}),
       new Promise((_,reject)=>{timer=setTimeout(()=>{const error=Object.assign(new Error('Browser verification timed out'),{code:'TIMEOUT'});cancelProofs(error);reject(error);},Math.max(1,deadline-Date.now()));})
     ]).finally(()=>clearTimeout(timer));
+    if(checked.timings)kernelChecks.push({contract:contract.name,...checked.timings});
     if(checked.code!==0)errors.push({source,contract:contract.name,stage:'lean',reason:`Lean browser check failed (exit ${checked.code})${checked.stderr?.length?': '+checked.stderr.join('\n'):''}`});
     for(const diagnostic of checked.diagnostics)if(diagnostic.severity==='error'||diagnostic.severity==='warning'&&diagnostic.message.includes('solc_import:'))errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});
     if(checked.outputs[output]){
@@ -57,6 +58,7 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
   }
   if(!contracts.length)errors.push({source,stage:'discovery',reason:'No contracts selected'});
   const report=parseReport(JSON.stringify({results,errors}));
+  report.timings={kernelChecks};
   if((!options.counterexamples||options.listing)&&results.some(row=>row.status==='refuted'))throw new Error('Kernel returned unrequested model prestate evidence');
   if(options.auditPreconditions&&!options.listing&&results.some(row=>row.preconditions===undefined))throw new Error('Kernel did not return the requested precondition audit');
   return report;

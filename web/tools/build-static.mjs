@@ -26,7 +26,7 @@ fs.copyFileSync(path.join(root,'LICENSE'),path.join(dist,'licenses/Solidity-Lean
 fs.copyFileSync(path.join(web,'THIRD_PARTY_NOTICES.md'),path.join(dist,'THIRD_PARTY_NOTICES.md'));
 fs.copyFileSync(path.join(web,'node_modules/brotli-dec-wasm/pkg/brotli_dec_wasm_bg.wasm'),path.join(dist,'brotli-dec.wasm'));
 for(const name of fs.readdirSync(path.join(web,'node_modules/brotli-dec-wasm')).filter(name=>name.startsWith('LICENSE-')))fs.copyFileSync(path.join(web,'node_modules/brotli-dec-wasm',name),path.join(dist,'licenses/Brotli-Decoder-'+name));
-for(const [name,file]of [['Monaco','monaco-editor/LICENSE'],['Monaco-ThirdParty','monaco-editor/ThirdPartyNotices.txt'],['Noble-Hashes','@noble/hashes/LICENSE'],['Buffer','buffer/LICENSE'],['Path-Browserify','path-browserify/LICENSE'],['Fflate','fflate/LICENSE']])fs.copyFileSync(path.join(web,'node_modules',file),path.join(dist,'licenses',name+'.txt'));
+for(const [name,file]of [['Monaco','monaco-editor/LICENSE'],['Monaco-ThirdParty','monaco-editor/ThirdPartyNotices.txt'],['Noble-Hashes','@noble/hashes/LICENSE'],['Hash-Wasm','hash-wasm/LICENSE'],['Zstandard-Decoder','zstddec/LICENSE'],['Buffer','buffer/LICENSE'],['Path-Browserify','path-browserify/LICENSE'],['Fflate','fflate/LICENSE']])fs.copyFileSync(path.join(web,'node_modules',file),path.join(dist,'licenses',name+'.txt'));
 fs.mkdirSync(path.join(dist,'compiler'),{recursive:true});fs.copyFileSync(compilerPath,path.join(dist,'compiler',compilerName));
 const leanAssets=process.env.SOLIDITY_BROWSER_LEAN;
 if(leanAssets){if(!fs.existsSync(path.join(leanAssets,'manifest.json')))throw new Error('Lean browser manifest is missing');fs.cpSync(leanAssets,path.join(dist,'lean'),{recursive:true});}
@@ -37,7 +37,7 @@ await build({entryPoints:[path.join(web,'browser/worker.mjs')],outfile:path.join
   plugins:[{name:'browser-memory-platform',setup(b){b.onResolve({filter:/^node:/},()=>({path:path.join(web,'browser/platform.mjs')}));}}]
 });
 await build({entryPoints:[path.join(web,'browser/kernel-worker.js')],outfile:path.join(dist,'kernel-worker.js'),bundle:true,format:'iife',platform:'browser',target:'es2022',minify:true});
-const csp="default-src 'self'; script-src 'self' 'unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'";
+const csp="default-src 'self'; script-src 'self' 'unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' data:; object-src 'none'; base-uri 'none'";
 fs.writeFileSync(path.join(dist,'_headers'),`/*\n  Content-Security-Policy: ${csp}\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n`);
 const assets=[];function visit(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())visit(file);else if(!['_headers','asset-manifest.json'].includes(entry.name))assets.push('/'+path.relative(dist,file).split(path.sep).join('/'));}}visit(dist);
 const revision=createHash('sha256');for(const asset of [...assets].sort())revision.update(asset).update(fs.readFileSync(path.join(dist,asset.slice(1))));const buildId=revision.digest('hex');

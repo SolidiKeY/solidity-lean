@@ -1,4 +1,7 @@
 import Solidity.Calculus.Budget
+import Lean.Meta.Tactic.Assert
+import Lean.Meta.Tactic.Clear
+import Lean.Meta.Tactic.TryThis
 
 /-!
 # Ground instances after opening a leaf's binders

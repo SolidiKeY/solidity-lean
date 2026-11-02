@@ -3,12 +3,18 @@
 // the parent's URLs forces workers to own their assets independently.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
+const {build}=require('esbuild');
+const {zstdCompressSync}=require('node:zlib');
 const artifacts=path.resolve(__dirname,'../artifacts');
 const localFile=process.argv.includes('--file');
 async function main(){
   fs.mkdirSync(path.join(artifacts,'browser-profiles'),{recursive:true});
   const fixture=fs.mkdtempSync(path.join(artifacts,'browser-profiles/fixture-'));
-  const html='<!doctype html><link rel="icon" href="data:,"><body></body>';
+  const csp="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' blob:; worker-src blob:; connect-src blob: data:; img-src data:";
+  const policy='<meta http-equiv="Content-Security-Policy" content="'+csp+'">';
+  const html='<!doctype html>'+(localFile?policy:'')+'<link rel="icon" href="data:,"><body></body>';
+  const compressed=Array.from(zstdCompressSync(Buffer.from('opaque offline decoder')));
+  const {outputFiles}=await build({stdin:{contents:`import {prepareZstd,inflateZstd} from './browser/zstd.mjs'; globalThis.codecReady=prepareZstd().then(()=>new TextDecoder().decode(inflateZstd(new Uint8Array(${JSON.stringify(compressed)}),22)));`,resolveDir:path.resolve(__dirname,'..')},bundle:true,write:false,format:'iife',platform:'browser',target:'es2022'});
   fs.writeFileSync(path.join(fixture,'index.html'),html);
   const server=localFile?null:http.createServer((_req,res)=>{res.setHeader('Content-Type','text/html');res.end(html);});
   if(server)await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -20,15 +26,15 @@ async function main(){
     if(localFile)await context.setOffline(true);
     context.on('request',request=>{if(!/^(blob:|data:)/.test(request.url())&&new URL(request.url()).origin!==new URL(url).origin)report.external.push(request.url());});
     const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));await page.goto(url);
-    report.result=await page.evaluate(async({source,localFile})=>new Promise((resolve,reject)=>{
+    report.result=await page.evaluate(async({source,localFile,codec,policy})=>new Promise((resolve,reject)=>{
       const iframe=document.createElement('iframe');iframe.sandbox='allow-scripts';const token=Date.now()+':'+Math.random();
       const timer=setTimeout(()=>reject(new Error('Embedded worker ownership test timed out')),15000);
       window.addEventListener('message',function receive(event){if(event.data?.token!==token)return;clearTimeout(timer);window.removeEventListener('message',receive);resolve(event.data);});
-      function run(token){
+      function run(token,codec){
         const assets={
           '/data':new Blob(['offline bytes']),
           '/dependency.js':new Blob(["self.dependency='imported';"],{type:'text/javascript'}),
-          '/child.js':new Blob(["onmessage=async event=>{try{const request=new XMLHttpRequest();request.open('GET','/data',false);request.send();postMessage({sequence:event.data.sequence,xhr:request.responseText,status:request.status,fetch:await(await fetch('/data')).text()});}catch(error){postMessage({error:error.message});}};"],{type:'text/javascript'}),
+          '/child.js':new Blob([codec,"\nonmessage=async event=>{try{const decoded=await codecReady;const request=new XMLHttpRequest();request.open('GET','/data',false);request.send();postMessage({sequence:event.data.sequence,xhr:request.responseText,status:request.status,fetch:await(await fetch('/data')).text(),direct:new TextDecoder().decode(await readEmbeddedAsset('/data')),sync:new TextDecoder().decode(readEmbeddedAssetSync('/data')),decoded});}catch(error){postMessage({error:error.message});}};"],{type:'text/javascript'}),
           '/main.js':new Blob(["importScripts('/dependency.js');const child=new Worker('/child.js');child.onmessage=event=>postMessage({dependency,...event.data});child.onerror=event=>postMessage({error:event.message});onmessage=event=>child.postMessage(event.data);"],{type:'text/javascript'})
         };
         try{
@@ -39,12 +45,12 @@ async function main(){
           for(const key of Object.keys(assets))URL.revokeObjectURL(resolveAsset(key));
         }catch(error){parent.postMessage({token,error:error.message},'*');}
       }
-      const code=source+'\n('+run.toString()+')('+JSON.stringify(token)+');';
-      if(localFile)(0,eval)(code);else{iframe.srcdoc='<script>'+code+'</script>';document.body.append(iframe);}
-    }),{source:fs.readFileSync(path.resolve(__dirname,'../browser/single-file.js'),'utf8'),localFile});
+      const code=source+'\n('+run.toString()+')('+JSON.stringify(token)+','+JSON.stringify(codec)+');';
+      if(localFile)(0,eval)(code);else{iframe.srcdoc=policy+'<script>'+code+'</script>';document.body.append(iframe);}
+    }),{source:fs.readFileSync(path.resolve(__dirname,'../browser/single-file.js'),'utf8'),localFile,codec:outputFiles[0].text,policy});
     assert.equal(report.result.error,undefined,report.result.error);if(localFile)assert.equal(report.result.protocol,'file:');else assert.equal(report.result.origin,'null');
     assert.deepEqual(report.result.results.map(r=>r.sequence).sort(),[1,2]);
-    for(const row of report.result.results){assert.equal(row.dependency,'imported');assert.equal(row.xhr,'offline bytes');assert.equal(row.fetch,'offline bytes');assert.equal(row.status,200);}
+    for(const row of report.result.results){assert.equal(row.dependency,'imported');assert.equal(row.xhr,'offline bytes');assert.equal(row.fetch,'offline bytes');assert.equal(row.direct,'offline bytes');assert.equal(row.sync,'offline bytes');assert.equal(row.decoded,'opaque offline decoder');assert.equal(row.status,200);}
     if(localFile)await page.reload();
     report.failureCleanup=await page.evaluate(async({source,connection,localFile})=>new Promise((resolve,reject)=>{
       const iframe=document.createElement('iframe');iframe.sandbox='allow-scripts';const token=Date.now()+':'+Math.random();

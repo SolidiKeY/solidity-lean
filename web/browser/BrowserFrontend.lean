@@ -1,4 +1,5 @@
-import Lean
+import Lean.Elab.Frontend
+import Lean.Elab.Tactic
 
 /-! Synchronous browser entry point for the project's pinned Lean 4.24 kernel.
 Only imported immutable environments are reused; each check gets fresh command

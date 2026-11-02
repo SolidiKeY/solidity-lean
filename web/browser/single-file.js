@@ -5,9 +5,25 @@ function installEmbeddedAssets(assets){
   // worker and create its URLs locally; a parent's blob:null URLs cannot be
   // imported or fetched from that worker.
   const urls=Object.create(null);
+  // A verified library loader can read its owned Blob directly. Routing
+  // thousands of local buffers through fetch's URL/network machinery adds
+  // avoidable IPC overhead, even though no network is involved.
+  globalThis.readEmbeddedAsset=async input=>{
+    const path=new URL(String(input),'https://embedded.invalid/').pathname;
+    if(!assets[path])throw new Error('Missing embedded asset: '+path);
+    return assets[path].arrayBuffer();
+  };
+  if(typeof FileReaderSync==='function'){
+    const reader=new FileReaderSync();
+    globalThis.readEmbeddedAssetSync=input=>{
+      const path=new URL(String(input),'https://embedded.invalid/').pathname;
+      if(!assets[path])throw new Error('Missing embedded asset: '+path);
+      return reader.readAsArrayBuffer(assets[path]);
+    };
+  }
   function resolve(input){
     const value=String(input instanceof Request?input.url:input);
-    if(value.startsWith('blob:'))return value;
+    if(value.startsWith('blob:')||value.startsWith('data:application/wasm;base64,'))return value;
     const path=new URL(value,'https://embedded.invalid/').pathname;
     if(!assets[path])throw new Error('Missing embedded asset: '+path);
     return urls[path]??=URL.createObjectURL(assets[path]);

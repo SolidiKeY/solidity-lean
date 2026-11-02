@@ -9,7 +9,11 @@ open Lean
 def main (args : List String) : IO Unit := do
   let [standardRoot, projectRoot] := args
     | throw (IO.userError "Expected native Lean source root and project root")
-  let mut pending : Array String := #["Solidity.Frontend.Testing", "Lean"]
+  let frontend ← IO.FS.readFile (System.FilePath.mk projectRoot / "web/browser/BrowserFrontend.lean")
+  let (header, _, messages) ← Parser.parseHeader (Parser.mkInputContext frontend "BrowserFrontend.lean")
+  if messages.hasErrors then throw (IO.userError "Cannot parse browser frontend imports")
+  let mut pending : Array String := #["Solidity.Frontend.Testing"] ++
+    (Elab.headerToImports header).map fun i => i.module.toString (escape := false)
   let mut modules : Std.HashMap String (Array String) := {}
   while !pending.isEmpty do
     let name := pending.back!

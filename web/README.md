@@ -7,7 +7,7 @@ WebSocket or account is required.
 
 Open the [GitHub Pages IDE](https://solidikey.github.io/solidity-lean/ide/).
 **File → Download Offline IDE** saves the complete website as one HTML file
-(about 856 MB). Reopen that file in a modern desktop browser for offline use,
+(about 838 MB). Reopen that file in a modern desktop browser for offline use,
 including fresh proof checking. Keep the original download: the live page removes
 embedded data nodes after preparing tools, so the browser's Save Page command
 does not produce the original self-contained artifact. A disconnected hosted
@@ -15,7 +15,7 @@ tab keeps working; reopening the hosted URL without a connection is not guarante
 
 ## Build the website
 
-Build dependencies and toolchains are needed once on the development machine;
+Node 22.15 or newer is required for packaging. Build dependencies and toolchains are needed once on the development machine;
 they are not runtime requirements for people opening the website.
 
 ```sh
@@ -44,14 +44,14 @@ No service worker is used. `build.json` records its fingerprint for deployment
 tests and is not needed to run the HTML. The Pages workflow preserves the examples
 viewer at `/` and places this HTML at `/ide/`.
 
-The alternative multi-file build contains 774 MiB of static assets. Its first visit downloads
+The alternative multi-file build's manifest lists its static assets. Its first visit downloads
 and caches the editor, compiler and proof libraries.
 Wait for preparation to finish before disconnecting. Subsequent reloads and fresh
 checks use those local assets, including when the static host is unreachable.
 Browser storage is origin-specific and may be cleared by the browser; exporting
 files provides a durable backup.
 
-The single-file loader stores Brotli-compressed tools in IndexedDB, using a
+The single-file loader stores Zstandard-compressed tools in IndexedDB, using a
 separate database per build and creating one Blob at a time. Reopening the same
 HTML reuses that disk-backed storage. Allow browser storage and leave several
 GiB of disk headroom. Opening a different copy or location may create a separate
@@ -73,8 +73,8 @@ invalidates displayed results.
 `SOLIDITY_BROWSER_SOLJSON` selects the locally prepared, checksum-verified compiler.
 `SOLIDITY_BROWSER_LEAN` may point to an existing packaged browser runtime.
 The proof runtime needs a modern desktop browser with WebAssembly tail calls and
-64-bit integer operations. Its linear-memory limit is 4 GiB; the complete QA tree
-peaked at 4.80 GiB aggregate RSS. The browser does not need the Memory64 proposal.
+64-bit integer operations. Its linear-memory limit is 4 GiB; browser QA also
+measures the complete process tree. The browser does not need the Memory64 proposal.
 A compiler-only development build is possible without Lean assets; it explicitly
 disables proof controls and never treats Solidity compilation as a proof.
 
@@ -82,12 +82,15 @@ disables proof controls and never treats Solidity compilation as a proof.
 
 ```sh
 node web/test/proofs.test.cjs           # failure/cancellation protocol boundaries
-node web/test/compression.test.mjs     # bounded decoder vs native Brotli, invalid streams
+node web/test/compression.test.mjs     # legacy Brotli decoder boundaries
+node web/test/zstd.test.mjs            # native/Wasm agreement, errors and memory bounds
+node web/test/checksum.test.mjs        # SHA-256 without Web Crypto or Node APIs
 npm run test:embedded --prefix web    # worker-owned assets, early messages, startup cleanup
 node web/test/embedded-assets.cjs --file # small offline-file check, no Lean build
 npm run test:website --prefix web      # real browser compiler and disconnected reload
 npm run test:website:proofs --prefix web # real kernel proofs, cancellation and offline proofs
 npm run test:single --prefix web       # one HTML, reuse, disconnected fresh workers/proofs
+npm run test:performance --prefix web  # fresh startup, cold proofs, real edits and cache control
 node web/test/website.cjs --single --file --proofs # offline local-file launch and reopening
 node web/test/offline-preparation.cjs  # incomplete downloads fail visibly
 npm test --prefix web                  # optional native transport regressions
@@ -103,10 +106,15 @@ requests were recorded. The actual extension and browser produce the same three
 proved functions, pending function, and positioned diagnostic. The captured
 workbenches differ by 2.09% overall and 0.03% in the code region.
 
-Cold verification took 8.94 seconds in the extension and 67.2 seconds in the
-browser, including its first proof-library import. Repeated checked-result
-lookups took under 0.2 seconds in both. These are local observations with
-prepared artifacts, not general performance guarantees.
+The performance update measured 29.08 seconds for the first proof request,
+including library import, versus 63.25 seconds in the baseline. Fresh navigation
+through the first result took 49.11 seconds. Real edited-source checks took
+8.38–10.80 seconds; an unchanged cached-result lookup took 14 ms and does not
+execute a new proof. Warm checks still need substantial improvement. The original
+native extension comparison measured 8.94 seconds and is historical. See
+[the design record](../docs/web-ide.md#performance-follow-up) for phases and
+limits. These are local observations with prepared artifacts, not general
+performance guarantees.
 
 The browser port also runs 3,500 differential expression-traversal cases against
 the original recursive Lean implementation, plus deep application/binder tests.
