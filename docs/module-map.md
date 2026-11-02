@@ -1338,3 +1338,6 @@ four-mode upstream EVM observations and refusal controls;
 | `Backend/InternalFlow/MemoryStoreLocalFrame.lean` | Actual successful heap-store local-environment frame; no heap-content invariant or withinM relaxation. |
 
 | `Backend/InternalFlow/MixedStoreAliasFrame.lean` | Actual mixed storage/scalar/heap-store storage-alias frame composition. |
+
+| `Solidity/Backend/InternalFlow/LocalStoreFlow.lean` | Typed local-only frames across real stores, blocks and branches; no heap-content/liveness inference. |
+| `Solidity/Backend/InternalFlow/LocalStoreTarget.lean` | Actual finite certificate composition with reached allocator input and both frames. |

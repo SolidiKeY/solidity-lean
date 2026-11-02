@@ -1,3 +1,4 @@
+import Solidity.Backend.InternalFlow.LocalStoreFlow
 import Solidity.Backend.InternalFlow.MixedStoreAliasFrame
 import Solidity.Backend.InternalFlow.MemoryStoreLocalFrame
 import Solidity.Backend.InternalFlow.CallerView
@@ -684,3 +685,87 @@ theorem wrong_element_after_suffix :
   rw [alias_frame]
   exact wrong_element
 end Solidity.Backend.InternalFlow.FragileReturnChecks.MixedSuffix
+
+
+namespace Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias
+open Evm Evm.Memory LocalStoreFlow
+abbrev PrivateCtx : Ctx := .val .uint :: .mem A :: Final
+
+def body : Prog C Final PrivateCtx :=
+  .cons (.assign (value .here) (.val (.simple (.lit 91 rfl))))
+  (.cons (.assignLocal (.there (.there (.there (.there (.there .here))))) (.read (value .here)))
+  (.cons (write (.there (.there (.there .here))) (.lit 1 rfl)
+    (.local (.there (.there (.there (.there (.there .here)))))))
+  (.cons (.declMem A (.user "scopedFresh") (some (.newArr (.lit 1 rfl) rfl)) rfl rfl)
+  (.cons (write .here (.lit 0 rfl) (.lit 55 rfl))
+  (.cons (.declLocal .uint (.user "privateMarker") (some (.simple (.lit 77 rfl)))) .nil)))))
+
+def condition : Val C Final .bool :=
+  .binop .eqB rfl rfl (.simple (.local (.there (.there (.there (.there (.there .here)))))))
+    (.simple (.lit 84 rfl))
+def selected : Stmt C Final Final := .ite condition body (.cons .revert .nil)
+def program : Prog C Final Final := .cons (.block (.cons selected .nil)) .nil
+
+def bodyPlan {t : LTy} (i : Idx Final t)
+    (safe : (t,i.toNat) ∉ [(LTy.val .uint,5)]) : ProgPlan t body i := by
+  refine .cons (.storage _ _ _) (.cons ?_ (.cons (.memory _ _ _)
+    (.cons ?_ (.cons (.memory _ _ _) (.cons ?_ (.nil _))))))
+  · exact .existing .nonpayable _ _ (by decide +kernel) safe
+  · exact .existing .nonpayable _ _ (by decide +kernel) (by exact List.not_mem_nil)
+  · exact .existing .nonpayable _ _ (by decide +kernel) (by exact List.not_mem_nil)
+def planFor {t : LTy} (i : Idx Final t)
+    (safe : (t,i.toNat) ∉ [(LTy.val .uint,5)]) : ProgPlan t program i :=
+  .cons (.block (.cons (.branch condition (bodyPlan i safe)
+    (.cons (.existing .nonpayable .revert _ (by decide +kernel) (by exact List.not_mem_nil)) (.nil _))) (.nil _))) (.nil _)
+
+private theorem succeeds : (program.run final.st).toOption.isSome = true := by decide +kernel
+def reached : Solidity.Out C final.st.H Final := (program.run final.st).toOption.get succeeds
+
+theorem source_run : program.run final.st = .ok reached := actual_get _ succeeds
+theorem alias_frame : reached.st.env.1 = final.st.env.1 :=
+  (planFor (.here : Idx Final (.alias R)) (by decide +kernel)).sound source_run
+
+theorem selected_guard : condition.evalT final.st = .ok true := by
+  have seen : (condition.evalT final.st).toOption = some true := by decide +kernel
+  cases h : condition.evalT final.st with
+  | error e => rw [h] at seen; cases seen
+  | ok v =>
+    rw [h] at seen
+    have same : v = true := Option.some.inj seen
+    cases same
+    rfl
+
+theorem complete_source :
+    storageValues reached.st = some [11,13,21,23,2,11,13,91,23,9] ∧
+    contents reached.st = some [[2,7,91],[1,23],[2,99,101],[1,55]] ∧
+    scalars reached.st = [91,1] ∧ aliases reached.st = [some 1,some 0,some 0] ∧
+    refObs reached.st.env.1 = some ("rows",[.idx ⟨1,by decide⟩]) ∧ reached.st.H.length = 4 := by
+  refine ⟨?_,?_,?_,?_,?_,?_⟩
+  all_goals decide +kernel
+
+abbrev ProtectedCtx : Ctx := [.alias R,.mem A,.mem A,.mem A,.val .uint]
+def protection : Thin ProtectedCtx Final :=
+  .keep (.keep (.keep (.keep (.keep (.drop .refl)))))
+theorem protected_unwritten {t : LTy} (i : Idx ProtectedCtx t) :
+    (t,(i.wk protection).toNat) ∉ [(LTy.val .uint,5)] := by
+  cases i with
+  | here => decide +kernel
+  | there i => cases i with
+    | here => decide +kernel
+    | there i => cases i with
+      | here => decide +kernel
+      | there i => cases i with
+        | here => decide +kernel
+        | there i => cases i with
+          | here => decide +kernel
+          | there i => cases i
+
+theorem captured_locals : TEnv.thin protection reached.st.env =
+    TEnv.wk reached.ext ProtectedCtx (TEnv.thin protection final.st.env) := by
+  apply TEnv.ext
+  intro t i
+  rw [CallerFrame.read_thin,TEnv.get_wk,CallerFrame.read_thin]
+  exact (planFor (i.wk protection) (protected_unwritten i)).sound source_run
+
+theorem original_guard_rejects : Prog.withinM .nonpayable program = false := by decide +kernel
+end Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias

@@ -126,3 +126,5 @@ history is in git.
 - [Memory-store local frame](../Solidity/Backend/InternalFlow/MemoryStoreLocalFrame.lean) — actual execution frames locals while heap contents may change.
 
 - [Mixed-store alias frame](../Solidity/Backend/InternalFlow/MixedStoreAliasFrame.lean) — operational alias preservation across actual mutations.
+
+V12 local-only structured store frames and their reached target allocator interface: [owned roadmap](feature-work/roadmap-v12-internal-flow.md).

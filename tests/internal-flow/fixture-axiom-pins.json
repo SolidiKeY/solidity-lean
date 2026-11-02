@@ -2722,5 +2722,171 @@
   "AxiomReports": {
     "guard": "tests/internal-flow/check-axiom-reporter.py",
     "pins": {}
+  },
+  "ScopedAliasFacts": {
+    "guard": "tests/internal-flow/check-scoped-alias-facts-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.metrics": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.need": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.flag": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.checked_need": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.checked_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.stmt_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.prefix_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.old_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.old_need": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.stmt_cost": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.previous_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.total_room": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
+  },
+  "ScopedAliasTarget": {
+    "guard": "tests/internal-flow/check-scoped-alias-target-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.LocalStoreFlow.StmtPlan.sound": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LocalStoreFlow.ProgPlan.sound": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LocalStoreFlow.ProgPlan.plain_slot": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LocalStoreFlow.ProgPlan.fragile_slot": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.LocalStoreFlow.program_statement_frames": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.source_run": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.alias_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.selected_guard": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.complete_source": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.protected_unwritten": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.captured_locals": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.original_guard_rejects": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.actual_endpoint": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.written_scalar_guard": [
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.wrong_old_contents": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.wrong_new_alias": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.private_marker_nonescape": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.wrong_persistent_value": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.FragileReturnChecks.ScopedAlias.skipped_reverts": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }

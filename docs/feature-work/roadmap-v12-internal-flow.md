@@ -2914,3 +2914,65 @@ Current complete aggregate is pending: this semantic proof is not a demonstrated
 performance repair and does not authorize an unchanged failed heavy retry.
 Complete current docs equal the previous/publication findings, with historical
 frozen46/current48 debt separate. Original goal identity/status is unchanged.
+
+
+### C37 — local-only structured store frames and a real reached target client
+
+`Solidity/Backend/InternalFlow/LocalStoreFlow.lean` adds typed proof derivations indexed by the
+existing intrinsic Stmt/Prog. Existing leaves retain BOTH the published withinM
+premise and the exact `(t,i.toNat)` writes exclusion. Store leaves consume
+actual storage/memory environment laws; sequence, block and branch proofs
+compose real successful executions and dependent heap weakening/drop. The
+conclusion preserves only the selected local binding, not old heap contents,
+mutability, persistent roots or storage-reference liveness. Plain/fragile slot
+consequences consume actual reached StateRepr; fragile findLive evidence is
+extracted from Sim.fragile rather than assumed from source identity.
+
+`LocalStoreTarget.program_statement_frames` retains both actual target frames,
+BaseExtends, genuine GrowsAllocator and the reached AllocationInput of two
+finite checked certificates. Its real premises are source success, initial
+representation, frame bounds and summed initial capacity. It does not implement
+another compiler or assume a simulation conclusion. The populated ScopedAlias
+client begins at the existing real call/suffix state, mutates indexed persistent
+storage and an older heap object, reads the mutation into caller scalar x,
+allocates a private array, writes55, then drops its memory/scalar binders through
+a selected branch and block. The actual source result has storage value91,
+heap [[2,7,91],[1,23],[2,99,101],[1,55]], scalars[91,1], memory identities[1,0,0]
+and result path rows[1]. No earlier fixture observation is changed.
+
+The actual target client derives the populated prefix frame and capacity5,
+executes the existing checked cost3 program, derives remaining capacity2 by
+GrowsAllocator.nextInput, then executes the real new compiled branch/block.
+The compiler-derived suffix need is8/cost2/fragile. The closed endpoint retains
+all three executions, prefix and both reached StateRepr, BaseExtends, growth2,
+stack equality, actual checked Input/Agrees, every protected memory address and
+primitive representation. It does not claim a new complete numeric target
+snapshot, a fixed numeric final cursor, or an unconditional final live alias.
+Actual false-branch bare revert, private-marker nonescape, wrong fresh alias,
+old content/persistent-write negatives and the rejected written-scalar guard
+have explicit positive baselines. withinM remains false for this mutating body.
+
+Both independent read-only reviewers caught one initial generalization error:
+the existing-leaf exclusion still named an alias type instead of the actual t.
+It was corrected before the generic proof passed; confirmed-review-fix.json
+retains the finding. Failed helper applications hit unchanged heartbeat limits;
+the successful proof uses separate checked endpoint boundaries and scalar cost
+facts. A decomposed proof then exposed missing opaque checked cost/need
+projections; named kernel-proved equations fixed those type mismatches. The
+failed output containing sorryAx is failed evidence only, never a deliverable.
+A distinct stronger old C29 joint endpoint attempt exited137/12GiB and remains
+open; its conditional observation preparation is not target closure. The
+false-branch test's initial incorrect literal constructor failed and was fixed
+to the existing Simple.bool constructor. All raw failures remain preserved.
+
+C37 uses new immutable continuation-37 artifacts and separate exact axiom guards
+without removing any previous report/type/fixture. Original Work1–6 and both
+Backfills remain partial. General frames/uncapped recursion/full-signature
+lowering/general early control and mixed loops/byte-journal-world/target
+transient-callback producers remain open. No goal write, publication or reserved
+producer edit occurs. Complete current raw/cached/full validation is pending
+with previous failed exits retained: this semantic checkpoint is not a measured
+repair authorizing an unchanged heavy retry. Raw docs normal/strict1 remain
+failures; complete previous/publication equality and frozen historical debt are
+separate findings. Runtime, scoped checks, exact identities, reviews and resource
+receipts are recorded in the checkpoint handoff, not inferred from this prose.
