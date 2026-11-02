@@ -1551,3 +1551,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/SignedDivisionControls.lean` | All sign combinations, raw zero/minimum wrap, narrow cleanup, full stack, ordered errors and complete fetched negative sequence. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ArithmeticShiftConsumer.lean` | Actual SAR/BitVec/Scalar word transport, emitted decoding and charged fetched State/X, including saturation. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ArithmeticShiftControls.lean` | Full-State signed/count/boundary/resource negatives and actual fetched SAR→SMOD; no huge saturated powers. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadConsumer.lean` | Actual charged/fetched SLOAD/TLOAD, exact warm/cold resource bounds and existing finite typed source-observation transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadControls.lean` | Populated root/transient/source witnesses, exact two-insertion warming states and gas/fuel/permission/coverage negatives. |

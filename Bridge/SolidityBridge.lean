@@ -59,3 +59,6 @@ import SolidityBridge.RoadmapV15.P10.SignedDivisionControls
 
 import SolidityBridge.RoadmapV15.P10.ArithmeticShiftConsumer
 import SolidityBridge.RoadmapV15.P10.ArithmeticShiftControls
+
+import SolidityBridge.RoadmapV15.P10.StorageReadConsumer
+import SolidityBridge.RoadmapV15.P10.StorageReadControls
