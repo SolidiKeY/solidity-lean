@@ -1500,3 +1500,51 @@ shape (an external function type) is now refused where the legacy path
 accepted it (fail-closed); enum returns of `canonicalOnly` vectors stay
 refused although v1 encodes them alike; public enum getters keep
 `retEnums = []` and stay refused.
+
+### Lane FU2-D (fu2-20261102): enums nested in ABI types
+
+* **`abi.decode` of an array of enums in `sol{}`** (`(E[])`, `(E[k])`,
+  nested arrays). Before, `sol{}` refused it with "abi.decode at E[]: a value
+  type, a byte string, an array or a struct" (`abiDecodeTy?` dropped every
+  flat type and `decodeKind?` knows no enum element), so nothing decoded
+  unchecked. Now `abiDecodeTy?` routes an array whose element is a contract
+  enum to the nested decoder, and `abiReadGen`'s value case, at a declared
+  enum element, reads the word as a `uint8` and `require`s it below the
+  member count before `E(w)`: solc's `validator_revert_t_enum_*`, an empty
+  revert. Pinned by `EnumArrayDecode` in `Examples/Tactics/AbiFeatures.lean`
+  (`#run`, five vectors) against the EVM observations below.
+* **The import keeps the refusal** "ABI decoding of enum values requires
+  nominal cardinality checks" for every nested enum
+  (`tests/solc/EnumArrayDecode.sol`, pinned in `test-solidity.test.mjs`). An
+  attempt to admit `(E[])`/`(E[k])` there (printing the component at the
+  enum's native name) was reverted: the import declares the target local at
+  its `uint8` carrier (`enumCarriers`), whose width rows the decoded `E[]`
+  does not match (the shape check refuses "narrow positions ·[]#enum 1 bits
+  wide where ·[] 8 bits wide are expected"), a misleading refusal. Admitting
+  it needs the import to declare enum-array locals at the enum. A struct with
+  an enum member is refused in any case: `sol{}` reads a struct's enum member
+  as a `uint` (`spellTy`; the struct table has no `#enum` row), so its
+  cardinality is lost before the decoder.
+* **Public enum getters** (`SolcJson/Contract.lean`): a synthesized getter
+  whose value, past its mapping keys and array indexes, is an enum gets
+  `retEnums := [0]`, so the replay reads its return at the ABI type `uint8`
+  (`Tools/Upstream.lean`, `ABI.validate`'s `topEnums`), as a source
+  function's top-level enum return; a struct getter with an enum member keeps
+  the refusal. Enum-typed mapping keys of a getter get no `paramEnums`
+  (recorded, not changed).
+* **EVM observations** (`scripts/enum-abi-probe.mjs`, solc 0.8.38 at the
+  repository's pinned SHA-256, `@ethereumjs/vm` 10.1.3, four configurations,
+  all agreeing; `tests/abi-0.8.38/EnumArrays.{sol,vectors.json}`):
+  `decodeArr(2, 1)` returns 21, `decodeArr(0, 3)` and `decodeArr(256, 0)`
+  revert with empty data; `decodeFixed(1, 2)` returns 12, `decodeFixed(3, 0)`
+  reverts empty; at the external entry `entryArr([2, 0])` returns 202,
+  `entryArr([2, 3])` and a raw element word `256` revert empty;
+  `entryStruct((2, 5))` returns 2005, `entryStruct((3, 5))` reverts empty;
+  the getter `stored()` returns 0, then 2 after `setStored(2)`, and still 2
+  after `setStored(3)` reverted with `Panic(0x21)`.
+* **Not done**: enum arrays and structs with an enum member at the external
+  entry stay refused by the replay (`ABI.shape`, "nominal enum ABI range
+  needs a declaration adapter", `Tools/Upstream.lean`, owned by
+  `fu2-calldata-access`); the vectors above are the evidence for that
+  follow-up. `tests/upstream/cf1-abi-entry-results.json` was not rerun or
+  edited.

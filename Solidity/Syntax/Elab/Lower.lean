@@ -1344,6 +1344,15 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
   match t with
   | .val k =>
     let (ss, v) ← abiWordAt d k p
+    -- an enum element (`E[]`, `E[k]`, declared at `E`): its word as a
+    -- `uint8`, then solc's validator (`validator_revert_t_enum_*`), an empty
+    -- revert unless below the member count, as a top-level enum's
+    -- (`abiDecodeWith`); `AbiTy.of` reads it as `uint8` alone
+    if let .named E := T then
+      if let some ms := lookupBy E C.enums then
+        let w ← abiFresh
+        return ss ++ [.decl (.named "uint") w (some v),
+          .require (.binop .lt (.name w) (.num ms.length)), put (.call E [.name w])]
     pure (ss ++ [put v])
   | .bytes =>
     let (s1, L) ← abiWordAt d (.uint 256) p
@@ -1418,7 +1427,13 @@ def abiDecodeTy? (Te : RawExpr) : Option (AbiTy × RawTy) := do
   let T ← abiTyExpr? Te
   let (ty, ws) ← (elabTyW C T).toOption
   let t ← AbiTy.of ty ws ""
-  if t.flat then none else some (t, T)
+  -- an array of an enum (`E[]`, `E[k]`) is flat, but only the nested
+  -- decoder checks each element against the member count (`abiReadGen`)
+  let rec enumElem : RawTy → Bool
+    | .named E => (lookupBy E C.enums).isSome
+    | .array T | .fixed T _ => enumElem T
+    | _ => false
+  if t.flat && !enumElem T then none else some (t, T)
 
 /-- The kind of `abi.decode`'s component written `T` that is not a value
 type or a byte string: `T[]`, `T[k]` of a value type `T`, a struct of value
@@ -1527,8 +1542,8 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
         let (s1, off) ← abiWordAt d (.uint 256) p
         let at0 ← abiFresh
         pure (s1 ++ [.decl (.named "uint") at0 (some off)] ++
-          (← abiReadGen d t T (.name at0) fun v => .declMemory T x (some v)))
-      else abiReadGen d t T p fun v => .declMemory T x (some v)
+          (← abiReadGen C d t T (.name at0) fun v => .declMemory T x (some v)))
+      else abiReadGen C d t T p fun v => .declMemory T x (some v)
     return (P ++ Q ++ (← elabStmtsP ([enough] ++ S)), .name x)
   let x := toString (← freshCapture "mv")
   -- the word at `o` read at the kind `kk` into a fresh local, then `put` of it

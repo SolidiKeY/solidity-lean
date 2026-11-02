@@ -1318,6 +1318,20 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       tag := .internal
       params := (plan.toOption.map (·.params)).getD []
       rets := (plan.toOption.map (·.rets)).getD []
+      -- a getter whose value (past its mapping keys and array indexes) is
+      -- an enum returns it at its ABI type `uint8`, as a source function's
+      -- top-level enum return (`retEnums`); a struct's members are not
+      -- counted, so a struct getter with an enum member keeps the refusal
+      retEnums := Id.run do
+        let mut t := (J.opt declarationNode "typeName").getD .null
+        for _ in [:(J.nodes t).length + 1] do
+          match J.kind t with
+          | "Mapping" => t := (J.opt t "valueType").getD .null
+          | "ArrayTypeName" => t := (J.opt t "baseType").getD .null
+          | _ => break
+        let enumRef := ((J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?).bind
+          (lookupBy · enumBounds)
+        if enumRef.isSome && ((plan.toOption.map (·.rets)).getD []).length == 1 then [0] else []
       body
       writingCall := false }
     pure (id, f, (plan.toOption.map (·.sourceParams)).getD [])

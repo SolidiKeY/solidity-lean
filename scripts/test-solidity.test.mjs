@@ -459,6 +459,18 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     assert.equal(status[name], 'proved', name);
 });
 
+test("nested enums in abi.decode keep the import's cardinality refusal (tests/solc/EnumArrayDecode.sol)", () => {
+  // docs/feature-work/abi-hashes.md, lane FU2-D: `sol{}` checks enum arrays,
+  // the import's `uint8` carriers and struct members do not carry the enum
+  const report = runSolidityTests(["tests/solc/EnumArrayDecode.sol"], {build:false, batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  for (const fn of ["dynamicArray", "fixedArray", "structMember"]) {
+    assert.equal(rows[fn].status, "unsupported", fn);
+    assert.match(rows[fn].reason, /requires nominal cardinality checks/, fn);
+  }
+});
+
 test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)
