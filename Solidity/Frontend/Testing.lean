@@ -274,6 +274,71 @@ def testingShares (formula : Expr) : Bool := expressionNodesLeft formula 12288 =
 
 initialize registerTraceClass `Solidity.Frontend.specProposal
 
+/-! A smaller closed-spec certificate. Dropping premises strengthens the leaf;
+only literal `true = true` premises are omitted. The original closer remains
+available when the smaller formula does not close. -/
+namespace SpecProposal
+open Solidity Decide
+variable {C : Contract}
+
+def trivialPremise (P : LFml C) : Bool :=
+  match P with
+  | @LFml.eq _ .bool a b => a.isTT && b.isTT
+  | _ => false
+
+def trim (φ : LFml C) : LFml C := φ.dropPrem trivialPremise
+
+def check (ψ : Fml C []) : Option Bool :=
+  (ψ.toLS true SymS.init).map fun l => l.boundsOk && (trim l).decideLift
+
+theorem check_valid {ψ : Fml C []} (h : check ψ = some true) : Fml.Valid ψ := by
+  simp only [check, Option.map_eq_some_iff, Bool.and_eq_true] at h
+  obtain ⟨l, hl, _, hc⟩ := h
+  exact Fml.Valid.of_toLS hl (fun g ν => LFml.dropPrem_holds trivialPremise g l ν (LFml.decideLift_valid hc g ν))
+
+def leaf {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (Seq.SLeaf C)) :=
+  if (H.wrap φ).modalFree then
+    match check (H.wrap φ) with
+    | some true => some []
+    | _ => Seq.leafS H φ
+  else Seq.leafS H φ
+
+theorem leaf_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ)
+    (ls : List (Seq.SLeaf C)) (h : leaf H φ = some ls)
+    (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ := by
+  unfold leaf at h
+  split at h
+  · split at h
+    · exact Proves.closeHolds (check_valid ‹_›) ‹_›
+    · exact Seq.leafS_sound H φ ls h hl
+  · exact Seq.leafS_sound H φ ls h hl
+
+def residue (steps : Nat) (R : RuleSet) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :=
+  (Seq.run R leaf Seq.refuteLanded steps H φ steps).map (·.1)
+
+theorem sound (steps : Nat) {R : RuleSet} {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml C Γ}
+    {ls : List (Seq.SLeaf C)} (h : residue steps R H φ = some ls)
+    (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ := by
+  obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
+  cases he
+  exact Seq.run_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
+    leaf_sound (fun {_} H c h {_ _} live => Seq.refuteLanded_sound H c h live)
+    _ H φ _ _ _ hr hl
+
+def quoteLeaf (c : Lean.Expr) (np : Option Nat) {Γ : Ctx}
+    (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List Lean.Expr) :=
+  if (H.wrap φ).modalFree then
+    match check (H.wrap φ) with
+    | some true => some []
+    | _ => Seq.leafQuoteS c np H φ
+  else Seq.leafQuoteS c np H φ
+
+def quoteResidue (steps : Nat) (R : RuleSet) (c : Lean.Expr) (np : Option Nat)
+    {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :=
+  (Seq.run R (quoteLeaf c np) Seq.refuteLanded steps H φ steps).map (·.1)
+
+end SpecProposal
+
 /-- Propose a small, closed derivation. The compiled walk is only an oracle:
 its equality certificate remains explicitly typed in the returned proof and
 is checked by the final addDecl. Open residues do not pay for a kernel replay.
@@ -295,7 +360,7 @@ private def closedSpecProof? (C formula : Expr) : TermElabM (Option Expr) := do
       let np ← Seq.paramCount H phi
       let qTy := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``List [0]) (mkConst ``Expr))
       let some [] ← unsafe Meta.evalExpr (Option (List Expr)) qTy
-        (mkAppN (mkConst ``Seq.residueQuoteWithin)
+        (mkAppN (mkConst ``SpecProposal.quoteResidue)
           #[C,toExpr (128:Nat),R,quoteConstName ns,toExpr np,ctxE [],H,phi]) | return none
       let leafTy := mkApp (mkConst ``Seq.SLeaf) C
       let listTy := mkApp (mkConst ``List [0]) leafTy
@@ -303,10 +368,10 @@ private def closedSpecProof? (C formula : Expr) : TermElabM (Option Expr) := do
       let nil := mkApp (mkConst ``List.nil [0]) leafTy
       let someNil := mkApp2 (mkConst ``Option.some [0]) listTy nil
       let equality := mkApp3 (mkConst ``Eq [1]) resTy
-        (mkAppN (mkConst ``Seq.residueWithin) #[C,toExpr (128:Nat),R,ctxE [],H,formula]) someNil
+        (mkAppN (mkConst ``SpecProposal.residue) #[C,toExpr (128:Nat),R,ctxE [],H,formula]) someNil
       let refl := mkApp2 (mkConst ``Eq.refl [1]) resTy someNil
       let certificate := mkApp2 (mkConst ``id [0]) equality refl
-      let derivation := mkAppN (mkConst ``Proves.of_residueWithin)
+      let derivation := mkAppN (mkConst ``SpecProposal.sound)
         #[C,toExpr (128:Nat),R,ctxE [],H,formula,nil,certificate,
           mkApp2 (mkConst ``Seq.SLeaf.nil) C R]
       let proof := mkAppN (mkConst ``Proves.fmlValid) #[C,R,formula,derivation]

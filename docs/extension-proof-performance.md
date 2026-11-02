@@ -24,8 +24,10 @@ compiled execution; the existing worker timeout remains active.
 
 Only an empty residue produces a candidate. Open residues immediately retain
 the original semantic tactic, avoiding an expensive kernel replay before a
-known-open result. Successful proposals construct `Proves.of_residueWithin`
-and apply `Proves.fmlValid`. An explicitly typed `id` keeps the exact residue
+known-open result. Successful proposals construct `SpecProposal.sound`
+and apply `Proves.fmlValid`. Since 0.5.2, the proposal first tries a leaf with
+literal `true = true` premises removed; a proved strengthening theorem connects
+that smaller leaf to the original. See [kernel replay measurements](kernel-replay-performance.md). An explicitly typed `id` keeps the exact residue
 equality certificate in the proof term. The final `addDecl` checks it in the final declaration rather than creating
 a separate auxiliary theorem.
 

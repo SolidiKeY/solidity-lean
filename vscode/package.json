@@ -2,7 +2,7 @@
   "name": "solidity-lean",
   "displayName": "Solidity Lean Verification",
   "description": "Run kernel-checked Solidity verification and inspect obligations, diagnostics and proof status.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "publisher": "SolidiKeY",
   "license": "MIT",
   "repository": { "type": "git", "url": "https://github.com/SolidiKeY/solidity-lean.git", "directory": "vscode" },

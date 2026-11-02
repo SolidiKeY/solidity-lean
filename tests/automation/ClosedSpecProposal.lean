@@ -22,3 +22,5 @@ run_elab do
     | throwError "missing checked store proof"
   unless thm.value.consumeMData.isAppOf ``Proves.fmlValid do
     throwError "the closed derivation path was not used"
+  unless (thm.value.find? fun e => e.isConstOf ``Solidity.Frontend.SpecProposal.sound).isSome do
+    throwError "the trimmed certificate path was not used"

@@ -21,9 +21,9 @@ for obj in Path('.lake/frontend-native').glob('*.o'):
 builder = Path('scripts/build-frontend-plugin.py').read_text()
 needle = '    digest = hashlib.sha256(raw).hexdigest()'
 assert builder.count(needle) == 1
-injection = '''    if module == 'Solidity.Calculus.ProvesDerive':
+injection = '''    if module == 'Solidity.Frontend.Testing':
         body = raw.decode()
-        pattern = r'LEAN_EXPORT lean_object\\* l_Solidity_Seq_residueQuoteWithin___redArg\\([^;\\n]*\\) \\{'
+        pattern = r'LEAN_EXPORT lean_object\\* l_Solidity_Frontend_SpecProposal_quoteResidue___redArg\\([^;\\n]*\\) \\{'
         match = re.search(pattern, body)
         if not match: raise RuntimeError('closed oracle C symbol missing')
         start = match.end() - 1
@@ -45,10 +45,13 @@ try:
     exec(compile(builder, 'negative-control-builder', 'exec'), {'__name__': '__main__'})
 finally:
     sys.argv = original_args
+lean_env = dict(os.environ)
+lean_env['LEAN_PATH'] = os.pathsep.join(filter(None, [
+    str(Path('.lake/build/lib/lean').resolve()), lean_env.get('LEAN_PATH')]))
 run = subprocess.run([str(prefix / 'bin/lean'), 'tests/automation/ClosedSpecRejected.lean',
     '-j1', '--tstack=131072', '-DElab.async=false',
     '--plugin=' + str(output / 'libSolidity_Frontend_Testing.so')],
-    text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
+    text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, env=lean_env)
 (output / 'result.log').write_text(run.stdout)
 print(run.stdout)
 if run.returncode != 0 or run.stdout.count('SPEC_PROPOSAL_ORACLE_CORRUPTED') < 2:
