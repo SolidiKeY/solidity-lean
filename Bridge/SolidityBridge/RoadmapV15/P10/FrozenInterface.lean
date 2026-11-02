@@ -1,16 +1,17 @@
 import SolidityBridge.RoadmapV15.P10.Interface
 import SolidityBridge.ExternalEvm.Assembly.Driver
 
-/-! H12 FROZEN P10 interface V1. Signatures/structures only, no axioms or stubs.
-Fields are explicit proof obligations, NOT assumed discharged. FrozenWitness
-constructs them from existing checked producer theorems. Changes to these
-signatures or their Site/native dependency meanings require coordinator notice.
+/-! Frozen P10 interface, version 1: signatures only, no axioms or placeholders.
+Each field is a proof obligation over existing definitions; `FrozenWitness`
+discharges all of them from existing P10 theorems, so `API` adds no fact beyond
+those. A signature change becomes a new version.
 
-Scope: actual Backend-emitted Site, pinned decoder, charged driver and real CALL.
-Site constructs target code/PC; it does not prove compiler/source frame origin.
-validJumps remains an actual array input, not a proved scanner certificate.
-No physical PaddingCorrect, Osaka/G45.03 execution meaning, source/ABI/world,
-resource abstraction, transaction or trace adequacy is asserted by this API. -/
+Scope: a Backend-emitted `Site` (a state built with the encoded code and PC), the
+pinned decoder, the charged driver and the reference CALL. `Site` does not prove
+compiler/source frame origin; `validJumps` is an input array, not a scanner
+certificate. No physical `PaddingCorrect`, Osaka/G45.03 execution meaning,
+source/ABI/world, resource abstraction, transaction or trace adequacy is
+asserted by this API. -/
 namespace SolidityBridge.RoadmapV15.P10.FrozenV1
 open Solidity Solidity.Backend EvmYul Solidity.Evm.External
 
@@ -117,7 +118,7 @@ structure Continuation : Prop where
         | .error error => .error error
         | .ok next => EVM.X (fuel+1) valid next
 
-/-- All18 obligations must be supplied. No future execution theorem is assumed. -/
+/-- All 18 obligations. No future execution theorem is assumed. -/
 structure API : Prop where
   decoded : Decode
   charged : ChargedStep

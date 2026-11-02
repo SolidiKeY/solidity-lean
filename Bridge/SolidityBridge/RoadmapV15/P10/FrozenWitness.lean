@@ -6,7 +6,7 @@ checked P10 laws. This does not discharge the missing production prerequisites
 listed by FrozenInterface; the field statements retain their exact boundaries. -/
 namespace SolidityBridge.RoadmapV15.P10.FrozenV1
 
-def api : API where
+theorem api : API where
   decoded := {
     decode_call := _root_.SolidityBridge.RoadmapV15.P10.decode_call
     decode_return_size := _root_.SolidityBridge.RoadmapV15.P10.decode_return_size

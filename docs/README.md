@@ -117,22 +117,5 @@ intrinsic world/callable adapters and one-step Source-boundary components
 (custom errors, ABI, emit, Keccak, transient journals, payments). No theorem
 yet links Source executions to the intrinsic world or to bytecode.
 
-P10 fetched CALL/RETURNDATA/JUMP helper: [interface and handoff](feature-work/roadmap-v15-p10-fetched-call.md).
-
-- [V15 modular consumers](feature-work/roadmap-v15-modular-consumers.md): full-precision scalar/fetched ADDMOD and MULMOD clauses.
-
-- [V15 power consumers](feature-work/roadmap-v15-power-consumers.md): actual EXP encoding, charged execution and local resource clauses.
-
-- [V15 stack-family consumers](feature-work/roadmap-v15-stack-family-consumers.md): checked fetched DUP/SWAP clauses at every legal depth.
-
-- [V15 signed division consumers](feature-work/roadmap-v15-signed-division-consumers.md): bounded representation and actual charged SDIV/SMOD clauses.
-
-- [V15 arithmetic shift consumers](feature-work/roadmap-v15-arithmetic-shift-consumers.md): actual SAR representation and charged execution, preserving saturation.
-
-- [V15 storage-read consumers](feature-work/roadmap-v15-storage-read-consumers.md): charged persistent/transient reads and explicit typed finite coverage.
-
-- [V15 balance environment consumers](feature-work/roadmap-v15-balance-environment-consumers.md): actual charged BALANCE and explicit account-ledger realization.
-
-- [V15 decoder agreement](feature-work/roadmap-v15-decoder-agreement.md): actual reference decode targets, with explicit Osaka CLZ mismatch.
-
-- [Frozen P10 consumer interface](feature-work/roadmap-v15-p10-frozen-interface.md): H12 signatures and checked existing-law inhabitant for V13/V14/V16/VY3/VY4.
+V15 P10 partial checkpoint: [fetched-byte EVM steps against EvmYul](feature-work/roadmap-v15-p10.md),
+including the frozen CALL/RETURNDATA/JUMP interface consumed by later lanes.
