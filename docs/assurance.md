@@ -342,17 +342,29 @@ ignored `Hyps.freshC` indices and was dropped as unneeded); only the first
 such end is inspected, which can keep `plain` skipped where it could run,
 never the reverse; full build and SolkeyTestSuite green.
 
-**Open: proof automation** (31's slice rows; 30 and 60 fixed by lane FU2-D, 43 and 57 pass since lane FU2-A), each "open
-proof goals" in a `box` obligation. For `sliceRead` (`t = xs[1:]; assert(t[k]
-== xs[1 + k])`) the CLI's goal dump (`action: inspect`, `show: goals`) leaves
-`read(memory, base[(k < len - 1 ? 1 + k : len)]) == read(memory, xs[1 + k])`
-without the bounds facts that would close it or make the read revert: a
-closer gap, not an admission change. For `indexOutOfRange` (`bytes4 b =
-"abcd"; bytes1 x = b[i];` with `i >= 4`, expected to revert) the leaf keeps
-`b[i]`'s lowering `((b >> 8 * (3 - i)) % 256) / (i < 4 ? 1 : 0)` as a plain
-update `se3 := se4 / se8` and ends at `false = true`: the zero divisor's
-revert branch is not taken by the search (the leaf also prints raw `‹Tm…›`
-escapes for `subW`/`mulW`, a printer gap). Not bisected (see above).
+**Open: proof automation** (integration of batch fu2-20261102, 2026-11-02):
+only test 31's `sliceHashed`, which ends in a heartbeat-timeout `error`
+rather than open goals in a `box` obligation (budget exhaustion of the
+symbolic `#sliceCopy` loop; it fails the same way at base `84a2a4be`, see
+lane FU2-C above). Rows 30 and 60 are fixed by lane FU2-D (`#bytesIndex`,
+literal revert data), 31's `sliceRead`, `sliceOfSlice` and `slicePast` by
+lane FU2-C (`#sliceIndex`), and 43 and 57 pass since lane FU2-A. The goal
+dumps that described `sliceRead`'s `base[(k < len - 1 ? 1 + k : len)]` leaf
+and `indexOutOfRange`'s zero-divisor lowering are historical: both lowerings
+are gone.
+
+**Integration note (batch fu2-20261102): `cdRef`'s length in the Backend.**
+Lane FU2-B gave `Source.Val.cdRef` a length (`cdRef h off len`), which the
+source interpreter uses as the array's element count (`lengthOf`,
+`indexLoc`, `sliceR`, `cdToMem` in `Solidity/Source/Eval.lean`). The Backend
+memory proofs (`Solidity/Backend/MemoryOps/Calldata*.lean` and the snapshot
+controls) build such values with length `0`: they read calldata only through
+`Source.Calldata.objects` (`DecodedArrayRead`, `DecodedArrayAt`), never
+through `Eval`, and their `off` is an object-table key, not a byte offset
+into `Fr.cd`, so no statement changes meaning. Under the source semantics
+those values would read as empty arrays: a bridge from these relations to
+`Source.evalE` must first carry the child's real length
+(`(MObj.elems .dyn (hp.get r)).length`).
 
 ### Lane FU2-D (fu2-20261102): the five rows diagnosed, 30 and 60 fixed
 
@@ -366,8 +378,8 @@ introduced it, from the history of the code it names (`git log -S`).
 | # | Row | Cause | First failing commit | Owner | State |
 |---|---|---|---|---|---|
 | 30 | `indexOutOfRange` | `bytesAt` (`Syntax/Elab/Values.lean`) lowered `b[i]` of a `bytesN` at a symbolic index to `uint8(((b >> 8 *% ((N-1) -% i)) % 256) / (i < N ? 1 : 0))`. The walk keeps the division as an update; behind the symbolic shift the closer does not refute it: in a scratch reproduction `sol_close_eval` times out on the leaf, while the same zero divisor without the shift closes. A missing reading, not a refactor. | not identified: the function was added in `4dd2d9d0` and its row in `f9a1cf42` (2026-10-20, both after the last green CI run), asserting `proved`, so it presumably closed when written; the lowering is `1789394d`'s, unchanged since (`63ac4b63` only moved it), so a later closer or walk change stopped it closing, not identified without rebuilds | FU2-D | fixed: `#bytesIndex` (below) |
-| 31 | `sliceRead` | see "Open: proof automation" above | — | `fu2-calldata-access` | not this lane's |
-| 43 | `tryScopeExit` | still pending on the lane head. Its open goals are the loop invariants inside the `try`'s success clause (`age >= 0 && i <= 1`, `age` the `returns (uint age)` binder): they reach the leaf as unreduced `(Val.wk (Thin.keepAll …) v).lower` terms (printed as `‹…›` escapes), which the closer does not evaluate, so even `se3 < 1 ⟹ se3 + 1 <= 1` stays open. A binder weakening in the try's frame, not a closer rule. | not identified (the row is in the last green run, `1f02521b`) | `fu2-frame-returns` | handed over |
+| 31 | `sliceRead` | fixed by lane FU2-C (see its section above); `sliceHashed` remains, see "Open: proof automation" | — | `fu2-calldata-access` | not this lane's |
+| 43 | `tryScopeExit` | fixed since by lane FU2-A (`CallbackWalk.liveFml`; the `Val.wk` escapes below were the leaf's printing, not the cause). On this lane's head: still pending. Its open goals are the loop invariants inside the `try`'s success clause (`age >= 0 && i <= 1`, `age` the `returns (uint age)` binder): they reach the leaf as unreduced `(Val.wk (Thin.keepAll …) v).lower` terms (printed as `‹…›` escapes), which the closer does not evaluate, so even `se3 < 1 ⟹ se3 + 1 <= 1` stays open. A binder weakening in the try's frame, not a closer rule. | not identified (the row is in the last green run, `1f02521b`) | `fu2-frame-returns` | handed over |
 
 | 57 | `tryArgumentSideEffect` | proved on the lane head with the test's `--self-address 0x…DeaDBeef` (every row of that test passes, `trySuccessKeepsStorageUnsound` and `callKeepsStorageUnsound` pending as pinned). Its callee has no literal reason and no `bytesN` index, so this lane's changes do not reach it: most likely fixed on master before the base, plausibly by `48db830` (the revert of the calldata-root import change that FU1's run carried). | not identified | `fu2-frame-returns` | passes here; not rerun at the base |
 | 60 | `reasonBytes` (also `reasonOfBranch`, `reasonPastCustom`) | `ea06b814` ("Solidity features", 2026-10-26) made the solc import print every string literal that has a `hexValue` as `hex"…"` (`byteLiteralText`, `SolcJson/Body.lean`), where it printed the quoted `value` before. `require(false, "boom")` then parses as `requireReason` (a reason expression) instead of `requireMsg`, so the self-call's callee reverts with the reason in a fresh memory `bytes` (`revertData [.mem …]`); `CatchKind.datas` knows no data of a memory part, and `catchDataStep` binds the reason as any bytes (`Fml.allocAll`). A refactor regression, inferred from `ea06b814`'s diff (not rebuilt at `ea06b814^`; nothing else in it touches the require/revert path). The test (`75dc97b4`, `aa47a432`, 2026-10-21) is after the last green CI run, so it never ran green in CI; it asserted `proved` when written. | `ea06b814` (inferred) | FU2-D | fixed: literal reasons (below) |
