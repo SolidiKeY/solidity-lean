@@ -56,8 +56,10 @@ theorem per obligation (`lake build SolkeyTestSuite`):
 
 The [VS Code extension](vscode/README.md) verifies Solidity files through the same
 runner, with Test Explorer, diagnostics, hover status and cancellation. The
-[offline web IDE](web/README.md) is a static website with a VS Code-style
-browser workbench and a pinned WebAssembly runtime under validation. The
+[offline web IDE](https://solidikey.github.io/solidity-lean/ide/) is a single-file
+static website with a VS Code-style workbench. Solidity compilation and Lean
+proof checking run entirely in the browser, including offline. See the
+[build and download instructions](web/README.md). The
 [Dafny feature audit](docs/dafny-parity.md) records reusable verification features
 and the remaining semantic gaps.
 

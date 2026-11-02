@@ -5,7 +5,9 @@
   "description": "Offline web workbench for the Solidity Lean VS Code extension",
   "scripts": {
     "build": "node tools/build-static.mjs",
+    "build:single": "node tools/build-single-file.mjs",
     "start": "node tools/serve-static.cjs",
+    "start:single": "node tools/serve-static.cjs --single",
     "start:native": "node server.cjs",
     "test": "node --test test/server.test.cjs",
     "test:browser": "node test/website.cjs",
@@ -14,6 +16,7 @@
     "test:native:browser": "node test/browser.cjs",
     "test:native:proofs": "node test/browser.cjs --proofs",
     "test:website:proofs": "node test/website.cjs --proofs",
+    "test:single": "node test/website.cjs --single --proofs",
     "test:protocol": "node test/proofs.test.cjs"
   },
   "engines": {
@@ -21,6 +24,7 @@
   },
   "dependencies": {
     "@noble/hashes": "1.8.0",
+    "brotli-dec-wasm": "2.3.2",
     "buffer": "6.0.3",
     "fflate": "0.8.2",
     "monaco-editor": "0.55.1",

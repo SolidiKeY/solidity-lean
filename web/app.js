@@ -62,6 +62,7 @@ function connect() {
   clearTimeout(reconnectTimer);
   socket = usingNativeBackend?new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/lsp`):new BrowserConnection();
   socket.onopen = async () => {
+    globalThis.singleFileIDE?.compilerStarted();
     state.connected = true; state.synced.clear(); state.workspaceSynced.clear(); $('#connection-status').textContent = usingNativeBackend?'Native development':'Browser · Offline'; $('.statusbar').classList.remove('reconnecting');
     try { await syncWorkspace(); await rpc('configure',state.settings); await syncAll(); updateStatus(); refreshSymbols(); log(usingNativeBackend?'Connected to the native development backend.':'Solidity WebAssembly compiler and language services are running in this browser.'); } catch (error) {notifyError(error);}
   };
@@ -74,8 +75,8 @@ function connect() {
       return;
     }
     const {method,params:p} = message;
-    if(method==='runtime'){Object.assign(state.runtime,p);log(p.message||'Browser runtime ready.');updateStatus();if(state.view==='settings')renderSidebar();return;}
-    if (method === 'backendError') { log(`Backend error: ${p.message}`); toast(p.message); return; }
+    if(method==='runtime'){Object.assign(state.runtime,p);if(p.error)globalThis.singleFileIDE?.invalidate();log(p.message||'Browser runtime ready.');updateStatus();if(state.view==='settings')renderSidebar();return;}
+    if (method === 'backendError') {globalThis.singleFileIDE?.runtimeFailure(new Error(p.message)); log(`Backend error: ${p.message}`); toast(p.message); return; }
     if (method === 'log') { log(p.message); return; }
     if (!p.name || !state.models.has(p.name) || p.version !== currentVersion(p.name)) return;
     if (method !== 'invalidated' && !allSynced()) return;
@@ -100,7 +101,7 @@ function connect() {
     $('#connection-status').textContent = usingNativeBackend?'Backend disconnected':'Browser runtime stopped'; $('.statusbar').classList.add('reconnecting');
     updateStatus(); renderSidebar(); renderPanel(); renderCounts(); reconnectTimer = setTimeout(connect,3000);
   };
-  socket.onerror = () => {};
+  socket.onerror = event => {if(!usingNativeBackend)globalThis.singleFileIDE?.runtimeFailure(new Error(event?.message||'Embedded compiler worker failed'));};
 }
 async function sync(name = state.active) {
   const model = state.models.get(name); if (!model) return;
@@ -269,7 +270,7 @@ function renderSidebar(){
     $('#restart-button').onclick=restart;
   }
 }
-function iconPath(status){return `/media/${status==='proved'?'proved':['refuted','error'].includes(status)?'error':status==='running'?'running':'pending'}.svg`;}
+function iconPath(status){const path=`/media/${status==='proved'?'proved':['refuted','error'].includes(status)?'error':status==='running'?'running':'pending'}.svg`;return globalThis.singleFileIDE?.assetURL(path)||path;}
 function detail(row){return `${row.contract}.${row.signature||row.function}: ${row.status}${row.reason?` — ${row.reason}`:''}${row.reading?`\nObligation reading: ${row.reading}`:''}${row.preconditions?`\nEntry condition: ${row.preconditions}`:''}${row.counterexample?`\nCertified model prestate: ${JSON.stringify(row.counterexample,null,2)}`:''}`;}
 async function reveal(name,r){await openFile(name);if(r){editor.setSelection(range(r));editor.revealLineInCenter(r.start.line+1);}editor.focus();}
 async function refreshSymbols(name=state.active,attempt=0){if(!state.models.has(name)||!state.connected)return;try{const version=currentVersion(name);const rows=await language('textDocument/documentSymbol',state.models.get(name));if(currentVersion(name)!==version)return;state.symbols.set(name,rows);if(name===state.active)renderOutline();}catch(error){if(attempt<2&&state.connected&&[-32800,-32801].includes(error.code))setTimeout(()=>refreshSymbols(name,attempt+1),250);}}
@@ -314,6 +315,7 @@ const commands=[
   {label:'File: Open Solidity Files…',key:'Ctrl+O',run:()=>$('#file-picker').click()},
   {label:'File: Save',key:'Ctrl+S',run:save},
   {label:'File: Export Current File',run:exportFile},
+  ...(globalThis.singleFileIDE?[{label:'File: Download Offline IDE',run:()=>{const link=document.createElement('a');link.href=location.href;link.download='Solidity-Lean-IDE.html';link.click();}},{label:'Help: Third Party Notices',run:()=>{const link=document.createElement('a');link.href=singleFileIDE.assetURL('/THIRD_PARTY_NOTICES.txt');link.download='THIRD_PARTY_NOTICES.txt';link.click();}}]:[]),
   {label:'View: Explorer',key:'Ctrl+Shift+E',run:()=>setView('explorer')},
   {label:'View: Testing',run:()=>setView('testing')},
   {label:'View: Search',key:'Ctrl+Shift+F',run:()=>setView('search')},
@@ -326,7 +328,7 @@ const commands=[
   {label:'Format Document',key:'Shift+Alt+F',run:()=>editor.getAction('editor.action.formatDocument').run().catch(notifyError)},
   {label:'Go to Definition',key:'F12',run:()=>editor.getAction('editor.action.revealDefinition').run()},
   {label:'Rename Symbol',key:'F2',run:()=>editor.getAction('editor.action.rename').run()},
-  {label:'Help: Offline IDE',run:()=>toast(usingNativeBackend?'Native development backend. Keep its local process running.':'This website runs in your browser.\nThe compiler and editor work without a network after initial caching.\nF1 opens commands. Ctrl+S saves browser files; Export keeps a disk copy.\n'+(state.runtime.proofReady?'Lean proof checking also runs in this browser.':'The compatible Lean proof runtime is still being prepared.'))}
+  {label:'Help: Offline IDE',run:()=>toast(usingNativeBackend?'Native development backend. Keep its local process running.':'This website runs in your browser.\n'+(globalThis.singleFileIDE?'File → Download Offline IDE saves the complete website as one HTML file.\nReopen that file for offline use.\n':'The compiler and editor work without a network after initial caching.\n')+'F1 opens commands. Ctrl+S saves browser files; Export keeps a disk copy.\n'+(state.runtime.proofReady?'Lean proof checking also runs in this browser.':'The compatible Lean proof runtime is still being prepared.'))}
 ];
 function openPalette(mode='commands'){const dialog=$('#palette');dialog.dataset.mode=mode;$('#palette-input').value=mode==='commands'?'>':'';$('#palette-input').placeholder=mode==='files'?'Search files by name':'Type a command';paletteIndex=0;renderPalette();dialog.showModal();$('#palette-input').focus();}
 function renderPalette(){const mode=$('#palette').dataset.mode,q=$('#palette-input').value.replace(/^>/,'').toLowerCase();paletteCommands=(mode==='files'?Object.keys(state.files).map(name=>({label:name,run:()=>openFile(name)})):commands).filter(c=>c.label.toLowerCase().includes(q));paletteIndex=Math.max(0,Math.min(paletteIndex,paletteCommands.length-1));$('#palette-items').replaceChildren();paletteCommands.forEach((c,i)=>{const b=document.createElement('button');b.className=i===paletteIndex?'chosen':'';b.setAttribute('role','option');b.setAttribute('aria-selected',String(i===paletteIndex));const t=document.createElement('span');t.textContent=c.label;b.append(t);if(c.key){const k=document.createElement('kbd');k.textContent=c.key;b.append(k);}b.onclick=()=>chooseCommand(i);$('#palette-items').append(b);});}
@@ -340,7 +342,7 @@ function wireUI(){
   $('#title').onclick=()=>openPalette();$('#more-button').onclick=()=>openPalette();$('#verify-button').onclick=()=>verify();$('#proof-status').onclick=()=>verify();$('#errors-status').onclick=()=>showPanel('problems');$('#offline-button').onclick=()=>commands.at(-1).run();$('#notification-button').onclick=()=>toast(usingNativeBackend?'Native development backend: '+(state.connected?'connected':'disconnected'):state.connected?'The compiler runs in WebAssembly in this browser. No remote service is used.':'The browser runtime is preparing.');
   $('#layout-button').onclick=$('#close-panel').onclick=()=>{document.body.classList.toggle('panel-hidden');editor.layout();};$('#clear-output').onclick=()=>{state.logs=[];renderPanel();};$('#outline-toggle').onclick=()=>{$('#outline-content').hidden=!$('#outline-content').hidden;};
   $('#file-picker').onchange=async e=>{for(const file of e.target.files){if(!validFileName(file.name)||file.size>8*1024*1024){toast('Open a .sol file smaller than 8 MiB with a simple file name.');continue;}if(file.name in state.files&&state.files[file.name]!==await file.text()){toast(`${file.name} already exists. Rename the imported file before opening it.`);continue;}state.files[file.name]=await file.text();await openFile(file.name);}persist();e.target.value='';};
-  const menus={File:['File: New','File: Open','File: Save','File: Export'],Edit:['Format Document','Rename Symbol'],Selection:[],View:['View: Explorer','View: Search','View: Testing','View: Problems','View: Output','View: Toggle'],Go:['Go to Definition'],Run:['Solidity Lean:'],Help:['Help:']};
+  const menus={File:['File:'],Edit:['Format Document','Rename Symbol'],Selection:[],View:['View: Explorer','View: Search','View: Testing','View: Problems','View: Output','View: Toggle'],Go:['Go to Definition'],Run:['Solidity Lean:'],Help:['Help:']};
   for(const button of $$('[data-menu]'))button.onclick=e=>{e.stopPropagation();$('.menu-popup')?.remove();const box=document.createElement('div');box.className='menu-popup';box.style.left=`${button.getBoundingClientRect().left}px`;const items=button.dataset.menu==='Selection'?[{label:'Select All',run:()=>{editor.focus();editor.trigger('keyboard','editor.action.selectAll');}}]:commands.filter(c=>menus[button.dataset.menu].some(prefix=>c.label.startsWith(prefix)));for(const c of items){const b=document.createElement('button');b.textContent=c.label.replace(/^(File|View|Help): /,'');if(c.key){const k=document.createElement('kbd');k.textContent=c.key;b.append(k);}b.onclick=()=>{box.remove();c.run();};box.append(b);}document.body.append(box);};
   document.addEventListener('click',()=>$('.menu-popup')?.remove());
   document.addEventListener('keydown',e=>{if($$('dialog[open]').length)return;const mod=e.ctrlKey||e.metaKey;let action;
@@ -353,14 +355,14 @@ function wireUI(){
   for(const [selector,axis]of [['.sidebar-resize','x'],['.panel-resize','y']]){const handle=$(selector);handle.onpointerdown=e=>{e.preventDefault();handle.setPointerCapture(e.pointerId);handle.classList.add('dragging');const move=event=>{const value=axis==='x'?Math.max(180,Math.min(600,event.clientX-48)):Math.max(90,Math.min(innerHeight-200,innerHeight-event.clientY-22));document.documentElement.style.setProperty(axis==='x'?'--sidebar-width':'--panel-height',`${value}px`);editor.layout();};handle.onpointermove=move;handle.onpointerup=()=>{handle.classList.remove('dragging');handle.onpointermove=null;};};handle.onkeydown=e=>{const amount=e.key==='ArrowLeft'||e.key==='ArrowDown'?-10:e.key==='ArrowRight'||e.key==='ArrowUp'?10:0;if(!amount)return;e.preventDefault();const key=axis==='x'?'--sidebar-width':'--panel-height';const value=parseInt(getComputedStyle(document.documentElement).getPropertyValue(key))+amount;document.documentElement.style.setProperty(key,`${Math.max(axis==='x'?180:90,value)}px`);editor.layout();};}
 }
 async function boot(){
-  if(!usingNativeBackend&&!('serviceWorker'in navigator))throw new Error('Use HTTPS or localhost to prepare this offline website');
+  if(!usingNativeBackend&&!globalThis.singleFileIDE&&!('serviceWorker'in navigator))throw new Error('Use HTTPS or localhost to prepare this offline website');
   const start=performance.now();let bootstrap;
   try{bootstrap=await (await fetch(usingNativeBackend?'/api/bootstrap':'/bootstrap.json')).json();store.write('examples',bootstrap.files);}catch{bootstrap={files:store.read('examples',{})};}
   const saved=store.read('workspace',{});state.files=saved.files&&Object.keys(saved.files).length?saved.files:bootstrap.files;state.baselines=saved.baselines||{...bootstrap.files};state.active=saved.active in state.files?saved.active:Object.keys(state.files)[0];state.dirty=new Set(saved.dirty||[]);
   if(!Object.keys(state.files).length){state.files={'Contract.sol':'// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Contract {}\n'};state.active='Contract.sol';}
   // Control the first Monaco load, so its AMD chunks and workers are cached on
   // the very first visit rather than only after a second online page load.
-  if('serviceWorker'in navigator){
+  if(!globalThis.singleFileIDE&&'serviceWorker'in navigator){
     navigator.serviceWorker.addEventListener('message',event=>{if(event.data?.method==='offlineProgress'&&$('#editor .loading'))$('#editor .loading').textContent=`Preparing offline website… ${event.data.done}/${event.data.total} local assets cached`;});
     try{const registration=await navigator.serviceWorker.register('/sw.js');
       await new Promise((resolve,reject)=>{
@@ -371,8 +373,8 @@ async function boot(){
       if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));
     }catch(error){log(`Offline asset cache: ${error.message}`);if(!usingNativeBackend)throw error;}
   }
-  require.config({paths:{vs:'/vendor/vs'}});
-  await new Promise((resolve,reject)=>require(['vs/editor/editor.main'],resolve,reject));
+  if(!globalThis.singleFileIDE){require.config({paths:{vs:'/vendor/vs'}});
+    await new Promise((resolve,reject)=>require(['vs/editor/editor.main'],resolve,reject));}
   const grammar=await (await fetch('/syntax.json')).json();
   registerLanguage(grammar);$('#editor').replaceChildren();
   editor=monaco.editor.create($('#editor'),{theme:'solidity-extension',fontFamily:"'Droid Sans Mono', monospace",fontSize:14,lineHeight:20,automaticLayout:true,minimap:{enabled:true},glyphMargin:true,lineNumbersMinChars:3,scrollBeyondLastLine:false,tabSize:4,insertSpaces:true,padding:{top:0},renderWhitespace:'none',bracketPairColorization:{enabled:false},stickyScroll:{enabled:false},quickSuggestions:{other:true,comments:false,strings:false}});
@@ -384,8 +386,9 @@ async function boot(){
   await openFile(state.active);wireUI();renderPanel();renderCounts();connect();
   window.addEventListener('pagehide',persistNow);
   state.startupMs=+(performance.now()-start).toFixed(1);log(`Offline workbench ready in ${state.startupMs} ms.`);
-  if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(error=>log(`Offline asset cache: ${error.message}`));
+  if(!globalThis.singleFileIDE&&'serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(error=>log(`Offline asset cache: ${error.message}`));
   // A small inspection surface for reproducible browser parity and latency tests.
   window.solidityIDE={state,editor,verify,openFile,setView,showPanel,rpc,sync,restart,save,language,get ready(){return !!editor;}};
 }
-boot().catch(error=>{$('#editor').textContent=`Unable to start the editor: ${error.message}. Reload after the website assets finish downloading.`;console.error(error);});
+const bootPromise=boot();if(globalThis.singleFileIDE)singleFileIDE.bootPromise=bootPromise;
+bootPromise.catch(error=>{globalThis.singleFileIDE?.invalidate();$('#editor').textContent=`Unable to start the editor: ${error.message}. Reload after the website assets finish downloading.`;console.error(error);});
