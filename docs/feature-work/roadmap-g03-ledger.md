@@ -1317,8 +1317,8 @@ Split parents in G00's cells, refined to child packages (`REFINE`):
   - missing: No stated theorem that numeric-to-bool coercion is impossible (rests on typing)
 
 - **`comments`** (model/partial)
-  - admission: `Solidity.Frontend.scanSpecifications` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:517`) — scans NatSpec spec annotations by lexical binders
-  - lowering: `Solidity.Frontend.specCommentTokens` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:288`) — tokenizes spec comments; ordinary comments stay data
+  - admission: `Solidity.Frontend.scanSpecifications` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:498`) — scans NatSpec spec annotations by lexical binders
+  - lowering: `Solidity.Frontend.specCommentTokens` (Solidity.Frontend.Import, `Solidity/Frontend/Import.lean:269`) — tokenizes spec comments; ordinary comments stay data
   - lowering: `Solidity.Frontend.docText` (Solidity.Frontend.SolcJson.Contract, `Solidity/Frontend/SolcJson/Contract.lean:21`) — reads documentation nodes for clauses
   - regression: `Solidity.Examples.Tactics.SourceIdentifiersImport.escaped_spec_valid` (Solidity.Examples.Tactics.SourceIdentifiersImport, `Solidity/Examples/Tactics/SourceIdentifiersImport.lean:21`) — spec with escaped identifiers is valid
   - no existing anchor: source, theorem
