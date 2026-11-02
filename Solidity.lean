@@ -983,3 +983,5 @@ import Solidity.Backend.Executable.PaymentArtifactChecks
 import Solidity.Backend.Executable.Relocation
 import Solidity.Backend.Executable.RelocationChecks
 import Solidity.Backend.Executable.RelocationCreation
+import Solidity.Backend.Executable.RelocationConstructor
+import Solidity.Backend.Executable.RelocationConstructorChecks

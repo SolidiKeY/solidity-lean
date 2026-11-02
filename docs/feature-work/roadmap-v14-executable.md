@@ -1827,3 +1827,53 @@ typo are retained; the typo was repaired without changing any resource guard
 and before launching its affected heavy process. Final scoped/doc comparisons
 and exact-head source/bundle/interface/checksum evidence are in the handoff.
 No model, policy, pin, profile, goal/objective or optional-vendor hold change.
+
+
+## Checkpoint25: general relocation-to-constructor consumer
+
+RelocationConstructor.enclosing uses the actual Creation.Artifact fields for
+an arbitrary encoded prefix, Assembled section, raw suffix and arguments.
+Its whole-runtime origin is zero; actual assembly still uses size pre. A real
+typed LinkTable retains all location bounds, origin and pairwise disjointness.
+local_origin derives its exact patch list. linked_runtime/relocated_constructor
+then derive the whole linked runtime from actual link_patch/linked_backedge,
+never accepting the desired runtime equality or an execution simulation premise.
+
+The full runtime length is derived using typed patch bounds and assembly sizes.
+The actual minimal-width wrapper gives header2*byteWidth(length)+8 and the
+corresponding argument interval; real constructor Exec, runtime/argument slices,
+backward operand/word fit and runtime/initcode jump-scan transport compose.
+return_iff preserves complete returned bytes, including same-length alternatives.
+Generic wrong-site, short-return, argument-leak and omitted-prefix refusals use
+actual origins, sizes and constructor determinism. A nonempty-prefix condition
+is explicit for omitted-prefix rejection, and actual filled assembly supplies
+its size equality. Scalar/Creation stacks are never identified.
+
+RelocationConstructorChecks consumes that general theorem with the actual
+nonzero-prefix/backedge/site5 client and arbitrary bounded padding/arguments.
+Actual runtime255/header10/args265/image13 and runtime256/header12/args268/
+image15 clients cross the constructor width boundary; the runtime operand stays3.
+A255-byte truncated return and stale argument boundary266 are rejected. A
+separate actual empty assembly witnesses runtimeempty/header8 with both empty
+and nonempty arguments; it does not vacuously inhabit backedge premises. Wrong
+site8, omitted-prefix copying and argument leakage remain discriminating.
+
+Twenty-three observed headline/control axiom sets are guarded. Independent
+read-only finder/skeptic reviews accept actual hypotheses and inhabited controls;
+raw proof failures remain preserved and were resolved without increasing any
+budget. No reserved assembler/creation implementation was edited. Kernel layout,
+copy/return and target scanning remain distinct from contained JUMP, pinned
+decoder, CREATE/account/world/nonce, payment/history/stipend, source/frame or
+G36.03 divergence correspondence. Full Work/Backfill obligations remain open;
+optional-vendor hold and original goal/objective are unchanged. Exact signatures,
+source/dependency hashes, full gates and artifacts are recorded in the handoff.
+
+Checkpoint25 finder/skeptic independently accept the general proof and real
+LinkTable premises. Their pending axiom-pin item is fixed and independently
+confirmed: all11generic+12client reports guarded. Focused19jobs, root1059+262
+and private1063+262 pass, SolKey377/131/131. Actual Lean4.24.0 and
+Lake5.0.0-src+797c613/KeySort2jobs precede runtime confirmation. Root/private
+aggregateRSS1726172/1723248KiB, one worker,12GiB/noSwap/180s/writerlease,
+OOM0; hostminimum17275188/17232288KiB exceeds12GiB reserve. Source/toolchain
+cache reused. Scope/trust/doc comparisons and exact-head immutable exports
+retain actual commands, failed raw receipts and complete parent obligations.

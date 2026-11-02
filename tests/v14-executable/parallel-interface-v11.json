@@ -1,0 +1,99 @@
+{
+  "kind": "PARALLEL-INTERFACE",
+  "prior_head": "e553ebfedaef8fd20bc692a4864174805379a0e8",
+  "frozen_base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "owned_sources": [
+    {
+      "path": "Solidity/Backend/Executable/RelocationConstructor.lean",
+      "blob": "0b07b16a2ccd2f0821e9a7c7187067f9621e98d1",
+      "sha256": "a0dda13eda4e23bb761a3fe52ca0320f3b7690c2fa1204e810c1f08279f8b1d4"
+    },
+    {
+      "path": "Solidity/Backend/Executable/RelocationConstructorChecks.lean",
+      "blob": "2509b4793110772fa09667f1d3d8693b7fa22a59",
+      "sha256": "56c2db88bc2c46e2289831479f77417a665b8fd60c6bfc9dc1977808cad3c698"
+    },
+    {
+      "path": "Solidity/Backend/Executable/Relocation.lean",
+      "blob": "65cbc66c2ceeb1bd65d4b58a106cab48def3b9ab",
+      "sha256": "87dc8aa08ef4a1d6cf84b13dcfce6141d5755159160ec88e4f3c682776c1bc08"
+    },
+    {
+      "path": "Solidity/Backend/Executable/RelocationChecks.lean",
+      "blob": "33a27dfe95a450bf174713efd398eb8b43c55502",
+      "sha256": "9abef602f86cacbc1ef516ea68c2f9a9c8bc2b1938c0976be1289815d3d81c69"
+    },
+    {
+      "path": "Solidity/Backend/Executable/RelocationCreation.lean",
+      "blob": "913c4c3154b19d5ff378931c26d7305f96cee226",
+      "sha256": "f23ad3ce496fbc65252bc1a1a5aa47520d71f3d8088be216d6a0ed7226d67fbd"
+    }
+  ],
+  "published_read_only_producers": [
+    {
+      "path": "Solidity/Backend/Assembler.lean",
+      "blob": "990ae3a90639260b93a2a5e5a64771c8b0e9e80b",
+      "sha256": "d0991b737f9a65416829c5850edca4bbb3f8fe7193ad104dd5aaeac92803f9d0",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Jumpdest.lean",
+      "blob": "c4e3cba782a737ec4931045220d6c0e758b8ad2c",
+      "sha256": "e5fc894e1b3470311a90887aa9f663c0536c3703f41195e7e04491a2b58dc3b2",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Artifact.lean",
+      "blob": "625fe0ae34b6cdf4064482974e1d5e53729197fc",
+      "sha256": "4dfdb7c95f914dd06ef0ec6b603c46d41eda4674e0a303225252740b93bdb947",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Linking.lean",
+      "blob": "f82845a3e7fcc2b0cad836a03bdb8428d2f97997",
+      "sha256": "305e79d2d699cd388cc20e39fe96818f45f80f2b6d00797aabc413bdd9a5dd58",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Execution.lean",
+      "blob": "83962ac3fadf3d14f9cc953278780a705c6e3d6b",
+      "sha256": "9e2ab984d9e9116700aeb309e266aa3cae50292f8ce04b80e6f55581953f6f04",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Regions.lean",
+      "blob": "f3fd6115d1aaf958921241b66f9b3f2a7515648d",
+      "sha256": "9abf380330ebbe9bd76558814872671c31bd5c6ff90ccab449ce3c6541d41568",
+      "published_head": "4165de133bafd522ab18099e18cad489bb1aa7d6"
+    }
+  ],
+  "declarations": [
+    "Solidity.Backend.Executable.RelocationConstructor.enclosing_length",
+    "Solidity.Backend.Executable.RelocationConstructor.local_origin",
+    "Solidity.Backend.Executable.RelocationConstructor.completed_length",
+    "Solidity.Backend.Executable.RelocationConstructor.constructor_layout",
+    "Solidity.Backend.Executable.RelocationConstructor.linked_runtime",
+    "Solidity.Backend.Executable.RelocationConstructor.relocated_constructor",
+    "Solidity.Backend.Executable.RelocationConstructor.return_iff",
+    "Solidity.Backend.Executable.RelocationConstructor.no_short_return",
+    "Solidity.Backend.Executable.RelocationConstructor.no_argument_return",
+    "Solidity.Backend.Executable.RelocationConstructor.no_omitted_prefix",
+    "Solidity.Backend.Executable.RelocationConstructor.wrong_sites",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.generic_client",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.low_coordinates",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.high_coordinates",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.width_boundary",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.omitted_prefix",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.wrong_site",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.argument_leak",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.empty_assembled",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.empty_constructor",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.empty_nonempty_arguments",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.truncated_high",
+    "Solidity.Backend.Executable.RelocationConstructorChecks.high_wrong_arguments"
+  ],
+  "signature_evidence": "interface-types.log contains complete actual dependent signatures, including fits, actual assembly success, typed LinkTable bounds/origin/disjointness, tagIndex/reference/j<k",
+  "derived_facts": "Actual enclosing linked runtime equality, whole-runtime size and minimalheader/args intervals, constructorcopy/return, actual backwardoperand/wordfit and runtime/initcode target; exact return iff and wrongsite/short/omittedprefix/argleak refusals. No desiredruntime equality premise.",
+  "inhabited_clients": "Actual base3/PUSH20/site5/backedge with arbitrary representable padding+args;255runtime\u2192header10/args265/image13 and256\u2192header12/args268/image15;actualemptyassembly/header8 andempty/nonemptyargs. Staleargboundary266, truncated255, wrongsite8, omittedprefix andargleak negatives.",
+  "limits": "Kernel linking/layout/constructorbyte-slice only; not contained JUMP, pinneddecoder, accountCREATE/world/nonce, generalpayment/history/stipend, source/frame or G36.03 divergence. No parent closure or model/budget/hold changes."
+}
