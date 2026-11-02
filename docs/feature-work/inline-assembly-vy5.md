@@ -2849,3 +2849,87 @@ holds remain unanswered; H1/H3 answer neither. Original goal identity/status/
 objective/counters remain unchanged; get_goal read tool unavailable, no mutation.
 New evidence/cleanup/immutable contract, source and incremental artifacts:
 `/workspace/vy5-composition/pipeline-contract-20261102/final-v2/`.
+
+
+### VY5 actual nested modifiers and answered VY1 H3 inputs (2026-11-02)
+
+H3 now ALSO answers LIB1/library-viaIR-error-1834 and unchecked-add: approved
+unchecked expectations are legacy512/viaIR0; library requires reviewed per-pipeline
+codegen contract and fresh validation. VY1 owns both. No semantic question is
+re-asked and no implementation duplicated. The new input-obligation registry
+records null consumed commit/package and pending committed evidence, not pending
+human choice. Only the previously staged VY1c7b128fd package is present in the
+designated immutable input index; no active peer checkout was inspected. Consume
+new exact committed exports when delivered; neither approval nor this component
+marks those gates passed. Earlier unanswered wording is historical.
+
+`Solidity/Yul/Composition/NestedModifierPhysical.lean` adds23 actual checked
+Source component facts. Distinct ownedOuter/ownedPost declaration keys and
+intrinsic typed argument indices run real evalConvArgs/dispatchMod/body lookup.
+The outer placeholder's actual Ph.rest contains the inner invocation; this is
+not two unrelated assumed runs. With normal OR return function body, the inner
+full-byte postlude aborts before the outer postlude. Body rethrow skips both.
+Both runMods attempt/finally operations restore the original arbitrary saved
+fnLocals and complete Source.St. A generic late-fuel11 theorem proves timeout
+AFTER entering the nested frame with both restorations, not an assumed outcome.
+Generic fuel+12 completion and completed-horizon stability have actual ref/heap
+lookup premises, no supplied desired execution. No evaluator/AST/Source owner
+or global proof/fuel/heartbeat budget changed.
+
+Inhabited samples use the real firstPhysical action/heap and existing completed
+raw caller. Inner old aliasAABB versus outer new payloadDEAD is discriminating;
+wrong same-type inner index yields the new full payload. Generic carry_plain_run
+retains ALL raw LocalValues/nonword cells, whole Source.St/outer typed scope,
+residual and owned-byte journals. No runClean/ofClean resumption, world rollback,
+representation-validity, physical-placement or allocation-refinement theorem is
+inferred. These are supplied resolved programs, not frontend Derived/Source
+assembly dispatch/general modifier adequacy; both pipeline proofs use rs=[].
+
+Independent expectations were frozen BEFORE actual driver execution. All78
+ordered Source cases in legacy/viaIR Source contexts matched: reversed modifier
+LIST/argument selection, body/normal/return full errors, empty/missing/bad inner
+and outer bodies, ignored versus reached dangling refs, normal10/return11/body12
+thresholds and their preceding timeouts. All selected input/result/heap/ref/
+saved-frame/outer-scope/raw/event/log/journal fields are compared. Source journal
+entry LIST and old/current account/c-path/transient fields are finite views,
+not enumeration of the infinite world; complete State equality is separately a
+kernel fact. Supplied ordered credit/log prefix is not G01/log-emit adequacy.
+Native comparisons are ZERO here; no previous native results are relabelled fresh.
+
+91 focused tests pass, rejecting wrong order/bytes/panic tail/inner references,
+ignored/reached dangling refs, missing/restored frames, late-timeout state reset,
+wrong high bits/nonword aliases/source/residual/owned journals and stale/malformed
+module/oracle/ledger/runner/raw receipts. An explicit H3 metadata control rejects
+claiming an owner package is consumed/passed when the consumer has none. Initial
+MCP failures (pipeline/program aliases and redundant already-closed tactic) and
+the dependent failed build are preserved. Driver syntax/indexed-local errors
+were corrected with the frozen expected observations unchanged; no budget raised.
+
+Final registered joint EXIT0: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613; KeySort2jobs precedes ./run-lean.sh library1295/TestSuite262;
+205core/0elaborator,1310reachable/0orphan/0notallowed; strict491automatic/
+61budgeted/0manual/11refuted/0pending; complete-input trust1325sources/252sites/
+0findings.23 complete signatures/scoped reports use standard
+propext/Classical.choice/Quot.sound only. This checks the exact private staged
+real tree, not default-branch publication. Finder and skeptic separately reviewed
+code/driver/oracle/tests/docs read-only with no Lean/server/build/test execution.
+
+H1 resource policy continues:4GiB OS-available reserve, hard12GiB/no-swap, CPU1,
+serial-j1/LEAN_NUM_THREADS1 and existing writer lock. Disk has ample headroom
+following the authorized stopped-container cleanup. No new producer/dependency
+package, cache deletion, resource stop or hidden budget increase. Current exited
+owned containers may be removed under H1 after raw receipts are preserved.
+Historical docs/G03 EXIT1 with exact-base equality remains failed global gates/
+zero regression only. Original strict native journal EXIT1/five errors remains
+immutable; separately approved H3 per-pipeline fresh175-test checkpoint remains
+at `pipeline-contract-20261102/final-v2`, not evidence for these new nested cases.
+
+All Work1/2/3 and BackfillA/B remain PARTIAL. All24 ORIGINAL obligations/six full
+Source combinations/fullProofGate remain pending. Frontend/admission, general
+raw operators/function/session/Source selection, allocation/refinement/G01,
+compiler/world/V16/final adequacy remain required. Selected ordinary nonempty
+producer and H1 disk/H3 trace choices remain resolved. LIB1/unchecked are now
+pending committed VY1 implementation/evidence, not human decisions. No new goal,
+reset/status/counter/objective change; no get_goal read tool is exposed.
+Exact source/signatures/patch/bundles/raw diagnostics/receipts/reviews/checksums:
+`/workspace/vy5-composition/nested-modifier-20261102/final/`.

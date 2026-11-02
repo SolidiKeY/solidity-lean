@@ -511,3 +511,12 @@ projections/8intended negatives and175tests. Original strict report remains
 FAILED, unchanged. All24original/six full combinations pending. See
 [lane handoff](inline-assembly-vy5.md#vy5-h1-resource-recovery-and-h3-per-pipeline-traces-2026-11-02)
 and `/workspace/vy5-composition/pipeline-contract-20261102/final-v2/`.
+
+
+VY5 (2026-11-02): actual nested modifier/placeholder composition adds23component
+facts,78ordered Source cases and91tests, with complete caller/raw/journal
+retention and late-timeout frame restoration. Native comparisons0; all24original
+obligations/six general combinations pending. H3LIB1/unchecked decisions are
+answered; VY1 committed inputs still required, no re-ask/duplicate implementation.
+See [lane handoff](inline-assembly-vy5.md#vy5-actual-nested-modifiers-and-answered-vy1-h3-inputs-2026-11-02)
+and `/workspace/vy5-composition/nested-modifier-20261102/final/`.

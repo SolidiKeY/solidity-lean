@@ -382,3 +382,16 @@ approve compiler-dependent source observations or prove G01/compiler adequacy.
 Original strict report/validator and failed exits remain immutable. See
 `tests/yul-composition/rethrow-trace-contract.json` and the VY5 lane handoff.
 VY5-DISK1 is resolved by H1; no filesystem growth/migration requested.
+
+
+### H3 continuation: LIB1 and unchecked-add (2026-11-02)
+
+The coordinator relayed that human H3 **“Per-pipeline”** also answers
+LIB1/library-viaIR-error-1834 and unchecked-add. Approved unchecked-add
+expectations are legacy512 and viaIR0; LIB1 requires a reviewed per-pipeline
+library-codegen contract and fresh validation. VY1 owns both implementations.
+VY5 will consume their exact committed results; it does not duplicate the owner,
+re-ask the decisions, assume package availability or mark these gates passed.
+Their status is pending committed producer evidence, not pending human choice.
+Earlier unanswered wording remains historical. Other original decisions/gates
+remain unchanged.

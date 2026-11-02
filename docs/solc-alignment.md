@@ -682,3 +682,11 @@ journal mismatches. The separate H3 validator passed fresh36calls/4profiles,
 20actual Source failure/full-byte projections and8intended negative projections;
 those projections are not Source/world/compiler correspondence. LIB1 and frozen
 unchecked-add decisions are unaffected. See the VY5 handoff for full evidence.
+
+
+H3 continuation relayed2026-11-02 also authorizes unchecked-add expectations
+legacy512/viaIR0 and a reviewed per-pipeline LIB1 library-codegen contract.
+VY1 owns their implementation/fresh validation. VY5 records the approved mapping
+in `tests/yul-composition/vy1-h3-input-obligations.json`; it awaits exact committed
+producer evidence, without re-asking or presenting approval as implemented support.
+This does not change any existing sealed fixture/report or establish adequacy.
