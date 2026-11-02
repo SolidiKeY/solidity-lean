@@ -651,3 +651,11 @@ Actual typed current-memory sources, snapshot overlap, arbitrary finite
 chronological copies, whole-map/source-state identity, every-original-H
 MemOK and reserved/unknown-byte laws are additive preparation results.
 Full Y04–Y06/Y09.02 and joint producer/compiler closure remain unfinished.
+
+
+VY2 mapping and transient handoff: [lane record](inline-assembly-vy2.md#mapping-slot-views-and-transient-slots).
+Constructive actual-declaration/key mapping encoding and whole-store roundtrip/
+unchanged laws use the original HashedLayout per-run region contract. Actual
+transient source/complement load/store, static failure, paired frame rollback
+and every-slot transaction reset are additive physical results. Full source/
+Yul/compiler and universal layout/dirty ownership remain unfinished.

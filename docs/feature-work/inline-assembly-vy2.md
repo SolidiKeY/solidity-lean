@@ -4216,3 +4216,71 @@ source/compiler/import/joint closure. Both Backfill A/B remain partial. This
 checkpoint proves canonical residual-copy composition, not full VY2 admission
 or assembly correctness. Persistent goal unchanged; no getter exposed. No new
 semantic choice is established; questions=[].
+
+
+## Mapping slot views and transient slots
+
+Continuation on `3f920bba44c7c441ea4c329ca2c740b222537193` adds
+`Solidity/Yul/Views/MappingSlots.lean`, `Solidity/Yul/Views/MappingSlotControls.lean`,
+`Solidity/Yul/Views/TransientSlots.lean` and `Solidity/Yul/Views/TransientSlotControls.lean`. Existing owner state,
+codecs, layout/Placement APIs, guards and semantic decisions are unchanged.
+Gate G0/history and independent design review confirmed no representation
+rewrite; the additive typed mapping certificate contains only actual source
+declaration/bank computations. No new recursion, proof, gas or step cap.
+
+`WordMappingRoot` checks an actual persistent uint256-to-uint256 declaration.
+The existing HashedLayout model places this owner root at zero; that is NOT a
+proof of arbitrary global/inherited declaration slot placement or solc packing.
+For every actual finite run key list, the adapter constructs full source key
+paths and computed `LocatedWord` registrations. Word byte serialization proves
+path injectivity; actual key Nodup derives symbolic separation. Numeric
+separation retains EXACTLY HashedLayout's per-run RegionsDisjoint premise,
+never global hash injectivity. The exact Fixed input is keyWord||rootWord,
+each big-endian32. Real u256 defaults construct a TOTAL finite encoder.
+
+`WordMappingRoot.decode_encode` proves whole actual Source.Storage identity,
+including unwritten versus explicit-default cells and all nonselected paths.
+`writeback_unchanged` gives the unchanged-view identity. `reencode_decode`
+derives complete raw map reconstruction after actual successful writeback;
+`decode_other`/`encode_unowned` preserve unrelated source cells/residual slots.
+Controls inhabit two distinct computed mapping keys, changed values77/999,
+unused root/nonzero unknown slots, actual changed decoding, missing/wrong root,
+duplicate aliases and a colliding hash. Finite run ownership is not a claim of
+infinite-domain collision-free mapping encoding or whole-source reachability.
+
+`transientSlotLoad` reconstructs actual typed fields plus the full raw
+complement, including unknown slots. `transientSlotStore?` binds requests to
+the real current frame and invokes actual Source.applyOp; residual updates
+occur only on success. Read-after-store is ENTIRE word equality. Static and
+same-value writes retain actual empty-revert errors and caller prefixes.
+Actual source sequences, not separately assumed source/residual runs, feed
+paired child rollback and committed-child/enclosing rollback theorems.
+`transientSlot_endTx` proves EVERY owned/unowned slot zero using real
+individual codec-zero defaults; both journals clear, persistent bank survives.
+Every original-H owner MemOK is preserved by the actual source operation.
+
+Controls use the existing ACTUAL declaration-derived transient uint16 root at
+slot0, an independent persistent bank at the SAME numeric slot, nonzero raw
+padding, repeated writes, full-width unknown slot99, distinct accounts, static
+failure, source/journal lengths, nested rollback and all-slot reset. The
+concrete root codec discharges zero-default evidence. This does not promote
+transient mappings/arrays or dirty canonical preparation to admitted support.
+
+Separate `MappingTransient.sol`/`mapping-transient-reference.mjs` use pinned
+solc0.8.38/Osaka legacy and viaIR for exact real mapping hashes and raw/typed
+reads, unchanged SSTORE static refusal, packed transient tload/tstore, child
+success/revert, enclosing revert, persistent-bank isolation and fresh public
+transaction reset. Complete return/revert bytes and persistent/transient post
+state are independently expected. Original observations and budgets remain
+unchanged. Synthetic kernel hash witnesses are separate from real compiler
+Keccak; finite external tests do not prove source/compiler adequacy.
+
+Versioned exact commands/signatures/axioms, reviews, failures and resources are
+in `/workspace/vy2-evidence/mapping-transient`; only actual recorded exits count
+as gates. Global documentation debt remains a real failing gate when exact-base
+comparison proves zero regressions. No frontend/admission row is promoted.
+Y04 broad nested/mapping/storage-bytes/transient/dirty ownership and arbitrary
+source-frame adequacy; Y05 universal memory/allocation refinement; Y06 complete
+source/Yul inputs; Y09.02 actual calculus/notation/printers/Lean-only rows;
+V10/V11 and final source/compiler/joint closure remain open. Both original
+Backfill queues remain partial; the persistent goal is unchanged. Questions=[].

@@ -1005,3 +1005,6 @@ import Solidity.Yul.Views.ResidualWindowControls
 import Solidity.Yul.Views.RetainedWindowControls
 
 import Solidity.Yul.Views.ResidualMcopyControls
+
+import Solidity.Yul.Views.MappingSlotControls
+import Solidity.Yul.Views.TransientSlotControls
