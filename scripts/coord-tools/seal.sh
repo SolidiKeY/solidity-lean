@@ -23,6 +23,15 @@ def verify(d):
     subprocess.run(["git","bundle","verify",str(bundle)],check=True)
     heads=git("bundle","list-heads",bundle).splitlines()
     if m["head"] not in [x.split()[0] for x in heads]: raise ValueError("bundle head differs")
+    prereqs=[]
+    with bundle.open("rb") as f:
+        f.readline()
+        for line in iter(f.readline,b""):
+            if line in (b"\n",b""): break
+            if line.startswith(b"-"): prereqs.append(line[1:].split()[0].decode())
+    if m["base"] not in prereqs: raise ValueError("bundle prerequisites do not include the manifest base")
+    for x in prereqs:
+        if subprocess.run(["git","merge-base","--is-ancestor",x,m["base"]]).returncode: raise ValueError("bundle prerequisite "+x+" is not an ancestor of the manifest base")
     with tempfile.TemporaryDirectory() as tmp:
         subprocess.run(["git","init","-q",tmp],check=True)
         objects=git("rev-parse","--path-format=absolute","--git-common-dir")+"/objects"
@@ -35,6 +44,7 @@ def main():
     if len(a) not in (1,2): raise ValueError("usage: seal.sh DIR [BASE] | --verify DIR")
     d=pathlib.Path(a[0]).resolve(); d.mkdir(parents=True,exist_ok=True)
     base=git("rev-parse","--verify",(a[1] if len(a)==2 else "origin/master")+"^{commit}"); head=git("rev-parse","HEAD")
+    base=git("merge-base",base,head)  # a moved BASE seals from the fork point
     if base==head: raise ValueError("empty base..HEAD")
     subprocess.run(["git","bundle","create",str(d/"checkpoint.bundle"),base+"..HEAD"],check=True)
     entries=[]
