@@ -2,13 +2,15 @@
 /** Pinned-solc/EVM observations of ABI entry decoding (lane CF1).
  *
  * Usage:
- *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--access] [--aggregate] [--inherited] [--out FILE]
+ *   node scripts/abi-entry-probe.mjs SOLJSON_FILE NODE_MODULES_DIRECTORY [--fixtures] [--probes] [--access] [--v1] [--aggregate] [--inherited] [--out FILE]
  *
  * `--fixtures` replays the retained Group 10 entry-decoding fixtures from the
  * verified upstream snapshot (`.lake/upstream/solidity`, see
  * `scripts/solidity-upstream.mjs verify`) with their exact calldata bytes.
  * `--access` runs `tests/abi-0.8.38/AccessEntry.sol` (lane FU2-C): when a calldata
  * element that fails only on access is read, encoded or copied.
+ * `--v1` runs `tests/abi-0.8.38/V1Entry.sol` (legacy only): ABI coder v1's
+ * cleanup of dirty value words and its short-calldata revert.
  * `--aggregate` runs the calldata named-argument reverts of
  * `tests/upstream/AggregateErrorControls.sol` (lane FU2-C, the pins of
  * `tests/upstream/AggregateErrorControls.lean`).
@@ -81,9 +83,9 @@ const selector = signature => id(signature).slice(0, 10);
 const hex = bytes => '0x' + Buffer.from(bytes).toString('hex');
 
 /** Run one source in every configuration; `vectors` are {signature, calldata (hex, no selector)}. */
-export async function observe(sources, mainSource, contract, vectors) {
+export async function observe(sources, mainSource, contract, vectors, configs = CONFIGS) {
   const results = {};
-  for (const config of CONFIGS) {
+  for (const config of configs) {
     const compiled = compile(sources, contract, mainSource, config);
     if (compiled.error) { results[config.name] = {error: compiled.error}; continue; }
     const deployed = await deploy(compiled.bytecode);
@@ -182,7 +184,9 @@ async function probes(name = 'LazyEntry', source = `tests/abi-0.8.38/${name}.sol
   const spec = JSON.parse(readFileSync(join(ROOT, `tests/abi-0.8.38/${name}.vectors.json`), 'utf8'));
   const report = [];
   for (const group of spec.groups) {
-    const results = await observe(sources, `${name}.sol`, group.contract, group.vectors);
+    // ABI coder v1 compiles in the legacy pipeline only.
+    const configs = spec.legacyOnly ? CONFIGS.filter(c => !c.viaIR) : CONFIGS;
+    const results = await observe(sources, `${name}.sol`, group.contract, group.vectors, configs);
     const summary = summarize(results);
     summary.forEach((o, i) => {
       const want = group.vectors[i].expect;
@@ -240,6 +244,7 @@ if (flag('--inherited')) output.inherited = await inherited();
 if (flag('--fixtures')) output.fixtures = await fixtures();
 if (flag('--probes')) output.probes = await probes();
 if (flag('--access')) output.access = await probes('AccessEntry');
+if (flag('--v1')) output.v1 = await probes('V1Entry');
 if (flag('--aggregate')) output.aggregate = await probes('AggregateCalldataErrors', 'tests/upstream/AggregateErrorControls.sol');
 const text = JSON.stringify(output, null, 2) + '\n';
 if (outFile) writeFileSync(outFile, text); else process.stdout.write(text);

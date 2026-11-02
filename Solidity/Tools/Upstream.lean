@@ -436,8 +436,19 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       match entryPlan with
       | .legacy =>
         if nominal then throw "nominal enum ABI range needs a declaration adapter"
-        ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
-        ABI.program C d (function.getD "constructor") ctor false bytes
+        -- ABI coder v1 value parameters are cleaned, not validated
+        -- (`UpstreamEntry.v1Plan`); everything else keeps the gate.
+        match (if canonicalOnly && !ctor then UpstreamEntry.v1Plan d bytes else .gate) with
+        | .revert =>
+          discard <| ABI.program C d (function.getD "constructor") ctor false bytes
+          entryProg C [.revert]
+        | .run cleaned =>
+          match ABI.canonical C d (function.getD "constructor") cleaned state true with
+          | .error reason => throw s!"generated decoder disagrees with the v1 cleanup: {reason}"
+          | .ok () => ABI.program C d (function.getD "constructor") ctor false cleaned
+        | .gate =>
+          ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
+          ABI.program C d (function.getD "constructor") ctor false bytes
       | .blocked reason => throw reason
       -- An entry check fails: an empty revert before the body.
       | .revert => do

@@ -282,6 +282,57 @@ def accessParams (d : FunDecl) (ps : List Param) : Nat → Bool := fun k =>
   | some (x, _), some p => p.loc == .calldata && accessOnly d x p.shape
   | _, _ => false
 
+/-! ### ABI coder v1 value parameters (lane FU2-C backfill)
+
+ABI coder v1 does not validate a value parameter: it cleans the word where
+the body uses it (legacy `CompilerUtils` cleanup), so a dirty word reads as
+its cleanup, and calldata shorter than the head reverts with empty data.
+Pinned solc 0.8.38, legacy with the optimizer off and on
+(`tests/abi-0.8.38/V1Entry.sol`, `scripts/abi-entry-probe.mjs --v1`):
+`uintN` is masked, `intN` sign-extended from its low `N` bits, `bool` is
+`1` for any nonzero word, `bytesN` keeps its high `N` bytes, `address` its
+low 160 bits; trailing data is ignored. Enums (v1 masks them to `uint8`
+instead of checking the range), function values and reference parameters
+keep the byte-identical gate. -/
+
+/-- v1's cleanup of a word of a value kind (`address` is `uint 160`). -/
+def v1Clean : AbiKind → Nat → Option Nat
+  | .uint n, w => some (w % 2 ^ n)
+  | .int n, w =>
+    let lo := w % 2 ^ n
+    some (if 0 < n && 2 ^ (n - 1) ≤ lo then lo + (2 ^ 256 - 2 ^ n) else lo)
+  | .bool, w => some (if w == 0 then 0 else 1)
+  | .bytesN n, w => some (w / 2 ^ (256 - 8 * n) * 2 ^ (256 - 8 * n))
+  | _, _ => none
+
+/-- The word at byte `p` of the argument bytes (zero past the end). -/
+def argWord (args : List Nat) (p : Nat) : Nat :=
+  (List.range 32).foldl (fun acc i => acc * 256 + (args[p + i]?.getD 0) % 256) 0
+
+/-- What the replay does with a v1 raw vector. -/
+inductive V1Plan where
+  /-- Outside the value parameters: the byte-identical gate. -/
+  | gate
+  | revert
+  /-- Run on the cleaned words. -/
+  | run (bytes : List Nat)
+
+def v1Plan (d : FunDecl) (args : List Nat) : V1Plan :=
+  let kinds : Option (List AbiKind) := d.params.mapM fun (x, T) => do
+    guard (T matches .prim _)
+    guard (plain T d.widths x)
+    match AbiTy.of T d.widths x with
+    | some (.val k) => pure k
+    | _ => none
+  match kinds with
+  | none => .gate
+  | some ks =>
+    if args.any (256 ≤ ·) then .gate
+    else if args.length < 32 * ks.length then .revert
+    else match ks.zipIdx.mapM (fun (k, i) => v1Clean k (argWord args (32 * i))) with
+      | some ws => .run (ws.flatMap fun w => (Solidity.AbiEntry.wordBytes w).map UInt8.toNat)
+      | none => .gate
+
 /-- What the replay does with one raw vector. -/
 inductive Plan where
   | legacy

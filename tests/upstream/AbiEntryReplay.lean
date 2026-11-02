@@ -30,6 +30,9 @@ private def C : Contract := contract!{
   }
   function reencode(uint[][3] calldata a) { counter++; abi.encode(a); }
   function order(uint8[] calldata x, uint k) returns (uint) { return x[0] + 1 / k; }
+  function add16(uint16 a, uint16 b) returns (uint16) { return a + b; }
+  function sx(int8 a, bool c) returns (int) { if (c) { return a; } return 0; }
+  function v1arr(uint[] memory xs) returns (uint) { return xs.length; }
   function shadow(uint8[] calldata x) returns (uint) { { uint[] memory x = new uint[](1); return x[0]; } }
   function bump() returns (uint) { counter++; return counter; }
 }
@@ -49,6 +52,7 @@ private def rows : List ImportRow :=
    ("element", "element(uint256[][],uint256,uint256)"), ("enc", "enc(uint256[][])"),
    ("encIf", "encIf(uint256[][],uint256)"), ("reencode", "reencode(uint256[][3])"),
    ("order", "order(uint8[],uint256)"), ("shadow", "shadow(uint8[])"),
+   ("add16", "add16(uint16,uint16)"), ("sx", "sx(int8,bool)"), ("v1arr", "v1arr(uint256[])"),
    ("bump", "bump()")].map fun (name, sig) =>
     { name, sourceSignature := sig, tag := .diamond, params := [], status := .elaborated, reason := "" }
 
@@ -149,6 +153,26 @@ private def panic12 : List Nat := (Semantics.encodePanic 0x12).map UInt8.toNat
 -- guarded by name: the body is not admitted for access-time reads.
 #eval check [vector "shadow(uint8[])" ["uint8[]"] (words [0x20, 1, 0x100]) (words [0])] "blocked" 0
   (some "calldata element fails only on access: needs access-time calldata semantics")
+
+-- ABI coder v1 (`canonicalOnly`) cleans value words (`UpstreamEntry.v1Plan`;
+-- `checked_add_v1.sol` and the `V1Entry` probes): 65536 reads as 0, an
+-- `int8` word `0x1ff` as -1, a `bool` word 2 as true; short calldata
+-- reverts; a reference parameter keeps the byte-identical gate.
+private def v1 (sig : String) (inputs outputs : List String) (data expected : List Nat)
+    (failure := false) : Json := Json.mkObj [
+  ("signature", toJson sig), ("inputTypes", toJson inputs), ("outputTypes", toJson outputs),
+  ("calldata", toJson data), ("expectedBytes", toJson expected), ("failure", toJson failure),
+  ("canonicalOnly", toJson true)]
+#eval check [
+  v1 "add16(uint16,uint16)" ["uint16", "uint16"] ["uint16"] (words [65536, 0]) (words [0]),
+  v1 "add16(uint16,uint16)" ["uint16", "uint16"] ["uint16"] (words [65534, 0]) (words [65534]),
+  v1 "add16(uint16,uint16)" ["uint16", "uint16"] ["uint16"] (words [65535, 1])
+    ((Semantics.encodePanic 0x11).map UInt8.toNat) true,
+  v1 "add16(uint16,uint16)" ["uint16", "uint16"] ["uint16"] ((words [1, 2]).take 63) [] true,
+  v1 "sx(int8,bool)" ["int8", "bool"] ["int256"] (words [0x1ff, 2]) (words [neg 1]),
+  v1 "sx(int8,bool)" ["int8", "bool"] ["int256"] (words [0x7f, 0, 9]) (words [0])] "working" 6
+#eval check [v1 "v1arr(uint256[])" ["uint256[]"] ["uint256"] (words [0x40, 0, 0]) (words [0])] "blocked" 0
+  (some "noncanonical calldata requires lazy ABI decoder replay")
 
 -- The replay checks the guarded outcome: a wrong expectation is broken.
 #eval check [vector "enc(uint256[][])" arr (words [0x20, 1, 0x1000]) (words [0x60])] "broken" 1
