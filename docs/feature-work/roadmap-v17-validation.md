@@ -858,3 +858,66 @@ The exact-base no-new gate therefore remains failed. Source layers, orphan and
 properly invoked source-only trust checks pass; an initial trust invocation
 without its required NUL file-list input failed and is retained separately.
 No current runtime, kernel, cache-equivalence or release gate follows.
+
+
+### Exact V11 reference dependency intake (2026-11-02)
+
+The missing RAM path was a tool-surface difference: sandboxed `exec_command`
+used mount namespace `4026532207`, while an authorized exact-environment read
+used `4026532201` on the same host. The latter read all three announced files
+and matched their independent SHA256 values. Earlier ENOENT receipts remain
+true for their sandbox surface. A NEW external incoming directory retains the
+original 14,145-byte archive, manifest, coordinator verification and the
+surface-resolution receipt; no checkout/source/index was changed by relay.
+The strict intake accepted all four exact members as **source bytes only**.
+
+`scripts/roadmap-v17-packet-dependencies.py` adds executable interface/request
+linkage and recursive lexical project-import accounting. It reuses the original
+kernel header comment handling, keeps core/Bridge boundaries, bounds nodes,
+edges, depth and aggregate bytes, and uses the existing local writer lock.
+The metadata-only CLI retains the 512 MiB/60-second bounds. Missing source,
+missing producer hash, source mismatch, cyclic imports, unsupported headers and
+unused source assertions cannot become a complete inventory. Full producer
+head/base are claims until an independent committed anchor is available.
+A source-byte receipt presented as a kernel/replay request is rejected.
+Installed toolchain imports remain separately unbound.
+
+The actual C74 packet is producer `e11335bb3405fe44e9cfe83af960e732d21e76a2`,
+original base `fb379ae20f10e2c92113453ddd9d40d8f2efbe09`; this does not alter
+V17's frozen base. Its `Solidity.Backend.MemoryOps` decrement/underflow and
+bump-pair declarations retain initial SourceUintFixedAt, local alignment,
+bounds, arithmetic range, Source.MemOK and Objects.StateRepr premises. Pair
+proofs also retain AllocatorRepr, positive base and actual caller nps. The
+inhabited `SourceUintFixedDecrementControls.reached_pair` is reference source,
+not newly checked here. The future two-decrement late-underflow draft is absent
+and unvalidated.
+
+Exact reconciliation against the main tree and existing V13/V14/V16 private
+source inventories found matching `Solidity/Evm/Correct.lean` and
+`Solidity/Source/SemanticsExamples.lean`. The three absent direct prerequisites
+are `Solidity.Backend.MemoryOps.IntervalOverwrite`,
+`Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls` and
+`Solidity.Backend.MemoryOps.SourceUintFixedIncrement`; their exact required
+hashes are retained in external `COORDINATOR-DEPENDENCIES.json`.
+The matched sources import Evm.Stmt and Source.Semantics/Examples/Ledger; their
+producer hash bindings were not supplied, so those four transitive bindings
+are explicitly requested. No source hash or producer ancestry is invented.
+No native/Lean/container job launched, and no V11 theorem is treated as checked.
+V14 replay and V13 remain queued under the unchanged headroom refusal; Derived17
+metadata, all457 rows and the complete original release queue remain open.
+
+Source lookup is hash-addressed across supplied directories, not a claim that
+Lean would resolve a combined overlay identically. Commit membership, actual
+import-path resolution and compiled kernel/replay evidence remain pending.
+The skeptic identified a contradictory producer-base claim; interface base,
+root set and all supplied direct-import hashes are now cross-checked against
+the actual authenticated interface, with wrong-base and partial-root controls.
+
+Both independent read-only reviews confirmed the corrected identity bindings
+and metadata-only boundary; neither reviewer used Lean/builds. Thirty-six
+controls pass, including six actual-packet cases and the real intrinsic
+KeySort source-byte baseline. Layers, orphans and source-only trust checks pass.
+Raw docs remain exit 1 (48 current versus 46 frozen-base findings), with two
+reserved inline-assembly additions and zero new V17 findings. An earlier draft
+doc run's three missing-module path citations were corrected to module names;
+its raw 51-finding failure is retained separately. No final gate is waived.

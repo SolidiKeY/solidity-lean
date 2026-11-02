@@ -60,7 +60,7 @@ def stable_read(path, limit):
     return data
 
 
-def inspect(packet, expected):
+def _inspect(packet, expected):
     # expected is an independently relayed allowlist, never a manifest trusted from the archive.
     require(isinstance(expected, dict) and set(expected) == {"schema", "packetSha256", "producerHead", "members"},
             "unsupported request shape")
@@ -84,6 +84,7 @@ def inspect(packet, expected):
     # Require canonical zero termination, including padding; tarfile alone accepts truncation.
     require(len(raw) % 512 == 0 and raw.endswith(bytes(1024)), "incomplete tar termination")
     actual = {}
+    bodies = {}
     with tarfile.open(fileobj=io.BytesIO(raw), mode="r:") as archive:
         for item in archive:
             safe_path(item.name)
@@ -95,6 +96,7 @@ def inspect(packet, expected):
             require(0 <= item.size <= RAW, "member size bound")
             body = archive.extractfile(item).read(item.size + 1)
             require(len(body) == item.size, "truncated member")
+            bodies[item.name] = body
             actual[item.name] = hashlib.sha256(body).hexdigest()
             require(actual[item.name] == members[item.name], "member digest mismatch")
         end = archive.offset
@@ -108,8 +110,11 @@ def inspect(packet, expected):
             "semanticPremisesDischarged": False, "releaseClosed": False,
             "pending": ["committed anchor identity", "complete dependency/source inventory",
                         "full declaration extraction", "mandatory live replay",
-                        "axiom/type/observation result linkage"]}
+                        "axiom/type/observation result linkage"]}, bodies
 
+
+def inspect(packet, expected):
+    return _inspect(packet, expected)[0]
 
 def main():
     resource.setrlimit(resource.RLIMIT_AS, (512 * 1024**2, 512 * 1024**2))
