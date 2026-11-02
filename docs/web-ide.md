@@ -29,7 +29,7 @@ A disposable worker hosts Lean 4.24.0, upstream commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, with explicit browser-port patches.
 Emscripten 4.0.15 and GMP 6.2.1 preserve the native 64-bit Lean object/integer
 layout while lowering memory access to ordinary WebAssembly. WebAssembly tail
-calls prevent compiled frontend call chains from exhausting the browser stack.
+calls reduce stack growth along compiled frontend call chains.
 The browser does not require the Memory64 proposal or a thread pool.
 
 The port replaces the C++ expression-replacement recursion with an explicit
@@ -48,6 +48,12 @@ every symbol lookup. Export membership uses direct lookup; new function-table
 entries use a cached symbol index. Build scripts pin and check upstream sources,
 GMP layout, native serialized-library version and compiler checksum. The full
 patch, traversal oracle and build tools are under `web/tools/lean-wasm/`.
+The linked, memory64-lowered module also receives a pinned Binaryen `-O1`
+postpass with tail calls and exception handling enabled. This changes generated
+code, not Lean algorithms or proof budgets. A content-checked stamp prevents
+reoptimizing an unchanged output; relocation, corruption and optimizer failures
+are regression-tested. A failed pass preserves the input and removes its partial
+output. The measured pass peaked at 3.76 GiB RSS within the build limit.
 
 `BrowserFrontend.lean` reuses immutable imported environments, then creates fresh
 synchronous command state and a unique main module per check. Unique names keep
@@ -63,8 +69,9 @@ Tactic clients explicitly import assertion, clearing and suggestion helpers.
 Declarations, proof bodies and the axiom policy are unchanged. The browser graph
 now starts from Testing plus the parsed imports of `BrowserFrontend.lean`, rather
 than forcing the umbrella `Lean` module into every package. The pinned parser
-finds 1,556 modules instead of 1,822; rebuilt serialized libraries total
-2,183.4 MiB instead of 2,445.3 MiB.
+finds 1,556 modules instead of 1,822. The first narrowed-import package contained
+2,183.4 MiB of serialized libraries instead of 2,445.3 MiB; the final package
+with the newer upstream frontend contains 2,185.5 MiB.
 
 The same native build supplies the rebuilt serialized libraries and interpreter
 data. Compiling the project importer into additional Wasm was evaluated and
@@ -160,6 +167,15 @@ The prototype supports four open documents, 128 flat workspace filenames and
 at a time with a 4 GiB linear-memory limit. Use a modern desktop browser with
 WebAssembly tail calls and 64-bit integer operations.
 
+The browser's machine-call stack is a separate limit. Complex calldata alias/slice
+proof search currently exceeds it during recursive simplification, despite the
+same bodies importing successfully. The failed job reports `BROWSER_STACK_LIMIT`
+and accepts no proof result. `node web/test/performance.cjs --single --calldata-proofs`
+reproduces that known limitation; ordinary listing returns `ready` for both
+functions and retains the writable-copy refusal. Listing establishes admission,
+not proof success. The default performance test uses listing for this additional
+control. General native proof-search parity remains incomplete.
+
 ## Measured validation
 
 The original comparison used the `c6c33c90` frontend baseline after a fresh 264-job rebuild.
@@ -221,64 +237,80 @@ production extension API and never injects fixture results.
 
 ## Performance follow-up
 
-The follow-up uses the `c53e2a17` project sources with the import-only changes
-described above. A fresh native `Solidity.Frontend.Testing` build passed all
-264 jobs; per-file Lean diagnostics were clean for the nine changed Lean files.
-The final Wasm build completed under the four-GiB, no-swap container cap.
-The generated browser graph has no umbrella `Lean` root. Project serialized
-artifacts were refreshed before packaging alongside the pinned native standard
-library's serialized artifacts.
+The final measurement includes upstream `febf70a6`, the narrowed imports and
+calldata integration repair, and the optimized browser runtime. A fresh native
+`Solidity.Frontend.Testing` build passed all 264 jobs and the four calldata
+import-status guards. The nine initial Lean edits had clean per-file diagnostics;
+after integration the changed importer and new regression file were checked
+again with clean Lean MCP diagnostics. Project serialized artifacts were refreshed
+alongside the pinned native standard library before packaging.
 
-The final single-file artifact is `b15a383b1a42…`, kernel manifest `37c4512e8334…`,
-and runtime SHA-256 `b3bace883d4543be4ab33aa4d312bfe7e2e828d33c9c18169fdab26e4ac32cd5`.
-It contains 2,878 embedded assets and is 838,256,097 bytes. A fresh Chromium
-profile produced the following measurements on the same managed host as the
-performance-audit baseline:
+The measured HTML is `d21fc01ffc52…`, kernel manifest `b3a70f6bc704…`, with runtime
+SHA-256 `f7cd91e0de1180cc701e021cbc2bef47c741b58ead6fe40c9d78932483cd16df`.
+It contains 2,877 embedded assets and is 837,616,302 bytes. The Binaryen pass
+reduced the linked module from 163,947,747 to 148,152,933 bytes. Static comparison
+preserved 170,753 exports and their function signatures, 389 imports and the
+32-bit memory contract (4,096 initial / 65,536 maximum pages). The production
+helper reproduced the benchmarked output byte for byte and verified a repeat
+cache hit. Its guarded production pass peaked at 3.65 GiB aggregate RSS.
+
+A fresh Chromium profile produced these measurements on the managed host:
 
 | Measurement | Time |
 |---|---:|
-| Editor/compiler/kernel readiness, including initial tool preparation | 20.01 s |
-| First proof request, including library import | 29.08 s |
-| Page navigation through first proof result | 49.11 s |
-| Unchanged cached-result retrieval | 14.0 ms |
-| Real proof after a comment edit | 10.61 s |
-| Real proof after changing `return 1` to `return 2` | 8.38 s |
-| Real proof after updating the postcondition to match `2` | 10.80 s |
+| Editor/compiler/kernel readiness, including initial tool preparation | 17.43 s |
+| First proof request, including library import | 23.49 s |
+| Page navigation through first proof result | 40.93 s |
+| Unchanged cached-result retrieval | 7.55 ms |
+| Real proof after a comment edit | 8.81 s |
+| Real proof after changing `return 1` to `return 2` | 7.55 s |
+| Real proof after updating the postcondition to match `2` | 9.42 s |
+| Calldata admission/listing, without executing its proof search | 0.43 s |
 
-The earlier audit measured 63.25 s for its cold proof request and 16.68 s for
-fresh startup. Cold proof latency fell by about 54%; navigation through the first
-result fell from roughly 80 s to 49 s. Warm rechecks remain slow and these data
-do not establish parity with Dafny or SolKey. The original 8.94-s native
-extension measurement above is historical, not a new simultaneous benchmark.
-This is one environment with locally prepared artifacts, not a hardware-independent
-latency guarantee or a measurement of an initial Internet download.
+The baseline audit measured 63.25 s for its cold proof request and 16.68 s for
+fresh startup. Cold proof latency fell by about 63%; navigation through the first
+result fell from roughly 80 s to 41 s. Before integrating the newer upstream
+frontend and the post-link optimization, the narrower-import/transport update
+alone measured 29.08 s for the cold request and 49.11 s through the first result;
+that evidence remains in `performance-before-integration-report.json`. These
+observations include multiple changes and normal run-to-run variation. Warm
+rechecks remain slow; they do not establish parity with Dafny or SolKey. The
+original 8.94-s native extension comparison above is historical. Measurements use
+locally prepared artifacts and exclude the initial Internet download.
 
-The false-result edit stayed pending; changing its specification made it prove.
-Every result matched the exact edited source's SHA-256. Only the unchanged-source
+The false-result edit stayed pending; updating its specification made it prove.
+Every result matched the exact edited source's SHA-256. The unchanged-source
 control retrieved a cached report; its retained kernel timings describe the
-original check and are not new proof execution. All three edited-source trials
-executed new kernel checks with zero library reads, confirming reuse of the
-already imported environment. The cold import decoded 2,280,169,240 bytes, less
-than the 2,289,409,376-byte package, with no second environment inflation pass.
-It used 2,839 direct Blob reads, zero bulk-prefetched bytes and zero XHR fallbacks.
-Measured cold phases included 2.52 s of synchronous reads, 2.92 s of checksum
-work and 5.75 s of decompression. Peak aggregate browser-test RSS was 3.88 GiB;
-the 12-GiB available-memory reserve remained intact. No external requests,
-WebSockets or uncaught page errors were recorded.
+original check and are not new execution. All three edited Counter trials ran
+new kernel checks with zero library reads. The cold import decoded
+2,282,434,832 bytes from the 2,291,674,968-byte package, with no second environment
+inflation pass. It used 2,839 direct Blob reads, zero bulk-prefetched bytes and
+zero XHR fallbacks. Measured phases included 1.80 s of synchronous reads, 2.39 s
+of checksum work and 4.54 s of decompression. Peak aggregate benchmark RSS was
+3.89 GiB; the 12-GiB available-memory reserve remained intact. No external
+requests, WebSockets or uncaught page errors were recorded.
 
-The reproducible benchmark is `node web/test/performance.cjs --single` and writes
-`web/artifacts/performance-single-report.json`. Its assertions check proof
-statuses, source hashes, the reduced library footprint, single-pass decoding
-and the direct-read path. Focused checks passed for five protocol boundaries,
-two legacy Brotli cases, two Zstandard cases and browser SHA-256 without Web
-Crypto or Node APIs. Both opaque-worker lifecycle cases also passed. The full
-14-check suite passed on this exact artifact, including proving `return 3` with
-its updated postcondition after both workers restarted with the server stopped
-and Chromium disconnected. That fresh offline proof took 25.30 s; the complete
-suite peaked at 4.14 GiB aggregate RSS without crossing the available-memory
-reserve. Results are in `web/artifacts/single-file-report.json`. CI additionally
-runs fresh file-origin launch/reopening and verifies the published build after
-deployment.
+`node web/test/performance.cjs --single` reproduces the five Counter timing
+controls plus the explicitly named calldata admission/listing control. Its report
+is `web/artifacts/performance-single-report.json`. Listing returns `ready` for
+aliases and slices and `unsupported` for writable copies; those rows are not
+proof successes. `--calldata-proofs` remains a known failing deep-simplification
+stack diagnostic. The actual stack-limit boundary is also checked separately
+for its explicit error and rejection of a proof report.
+
+Focused checks passed for six protocol boundaries, two legacy Brotli cases,
+two Zstandard cases, browser SHA-256 without Web Crypto or Node APIs, and optimizer
+cache reuse, relocation, corruption and failure cleanup. Opaque-worker lifecycle
+coverage passed as well. Full browser evidence is written to
+`web/artifacts/single-file-report.json`: all 14 checks passed on this exact HTML,
+with zero external requests, WebSockets or page errors. A semantically changed
+program (`return 3` with its updated postcondition) proved after both workers
+restarted with the server stopped and Chromium disconnected. That fresh offline
+check took 26.88 s. The full suite peaked at 4.26 GiB aggregate RSS and preserved
+the available-memory reserve. The separate real stack-error boundary passed at
+3.99 GiB, retained `BROWSER_STACK_LIMIT`, and accepted no proof report. CI
+additionally runs fresh file-origin launch/reopening and verifies the published
+build after deployment.
 
 ## Milestone review and resource bounds
 
@@ -325,6 +357,17 @@ recorded separately and is not counted as a passing run. Final suite evidence
 was refreshed to the exact performance artifact before committing. Changed
 documentation links resolve; the repository-wide path scan still reports 48
 existing missing references in external citations and older records.
+
+Integration brought in upstream `febf70a6`, including frontend and closer
+changes. A read-only review identified an inherited calldata regression:
+the importer generated `sol_raw_calldata!` but a new branch matched only
+`sol_raw!`, refusing aliases and slices. Two native guards reproduced those
+failures while an ordinary parameter and writable-copy refusal remained correct.
+Removing the redundant branch leaves the existing origin-preserving macro in
+control. The final native frontend build passed all 264 jobs and all four
+guards; Lean MCP diagnostics were clean for the importer and regression file.
+Pages runs the guards before checking the kernel cache. Finder and skeptic
+reviews accepted the fix, test controls and CI placement without using Lean.
 
 The writer lock is held throughout changes and checks. Heavy jobs run sequentially.
 This environment has no systemd bus: builds use a four-GiB, no-swap Docker cap

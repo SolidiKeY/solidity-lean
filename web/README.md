@@ -75,22 +75,29 @@ invalidates displayed results.
 The proof runtime needs a modern desktop browser with WebAssembly tail calls and
 64-bit integer operations. Its linear-memory limit is 4 GiB; browser QA also
 measures the complete process tree. The browser does not need the Memory64 proposal.
+Complex proof search can hit the browser's separate call-stack limit. The IDE
+reports that limit explicitly and accepts no proof result for the failed job.
+Calldata alias/slice proof search is a known example; listing those functions
+only checks admission. The design record includes a reproducer.
 A compiler-only development build is possible without Lean assets; it explicitly
 disables proof controls and never treats Solidity compilation as a proof.
 
 ## Verification
 
 ```sh
+lake env lean -j1 --tstack=131072 web/test/CalldataImport.lean # native packaging guard
 node web/test/proofs.test.cjs           # failure/cancellation protocol boundaries
 node web/test/compression.test.mjs     # legacy Brotli decoder boundaries
 node web/test/zstd.test.mjs            # native/Wasm agreement, errors and memory bounds
 node web/test/checksum.test.mjs        # SHA-256 without Web Crypto or Node APIs
+node web/test/optimize-wasm.test.mjs   # optimizer cache integrity and failure cleanup
 npm run test:embedded --prefix web    # worker-owned assets, early messages, startup cleanup
 node web/test/embedded-assets.cjs --file # small offline-file check, no Lean build
 npm run test:website --prefix web      # real browser compiler and disconnected reload
 npm run test:website:proofs --prefix web # real kernel proofs, cancellation and offline proofs
 npm run test:single --prefix web       # one HTML, reuse, disconnected fresh workers/proofs
 npm run test:performance --prefix web  # fresh startup, cold proofs, real edits and cache control
+node web/test/performance.cjs --single --calldata-proofs # known failing deep-simp stack diagnostic
 node web/test/website.cjs --single --file --proofs # offline local-file launch and reopening
 node web/test/offline-preparation.cjs  # incomplete downloads fail visibly
 npm test --prefix web                  # optional native transport regressions
@@ -106,10 +113,10 @@ requests were recorded. The actual extension and browser produce the same three
 proved functions, pending function, and positioned diagnostic. The captured
 workbenches differ by 2.09% overall and 0.03% in the code region.
 
-The performance update measured 29.08 seconds for the first proof request,
+The performance update measured 23.49 seconds for the first proof request,
 including library import, versus 63.25 seconds in the baseline. Fresh navigation
-through the first result took 49.11 seconds. Real edited-source checks took
-8.38–10.80 seconds; an unchanged cached-result lookup took 14 ms and does not
+through the first result took 40.93 seconds. Real edited-source checks took
+7.55–9.42 seconds; an unchanged cached-result lookup took 7.55 ms and does not
 execute a new proof. Warm checks still need substantial improvement. The original
 native extension comparison measured 8.94 seconds and is historical. See
 [the design record](../docs/web-ide.md#performance-follow-up) for phases and

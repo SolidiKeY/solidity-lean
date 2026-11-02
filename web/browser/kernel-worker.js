@@ -144,5 +144,8 @@ onmessage=async event=>{
     const outputs={};for(const path of params.outputs||[])if(Module.FS.analyzePath(path).exists){try{outputs[path]=Module.FS.readFile(path,{encoding:'utf8'});}finally{Module.FS.unlink(path);}}
     const libraries=Object.fromEntries(Object.entries(metrics).map(([key,value])=>[key,value-previous[key]]));
     postMessage({id,result:{code,diagnostics:diagnostics.splice(0),stderr:stderr.splice(0),outputs,timings:{checkMs:performance.now()-started,libraries}}});
-  }catch(error){postMessage({id,error:{message:error.message||String(error),stack:error.stack,stderr:stderr.slice()}});}
+  }catch(error){
+    const stackLimit=(error instanceof RangeError||error instanceof WebAssembly.RuntimeError)&&/maximum call stack|call stack exhausted|too much recursion/i.test(error.message);
+    postMessage({id,error:{message:stackLimit?'Browser proof checking exceeded its call-stack limit. No proof result was accepted.':error.message||String(error),code:stackLimit?'BROWSER_STACK_LIMIT':undefined,stack:error.stack,stderr:stderr.slice()}});
+  }
 };

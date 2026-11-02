@@ -38,3 +38,7 @@ test('explicit cancellation rejects the active kernel request',async()=>{
   let started;const ready=new Promise(resolve=>{started=resolve;});response=()=>started();
   const pending=check(1000);await ready;proofs.cancelProofs();await assert.rejects(pending,error=>error.code==='CANCELLED');
 });
+test('a browser stack limit rejects the request with its explicit cause',async()=>{
+  response=(worker,id)=>worker.onmessage({data:{id,error:{code:'BROWSER_STACK_LIMIT',message:'Browser proof checking exceeded its call-stack limit. No proof result was accepted.'}}});
+  await assert.rejects(check(1000),error=>error.code==='BROWSER_STACK_LIMIT'&&/No proof result was accepted/.test(error.message));
+});

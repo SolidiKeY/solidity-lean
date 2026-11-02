@@ -15,7 +15,7 @@ export function cancelProofs(reason=Object.assign(new Error('Verification cancel
 export async function prepareProofs(progress){
   if(!booting){
     worker=new Worker('/kernel-worker.js');
-    worker.onmessage=event=>{const message=event.data;if(message.method){progress?.(message);return;}const task=pending.get(message.id);if(!task)return;pending.delete(message.id);if(message.error){if(message.error.stack)progress?.({method:'log',message:message.error.stack});task.reject(new Error(message.error.message));}else task.resolve(message.result);};
+    worker.onmessage=event=>{const message=event.data;if(message.method){progress?.(message);return;}const task=pending.get(message.id);if(!task)return;pending.delete(message.id);if(message.error){if(message.error.stack)progress?.({method:'log',message:message.error.stack});task.reject(Object.assign(new Error(message.error.message),{code:message.error.code}));}else task.resolve(message.result);};
     worker.onerror=event=>{for(const task of pending.values())task.reject(new Error(event.message||'Browser Lean worker failed'));pending.clear();booting=undefined;worker?.terminate();worker=undefined;};
     booting=request('boot');
   }
