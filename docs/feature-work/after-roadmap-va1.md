@@ -2991,3 +2991,78 @@ DecisionTheorem-prime remain open, as do general array collector/coverage, wider
 memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511 bound,
 remaining performance/backfill and final full gates. Goal/VM/branch and prior
 seals/failures preserved; no push/merge/PR/tag or whole-goal completion.
+
+
+## Exact bounded-instance semantic certificates (2026-11-02)
+
+After sealed1f0e5cfd, owned DecisionBoundedInstance proves for all C/index/bound/
+value/qf bodies, under the explicit in-range literal inequality, validity of
+(all index uint (uintBelow index bound implies body)) implies the actual
+body.subst1 at that returning literal. The proof uses existing guard/set and
+substitution semantics; arbitrary typed partial/storage observations are allowed.
+BoundedUIntLiteralInstance retains complete source equality, qf evidence and
+in-range premise. Actual guard and full consequent comparisons provide an exact
+recognizer with soundness/completeness/iff and constructive Decidable. Membership
+is parameterized by the supplied literal, not existential search over all values.
+No target/Covered/unknown oracle, future theorem or semantic assumption is stored.
+
+DecisionBoundedInstanceSource closes the actual UniversalPrefix and reverses
+prenex, conditional simplification and elimination through real SourceReduction
+certificates. Its hash-reading theorem retains the existing explicit hasHash=false
+premise. Concrete clients compute source/prefix/witness data for original
+dynamic-below-key and below-field, obtaining actual Valid/ValidH certificates.
+The existing Covered=false and global unknown observations remain unchanged.
+Fixed-below-key refuses this exact recognizer in both the probe and a checked
+actual source/prefix client; its unknown/noncoverage pins remain. This is genuine
+semantic certificate transport, not general array collector/coverage integration.
+
+Warned before dependency refactoring and inspected116cb4c4 history. Existing
+leafTerm_beq_self/leafFormula_same_self move byte-for-byte once from UIntPrefix
+to lower DecisionLeafEquality, preserving names/signatures/proofs/recursion layout.
+The rest of UIntPrefix is byte-identical except its new import. New low205-module
+closure excludes main Decision, verified in acyclic-low-closure.json. This avoids
+duplicating equality/decoder work; no representation/compiler API changes.
+Four root imports/four map rows are additive; shared existing rows are untouched.
+
+Controls include actual keyed/field witnesses, fixed refusal, supplied literal
+out-of-range refusal, full consequent mismatch and unsupported quantified body
+refusal. Refusal is distinct from invalidity: quantified-body fixture is valid.
+The new test originally confused strict LFml.eq with optional equality. Failed
+source/output are retained. Original strict test definitions remain unchanged;
+their antecedent is proved false and mismatched implication vacuously valid.
+Separate existing LFml.optEq fixtures now give an inhabited antecedent, actual
+all-state certificate and genuine None-versus-Some countermodel at State.init.
+No strict operation/default/observation or existing expected verdict was changed
+to rescue those mistaken test claims. Implicit err-sort and anonymous optEq-name
+errors are also retained. Final client diagnostics have no items/dependency errors.
+
+Raw /workspace/va1-evidence/bounded-instance-next. Seven final gates pass:
+five per-file MCP checks equality4.260/core5.243/source4.173/compatibility5.245/
+controls5.233s, complete22-module nonaggregate affected closure392jobs63.191s,
+and28 public type/axiom reports9.668s. Existing standard axiom subsets only, no
+sorryAx. This is a warm affected build, not a new cold/full pass. Every edited
+file is explicitly emitted before audit; aggregate Solidity/Main full gate remains
+pending under unchanged VA1-Q2. All per-module300s guards remain.
+Initial low-module import was insufficient: MCP4.347s/build3.106s FAIL. I started
+that prewarm before inspecting the failed MCP; subsequent helpers explicitly
+require passing diagnostics first. Correct ExactReduction import fixed it;
+proof text remains verbatim. External probe spacing failure and all test/semantic
+failures remain nonpasses with exact sources/raw outputs; no unchanged retry.
+
+Original writer lock, Lean4.24.0/Lake5.0.0-src+797c613, threads1/Lean-j1, hard
+memory.max12884901888/swap.max0 and12GiB host reserve remain enforced. Sampled
+aggregate RSS3790376KiB, cgroup peak2676498432bytes, minimum host available
+15041462272bytes;13 unsuccessful measurements retained. Reachability1120, layers
+180core, strict automatic491/61budgets/11refuted, trust1135sources/248sites and
+whitespace pass. Same85 docs/404 inventory findings remain FAIL against frozen
+base analysis; prior full/TypeExamples resource stops remain failures.
+
+Independent read-only finder/skeptic reviews find no final source/gate issues and
+verify strict/optional distinction and actual conditional source transport. Neither
+uses Lean/server/builds/edits. Final docs/export reviews and committed seal remain
+pending until performed. All original global Residue/DecisionTheorem-prime/
+exhaustive target/hash bridge, general array collector/decision integration, wider
+memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511 bound,
+remaining performance/backfill and full gates remain open. Kernel/Lean evidence
+only, no EVM claim. Goal/VM/branch/prior seals/failures preserved; no publication
+or whole-goal completion.

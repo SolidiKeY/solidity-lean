@@ -1319,6 +1319,22 @@ equivalence or mapping-child realization is assumed. This is a meaningful reason
 component, not global Residue exhaustiveness or a new target exclusion.
 
 
+VA1 bounded-instance certificates (2026-11-02): DecisionBoundedInstance proves
+that the actual literal-bounded universal implies its in-range literal instance
+for arbitrary quantifier-free typed bodies and partial observations. Its exact
+recognizer/constructive membership decision is parameterized by the supplied
+literal; no exhaustive literal search or coverage test is used. The source
+transport reverses actual prefix/prenex/conditional/elimination certificates,
+with the existing hash-free premise explicit. Real keyed/field source outputs
+are witnessed; fixed-below-key refuses this exact syntax. Covered/unknown pins
+remain unchanged. Strict LFml.eq and existing LFml.optEq have separate controls:
+two failed strict operands do not satisfy equality, while optional equality has
+an inhabited antecedent and genuine mismatched-result countermodel. Existing
+self-comparison lemmas move verbatim below the facade for this low API. The
+22-module affected closure and28 public axiom reports pass; collector/decision
+integration and global Residue remain open.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.

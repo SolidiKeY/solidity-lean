@@ -183,6 +183,7 @@ import Solidity.Calculus.DecisionUIntSyntax
 import Solidity.Calculus.DecisionUIntRecognizer
 import Solidity.Calculus.DecisionUIntGrammar
 import Solidity.Calculus.DecisionUIntFormula
+import Solidity.Calculus.DecisionLeafEquality
 import Solidity.Calculus.DecisionUIntPrefix
 import Solidity.Calculus.DecisionLeafPreparation
 import Solidity.Calculus.DecisionNumericFormula
@@ -193,6 +194,8 @@ import Solidity.Calculus.DecisionFixedArrayPath
 import Solidity.Calculus.DecisionFixedArrayStorage
 import Solidity.Calculus.DecisionFixedArrayPair
 import Solidity.Calculus.DecisionBoundedUInt
+import Solidity.Calculus.DecisionBoundedInstance
+import Solidity.Calculus.DecisionBoundedInstanceSource
 import Solidity.Calculus.DecisionUIntShape
 import Solidity.Calculus.DecisionNumericLogic
 import Solidity.Calculus.DecisionNumericTraversal
@@ -271,6 +274,7 @@ import Solidity.Examples.DecisionFixedArrayPath
 import Solidity.Examples.DecisionFixedArrayStorage
 import Solidity.Examples.DecisionFixedArrayPair
 import Solidity.Examples.DecisionBoundedUInt
+import Solidity.Examples.DecisionBoundedInstance
 import Solidity.Examples.DecisionUIntShape
 import Solidity.Examples.DecisionNumericLogic
 import Solidity.Examples.DecisionNumericTraversal
