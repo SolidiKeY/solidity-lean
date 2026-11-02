@@ -15,7 +15,7 @@ to an actual typed heap child. No compiler or preservation relation occurs. -/
 def BoolChildRepr {D : Source.Layout} {H : HTy} (c : Source.Calldata D)
     (address : Nat → Nat) (hp : Heap H) (s : Source.Data D BoolChildTy)
     (r : HRef H BoolChildRef) : Prop :=
-  s = .val (.cdRef rfl (address r.id)) ∧
+  s = .val (.cdRef rfl (address r.id) 0) ∧
   c.objects (address r.id) = some ⟨BoolChildTy, decodedBools (MObj.elems .dyn (hp.get r))⟩
 
 /-- Derive output correspondence from the actual other-object frame theorem. -/

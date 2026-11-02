@@ -67,7 +67,7 @@ private theorem hu (n : Nat) (hn : n+3 < 2^256) : SliceBounds ((hp n hn).len r .
 private theorem he (n : Nat) (hn : n+3 < 2^256) : 0+(3-1) ≤ (hp n hn).len r .dyn := by rw [len]; omega
 private def mid (n : Nat) (hn : n+3 < 2^256) := captureOverwrite (hp n hn) r .dyn r .dyn 0 1 1 (hs n hn) (hd n hn)
 private def out (n : Nat) (hn : n+3 < 2^256) := captureTwice (hp n hn) r .dyn 0 1 1 (hs n hn) (hd n hn) 1 3 0 (hu n hn) (he n hn)
-private def sv : Source.Data D BoolChildTy := .val (.cdRef rfl 7)
+private def sv : Source.Data D BoolChildTy := .val (.cdRef rfl 7 0)
 private theorem initial (n : Nat) (hn : n+3 < 2^256) : BoolChildRepr (bools (old n)) (fun _ => 7) (hp n hn) sv r := by
   refine ⟨rfl,?_⟩; simp only [MObj.elems_dyn]; rfl
 

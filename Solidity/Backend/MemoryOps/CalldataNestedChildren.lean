@@ -12,17 +12,17 @@ not a payload converter, target emitter or decoder. -/
 def decodedChildRefs {D : Source.Layout} {H : HTy} (address : Nat → Nat)
     (rs : List (HRef H BoolChildRef)) : Source.Data D RefChildTy :=
   .array rs.length (fun _ h => by cases h)
-    (fun j => .val (.cdRef rfl (address rs[j].id)))
+    (fun j => .val (.cdRef rfl (address rs[j].id) 0))
 
 /-- Both the reference-containing child's table and its actual Boolean children
 are represented, with identities retained at each edge. -/
 def RefChildRepr {D : Source.Layout} {H : HTy} (c : Source.Calldata D)
     (address : Nat → Nat) (hp : Heap H) (s : Source.Data D RefChildTy)
     (r : HRef H RefChildRef) : Prop :=
-  s = .val (.cdRef rfl (address r.id)) ∧
+  s = .val (.cdRef rfl (address r.id) 0) ∧
   c.objects (address r.id) = some ⟨RefChildTy, decodedChildRefs address (MObj.elems .dyn (hp.get r))⟩ ∧
   ∀ q ∈ MObj.elems .dyn (hp.get r),
-    BoolChildRepr c address hp (.val (.cdRef rfl (address q.id))) q
+    BoolChildRepr c address hp (.val (.cdRef rfl (address q.id) 0)) q
 
 /-- Actual framing of the child and each referenced descendant yields the
 nested correspondence at the output heap. Repeated descendants are allowed. -/
@@ -50,12 +50,12 @@ theorem RefChildRepr.index {D : Source.Layout} {H : HTy}
     (hi : i.1.toNat < hp.len r .dyn) :
     ∃ q, hp.index r .dyn i = some q ∧
       DecodedArrayRead c (address r.id) BoolChildTy none i.1.toNat
-        (.val (.cdRef rfl (address q.id))) ∧
-      BoolChildRepr c address hp (.val (.cdRef rfl (address q.id))) q := by
+        (.val (.cdRef rfl (address q.id) 0)) ∧
+      BoolChildRepr c address hp (.val (.cdRef rfl (address q.id) 0)) q := by
   let rs := MObj.elems .dyn (hp.get r)
   have hq : rs[i.1.toNat]? = some rs[i.1.toNat] := List.getElem?_eq_some_iff.mpr ⟨hi, rfl⟩
   refine ⟨rs[i.1.toNat], hq, ?_, hr.2.2 _ (List.getElem_mem hi)⟩
-  exact ⟨rs.length, (fun j => .val (.cdRef rfl (address rs[j].id))), hi,
+  exact ⟨rs.length, (fun j => .val (.cdRef rfl (address rs[j].id) 0)), hi,
     (fun _ h => by cases h), hr.2.1, rfl⟩
 
 /-- The actual typed child index rejects an endpoint overrun, and no finite
@@ -69,7 +69,7 @@ theorem RefChildRepr.index_bounds {D : Source.Layout} {H : HTy}
   refine ⟨List.getElem?_eq_none_iff.mpr hi, ?_⟩
   have hc : DecodedArrayAt (τ := BoolChildTy) (n := none) c (address r.id) (MObj.elems .dyn (hp.get r)).length
       (fun _ h => by cases h)
-      (fun j => .val (.cdRef rfl (address (MObj.elems .dyn (hp.get r))[j].id))) := hr.2.1
+      (fun j => .val (.cdRef rfl (address (MObj.elems .dyn (hp.get r))[j].id) 0)) := hr.2.1
   exact decodedArrayRead_overrun hc hi v
 
 /-- Compose two real typed memory-index observations with decoded child reads.
@@ -81,7 +81,7 @@ theorem RefChildRepr.index_bool {D : Source.Layout} {H : HTy}
     (hi : i.1.toNat < hp.len r .dyn) (j : PrimTy.uint.Denote) (b : Bool) :
     ∃ q, hp.index r .dyn i = some q ∧
       DecodedArrayRead c (address r.id) BoolChildTy none i.1.toNat
-        (.val (.cdRef rfl (address q.id))) ∧
+        (.val (.cdRef rfl (address q.id) 0)) ∧
       (DecodedBoolRead c (address q.id) j.1.toNat b ↔ hp.index q .dyn j = some b) := by
   obtain ⟨q, hq, hs, hc⟩ := hr.index i hi
   exact ⟨q, hq, hs, hc.read_iff _ b⟩

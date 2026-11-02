@@ -34,8 +34,8 @@ theorem decodedChildRefs_wk {D : Source.Layout} {H H' : HTy} (e : H <+: H')
     (decodedChildRefs (D := D) address (rs.map (HRef.wk e))) = decodedChildRefs address rs := by
   apply array_none_congr (List.length_map (HRef.wk e))
   intro i hi hj
-  change (Source.Data.val (.cdRef rfl (address ((rs.map (HRef.wk e))[i]'hi).id)) : Source.Data D BoolChildTy) =
-    .val (.cdRef rfl (address (rs[i]'hj).id))
+  change (Source.Data.val (.cdRef rfl (address ((rs.map (HRef.wk e))[i]'hi).id) 0) : Source.Data D BoolChildTy) =
+    .val (.cdRef rfl (address (rs[i]'hj).id) 0)
   rw [List.getElem_map]
   rfl
 

@@ -14,7 +14,7 @@ def calldataBool {D : Source.Layout} (d : Source.Data D .bool) : Bool := by
     | bool b => exact b
     | memRef h _ => cases h
     | storRef h _ => cases h
-    | cdRef h _ => cases h
+    | cdRef h _ _ => cases h
 
 /-- Extract finite decoded contents, retaining arbitrary runtime lengths. A
 reference-valued Data.val is not mistaken for the decoded object it names. -/
@@ -58,7 +58,7 @@ theorem calldataBool_exact {D : Source.Layout} (d : Source.Data D .bool) :
     | bool b => rfl
     | memRef h _ => cases h
     | storRef h _ => cases h
-    | cdRef h _ => cases h
+    | cdRef h _ _ => cases h
 
 theorem checkedCalldataBools_some {D : Source.Layout} {n : Option Nat}
     {c : Source.Calldata D} {off len : Nat} {hn : ∀ m, n = some m → m = len}

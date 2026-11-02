@@ -116,7 +116,7 @@ private def values (n : Nat) := [false,true,false] ++ List.replicate n false
 private def hp (n : Nat) (hn : n+3 < 2^256) : Heap H :=
   (⟨values n,by simp only [values,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩,
    ⟨[zero,seven],by decide⟩,())
-private def sv : Source.Data D BoolChildTy := .val (.cdRef rfl 7)
+private def sv : Source.Data D BoolChildTy := .val (.cdRef rfl 7 0)
 private theorem initial (n : Nat) (hn : n+3 < 2^256) :
     BoolChildRepr (bools (values n)) (fun _ => 7) (hp n hn) sv child := by
   refine ⟨rfl,?_⟩
