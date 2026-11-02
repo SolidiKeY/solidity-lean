@@ -49,6 +49,8 @@ import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.Aggregates.ByteParameterControls
 import Solidity.Backend.Aggregates.ByteParameters
+import Solidity.Backend.Aggregates.ByteSliceControls
+import Solidity.Backend.Aggregates.ByteSlices
 import Solidity.Backend.Aggregates.G18ArrayAccess
 import Solidity.Backend.Aggregates.G18ArrayAccessControls
 import Solidity.Backend.Aggregates.G18Controls

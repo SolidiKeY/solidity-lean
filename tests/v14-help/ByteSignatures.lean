@@ -1,4 +1,4 @@
-import Solidity.Backend.Aggregates.ByteParameterControls
+import Solidity.Backend.Aggregates.ByteSliceControls
 
 #check Solidity.Backend.Aggregates.ByteParameters.entry_length
 #check Solidity.Backend.Aggregates.ByteParameters.entry_region
@@ -24,3 +24,21 @@ import Solidity.Backend.Aggregates.ByteParameterControls
 #check Solidity.Backend.Aggregates.ByteParameters.entry_value
 #check Solidity.Backend.Aggregates.ByteParameters.raw_parameter_related
 #check Solidity.Backend.Aggregates.ByteParameterControls.entry_reference
+#check Solidity.Backend.Aggregates.ByteSlices.eval_expr
+#check Solidity.Backend.Aggregates.ByteSlices.slice_success
+#check Solidity.Backend.Aggregates.ByteSlices.slice_capacity
+#check Solidity.Backend.Aggregates.ByteSlices.slice_extent
+#check Solidity.Backend.Aggregates.ByteSlices.index_typed
+#check Solidity.Backend.Aggregates.ByteSlices.import_slice
+#check Solidity.Backend.Aggregates.ByteSliceControls.client
+#check Solidity.Backend.Aggregates.ByteSliceControls.eval_good
+#check Solidity.Backend.Aggregates.ByteSliceControls.source_aliases
+#check Solidity.Backend.Aggregates.ByteSliceControls.target_aliases
+#check Solidity.Backend.Aggregates.ByteSliceControls.target_contents
+#check Solidity.Backend.Aggregates.ByteSliceControls.reversed_eval
+#check Solidity.Backend.Aggregates.ByteSliceControls.past_end_eval
+#check Solidity.Backend.Aggregates.ByteSliceControls.empty_eval
+#check Solidity.Backend.Aggregates.ByteSliceControls.no_source_allocation
+#check Solidity.Backend.Aggregates.ByteSliceControls.wrong_source_allocation
+#check Solidity.Backend.Aggregates.ByteSliceControls.wrong_halt
+#check Solidity.Backend.Aggregates.ByteSliceControls.omitted_slice_origin

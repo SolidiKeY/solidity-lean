@@ -1,4 +1,4 @@
-import Solidity.Backend.Aggregates.ByteParameterControls
+import Solidity.Backend.Aggregates.ByteSliceControls
 
 #print axioms Solidity.Backend.Aggregates.ByteParameters.entry_length
 #print axioms Solidity.Backend.Aggregates.ByteParameters.entry_region
@@ -24,3 +24,21 @@ import Solidity.Backend.Aggregates.ByteParameterControls
 #print axioms Solidity.Backend.Aggregates.ByteParameters.entry_value
 #print axioms Solidity.Backend.Aggregates.ByteParameters.raw_parameter_related
 #print axioms Solidity.Backend.Aggregates.ByteParameterControls.entry_reference
+#print axioms Solidity.Backend.Aggregates.ByteSlices.eval_expr
+#print axioms Solidity.Backend.Aggregates.ByteSlices.slice_success
+#print axioms Solidity.Backend.Aggregates.ByteSlices.slice_capacity
+#print axioms Solidity.Backend.Aggregates.ByteSlices.slice_extent
+#print axioms Solidity.Backend.Aggregates.ByteSlices.index_typed
+#print axioms Solidity.Backend.Aggregates.ByteSlices.import_slice
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.client
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.eval_good
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.source_aliases
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.target_aliases
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.target_contents
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.reversed_eval
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.past_end_eval
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.empty_eval
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.no_source_allocation
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.wrong_source_allocation
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.wrong_halt
+#print axioms Solidity.Backend.Aggregates.ByteSliceControls.omitted_slice_origin
