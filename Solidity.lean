@@ -997,3 +997,6 @@ import Solidity.Backend.AbiWorld.BytesArrayReadback
 
 import Solidity.Backend.AbiWorld.BodyComposition
 import Solidity.Backend.AbiWorld.TripleReadback
+
+import Solidity.Backend.AbiWorld.WordListReadback
+import Solidity.Backend.AbiWorld.StaticAggregateReadback

@@ -1342,3 +1342,6 @@ four-mode upstream EVM observations and refusal controls;
 
 | `Backend/AbiWorld/BodyComposition.lean` | Unconditional indexed bodyValues concatenation, actual tail head position and ordered eager/lazy failures with the original fuel. |
 | `Backend/AbiWorld/TripleReadback.lean` | Generic actual typed bytes/uint-array/scalar entry/body identity for four memory/calldata combinations, codec-derived three-head layout and actual calldata-only entry origins. |
+
+| `Backend/AbiWorld/WordListReadback.lean` | Uniform typed canonical entry/body induction over arbitrary existing validated-word Param/Vals lists, exact head bounds/cursor and original fuel; sufficient constructor case only. |
+| `Backend/AbiWorld/StaticAggregateReadback.lean` | Actual tuple/fixed/dynamic-array consumers over validated-word Vals/Seq, real allocator/member-fuel/header conditions and tuple eager/lazy agreement. |

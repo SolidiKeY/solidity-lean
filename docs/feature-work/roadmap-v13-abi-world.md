@@ -1884,3 +1884,108 @@ All270prior entries/21immutable manifests verify, including unchanged caller pac
 Independent source and owning-roadmap finder/skeptic PASS, byte-unit comment finding
 CLOSED with proof unchanged. Final committed-artifact/seal reviews are in the NEW
 immutable export. No whole-lane, native/runtime/world or automatic-goal completion.
+
+
+## 2026-11-02 uniform canonical word-list and actual aggregate constructors
+
+The exact initial/current inventory and dependent remaining signatures are in the
+NEW export's constructor-inventory.json. Existing canonical readback covered uint
+words, bytes, uint[] and uint[][] plus isolated mixed families; unconditional
+enter_append/body_append alone did not prove successful arbitrary list admission.
+Actual Shape constructors remain word/bytes/array/fixed/tuple, with Param value/
+memory/calldata and readsOnly behavior unchanged. No scope/exclusion is changed.
+
+NEW `Solidity/Backend/AbiWorld/WordListReadback.lean` proves uniform canonical
+successful readback by typed induction over ARBITRARY existing Param/Vals lists
+whose shapes are validated words. WordShapes is an auxiliary SUFFICIENT constructor
+condition, NOT an admitted source/profile predicate or rejection of other shapes.
+All existing Kind.valid cases/Word.lt/Word.valid are used, including nominal enum
+cardinality, signed and fixed-byte cleanup; no uint8proxy, ByteRange or new AST.
+go_static/assemble_static/parts_static/encoded_cons derive actual encodeArgs heads
+from the existing assemble.go/parts recursion, not a supplied desired packet.
+encoded_length/heads_words derive exact32*N extent. window constructs ACTUAL Entries
+from canonical arbitrary prefix/suffix bytes, exact head position, original fuel2
+and unchanged incoming allocation cursor, consuming enter_append/body_success.
+roundtrip then proves actual entry/body/verdict typed identity, no assumed success.
+Complete input-size≤lim yields actual4+headsOf≤lim, not a len<W shortcut. Each parameter
+reuses the SAME original fuel; this is not constant CPU/gas/resource cost. Existing
+intrinsic locations/readsOnly covered; no new Source location profile is admitted.
+
+NEW `Solidity/Backend/AbiWorld/StaticAggregateReadback.lean` then continues ready
+constructor work. members proves ACTUAL mmembers for arbitrary heterogeneous
+validated-word Vals: original consumed member fuelN+2 and cursor unchanged.
+mdec_tuple proves actual Shape.tuple decoding, region check, allocationN*32 and
+original fuelN+3; tuple_roundtrip adds memory/calldata entry/body typed tuple identity
+at top fuelN+4 and published eager_cref lazy agreement at fuel-1 under actual size
+bound. Flat parameter bytes equal these tuple bytes, but typed shapes/costs differ:
+flatwordlist allocates0; tuple allocates32*N. No type/heap/alias equivalence inferred.
+
+sequence proves ACTUAL mseq for arbitrary indexed Seq(.word k)n. mdec_fixed uses
+real fixed codec/header/count/region/allocatorN*32 and original fuelN+3, with explicit
+pre.length+31<input.size EVENn=0, preserving the published guard. mdec_word_array
+uses actual count header, count/word bounds derived from allocatorN*32+32, exact
+sequence/cursor and original fuelN+3, for ANY existing validated word kind rather
+than uint256 only. Fixed/dynamic-word-array results are mdec FRAGMENTS, not generic
+entry/body/lazy admission for all these constructors. Source nested-enum/aggregate
+type mapping is NOT proved. No reserved decoder/slice/source semantics changed.
+
+NEW `tests/v13-abi-world/UniformWordControls.lean` supplies an inhabited arbitrary-
+length repeat client over actual Param/Vals and full max words, heterogeneous
+uint8/bool/enumBelow3/int8/fixedBytes32/uint256 values, all intrinsic locations and
+mixed-location/readsOnly controls. Actual typed tuple entry/body/cval, fixed and
+word-array mdec consume the generic theorems. All condition premises are discharged
+in nonempty finite applications. Signed/max/full300 values retain ALL32bytes.
+Nominal enum3 rejection is distinguished from uint8 validity of3. Wrong highword,
+truncation, wrong-offset and wrong-cursor cases have positive baselines. Tuple
+allocation before invalid member and fixed allocation before short payload preserve
+actual failure priority. Exact lim succeeds; one-byte-over Panic stays distinct.
+Calldata invalid cleanup remains access-time BLOCKED versus eager entry REVERT.
+
+Intrinsic empty controls do NOT admit empty Source aggregates: empty flat enter
+allocates nothing even above memorylim; empty tuple executes real alloc0 and can
+Panic; empty fixed still needs its original32byteheader lookahead. Positive fixed0
+with suffix32 and short-header negative preserve that exact guard. No new human
+semantic choice, default or premise weakening. Generic constructor conditions are
+sufficient; remaining shapes and lazy/noncanonical cases retain original behavior.
+
+All203FULL ordered vectors preserve ALL176prior byte-identical;87scalar observations
+preserve ALL64prior.43actual scoped standard-only axiom guards. No new external
+compiler/EVM/native agreement. Source finder/skeptic PASS/no findings. Actual raw
+iteration failures retained; no heartbeat/depth/node/fuel/test/resource increases.
+Finite invalid-kind fixtures are representative, not exhaustive per-kind testing.
+
+Remaining OWNED proofs are explicit: uniform mixed dynamic parameter lists require
+actual assemble.go head/tail offset induction plus recursively DERIVED allocation/
+fuel; arbitrary recursive array/fixed/tuple elements require mseq/mmembers/mdec
+canonical proofs over existing Seq/Vals. Definitions exist: not a whole-lane excuse,
+not discharged by an assumed decoder-success certificate. Current static-word case
+is progress toward uniform consumer coverage, not full all-profile closure.
+
+G41 runtime encoding gap stays OPEN: PacketEmission.emitResult specializes bytes
+from already supplied Vals; ReturnedBytes observes represented cells; Failure.Slice
+only supports fixed literal PUSH/MSTORE8/RETURN/REVERT. None reads unknown runtime
+memory or proves arbitrary CALL/RETURNDATA. Do not widen that reserved slice or
+rename host codec/observer equality as emitted execution. Actual Source type/value/
+codec lowering, raw declared-demand/same-invocation/static Frame, arbitrary callee/
+callback/library/world/physical-resource and mandatory final closure remain with
+real producers/owners. Prior O1 caller packet/proposal untouched and UNADOPTED.
+
+ALL original queues remain G40partial,G41partial,G42.01/.02/.03/.05blocked,
+G42.04/.06partial,BackfillA/Bpartial. No Source/native/compiler/EVM/profile/target
+predicate/observation/pin/fixture/Panic-control change. Mainalone lacks exact9private
+V12 inputs7881cb3a; combined checks remain development evidence, not publication.
+Goal blocked unchanged; no administration/reactivation/completion. More ready owned
+cases remain, not declared exhausted. Raw docs1/frozen86vs83,Suite124/181.061s,
+full1/5038.87s,cold124/5400.579s remain FAILURES, no unchanged heavy retries. Complete
+prior/publication finding equality is separate. Only proposed G03 reconciliation:
+G40/G41/BackfillA uniform constructor readback preparation, not parent closure.
+
+Final recovery checks: strict per-file uniformword/aggregate/control/root MCP PASS;
+focused guarded modules/controls and registered changed closure PASS1075jobs;
+203FULL vectors/87scalars preserve176/64prior;43actual standard-only scoped axioms.
+Static import/layer/orphan/trust/whitespace PASS. Lean4.24.0/Lake5.0.0-src+797c613,
+actual KeySort “Build completed successfully (2 jobs).” RUNTIME_GATE_PASS only for
+runtime; hard12GiB/swap0, peak1470836736bytes/no OOM. All292prior entries/22immutable
+manifests verify, untouched. Independent source and owning-roadmap finder/skeptic
+PASS/no findings; final committed-artifact/seal reviews recorded in NEW export.
+No original queue, mandatory failed gate or blocked goal is declared complete.
