@@ -15,7 +15,9 @@ export function factory(source,file,registry,read,exists,sharedToolchain) {
     toolchainInputs:()=>{throw Error("test must supply explicit toolchain inputs")},
     pinsFile:"tests/internal-flow/fixture-axiom-pins.json",expected:registry[file.split("/").at(-1).slice(0,-5)],
     dir:".lake/build/lib/lean/tests/internal-flow",imports,createHash,hash:p=>digest(read(p))};
-  return runInNewContext(keyBody(source)+"\nkey",context);
+  const body=keyBody(source).replace('"tests/internal-flow/fixture-cache.mjs","lean-toolchain"','"tests/internal-flow/fixture-cache.mjs","tests/internal-flow/exact-byte-digest.mjs","lean-toolchain"');
+  context.freshObjectDigest=p=>digest(read(p));
+  return runInNewContext(body+"\nkey",context);
 }
 const file="tests/internal-flow/Main.lean", dep="tests/internal-flow/Dep.lean", leaf="Solidity/Leaf.lean";
 const registry={Main:{guard:"main-guard.py",pins:{a:["propext"],b:[]}},Dep:{guard:"dep-guard.py",pins:{}}};
@@ -24,7 +26,7 @@ const manifest=".lake/build/lib/lean/tests/internal-flow/Dep.v12-cache.json";
 const initial=new Map(Object.entries({[file]:'import tests.«internal-flow».Dep\n',[dep]:'import Solidity.Leaf\n',[leaf]:'import Init.Prelude\n-- raw byte test\n',
  [objects(dep)]:'dep object',[objects(leaf)]:'leaf object',"main-guard.py":"root guard","dep-guard.py":"dep guard",
  "tests/internal-flow/fixture-axiom-pins.json":"registry", "tests/internal-flow/fixture-cache.mjs":"IDENTICAL DRIVER INPUT FOR ALGORITHM COMPARISON",
- "lean-toolchain":"lean4", "lakefile.toml":"config"}).map(([p,b])=>[p,Buffer.from(b)]));
+ "tests/internal-flow/exact-byte-digest.mjs":"EXACT TEST HELPER INPUT", "lean-toolchain":"lean4", "lakefile.toml":"config"}).map(([p,b])=>[p,Buffer.from(b)]));
 // Invalid UTF8 inside a comment proves hashing uses original bytes, not a
 // decoded/re-encoded string. The existing parser consumes decoded exact text.
 initial.set(leaf,Buffer.concat([initial.get(leaf),Buffer.from([47,45,255,254,45,47])]));
@@ -49,7 +51,7 @@ for(const p of [file,dep,leaf]) {
  assert.equal(fresh.reads.find(x=>x.p===p).hex,data.get(p).toString("hex"));
 }
 const cases=[];
-for(const p of [file,dep,leaf,objects(dep),objects(leaf),"main-guard.py","dep-guard.py",manifest,"lean-toolchain","lakefile.toml","tests/internal-flow/fixture-axiom-pins.json","tests/internal-flow/fixture-cache.mjs"]) {
+for(const p of [file,dep,leaf,objects(dep),objects(leaf),"main-guard.py","dep-guard.py",manifest,"lean-toolchain","lakefile.toml","tests/internal-flow/fixture-axiom-pins.json","tests/internal-flow/fixture-cache.mjs","tests/internal-flow/exact-byte-digest.mjs"]) {
  const h=harness(changed,new Map(data));const saved=h.key();
  h.files.set(p,Buffer.concat([h.files.get(p),Buffer.from("\nchanged")]));
  let rejected=false;try{rejected=h.key().key!==saved.key}catch{rejected=true}
@@ -83,4 +85,4 @@ const groups=[{names:["a","b"]}];
 const validate=log=>{splitBatchReports(log,groups);return runInNewContext(guard+"\nguard(log)",{expected:registry.Main,log});};
 assert.equal(validate(good),2);
 for(const [name,log]of Object.entries({missing:good.split("\n")[0],reordered:good.trim().split("\n").reverse().join("\n"),duplicate:good+good,wrong:good.replace("propext","sorryAx"),error:good+"error: test"})) {assert.throws(()=>validate(log));cases.push({report:name,rejected:true});}
-console.log(JSON.stringify({status:"pass",no_Lean:true,exact_serialized_inputs_keys_and_order:true,source_reads_per_key:{before:2,after:1},raw_bytes:true,mutation_after_read_coherent_next_call_fresh:true,cases},null,2));
+console.log(JSON.stringify({status:"pass",no_Lean:true,exact_serialized_inputs_keys_and_order:true,source_reads_per_key:{before:2,after:1},new_helper_dimension_normalized_explicitly:true,raw_bytes:true,mutation_after_read_coherent_next_call_fresh:true,cases},null,2));

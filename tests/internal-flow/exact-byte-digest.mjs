@@ -1,5 +1,9 @@
-// HOST-ONLY candidate. Never skips a fresh read; no state survives the owner invocation.
+// Exact-byte reuse. Every caller must supply a freshly read complete Buffer.
+// No state survives an explicitly owned preflight/postflight phase.
 import {createHash} from 'node:crypto';
+import {readFileSync} from 'node:fs';
+import {setFlagsFromString} from 'node:v8';
+import {runInNewContext} from 'node:vm';
 export function exactByteDigests(limit, maxEntries=4096) {
  if (!Number.isSafeInteger(limit) || limit < 0) throw Error('invalid byte limit');
  if(!Number.isSafeInteger(maxEntries)||maxEntries<1)throw Error('invalid entry limit');
@@ -19,4 +23,31 @@ export function exactByteDigests(limit, maxEntries=4096) {
   }
   return digest;
  }, clear(){entries.clear();retained=0;}};
+}
+
+// Keep the ordinary read point even on a hit. Never memoize toolchain/source,
+// config/guard/manifests here; their original byte/read boundaries are unchanged.
+export function freshObjectDigest(path, owner=null) {
+ const bytes=readFileSync(path);
+ return owner ? owner.digest(path,bytes) : createHash('sha256').update(bytes).digest('hex');
+}
+let collect;
+function collectReleasedBytes() {
+ // No CLI argument/child flag changes. Synchronous major collection is required
+ // before the phase returns, NOT left to memory pressure during the Lean child.
+ if(!collect) {
+  setFlagsFromString('--expose_gc');
+  try { collect=runInNewContext('gc'); } finally { setFlagsFromString('--no-expose_gc'); }
+ }
+ collect({execution:'sync',type:'major'});
+}
+export async function withObjectDigests(work, observe=()=>{}) {
+ const memo=exactByteDigests(512*1024*1024,4096);let open=true;
+ const owner={digest(path,bytes){if(!open)throw Error('closed object digest phase');return memo.digest(path,bytes);}};
+ const before=process.memoryUsage();
+ try { return await work(owner); }
+ finally {
+  open=false;memo.clear();collectReleasedBytes();
+  observe({closed:true,retained_payload_bytes:0,stats:{...memo.stats},before,after:process.memoryUsage()});
+ }
 }

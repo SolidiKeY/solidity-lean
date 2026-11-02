@@ -5,6 +5,7 @@ import {resolve,basename} from "node:path";
 import {createHash,randomUUID} from "node:crypto";
 import {spawn} from "node:child_process";
 import {pathToFileURL} from "node:url";
+import {freshObjectDigest,withObjectDigests} from "./exact-byte-digest.mjs";
 const pinsFile="tests/internal-flow/fixture-axiom-pins.json";
 const registry=JSON.parse(readFileSync(pinsFile,"utf8"));
 const hash=p=>createHash("sha256").update(readFileSync(p)).digest("hex");
@@ -182,7 +183,7 @@ export async function run(args,log,journal,limit=MAX_CHILD_OUTPUT_BYTES) {
   },{args,log,stdout:log+".stdout",stderr:log+".stderr",state:"unfinished"});
 }
 
-async function fixture(mode,file,out,sharedToolchain=null,batchItems=null,stages=null) {
+async function fixture(mode,file,out,sharedToolchain=null,batchItems=null,stages=null,preflightOwner=null) {
   if(!["prepare","check"].includes(mode) || !/^tests\/internal-flow\/[A-Za-z][A-Za-z0-9]*\.lean$/.test(file ?? "") || !out?.startsWith("/"))
     throw new Error("usage: fixture-cache.mjs prepare|check tests/internal-flow/Name.lean /absolute/evidence");
   const name=basename(file,".lean"),dir=".lake/build/lib/lean/tests/internal-flow";
@@ -193,7 +194,10 @@ async function fixture(mode,file,out,sharedToolchain=null,batchItems=null,stages
   return stages.measureAsync(`fixture.${mode}.${name}${batchItems?".precheck":""}`,async()=>{
 
 function key() {
-  // Fresh bytes/digests live only for THIS invocation. Bind dependency parsing
+  const objectOwner=arguments[0]??null;
+  // Source bytes/digests live only for THIS key invocation. Object reuse, if
+  // supplied, belongs to a separately closed preflight/postflight owner and
+  // still requires a complete fresh read and exact byte equality. Bind parsing
   // and its input hash to the same exact read; no source/hash freshness cache
   // survives the next pre/post key() call. Pure importMemo remains separate.
   const sourceDigests=new Map();
@@ -222,12 +226,13 @@ function key() {
     pending.push(...readSource(path));
   }
   const inputs={};
-  for(const path of [file,pinsFile,expected.guard,"tests/internal-flow/fixture-cache.mjs","lean-toolchain","lakefile.lean","lakefile.toml","lake-manifest.json"])
+  if(!existsSync("tests/internal-flow/exact-byte-digest.mjs")) throw new Error("missing object digest implementation");
+  for(const path of [file,pinsFile,expected.guard,"tests/internal-flow/fixture-cache.mjs","tests/internal-flow/exact-byte-digest.mjs","lean-toolchain","lakefile.lean","lakefile.toml","lake-manifest.json"])
     if(existsSync(path)) inputs[path]=sourceDigests.get(path) ?? hash(path);
   Object.assign(inputs, sharedToolchain ?? toolchainInputs());
   for(const path of [...closure].sort()) {
     inputs[path]=sourceDigests.get(path);
-    inputs[".lake/build/lib/lean/"+path.slice(0,-5)+".olean"]=hash(".lake/build/lib/lean/"+path.slice(0,-5)+".olean");
+    inputs[".lake/build/lib/lean/"+path.slice(0,-5)+".olean"]=freshObjectDigest(".lake/build/lib/lean/"+path.slice(0,-5)+".olean",objectOwner);
   }
   for(const dependency of [...fixtureDeps].sort()) inputs[registry[dependency].guard]=hash(registry[dependency].guard);
   // An imported fixture must have its OWN prior checked source/object binding.
@@ -269,16 +274,16 @@ if(mode==="prepare") {
   const result={fixture:file,mode,key:after.key,reports,object}; console.log(JSON.stringify(result)); return result;
 } else {
   if(!existsSync(manifest)) throw new Error(`missing checked fixture cache: prepare ${file}`);
-  const saved=JSON.parse(readFileSync(manifest,"utf8")), current=stages.measure(`key.before.${name}`,key);
+  const saved=JSON.parse(readFileSync(manifest,"utf8")), current=stages.measure(`key.before.${name}`,()=>key(preflightOwner));
   if(saved.key!==current.key || JSON.stringify(saved.inputs)!==JSON.stringify(current.inputs) || saved.object_sha256!==hash(object))
     throw new Error(`stale or altered compiled fixture ${file}; run bounded preparation`);
   const harness=`import tests.«internal-flow».${name}\n`+Object.keys(expected.pins).sort().map(n=>`#print axioms ${n}\n`).join("");
   const harnessFile=`.lake/build/${name}-v12-import.lean`;
   writeFileSync(harnessFile,harness);writeFileSync(`${out}/cached-${name}-import.lean`,harness);
-  const finish=log=>{
+  const finish=(log,postflightOwner=null)=>{
   const reports=stages.measure(`reports.${name}`,()=>guard(log));
   // Recheck keys after execution, including the exact consumed fixture object.
-  if(stages.measure(`key.after.${name}`,key).key!==saved.key || hash(object)!==saved.object_sha256) throw new Error("inputs changed while importing fixture");
+  if(stages.measure(`key.after.${name}`,()=>key(postflightOwner)).key!==saved.key || hash(object)!==saved.object_sha256) throw new Error("inputs changed while importing fixture");
   writeFileSync(`${out}/cached-${name}-key.json`,JSON.stringify({...saved,fixture:file,reports,toolchain_verification:sharedToolchain?"complete-batch-boundary":"complete-per-file-boundary"},null,2)+"\n");
   const result={fixture:file,mode,key:saved.key,reports,object}; console.log(JSON.stringify(result)); return result;
   };
@@ -309,7 +314,7 @@ async function batch(out,files) {
   return stages.measureAsync("batch",async()=>{
   const before=Object.freeze(stages.measure("toolchain.before",toolchainInputs));
   const items=[];
-  await visitFixturesAsync(files,file=>fixture("check",file,out,before,items,stages));
+  await withObjectDigests(owner=>visitFixturesAsync(files,file=>fixture("check",file,out,before,items,stages,owner)),record=>stages.record("object-digests.preflight-released",record));
   // Every fixture source/object/dependency key is freshly checked before the
   // actual combined Lean import. No fixture, report or freshness check is cut.
   const combined=items.map(item=>item.harness.split("\n")[0]).join("\n")+"\n"+
@@ -318,11 +323,11 @@ async function batch(out,files) {
   stages.measure("harness.write",()=>{writeFileSync(harness,combined);writeFileSync(`${out}/cached-all-fixtures-import.lean`,combined);});
   const log=await run(["env","lean","-j1","--tstack=131072",harness],`${out}/cached-all-fixtures-diagnostics.log`,stages);
   const slices=stages.measure("reports.batch",()=>splitBatchReports(log,items));
-  const results=visitFixtures(items,(item)=>{
+  const results=await withObjectDigests(owner=>visitFixtures(items,(item)=>{
     const index=items.indexOf(item),slice=slices[index];
     writeFileSync(`${out}/cached-${basename(item.file,".lean")}-diagnostics.log`,slice);
-    return item.finish(slice); // Exact guard AND fresh post-import key/object.
-  });
+    return item.finish(slice,owner); // Exact guard AND fresh post-import key/object.
+  }),record=>stages.record("object-digests.postflight-released",record));
   const after=stages.measure("toolchain.after",toolchainInputs);
   stages.measure("toolchain.compare",()=>requireSameToolchain(before,after));
   const record={status:"pass",execution:"one-actual-Lean-process-all-imports-and-all-axiom-reports",toolchain_verification:"complete-before-and-after-batch",toolchain_entries:Object.keys(before).length,

@@ -3417,3 +3417,40 @@ requirements, not discharged runtime claims. All Work1–6/BackfillA–B remain
 partial. Cached124/120.820s, raw124, full124/300s (TestSuite/sort unreached),
 and docs1 remain failures. No Lean/cache preparation or aggregate/raw/full gate
 was run in C44. The original blocked goal is untouched.
+
+
+### C45 — authenticated exact-byte digest phases (partial, validation pending)
+
+The validator now requires and hashes `tests/internal-flow/exact-byte-digest.mjs`
+in every fixture key, including dependency bindings. All existing source/config/
+guard/object/manifest/toolchain inputs remain in their original relative order.
+Only project object digests may be reused, after the original complete fresh read
+and exact comparison against a private copy; all other hashes and manifest's two
+reads remain unchanged. Preflight and postflight own separate bounded maps.
+Both close and clear in `finally`, then synchronously major-collect released
+buffers before returning, including on error. No map is live during the actual
+Lean child; late owner use fails. Ordinary Node launch is supported; a private VM
+collector is acquired through temporary V8 GC exposure, without changing CLI or
+Lean child arguments. This is host lifecycle behavior, not kernel evidence or a
+claim that RSS returns to its initial value.
+
+The FINAL 512 MiB/4096-entry helper was measured with exact actual inputs in two
+reverse-order paired sweeps INCLUDING cleanup: ordinary9.591/9.378s versus
+bounded4.883/5.131s. Each sweep retains5038 fresh object reads/9,349,966,680bytes,
+4790hits/248misses. Actual complete ordered keys/outcomes match (22stale dependency
+errors and five returned helpers are not authenticated successes). Full toolchain
+hashes match before/after. Process34.639s, sampled peak806888KiB; after collection
+live arrayBuffers209323B, remaining RSS650–680MB. This demonstrates changed host
+work, not aggregate headroom. Actual CLI stale-preflight cleanup passed3.528s,
+no child; controlled key/read-boundary/helper/manifest/report mutations and
+exception/owner cleanup pass. Original542types/85tupletypes/27fixtures/739pins and
+all Lean sources are unchanged. Source finder/skeptic PASS; genuine bounded
+fixture preparation and at most one complete120s aggregate are still required.
+
+The first combined host-control invocation retained exit127 because Python is
+absent inside the container, after its Node controls passed. Unchanged Python
+cached/raw driver mocks passed separately in the host under the original120s
+bound, no Lean. This does not repair cached124/120.820s, raw124, full124/300s,
+TestSuite/sort unreached or docsnormal/strict1. All Work1–6/BackfillsA–B remain
+partial; original blocked goal untouched. No unchanged raw/full retry or broader
+semantic admission is authorized by this host repair.
