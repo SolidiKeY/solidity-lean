@@ -3696,3 +3696,69 @@ General runtime frames/unbounded recursion/full-signature dispatch, general mixe
 or early-control loop compilation, live byte-journal/transient/world producers
 remain open/reserved. Original blocked goal unchanged, no administration/reset/
 reactivation, push/merge/PR/peer transfer/new VM/thread/model or budget change.
+
+
+### C50 — general typed runtime and ordinary-world caller-phase interfaces
+
+Coordinator-directed implementation resumes in Work1/G37.01 without treating
+mandatory validation overruns as implementation blockers. RuntimeCalls.success_iff
+and failure_iff invert ACTUAL TRun.call for EVERY current CallRet constructor:
+none, val (including a particular destination), primitive tuple binders, memory
+and storage alias results. The exact evaluated TEnv, result-entry Out, body Out,
+composed heap extension and private-local removal/export are retained. No noMem,
+inlining depth, target simulation oracle or desired output equation is assumed.
+This is the existing intrinsic call semantics, not general target call frames or
+uncapped recursive source/target simulation. Alias identity is not liveness.
+
+RuntimeWorld.concat constructs only existing typed Prog constructors and its
+runR law uses actual TRun.seq associativity. RuntimeWorld.callFrame_success
+extracts installed typed storage, actual paid initial state, actual nonempty
+caller prefix, evaluated arguments/body and exported state from a REAL
+World.callFrame success. It retains exact finish/settlement and derives other
+account STORAGE preservation through the published finish_other theorem (not
+arbitrary balance preservation). RuntimeWorld.call_success_iff separates actual
+World.call success into frame execution AND caller-side decoder execution.
+decode_failure retains the exact halt after a successful frame, with no catch,
+failed State or rollback inference. The Entry.result decoder is NOT run by
+callFrame itself. These consume existing source-world APIs unchanged; they are
+not external CALL/gas/bytecode or general callback/world correspondence.
+
+RuntimeGuardedFrame.success combines the SAME actual call decomposition with
+the published syntax-derived TGFrameM and TLocAgreeM theorems. Genuine readsIn
+and withinM premises remain. In particular val-result destinations may change,
+and local transport excludes actual writesAt destinations; other typed locals
+are weakened along the exact extension. No unconditional Heap.Keeps or fragile
+alias liveness is asserted for arbitrary mutating bodies. Readonly consumers
+can use this guarded interface independently of the ordinary-world adapter.
+
+The inhabited RuntimeFrameChecks world prefix constructs old[7,11], two aliases
+and protected9/11 locals. Memory result entry and private allocation grow H1→H3;
+returned reference2 contains[13,17], old aliases0 retain[7,11], and the body writes
+persistent23/transient29 in the ACTUAL local Storage model. This is not EIP1153
+or transaction-reset/world-journal correspondence. The ordinary zero-value world
+client derives its runtime frame from actual execution and preserves a distinct
+installed account. It pins all these ordered observations, wrong alias/scalar,
+static refusal and rejected mutating withinM. A SEPARATE admitted allocation-only
+readonly client consumes RuntimeGuardedFrame. Body failure keeps DE/00/AD bytes;
+a separate99/00 decoder failure occurs AFTER an actual successful frame. No
+failed-world state, absence of side effects or rollback follows from error values.
+
+The local published World.callFrame conservatively REFUSES all these nonempty
+entries in static mode; RuntimeWorld.static_refused preserves that exact rule.
+The V13 effect-certified StaticInvocation.Frame.static producer is not locally
+published here and is not recreated. This interface supplies ordinary caller
+phase and guarded intrinsic-call facts; it does not claim that V13/G22 parent
+obligations or computed static admission are discharged. Installed bodies and
+external response tables retain their existing explicit model obligations.
+
+All23 new actual builtin axiom reports are pinned; all840 old ordered pins and31
+fixture sources remain unchanged, giving32fixtures/863reports. Independent
+read-only finder/skeptic generic and populated-client source reviews PASS with
+no findings; final registration/guard/artifact reviews are separate. Per-file
+CLI fallback is used because Lean MCP diagnostics are unavailable. No proof,
+fuel, node, heartbeat, stack, memory or test budget increase. Three new core
+modules are append-only registered; no reserved producer/source file is edited.
+Old cached/raw/full/docs failures remain failed and are HELD until end-of-lane
+validation under coordinator scheduling, not rerun or relabeled here. All
+original Work1–6/BackfillsA–B remain partial. No push/merge/PR, peer transfer,
+new VM/thread/model or goal administration/reset/reactivation/completion.

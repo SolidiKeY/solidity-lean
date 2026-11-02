@@ -1355,3 +1355,7 @@ four-mode upstream EVM observations and refusal controls;
 | `Solidity/Backend/InternalFlow/SharedCallPrefix.lean` | Public memory-compiler constructor sharing, dependent typed continuations and code-prefix congruence; concrete actual root-selector links and emitted argument-failure clients in SharedArgument fixtures. |
 
 | `Solidity/Backend/InternalFlow/SharedPrefixCapacity.lean` | One actual checked prefix endpoint with represented locals/old addresses and capacity for either of two alternative continuation budgets; maximum is not a sequential sum. |
+
+| `Solidity/Backend/InternalFlow/RuntimeCalls.lean` | Exact all-CallRet typed argument/body/result success and halt decomposition from actual TRun.call; no new evaluator. |
+| `Solidity/Backend/InternalFlow/RuntimeWorld.lean` | Actual world caller-prefix/internal-call frame and caller decode extraction; preserves conservative static refusal, settlement and other-account storage. |
+| `Solidity/Backend/InternalFlow/RuntimeGuardedFrame.lean` | General successful runtime-call frame/local/result consumer with genuine existing readsIn/withinM admission; not arbitrary mutating calls or effect-certified static world admission. |

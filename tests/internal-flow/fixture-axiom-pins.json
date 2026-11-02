@@ -4248,5 +4248,123 @@
         "propext"
       ]
     }
+  },
+  "RuntimeFrameChecks": {
+    "guard": "tests/internal-flow/check-runtime-frame-axioms.py",
+    "pins": {
+      "Solidity.Backend.InternalFlow.RuntimeCalls.success_iff": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeCalls.failure_iff": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeWorld.concat_runR": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeWorld.callFrame_success": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeWorld.static_refused": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.actual_world": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.runtime_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.complete_observations": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.other_account": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.static_refusal": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.wrong_alias": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeGuardedFrame.success": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.guarded_client": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.mutating_guard_rejected": [
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.exact_world_failure": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.wrong_failure_class": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.wrong_payload": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeWorld.call_success_iff": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeWorld.decode_failure": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.actual_call": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.frame_before_bad_decode": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.decode_after_frame": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "Solidity.Backend.InternalFlow.RuntimeFrameChecks.wrong_protected_scalar": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    }
   }
 }
