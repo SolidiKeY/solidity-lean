@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/vendor/vs/editor/editor.main.css">
   <script src="/vendor/vs/loader.js" defer></script>
+  <script src="/browser-connection.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
@@ -43,7 +44,7 @@
     <main>
       <div class="editor-top"><div id="tabs" role="tablist" aria-label="Open editors"></div><div class="editor-actions"><button id="verify-button" title="Verify File (Ctrl+Shift+Enter)" aria-label="Verify File"></button><button id="more-button" title="More actions" aria-label="More actions">···</button></div></div>
       <div id="breadcrumbs" aria-label="Breadcrumbs"><span class="sol-icon">◈</span><span id="breadcrumb-file">Counter.sol</span></div>
-      <div id="editor" aria-label="Solidity source editor"><div class="loading">Starting local editor…</div></div>
+      <div id="editor" aria-label="Solidity source editor"><div class="loading">Preparing offline website…</div></div>
       <div class="resize panel-resize" role="separator" aria-label="Resize panel" aria-orientation="horizontal" tabindex="0"></div>
       <section id="panel" aria-label="Bottom panel">
         <div class="panel-heading"><nav aria-label="Panel tabs"><button data-panel="problems" class="selected">PROBLEMS <span id="problem-count" class="count">0</span></button><button data-panel="output">OUTPUT</button><button data-panel="results">TEST RESULTS</button></nav><div class="panel-tools"><span id="output-channel">Solidity Lean</span><button id="clear-output" title="Clear Output" aria-label="Clear Output"></button><button id="close-panel" title="Close Panel (Ctrl+J)" aria-label="Close Panel">×</button></div></div>
@@ -51,7 +52,7 @@
       </section>
     </main>
   </div>
-  <footer class="statusbar"><button id="remote-status" title="Local offline workspace" aria-label="Local offline workspace">⌁</button><button id="errors-status" title="Show Problems">⊗ 0 &nbsp; △ 0</button><button id="proof-status" title="Verify File">⚗ Solidity Lean: connecting</button><div class="status-spacer"></div><span id="connection-status">Local · Offline</span><span id="position-status">Ln 1, Col 1</span><span>Spaces: 4</span><span>UTF-8</span><span>LF</span><span>Solidity</span><button id="notification-button" title="Notifications" aria-label="Notifications"></button></footer>
+  <footer class="statusbar"><button id="remote-status" title="Browser workspace" aria-label="Browser workspace">⌁</button><button id="errors-status" title="Show Problems">⊗ 0 &nbsp; △ 0</button><button id="proof-status" title="Verify File">Solidity: preparing browser runtime</button><div class="status-spacer"></div><span id="connection-status">Browser · Offline</span><span id="position-status">Ln 1, Col 1</span><span>Spaces: 4</span><span>UTF-8</span><span>LF</span><span>Solidity</span><button id="notification-button" title="Notifications" aria-label="Notifications"></button></footer>
   <dialog id="palette" aria-label="Command Palette"><input id="palette-input" aria-label="Type a command" placeholder="Type a command"><div id="palette-items" role="listbox"></div><div class="palette-hint">↑↓ to navigate &nbsp; ↵ to select &nbsp; esc to close</div></dialog>
   <dialog id="input-dialog"><form method="dialog"><label id="input-label" for="input-value">File name</label><input id="input-value" autocomplete="off" required><p id="input-error" role="alert"></p><div><button value="cancel" formnovalidate>Cancel</button><button id="input-submit" value="ok">Create</button></div></form></dialog>
   <div id="toast" role="status" hidden></div>

@@ -39,7 +39,7 @@ function createServer({port = 4173, Client = LanguageClient, backendPath = ROOT}
         const files = Object.fromEntries(fs.readdirSync(path.join(__dirname, 'examples')).filter(validName).map(name => [name, fs.readFileSync(path.join(__dirname, 'examples', name), 'utf8')]));
         return reply(200, 'application/json', JSON.stringify({files, backend:'Solidity Lean', offline:true, protocol:1}));
       }
-      const routes = {'/':'index.html','/index.html':'index.html','/app.js':'app.js','/styles.css':'styles.css','/sw.js':'sw.js','/manifest.json':'manifest.json'};
+      const routes = {'/':'index.html','/index.html':'index.html','/app.js':'app.js','/browser-connection.js':'browser/connection.js','/styles.css':'styles.css','/sw.js':'sw.js','/manifest.json':'manifest.json'};
       let file;
       if (pathname === '/syntax.json') file = path.join(ROOT, 'vscode/syntaxes/solidity.tmLanguage.json');
       else if (routes[pathname]) file = path.join(__dirname, routes[pathname]);
@@ -179,7 +179,7 @@ function createServer({port = 4173, Client = LanguageClient, backendPath = ROOT}
 }
 if (require.main === module) {
   const app = createServer({port:Number(process.env.PORT || 4173)});
-  app.listen().then(url => console.log(`Solidity Lean offline IDE: ${url}\nUses local compiler and Lean kernel. No Internet connection is needed.`)).catch(error => {console.error(error); process.exitCode = 1;});
+  app.listen().then(url => console.log(`Native comparison server: ${url}/?backend=native\nDevelopment tooling using local compiler and Lean processes.`)).catch(error => {console.error(error); process.exitCode = 1;});
   for (const signal of ['SIGINT','SIGTERM']) process.once(signal, async () => {await app.close(); process.exit();});
 }
 module.exports = {createServer, validName, settings};

@@ -21,7 +21,7 @@ async function main(){
   async function ready(){await page.waitForFunction(()=>window.solidityIDE?.ready,{timeout:60000});await page.waitForFunction(()=>solidityIDE.state.connected);}
   try{
     await check('cold startup, local assets, shared Solidity syntax and compiler symbols',async()=>{
-      const start=performance.now();await page.goto(url);await ready();report.startupMs=+(performance.now()-start).toFixed(1);
+      const start=performance.now();await page.goto(url+'/?backend=native');await ready();report.startupMs=+(performance.now()-start).toFixed(1);
       await page.waitForFunction(()=>solidityIDE.state.symbols.get('Counter.sol')?.some(s=>s.name==='Counter'));
       assert.equal(await page.evaluate(()=>solidityIDE.editor.getModel().getLanguageId()),'solidity');
       assert.equal(await page.evaluate(()=>solidityIDE.editor.getModel().getOptions().bracketPairColorizationOptions.enabled),false);
@@ -110,7 +110,7 @@ async function main(){
       // A brand-new profile with exactly one initial page load catches missing
       // first-load AMD chunks that a warm profile would hide.
       const offlineContext=await browser.newContext({viewport:{width:1440,height:900}});const offlinePage=await offlineContext.newPage();offlinePage.on('pageerror',error=>report.pageErrors.push(error.message));
-      await offlinePage.goto(url);await offlinePage.waitForFunction(()=>window.solidityIDE?.ready);
+      await offlinePage.goto(url+'/?backend=native');await offlinePage.waitForFunction(()=>window.solidityIDE?.ready);
       await offlinePage.evaluate(()=>navigator.serviceWorker.ready);await offlinePage.waitForTimeout(500);
       await offlineContext.setOffline(true);await offlinePage.reload();await offlinePage.waitForFunction(()=>window.solidityIDE?.ready,{timeout:30000});
       await offlinePage.evaluate(()=>solidityIDE.editor.setValue(solidityIDE.editor.getValue()+'\n// edited while fully disconnected\n'));

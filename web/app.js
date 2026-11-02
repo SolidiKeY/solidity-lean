@@ -6,6 +6,7 @@
 window.addEventListener('unhandledrejection',event=>{if(event.reason?.name==='Canceled'&&event.reason?.message==='Canceled')event.preventDefault();});
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
+const usingNativeBackend=new URLSearchParams(location.search).get('backend')==='native';
 const icons = {
   explorer:'<path d="M8 3h9l4 4v14H8z"/><path d="M17 3v5h4M5 7H3v14h2"/>',
   search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
@@ -32,24 +33,25 @@ $('#offline-button').innerHTML = svg('offline'); $('#notification-button').inner
 $('#verify-button').innerHTML = svg('run'); $('#layout-button').innerHTML = svg('layout'); $('#clear-output').innerHTML = svg('clear');
 const store = {
   read(key, fallback) { try { return JSON.parse(localStorage.getItem(`solidity-lean:${key}`)) ?? fallback; } catch { return fallback; } },
-  write(key, value) { try { localStorage.setItem(`solidity-lean:${key}`, JSON.stringify(value)); } catch { toast('Browser storage is full. Export your files to keep your changes.'); } }
+  write(key, value) { try { localStorage.setItem(`solidity-lean:${key}`, JSON.stringify(value)); return true; } catch { toast('Browser storage is full. Export your files to keep your changes.'); return false; } }
 };
 const state = {
   files:{}, baselines:{}, active:'Counter.sol', view:'explorer', panel:'problems', testFilter:'', diagnostics:new Map(), reports:new Map(),
   statuses:new Map(), models:new Map(), views:new Map(), opened:new Set(), dirty:new Set(), versions:new Map(),
-  symbols:new Map(), decorations:new Map(), synced:new Map(), syncing:new Map(), workspaceSynced:new Map(), revision:0, logs:[], timing:[], settings:store.read('settings', {automaticVerification:'never',counterexamples:false,auditPreconditions:false,workers:1}), connected:false
+  symbols:new Map(), decorations:new Map(), synced:new Map(), syncing:new Map(), workspaceSynced:new Map(), runtime:{mode:usingNativeBackend?'native':'browser',proofReady:usingNativeBackend}, revision:0, logs:[], timing:[], settings:store.read('settings', {automaticVerification:'never',counterexamples:false,auditPreconditions:false,workers:1}), connected:false
 };
 let editor, socket, requestID = 0, reconnectTimer, symbolTimer, saveTimer, toastTimer, paletteIndex = 0, paletteCommands = [];
 const requests = new Map();
 function toast(text) { $('#toast').textContent = text; $('#toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => {$('#toast').hidden = true;}, 7000); }
 function log(message) { state.logs.push(message); if (state.logs.length > 1000) state.logs.shift(); if (state.panel === 'output') renderPanel(); }
-function persistNow() { store.write('workspace',{files:state.files,baselines:state.baselines,active:state.active,opened:[...state.opened],dirty:[...state.dirty]}); }
+function persistNow() { return store.write('workspace',{files:state.files,baselines:state.baselines,active:state.active,opened:[...state.opened],dirty:[...state.dirty]}); }
 function persist() { clearTimeout(saveTimer); saveTimer = setTimeout(persistNow,150); }
 function rpc(method, params = {}) {
-  if (!state.connected || socket?.readyState !== WebSocket.OPEN) return Promise.reject(new Error('Local backend disconnected. Start npm start in web/ to run verification.'));
+  if (!state.connected || socket?.readyState !== 1) return Promise.reject(new Error(usingNativeBackend?'Native development backend disconnected.':'The browser compiler is still preparing.'));
   const id = ++requestID;
   return new Promise((resolve,reject) => {
-    const timer = setTimeout(() => {requests.delete(id); reject(new Error('Local backend timed out'));}, 150000);
+    const timeout=!usingNativeBackend&&method==='verify'?(state.settings.timeoutMs||600000)+10000:150000;
+    const timer = setTimeout(() => {requests.delete(id);if(!usingNativeBackend&&method==='verify')socket.send(JSON.stringify({id:++requestID,method:'cancel',params:{name:params.name}}));reject(new Error('Browser operation timed out'));}, timeout);
     requests.set(id, {resolve,reject,timer}); socket.send(JSON.stringify({id,method,params}));
   });
 }
@@ -58,10 +60,10 @@ function currentVersion(name) { return state.models.get(name)?.getVersionId() ||
 function filename(uri) { return decodeURIComponent(uri?.split('/').pop() || ''); }
 function connect() {
   clearTimeout(reconnectTimer);
-  socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/lsp`);
+  socket = usingNativeBackend?new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/lsp`):new BrowserConnection();
   socket.onopen = async () => {
-    state.connected = true; state.synced.clear(); state.workspaceSynced.clear(); $('#connection-status').textContent = 'Local · Offline'; $('.statusbar').classList.remove('reconnecting');
-    try { await syncWorkspace(); await rpc('configure',state.settings); await syncAll(); updateStatus(); refreshSymbols(); log('Connected to the local Solidity Lean language server.'); } catch (error) {notifyError(error);}
+    state.connected = true; state.synced.clear(); state.workspaceSynced.clear(); $('#connection-status').textContent = usingNativeBackend?'Native development':'Browser · Offline'; $('.statusbar').classList.remove('reconnecting');
+    try { await syncWorkspace(); await rpc('configure',state.settings); await syncAll(); updateStatus(); refreshSymbols(); log(usingNativeBackend?'Connected to the native development backend.':'Solidity WebAssembly compiler and language services are running in this browser.'); } catch (error) {notifyError(error);}
   };
   socket.onmessage = event => {
     let message; try { message = JSON.parse(event.data); } catch { return; }
@@ -72,6 +74,7 @@ function connect() {
       return;
     }
     const {method,params:p} = message;
+    if(method==='runtime'){Object.assign(state.runtime,p);log(p.message||'Browser runtime ready.');updateStatus();if(state.view==='settings')renderSidebar();return;}
     if (method === 'backendError') { log(`Backend error: ${p.message}`); toast(p.message); return; }
     if (method === 'log') { log(p.message); return; }
     if (!p.name || !state.models.has(p.name) || p.version !== currentVersion(p.name)) return;
@@ -90,11 +93,11 @@ function connect() {
   };
   socket.onclose = () => {
     state.connected = false; state.synced.clear();
-    for (const pending of requests.values()) {clearTimeout(pending.timer); pending.reject(new Error('Local backend disconnected'));} requests.clear();
+    for (const pending of requests.values()) {clearTimeout(pending.timer); pending.reject(new Error('Runtime stopped'));} requests.clear();
     // Never retain certified status after losing the backend connection.
     state.reports.clear(); state.statuses.clear(); state.diagnostics.clear();
     for (const name of state.models.keys()) {applyMarkers(name); drawGutters(name);}
-    $('#connection-status').textContent = 'Backend disconnected'; $('.statusbar').classList.add('reconnecting');
+    $('#connection-status').textContent = usingNativeBackend?'Backend disconnected':'Browser runtime stopped'; $('.statusbar').classList.add('reconnecting');
     updateStatus(); renderSidebar(); renderPanel(); renderCounts(); reconnectTimer = setTimeout(connect,3000);
   };
   socket.onerror = () => {};
@@ -201,7 +204,7 @@ function createModel(name,text) {
 }
 async function openFile(name) {
   if (!(name in state.files)) return;
-  if (!state.models.has(name) && state.models.size>=4) {toast('Close an editor tab before opening another file. The backend supports four open documents.');return;}
+  if (!state.models.has(name) && state.models.size>=4) {toast('Close an editor tab before opening another file. The runtime supports four open documents.');return;}
   if (editor?.getModel()) state.views.set(state.active,editor.saveViewState());
   state.active=name; state.opened.add(name);
   const model=state.models.get(name)||createModel(name,state.files[name]); editor.setModel(model); editor.restoreViewState(state.views.get(name)||null); editor.focus();
@@ -257,10 +260,11 @@ function renderSidebar(){
     el.innerHTML='<div class="settings-content"><button id="run-verify">Verify File</button><button id="run-discover">Discover Obligations</button><button id="run-cancel">Cancel Verification</button><h3>Solidity Lean</h3><p>Verify the current source buffer with the local Lean kernel.</p><p>Open goals appear in Problems. The Testing view lists individual obligations.</p></div>';
     $('#run-verify').onclick=()=>verify();$('#run-discover').onclick=()=>verify(true);$('#run-cancel').onclick=cancel;
   }else if(state.view==='extensions'){
-    el.innerHTML='<div class="section-heading">⌄ &nbsp; BUILT-IN</div><div class="settings-content"><h3>◈ Solidity Lean Verification</h3><p>Compiler-backed language services and kernel-checked proofs.</p><small>SolidiKeY · Local backend</small><h3>Monaco Editor</h3><p>The editor that powers VS Code. Bundled for offline use.</p><small>Microsoft · MIT</small><h3>Solidity Language</h3><p>The VS Code extension’s syntax grammar and proof gutter icons.</p><small>SolidiKeY · MIT</small></div>';
+    el.innerHTML='<div class="section-heading">⌄ &nbsp; BUILT-IN</div><div class="settings-content"><h3>◈ Solidity Lean Verification</h3><p>Compiler-backed language services and kernel-checked proofs.</p><small>SolidiKeY · Browser runtime</small><h3>Monaco Editor</h3><p>The editor that powers VS Code. Bundled for offline use.</p><small>Microsoft · MIT</small><h3>Solidity Language</h3><p>The VS Code extension’s syntax grammar and proof gutter icons.</p><small>SolidiKeY · MIT</small></div>';
   }else if(state.view==='settings'){
     el.innerHTML='<div class="settings-content"><h3>Solidity Lean</h3><p>Kernel-checked verification on this computer.</p><label for="auto-setting">Automatic verification</label><select id="auto-setting"><option value="never">Never — verify manually</option><option value="change">On change</option><option value="save">On save</option></select><label><input type="checkbox" id="counterexample-setting"> Certified model counterexamples</label><label><input type="checkbox" id="audit-setting"> Audit preconditions</label><label for="worker-setting">Proof workers</label><select id="worker-setting"><option>1</option><option>2</option><option>3</option><option>4</option></select><button id="restart-button">Restart Language Server</button><h3>Offline workspace</h3><p>Files stay in this browser. Export a file to keep a copy on disk.</p><p>Compiler and proof checking run in the local Node and Lean runtime. No Internet or remote service is used.</p><small>To verify, keep the local server running. Editing remains available in the cached app when it is disconnected.</small></div>';
-    $('#auto-setting').value=state.settings.automaticVerification;$('#counterexample-setting').checked=state.settings.counterexamples;$('#audit-setting').checked=state.settings.auditPreconditions;$('#worker-setting').value=state.settings.workers;
+    if(!usingNativeBackend){const paragraphs=el.querySelectorAll('.settings-content>p');paragraphs[0].textContent='Solidity compilation and language services run inside this browser.';paragraphs[2].textContent=state.runtime.proofReady?'The pinned Lean kernel also runs in WebAssembly in this browser.':'The pinned Lean 4.24 WebAssembly proof runtime is being prepared. No kernel proofs are claimed until it is ready.';el.querySelector('.settings-content small').textContent='After the offline assets finish caching, no network or local server is needed.';$('#restart-button').textContent='Restart Browser Runtime';$('#worker-setting').innerHTML='<option>1</option>';for(const selector of ['#auto-setting','#counterexample-setting','#audit-setting','#worker-setting'])$(selector).disabled=!state.runtime.proofReady;}
+    $('#auto-setting').value=state.settings.automaticVerification;$('#counterexample-setting').checked=state.settings.counterexamples;$('#audit-setting').checked=state.settings.auditPreconditions;$('#worker-setting').value=usingNativeBackend?state.settings.workers:1;
     for(const selector of ['#auto-setting','#counterexample-setting','#audit-setting','#worker-setting'])$(selector).onchange=async()=>{state.settings={automaticVerification:$('#auto-setting').value,counterexamples:$('#counterexample-setting').checked,auditPreconditions:$('#audit-setting').checked,workers:Number($('#worker-setting').value)};store.write('settings',state.settings);try{await rpc('configure',state.settings);clearResults();}catch(error){notifyError(error);}};
     $('#restart-button').onclick=restart;
   }
@@ -281,7 +285,7 @@ function renderPanel(){
 }
 function showPanel(panel){state.panel=panel;document.body.classList.remove('panel-hidden');renderPanel();editor?.layout();}
 function proofStatus(text){$('#proof-status').innerHTML=svg('testing');$('#proof-status').append(document.createTextNode(`Solidity Lean: ${text}`));}
-function updateStatus(){const s=state.statuses.get(state.active);const text=!state.connected?'disconnected':s?.state||'ready';proofStatus(text);$('#verify-button').disabled=!state.connected;}
+function updateStatus(){const s=state.statuses.get(state.active);const text=!state.connected?'preparing':s?.state||'ready';proofStatus(text);$('#verify-button').disabled=!state.connected||!state.runtime.proofReady;$('#verify-button').title=state.runtime.proofReady?'Verify File (Ctrl+Shift+Enter)':state.runtime.error||'Pinned browser proof runtime is not ready yet';}
 async function verify(listing=false,row){
   const name=state.active;if(!state.models.has(name))return;
   try{await syncAll();const version=currentVersion(name),revision=state.revision,start=performance.now();log(`${listing?'Discovering':'Verifying'} ${name}${row?` — ${row.contract}.${row.signature||row.function}`:''}`);proofStatus('running');
@@ -291,8 +295,8 @@ async function verify(listing=false,row){
 }
 async function cancel(){try{await rpc('cancel',{});log('Verification cancelled.');}catch(error){notifyError(error);}}
 function clearResults(){state.reports.clear();state.statuses.clear();state.diagnostics.clear();for(const name of state.models.keys()){applyMarkers(name);drawGutters(name);}renderSidebar();renderPanel();renderCounts();updateStatus();}
-async function restart(){try{await rpc('restart');clearResults();log('Language server restarted.');toast('Solidity Lean language server restarted.');}catch(error){notifyError(error);}}
-async function save(){const name=state.active,model=state.models.get(name);if(!model)return;const version=model.getVersionId(),text=model.getValue();try{await syncAll();if(currentVersion(name)!==version)throw Object.assign(new Error('Document content changed'),{code:-32801});await rpc('save',{name});if(currentVersion(name)===version&&state.files[name]===text){state.baselines[name]=text;state.dirty.delete(name);}persistNow();renderTabs();renderSidebar();log(`Saved ${name} in the local session workspace and browser storage.`);}catch(error){notifyError(error);}}
+async function restart(){if(!usingNativeBackend){socket?.close();log('Browser compiler and proof workers restarting.');toast('Restarting the browser runtime.');return;}try{await rpc('restart');clearResults();log('Language server restarted.');toast('Solidity Lean language server restarted.');}catch(error){notifyError(error);}}
+async function save(){const name=state.active,model=state.models.get(name);if(!model)return;const version=model.getVersionId(),text=model.getValue();try{await syncAll();if(currentVersion(name)!==version)throw Object.assign(new Error('Document content changed'),{code:-32801});await rpc('save',{name});const previous=state.baselines[name];if(currentVersion(name)===version&&state.files[name]===text){state.baselines[name]=text;state.dirty.delete(name);}const persisted=persistNow();if(!persisted){state.baselines[name]=previous;if(state.files[name]!==previous)state.dirty.add(name);}renderTabs();renderSidebar();if(persisted)log(`Saved ${name} in the local session workspace and browser storage.`);}catch(error){notifyError(error);}}
 function showDiff(name){
   const dialog=document.createElement('dialog');dialog.className='diff-dialog';const heading=document.createElement('div');heading.className='diff-heading';heading.textContent=`${name} — Last saved ↔ Current buffer`;const close=document.createElement('button');close.textContent='×';close.setAttribute('aria-label','Close comparison');close.onclick=()=>dialog.close();heading.append(close);const host=document.createElement('div');host.className='diff-host';dialog.append(heading,host);document.body.append(dialog);dialog.showModal();
   const original=monaco.editor.createModel(state.baselines[name]||'','solidity');const modified=monaco.editor.createModel(state.files[name],'solidity');const diff=monaco.editor.createDiffEditor(host,{theme:'solidity-extension',readOnly:true,automaticLayout:true,fontSize:14,lineHeight:20,renderSideBySide:innerWidth>800});diff.setModel({original,modified});dialog.onclose=()=>{diff.dispose();original.dispose();modified.dispose();dialog.remove();};
@@ -322,7 +326,7 @@ const commands=[
   {label:'Format Document',key:'Shift+Alt+F',run:()=>editor.getAction('editor.action.formatDocument').run().catch(notifyError)},
   {label:'Go to Definition',key:'F12',run:()=>editor.getAction('editor.action.revealDefinition').run()},
   {label:'Rename Symbol',key:'F2',run:()=>editor.getAction('editor.action.rename').run()},
-  {label:'Help: Offline IDE',run:()=>toast('Solidity Lean runs on this computer.\nKeep npm start running in web/ for compiler and Lean proofs.\nF1 opens commands. Ctrl+Shift+Enter verifies. Ctrl+S saves the local session; Export keeps a disk copy.')}
+  {label:'Help: Offline IDE',run:()=>toast(usingNativeBackend?'Native development backend. Keep its local process running.':'This website runs in your browser.\nThe compiler and editor work without a network after initial caching.\nF1 opens commands. Ctrl+S saves browser files; Export keeps a disk copy.\n'+(state.runtime.proofReady?'Lean proof checking also runs in this browser.':'The compatible Lean proof runtime is still being prepared.'))}
 ];
 function openPalette(mode='commands'){const dialog=$('#palette');dialog.dataset.mode=mode;$('#palette-input').value=mode==='commands'?'>':'';$('#palette-input').placeholder=mode==='files'?'Search files by name':'Type a command';paletteIndex=0;renderPalette();dialog.showModal();$('#palette-input').focus();}
 function renderPalette(){const mode=$('#palette').dataset.mode,q=$('#palette-input').value.replace(/^>/,'').toLowerCase();paletteCommands=(mode==='files'?Object.keys(state.files).map(name=>({label:name,run:()=>openFile(name)})):commands).filter(c=>c.label.toLowerCase().includes(q));paletteIndex=Math.max(0,Math.min(paletteIndex,paletteCommands.length-1));$('#palette-items').replaceChildren();paletteCommands.forEach((c,i)=>{const b=document.createElement('button');b.className=i===paletteIndex?'chosen':'';b.setAttribute('role','option');b.setAttribute('aria-selected',String(i===paletteIndex));const t=document.createElement('span');t.textContent=c.label;b.append(t);if(c.key){const k=document.createElement('kbd');k.textContent=c.key;b.append(k);}b.onclick=()=>chooseCommand(i);$('#palette-items').append(b);});}
@@ -333,7 +337,7 @@ function wireUI(){
   $('#main-menu-button').onclick=()=>openPalette();
   for(const b of $$('[data-view]'))b.onclick=()=>setView(b.dataset.view);
   for(const b of $$('[data-panel]'))b.onclick=()=>showPanel(b.dataset.panel);
-  $('#title').onclick=()=>openPalette();$('#more-button').onclick=()=>openPalette();$('#verify-button').onclick=()=>verify();$('#proof-status').onclick=()=>verify();$('#errors-status').onclick=()=>showPanel('problems');$('#offline-button').onclick=()=>commands.at(-1).run();$('#notification-button').onclick=()=>toast(state.connected?'Connected to the local compiler and Lean kernel. No remote services.':'Local backend disconnected. Start npm start in web/ to verify.');
+  $('#title').onclick=()=>openPalette();$('#more-button').onclick=()=>openPalette();$('#verify-button').onclick=()=>verify();$('#proof-status').onclick=()=>verify();$('#errors-status').onclick=()=>showPanel('problems');$('#offline-button').onclick=()=>commands.at(-1).run();$('#notification-button').onclick=()=>toast(usingNativeBackend?'Native development backend: '+(state.connected?'connected':'disconnected'):state.connected?'The compiler runs in WebAssembly in this browser. No remote service is used.':'The browser runtime is preparing.');
   $('#layout-button').onclick=$('#close-panel').onclick=()=>{document.body.classList.toggle('panel-hidden');editor.layout();};$('#clear-output').onclick=()=>{state.logs=[];renderPanel();};$('#outline-toggle').onclick=()=>{$('#outline-content').hidden=!$('#outline-content').hidden;};
   $('#file-picker').onchange=async e=>{for(const file of e.target.files){if(!validFileName(file.name)||file.size>8*1024*1024){toast('Open a .sol file smaller than 8 MiB with a simple file name.');continue;}if(file.name in state.files&&state.files[file.name]!==await file.text()){toast(`${file.name} already exists. Rename the imported file before opening it.`);continue;}state.files[file.name]=await file.text();await openFile(file.name);}persist();e.target.value='';};
   const menus={File:['File: New','File: Open','File: Save','File: Export'],Edit:['Format Document','Rename Symbol'],Selection:[],View:['View: Explorer','View: Search','View: Testing','View: Problems','View: Output','View: Toggle'],Go:['Go to Definition'],Run:['Solidity Lean:'],Help:['Help:']};
@@ -349,16 +353,23 @@ function wireUI(){
   for(const [selector,axis]of [['.sidebar-resize','x'],['.panel-resize','y']]){const handle=$(selector);handle.onpointerdown=e=>{e.preventDefault();handle.setPointerCapture(e.pointerId);handle.classList.add('dragging');const move=event=>{const value=axis==='x'?Math.max(180,Math.min(600,event.clientX-48)):Math.max(90,Math.min(innerHeight-200,innerHeight-event.clientY-22));document.documentElement.style.setProperty(axis==='x'?'--sidebar-width':'--panel-height',`${value}px`);editor.layout();};handle.onpointermove=move;handle.onpointerup=()=>{handle.classList.remove('dragging');handle.onpointermove=null;};};handle.onkeydown=e=>{const amount=e.key==='ArrowLeft'||e.key==='ArrowDown'?-10:e.key==='ArrowRight'||e.key==='ArrowUp'?10:0;if(!amount)return;e.preventDefault();const key=axis==='x'?'--sidebar-width':'--panel-height';const value=parseInt(getComputedStyle(document.documentElement).getPropertyValue(key))+amount;document.documentElement.style.setProperty(key,`${Math.max(axis==='x'?180:90,value)}px`);editor.layout();};}
 }
 async function boot(){
+  if(!usingNativeBackend&&!('serviceWorker'in navigator))throw new Error('Use HTTPS or localhost to prepare this offline website');
   const start=performance.now();let bootstrap;
-  try{bootstrap=await (await fetch('/api/bootstrap')).json();store.write('examples',bootstrap.files);}catch{bootstrap={files:store.read('examples',{})};}
+  try{bootstrap=await (await fetch(usingNativeBackend?'/api/bootstrap':'/bootstrap.json')).json();store.write('examples',bootstrap.files);}catch{bootstrap={files:store.read('examples',{})};}
   const saved=store.read('workspace',{});state.files=saved.files&&Object.keys(saved.files).length?saved.files:bootstrap.files;state.baselines=saved.baselines||{...bootstrap.files};state.active=saved.active in state.files?saved.active:Object.keys(state.files)[0];state.dirty=new Set(saved.dirty||[]);
   if(!Object.keys(state.files).length){state.files={'Contract.sol':'// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Contract {}\n'};state.active='Contract.sol';}
   // Control the first Monaco load, so its AMD chunks and workers are cached on
   // the very first visit rather than only after a second online page load.
   if('serviceWorker'in navigator){
-    try{await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready;
+    navigator.serviceWorker.addEventListener('message',event=>{if(event.data?.method==='offlineProgress'&&$('#editor .loading'))$('#editor .loading').textContent=`Preparing offline website… ${event.data.done}/${event.data.total} local assets cached`;});
+    try{const registration=await navigator.serviceWorker.register('/sw.js');
+      await new Promise((resolve,reject)=>{
+        const observed=new Set();const finish=error=>{clearTimeout(timer);registration.removeEventListener('updatefound',observe);for(const worker of observed)worker.removeEventListener('statechange',observe);error?reject(error):resolve();};
+        const observe=event=>{if(event?.target?.state==='redundant')return finish(new Error('Offline preparation failed. Check available browser storage and reload to retry.'));const worker=registration.installing||registration.waiting||registration.active;if(!worker)return;if(!observed.has(worker)){observed.add(worker);worker.addEventListener('statechange',observe);}if(worker.state==='redundant')finish(new Error('Offline preparation failed. Check available browser storage and reload to retry.'));else if(worker.state==='activated')finish();};
+        const timer=setTimeout(()=>finish(new Error('Offline preparation timed out. Reconnect and reload to retry.')),600000);registration.addEventListener('updatefound',observe);observe();
+      });
       if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));
-    }catch(error){log(`Offline asset cache: ${error.message}`);}
+    }catch(error){log(`Offline asset cache: ${error.message}`);if(!usingNativeBackend)throw error;}
   }
   require.config({paths:{vs:'/vendor/vs'}});
   await new Promise((resolve,reject)=>require(['vs/editor/editor.main'],resolve,reject));
@@ -377,4 +388,4 @@ async function boot(){
   // A small inspection surface for reproducible browser parity and latency tests.
   window.solidityIDE={state,editor,verify,openFile,setView,showPanel,rpc,sync,restart,save,language,get ready(){return !!editor;}};
 }
-boot().catch(error=>{$('#editor').textContent=`Unable to start the editor: ${error.message}. Run npm install in web/ before starting the local server.`;console.error(error);});
+boot().catch(error=>{$('#editor').textContent=`Unable to start the editor: ${error.message}. Reload after the website assets finish downloading.`;console.error(error);});

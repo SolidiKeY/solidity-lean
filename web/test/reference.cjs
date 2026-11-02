@@ -15,6 +15,12 @@ async function main(){
   async function command(label){await page.keyboard.press('F1');const input=page.locator('.quick-input-widget input');await input.fill('>'+label);await page.waitForTimeout(200);const results=await page.locator('.quick-input-widget').innerText();assert.ok(!results.includes('No matching results'),`Native command unavailable: ${label}`);await page.keyboard.press('Enter');await page.waitForTimeout(350);}
   try{
     const start=performance.now();await page.goto(url);await page.waitForSelector('.monaco-workbench',{timeout:60000});await page.waitForTimeout(1500);
+    // Only the task-owned comparison fixture may be trusted automatically.
+    const trust=page.getByRole('button',{name:/Yes, I trust the authors/});
+    if(await trust.isVisible()){
+      assert.equal(url,'http://127.0.0.1:4180/?folder=/tmp/solidity-web-reference/workspace','Trust the isolated reference workspace before capturing');
+      await trust.click();await page.waitForTimeout(500);
+    }
     if(await page.locator('.part.auxiliarybar').isVisible())await command('View: Toggle Secondary Side Bar Visibility');
     await command('View: Close All Editors');await page.keyboard.press('Control+Shift+e');await page.getByText('Counter.sol',{exact:true}).first().dblclick();
     await page.waitForSelector('.view-lines .view-line');const nativeStartupMs=+(performance.now()-start).toFixed(1);
