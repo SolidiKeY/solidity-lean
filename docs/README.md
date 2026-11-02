@@ -127,3 +127,5 @@ including the frozen CALL/RETURNDATA/JUMP interface consumed by later lanes.
 P1 runtime-frame partial checkpoint: [foundation and frozen interfaces v1 and v2](feature-work/runtime-frame-p1.md).
 
 P9 and Source soundness checkpoints: [checked call graphs](feature-work/p9-checked-callgraphs.md), [allocation and frame preservation](feature-work/source-preservation-allocations.md) and [checked call-program progress](feature-work/source-progress-checked.md).
+
+Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` and its setup directory as `${VM_SETUP}`.

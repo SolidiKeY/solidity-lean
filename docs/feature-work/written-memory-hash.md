@@ -97,7 +97,7 @@ language inventory support classifications remain unchanged.
 
 ## Runtime, failures and recovery
 
-The retained checkout is `.`, branch
+The retained checkout is the VM's `solidity-lean` checkout, branch
 `codex/next10-written-memory-hash`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, based on published master
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`. Startup/reconnect verified the

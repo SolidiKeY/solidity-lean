@@ -563,7 +563,7 @@ in 104 seconds; removing that print still hit the same limit at the closer.
 No limit, target, invariant or expected verdict changed. The exact dependency is
 a bounded proof/closer repair for that recorded invariant-exit sequent. No
 refutation is claimed. The failed prototype is outside the checkout as
-VM location diamond-payments-evidence/PiggyBlocked.lean; no unfinished theorem
+`${VM_WORKSPACE}/diamond-payments-evidence/PiggyBlocked.lean`; no unfinished theorem
 is imported or committed. All original callback corpus pins remain unchanged.
 
 The success send control now starts with `ok=false` and proves the true result,
@@ -630,7 +630,7 @@ implementation, not completion of coverage-plan step 11.
 ## Resumed milestone: original PiggyBank and conditional dispatch
 
 Retained checkpoint `2edd52bf` is preserved on the same saved branch and VM.
-The original VM location diamond-payments-evidence/PiggyBlocked.lean exit sequent was isolated: after `state := 2`,
+The original `${VM_WORKSPACE}/diamond-payments-evidence/PiggyBlocked.lean` exit sequent was isolated: after `state := 2`,
 the owner frame and old state-one invariant establish that the booked ledger
 at the owner is zero. `Calculus/PaymentClose.lean` supplies explicit typed lemmas for
 that frame, conditional debit, written state and invariant-preserving resumption.

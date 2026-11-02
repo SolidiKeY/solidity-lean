@@ -20,7 +20,7 @@ its cgroup peak is11363561472bytes. This is not a passing full gate.
 Base: `fb379ae20f10e2c92113453ddd9d40d8f2efbe09`.
 Branch: `codex/solidity-v07-v11-20261030/v08-world-lowering`.
 Checkout: VM location `v08-world-lowering-pinned`.
-Original checkout `.` stays on `work` at
+The VM's original `solidity-lean` checkout stays on `work` at
 `204eb1545cbf57e436196e4cba346075515b7279`; `bridge-theorems` is preserved.
 The exact-SHA fetch from the existing GitHub origin succeeded, and its original
 checkout FETCH_HEAD equals the base. A separate worktree was created from it.

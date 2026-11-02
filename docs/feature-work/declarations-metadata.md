@@ -701,7 +701,7 @@ in the source-proof controls.
 
 ### Reproduction and provenance
 
-Source VM location `.setup/activate.sh` in `.`. The managed
+Source VM location `.setup/activate.sh` in the VM's `solidity-lean` checkout. The managed
 runtime gate passes with Lean 4.24.0, Lake 5.0.0-src+797c613 and
 `lake build Solidity.KeySort Solidity.Tools.Upstream`.
 `node scripts/solidity-upstream.mjs verify` verifies all 11,622 archived files.
@@ -1302,7 +1302,7 @@ Remaining roots, without weakened expectations:
 
 ### Reproduction and validation
 
-Use the attached managed executor at `.`:
+Use the attached managed executor in the VM's `solidity-lean` checkout:
 
 ```sh
 # Source the VM setup activate.sh

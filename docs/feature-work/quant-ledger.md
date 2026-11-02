@@ -1,7 +1,7 @@
 # Ledger quantifier lane
 
 Base `f4dee4a29c2e208b36db4a4161a4723c735cd775`, branch
-`codex/next10-quant-ledger`, repository `.`, origin
+`codex/next10-quant-ledger`, repository: the VM's `solidity-lean` checkout, origin
 `https://github.com/SolidiKeY/solidity-lean.git`. The fetched master is exactly
 that base and its ancestry check succeeded. Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.

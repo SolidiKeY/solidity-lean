@@ -71,7 +71,7 @@ Ordinary Lean runs assert only failure, not the panic code.
 
 This independent repair starts from `origin/master` at
 `006fcd593f5beeb540e7adf2bc76de4638566924` on branch
-`codex/group03-operators`. The managed executor is `.`;
+`codex/group03-operators`. The managed executor is the VM's `solidity-lean` checkout;
 VM location `.setup/activate.sh` supplies Lean 4.24.0 and Lake
 5.0.0-src+797c613. `lake build Solidity.KeySort` succeeded both before and after
 switching to the requested base. The runner verified all 11,622 pinned archive
@@ -177,7 +177,7 @@ and unchanged runner SHA-256
 ### Reproduction and review
 
 ```sh
-cd .
+cd ${VM_WORKSPACE}/solidity-lean
 # Source the VM setup activate.sh
 lean --version
 lake --version

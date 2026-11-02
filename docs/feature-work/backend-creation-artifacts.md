@@ -3,8 +3,8 @@
 This lane supplies component proofs, not whole-contract source-to-bytecode
 preservation. Base: `50658f41061b366d6e503d1e8a3a324a281e9fca`; branch:
 `codex/solidity-independent5-20261029/creation-artifacts`.
-The checkout is VM location `scratch/creation-artifacts-assigned`; the original
-`.` checkout remains untouched.
+The checkout is VM location `scratch/creation-artifacts-assigned`; the VM's original
+`solidity-lean` checkout remains untouched.
 
 ## Scope and prerequisites
 

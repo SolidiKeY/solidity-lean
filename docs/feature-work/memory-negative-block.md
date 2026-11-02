@@ -13,7 +13,7 @@ integration and final evidence are at the end. No target, waiver, exclusion,
 profile or `DecisionTheorem` statement is changed. The other five original
 gap statements and all six original target certificates are preserved.
 
-Baseline: `.`, origin
+Baseline: the VM's `solidity-lean` checkout, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, published master and branch
 base `f4dee4a29c2e208b36db4a4161a4723c735cd775`. The isolated branch is
 `codex/next10-memory-negative-block`. Fetch and ancestry checks succeeded.
@@ -126,7 +126,7 @@ container, including cache; they are not isolated per-command RSS.
 | MCP all-severity `MemoryFloor.lean` | 3 | 543367168 | `mcp-controls-4.log` |
 | MCP all-severity `MemoryNegativeCountermodel.lean` | 3 | 632573952 | `mcp-countermodel-2.log` |
 | `lake build Solidity.Examples.MemoryFloor` (controls-build) | 2.147 | 198365184 | `controls-build.log` |
-| `lake env lean --tstack=131072 -j1 VM location: next10-memory-negative-block-evidence/ObserveMemory.lean` (observations-after) | 27.459 | 222322688 | `observations-after.log` |
+| `lake env lean --tstack=131072 -j1 ${VM_WORKSPACE}/next10-memory-negative-block-evidence/ObserveMemory.lean` (observations-after) | 27.459 | 222322688 | `observations-after.log` |
 | `node scripts/check-orphans.mjs` (orphans) | 0.121 | 67735552 | `orphans.log` |
 | `node scripts/check-layers.mjs` (layers) | 0.141 | 69787648 | `layers.log` |
 | `node scripts/check-automatic.mjs --strict` (automatic-strict) | 0.042 | 69787648 | `automatic-strict.log` |
@@ -134,11 +134,11 @@ container, including cache; they are not isolated per-command RSS.
 | `python3 scripts/solidity-feature-audit.py` (inventory) | 0.045 | 169979904 | `inventory.log` |
 | `bash ./run-lean.sh` (full-run-lean) | 6267.705 | 12884901888 | `full-run-lean.log` |
 | `lake build Solidity.Examples.MemoryNegativeCountermodel` (countermodel-build) | 1.873 | 206585856 | `countermodel-build.log` |
-| `lake env lean --tstack=131072 -j1 VM location: next10-memory-negative-block-evidence/ObserveFloor.lean` (floor-observations) | 3.411 | 206585856 | `floor-observations.log` |
+| `lake env lean --tstack=131072 -j1 ${VM_WORKSPACE}/next10-memory-negative-block-evidence/ObserveFloor.lean` (floor-observations) | 3.411 | 206585856 | `floor-observations.log` |
 | `bash ./run-lean.sh` (full-final-warm) | 2.714 | 451903488 | `full-final-warm.log` |
 | `node scripts/check-orphans.mjs` (orphans-final) | 0.157 | 451903488 | `orphans-final.log` |
 | `node scripts/check-layers.mjs` (layers-final) | 0.169 | 451903488 | `layers-final.log` |
-| `node scripts/check-automatic.mjs --strict --build-log VM location: next10-memory-negative-block-evidence/full-run-lean.log` (automatic-strict-timed) | 0.068 | 451903488 | `automatic-strict-timed.log` |
+| `node scripts/check-automatic.mjs --strict --build-log ${VM_WORKSPACE}/next10-memory-negative-block-evidence/full-run-lean.log` (automatic-strict-timed) | 0.068 | 451903488 | `automatic-strict-timed.log` |
 | `bash scripts/check-trust.sh` (trust-final) | 5.023 | 451903488 | `trust-final.log` |
 | `python3 scripts/solidity-feature-audit.py` (inventory-final) | 0.058 | 451903488 | `inventory-final.log` |
 | `git diff --check` (diff-check) | 0.013 | 451903488 | `diff-check.log` |
@@ -234,13 +234,13 @@ lock using the same runtime and bounds:
 ```sh
 (
   flock 9
-  git -C . status --short
-  cp ${VM_WORKSPACE}/next10-memory-negative-block-evidence/lakefile.memory-negative.toml lakefile.memory-negative.toml
+  git -C ${VM_WORKSPACE}/solidity-lean status --short
+  cp ${VM_WORKSPACE}/next10-memory-negative-block-evidence/lakefile.memory-negative.toml ${VM_WORKSPACE}/solidity-lean/lakefile.memory-negative.toml
   docker run --rm --user 1000:1000 --memory=12g --memory-swap=12g \
   --mount type=bind,src=/workspace,dst=/workspace \
   --mount type=bind,src=/usr,dst=/usr,readonly \
   --mount type=bind,src=/opt/codex/runtimes,dst=/opt/codex/runtimes,readonly \
-  -w . ubuntu:24.04 bash -c ': "Source the VM setup activate.sh"; export LEAN_NUM_THREADS=1; export PATH=${VM_WORKSPACE}/next10-memory-negative-block-evidence/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:$PATH; bash ./run-lean.sh'
+  -w "${VM_WORKSPACE}/solidity-lean" ubuntu:24.04 bash -c 'source ${VM_SETUP}/activate.sh; export LEAN_NUM_THREADS=1; export PATH=${VM_WORKSPACE}/next10-memory-negative-block-evidence/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:$PATH; bash ./run-lean.sh'
 ) 9>/tmp/solidity-lean-feature-groups-20261025/writer.lock
 ```
 

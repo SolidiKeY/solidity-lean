@@ -2,7 +2,7 @@
 
 Task branch: codex/next10-memory-parameter-witness.
 Published base: f4dee4a29c2e208b36db4a4161a4723c735cd775.
-Repository: .; origin https://github.com/SolidiKeY/solidity-lean.git.
+Repository: the VM's original `solidity-lean` checkout; origin https://github.com/SolidiKeY/solidity-lean.git.
 Origin/master was fetched and the base ancestry check succeeded; fetched master equals the base.
 
 ## Scope and evidence boundary

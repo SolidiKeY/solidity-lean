@@ -28,7 +28,7 @@ encoding with its unchanged side conditions and limits. No ledger cut,
 
 ## Baseline and observations
 
-Checkout `.`, origin
+Checkout: the VM's `solidity-lean` checkout, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, branch
 `codex/next10-kint-two-anchors`, published base and fetched `origin/master`
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`; ancestry confirmed. Lean 4.24.0,

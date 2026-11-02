@@ -67,7 +67,7 @@ Solidity obligation proofs or compiler/EVM equivalence. In particular,
 
 ## Baseline and runtime evidence
 
-Repository `.`, origin
+Repository: the VM's `solidity-lean` checkout, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, base
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`, branch
 `codex/next10-diamond-try`. Initial fetch brought `origin/master` to that exact
@@ -793,7 +793,7 @@ no base integration, unpublished import, callback change or global world rewrite
 was needed. The pre-edit KeySort gate actually passed in one second with
 24,825,856-byte cgroup peak, before the runtime pass marker was written.
 All detailed commands, failed attempts, diagnostics and reports live in
-VM location: next10-diamond-try-evidence/return-bridge (VM evidence: `next10-diamond-try-evidence/return-bridge`).
+`next10-diamond-try-evidence/return-bridge` (VM evidence).
 
 The first original row was structured.sol, selected from the retained conditional
 fixture account. Its native entry mixed two uint results with a string memory
@@ -977,7 +977,7 @@ world-call refinement. In particular, stale caller funds must not be used to
 model arbitrary constructor payments. No global world semantics is changed.
 
 The published prerequisite inspection is retained in
-VM location: next10-diamond-try-evidence/creation-source/published-prerequisites.log (VM evidence: `next10-diamond-try-evidence/creation-source/published-prerequisites.log`).
+`next10-diamond-try-evidence/creation-source/published-prerequisites.log` (VM evidence).
 Published origin/master was `dedb3aee5743025aeb6d8f7219c9b6b9c1e00e5d`;
 its ContractWorld blob was `9f22396da6266fa083413689a5c2e4141e545a95` and
 WorldImport blob `8c5f0e05c9c5a4976612b05112a357e4e4d333ef`.
@@ -1031,8 +1031,8 @@ installation flags and full failed-constructor Error bytes. Its legacy and IR
 kernel certificates independently compute the same original ordered outputs.
 
 The full row-by-row before/after account and complete byte evidence are retained
-at VM location: next10-diamond-try-evidence/creation-source/fixture-account.md (VM evidence: `next10-diamond-try-evidence/creation-source/fixture-account.md`)
-and VM location: next10-diamond-try-evidence/creation-source/fixture-parity.json (VM evidence: `next10-diamond-try-evidence/creation-source/fixture-parity.json`).
+at `next10-diamond-try-evidence/creation-source/fixture-account.md` (VM evidence)
+and `next10-diamond-try-evidence/creation-source/fixture-parity.json` (VM evidence).
 Actual transitive audits cover **151 distinct declarations**: 28 new creation
 statements/generated correspondences and all 123 retained task declarations.
 Only `propext`, `Classical.choice` and `Quot.sound` occur; no new proof axiom is
@@ -1171,7 +1171,7 @@ scalar/storage try-and-return composition. No commit/base integration was needed
 Original base f4dee4a and all prior checkpoints/exports/failures are preserved.
 
 Evidence is retained at
-VM location: next10-diamond-try-evidence/library-source (VM evidence: `next10-diamond-try-evidence/library-source`).
+`next10-diamond-try-evidence/library-source` (VM evidence).
 The six physical-assembly/nonprimitive-ABI rows, two historical profile rows,
 and 36-byte versus trailing256-byte Panic review item are not changed here.
 The original assignment is not complete while its remaining source rows/gates
@@ -1242,9 +1242,9 @@ setup/cache files were preserved; no new VM, unpublished import, push or merge.
 
 Per-fixture before/after/full-byte evidence, actual axiom sets, diagnostic
 records, gate exits/timings/resources and repaired review findings are retained in
-VM location: next10-diamond-try-evidence/library-source/fixture-account.md (VM evidence: `next10-diamond-try-evidence/library-source/fixture-account.md`),
-VM location: next10-diamond-try-evidence/library-source/fixture-parity.json (VM evidence: `next10-diamond-try-evidence/library-source/fixture-parity.json`),
-VM location: next10-diamond-try-evidence/library-source/axiom-account.json (VM evidence: `next10-diamond-try-evidence/library-source/axiom-account.json`)
+`next10-diamond-try-evidence/library-source/fixture-account.md` (VM evidence),
+`next10-diamond-try-evidence/library-source/fixture-parity.json` (VM evidence),
+`next10-diamond-try-evidence/library-source/axiom-account.json` (VM evidence)
 and the linked task evidence directory. Independent finder/skeptic reviews were
 read-only, with neither Lean server nor checks/writes. Confirmed total-extractor,
 linked-context and receipt-retention findings were fixed with controls.
@@ -1287,7 +1287,7 @@ no fixture may be promoted merely because its decoder discrepancy is repaired.
 Historical-profile investigation compiled both original gas8000 fixtures in
 both pipelines for five target forks and queried the existing pinned EVM opcode
 tables. No historical fixture was executed and no historical runner was enabled.
-See VM location: next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md (VM evidence: `next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md`)
+See `next10-diamond-try-evidence/panic-decoder/compatibility-proposal.md` (VM evidence)
 and exact compiler inputs/outputs/compatibility.json. The current profile's
 blocked results and frozen observations remain unchanged. Runtime compatibility
 is not established by compilation or opcode-table membership alone.
@@ -1399,7 +1399,7 @@ configuration was added. Exact runtime configuration is retained externally.
 Actual command footers distinguish command time from host driver/writer-lock
 queue time and sampled aggregate RSS from physical cgroup peak. Evidence and
 per-fixture before/after account:
-VM location: next10-diamond-try-evidence/panic-decoder/fixture-account.md (VM evidence: `next10-diamond-try-evidence/panic-decoder/fixture-account.md`),
+`next10-diamond-try-evidence/panic-decoder/fixture-account.md` (VM evidence),
 parity (VM evidence: `next10-diamond-try-evidence/panic-decoder/fixture-parity.json`),
 axioms (VM evidence: `next10-diamond-try-evidence/panic-decoder/axiom-account.json`),
 gates (VM evidence: `next10-diamond-try-evidence/panic-decoder/gate-account.json`),

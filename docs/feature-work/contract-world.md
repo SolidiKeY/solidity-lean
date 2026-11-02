@@ -83,7 +83,7 @@ listed in `tests/trust-inventory.json`.
 
 Branch `feature/world-reachable-catch` starts at current `origin/master`
 `f4dee4a29c2e208b36db4a4161a4723c735cd775`. The clean cloud clone is
-`.`; groups 01–10 and their reports were preserved.
+the VM's `solidity-lean` checkout; groups 01–10 and their reports were preserved.
 This increment certifies existing executable source wrappers; it does not
 claim dynamic source arguments or general external-code execution.
 

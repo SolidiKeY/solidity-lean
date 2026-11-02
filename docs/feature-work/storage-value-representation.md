@@ -3,7 +3,7 @@
 Assigned branch: `codex/solidity-independent5-20261029/storage-values`.
 Exact base: `50658f41061b366d6e503d1e8a3a324a281e9fca`.
 Repository: VM location `scratch/storage-values-assigned`.
-Original `.` checkout is preserved on `work`.
+The VM's original `solidity-lean` checkout is preserved on `work`.
 
 This is a preparation component of G27.01–G27.05, not full source-to-bytecode
 preservation. Source reads remain the committed intrinsic `SVal.find`.
@@ -362,7 +362,7 @@ The prior cold full gate is also retained; its terminal Docker exit was 0.
 | `node scripts/check-orphans.mjs` | Pass; 783 reachable, zero orphaned/not allowed. |
 | `bash scripts/check-trust.sh` | Pass; 798 sources, 241 inventoried sites, zero findings. |
 | `bash scripts/check-testsuite.sh --complete --solkey tests/migration/solkey/keyext.solidity.examples` | Pass; 564 functions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skips. |
-| `node scripts/check-automatic.mjs --strict --build-log VM location: scratch/storage-values-evidence/full-gate-recovery3.log` | Pass; 491 automatic + 61 with a step budget, 0 manual; 11 refuted, 0 pending; all 26 timed TestSuite modules within unchanged 300 s budget. |
+| `node scripts/check-automatic.mjs --strict --build-log ${VM_WORKSPACE}/scratch/storage-values-evidence/full-gate-recovery3.log` | Pass; 491 automatic + 61 with a step budget, 0 manual; 11 refuted, 0 pending; all 26 timed TestSuite modules within unchanged 300 s budget. |
 | `bash scripts/check-doc-paths.sh` | Raw exit 1 on exact base and head: 46 missing plus 24 ambiguous references each, zero new findings. This inherited debt is not reported as a raw pass. |
 | Task-document relative links and staged whitespace | Checked separately in final evidence. |
 

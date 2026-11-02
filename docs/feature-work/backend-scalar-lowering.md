@@ -12,7 +12,7 @@ preservation remains a parent integration obligation; it is not claimed here.
 - Repository: VM location `scalar-lowering`; branch
   `codex/solidity-independent5-20261029/scalar-lowering`.
 - Exact base: `50658f41061b366d6e503d1e8a3a324a281e9fca`.
-  The original `.` checkout is preserved on `work`.
+  The VM's original `solidity-lean` checkout is preserved on `work`.
 - The initial compact continuation lacked the full assignment and published
   base. The full assignment was subsequently supplied; fetching origin recovered
   the exact base, and an isolated worktree was created without resetting work.

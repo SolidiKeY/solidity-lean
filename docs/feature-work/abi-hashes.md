@@ -940,7 +940,7 @@ checked independently by the collector. The compiler remains SHA256
 runner dc97568c2597dc4cb65a4a153d21d3389f9fc5c8067b19aa70a2474efb5ea3fc,
 and archive 9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d.
 The representative command is node scripts/solidity-upstream.mjs run --compiler
-VM setup: soljson/soljson-v0.8.38+commit.1835d247.js --filter
+${VM_SETUP}/soljson/soljson-v0.8.38+commit.1835d247.js --filter
 <exact fixture path> --batch-size 1 --out <distinct reviewed-inventory directory>;
 the report's command array retains the actual separate flag/value arguments.
 The original 120000ms process limit and 1000 loop fuel remain unchanged.

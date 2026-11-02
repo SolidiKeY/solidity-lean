@@ -10,7 +10,7 @@ Osaka EVM correspondence. Source denotation remains the existing intrinsic
 - Branch: `codex/solidity-independent5-20261029/environment-lowering`.
 - Exact base: `50658f41061b366d6e503d1e8a3a324a281e9fca`.
 - Repository: VM location `scratch/environment-lowering-assigned`.
-- Preserved original checkout: `.`, branch `work`,
+- Preserved original checkout: the VM's original `solidity-lean` checkout, branch `work`,
   head `dedb3aee5743025aeb6d8f7219c9b6b9c1e00e5d`.
 - Owned modules: `Solidity/Backend/Environment/`; this document and append-only
   imports/module-map/document registry rows. No other new/unmerged lane is imported; committed reserved interfaces are reused read-only.
