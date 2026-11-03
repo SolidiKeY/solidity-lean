@@ -1,5 +1,5 @@
 {
-  "public_base": "e7cc378c275eafe7a047c63f672bedbed2fec6ff",
+  "public_base": "6510c302ff8c276cd2f69e9c0524bd22c1d90d8a",
   "modules": {
     "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean": {
       "sha256": "600bfae545a80249150782b53c9df61a2a690c4d82d4646f0e3009150a94bd0e",
@@ -57,7 +57,7 @@
       }
     },
     "Solidity/Backend/MemoryOps/PhysicalByteJournal.lean": {
-      "sha256": "2ebcd71b72f7a4fb0826d428e2181c070d685244ecaef31d16836126da5d7162",
+      "sha256": "2ba98a11d037f85cc84dc639fd02fd2ea90dbb64d2fc4f4410f7a36627620a22",
       "namespace": "Solidity.Backend.MemoryOps.Physical",
       "declarations": [
         "getBytes_length",
@@ -107,7 +107,7 @@
       }
     },
     "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean": {
-      "sha256": "49379fc62c2c4ecb57fa8bf927e1ee42c735424cef3b631fff82c6798bf6027d",
+      "sha256": "05aaa6ebf89caf2ccf4cda1b0bbc0a6d28eff0ea4e61bbf6a2c644d70b9465ca",
       "namespace": "Solidity.Backend.MemoryOps.Physical.Controls",
       "declarations": [
         "source_read_and_neighbor",
@@ -115,9 +115,42 @@
         "wrong_unscaled_offset",
         "live_payload_then_local_restore",
         "reached_source_write",
-        "frozen_source_is_wrong"
+        "frozen_source_is_wrong",
+        "physical_delete_program",
+        "physical_delete_endpoint_timeout",
+        "physical_delete_skipped_differs",
+        "physical_delete_typed_program"
       ],
       "pins": {
+        "Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_typed_program": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_program": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_endpoint_timeout": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_skipped_differs": [
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.reached_source_write": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "Solidity.Backend.MemoryOps.Physical.Controls.frozen_source_is_wrong": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
         "Solidity.Backend.MemoryOps.Physical.Controls.source_read_and_neighbor": [
           "Classical.choice",
           "Quot.sound",
@@ -133,16 +166,6 @@
           "propext"
         ],
         "Solidity.Backend.MemoryOps.Physical.Controls.live_payload_then_local_restore": [
-          "Classical.choice",
-          "Quot.sound",
-          "propext"
-        ],
-        "Solidity.Backend.MemoryOps.Physical.Controls.reached_source_write": [
-          "Classical.choice",
-          "Quot.sound",
-          "propext"
-        ],
-        "Solidity.Backend.MemoryOps.Physical.Controls.frozen_source_is_wrong": [
           "Classical.choice",
           "Quot.sound",
           "propext"
