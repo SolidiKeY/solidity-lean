@@ -247,3 +247,5 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolPostIter/LocalBoolForPost add concrete all-fuel clean Source composition for present Boolean posts, preserving post effects and scoped failure contexts. Full lane remains open.
 
 - VY1: LocalBoolForNoGuard adds exact Source omitted-guard transport and concrete clean adapters for both post modes, with independent Source and raw guard controls. Full lane remains open.
+
+- VY1: LocalBoolUnchecked adds concrete clean Source item/block composition across unchecked and ordinary scopes, retaining reached failure contexts. Full lane remains open.

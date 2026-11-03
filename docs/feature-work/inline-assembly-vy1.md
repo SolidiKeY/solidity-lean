@@ -707,3 +707,20 @@ Full P16 and final lane validation remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Unchecked and ordinary item scopes
+
+LocalBoolUnchecked composes a certified unchecked Boolean item scope with
+ordinary following items. Concrete all-fuel Source item/block proofs execute
+the inner scope with checked=false, restore its declarations, and resume the
+tail in the original frame. Successful enclosing blocks close tail declarations;
+failures retain their reached context and partial effects. Clean representation
+is derived through producer equations and decoder inversion.
+Controls distinguish inner and restored-tail timeout contexts, final enclosing
+writes, tail cleanup and dirty projection refusal. Independent actual Source
+checks prove timeout and a successful true-to-false enclosing write. This
+Boolean slice makes no new arithmetic, pipeline or dirty compiler claim.
+Full P16 and final lane validation remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

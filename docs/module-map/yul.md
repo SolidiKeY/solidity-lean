@@ -48,3 +48,5 @@
 - Yul/LocalBoolPostIter.lean, Yul/LocalBoolForPost.lean and Yul/Checks/LocalBoolForPost.lean: scoped for posts and initializer composition.
 
 - Yul/LocalBoolForNoGuard.lean and Yul/Checks/LocalBoolForNoGuard.lean: exact omitted-guard Source transport and concrete scoped adapters.
+
+- Yul/LocalBoolUnchecked.lean and Yul/Checks/LocalBoolUnchecked.lean: unchecked/ordinary Boolean item scope composition and concrete Source laws.

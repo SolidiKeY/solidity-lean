@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalBoolUnchecked|Checks\.LocalBoolUnchecked)$/, // Concrete unchecked and ordinary scope composition.
   /^Solidity\.Yul\.(LocalBoolForNoGuard|Checks\.LocalBoolForNoGuard)$/, // Exact omitted-guard transport and concrete adapters.
   /^Solidity\.Yul\.(LocalBoolPostIter|LocalBoolForPost|Checks\.LocalBoolForPost)$/, // Scoped Boolean for posts.
   /^Solidity\.Yul\.(LocalBoolDivergence|Checks\.LocalBoolDivergence)$/, // No finite normal completion of constant-true scoped loops.
