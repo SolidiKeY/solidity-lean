@@ -638,3 +638,32 @@ mask-framing theorem. Generated pins enforce scoped standard axiom reports.
 No native/charged/G24/views/function/divergence, wider operator or full frontend
 closure is inferred. H22 remains respected; routine named projections stay in
 evidence and new optional registrations are coordinator-generated.
+
+### Concrete signed structured selection
+
+`SolidityBridge.Yul.SignedSelection` discharges SDIV/SMOD/SLT/SGT instruction
+certificates using the existing signed compiler bridges and VY1 word-step
+proofs. The typed slice checker now accepts a candidate generator, but still
+checks real instruction certificates and exact re-emission; it assumes no
+correctness property of that generator. The original numeric entry point and
+its refusal verdicts remain unchanged.
+
+An original source SLT-guarded sequence updates its first local by SDIV, its
+second by SMOD of the updated quotient, and its third by SGT of the updated
+locals. Actual compilation/emission/selection identities close by rfl. General
+source/model and whole-iff artifacts are inhabited at depths0/2 for all
+represented three-word locals and arbitrary caller/newer frames. No desired
+source/target run or code-origin premise remains in those concrete instances.
+Controls cover signed order, zero divisors, MIN/-1 overflow, negative remainder,
+ordered writes, dirty words, full machine fields, underflow, incorrect candidate
+proposals, old refusals and width/fuel/depth/loop boundaries. Oversized gasless
+success remains distinct from physical capacity. Nineteen generated guards pin
+scoped axiom reports to standard Lean axioms.
+
+The generated Bridge root now registers the sixteen accumulated selection
+modules. Its full bounded build passes; the earlier missing-object import
+failure remains raw evidence. Native/G24/views/functions/loops/divergence,
+Solidity raw-local readback, frontend admission and final joint composition
+remain open. No external solc/client-EVM result follows from these kernel
+checks. Existing scope decisions and the ExtCall construction freeze are
+preserved. Routine named projections remain evidence-only.

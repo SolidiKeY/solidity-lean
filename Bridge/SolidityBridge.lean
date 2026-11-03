@@ -302,6 +302,8 @@ import SolidityBridge.WeakestPreLaws
 import SolidityBridge.Yul.ArithmeticSelection
 import SolidityBridge.Yul.ArithmeticSelectionControls
 import SolidityBridge.Yul.BinaryPlacement
+import SolidityBridge.Yul.BitwiseSelection
+import SolidityBridge.Yul.BitwiseSelectionControls
 import SolidityBridge.Yul.BranchModel
 import SolidityBridge.Yul.BranchModelControls
 import SolidityBridge.Yul.ChargedArithmeticShift
@@ -324,6 +326,11 @@ import SolidityBridge.Yul.ChargedShifts
 import SolidityBridge.Yul.ChargedShiftsControls
 import SolidityBridge.Yul.ControlCompleteness
 import SolidityBridge.Yul.ControlRealization
+import SolidityBridge.Yul.ControlCompletenessControls
+import SolidityBridge.Yul.ControlRealization
+import SolidityBridge.Yul.ControlRealizationControls
+import SolidityBridge.Yul.FrameCertificatesV2
+import SolidityBridge.Yul.FrameCertificatesV2Controls
 import SolidityBridge.Yul.LiteralSelection
 import SolidityBridge.Yul.LiteralSelectionControls
 import SolidityBridge.Yul.QuotientControl
@@ -331,12 +338,15 @@ import SolidityBridge.Yul.QuotientControlControls
 import SolidityBridge.Yul.QuotientPlacement
 import SolidityBridge.Yul.QuotientPlacementControls
 import SolidityBridge.Yul.QuotientSelection
+import SolidityBridge.Yul.QuotientSelectionControls
 import SolidityBridge.Yul.QuotientSuffix
 import SolidityBridge.Yul.QuotientSuffixControls
 import SolidityBridge.Yul.SelectionSequence
 import SolidityBridge.Yul.SelectionSequenceControls
 import SolidityBridge.Yul.SignedPlacement
 import SolidityBridge.Yul.SignedPlacementControls
+import SolidityBridge.Yul.SignedSelection
+import SolidityBridge.Yul.SignedSelectionControls
 import SolidityBridge.Yul.SignextendPlacement
 import SolidityBridge.Yul.SignextendPlacementControls
 import SolidityBridge.Yul.StackSelection

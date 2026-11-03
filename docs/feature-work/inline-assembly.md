@@ -267,3 +267,9 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
 - VY3 bitwise/shift certificates now compose with actual guarded source and
   whole-iff lowering under live prefixes, including full-word count boundaries.
   Native/G24/full-lane work remains open; see the [lane document](inline-assembly-vy3.md).
+
+- VY3 signed structured selection: concrete SDIV/SMOD/SLT/SGT certificates,
+  original source conditional with ordered updates, general source/model and
+  whole-iff artifacts at depths0/2, exact candidate validation and negative
+  controls. Generated Bridge import closure passes. Full source/G24/native/
+  frontend composition remains partial; see [lane](inline-assembly-vy3.md).
