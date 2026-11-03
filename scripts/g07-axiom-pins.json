@@ -1750,6 +1750,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingResume.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingResume.coupled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSource.success": [
   "Classical.choice",
   "Quot.sound",
