@@ -21,6 +21,8 @@ export PATH="$HOME/.elan/bin:$repo_root/scripts/lean-vscode/bin:$PATH"
 
 # The core reaches no elaborator module (`docs/parallelism.md`): no Lean.
 node scripts/check-layers.mjs
+# The library roots are generated from the file tree (`docs/parallelism.md`, P5).
+bash scripts/coord-tools/register.sh --check
 # One Lake invocation: the default targets (read from `lakefile.toml`) and
 # solkey's TestSuite through the solc import. The TestSuite is not a default
 # target, and the import reports a function that stops elaborating as a row,

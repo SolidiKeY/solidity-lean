@@ -208,3 +208,37 @@ with one or few workers gains little; not measured there.
 The one-call run shared the host with another session's Lake build (two
 other Lean/Lake processes at its start; the two-call run had none), so the
 gain is if anything understated.
+
+### Shared registries
+
+The library roots are generated: `scripts/coord-tools/register.sh` writes
+`Solidity.lean` and `Bridge/SolidityBridge.lean` from the file tree, each
+importing every module under its prefix, sorted, minus other libraries'
+subtrees (`Corpus/`, `TestSuite/`, `Solkey/TestSuite.lean`) and `Scratch/`.
+The generated `Solidity.lean` imports exactly the closure the hand-kept one
+reached (3487 modules at d7b05d68c; 3048 direct imports before).  `register.sh --check`
+fails on a stale root; `run-lean.sh`, `gate.sh checkpoint|full` and CI
+(`lean.yml`) run it.  `.gitattributes` merges the roots with `merge=union`,
+so a rebase rarely stops on them.  A union keeps both sides of overlapping
+hunks, so it can bring back a deleted module's import or leave the list
+unsorted without any conflict reported; only `--check` catches that, so run
+`register.sh` after every rebase or merge.  A lane runs `register.sh` after adding,
+moving or deleting a module and commits the result; the integrator drops the
+lanes' root hunks and regenerates.
+
+`docs/module-map.md` is an index; the rows are in one file per area under
+`docs/module-map/` (its former `##` sections, contents unchanged).  A lane
+adds rows only to its area's file; `scripts/coord-tools/module-map.py BASE`
+lists the modules added since BASE without a row and proposes the area file
+and a row (the integrator's former `mmrows`/`mmplace`).
+
+Measured on the history since 2026-10-27 (non-merge commits): 214 touched
+`Solidity.lean`, whose hunks are now regenerated instead of merged.  269
+touched `docs/module-map.md`; of their 36,046 pairs, 3,613 (10.0 %; 738 of
+the 6,912 concurrent pairs) edited the same section.  Edits in different
+sections rarely conflicted before either, so the split mainly shortens the
+file a lane reads and edits; it removes few module-map conflicts.  Rebuilds:
+every added, moved or deleted module now edits the root and rebuilds it
+(`Built Solidity`, 1.5–4.3 s); before, only those imported directly did.
+Only `scripts/AxiomAudit.lean` imports the root.  A rebase can still stop on
+a modify/delete conflict of a root; `register.sh` resolves it.

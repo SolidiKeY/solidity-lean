@@ -65,7 +65,8 @@ Several files are large — `Calculus/RuleSyntax.lean` is 1,553 lines,
 - Broad "where is X used" questions: `rg` (it honours `.gitignore`, so it
   skips the 541 MB `.lake/`), or `lean_references`, or delegate the sweep to
   an Explore subagent so the file dumps stay out of this context.
-- `docs/module-map.md` answers "which file is this in" without any search.
+- `docs/module-map.md` and its area files (`docs/module-map/*.md`) answer
+  "which file is this in" without any search.
 
 ## Speed
 
@@ -154,7 +155,7 @@ and the failure looks nothing like the missing flag.
 
 - No new `sorry` and no new `axiom`. Check against the baseline:
   `rg -c 'sorry' Solidity --stats | tail -3`. The existing ones are documented
-  at their site and listed in `docs/module-map.md`.
+  at their site and listed in `docs/module-map/`.
 - The axiom set of the headline theorem you touched: `#print axioms T`
   appended to its file, as in Speed above, not `lean_verify`.
 - Then **minimize**: collapse redundant rewrites, check whether `simp` or

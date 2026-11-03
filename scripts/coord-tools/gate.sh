@@ -61,6 +61,7 @@ else
     run_gate trust bash scripts/check-trust.sh
     run_gate orphans node scripts/check-orphans.mjs
     run_gate layers node scripts/check-layers.mjs
+    run_gate roots bash scripts/coord-tools/register.sh --check
     run_gate doc-paths bash scripts/check-doc-paths.sh
     run_gate axiom-pins node scripts/check-axiom-pins.mjs
   fi

@@ -1,6 +1,6 @@
 # V07: source lowering components
 
-Partial. V07 keeps G16, G17, G18.01 and G18.06. [Modules](../module-map.md#v07-source-lowering)
+Partial. V07 keeps G16, G17, G18.01 and G18.06. [Modules](../module-map/v07-lowering.md)
 work over the existing Source and intrinsic carriers (no new AST, IR, value or
 state layer); no elaborator agreement, solc/EVM run or constructor is claimed.
 

@@ -16,6 +16,7 @@ each proof iteration. Documentation-only edits need path and link checks.
 | Command | Coverage |
 |---|---|
 | `./run-lean.sh` | Layer check, then the default targets and `SolkeyTestSuite` in one Lake invocation, then the SolKey sort check; see the checkout caveat below |
+| `bash scripts/coord-tools/register.sh --check` | The generated library roots match the file tree (`register.sh` rewrites them); no Lean |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
 | `node scripts/check-layers.mjs` | No core module reaches an elaborator, printer or tactic front end; no Lean |
 | `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose |

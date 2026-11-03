@@ -38,6 +38,10 @@ jobs:
       # the printers or the tactic front ends, even transitively.
       - name: Check layering
         run: node scripts/check-layers.mjs
+      # The library roots are generated from the file tree
+      # (`docs/parallelism.md`, P5): a stale root fails here.
+      - name: Check generated library roots
+        run: bash scripts/coord-tools/register.sh --check
 
       - name: Check pinned Solidity feature inventory
         run: python3 scripts/solidity-feature-audit.py --check

@@ -17,8 +17,10 @@ A dependency-free Lean 4 model of [SolKey](https://github.com/SolidiKeY/solkey).
   [lean-key-rule-map.md](docs/lean-key-rule-map.md) owns the correspondence;
   [solc-alignment.md](docs/solc-alignment.md) records semantic deviations.
 - Keep imports local and acyclic. The core must not reach elaborators,
-  printers or tactic front ends. Register new modules through `Solidity.lean`
-  and follow [parallelism.md](docs/parallelism.md).
+  printers or tactic front ends. The library roots are generated: register
+  new modules with `scripts/coord-tools/register.sh`, give each a row in its
+  area's `docs/module-map/` file, and follow
+  [parallelism.md](docs/parallelism.md).
 - Do not raise `maxHeartbeats` to rescue a proof. Use `simp only [...]` in
   finished proofs and write explicit signature and `have` types.
 
