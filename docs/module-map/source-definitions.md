@@ -88,3 +88,5 @@
 | `Source/FailureEventControls.lean` | Independently fixed complete states for actual Source.emitEvent, with nonempty caller journal/event prefix and byte-memory alias. |
 | `Source/FailureEventLaws.lean` | Full-state law for the actual Source event emitter. |
 | `Source/FailureRuntimeControls.lean` | Actual explicit-plan Source execution through existing registered code. |
+
+| `Source/MonetaryLaws.lean` | H19 primitive credit-produced and debit-preserved range facts; constructive out-of-range successful debit control. No Account/ledger migration or execution reachability claim. |

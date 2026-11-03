@@ -241,5 +241,22 @@ measurements are recorded separately, not substituted for that failure.
 The corrected legacy Horizon source checks successfully at345.3233s versus
 the prior339.6516s (+1.67%); this remains over the unchanged300s policy. The
 failed369.6618s elaboration is not used as a passing timing comparison.
-HorizonDeploy/Session still need a fresh compiled Horizon artifact and their
-affected checks; no duplicate full checkpoint was launched after reconnect.
+The fresh compiled affected import closure now passes: `lake build
+Solidity.Source.HorizonDeploy Solidity.Source.Session`, exit0 (28 jobs).
+Raw evidence: `/workspace/vy5-composition/evidence/source-import-closure-20261103.log`.
+This does not close the unchanged300s Horizon policy failure or full P8 realization.
+
+## H19 primitive range transport
+
+`Source/MonetaryLaws.lean` proves successful credit produces Fits and debit
+preserves an explicit initial Fits. Successful zero debit at2^256 remains
+out of range, a constructive negative control. These four laws do not migrate
+Account, Fixed.ledger, Eval.balance or fees, or prove EVM-reachable Source
+state bounds. In particular the code-absent Eval.balance path still uses the
+word-valued fixed ledger; replacing Account.balance alone cannot close H19.
+
+Automation trials and the exact axiom reports are retained under
+`/workspace/vy5-composition/monetary-laws-20261103`. Credit uses propext;
+the other three laws are axiom-free. Independent read-only finder and skeptic
+reviews approved the explicit premises and scope, with no findings. No native
+execution was added, and all24 full obligations/six combinations stay open.
