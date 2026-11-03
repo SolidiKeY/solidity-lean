@@ -49,3 +49,18 @@ theorem scalar_observation_agrees (pipeline : Roadmap.Pipeline) (choice : Bool) 
 
 Draft only; no placeholder declaration or completed coverage claim.
 Soundness, generic reached-context proof and negative controls stay with Sol.
+
+
+## Return-tail scalar observation corollary
+
+Module: Solidity/Lowering/G19/ReturnTailControls.lean
+Lemma: scalar_observation_agrees. Routine: rewrite the two existing complete
+scalar observation endpoints; preserve the outcome/selector and every caller field.
+
+```lean
+theorem scalar_observation_agrees (pipeline : Roadmap.Pipeline) (choice : Bool) :
+    sourceObs pipeline choice = observeTarget (code tci tca ti ta) choice
+```
+
+Draft only; no placeholder declaration or completed coverage claim.
+Soundness, captured-selector proof and alias negatives stay with Sol.
