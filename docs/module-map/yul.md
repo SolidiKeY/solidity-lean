@@ -34,3 +34,6 @@
 | `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](../feature-work/inline-assembly-vy4.md)). |
 | `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](../feature-work/vy5-composition.md)). |
 | `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
+| `Yul/Views/NominalInventory.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
+| `Yul/Views/NominalInventoryControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
+| `Yul/Views/NominalInventoryLaws.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
