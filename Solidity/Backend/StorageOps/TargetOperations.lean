@@ -1,5 +1,6 @@
 import Solidity.Backend.StorageOps.RepresentedOperations
 import Solidity.Storage.HashedLayoutEvm
+import Solidity.Backend.StorageOps.StackWordWrite
 
 /-! Operation-side adapters between PUBLIC graph/symbolic representation and
 existing Evm.Instr storage operations. No instruction semantics, graph/value
@@ -65,7 +66,7 @@ def encodeWord (word : Semantics.Word) : Fin Evm.W := ⟨keyWord (p := .uint) wo
 
 def readCode (slot : Evm.Slot) : List Evm.Instr := [.push (.slot slot),.sload]
 def writeCode (slot : Evm.Slot) (word : Semantics.Word) : List Evm.Instr :=
-  [.push (.val (encodeWord word)),.push (.slot slot),.sstore]
+  [.push (.val (encodeWord word))] ++ StackWordWrite.code slot
 /-- Actual SLOAD reads the CURRENT target store before SSTORE; no evaluated
 source payload is supplied as a compile-time target oracle. -/
 def copyCode (dst src : Evm.Slot) : List Evm.Instr :=

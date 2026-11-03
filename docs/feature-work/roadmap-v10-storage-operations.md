@@ -1,185 +1,66 @@
-# V10 storage operations
+# V10 storage operations — G27–G30
 
-Storage copy, clear, push and pop over the existing storage graph, numeric
-word store and structured `Evm.Instr` target (`Backend/StorageOps/`), from the
-v10-storage-operations lane. The core is Source-free. Above it, `Lowering/StorageOps/` checks actual
-independent Source storage operations; these are operation correspondences,
-not a general compiler or bytecode refinement.
+The lane remains partial. `Backend/StorageOps/` is Source-free;
+`Lowering/StorageOps/` contains clients of the independent Source semantics.
+Kernel operation laws, structured target execution, numeric transport and
+external compiler/EVM evidence are separate boundaries.
 
-## Layers
+## Graph and representation components
 
-- Runtime-shaped graph operations: `Traversal.copyArray`/`copyAt`,
-  `RecursiveCopy.recursiveCopy`, `RecursiveClear`, `RecursivePop`, each proved
-  equal to the master semantics (`copyArray_eq_overlay`, `copyAt_eq_semantics`,
-  `recursiveCopy_eq_overlay`).
-- Prefix transport and disjoint-path commutation (`CommonPrefix`,
-  `PrefixLaws`, `PathOperations`, `Commutation`, …); push/pop/delete
-  lifecycles (`Lifecycle*`, `MixedLifecycle`, `CopyLifecycle`).
-- Operations against the `Represented` relation (`PathRepresentation`,
-  `Copy*`, `Clear*`, `RepresentedOperations`); scalar save/copy to numeric
-  stores and `Evm.Slot` (`TargetOperations`, `KeysFit`).
-- Numeric transport with per-run regions (`FiniteRun`), footprints and G27
-  layout access (`NumericTraversal`, `CopyTransport`, `CopyWrites`,
-  `LayoutAccess`).
-- Structured target loops and correspondence (`TargetArray*`, `TargetCopy*`,
-  `TargetNested*`, `TargetFixed*`, `TargetSnapshot*`), snapshot frames,
-  nested-array root composition (`OutputRootComplete.complete`, whose
-  `reads`/`writes`/`clearWrites` premises cover intermediate copy states).
-- Runtime-header repetition and footprint shrinkage: `RuntimeCopyRepeat`
-  (`headers_and_footprint`, `copy_repeat`), `RuntimeCopyComposition.complete`,
-  `TargetArrayRepeat.complete`, quantified over machines, slots, lengths and
-  `FiniteRun`.
+`Value.overlay` is the independent copy specification. `Traversal.copyArray`
+provides outer runtime-prefix transport with semantic nested leaves;
+`RecursiveCopy` and `RecursiveClear` independently traverse demanded nested
+values. Their correspondence laws identify these views, without an admitted
+depth cap. Lazy function-valued fields do not prove eager emitted traversal.
 
-Premises catalogue: the `FiniteRun` per-run region, `KeysFit`, the
-`targetInitial` correspondence, self-copy or separation. Retained
-counterexamples: overlap refutes repetition, a region collision, header
-interference. `*Controls` modules instantiate the premises
-(`RuntimeCopyRepeatControls` builds a real `FiniteRun 128 16 2`).
+Path/common-prefix laws, disjoint updates, snapshot copies, mapping barriers,
+stale-tail clearing and aggregate lifecycle components reuse the existing
+intrinsic graph and published `Represented` relation. Numeric transport retains
+`FiniteRun` per-run hash/region coverage, `KeysFit`, initial store observations
+and separation premises; no global hash injectivity is inferred.
 
-## Open
+Structured target loops include runtime headers, repetition and nested/fixed
+copies. `OutputRootComplete.complete` requires read/write/clear coverage over
+intermediate stores. `LoopLaws` shares turn/exit adapters; it does not prove
+arbitrary-loop termination. Controls retain overlap, collision, header
+interference, malformed operands and complete context observations.
 
-General Source AST/compiler/address/liveness correspondence, emitted recursive
-traversal, packing and ABI, world rollback.
+## Source clients and address limits
 
-## Source operation clients (C145)
+Source delete/copy, repetition and disjoint-copy clients preserve exact runtime
+footprints, captured snapshots, older shadows and ordered outcomes. Registered
+modules replace historical script wrappers; those scripts are not dependencies
+of the new interfaces. Rollback laws invoke the existing rollback explicitly.
 
-Registered `Lowering/StorageOps/SourceCopyCommutation.lean` uses the
-independent Source semantics and the existing copy operation log. Its four laws
-prove exact runtime touched-path frames, overwritten-word independence,
-pointwise transport and all-path word commutation for disjoint destinations
-and fixed captured payloads. Ordinary storage is explicit. Older shadows and
-missing outside cells remain observable; journals and full states do not commute.
+`SourceWordRead.complete` and `SourceWordWrite.complete` pair independent Source
+and SLOAD/SSTORE runs sharing word observations. Source paths and target slots
+are independent parameters. `SourceArrayWrite.complete_numeric` similarly shares
+length, index and payload with graph/target operations, but has no relation
+identifying its Source path with its target base. These facts do not establish
+Source address/layout compilation or compiler preservation.
 
-`Lowering/StorageOps/SourceCopyCommutationControls.lean` executes both actual `Source.storeVal`
-orders with shrinking/growing arrays and complete ordered observations.
-Distinct journal snapshots refute state equality. Same-target and incremental
-source-capture orders discriminate the premises; rollback is explicitly invoked.
-These clients are registered above the Source-free Backend core. They do not
-supply general compiler, target, physical-address or world equivalence. Ten
-Source modules are migrated with unchanged proof bodies and declaration names;
-legacy script import wrappers preserve their clients.
+`StackWordWrite.code` consumes the value already on the stack;
+`TargetOperations.writeCode` adds the constant value push to that shared suffix.
+Their existing instruction behavior and proof premises are unchanged.
 
-## Operation views and Source clients
+Fresh indexing laws derive canonical-header checks and panic0x32 from raw Source
+cells. Bounds-first write failures precede payload/type/static/fuel checks.
+Retained raw reads remain distinct from fresh liveness. Unwritten uint cells
+are raw-absent while published reads default to zero. Finite numeric and
+nonempty live/retained owner-query clients discharge their stated premises;
+written-read inequality is not a separate failed representation judgment.
 
-`Value.overlay` is the independent graph specification. `Traversal.copyArray`
-provides outer runtime-prefix transport, using the semantic slot operation at
-nested leaves. `RecursiveCopy` and `RecursiveClear` independently recurse at
-nested demanded values. Their correspondence laws identify these views; lazy
-function-valued fields do not establish eager emitted traversal of a whole
-aggregate.
+`SourceWordCommutation` proves full Source-world equality for distinct captured
+typed cell writes, actual ordinary/writable execution and exact journal order.
+Mixed uint/bool controls retain nonempty locals, transient storage and a journal
+prefix: worlds agree while journals/states differ; overlap changes worlds.
+Explicit undo restores the seeded execution state. The routine combined adapter
+is pending in [TERRA-TODO](../../TERRA-TODO.md), without a compiled stub.
 
-`Lowering/StorageOps/SourceScalarDeleteLog.lean`,
-`Lowering/StorageOps/SourceArrayDeleteTarget.lean` and
-`Lowering/StorageOps/SourceStorageCopy.lean` supply actual Source delete/copy
-execution laws, frames and explicit rollback. Source repetition and commutation
-clients preserve complete ordered observations and distinguish journal/state
-identity. These modules import published Source semantics above the core;
-representation, target and whole-program premises remain explicit.
+## Remaining obligations
 
-`Backend/StorageOps/TargetSelfCopy.lean` is the target-only self-copy interface.
-The old module and theorem namespace remain compatible; the canonical namespace
-exports the same laws. `OutputRootComplete.complete` requires read/write/clear
-location coverage over intermediate stores as well as OLD graph observations.
-
-The remaining actual Source clients are registered above the core: scalar,
-integer and boolean array deletion with represented target clearing; signed,
-boolean and fixed-array copying with captured snapshot target observations;
-mapping barriers, Source self-copy and two-destination deletes. All 42 legacy
-script imports remain compatible. Module registration preserves their proof
-bodies, exact fuels, typed path/read/layout premises and complete ordered
-positive and negative controls. These component correspondences do not close
-general Source compiler, recursive emitted traversal or world refinement.
-
-The Source and target self-copy modules retain a shared historical namespace
-with disjoint declaration names. Their module paths and import layers remain
-separate; the canonical target namespace exports only the five target laws.
-
-`Backend/StorageOps/LoopLaws.lean` shares the condition/body turn, zero-guard
-exit and single-loop adapters used by five runtime loop modules. Their ranking
-and prefix proofs still establish the required `loopRun` result. The clear
-condition reuses the published memory range condition with the same instruction
-list. Populated controls pin complete ordered context observations, false-guard
-body avoidance, pending-jump and malformed-flag faults, and one actual terminating
-loop. Shared adapters alone do not prove arbitrary-loop termination.
-
-`Backend/StorageOps/StackWordWrite.lean` supplies a destination-only SSTORE
-program whose value arrives on the runtime stack. The above-core
-`Lowering/StorageOps/SourceWordWrite.lean` states actual Source `storeVal`
-execution with typed word readback beside that target operation; the Source
-path and target slot are independent parameters sharing only the word, so no
-address correspondence is claimed (likewise `SourceArrayWrite.complete_numeric`
-relates path and base only through length, index and payload). Positive
-budget, writable ordinary storage and input word agreement are explicit. The
-existing `Val.word` excludes function/reference values; no new admission or
-encoding is inferred. Concrete controls preserve ordered Source/target context
-observations and distinguish static, budget, type, region and operand behavior.
-The new Source namespaces match their paths; existing public namespaces remain
-compatible. Address compilation, liveness, physical layout and world closure
-remain separate obligations.
-
-`Lowering/StorageOps/SourceWordRead.lean` derives the total typed ordinary-cell
-read equation, retaining missing-value failure, and connects successful actual
-Source reads to actual SLOAD under raw cell presence and input word agreement.
-No writable-frame or store-fuel premise is needed for reads. Populated controls
-retain complete ordered source/target contexts, static and transient reads,
-missing/type failures and a wrong-address countercontrol. This does not prove
-source address compilation, default encoding, liveness or world agreement.
-
-`Lowering/StorageOps/SourceArrayIndex.lean` derives actual fresh dynamic-array
-location checks from raw canonical Source header cells, retaining both the typed
-child location and panic0x32. Actual index/read composition reuses PUBLIC
-`Represented` and guarded target-read facts; raw Source header/leaf agreement,
-graph liveness and target initialization remain explicit. No source success is
-assumed. Out-of-bounds failure needs no selected-child or zero-default premise.
-Controls retain complete ordered source/target contexts and distinguish live
-reads from populated retained aliases and an incorrect unguarded read. Source
-panic payload, target revert and world rollback remain separate boundaries.
-
-`Lowering/StorageOps/SourceArrayWrite.lean` composes actual fresh Source
-indexing and by-value lvalue writes with the published guarded target write,
-represented update/frame and finite per-run numeric transport. Raw Source
-header, payload word and target address observations remain explicit premises.
-Primitive `writeLoc` works at every budget, including zero. Controls change
-the live payload while preserving header, retained tail and unrelated context,
-and distinguish fresh bounds failure from a raw retained-location write.
-Independent finder/skeptic reviews found no issues. `SourceArrayWriteNumericControls.lean` now discharges the numeric certificate
-inputs in a finite run covering the header and three children, with budget-zero
-Source execution and numeric readbacks `[2,53,59,61]` to `[2,53,83,61]`. The
-additional observer-query list is empty; that client does not exercise sibling
-query-owner frame premises. Existing full context/retained/outside controls stay
-unchanged. General Source address/default compilation, recursive physical
-emission and world rollback remain open.
-
-`Lowering/StorageOps/SourceArrayWriteFailure.lean` derives bounds-first
-Source panic and guarded target revert for arbitrary intrinsic payload types,
-without child presence/type, payload encoding, writable mode or positive fuel
-premises. Raw canonical Source header, target header agreement and target index
-fit remain explicit. Controls distinguish live type/static/fuel failures from
-bounds failure and pin complete ordered contexts. Unwritten raw uint cells are
-absent while their published read defaults to zero; both observations are
-retained. Malformed adapter inputs are negative controls, not admitted programs.
-Independent finder/skeptic reviews found no issues. World rollback and general
-address compilation remain separate obligations.
-
-`Lowering/StorageOps/SourceArrayWriteFrameControls.lean` instantiates the
-Source/represented/numeric write with nonempty old-owner queries for a live
-sibling and a retained sibling. Logical path separation and symbolic nonaliasing
-are proved from existing constructors, and all original finite-run conditions
-are discharged. Ordered raw observations retain `53/61` while the written query
-changes `59` to `83`; retained fresh liveness stays absent. The negative control
-proves inequality of the written query's reads, not a separate failed
-representation judgment. Existing complete context/numeric fixtures are reused
-unchanged. Independent finder/skeptic reviews found no issues; general source,
-recursive physical emission and world composition remain open.
-
-`Lowering/StorageOps/SourceWordCommutation.lean` proves full Source-world
-commutation for distinct captured typed cells, actual ordinary/writable
-`writeAt` sequencing, and exact ordered journal snapshots. It does not identify
-whole Source states or evaluate fresh addresses/effectful right-hand sides.
-Mixed uint/bool controls retain nonempty locals, transient state and an existing
-journal prefix: worlds agree, journals/states differ, and overlap changes the
-world. Explicit undo restores the prior execution state; failure does not imply
-implicit rollback. Independent finder/skeptic reviews found no issues. The
-routine combined adapter is pending Terra in [the TODO index](../../TERRA-TODO.md),
-with no compiled stub. Numeric/physical target and general source composition
-remain separate obligations.
+General Source AST/address/default/value correspondence, complete packing/ABI
+and recursive physical emission, aggregate target lifecycle and compiler/world
+rollback composition remain open. G27.01–G27.05, G28, G29.01–G29.03, G30 and
+Backfill A/B therefore remain partial. Published owner results are reused with
+explicit premises; no missing representation or target bridge is assumed closed.
