@@ -1999,6 +1999,18 @@ import Solidity.Backend.AbiEntry.RawFreeTransport
 import Solidity.Backend.AbiEntry.RejectionInterface
 import Solidity.Backend.AbiEntry.WordValidation
 import Solidity.Backend.AbiEntry.WordValidationInterface
+import Solidity.Backend.FailurePaths.BooleanReturn
+import Solidity.Backend.FailurePaths.BooleanReturnControls
+import Solidity.Backend.FailurePaths.Controls
+import Solidity.Backend.FailurePaths.Interface
+import Solidity.Backend.FailurePaths.Parametric
+import Solidity.Backend.FailurePaths.ParametricControls
+import Solidity.Backend.FailurePaths.Premises
+import Solidity.Backend.FailurePaths.Returns
+import Solidity.Backend.FailurePaths.Statements
+import Solidity.Backend.FailurePaths.TransientControls
+import Solidity.Backend.FailurePaths.TransientUnwind
+import Solidity.Backend.FailurePaths.WorldUnwind
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
