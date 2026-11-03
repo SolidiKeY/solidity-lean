@@ -1267,3 +1267,31 @@ refused the closure after the focused checks and KeySort had passed. This is a
 failed closure gate, separate from the passing per-file checks and the four
 focused backedge/cycle module targets: LinkedBackedgePush,
 LinkedBackedgePushControls, LinkedCycle and LinkedCycleControls. Full import and cumulative validation remain open.
+
+## Header time and own balance
+
+[HeaderEnvironment.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironment.lean)
+proves fetched TIMESTAMP and SELFBALANCE at arbitrary Backend sites, with exact
+costs 2 and 5, sufficient gas, one available stack slot and explicit fuel.
+The actual decoder, charged driver checks, whole native State and `X`
+continuation are derived. TIMESTAMP converts the header Nat modulo the native
+256-bit word size. SELFBALANCE reads the code owner's actual account-map entry,
+returning zero for an absent entry. No independent balance oracle, warmth,
+permission, source frame or desired execution is supplied as a premise.
+
+[HeaderEnvironmentControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironmentControls.lean)
+retains independently stated complete result States and ordered code, stack,
+memory, buffers, calldata, accounts and substate. Controls distinguish owner
+balance 29 from another account's 41, call value 37 and remaining gas 4. They
+cover both permissions, empty and maximal legal input stacks, real overflow,
+gas and fuel failures, and a header `2^256 + 513` observed as word 513. The
+oversized header and absent-account cases are explicitly raw-reference
+behaviors, not source/consensus or driver-origin reachability witnesses.
+
+Earlier private environment-production work already covers fixed-entry reads
+with exact opcode charges. This increment generalizes those native clauses to
+arbitrary emitted sites and adequate gas; it adds no source profile or first
+opcode/full-row claim. Independent finder and skeptic reviews found no defect
+in the statements, complete observations or proof boundaries. The new focused
+module checks do not discharge the failed registered Bridge closure or the
+remaining source/compiler/Osaka/account/world/resource/transaction obligations.
