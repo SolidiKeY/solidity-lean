@@ -1209,6 +1209,12 @@ import Solidity.Lowering.V08.CallableReflection
 import Solidity.Lowering.V08.SourceCallPhase
 import Solidity.Lowering.V08.SourceCallPhaseControls
 import Solidity.Lowering.V08.SourceExternalPhaseControls
+import Solidity.Lowering.V08.BoolErrorControls
+import Solidity.Lowering.V08.BoolErrorLowering
+import Solidity.Lowering.V08.LiteralFailureControls
+import Solidity.Lowering.V08.LiteralFailureLowering
+import Solidity.Lowering.V08.SliceFailureControls
+import Solidity.Lowering.V08.SliceFailureLowering
 
 import Solidity.Calculus.CallFunctionAffine
 import Solidity.Tools.CallFunctionShare
@@ -1253,6 +1259,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveDescent
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRef
+import Solidity.Backend.InternalFlow.RuntimeFrameV3BareRevertProducer
 import Solidity.Backend.InternalDispatch
 import Solidity.Backend.InternalDispatch.Agreement
 import Solidity.Backend.InternalDispatch.Chain

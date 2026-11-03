@@ -1528,6 +1528,9 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Lowering/V08/AbiObservations.lean` | Independent source/intrinsic word, panic and reason byte agreement. |
 | `Lowering/V08/Transactions.lean` | Snapshot, atomic status, observation and repeated reset laws. |
 | `Lowering/V08/LibraryCreation.lean` | Linked caller-context and creation-continuation observations. |
+| `Lowering/V08/LiteralFailureLowering.lean`, `Lowering/V08/LiteralFailureControls.lean` | G21: `literalInput` compiler for closed assert/require/revert/panic literals; source and terminal-byte agreement ([G21](feature-work/g21-failure-lowering.md)). |
+| `Lowering/V08/BoolErrorLowering.lean`, `Lowering/V08/BoolErrorControls.lean` | G21: closed boolean custom errors; ABI payload, source run and constant-payload emitter. |
+| `Lowering/V08/SliceFailureLowering.lean`, `Lowering/V08/SliceFailureControls.lean` | G21: Source calldata-slice equations; the revert paired with an empty terminal (not a lowered bounds check). |
 | `Lowering/V08/Controls.lean` | Funded, failure-byte, rollback, reset and caught constructor controls. |
 | `Lowering/V08/AbiControls.lean` | Exact catch positives and malformed/wrong-code negatives. |
 | `Lowering/V08/LibraryControls.lean` | Delegated owner isolation and nonempty constructor installation. |
@@ -1688,6 +1691,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean` | Actual `callRec` countdown family: all-horizon execution and `RecursiveReturnCoherence`; no v3 recursive instance. |
 | `Backend/InternalFlow/RuntimeFrameV3CallProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3CallProducerControls.lean` | v3 `PendingCallProducer` for primitive value-returning calls (`coverage`, `returns`, `bare_revert`, `make`) and an applied control with real success and revert runs. |
 | `Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean` | Typed memory-return and tuple call forms and the remaining `PendingCallProducer` target for them; no inhabitant. |
+| `Backend/InternalFlow/RuntimeFrameV3BareRevertProducer.lean` | P1-REVERT: `bare_revert` for any statement; `directProducer`/`callProducer` inhabit `PendingBareRevertProducer` on one fixture with real reverting runs. |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveActivation.lean`, `RuntimeFrameV3RecursiveDescent.lean`, `RuntimeFrameV3RecursiveHistory.lean` | Countdown family: checked activation bridge, descent at every reached horizon, saved parent history and nearest-parent pop. |
 | `Backend/InternalFlow/RuntimeFrameV3PairedUnwind.lean`, `RuntimeFrameV3RecursiveReturn.lean` | Countdown family: paired all-parent unwind and the descent-plus-unwind endpoint in the original `StateRepr` (hand-written image). |
 | `Backend/InternalFlow/RuntimeFrameMutation.lean`, `RuntimeFrameNested.lean`, `RuntimeFrameReferenceProgram.lean`, `RuntimeFrameCodeEquality.lean` | One-level and nested call compilers (`compileCall`), reference-returning programs, Boolean instruction-list equality. |

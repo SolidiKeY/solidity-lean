@@ -79,7 +79,7 @@ profile coverage. `PendingRestoration` stays in v1.
 
 ## Open
 
-- G37.01: no `Pending*` instance yet. General caller save/restore agreement
+- G37.01: `PendingCallProducer` (P1-CALL) and `PendingBareRevertProducer` (P1-REVERT, below) instances exist for fixed fragments; no recursive one. General caller save/restore agreement
   and runtime return control are still missing, and the scratch-safe
   selectors do not yet compile bodies that contain calls or loops.
 - G37.02: unbounded recursion (running prefix, termination, divergence) is
@@ -260,3 +260,17 @@ The populated clients and controls (`tests/runtime-frame/`) are not on master,
 so no in-tree instance shows the premises of `complete`/`endpoint` jointly
 satisfiable. Read-only finder and skeptic reviews found no Lean defect; their
 doc and docstring findings are fixed here.
+
+## P1-REVERT: bare-revert producer
+
+`RuntimeFrameV3BareRevertProducer.lean` (from the v13-abi-world lane) builds
+`PendingBareRevertProducer` instances of the frozen v3 interface.
+`bare_revert` proves the reverting entry for any statement through
+`CapturedProgram.bare_revert` and `CallAgreement.singleton_failure`.
+`directProducer` and `callProducer` inhabit the structure on one concrete
+input (frame 16, the `CompileExamples` fixture), whose `initial` is a real
+`StateRepr`; `direct_source`/`call_source` are real out-of-bounds reverts and
+`direct_endpoint`/`call_endpoint` a concrete `Evm.run … = .revert`.
+`InitialInput` restates the `Entry` resource fields, so `coverage` is a
+repackaging; `make` is not applied (the producers are built directly).
+Approved-domain provenance stays external (`hprof`), as v3 requires.

@@ -127,6 +127,7 @@ including the frozen CALL/RETURNDATA/JUMP interface consumed by later lanes.
 P1 runtime-frame partial checkpoint: [foundation, frozen interfaces v1–v3 and producers](feature-work/runtime-frame-p1.md); [P1-CALL value-call producer](feature-work/p1-call-producer.md) and [G37.03/P4 typed dispatch](feature-work/roadmap-g37-dispatch-p4.md).
 G33 finite struct defaults: [pair and nested struct default construction](feature-work/roadmap-g33-struct-defaults.md).
 G22/G42 read-only calls: [typed source calls, callbacks and the static-world frame](feature-work/g22-readonly-calls.md); [world-call consumers](feature-work/g42-world-call-consumers.md).
+G21 closed failure lowering: [literal, boolean custom-error and slice failures](feature-work/g21-failure-lowering.md).
 
 P8 partial checkpoints: [admission and failure resources](feature-work/p8-admission.md), including the [P8a frozen interface](feature-work/p8-admission.md#frozen-interface) and [settings and assembly boundary](feature-work/p8-admission.md#all-settings-and-producer-assembly), and the [P8b frozen consumer interface](feature-work/p8b-frozen-interface.md).
 
