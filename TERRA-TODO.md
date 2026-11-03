@@ -29,3 +29,14 @@ Add routine glue only in NEW `Solidity.Backend.Aggregates.G18SourceMappingCoroll
 - `zero_horizon` for actual `c` and `G : Source.Glob (E c)`: instantiate existing ScalarMapping.Controls.zero_horizon at `[.bool]`, frame, `(locals c,state c)`. No claim that a Glob or SourceSpec instance is inhabited, no timeout-to-divergence conversion.
 
 Try shared automation first. No Source edits, profile assumptions, budget increases, new axioms or sorry stubs.
+
+## Resolved mapping expression statement consumer
+
+Routine glue in NEW `Solidity.Backend.Aggregates.G18MappingStatementCorollaries`, importing G18MappingExpressionControls; keep the proved producers unchanged. None of these statements is assumed or counted proved here.
+
+- `statement c : Source.RStmt (SourceMachine.Controls.E c) [] false ⟨false,false⟩ [.bool] [.bool] := .expr (SourceMachine.Expression.assignment c)`. Actual Source constructor, not new semantics.
+- `statement_run` for `c`, actual `G : Source.Glob (SourceMachine.Controls.E c)` and `fuel`: `(Source.execS G SourceMachine.Controls.frame (fuel+4) 0 none (statement c) (SourceMachine.Controls.locals c)).run (.nil,SourceMachine.Controls.state c) = (.ok (.normal (SourceMachine.Controls.locals c)),(.nil,SourceMachine.Controls.afterState c))`. Routine published EM.sub/Hoare.run_bind plus assignment_run. Outer interpreter locals are EMPTY; inner Boolean local is retained in Out.normal. Do not confuse these two phases/contexts.
+- Scoped storage-effect consumer: combine statement_run, SourceMachine.Controls.state_cells and SourceMachine.Controls.certificate's CopyPost. This is not a Compiler.compile/source-admission certificate. The structured target driver DISCARDS the expression value, so no result-on-stack relation may be inferred for assignment_run alone. A value-producing adapter needs an actual producer.
+- `statement_static` similarly from Expression.static_run: exact `.error (.revert [])`, unchanged outer locals/state; no normal continuation. Preserve exact payload, do not treat it as timeout/divergence or claim target failure agreement.
+
+Use shared automation first; no Source/producer edits, axioms/sorry stubs, budget increases or full-profile claims.

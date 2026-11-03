@@ -963,6 +963,8 @@ import Solidity.Backend.Aggregates.G18ScalarMapping
 import Solidity.Backend.Aggregates.G18ScalarMappingControls
 import Solidity.Backend.Aggregates.G18SourceMapping
 import Solidity.Backend.Aggregates.G18SourceMappingControls
+import Solidity.Backend.Aggregates.G18MappingExpression
+import Solidity.Backend.Aggregates.G18MappingExpressionControls
 import Solidity.Backend.StructuredFlow.BranchControls
 import Solidity.Backend.StructuredFlow.BranchSelector
 import Solidity.Backend.StructuredFlow.CoreScopeControls
