@@ -174,3 +174,22 @@ Successful computed image preparation also yields the original `ObjectWord`/`Obj
 `CalldataHashBinding` proves actual checked keccak evaluation for a bytes.calldata local, including the existing implicit conversion and real memory-object allocation. The returned source state retains that allocation. Physical payload hashing uses the effective clipped slice length, so oversized declared lengths are not replaced by zero-padded hash inputs. Both aliases, empty/past-end slices and timeouts are covered; every original-H MemOK follows from the actual allocation rule. This binds payload bytes only: header/FMP allocation refinement, target offset wrapping and ABI reachability remain separate.
 
 `P6CalldataHash.source_target_clipped_hash` connects the actual calldata-local source expression, its implicit allocation, the published bounded P6 frame copy, and the published target KECCAK256 step over the same derived clipped payload. Source and target word agreement retains an explicit per-input Fixed-to-concrete-Keccak premise, discharged by the controls using Roadmap.Evm.withKeccak in both pipelines. Stack tail, copied memory, carrier/key and every original-H source invariant are retained. Empty copy/hash at maximum offset is covered. Full allocator/header/FMP, World-state, compiler and gas adequacy remain separate.
+
+## Nominal inventory preparation
+
+`Views.NominalInventory` adds declared memory arrays of UDVT elements to the
+existing inventory dispatcher, reusing `NominalMemory.decodeArray`. Existing
+canonical cases retain their decoder. Missing nominal metadata fails preparation
+even for an empty array; successful updates retain the original allocation-size
+check and execute `runInventoryUpdates` on the actual Source state.
+
+`snapshot_encode` derives exact typed data from canonical element words.
+`reencode_raw` reconstructs the complete supplied byte map for an arbitrary
+successful mixed preparation sequence, and `writeback_MemOK` preserves every
+initial owner typing. The controls inhabit an exact changed whole-source result
+with two real aliases and the actual owner invariant. Canonical failure remains
+preparation `None`, not source refusal or cleaning.
+
+Complete computed-inventory nominal coverage, whole-store unchanged/replay and
+constructed output placement/history still need integration. These laws do not
+discharge dirty-word transport, allocator reachability, or compiler adequacy.
