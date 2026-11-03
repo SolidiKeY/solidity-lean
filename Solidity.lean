@@ -1939,6 +1939,7 @@ import Solidity.Backend.StorageOps.Touched
 import Solidity.Backend.StorageOps.Traversal
 import Solidity.Backend.StorageOps.TwoClearRepresentation
 import Solidity.Backend.StorageOps.LoopLawsControls
+import Solidity.Backend.StorageOps.StackWordWrite
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Fetch
 import Solidity.Backend.LabelExec.Loops
@@ -2276,6 +2277,18 @@ import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteNumeric
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteNumericControls
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeletes
 import Solidity.Lowering.StorageOps.TwoClearRepresentationControls
+import Solidity.Lowering.StorageOps.SourceArrayIndex
+import Solidity.Lowering.StorageOps.SourceArrayIndexControls
+import Solidity.Lowering.StorageOps.SourceArrayWrite
+import Solidity.Lowering.StorageOps.SourceArrayWriteControls
+import Solidity.Lowering.StorageOps.SourceArrayWriteFailure
+import Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls
+import Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls
+import Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls
+import Solidity.Lowering.StorageOps.SourceWordRead
+import Solidity.Lowering.StorageOps.SourceWordReadControls
+import Solidity.Lowering.StorageOps.SourceWordWrite
+import Solidity.Lowering.StorageOps.SourceWordWriteControls
 import Solidity.Source.Preservation.EncodingVariantControls
 import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.LiteralBuiltinControls

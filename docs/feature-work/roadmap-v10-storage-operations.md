@@ -101,3 +101,70 @@ condition reuses the published memory range condition with the same instruction
 list. Populated controls pin complete ordered context observations, false-guard
 body avoidance, pending-jump and malformed-flag faults, and one actual terminating
 loop. Shared adapters alone do not prove arbitrary-loop termination.
+
+`Backend/StorageOps/StackWordWrite.lean` supplies a destination-only SSTORE
+program whose value arrives on the runtime stack. The above-core
+`Lowering/StorageOps/SourceWordWrite.lean` connects actual independent Source
+`storeVal` execution and typed word readback to that target operation. Positive
+budget, writable ordinary storage and input word agreement are explicit. The
+existing `Val.word` excludes function/reference values; no new admission or
+encoding is inferred. Concrete controls preserve ordered Source/target context
+observations and distinguish static, budget, type, region and operand behavior.
+The new Source namespaces match their paths; existing public namespaces remain
+compatible. Address compilation, liveness, physical layout and world closure
+remain separate obligations.
+
+`Lowering/StorageOps/SourceWordRead.lean` derives the total typed ordinary-cell
+read equation, retaining missing-value failure, and connects successful actual
+Source reads to actual SLOAD under raw cell presence and input word agreement.
+No writable-frame or store-fuel premise is needed for reads. Populated controls
+retain complete ordered source/target contexts, static and transient reads,
+missing/type failures and a wrong-address countercontrol. This does not prove
+source address compilation, default encoding, liveness or world agreement.
+
+`Lowering/StorageOps/SourceArrayIndex.lean` derives actual fresh dynamic-array
+location checks from raw canonical Source header cells, retaining both the typed
+child location and panic0x32. Actual index/read composition reuses PUBLIC
+`Represented` and guarded target-read facts; raw Source header/leaf agreement,
+graph liveness and target initialization remain explicit. No source success is
+assumed. Out-of-bounds failure needs no selected-child or zero-default premise.
+Controls retain complete ordered source/target contexts and distinguish live
+reads from populated retained aliases and an incorrect unguarded read. Source
+panic payload, target revert and world rollback remain separate boundaries.
+
+`Lowering/StorageOps/SourceArrayWrite.lean` composes actual fresh Source
+indexing and by-value lvalue writes with the published guarded target write,
+represented update/frame and finite per-run numeric transport. Raw Source
+header, payload word and target address observations remain explicit premises.
+Primitive `writeLoc` works at every budget, including zero. Controls change
+the live payload while preserving header, retained tail and unrelated context,
+and distinguish fresh bounds failure from a raw retained-location write.
+Independent finder/skeptic reviews found no issues. `SourceArrayWriteNumericControls.lean` now discharges the numeric certificate
+inputs in a finite run covering the header and three children, with budget-zero
+Source execution and numeric readbacks `[2,53,59,61]` to `[2,53,83,61]`. The
+additional observer-query list is empty; that client does not exercise sibling
+query-owner frame premises. Existing full context/retained/outside controls stay
+unchanged. General Source address/default compilation, recursive physical
+emission and world rollback remain open.
+
+`Lowering/StorageOps/SourceArrayWriteFailure.lean` derives bounds-first
+Source panic and guarded target revert for arbitrary intrinsic payload types,
+without child presence/type, payload encoding, writable mode or positive fuel
+premises. Raw canonical Source header, target header agreement and target index
+fit remain explicit. Controls distinguish live type/static/fuel failures from
+bounds failure and pin complete ordered contexts. Unwritten raw uint cells are
+absent while their published read defaults to zero; both observations are
+retained. Malformed adapter inputs are negative controls, not admitted programs.
+Independent finder/skeptic reviews found no issues. World rollback and general
+address compilation remain separate obligations.
+
+`Lowering/StorageOps/SourceArrayWriteFrameControls.lean` instantiates the
+Source/represented/numeric write with nonempty old-owner queries for a live
+sibling and a retained sibling. Logical path separation and symbolic nonaliasing
+are proved from existing constructors, and all original finite-run conditions
+are discharged. Ordered raw observations retain `53/61` while the written query
+changes `59` to `83`; retained fresh liveness stays absent. The negative control
+proves inequality of the written query's reads, not a separate failed
+representation judgment. Existing complete context/numeric fixtures are reused
+unchanged. Independent finder/skeptic reviews found no issues; general source,
+recursive physical emission and world composition remain open.
