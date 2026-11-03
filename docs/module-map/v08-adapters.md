@@ -376,5 +376,6 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8/DeclarationGraphAdmission.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
 | `Lowering/P8/DeclarationGraphCheck.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
 | `Lowering/P8/DeclarationGraphControls.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
+| `Backend/FunctionValues/RuntimeConstruction.lean` | Bounded memory-reference-structs checkpoint; scope and retained premises are stated in the module docstring. |
 
 See [P8 admission](../feature-work/p8-admission.md).

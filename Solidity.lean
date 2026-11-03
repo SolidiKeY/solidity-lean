@@ -121,6 +121,7 @@ import Solidity.Backend.FunctionValues.Inequality
 import Solidity.Backend.FunctionValues.Interface
 import Solidity.Backend.FunctionValues.Premises
 import Solidity.Backend.FunctionValues.Representation
+import Solidity.Backend.FunctionValues.RuntimeConstruction
 import Solidity.Backend.InternalDispatch
 import Solidity.Backend.InternalDispatch.Agreement
 import Solidity.Backend.InternalDispatch.Chain
