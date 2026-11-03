@@ -22,8 +22,7 @@ dispatcher, gas/halting driver and `execBinOp` transformer. It also contains ups
 an IO debugging helper. The original arithmetic agreement does not require FFI correctness; its pinned
 axiom audits in `SolidityBridge/Checks.lean` show only `propext`,
 `Classical.choice` and `Quot.sound`. The optional bounded memory refinement
-explicitly assumes a named zero-allocation correctness contract, with no
-claimed inhabitant. Its separate `scripts/check-external-memory.sh` observation
+explicitly assumes a named zero-allocation correctness contract, proved for the H7 logical body (see below), not for the native code. Its separate `scripts/check-external-memory.sh` observation
 fixture links only the verbatim pinned `memset_zero` function and a generated
 ABI wrapper. This neither replaces these Lean declarations nor proves that
 contract. No hashing C library or upstream conformance executable is linked
@@ -51,7 +50,7 @@ input hashes in `h7-bounded-scanner-padding-pin.json`. It changes two files:
   `D_J_aux_bounded` stating that choice. Outside that bound the original
   partial computation is unchanged; no totalization is claimed.
 - `FFI/ffi.lean`: `ByteArray.zeroes` keeps its `memset_zero` extern symbol,
-  and its `opaque` declaration gets the logical body `Array.replicate n 0` with
+  and its `opaque` declaration gets the logical body `Array.replicate n.toNat 0` with
   size, empty and element laws. Native allocation and the correspondence of
   `memset_zero` to that body stay separate obligations.
 

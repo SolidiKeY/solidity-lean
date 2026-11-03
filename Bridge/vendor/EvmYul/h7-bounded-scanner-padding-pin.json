@@ -14,7 +14,7 @@
     "UPSTREAM_SHA256SUMS": "bb469cc3611a19e6b6f2a64de2e9a6c6c4f65dfac1e9948e6d7d09c4028ba54b"
   },
   "patchFormat": "git diff --binary --unified=0",
-  "patchReplay": "After verifying exact original SHA256 inputs, git apply --binary --unidiff-zero bounded-scanner-padding.patch",
+  "patchReplay": "After verifying exact original SHA256 inputs, git apply --binary --unidiff-zero Bridge/vendor/EvmYul/h7-bounded-scanner-padding.patch",
   "patchedVendorInputs": {
     "FFI/ffi.lean": "5fc7ab512325ac6a7ab73f392f2f0eaff246b8cb1ad1e1a019bd47ccb0e3f05a",
     "EVM/Semantics.lean": "fb3dfc2c235e6f56142417d343f05666d0ec81806859a099d427d421ce40d5be"
