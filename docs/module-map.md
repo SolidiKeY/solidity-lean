@@ -754,26 +754,26 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Frontend/Checked/Parser.lean` | G09–G11: the untrusted recursive-descent parser from located tokens to `Syn .unit` and its layout (`parseTokens`), fuel-structural. |
 | `Frontend/Checked/Check.lean` | G11: whole-source parsing checked against the yield and precedence (`parse`, `parse_sound`, `parse_derives`). |
 | `Frontend/Checked/Render.lean` | G09: canonical token spellings and the source printer `Syn.print`. |
-| `Frontend/Checked/TypeCorpusAcceptance.lean` | Isolated G09 type corpus acceptance controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypeCorpusCoverage.lean` | Isolated G09 type corpus coverage controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypeCorpusExamples.lean` | Isolated G09 type corpus examples controls; original public observations and budgets retained. |
+| `Frontend/Checked/TypeCorpusAcceptance.lean` | G09 `declCorpus_accepted`, composed from the two per-member constructor certificates. |
+| `Frontend/Checked/TypeCorpusCoverage.lean` | G09 `declCtors_covered`, composed from the two per-member constructor certificates. |
+| `Frontend/Checked/TypeCorpusExamples.lean` | Re-export of the G09 corpus modules (acceptance, coverage, profile); no declarations. |
 | `Frontend/Checked/TypeCorpusFirst.lean` | Kernel-certified constructor list for the first original corpus member. |
 | `Frontend/Checked/TypeCorpusMembers.lean` | Exact original two-member corpus equation. |
 | `Frontend/Checked/TypeCorpusObservations.lean` | Named copies of the original profile and round-trip predicates. |
-| `Frontend/Checked/TypeCorpusProfile.lean` | Isolated G09 type corpus profile controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypeCorpusProfileFirst.lean` | Isolated G09 type corpus profile first controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypeCorpusProfileSecond.lean` | Isolated G09 type corpus profile second controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypeCorpusRoundtripFirst.lean` | Isolated G09 type corpus roundtrip first controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypeCorpusRoundtripSecond.lean` | Isolated G09 type corpus roundtrip second controls; original public observations and budgets retained. |
+| `Frontend/Checked/TypeCorpusProfile.lean` | G09 `declCorpus_in_profile`, composed from the per-member profile certificates. |
+| `Frontend/Checked/TypeCorpusProfileFirst.lean` | Per-member certificate (`TypeCorpusCertificates.first_profile`): the first corpus member parses with no rejections. |
+| `Frontend/Checked/TypeCorpusProfileSecond.lean` | Per-member certificate (`TypeCorpusCertificates.second_profile`): the second corpus member parses with no rejections. |
+| `Frontend/Checked/TypeCorpusRoundtripFirst.lean` | Per-member certificate (`TypeCorpusCertificates.first_roundtrip`): the first corpus member reprints to the same tree. |
+| `Frontend/Checked/TypeCorpusRoundtripSecond.lean` | Per-member certificate (`TypeCorpusCertificates.second_roundtrip`): the second corpus member reprints to the same tree. |
 | `Frontend/Checked/TypeCorpusSecond.lean` | Kernel-certified constructor list for the second original corpus member. |
-| `Frontend/Checked/TypeDeclarationExamples.lean` | Isolated G09 type declaration examples controls; original public observations and budgets retained. |
+| `Frontend/Checked/TypeDeclarationExamples.lean` | G09 declaration controls: recursive and mutual structs, attribute order, transient, refusals. |
 | `Frontend/Checked/TypeExampleCore.lean` | Original G09 shared helpers and unchanged corpus data. |
-| `Frontend/Checked/TypeNameExamples.lean` | Isolated G09 type name examples controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypePrintChecksum.lean` | Isolated G09 type print checksum controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypePrintExamples.lean` | Isolated G09 type print examples controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypePrintRoundtrip.lean` | Isolated G09 type print roundtrip controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypePrintText.lean` | Isolated G09 type print text controls; original public observations and budgets retained. |
-| `Frontend/Checked/TypeExamples.lean` | G09 controls: type-name trees, attribute layouts, recursive declaration references, printing round trips, type and declaration constructor coverage (`declCtors_covered`), refusals. |
+| `Frontend/Checked/TypeNameExamples.lean` | G09 type-name controls: arrays, mappings, function types, attribute layouts, refusals. |
+| `Frontend/Checked/TypePrintChecksum.lean` | G09 `print_checksum_flag`. |
+| `Frontend/Checked/TypePrintExamples.lean` | Re-export of the G09 printing modules (text, round trip, checksum); no declarations. |
+| `Frontend/Checked/TypePrintRoundtrip.lean` | G09 `print_roundtrip`, composed from the per-member round-trip certificates. |
+| `Frontend/Checked/TypePrintText.lean` | G09 `print_text`. |
+| `Frontend/Checked/TypeExamples.lean` | Entry point re-exporting the split G09 modules, with the two axiom guards. The controls: type-name trees, attribute layouts, recursive declaration references, printing round trips, type and declaration constructor coverage (`declCtors_covered`), refusals. |
 | `Frontend/Checked/ExprExamples.lean` | G10 controls: precedence and associativity lemmas over `Syn.precNode`, every operator, expression trees, refused ambiguous forms, expression constructor coverage (`exprCtors_covered`). |
 | `Frontend/Checked/Certificate.lean` | G11: G05's parse-stage instance: `Units`, `Parses`, `parseChecker` (`checkUnits_sound`), the producer (`produce_accepted`), `FrontendSpec.ofParse`. |
 | `Frontend/Checked/UnitExamples.lean` | G11 controls: statements, definitions and units, every S00 constructor covered (`allCtors_covered`, `profileCtors_covered`), out-of-profile refusals, the G05 checker on a two-unit input. |

@@ -1,7 +1,7 @@
 import Solidity.Frontend.Checked.TypeExampleCore
 
 /-! Exact kernel-certified constructor list for one original G09 corpus member.
-The external list observation is only staging; the theorem below checks the actual parser. -/
+The list was produced outside Lean; the theorem below checks it against the parser. -/
 
 namespace Solidity.Frontend.Checked.TypeCorpusCertificates
 

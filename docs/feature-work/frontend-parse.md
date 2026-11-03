@@ -670,8 +670,9 @@ server). Findings and their disposition:
   `scripts/check-checked-frontend.mjs` are not in CI; `report --write`
   records a baseline without the unclassified check, a missing baseline
   exits 0, and the reason rules match on paths. Open.
-- **Checking cost.** `UnitExamples.lean` (about 4 min) and
-  `TypeExamples.lean` (about 110 s) are the heaviest new files. Open.
+- **Checking cost.** `UnitExamples.lean` (about 4 min) is the heaviest
+  new file. `TypeExamples.lean` (about 110 s) was split into per-group
+  modules (H6, [va1-h6-type-split.md](va1-h6-type-split.md)).
 - **Finder findings (open).** G05's `UnitParses`
   (`Frontend/Checked/Certificate.lean`) quantifies over any `Lexed` split,
   not `lex`'s output, and `Lexed`'s maximal-munch check skips pragma mode

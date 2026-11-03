@@ -1008,6 +1008,18 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
   that the directory exists before running git there, and fetch before
   pushing.
 
+### H6 · `TypeExamples` split (performance only)
+
+`Solidity/Frontend/Checked/TypeExamples.lean` is now an entry point over
+nineteen modules (`TypeExampleCore`, `TypeNameExamples`, `TypeCorpus*`,
+`TypeDeclarationExamples`, `TypePrint*`). Its ten helpers and nineteen
+statements are unchanged; four aggregate proofs (`declCorpus_accepted`,
+`declCtors_covered`, `declCorpus_in_profile`, `print_roundtrip`) compose
+eleven new per-member declarations in `TypeCorpusCertificates`. The two axiom
+guards stay in `TypeExamples.lean`. This is not part of the M7-next steps
+above and closes none of them. Timings:
+[va1-h6-type-split.md](feature-work/va1-h6-type-split.md).
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.
@@ -1037,13 +1049,3 @@ records the deviation.
   overflowing and false cases. False cases may be `refuted` or `pending`,
   never `proved`. `externalValue == proved` is a hard gate; do not relax it to
   `pending`.
-
-M7-next H6 performance progress: the original `Solidity/Frontend/Checked/TypeExamples.lean`
-entry point now fronts a twenty-module bounded control split. Its ten helpers, nineteen
-public statements, original data and two axiom guards are unchanged; four aggregate
-proofs reuse actual kernel-certified per-corpus observations. All twenty files pass
-individual diagnostics/builds below the unchanged 300 s bound. This closes that
-focused performance repair, not AU01/AU02 or the full build: the full attempt
-stopped for disk exhaustion, and the general Residue/target/hash and remaining
-pipeline obligations stay open. The isolated master relay and its focused timings are recorded in
-[H6 type split](feature-work/va1-h6-type-split.md).
