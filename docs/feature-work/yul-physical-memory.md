@@ -262,7 +262,22 @@ suffix-execution discriminators, duplicate visits, original-capacity loss and
 nonzero tails. Safety for the inhabited fixture is proved for every input list;
 factoring avoids concrete byte-function normalization under unchanged limits.
 
-These are supplied-snapshot transport laws. Generation of successive physical
-maps by execution, arbitrary frame/call/rollback adequacy, broader mixed and
-nested dynamic history, dirty-word transport, universal ownership, allocator
-reachability and compiler adequacy remain open.
+`PhysicalSnapshotSlice` obtains final bytes from the actual published
+`Backend.Environment.runSlice` and passes them to the same Source snapshot step.
+It retains the complete reached stack/memory on both preparation outcomes.
+Outer `None` remains the partial target evaluator result; `some (reached, none)`
+retains real physical output with unsupported canonical preparation. Neither is
+promoted to an invented Yul refusal or rollback policy. Target concatenation is
+proved before the single final synchronization, so an actual later store may
+repair dirty intermediate bytes. The existing backend writer and `Views.mstore`
+are proved equal on the entire mathematical byte map. A kernel witness connects
+actual generated PUSH/PUSH/MSTORE to actual Source shrink; executable controls
+cover repaired/final dirty signed words, retained header changes, stack tails,
+MSTORE8 into a byte-object sibling, residual bytes and wrong destinations.
+
+The slice adapter does not assume or establish initial Source/raw agreement,
+resource/capacity correctness, intermediate observation/capture or compiler
+correspondence. General physical execution beyond that published slice, arbitrary
+frame/call/rollback adequacy, broader mixed and nested dynamic history, dirty-word
+transport, universal ownership, allocator reachability and compiler adequacy
+remain open.
