@@ -180,3 +180,42 @@ and P9 certificate, then observes the supplied intrinsic conditional and exact
 arguments in both pipelines while preserving a live caller reference. Finder
 and skeptic reviews found no confirmed issue. Printed axioms are standard only;
 no compiler/EVM refinement or universal source-coverage claim follows.
+
+## Ready single-return memory calls
+
+`Progress/ReadyDefaults.lean` proves progress through the actual default
+return-slot path. `ZeroReady` requires an existing `Val.default` witness or an
+explicit empty-memory type: bytes, string or a dynamic array. Empty dynamic
+arrays need no element default because zeroing creates no elements. This is
+different from `NewReady` for a requested allocation length. Fixed arrays,
+structs and other unsupported defaults are not added by this certificate.
+
+`Progress/ReadyReturns.lean` defines `singleReturningBody` with one ordinary
+same-type return of a `ReadyExpr`. Its proof derives expression progress, plain
+value extraction, frame-indexed return-slot writing, `runMods []` and final
+`retVals` extraction. `call_single_return_ns` covers every horizon. The joint
+call and expression theorems pair this progress with existing full memory
+preservation; the expression case restores caller locals through actual `sub`.
+No semantic body-progress or preservation oracle is supplied.
+
+The `single_return_from_elaborate` and `single_return_expr_from_elaborate`
+adapters derive value-callee admission through actual elaboration and P9's
+supplied-allowlist check. Their callee is a source-function subtype carrying
+membership and matching signature, and its selected body must equal the exact
+typed single-return constructor. This is explicit body-shape admission, not an
+executable memory-body recognizer or complete-function progress certificate.
+It adds no general statement sequence, modifier, multiple-return, recursive
+memory-call graph, external/transaction or compiler/EVM progress claim.
+
+`ReadyReturnControls` consumes the source-elaborated memory identity function
+and observes its alias return and default allocation, including a body timeout
+that retains that allocation. `ReadyFreshReturnControls` actually elaborates
+`fresh(uint256 n)` returning `new uint256[](n)`: object 0 survives, the default
+slot allocates empty object 1 and the returned fresh object is 2. An oversized
+length panics after the default allocation. Its call-expression control proves
+non-stuckness while retaining the caller's live reference and validating the
+escaped fresh reference. Both evaluator pipelines execute these legacy-resolved
+bodies. The named storage-reference default refusal, `no default value`, remains
+outside `ZeroReady`. Progress alone does not validate dangling input references;
+the preservation triples still require `MemOK` and argument witnesses. Finder
+and skeptic reviews found no confirmed defect. All printed axioms are standard.

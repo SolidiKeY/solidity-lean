@@ -381,3 +381,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ReadyArguments.lean` | Exact-type ready arguments combine non-stuck extraction with the existing reference-preserving argument evaluator. |
 | `Source/Progress/ReadyExpressionControls.lean` | Ready reference conditionals and exact argument lists over inhabited memory. |
 | `Source/Progress/ReadyExpressions.lean` | Readiness-decorated allocating expressions, over the existing intrinsic syntax and preservation admission. |
+| `Source/Progress/ReadyDefaults.lean` | Default return-slot progress for explicit ready types. |
+| `Source/Progress/ReadyReturnControls.lean` | Actual source-elaborated alias and allocating reference returns. |
+| `Source/Progress/ReadyReturns.lean` | Actual single-return memory bodies and calls. |

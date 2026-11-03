@@ -240,3 +240,8 @@ The standalone dynamic-new parent also has a progress adapter under explicit
 ready-type and checked length-fragment conditions; see
 [source-progress-checked.md](source-progress-checked.md#dynamic-allocation-with-a-checked-length).
 This does not extend the memory-body certificate to general progress.
+
+A one-statement ordinary return body now also has a checked progress companion
+when its expression and return-slot default have explicit readiness certificates;
+see [ready single-return calls](source-progress-checked.md#ready-single-return-memory-calls).
+This does not prove progress for arbitrary `MemoryItems` bodies.
