@@ -373,12 +373,12 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8/SourceProgramAcceptance.lean`, `SourceProgramAcceptanceControls.lean` | Exact actual elaborator success-bit laws and the full original kernel contract-control conjunction; ordered expectations unchanged. |
 | `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; selected and special-entry root coverage, not executed-entry or full admission adequacy. |
 | `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard proved redundant (`accept_eq_upstream`); composed independent ProgramSite soundness, not full feature/profile adequacy. |
-| `Lowering/P8/DeclarationGraphAdmission.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
-| `Lowering/P8/DeclarationGraphCheck.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
-| `Lowering/P8/DeclarationGraphControls.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
-| `Backend/FunctionValues/RuntimeConstruction.lean` | Bounded memory-reference-structs checkpoint; scope and retained premises are stated in the module docstring. |
-| `Backend/FailurePaths/TransientCallback.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module docstring. |
-| `Backend/FailurePaths/TransientSharing.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module docstring. |
+| `Lowering/P8/DeclarationGraphAdmission.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module. |
+| `Lowering/P8/DeclarationGraphCheck.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module. |
+| `Lowering/P8/DeclarationGraphControls.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module. |
+| `Backend/FunctionValues/RuntimeConstruction.lean` | Bounded memory-reference-structs checkpoint; scope and retained premises are stated in the module. |
+| `Backend/FailurePaths/TransientCallback.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module. |
+| `Backend/FailurePaths/TransientSharing.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |

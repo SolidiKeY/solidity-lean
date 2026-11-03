@@ -10,3 +10,6 @@ it does not establish completion of the remaining lane queue.
 Touched-module and library checkpoint gates pass: trust, roots, orphans,
 layers, documentation paths and axiom inventory.
 Independent read-only finder and skeptic reviews are required before publication.
+
+Finder and skeptic reviews passed. Confirmed fixes and retained boundaries are
+recorded in the [integration milestone](integration-20261103-checkpoints.md).

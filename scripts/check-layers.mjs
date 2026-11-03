@@ -12,6 +12,8 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.Views\.NominalInventory(?:Laws|Controls)?$/, // Intrinsic nominal view inventory.
+  /^Solidity\.Yul\.World\.SelfDestructBuiltin(?:Controls)?$/, // Typed builtin binding and controls.
   /^Solidity\.Yul\.(LocalBoolWhile|LocalBoolDivergence|Checks\.LocalBoolWhile|Checks\.LocalBoolDivergence)$/, // Typed loop checkpoints.
   /^Solidity\.Yul\.(LocalBoolIfElse|Checks\.LocalBoolIfElse)$/, // Conditional selection of independently indexed scopes.
   /^Solidity\.Yul\.(LocalBoolIf|Checks\.LocalBoolIf)$/, // Conditional execution of a certified Boolean item scope.
