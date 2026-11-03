@@ -3723,9 +3723,9 @@ violation. Confirmed findings and their resolution:
   expected ABI payloads are computed with the same `Source.abiLayout` helpers;
   Source fixtures and intrinsic entries are written to match, with no theorem
   linking them. The docs/README.md entry states this boundary.
-- The `scripts/v08-*` validators and their `.test.py` files read VM-only
+- The the lane-only fixture v08-* (not on master) validators and their `.test.py` files read VM-only
   paths (VM location `v08-*`) and are not wired into CI, so the
-  `scripts/v08-*axiom-pins.json` pins are checked only in the lane VM;
+  the lane-only fixture v08-*axiom-pins.json (not on master) pins are checked only in the lane VM;
   `scripts/AxiomAudit.lean` and `check-axiom-pins.mjs` (unchanged count) still
   cover the axiom whitelist. The 1,577 `#print axioms` lines are unguarded
   and pin nothing in the Lean build.
@@ -3781,3 +3781,99 @@ merged). No `Producer` instance exists.
 Open: `ResetInputs` stays assumed; layout/reset producers, general library
 execution, admission, unit transport and bytecode obligations.
 
+
+
+## Actual request-clock client
+
+SourceClockTransactions executes a supplied intrinsic RBody at the existing g
+signature: persistent/transient writes and a timestamp return. Source.runTx
+uses request time12345 over initial global99. A separate typed-world client
+creates code, initializes3/4, then writes5/7 and returns the clock; end/reset
+yields5/0. Actual raw dispatch/call controls expose transient7 before end,
+so final reset cannot hide a skipped effect. Complete Source state and exact
+byte observations, stale-clock success, timeout prefix and empty/binary/33-byte
+clients cover both pipelines. This does not prove original syntax provenance,
+canonical body/layout/admission/bytecode compilation or full target-world
+equality. Dirty Source and pre-reset target inputs are not claimed related.
+
+Nineteen exact axiom guards cover the client and reached-state controls.
+The operation list only certifies the actual dispatch-generated journal;
+it is not an interpreter or assumed execution result.
+
+
+## Effectful callable-argument component
+
+LocalCallableTransport's EffectfulCallableArgument consumes the published V07
+assignment operand and the existing actual Source callable body producer.
+Two converted Boolean arguments write then read the reached caller local;
+the reversed list returns the old value. The Source body allocates its binary
+hash argument, and complete caller locals and reached machine are retained.
+The target operand reads a fixed actual caller index, retaining its write after
+the private temporary is dropped. Shifted positions around a live uint42,
+a closed target state, wrong read-index, skipped write, zero fuel and reached
+argument-prefix timeout controls distinguish the boundaries. Fourteen exact
+standard-axiom guards cover the new declarations.
+
+This is argument/result-value transport, not compilation of the callee: the
+Source application consumes the existing populated body producer; no arbitrary
+heap/body execution is assumed or concluded. Canonical argument-list/body,
+heap/layout, ABI, admission and P1 runtime-frame composition remain open.
+
+
+## General integer assignment-argument application
+
+AssignedIntegerCallable in LocalCallableTransport consumes V07's actual
+assignment run and IntegerCallable's declaration/signature/body-selection
+certificate. The Source application covers arbitrary environments, caller
+contexts, complete machines, widths/signs, valid integers and local aliases;
+it derives execution of assignment, conversion, callInternal and return,
+retaining the caller write and whole Source state. The target remains the
+actual assignment operand, with independent initial typed read premises.
+No callee execution/preservation equality is an input.
+
+Seventeen exact standard-axiom guards include signed minimum/maximum,
+uint256 maximum, shifted indices and a retained live Boolean, static local
+assignment, actual wrong reads/skipped write, prefix timeout and closed
+empty/binary/33-byte clients. Complete populated storage/transient, journal,
+accounts, heap/allocator, events/logs and function-local fields are retained.
+This is a pure echo-body argument/value component, not a general body
+compiler, canonical context/heap/ABI mapping, external call, admission,
+runtime-frame or bytecode adequacy result. Those obligations remain open.
+
+
+## Reached caller binding alignment
+
+AssignedCallableContext composes the actual assignment-argument/call result
+with V07.ContextMap.related_assign. Initial VALUE alignment and exact read/write
+slot maps derive complete reached mapped-binding alignment; no desired
+execution/post-preservation equality is a premise. The strict integer/Boolean
+client shifts three Source bindings into four target bindings, retaining an
+unmapped uint42 and all mapped locals. Actual extra target Boolean execution
+keeps the correct scalar result but breaks the live-binding relation; the
+pre-argument Source snapshot is also rejected. Nine exact standard-axiom guards
+cover the theorem, populated/closed clients and discriminating controls.
+This is caller-local alignment, not canonical extraction, heap alias, arbitrary
+callee/body, external/runtime frame, admission or whole-world compilation.
+Effecting Source.runTx / Machine / Eval / Semantics / Session / Horizon and
+balance/Funds changes belong to VY5 vy5-composition H16/H19; none are made here.
+
+
+## Typed catalogue lookup reflection
+
+WorldImageAccess.lookup_reflect reconstructs source code index, actual supplied
+program-table name, linked kind and the exact returned-store relation from a
+real typed lookup and the initial Image. No name-map injectivity or functional
+StoreRelation is assumed. The two-sided lookup law is existential in the store;
+it cannot install an arbitrary related store. None, absent-code and wrong-kind
+clauses distinguish metadata rejection. These are initial catalogue facts,
+not Source declaration membership, body availability, admission or call lowering.
+Eighteen exact standard-axiom guards cover the laws and inhabited controls.
+
+Source instanceAt probes retain whole populated locals/machines before and
+after explicit reset. Complete old world/funds/time/store observations remain;
+funds without tracked code, wrong code and stale transient stores discriminate.
+An unused EMPTY extra catalogue kind witnesses a real typed-kind rejection
+while Source still reports code C; no library is installed or Source library
+execution claimed. Its complete role/account/store/funds vector is retained.
+Source H16/H19 execution files remain untouched. General creation/library/unit
+body/frame/layout/ledger/ABI/bytecode and canonical Backfill applications stay open.

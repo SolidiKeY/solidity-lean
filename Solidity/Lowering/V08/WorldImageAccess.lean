@@ -126,3 +126,120 @@ theorem timestamp_frame {Γ : Source.RCtx} (clock : WorldImage.TimeAligned g tar
 #guard_msgs in
 #print axioms timestamp_frame
 end Solidity.Lowering.V08.WorldImageAccess
+
+
+/-! Converse catalogue facts concern the initial image and actual typed lookup,
+not execution/body/catch/admission or complete World equality. The exact store
+relation survives reflection; no functionality/injectivity of that relation or
+the source-name map is assumed. -/
+namespace Solidity.Lowering.V08.WorldImageAccess
+open Solidity
+variable {E : Source.Env} {K : Type} [DecidableEq K] {contracts : K → Contract}
+  {g : Source.Glob E} {kindOf : String → Option K}
+  {relation : WorldImage.StoreRelation E contracts}
+  {environment : Roadmap.SessionEnv} {history : List Roadmap.Event}
+  {source : Source.St E} {target : ContractWorld.World contracts}
+
+theorem lookup_reflect
+    (image : WorldImage.Image g kindOf relation environment history source target)
+    (address : Roadmap.Address) (kind : K) (store : Storage (contracts kind))
+    (lookup : target.storage? (⟨EnvironmentProjection.liftAddress address⟩ : ContractWorld.Handle kind) = some store) :
+    ∃ code name, (source.ex.world.accounts address).code = some code ∧
+      g.contractAt code = some name ∧ kindOf name = some kind ∧
+      relation address kind (source.ex.world.accounts address).storage (source.ex.transient.cells address) store := by
+  have actual := LibraryFrameTransport.account_of_lookup target _ store lookup
+  have account := image.accounts (EnvironmentProjection.liftAddress address)
+  unfold WorldImage.AccountImage at account
+  dsimp only at account
+  rw [EnvironmentProjection.lower_lift_address] at account
+  cases code : (source.ex.world.accounts address).code with
+  | none =>
+    rw [code] at account
+    rw [account] at actual
+    cases actual
+  | some index =>
+    rw [code] at account
+    obtain ⟨name,otherKind,otherStore,selected,linked,installed,represented⟩ := account
+    have pair := Option.some.inj (installed.symm.trans actual)
+    have sameKind : otherKind = kind := congrArg (fun entry : (k : K) × Storage (contracts k) => entry.1) pair
+    subst otherKind
+    have sameStore : otherStore = store := Option.some.inj ((account_lookup _ kind otherStore installed).symm.trans lookup)
+    subst otherStore
+    exact ⟨index,name,rfl,selected,linked,represented⟩
+
+/-- Existential lookup is two-sided without assuming that StoreRelation is
+functional. A relation alone cannot choose an arbitrary exact target store. -/
+theorem lookup_some_iff
+    (image : WorldImage.Image g kindOf relation environment history source target)
+    (address : Roadmap.Address) (kind : K) :
+    (∃ store, target.storage? (⟨EnvironmentProjection.liftAddress address⟩ : ContractWorld.Handle kind) = some store) ↔
+    ∃ code name, (source.ex.world.accounts address).code = some code ∧
+      g.contractAt code = some name ∧ kindOf name = some kind := by
+  constructor
+  · rintro ⟨store,lookup⟩
+    obtain ⟨code,name,present,selected,linked,_⟩ := lookup_reflect image address kind store lookup
+    exact ⟨code,name,present,selected,linked⟩
+  · rintro ⟨code,name,present,selected,linked⟩
+    obtain ⟨store,lookup,_⟩ := installed_lookup image address code name kind present selected linked
+    exact ⟨store,lookup⟩
+
+theorem lookup_none_iff
+    (image : WorldImage.Image g kindOf relation environment history source target)
+    (address : Roadmap.Address) (kind : K) :
+    target.storage? (⟨EnvironmentProjection.liftAddress address⟩ : ContractWorld.Handle kind) = none ↔
+      ¬ ∃ code name, (source.ex.world.accounts address).code = some code ∧
+        g.contractAt code = some name ∧ kindOf name = some kind := by
+  constructor
+  · intro empty present
+    obtain ⟨store,lookup⟩ := (lookup_some_iff image address kind).mpr present
+    rw [empty] at lookup
+    cases lookup
+  · intro absent
+    cases lookup : target.storage? (⟨EnvironmentProjection.liftAddress address⟩ : ContractWorld.Handle kind) with
+    | none => rfl
+    | some store => exact False.elim (absent ((lookup_some_iff image address kind).mp ⟨store,lookup⟩))
+
+theorem lookup_none_of_code_absent
+    (image : WorldImage.Image g kindOf relation environment history source target)
+    (address : Roadmap.Address) (kind : K)
+    (absent : (source.ex.world.accounts address).code = none) :
+    target.storage? (⟨EnvironmentProjection.liftAddress address⟩ : ContractWorld.Handle kind) = none := by
+  apply (lookup_none_iff image address kind).mpr
+  rintro ⟨code,name,present,_,_⟩
+  rw [absent] at present
+  cases present
+
+theorem lookup_none_of_kind_mismatch
+    (image : WorldImage.Image g kindOf relation environment history source target)
+    (address : Roadmap.Address) (code : Nat) (name : String) (kind : K)
+    (present : (source.ex.world.accounts address).code = some code)
+    (selected : g.contractAt code = some name) (mismatch : kindOf name ≠ some kind) :
+    target.storage? (⟨EnvironmentProjection.liftAddress address⟩ : ContractWorld.Handle kind) = none := by
+  apply (lookup_none_iff image address kind).mpr
+  rintro ⟨otherCode,otherName,otherPresent,otherSelected,otherLinked⟩
+  have sameCode : otherCode = code := Option.some.inj (otherPresent.symm.trans present)
+  subst otherCode
+  have sameName : otherName = name := Option.some.inj (otherSelected.symm.trans selected)
+  subst otherName
+  exact mismatch otherLinked
+
+/-- info: 'Solidity.Lowering.V08.WorldImageAccess.lookup_reflect' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.WorldImageAccess.lookup_reflect
+/-- info: 'Solidity.Lowering.V08.WorldImageAccess.lookup_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.WorldImageAccess.lookup_some_iff
+/-- info: 'Solidity.Lowering.V08.WorldImageAccess.lookup_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.WorldImageAccess.lookup_none_iff
+/-- info: 'Solidity.Lowering.V08.WorldImageAccess.lookup_none_of_code_absent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.WorldImageAccess.lookup_none_of_code_absent
+/-- info: 'Solidity.Lowering.V08.WorldImageAccess.lookup_none_of_kind_mismatch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.WorldImageAccess.lookup_none_of_kind_mismatch
+end Solidity.Lowering.V08.WorldImageAccess

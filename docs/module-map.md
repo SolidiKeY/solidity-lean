@@ -2203,3 +2203,7 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/Adapters/P6CalldataHash{,Controls}` | Actual calldata conversion/allocation, bounded P6 copy and target KECCAK256 composition with explicit per-input concrete hash premise. |
 | `Lowering/V07/WrappedMultiplicationPair` | Actual effectful unsigned multiplication pairs with all local aliases |
 | `Lowering/V07/WrappedMultiplicationControls` | Closed multiplication-pair clients and ordered alias/width controls |
+### V08 transaction request-clock client
+| Module | Purpose |
+|---|---|
+| `Lowering/V08/SourceClockTransactions.lean` | Actual Source.runTx and typed-world request-clock execution with raw/end/reset observations; handwritten RBody/entry, not canonical compilation. |
