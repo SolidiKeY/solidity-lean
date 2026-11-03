@@ -2149,6 +2149,7 @@ import Solidity.Lowering.V07.GraphAdmissionBoundary
 import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls
 import Solidity.Lowering.V07.GraphRanks
+import Solidity.Lowering.V07.HeadlineAxioms
 import Solidity.Lowering.V07.IntegerAssignmentPrefixes
 import Solidity.Lowering.V07.IntegerConstantAssignment
 import Solidity.Lowering.V07.IntegerConstantAssignmentControls

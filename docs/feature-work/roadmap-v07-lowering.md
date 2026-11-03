@@ -379,9 +379,11 @@ arbitrary-branch lowering theorem. Finder/skeptic reviews found no defect. This
 is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B remain
 partial, G18 admission/composition prerequisites stay open, and no constructor
 or external compiler/EVM coverage is added.
-The V07 axiom guards and the `*Checks.lean` fixtures cited above are lane-only;
-master has no V07 entries in `scripts/g07-axiom-pins.json`.
-
+The historical axiom suite and the `*Checks.lean` fixtures cited above remain
+lane-only. `HeadlineAxioms` registers61 exact guards for selected arithmetic,
+cast, conditional, reference and structural graph theorems in the default
+closure. It does not add entries to `scripts/g07-axiom-pins.json` or discharge
+missing admission, producer, production or coverage obligations.
 
 ## Full-range int256 subtraction
 

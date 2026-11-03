@@ -64,3 +64,5 @@
 | `Lowering/V07/P12ContextExtension.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V07/P12ContextExtensionControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V07/SignedSubtractionControls.lean` | Signed subtraction clients, boundaries, capture/sign negatives and mixed frames |
+
+| `Lowering/V07/HeadlineAxioms.lean` | Registered exact axiom guards for selected scalar, effect, reference and structural graph headlines |
