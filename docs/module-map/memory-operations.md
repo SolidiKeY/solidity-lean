@@ -194,3 +194,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Aggregates/IntegerArrays.lean` | Published V07-backed integer array/copy/read/scoped clients; explicit selected-word versus eager-import validation boundary. |
 | `Backend/Aggregates/IntegerReadBoundaryWitness.lean` | Inhabited uint8 ABI witness: selected 255 succeeds while later 256 makes eager import revert; native Source observations only. |
 | `Backend/Executable/CreationPatchOrder{,Controls}` | Checked immutable/link table commutation and constructor-copy consumers; no fetched-runtime/world claim. |
+| `Backend/Executable/CreationFreshness{,Controls}` | Actual successful-creation freshness, heterogeneous account preservation and constructor controls; no allocator/source/EVM correspondence. |

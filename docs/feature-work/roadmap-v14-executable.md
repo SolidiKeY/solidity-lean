@@ -157,3 +157,28 @@ H22 ExtCall is untouched; H19 balance-dependent facts remain pending. Scoped
 standard-axiom guards and focused checks pass. The earlier bounded import-root
 exit 124 and historical documentation failures remain failures, with full and
 combined-helper closure pending; no unchanged failed heavy gate was rerun.
+
+## Freshness derived from actual successive creations
+
+`CreationFreshness.fresh` extracts account absence from the existing successful
+`World.create` and its collision guard. `other` consumes the actual constructor
+and finish witnesses to preserve another complete code/storage account. `two`
+uses the first installed account and the second checked absence to derive
+address inequality, rather than accepting it as a premise. It retains both
+actual handle addresses, the first exact installed account and the second
+contract-indexed storage. Contract kinds, constructors and contexts may differ.
+
+`CreationFreshnessControls` supplies two nonempty typed constructors, writing
+uint42 and booltrue. The complete code/storage observations retain the first
+object, the second object and a populated preexisting account. Wrong-world and
+wrong-kind handle reads are refused; an occupied-address retry returns bare
+revert and cannot be relabelled with different payload bytes. Independent
+read-only finder and skeptic reviews found no source defect.
+
+These are intrinsic ContractWorld creation consequences at explicitly chosen
+addresses. They do not certify an address allocator/nonce, independent Source
+constructor lowering, emitted initcode/account agreement or fetched CREATE.
+No balance equation or H19 representation fact is asserted. H22 ExtCall remains
+untouched. Focused module and standard-axiom checks are distinct from the still
+pending full/import-root and combined-helper gates; historical timeout and
+documentation failures are not rerun or relabelled green.
