@@ -963,3 +963,74 @@ scanner or correctness of arbitrary supplied arrays.
 Independent finder and skeptic source reviews found no defect. Compiler/source
 control-flow, scanner, Osaka, global resources, account/world and transaction
 correspondence remain separate. All full opcode rows remain open.
+
+### Linked-reference JUMPI consumer
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedJumpConsumer.lean` consumes
+`LinkedProgram.reference` from the published assembly bridge. A reference in
+the checked image yields its nonwrapping word address, membership in the
+certified scanner array and actual JUMPDEST decoding. `linked_reference_member`
+supplies the Boolean membership needed by the charged gate.
+`linked_reference_jumpi` then transports the exact conditional-PC State and X
+continuation of a Backend-encoded JUMPI site. Code equality with the linked
+image and the original gas, legal-stack and fuel bounds stay explicit. No
+membership, target decode or desired execution is assumed separately.
+
+The new consumer does not recreate the linked-program checker, scanner,
+reference or loop-certificate producers. The previous membership consumer
+remains the raw supplied-array transport. Equality with opaque upstream D_J,
+prefix execution, source/frame origin and subsequent termination remain open.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedJumpFixtures.lean` reuses the
+published `LinkedChecks.loopProgram`. Its actual Backend encoding of the entire
+loop image aligns by reflexivity. The represented entry is JUMPI at byte 36,
+with populated accounts and ordered memory/calldata/return buffers; no preceding
+prefix run is claimed.
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedJumpControls.lean` consumes the
+reference certificate for exit 72, proving target decode and actual charged
+State/X. Zero falls through to 37; a nonzero word takes 72. Minimum and full
+legal stacks are inhabited. STOP byte 73 is not a reference and is refused as
+a nonzero target. Complete ordered bytes and wrong-tail/PC negatives prevent
+mistaking this client for a reordered stack or different code image.
+
+Independent finder and skeptic source reviews found no defect. This discharges
+available linked-reference and representation clauses, not compiler/source,
+physical frame, full scanner, global resource, Osaka or account/transaction
+correspondence. All full opcode rows remain open.
+
+### Resource-bounded linked exit completion
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionLayout.lean` constructs
+the represented JUMPI entry at byte 36 of the linked image above, with target 72
+and canonical nonzero condition 1. Caller accounts, memory, environment, initial
+gas and tail are arbitrary native data. These are State observations, not a
+second transition semantics. The actual JUMPDEST and STOP gates are discharged
+with their original gas, arity, capacity and static checks.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletion.lean` composes the
+certified fetched branch with the published `X_destination_stop` law. Eleven
+initial gas, a legal two-operand input and fuel at least four suffice for actual
+X success after JUMPI, JUMPDEST and the explicit STOP at byte 73. The target is
+actually decoded from the linked certificate; STOP is decoded from the exact
+emitted bytes. No successful gate, trace or final frame is assumed. Native
+returnData is cleared by STOP, H_return is retained, and the PC stays at STOP.
+The natural debit theorem proves that the constructed output has initial gas
+minus 11; relating that output to execution also requires the execution
+theorem's legal-stack and fuel clauses.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionControls.lean` consumes
+the general result with populated static and writable callers. Exactly 11 gas
+finishes with zero left; 27 leaves 16. Minimum and full legal input stacks are
+inhabited. Ten gas fails at JUMPDEST and fuel three fails at STOP. The refusal
+controls use modular step unfoldings. Full terminal State equalities retain
+account maps, substate, ordered code, memory and calldata; ordered-tail, PC and
+returnData negatives rule out reordered or differently halted observations.
+
+Earlier linked-reference work proves one-step transport, and the published
+assembly bridge supplies the scanner/reference and terminal helper laws. The
+new result composes this particular three-instruction exit for arbitrary native
+caller State and legal tail. It does not execute the preceding prefix, establish
+source/frame origin or opaque D_J equality, or prove compiler, account/transaction,
+global resource abstraction or full Osaka correspondence. Separate independent
+finder and skeptic source reviews found no defect. All full opcode rows remain
+open.

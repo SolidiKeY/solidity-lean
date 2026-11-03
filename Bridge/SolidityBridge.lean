@@ -195,3 +195,9 @@ import SolidityBridge.Yul.SignedPlacement
 import SolidityBridge.Yul.SignedPlacementControls
 import SolidityBridge.Yul.SignextendPlacement
 import SolidityBridge.Yul.SignextendPlacementControls
+
+import SolidityBridge.RoadmapV15.P10.LinkedJumpConsumer
+import SolidityBridge.RoadmapV15.P10.LinkedJumpControls
+
+import SolidityBridge.RoadmapV15.P10.LinkedCompletion
+import SolidityBridge.RoadmapV15.P10.LinkedCompletionControls

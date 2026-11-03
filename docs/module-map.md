@@ -1740,6 +1740,12 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/JumpZeroControls.lean` | Maximum destination, arbitrary-array, static/writable, legal stack boundaries and nonzero/refusal contrasts with ordered observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/JumpMemberConsumer.lean` | Supplied-membership JUMPI charged State/X transport and nonzero missing-target driver/X refusal derived from actual checks. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/JumpMemberControls.lean` | Taken/zero/max condition clients, legal stack boundaries, missing-target priority and complete ordered byte/state controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedJumpConsumer.lean` | Published linked-reference certificate supplies membership, nonwrapping and target decode for code-aligned Backend JUMPI State/X transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedJumpFixtures.lean` | Actual Backend encoding and populated entry for the published linked-loop image; no prefix/frame-origin assertion. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedJumpControls.lean` | Certified exit72/fallthrough37 clients from PC36, exact entire image, legal boundaries and STOP73 target refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionLayout.lean` | Arbitrary native caller-state entry/output records and actual JUMPDEST/STOP resource gates. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletion.lean` | Modular linked JUMPI/JUMPDEST/STOP X completion with eleven-gas adequacy and exact natural debit. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionControls.lean` | Exact/excess gas, legal stack boundaries, fuel/gas refusals and full ordered terminal State including STOP returnData clearing. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseFixtures.lean` | Populated value-not-key chain, alias and owner-specific warmth data with coherent memory. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseControls.lean` | Full-state nonalias/alias clients, direct charge-law consumers, exact gas/fuel/stack and ordered observation controls. |
 
