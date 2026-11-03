@@ -129,6 +129,7 @@ G33 finite struct defaults: [pair and nested struct default construction](featur
 G22/G42 read-only calls: [typed source calls, callbacks and the static-world frame](feature-work/g22-readonly-calls.md); [world-call consumers](feature-work/g42-world-call-consumers.md).
 G21 closed failure lowering: [literal, boolean custom-error and slice failures](feature-work/g21-failure-lowering.md).
 V07 source lowering (G16–G18.01): [scalar/effectful lowering, P12 context map, declaration-location graphs](feature-work/roadmap-v07-lowering.md).
+P6 physical memory: [word frames, byte journal, uint arrays, reference stores](feature-work/physical-memory-interface.md).
 
 P8 partial checkpoints: [admission and failure resources](feature-work/p8-admission.md), including the [P8a frozen interface](feature-work/p8-admission.md#frozen-interface) and [settings and assembly boundary](feature-work/p8-admission.md#all-settings-and-producer-assembly), and the [P8b frozen consumer interface](feature-work/p8b-frozen-interface.md).
 

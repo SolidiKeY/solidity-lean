@@ -1121,6 +1121,20 @@ import Solidity.Backend.MemoryOps.StructDefaults.NestedWordControls
 import Solidity.Backend.MemoryOps.StructDefaults.SourcePair
 import Solidity.Backend.MemoryOps.StructDefaults.Word
 import Solidity.Backend.MemoryOps.StructDefaults.WordControls
+import Solidity.Backend.MemoryOps.PhysicalArrayReframe
+import Solidity.Backend.MemoryOps.PhysicalByteJournal
+import Solidity.Backend.MemoryOps.PhysicalFrameImage
+import Solidity.Backend.MemoryOps.PhysicalFrameImageControls
+import Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal
+import Solidity.Backend.MemoryOps.PhysicalMemoryControls
+import Solidity.Backend.MemoryOps.PhysicalPointerFrame
+import Solidity.Backend.MemoryOps.PhysicalReferenceStore
+import Solidity.Backend.MemoryOps.PhysicalSourceUint
+import Solidity.Backend.MemoryOps.PhysicalUintDelete
+import Solidity.Backend.MemoryOps.PhysicalUintWrite
+import Solidity.Backend.MemoryOps.PhysicalWordFrame
+import Solidity.Backend.MemoryOps.PhysicalWorldUnwind
+import Solidity.Backend.MemoryOps.PhysicalWorldUnwindControls
 
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.CoreBoundary

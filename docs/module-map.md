@@ -1397,6 +1397,11 @@ see [the checkpoint boundary](feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/CalldataNestedChildren.lean` | Compose existing typed child-table observations for reference-containing |
 | `Backend/MemoryOps/StructDefaults/*.lean` | G33 finite struct defaults: pair and nested struct `zeroVal`, intrinsic default allocation and compiled `DefaultPlan` runs, with controls ([G33](feature-work/roadmap-g33-struct-defaults.md)). |
 | `Backend/Aggregates/ByteParameters.lean`, `Backend/Aggregates/ByteParameterControls.lean` | G18.04/.05 groundwork: Source `cdArg`/`cdToMem` for a `bytes`/`string` parameter paired with a target state allocating the payload object (single-object relation); no target program or lowering run. |
+| `Backend/MemoryOps/PhysicalWordFrame.lean`, `Backend/MemoryOps/PhysicalByteJournal.lean` | P6: word cell to 32-byte span; paired word/byte MSTORE; byte journal and REVERT reads ([P6](feature-work/physical-memory-interface.md)). |
+| `Backend/MemoryOps/PhysicalSourceUint.lean`, `Backend/MemoryOps/PhysicalUintWrite.lean`, `Backend/MemoryOps/PhysicalUintDelete.lean`, `Backend/MemoryOps/PhysicalArrayReframe.lean` | `UintArrayAt` Source/intrinsic/word/byte relation; read, write, delete as zero write; reframe cell agreement. |
+| `Backend/MemoryOps/PhysicalReferenceStore.lean`, `Backend/MemoryOps/PhysicalPointerFrame.lean` | Reference-array store with scaled-pointer bytes; `PointerFrame`. |
+| `Backend/MemoryOps/PhysicalFrameImage.lean`, `Backend/MemoryOps/PhysicalWorldUnwind.lean` | Frame-memory byte image; world journal, reason emitter and local checkpoint unwind. |
+| `Backend/MemoryOps/PhysicalLocalDeleteGoal.lean`, `Backend/MemoryOps/Physical{Memory,FrameImage,WorldUnwind}Controls.lean` | Unproved target statements; concrete controls. |
 | `Backend/MemoryOps/CalldataRead.lean` | Published decoded calldata objects and typed memory slice reads |
 | `Backend/MemoryOps/CalldataSequence.lean` | Option composition of actual immutable decoded transfers. No payload is an |
 | `Backend/MemoryOps/CalldataSequenceChildren.lean` | Existing immutable child-table correspondence at actual sequence outputs. |
