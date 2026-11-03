@@ -443,7 +443,7 @@ of H16 carrier-aware execution or the final Producer prerequisites.
 
 ## Checked frontend to actual unit programs
 
-`Lowering/P8/SourcePrograms.lean` adds `admit`: existing original-byte parse,
+`Lowering/P8/SourcePrograms.lean` adds `accept`: existing original-byte parse,
 resolution and component-metadata checks, followed by the actual
 `Source.elaborate` on every resolved unit in order. No failed unit is dropped.
 `elaborateUnits_sound` proves the independent per-position graph of the
@@ -454,7 +454,7 @@ whole result to fail, independently of the first program's proof data.
 All three axiom reports are guarded to the standard axioms.
 
 The candidate `produce` wrapper uses `CheckedSyntax.produce` and rechecks
-through `admit`. It does not reroute the existing public solc-JSON compiler.
+through `accept`. It does not reroute the existing public solc-JSON compiler.
 Its routine transport proof `ProduceInputSound` (A06) and all-position source
 program identity packaging `UnitsProgramIdentity` (A05) are typechecked
 propositions, not supplied proofs; the latter consumes the published

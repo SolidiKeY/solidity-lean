@@ -48,7 +48,7 @@ theorem units_acceptance : UnitsAcceptance := by
 /-- Routine component-guard composition for Terra; no witness supplied. -/
 abbrev AdmitAcceptance : Prop := ∀ (i : Input) (p : CheckedSyntax.Parsed)
   (r : SourceResolutions.Packet) (cert : CheckedSyntax.Cert),
-  (SourcePrograms.admit i p r cert).isSome =
+  (SourcePrograms.accept i p r cert).isSome =
     (SourceMetadata.checkInput i p r cert && r.units.all (fun u => elaborates u.2.env))
 
 /-- info: 'Solidity.Lowering.P8.SourceProgramAcceptance.elaborate_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/

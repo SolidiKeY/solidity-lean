@@ -8,17 +8,17 @@ open Solidity.Source Solidity.Roadmap.Frontend
 open SourcePrograms SourceMetadataControls
 
 def admitted (q : Solidity.Frontend.Source.Pipeline) : Option Programs :=
-  admit (input q) (parsed q) (SourceResolutions.produce (parsed q)) CheckedSyntax.Controls.layout
+  accept (input q) (parsed q) (SourceResolutions.produce (parsed q)) CheckedSyntax.Controls.layout
 
 def admittedTwo : Option Programs :=
-  admit SourceResolutionControls.twoInput SourceResolutionControls.twoUnits
+  accept SourceResolutionControls.twoInput SourceResolutionControls.twoUnits
     (SourceResolutions.produce SourceResolutionControls.twoUnits)
     SourceResolutionControls.twoCertificates
 
 def corruptInput : Input := { input .legacy with
   units := [⟨"C.sol", [99,111,110,116,114,97,99,116,32,68,32,123,125]⟩] }
 def corrupted : Option Programs :=
-  admit corruptInput (parsed .legacy) (SourceResolutions.produce (parsed .legacy))
+  accept corruptInput (parsed .legacy) (SourceResolutions.produce (parsed .legacy))
     CheckedSyntax.Controls.layout
 
 def badTree : Syn .unit := .unit (.cons (.topPart
@@ -35,7 +35,7 @@ def emptyInput : Input := { input .legacy with units := [⟨"Empty.sol", []⟩],
 def emptyParsed : CheckedSyntax.Parsed :=
   ⟨emptyInput.settings, "Empty.sol", [("Empty.sol", .unit .nil)]⟩
 def emptyCert : CheckedSyntax.Cert := [⟨[], []⟩]
-def emptyAdmitted : Option Programs := admit emptyInput emptyParsed
+def emptyAdmitted : Option Programs := accept emptyInput emptyParsed
   (SourceResolutions.produce emptyParsed) emptyCert
 
 /-- Independent minimal kernel witness, separate from the nonempty contract

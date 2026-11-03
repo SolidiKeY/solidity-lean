@@ -8,12 +8,12 @@ namespace Solidity.Lowering.P8.SourceObservationControls
 open Source Roadmap.Frontend Frontend.Admission
 open SourceObservationAdmission
 
-def accepted := admit SourceProgramControls.emptyInput SourceProgramControls.emptyParsed
+def accepted := accept SourceProgramControls.emptyInput SourceProgramControls.emptyParsed
   (SourceResolutions.produce SourceProgramControls.emptyParsed) SourceProgramControls.emptyCert
 
 def changed : Input := {SourceProgramControls.emptyInput with
   units := [⟨"Empty.sol", [255]⟩]}
-def refused := admit changed SourceProgramControls.emptyParsed
+def refused := accept changed SourceProgramControls.emptyParsed
   (SourceResolutions.produce SourceProgramControls.emptyParsed) SourceProgramControls.emptyCert
 
 abbrev Controls : Prop :=

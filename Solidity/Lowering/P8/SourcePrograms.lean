@@ -25,7 +25,7 @@ def elaborateUnits : List (String × Resolution) → Option Programs
 
 /-- Validates all original frontend certificates before elaborating all units.
 Failure is retained; a failed unit is never dropped from the result. -/
-def admit (i : Input) (p : Parsed) (r : Packet) (cert : CheckedSyntax.Cert) :
+def accept (i : Input) (p : Parsed) (r : Packet) (cert : CheckedSyntax.Cert) :
     Option Programs :=
   if SourceMetadata.checkInput i p r cert then elaborateUnits r.units else none
 
@@ -55,21 +55,21 @@ theorem elaborateUnits_tail_failure (u : String × Resolution) (us : List (Strin
   cases he : elaborate u.2 <;> simp only [elaborateUnits, he, h, bind, pure, Option.bind] <;> rfl
 
 theorem admit_sound (i : Input) (p : Parsed) (r : Packet) (cert : CheckedSyntax.Cert)
-    (es : Programs) (h : admit i p r cert = some es) :
+    (es : Programs) (h : accept i p r cert = some es) :
     i.Ok ∧ Parses i p ∧ SourceResolutions.Resolves p r ∧ SourceMetadata.ComponentOK r ∧
       UnitsElaborate r.units es := by
-  unfold admit at h
+  unfold accept at h
   split at h
   · rename_i hc
     obtain ⟨hi, hp, hr, hm⟩ := SourceMetadata.input_sound i p r cert hc
     exact ⟨hi, hp, hr, hm, elaborateUnits_sound r.units es h⟩
   · cases h
 
-/-- Untrusted parse candidates are rechecked by admit; no existing public
+/-- Untrusted parse candidates are rechecked by accept; no existing public
 compiler is rerouted, and no candidate completeness is asserted. -/
 def produce (i : Input) : Option Programs := do
   let candidate ← CheckedSyntax.produce i
-  admit i candidate.1 (SourceResolutions.produce candidate.1) candidate.2
+  accept i candidate.1 (SourceResolutions.produce candidate.1) candidate.2
 
 /-- Routine candidate-wrapper transport, not an exported correctness proof. -/
 abbrev ProduceInputSound : Prop :=
@@ -77,7 +77,7 @@ abbrev ProduceInputSound : Prop :=
     i.Ok ∧ Parses i p ∧ SourceResolutions.Resolves p (SourceResolutions.produce p) ∧
     SourceMetadata.ComponentOK (SourceResolutions.produce p) ∧
     UnitsElaborate (SourceResolutions.produce p).units es ∧
-    admit i p (SourceResolutions.produce p) cert = some es
+    accept i p (SourceResolutions.produce p) cert = some es
 
 /-- Routine output identity packaging for Terra; no proof is supplied.
 The single-unit identity theorem is the published P9.elaborate_program. -/

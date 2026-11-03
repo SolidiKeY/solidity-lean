@@ -47,7 +47,7 @@ theorem single_control : SingleControl := by
   have hf : (Solidity.Source.elaborate (Solidity.Lowering.P8.SourceProgramAcceptanceControls.resolution q)).isSome = true :=
     (Solidity.Lowering.P8.SourceProgramAcceptance.elaborate_acceptance _).trans
       (Solidity.Lowering.P8.SourceProgramAcceptanceControls.contract_acceptance q)
-  unfold Solidity.Lowering.P8.SourceProgramControls.admitted Solidity.Lowering.P8.SourcePrograms.admit
+  unfold Solidity.Lowering.P8.SourceProgramControls.admitted Solidity.Lowering.P8.SourcePrograms.accept
   rw [hm]
   change (Solidity.Lowering.P8.SourcePrograms.elaborateUnits [("C.sol", Solidity.Lowering.P8.SourceProgramAcceptanceControls.resolution q)]).map (fun es => es.map Prod.fst) = some ["C.sol"]
   cases he : Solidity.Source.elaborate (Solidity.Lowering.P8.SourceProgramAcceptanceControls.resolution q) with
@@ -61,7 +61,7 @@ theorem two_control : TwoControl := by
   have hf : (Solidity.Source.elaborate (Solidity.Lowering.P8.SourceProgramAcceptanceControls.resolution .legacy)).isSome = true :=
     (Solidity.Lowering.P8.SourceProgramAcceptance.elaborate_acceptance _).trans
       (Solidity.Lowering.P8.SourceProgramAcceptanceControls.contract_acceptance .legacy)
-  unfold Solidity.Lowering.P8.SourceProgramAcceptanceControls.TwoControl Solidity.Lowering.P8.SourceProgramControls.admittedTwo Solidity.Lowering.P8.SourcePrograms.admit
+  unfold Solidity.Lowering.P8.SourceProgramAcceptanceControls.TwoControl Solidity.Lowering.P8.SourceProgramControls.admittedTwo Solidity.Lowering.P8.SourcePrograms.accept
   rw [Solidity.Lowering.P8.SourceMetadataControls.two_unit_stages]
   change (Solidity.Lowering.P8.SourcePrograms.elaborateUnits
     [("A.sol", Solidity.Lowering.P8.SourceProgramAcceptanceControls.resolution .legacy),

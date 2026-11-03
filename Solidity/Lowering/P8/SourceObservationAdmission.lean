@@ -19,20 +19,20 @@ def Allowed (es : Programs) : Prop :=
   ∀ e ∈ es, ∀ site, ProgramSite e.2.prog site → site.allowed = true
 
 /-- Leaves original order, names and dependent program values untouched. -/
-def admit (i : Input) (p : CheckedSyntax.Parsed) (r : SourceResolutions.Packet)
+def accept (i : Input) (p : CheckedSyntax.Parsed) (r : SourceResolutions.Packet)
     (cert : CheckedSyntax.Cert) : Option Programs := do
-  let es ← SourcePrograms.admit i p r cert
+  let es ← SourcePrograms.accept i p r cert
   if check es then some es else none
 
-abbrev Sound : Prop := ∀ i p r cert es, admit i p r cert = some es →
+abbrev Sound : Prop := ∀ i p r cert es, accept i p r cert = some es →
   i.Ok ∧ CheckedSyntax.Parses i p ∧ SourceResolutions.Resolves p r ∧
   SourceMetadata.ComponentOK r ∧ UnitsElaborate r.units es ∧ Allowed es ∧
-  SourcePrograms.admit i p r cert = some es
+  SourcePrograms.accept i p r cert = some es
 
 theorem sound : Sound := by
   intro i p r cert es h
-  unfold Solidity.Lowering.P8.SourceObservationAdmission.admit at h
-  cases hs : Solidity.Lowering.P8.SourcePrograms.admit i p r cert with
+  unfold Solidity.Lowering.P8.SourceObservationAdmission.accept at h
+  cases hs : Solidity.Lowering.P8.SourcePrograms.accept i p r cert with
   | none => simp only [hs, bind, Option.bind] at h; cases h
   | some outputs =>
     simp only [hs, bind, Option.bind] at h
