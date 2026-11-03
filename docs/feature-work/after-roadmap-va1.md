@@ -4526,3 +4526,50 @@ base comparison retains raw failures. All remaining missing references are
 inherited from the frozen base; a further Arms basename ambiguity comes from
 published source outside this adaptation. No unrelated documentation is rewritten
 to mask the gate. Final whole-lane documentation validation remains open.
+
+
+## Independent two-prefix numeric source producer (2026-11-03)
+
+After fetching origin/master0538c8660100bd94f25cc8b71909948dc316d1de, source/log
+inspection found no published Decision/residue implementation to duplicate.
+This incremental producer is built on checked9ffc64a5; newer unrelated published
+changes are not silently treated as a combined-tree pass.
+
+`Calculus/DecisionNumericTwoPrefix.lean` proves
+`uintLinear_two_prefix_sourceBound`: every intrinsic UIntLinear uint term in
+the actual two-uint context translates through two real pushQ operations, with
+only atoms0/1, no environment atoms, elimination/conditional identities and
+leaf term nodes≤original source term size. The inner local maps to atom1, the
+outer to atom0, and the third intrinsic context case is impossible. There is
+no coverage/parser/verdict/validity premise, fixed511 premise or new runtime
+function. The existing generic source-bound proof is reused after discharging
+all actual environment obligations. Both predicates and every budget are unchanged.
+
+`Examples/DecisionNumericTwoPrefix.lean` constructs a source using both locals,
+checks its exact translated order, instantiates the producer and kernel-proves
+that actual inExact rejects foreign atom2 below the two binders. Two concrete
+leaves are separately kernel-certified inTarget/Covered; their guarded Lean
+interpreter outputs are proved/refuted, with the original gapHashNegForall
+unknown retained. This does not prove general two-prefix coverage or transfer
+the interpreter observations into an extra semantic theorem.
+
+H14 automation-first trials retain all six default failures on the generic
+producer and combined controls. The actual refusal goal then used MCP goal and
+lean_multi_attempt: rfl passed; decide/omega/simp only/sol_prove/sol_chain failed.
+An initial MCP diagnostics-unavailable result and the generic-C decide+kernel
+control error are retained with exact draft sources. The final refusal uses
+the successful rfl proof, with the same expected false result.
+
+Final producer MCP/build pass3.253s/1.207s; control MCP/build7.469s/6.132s; public
+interface/axiom/verdict probe7.453s. Six public axiom reports contain only the
+standard axioms. The focused serial ledger reaches412total, including the
+eight additional producer/control entries after the404-entry H1 checkpoint.
+Hard12GiB/no swap,4GiB reserve, one thread, explicit-j1,300s and writer lock
+remain; no LSP/build overlap. Source/control registrations use register.sh.
+
+Independent read-only finder and skeptic found no issue, with no Lean/server/
+build/writes. Evidence and raw failures: /workspace/va1-evidence/two-prefix-next.
+TERRA-TODO lists a fourth routine exact-test adapter; it is unproved and unused.
+Sol retains the actual source-formula, both-polarity, source-size and semantic
+bridge work. All original AU01/AU02/backfill/full-gate obligations remain open
+as above; the inherited failing documentation gate remains failed.

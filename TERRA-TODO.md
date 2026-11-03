@@ -55,3 +55,29 @@ previous HashReduction reserve stop while retaining the hard12GiB/no-swap cap.
 HashReduction and the404-entry focused closure now pass. The above helper
 statements remain unproved and are not used as assumptions. The full lane and
 its general two-prefix source/coverage boundary remain incomplete.
+
+## Available Sol producer
+
+`Solidity.Decide.uintLinear_two_prefix_sourceBound` in
+`Solidity/Calculus/DecisionNumericTwoPrefix.lean` now derives both actual atoms,
+elimination/conditional identities and the source term-size bound from two real
+pushQ operations. It assumes none of T1–T3. The both-atom client and foreign
+atom rejection are checked in `Solidity/Examples/DecisionNumericTwoPrefix.lean`.
+The full source-formula and target/coverage bridges remain Sol work.
+
+## VA1-T4: LFml.UIntQF.twoPrefix_exact_tests
+
+Routine: reuse T1–T3 and the unchanged one-prefix exact_tests proof's parser,
+condMax, liftCond and cut facts. This is a conditional adapter for the existing
+511 test, not a derivation of that bound or a source/semantic theorem.
+
+```lean
+theorem LFml.UIntQF.twoPrefix_exact_tests
+    {C : Contract} {ψ : LFml C}
+    (h : ψ.UIntQF (fun q => q = ⟨.uint, 0⟩ ∨ q = ⟨.uint, 1⟩) (fun _ => False))
+    (hn : ψ.nodes ≤ 511) :
+    (LFml.all 0 .uint (.all 1 .uint ψ)).inExact = true ∧
+    (LFml.all 0 .uint (.all 1 .uint ψ)).exactBounded = true
+```
+
+No unproved helper is assumed by a checked theorem.
