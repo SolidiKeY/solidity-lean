@@ -89,3 +89,12 @@ MLOAD payload agreement with the existing P6 byte image at every native offset,
 plus unchanged physical bytes. It adds no capacity/offset restriction. Charged
 execution uses the existing memory certificate; post active-extent representation
 and Source-origin adequacy remain separate obligations.
+
+`MemoryLoad.lean` inhabits the MLOAD payload contract using the existing clipped
+reader, H7 padding, byte-order/range theorems and active-extent agreement. Its
+byte-only initializer supplies logical initial images without a native allocator
+or Source-origin claim. `MemoryLoadControls.lean` checks full and clipped backing
+with ordered nonzero bytes across a word boundary, right padding, both zero
+guards, large offsets, unchanged bytes and wrong-endian refusal for either
+pipeline tag. Independent finder/skeptic reviews found no issue; scoped guards
+pin standard axioms. Post-load active-image adequacy remains open.
