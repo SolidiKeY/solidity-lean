@@ -1030,6 +1030,11 @@ import Solidity.Evm.MemoryRecursiveSound
 import Solidity.Evm.TryPanicSourceDeterminism
 import Solidity.Evm.TryPanicSourceFrame
 import Solidity.Evm.TryPanicSourcePlan
+import Solidity.Evm.TryPanicSourceBody
+import Solidity.Evm.TryPanicSourceBodyImage
+import Solidity.Evm.TryPanicSourceBytes
+import Solidity.Evm.TryPanicSourceControl
+import Solidity.Evm.TryPanicSourceExecution
 
 import Solidity.Storage.Representation.Model
 import Solidity.Storage.Representation.Controls

@@ -20,3 +20,15 @@ Not on master yet: the Bridge relative closure (`ExternalEvm/TryPanicRelative`,
 `TryPanicSourcePadding`, `TryPanicSourceScanner`), which needs the H7 padding
 and scanner supplier and the vendor overlay. In that theorem the P1/P3
 conjuncts restate supplied premise fields; P1/P3 provenance stays open.
+
+Generic Panic body (sched 2026-11-03), core only:
+
+- `Evm/TryPanicSource{Control,Bytes,Body,BodyImage,Execution}.lean`: normalized
+  bounded Panic caller/return control; the generic Panic bytes; a proof-only
+  body (allocation, six guarded byte writes, raw-memory revert) over the
+  existing `Stmt`/`Prog`; its byte image and its execution. Two single-step
+  glue facts (`TryPanicSourceBody.PutThen`, `AllocateRun`) are parameters, not
+  proved. This is not an association with the compiled code.
+- Still not on master: the Bridge `TryPanicOperational` adapter, which imports
+  the relative closure above.
+
