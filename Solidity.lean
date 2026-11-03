@@ -1194,6 +1194,7 @@ import Solidity.Calculus.SoundSummary
 import Solidity.Calculus.Spec
 import Solidity.Calculus.StateFacts
 import Solidity.Calculus.StatePartsScoped
+import Solidity.Calculus.StaticInvocation
 import Solidity.Calculus.StaticLinear
 import Solidity.Calculus.Step
 import Solidity.Calculus.StepFragment
@@ -2083,6 +2084,7 @@ import Solidity.Semantics.RunFrame
 import Solidity.Semantics.RunFuel
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.State
+import Solidity.Semantics.StaticInvocation
 import Solidity.Semantics.Storage
 import Solidity.Semantics.Storage.Anon
 import Solidity.Semantics.Storage.Ops
