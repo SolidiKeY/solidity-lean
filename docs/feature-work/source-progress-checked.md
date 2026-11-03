@@ -66,8 +66,8 @@ and every parameter as data, with indexed and anonymous flags ignored.
 elaborated event-only unit: its function catalogue is empty, while its Boolean
 argument and locals are inhabited. `checked_call_statement` consumes
 `checked_builtin_statement` with the nonempty P9 catalogue and an internal
-call as the require argument. No admitted callee body contains a builtin or
-emit statement.
+call as the require argument. Under the original P9 checker, no admitted
+callee body contains a builtin or emit statement.
 
 These are direct-node progress adapters. They do not extend the existing
 callee-body catalogue checker to builtin/emit-containing bodies. Arbitrary
