@@ -60,3 +60,5 @@
 - Yul/LocalItemWorld.lean and Yul/Checks/LocalItemWorld.lean: universal raw-input world preservation for pure local item/default/unchecked execution.
 
 - Yul/LocalDefaultIfElse.lean and Yul/Checks/LocalDefaultIfElse.lean: conditional default scopes, concrete Source agreement and raw world preservation.
+
+- Yul/LocalDefaultWhile.lean and Yul/Checks/LocalDefaultWhile.lean: scoped default-loop Source agreement, raw purity and finite-normal exclusion.

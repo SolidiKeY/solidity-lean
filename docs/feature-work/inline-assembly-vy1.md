@@ -841,3 +841,22 @@ dirty compiler adequacy and final lane gates remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Loops with heterogeneous default scopes
+
+LocalDefaultWhile iterates a certified default-item scope after an actual Boolean
+condition. Each successful iteration drops its temporary prefix before the next
+guard; a halt retains its reached locals and partial effects. The all-fuel clean
+Source theorem composes concrete condition/block execution and recursive Source
+iteration. A separate raw-input theorem preserves the existing world at every
+horizon. Constant-true supported loops have no finite normal result, both in raw
+execution and actual clean-input Source execution; this does not classify halts.
+An inhabited uint8/uint256/Boolean body updates the enclosing guard and exits.
+Controls distinguish guard, first-declaration and body-grown timeouts, restored
+completion, untouched state on a false guard and an assigning guard's effect.
+Dirty siblings remain present. Independent Source checks confirm completion and
+timeout. General P16, admission, dirty compiler adequacy and final lane gates
+remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

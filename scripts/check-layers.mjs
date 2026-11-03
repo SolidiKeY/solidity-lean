@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalDefaultWhile|Checks\.LocalDefaultWhile)$/, // Concrete iteration of typed default scopes.
   /^Solidity\.Yul\.(LocalDefaultIfElse|Checks\.LocalDefaultIfElse)$/, // Conditional selection of typed default scopes.
   /^Solidity\.Yul\.(LocalItemWorld|Checks\.LocalItemWorld)$/, // World preservation for actual pure local runners.
   /^Solidity\.Yul\.(LocalDefaultUnchecked|Checks\.LocalDefaultUnchecked)$/, // Actual unchecked default-scope composition.
