@@ -1,6 +1,6 @@
 # Memory defaults and copies
 
-`Solidity/Backend/MemoryCopies/**` holds a partial, signature-only draft for
+`Solidity/Backend/MemoryCopies/**` holds partial certificate interfaces, local laws and inhabited controls for
 G33 and G35.01/.04/.05/.06. It is not a frozen complete interface, and no
 G33/G35 coverage is claimed. The existing intrinsic heap, storage-copy fold
 and word allocator remain the only models; no second heap or evaluator is
@@ -58,12 +58,29 @@ allocator, address-map extension, machine shape and lower-cell frame.
 
 `NewArrayLengthPanicPremise` contains length evaluation, successful index
 conversion and the oversized-length condition only. The published `2^64`
-length-panic equation is to be derived from those inputs in `SourceSize`, not
+length-panic equation is derived from those inputs in `SourceSize`, not
 assumed as another premise. Finalize-allocation/cursor-overflow semantics
 remain the separate S03-PANIC41 boundary.
 
-Positive V2 and Source certificate controls and the derived local panic law
-are separate registered modules. Their implementation and validation receipts
-must pass before the integration-review findings are considered closed. Full
-G33/G35 implementation, total size-failure coverage, recursive traversal and
-mixed-location composition remain open.
+`ControlsV2.lean` inhabits both V2 certificates using the existing empty-array
+builder and a represented allocator. Its concrete execution observes root 40,
+next cursor 41 and zero length, and preserves the reserved gap [0,8]. The
+positive witnesses accompany the empty-code and cost-W negative controls.
+
+`SourceControls.lean` inhabits all five Source certificate structures. The
+storage-copy witness loads a live two-element uint8 array, allocates a fresh
+memory parent, preserves the old heap object and observes values 7 and 11;
+index 2 panics. Bytes defaults preserve nonheap state. Timeout controls retain
+the input state. These are Source executions, not a Source-to-backend
+representation or compiled-code theorem.
+
+`SourceSize.lean` derives the oversized-length panic at the reached evaluation
+state. Concrete controls distinguish zero-length success, oversized-length
+panic and horizon timeout. The generic theorem permits a changed reached
+state; the concrete local-expression witness has no side effects.
+
+Independent finder and skeptic reviews checked the strengthened root/gap
+contract, positive inhabitants and removal of the assumed local panic result.
+Per-file diagnostics pass; full checkpoint validation is recorded separately.
+Full G33/G35 implementation, total size-failure coverage, recursive traversal
+and mixed-location composition remain open.

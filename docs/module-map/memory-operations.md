@@ -162,3 +162,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/SourceInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/SourceControls.lean` | Inhabited Source certificates with populated storage-copy observations, default/timeout controls and size-boundary witnesses. |
+| `Backend/MemoryCopies/SourceSize.lean` | Derives new-array oversized-length panic from evaluation, conversion and size hypotheses. |
