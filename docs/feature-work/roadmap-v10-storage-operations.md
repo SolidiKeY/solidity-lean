@@ -102,8 +102,10 @@ an existing location still reads it. Static/type/self-copy and next-fuel control
 distinguish false extensions. The proof reuses published capture/leaf operations;
 it does not implement memory-to-storage lowering or infer automatic rollback.
 
-Defaulted header readback is kernel-checked after repairing a stale local
-matcher reference; its existing statements, controls and axiom guards are unchanged.
+Header readback retains the published proof unchanged. The task runtime now
+follows repository-default elaboration, preserving explicit single-thread and
+resource limits; both readback and the original EVM heartbeat checks pass in
+that mode. Diagnostics from the incompatible task-local override are retained.
 
 ## Remaining obligations
 
