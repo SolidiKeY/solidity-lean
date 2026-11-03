@@ -179,20 +179,20 @@ theorem loaded_log_negative :
 
 /-- Inhabited local semantic rules over the actual copy/log consumer code.
 They are not source dl/tm embeddings or G51 transport certificates. -/
-theorem copy_rule_control :
+theorem copy_step_eq_control :
     AdapterRules.Box (AdapterRules.CopyStep TargetMemory.port (toWord 31) (toWord 1) (toWord 2))
       (fun after => after.observed = done true ∧ after.memory = writeBytes memory 31 [34, 51])
       (⟨done true, memory⟩ : AdapterRules.Configuration Memory D₀ LW LW) :=
-  AdapterRules.copy_rule _ _ _ _ _ _ rfl
+  AdapterRules.copy_step_eq _ _ _ _ _ _ rfl
 
-theorem log_rule_control :
+theorem log_step_eq_control :
     AdapterRules.Box (AdapterRules.LogStep TargetMemory.port false (addr 3) ⟨2, by decide⟩
       #v[toWord 5, toWord 6] (toWord 7) (toWord 3))
       (fun after => after.observed = emitObserved observed loadedLog ∧ after.memory = memory)
       (⟨observed, memory⟩ : AdapterRules.Configuration Memory D₀ LW LW) :=
-  AdapterRules.log_rule _ _ _ _ _ _ _ _ (logAdapter_exact _ _ _ _ _ _ _ _ _ input_loaded)
+  AdapterRules.log_step_eq _ _ _ _ _ _ _ _ (logAdapter_exact _ _ _ _ _ _ _ _ _ input_loaded)
 
-theorem call_rule_control (fail : Bool) :
+theorem call_step_eq_control (fail : Bool) :
     AdapterRules.Box (AdapterRules.CallStep TargetMemory.port (producer fail) parent .call (addr 3)
       (toWord 100000) (toWord 0) (toWord 7) (toWord 3) (toWord 31) (toWord 2)
       (answer fail [17, 34, 51]).outcome)
@@ -205,7 +205,7 @@ theorem call_rule_control (fail : Bool) :
       (toWord 100000) (toWord 0) (toWord 7) (toWord 3) (toWord 31) (toWord 2) = some result := by
     rw [callAdapter_exact _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ rfl rfl input_loaded rfl]
     cases fail <;> rfl
-  exact AdapterRules.call_rule TargetMemory.port (producer fail) parent .call (addr 3)
+  exact AdapterRules.call_step_eq TargetMemory.port (producer fail) parent .call (addr 3)
     (toWord 100000) (toWord 0) (toWord 7) (toWord 3) (toWord 31) (toWord 2) ⟨observed, memory⟩ result
     (writeBytes memory 31 [17, 34]) hc rfl
 
@@ -221,7 +221,4 @@ theorem wrong_call_outcome_refused (after : AdapterRules.Configuration Memory D�
   cases Option.some.inj hr
   cases ho
 
-#print axioms call_plumbing
-#print axioms reverted_call
-#print axioms actual_copy
 end Solidity.Yul.World.AdapterChecks

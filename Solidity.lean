@@ -2043,6 +2043,8 @@ import Solidity.Yul.World.Raw
 import Solidity.Yul.World.ReturnSize
 import Solidity.Yul.World.ReturnSizeChecks
 import Solidity.Yul.World.WorldChecks
+import Solidity.Yul.World.TargetCallMemory
+import Solidity.Yul.World.TargetCallRules
 import Solidity.Yul.Composition.CorrectnessControls
 import Solidity.Yul.Composition.CorrectnessInstances
 import Solidity.Yul.Composition.CorrectnessPublic

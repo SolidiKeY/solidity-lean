@@ -377,29 +377,3 @@ theorem window_trace_negative_controls :
        .event (.credit (addr 7) (toWord 9))] := by decide
 
 end Solidity.Yul.World.Checks
-
-#print axioms Solidity.Yul.World.returnWindow_length
-#print axioms Solidity.Yul.World.create2Input_length
-#print axioms Solidity.Yul.World.complete_revert
-#print axioms Solidity.Yul.World.nested_revert
-#print axioms Solidity.Yul.World.rollback_events
-#print axioms Solidity.Yul.World.rollback_logs
-#print axioms Solidity.Yul.World.lifecycle_revert
-#print axioms Solidity.Yul.World.Checks.mixed_rollback_exact
-#print axioms Solidity.Yul.World.Checks.success_then_revert_trace
-#print axioms Solidity.Yul.World.Checks.enclosing_revert_trace
-#print axioms Solidity.Yul.World.Checks.mixed_negative
-
-#print axioms Solidity.Yul.World.schedule_exact
-#print axioms Solidity.Yul.World.finish_idempotent
-#print axioms Solidity.Yul.World.rollback_destructTransfer
-#print axioms Solidity.Yul.World.destructTransfer_outer_revert
-#print axioms Solidity.Yul.World.Checks.funded_self_rollback
-#print axioms Solidity.Yul.World.Checks.funded_transfer_rollback
-#print axioms Solidity.Yul.World.Checks.funded_enclosing_rollback
-
-#print axioms Solidity.Yul.World.returnWindow_byte
-#print axioms Solidity.Yul.World.returnWindow_compose
-#print axioms Solidity.Yul.World.rollbackTrace_nested
-#print axioms Solidity.Yul.World.rollbackTrace_enclosing
-#print axioms Solidity.Yul.World.Checks.nested_trace_law_control

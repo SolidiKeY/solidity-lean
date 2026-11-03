@@ -114,3 +114,5 @@ import SolidityBridge.RoadmapV15.P10.StorageWarmTransport
 import SolidityBridge.RoadmapV15.P10.StorageWarmControls
 
 import SolidityBridge.RoadmapV15.P10.StorageIsolationControls
+import SolidityBridge.YulWorld.Returndata
+import SolidityBridge.YulWorld.ReturndataControls

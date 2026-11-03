@@ -84,9 +84,9 @@ def Step (F : Fixed) (salt : Option Word) (port : BytePort Memory) (invoke : Ini
   ∃ result, addressedCreation F salt port invoke before.observed before.memory parent gas value offset size = some result ∧
     result.initialization = outcome ∧ after.observed = result.observed ∧ after.memory = before.memory
 
-/-- Lean-only normal-return rule for the actual address-selected function.
+/-- Equation-indexed normal-return determinism for the address-selected function.
 Preparation and selection are part of that function, not a producer assumption. -/
-theorem addressed_rule (F : Fixed) (salt : Option Word) (port : BytePort Memory)
+theorem addressed_step_eq (F : Fixed) (salt : Option Word) (port : BytePort Memory)
     (invoke : InitcodePort D L T) (parent : CallFrame) (gas value offset size : Word)
     (before : Configuration Memory D L T) (result : CompletedCreation D L T)
     (h : addressedCreation F salt port invoke before.observed before.memory parent gas value offset size = some result) :
