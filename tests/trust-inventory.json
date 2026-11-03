@@ -1453,5 +1453,25 @@
     "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
     "kind": "override",
     "code": "@[implemented_by progallocatesM]"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "unsafe",
+    "code": "unsafe Meta.evalExpr Json (mkConst ``Json) value"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "unsafe",
+    "code": "let some [] \u2190 unsafe Meta.evalExpr (Option (List Expr)) qTy"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "kernel-option",
+    "code": "let solved \u2190 tryCatchRuntimeEx (withOptions (debug.skipKernelTC.set \u00b7 true) do"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "kernel-option",
+    "code": "let result \u2190 withOptions (debug.skipKernelTC.set \u00b7 true) <|"
   }
 ]

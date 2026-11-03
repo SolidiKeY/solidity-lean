@@ -25,7 +25,12 @@ core stays dependency-free.
   implements its definition.  Known: the opaque cryptographic primitive is
   a model assumption, recursive thunk elaboration uses unsafe code, and
   error-recovery tactics can introduce a synthetic `sorry` while reporting
-  an error.  None may reach an audited theorem.
+  an error.  None may reach an audited theorem.  The IDE-only
+  `sol.testing.direct` mode (default off; results marked
+  `verification: direct`) evaluates its checker with
+  `debug.skipKernelTC` and `unsafe evalExpr` and adds no declaration;
+  the closed-spec proposal's `evalExpr` is only an oracle whose proof
+  the kernel checks in `addDecl`.
 * **Axiom gate**: `lake env lean --tstack=131072 TrustAudit.lean` follows
   the transitive axioms of the headline theorems (correctness, callbacks,
   symbolic execution, compilation, non-vacuity); anything but `propext`,
