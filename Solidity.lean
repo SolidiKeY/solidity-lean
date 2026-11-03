@@ -133,6 +133,7 @@ import Solidity.Backend.Executable.ConstructorArgumentFailure
 import Solidity.Backend.Executable.ConstructorArgumentObservations
 import Solidity.Backend.Executable.ConstructorBaseArgumentControls
 import Solidity.Backend.Executable.ConstructorBaseArguments
+import Solidity.Backend.Executable.ConstructorInitialization
 import Solidity.Backend.Executable.ConstructorLocalArguments
 import Solidity.Backend.Executable.ConstructorStorageFailure
 import Solidity.Backend.Executable.CreationFreshness

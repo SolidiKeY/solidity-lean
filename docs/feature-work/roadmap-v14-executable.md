@@ -182,3 +182,27 @@ No balance equation or H19 representation fact is asserted. H22 ExtCall remains
 untouched. Focused module and standard-axiom checks are distinct from the still
 pending full/import-root and combined-helper gates; historical timeout and
 documentation failures are not rerun or relabelled green.
+
+## Initializer composition and argument-failure ordering
+
+`ConstructorInitialization.append` proves equality of the actual `runInits`
+computation when splitting an arbitrary initializer list. It preserves all
+state effects and the first exact halt, without a simulation premise.
+`Controls.split_init_run` exercises two nonempty segments: two writes of the
+same uint8 value 7 retain two journal entries. `repeat_not_idempotent` rules out
+silently deduplicating the second write.
+
+The supplied constructor program adds that initializer to Base in the existing
+storage-effect argument fixture. `legacy_failure` executes initialization,
+then complements saved7 to248 before checked int16-minimum negation panics;
+`viaIR_failure` complements saved255 to0 and panics before initialization.
+Both retain exact arithmetic-panic bytes but different complete returned
+states (journal lengths3/2). `observations` retains the old heap and caller
+alias; `different_states` rejects identifying these states from matching halts.
+
+Independent read-only finder and skeptic found no source defect. Five scoped
+standard-axiom guards and focused checks are separate from full/combined-helper
+validation. Program, initializer and baseArgs remain supplied typed fixtures,
+not canonical elaboration or source-to-backend constructor lowering. No Source
+implementation, H19 balance fact, H22 ExtCall, profile, budget or transaction
+rollback semantics changed. General G44.01 and the full lane remain incomplete.
