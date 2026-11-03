@@ -426,6 +426,7 @@ import Solidity.Backend.MemoryOps.CalldataViewExtensionControls
 import Solidity.Backend.MemoryOps.SourceCalldataUintCopy
 import Solidity.Backend.MemoryOps.SourceCalldataUintCopyControls
 import Solidity.Backend.MemoryOps.SourceCalldataUintTransfer
+import Solidity.Backend.MemoryOps.SourceCalldataUintBinding
 
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.CaptureAliases

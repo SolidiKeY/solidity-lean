@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceCalldataUintBinding
 import Solidity.Backend.MemoryOps.SourceCalldataUintTransfer
 import Solidity.Backend.MemoryOps.SourceCalldataUintCopy
 import Solidity.Source.SemanticsExamples
@@ -321,4 +322,211 @@ theorem checked_zero_runtime (off n : Nat) (capacity : n<2^256) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms checked_zero_runtime
+
+/-! Additional actual fresh-binding/reached-read clients. -/
+private abbrev BΓ : Source.RCtx := (.int .u256)::Γ
+private def bIndex : Source.Idx BΓ (.int .u256) := .here
+private def bSrc : Source.Idx BΓ CD := .there .here
+private def bDst : Source.Idx BΓ SU := .there (.there .here)
+private def bAlias : Source.Idx BΓ SU := .there (.there (.there .here))
+private def bNeighbor : Source.Idx BΓ SU := .there (.there (.there (.there .here)))
+private def bInput (off len : Nat) (k : PrimTy.uint.Denote) : Source.EMState E0 BΓ :=
+  (.cons (sourceUint k) (sy off len).1,(sy off len).2)
+private def bMid : Source.EMState E0 BΓ :=
+  ((bInput 0 3 (u 0)).1.set bDst (.memRef rfl 2),z.2)
+private def bFinal (value : PrimTy.uint.Denote) : Source.EMState E0 BΓ :=
+  (bMid.1.set bIndex (sourceUint value),bMid.2)
+private theorem bMemOK (off len : Nat) (k : PrimTy.uint.Denote) :
+    Source.MemOK E0 SH (bInput off len k) :=
+  ⟨⟨(memOK off len).1.1,⟨trivial,(memOK off len).1.2⟩⟩,(memOK off len).2⟩
+private def bProgram : Source.RItems E0 [] false .body BΓ BΓ :=
+  .stmt (.expr (sourceUintCalldataBind bDst bSrc))
+    (.stmt (.expr (sourceUintReadInto bDst bIndex bIndex)) .nil)
+
+/-- A real BOTH-pipeline program binds the fresh copy, reads through it and
+stores2 in the SAME scalar slot that held the initial index0. -/
+theorem bound_read_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 0 3 (u 0))=
+      (.ok (.val (.memRef rfl 2)),bMid) ∧
+    (Source.evalE (G0 p) frame (fuel+2) (.indexArray (.local bDst) (.local bIndex) rfl)).run bMid=
+      (.ok (.val (sourceUint (u 2))),bMid) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintReadInto bDst bIndex bIndex)).run bMid=
+      (.ok (.val (sourceUint (u 2))),bFinal (u 2)) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none bProgram (bInput 0 3 (u 0)).1).run (.nil,(bInput 0 3 (u 0)).2)=
+      (.ok (.normal (bFinal (u 2)).1),(.nil,(bFinal (u 2)).2)) ∧
+    checkedSourceFreshUints (E := E0) frame 0 3 hp (by decide)=.ok (some out) ∧
+    Heap.Keeps (List.prefix_append H [A]) hp out ∧
+    SourceUintMemoryAt (bFinal (u 2)) 2 out fresh .dyn ∧ Source.MemOK E0 SH (bFinal (u 2)) ∧
+    SourceUintMemoryAt (bFinal (u 2)) 0 out (left.wk (List.prefix_append H [A])) .dyn ∧
+    SourceUintMemoryAt (bFinal (u 2)) 1 out (right.wk (List.prefix_append H [A])) .dyn ∧
+    (bFinal (u 2)).1.get bAlias=.memRef rfl 0 ∧ (bFinal (u 2)).1.get bNeighbor=.memRef rfl 1 := by
+  have result := source_cd_uint_bind_read (bInput 0 3 (u 0)) hp (G0 p) frame fuel nps
+    bDst bSrc bIndex bIndex 0 3 (u 0) rfl rfl (by decide) (by decide) SH (bMemOK 0 3 (u 0))
+  rw [actually_decoded] at result
+  obtain ⟨valid,value,hit,first,read,second,program,adapter,keep,new,mok,selected,stored,other,preserved,ex,events,logs,fn⟩ := result
+  change some (u 2)=some value at hit
+  cases Option.some.inj hit
+  have oldInitial : SourceUintMemoryAt (bInput 0 3 (u 0)) 0 hp left .dyn := old_at 0 3
+  have neighborInitial : SourceUintMemoryAt (bInput 0 3 (u 0)) 1 hp right .dyn := neighbor_at 0 3
+  have oldFinal := oldInitial.transport keep (fun b obj hb => (preserved b obj hb).1)
+  have neighborFinal := neighborInitial.transport keep (fun b obj hb => (preserved b obj hb).1)
+  exact ⟨first,read,second,program,adapter,keep,new,mok,oldFinal,neighborFinal,rfl,rfl⟩
+
+/-- Full ordered local/object/identity observations at all three Source stages;
+old aliases/neighbor survive while the selected local and scalar really change. -/
+theorem bound_vectors :
+    (bInput 0 3 (u 0)).1=.cons (sourceUint (u 0)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 0) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    bMid.1=.cons (sourceUint (u 0)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    (bFinal (u 2)).1=.cons (sourceUint (u 2)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    [(bInput 0 3 (u 0)).2.heap.get 0,(bInput 0 3 (u 0)).2.heap.get 1,(bInput 0 3 (u 0)).2.heap.get 2,
+      (bInput 0 3 (u 0)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none] ∧
+    [bMid.2.heap.get 0,bMid.2.heap.get 1,bMid.2.heap.get 2,bMid.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none] ∧
+    [(bFinal (u 2)).2.heap.get 0,(bFinal (u 2)).2.heap.get 1,(bFinal (u 2)).2.heap.get 2,(bFinal (u 2)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none] ∧
+    [left.id,right.id,fresh.id]=[0,1,2] ∧
+    (bFinal (u 2)).2.ex=(bInput 0 3 (u 0)).2.ex ∧
+    (bFinal (u 2)).2.events=(bInput 0 3 (u 0)).2.events ∧
+    (bFinal (u 2)).2.logs=(bInput 0 3 (u 0)).2.logs ∧
+    (bFinal (u 2)).2.fnLocals=(bInput 0 3 (u 0)).2.fnLocals := by
+  exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- Reversing the two REAL statements reads old7 before binding, retaining7 in
+the final scalar. This differs from the proper program's final scalar2. -/
+theorem wrong_order_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.execItems (G0 p) frame (fuel+6) nps none
+      (.stmt (.expr (sourceUintReadInto bDst bIndex bIndex))
+        (.stmt (.expr (sourceUintCalldataBind bDst bSrc)) .nil) : Source.RItems E0 [] false .body BΓ BΓ)
+      (bInput 0 3 (u 0)).1).run (.nil,(bInput 0 3 (u 0)).2)=
+        (.ok (.normal (bFinal (u 7)).1),(.nil,(bFinal (u 7)).2)) ∧
+    (bFinal (u 2)).1.get bIndex≠(bFinal (u 7)).1.get bIndex := by
+  let initial := bInput 0 3 (u 0)
+  let mid : Source.EMState E0 BΓ := (initial.1.set bIndex (sourceUint (u 7)),initial.2)
+  have oldAt : SourceUintMemoryAt initial 0 hp left .dyn := old_at 0 3
+  have bound : (u 0).1.toNat<hp.len left .dyn := by
+    simp only [Heap.len,MObj.elems_dyn]
+    decide
+  have read := oldAt.eval_index (G0 p) frame (fuel+1) bDst bIndex (u 0) rfl rfl bound
+  have actualRead : (Source.evalE (G0 p) frame (fuel+3)
+      (.indexArray (.local bDst) (.local bIndex) rfl)).run initial=(.ok (.val (sourceUint (u 7))),initial) := by
+    simpa only [MObj.elems_dyn] using read
+  have first := source_uint_read_into_of_run (G0 p) frame (fuel+1) initial bDst bIndex bIndex (u 7) actualRead
+  have firstStatement := source_expr_statement_run (G0 p) frame (fuel+4) nps _ initial mid _ first
+  have second : (Source.evalE (G0 p) frame (fuel+3) (sourceUintCalldataBind bDst bSrc)).run mid=
+      (.ok (.val (.memRef rfl 2)),bFinal (u 7)) := by
+    rw [source_cd_uint_bind_run (G0 p) frame fuel mid bDst bSrc 0 3 rfl,actually_decoded]
+    rfl
+  have secondStatement := source_expr_statement_run (G0 p) frame (fuel+3) nps _ mid (bFinal (u 7)) _ second
+  refine ⟨source_items_pair_run (G0 p) frame fuel nps _ _ initial mid (bFinal (u 7)) firstStatement secondStatement,?_⟩
+  intro same
+  have observed := congrArg (fun v : Source.Val E0.layout (.int .u256) => calldataUint (.val v)) same
+  change u 2=u 7 at observed
+  exact (by decide : u 2≠u 7) observed
+
+/-- Empty copy REALLY binds a new empty root before the second read fails.
+The error outcome exposes its retained state, not a final local environment. -/
+theorem bound_empty_error (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    let initial := bInput 0 0 (u 0)
+    let mid : Source.EMState E0 BΓ :=
+      (initial.1.set bDst (.memRef rfl 2),{initial.2 with heap := (initial.2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run initial=
+      (.ok (.val (.memRef rfl 2)),mid) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintReadInto bDst bIndex bIndex)).run mid=
+      (.error (.revert (Source.panicData .index)),mid) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none bProgram initial.1).run (.nil,initial.2)=
+      (.error (.revert (Source.panicData .index)),(.nil,mid.2)) ∧
+    let pair := hp.alloc (R := A) (⟨[],by decide⟩ : MObj H A)
+    checkedSourceFreshUints (E := E0) frame 0 0 hp (by decide)=.ok (some pair.1) ∧
+    Heap.Keeps (List.prefix_append H [A]) hp pair.1 ∧
+    SourceUintMemoryAt mid 2 pair.1 pair.2 .dyn ∧ Source.MemOK E0 SH mid ∧
+    pair.1.index pair.2 .dyn (u 0)=none ∧
+    mid.2.heap.get 2=some ⟨SU,sourceUintMemory []⟩ ∧ mid.2.heap.next=3 := by
+  dsimp only
+  let initial := bInput 0 0 (u 0)
+  let mid : Source.EMState E0 BΓ :=
+    (initial.1.set bDst (.memRef rfl 2),{initial.2 with heap := (initial.2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})
+  have binding := source_cd_uint_bind_copy initial hp (G0 p) frame (fuel+1) nps bDst bSrc 0 0 rfl (by decide) SH (bMemOK 0 0 (u 0))
+  have decodedEmpty : sourceCalldataUintValues E0 frame 0 0=.ok [] := rfl
+  rw [decodedEmpty] at binding
+  obtain ⟨valid,first,firstStatement,adapter,keep,freshRep,mok,selected,other,identity,preserved,ex,events,logs,fn⟩ := binding
+  have read := freshRep.eval_read_bounds (G0 p) frame fuel bDst bIndex (u 0) selected rfl
+    (by simp only [Heap.len,Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,sourceUintValuePayload,List.map_nil,List.length_nil];exact Nat.le_refl _)
+  have actualRead : (Source.evalE (G0 p) frame (fuel+2)
+      (.indexArray (.local bDst) (.local bIndex) rfl)).run mid=
+      (.error (.revert (Source.panicData .index)),mid) := read
+  have second : (Source.evalE (G0 p) frame (fuel+3) (sourceUintReadInto bDst bIndex bIndex)).run mid=
+      (.error (.revert (Source.panicData .index)),mid) := by
+    unfold sourceUintReadInto
+    rw [Source.evalE,Source.Hoare.run_bind,actualRead]
+  have secondStatement := source_expr_statement_error (G0 p) frame (fuel+3) nps _ mid mid _ second
+  refine ⟨first,second,source_items_pair_error (G0 p) frame fuel nps _ _ initial mid mid
+    (.revert (Source.panicData .index)) firstStatement secondStatement,
+    adapter,keep,freshRep,mok,?_,rfl,rfl⟩
+  change (MObj.elems .dyn _)[0]?=none
+  rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+  rfl
+
+theorem binding_low (p : Roadmap.Pipeline) (fuel : Nat) (low : fuel≤2) :
+    (Source.evalE (G0 p) frame fuel (sourceUintCalldataBind bDst bSrc)).run (bInput 0 3 (u 0))=
+      (.error .timeout,bInput 0 3 (u 0)) :=
+  source_cd_uint_bind_low (G0 p) frame _ bDst bSrc fuel low
+
+/-- Full reversed-order final local vector; its heap/world is exactly the
+forward heap/world, while the stored scalar observation differs. -/
+theorem wrong_order_vectors :
+    (bFinal (u 7)).1=.cons (sourceUint (u 7)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    (bFinal (u 7)).2=(bFinal (u 2)).2 ∧
+    [(bFinal (u 7)).2.heap.get 0,(bFinal (u 7)).2.heap.get 1,(bFinal (u 7)).2.heap.get 2,(bFinal (u 7)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none] := by
+  exact ⟨rfl,rfl,rfl⟩
+
+/-- The complete retained EMPTY-prefix table and its reached locals. These
+locals belong to the successful prefix, not the erased error outcome context. -/
+theorem empty_prefix_vectors :
+    let initial := bInput 0 0 (u 0)
+    let mid : Source.EMState E0 BΓ :=
+      (initial.1.set bDst (.memRef rfl 2),{initial.2 with heap := (initial.2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})
+    mid.1=.cons (sourceUint (u 0)) (.cons (.cdRef rfl 0 0)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    [mid.2.heap.get 0,mid.2.heap.get 1,mid.2.heap.get 2,mid.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory []⟩,none] ∧
+    mid.2.ex=initial.2.ex ∧ mid.2.events=initial.2.events ∧ mid.2.logs=initial.2.logs ∧ mid.2.fnLocals=initial.2.fnLocals := by
+  exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.bound_read_program' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bound_read_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.bound_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms bound_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.wrong_order_program' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_order_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.bound_empty_error' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bound_empty_error
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.binding_low' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms binding_low
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.wrong_order_vectors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_order_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.empty_prefix_vectors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms empty_prefix_vectors
 end Solidity.Backend.MemoryOps.UintCopyControls
