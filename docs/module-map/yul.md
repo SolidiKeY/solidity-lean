@@ -54,3 +54,5 @@
 | `Bridge/SolidityBridge/Yul/BranchModelControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAlias.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Yul/Composition/SourceCatchBinding.lean` | Actual Source raw-bytes try/catch allocation and canonical rethrow: complete-state all-byte/all-horizon≥3 proof, old/new heap readback and scoped controls; no native/physical/full-Yul adequacy. |

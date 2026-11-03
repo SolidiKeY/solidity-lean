@@ -29973,6 +29973,102 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.call_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.completed_horizons_agree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.empty_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.environment_has_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.exact_ordered_events": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.fresh_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.no_system_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.old_alias_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.one_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.panic_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.payload_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.ping_not_static": [],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.run_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.run_rethrow_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.same_length_wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.scope_state_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.selector_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.state_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.zero_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/upstream/ByteLiterals.lean:literal_ignores_ambient_append": [],
  "tests/upstream/ByteLiterals.lean:long_literal_exact": [],
  "tests/upstream/ByteLiterals.lean:long_literal_not_truncated": [],

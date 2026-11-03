@@ -129,3 +129,41 @@ Horizon checking was339.65 seconds both before and after the Source change.
 That exceeds the300-second per-module bound: kernel completion is recorded
 separately from this pre-existing policy failure. This checkpoint does not
 fix that baseline debt or raise its budget. The lane remains partial.
+
+## Actual Source catch binding on published059eb83d
+
+The branch adopted059eb83d4e1d494f42c532513ffbcd3e65adaf75. Its actual
+`RStmt.tryCall` and `execS` now provide raw-bytes catch binding: older absence
+reports do not describe this published tree. Named Error/Panic selection and
+general Yul/raw-frame admission/adequacy remain distinct obligations.
+
+`Yul/Composition/SourceCatchBinding` executes the existing exact
+`Lowering.Readonly.SourceHistory.Try.equation`, actual CALL, catch allocRef,
+then actual canonical rethrow. A typed contract local is the receiver; the
+caller has an old memory alias and bool. The initial St has persistent and
+transient contents, a caller nonce journal, logs, fnLocals and an event prefix.
+For every byte list, both pipelines and every horizon extra+3, the result is
+the exact full bytes plus independently specified complete St: old world,
+journal/log/fnLocals/resource retained, ordered call/answer appended, fresh
+logical bytes entry1 allocated and old alias0 retained. These are logical heap
+indices, not EVM pointers or an allocation-refinement theorem. The outer EM
+locals are empty; this is not a raw caller cleanup/resumption theorem.
+
+The global uses the explicit toy Fixed and source environment strategy
+answer(revert bytes), not an assumed execution result or a compiler oracle.
+Twenty component laws include completed-horizon equality, complete old/new
+heap readback, empty/full-panic witnesses, same-length wrong-byte distinction
+and fuel0/1 timeouts. Fuel2's exact partial-event state remains unproved after
+monolithic reduction hit the unchanged200000 heartbeat budget. Its statement
+and failed source snapshot are retained outside the checked tree. The main
+proof was factored through actual producer equations instead of raising limits.
+
+Evidence: `/workspace/vy5-composition/source-catch-binding-20261103/`. No fresh
+native comparison or full checkpoint pass is claimed here. Constructor-plan
+before timings were collected, but its source functions were not edited;
+current published try support was selected instead. H16 full Bound/session
+execution, H19 monetary migration/shared-ledger contract, immutable/funds
+release, P8 realization, all24 original obligations and six full Source
+combinations remain open. Source/Lowering/Readonly producer bodies were read
+only; this checkpoint adds no Source core change. Independent finder and
+skeptic approved the concrete proof scope with no findings.

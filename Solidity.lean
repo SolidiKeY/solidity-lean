@@ -2587,6 +2587,7 @@ import Solidity.Yul.Composition.CorrectnessPublic
 import Solidity.Yul.Composition.CorrectnessPublicControls
 import Solidity.Yul.Composition.P6FrameControls
 import Solidity.Yul.Composition.P6FrameCorrectness
+import Solidity.Yul.Composition.SourceCatchBinding
 import Solidity.Yul.CoordinateControl
 import Solidity.Yul.CoordinateUpdates
 import Solidity.Yul.DeclarationCheck

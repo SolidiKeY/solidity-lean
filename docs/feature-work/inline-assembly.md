@@ -231,3 +231,9 @@ VY1 follow-up: intrinsic certificates and concrete all-list/all-fuel Source comp
 VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed suffix restoration, concrete Source block correspondence and retained reached-context failures. General P16 and final composition remain open. See inline-assembly-vy1.md.
 - VY1: LocalBoolIf adds concrete clean-input Source conditional/scope agreement with retained condition effects and partial branch contexts; full lane gates remain open. See [lane handoff](inline-assembly-vy1.md).
 - VY1: LocalBoolIfElse adds clean-input Source agreement for independently indexed conditional branches, retaining partial effects; see [lane handoff](inline-assembly-vy1.md). General P16 and final gates remain open.
+
+VY5 consumer checkpoint: actual published Source try/catch bytes allocation
+and canonical rethrow are composed with complete-state/all-byte/horizon≥3
+kernel laws in `Yul/Composition/SourceCatchBinding.lean`. See
+[the lane record](vy5-composition.md). This is not general Yul/compiler
+adequacy or native execution; the24 full obligations/six combinations stay open.
