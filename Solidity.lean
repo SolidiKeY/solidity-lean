@@ -868,6 +868,8 @@ import Solidity.Backend.StorageOps.Traversal
 import Solidity.Backend.StorageOps.TwoClearRepresentation
 import Solidity.Backend.StructuredFlow.BranchControls
 import Solidity.Backend.StructuredFlow.BranchSelector
+import Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler
+import Solidity.Backend.StructuredFlow.ConditionalSequenceCompilerControls
 import Solidity.Backend.StructuredFlow.ConditionalSourceCompiler
 import Solidity.Backend.StructuredFlow.ConditionalSourceCompilerControls
 import Solidity.Backend.StructuredFlow.CoreScopeControls

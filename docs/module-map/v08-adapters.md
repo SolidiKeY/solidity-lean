@@ -430,3 +430,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/G19/ReturnTailControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
 | `Lowering/G19/WhileReturn.lean` | The mapped assignment selector lowers a while whose body immediately bare-returns. |
 | `Lowering/G19/WhileReturnControls.lean` | Inhabited map-guided G19 clients over V07's actual mixed Bool/integer/ memory/storage fixture. |
+| `Backend/StructuredFlow/ConditionalSequenceCompiler.lean` | Compiler connection for the existing V07-related conditional followed by an assignment in its reached caller context. |
+| `Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean` | Inhabited Source/compiler continuation witnesses, frame observations and wrong-slot controls. |

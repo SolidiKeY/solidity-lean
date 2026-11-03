@@ -147,3 +147,24 @@ theorem source_fields (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
     | _ => []) = [some (if flag then 1 else 0),some 0,some 0]
 end Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls
 ```
+
+
+## ConditionalSequenceCompiler Source field projection
+
+- Module: Solidity/Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean
+- Lemma: source_sequence_fields (draft only, unimplemented and not proof evidence).
+- Routine: rewrite joined.1, split flag and reduce all three reached local reads. Keep the Source/typed/EVM statements and13 premises unchanged; the hard composition is already proved. Do not duplicate the older prefix source_fields or MappedBranch.false_run items.
+
+```lean
+namespace Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls
+open Solidity.Lowering.G19
+open Source.SemanticsExamples (G0 F0)
+open ConditionalSourceCompiler.Controls (source sci sca)
+theorem source_sequence_fields (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
+    (match (Source.execS (G0 pipeline) F0 (fuel+6) 0 none (R := []) (M := false)
+      (ConditionalSequence.statement (k := ⟨false,false⟩) sci sca sci .here sca sci sca sci)
+      (source flag).1).run (.nil,(source flag).2) with
+    | (.ok (.normal ls),_) => [(ls.get sca).key,(ls.get sci).key,(ls.get .here).key]
+    | _ => []) = [some 0,some 0,some 0]
+end Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls
+```
