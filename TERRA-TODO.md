@@ -50,3 +50,7 @@ NEW `Solidity.Backend.Aggregates.G18ArrayAccessCorollaries`, imports G18ArrayAcc
 - `selected_not_whole`: extract the existing read_element consequences without claiming the arbitrary target Path establishes target-array length or layout. Whole aggregate correspondence still needs its actual producer.
 
 Try shared tactics first; no Source edits, simulated execution premise, missing-length admission, profile/budget changes or axiom/sorry stubs.
+
+## SS-CP2 dynamic-new routine applications
+
+NEW Roadmap/V16/SSCP2/NewAllocationCorollaries.lean importing NewAllocationControls. Unproved/unused statements only: instantiate local_new_mem at bytes/string; derive seed.ty.Le after.heap.ty from preserved MemOK.le; derive nonheap frame for refusedState; export primitive allocation_mem's result as RVal.val using Hoare.bind/pure'. Keep every halt and distinguish helper postallocation refusal from source-node cap panic. No new domain/profile, source edits, axioms/sorry or proof-budget increases.
