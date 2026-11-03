@@ -2867,6 +2867,12 @@ import Solidity.Yul.Compilation.UnaryBranchControls
 import Solidity.Yul.Compilation.UnaryMachine
 import Solidity.Yul.Compilation.UnaryMachineControls
 import Solidity.Yul.Compilation.WordExpressions
+import Solidity.Yul.Compilation.ExponentMachine
+import Solidity.Yul.Compilation.ExponentMachineControls
+import Solidity.Yul.Compilation.SignedComparisonMachine
+import Solidity.Yul.Compilation.SignedComparisonMachineControls
+import Solidity.Yul.Compilation.SignedQuotientMachine
+import Solidity.Yul.Compilation.SignedQuotientMachineControls
 import Solidity.Yul.World.AdapterChecks
 import Solidity.Yul.World.AdapterRules
 import Solidity.Yul.World.Adapters

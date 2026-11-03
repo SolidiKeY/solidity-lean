@@ -191,3 +191,31 @@ VY1 follow-up: an executed context-growing Boolean Source declaration with typed
 VY1 follow-up: executed Boolean declaration/scope closure with exact Source suffix restoration, full snapshot/frame agreement, existing adapter packaging and concrete two-scope controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
 VY1 follow-up: certified constant-default declarations and unconditional all-IntTy Source correspondence, with concrete uint8/uint256 growth and dirty-prefix controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
 VY4 follow-up: intrinsic LOG, returndata and CALL-family port bindings retain full observations/return buffers, with constructive normal LOG rules, actual coupled transient rollback and lifecycle snapshot preparation. CALL completion survives output-copy refusal; source/world/static-operation/compiler/G01/G51 and final lane adequacy remain open. See [the VY4 lane record](inline-assembly-vy4.md) for exact premises and scoped controls.
+VY3 exponent checkpoint: actual EXP compiler-model execution is proved for all
+word operands, preserving machine fields and symbolic caller tails. Native gas,
+feasible large-power evaluation and general source/G24/frontend closure remain
+separate. See [the lane handoff](inline-assembly-vy3.md#exponent-compiler-model-execution).
+VY3 signed-comparison checkpoint: existing signed readings agree by a budget-
+preserving cast proof, and actual SLT/SGT compiler-model runs preserve full dirty
+words, machine fields and symbolic callers. General source/G24/native/frontend
+closure remains open. See [the lane handoff](inline-assembly-vy3.md#signed-comparison-compiler-model-execution).
+VY3 signed-quotient checkpoint: actual published VY1 step producers now drive
+complete SDIV/SMOD compiler-model runs, preserving raw results and caller/machine
+state. General Source/G24/native/frontend closure remains open. See
+[the lane handoff](inline-assembly-vy3.md#signed-quotient-consumption-of-published-word-producers).
+VY3 charged-bitwise checkpoint: actual AND/OR/XOR source/compiler origins and
+ordered code images connect to real three-gas P10 steps at emitted sites. DUP-
+prefix execution and general Source/G24/Osaka closure remain open. See
+[the lane handoff](inline-assembly-vy3.md#charged-bitwise-compiler-origin-correspondence).
+VY3 charged ISZERO checkpoint: see [lane handoff](inline-assembly-vy3.md#charged-raw-iszero-slice). Both native DUP1/ISZERO steps and X continuation are derived; full Source/G24/frontend/Bridge adequacy remains partial.
+VY3 charged NOT checkpoint: [lane handoff](inline-assembly-vy3.md#charged-raw-not-slice). Actual two-step native continuation; full original lane remains partial.
+VY3 logical shift compiler slices: [lane handoff](inline-assembly-vy3.md#charged-logical-shift-compiler-slices). Original source evaluation and complete native X continuations; full lane remains partial.
+VY3 SAR compiler slice: [lane handoff](inline-assembly-vy3.md#charged-arithmetic-shift-compiler-slice). Original source evaluation and native continuation; full lane remains partial.
+VY3 arity-three modular compiler slices: [lane handoff](inline-assembly-vy3.md#charged-arity-three-modular-compiler-slices). Original source/native continuations and exact DUP3 frames; full lane remains partial.
+VY3 dynamic-cost EXP compiler slice: [lane handoff](inline-assembly-vy3.md#charged-dynamic-cost-exponent-compiler-slice). Original source/native continuation with actual exponent-byte gas; full lane remains partial.
+VY3 concrete arithmetic selection clients: [lane handoff](inline-assembly-vy3.md#published-selection-interface-arithmetic-clients). Actual success/refusal certificate bodies; full native/Source-G24 lane remains partial.
+VY3 selection sequence composition: [lane handoff](inline-assembly-vy3.md#actual-selection-certificate-sequence-composition). Exact model/Scalar success and failure composition with real ADD/MUL instances; full lane remains partial.
+VY3 finite DUP selection: [lane handoff](inline-assembly-vy3.md#finite-dup-selection-and-actual-compiler-read-prefixes). Concrete all-index bodies connect actual ADD/MUL compiler read prefixes to sequence transport; full lane remains partial.
+VY3 source local-write/model composition: [lane handoff](inline-assembly-vy3.md#local-writes-through-actual-swappop-selection). Concrete SWAP/POP bodies and original assignment/read-after-write sequence instances; full lane remains partial.
+VY3 literal/scoped source-model composition: [lane handoff](inline-assembly-vy3.md#literal-push-and-initialized-source-scopes). Real PUSH body and initialized/zero scope instances; full lane remains partial.
+VY3 source-to-structured control: [lane handoff](inline-assembly-vy3.md#normal-source-control-to-the-published-structured-relation). Actual compiler branches/sequences establish the published stack relation; native realization/full lane remain partial.
