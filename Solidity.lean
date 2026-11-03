@@ -543,6 +543,9 @@ import Solidity.Backend.Passes.ShortCircuitBoundary
 import Solidity.Backend.Passes.ShortCircuitWitness
 import Solidity.Backend.Passes.SignedWidthCapture
 import Solidity.Backend.Passes.SignedWidthGuard
+import Solidity.Backend.Passes.SourceAdditionValue
+import Solidity.Backend.Passes.SourceAdditionValueControls
+import Solidity.Backend.Passes.SourceAdditionValuePins
 import Solidity.Backend.Passes.SourceCallBoundary
 import Solidity.Backend.Passes.SourceCallControls
 import Solidity.Backend.Passes.SourceCallFrame
