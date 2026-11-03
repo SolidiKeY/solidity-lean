@@ -18,3 +18,19 @@ are retained; retry after introducing binders, then pair/equality cases if
 needed. Keep only the winning proof. After checking, a wrapper may discharge
 correct's map_i/map_a; do not count this universal obligation closed beforehand.
 Concrete controls close both by rfl. Do not edit V07 or reserved Source modules.
+
+
+## Conditional statement scalar observation corollary
+
+Module: Solidity/Lowering/G19/ConditionalStatementControls.lean
+Lemma: scalar_observation_agrees. Why routine: rewrite the two already proved
+source_observation/target_observation endpoints; no new soundness argument.
+Use existing module opens and preserve both pipeline/choice parameters.
+
+```lean
+theorem scalar_observation_agrees (pipeline : Roadmap.Pipeline) (choice : Bool) :
+    sourceObs pipeline choice = observeTarget (code tci tca ti ta tj tb) choice
+```
+
+Draft statement only, not a compiled declaration or completed coverage row.
+Do not change either observation list, expected result or producer interface.
