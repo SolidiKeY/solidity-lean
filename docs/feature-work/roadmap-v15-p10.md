@@ -1484,3 +1484,27 @@ observations remain controls. Finder and skeptic reviews cover actual premises
 and non-vacuity. Existing primitive semantics and source certificates remain
 prior work; source/compiler/frame origin, Osaka approval and full opcode rows
 remain open.
+
+
+### Fetched signed greater-or-equal
+
+[SignedGeConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/SignedGeConsumer.lean)
+adds general fetched SLT and the actual SLT/ISZERO sequence of `Scalar.intGe`.
+The reserved signed-word bridge and existing `Scalar.intLt`/`Scalar.intGe`
+certificates are consumed read-only. Actual `toInt` interpretation, decoder,
+charged gates, intermediate complete State, code/PC alignment and remaining
+gas are derived. The single step requires gas at least three; the sequence
+requires six. Initial capacity, PC fit and fuel remain explicit. Arbitrary
+supplied arrays are instruction-local, not scanner or later-jump adequacy.
+Exact sequence gas debit and retained State/buffers are separate consequences.
+
+[SignedGeControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/SignedGeControls.lean)
+applies both typed producers directly, checking negative-versus-positive,
+unsigned contrast, minimum/maximum, equality and reversed directions with
+complete independent expected States. Empty/full legal inputs, gas/fuel/arity
+refusals and ordered code/stack/buffer/account observations are controls.
+Lean caught a copied unsigned predicate in the initial typed SLT draft; it was
+corrected to signed `toInt` before commit and the failure retained. Finder and
+skeptic reviews found no substantive defect; a mistaken LT docstring was fixed
+to SLT. Existing signed-less-or-equal work is unchanged. Compiler/frame origin,
+Osaka approval and full opcode/world correspondence remain open.

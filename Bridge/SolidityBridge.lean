@@ -255,6 +255,8 @@ import SolidityBridge.RoadmapV15.P10.SignedCompositionControls
 import SolidityBridge.RoadmapV15.P10.SignedCompositionFixtures
 import SolidityBridge.RoadmapV15.P10.SignedDivisionConsumer
 import SolidityBridge.RoadmapV15.P10.SignedDivisionControls
+import SolidityBridge.RoadmapV15.P10.SignedGeConsumer
+import SolidityBridge.RoadmapV15.P10.SignedGeControls
 import SolidityBridge.RoadmapV15.P10.SignedLeControls
 import SolidityBridge.RoadmapV15.P10.SignedLeExecution
 import SolidityBridge.RoadmapV15.P10.SignedLeFixtures

@@ -388,3 +388,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictConsumer.lean` | Actual fetched GT/ISZERO and LT/ISZERO typed LE/GE transport, exact resource premises and full State continuation. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictControls.lean` | Direct typed clients, equality-versus-strict/directional negatives, complete States and capacity/resource/ordered-observation controls. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeConsumer.lean` | General actual signed SLT and SLT/ISZERO typed intGe transport with reserved word bridge, explicit resources and complete State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeControls.lean` | Direct typed signed LT/GE clients, unsigned contrast/min/max/equality, complete States and capacity/resource/order negatives. |
