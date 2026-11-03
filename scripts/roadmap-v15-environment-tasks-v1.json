@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "namespace": "SolidityBridge.RoadmapV15.P10.EnvironmentTasksV1",
+  "rows": [
+    {
+      "opcode": "ORIGIN",
+      "claim": "OriginClaim",
+      "value": "UInt256.ofNat site.state.executionEnv.sender.val"
+    },
+    {
+      "opcode": "GASPRICE",
+      "claim": "GasPriceClaim",
+      "value": "UInt256.ofNat site.state.executionEnv.gasPrice"
+    },
+    {
+      "opcode": "CHAINID",
+      "claim": "ChainIdClaim",
+      "value": "EvmYul.State.chainId site.state.toState"
+    }
+  ]
+}
