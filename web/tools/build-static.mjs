@@ -35,6 +35,9 @@ const directAssets=process.env.SOLIDITY_BROWSER_DIRECT;
 if(directAssets){
   const manifest=JSON.parse(fs.readFileSync(path.join(directAssets,'build.json'),'utf8'));
   if(manifest.leanCommit!=='797c613eb9b6d4ec95db23e3e00af9ac6657f24b')throw new Error('Direct verifier toolchain mismatch');
+  for(const [file,key] of [['web/browser/direct-bridge.c','bridgeSha256'],['scripts/direct-runtime-closure.py','closureScriptSha256']]){
+    if(createHash('sha256').update(fs.readFileSync(path.join(root,file))).digest('hex')!==manifest[key])throw new Error('Stale direct verifier build input: '+file);
+  }
   for(const name of ['direct.js','direct.wasm']){
     const bytes=fs.readFileSync(path.join(directAssets,name));
     if(createHash('sha256').update(bytes).digest('hex')!==manifest[name==='direct.js'?'javascript':'wasm'])throw new Error('Direct verifier bytes do not match its build');
@@ -46,6 +49,8 @@ if(directAssets){
   }
   fs.mkdirSync(path.join(dist,'direct'),{recursive:true});
   for(const name of ['direct.js','direct.wasm','build.json'])fs.copyFileSync(path.join(directAssets,name),path.join(dist,'direct',name));
+  if(!fs.existsSync(path.join(directAssets,'licenses/Lean-LICENSE.txt')))throw new Error('Direct verifier license notices are missing; rebuild it with the current builder');
+  fs.cpSync(path.join(directAssets,'licenses'),path.join(dist,'licenses/Direct-Verifier'),{recursive:true});
 }
 const files=Object.fromEntries(fs.readdirSync(path.join(web,'examples')).filter(n=>n.endsWith('.sol')).map(n=>[n,fs.readFileSync(path.join(web,'examples',n),'utf8')]));
 fs.writeFileSync(path.join(dist,'bootstrap.json'),JSON.stringify({files,backend:'browser',offline:true,protocol:1,compiler:{file:compilerName,sha256:compilerHash},lean:{version:'4.24.0',available:!!leanAssets}},null,2)+'\n');

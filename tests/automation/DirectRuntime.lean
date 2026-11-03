@@ -28,7 +28,9 @@ run_elab do
   for name in ["CompactBuiltinShadow", "CompactAssertShadow"] do
     let some c := nodes.find? (fun n => (n.getObjValAs? String "name").toOption == some name)
       | throwError "missing shadow fixture"
-    if let .ok _ := check (Json.mkObj [("contract", c), ("function",toJson "wrong")]) then
+    let rows ← Lean.ofExcept (check (Json.mkObj [("contract", c), ("function",toJson "wrong")]))
+    let rows ← Lean.ofExcept rows.getArr?
+    unless rows.all (fun row => (row.getObjValAs? String "status").toOption == some "unsupported") do
       throwError "user function recognized as a builtin"
   let some c := nodes.find? (fun n => (n.getObjValAs? String "name").toOption == some "CompactScopes")
     | throwError "missing scope fixture"
@@ -46,12 +48,9 @@ run_elab do
   let nodes ← Lean.ofExcept (ast.getObjValAs? (Array Json) "nodes")
   let some c := nodes.find? (fun n => (n.getObjValAs? String "name").toOption == some "CompactConstants")
     | throwError "missing constant fixture"
-  if let .ok _ := check (Json.mkObj [("contract",c),("function",toJson "rationalConstant")]) then
-    throwError "unfolded compiler constant must use the rational reader"
-  -- Unsupported expressions reject the contract before selecting a function.
-  let c := c.setObjVal! "nodes" (Json.arr ((← Lean.ofExcept (c.getObjValAs? (Array Json) "nodes")).filter
-    (fun n => (n.getObjValAs? String "name").toOption != some "rationalConstant")))
-  for (name,expected) in [("implicitDefault","proved"),("falseImplicitDefault","refuted"),
+  -- Exact compiler constants are folded before lowering; 1 / 2 * 2 is 1
+  -- in Solidity's compile-time rational arithmetic, not integer division.
+  for (name,expected) in [("rationalConstant","refuted"),("implicitDefault","proved"),("falseImplicitDefault","refuted"),
       ("builtinAssert","proved"),("falseAfterRequire","refuted"),("reverting","proved")] do
     let rows ← Lean.ofExcept (check (Json.mkObj [("contract",c),("function",toJson name)]))
     let rows ← Lean.ofExcept rows.getArr?

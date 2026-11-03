@@ -6,6 +6,7 @@ const {createHash}=require('node:crypto');
 const {LeanSession}=require('./lean-session.cjs');
 const projects=require('./project.cjs');
 const {checkDirect}=require('./direct-runtime.cjs');
+const {unknownResult}=require('./direct-model.cjs');
 
 let session,compiler,locations;
 function checkpointRows(path,contract,contracts=[]){
@@ -42,9 +43,12 @@ async function execute(task){
   const locate=locations.sourceLocations(primary,Buffer.from(text));
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
-    const direct=await checkDirect(root,contract,options);
+    const direct=await checkDirect(root,contract,options) ||
+      (options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0'
+        ? unknownResult(contract,options,'The compiled verifier is unavailable or does not support this input.',allContracts) : null);
     if(direct){
-      directChecks.push({contract:contract.name,...direct.timings});wasmBuild=direct.build;
+      directChecks.push({contract:contract.name,backend:'unavailable',environmentImports:0,...direct.timings});wasmBuild=direct.build;
+      errors.push(...(direct.errors||[]).map(error=>({source,contract:contract.name,...error})));
       for(const row of direct.results){
         const range=locate(contract.name,row);
         results.push({...row,source,contract:contract.name,sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{}),...(row.counterexample?{counterexample:locations.sourceWitness(primary,contract.name,row)}:{})});
@@ -75,7 +79,7 @@ async function execute(task){
     else if(!errors.length)throw new Error('Lean completed without a verification checkpoint');
   }
   if(!contracts.length)errors.push({source,stage:'discovery',reason:'No contracts selected'});
-  return {results,errors,backend:{workerPid:process.pid,directChecks,...(!usedLegacy&&directChecks.length?{kind:'generated-c-wasm',wasmBuild,native:{active:false,reason:'standalone-wasm'}}:{kind:directChecks.length?'mixed':'lean',leanServerPid:session?.child?.pid,leanDocumentVersion:session?.version,native:session?.native??{active:false,reason:'no-contracts'}}),...(options.benchmark?{benchmarkMessages:benchmarkLog,phases:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/SOLKEY_BENCH (\{[^\r\n]*\})/g)].map(m=>JSON.parse(m[1])),nativeDirectNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_DIRECT_CHECK (\d+)/g)].map(m=>Number(m[1])),nativeWalkNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_SPEC_WALK (\d+)/g)].map(m=>Number(m[1]))}:{})}};
+  return {results,errors,backend:{workerPid:process.pid,directChecks,...(!usedLegacy&&directChecks.length?{kind:directChecks.every(c=>c.backend==='generated-c-wasm')?'generated-c-wasm':directChecks.every(c=>c.backend==='generated-c-native')?'generated-c-native':'compiled-unknown',wasmBuild,native:{active:directChecks.every(c=>c.backend==='generated-c-native'),reason:directChecks.every(c=>c.backend==='generated-c-native')?'standalone-native':'standalone-wasm-or-unavailable'}}:{kind:directChecks.length?'mixed':'lean',leanServerPid:session?.child?.pid,leanDocumentVersion:session?.version,native:session?.native??{active:false,reason:'no-contracts'}}),...(options.benchmark?{benchmarkMessages:benchmarkLog,phases:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/SOLKEY_BENCH (\{[^\r\n]*\})/g)].map(m=>JSON.parse(m[1])),nativeDirectNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_DIRECT_CHECK (\d+)/g)].map(m=>Number(m[1])),nativeWalkNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_SPEC_WALK (\d+)/g)].map(m=>Number(m[1]))}:{})}};
 }
 if(require.main===module){
 process.on('message',async task=>{

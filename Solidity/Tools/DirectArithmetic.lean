@@ -1,4 +1,6 @@
 import Solidity.Calculus.InputReduction
+import Solidity.Calculus.DependentReduction
+import Solidity.Calculus.ArrayReduction
 
 /-! Bounded compiled arithmetic over the existing exact source reduction.
 A closed derivative walk proves validity; refutation or exhaustion leaves this
@@ -57,6 +59,12 @@ private def upper : (f : AFml) → Option (Upper f)
       omega⟩
   | _ => none
 
+private def uppers : (f : AFml) → List (Upper f)
+  | .eq a c => [⟨a, c, fun _ h => Int.le_of_eq h⟩,
+      ⟨a.map (- ·), -c, fun x h =>
+        (Lin.eval_neg a x).symm ▸ Int.le_of_eq (congrArg (fun n : Int => -n) h)⟩]
+  | f => (upper f).toList
+
 /-- An inequality sufficient for the requested conclusion. -/
 structure Target (f : AFml) where
   coefficients : Lin
@@ -77,7 +85,7 @@ private def fromBounds? (hs : List AFml) (f : AFml) :
     Option (PLift (∀ x, (∀ a ∈ hs, a.holds x) → f.holds x)) := do
   let t ← target f
   for ha : a in hs do
-    if let some u := upper a then
+    for u in uppers a do
       if h : u.coefficients.trim = t.coefficients.trim then
         if hb : u.bound ≤ t.bound then
           return ⟨fun x hx => t.correct x (by
@@ -86,7 +94,7 @@ private def fromBounds? (hs : List AFml) (f : AFml) :
               rw [← Lin.eval_trim, h, Lin.eval_trim]
             omega)⟩
       for hbmem : b in hs do
-        if let some v := upper b then
+        for v in uppers b do
           if h : (u.coefficients.add v.coefficients).trim = t.coefficients.trim then
             if hb : u.bound + v.bound ≤ t.bound then
               return ⟨fun x hx => t.correct x (by
@@ -113,6 +121,11 @@ private def linearProof? : (fuel : Nat) → (hs : List AFml) → (f : AFml) →
       pure ⟨fun x h ha => hb.down x (fun c hc =>
         (List.mem_append.mp hc).elim
           (fun hc => a.hypotheses_hold x ha c hc) (fun hc => h c hc))⟩
+    | .eq a c => do
+      let hi ← fromBounds? hs (.le a c)
+      let lo ← fromBounds? hs (.le (a.map (- ·)) (-c))
+      pure ⟨fun x h => Int.le_antisymm (hi.down x h)
+        (Int.le_of_neg_le_neg (Eq.mp (congrArg (fun value => value ≤ -c) (Lin.eval_neg a x)) (lo.down x h)))⟩
     | g => fromBounds? hs g
 
 def propagateValid (f : AFml) : Option (PLift f.Valid) := do
@@ -123,11 +136,65 @@ end Solidity.Linear.AFml
 
 namespace Solidity.Tools
 
+private def arithmeticProof {ps : List PrimTy} (f : Linear.TypedFormula ps) : Option (PLift f.Valid) := do
+  let h ← f.guarded.propagateValid.orElse (fun _ => f.guarded.boundedValid 8192)
+  return ⟨f.valid_iff.mpr h.down⟩
+
+/-- Positive verification needs sound lowering, rather than an exact reverse
+mapping for countermodels. This also admits universal loop locals introduced
+below source antecedents. All transport proofs are erased by compilation. -/
+private def loweredArithmeticProof {C : Contract} (φ : Fml C []) : Option (PLift (Fml.Valid φ)) :=
+  match hl : φ.toLS true Decide.SymS.init with
+  | none => none
+  | some leaf => do
+    let sentence ← Decide.UniversalPrefix.ofFormula? 1024 leaf.elim.condSimp.prenex
+    let es := Decide.Inputs.unique (Decide.Inputs.formulaKeys sentence.body)
+    let encoded ← Decide.StorageEncoding.ofFormula? (ps := sentence.parameters) (es := es) sentence.body
+    let rs := ReadRealization.Layout.unique encoded.refs
+    if hc : ∀ q ∈ encoded.refs, q ∈ rs then
+      if hw : (encoded.lower rs).width ≤ (Decide.Inputs.types es sentence.parameters rs).length then
+        let typed : Linear.TypedFormula (Decide.Inputs.types es sentence.parameters rs) := ⟨encoded.lower rs, hw⟩
+        let h ← arithmeticProof typed
+        return ⟨Fml.Valid.of_toLS hl (fun g ν =>
+          (Decide.LFml.elim_holds g leaf ν).mp
+            ((Decide.LFml.condSimp_holds g _ ν).mp
+              ((Decide.LFml.prenex_holds g _ ν).mp
+                (sentence.close g ν (fun chosen =>
+                  (encoded.correct rs hc g chosen).mp
+                    (h.down (Decide.Inputs.observe es sentence.parameters rs g chosen)))))))⟩
+      else none
+    else none
+
+/-- The same positive transport through the existing array-read reduction. -/
+private def loweredArrayProof {C : Contract} (φ : Fml C []) : Option (PLift (Fml.Valid φ)) :=
+  match hl : φ.toLS true Decide.SymS.init with
+  | none => none
+  | some leaf => do
+    let body ← Decide.arrayBody? leaf.elim.condSimp.prenex
+    if (body.cut.gx.liftCondB Decide.condLiftFuel Decide.liftBudget).isNone then none else do
+      let flat ← Decide.flattenedArithmetic? (Decide.readBudget body.leaf.cutAll) body.leaf
+      let h ← arithmeticProof flat.encoding.arithmetic
+      return ⟨Fml.Valid.of_toLS hl (fun g ν =>
+        (Decide.LFml.elim_holds g leaf ν).mp
+          ((Decide.LFml.condSimp_holds g _ ν).mp
+            ((Decide.LFml.prenex_holds g _ ν).mp
+              (body.pre.close g ν (fun chosen => by
+                have hv := body.valid_iff.mpr (flat.valid_iff.mpr h.down)
+                exact body.holds_body g chosen (hv g))))))⟩
+
+def directArithmeticProof {C : Contract} (φ : Fml C []) : Option (PLift (Fml.Valid φ)) :=
+  let simple : Option (PLift (Fml.Valid φ)) := do
+    let r ← Decide.inputReduction? φ
+    let h ← arithmeticProof r.arithmetic
+    return ⟨r.valid_iff.mpr h.down⟩
+  simple.orElse fun _ => (loweredArithmeticProof φ).orElse fun _ => (loweredArrayProof φ).orElse fun _ => do
+    -- Loop frames introduce universal locals below antecedents. The existing
+    -- dependent reduction hoists that prefix and flattens dependent reads.
+    let r ← Decide.dependentReduction? φ
+    let h ← arithmeticProof r.arithmetic
+    return ⟨r.valid_iff.mpr h.down⟩
+
 def directArithmetic {C : Contract} (φ : Fml C []) : Bool :=
-  match Decide.inputReduction? φ with
-  | none => false
-  | some r =>
-    let f := r.arithmetic.guarded
-    if f.propagateValid.isSome then true else (f.boundedValid 8192).isSome
+  (directArithmeticProof φ).isSome
 
 end Solidity.Tools

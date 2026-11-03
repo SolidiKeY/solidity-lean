@@ -1,0 +1,4261 @@
+{
+  "startedAt": "2026-11-03T20:55:58.633Z",
+  "commit": "657ff2d0c8104cfcb78571b30d4c972592b7cf99",
+  "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "jarSha256": "a087efc9eeb13c7e7a8749c0d7774913a190ff54f38147e0aaaad9e5fab7e5dc",
+  "javaVersion": "openjdk version \"21.0.9\" 2025-10-21 LTS\nOpenJDK Runtime Environment Temurin-21.0.9+10 (build 21.0.9+10-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.9+10 (build 21.0.9+10-LTS, mixed mode, sharing)",
+  "trials": [
+    {
+      "name": "additionStorageWrite",
+      "repeat": 0,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "mode": "cold",
+      "wallMs": 2033.1285249999999,
+      "results": [
+        {
+          "function": "additionStorageWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 193,
+          "millis": 371,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionStorageWrite",
+      "repeat": 0,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "mode": "server",
+      "wallMs": 1765.8628270000004,
+      "results": [
+        {
+          "function": "additionStorageWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 193,
+          "millis": 316,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionSimple",
+      "repeat": 0,
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "mode": "server",
+      "wallMs": 124.22363800000039,
+      "results": [
+        {
+          "function": "additionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 29,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionStorageRead",
+      "repeat": 0,
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "mode": "server",
+      "wallMs": 167.09429700000055,
+      "results": [
+        {
+          "function": "additionStorageRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 85,
+          "millis": 74,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "subtractionSimple",
+      "repeat": 0,
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "mode": "server",
+      "wallMs": 104.74008299999969,
+      "results": [
+        {
+          "function": "subtractionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "subtractionStorageRead",
+      "repeat": 0,
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "mode": "server",
+      "wallMs": 142.28587199999947,
+      "results": [
+        {
+          "function": "subtractionStorageRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 89,
+          "millis": 52,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "multiplicationSimple",
+      "repeat": 0,
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "mode": "server",
+      "wallMs": 104.73720800000046,
+      "results": [
+        {
+          "function": "multiplicationSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 16,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "divisionSimple",
+      "repeat": 0,
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "mode": "server",
+      "wallMs": 108.10941399999956,
+      "results": [
+        {
+          "function": "divisionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 45,
+          "millis": 29,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "moduloSimple",
+      "repeat": 0,
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "mode": "server",
+      "wallMs": 117.60444499999994,
+      "results": [
+        {
+          "function": "moduloSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 49,
+          "millis": 27,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "powerSimple",
+      "repeat": 0,
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "mode": "server",
+      "wallMs": 93.11312999999973,
+      "results": [
+        {
+          "function": "powerSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 14,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "localArithmeticInRange",
+      "repeat": 0,
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "mode": "server",
+      "wallMs": 188.11945699999978,
+      "results": [
+        {
+          "function": "localArithmeticInRange",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 201,
+          "millis": 103,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "greaterEqualSimple",
+      "repeat": 0,
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "mode": "server",
+      "wallMs": 95.5627629999999,
+      "results": [
+        {
+          "function": "greaterEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 39,
+          "millis": 15,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "greaterThanSimple",
+      "repeat": 0,
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "mode": "server",
+      "wallMs": 91.50964999999997,
+      "results": [
+        {
+          "function": "greaterThanSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "lessEqualSimple",
+      "repeat": 0,
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "mode": "server",
+      "wallMs": 82.37723300000016,
+      "results": [
+        {
+          "function": "lessEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 7,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "lessThanSimple",
+      "repeat": 0,
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "mode": "server",
+      "wallMs": 84.67507099999966,
+      "results": [
+        {
+          "function": "lessThanSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "notEqualSimple",
+      "repeat": 0,
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "mode": "server",
+      "wallMs": 94.71843799999988,
+      "results": [
+        {
+          "function": "notEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 7,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalAndSimple",
+      "repeat": 0,
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "mode": "server",
+      "wallMs": 95.3650090000001,
+      "results": [
+        {
+          "function": "logicalAndSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 41,
+          "millis": 15,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "repeat": 0,
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "mode": "server",
+      "wallMs": 125.85361300000022,
+      "results": [
+        {
+          "function": "logicalAndShortCircuitRhs",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 29,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalNotSimple",
+      "repeat": 0,
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "mode": "server",
+      "wallMs": 86.51338000000032,
+      "results": [
+        {
+          "function": "logicalNotSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 7,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalOrSimple",
+      "repeat": 0,
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "mode": "server",
+      "wallMs": 96.79186100000061,
+      "results": [
+        {
+          "function": "logicalOrSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "repeat": 0,
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "mode": "server",
+      "wallMs": 123.40283799999997,
+      "results": [
+        {
+          "function": "logicalOrShortCircuitRhs",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 85,
+          "millis": 39,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "repeat": 0,
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "mode": "server",
+      "wallMs": 106.38309600000048,
+      "results": [
+        {
+          "function": "ternaryCaptureCond",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 76,
+          "millis": 25,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ternaryToIf",
+      "repeat": 0,
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "mode": "server",
+      "wallMs": 94.34961999999996,
+      "results": [
+        {
+          "function": "ternaryToIf",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 53,
+          "millis": 16,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifUnfold",
+      "repeat": 0,
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "mode": "server",
+      "wallMs": 101.19647199999963,
+      "results": [
+        {
+          "function": "ifUnfold",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 72,
+          "millis": 24,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseUnfold",
+      "repeat": 0,
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "mode": "server",
+      "wallMs": 100.55089299999963,
+      "results": [
+        {
+          "function": "ifElseUnfold",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 75,
+          "millis": 23,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifSplit",
+      "repeat": 0,
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "mode": "server",
+      "wallMs": 96.60239000000001,
+      "results": [
+        {
+          "function": "ifSplit",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 60,
+          "millis": 17,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseSplit",
+      "repeat": 0,
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "mode": "server",
+      "wallMs": 107.56452400000035,
+      "results": [
+        {
+          "function": "ifElseSplit",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 62,
+          "millis": 30,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifTrue",
+      "repeat": 0,
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "mode": "server",
+      "wallMs": 82.79346199999964,
+      "results": [
+        {
+          "function": "ifTrue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 13,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifFalse",
+      "repeat": 0,
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "mode": "server",
+      "wallMs": 96.2183670000004,
+      "results": [
+        {
+          "function": "ifFalse",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 12,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseTrue",
+      "repeat": 0,
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "mode": "server",
+      "wallMs": 86.5570200000002,
+      "results": [
+        {
+          "function": "ifElseTrue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 17,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseFalse",
+      "repeat": 0,
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "mode": "server",
+      "wallMs": 102.36662500000057,
+      "results": [
+        {
+          "function": "ifElseFalse",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseNegated",
+      "repeat": 0,
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "mode": "server",
+      "wallMs": 100.62635500000033,
+      "results": [
+        {
+          "function": "ifElseNegated",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 62,
+          "millis": 25,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireTrueLiteral",
+      "repeat": 0,
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "mode": "server",
+      "wallMs": 86.72736799999984,
+      "results": [
+        {
+          "function": "requireTrueLiteral",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 25,
+          "millis": 5,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireFalseLiteral",
+      "repeat": 0,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "mode": "server",
+      "wallMs": 81.50244799999928,
+      "results": [
+        {
+          "function": "requireFalseLiteral",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 17,
+          "millis": 5,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireGuardBox",
+      "repeat": 0,
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "mode": "server",
+      "wallMs": 114.02059399999962,
+      "results": [
+        {
+          "function": "requireGuardBox",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 123,
+          "millis": 37,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "repeat": 0,
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "mode": "server",
+      "wallMs": 105.54673399999956,
+      "results": [
+        {
+          "function": "requireHoldsDiamond",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 108,
+          "millis": 32,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "testSimpleAssert",
+      "repeat": 0,
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "mode": "server",
+      "wallMs": 107.91325200000028,
+      "results": [
+        {
+          "function": "testSimpleAssert",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 67,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootReadWrite",
+      "repeat": 0,
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "mode": "server",
+      "wallMs": 95.63976100000036,
+      "results": [
+        {
+          "function": "storageRootReadWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 67,
+          "millis": 19,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootAddAssign",
+      "repeat": 0,
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "mode": "server",
+      "wallMs": 100.02234700000008,
+      "results": [
+        {
+          "function": "storageRootAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 28,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootSubAssign",
+      "repeat": 0,
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "mode": "server",
+      "wallMs": 99.9501309999996,
+      "results": [
+        {
+          "function": "storageRootSubAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 94,
+          "millis": 28,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootMulAssign",
+      "repeat": 0,
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "mode": "server",
+      "wallMs": 112.48129499999959,
+      "results": [
+        {
+          "function": "storageRootMulAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 91,
+          "millis": 27,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDivAssign",
+      "repeat": 0,
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "mode": "server",
+      "wallMs": 117.78826200000003,
+      "results": [
+        {
+          "function": "storageRootDivAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 97,
+          "millis": 40,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootModAssign",
+      "repeat": 0,
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "mode": "server",
+      "wallMs": 110.44333499999993,
+      "results": [
+        {
+          "function": "storageRootModAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 102,
+          "millis": 34,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "repeat": 0,
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "mode": "server",
+      "wallMs": 111.62069100000008,
+      "results": [
+        {
+          "function": "storageRootMultipleWrites",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 81,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPostincrement",
+      "repeat": 0,
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "mode": "server",
+      "wallMs": 108.42134699999951,
+      "results": [
+        {
+          "function": "storageRootPostincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 27,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPreincrement",
+      "repeat": 0,
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "mode": "server",
+      "wallMs": 100.59633200000098,
+      "results": [
+        {
+          "function": "storageRootPreincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 28,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPredecrement",
+      "repeat": 0,
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "mode": "server",
+      "wallMs": 101.4509620000008,
+      "results": [
+        {
+          "function": "storageRootPredecrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 94,
+          "millis": 28,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDelete",
+      "repeat": 0,
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "mode": "server",
+      "wallMs": 103.03910899999937,
+      "results": [
+        {
+          "function": "storageRootDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 24,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDisjoint",
+      "repeat": 0,
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "mode": "server",
+      "wallMs": 102.78455499999836,
+      "results": [
+        {
+          "function": "storageRootDisjoint",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "repeat": 0,
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "mode": "server",
+      "wallMs": 226.63686899999993,
+      "results": [
+        {
+          "function": "storageRootWriteRhsCapture",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 292,
+          "millis": 145,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "repeat": 0,
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "mode": "server",
+      "wallMs": 93.14802500000042,
+      "results": [
+        {
+          "function": "storageBoolRootReadWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 52,
+          "millis": 18,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "repeat": 0,
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "mode": "server",
+      "wallMs": 105.04479700000047,
+      "results": [
+        {
+          "function": "storageIndexRootMapping",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 79,
+          "millis": 25,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "repeat": 0,
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "mode": "server",
+      "wallMs": 135.38236099999995,
+      "results": [
+        {
+          "function": "storageIndexMappingAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 118,
+          "millis": 50,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "repeat": 0,
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "mode": "server",
+      "wallMs": 122.63039800000115,
+      "results": [
+        {
+          "function": "storageIndexReadMappingStoreRoot",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 149,
+          "millis": 47,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "repeat": 0,
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "mode": "server",
+      "wallMs": 202.79064900000049,
+      "results": [
+        {
+          "function": "storageIndexWriteNseChain",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 329,
+          "millis": 126,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "repeat": 0,
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "mode": "server",
+      "wallMs": 113.74258100000043,
+      "results": [
+        {
+          "function": "storageIndexDeleteMappingBool",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 103,
+          "millis": 31,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "repeat": 0,
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "mode": "server",
+      "wallMs": 127.65472899999986,
+      "results": [
+        {
+          "function": "storageIndexDeleteNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 163,
+          "millis": 52,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "repeat": 0,
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "mode": "server",
+      "wallMs": 244.2430379999987,
+      "results": [
+        {
+          "function": "testStorageMapReadWriteAndDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 304,
+          "millis": 167,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "repeat": 0,
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "mode": "server",
+      "wallMs": 244.69725599999947,
+      "results": [
+        {
+          "function": "storageIndexCopyValue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 412,
+          "millis": 165,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageGridWriteRead",
+      "repeat": 0,
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "mode": "server",
+      "wallMs": 135.52272099999936,
+      "results": [
+        {
+          "function": "storageGridWriteRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 174,
+          "millis": 64,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "repeat": 0,
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "mode": "server",
+      "wallMs": 128.5243929999997,
+      "results": [
+        {
+          "function": "storageBoolKeyedMapping",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 111,
+          "millis": 52,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "repeat": 0,
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "mode": "server",
+      "wallMs": 190.06873199999973,
+      "results": [
+        {
+          "function": "storageIndexAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 352,
+          "millis": 116,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "repeat": 0,
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "mode": "server",
+      "wallMs": 207.86457300000075,
+      "results": [
+        {
+          "function": "storageIndexSubAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 354,
+          "millis": 125,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "repeat": 0,
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "mode": "server",
+      "wallMs": 177.89895800000158,
+      "results": [
+        {
+          "function": "storageIndexMultipleWrites",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 332,
+          "millis": 104,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "repeat": 0,
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "mode": "server",
+      "wallMs": 194.18480400000044,
+      "results": [
+        {
+          "function": "storageIndexPostincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 352,
+          "millis": 102,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "repeat": 0,
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "mode": "server",
+      "wallMs": 195.89045499999884,
+      "results": [
+        {
+          "function": "storageIndexPostdecrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 354,
+          "millis": 118,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDelete",
+      "repeat": 0,
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "mode": "server",
+      "wallMs": 179.0727939999997,
+      "results": [
+        {
+          "function": "storageIndexDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 336,
+          "millis": 105,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "repeat": 0,
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "mode": "server",
+      "wallMs": 186.64453899999899,
+      "results": [
+        {
+          "function": "storageIndexReadNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 313,
+          "millis": 104,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "repeat": 0,
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "mode": "server",
+      "wallMs": 116.04042699999991,
+      "results": [
+        {
+          "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 102,
+          "millis": 32,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "repeat": 0,
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "mode": "server",
+      "wallMs": 105.7153359999993,
+      "results": [
+        {
+          "function": "storageIndexArrayReadOutOfBoundsReverts",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 100,
+          "millis": 27,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "repeat": 0,
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "mode": "server",
+      "wallMs": 237.99904500000048,
+      "results": [
+        {
+          "function": "storageMatrixWriteRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 537,
+          "millis": 160,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "repeat": 0,
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "mode": "server",
+      "wallMs": 391.0786449999996,
+      "results": [
+        {
+          "function": "storageMatrixNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 898,
+          "millis": 315,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushEmpty",
+      "repeat": 0,
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "mode": "server",
+      "wallMs": 166.0619600000009,
+      "results": [
+        {
+          "function": "storagePushEmpty",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 142,
+          "millis": 73,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "repeat": 0,
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "mode": "server",
+      "wallMs": 118.24693200000002,
+      "results": [
+        {
+          "function": "storagePushLengthPositive",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 123,
+          "millis": 42,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "repeat": 0,
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "mode": "server",
+      "wallMs": 268.6920420000006,
+      "results": [
+        {
+          "function": "storagePushNonsimpleArg",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 428,
+          "millis": 180,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushReadBack",
+      "repeat": 0,
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "mode": "server",
+      "wallMs": 210.9299370000008,
+      "results": [
+        {
+          "function": "storagePushReadBack",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 275,
+          "millis": 136,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopAfterPush",
+      "repeat": 0,
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "mode": "server",
+      "wallMs": 158.47245100000146,
+      "results": [
+        {
+          "function": "storagePopAfterPush",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 289,
+          "millis": 88,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopNonempty",
+      "repeat": 0,
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "mode": "server",
+      "wallMs": 203.06096400000024,
+      "results": [
+        {
+          "function": "storagePopNonempty",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 397,
+          "millis": 127,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "repeat": 0,
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "mode": "server",
+      "wallMs": 119.27846200000022,
+      "results": [
+        {
+          "function": "storagePopUnknownLength",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 207,
+          "millis": 48,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "whileCountsUp",
+      "repeat": 0,
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "mode": "server",
+      "wallMs": 135.4324460000007,
+      "results": [
+        {
+          "function": "whileCountsUp",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 134,
+          "millis": 64,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "repeat": 0,
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "mode": "server",
+      "wallMs": 401.9852159999991,
+      "results": [
+        {
+          "function": "whileBodyDeclaresLocal",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 596,
+          "millis": 321,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "forWritesStorageArray",
+      "repeat": 0,
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "mode": "server",
+      "wallMs": 544.9200290000008,
+      "results": [
+        {
+          "function": "forWritesStorageArray",
+          "status": "OPEN",
+          "stopReason": "NO_APPLICABLE_RULE",
+          "steps": 696,
+          "millis": 467,
+          "openGoals": 1
+        }
+      ]
+    },
+    {
+      "name": "invariantCountsToBound",
+      "repeat": 0,
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "mode": "server",
+      "wallMs": 164.01135000000068,
+      "results": [
+        {
+          "function": "invariantCountsToBound",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 202,
+          "millis": 78,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "repeat": 0,
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "mode": "server",
+      "wallMs": 206.0187509999996,
+      "results": [
+        {
+          "function": "invariantForCountsArrayLength",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 263,
+          "millis": 131,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionStorageWrite",
+      "repeat": 1,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "mode": "server",
+      "wallMs": 138.66854800000146,
+      "results": [
+        {
+          "function": "additionStorageWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 193,
+          "millis": 58,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionSimple",
+      "repeat": 1,
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "mode": "server",
+      "wallMs": 94.75169900000037,
+      "results": [
+        {
+          "function": "additionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionStorageRead",
+      "repeat": 1,
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "mode": "server",
+      "wallMs": 99.74609599999894,
+      "results": [
+        {
+          "function": "additionStorageRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 85,
+          "millis": 23,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "subtractionSimple",
+      "repeat": 1,
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "mode": "server",
+      "wallMs": 79.55522000000201,
+      "results": [
+        {
+          "function": "subtractionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "subtractionStorageRead",
+      "repeat": 1,
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "mode": "server",
+      "wallMs": 94.37076199999865,
+      "results": [
+        {
+          "function": "subtractionStorageRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 89,
+          "millis": 25,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "multiplicationSimple",
+      "repeat": 1,
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "mode": "server",
+      "wallMs": 86.74796799999967,
+      "results": [
+        {
+          "function": "multiplicationSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "divisionSimple",
+      "repeat": 1,
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "mode": "server",
+      "wallMs": 92.15531700000065,
+      "results": [
+        {
+          "function": "divisionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 45,
+          "millis": 12,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "moduloSimple",
+      "repeat": 1,
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "mode": "server",
+      "wallMs": 86.62745799999902,
+      "results": [
+        {
+          "function": "moduloSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 49,
+          "millis": 12,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "powerSimple",
+      "repeat": 1,
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "mode": "server",
+      "wallMs": 79.5367019999976,
+      "results": [
+        {
+          "function": "powerSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "localArithmeticInRange",
+      "repeat": 1,
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "mode": "server",
+      "wallMs": 131.0553329999966,
+      "results": [
+        {
+          "function": "localArithmeticInRange",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 201,
+          "millis": 56,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "greaterEqualSimple",
+      "repeat": 1,
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "mode": "server",
+      "wallMs": 86.13474900000074,
+      "results": [
+        {
+          "function": "greaterEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 39,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "greaterThanSimple",
+      "repeat": 1,
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "mode": "server",
+      "wallMs": 74.58321200000137,
+      "results": [
+        {
+          "function": "greaterThanSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "lessEqualSimple",
+      "repeat": 1,
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "mode": "server",
+      "wallMs": 75.42608100000143,
+      "results": [
+        {
+          "function": "lessEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 5,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "lessThanSimple",
+      "repeat": 1,
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "mode": "server",
+      "wallMs": 89.6316250000018,
+      "results": [
+        {
+          "function": "lessThanSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 7,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "notEqualSimple",
+      "repeat": 1,
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "mode": "server",
+      "wallMs": 75.58920399999988,
+      "results": [
+        {
+          "function": "notEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalAndSimple",
+      "repeat": 1,
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "mode": "server",
+      "wallMs": 94.03335000000152,
+      "results": [
+        {
+          "function": "logicalAndSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 41,
+          "millis": 12,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "repeat": 1,
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "mode": "server",
+      "wallMs": 91.78462199999922,
+      "results": [
+        {
+          "function": "logicalAndShortCircuitRhs",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalNotSimple",
+      "repeat": 1,
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "mode": "server",
+      "wallMs": 78.63648499999908,
+      "results": [
+        {
+          "function": "logicalNotSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalOrSimple",
+      "repeat": 1,
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "mode": "server",
+      "wallMs": 86.15257099999872,
+      "results": [
+        {
+          "function": "logicalOrSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 7,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "repeat": 1,
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "mode": "server",
+      "wallMs": 109.20445000000109,
+      "results": [
+        {
+          "function": "logicalOrShortCircuitRhs",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 85,
+          "millis": 34,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "repeat": 1,
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "mode": "server",
+      "wallMs": 98.45738899999924,
+      "results": [
+        {
+          "function": "ternaryCaptureCond",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 76,
+          "millis": 19,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ternaryToIf",
+      "repeat": 1,
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "mode": "server",
+      "wallMs": 83.75926199999958,
+      "results": [
+        {
+          "function": "ternaryToIf",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 53,
+          "millis": 12,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifUnfold",
+      "repeat": 1,
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "mode": "server",
+      "wallMs": 110.32236300000295,
+      "results": [
+        {
+          "function": "ifUnfold",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 72,
+          "millis": 32,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseUnfold",
+      "repeat": 1,
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "mode": "server",
+      "wallMs": 88.29090200000064,
+      "results": [
+        {
+          "function": "ifElseUnfold",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 75,
+          "millis": 17,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifSplit",
+      "repeat": 1,
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "mode": "server",
+      "wallMs": 84.12355799999932,
+      "results": [
+        {
+          "function": "ifSplit",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 60,
+          "millis": 13,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseSplit",
+      "repeat": 1,
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "mode": "server",
+      "wallMs": 93.302128000003,
+      "results": [
+        {
+          "function": "ifElseSplit",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 62,
+          "millis": 17,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifTrue",
+      "repeat": 1,
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "mode": "server",
+      "wallMs": 87.0509779999993,
+      "results": [
+        {
+          "function": "ifTrue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifFalse",
+      "repeat": 1,
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "mode": "server",
+      "wallMs": 85.67007899999953,
+      "results": [
+        {
+          "function": "ifFalse",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 10,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseTrue",
+      "repeat": 1,
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "mode": "server",
+      "wallMs": 79.98204600000099,
+      "results": [
+        {
+          "function": "ifElseTrue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseFalse",
+      "repeat": 1,
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "mode": "server",
+      "wallMs": 80.86177400000088,
+      "results": [
+        {
+          "function": "ifElseFalse",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseNegated",
+      "repeat": 1,
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "mode": "server",
+      "wallMs": 90.2095339999978,
+      "results": [
+        {
+          "function": "ifElseNegated",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 62,
+          "millis": 17,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireTrueLiteral",
+      "repeat": 1,
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "mode": "server",
+      "wallMs": 69.68425299999944,
+      "results": [
+        {
+          "function": "requireTrueLiteral",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 25,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireFalseLiteral",
+      "repeat": 1,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "mode": "server",
+      "wallMs": 74.46904799999902,
+      "results": [
+        {
+          "function": "requireFalseLiteral",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 17,
+          "millis": 3,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireGuardBox",
+      "repeat": 1,
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "mode": "server",
+      "wallMs": 100.79042900000059,
+      "results": [
+        {
+          "function": "requireGuardBox",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 123,
+          "millis": 28,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "repeat": 1,
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "mode": "server",
+      "wallMs": 100.30563800000164,
+      "results": [
+        {
+          "function": "requireHoldsDiamond",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 108,
+          "millis": 24,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "testSimpleAssert",
+      "repeat": 1,
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "mode": "server",
+      "wallMs": 90.64296900000045,
+      "results": [
+        {
+          "function": "testSimpleAssert",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 67,
+          "millis": 15,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootReadWrite",
+      "repeat": 1,
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "mode": "server",
+      "wallMs": 92.15141200000289,
+      "results": [
+        {
+          "function": "storageRootReadWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 67,
+          "millis": 19,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootAddAssign",
+      "repeat": 1,
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "mode": "server",
+      "wallMs": 90.7923809999993,
+      "results": [
+        {
+          "function": "storageRootAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootSubAssign",
+      "repeat": 1,
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "mode": "server",
+      "wallMs": 97.8067910000027,
+      "results": [
+        {
+          "function": "storageRootSubAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 94,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootMulAssign",
+      "repeat": 1,
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "mode": "server",
+      "wallMs": 97.00035699999717,
+      "results": [
+        {
+          "function": "storageRootMulAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 91,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDivAssign",
+      "repeat": 1,
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "mode": "server",
+      "wallMs": 102.57546900000307,
+      "results": [
+        {
+          "function": "storageRootDivAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 97,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootModAssign",
+      "repeat": 1,
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "mode": "server",
+      "wallMs": 97.26423200000136,
+      "results": [
+        {
+          "function": "storageRootModAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 102,
+          "millis": 24,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "repeat": 1,
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "mode": "server",
+      "wallMs": 94.45082800000091,
+      "results": [
+        {
+          "function": "storageRootMultipleWrites",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 81,
+          "millis": 19,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPostincrement",
+      "repeat": 1,
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "mode": "server",
+      "wallMs": 92.80892500000118,
+      "results": [
+        {
+          "function": "storageRootPostincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 24,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPreincrement",
+      "repeat": 1,
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "mode": "server",
+      "wallMs": 100.1205289999998,
+      "results": [
+        {
+          "function": "storageRootPreincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPredecrement",
+      "repeat": 1,
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "mode": "server",
+      "wallMs": 102.54857999999876,
+      "results": [
+        {
+          "function": "storageRootPredecrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 94,
+          "millis": 27,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDelete",
+      "repeat": 1,
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "mode": "server",
+      "wallMs": 95.99807800000053,
+      "results": [
+        {
+          "function": "storageRootDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDisjoint",
+      "repeat": 1,
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "mode": "server",
+      "wallMs": 87.59117500000139,
+      "results": [
+        {
+          "function": "storageRootDisjoint",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "repeat": 1,
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "mode": "server",
+      "wallMs": 161.30610399999932,
+      "results": [
+        {
+          "function": "storageRootWriteRhsCapture",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 292,
+          "millis": 93,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "repeat": 1,
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "mode": "server",
+      "wallMs": 86.63680600000225,
+      "results": [
+        {
+          "function": "storageBoolRootReadWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 52,
+          "millis": 11,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "repeat": 1,
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "mode": "server",
+      "wallMs": 100.38054600000032,
+      "results": [
+        {
+          "function": "storageIndexRootMapping",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 79,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "repeat": 1,
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "mode": "server",
+      "wallMs": 120.47453400000086,
+      "results": [
+        {
+          "function": "storageIndexMappingAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 118,
+          "millis": 44,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "repeat": 1,
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "mode": "server",
+      "wallMs": 134.00431500000195,
+      "results": [
+        {
+          "function": "storageIndexReadMappingStoreRoot",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 149,
+          "millis": 48,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "repeat": 1,
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "mode": "server",
+      "wallMs": 181.23705999999947,
+      "results": [
+        {
+          "function": "storageIndexWriteNseChain",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 329,
+          "millis": 104,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "repeat": 1,
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "mode": "server",
+      "wallMs": 115.91018199999962,
+      "results": [
+        {
+          "function": "storageIndexDeleteMappingBool",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 103,
+          "millis": 34,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "repeat": 1,
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "mode": "server",
+      "wallMs": 124.50821800000267,
+      "results": [
+        {
+          "function": "storageIndexDeleteNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 163,
+          "millis": 51,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "repeat": 1,
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "mode": "server",
+      "wallMs": 204.51877999999851,
+      "results": [
+        {
+          "function": "testStorageMapReadWriteAndDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 304,
+          "millis": 130,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "repeat": 1,
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "mode": "server",
+      "wallMs": 207.7178559999993,
+      "results": [
+        {
+          "function": "storageIndexCopyValue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 412,
+          "millis": 134,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageGridWriteRead",
+      "repeat": 1,
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "mode": "server",
+      "wallMs": 143.09824600000138,
+      "results": [
+        {
+          "function": "storageGridWriteRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 174,
+          "millis": 66,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "repeat": 1,
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "mode": "server",
+      "wallMs": 112.13628899999821,
+      "results": [
+        {
+          "function": "storageBoolKeyedMapping",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 111,
+          "millis": 36,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "repeat": 1,
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "mode": "server",
+      "wallMs": 172.1968799999995,
+      "results": [
+        {
+          "function": "storageIndexAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 352,
+          "millis": 100,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "repeat": 1,
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "mode": "server",
+      "wallMs": 168.60162299999865,
+      "results": [
+        {
+          "function": "storageIndexSubAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 354,
+          "millis": 99,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "repeat": 1,
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "mode": "server",
+      "wallMs": 163.5822900000021,
+      "results": [
+        {
+          "function": "storageIndexMultipleWrites",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 332,
+          "millis": 85,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "repeat": 1,
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "mode": "server",
+      "wallMs": 166.01500600000145,
+      "results": [
+        {
+          "function": "storageIndexPostincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 352,
+          "millis": 95,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "repeat": 1,
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "mode": "server",
+      "wallMs": 163.98355599999923,
+      "results": [
+        {
+          "function": "storageIndexPostdecrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 354,
+          "millis": 87,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDelete",
+      "repeat": 1,
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "mode": "server",
+      "wallMs": 154.443808,
+      "results": [
+        {
+          "function": "storageIndexDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 336,
+          "millis": 82,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "repeat": 1,
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "mode": "server",
+      "wallMs": 158.45395300000018,
+      "results": [
+        {
+          "function": "storageIndexReadNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 313,
+          "millis": 84,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "repeat": 1,
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "mode": "server",
+      "wallMs": 103.20462499999849,
+      "results": [
+        {
+          "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 102,
+          "millis": 26,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "repeat": 1,
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "mode": "server",
+      "wallMs": 99.69375299999956,
+      "results": [
+        {
+          "function": "storageIndexArrayReadOutOfBoundsReverts",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 100,
+          "millis": 25,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "repeat": 1,
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "mode": "server",
+      "wallMs": 223.4988510000003,
+      "results": [
+        {
+          "function": "storageMatrixWriteRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 537,
+          "millis": 152,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "repeat": 1,
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "mode": "server",
+      "wallMs": 388.28252799999973,
+      "results": [
+        {
+          "function": "storageMatrixNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 898,
+          "millis": 306,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushEmpty",
+      "repeat": 1,
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "mode": "server",
+      "wallMs": 110.94112900000255,
+      "results": [
+        {
+          "function": "storagePushEmpty",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 142,
+          "millis": 37,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "repeat": 1,
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "mode": "server",
+      "wallMs": 104.57492300000013,
+      "results": [
+        {
+          "function": "storagePushLengthPositive",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 123,
+          "millis": 34,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "repeat": 1,
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "mode": "server",
+      "wallMs": 209.06027900000117,
+      "results": [
+        {
+          "function": "storagePushNonsimpleArg",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 428,
+          "millis": 134,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushReadBack",
+      "repeat": 1,
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "mode": "server",
+      "wallMs": 174.36243199999808,
+      "results": [
+        {
+          "function": "storagePushReadBack",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 275,
+          "millis": 102,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopAfterPush",
+      "repeat": 1,
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "mode": "server",
+      "wallMs": 158.93265600000086,
+      "results": [
+        {
+          "function": "storagePopAfterPush",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 289,
+          "millis": 92,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopNonempty",
+      "repeat": 1,
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "mode": "server",
+      "wallMs": 191.33518600000025,
+      "results": [
+        {
+          "function": "storagePopNonempty",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 397,
+          "millis": 123,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "repeat": 1,
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "mode": "server",
+      "wallMs": 144.25508999999875,
+      "results": [
+        {
+          "function": "storagePopUnknownLength",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 207,
+          "millis": 65,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "whileCountsUp",
+      "repeat": 1,
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "mode": "server",
+      "wallMs": 120.70872299999974,
+      "results": [
+        {
+          "function": "whileCountsUp",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 134,
+          "millis": 43,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "repeat": 1,
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "mode": "server",
+      "wallMs": 388.3180460000003,
+      "results": [
+        {
+          "function": "whileBodyDeclaresLocal",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 596,
+          "millis": 314,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "forWritesStorageArray",
+      "repeat": 1,
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "mode": "server",
+      "wallMs": 415.1243739999991,
+      "results": [
+        {
+          "function": "forWritesStorageArray",
+          "status": "OPEN",
+          "stopReason": "NO_APPLICABLE_RULE",
+          "steps": 696,
+          "millis": 350,
+          "openGoals": 1
+        }
+      ]
+    },
+    {
+      "name": "invariantCountsToBound",
+      "repeat": 1,
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "mode": "server",
+      "wallMs": 153.9455850000013,
+      "results": [
+        {
+          "function": "invariantCountsToBound",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 202,
+          "millis": 81,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "repeat": 1,
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "mode": "server",
+      "wallMs": 173.8756519999988,
+      "results": [
+        {
+          "function": "invariantForCountsArrayLength",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 263,
+          "millis": 102,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionStorageWrite",
+      "repeat": 2,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "mode": "server",
+      "wallMs": 122.61439799999789,
+      "results": [
+        {
+          "function": "additionStorageWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 193,
+          "millis": 48,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionSimple",
+      "repeat": 2,
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "mode": "server",
+      "wallMs": 81.74231299999883,
+      "results": [
+        {
+          "function": "additionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 7,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "additionStorageRead",
+      "repeat": 2,
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "mode": "server",
+      "wallMs": 90.61626299999989,
+      "results": [
+        {
+          "function": "additionStorageRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 85,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "subtractionSimple",
+      "repeat": 2,
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "mode": "server",
+      "wallMs": 77.81950900000083,
+      "results": [
+        {
+          "function": "subtractionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "subtractionStorageRead",
+      "repeat": 2,
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "mode": "server",
+      "wallMs": 89.93573200000174,
+      "results": [
+        {
+          "function": "subtractionStorageRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 89,
+          "millis": 23,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "multiplicationSimple",
+      "repeat": 2,
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "mode": "server",
+      "wallMs": 83.1928160000025,
+      "results": [
+        {
+          "function": "multiplicationSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 12,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "divisionSimple",
+      "repeat": 2,
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "mode": "server",
+      "wallMs": 87.01315499999691,
+      "results": [
+        {
+          "function": "divisionSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 45,
+          "millis": 13,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "moduloSimple",
+      "repeat": 2,
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "mode": "server",
+      "wallMs": 83.24008600000161,
+      "results": [
+        {
+          "function": "moduloSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 49,
+          "millis": 11,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "powerSimple",
+      "repeat": 2,
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "mode": "server",
+      "wallMs": 81.09816900000078,
+      "results": [
+        {
+          "function": "powerSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "localArithmeticInRange",
+      "repeat": 2,
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "mode": "server",
+      "wallMs": 121.31599700000152,
+      "results": [
+        {
+          "function": "localArithmeticInRange",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 201,
+          "millis": 55,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "greaterEqualSimple",
+      "repeat": 2,
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "mode": "server",
+      "wallMs": 81.60639600000286,
+      "results": [
+        {
+          "function": "greaterEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 39,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "greaterThanSimple",
+      "repeat": 2,
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "mode": "server",
+      "wallMs": 81.28004999999757,
+      "results": [
+        {
+          "function": "greaterThanSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 5,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "lessEqualSimple",
+      "repeat": 2,
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "mode": "server",
+      "wallMs": 85.31395899999916,
+      "results": [
+        {
+          "function": "lessEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 6,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "lessThanSimple",
+      "repeat": 2,
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "mode": "server",
+      "wallMs": 73.205919,
+      "results": [
+        {
+          "function": "lessThanSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "notEqualSimple",
+      "repeat": 2,
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "mode": "server",
+      "wallMs": 75.06247300000177,
+      "results": [
+        {
+          "function": "notEqualSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalAndSimple",
+      "repeat": 2,
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "mode": "server",
+      "wallMs": 80.42300199999954,
+      "results": [
+        {
+          "function": "logicalAndSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 41,
+          "millis": 8,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "repeat": 2,
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "mode": "server",
+      "wallMs": 88.37480999999752,
+      "results": [
+        {
+          "function": "logicalAndShortCircuitRhs",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalNotSimple",
+      "repeat": 2,
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "mode": "server",
+      "wallMs": 71.13378200000079,
+      "results": [
+        {
+          "function": "logicalNotSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalOrSimple",
+      "repeat": 2,
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "mode": "server",
+      "wallMs": 74.72476199999801,
+      "results": [
+        {
+          "function": "logicalOrSimple",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 26,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "repeat": 2,
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "mode": "server",
+      "wallMs": 97.1067550000007,
+      "results": [
+        {
+          "function": "logicalOrShortCircuitRhs",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 85,
+          "millis": 31,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "repeat": 2,
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "mode": "server",
+      "wallMs": 99.71184999999969,
+      "results": [
+        {
+          "function": "ternaryCaptureCond",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 76,
+          "millis": 24,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ternaryToIf",
+      "repeat": 2,
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "mode": "server",
+      "wallMs": 88.90723699999944,
+      "results": [
+        {
+          "function": "ternaryToIf",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 53,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifUnfold",
+      "repeat": 2,
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "mode": "server",
+      "wallMs": 93.38409500000125,
+      "results": [
+        {
+          "function": "ifUnfold",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 72,
+          "millis": 19,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseUnfold",
+      "repeat": 2,
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "mode": "server",
+      "wallMs": 90.64988300000186,
+      "results": [
+        {
+          "function": "ifElseUnfold",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 75,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifSplit",
+      "repeat": 2,
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "mode": "server",
+      "wallMs": 88.73605099999986,
+      "results": [
+        {
+          "function": "ifSplit",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 60,
+          "millis": 14,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseSplit",
+      "repeat": 2,
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "mode": "server",
+      "wallMs": 87.59887000000163,
+      "results": [
+        {
+          "function": "ifElseSplit",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 62,
+          "millis": 16,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifTrue",
+      "repeat": 2,
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "mode": "server",
+      "wallMs": 86.12527299999783,
+      "results": [
+        {
+          "function": "ifTrue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifFalse",
+      "repeat": 2,
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "mode": "server",
+      "wallMs": 83.5364640000007,
+      "results": [
+        {
+          "function": "ifFalse",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 38,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseTrue",
+      "repeat": 2,
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "mode": "server",
+      "wallMs": 81.50188799999887,
+      "results": [
+        {
+          "function": "ifElseTrue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 10,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseFalse",
+      "repeat": 2,
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "mode": "server",
+      "wallMs": 78.72827299999699,
+      "results": [
+        {
+          "function": "ifElseFalse",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 42,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "ifElseNegated",
+      "repeat": 2,
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "mode": "server",
+      "wallMs": 88.6674430000021,
+      "results": [
+        {
+          "function": "ifElseNegated",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 62,
+          "millis": 18,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireTrueLiteral",
+      "repeat": 2,
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "mode": "server",
+      "wallMs": 80.06411899999875,
+      "results": [
+        {
+          "function": "requireTrueLiteral",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 25,
+          "millis": 3,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireFalseLiteral",
+      "repeat": 2,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "mode": "server",
+      "wallMs": 71.56808999999703,
+      "results": [
+        {
+          "function": "requireFalseLiteral",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 17,
+          "millis": 4,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireGuardBox",
+      "repeat": 2,
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "mode": "server",
+      "wallMs": 103.55808900000193,
+      "results": [
+        {
+          "function": "requireGuardBox",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 123,
+          "millis": 30,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "repeat": 2,
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "mode": "server",
+      "wallMs": 105.73049499999979,
+      "results": [
+        {
+          "function": "requireHoldsDiamond",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 108,
+          "millis": 25,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "testSimpleAssert",
+      "repeat": 2,
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "mode": "server",
+      "wallMs": 88.35935099999915,
+      "results": [
+        {
+          "function": "testSimpleAssert",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 67,
+          "millis": 16,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootReadWrite",
+      "repeat": 2,
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "mode": "server",
+      "wallMs": 78.50813600000038,
+      "results": [
+        {
+          "function": "storageRootReadWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 67,
+          "millis": 14,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootAddAssign",
+      "repeat": 2,
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "mode": "server",
+      "wallMs": 86.47875900000145,
+      "results": [
+        {
+          "function": "storageRootAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 21,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootSubAssign",
+      "repeat": 2,
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "mode": "server",
+      "wallMs": 90.56863200000225,
+      "results": [
+        {
+          "function": "storageRootSubAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 94,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootMulAssign",
+      "repeat": 2,
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "mode": "server",
+      "wallMs": 93.70041899999705,
+      "results": [
+        {
+          "function": "storageRootMulAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 91,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDivAssign",
+      "repeat": 2,
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "mode": "server",
+      "wallMs": 93.49727699999858,
+      "results": [
+        {
+          "function": "storageRootDivAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 97,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootModAssign",
+      "repeat": 2,
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "mode": "server",
+      "wallMs": 87.13461000000098,
+      "results": [
+        {
+          "function": "storageRootModAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 102,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "repeat": 2,
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "mode": "server",
+      "wallMs": 92.1941590000024,
+      "results": [
+        {
+          "function": "storageRootMultipleWrites",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 81,
+          "millis": 18,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPostincrement",
+      "repeat": 2,
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "mode": "server",
+      "wallMs": 83.93867099999989,
+      "results": [
+        {
+          "function": "storageRootPostincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPreincrement",
+      "repeat": 2,
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "mode": "server",
+      "wallMs": 85.40905799999746,
+      "results": [
+        {
+          "function": "storageRootPreincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 93,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootPredecrement",
+      "repeat": 2,
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "mode": "server",
+      "wallMs": 90.82808700000169,
+      "results": [
+        {
+          "function": "storageRootPredecrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 94,
+          "millis": 22,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDelete",
+      "repeat": 2,
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "mode": "server",
+      "wallMs": 92.49966399999903,
+      "results": [
+        {
+          "function": "storageRootDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootDisjoint",
+      "repeat": 2,
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "mode": "server",
+      "wallMs": 86.5035760000028,
+      "results": [
+        {
+          "function": "storageRootDisjoint",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 84,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "repeat": 2,
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "mode": "server",
+      "wallMs": 152.01635499999975,
+      "results": [
+        {
+          "function": "storageRootWriteRhsCapture",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 292,
+          "millis": 82,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "repeat": 2,
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "mode": "server",
+      "wallMs": 78.97192400000131,
+      "results": [
+        {
+          "function": "storageBoolRootReadWrite",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 52,
+          "millis": 9,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "repeat": 2,
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "mode": "server",
+      "wallMs": 91.60931899999923,
+      "results": [
+        {
+          "function": "storageIndexRootMapping",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 79,
+          "millis": 20,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "repeat": 2,
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "mode": "server",
+      "wallMs": 99.9885409999988,
+      "results": [
+        {
+          "function": "storageIndexMappingAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 118,
+          "millis": 33,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "repeat": 2,
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "mode": "server",
+      "wallMs": 104.47193799999877,
+      "results": [
+        {
+          "function": "storageIndexReadMappingStoreRoot",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 149,
+          "millis": 38,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "repeat": 2,
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "mode": "server",
+      "wallMs": 162.50462300000072,
+      "results": [
+        {
+          "function": "storageIndexWriteNseChain",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 329,
+          "millis": 91,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "repeat": 2,
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "mode": "server",
+      "wallMs": 97.06041600000026,
+      "results": [
+        {
+          "function": "storageIndexDeleteMappingBool",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 103,
+          "millis": 27,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "repeat": 2,
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "mode": "server",
+      "wallMs": 111.77961499999947,
+      "results": [
+        {
+          "function": "storageIndexDeleteNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 163,
+          "millis": 45,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "repeat": 2,
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "mode": "server",
+      "wallMs": 189.2888559999992,
+      "results": [
+        {
+          "function": "testStorageMapReadWriteAndDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 304,
+          "millis": 119,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "repeat": 2,
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "mode": "server",
+      "wallMs": 209.60109400000147,
+      "results": [
+        {
+          "function": "storageIndexCopyValue",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 412,
+          "millis": 136,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageGridWriteRead",
+      "repeat": 2,
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "mode": "server",
+      "wallMs": 126.17223999999987,
+      "results": [
+        {
+          "function": "storageGridWriteRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 174,
+          "millis": 56,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "repeat": 2,
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "mode": "server",
+      "wallMs": 92.20367299999634,
+      "results": [
+        {
+          "function": "storageBoolKeyedMapping",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 111,
+          "millis": 32,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "repeat": 2,
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "mode": "server",
+      "wallMs": 162.45694200000435,
+      "results": [
+        {
+          "function": "storageIndexAddAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 352,
+          "millis": 88,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "repeat": 2,
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "mode": "server",
+      "wallMs": 167.42771399999765,
+      "results": [
+        {
+          "function": "storageIndexSubAssign",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 354,
+          "millis": 93,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "repeat": 2,
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "mode": "server",
+      "wallMs": 164.62786099999357,
+      "results": [
+        {
+          "function": "storageIndexMultipleWrites",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 332,
+          "millis": 86,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "repeat": 2,
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "mode": "server",
+      "wallMs": 155.92705099999876,
+      "results": [
+        {
+          "function": "storageIndexPostincrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 352,
+          "millis": 88,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "repeat": 2,
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "mode": "server",
+      "wallMs": 155.2752709999986,
+      "results": [
+        {
+          "function": "storageIndexPostdecrement",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 354,
+          "millis": 89,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexDelete",
+      "repeat": 2,
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "mode": "server",
+      "wallMs": 145.43789200000174,
+      "results": [
+        {
+          "function": "storageIndexDelete",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 336,
+          "millis": 79,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "repeat": 2,
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "mode": "server",
+      "wallMs": 153.15347699999984,
+      "results": [
+        {
+          "function": "storageIndexReadNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 313,
+          "millis": 80,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "repeat": 2,
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "mode": "server",
+      "wallMs": 92.3159300000043,
+      "results": [
+        {
+          "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 102,
+          "millis": 25,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "repeat": 2,
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "mode": "server",
+      "wallMs": 96.70668999999907,
+      "results": [
+        {
+          "function": "storageIndexArrayReadOutOfBoundsReverts",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 100,
+          "millis": 27,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "repeat": 2,
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "mode": "server",
+      "wallMs": 229.37537999999768,
+      "results": [
+        {
+          "function": "storageMatrixWriteRead",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 537,
+          "millis": 159,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "repeat": 2,
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "mode": "server",
+      "wallMs": 380.89923400000407,
+      "results": [
+        {
+          "function": "storageMatrixNseIndex",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 898,
+          "millis": 308,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushEmpty",
+      "repeat": 2,
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "mode": "server",
+      "wallMs": 111.63186600000336,
+      "results": [
+        {
+          "function": "storagePushEmpty",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 142,
+          "millis": 42,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "repeat": 2,
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "mode": "server",
+      "wallMs": 109.657941999998,
+      "results": [
+        {
+          "function": "storagePushLengthPositive",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 123,
+          "millis": 36,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "repeat": 2,
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "mode": "server",
+      "wallMs": 209.7245269999985,
+      "results": [
+        {
+          "function": "storagePushNonsimpleArg",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 428,
+          "millis": 135,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePushReadBack",
+      "repeat": 2,
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "mode": "server",
+      "wallMs": 173.27515099999437,
+      "results": [
+        {
+          "function": "storagePushReadBack",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 275,
+          "millis": 103,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopAfterPush",
+      "repeat": 2,
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "mode": "server",
+      "wallMs": 163.7689029999965,
+      "results": [
+        {
+          "function": "storagePopAfterPush",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 289,
+          "millis": 96,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopNonempty",
+      "repeat": 2,
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "mode": "server",
+      "wallMs": 205.49401500000386,
+      "results": [
+        {
+          "function": "storagePopNonempty",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 397,
+          "millis": 130,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "repeat": 2,
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "mode": "server",
+      "wallMs": 136.51440100000036,
+      "results": [
+        {
+          "function": "storagePopUnknownLength",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 207,
+          "millis": 48,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "whileCountsUp",
+      "repeat": 2,
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "mode": "server",
+      "wallMs": 114.1462709999978,
+      "results": [
+        {
+          "function": "whileCountsUp",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 134,
+          "millis": 44,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "repeat": 2,
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "mode": "server",
+      "wallMs": 379.84862099999737,
+      "results": [
+        {
+          "function": "whileBodyDeclaresLocal",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 596,
+          "millis": 307,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "forWritesStorageArray",
+      "repeat": 2,
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "mode": "server",
+      "wallMs": 400.5022069999977,
+      "results": [
+        {
+          "function": "forWritesStorageArray",
+          "status": "OPEN",
+          "stopReason": "NO_APPLICABLE_RULE",
+          "steps": 696,
+          "millis": 328,
+          "openGoals": 1
+        }
+      ]
+    },
+    {
+      "name": "invariantCountsToBound",
+      "repeat": 2,
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "mode": "server",
+      "wallMs": 143.76276599999983,
+      "results": [
+        {
+          "function": "invariantCountsToBound",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 202,
+          "millis": 67,
+          "openGoals": 0
+        }
+      ]
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "repeat": 2,
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "mode": "server",
+      "wallMs": 173.50827600000048,
+      "results": [
+        {
+          "function": "invariantForCountsArrayLength",
+          "status": "PROVED",
+          "stopReason": "PROVED",
+          "steps": 263,
+          "millis": 104,
+          "openGoals": 0
+        }
+      ]
+    }
+  ],
+  "serverStartupMs": 305.257333,
+  "passed": true
+}

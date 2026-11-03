@@ -26,7 +26,7 @@ async function loadCompiler(){
   writeFileSync(base+'build.gradle',`ext.soljsonFile = "soljson-v0.8.34+commit.80d5c536.js"\next.soljsonSha256 = "${pin}"\n`);
   writeFileSync('/runtime/solkey/snapshot.json',JSON.stringify({commit:'browser-local-compiler'}));
   await new Promise((resolve,reject)=>{globalThis.Module={onRuntimeInitialized:resolve,onAbort:message=>reject(new Error(String(message)))};try{importScripts('/compiler/soljson-v0.8.34+commit.80d5c536.js');}catch(error){reject(error);}});
-  send('runtime',{mode:'browser',compilerReady:true,proofReady:false,error:null,message:'Solidity compilation runs in this browser. Preparing the pinned Lean kernel.'});
+  send('runtime',{mode:'browser',compilerReady:true,proofReady:false,error:null,message:'Preparing the compiled verifier.'});
   initializeProofs();
 }
 function resetProofs(replayAutomatic=false){cancelProofs();proofReady=false;activeProof=undefined;proofChain=Promise.resolve();proofBoot++;send('runtime',{mode:'browser',compilerReady:true,proofReady:false,error:null,message:'Preparing the browser proof worker.'});initializeProofs(replayAutomatic);}
@@ -34,14 +34,15 @@ async function initializeProofs(replayAutomatic=true){
   const boot=++proofBoot;
   try{
     const runtime=await prepareProofs(event=>{if(event.method==='log')send('log',{message:event.message});if(event.method==='restartRequired')resetProofs(true);});
+    if(runtime.kind==='compiled-verifier-unavailable')throw new Error('The compiled verifier is not installed. Rebuild the website with its matching runtime.');
     if(boot!==proofBoot)return;proofReady=true;send('runtime',{mode:'browser',compilerReady:true,proofReady:true,error:null,lean:runtime.version,verifier:runtime.kind||'lean-frontend',wasmBytes:runtime.wasmBytes,build:runtime.build,message:'The verifier and Solidity compiler run entirely in this browser.'});if(replayAutomatic&&settings.automaticVerification==='change')for(const doc of docs.values())schedule(doc);
-  }catch(error){if(boot!==proofBoot)return;cancelProofs();proofReady=false;send('runtime',{mode:'browser',compilerReady:true,proofReady:false,error:error.message,message:'Unable to start Lean: '+error.message});}
+  }catch(error){if(boot!==proofBoot)return;cancelProofs();proofReady=false;send('runtime',{mode:'browser',compilerReady:true,proofReady:false,error:error.message,message:'Unable to start the verifier: '+error.message});}
 }
 async function verify(doc,options){
   const epoch=generation,version=doc.version,text=doc.text;
   const compiled=await analyze(doc);
   if(epoch!==generation)throw Object.assign(new Error('Document content changed'),{code:-32801});
-  if(!proofReady)throw new Error('The pinned Lean 4.24 browser proof runtime is not installed yet or is still preparing. No proof has been claimed.');
+  if(!proofReady)throw new Error('The compiled verifier is still preparing or unavailable.');
   const key=JSON.stringify([epoch,doc.name,version,options]);
   emit('status',doc,{state:'running',functions:compiled.index.nodes.filter(n=>n.nodeType==='FunctionDefinition').map(n=>({range:compiled.index.nameRange(n),status:'running'})).filter(f=>f.range)});
   let report=proofCache.get(key),cacheHit=!!report;

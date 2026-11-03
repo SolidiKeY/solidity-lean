@@ -71,3 +71,15 @@ test('witness names use exact parameter positions across renamed and unnamed ove
   assert.ok(sourceWitness(ast,'C',{...row,sourceId:99}).arguments.every(a => a.sourceName === undefined));
   assert.equal(sourceWitness(ast,'C',{}),undefined);
 });
+
+test('inherited declarations retain same-source locations and reject foreign offsets', () => {
+  const bytes=Buffer.from('contract Base { function f() {} } contract Derived is Base {}');
+  const offset=bytes.indexOf('function');
+  const base={nodeType:'ContractDefinition',id:1,name:'Base',src:'0:32:0',nodes:[
+    {nodeType:'FunctionDefinition',id:11,src:`${offset}:15:0`},
+    {nodeType:'FunctionDefinition',id:12,src:'0:10:1'}]};
+  const derived={nodeType:'ContractDefinition',id:2,name:'Derived',src:'33:27:0',linearizedBaseContracts:[2,1],nodes:[]};
+  const locate=sourceLocations({src:`0:${bytes.length}:0`,nodes:[base,derived]},bytes);
+  assert.equal(locate('Derived',{sourceId:11}).start.character,offset);
+  assert.equal(locate('Derived',{sourceId:12}),undefined);
+});

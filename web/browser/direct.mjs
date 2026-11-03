@@ -13,7 +13,7 @@ export async function prepareDirect(progress){
   }catch(error){
     if(error.code==='CANCELLED'||transport!==owned)throw error;
     owned.dispose();transport=undefined;ready=undefined;unavailable=true;
-    progress?.({method:'log',message:'Using the general verifier: '+error.message});return null;
+    progress?.({method:'log',message:'Compiled verifier unavailable: '+error.message});return null;
   }
 }
 export async function checkDirect(contract,options,timeoutMs){
