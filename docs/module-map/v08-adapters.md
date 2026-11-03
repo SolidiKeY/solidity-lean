@@ -385,3 +385,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderConsumer.lean` | General fetched LT/GT word and typed-certificate agreement with actual decoder, charged gate and full State continuation. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderControls.lean` | Direct typed clients, unsigned-versus-signed/reversed order, boundary/capacity/resource negatives and complete ordered States. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictConsumer.lean` | Actual fetched GT/ISZERO and LT/ISZERO typed LE/GE transport, exact resource premises and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictControls.lean` | Direct typed clients, equality-versus-strict/directional negatives, complete States and capacity/resource/ordered-observation controls. |

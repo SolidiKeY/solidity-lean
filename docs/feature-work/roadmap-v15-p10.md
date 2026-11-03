@@ -1461,3 +1461,26 @@ refusals and ordered code/stack/buffer/account observations are controls.
 Independent finder and skeptic reviews cover premises, non-vacuity and prior
 coverage. Existing raw word bridges and source certificates remain read-only;
 compiler/frame origin, Osaka approval and full opcode correspondence stay open.
+
+
+### Fetched unsigned non-strict order
+
+[UnsignedNonStrictConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictConsumer.lean)
+composes actual GT/ISZERO for unsigned less-or-equal and LT/ISZERO for unsigned
+greater-or-equal, using the prior general strict-order and ISZERO consumers.
+The existing `Scalar.uintLe` and `Scalar.uintGe` certificates connect the same
+typed operands to the two fetched steps. Intermediate complete State, code/PC
+alignment and remaining gas are derived. Gas at least six, initial capacity,
+post-comparison PC fit and fuel stay explicit. Any supplied destination array
+is instruction-local; scanner and later-jump adequacy do not follow. Exact gas
+debit and retained State/memory/return buffers are separate consequences.
+
+[UnsignedNonStrictControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictControls.lean)
+applies both combined typed producers directly with independent complete
+expected States. Equality must return true in both sequences, unlike strict
+order; maximum/zero distinguish directions. Empty/full legal input stacks,
+high-bit words, gas five, fuel two and ordered code/stack/buffer/account
+observations remain controls. Finder and skeptic reviews cover actual premises
+and non-vacuity. Existing primitive semantics and source certificates remain
+prior work; source/compiler/frame origin, Osaka approval and full opcode rows
+remain open.
