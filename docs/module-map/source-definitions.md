@@ -81,3 +81,9 @@
 | `Source/ExprProgress.lean` | V04b progress, expressions: `NS`/`NSP`; the value fragment (`RExpr.ValFrag`, `RExpr.MapRef`, `RLVal.IsSimple`: locals, value-type state variables, mappings) is never stuck (`exprNSAt`, `evalE_valFrag_ns`; `readAt_ns`, `writeAt_ns`, `keyStep_nsp`, `convRV_ns`); the fragment parameterized by allowed callees (`RExpr.ValFragC`, `CallNS`, `exprNSAt_step`) |
 | `Source/StmtProgress.lean` | V04b progress, statements: the statement value fragment in a body frame is never stuck (`stmtNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`; `RStmt.ext`, `Locals.restore_ok`, `BodyFrame`); calls inside expressions by the joint induction `FragAt`/`fragAt` under `CallsOK` (`evalE_callFrag_ns`); elaborated frames (`Elaborated.body_locals`, `Glob.dispatchFn_params`) |
 | `Source/SoundnessExamples.lean` | V04b controls: value-layer witnesses and stuck negative controls; fragment witnesses evaluated in the kernel (a loop, a storage update), an unframed `return` stuck; call witnesses (`callF_ns`, `recF_ns`, `callF_badFrame_stuck`) |
+| `Source/FailureMachine.lean` | Explicit-plan Source frame operations (H16 execution leaf) These operations run in the actual Source EM and use its existing event emitter. |
+| `Source/FailureMachineControls.lean` | Independent expected actual-EM controls. |
+| `Source/FailurePrimitives.lean` | Shared actual-EM failure primitives below Eval. |
+| `Source/Monetary.lean` | Balances are exact naturals, including values outside the EVM word range. |
+| `Source/FailureEventControls.lean` | Independently fixed complete states for actual Source.emitEvent, with nonempty caller journal/event prefix and byte-memory alias. |
+| `Source/FailureEventLaws.lean` | Full-state law for the actual Source event emitter. |

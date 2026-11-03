@@ -51,3 +51,10 @@ Module `Solidity.Source.FailureMachine`, namespace `Source.FailureExecution`:
 - `emit_none {E Γ} (event : Roadmap.Event) : emit (E := E) (Γ := Γ) none event = Source.emitEvent event`.
 All are definitionally the None branch, routine `rfl`; immutable-plan execution
 and owner/error soundness remain with Sol. Do not alter the Source evaluator.
+
+## Actual Source event hook (routine glue; no Lean placeholders)
+
+- `Source/FailureEventLaws`, `emit_disabled_run`: for arbitrary E/Γ/event/l/s, `(Source.emitEvent event none).run (l,s) = (.ok (), (l,{s with events := s.events ++ [event]}))`. Routine definitional compatibility, including stale cursor metadata.
+- `Source/FailureEventLaws`, `emit_facade_eq`: `FailureExecution.emit plan event = Source.emitEvent event plan`. Routine facade identity.
+
+The general reached-stop/full-state soundness law remains Sol-owned and is proved in the module. These routine statements are not assumed by any proof.

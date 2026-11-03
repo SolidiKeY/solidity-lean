@@ -3356,3 +3356,6 @@ import Solidity.Source.FailureCursor
 import Solidity.Source.FailureMachine
 import Solidity.Source.FailureMachineControls
 import Solidity.Source.Monetary
+import Solidity.Source.FailurePrimitives
+import Solidity.Source.FailureEventLaws
+import Solidity.Source.FailureEventControls

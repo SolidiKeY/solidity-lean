@@ -1,4 +1,5 @@
 import Solidity.Source.Machine
+import Solidity.Source.FailurePrimitives
 
 /-!
 # Expression and statement semantics (S02, S03)
@@ -747,7 +748,15 @@ def instanceAt {Γ : RCtx} (G : Glob E) (a : Address) : EM E Γ (Option String) 
   | none => pure none
 
 /-- Recording an observable event. -/
-def emitEvent {Γ : RCtx} (e : Event) : EM E Γ Unit := modSt fun s => { s with events := s.events ++ [e] }
+def emitEvent {Γ : RCtx} (e : Event)
+    (plan : FailureExecution.RuntimePlan := none) : EM E Γ Unit :=
+  match plan with
+  | none => modSt fun s => { s with events := s.events ++ [e] }
+  | some _ => do
+    FailureExecution.check plan
+    modSt fun s => { s with events := s.events ++ [e] }
+    modSt fun s => { s with resource := s.resource.advanceEvent }
+    FailureExecution.check plan
 
 /-- Crediting an instance (a callback's value from outside, an
 environment credit), journaled. -/

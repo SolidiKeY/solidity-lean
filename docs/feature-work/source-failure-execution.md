@@ -160,3 +160,30 @@ resource-aware execution/consistency is unfinished; S02/FUNDS after-measurements
 and one Source commit/full build are pending; V14 cdNested patch is queued
 behind the extension and no unsealed peer checkout is inspected. Existing
 before/after draft results do not discharge these landing requirements.
+
+### Actual emitter leaf on published master (2026-11-03)
+
+The frame/check/pending definitions now live unchanged below Eval in the
+acyclic failure-primitives module. The actual Source event emitter accepts an
+explicit optional plan: None retains the legacy append; Some checks before
+and after appending exactly one actual event and advancing the stored cursor.
+The facade delegates to this actual operation. Existing recursive Eval and
+Session calls still default to None: arbitrary frame/request execution and
+P8 realization remain unimplemented. Cursor/plan coherence remains a producer
+invariant, not a theorem supplied by this leaf.
+
+The general stopped-event law proves the exact exceptional result and entire
+typed caller/source post-state without a supplied execution outcome. Seven
+closed controls check enabled/disabled behavior, caller prefix and nonce,
+frame ownership, false-success refusal and exact nonempty heap readback. The
+existing 27 frame controls also pass through the actual emitter. These are
+kernel facts, not new compiler/EVM comparisons or any of the 24 original
+full Y10 obligations/six general combinations.
+
+Single-thread evaluator checking measured 7.9861s before and 8.0682s after
+(about 1%); peak RSS is essentially unchanged. Primitive/facade checks take
+0.1970/0.2340s and existing controls 1.3261s. The earlier complete checkpoint
+passed library/run-lean/TestSuite336/trust/layers/orphans; its original doc and
+pin-inventory failures and the subsequent corrected passes are retained in
+the sealed cursor release. Its pre-existing Horizon 339.65s policy violation
+is still a failure. No new full checkpoint is claimed for this emitter leaf.
