@@ -1423,5 +1423,35 @@
     "file": "Solidity/Yul/TierPolicy.lean",
     "kind": "recovery",
     "code": "change ((b.admit tier >>= fun _ => allFin _ (fun i => checkExpr tier (args i))) = .ok ()) \u2194 _"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCert.lean",
+    "kind": "override",
+    "code": "@[implemented_by stmtneedM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCert.lean",
+    "kind": "override",
+    "code": "@[implemented_by progneedM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCompile.lean",
+    "kind": "override",
+    "code": "@[implemented_by compileStmtM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCompile.lean",
+    "kind": "override",
+    "code": "@[implemented_by compileProgM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
+    "kind": "override",
+    "code": "@[implemented_by stmtallocatesM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
+    "kind": "override",
+    "code": "@[implemented_by progallocatesM]"
   }
 ]
