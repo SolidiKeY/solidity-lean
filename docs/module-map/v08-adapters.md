@@ -436,3 +436,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/G19/AssignmentWhileResetControls.lean` | Inhabited Source/compiler loop, alias and prefix-only omission controls. |
 | `Lowering/G19/AssignmentWhileContinue.lean` | Mapped resetting while proves continue skips arbitrary suffixes and retests the condition. |
 | `Lowering/G19/AssignmentWhileContinueControls.lean` | Inhabited continue/retest and donor-observation controls with reused compiled loop witnesses. |
+| `Backend/StructuredFlow/WhileContinueCompiler.lean` | Actual emitter and compiler connection for the existing V07-related continue/retest loop. |
+| `Backend/StructuredFlow/WhileContinueCompilerControls.lean` | Inhabited Source/compiler join, semantic guard mutation and corrupted-entry simulation controls. |

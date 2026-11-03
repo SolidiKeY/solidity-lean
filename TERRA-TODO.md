@@ -168,3 +168,17 @@ theorem source_sequence_fields (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag 
     | _ => []) = [some 0,some 0,some 0]
 end Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls
 ```
+
+## WhileContinueCompiler routine fragment closure (not proved)
+
+Module: `Solidity/Backend/StructuredFlow/WhileContinueCompiler.lean`.
+Lemma: `all_readable`. Routine finite fragment/list bookkeeping for the existing primitive-only reset body; use existing Frag/inFragP definitions. This statement is a draft only, has not been compiled, and does not discharge correct.checked. Do not change the checker or infer a primitive-local refusal from alias flags.
+
+```lean
+theorem all_readable {srcΓ : Solidity.Source.RCtx} {C : Solidity.Contract} {Γ : Solidity.Ctx}
+    (m : Solidity.Lowering.V07.ContextMap srcΓ Γ) (i a : Solidity.Source.Idx srcΓ .bool)
+    (hi : (m.slot i).1 = .val .bool) (ha : (m.slot a).1 = .val .bool) :
+    Solidity.Evm.inFragP (Solidity.Evm.Frag.init Γ)
+      (Solidity.Lowering.G19.AssignmentWhileReset.code (C := C) m i a hi ha) =
+      some (Solidity.Evm.Frag.init Γ)
+```
