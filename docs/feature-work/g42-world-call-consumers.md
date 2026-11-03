@@ -74,10 +74,14 @@ the input of `restoration`.
 - `UnknownSourceCall`: `transport` is the exact `callAddr` equation for a
   zero-value unknown receiver below the depth limit. Halts stay halts, success
   keeps its state, and a revert keeps its bytes and runs `rollbackTo` the live
-  checkpoint (not shown to undo mutations). `success_history` uses
+  checkpoint. `success_history` uses
   `EnvironmentHistory.loop` with `CallbackHistories` as a premise.
   `invocation_success` gives `RawAt` and `RuntimeFrames` together, only for a
-  successful, zero-value, static, unknown-receiver call.
+  successful, zero-value, static, unknown-receiver call. `history` also covers
+  revert and every halt, using actual journal ancestry to rewind a completed
+  revert. `evaluated_frame` gives the actual computed `RawAt` and static frame
+  for all outcomes, with zero value, depth, unknown-instance and bounded Source
+  callback-history premises retained. No desired endpoint frame is assumed.
 
 ## Controls
 
@@ -108,3 +112,15 @@ the input of `restoration`.
   an admission-preserving return witness, and proof that the intrinsic call
   represents the source invocation (self-call ABI, dispatch, G37 frame).
 - Native and compiler adequacy.
+
+Pending-producer-consuming wrappers expose a separate external `hprof`
+(`AdmissionAgreement`, or family agreement for recursion). No identity-domain
+proof is substituted. Source `CallbackHistories` is an O1 Source obligation,
+distinct from P1 runtime frames; see [Source histories](g22-source-history-producer.md).
+
+`UnknownRevertControls` exercises an actual credit followed by ordered revert
+bytes, retaining a supplied prior caller write, undoing the credit balance and
+keeping its observable event. Its nil arguments do not execute the prior write.
+The concrete strategy's callback-history premise is proved from its moves, not
+from mutability metadata. General callback histories and Source/target adequacy
+remain open.

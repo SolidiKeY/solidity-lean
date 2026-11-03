@@ -58,7 +58,7 @@ theorem static_storage (p : Premises i) (key : Identity) (initial : Evm.Machine)
   InvocationFrame.typed_storage i raw final (p.sourceRaw _ _ _ _ _ step)
     ⟨mode, p.p2History _ _ _ _ _ step⟩ rep before after entry exit
 
-/-- Direct use of the G22.02 source loop consumer: the P1 child histories are
+/-- Direct use of the G22.02 source loop consumer: the Source child histories are
 still explicit and are not discharged by a target code label. -/
 theorem source_environment (global : Glob E) (mode : Bool) (n depth : Nat) (state : St E)
     (children : EnvironmentHistory.CallbackHistories global mode n) :
@@ -72,7 +72,8 @@ theorem compiled_return {C : Contract} {Ξ Ω params results bodyCtx : Ctx}
     {b : Nat} {F : Evm.Frag Ξ} {name : Name} {args : Solidity.Args C Ξ params}
     {ret : CallRet Ξ results Ω} {body : Prog C (results ++ params) bodyCtx}
     {approved admitted : InternalFlow.RuntimeFrame.InterfaceV3.Admission C Ξ}
-    (producer : PendingCallProducer b F approved admitted name args ret body) (p : Premises i)
+    (producer : PendingCallProducer b F approved admitted name args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) (p : Premises i)
     (L frame : Nat) (caller : Solidity.State C Ξ) (base : Nat → Fin Evm.W)
     (initial target : Evm.Machine) (start : Nat) (out : Solidity.Out C caller.H Ω)
     (entry : Entry producer.plan L b frame F caller base initial start)

@@ -1812,6 +1812,35 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/WorldCalls/Callbacks.lean`, `Backend/WorldCalls/ExternalCalls.lean`, `Backend/WorldCalls/SelfCalls.lean`, `Backend/WorldCalls/P1Consumers.lean` | Conditional callback, external, self-call and frozen P1 V3 consumers projecting producer premises ([G42](feature-work/g42-world-call-consumers.md)). |
 | `Backend/WorldCalls/SourceBridge.lean`, `Backend/WorldCalls/UnknownSourceCall.lean` | P3 bridge from `RawAt` to the source raw phase; zero-value unknown-call transport and joint `RawAt`/`RuntimeFrames` ([G42](feature-work/g42-world-call-consumers.md)). |
 | `Backend/WorldCalls/PaymentControl.lean`, `Backend/WorldCalls/ExternalControls.lean`, `Backend/WorldCalls/SelfControls.lean`, `Backend/WorldCalls/SourceBridgeControls.lean`, `Backend/WorldCalls/UnknownSourceControls.lean` | Restricted paired payment-CALL fixture and source controls for the world-call consumers ([G42](feature-work/g42-world-call-consumers.md)). |
+| `Lowering/Readonly/HistoryRollback.lean` | Algebraic history ancestry and actual live Source checkpoint rewind. |
+| `Lowering/Readonly/CallbackFrame.lean` | Child success/revert/halt history step from smaller actual Source dispatch; zero bound. |
+| `Lowering/Readonly/HistoryRollbackControls.lean` | Actual ordinary/static child dispatch, live/stale checkpoint and both-pipeline controls. |
+| `Lowering/Readonly/SourceHistory.lean`, `SourceHistoryBase.lean` | Generated typed 17-way Source induction predicate and exhausted base only; positive bound remains open. |
+| `Backend/WorldCalls/UnknownRevertControls.lean` | Actual computed unknown-call credit/revert frame at a supplied prior-effect state; no general target correspondence. |
+| `Lowering/Readonly/EffectRules.lean` | Source journal-effect composition: live bind, subframes, caught halt and inherited mode; no arbitrary state overwrite. |
+| `Lowering/Readonly/MachineEffects.lean`, `Lowering/Readonly/MachineEffectControls.lean` | Actual allocation/replacement journal effects, type-refusal/caught-halt memory controls and ordinary-write negative. |
+| `Lowering/Readonly/ReadEffects.lean` | Actual read/reference/guarded-write journal producers, retaining refusal branches. |
+| `Lowering/Readonly/DeleteEffects.lean`, `Lowering/Readonly/DeleteControls.lean` | Closed all-horizon mutual storage deletion histories; populated ordinary/static/exhaustion/read controls. |
+| `Lowering/Readonly/ZeroEffects.lean`, `Lowering/Readonly/ZeroControls.lean` | Closed all-horizon/mode mutual Source zero-initialization histories and actual allocation/exhaustion/default-refusal controls. |
+| `Lowering/Readonly/LoadEffects.lean`, `Lowering/Readonly/StoreEffects.lean` | Closed Source loading/copying journal histories; actual static guards and all failure/no-op/exhaustion branches. |
+| `Lowering/Readonly/CopyControls.lean` | Typed populated source/destination copy controls: post-seeding checkpoint, allocating load, shrink/tail clearing, static refusal, no-op and ordinary-change negative. |
+| `Lowering/Readonly/EvalEffectsBase.lean`, `Lowering/Readonly/LocationEffects.lean` | Actual evaluator/location histories: permitted local/memory mutation, guarded storage writes, read/type/bounds/calldata refusals. |
+| `Lowering/Readonly/LocationControls.lean` | Populated static local/memory mutation and storage/refusal controls with inhabited effect clients. |
+| `Lowering/Readonly/LocalInitializationEffects.lean`, `Lowering/Readonly/LocalInitializationControls.lean` | Closed value-list/return-slot initialization effects with separate contexts, actual allocation/refusal/exhaustion/empty-work controls. |
+| `Lowering/Readonly/CallSupportEffects.lean` | Actual instance/event/mark/outcome journal effects; no unconditional rollback or static LOG permission. |
+| `Lowering/Readonly/CollectionEffects.lean` | Map/mapM and lifted value/index effects, preserving partial-failure state. |
+| `Lowering/Readonly/ReferenceEffects.lean` | Existing byte/reference/implicit/explicit conversion journal effects, without ABI correctness or admission claims. |
+| `Lowering/Readonly/TupleCopyEffects.lean` | Typed tuple pushing with separate contexts and storage copying under the real static flag. |
+| `Lowering/Readonly/HelperControls.lean` | Populated lookup/events/conversion/tuple allocation, refusal, timeout and partial-failure controls. |
+| `Lowering/Readonly/SourceSequenceEffects.lean`, `Lowering/Readonly/SourceSequenceControls.lean` | Strictly smaller-bound operand/argument sequencing steps and inhabited ordering/local-mutation/empty/exhaustion controls. |
+| `Lowering/Readonly/KeyStepEffects.lean` | Journal effects of actual mapping-key conversion, including refused keys and bounded reference reads. |
+| `Lowering/Readonly/SourceLvalueCallEffects.lean`, `Lowering/Readonly/SourceLvalueCallControls.lean` | Lvalue/payment successor histories with inherited static mode; actual key/location and caller-halt/child-revert controls. |
+| `Lowering/Readonly/SourcePayloadEffects.lean`, `Lowering/Readonly/SourcePayloadDecodeEffects.lean`, `Lowering/Readonly/SourcePayloadControls.lean` | Journal-only effects of existing payload algorithms and populated allocation/refusal/return-phase controls; no ABI correctness or admission claim. |
+| `Lowering/Readonly/SourceAggregateReadEffects.lean` | Actual digest-shape, typed-field and bounded-path read histories, retaining refusals without getter/ABI correctness claims. |
+| `Lowering/Readonly/SourceBuiltinEffects.lean` | Strictly smaller-bound actual builtin sequencing/history step, including refusals and opaque precompile handling. |
+| `Lowering/Readonly/SourceExpressionParts/*.lean`, `Lowering/Readonly/SourceExpressionEffects.lean` | Generated exact constructor cuts and exhaustive actual expression successor history; full evaluator induction remains separate. |
+| `Lowering/Readonly/SourceReadBuiltinControls.lean` | Typed seeded path/construction/builtin observations, an actual At0 expression client and named gas-refusal negative. |
+
 
 ## V07 source lowering
 
@@ -1935,3 +1964,6 @@ See [P8 admission](feature-work/p8-admission.md).
 | Module (`Solidity/` omitted) | Role |
 |---|---|
 | `Backend/InternalFlow/RuntimeFrameV3NativeParents.lean` | Actual indexed native child-call/return clauses and represented parent poststate linkage; exhaustion and child-export controls. |
+| `Lowering/Readonly/SourceBodyEffects.lean`, `Lowering/Readonly/SourceBodyControls.lean` | Actual internal-body, typed item and modifier successor journal effects; inhabited static modifier observations. Full history induction remains open. |
+| `Lowering/Readonly/SourceLoopEffects.lean`, `Lowering/Readonly/SourceLoopControls.lean` | Actual loop successor journal effects and15 populated-state exit/refusal/exhaustion controls; smaller-bound premise retained. |
+| `Lowering/Readonly/SourceDispatchEffects.lean`, `Lowering/Readonly/SourceDispatchControls.lean` | Exact selector leaves and exhaustive dispatch successor journal effect;13 finite observations and inhabited client, not full call/native adequacy. |

@@ -145,7 +145,6 @@ P9 and Source soundness checkpoints: [checked call graphs](feature-work/p9-check
 Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` and its setup directory as `${VM_SETUP}`.
 
 - [G18 storage cells](feature-work/g18-storage-cells.md): operation-level Source/IR cell consumers and inhabited controls; full aggregate lowering remains open.
-
 - [Integer-valued mapping copy](feature-work/g18-scalar-mapping-copy.md): all-key storage relations and a captured-slot copy consumer; physical/runtime closure remains open.
-
 - [Dynamic storage array access](feature-work/g18-array-access.md): actual length/bounds and selected-cell transports, with invalid-representation controls.
+Source callback history producer components: [G22 Source histories](feature-work/g22-source-history-producer.md).

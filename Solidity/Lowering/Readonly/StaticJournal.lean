@@ -1,8 +1,8 @@
 import Solidity.Source.Eval
 
 /-! P2 journal algebra over the ACTUAL source world's operations and rollback.
-`History` is an algebraic journal certificate (execution linkage is the
-producer's obligation, requested from P1), not a new
+`History` is an algebraic journal certificate; execution linkage is the
+Source producer's obligation, not a P1 runtime-frame premise. It is not a new
 interpreter or a theorem that all source static executions produce it.
 It retains balance changes, ordinary writes, inherited child modes and
 scoped rollback; a rolled-back child also carries its guarded mode history. -/

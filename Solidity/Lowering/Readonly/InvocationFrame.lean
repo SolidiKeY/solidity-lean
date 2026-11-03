@@ -2,9 +2,9 @@ import Solidity.Lowering.Readonly.StaticJournal
 import Solidity.Backend.Passes.SourceTypedCall
 import Solidity.Semantics.State
 
-/-! Conditional P2 consumer interface for P1 runtime histories and P3 raw
+/-! Conditional P2 consumer interface for Source execution histories and raw
 source outcomes. Both are indexed by one actual typed source capture and its
-post-argument state. No P1/P3 producer theorem is asserted here. In particular,
+post-argument state. No general Source producer theorem is asserted here. In particular,
 this does not prove a general source execution produces `History`.
 The representation relation is explicit and storage-only, with uniqueness;
 no memory/ledger/balance/transaction representation is inferred. -/
@@ -46,7 +46,7 @@ def RawAt (i : Invocation E Γ dn ps rs) (result : Except Halt Outcome) (final :
   (callAddr i.global i.frame i.horizon i.captured.receiver i.captured.value
     i.captured.input i.requested).run (L0 E, i.after.2) = (result, (L0 E, final))
 
-/-- P1's required structural journal fact for the same live entry/final state.
+/-- The required Source structural journal fact for the same live entry/final state.
 This is an explicit producer premise, NOT a proved consequence of mode alone. -/
 structure RuntimeFrames (i : Invocation E Γ dn ps rs) (final : St E) : Prop where
   static : i.mode = true

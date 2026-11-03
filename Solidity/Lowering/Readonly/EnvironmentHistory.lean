@@ -2,7 +2,7 @@ import Solidity.Lowering.Readonly.EnvironmentCredit
 import Solidity.Lowering.Readonly.JournalLeaves
 
 /-! Conditional structural-history induction over the ACTUAL source envLoop.
-P1 must produce the exact admitted callback history, including its preceding
+The Source callback induction must produce the exact admitted callback history, including its preceding
 credit from the live pre-credit mark. No arbitrary source execution is assumed
 to produce that history. No outcome/byte/ABI or whole-world frame is inferred. -/
 namespace Solidity.Lowering.Readonly.EnvironmentHistory
@@ -11,7 +11,7 @@ open Solidity.Roadmap (Address Word Bytes)
 open StaticJournal EnvironmentSteps EnvironmentCredit
 variable {E : Env}
 
-/-- The bounded P1 input for actual admitted callbacks. All provenance fields
+/-- The bounded Source input for actual admitted callbacks. All provenance fields
 are from this source step and the child .run is indexed by its inherited mode.
 History starts before credit, matching the actual rollback mark. -/
 def CallbackHistories (global : Glob E) (mode : Bool) (bound : Nat) : Prop :=
@@ -48,7 +48,7 @@ private theorem instance_run (global : Glob E) (target : Address) (state : St E)
   cases (state.ex.world.accounts target).code <;> rfl
 
 /-- All permitted credits/refusals/outcomes/halts are retained. Only actual
-admitted child histories are delegated to the bounded P1 premise. -/
+admitted child histories are delegated to the bounded Source premise. -/
 theorem loop (global : Glob E) (mode : Bool) (n : Nat)
     (children : CallbackHistories global mode n) (depth : Nat) (state : St E) :
     History state.ex mode ((envLoop global n depth mode).run (L0 E, state)).2.2.ex := by

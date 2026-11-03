@@ -16,60 +16,74 @@ variable {approvedFamily admittedFamily : Nat → InternalFlow.RuntimeFrame.Inte
 variable {f : Name} {args : Args C Γ ps} {ret : CallRet Γ rs Δ}
 
 theorem ordinary_return {body : Prog C (rs ++ ps) Γf}
-    (p : PendingCallProducer b F approved admitted f args ret body) :
+    (p : PendingCallProducer b F approved admitted f args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) :
     ReturnClaim b F (.call f args ret body) p.plan := p.required_return
 
 theorem ordinary_bare_revert {body : Prog C (rs ++ ps) Γf}
-    (p : PendingCallProducer b F approved admitted f args ret body) :
+    (p : PendingCallProducer b F approved admitted f args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) :
     BareRevertClaim b F (.call f args ret body) p.plan := p.required_bare_revert
 
 theorem fixed_bare_revert {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingFixedCallRecProducer b F approved admitted f args ret body) (d : Nat) :
+    (p : PendingFixedCallRecProducer b F approved admitted f args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) (d : Nat) :
     BareRevertClaim b F (.callRec f d args ret body) p.plan := p.required_bare_revert d
 
 theorem fixed_return {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingFixedCallRecProducer b F approved admitted f args ret body) (d : Nat) :
+    (p : PendingFixedCallRecProducer b F approved admitted f args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) (d : Nat) :
     ReturnClaim b F (.callRec f d args ret body) p.plan := p.required_return d
 
 theorem recursive_bare_revert {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step) (n : Nat) :
+    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.FamilyAdmissionAgreement approvedFamily admittedFamily) (n : Nat) :
     BareRevertClaim b F (recursiveSource f args ret step n) (p.plan.at n) := p.required_bare_revert n
 
 theorem recursive_code {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step) (n : Nat) : (p.plan.at n).code = p.plan.code := rfl
+    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.FamilyAdmissionAgreement approvedFamily admittedFamily) (n : Nat) : (p.plan.at n).code = p.plan.code := rfl
 
 theorem recursive_return {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step) (n : Nat) :
+    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.FamilyAdmissionAgreement approvedFamily admittedFamily) (n : Nat) :
     ReturnClaim b F (recursiveSource f args ret step n) (p.plan.at n) := p.required_return n
 
 theorem recursive_coherence {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step) :
+    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.FamilyAdmissionAgreement approvedFamily admittedFamily) :
     RecursiveReturnCoherence f args ret step := p.required_source_coherence
 
 theorem restoration (p : PendingRestoration) : RestoredRepresentationClaim := p.required
 
 theorem ordinary_successful_entry {body : Prog C (rs ++ ps) Γf}
-    (p : PendingCallProducer b F approved admitted f args ret body) :
+    (p : PendingCallProducer b F approved admitted f args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) :
     SuccessfulEntry b F admitted (.call f args ret body) p.plan := p.required_successful_entry
 
 theorem fixed_successful_entry {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingFixedCallRecProducer b F approved admitted f args ret body) (d : Nat) :
+    (p : PendingFixedCallRecProducer b F approved admitted f args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) (d : Nat) :
     SuccessfulEntry b F admitted (.callRec f d args ret body) p.plan := p.required_successful_entry d
 
 theorem recursive_successful_entry {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
-    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step) :
+    (p : PendingRecursiveReturns b F approvedFamily admittedFamily f args ret step)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.FamilyAdmissionAgreement approvedFamily admittedFamily) :
     ∃ n, SuccessfulEntry b F (admittedFamily n) (recursiveSource f args ret step n) (p.plan.at n) := p.required_successful_entry
 
 theorem bare_reverting_entry {statement : Stmt C Γ Δ}
-    (p : PendingBareRevertProducer b F approved admitted statement) : RevertingEntry b F admitted statement p.plan := p.required_reverting_entry
+    (p : PendingBareRevertProducer b F approved admitted statement)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) : RevertingEntry b F admitted statement p.plan := p.required_reverting_entry
 
 theorem bare_revert_claim {statement : Stmt C Γ Δ}
-    (p : PendingBareRevertProducer b F approved admitted statement) : BareRevertClaim b F statement p.plan := p.required_bare_revert
+    (p : PendingBareRevertProducer b F approved admitted statement)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) : BareRevertClaim b F statement p.plan := p.required_bare_revert
 
 /-- Given a V3 producer, its genuine successful entry invokes its full return
 requirement for THAT SAME caller. No global producer existence is asserted. -/
 theorem ordinary_return_witness {body : Prog C (rs ++ ps) Γf}
-    (p : PendingCallProducer b F approved admitted f args ret body) :
+    (p : PendingCallProducer b F approved admitted f args ret body)
+    (hprof : InternalFlow.RuntimeFrame.InterfaceV3.AdmissionAgreement approved admitted) :
     ∃ (L frame : Nat) (caller : State C Γ) (base : Nat → Fin W)
       (machine : Machine) (start : Nat) (out : Solidity.Out C caller.H Δ),
       Entry p.plan L b frame F caller base machine start ∧
