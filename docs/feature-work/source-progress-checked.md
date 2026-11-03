@@ -219,3 +219,35 @@ bodies. The named storage-reference default refusal, `no default value`, remains
 outside `ZeroReady`. Progress alone does not validate dangling input references;
 the preservation triples still require `MemOK` and argument witnesses. Finder
 and skeptic reviews found no confirmed defect. All printed axioms are standard.
+
+
+## Complete hybrid function catalogues
+
+`Progress/ReadyProgram.lean` derives `ReadyProgramCalls` for every function in
+an elaborated unit covered by two supplied catalogues: a P9-checked value-call
+graph and syntactically ready single-return memory bodies. Coverage is union
+inclusion, not a disjoint partition. Each memory entry carries its actual
+signature and selected-body equality; its expression may call the checked
+value catalogue. The proof derives both non-stuckness and the conditional
+memory-preservation triple, including every halt. Entry `MemOK` and argument
+validity remain necessary for preservation. No semantic call-progress oracle
+is assumed for the memory catalogue.
+
+The derived call context also gives progress for the existing expression
+fragment with all covered functions admitted. This is an expression
+non-stuckness theorem, not a generic memory-preservation theorem for every
+reference expression. It adds no arbitrary memory-body sequence, recursive
+memory-call graph, external call, transaction or compiler/EVM refinement.
+The supplied certificates are not an executable frontend recognizer or a
+universal source-coverage claim.
+
+`ReadyProgramControls` elaborates a legacy source unit with `count()` returning
+2 and `fresh()` returning `new uint256[](count())`. Actual runs in both evaluator
+pipelines retain object 0, allocate empty default object 1 and return fresh
+object 2 with two zero elements. The call triple validates the escaped result;
+the concrete expression witness also restores and validates the caller's live
+reference. Omitting either function fails coverage, and the original value-only
+checker still refuses the memory body. A separate elaborated identity unit
+consumes the complete-catalogue theorem with a valid reference parameter and
+returns the same alias. Finder and skeptic reviews found no confirmed defect.
+Printed axioms are standard only.

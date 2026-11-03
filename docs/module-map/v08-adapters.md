@@ -384,3 +384,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ReadyDefaults.lean` | Default return-slot progress for explicit ready types. |
 | `Source/Progress/ReadyReturnControls.lean` | Actual source-elaborated alias and allocating reference returns. |
 | `Source/Progress/ReadyReturns.lean` | Actual single-return memory bodies and calls. |
+| `Source/Progress/ReadyProgram.lean` | Complete hybrid value and ready memory function catalogues derive call progress and preservation. |
+| `Source/Progress/ReadyProgramControls.lean` | Elaborated mixed and identity units with inhabited call and expression witnesses. |
