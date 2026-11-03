@@ -65,3 +65,4 @@
 | `Yul/Views/NominalInventoryUnchanged{,Controls}`, `Yul/Views/NominalInventoryPreparation` | Actual image-derived unchanged-source identity and owner-MemOK completeness of the existing finite heap preparer for the nominal decoder profile. |
 | `Yul/Views/NominalInventoryView{,Controls}` | Constructive changed-snapshot Source result, output placement/history and exact full-map realization for canonical nominal inventories. |
 | `Yul/Views/NominalInventoryTransport`, `Yul/Views/NominalInventoryReplay{,Controls}` | Actual source-prefix decoder refresh and whole-poststate replay for permutations of nominal output inventories. |
+| `Yul/Views/NominalInventoryDynamic{,Controls}` | Exact retained-array/inventory result compatibility, shrink-to-zero/regrowth, original-capacity and constructed output-view controls. |

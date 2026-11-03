@@ -222,6 +222,14 @@ history. Controls establish an actual changed state, a nonempty prepared prefix,
 and a reverse replay containing two distinct roots. The mixed reverse fixture
 uses an unchanged input; it is separate from the changed singleton fixture.
 
-Executable sequential re-preparation across changing snapshots, broader dynamic
-history controls, dirty-word transport, universal ownership, allocator
-reachability and compiler adequacy remain open.
+`NominalInventoryDynamic` proves exact singleton compatibility with the existing
+retained-array operation, including `None`, source errors and whole-state
+results. Controls transfer real source shrink-to-zero and regrowth to the
+inventory API, construct the regrown shape/history/raw view and preserve every
+original owner typing. Canonical data that fits a free-pointer gap still fails
+preparation when it exceeds the original owned allocation. This is not a Yul
+refusal or a new capacity policy.
+
+Executable sequential re-preparation across changing snapshots, broader mixed
+and nested dynamic history, dirty-word transport, universal ownership,
+allocator reachability and compiler adequacy remain open.

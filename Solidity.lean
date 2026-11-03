@@ -3031,6 +3031,8 @@ import Solidity.Yul.Views.NestedMappingLayout
 import Solidity.Yul.Views.NestedMappingSlots
 import Solidity.Yul.Views.NominalInventory
 import Solidity.Yul.Views.NominalInventoryControls
+import Solidity.Yul.Views.NominalInventoryDynamic
+import Solidity.Yul.Views.NominalInventoryDynamicControls
 import Solidity.Yul.Views.NominalInventoryLaws
 import Solidity.Yul.Views.NominalInventoryPreparation
 import Solidity.Yul.Views.NominalInventoryReplay
