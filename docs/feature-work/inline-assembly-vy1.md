@@ -822,3 +822,22 @@ dirty compiler adequacy and final lane gates remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Conditional default scopes
+
+LocalDefaultIfElse selects between two certified constant-default item scopes
+with independently indexed output contexts. Condition effects precede branch
+execution; only the selected scope runs. Success restores its enclosing context,
+while a halt retains its reached context and partial effects. The all-fuel clean
+Source theorem composes actual condition and block execution, including Source's
+extra close through the existing restore-self law. A separate theorem preserves
+the world for arbitrary raw inputs and all horizons.
+The inhabited witness uses different branch prefixes. Controls distinguish both
+outcomes and timeout contexts, nonzero dirty condition selection, and a condition
+assignment retained before branch timeout. Independent actual Source evaluations
+check both outcomes and timeout. Source and world interfaces are concretely
+instantiated for literal, local and assigning conditions. General P16, admission,
+dirty compiler adequacy and final lane gates remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

@@ -2370,6 +2370,7 @@ import Solidity.Yul.Checks.LocalDefaultBinding
 import Solidity.Yul.Checks.LocalDefaultItems
 import Solidity.Yul.Checks.LocalDefaultUnchecked
 import Solidity.Yul.Checks.LocalItemWorld
+import Solidity.Yul.Checks.LocalDefaultIfElse
 import Solidity.Yul.WordPrint
 import Solidity.Yul.Adapters.FrameHeap
 import Solidity.Yul.Adapters.FrameHeapControls
@@ -3411,3 +3412,4 @@ import Solidity.Yul.LocalDefaultBinding
 import Solidity.Yul.LocalDefaultItems
 import Solidity.Yul.LocalDefaultUnchecked
 import Solidity.Yul.LocalItemWorld
+import Solidity.Yul.LocalDefaultIfElse
