@@ -152,3 +152,16 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TraversalInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/SourceCalldataUintDelete.lean` | Actual raw uint copy/bind then reached deletion or bounds rejection; old-object frames. |
 | `Backend/MemoryOps/SourceCalldataMixedCopy.lean` | Actual uint copy/bind followed by reached Boolean copy; typed fresh observers and late decode failure. |
+| `Backend/MemoryOps/PhysicalReferenceSequence.lean` | Actual parent-pointer redirection and reached primitive child write, dynamic word path and component byte stores. |
+| `Backend/MemoryOps/PhysicalReferenceSequenceControls.lean` | Inhabited alias, complete word/byte vector, stale-base and endpoint rejection controls. |
+| `Backend/MemoryOps/CalldataViewExtension.lean` | Structural extension of supplied typed views. |
+| `Backend/MemoryOps/CalldataViewExtensionControls.lean` | Clients with genuinely noncanonical prior keys; structural view packing only. |
+| `Backend/MemoryOps/CalldataViewPacking.lean` | Finite structural packing of supplied coherent typed views into the EXISTING Source.Calldata. |
+| `Backend/MemoryOps/CalldataViewPackingControls.lean` | Inhabited structural packing clients. |
+| `Backend/MemoryOps/SourceCalldataBinding.lean` | Actual RHS-first Source calldata conversion followed by local reference binding and reached observations. |
+| `Backend/MemoryOps/SourceCalldataMutation.lean` | Reached Source mutation after actual raw-input copy/local binding. |
+| `Backend/MemoryOps/SourceCalldataUintBinding.lean` | Actual Source numeric copy/local binding and reached read composition. |
+| `Backend/MemoryOps/SourceCalldataUintCopy.lean` | Actual independent Source uint256 calldata-to-memory conversion and paired existing intrinsic allocation. |
+| `Backend/MemoryOps/SourceCalldataUintCopyControls.lean` | Actual populated uint Source/intrinsic copy clients. |
+| `Backend/MemoryOps/SourceCalldataUintMutation.lean` | Actual reached uint mutation after raw-input copy/local binding. |
+| `Backend/MemoryOps/SourceCalldataUintTransfer.lean` | One observed typed table object projected from the REAL numeric Source word decoder, then the EXISTING checked transfer. |
