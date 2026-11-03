@@ -482,6 +482,29 @@ retains the original branch allocator obligations. Extended Source locals
 classify the returned reference; no Source declaration execution, general heap
 content relation, admission/world or bytecode theorem follows.
 
+## Plain storage-alias capture
+
+[RelatedStorageCapture](../../Solidity/Backend/Passes/RelatedStorageCapture.lean)
+consumes the paired published `related_storage_capture` through the existing
+core compilation branch. The original `inFragP` certificate, plain `.ok` alias
+fragment fact and full core Input remain explicit. Initial Sim.aliases supplies
+the typed reference, symbolic Slot and PathSlot witness before all saved tails.
+The exact existing load/store code and its actual successful execution derive
+fresh-cell capture and appended pointer readback with full core MappedOutput.
+Core Sim is not upgraded to memory ownership.
+
+[Controls](../../Solidity/Backend/Passes/RelatedStorageCaptureControls.lean)
+inhabit two distinct typed storage roots, the independent Source-local context
+relation and original core representation. Public compiler option-code equality
+recognizes the actual instructions; it is not a claim of dependent certificate
+record equality. Complete selected-cell and stack observations distinguish real
+wrong-alias and skipped-capture runs, and symbolic `.slot` from numeric `.val`.
+[Exact guards](../../Solidity/Backend/Passes/RelatedStorageCapturePins.lean)
+retain the observed standard-only axiom sets. This bounded application covers
+plain aliases, not the separate fragile-alias case. It proves neither Source
+declaration execution nor general storage contents, hashing/layout, decoding,
+resource/session or world-to-bytecode adequacy.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

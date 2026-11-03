@@ -771,6 +771,9 @@ import Solidity.Backend.Passes.EffectfulConditionalPins
 import Solidity.Backend.Passes.RelatedMemoryCapture
 import Solidity.Backend.Passes.RelatedMemoryCaptureControls
 import Solidity.Backend.Passes.RelatedMemoryCapturePins
+import Solidity.Backend.Passes.RelatedStorageCapture
+import Solidity.Backend.Passes.RelatedStorageCaptureControls
+import Solidity.Backend.Passes.RelatedStorageCapturePins
 
 
 import Solidity.Lowering.V08.Audit

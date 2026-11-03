@@ -59,3 +59,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/EffectfulConditional{Assignment,Controls,Pins}.lean` | Effectful conditional-expression Source/context transport, compiled captures and actual wrong-order controls. |
 
 | `Backend/Passes/RelatedMemoryCapture{,Controls,Pins}.lean` | Initial Source context alignment through actual reference capture and selected-map pointer readback. |
+
+| `Backend/Passes/RelatedStorageCapture{,Controls,Pins}.lean` | Plain core storage-alias context transport and symbolic-slot capture/readback. |
