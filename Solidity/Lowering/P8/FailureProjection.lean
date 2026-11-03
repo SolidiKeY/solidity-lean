@@ -48,6 +48,15 @@ def frameDiagonal (extract : Nat → Choices) : Choices where
 Source execution is claimed to honor this plan before the resource decision. -/
 def requestCutWitness : Resource := requestCut 3 (fun i => i + 1) 7 257 0
 
+
+/-- The existing positive-balance cut-at-zero witness is genuinely failing. -/
+theorem requestCutWitness_not_noFail : ¬ NoFail (points requestCutWitness) := by
+  first
+  | (simp only [NoFail, points, requestCutWitness, requestCut]; done)
+  | exact request_cut_not_noFail (i := 7) (balance := 257) (cut := 0) rfl
+
+#print axioms requestCutWitness_not_noFail
+
 /-- No candidate horizon enumerates this plan: a single frame coordinate
 already contradicts equality. The request component is uniformly uncut. -/
 theorem frameDiagonal_ne (extract : Nat → Choices) (j : Nat) :

@@ -85,6 +85,66 @@ theorem represented_after_store (p : Pipeline) :
   represented_store (image p) Evm.Machine.init (fun c => c = 1) (initial_frame p)
     (Evm.wmod 1) a high rfl (by decide) (fits p)
 
+
+/-- A genuinely fresh represented cell: initial ownership is {1}, the
+store reaches cell2 at byte64, and physical W-fit is established separately. -/
+def fresh_a : Roadmap.Word := ⟨64, by decide⟩
+def fresh_fits (p : Pipeline) : fresh_a.val + 32 ≤ (image p).capacity := by
+  change 64 + 32 ≤ 96
+  decide
+def fresh_reached (p : Pipeline) : FrameMem C [] :=
+  store32 (image p) (wordSpan (image p) fresh_a (fresh_fits p)) (U high)
+
+theorem fresh_not_initially_owned : ¬ ((fun c : Nat => c = 1) 2) := by decide
+
+theorem represented_fresh_after_store (p : Pipeline) :
+    WordFrame (Evm.Memory.writeMachine Evm.Machine.init 2 (.val high))
+      (frameBytes (fresh_reached p)) (fun c => c = 1 ∨ c = 2) := by
+  rw [fresh_reached, frameBytes_store32]
+  change WordFrame (Evm.Memory.writeMachine Evm.Machine.init 2 (.val high))
+    (Environment.writeBytes (frameBytes (image p)) 64 (Semantics.wordBytes high.val))
+    (fun c => c = 1 ∨ c = 2)
+  exact (initial_frame p).write 2 high (by decide)
+
+theorem fresh_full_payload (p : Pipeline) :
+    snapshot (fresh_reached p) (byteSpan (fresh_reached p) fresh_a n (Or.inr (by change 64 + 32 ≤ 96; decide))) = payload := by
+  rw [frame_snapshot_read]
+  change Environment.readMemory (frameBytes (fresh_reached p)) 64 32 = payload
+  unfold fresh_reached
+  rw [frameBytes_store32]
+  change Environment.readMemory
+    (Environment.writeBytes (frameBytes (image p)) 64 (Semantics.wordBytes high.val)) 64 32 = payload
+  have h := Environment.read_written (Semantics.wordBytes high.val) 64 (frameBytes (image p))
+  rw [word_bytes_length] at h
+  rw [h]
+  decide
+
+
+def fresh_readFits (p : Pipeline) : n.val = 0 ∨ fresh_a.val + n.val ≤ (image p).capacity :=
+  Or.inr (by change 64 + 32 ≤ 96; decide)
+
+theorem actual_fresh_store (p : Pipeline) :
+    Environment.cryptoStep (.op .MSTORE)
+      ⟨U fresh_a :: U high :: (fresh_a :: n :: tail).map U, frameBytes (image p)⟩ =
+      some ⟨(fresh_a :: n :: tail).map U, frameBytes (fresh_reached p)⟩ :=
+  (store_capture (image p) fresh_a n high (fresh_fits p) (fresh_readFits p) tail []).1
+
+theorem actual_fresh_revert (p : Pipeline) (suffix : Backend.Program) :
+    Failure.Slice.run (.op .REVERT :: suffix) ⟨fresh_a :: n :: tail, frameBytes (fresh_reached p)⟩ =
+      some (⟨tail, frameBytes (fresh_reached p)⟩, some (.revert payload)) := by
+  have h := (store_capture (image p) fresh_a n high (fresh_fits p) (fresh_readFits p) tail suffix).2.1
+  have hp := fresh_full_payload p
+  change snapshot (store32 (image p) (wordSpan (image p) fresh_a (fresh_fits p)) (U high))
+    (byteSpan (store32 (image p) (wordSpan (image p) fresh_a (fresh_fits p)) (U high)) fresh_a n (fresh_readFits p)) = payload at hp
+  rw [hp] at h
+  exact h
+
+#print axioms actual_fresh_store
+#print axioms actual_fresh_revert
+
+#print axioms represented_fresh_after_store
+#print axioms fresh_full_payload
+
 theorem carried_state_key (p : Pipeline) :
     (reached p).st = (image p).st ∧ (reached p).key = key p :=
   (store_capture (image p) a n high (fits p) (readFits p) tail []).2.2

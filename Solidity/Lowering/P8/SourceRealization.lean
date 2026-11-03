@@ -1,4 +1,5 @@
 import Solidity.Lowering.P8.FailureProjection
+import Solidity.Lowering.P8.ResourceContractLaw1
 import Solidity.Source.Session
 
 /-! The actual published Source execution used as the reference anchor.
@@ -20,6 +21,14 @@ def MachineAgreement : Prop :=
     run program environment horizon =
       (Source.sourceLangEvents program.1).sem program.2 environment horizon
 
+
+/-- Definitional agreement with the actual published Source session. -/
+theorem machineAgreement : MachineAgreement := by
+  intro program environment horizon
+  rfl
+
+#print axioms machineAgreement
+
 /-- The graph of the actual Source machine, before any unimplemented
 failure-resource extension. This is not a frozen OperationalReference: its
 bare horizon cannot carry that interface's arbitrary failure plans. -/
@@ -33,11 +42,7 @@ bare horizon is insufficient. This obstruction does not alter either API or
 claim that attaching an ignored failure plan implements source execution. -/
 theorem no_countable_resource (S : P8a.Spec) (failures : P8a.FailureProjection S)
     (encode : S.lang.Res → Nat) (decode : Nat → S.lang.Res)
-    (roundtrip : ∀ r, decode (encode r) = r) : False := by
-  apply Source.FailureResources.no_horizon_retraction
-    (fun n => failures.points (S.failures (decode n)))
-    (fun _ p => encode (S.withFailures (decode 0) (failures.ofPoints p)))
-  intro n p
-  simp only [roundtrip, S.failures_with, failures.points_ofPoints]
+    (roundtrip : ∀ r, decode (encode r) = r) : False :=
+  ResourceContractLaw1.nat_encodable_resource_impossible S failures encode decode roundtrip
 
 end Solidity.Lowering.P8.SpecExecution

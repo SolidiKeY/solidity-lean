@@ -1909,6 +1909,7 @@ import Solidity.Source.Preservation.EncodingVariantControls
 import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.LiteralBuiltinControls
 import Solidity.Source.FailureResources
+import Solidity.Source.FailureCursor
 import Solidity.Yul
 import Solidity.Yul.Checks.Parsing
 import Solidity.Yul.WordPrint

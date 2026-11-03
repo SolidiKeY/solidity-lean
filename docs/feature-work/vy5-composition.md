@@ -19,3 +19,21 @@ funds) and the modules that need them are not on master yet.
 
 Open: the H16 Source resource extension, the immutable and funds Source edits,
 a real assembly instance.
+
+### H16 cursor interface (sched 2026-11-03)
+
+- `Source/FailureCursor.lean` (`Source.FailureExecution`): typed request and
+  frame budgets over `FailureResources.Bound`, with request-before-frame and
+  oldest-frame priority. Executable cursor operations only; no Machine, Eval or
+  Session hook is installed and no failure-aware language or P8a `Producer` is
+  claimed.
+- `SpecExecution.machineAgreement` (proved by `rfl`),
+  `FailureProjection.requestCutWitness_not_noFail`, and `no_countable_resource`
+  now delegates to `ResourceContractLaw1.nat_encodable_resource_impossible`.
+- `P6FrameControls`: a fresh represented cell (byte 64, not initially owned)
+  through the actual MSTORE and Slice REVERT.
+
+The H16 Source edits (immutables, funds) are not on master: VY5 has recorded
+only the before timings (15-file Source closure, 492.5 s single-thread), no
+after timings.
+
