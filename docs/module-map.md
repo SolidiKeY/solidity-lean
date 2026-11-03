@@ -2077,6 +2077,9 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/LabelExec/LiteralLoops.lean`, `Backend/LabelExec/LiteralChecks.lean` | Actual head/PUSH-to-test composition for literal conditions; zero/nonzero assembled entry controls, no reached-test premise. |
 | `Backend/LabelExec/Boundaries.lean`, `Backend/LabelExec/LoopExit.lean`, `Backend/LabelExec/LoopExitControls.lean` | Actual indexed fetch/tag execution and six-step zero-loop exit; skipped unsupported-body and EOF controls. |
 | `Backend/LabelExec/Fragment.lean`, `Backend/LabelExec/FragmentSound.lean`, `Backend/LabelExec/FragmentControls.lean` | Intrinsic stack-height/capacity refinement of existing numeric code and Block; actual one-step successor derivation and value-frame/capacity countercontrols. |
+| `Backend/Transient/{State,Instructions,TypedSource,Code,Frames,Controls,SourceFrames}.lean` | P7 transient target: owner-indexed word bank, executed TLOAD/TSTORE code, selected bool Source correspondence, reset and local callback rollback; see [P7](feature-work/p7-transient-target.md). |
+| `Backend/Transient/{WordSource,WordControls}.lean` | `Val.word` Source port and signed/unsigned write/reset controls with explicit selected-slot/default premises. |
+| `Backend/Transient/{Mixed,SourceCallback}.lean` | Persistent/memory/transient composition under reset, and Source environment callback execution with caller-state, static, revert and timeout controls. |
 
 ### G46.05 direct hash-query receipts (optional Bridge)
 | Module (under `Bridge/SolidityBridge/`) | Purpose |
