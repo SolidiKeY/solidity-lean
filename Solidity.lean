@@ -1299,6 +1299,17 @@ import Solidity.Backend.WorldCalls.UnknownSourceCall
 import Solidity.Backend.WorldCalls.UnknownSourceControls
 import Solidity.Backend.Aggregates.ByteParameterControls
 import Solidity.Backend.Aggregates.ByteParameters
+import Solidity.Backend.Aggregates.G18Controls
+import Solidity.Backend.Aggregates.G18DistinctClient
+import Solidity.Backend.Aggregates.G18DistinctControls
+import Solidity.Backend.Aggregates.G18Graph
+import Solidity.Backend.Aggregates.G18GraphRootControls
+import Solidity.Backend.Aggregates.G18Memory
+import Solidity.Backend.Aggregates.G18MemoryClient
+import Solidity.Backend.Aggregates.G18Physical
+import Solidity.Backend.Aggregates.G18PhysicalControls
+import Solidity.Backend.Aggregates.G18ReferenceSequence
+import Solidity.Backend.Aggregates.G18Storage
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
