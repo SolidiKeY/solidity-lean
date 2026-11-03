@@ -75,7 +75,7 @@ the empty heap typing over that nonempty heap, obtaining post-state MemOK and va
 allocated bytes reference in both pipelines. The signature digest stays
 parameterized by Fixed.
 
-`NewArrayFragment.eval_new_fragment_mem` consumes the published V16
+`Preservation.eval_new_fragment_mem` in `NewArrayFragment.lean` consumes the published V16
 `eval_new_mem` rule and discharges its child-memory premise with the existing
 checked call-fragment theorem. It covers a standalone new-array parent whose
 indexable length belongs to that fragment; it does not add allocating nodes
