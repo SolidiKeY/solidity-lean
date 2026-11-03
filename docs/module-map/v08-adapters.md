@@ -372,3 +372,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/EffectBodies.lean` | Callee-body sequences containing the proved builtin and emit statements. |
 | `Source/Progress/EffectCatalogue.lean` | A finite declaration-order certificate for nonrecursive effect bodies. |
 | `Source/Progress/EffectCatalogueControls.lean` | Actual elaborated source functions with an emit in the leaf, a require that calls the leaf, and an assert-failing callee. |
+| `Source/Preservation/AllocationBodyControls.lean` | Actual typed allocation nodes composed in admitted memory-body statements. |
+| `Source/Preservation/EncodingArguments.lean` | Syntactic ABI arguments with allocating expression children and raw string literals. |

@@ -1,4 +1,7 @@
 import Solidity.Source.Preservation.ReferenceReturns
+import Solidity.Source.Preservation.EncodingArguments
+import Solidity.Source.Preservation.ArrayLiterals
+import Solidity.Source.Preservation.MemberPacking
 
 /-! Memory body expressions over the existing intrinsic source syntax.
 Reference rebinding and primitive memory-array writes retain actual bounds,
@@ -9,6 +12,13 @@ variable {E : Env}
 
 inductive BodyExpr (A : Decl → Prop) {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | base {τ} {e : RExpr E Γ τ} : AllocatingExpr A e → BodyExpr A e
+  | structNew {dn : DeclName} {ps : List STy}
+      (hs : (E.structFields dn .memory).map (·.map Prod.snd) = some ps)
+      {args : RConvArgs E Γ ps} : ExactArgs A args → BodyExpr A (.structNew hs args)
+  | inlineArray {σ : STy} {m : Nat} {args : RConvArgs E Γ (List.replicate m σ)}
+      (hs : σ.oneWord = true) : ExactArgs A args → BodyExpr A (.inlineArray args hs)
+  | encode {ts : List STy} (kind : AbiKind) {args : RArgs E Γ ts}
+      (hk : kind.argsOK E.isBase ts = true) : EncodingArgs A args → BodyExpr A (.abiEncode kind args)
   | rebind {τ} (i : Idx Γ τ) {e : RExpr E Γ τ} :
       AllocatingExpr A e → BodyExpr A (.assign (.local i) e)
   | arrayWrite {τ σ : STy} {size : Option Nat}
@@ -96,7 +106,19 @@ theorem eval_body_expr_mem {A : Decl → Prop} {G : Glob E} {c : String}
       (fun v y => MemOK E H y ∧ RValOK E y.2.heap.ty v) (fun _ y => MemOK E H y) := by
   cases admitted with
   | base h => exact eval_allocating_mem calls F contract n e h H
-  | @rebind i rhs hr =>
+  | structNew hs args =>
+    cases n with
+    | zero => exact Hoare.halt' (fun _ h => h)
+    | succ n => exact evalE_structNew_mem G F n hs _ (eval_exact_args_mem calls F contract n _ args H)
+  | inlineArray hs args =>
+    cases n with
+    | zero => exact Hoare.halt' (fun _ h => h)
+    | succ n => exact evalE_inlineArray_mem G F n _ hs (eval_exact_args_mem calls F contract n _ args H)
+  | encode kind hk args =>
+    cases n with
+    | zero => exact Hoare.halt' (fun _ h => h)
+    | succ n => exact evalE_abiKind_mem G F n kind _ hk (eval_encoding_args_mem calls F contract n _ args H)
+  | @rebind τ i rhs hr =>
     cases n with
     | zero => exact Hoare.halt' (fun _ h => h)
     | succ n =>
@@ -111,7 +133,7 @@ theorem eval_body_expr_mem {A : Decl → Prop} {G : Glob E} {c : String}
       rcases h with ⟨valid,rfl⟩
       exact (Hoare.bind (getV_ref_mem v H) (fun x =>
         Hoare.bind (write_local_ref_mem F n i x H) (fun _ => Hoare.pure' (fun _ h => h)))) y valid
-  | @arrayWrite σ size a i rhs hi value ha hx hr =>
+  | @arrayWrite τ σ size a i rhs hi value ha hx hr =>
     cases n with
     | zero => exact Hoare.halt' (fun _ h => h)
     | succ n =>

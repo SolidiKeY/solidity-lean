@@ -2086,6 +2086,7 @@ import Solidity.Source.Observe
 import Solidity.Source.Overloads
 import Solidity.Source.Preservation.AllocatingControls
 import Solidity.Source.Preservation.AllocatingFragment
+import Solidity.Source.Preservation.AllocationBodyControls
 import Solidity.Source.Preservation.AllocationControls
 import Solidity.Source.Preservation.AllocationSites
 import Solidity.Source.Preservation.ArrayLiteralControls
@@ -2095,6 +2096,7 @@ import Solidity.Source.Preservation.CallerReferenceControls
 import Solidity.Source.Preservation.Combinators
 import Solidity.Source.Preservation.Controls
 import Solidity.Source.Preservation.Encoding
+import Solidity.Source.Preservation.EncodingArguments
 import Solidity.Source.Preservation.EncodingVariantControls
 import Solidity.Source.Preservation.EncodingVariants
 import Solidity.Source.Preservation.Expressions

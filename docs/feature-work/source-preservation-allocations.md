@@ -168,8 +168,38 @@ consume the corresponding exact evaluator runs on inhabited memory, in both
 pipelines. Finder and skeptic reviews found no confirmed soundness issue in the
 conditional induction; these controls do not imply frontend or compiler admission.
 
+## Allocation parents in memory bodies
+
+`BodyExpr` also admits struct construction and inline-array literals with
+`ExactArgs`, and every existing ABI encoding kind with `EncodingArgs` and its
+original `argsOK` check. `EncodingArguments.lean` derives argument preservation
+from `AllocatingExpr` children and raw string literals, in the actual evaluator's
+left-to-right order. The struct and inline-array parents derive their child
+triples from exact-type argument admission. Field packing, one-word elements,
+ABI eligibility, horizon and allocation halts remain unchanged. Encoding
+preservation does not assert successful encoding or general ABI correctness.
+
+These parents can occur in admitted expression statements, initialized
+declarations and conditional conditions where types permit. Their children
+remain the narrower `AllocatingExpr`/`ExactArgs` admissions; the change does not
+allow every `BodyExpr` constructor recursively in arbitrary argument, rebinding
+or return positions. Returning a previously bound reference retains the
+existing exact-local admission.
+
+`AllocationBodyControls` composes actual typed struct, inline-array and packed
+encoding nodes in a statement block over a nonempty memory prefix. It consumes
+`memory_body_at` and observes the exact three new objects and restored frame.
+Selector and signature controls consume the new parent rule and existing exact
+runs. A packed encoder evaluates an allocating child before allocating its own
+output; a second child that panics leaves the first child's allocation in place.
+Missing-head eligibility remains false and the existing named `abi arguments`
+halt is retained. All observations run in both source pipelines and the
+preservation consumers have inhabited inputs. Independent finder and skeptic
+reviews found no confirmed defect; neither inferred frontend, progress or
+compiler coverage from these source controls.
+
 Not covered: arbitrary reference-call bodies, whole-program admission of this
-memory subset, other allocating arms inside this subset, progress or termination,
+memory subset, unrestricted allocation nesting or cross-type argument conversion, progress or termination,
 compiler/EVM refinement, `SourceSpec` and rollback. The existing standalone
 allocation-arm rules above retain their stated premises. All printed axioms are
 `propext`, `Classical.choice` and `Quot.sound`.
