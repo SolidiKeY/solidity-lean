@@ -437,3 +437,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ReadyDispatchControls.lean` | Nonidentity inherited dispatch consumes elaboration-derived ready-frame metadata. |
 | `Source/Progress/CallComposition.lean` | Finite nested certified calls and exact arguments preserve source memory and progress. |
 | `Source/Progress/CallCompositionControls.lean` | Inhabited nested alias returns, argument growth and exact halt/refusal controls. |
+| `Source/Progress/ForwardingReturns.lean` | Actual single-return forwarding bodies and calls derive progress and memory preservation from composed expressions. |
+| `Source/Progress/ForwardingControls.lean` | Elaborated primitive-argument memory-return relay with escaped references and callee-panic restoration. |

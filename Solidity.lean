@@ -2193,6 +2193,8 @@ import Solidity.Source.Progress.EffectBodies
 import Solidity.Source.Progress.EffectCatalogue
 import Solidity.Source.Progress.EffectCatalogueControls
 import Solidity.Source.Progress.EmitBuiltins
+import Solidity.Source.Progress.ForwardingControls
+import Solidity.Source.Progress.ForwardingReturns
 import Solidity.Source.Progress.LiteralBuiltinControls
 import Solidity.Source.Progress.LiteralBuiltins
 import Solidity.Source.Progress.NewArray

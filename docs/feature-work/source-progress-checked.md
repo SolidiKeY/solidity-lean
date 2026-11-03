@@ -384,3 +384,42 @@ heap-typing preservation, not a physical base-map relation or compiler/EVM
 composition. General memory mutation/loop bodies, recursive memory-call graphs,
 external/world/transaction progress and universal source coverage remain outside
 this result.
+
+
+## Forwarding memory-return bodies
+
+`Progress/ForwardingReturns.lean` lifts composed expressions through an actual
+single-return statement, its modifier-free body and its internal call. The
+proof derives return-slot writes, extraction and frame restoration; it accepts
+no body-progress or preservation oracle. The `forwarding_from_elaborate` adapter
+derives prior callee admission from actual elaboration and a ready catalogue.
+Declaration/signature membership, selected single-return-body equality, plain
+result extraction and supported return defaults remain explicit.
+
+`extend_forwarding_calls` extends a proved callee set with a forwarding entry
+whose expression calls already certified entries. This supports explicit finite
+forwarding prefixes; it is not an executable call-graph recognizer or a general
+recursive-body result. The base ready catalogue and value-callee hypotheses
+retain their existing restrictions. No whole-program coverage check is added
+by this adapter, and multiple-return or arbitrary statement bodies are not
+silently admitted.
+
+`ForwardingControls` kernel-checks the real legacy-elaborated source functions
+`fresh(uint n)` returning `new uint[](n)` and `relay(uint n)` returning
+`fresh(n)`. These calls have primitive arguments, so this control does not
+require function-value reference-argument elaboration. Both evaluator pipelines
+execute the source bodies. Object 0 survives, both return defaults occupy
+objects 1 and 2, and success returns fresh object 3. An oversized length panics
+inside the callee after the defaults; the relay propagates the exact allocation
+panic. Inhabited call-expression consumers retain the caller's live reference
+and validate the escaped result on success and the reached heap on panic.
+The distinct-declaration and wrong-signature controls check certificate/signature
+premises, not executable frontend refusal. Finder and skeptic reviews found no
+confirmed defect; printed axioms are standard only.
+
+Validation targets are `Solidity.Source.Progress.ForwardingReturns` and
+`ForwardingControls`. This is source progress and memory preservation, not a
+physical base-map, bytecode or end-to-end compiler correspondence claim. It does
+not discharge the remaining P8 concrete-producer/adequacy, runtime-frame payload
+transport or H16/H19 obligations. Source evaluator and intrinsic representations
+are unchanged.
