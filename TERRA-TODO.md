@@ -106,3 +106,17 @@ theorem qfUIntLinear_twoPrefix_sourceBound {C : Contract}
 
 This helper is unproved and unused. It does not derive the511 bound or prove
 normalization, source reduction, general target/coverage or soundness.
+
+## VA1-T6: Fml.qfUIntLinearShape_iff
+
+Planned module: `Solidity.Calculus.DecisionUIntFormulaRecognizerGlue` (not created).
+Import `Solidity.Calculus.DecisionUIntFormulaRecognizer`.
+Routine: unfold the explicit constructive decide view and use the existing
+decide_eq_true_eq lemma. Decidability and both membership directions already
+come from Sol's checked Decidable-valued function; this convenience lemma is
+unproved and unused. No semantic validity or coverage is involved.
+
+```lean
+theorem Fml.qfUIntLinearShape_iff {C : Contract} {Γ : Ctx} (φ : Fml C Γ) :
+    φ.qfUIntLinearShape = true ↔ φ.QFUIntLinear
+```

@@ -4284,6 +4284,8 @@ import Solidity.Calculus.DecisionGivenHeapComputedReason
 import Solidity.Calculus.DecisionGivenHeapComputedBoundary
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
+import Solidity.Calculus.DecisionUIntFormulaRecognizer
 import Solidity.Examples.DecisionGivenHeapComputedReason
 import Solidity.Examples.DecisionNumericTwoPrefix
 import Solidity.Examples.DecisionNumericTwoPrefixFormula
+import Solidity.Examples.DecisionUIntFormulaRecognizer

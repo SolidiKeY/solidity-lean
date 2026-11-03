@@ -4625,3 +4625,56 @@ source producer; it is unproved and unused. General logical-prefix normalization
 source reduction, target/coverage/soundness, exhaustive Residue/DecisionTheorem-prime
 and all other original unfinished AU01/AU02/backfill/full gates remain open.
 The inherited documentation-path failure remains failed.
+
+
+## Constructive numeric formula syntax recognition (2026-11-03)
+
+Fresh publication audit at6510c302ff8c276cd2f69e9c0524bd22c1d90d8a found no
+QFUIntLinear decidability implementation. The existing term recognizer is
+reused, not reimplemented. No newer unrelated master code is claimed integrated.
+
+`Calculus/DecisionUIntFormulaRecognizer.lean` adds
+Fml.qfUIntLinearDecidable, its constructive instance and qfUIntLinearShape.
+They decide the exact existing QFUIntLinear predicate from the prior VA1
+checkpoint: tt, uint equality of UIntLinear operands, not/and/imp. Indexed
+constructor cases produce either actual positive evidence or its negation.
+Other primitive equalities and source constructors are rejected by impossible
+indexed cases. Recursion follows actual formula subterms; term decisions use
+the existing constructive UIntLinear instance. No classical/noncomputable
+decision shortcut, target/Covered/hashCovered/parser/verdict query, semantic
+profile/default change or new fuel/proof budget occurs.
+
+`Examples/DecisionUIntFormulaRecognizer.lean` checks a genuine two-input logical
+combination and rejects symbolic multiplication. Boolean identity and an
+actual quantified positive leaf are kernel-certified target/Covered despite
+being outside this grammar. Consequently a syntax rejection is explicitly NOT
+a Residue classification or an unknown verdict. The actual profile vector is
+[true,false,false,false], with retained verdict controls[proved,refuted,unknown].
+This is residue-census groundwork, not the exhaustive source census or bridge.
+
+All seven default/instance automation attempts failed before implementation.
+The generic control's decide free-variable error is retained with its exact
+draft. Actual MCP goal/multi_attempt then found only
+`exact of_decide_eq_true rfl` successful; the final proof is kernel reduction
+of the constructive decision data, with no native trust shortcut.
+
+Classifier MCP passes3.219s; its focused build reuses the checked artifact in
+0.302s with zero Lean compilers observed, not a cold compile timing. Control
+MCP/build passes7.501s/6.437s; public interface/axiom/probe7.433s. Five inspected
+axiom reports contain only standard axioms. The cumulative focused ledger has
+418entries, with its historical cache/rebuild boundaries retained.
+
+Independent finder and skeptic used no Lean/server/build/writes and found no
+issue in constructor exhaustiveness, negative witnesses, recursion, instance
+selection or boundary controls. Existing grammar definitions, inTarget, Covered,
+Waivers, observations and all resource/proof/time/node/fuel budgets stay unchanged.
+H1 remains hard12GiB/no swap,4GiB reserve, one thread/explicit-j1, original lock
+and no LSP/build overlap. Evidence: /workspace/va1-evidence/qf-recognizer-next.
+
+TERRA-TODO T6 is an optional convenience iff over the already checked decision
+data, unproved and unused. The assigned global Residue must still be an
+independent meaningful/exhaustive syntactic gap census, not the complement
+of this profile or any coverage/verdict test. Actual unknown residual examples,
+substantial nonresidual bridges including the hash route, DecisionTheorem-prime,
+remaining AU02/backfill and full gates are not discharged here. The inherited
+documentation-path gate remains failed as previously compared to frozen base.
