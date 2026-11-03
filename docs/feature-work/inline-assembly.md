@@ -255,3 +255,5 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 VY1: constant-default scopes now have concrete clean-input Source block agreement and raw restoration controls; full P16 and lane validation remain open.
 
 VY1: heterogeneous constant-default declaration sequences have concrete clean-input Source item agreement and raw partial-context controls; general P16 remains open.
+
+VY1: heterogeneous default sequences now have raw scope closure and concrete clean-input Source block agreement; general P16 and final lane validation remain open.

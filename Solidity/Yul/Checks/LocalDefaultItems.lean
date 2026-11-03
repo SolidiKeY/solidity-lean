@@ -69,4 +69,39 @@ theorem sourceControls : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.Lo
 #print axioms concrete
 #print axioms controls
 #print axioms sourceControls
+
+theorem blockControls : Solidity.Yul.LocalDefaultItems.restore Solidity.Yul.Checks.LocalDefaultItems.proof Solidity.Yul.Checks.LocalDefaultItems.finalState = Solidity.Yul.Checks.LocalDefaultItems.assigned false ∧
+Solidity.Yul.LocalDefaultItems.blockRun Solidity.Yul.Checks.LocalDefaultItems.proof 8 Solidity.Yul.Checks.LocalDefaultItems.initial = .normal (Solidity.Yul.Checks.LocalDefaultItems.assigned false) ∧
+Solidity.Yul.LocalDefaultItems.blockRun Solidity.Yul.Checks.LocalDefaultItems.proof 7 Solidity.Yul.Checks.LocalDefaultItems.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultItems.bodyState ∧
+Solidity.Yul.LocalDefaultItems.blockRun Solidity.Yul.Checks.LocalDefaultItems.proof 4 Solidity.Yul.Checks.LocalDefaultItems.initial = .halted .timeout Solidity.Yul.Checks.LocalDefaultItems.firstState ∧
+Solidity.Yul.LocalBoolItems.project Solidity.Yul.Checks.LocalDefaultItems.Fixture.ctx.tys
+ (Solidity.Yul.LocalDefaultItems.blockRun Solidity.Yul.Checks.LocalDefaultItems.proof 8 Solidity.Yul.Checks.LocalDefaultItems.initial) = none := by
+  exact ⟨rfl,rfl,rfl,rfl,rfl⟩
+
+theorem sourceBlockControls : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.LocalDefaultItems.Fixture.env) (frame : Solidity.Source.Fr)
+ (nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.LocalDefaultItems.Fixture.env)),
+ (Solidity.Source.execS glob frame 7 nps ph (.block Solidity.Yul.Checks.LocalDefaultItems.items)
+   (Solidity.Yul.Checks.LocalDefaultItems.Fixture.initial.clean.set .here (.bool true))).run
+ (Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultItems.Fixture.env,Solidity.Yul.Checks.LocalDefaultItems.Fixture.initial.world) =
+ (.error .timeout,(Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultItems.Fixture.env,Solidity.Yul.Checks.LocalDefaultItems.Fixture.initial.world)) ∧
+ (Solidity.Source.execS glob frame 8 nps ph (.block Solidity.Yul.Checks.LocalDefaultItems.items)
+   (Solidity.Yul.Checks.LocalDefaultItems.Fixture.initial.clean.set .here (.bool true))).run
+ (Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultItems.Fixture.env,Solidity.Yul.Checks.LocalDefaultItems.Fixture.initial.world) =
+ (.ok (.normal (Solidity.Yul.Checks.LocalDefaultItems.Fixture.initial.clean.set .here (.bool false))),
+ (Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultItems.Fixture.env,Solidity.Yul.Checks.LocalDefaultItems.Fixture.initial.world)) := by
+  intro glob frame nps ph
+  exact ⟨rfl,rfl⟩
+
+def concreteBlock (glob : Solidity.Source.Glob Fixture.env) (frame : Solidity.Source.Fr)
+    (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Fixture.env)) :=
+  Solidity.Yul.LocalDefaultItems.block_source_agrees Fixture.env [] false ⟨false,false⟩
+    Fixture.ctx.tys _ items proof glob frame fuel nps ph Fixture.initial.clean Fixture.initial.world
+
+#print axioms Solidity.Yul.LocalDefaultItems.context
+#print axioms Solidity.Yul.LocalDefaultItems.source_restore
+#print axioms Solidity.Yul.LocalDefaultItems.restore_project
+#print axioms Solidity.Yul.LocalDefaultItems.block_source_agrees
+#print axioms blockControls
+#print axioms sourceBlockControls
+#print axioms concreteBlock
 end Solidity.Yul.Checks.LocalDefaultItems

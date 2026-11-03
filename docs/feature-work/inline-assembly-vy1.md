@@ -767,9 +767,22 @@ introduced. The all-fuel clean-input theorem composes concrete Source declaratio
 and body proofs rather than requiring a supplied simulation law.
 A uint8/uint256 sequence checks shifted enclosing writes, multiple partial
 contexts, preserved dirty sibling bits and refusal of clean projection. Independent
-Source controls distinguish timeout from successful execution. General enclosing
-scope closure for this sequence family, broader P16 and final lane gates remain
-open. Existing single-default block closure remains available.
+Source controls distinguish timeout from successful execution. Broader P16 and final lane gates remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.
+
+### Closing heterogeneous default sequences
+
+LocalDefaultItems now proves that each certified output context extends the input
+by a prefix. Its scope runtime restores only successful outcomes, dropping that
+prefix without decoding surviving raw values; halts retain their reached context.
+The all-fuel block theorem composes actual Source item execution and restoration
+from clean input, with successful decoding required before the restoration
+projection law. Controls distinguish partial declaration/body contexts from
+successful closure, preserve the enclosing write and dirty sibling bits, and
+independently evaluate actual Source block timeout/completion. Broader P16,
+general admission, dirty compiler adequacy and final lane validation remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
