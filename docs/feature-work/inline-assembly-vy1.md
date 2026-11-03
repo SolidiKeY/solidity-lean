@@ -606,3 +606,12 @@ zero orphans. Forty existing ambiguous doc references all resolve. Scoped
 theorem/control reports use only propext, Classical.choice and Quot.sound. Final
 lane gates are pending, not claimed. get_goal remains unavailable; persistent
 goal unchanged.
+### Scoped Boolean while adapter
+
+LocalBoolWhile.run iterates an actual certified Source Boolean condition and a context-growing certified item body. Successful iterations drop body declarations and retain enclosing effects; halts retain the actual reached context. Condition, scoped body and recursive loop use Source's predecessor horizon. source_agrees proves all-fuel agreement with actual Source.execS whileLoop from a completely clean frame. After successful bodies it obtains the real decoder result from scope agreement, reconstructs the raw clean frame through values_inverse, and applies fuel induction. No cleanliness/simulation law is assumed from a caller.
+
+Checks.LocalBoolWhile inhabits an actual loop that declares a temporary copy and clears its enclosing condition. Controls show partial declared context at fuel five, termination at seven, false-condition skipping, condition partial effects, dirty nonzero truth and preservation of dirty sibling bits with refused clean projection. A universal iteration lemma factors constant-true repetition, tested at horizons eight and twelve; these finite controls do not claim a general divergence theorem. Direct repeated reduction hit the unchanged 200000-heartbeat limit; the factored proof passes without raising budgets. Scratch failures are retained.
+
+No Source/** changes, frontend admission expansion, or new solc/EVM evidence. Clean Source correspondence does not establish dirty Source/compiler adequacy. Full VY1/general P16, other statement/type classes, dirty pipeline boundaries and final joint/full gates remain unfinished. Exact signatures, automation, review and bounded check evidence are sealed in the head-named parallel packet.
+
+Six independent read-only reviews reported no findings. Both per-file MCP diagnostics have zero errors. Serial affected build (130 jobs), two per-file gates, layer/registration/orphan/doc-path/diff checks pass; scoped axiom reports list only propext, Classical.choice and Quot.sound. Forty existing ambiguous documentation references all resolve. Lean 4.24.0 / Lake 5.0.0-src+797c613; hard 12 GiB/no-swap bound and serial Lean -j1 with OS-headroom monitoring. Full lane gates were not rerun or claimed. Persistent goal unchanged; get_goal read API remains unavailable.
