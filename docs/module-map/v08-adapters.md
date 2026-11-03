@@ -441,3 +441,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 |---|---|
 | `Lowering/V08/LiteralFailureMixedSignature.lean` | Actual mixed-tail encodeWithSignature allocation, raw rethrow and post-allocation timeout from existing field/read/hash semantics. |
 | `Lowering/V08/LiteralFailureMixedSignatureControls.lean` | Signature/payload aliasing, existing Keccak pin, four-byte prefix, empty tail, timeouts and complete reached outputs. |
+
+## Declared mixed custom errors
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedCustomError.lean` | Actual identity-converted local arguments and custom-error execution from generic mixed codec field facts. |
+| `Lowering/V08/LiteralFailureMixedCustomErrorControls.lean` | Member/type witnesses for mixed and empty errors, populated state, selector transport and exact stuck/timeout controls. |

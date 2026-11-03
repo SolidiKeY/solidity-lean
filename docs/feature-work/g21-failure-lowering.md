@@ -80,3 +80,7 @@ target encoder, source/target simulation or admission theorem is claimed.
 ### Mixed signature-prefixed packets
 
 `LiteralFailureMixedSignature` derives actual `encodeWithSignature` execution for arbitrary represented word/bytes tails. It consumes the real signature-memory read and existing hash-prefix semantics, then retains the complete typed codec body. Controls share the signature and first payload reference, prove their preservation across fresh allocation, consume the existing Keccak contract, and distinguish a four-byte prefix from the full hash. Signature-only encoding, raw rethrow and pre-argument versus post-allocation timeout remain explicit. The supplied bytes are not asserted to name an admitted declaration; no new hash implementation, native agreement, dispatch, same-invocation transport or target encoder is provided.
+
+### Declared mixed custom errors
+
+`LiteralFailureMixedCustomError` derives actual converted local argument execution and consumes the mixed encoder proof to execute the existing custom-error statement. Controls include mixed and zero-argument error declarations in their environment, prove parameter types and canonical ASCII/UTF8 selector transport, and retain complete populated state on the Source error result. A dangling reference is stuck; insufficient argument fuel times out. Neither is relabeled an ABI validation revert. The Source statement allocates no result object. These component facts do not establish function-entry admission, transaction rollback, target emission or arbitrary world transport.

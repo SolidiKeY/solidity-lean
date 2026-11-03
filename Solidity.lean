@@ -1929,6 +1929,8 @@ import Solidity.Lowering.V08.LiteralFailureMemoryReason
 import Solidity.Lowering.V08.LiteralFailureMemoryReasonControls
 import Solidity.Lowering.V08.LiteralFailureMemoryRevert
 import Solidity.Lowering.V08.LiteralFailureMemoryRevertControls
+import Solidity.Lowering.V08.LiteralFailureMixedCustomError
+import Solidity.Lowering.V08.LiteralFailureMixedCustomErrorControls
 import Solidity.Lowering.V08.LiteralFailureMixedEncoding
 import Solidity.Lowering.V08.LiteralFailureMixedEncodingControls
 import Solidity.Lowering.V08.LiteralFailureMixedExpression
