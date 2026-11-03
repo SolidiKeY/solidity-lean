@@ -1,3 +1,9 @@
+# Ownership update
+
+The SS-CP2 entries below are historical and withdrawn from this lane: MIC owns
+all remaining memory-preservation work. Do not implement those entries here.
+The original sealed checkpoint and notes remain available for owner handoff.
+
 # Routine G18 follow-up (H14 cascade)
 
 These statements are NOT proved or assumed by the checked storage client. Add them in NEW `Solidity.Backend.Aggregates.G18StorageFrames`, importing G18StorageClient; keep the producer modules unchanged. Namespace Solidity.Backend.Aggregates.StorageClient.
