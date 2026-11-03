@@ -1,6 +1,7 @@
 import Solidity.Source.Value
 import Solidity.Source.World
 import Solidity.Source.Elaborated
+import Solidity.Source.FailureCursor
 
 /-!
 # The source machine: state, locals and storage access (S02)
@@ -160,6 +161,9 @@ structure St (E : Env) where
   /-- Emitted logs (an excluded observation, G00), newest first. -/
   logs : List (Address × Bytes)
   fnLocals : Σ Γ : RCtx, Locals E.layout Γ
+  /-- Monotone H16 request/frame execution metadata. Legacy evaluation ignores
+  this field; enabled operations take an immutable RuntimePlan explicitly. -/
+  resource : FailureExecution.Cursor := FailureExecution.Cursor.empty
 
 /-- **A call frame's context**. -/
 structure Fr where

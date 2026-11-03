@@ -3353,3 +3353,4 @@ import Solidity.Yul.RawSourceVoidReturn
 
 
 import Solidity.Source.FailureCursor
+import Solidity.Source.FailureMachine

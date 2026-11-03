@@ -63,3 +63,34 @@ S02/S04 core edits, their nine dependent modules and V14's later Eval patch rema
 pending. H16-TX1 and H16-BAL1 are already routed to the human; no answer is assumed.
 All24 original full obligations and six Source combinations remain open. No
 native compiler/EVM execution occurred in this follow-up.
+
+
+### H16 explicit-plan frame execution leaf (2026-11-03)
+
+New `Source/FailureMachine.lean` runs frame cursor operations in actual Source.EM,
+reusing the actual Source event emitter. Source.St gains only a typed cursor;
+St.init initializes it. The immutable RuntimePlan is an explicit argument, not
+a mutable state field. None does not inspect stale metadata. A reached parent
+stop prevents entry, and body pre/post checks are inside attempt; scope exit
+retains ordinal progress and ancestor/request stops. This is not a second
+interpreter, dispatch, rollback, catch selector, receipt policy or SourceSpec.
+Actual Eval/session wiring and fixed-plan consistency remain unfinished.
+
+Fresh single-thread checking before/after on the published Source bodies:
+
+| Source file | Before seconds | After seconds |
+|---|---:|---:|
+| Machine | 1.7217 | 1.6521 |
+| Eval | 7.9047 | 8.0273 |
+| Semantics | 0.8670 | 0.9007 |
+| Horizon | 339.6516 | 339.6591 |
+
+Commands used unchanged j1/131072 stack and hard12GiB/no swap/H1 OS reserve.
+Fresh setup/import hashes and raw results are retained in frame-machine evidence.
+No noticeable checking-time regression appears in these measurements. They do
+not constitute a full Source closure or full build; those gates remain required.
+The independent draft reviews accepted the scoped operations. Frozen controls
+include an existing nonempty heap/local alias, log/event prefix, swallowed own
+failure, child/ancestor/request ownership, zero cuts and exact halt bytes.
+The root TX1/BAL1 choices remain pending with the human. Existing immutable/funds
+patches and all24 original obligations/six general Source combinations remain open.

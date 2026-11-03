@@ -261,7 +261,7 @@ def SrcProg.glob (P : SrcProg E) (env : SessionEnv) : Glob E :=
 
 /-- The state before the session: no instances. -/
 def St.init (E : Env) : St E :=
-  ⟨⟨⟨fun _ => Account.empty _⟩, Transient.empty, []⟩, Heap.empty, [], [], ⟨[], .nil⟩⟩
+  ⟨⟨⟨fun _ => Account.empty _⟩, Transient.empty, []⟩, Heap.empty, [], [], ⟨[], .nil⟩, FailureExecution.Cursor.empty⟩
 
 /-- A computation of the empty context run from a state, at horizon `k`. -/
 def runAt {α : Type} (m : Nat → EM E [] α) (s : St E) (k : Nat) : Except Halt α × St E :=

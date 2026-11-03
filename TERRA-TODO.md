@@ -41,3 +41,13 @@ The request-cut and diagonal soundness arguments remain with VY5.
 - Prove new frame IDs exceed every existing frame ID using Fin.isLt;
   prove pop never reuses an ordinal. Resource execution, unwind soundness,
   actual hooks and horizon consistency remain VY5's producer obligations.
+
+## H16 explicit-plan frame identities (routine; no placeholders in Lean)
+
+Module `Solidity.Source.FailureMachine`, namespace `Source.FailureExecution`:
+- `frame_none {E Γ α} (body : Source.EM E Γ α) : frame none body = body`.
+- `check_none {E Γ} : check (E := E) (Γ := Γ) none = pure ()`.
+- `pending_none {E Γ} : pending (E := E) (Γ := Γ) none = pure false`.
+- `emit_none {E Γ} (event : Roadmap.Event) : emit (E := E) (Γ := Γ) none event = Source.emitEvent event`.
+All are definitionally the None branch, routine `rfl`; immutable-plan execution
+and owner/error soundness remain with Sol. Do not alter the Source evaluator.
