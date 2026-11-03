@@ -1903,7 +1903,6 @@ See [P8 admission](feature-work/p8-admission.md).
 | Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
 
 ## Inline assembly (Yul)
-
 | Modules | Purpose |
 |---|---|
 | `Yul.lean`, `Yul/Words.lean`, `Yul/Builtins.lean`, `Yul/Syntax.lean`, `Yul/ExpressionCheck.lean` | Yul library root; words, builtins, intrinsic syntax and checking ([VY1](feature-work/inline-assembly-vy1.md)). |
@@ -1967,3 +1966,50 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/Readonly/SourceBodyEffects.lean`, `Lowering/Readonly/SourceBodyControls.lean` | Actual internal-body, typed item and modifier successor journal effects; inhabited static modifier observations. Full history induction remains open. |
 | `Lowering/Readonly/SourceLoopEffects.lean`, `Lowering/Readonly/SourceLoopControls.lean` | Actual loop successor journal effects and15 populated-state exit/refusal/exhaustion controls; smaller-bound premise retained. |
 | `Lowering/Readonly/SourceDispatchEffects.lean`, `Lowering/Readonly/SourceDispatchControls.lean` | Exact selector leaves and exhaustive dispatch successor journal effect;13 finite observations and inhabited client, not full call/native adequacy. |
+| the lane-only fixture SourceCopyCommutation.lean (not on master) | Above-core Source copy runtime footprints and word commutation; Source-layer integration pending. |
+| the lane-only fixture SourceCopyCommutationControls.lean (not on master) | Actual Source both-order clients; journal/state and overlap/order controls. |
+| `Lowering/StorageOps/SourceScalarDeleteLog.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceArrayDeleteTarget.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceReadFrames.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceStorageCopy.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceCopyFrames.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceCopyReadbacks.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceCopyCommutation.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceCopyCommutationControls.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceCopyRepeat.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Lowering/StorageOps/SourceCopyRepeatControls.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
+| `Backend/StorageOps/TargetSelfCopy.lean` | Target-only runtime self-copy; compatible legacy import and canonical exported names |
+| `Lowering/StorageOps/SourceArrayDeleteNumeric.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceArrayReadback.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolStorageCopy.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolCopyReadbacks.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolArrayDeleteNumericControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolFixedStorageCopy.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolFixedStorageCopyTarget.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolStorageCopyTarget.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceBoolStorageCopyTargetControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceCopyFramesControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceFixedStorageCopy.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceIntCopyReadbacks.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceFixedStorageCopyControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceFixedStorageCopyTarget.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceIntArrayDeleteNumeric.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceMappingDelete.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceSelfCopy.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceSignedStorageCopyTarget.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceStorageCopyControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceStorageCopyTarget.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceStorageCopyTargetControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceTwoArrayDeletes.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceTwoArrayDeleteControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceTwoArrayDeleteNumeric.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/TwoClearRepresentationControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Backend/StorageOps/LoopLaws.lean` | Shared intrinsic loop-turn/exit/single-loop adapters with explicit operational premises |
+| `Backend/StorageOps/LoopLawsControls.lean` | Populated ordered positive/negative loop controls and concrete termination witness |

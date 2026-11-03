@@ -149,3 +149,5 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [Dynamic storage array access](feature-work/g18-array-access.md): actual length/bounds and selected-cell transports, with invalid-representation controls.
 Source callback history producer components: [G22 Source histories](feature-work/g22-source-history-producer.md).
 Compiler-pass integration checks and retained local applications are described in [the compiler-pass record](feature-work/roadmap-v09-compiler-passes.md#integration-checks).
+V10 Source operation clients and remaining integration: [storage operations](feature-work/roadmap-v10-storage-operations.md#source-operation-clients-c145).
+Registered V10 Source operation clients: [storage operation views and Source clients](feature-work/roadmap-v10-storage-operations.md#operation-views-and-source-clients).

@@ -1,3 +1,5 @@
+import Solidity.Evm.MemoryStorageCopyLoop
+import Solidity.Backend.StorageOps.LoopLaws
 import Solidity.Backend.StorageOps.TargetArrayWrite
 
 /-! A genuine structured target runtime loop clears primitive array live slots.
@@ -5,7 +7,7 @@ Its old length is loaded by SLOAD, not read from a graph-value oracle. Kernel
 loopIterN/loopRun proofs retain the existing instruction/loop semantics. -/
 namespace Solidity.Backend.StorageOps.TargetArrayClear
 
-def condition : List Evm.Instr := [.dup 2,.dup 2,.lt]
+def condition : List Evm.Instr := Evm.Memory.copyRangeCond
 def body : List Evm.Instr := [.push (.val ⟨0,by decide⟩),.dup 4,.keccakArr,.dup 3,.add,.sstore,
   .push (.val ⟨1,by decide⟩),.add]
 def setup : List Evm.Instr := [.dup 1,.sload,.push (.val ⟨0,by decide⟩)]
@@ -59,7 +61,7 @@ theorem run_condition (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm
     (i limit : Fin Evm.W) :
     Evm.run condition { machine with stack := .val i :: .val limit :: .slot slot :: tail } =
       .ok { machine with stack := .val (Evm.bword (decide (i.val < limit.val))) :: .val i :: .val limit :: .slot slot :: tail } 0 := by
-  simp only [condition,Evm.run,Evm.exec,Evm.Instr.step,Evm.Machine.next,Evm.Out.bind,
+  simp only [condition,Evm.Memory.copyRangeCond,Evm.run,Evm.exec,Evm.Instr.step,Evm.Machine.next,Evm.Out.bind,
     List.getElem?_cons_zero,List.getElem?_cons_succ]
 
 /-- One ACTUAL SSTORE turn clears only current index, then advances the runtime
@@ -92,35 +94,15 @@ theorem body_at (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
 
 
 
-private theorem turn_step (rc rb : Evm.Machine → Evm.Out) (machine result : Evm.Machine)
-    (flag : Fin Evm.W) (nonzero : flag.val ≠ 0)
-    (cond : rc machine = .ok { machine with stack := .val flag :: machine.stack } 0)
-    (step : rb machine = .ok result 0) : Evm.loopTurn rc rb machine = .inl result := by
-  unfold Evm.loopTurn
-  rw [cond]
-  change (if flag.val = 0 then (Sum.inr (Evm.Out.ok machine 0) : Evm.Machine ⊕ Evm.Out) else
-      match rb machine with
-      | .ok current 0 => Sum.inl current
-      | .ok _ (_+1) => Sum.inr Evm.Out.fault
-      | current => Sum.inr current) = _
-  rw [if_neg nonzero,step]
-
 theorem turn_more (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
     (limit i : Fin Evm.W) (live : i.val < limit.val) :
     Evm.loopTurn (Evm.run condition) (Evm.run body) (iterationMachine machine tail slot limit i) =
       .inl (iterationMachine machine tail slot limit ⟨i.val+1,by omega⟩) := by
   have guard : (Evm.bword (decide (i.val < limit.val))).val ≠ 0 := by
     simpa only [live,decide_true,Evm.bword,if_true] using Nat.one_ne_zero
-  exact turn_step (Evm.run condition) (Evm.run body) _ _ _ guard
+  exact LoopLaws.turn_step (Evm.run condition) (Evm.run body) _ _ _ guard
     (condition_at machine tail slot limit i) (body_at machine tail slot limit i (by have h := limit.isLt; omega))
 
-
-private theorem turn_exit (rc rb : Evm.Machine → Evm.Out) (machine : Evm.Machine)
-    (cond : rc machine = .ok { machine with stack := .val ⟨0,by decide⟩ :: machine.stack } 0) :
-    Evm.loopTurn rc rb machine = .inr (.ok machine 0) := by
-  unfold Evm.loopTurn
-  rw [cond]
-  rfl
 
 theorem turn_done (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
     (limit : Fin Evm.W) :
@@ -131,7 +113,7 @@ theorem turn_done (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slo
     simp only [Nat.lt_irrefl,decide_false,Evm.bword,Bool.false_eq_true,if_false]
   have cond := condition_at machine tail slot limit limit
   rw [zero] at cond
-  exact turn_exit (Evm.run condition) (Evm.run body) _ cond
+  exact LoopLaws.turn_exit (Evm.run condition) (Evm.run body) _ cond
 
 /-- Every finite runtime word length terminates after exactly its remaining
 body turns plus one final false condition. This is not a source fuel bound. -/
@@ -173,20 +155,13 @@ theorem iterations_prefix (machine : Evm.Machine) (tail : List Evm.Word) (slot :
     change i.val+1+steps = i.val+(steps+1)
     omega
 
-private theorem run_single_loop (cond body : List Evm.Instr) (machine result : Evm.Machine)
-    (finished : Evm.loopRun (Evm.run cond) (Evm.run body) machine = .ok result 0) :
-    Evm.run [.loop cond body] machine = .ok result 0 := by
-  change (Evm.loopRun (Evm.run cond) (Evm.run body) machine).bind (fun m k => Evm.exec [] k m) = _
-  rw [finished]
-  rfl
-
 /-- Kernel loop specification: restart at ANY matching prefix. The existing
 compiled loopImpl twin is not evaluated to prove termination or the result. -/
 theorem run_loop_from (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
     (limit i : Fin Evm.W) (bound : i.val ≤ limit.val) :
     Evm.run [.loop condition body] (iterationMachine machine tail slot limit i) =
       .ok (iterationMachine machine tail slot limit limit) 0 := by
-  apply run_single_loop
+  apply LoopLaws.run_single_loop
   exact Evm.loopRun_of_iterN (iterations_finish machine tail slot limit (limit.val-i.val) i (by omega))
 
 theorem run_loop (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)

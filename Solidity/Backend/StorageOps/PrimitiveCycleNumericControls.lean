@@ -80,7 +80,7 @@ theorem collision_negative :
 
 private def wrong : WordStore := writeWord (writeWord (numeric (small 2)) 6 w0) 0 w2
 /-- Actual push/pop on OLD input clears a different retained slot and keeps
-header2. This is not the FIRSTpop result observed by the triple. -/
+header2. This is not the first pop result observed by the triple. -/
 theorem wrong_order :
  ((LifecycleNumeric.pushPrimitive 16 hash base (numeric (small 2))).bind (PrimitivePop.execute 16 hash base)).map view =
  some [w2,w53,w53,w0,w99,w53,w53] ∧

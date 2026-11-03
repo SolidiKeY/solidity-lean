@@ -1,9 +1,9 @@
 import Solidity.Backend.StorageOps.AbsentRootQueries
 
-/-! Actual output composition adds exact failed observations to nontrivial
-successful ROOT families. Both are derived from OLD graph evidence and the
-concrete runtime certificate; no desired postowner is an input. None imposes
-no physical-cell contract; numeric/ALLtarget transport remains unchanged. -/
+/-! Output composition combines OLD graph evidence with the runtime certificate.
+The reads, writes and clearWrites premises explicitly cover intermediate stores;
+they are not consequences of OLD observations alone. Failed graph observations
+impose no physical-cell contract. Numeric and target transport stay explicit. -/
 namespace Solidity.Backend.StorageOps.OutputRootComplete
 open TypeGraph Solidity.Storage Solidity.Storage.Representation Solidity.Storage.Representation.Graph
 

@@ -1,3 +1,4 @@
+import Solidity.Backend.StorageOps.LoopLaws
 import Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop
 
 /-! Runtime OUTER stale-child clear loop. Each active child executes the checked
@@ -36,19 +37,6 @@ theorem body_at (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot) 
   simp only [iterationMachine,prefixMachine,if_pos begun]
   rfl
 
-private theorem turn_step (rc rb : Evm.Machine → Evm.Out) (machine result : Evm.Machine)
-    (flag : Fin Evm.W) (nonzero : flag.val ≠ 0)
-    (cond : rc machine = .ok { machine with stack := .val flag :: machine.stack } 0)
-    (step : rb machine = .ok result 0) : Evm.loopTurn rc rb machine = .inl result := by
-  unfold Evm.loopTurn
-  rw [cond]
-  change (if flag.val = 0 then (Sum.inr (Evm.Out.ok machine 0) : Evm.Machine ⊕ Evm.Out) else
-    match rb machine with
-    | .ok current 0 => Sum.inl current
-    | .ok _ (_+1) => Sum.inr Evm.Out.fault
-    | current => Sum.inr current) = _
-  rw [if_neg nonzero,step]
-
 theorem turn_more (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot) (start : Nat)
     (newLength limit i : Fin Evm.W) (begun : start ≤ i.val) (live : i.val < limit.val) :
     Evm.loopTurn (Evm.run TargetArrayClear.condition) (Evm.run TargetNestedArrayCopy.clearBody)
@@ -56,15 +44,8 @@ theorem turn_more (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot
       .inl (iterationMachine initial tail dst start newLength limit ⟨i.val+1,by omega⟩) := by
   have flag : (Evm.bword (decide (i.val < limit.val))).val ≠ 0 := by
     simpa only [live,decide_true,Evm.bword,if_true] using Nat.one_ne_zero
-  exact turn_step _ _ _ _ _ flag (condition_at initial tail dst start newLength limit i)
+  exact LoopLaws.turn_step _ _ _ _ _ flag (condition_at initial tail dst start newLength limit i)
     (body_at initial tail dst start newLength limit i begun (by omega))
-
-private theorem turn_exit (rc rb : Evm.Machine → Evm.Out) (machine : Evm.Machine)
-    (cond : rc machine = .ok { machine with stack := .val ⟨0,by decide⟩ :: machine.stack } 0) :
-    Evm.loopTurn rc rb machine = .inr (.ok machine 0) := by
-  unfold Evm.loopTurn
-  rw [cond]
-  rfl
 
 theorem turn_done (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot) (start : Nat)
     (newLength limit i : Fin Evm.W) (done : limit.val ≤ i.val) :
@@ -76,7 +57,7 @@ theorem turn_done (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot
     simp only [show ¬ i.val < limit.val by omega,decide_false,Evm.bword,Bool.false_eq_true,if_false]
   have cond := condition_at initial tail dst start newLength limit i
   rw [zero] at cond
-  exact turn_exit _ _ _ cond
+  exact LoopLaws.turn_exit _ _ _ cond
 
 /-- Exact termination of the stale OUTER suffix for every runtime word limit. -/
 theorem iterations_finish (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot) (start : Nat)
@@ -97,19 +78,12 @@ theorem iterations_finish (initial : Evm.Machine) (tail : List Evm.Word) (dst : 
     · change start ≤ i.val+1; omega
     · change i.val+1+remaining = limit.val; omega
 
-private theorem run_single_loop (cond body : List Evm.Instr) (machine result : Evm.Machine)
-    (finished : Evm.loopRun (Evm.run cond) (Evm.run body) machine = .ok result 0) :
-    Evm.run [.loop cond body] machine = .ok result 0 := by
-  change (Evm.loopRun (Evm.run cond) (Evm.run body) machine).bind (fun m k => Evm.exec [] k m) = _
-  rw [finished]
-  rfl
-
 theorem run_loop_from (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot) (start : Nat)
     (newLength limit i : Fin Evm.W) (begun : start ≤ i.val) (bound : i.val ≤ limit.val) :
     Evm.run [.loop TargetArrayClear.condition TargetNestedArrayCopy.clearBody]
       (iterationMachine initial tail dst start newLength limit i) =
       .ok (iterationMachine initial tail dst start newLength limit limit) 0 := by
-  apply run_single_loop
+  apply LoopLaws.run_single_loop
   exact Evm.loopRun_of_iterN (iterations_finish initial tail dst start newLength limit (limit.val-i.val) i begun (by omega))
 
 theorem run_loop_immediate (initial : Evm.Machine) (tail : List Evm.Word) (dst : Evm.Slot) (start : Nat)
@@ -117,7 +91,7 @@ theorem run_loop_immediate (initial : Evm.Machine) (tail : List Evm.Word) (dst :
     Evm.run [.loop TargetArrayClear.condition TargetNestedArrayCopy.clearBody]
       (iterationMachine initial tail dst start newLength limit i) =
       .ok (iterationMachine initial tail dst start newLength limit i) 0 := by
-  apply run_single_loop
+  apply LoopLaws.run_single_loop
   exact Evm.loopRun_of_iterN (show Evm.loopIterN _ _ 1 _ = _ by
     rw [Evm.loopIterN,turn_done initial tail dst start newLength limit i done])
 

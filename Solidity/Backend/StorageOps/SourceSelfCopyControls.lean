@@ -1,4 +1,4 @@
-import Solidity.Backend.StorageOps.SourceSelfCopy
+import Solidity.Backend.StorageOps.TargetSelfCopy
 
 /-! Populated target-only controls below the Source boundary. -/
 namespace Solidity.Backend.StorageOps.SourceSelfCopyTargetControls
@@ -24,13 +24,13 @@ private def context (m : Evm.Machine) :=
 
 theorem target_self :
     Evm.run TargetNestedArrayCopy.code { machine with stack := .slot slot :: .slot slot :: tail } = .ok machine 0 :=
-  SourceSelfCopy.run_self machine tail slot
+  TargetSelfCopy.run_self machine tail slot
 
 theorem target_ordered :
     (targetView machine,targetView (TargetNestedArrayRuntime.afterCopy machine tail slot slot),
       context (TargetNestedArrayRuntime.afterCopy machine tail slot slot)) =
     ([2,1,7,11,1,17,1,71,0,99],[2,1,7,11,1,17,1,71,0,99],context machine) := by
-  rw [SourceSelfCopy.nested_after_self]
+  rw [TargetSelfCopy.nested_after_self]
   rfl
 
 /-- A different empty source clears the destination live prefix while preserving older shadows. -/

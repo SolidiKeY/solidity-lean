@@ -1,3 +1,4 @@
+import Solidity.Backend.StorageOps.LoopLaws
 import Solidity.Backend.StorageOps.TargetArrayCopy
 
 /-! The actual copy program's second runtime loop clears only the stale tail.
@@ -71,35 +72,15 @@ theorem body_at (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
   change Evm.run TargetArrayClear.body (iterationMachine machine tail slot start limit i) = _ at step
   simpa only [iterationMachine,clearSuffix,if_pos begun] using step
 
-private theorem turn_step (rc rb : Evm.Machine → Evm.Out) (machine result : Evm.Machine)
-    (flag : Fin Evm.W) (nonzero : flag.val ≠ 0)
-    (cond : rc machine = .ok { machine with stack := .val flag :: machine.stack } 0)
-    (step : rb machine = .ok result 0) : Evm.loopTurn rc rb machine = .inl result := by
-  unfold Evm.loopTurn
-  rw [cond]
-  change (if flag.val = 0 then (Sum.inr (Evm.Out.ok machine 0) : Evm.Machine ⊕ Evm.Out) else
-      match rb machine with
-      | .ok current 0 => Sum.inl current
-      | .ok _ (_+1) => Sum.inr Evm.Out.fault
-      | current => Sum.inr current) = _
-  rw [if_neg nonzero,step]
-
 theorem turn_more (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
     (start : Nat) (limit i : Fin Evm.W) (begun : start ≤ i.val) (live : i.val < limit.val) :
     Evm.loopTurn (Evm.run TargetArrayClear.condition) (Evm.run TargetArrayClear.body) (iterationMachine machine tail slot start limit i) =
       .inl (iterationMachine machine tail slot start limit ⟨i.val+1,by omega⟩) := by
   have guard : (Evm.bword (decide (i.val < limit.val))).val ≠ 0 := by
     simpa only [live,decide_true,Evm.bword,if_true] using Nat.one_ne_zero
-  exact turn_step (Evm.run TargetArrayClear.condition) (Evm.run TargetArrayClear.body) _ _ _ guard
+  exact LoopLaws.turn_step (Evm.run TargetArrayClear.condition) (Evm.run TargetArrayClear.body) _ _ _ guard
     (condition_at machine tail slot start limit i) (body_at machine tail slot start limit i begun (by have h := limit.isLt; omega))
 
-
-private theorem turn_exit (rc rb : Evm.Machine → Evm.Out) (machine : Evm.Machine)
-    (cond : rc machine = .ok { machine with stack := .val ⟨0,by decide⟩ :: machine.stack } 0) :
-    Evm.loopTurn rc rb machine = .inr (.ok machine 0) := by
-  unfold Evm.loopTurn
-  rw [cond]
-  rfl
 
 theorem turn_done (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
     (start : Nat) (limit : Fin Evm.W) :
@@ -110,7 +91,7 @@ theorem turn_done (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slo
     simp only [Nat.lt_irrefl,decide_false,Evm.bword,Bool.false_eq_true,if_false]
   have cond := condition_at machine tail slot start limit limit
   rw [zero] at cond
-  exact turn_exit (Evm.run TargetArrayClear.condition) (Evm.run TargetArrayClear.body) _ cond
+  exact LoopLaws.turn_exit (Evm.run TargetArrayClear.condition) (Evm.run TargetArrayClear.body) _ cond
 
 /-- Every finite runtime word length terminates after exactly its remaining
 body turns plus one final false condition. This is not a source fuel bound. -/
@@ -152,20 +133,13 @@ theorem iterations_prefix (machine : Evm.Machine) (tail : List Evm.Word) (slot :
     change i.val+1+steps = i.val+(steps+1)
     omega
 
-private theorem run_single_loop (cond body : List Evm.Instr) (machine result : Evm.Machine)
-    (finished : Evm.loopRun (Evm.run cond) (Evm.run body) machine = .ok result 0) :
-    Evm.run [.loop cond body] machine = .ok result 0 := by
-  change (Evm.loopRun (Evm.run cond) (Evm.run body) machine).bind (fun m k => Evm.exec [] k m) = _
-  rw [finished]
-  rfl
-
 /-- Kernel loop specification: restart at ANY matching prefix. The existing
 compiled loopImpl twin is not evaluated to prove termination or the result. -/
 theorem run_loop_from (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)
     (start : Nat) (limit i : Fin Evm.W) (begun : start ≤ i.val) (bound : i.val ≤ limit.val) :
     Evm.run [.loop TargetArrayClear.condition TargetArrayClear.body] (iterationMachine machine tail slot start limit i) =
       .ok (iterationMachine machine tail slot start limit limit) 0 := by
-  apply run_single_loop
+  apply LoopLaws.run_single_loop
   exact Evm.loopRun_of_iterN (iterations_finish machine tail slot start limit (limit.val-i.val) i begun (by omega))
 
 
@@ -190,13 +164,13 @@ theorem run_tail (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot
       simp only [show ¬ start.val < limit.val by omega,decide_false,Evm.bword,Bool.false_eq_true,if_false]
     have cond := TargetArrayClear.run_condition machine tail slot start limit
     rw [zero] at cond
-    have finished := turn_exit (Evm.run TargetArrayClear.condition) (Evm.run TargetArrayClear.body)
+    have finished := LoopLaws.turn_exit (Evm.run TargetArrayClear.condition) (Evm.run TargetArrayClear.body)
       { machine with stack := .val start :: .val limit :: .slot slot :: tail } cond
     have result := Evm.loopRun_of_iterN (show Evm.loopIterN (Evm.run TargetArrayClear.condition)
       (Evm.run TargetArrayClear.body) 1 { machine with stack := .val start :: .val limit :: .slot slot :: tail } =
         .inr (.ok { machine with stack := .val start :: .val limit :: .slot slot :: tail } 0) by
           rw [Evm.loopIterN,finished])
-    have executed := run_single_loop _ _ _ _ result
+    have executed := LoopLaws.run_single_loop _ _ _ _ result
     simpa only [Nat.max_eq_left (show limit.val ≤ start.val by omega),endEq,
       suffix_before machine.store slot start.val start.val (Nat.le_refl _)] using executed
 

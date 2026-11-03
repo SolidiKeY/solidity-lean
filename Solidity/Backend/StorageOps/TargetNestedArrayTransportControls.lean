@@ -2785,7 +2785,7 @@ theorem fresh_wrong_extra_tail :
 
 /-- PUBLIC selected representation alone does not pin a failed query's raw
 word. Even wrong raw89 at this fresh None query satisfies that relation;
-the separate numeric/ALLtarget operation certificate rejects the extra write. -/
+the separate numeric/target operation certificate rejects the extra write. -/
 theorem fresh_none_does_not_pin_raw_tail : Represented (freshOldRoot.overlay freshSourceRoot) freshQueries (.root 1)
     (Representation.write (TargetNestedArrayTransport.afterStore freshStore (.root 1) (.root 0)) (.data (.data (.root 1) 1) 2) (w 89)) := by
   intro q member

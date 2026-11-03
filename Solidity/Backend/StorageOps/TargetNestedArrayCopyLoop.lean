@@ -1,3 +1,4 @@
+import Solidity.Backend.StorageOps.LoopLaws
 import Solidity.Backend.StorageOps.TargetNestedArrayCopy
 
 /-! Kernel runtime OUTER copy-loop prefix and termination over the existing
@@ -27,19 +28,6 @@ theorem body_at (initial : Evm.Machine) (tail : List Evm.Word) (src dst : Evm.Sl
   rw [iterationMachine,TargetNestedArrayCopy.run_copy_body]
   rfl
 
-private theorem turn_step (rc rb : Evm.Machine → Evm.Out) (machine result : Evm.Machine)
-    (flag : Fin Evm.W) (nonzero : flag.val ≠ 0)
-    (cond : rc machine = .ok { machine with stack := .val flag :: machine.stack } 0)
-    (step : rb machine = .ok result 0) : Evm.loopTurn rc rb machine = .inl result := by
-  unfold Evm.loopTurn
-  rw [cond]
-  change (if flag.val = 0 then (Sum.inr (Evm.Out.ok machine 0) : Evm.Machine ⊕ Evm.Out) else
-    match rb machine with
-    | .ok current 0 => Sum.inl current
-    | .ok _ (_+1) => Sum.inr Evm.Out.fault
-    | current => Sum.inr current) = _
-  rw [if_neg nonzero,step]
-
 theorem turn_more (initial : Evm.Machine) (tail : List Evm.Word) (src dst : Evm.Slot)
     (oldLength limit i : Fin Evm.W) (live : i.val < limit.val) :
     Evm.loopTurn (Evm.run TargetArrayCopy.condition) (Evm.run TargetNestedArrayCopy.copyBody)
@@ -47,15 +35,8 @@ theorem turn_more (initial : Evm.Machine) (tail : List Evm.Word) (src dst : Evm.
       .inl (iterationMachine initial tail src dst oldLength limit ⟨i.val+1,by omega⟩) := by
   have flag : (Evm.bword (decide (i.val < limit.val))).val ≠ 0 := by
     simpa only [live,decide_true,Evm.bword,if_true] using Nat.one_ne_zero
-  exact turn_step _ _ _ _ _ flag (condition_at initial tail src dst oldLength limit i)
+  exact LoopLaws.turn_step _ _ _ _ _ flag (condition_at initial tail src dst oldLength limit i)
     (body_at initial tail src dst oldLength limit i (by omega))
-
-private theorem turn_exit (rc rb : Evm.Machine → Evm.Out) (machine : Evm.Machine)
-    (cond : rc machine = .ok { machine with stack := .val ⟨0,by decide⟩ :: machine.stack } 0) :
-    Evm.loopTurn rc rb machine = .inr (.ok machine 0) := by
-  unfold Evm.loopTurn
-  rw [cond]
-  rfl
 
 theorem turn_done (initial : Evm.Machine) (tail : List Evm.Word) (src dst : Evm.Slot)
     (oldLength limit : Fin Evm.W) :
@@ -67,7 +48,7 @@ theorem turn_done (initial : Evm.Machine) (tail : List Evm.Word) (src dst : Evm.
     simp only [Nat.lt_irrefl,decide_false,Evm.bword,Bool.false_eq_true,if_false]
   have cond := condition_at initial tail src dst oldLength limit limit
   rw [zero] at cond
-  exact turn_exit _ _ _ cond
+  exact LoopLaws.turn_exit _ _ _ cond
 
 /-- Every finite runtime outer word length terminates. Remaining is a proof
 index for the existing loopIterN specification, never executable source fuel. -/
@@ -88,20 +69,13 @@ theorem iterations_finish (initial : Evm.Machine) (tail : List Evm.Word) (src ds
     change i.val+1+remaining = limit.val
     omega
 
-private theorem run_single_loop (cond body : List Evm.Instr) (machine result : Evm.Machine)
-    (finished : Evm.loopRun (Evm.run cond) (Evm.run body) machine = .ok result 0) :
-    Evm.run [.loop cond body] machine = .ok result 0 := by
-  change (Evm.loopRun (Evm.run cond) (Evm.run body) machine).bind (fun m k => Evm.exec [] k m) = _
-  rw [finished]
-  rfl
-
 /-- Restart from any matching actual prefix, using kernel loop specification. -/
 theorem run_loop_from (initial : Evm.Machine) (tail : List Evm.Word) (src dst : Evm.Slot)
     (oldLength limit i : Fin Evm.W) (bound : i.val ≤ limit.val) :
     Evm.run [.loop TargetArrayCopy.condition TargetNestedArrayCopy.copyBody]
       (iterationMachine initial tail src dst oldLength limit i) =
       .ok (iterationMachine initial tail src dst oldLength limit limit) 0 := by
-  apply run_single_loop
+  apply LoopLaws.run_single_loop
   exact Evm.loopRun_of_iterN (iterations_finish initial tail src dst oldLength limit (limit.val-i.val) i (by omega))
 
 /-- Matching actual progress before exit, with no executable fuel cap. -/
