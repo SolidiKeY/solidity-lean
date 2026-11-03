@@ -555,3 +555,23 @@ Routine projection requests remain archived in evidence; no excluded ledger
 or tests are resubmitted. New optional Bridge registrations remain generated
 at integration. Independent read-only reviews and focused checks are recorded
 in the checkpoint handoff.
+
+### Concrete V2 frame certificates
+
+`SolidityBridge.Yul.FrameCertificatesV2` constructs the published V2 frame
+contract for existing old-local reads, supplied-value writes and finite nested
+updates. Actual frame execution and all admitted caller-tail capacity follow
+from the existing slot/nested-write laws; no desired run or stackBound premise
+is supplied. Input room admits the empty caller. Reads need peak1; supplied-value
+SWAP/POP writes peak0 because the value is already input; update sequences use
+peak0 when empty and peak1 when nonempty. Shifted accessibility remains separate
+from room, and target-package checks do not change source admission.
+
+Controls preserve dirty words/newer locals/callers, check repeated writes and
+last/beyond accessible slots, underflow, full-height empty identity, real first
+PUSH prefix capacity and oversized gasless execution versus capacity refusal.
+The V2 overfull-output impossibility is separately witnessed. Generated axiom
+pins enforce the scoped reports. This closes V2 frame/capacity obligations for
+these target slices, not native expanded control, charged execution, functions,
+source/G24/views or full-lane composition. Routine projections stay archived
+in evidence; registrations remain coordinator-generated.

@@ -248,3 +248,8 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   and exact model-fault transport for supported scalar/sequence/conditional
   blocks, with original source prefix witnesses. Native/G24/capacity and full
   lane closure remain open; see the [lane document](inline-assembly-vy3.md).
+
+- VY3 concrete read/write/nested-update slices now inhabit nonvacuous V2 frame
+  certificates with real caller-tail capacity and transient-prefix witnesses.
+  Native/function/G24 and full-lane obligations remain open; see the
+  [lane document](inline-assembly-vy3.md).
