@@ -172,3 +172,9 @@ checks, remaining obligations).
 
 - VY1 (2026-11-03): Yul syntax, static checks, closed execution and word
   logic; see [inline-assembly-vy1.md](inline-assembly-vy1.md).
+- VY2 (2026-11-03): memory views and adapters; see
+  [yul-physical-memory.md](yul-physical-memory.md).
+- VY3 (2026-11-03): compilation combinators; see
+  [inline-assembly-vy3.md](inline-assembly-vy3.md).
+- VY4 (2026-11-03): world interface; see
+  [inline-assembly-vy4.md](inline-assembly-vy4.md).

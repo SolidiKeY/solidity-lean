@@ -12,6 +12,8 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.Compilation\./, // Yul compilation (target-side combinators).
+  /^Solidity\.Yul\.World\.(Raw|Observations|Frames|Lifecycle|Adapters|ByteMemory|AdapterRules|LifecycleAdapter|CreationFrames|CreationRules|CreationAddressing|ReturnSize)$/, // Yul world consumer core.
   /^Solidity\.Yul\.RawSourceAdapterFor$/, // Generated VY1 new-module registration.
   /^Solidity\.Yul\.RawSourceForIter$/, // Generated VY1 new-module registration.
   /^Solidity\.Yul\.RawSourceAdapterUnchecked$/, // Generated VY1 new-module registration.

@@ -1881,3 +1881,5 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Evm/MemoryRecursiveCert.lean`, `Evm/MemoryRecursiveCompile.lean`, `Evm/MemoryRecursiveSound.lean`, `Evm/MemoryRecursiveDispatch.lean`, `Evm/MemoryMixedLoop.lean` | Recursive and mixed-body loop certificates, compiler, correctness, dispatch fallback. |
 | `Yul/Views/**` | Byte/word memory views, codecs, arrays, objects, heap inventories. |
 | `Yul/Adapters/**` | Source/frame-memory agreement with the P6 interface; writeback and slices. |
+| `Yul/Compilation/**` | Target-side Yul compilation combinators: stack slots, lowering, opcodes, control ([VY3](feature-work/inline-assembly-vy3.md)). |
+| `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](feature-work/inline-assembly-vy4.md)). |
