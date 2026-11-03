@@ -380,7 +380,7 @@ is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B remain
 partial, G18 admission/composition prerequisites stay open, and no constructor
 or external compiler/EVM coverage is added.
 The historical axiom suite and the `*Checks.lean` fixtures cited above remain
-lane-only. `HeadlineAxioms` registers131 exact guards (96 theorems and35 inhabited clients) for selected arithmetic,
+lane-only. `HeadlineAxioms` registers149 exact guards (105 theorems and44 inhabited clients) for selected arithmetic,
 cast, conditional, reference and structural graph theorems in the default
 closure. It does not add entries to `scripts/g07-axiom-pins.json` or discharge
 missing admission, producer, production or coverage obligations.
@@ -431,8 +431,8 @@ equal-content distinct locals and live reference frames. Actual ordered runs
 return1 and caller257 while the alias read is7 under legacy and257 under viaIR.
 Stale-local and omitted-cast executions return7 and257. Independent finder and
 skeptic source reviews found no proof issue. These are kernel and evaluator
-controls, not external solc/EVM tests. Other source widths, signed narrowing,
-full casts, failure payloads, graph admission and production lowering stay open;
+controls, not external solc/EVM tests. Other source widths and signed casts are handled below;
+full cast coverage, failure payloads, graph admission and production lowering stay open;
 all original queue statuses remain partial or delegated as recorded above.
 
 ## All unsigned source and destination widths
@@ -453,7 +453,33 @@ of negative unsigned constant admission. The uint16-to-uint8 assignment returns1
 and stores257, with old/reached alias captures7/257. Repeated aliases, distinct
 equal contents, stale/omitted casts, fresh context and live caller references
 are covered. Independent finder and skeptic source reviews found no proof
-issue. Signed casts, constant admission, generic elaboration, graph admission,
+issue. Mixed-sign casts, constant admission, generic elaboration, graph admission,
 recursive lifetimes and production composition remain open; queue statuses
 stay partial or delegated. These controls are kernel/evaluator evidence, not
 external compiler or EVM tests.
+
+## All signed source and destination widths
+
+`SignedWidthCasts` proves actual intM-to-intN casts for every approved signed
+width pair. It derives the word embedding, proves the destination sign-threshold
+formula and uses existing typed word truncation/subtraction, signed readback
+and `Val.ternary`. Width256 is identity on canonical inputs. Repeated target
+value reads are pure; effectful Source operands are captured once before the
+cast and scope exit. Initial-family assignment transport derives executions,
+returned agreement and the post-family, retaining the caller's source type.
+
+`SignedWidthCastControls` supplies nine inhabited clients and45,056 Source/target
+cases over32×32 widths, both pipelines/checked flags and11 source-wrapped
+boundary inputs, including source minimum/maximum. These are value cases,
+not out-of-range constant admission. Int16-to-int8 assignment returns−128
+while storing128; alias capture reads7 under legacy and128 under viaIR.
+Wrong stale/omitted casts execute7/128, and an actual wrong zero-extension
+returns255 where the correct cast returns−1. Repeated aliases, equal-content
+distinct locals, fresh context and live memory/storage frames are covered.
+Independent finder and skeptic source/control reviews found no proof issue. The finder's module-map table placement finding was corrected.
+
+Narrow signed arithmetic, mixed-sign casts outside the supplied clauses,
+constants/enums, general effects/elaborator production, graph admission,
+recursive lifetimes and aggregate composition remain open. G16/G17 and both
+backfills remain partial; G18.01/G18.06 dependencies and delegated children
+are unchanged. No external compiler/EVM test or constructor is added.

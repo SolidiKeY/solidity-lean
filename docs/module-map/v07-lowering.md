@@ -76,3 +76,4 @@
 
 | `Lowering/V07/UnsignedWidthCasts.lean` | Actual unsigned cast transport for every approved source and destination width |
 | `Lowering/V07/UnsignedWidthCastControls.lean` | All unsigned width pairs, cast order and caller frame controls |
+| `Lowering/V07/SignedWidthCastControls.lean` | Signed thresholds, all width pairs, negative extension and caller frame controls |
