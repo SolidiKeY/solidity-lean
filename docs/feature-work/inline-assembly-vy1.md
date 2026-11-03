@@ -877,3 +877,22 @@ adequacy and final lane gates remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Scoped for-iterations with post expressions
+
+LocalDefaultPostIter composes a supported Boolean guard, heterogeneous default
+scope and supported Boolean post expression through actual Source.forIter.
+The body closes before the post; the post runs at the predecessor horizon and
+its returned value is discarded. The all-fuel clean Source theorem concretely
+supplies guard/body/post agreement, restoration and recursion. Raw world
+preservation includes partial halts. Constant-true guards have no finite normal
+outcome for any supported post, including one returning false; no halt
+classification or dirty Source adequacy is asserted.
+The witness reuses the existing body. Controls check both post values, continued
+iteration after a false post under a true guard, post writes and writes retained
+before a post timeout. Independent Source evaluations confirm the same outcomes.
+Dirty siblings remain present. General P16, admission, dirty compiler adequacy
+and final lane gates remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

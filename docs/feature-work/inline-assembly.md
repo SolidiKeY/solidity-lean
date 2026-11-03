@@ -267,3 +267,5 @@ VY1: conditional selection between independently typed default scopes now has co
 VY1: loops over heterogeneous default scopes have concrete Source agreement, raw world preservation and constant-true finite-normal exclusion; full P16 remains open.
 
 VY1: body-first default-scope loops now have concrete Source agreement, raw world preservation and finite-normal exclusion; full P16 remains open.
+
+VY1: scoped default for-iterations with Boolean posts have concrete Source agreement, raw purity and post-value-discard controls; full P16 remains open.

@@ -64,3 +64,5 @@
 - Yul/LocalDefaultWhile.lean and Yul/Checks/LocalDefaultWhile.lean: scoped default-loop Source agreement, raw purity and finite-normal exclusion.
 
 - Yul/LocalDefaultDoWhile.lean and Yul/Checks/LocalDefaultDoWhile.lean: body-first default scopes, Source agreement, raw purity and finite-normal exclusion.
+
+- Yul/LocalDefaultPostIter.lean and Yul/Checks/LocalDefaultPostIter.lean: scoped default for-iterations with Boolean post evaluation, Source agreement and raw purity.

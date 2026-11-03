@@ -2373,6 +2373,7 @@ import Solidity.Yul.Checks.LocalItemWorld
 import Solidity.Yul.Checks.LocalDefaultIfElse
 import Solidity.Yul.Checks.LocalDefaultWhile
 import Solidity.Yul.Checks.LocalDefaultDoWhile
+import Solidity.Yul.Checks.LocalDefaultPostIter
 import Solidity.Yul.WordPrint
 import Solidity.Yul.Adapters.FrameHeap
 import Solidity.Yul.Adapters.FrameHeapControls
@@ -3417,3 +3418,4 @@ import Solidity.Yul.LocalItemWorld
 import Solidity.Yul.LocalDefaultIfElse
 import Solidity.Yul.LocalDefaultWhile
 import Solidity.Yul.LocalDefaultDoWhile
+import Solidity.Yul.LocalDefaultPostIter

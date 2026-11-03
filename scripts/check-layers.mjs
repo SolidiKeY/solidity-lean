@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalDefaultPostIter|Checks\.LocalDefaultPostIter)$/, // Actual scoped for-iterations with discarded post values.
   /^Solidity\.Yul\.(LocalDefaultDoWhile|Checks\.LocalDefaultDoWhile)$/, // Actual body-first iteration of typed default scopes.
   /^Solidity\.Yul\.(LocalDefaultWhile|Checks\.LocalDefaultWhile)$/, // Concrete iteration of typed default scopes.
   /^Solidity\.Yul\.(LocalDefaultIfElse|Checks\.LocalDefaultIfElse)$/, // Conditional selection of typed default scopes.
