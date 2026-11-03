@@ -11,7 +11,10 @@ theorem is claimed by declaring a structure.
 operand refusal), frame preservation over every untouched suffix, finite
 structured execution of the existing `Block`, execution at a real assembled
 byte placement, and composition that ties assembly, encoding and behaviour to
-the same emitted program. `StructuredExec` uses the existing numeric
+the same emitted program. `FrameCertificate.prefixes` is conditional on `Scalar.stackBound` and follows
+from the existing `Scalar.prefix_capacity`, so it does not yet impose the
+G45.02 physical capacity; that field is still to be strengthened.
+`StructuredExec` uses the existing numeric
 evaluator for leaves and conditions, records the actual intermediate stacks
 and covers arbitrary finite loop bodies. It does not classify divergence or
 change Source evaluation horizons. A decoder roundtrip alone is never treated

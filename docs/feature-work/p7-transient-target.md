@@ -8,8 +8,8 @@ target/reset/callback input, not full G39 lowering or G42 entry.
 
 The target extends `Evm.Machine` with a separate owner-indexed word bank and a
 write journal; persistent storage is never reused as transient storage.
-Backend PUSH/TLOAD/TSTORE code runs on the existing `Evm.exec` and keeps its
-complete `Out`. A successful zero-skip resume preserves transient state. Reset
+Backend PUSH/TLOAD/TSTORE code runs on the slice interpreter `Transient.run`;
+ordinary code runs on the existing `Evm.exec` and keeps its complete `Out`. A successful zero-skip resume preserves transient state. Reset
 clears bank and journal, keeps the ordinary machine and is idempotent.
 
 ## Source correspondence
@@ -31,10 +31,12 @@ reset.
 `SourceCallback` runs the existing `Source.callAddr`/`envLoop`/`instanceAt`/
 `enterInstance`/`dispatch`/`runMods` bodies against a registered fallback that
 assigns a transient bool, in both pipelines: success, revert, static refusal
-and timeout keep caller heap, locals, logs, accounts and journals. Wrong code
-refuses entry; a four-step horizon keeps its pending credit and events.
-`source_target` composes this with the framed target store into a post-write
-selected-cell relation, not a full-state simulation. `Mixed` shows that reset
+and timeout keep the caller heap, locals, function locals, events and logs
+(success adds journal entries and writes the owner's cell). Wrong code refuses
+entry; a four-step horizon keeps its pending credit and events.
+`source_target` pairs this run with a framed target store on an arbitrary
+target state and the post-write selected-cell relation; it assumes no initial
+relation between the two, so it is not a composition or simulation. `Mixed` shows that reset
 keeps ordinary persistent and memory writes while zeroing only transient
 state.
 

@@ -29,7 +29,8 @@ structure InstructionCertificate (i : Evm.Instr) where
     (i.step m = .fault ↔ Scalar.run code input = none)
 
 /-- A physical frame transformation, uniformly over every untouched suffix.
-Capacity is checked at the full physical height, including that suffix. -/
+`prefixes` is conditional on `stackBound`, so it follows from
+`Scalar.prefix_capacity` and does not yet impose physical capacity. -/
 structure FrameCertificate (input output : Scalar.Stack) where
   code : Program
   frame : ∀ tail : Scalar.Stack,

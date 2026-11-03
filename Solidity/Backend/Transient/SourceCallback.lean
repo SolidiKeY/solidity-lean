@@ -119,8 +119,9 @@ theorem classification (pipeline : Roadmap.Pipeline) (out : Roadmap.Outcome) :
     (before.2.ex.world.accounts external).code=none ∧
     external≠Controls.owner := ⟨rfl,rfl,rfl,rfl,by decide⟩
 
-/-- Actual Source callback execution and executed target context/code. Only the
-selected transient cell is related; not full G42/world/trace correspondence. -/
+/-- Actual Source callback execution paired with executed target context/code on
+an arbitrary target state. Only the post-write selected cell is related; no
+initial relation is assumed, so this is not a composition or G42 correspondence. -/
 theorem source_target (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) (target : State) :
     (run pipeline (.success bytes) false 10).run before=
       (.ok (.success bytes),after (.success bytes) false) ∧

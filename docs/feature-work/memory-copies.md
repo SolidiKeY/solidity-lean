@@ -25,8 +25,11 @@ constructors, and neither boundary may silently exclude approved shapes.
 `Interface.lean` has the default builder certificate, storage-to-memory heap
 and capacity-conditional word certificates, dynamic-length observations,
 alias identity and overlap snapshots, and a finite heap traversal record that
-claims no guarded-schema or total compiler coverage. A capacity-conditional
-helper cannot certify a total compiler by choosing an impossible capacity.
+claims no guarded-schema or total compiler coverage. The capacity-conditional
+records are not yet non-vacuous: a `cost` with no room (for example `W`)
+makes `StorageWordCertificate.correct` hold for empty code, as for the
+existing `DefaultBuilder`. `cost` still has to be tied to the copied object's
+allocation size.
 
 `Premises.lean` has explicit boundary records with no assumed instances: the
 S03-PANIC41 allocation failure and final Source state, G34 alias agreement,
