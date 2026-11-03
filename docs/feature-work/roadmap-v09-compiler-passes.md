@@ -171,9 +171,124 @@ unmasked word, operand order and corrupted-tail controls discriminate results.
 This fragment application is not general frontend width lowering, primitive
 byte execution, panic ABI encoding, or public resource/session adequacy.
 
+## Capture and failure packaging
+
+The four previously deferred routine statements are now implemented by V09:
+[CapturedReadback](../../Solidity/Backend/Passes/CapturedReadback.lean),
+[ShortCircuitWitness](../../Solidity/Backend/Passes/ShortCircuitWitness.lean),
+[ConditionalReferenceInput](../../Solidity/Backend/Passes/ConditionalReferenceInput.lean)
+and [RuntimeCaptureReflection](../../Solidity/Backend/Passes/RuntimeCaptureReflection.lean).
+Their exact original signatures retain the two actual value certificates,
+physical representations, capacity, branch fragments and arbitrary saved tails.
+Joined readback uses actual successful capture/update execution. Revert witnesses
+expose immediate or reached operand runs. Conditional Input derives the real
+frame bound and zero cost. Capture reflection consumes the full original Input
+and actual typed value alternatives, without a raw fault-tail law.
+
+[Controls](../../Solidity/Backend/Passes/QueueCompletionControls.lean) inhabit
+success, immediate/reached/skipped failure, conditional reference capture and
+frame refusal over the existing populated heap. All eleven listed cells and the
+full saved stack are retained. The wrong-readback control is a cell inequality,
+not another emitted execution. Independent finder and skeptic reviews found no
+proof or premise defect. These close the routine statements, not public Source,
+ABI, world or resource/session adequacy.
+
 ## Open
 
-General source/world/backend composition and the G24.03 statement freeze
-remain open. Some concrete intrinsic whole programs are accepted, as proved
+General source/world/backend composition remains open. Some concrete intrinsic whole programs are accepted, as proved
 by `FreshBooleanCompilation.public_whole`; this is not general source closure.
 Remaining G25/G26 obligations stay explicit; G31 is owned by VY4.
+
+
+### Reference-call capture and readback
+
+`Backend/Passes/ReferenceCallReadback.lean` consumes the published memory/tuple
+return producer with its original `Form`, `Entry`, `NoAliasPromotion` and actual
+intrinsic call success. `execution` derives the receiving capture/update Input
+from the actual returned full representation. Returned map and operand words
+precede the saved-tail quantifier; the result retains BaseExtends, exact call-cost
+allocator growth, full suffix MappedOutput, cursor and every protected private-frame
+word. `call_revert` absorbs an unreachable suffix without a suffix Input.
+
+The controls instantiate a real mixed tuple call: default allocation costs one
+word, the returned reference aliases the old array, capture saves 7, and the
+old scalar becomes 9 before readback returns 7. All five final locals, both heap
+objects, fourteen selected target cells, allocator cursor and full saved stack
+are observed. The original map cannot represent the newly allocated default
+object; frame 15 cannot admit private pointer 16; argument index 2 reaches body
+revert. Wrong recapture is an inequality of reached cells, not execution of an
+alternative compiler. These are intrinsic/symbolic execution results, not
+independent Source evaluation, frontend correspondence, external EVM validation,
+public ABI or session/resource adequacy.
+
+Separate read-only finder and skeptic reviews found no confirmed defect.
+Thirteen generated guards pin the actual standard-only axiom reports. Two
+unvalidated control proofs exceeded the fixed 12-GiB cap; after splitting
+opaque run extraction and giving the selected certificate its complete call type,
+the complete controls passed without changing any budget or observation.
+
+
+### Reached capture failure after a reference return
+
+`Backend/Passes/ReferenceCallCaptureFailure.lean` retains the actual successful
+memory/tuple call output, selected address map, full representation, exact
+allocation cost, cursor and private frame before every saved tail. It derives
+the receiving capture Input at each tailed machine and proves joined emitted
+revert iff the reached operand ordinarily reverts. The intrinsic joined
+call/capture program also reverts when that operand does. No post-failure state
+or map is constructed.
+
+The controls return the old array alias after default allocation, then actually
+read index one of its length-one array during capture. Both intrinsic and target
+joined executions revert; a local receiver read still returns seven at that same
+reached representation. All fourteen selected prefix cells and the full saved
+stack are observed. The next physical local slot contains the old pointer 128
+before declaration, not zero; `wrong_zero_capture_cell` refutes the false zero
+assumption from an unvalidated draft. The earlier post-capture vector, whose
+same cell contains seven, is unchanged. No failed-machine observation, Source
+frontend correspondence or public resource/session claim follows. Separate
+read-only finder and skeptic source reviews found no confirmed defect.
+
+
+### Runtime argument failure before return allocation
+
+`Backend/Passes/ReferenceCallArgumentFailure.lean` uses one checked tuple call
+for both runtime cases. Its first primitive argument reads the old array at the
+caller index. Index zero succeeds and reaches default return allocation with
+exact cost one; index two fails in that argument with exact reached cost zero,
+even though the emitted program's static allocation flag is true. Original
+Entry, frame and capacity predicates remain intact. The emitted first-value
+prefix precedes its parameter store and the return/body suffix. The successful
+return retains the old array alias and the distinctive primitive seven.
+
+`Backend/Passes/ReferenceCallArgumentPrefix.lean` consumes the published context
+capture certificate to derive actual save execution, full caller representation
+and zero allocator growth. The argument then reverts under that reached
+representation for every saved tail and arbitrary unreachable suffix. All
+fourteen selected prefix cells and the complete stack are observed; the heap
+cursor remains 130 while the private save pointer advances to 22. A successful
+branch of the same emitted call refutes an always-revert claim. These are
+intrinsic/symbolic-word results, not independent Source or public ABI/resource
+adequacy. Separate read-only finder and skeptic reviews found no confirmed defect.
+
+
+### Independent Source arithmetic effects and emitted captures
+
+`Backend/Passes/AssignmentSubtractionPass.lean` consumes the published V07
+`assignment_subtraction_transport` for `(i = a) - i`. It retains original
+Source/target reads, integer ranges, result-range guard, frame and `fuel + 4`
+quantification, actual accepted memory-prefix certificate/Input and compiled
+subtraction value. It derives the reached value through the existing arithmetic
+proof, then retains full prefix MappedOutput and actual joined code execution
+with one canonical machine, selected map and result word before every saved tail.
+No P8 producer or desired-preservation premise is introduced.
+
+The controls align Source locals `a = 9`, `i = 7` with a represented target
+containing an independent old array. Both Source and emitted code yield legacy
+result two versus via-IR zero, while both retain `i = 9`. All eleven selected
+target cells, the allocator, old array, sentinel and full saved stack remain
+observed. Executing the reversed operand code after the actual legacy prefix
+reverts; stale RHS, corrupted tail and insufficient frame are rejected. This is
+a local integer/result correspondence plus physical target preservation, not a
+global Source-heap/world relation or general overflow/wrapping/ABI adequacy.
+Separate independent finder and skeptic source reviews found no confirmed defect.

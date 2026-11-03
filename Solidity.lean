@@ -1424,6 +1424,24 @@ import Solidity.Backend.Passes.RuntimeVoidReflectionPins
 import Solidity.Backend.Passes.SourceNarrowingValue
 import Solidity.Backend.Passes.SourceNarrowingValueControls
 import Solidity.Backend.Passes.SourceNarrowingValuePins
+import Solidity.Backend.Passes.AssignmentSubtractionControls
+import Solidity.Backend.Passes.AssignmentSubtractionPass
+import Solidity.Backend.Passes.AssignmentSubtractionPins
+import Solidity.Backend.Passes.CapturedReadback
+import Solidity.Backend.Passes.ConditionalReferenceInput
+import Solidity.Backend.Passes.QueueCompletionControls
+import Solidity.Backend.Passes.QueueCompletionPins
+import Solidity.Backend.Passes.ReferenceCallArgumentFailure
+import Solidity.Backend.Passes.ReferenceCallArgumentPins
+import Solidity.Backend.Passes.ReferenceCallArgumentPrefix
+import Solidity.Backend.Passes.ReferenceCallCaptureFailure
+import Solidity.Backend.Passes.ReferenceCallCaptureFailureControls
+import Solidity.Backend.Passes.ReferenceCallCaptureFailurePins
+import Solidity.Backend.Passes.ReferenceCallReadback
+import Solidity.Backend.Passes.ReferenceCallReadbackControls
+import Solidity.Backend.Passes.ReferenceCallReadbackPins
+import Solidity.Backend.Passes.RuntimeCaptureReflection
+import Solidity.Backend.Passes.ShortCircuitWitness
 
 
 import Solidity.Lowering.V08.Audit
