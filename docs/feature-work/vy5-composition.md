@@ -94,3 +94,18 @@ include an existing nonempty heap/local alias, log/event prefix, swallowed own
 failure, child/ancestor/request ownership, zero cuts and exact halt bytes.
 The root TX1/BAL1 choices remain pending with the human. Existing immutable/funds
 patches and all24 original obligations/six general Source combinations remain open.
+
+
+The frame leaf now has27 closed actual-Source controls and31 generated exact
+axiom pins. They prove complete Source states, owner distinction, full panic
+bytes, actual zero-horizon dispatch through sub and a nonempty caller journal
+prefix preserved by actual applyOp/mark/rollbackTo. A wrong mark loses that
+prefix. Cursor scope exit itself performs no logical rollback. The affected
+Source Session/HorizonDeploy/legacy SourceCallFrame closure builds (32 jobs).
+Full source-language/Bound/P8 and assembly adequacy remain unfinished.
+
+H18 resolves deployment indexing: deployment consumes tx0, ordinary requests
+start at tx1, with initcode frame coverage retained. H19 resolves BAL1 by
+extending the monetary representation. Those questions are not pending now.
+Next, Source.Account and actual balance operations must migrate under measured
+checking; no field bound may substitute for the explicit EVM-reachable invariant.

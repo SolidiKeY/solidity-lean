@@ -35,7 +35,10 @@ def pending (plan : RuntimePlan) : EM E Γ Bool :=
 
 /-- Enter one compiled-system activation after the caller's refusal checks.
 An existing ancestor/request stop prevents entry. Pre/post checks are inside
-attempt so a handler in body cannot turn a resource stop into success. Pop
+attempt so an ordinary halt handler cannot turn a resource stop into success.
+Body code must retain the cursor protocol; arbitrary EM.modSt cursor forgery is
+not prohibited by this helper type. Actual AST/evaluator integration must prove
+that invariant rather than assume execution agreement. Pop
 only this activation on every body result, retaining ancestor/request stops
 and the monotone ordinal. Horizon exhaustion stays timeout. -/
 def frame {α : Type} (plan : RuntimePlan) (body : EM E Γ α) : EM E Γ α :=
@@ -65,5 +68,16 @@ def emit (plan : RuntimePlan) (event : Roadmap.Event) : EM E Γ Unit :=
     Source.emitEvent event
     modSt fun s => { s with resource := s.resource.advanceEvent }
     check plan
+
+/- BEGIN GENERATED H16 AXIOM PINS -/
+/-- info: 'Solidity.Source.FailureExecution.check' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.check
+/-- info: 'Solidity.Source.FailureExecution.pending' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.pending
+/-- info: 'Solidity.Source.FailureExecution.frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.frame
+/-- info: 'Solidity.Source.FailureExecution.emit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.emit
+/- END GENERATED H16 AXIOM PINS -/
 
 end Solidity.Source.FailureExecution
