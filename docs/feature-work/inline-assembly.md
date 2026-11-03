@@ -291,3 +291,9 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   depths0/2, and explicit height-capacity versus operand-arity controls. Native
   gas and full source/G24/frontend closure remain open; see
   [lane](inline-assembly-vy3.md).
+
+- VY3 software BYTE selection: bounded exact PUSH1 certificates and existing
+  expansion composed with original-source conditional/ordered updates and
+  source/model/whole-iff artifacts at depths0/2. Mixed-width refusals and native/
+  full Source/G24/frontend limits remain explicit; see
+  [lane](inline-assembly-vy3.md).

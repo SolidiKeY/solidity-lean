@@ -306,6 +306,8 @@ import SolidityBridge.Yul.BitwiseSelection
 import SolidityBridge.Yul.BitwiseSelectionControls
 import SolidityBridge.Yul.BranchModel
 import SolidityBridge.Yul.BranchModelControls
+import SolidityBridge.Yul.ByteSelection
+import SolidityBridge.Yul.ByteSelectionControls
 import SolidityBridge.Yul.ChargedArithmeticShift
 import SolidityBridge.Yul.ChargedArithmeticShiftControls
 import SolidityBridge.Yul.ChargedBitwise

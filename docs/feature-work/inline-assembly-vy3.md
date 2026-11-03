@@ -730,3 +730,23 @@ standard axiom reports. Universal mathematical word proofs and feasible finite
 evaluations do not establish efficient huge-exponent execution or native gas.
 Full Source/G24/views/raw-readback, native/world/resource, function/loop/
 divergence/frontend and final joint adequacy remain open.
+
+### Software BYTE and compact literals
+
+`SolidityBridge.Yul.ByteSelection` proves exact PUSH1 execution and certificates
+for values with a real one-byte bound, reusing existing literal correctness.
+Its leaf compiler first retains the earlier PUSH32 selection, then tries a
+compact table with the same exact re-emission check. Mixed PUSH32/PUSH1 uses
+of the same value in one leaf remain refused by the current certificate-table
+interface; no code normalization or general width coverage is claimed.
+
+The existing software BYTE expansion now has concrete primitive selection and
+original-source BYTE/ISZERO conditional instances, with ordered updated-index
+and updated-value reads, source/model and whole-iff artifacts at depths0/2.
+Controls cover big-endian indices0/31, full-word out-of-range indices32 and
+high-bit-only values, dirty data, old literal behavior, width refusals,
+protected frames and full machine fields. General PUSH1 capacity requires one
+spare height, separately from uncapped Scalar/model success. Thirteen guards
+pin observed standard axioms. This adds neither a native BYTE instruction nor
+frontend admission; native bytes/PC/resources, full Source/G24/views/readback,
+functions/loops/divergence and joint adequacy remain open.
