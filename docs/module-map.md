@@ -1890,9 +1890,7 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](feature-work/inline-assembly-vy4.md)). |
 | `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](feature-work/vy5-composition.md)). |
 | `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
-
 ## Label execution
-
 | Module | Purpose |
 |---|---|
 | `Backend/LabelExec/Step.lean`, `Backend/LabelExec/Fetch.lean`, `Backend/LabelExec/Packets.lean` | Byte-PC step over the numeric slice and JUMP/JUMPI/JUMPDEST; fetch behind a prefix; branch packets ([label execution](feature-work/backend-label-exec.md)). |
@@ -1911,3 +1909,29 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/MemoryOps/PhysicalReferenceArray.lean` | Typed reference-parent pointer-byte layout and redirection. |
 | `Backend/MemoryOps/PhysicalReferenceChild.lean` | Reference parent framing across separated primitive writes. |
 | `Backend/MemoryOps/PhysicalLocalDeleteGoal.lean` | Centralized unproved physical assembly/client targets; existing fixture inputs are exported by PhysicalMemoryControls. |
+### Runtime countdown witness
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean` | Populated core-only countdown endpoint; actual prefixes/arguments, full caller reconstruction and ordered observations. No general recursive producer claim. |
+### Bare failure after a checked prefix
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3BarePrefix.lean` | Derived reached entry/allocation input and exact bare-revert execution after a successful checked prefix; no rollback/profile closure. |
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3AllocatorReturn.lean` | Recursive return allocator transport and inhabited callee-only ownership client; zero source allocation, with initial ownership explicit. |
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveResult.lean` | Actual allocator-backed native body/runtime `GrowingResult` client; retains shallow exhaustion mismatch. |
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3ParentRestore.lean` | Actual first-parent typed restore and allocator transport from reached child/saved words, with inhabited countdown client. |
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3ParentPrefixes.lean` | Typed actual running unwind prefixes, remaining payload transport and inhabited ordered-observation controls. |
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3ParentStop.lean` | Final false guard, typed completed unwind and stable later horizons, with populated and empty-history controls. |
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3NativeParents.lean` | Actual indexed native child-call/return clauses and represented parent poststate linkage; exhaustion and child-export controls. |

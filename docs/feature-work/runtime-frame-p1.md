@@ -98,7 +98,7 @@ remaining weaknesses now listed above.
 Version 1 was merged from f4fa6f12: the interface and its import closure only.
 The other `RuntimeFrame*` modules were merged later (Result and Reference
 with v3, the recursive components and call compilers below; Bytes is still
-out); the `tests/runtime-frame/` fixtures and the modules of other lanes on that
+out); the the lane-only fixture  (not on master) fixtures and the modules of other lanes on that
 branch were not merged.
 
 Read-only finder and skeptic reviews found no `sorry`, axiom or heartbeat
@@ -202,7 +202,7 @@ divergence and approved-profile provenance remain open (P1 lane).
 ## Integration record (v3)
 
 Merged from the lane head fd08f0c1: `RuntimeFrameInterfaceV3` and its import
-closure (the modules above). Not merged: the `tests/runtime-frame/` clients
+closure (the modules above). Not merged: the the lane-only fixture  (not on master) clients
 and controls, including the v3 interface controls, the void-call and
 recursive descent/unwind/countdown clients and their axiom-check scripts, the
 other `RuntimeFrame*` modules (most merged later, see below) and staged
@@ -256,9 +256,7 @@ compiler maps source syntax to them); none inhabits `PendingRecursiveReturns`.
 Open: general recursive bodies, signatures and layouts, divergence,
 allocator-growth transport, approved-domain provenance (P1-PROFILE) and the
 recursive V3 producer. The family has no represented bare-revert case.
-The populated clients and controls (`tests/runtime-frame/`) are not on master,
-so no in-tree instance shows the premises of `complete`/`endpoint` jointly
-satisfiable. Read-only finder and skeptic reviews found no Lean defect; their
+The registered RuntimeFrameV3CountdownWitness below now supplies a core-only populated instance of the joint premises. Read-only finder and skeptic reviews found no Lean defect; their
 doc and docstring findings are fixed here.
 
 ## P1-REVERT: bare-revert producer
@@ -285,3 +283,150 @@ hypothesis; `coverage` is universal; the domain is non-vacuous (`member0`,
 real out-of-bounds run (`reverting`). Holding at every recursion index is
 immediate, because `Stmt.callRec` ignores its depth argument. The fixture
 (`Witness`) currently lives in the producer module.
+### Registered countdown witness
+
+`RuntimeFrameV3CountdownWitness` imports the published nonempty memory fixture
+and the recursive return emitter directly; it imports no test module. Actual
+source/target prefixes set the counter and runtime header. The proof derives the
+full caller representation, actual argument evaluation and callee projection,
+then instantiates the checked return endpoint. `returned_caller` reconstructs all
+four original caller bindings, including both older aliases, from the same
+reached globals/heap and proved old-word agreement. `call_endpoint` couples actual
+native call success at every depth greater than two to that executed target and
+complete caller representation.
+
+The full ordered stack/memory observation, protected older arena, wrong alias,
+wrong cursor and insufficient native horizon controls are checked in-tree. A
+builtin axiom guard pins the headline theorem to the standard three axioms.
+This witnesses the premises; it does not turn the hand-written image into public
+compiler output, provide per-parent unwind representations or instantiate the
+recursive V3 producer/profile/growth/divergence obligations. The two prior guard
+proofs retain only their successful `simp only` branches, with statements and
+runtime behavior unchanged.
+
+### Successful checked prefix followed by bare failure
+
+`RuntimeFrameV3BarePrefix.after_prefix` consumes the published
+`RuntimeFrameV3BareRevertProducer.bare_revert` theorem. A checked successful
+prefix supplies the actual reached machine and fragment. Summed source allocation
+capacity is transported through `GrowsAllocator.nextInput`; the checked footprint
+preserves the real runtime cursor. The proof constructs the failure entry at that
+same reached state and derives exact combined bare revert. No reached
+representation, post-prefix capacity or target simulation is an input.
+
+The populated core client changes the caller scalar from nine to two, with an
+explicit checked prefix and owned `Mutation.compileProgram` selector equality,
+then executes the
+published callee out-of-bounds failure. It pins the complete ordered prefix words,
+source sequence and exact halt class, with wrong-scalar and fault controls.
+A builtin guard checks the headline theorem's axioms. This is execution transport,
+not approved-domain provenance: the producer's `hprof` obligation is unchanged.
+No failed output state, rollback, payload bytes or absence of prior effects is
+inferred. Published readonly/world-call modules replace the old staged copies;
+algebraic journal history still requires its actual execution linkage.
+
+### Published physical memory dependency
+
+The runtime byte-frame consumer imports the published P6 physical memory
+modules, including the producer-owned control module. The original byte-image
+fit and initial representation premises remain explicit; word-frame capacity
+alone does not establish physical byte bounds. Local checkpoint restoration
+does not imply world rollback or a general source-to-target call simulation.
+
+### Recursive return allocator ownership
+
+`RuntimeFrameV3AllocatorReturn` derives zero source-allocation transport from
+the actual reached representation, cursor-cell equality and unchanged memory
+above the frame. Initial live-object bounds and free-tail ownership are retained;
+full machine equality and arbitrary-callee heap preservation are not assumed.
+Its new callee-only client initializes the heap cursor to 22 beyond both nonempty
+objects, proves ownership, and executes the existing two-level return image.
+The final cursor, represented heap, protected stack and free tail survive. Wrong
+cursor and nonzero free-tail writes reject ownership independently.
+
+The older whole-caller fixture remains unchanged: its cell zero contains a
+reference, so its allocator implication is explicitly conditional. Runtime
+private-frame writes consume no source heap allocation. This component does not
+prove allocating recursion, public recursive compiler admission, profile
+provenance, general divergence or a V3 recursive producer.
+
+### Allocator-backed recursive result client
+
+`RuntimeFrameV3RecursiveResult.success` packages actual native countdown body
+execution at every sufficient horizon and the same executed return image into
+the existing `GrowingResult` relation. It includes reached representation,
+unchanged older addresses, protected stack and zero-cost allocator transport
+from the inhabited cursor-22 input. `shallow_refused` keeps native depth-two
+exhaustion distinct: that source result cannot match either successful or
+bare-reverting `GrowingResult`, despite success of the runtime image.
+
+This is the fixed populated body client, not public compiler output, profile
+coverage or an inhabitant of the dual-outcome general recursive interface.
+
+### Typed first-parent unwind
+
+`RuntimeFrameV3ParentRestore.restore` derives parent representation from the
+reached child representation, typed counter update and actual saved words. It
+executes the existing context restore and uses its local/exterior/field laws;
+no restored representation or run is supplied as a premise. Generic saved words
+remain input evidence, not a claim of arbitrary capture provenance.
+
+The populated client derives its payload and child representation from the same
+actual two-level descent and saved history. The first returned parent has
+counter one, cursor twelve, old alias sixteen and inhabited allocator ownership
+at twenty-two. Wrong parent-counter and alias controls distinguish it from the
+outer caller. The corresponding source state is reached by the actual native
+activation prefix. This is one parent leaf, not arbitrary unwind horizons,
+recursive bodies or a completed general recursive producer.
+
+### Typed running unwind prefixes
+
+`RuntimeFrameV3ParentPrefixes.running_prefix` inducts over the existing target
+`loopIterN`. Every reached horizon through the saved frame count has its exact
+`sourceAt` parent, representation, stack, cursor, old reference, allocator growth
+and exterior memory. Each step derives its execution and propagates the remaining
+saved words and bottom marker from the actual context restore. Generic initial
+saved words remain premises; no desired per-prefix simulation is assumed.
+
+The populated client derives those words from its actual two-level descent and
+inhabited allocator input. At horizons zero, one and two the counter rises from
+zero to two as the runtime cursor falls from fourteen to ten. Complete older
+object and saved-frame word lists, bottom marker and protected stack are retained;
+the wrong next-horizon counter is rejected. Popping every frame is still a running
+observation before the final false guard. This is typed countdown target-prefix
+transport, not native source-trace correspondence, arbitrary recursive bodies,
+divergence or completed V3/profile coverage.
+
+### Stopping guard and completed unwind horizons
+
+`RuntimeFrameV3ParentStop.complete` connects the represented all-frame-pop
+running prefix to the actual final false guard. At frame count plus one, and
+at every later observation horizon, the result is the same successful machine
+with its parent representation, stack, cursor, old reference, allocator growth
+and heap exterior. It consumes the existing loop iterator and public stopped
+horizon law, not a new evaluator or assumed termination certificate.
+
+The populated client composes real runtime-header initialization, descent and
+unwind, retaining all prior heap and saved-word vectors and allocator ownership.
+It rejects stopping before the last guard, revert and fault. An empty-history
+client stops immediately without a pop and retains the same represented input.
+This closes countdown target-unwind termination/stability, not native
+source-trace equivalence, arbitrary recursive bodies, public compiler admission,
+approved-profile provenance or a general V3 recursive producer.
+
+### Native child returns and represented parent poststates
+
+`RuntimeFrameV3NativeParents.clause` derives the actual positive guard, typed
+argument evaluation, child-body execution and caller restoration for the indexed
+parent family at every native horizon. The caller keeps counter `n+1`; a
+same-typed child-counter export is rejected. Insufficient horizons remain
+exhaustion, distinct from bare revert.
+
+The populated client links these genuine native poststates to the same
+represented target unwind parents one and two, retaining real allocator
+ownership and complete ordered observations. This is poststate linkage: it does
+not show that target execution beginning at each native caller simulates the
+entire child-call trace, nor produce a general `GrowingResult`, recursive
+compiler, approved profile or V3 producer. Native source execution and target
+parent representation are both proved; the complete entry/trace bridge remains
+an obligation.

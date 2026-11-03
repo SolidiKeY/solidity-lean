@@ -221,7 +221,7 @@ theorem positive_turn {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Pa
  loopTurn (run (guardCompiled (C:=C) b F).code) (run (activationCode (C:=C) b F pointer)) m=.inl next := by
  have guard := guard_run σ (n+1) bound counter base m repr
  have positive : decide (0<n+1)=true := decide_eq_true (by omega)
- first | solve | simp only [loopTurn,guard,positive,Machine.push,bword,if_true,Nat.one_ne_zero,if_false,executed] | decide | omega | rfl
+ simp only [loopTurn,guard,positive,Machine.push,bword,if_true,Nat.one_ne_zero,if_false,executed]
 
 /-- False guard skips activation even when its decrement leaf would revert. -/
 theorem zero_turn {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Parameters R)}
@@ -230,7 +230,7 @@ theorem zero_turn {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Parame
  (base : Nat → Fin W) (m : Machine) (repr : StateRepr L b frame F σ base m) (pointer : Nat) :
  loopTurn (run (guardCompiled (C:=C) b F).code) (run (activationCode (C:=C) b F pointer)) m=.inr (.ok m 0) := by
  have guard := guard_run σ 0 W_pos counter base m repr
- first | solve | simp only [loopTurn,guard,show decide (0<(0:Nat))=false from rfl,Machine.push,bword,Bool.false_eq_true,if_false,if_true] | decide | omega | rfl
+ simp only [loopTurn,guard,show decide (0<(0:Nat))=false from rfl,Machine.push,bword,Bool.false_eq_true,if_false,if_true]
 
 theorem decrement_failure {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Parameters R)}
  (σ : State C (Parameters R)) (base : Nat → Fin W) (m : Machine)
