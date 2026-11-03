@@ -222,6 +222,8 @@ import SolidityBridge.RoadmapV15.P10.Modular
 import SolidityBridge.RoadmapV15.P10.ModularControls
 import SolidityBridge.RoadmapV15.P10.NegationBody
 import SolidityBridge.RoadmapV15.P10.NegationBodyControls
+import SolidityBridge.RoadmapV15.P10.NegationSourceConsumer
+import SolidityBridge.RoadmapV15.P10.NegationSourceControls
 import SolidityBridge.RoadmapV15.P10.NonbranchTableControls
 import SolidityBridge.RoadmapV15.P10.NonbranchTables
 import SolidityBridge.RoadmapV15.P10.PopConsumer

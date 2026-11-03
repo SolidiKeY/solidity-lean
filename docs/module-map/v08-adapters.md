@@ -370,3 +370,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean` | Actual selected G25 signed-negation body to two fetched steps, exact resources and frame; checked guard/panic execution remains open. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Complete signed/zero/boundary States, peak capacity, gas/fuel refusals and minimum-wrap versus Scalar-guard controls. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Derives non-minimum source range/result and relates its encoding to the actual fetched negation body; minimum failure separate. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Typed signed/zero/max clients, ordered native output and simultaneous minimum source-failure/body-success control. |

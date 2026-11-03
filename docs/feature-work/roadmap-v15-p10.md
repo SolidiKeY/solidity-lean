@@ -1349,3 +1349,24 @@ the source evaluator fails. Native execution of that guard and panic path is
 not proved here. Independent finder and skeptic reviews found no defect.
 This body sequence establishes no compiler/frame origin, Osaka approval or
 account/world/transaction closure; full opcode obligations remain open.
+
+
+### Typed source result of the negation body
+
+[NegationSourceConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean)
+derives the negative operand's intrinsic range for every non-minimum signed
+input, calculates the actual `UnOp.evalT` result, and relates its encoding to
+the fetched body's output stack and continuation. The input's range is not a
+source-success or execution hypothesis. The necessary non-minimum branch is
+explicit; minimum source failure is proved separately. Original PC, capacity,
+gas and fuel premises stay visible. This proves a result-value connection for
+an explicitly constructed native body input, without compiler/frame origin or
+execution of the checked guard/panic path.
+
+[NegationSourceControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean)
+provides signed, zero and maximum typed values, an ordered populated native
+client, and the minimum's simultaneous source failure/native body success.
+Finder and skeptic reviews prompted a direct populated application of the new
+combined producer; this was added while retaining the expected observations.
+Independent read-only reviews cover the branch boundary
+and absence of a desired-execution premise. Broader correspondence remains open.
