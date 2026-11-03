@@ -122,6 +122,41 @@ allocation panics after the two default allocations; `panic_preserved` applies
 the same call theorem to that halt with heap-next 3. Independent
 finder and skeptic reviews found no confirmed defect in this additive subset.
 
+## Memory statements and internal bodies
+
+`MemoryExpressions.lean` extends this admission with same-type local rebinding
+and primitive memory-array writes. Array base, index and right-hand side must
+belong to `AllocatingExpr`; writes retain the evaluator's bounds and location
+checks. Rebinding a pointer changes that local, while writes through an alias
+change the shared object. Reference-element writes are outside this admission.
+
+`MemoryBodies.lean` defines syntactic `MemoryStmt` and `MemoryItems`
+certificates. A joint horizon induction derives `MemOK` and outcome-local
+validity for declarations, admitted expression statements, exact-type returns,
+blocks, sequences and unchecked blocks. Existing value-fragment statements
+retain their original operations and call premises. The proof covers every
+success and halt; declaration admission does not assert allocation success.
+
+`MemoryBodyCalls.lean` derives modifier-free body preservation from these
+certificates. `call_memory_body_mem` handles actual argument packing, default
+return slots and result extraction; `sub_memory_body_mem` transports valid
+caller references across heap growth. `eval_memory_call_mem` consumes the
+actual selected-body equality, signature, parameter/result types and initial
+frame-layout equation. No callee memory-preservation oracle is assumed. Calls
+inside admitted expressions still use the original value `CallsOK` catalogue;
+this does not recursively admit memory-body calls.
+
+`MemoryBodyControls` uses a hand-built intrinsic runtime program with a matching
+signature, in both source pipelines. Two parameters alias object 0; a write is
+visible through the other alias, rebinding one parameter allocates a distinct
+object, and the returned alias remains valid after caller restoration. A
+bounds failure retains the already allocated default return slot and restores
+the caller. A separate block allocates a default bytes object and an initialized
+array, then restores its incoming local frame. Preservation theorems consume
+these actual evaluator equalities over inhabited, nonempty memory. Timeout is
+also retained. Independent read-only finder and skeptic reviews found no
+confirmed soundness defect.
+
 Not covered: arbitrary reference-call bodies, whole-program admission of this
 memory subset, other allocating arms inside this subset, progress or termination,
 compiler/EVM refinement, `SourceSpec` and rollback. The existing standalone
