@@ -42,7 +42,7 @@ theorem readLen_after_clear {E : Source.Env} {Γ : Source.RCtx}
     Source.World.set_get,Source.Storage.read,Source.Storage.set,dif_pos,Source.Env.lay]
     at result ⊢
   unfold Source.readCell.match_1 Source.readLen.match_1
-  unfold default_length.match_1 default_length.match_3 at result
+  unfold default_length.match_1 default_length.match_2 at result
   exact result
 
 /-- The next input read is derived from actual first execution, not assumed. -/

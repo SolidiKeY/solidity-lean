@@ -102,6 +102,9 @@ an existing location still reads it. Static/type/self-copy and next-fuel control
 distinguish false extensions. The proof reuses published capture/leaf operations;
 it does not implement memory-to-storage lowering or infer automatic rollback.
 
+Defaulted header readback is kernel-checked after repairing a stale local
+matcher reference; its existing statements, controls and axiom guards are unchanged.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI
