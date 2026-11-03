@@ -12,3 +12,8 @@ generated roots, orphan detection, documentation paths and the axiom inventory.
 Read-only finder and skeptic reviews are required before publication.
 
 Independent read-only finder and skeptic reviews passed with no confirmed findings.
+
+Finder and skeptic reviews passed. The requested explicit type on the local
+`after` proof was added without changing its proof term or any theorem statement;
+per-file MCP diagnostics and the touched build passed, and both follow-up reviews
+confirmed the annotation. Full CALL/G42/EVM adequacy remains outside this increment.
