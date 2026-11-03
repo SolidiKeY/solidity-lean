@@ -1034,3 +1034,162 @@ source/frame origin or opaque D_J equality, or prove compiler, account/transacti
 global resource abstraction or full Osaka correspondence. Separate independent
 finder and skeptic source reviews found no defect. All full opcode rows remain
 open.
+
+## Universal linked-exit resource refusals
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedResourceBounds.lean` generalizes
+the finite refusal controls to arbitrary native caller State and every legal
+tail (length at most 1022). Exactly ten initial gas pays JUMPI but fails the
+fetched JUMPDEST charge, with any dispatcher fuel at least three. Three fuel
+units with at least eleven gas reach STOP but exhaust its evaluator fuel.
+Both proofs compose actual decoder, driver gates and X steps; they assume no
+successful trace, desired final frame or source-prefix execution.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedResourceControls.lean` checks
+both permissions, populated distinct ordered tails and buffers, and full legal
+input capacity. Eleven gas and four fuel succeed, while the corresponding
+refused run cannot equal successful empty output. This reference suffix result
+does not discharge full opcode, compiler, Osaka, account or transaction closure.
+
+Separate independent finder and skeptic reviews found no defect in the universal
+resource premises, populated controls or ownership boundaries.
+
+## Nonbranch jump-table transport
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/NonbranchTables.lean` proves that
+changing the supplied destination array preserves the actual charged gate for
+native opcodes other than JUMP and JUMPI. Every gas, stack, static, memory-range
+and stipend clause remains in that gate. This is gate equality, not whole-run
+table independence for CALL or for a later branch.
+
+The same module consumes the existing emitted PUSH32 decoder and checked
+producer to prove identical counted outcomes for any two arrays, for every
+fuel value and with no gas or capacity premise. Its success consumer also
+retains the Scalar result, complete native output State and actual X
+continuation under the original gas, capacity and nonwrapping-PC clauses.
+The continuation uses the same supplied array on both sides; no desired
+decoder, gate, run, trace or source-frame result is assumed.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/NonbranchTableControls.lean` instantiates
+arbitrary arrays and both permissions with populated callers. Duplicate and
+unrelated entries, zero/nonzero/maximum words, legal full-input refusal and
+gas-before-capacity/fuel-before-gas order are checked. A fetched JUMPI changes
+its result when membership changes, demonstrating why branches are excluded.
+Whole-State success retains complete ordered code, stack, memory, return and
+calldata bytes, accounts and substate. No supplied table is asserted to equal
+opaque D_J, and no source, Osaka, account/transaction or full-opcode closure
+follows. Independent finder and skeptic reviews found no semantic defect;
+their JUMP/JUMPI comment correction was applied.
+
+## Fetched linked entry prefix
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedEntry.lean` executes the first
+two JUMPDESTs of the existing linked image from byte zero. Actual decodes,
+charged gates and steps derive a two-step counted prefix and X continuation
+at byte two for arbitrary native caller State, any supplied destination array
+and every input stack of length at most 1024. Two initial gas and dispatcher
+fuel at least three suffice for this prefix. The natural debit is exactly two.
+The seed's original PC, code and stack are explicitly replaced at represented
+entry; no source/compiler frame origin is inferred.
+
+The frame theorem describes the constructed output. Its execution significance
+comes from the prefix theorem, with its gas and capacity premises. Native world,
+memory, returnData, H_return and the entire ordered stack remain as represented;
+PC becomes two and execLength increases by two.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedEntryControls.lean` supplies
+populated static/writable callers, empty/full legal capacity and complete
+ordered code, stack, buffers and account observations. With two gas the counted
+prefix succeeds, but continued X fails at ISZERO; short prefix fuel also
+refuses. This proves neither terminal success nor the remaining prefix,
+opaque D_J correctness, source origin, full resource abstraction or Osaka/world
+correspondence. Independent finder and skeptic source reviews found no defect.
+
+## Linked entry through ISZERO
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedZero.lean` consumes the existing
+ISZERO primitive producer at the actual state reached after both JUMPDESTs.
+The intermediate full record and emitted code align by proof, not an input
+hypothesis. For arbitrary scalar operand and caller tail, five initial gas,
+legal input capacity and dispatcher fuel at least four derive the Scalar flag,
+three counted fetched steps and X continuation at byte three. Natural gas
+debit is exactly five; the native world, memory and return buffers are retained
+as represented. The seed's original PC/code/stack are explicitly replaced at
+entry; source/compiler origin is not asserted.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/CountedAppend.lean` proves the counted
+driver composition equation used here, with its exact fuel offsets. This is
+algebra of the existing counted driver; terminal opcodes are not thereby shown
+to continue in X. The concrete prefix separately consumes nonhalting X laws.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedZeroControls.lean` checks zero,
+nonzero signed-word, both permissions and minimum/full legal input capacity.
+It retains an independently written full expected State record; the gas-word
+field is proved from natural debit. Complete ordered code, stack, caller buffers
+and account observations are checked. The prefix can succeed while the next
+PUSH runs out of gas; short fuel refuses, and missing operands preserve native
+gas-before-arity checks. These are raw scalar/reference word claims, not a new
+source signedness or admission policy. Independent finder and skeptic source
+reviews found no semantic defect. The following PUSH/branch/terminal composition,
+source origin, full resources, scanner/D_J and Osaka/world correspondence remain
+separate obligations.
+
+## Particular linked-program exit
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedProgram.lean` consumes the
+existing emitted PUSH32 producer after ISZERO. Full record and code alignment
+are proved, retaining arbitrary scalar operand and supplied table for the
+four-step prefix. Eight initial gas and legal peak capacity suffice to reach
+JUMPI at byte 36; natural debit is exactly eight.
+
+For an initial zero operand, the computed condition is one. A proved alignment
+connects this state to the existing certified linked exit. The theorem
+`linked_program_exit` composes all seven fetched instructions from PC0 to
+explicit STOP73 using the particular program's supplied linked array. It
+requires tail.length+2<=1024, initial gas>=19 and dispatcher fuel>=8. Exact
+natural debit is nineteen; the final native world and memory are retained,
+returnData is cleared, H_return remains unchanged, the caller tail is restored
+and execLength increases by seven. The seed's original PC/code/stack are
+explicitly replaced at represented entry.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedProgramControls.lean` derives
+an independently written full terminal record, populated static/writable
+clients and minimum/full legal capacity. Eighteen gas and seven fuel refuse;
+a wrong supplied table refuses at JUMPI. A nonzero signed-word witness covers
+only the four-step prefix. Complete ordered code, stack, memory, return bytes,
+calldata and account observations are retained. Independent finder and skeptic
+source reviews found no defect.
+
+This is a complete execution of this particular zero-operand reference path.
+It does not establish source/compiler origin, correctness of opaque D_J,
+Osaka fork approval, arbitrary nonzero loop behavior, general account/call,
+resource abstraction, transactions or finite/infinite trace correspondence.
+All full opcode and parent obligations remain open.
+
+## Nonzero linked fallthrough
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthrough.lean` derives the
+ISZERO flag from a nonzero scalar operand, proves the complete JUMPI input
+alignment and consumes the existing zero-condition branch producer. Five
+fetched instructions reach PC37 with eighteen initial gas; the actual next
+JUMPDEST extends this to six instructions and PC38 with nineteen gas. Both
+laws retain arbitrary native callers and supplied arrays, legal peak capacity
+(tail.length+2<=1024), and exact dispatcher fuel offsets. No membership or
+successful branch, decoder, frame or run premise is assumed. Natural debits
+are eighteen and nineteen. Frame recipes gain execution meaning through the
+corresponding prefix theorem and its nonzero/resource clauses.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthroughControls.lean` retains
+an independent full expected boundary State. Populated nonzero and raw signed
+words, both permissions, empty/full legal capacity and arbitrary tables are
+checked. Nineteen gas reaches PC38 but cannot fund the next PUSH; eighteen
+fails at JUMPDEST37, and short prefix fuel refuses. Zero takes the other actual
+branch and yields the earlier wrong-table counterexample. Complete ordered
+code, tail, buffers and account observations are retained, including unchanged
+returnData (this prefix has not stopped). These raw-word cases assert no new
+source signedness or admission policy. Independent finder and skeptic source
+reviews found no defect.
+
+The final PUSH/JUMP cycle, arbitrary repeated nonzero iterations, compiler
+origin, scanner/D_J correctness, Osaka approval, account/world/transaction
+and complete resource/trace correspondence remain separate obligations.

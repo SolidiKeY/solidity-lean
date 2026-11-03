@@ -1750,6 +1750,19 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionLayout.lean` | Arbitrary native caller-state entry/output records and actual JUMPDEST/STOP resource gates. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletion.lean` | Modular linked JUMPI/JUMPDEST/STOP X completion with eleven-gas adequacy and exact natural debit. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionControls.lean` | Exact/excess gas, legal stack boundaries, fuel/gas refusals and full ordered terminal State including STOP returnData clearing. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedResourceBounds.lean` | Universal legal-tail ten-gas and three-fuel refusals through the actual linked fetched suffix. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedResourceControls.lean` | Both permissions, full legal stack and populated ordered buffer observations at resource boundaries. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NonbranchTables.lean` | Actual nonbranch charged-gate table independence and all-outcome/fetched-State/X PUSH32 transport for arbitrary destination arrays. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NonbranchTableControls.lean` | Populated arbitrary/duplicate tables, both permissions, gas/stack/fuel order, JUMPI counterexample and complete ordered caller observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedEntry.lean` | Actual two-JUMPDEST entry prefix, two-gas debit and native frame transport at PC2 for arbitrary legal stacks and supplied tables. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedEntryControls.lean` | Both permissions, empty/full capacity, prefix-versus-whole-run resource negatives and complete ordered linked-image observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CountedAppend.lean` | Exact composition of existing counted driver prefixes; no terminal-X continuation claim. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedZero.lean` | Actual three-instruction linked entry through ISZERO, arbitrary scalar operand, derived alignment and five-gas/native-frame transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedZeroControls.lean` | Zero/signed/full-capacity callers, original independent State observation, following-PUSH refusal and gas-before-arity controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedProgram.lean` | Actual four-step PUSH prefix and zero-operand seven-instruction reference exit, exact nineteen-gas debit and native terminal frame. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedProgramControls.lean` | Both permissions, legal capacity, exact gas/fuel and wrong-table refusals, nonzero prefix and complete ordered terminal State. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthrough.lean` | Derived nonzero ISZERO flag and actual five/six-step fallthrough prefixes to PC37/38, exact resource and native-frame transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthroughControls.lean` | Arbitrary tables, both permissions, nonzero/signed capacity clients, zero counterexample and ordered resource failures/state. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseFixtures.lean` | Populated value-not-key chain, alias and owner-specific warmth data with coherent memory. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseControls.lean` | Full-state nonalias/alias clients, direct charge-law consumers, exact gas/fuel/stack and ordered observation controls. |
 

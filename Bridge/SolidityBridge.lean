@@ -201,3 +201,29 @@ import SolidityBridge.RoadmapV15.P10.LinkedJumpControls
 
 import SolidityBridge.RoadmapV15.P10.LinkedCompletion
 import SolidityBridge.RoadmapV15.P10.LinkedCompletionControls
+
+import SolidityBridge.RoadmapV15.P10.LinkedResourceBounds
+
+import SolidityBridge.RoadmapV15.P10.LinkedResourceControls
+
+import SolidityBridge.RoadmapV15.P10.NonbranchTables
+
+import SolidityBridge.RoadmapV15.P10.NonbranchTableControls
+
+import SolidityBridge.RoadmapV15.P10.LinkedEntry
+
+import SolidityBridge.RoadmapV15.P10.LinkedEntryControls
+
+import SolidityBridge.RoadmapV15.P10.CountedAppend
+
+import SolidityBridge.RoadmapV15.P10.LinkedZero
+
+import SolidityBridge.RoadmapV15.P10.LinkedZeroControls
+
+import SolidityBridge.RoadmapV15.P10.LinkedProgram
+
+import SolidityBridge.RoadmapV15.P10.LinkedProgramControls
+
+import SolidityBridge.RoadmapV15.P10.LinkedFallthrough
+
+import SolidityBridge.RoadmapV15.P10.LinkedFallthroughControls
