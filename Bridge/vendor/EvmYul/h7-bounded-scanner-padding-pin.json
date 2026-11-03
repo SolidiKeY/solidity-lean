@@ -1,0 +1,22 @@
+{
+  "upstreamCommit": "047f63070309f436b66c61e276ab3b6d1169265a",
+  "localRevision": "047f6307+h7-bounded-scanner-padding-v1",
+  "humanAuthorization": "H7: Implement; vendor-scanner-padding-interfaces",
+  "patch": "h7-bounded-scanner-padding.patch",
+  "patchSHA256": "1a4aace54e2b088cfd58c7e77c4e3db9e4c9c92809841362f0a7bdd4cf9133fd",
+  "nativeSymbolUnchanged": "memset_zero",
+  "outsideScannerBound": "Exact original partial scanner retained; no totalization claim",
+  "nativeBoundary": "Logical body proved in Lean; retained extern/native correctness and allocation remain separate obligations",
+  "originalVendorInputs": {
+    "FFI/ffi.lean": "c09e0bd787e15330194e3cf8911520560f13345713b2f466eaf8b456560a04eb",
+    "EVM/Semantics.lean": "2338555eb4829e4e29c3b6f6b6d392fc33ead1b2be179c0794b59e434df4b3cb",
+    "SHA256SUMS": "1ee9fd89796a036243314f56c09f4ff77a92c5daa12dc4b8d86beba6bfc89c86",
+    "UPSTREAM_SHA256SUMS": "bb469cc3611a19e6b6f2a64de2e9a6c6c4f65dfac1e9948e6d7d09c4028ba54b"
+  },
+  "patchFormat": "git diff --binary --unified=0",
+  "patchReplay": "After verifying exact original SHA256 inputs, git apply --binary --unidiff-zero bounded-scanner-padding.patch",
+  "patchedVendorInputs": {
+    "FFI/ffi.lean": "5fc7ab512325ac6a7ab73f392f2f0eaff246b8cb1ad1e1a019bd47ccb0e3f05a",
+    "EVM/Semantics.lean": "fb3dfc2c235e6f56142417d343f05666d0ec81806859a099d427d421ce40d5be"
+  }
+}

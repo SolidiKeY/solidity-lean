@@ -1,0 +1,57 @@
+diff --git a/Bridge/vendor/EvmYul/EVM/Semantics.lean b/Bridge/vendor/EvmYul/EVM/Semantics.lean
+index 9ea06749..b7cc7549 100644
+--- a/Bridge/vendor/EvmYul/EVM/Semantics.lean
++++ b/Bridge/vendor/EvmYul/EVM/Semantics.lean
+@@ -99 +99,2 @@ def fetchInstr (I : EvmYul.ExecutionEnv .EVM) (pc : UInt256) :
+-partial def D_J_aux (c : ByteArray) (i : UInt256) (result : Array UInt256) : Array UInt256 :=
++/-- Exact old scanner retained for code outside the proved no-wrap domain. -/
++partial def D_J_aux_unbounded (c : ByteArray) (i : UInt256) (result : Array UInt256) : Array UInt256 :=
+@@ -102 +103,25 @@ partial def D_J_aux (c : ByteArray) (i : UInt256) (result : Array UInt256) : Arr
+-    | some cᵢ => D_J_aux c (N i cᵢ) (if cᵢ = .JUMPDEST then result.push i else result)
++    | some cᵢ => D_J_aux_unbounded c (N i cᵢ) (if cᵢ = .JUMPDEST then result.push i else result)
++
++
++/-- Natural-PC traversal uses the existing parser/width and accumulator order.
++The structural measure is bytes remaining, not EVM execution fuel. -/
++def D_J_scan (c : ByteArray) (pc : Nat) (result : Array UInt256) : Array UInt256 :=
++  if _h : pc < c.size then
++    match c.get? pc >>= EvmYul.EVM.parseInstr with
++    | none => result
++    | some op => D_J_scan c (pc + 1 + argOnNBytesOfInstr op)
++        (if op = .JUMPDEST then result.push (.ofNat pc) else result)
++  else result
++termination_by c.size - pc
++decreasing_by omega
++
++/-- H7 bounded logical interface. Outside its no-wrap domain the original
++partial computation is retained; no arbitrary-code totalization is adopted. -/
++def D_J_aux (c : ByteArray) (i : UInt256) (result : Array UInt256) : Array UInt256 :=
++  if c.size + 33 < UInt256.size then D_J_scan c i.toNat result
++  else D_J_aux_unbounded c i result
++
++theorem D_J_aux_bounded (c : ByteArray) (i : UInt256) (result : Array UInt256)
++    (bound : c.size + 33 < UInt256.size) :
++    D_J_aux c i result = D_J_scan c i.toNat result := by
++  simp only [D_J_aux, if_pos bound]
+diff --git a/Bridge/vendor/EvmYul/FFI/ffi.lean b/Bridge/vendor/EvmYul/FFI/ffi.lean
+index a7178dad..519f23eb 100644
+--- a/Bridge/vendor/EvmYul/FFI/ffi.lean
++++ b/Bridge/vendor/EvmYul/FFI/ffi.lean
+@@ -0,0 +1,2 @@
++import Init.Data.Array.Lemmas
++
+@@ -18 +20,13 @@ def BLAKE2 (d : ByteArray) : Except String ByteArray := do
+-opaque ByteArray.zeroes (n : USize) : ByteArray
++def ByteArray.zeroes (n : USize) : ByteArray :=
++  ⟨Array.replicate n.toNat (0 : UInt8)⟩
++
++/-- Kernel specification of the retained memset_zero ABI. Native allocation
++and implementation correspondence are separate from these logical laws. -/
++theorem ByteArray.zeroes_size (n : USize) : (zeroes n).size = n.toNat := by
++  simp only [zeroes, _root_.ByteArray.size, Array.size_replicate]
++
++theorem ByteArray.zeroes_zero : zeroes (0 : USize) = _root_.ByteArray.empty := rfl
++
++theorem ByteArray.zeroes_get (n : USize) (i : Nat) (h : i < n.toNat) :
++    (zeroes n).data[i]'(by simpa only [zeroes, Array.size_replicate] using h) = 0 := by
++  exact Array.getElem_replicate _
