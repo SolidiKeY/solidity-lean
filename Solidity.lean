@@ -1274,6 +1274,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRef
 import Solidity.Backend.InternalFlow.RuntimeFrameV3BareRevertProducer
+import Solidity.Backend.InternalFlow.RuntimeFrameV3FixedThunkProducer
 import Solidity.Backend.InternalDispatch
 import Solidity.Backend.InternalDispatch.Agreement
 import Solidity.Backend.InternalDispatch.Chain
@@ -1310,6 +1311,14 @@ import Solidity.Backend.Aggregates.G18Physical
 import Solidity.Backend.Aggregates.G18PhysicalControls
 import Solidity.Backend.Aggregates.G18ReferenceSequence
 import Solidity.Backend.Aggregates.G18Storage
+import Solidity.Backend.StructuredFlow.BranchControls
+import Solidity.Backend.StructuredFlow.BranchSelector
+import Solidity.Backend.StructuredFlow.CoreScopeControls
+import Solidity.Backend.StructuredFlow.CoreScopes
+import Solidity.Backend.StructuredFlow.CoreSequence
+import Solidity.Backend.StructuredFlow.CoreSequenceControls
+import Solidity.Backend.StructuredFlow.ExitControls
+import Solidity.Backend.StructuredFlow.ExitSelector
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls

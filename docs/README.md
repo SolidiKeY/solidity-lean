@@ -131,6 +131,7 @@ G21 closed failure lowering: [literal, boolean custom-error and slice failures](
 V07 source lowering (G16–G18.01): [scalar/effectful lowering, P12 context map, declaration-location graphs](feature-work/roadmap-v07-lowering.md).
 P6 physical memory: [word frames, byte journal, uint arrays, reference stores](feature-work/physical-memory-interface.md).
 G18.02/.03 aggregates: [storage path typing, graph fields, memory writes and aliases](feature-work/g18-aggregates.md).
+G36.01 structured flow: [target branch and exit selectors](feature-work/roadmap-g36-structured-flow.md).
 
 P8 partial checkpoints: [admission and failure resources](feature-work/p8-admission.md), including the [P8a frozen interface](feature-work/p8-admission.md#frozen-interface) and [settings and assembly boundary](feature-work/p8-admission.md#all-settings-and-producer-assembly), and the [P8b frozen consumer interface](feature-work/p8b-frozen-interface.md).
 

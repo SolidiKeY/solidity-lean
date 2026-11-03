@@ -274,3 +274,14 @@ input (frame 16, the `CompileExamples` fixture), whose `initial` is a real
 `InitialInput` restates the `Entry` resource fields, so `coverage` is a
 repackaging; `make` is not applied (the producers are built directly).
 Approved-domain provenance stays external (`hprof`), as v3 requires.
+
+## P1-THUNK: fixed-thunk producer
+
+`RuntimeFrameV3FixedThunkProducer.lean` (from the v17-validation-release lane)
+inhabits `PendingFixedCallRecProducer` for one bounds-sensitive array-writing
+thunk: `producer` takes the approved-domain agreement (`hprof`) as its only
+hypothesis; `coverage` is universal; the domain is non-vacuous (`member0`,
+`member9`); success is a real index-0 run (`successful`) and the bare revert a
+real out-of-bounds run (`reverting`). Holding at every recursion index is
+immediate, because `Stmt.callRec` ignores its depth argument. The fixture
+(`Witness`) currently lives in the producer module.
