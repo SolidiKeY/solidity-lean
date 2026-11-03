@@ -112,7 +112,9 @@ import Solidity.Backend.FailurePaths.ParametricControls
 import Solidity.Backend.FailurePaths.Premises
 import Solidity.Backend.FailurePaths.Returns
 import Solidity.Backend.FailurePaths.Statements
+import Solidity.Backend.FailurePaths.TransientCallback
 import Solidity.Backend.FailurePaths.TransientControls
+import Solidity.Backend.FailurePaths.TransientSharing
 import Solidity.Backend.FailurePaths.TransientUnwind
 import Solidity.Backend.FailurePaths.WorldUnwind
 import Solidity.Backend.FunctionValues.Controls
