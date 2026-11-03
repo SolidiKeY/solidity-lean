@@ -571,3 +571,157 @@ theorem two_kind_observations (p : Roadmap.Pipeline) :
 #guard_msgs in
 #print axioms Solidity.Lowering.V08.CatalogueReflectionControls.two_kind_observations
 end Solidity.Lowering.V08.CatalogueReflectionControls
+
+
+/-! Real source payment preserves the code/store image, not its funds field.
+The operation list below is a certificate of the actual Option transfer result,
+used only with the existing explicit rollback law. It is not a call interpreter. -/
+namespace Solidity.Lowering.V08.WorldPaymentImageControls
+open Solidity
+open SourceEnvironmentControls
+
+def amount : Roadmap.Word := ⟨5, by decide +kernel⟩
+def operations : List (Source.Op E.layout E.lay E.lay) :=
+  [.account sender (fun account => account.withBalance ⟨88,by decide +kernel⟩),
+   .account self (fun account => account.withBalance ⟨12,by decide +kernel⟩)]
+def paid : Source.St E := {populated with ex := populated.ex.run operations}
+
+theorem actual_payment : populated.ex.transfer sender self amount = some paid.ex := rfl
+
+theorem account_images (pipeline : Roadmap.Pipeline) (address : ContractWorld.Address) :
+    WorldImage.AccountImage (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      paid (WorldCatalogueControls.world pipeline) address :=
+  (WorldImageAccess.account_transfer (g := global pipeline) (source := populated)
+    sender self amount paid.ex actual_payment address).2
+      ((WorldCatalogueControls.initial_image pipeline).accounts address)
+
+/-- Complete owner/account and nonworld observations, including every old heap
+object and full log/event/function-local payloads, are retained explicitly. -/
+theorem ordered_observations :
+    ((populated.ex.world.accounts sender).balance.val,
+     (populated.ex.world.accounts self).balance.val,populated.ex.journal.length,
+     (paid.ex.world.accounts sender).balance.val,
+     (paid.ex.world.accounts self).balance.val,paid.ex.journal.length,
+     (paid.ex.world.accounts self).code,(paid.ex.world.accounts self).nonce,
+     (paid.ex.world.accounts self).storage.read saved,
+     (paid.ex.transient.cells self).read scratch,paid.heap.next,paid.heap.get 0) =
+      (93,7,3,88,12,5,some 0,1,some (.bool true),some (.bool true),1,
+        some ⟨.bytes .memory,.bytes [0,255]⟩) ∧
+    (paid.ex.world.accounts sender) = (populated.ex.world.accounts sender).withBalance ⟨88,by decide +kernel⟩ ∧
+    (paid.ex.world.accounts self) = (populated.ex.world.accounts self).withBalance ⟨12,by decide +kernel⟩ ∧
+    paid.ex.transient = populated.ex.transient ∧ paid.heap = populated.heap ∧
+    paid.events = populated.events ∧ paid.logs = populated.logs ∧ paid.fnLocals = populated.fnLocals :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+theorem journal_entries : paid.ex.journal =
+    .account self (populated.ex.world.accounts self) ::
+    .account sender (populated.ex.world.accounts sender) :: populated.ex.journal := rfl
+
+theorem other_accounts (address : Roadmap.Address) (notSender : address ≠ sender)
+    (notSelf : address ≠ self) :
+    paid.ex.world.accounts address = populated.ex.world.accounts address := by
+  simp only [paid, operations, Source.ExecState.run, Source.ExecState.apply,
+    Source.World.set, notSender, notSelf, ↓reduceDIte]
+
+/-- Supplied journal marks are explicit; successful transfer does not itself
+execute an admitted call or roll back. -/
+theorem explicit_rollback :
+    {paid with ex := (populated.ex.enter self sender amount [] false).rollback paid.ex} = populated := by
+  have back := Source.rollback_run populated.ex operations self sender amount [] false
+  change {paid with ex := (populated.ex.enter self sender amount [] false).rollback paid.ex} = populated
+  rw [show (populated.ex.enter self sender amount [] false).rollback paid.ex = populated.ex from back]
+  rfl
+
+theorem end_without_refund :
+    ((SourceTransient.endExecution paid).ex.world,
+     (SourceTransient.endExecution paid).ex.journal.length,
+     ((SourceTransient.endExecution paid).ex.transient.cells self).read scratch) =
+      (paid.ex.world,0,some (.bool false)) := rfl
+
+theorem source_reads (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 3
+      (.balance (.addressLit [⟨1,by decide +kernel⟩]) :
+        Source.RExpr E [.bool] (.int Source.IntTy.u256))).run (locals,paid) =
+      (.ok (.val (Source.intWrap Source.IntTy.u256 100)),(locals,paid)) ∧
+    (Source.evalE (global pipeline) {frame with static:=static} 3
+      (.balance (.addressLit [⟨2,by decide +kernel⟩]) :
+        Source.RExpr E [.bool] (.int Source.IntTy.u256))).run (locals,paid) =
+      (.ok (.val (Source.intWrap Source.IntTy.u256 12)),(locals,paid)) := ⟨rfl,rfl⟩
+
+/-- The old target funds are actually wrong for the paid installed owner.
+Code/store framing must never be promoted to full Image preservation. -/
+theorem not_whole_image (pipeline : Roadmap.Pipeline) :
+    ¬ WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment paid.events paid (WorldCatalogueControls.world pipeline) := by
+  intro image
+  have funds := congrArg (fun f => (f (EnvironmentProjection.liftAddress self)).1) image.funds
+  change (7 : Int) = 12 at funds
+  omega
+
+theorem wrong_end_refund :
+    ((SourceTransient.endExecution paid).ex.world.accounts sender).balance.val ≠ 93 := by
+  change (88 : Nat) ≠ 93
+  decide +kernel
+
+theorem wrong_journal_identity : paid.ex ≠ populated.ex := by
+  intro same
+  have journal := congrArg (fun state : Source.ExecState E.layout E.lay E.lay => state.journal.length) same
+  change (5 : Nat) = 3 at journal
+  omega
+
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.actual_payment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms actual_payment
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.account_images' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms account_images
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.ordered_observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms ordered_observations
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.journal_entries' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms journal_entries
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.other_accounts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms other_accounts
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.explicit_rollback' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms explicit_rollback
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.end_without_refund' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms end_without_refund
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.source_reads' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms source_reads
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.not_whole_image' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms not_whole_image
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.wrong_end_refund' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_end_refund
+/-- info: 'Solidity.Lowering.V08.WorldPaymentImageControls.wrong_journal_identity' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_journal_identity
+end Solidity.Lowering.V08.WorldPaymentImageControls

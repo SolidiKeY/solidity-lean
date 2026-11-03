@@ -3927,3 +3927,7 @@ The memory-byte hash adapter also propagates exact argument halts and refuses da
 ### Published Decision dependency retry
 
 The published feature-catalogue/HashingNames split justified a new bounded Decision dependency check, including the relocated DecisionHashesChecks verdicts. The unchanged 600-second container guard stopped it in MemRead.Ok after 149 of 282 targets; neither Decision nor its relocated checks was reached. Host monitoring was interrupted by model capacity; recovered logs and unchanged source/config/protected-state bindings do not fill that telemetry gap. The attempt is failed/incomplete, not a full or Decision pass. Canonical source/body/frame/unit producer obligations remain open.
+
+### Payment account-image framing
+
+`WorldImageAccess.account_transfer` derives preservation of code/store AccountImage fields from an actual successful Source transfer, including same-owner and two-update cases. Its populated client retains full account/nonworld observations and ordered journal entries, proves explicit rollback and end without refund, and refutes full Image preservation with unchanged target funds. This is neither a payment-dispatch/compiler theorem nor a replacement for ledger/body/frame/admission producers.
