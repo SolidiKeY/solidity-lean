@@ -2146,3 +2146,4 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameResultAgreement.lean` | Successful-output agreement under existing typed result and execution operators, with no failed-state or termination assertion. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean` | Exact allocating-family source-return coherence at all quotation pairs and a populated all-sufficient-index caller control. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean` | Actual allocating fixed-image running prefixes, reached active parameter frames and exact allocator growth, with populated horizon/stop/countercontrols. |
+| `Roadmap/V16/SourceTransactionConsumer.lean` | Bounded actual Source transaction pairs, exact states, rollback and Hoare consumer; no compiler/session closure |

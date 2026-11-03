@@ -47,3 +47,44 @@ specification applications remain obligations.
 Independent finder and skeptic review found no semantic defect. The requested
 direct preservation control for the post-allocation refusal was added, together
 with low-horizon timeout controls.
+
+
+## Bounded Source transaction specification consumer
+
+[SourceTransactionConsumer](../../Solidity/Roadmap/V16/SourceTransactionConsumer.lean)
+consumes the published V08 `g` and `poke` executions at horizon20, in both
+pipelines. These are actual `Source.runTx` computations, with complete returned
+state records and ordered outcome pairs, rather than a replacement evaluator.
+A reverted transaction completes as `.ok (.revert [])`, so a following
+transaction runs. A horizon timeout is `.error .timeout`; the monadic suffix
+is skipped and the actual unfinished state is retained. Timeout is not proof
+of divergence or a completed rollback.
+
+`after_revert_success` and `after_success_revert` use the published journal undo
+certificate at the actual entry. The second reverting call rolls back to the
+first committed world with x5, rather than the original world with x3.
+`revert_success_prefix` and `success_revert_prefix` retain both exact outcomes
+and the entire final state. `timeout_prefix` retains the actual early halt.
+`success_revert_spec` constructs the existing Source Hoare triple: its inhabited
+precondition is the exact populated initial state, its postcondition the exact
+outcome pair and final state, and its halt postcondition false for these checked
+bounded runs. This is not a full-profile termination assertion.
+
+Old bytes are arbitrary; the populated caller locals, log structure and prior
+event shape are fixed fixtures. Complete state equalities retain every field; `complete_vector`
+extracts selected storage/transient/journal/heap/local/log observations and the
+whole ordered event history. `wrong_original_rollback` rejects the incorrect
+original-world endpoint for the actual two-run composition; `wrong_event_order`
+rejects exchanging the two completed transaction statuses. Nine generated
+axiom guards pin the observed standard axiom sets. Independent read-only finder
+and skeptic review found no semantic defect.
+
+These are fixture executions, with inherited toyFixed selectors and fixed
+horizons. No accepted-source, SourceSpec, least-completing-horizon session,
+constructor-rooted reachability, source-to-intrinsic representation, ABI/world,
+physical frame, bytecode, Osaka/resource or adversarial correctness is supplied.
+SS-CP2 remains owned by MIC; its integrated allocation modules are unchanged.
+
+Final finder and skeptic review corrected the distinction between arbitrary
+payload bytes and fixed fixture locals/log/event shapes. No proof premise or
+observation was changed.
