@@ -1288,3 +1288,37 @@ parameter-frame result is separate from the arbitrary-context source export,
 and supplies no public general recursive compiler, approved-domain provenance,
 all-counter native target return theorem or byte/world rollback. Frozen
 interfaces and every earlier observation remain unchanged.
+
+
+## Mutating prefixes with native continuations
+
+`RuntimeFrameV3MutatingResume.coupled` strengthens each feasible mutating
+descent horizon with an equation over actual residual native execution at
+every quotation index. It uses the existing no-result export operator; no
+second evaluator or source trace is introduced. Each positive induction step
+consumes the real write/allocation/entry certificate on the preceding child.
+Lengths and addresses transport without asserting old-content preservation.
+
+`finish` and `complete` discharge the residual zero branch. For every valid
+initial counter and actual frame/allocator capacity, the source body returns
+the same reached heap with restored caller locals, while the actual descent
+loop ends with its represented zero-counter child. The target at this point
+is before parent unwind. Source quotation exhaustion is a separate outcome;
+the continuation equation assigns no failed state or allocation frontier to
+an error result.
+
+The populated zero/one/two-horizon client reuses the complete twenty-one- and
+twenty-five-cell snapshots. Whole source-output identity follows from actual
+source executions, and `entered_state` recovers the exact earlier zero-child
+state using its proved environment and export law. Only machine identities
+come from target determinism. The actual caller export retains scalar two
+and aliases `0,0,1`; the returned old arrays are `[1,2]` and unrelated `[4]`.
+Controls distinguish quotation exhaustion from revert, the first and second
+target horizons, missing mutation, and the restored source output from the
+still-entered zero-counter target view.
+
+This closes the native continuation/heap link for the specialized mutating
+family. Generic saved history and paired target return, general recursive
+compiler selection, approved-domain provenance and byte/world correspondence
+remain separate obligations. Earlier interfaces, observations and refusals
+are unchanged.
