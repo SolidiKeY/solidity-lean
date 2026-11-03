@@ -86,3 +86,21 @@ check complete observed carriers, reverted output truncation, successful short
 output with an untouched tail, and zero output retaining full returndata.
 Independent finder/skeptic reviews found no issues. Final lane gates and the
 original producer/composition obligations above remain open.
+
+## Concrete target-memory normal-return rule
+
+`TargetCallRules.call_output_box` derives its normal-return Box conclusion
+from preflight, accepted output extent, exact input loading and the actual
+producer invocation equation. It does not take the desired `CallStep` equation
+as a premise. Every normal successor retains the complete ordered observed
+carrier, reads back the exact truncated prefix and preserves every byte outside
+that prefix. Both successful and reverted calls are covered. This is a Lean-only
+consumer rule over the existing preparation relation, not intrinsic Yul/G51
+calculus closure or a replacement callee semantics.
+
+`TargetCallRuleChecks` proves nonvacuity and applies the rule for both outcomes;
+a nonzero-value call in a static caller has no normal successor. This checks
+preflight only, not the unrestricted producer's static write behavior. Five
+scoped kernel reports use only `propext`/`Quot.sound`. Independent read-only
+finder/skeptic reviews found no issues. The original full lane gates and
+producer/physical/source/compiler obligations remain open.
