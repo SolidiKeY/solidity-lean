@@ -2309,6 +2309,69 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewIdentity_eq": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewKey_aliases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewKey_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewKey_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewTable_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.overlappingCalldataViews": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.disagreement_not_coherent": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.empty_table": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.fixture_coherent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.no_raw_offset_keys": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.packed_keys": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.packed_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.repeated_coherent": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPackingControls.lean:Solidity.Backend.MemoryOps.ViewPackingControls.repeated_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.captureOverwrite_keeps": [
   "Quot.sound",
   "propext"
