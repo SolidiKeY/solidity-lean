@@ -87,3 +87,4 @@
 | `Source/Monetary.lean` | Balances are exact naturals, including values outside the EVM word range. |
 | `Source/FailureEventControls.lean` | Independently fixed complete states for actual Source.emitEvent, with nonempty caller journal/event prefix and byte-memory alias. |
 | `Source/FailureEventLaws.lean` | Full-state law for the actual Source event emitter. |
+| `Source/FailureRuntimeControls.lean` | Actual explicit-plan Source execution through existing registered code. |

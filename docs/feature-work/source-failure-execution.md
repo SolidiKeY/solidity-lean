@@ -187,3 +187,59 @@ passed library/run-lean/TestSuite336/trust/layers/orphans; its original doc and
 pin-inventory failures and the subsequent corrected passes are retained in
 the sealed cursor release. Its pre-existing Horizon 339.65s policy violation
 is still a failure. No new full checkpoint is claimed for this emitter leaf.
+
+### Explicit plans through real recursive execution (2026-11-03)
+
+All seventeen existing mutual evaluator functions now carry the same optional
+RuntimePlan as a trailing argument, and every recursive call and all five
+actual event calls forward it explicitly. Existing default calls remain None.
+Actual entered-system dispatch now uses the existing frame operation after
+entry/refusal checks. Ordinary child failures apply the actual rollback;
+remaining request/ancestor stops are re-raised after heap restoration/rollback
+instead of becoming catchable child outcomes. A transparent preflight keeps
+None expressions identical, preserving unchanged G22 boundary/typed-call/frame
+statements and proofs. No ExtCall construction is changed (H22).
+
+Twenty-three component laws exercise existing registered Source code under
+both pipeline settings: zero/one/two-event cuts, success, two timeout horizons,
+bodyless refusal, genuine wrong-frame stuck, full assertion panic bytes,
+request/ancestor propagation, inherited static traces, exact transfer plus
+entered-child undo, caller heap alias and a real reentrant zero-cut callback.
+Complete ordered events and full Source state are checked, not only result
+bytes. Source examples use their existing toy Fixed hash, so no production
+hash, frontend, compiler, EVM or whole-session adequacy follows.
+
+Single-thread evaluator checks measured 8.1017s before and 8.1816s after the
+complete activation change; RSS481432→483564KiB. Intermediate failed draft
+checks are preserved: bare check-None broke old simplification (fixed in the
+producer, without foreign proof edits); symbolic pipeline reduction exhausted
+200000 heartbeats (fixed by constructor case analysis, no budget increase).
+An initially incorrect new missing-body draft expected stuck, but pickFn
+excludes bodyless functions: the separately named refusal and wrong-frame
+controls follow the actual source branches. No original fixture was changed.
+The outer CALL-prefix composition still exceeds existing reduction limits;
+only actual transfer and actual entered-child composition are delivered.
+
+Full Bound-based Source language/session consistency, initcode/request roots,
+post-fee natural balances/reachability, P8a realization and all original24/six
+Y10 obligations remain open. No native comparison is added by these laws.
+
+The generated signature tool also audits same-plan forwarding lexically and
+has 17 in-memory mutation tests. It rejects erased/reset/default-changed
+arguments, root-qualified bypasses, unsupported aliases, quoted identifiers
+and malformed comment/string masks; it does not prove runtime coherence.
+Finder and skeptic confirmed a root-qualified bypass in the initial guard;
+the whitelist/fail-closed correction and regression cases resolve it.
+
+Affected legacy Horizon checking exposed one generated equation application:
+the new plan parameter precedes the final horizon in envLoop.eq_2. The proof
+now supplies explicit None; its theorem, tactic and budgets are unchanged.
+The original failed check (369.66s) and manual stop of the dependent-check
+container (exit137, no OOM/resource stop) are retained. Corrected-check
+measurements are recorded separately, not substituted for that failure.
+
+The corrected legacy Horizon source checks successfully at345.3233s versus
+the prior339.6516s (+1.67%); this remains over the unchanged300s policy. The
+failed369.6618s elaboration is not used as a passing timing comparison.
+HorizonDeploy/Session still need a fresh compiled Horizon artifact and their
+affected checks; no duplicate full checkpoint was launched after reconnect.

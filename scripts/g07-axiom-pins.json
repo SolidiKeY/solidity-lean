@@ -28140,6 +28140,126 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.preflight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.ancestor_not_child_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.ancestor_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.bodyless_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.caller_heap_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.entered_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.first_event_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.nested_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.nested_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.panic_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.panic_full_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.registered_receiver": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.request_not_catchable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.request_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.second_event_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.static_event_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.transfer_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.transferred_entered_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.transferred_entered_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.uncut_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.wrong_frame_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.wrong_panic_payload_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/Horizon.lean:Solidity.Source.belowAt": [
   "Classical.choice",
   "Quot.sound",

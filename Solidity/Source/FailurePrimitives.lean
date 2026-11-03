@@ -1,7 +1,8 @@
 import Solidity.Source.Machine
 
-/-! Shared actual-EM failure primitives below Eval. Bodies are extracted
-unchanged from FailureMachine; this module installs no evaluator hooks. -/
+/-! Shared actual-EM failure primitives below Eval. The check/pending/frame
+bodies are extracted unchanged from FailureMachine. The preflight combinator
+preserves disabled expressions exactly; this module installs no dispatch hook. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env} {Γ : RCtx}
@@ -23,6 +24,13 @@ def pending (plan : RuntimePlan) : EM E Γ Bool :=
   match plan with
   | none => pure false
   | some _ => do return (← st).resource.pending.isSome
+
+/-- Check an enabled plan before a real operation. Disabled mode returns the
+operation itself, preserving the legacy expression without an extra bind. -/
+abbrev preflight {α : Type} (plan : RuntimePlan) (body : EM E Γ α) : EM E Γ α :=
+  match plan with
+  | none => body
+  | some _ => do check plan; body
 
 /-- Enter one compiled-system activation after the caller's refusal checks.
 An existing ancestor/request stop prevents entry. Pre/post checks are inside

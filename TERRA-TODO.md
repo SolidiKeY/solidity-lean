@@ -58,3 +58,10 @@ and owner/error soundness remain with Sol. Do not alter the Source evaluator.
 - `Source/FailureEventLaws`, `emit_facade_eq`: `FailureExecution.emit plan event = Source.emitEvent event plan`. Routine facade identity.
 
 The general reached-stop/full-state soundness law remains Sol-owned and is proved in the module. These routine statements are not assumed by any proof.
+
+## Explicit-plan runtime compatibility (routine statements only)
+
+- `Source/FailurePrimitives`, `preflight_none`: for every typed EM body, `preflight none body = body`; definitional None branch.
+- `Source/FailurePrimitives`, `preflight_some`: `preflight (some points) body = (do check (some points); body)`; definitional enabled branch.
+
+No placeholder theorem or assumption is used. The Source CALL-prefix reduction/entered-child proof and fixed-plan horizon soundness remain Sol-owned, not delegated as routine glue.
