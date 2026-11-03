@@ -90,3 +90,23 @@ partials remain at 22a1b53ecd0d50272d26e2758bafaead52bf247d for relay; no new G4
 implementation was added here. G43/P14, G44.01-.03, G18.04/.05, S02-CD-AGG and
 G36.03 remain with V14. Earlier G45 completion obligations are integration
 obligations against that producer, not authorization to duplicate its work.
+
+## Argument failure before base-frame installation
+
+`ConstructorArgumentFailure.run_inner` is a concrete native producer: the first
+argument writes the bitwise complement of uint8(255), changing the inner local
+to zero; checked negation of int16(-32768) in the next argument then returns the
+original arithmetic-panic bytes. It runs at the existing Source argument
+budget 4, without changing any prior fixture or process/proof budget.
+
+`transport_failure` composes a real failed evalConvArgs run with giveArgs: it
+preserves the exact halt and returned Source state, dropping only inner locals.
+It does not roll back argument effects on state. The concrete `giveArgs_failed`
+discharges that native-run premise with `run_inner`; no simulation oracle or
+assumed source/body correctness is introduced. Native constructor controls show
+failure propagation in both pipelines, existing-base priority, inner-versus-outer
+local separation and arithmetic-versus-division-panic byte separation. Program
+fixtures remain manually supplied, without canonical elaboration or profile
+provenance. No failed CREATE/account/World rollback or EVM behavior is proved.
+Four further scoped guards require only standard axioms. Full/global validation
+and the original joint payment/world obligations remain open.

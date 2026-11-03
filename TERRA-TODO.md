@@ -309,3 +309,14 @@ G43 and final executable closure. No P8a coverage or P1 profile provenance infer
 Hard work remains with V14: general effectful/n-ary argument transport, actual
 constructor/body/initializer lowering and admitted Program provenance; the
 current manually supplied fixture is not an elaborator certificate.
+
+## Constructor failure routine projections (H14)
+
+- ConstructorArgumentFailure.inner_aliases: project old reference locals through
+  the existing setter-based innerAfter; routine Locals.get/set reduction.
+- ConstructorArgumentFailure.wrong_panic: derive the actual giveArgs failure
+  cannot return divZero bytes from giveArgs_failed and constructor_controls;
+  routine Except.error injectivity, preserving exact Source.Halt.
+
+General state-effectful arguments, multiple bases/initializers, canonical Program
+provenance, source/body compilation and G43 remain substantive V14 work.

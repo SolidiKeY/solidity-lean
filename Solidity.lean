@@ -129,6 +129,7 @@ import Solidity.Backend.Environment.Observations
 import Solidity.Backend.Environment.ObservationsChecks
 import Solidity.Backend.EvmVectors
 import Solidity.Backend.Executable.ConstructorArgumentControls
+import Solidity.Backend.Executable.ConstructorArgumentFailure
 import Solidity.Backend.Executable.ConstructorArgumentObservations
 import Solidity.Backend.Executable.ConstructorBaseArgumentControls
 import Solidity.Backend.Executable.ConstructorBaseArguments
