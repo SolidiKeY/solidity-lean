@@ -6,6 +6,7 @@ import Solidity.Backend.MemoryOps.PhysicalStructAlias
 import Solidity.Backend.MemoryOps.SourceCalldataCopy
 import Solidity.Backend.MemoryOps.SourceCalldataTransfer
 import Solidity.Backend.MemoryOps.SourceCalldataBinding
+import Solidity.Backend.MemoryOps.SourceCalldataMutation
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -2091,4 +2092,186 @@ theorem source_copy_binding_prefix_tables :
 #guard_msgs (whitespace := lax) in #print axioms source_copy_binding_empty_late
 /-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_prefix_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_copy_binding_prefix_tables
+private def mutationRhs : Source.Idx BindingCtx .bool := .there (.there .here)
+private def mutationInput : Source.EMState E BindingCtx :=
+  ((bindingInput 3).1.set bindingIndex (sourceUint (indexValue (wmod 1))),(bindingInput 3).2)
+private def mutationBound : Source.EMState E BindingCtx :=
+  (mutationInput.1.set bindingDst (.memRef rfl 3),(bindingOutput 3 [true,false,true]).2)
+private def mutationHeap : Heap (H++[B]) :=
+  copyHeap.1.set copyHeap.2 (MObj.setElem .dyn (copyHeap.1.get copyHeap.2) 1 true)
+private theorem mutation_at : SourceBoolStructAt mutationInput 2 hp parent addresses layout :=
+  ⟨source_at.parent,source_at.leaf⟩
+private theorem mutation_mok : Source.MemOK E SH mutationInput :=
+  ⟨⟨(binding_memOK 3).1.1,Source.LocalsOK.set (bindingInput 3).1 bindingIndex
+      (binding_memOK 3).1.2 (v := sourceUint (indexValue (wmod 1))) trivial⟩,(binding_memOK 3).2⟩
+private theorem mutation_write : copyHeap.1.writeAddr (.index copyHeap.2 .dyn (indexValue (wmod 1))) true=some mutationHeap := by
+  have length : copyHeap.1.len copyHeap.2 .dyn=3 := by
+    unfold Heap.len
+    rw [source_calldata_copy_client.2.2.2.2.2.2.1]
+    rfl
+  change (if 1<copyHeap.1.len copyHeap.2 .dyn then some _ else none)=_
+  rw [length]
+  rfl
+
+/-- ACTUAL copy/bind then materially changing fresh TFT to TTT in ONE Source
+program; all old objects/aliases/tag survive. No emitted fresh-copy is assumed. -/
+theorem source_copy_mutation_client (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    ∃ z : Source.EMState E BindingCtx,
+      (Source.evalE (G p) copyFrame (fuel+4) (sourceBoolCalldataBind bindingDst bindingSrc)).run mutationInput=
+        (.ok (.val (.memRef rfl 3)),mutationBound) ∧
+      (Source.evalE (G p) copyFrame (fuel+3) (sourceIndexedAssign bindingDst bindingIndex mutationRhs)).run mutationBound=
+        (.ok (.val (.bool true)),z) ∧
+      (Source.execItems (G p) copyFrame (fuel+6) nps none
+        (.stmt (.expr (sourceBoolCalldataBind bindingDst bindingSrc))
+          (.stmt (.expr (sourceIndexedAssign bindingDst bindingIndex mutationRhs)) .nil) :
+            Source.RItems E [] false .body BindingCtx BindingCtx) mutationInput.1).run (.nil,mutationInput.2)=
+              (.ok (.normal z.1),(.nil,z.2)) ∧
+      SourceBoolMemoryAt z 3 mutationHeap copyHeap.2 .dyn ∧
+      SourceBoolStructAt z 2 mutationHeap (parent.wk copyExt) copyAddresses layout ∧ Source.MemOK E SH z ∧
+      Heap.Keeps copyExt hp mutationHeap ∧
+      z.1=.cons (.memRef rfl 0) (.cons (.cdRef rfl 0 3) (.cons (.bool true)
+        (.cons (sourceUint (indexValue (wmod 1))) (.cons (.memRef rfl 2)
+          (.cons (.memRef rfl 1) (.cons (.memRef rfl 3) (.cons (.memRef rfl 2) .nil))))))) ∧
+      [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3]=
+        [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+         some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory [true,true,true]⟩] ∧
+      [MObj.elems .dyn (mutationHeap.get copyHeap.2),MObj.elems .dyn (mutationHeap.get (left.wk copyExt)),
+        MObj.elems .dyn (mutationHeap.get (right.wk copyExt))]=[[true,true,true],[true,false,false],[false,true,false]] ∧
+      mutationHeap.field (parent.wk copyExt) layout.tag_type=u7 ∧
+      mutationHeap.field (parent.wk copyExt) layout.child_type=left.wk copyExt ∧
+      z.2.ex=mutationInput.2.ex ∧ z.2.events=mutationInput.2.events ∧
+      z.2.logs=mutationInput.2.logs ∧ z.2.fnLocals=mutationInput.2.fnLocals := by
+  have result := mutation_at.bind_cd_bool_assign (G p) copyFrame fuel nps bindingDst bindingSrc bindingIndex mutationRhs
+    0 3 (indexValue (wmod 1)) true rfl rfl rfl (by decide) (by decide) SH mutation_mok
+  rw [copy_decoded] at result
+  obtain ⟨_,out,z,first,second,run,_,hw,new,mok,keep,old,values,occupied,locals,ex,events,logs,fn⟩ := result
+  change copyHeap.1.writeAddr (.index copyHeap.2 .dyn (indexValue (wmod 1))) true=some out at hw
+  have same : out=mutationHeap := Option.some.inj (hw.symm.trans mutation_write)
+  subst out
+  change Heap.Keeps copyExt hp mutationHeap at keep
+  change MObj.elems .dyn (mutationHeap.get copyHeap.2)=[true,true,true] at values
+  change SourceBoolMemoryAt z 3 mutationHeap copyHeap.2 .dyn at new
+  have sourceFresh := new
+  unfold SourceBoolMemoryAt at sourceFresh
+  rw [values] at sourceFresh
+  refine ⟨z,first,second,run,new,old,mok,keep,?_,?_,?_,?_,?_,ex,events,logs,fn⟩
+  · rw [locals];rfl
+  · rw [occupied 0 _ rfl,occupied 1 _ rfl,occupied 2 _ rfl,sourceFresh]
+  · rw [values,keep left,keep right,MObj.elems_wk,MObj.elems_wk,left_values,right_values];rfl
+  · rw [keep.field parent layout.tag_type];rfl
+  · rw [keep.field parent layout.child_type];rfl
+
+/-- The whole program stops on its actual decoder failure, before allocation
+or the second write. The retained state is not an outer rollback theorem. -/
+theorem source_copy_mutation_decode_error (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.execItems (G p) badCopyFrame (fuel+6) nps none
+      (.stmt (.expr (sourceBoolCalldataBind bindingDst bindingSrc))
+        (.stmt (.expr (sourceIndexedAssign bindingDst bindingIndex mutationRhs)) .nil) :
+          Source.RItems E [] false .body BindingCtx BindingCtx) mutationInput.1).run (.nil,mutationInput.2)=
+            (.error (.revert []),(.nil,mutationInput.2)) := by
+  have result := mutation_at.bind_cd_bool_assign (G p) badCopyFrame fuel nps bindingDst bindingSrc bindingIndex mutationRhs
+    0 3 (indexValue (wmod 1)) true rfl rfl rfl (by decide) (by decide) SH mutation_mok
+  have bad : sourceCalldataBoolValues E badCopyFrame 0 3=.error (.revert []) := rfl
+  rw [bad] at result
+  exact result
+
+/-- After actual fresh mutation the new local reads TRUE while retained old
+aliases read FALSE. Ignoring the write leaves the actual fresh TFT unchanged. -/
+theorem source_copy_mutation_reads (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    ∃ z : Source.EMState E BindingCtx,
+      (Source.execItems (G p) copyFrame (fuel+6) nps none
+        (.stmt (.expr (sourceBoolCalldataBind bindingDst bindingSrc))
+          (.stmt (.expr (sourceIndexedAssign bindingDst bindingIndex mutationRhs)) .nil) :
+            Source.RItems E [] false .body BindingCtx BindingCtx) mutationInput.1).run (.nil,mutationInput.2)=
+              (.ok (.normal z.1),(.nil,z.2)) ∧
+      (Source.evalE (G p) copyFrame (fuel+2) (bindingRead bindingDst)).run z=(.ok (.val (.bool true)),z) ∧
+      (Source.evalE (G p) copyFrame (fuel+2) (bindingRead .here)).run z=(.ok (.val (.bool false)),z) ∧
+      (Source.evalE (G p) copyFrame (fuel+2) (bindingRead bindingDst)).run mutationBound=
+        (.ok (.val (.bool false)),mutationBound) ∧ mutationHeap≠copyHeap.1 := by
+  obtain ⟨z,_,_,run,fresh,old,_,keep,locals,_,typed,_,child,_⟩ := source_copy_mutation_client p fuel nps
+  have values : MObj.elems .dyn (mutationHeap.get copyHeap.2)=[true,true,true] := (List.cons.inj typed).1
+  have oldAt := old.leaf
+  rw [child] at oldAt
+  change SourceBoolMemoryAt z 0 mutationHeap (left.wk copyExt) .dyn at oldAt
+  have root : z.1.get bindingDst=.memRef rfl 3 := by rw [locals];rfl
+  have alias : z.1.get .here=.memRef rfl 0 := by rw [locals];rfl
+  have index : z.1.get bindingIndex=sourceUint (indexValue (wmod 1)) := by rw [locals];rfl
+  have hit : mutationHeap.index copyHeap.2 .dyn (indexValue (wmod 1))=some true := by
+    change (MObj.elems .dyn (mutationHeap.get copyHeap.2))[1]?=some true
+    rw [values];rfl
+  have oldHit : mutationHeap.index (left.wk copyExt) .dyn (indexValue (wmod 1))=some false := by
+    change (MObj.elems .dyn (mutationHeap.get (left.wk copyExt)))[1]?=some false
+    rw [keep left,MObj.elems_wk,left_values];rfl
+  have before : SourceBoolMemoryAt mutationBound 3 copyHeap.1 copyHeap.2 .dyn := by
+    unfold SourceBoolMemoryAt
+    rw [source_calldata_copy_client.2.2.2.2.2.2.1]
+    rfl
+  have beforeHit : copyHeap.1.index copyHeap.2 .dyn (indexValue (wmod 1))=some false := by
+    change (MObj.elems .dyn (copyHeap.1.get copyHeap.2))[1]?=some false
+    rw [source_calldata_copy_client.2.2.2.2.2.2.1];rfl
+  refine ⟨z,run,fresh.eval_local_read (G p) copyFrame fuel bindingDst bindingIndex _ true root index hit,
+    oldAt.eval_local_read (G p) copyFrame fuel .here bindingIndex _ false alias index oldHit,
+    before.eval_local_read (G p) copyFrame fuel bindingDst bindingIndex _ false rfl rfl beforeHit,?_⟩
+  intro same
+  have observed := congrArg (fun h : Heap (H++[B]) => MObj.elems .dyn (h.get copyHeap.2)) same
+  dsimp only at observed
+  rw [values,source_calldata_copy_client.2.2.2.2.2.2.1] at observed
+  cases observed
+
+/-- A valid allocating/binding prefix precedes an actual indexed-assignment
+bounds rejection on the fresh empty array. Source retains that heap; intrinsic
+None supplies no suffix heap, and no target revert machine is fabricated. -/
+theorem source_copy_mutation_empty_late (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G p) copyFrame (fuel+4) (sourceBoolCalldataBind bindingDst bindingSrc)).run (bindingInput 0)=
+      (.ok (.val (.memRef rfl 3)),bindingOutput 0 []) ∧
+    (Source.execItems (G p) copyFrame (fuel+6) nps none
+      (.stmt (.expr (sourceBoolCalldataBind bindingDst bindingSrc))
+        (.stmt (.expr (sourceIndexedAssign bindingDst bindingIndex mutationRhs)) .nil) :
+          Source.RItems E [] false .body BindingCtx BindingCtx) (bindingInput 0).1).run (.nil,(bindingInput 0).2)=
+            (.error (.revert (Source.panicData .index)),(.nil,(bindingOutput 0 []).2)) ∧
+    (zeroCopyHeap 0 (by decide)).1.writeAddr (.index (zeroCopyHeap 0 (by decide)).2 .dyn (indexValue (wmod 2))) true=none ∧
+    (bindingOutput 0 []).2.heap.get 3=some ⟨SB,sourceBoolMemory []⟩ := by
+  have decoded : sourceCalldataBoolValues E copyFrame 0 0=.ok [] := rfl
+  have result := (binding_at 0).bind_cd_bool_copy (G p) copyFrame (fuel+1) nps bindingDst bindingSrc 0 0 rfl
+    (by decide) SH (binding_memOK 0)
+  rw [decoded] at result
+  obtain ⟨_,first,firstStatement,_,_,_,fresh,_,selected,other,_⟩ := result
+  change SourceBoolMemoryAt (bindingOutput 0 []) 3 (zeroCopyHeap 0 (by decide)).1 (zeroCopyHeap 0 (by decide)).2 .dyn at fresh
+  obtain ⟨_,_,_,_,length,_⟩ := source_calldata_copy_zero_pair 0 (by decide)
+  have bound : (zeroCopyHeap 0 (by decide)).1.len (zeroCopyHeap 0 (by decide)).2 .dyn≤(indexValue (wmod 2)).1.toNat := by rw [length];decide
+  have index := other (.int .u256) bindingIndex (by decide)
+  have rhs := other .bool mutationRhs (by decide)
+  have bad := fresh.eval_assign_bounds (G p) copyFrame fuel bindingDst bindingIndex mutationRhs _ true selected index rhs bound
+  have badStatement := source_expr_statement_error (G p) copyFrame (fuel+3) nps _ _ _ (.revert (Source.panicData .index)) bad
+  refine ⟨first,source_items_pair_error (G p) copyFrame fuel nps _ _ _ _ _ _ firstStatement badStatement,?_,rfl⟩
+  change (if (indexValue (wmod 2)).1.toNat<(zeroCopyHeap 0 (by decide)).1.len (zeroCopyHeap 0 (by decide)).2 .dyn then some _ else none)=none
+  rw [if_neg (Nat.not_lt.mpr bound)]
+
+/-- Complete initial/mid locals and heap tables for this material mutation,
+not a projection that forgets the initial scalar or fresh-copy payload. -/
+theorem source_copy_mutation_prefix_tables :
+    mutationInput.1=.cons (.memRef rfl 0) (.cons (.cdRef rfl 0 3) (.cons (.bool true)
+      (.cons (sourceUint (indexValue (wmod 1))) (.cons (.memRef rfl 2)
+        (.cons (.memRef rfl 1) (.cons (.memRef rfl 0) (.cons (.memRef rfl 2) .nil))))))) ∧
+    mutationBound.1=.cons (.memRef rfl 0) (.cons (.cdRef rfl 0 3) (.cons (.bool true)
+      (.cons (sourceUint (indexValue (wmod 1))) (.cons (.memRef rfl 2)
+        (.cons (.memRef rfl 1) (.cons (.memRef rfl 3) (.cons (.memRef rfl 2) .nil))))))) ∧
+    [mutationInput.2.heap.get 0,mutationInput.2.heap.get 1,mutationInput.2.heap.get 2,mutationInput.2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,none] ∧
+    [mutationBound.2.heap.get 0,mutationBound.2.heap.get 1,mutationBound.2.heap.get 2,mutationBound.2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory [true,false,true]⟩] := by
+  first | simp only [] | decide | omega | rfl | exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_mutation_client
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_decode_error' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_mutation_decode_error
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_mutation_reads
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_empty_late' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_mutation_empty_late
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_prefix_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_mutation_prefix_tables
 end Solidity.Backend.MemoryOps.Physical.StructChildControls
