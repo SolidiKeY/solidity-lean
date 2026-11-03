@@ -193,95 +193,61 @@ not another emitted execution. Independent finder and skeptic reviews found no
 proof or premise defect. These close the routine statements, not public Source,
 ABI, world or resource/session adequacy.
 
+## Reference-call sequencing
+
+The following completed components consume the published memory/tuple return
+producer with its original `Form`, full `Entry`, `NoAliasPromotion`, actual
+intrinsic call outcome and exact frame/allocation premises.
+
+- [ReferenceCallReadback](../../Solidity/Backend/Passes/ReferenceCallReadback.lean)
+  derives the receiving capture/update Input from the actual returned map and
+  full representation. Map and operand words precede every saved tail. Exact
+  cost, allocator growth, cursor and private-frame words are retained. The
+  mixed tuple client allocates a default object, returns the old array alias,
+  captures 7, updates the old scalar to 9 and reads back 7; stale-map and frame
+  refusals are checked.
+- [ReferenceCallCaptureFailure](../../Solidity/Backend/Passes/ReferenceCallCaptureFailure.lean)
+  retains the actual successful call prefix before a failed returned-alias
+  read. It derives each tailed capture Input and joined target revert iff the
+  operand ordinarily reverts. No post-failure state or map is supplied. The
+  next free physical cell contains pointer 128 before declaration, then 7
+  after successful capture; no zero-initialization premise is assumed.
+- [ReferenceCallArgumentFailure](../../Solidity/Backend/Passes/ReferenceCallArgumentFailure.lean)
+  and [Prefix](../../Solidity/Backend/Passes/ReferenceCallArgumentPrefix.lean)
+  use one emitted tuple call: runtime index zero succeeds with reached cost
+  one, while index two fails in its first argument with cost zero despite a
+  true static allocation flag. Actual save execution, full representation,
+  zero prefix allocator growth and arbitrary saved tails are proved. The
+  heap cursor stays 130 while the private save pointer advances to 22.
+
+The controls retain complete ordered selected-cell vectors and full stacks.
+They are intrinsic/symbolic-word results, not independent Source, recursive
+call, approved-profile, public ABI or session-resource adequacy.
+
+## Source assignment arithmetic
+
+[AssignmentSubtractionPass](../../Solidity/Backend/Passes/AssignmentSubtractionPass.lean)
+connects the independent V07 Source clause for `(i = a) - i` to actual compiled
+capture-prefix and subtraction execution. Original Source/target reads,
+integer and result ranges, `fuel + 4`, frame, Input and value certificates
+remain explicit. A canonical machine, selected map and word precede every
+saved tail; full prefix MappedOutput and joined code execution are derived.
+
+For `a = 9`, `i = 7`, both Source and emitted code give legacy 2 versus via-IR
+0, while retaining `i = 9` and the old array, allocator and sentinel. Reversed
+operand code actually reverts; stale RHS, frame and saved-tail corruption are
+rejected. This is local integer/result correspondence and physical target
+preservation, not a global Source-heap/world relation, general overflow or
+narrow wrapping theorem. No P8 producer is assumed.
+
 ## Open
 
-General source/world/backend composition remains open. Some concrete intrinsic whole programs are accepted, as proved
-by `FreshBooleanCompilation.public_whole`; this is not general source closure.
-Remaining G25/G26 obligations stay explicit; G31 is owned by VY4.
-
-### Reference-call capture and readback
-
-`Backend/Passes/ReferenceCallReadback.lean` consumes the published memory/tuple
-return producer with its original `Form`, `Entry`, `NoAliasPromotion` and actual
-intrinsic call success. `execution` derives the receiving capture/update Input
-from the actual returned full representation. Returned map and operand words
-precede the saved-tail quantifier; the result retains BaseExtends, exact call-cost
-allocator growth, full suffix MappedOutput, cursor and every protected private-frame
-word. `call_revert` absorbs an unreachable suffix without a suffix Input.
-
-The controls instantiate a real mixed tuple call: default allocation costs one
-word, the returned reference aliases the old array, capture saves 7, and the
-old scalar becomes 9 before readback returns 7. All five final locals, both heap
-objects, fourteen selected target cells, allocator cursor and full saved stack
-are observed. The original map cannot represent the newly allocated default
-object; frame 15 cannot admit private pointer 16; argument index 2 reaches body
-revert. Wrong recapture is an inequality of reached cells, not execution of an
-alternative compiler. These are intrinsic/symbolic execution results, not
-independent Source evaluation, frontend correspondence, external EVM validation,
-public ABI or session/resource adequacy.
-
-Separate read-only finder and skeptic reviews found no confirmed defect.
-Thirteen generated guards pin the actual standard-only axiom reports.
-
-### Reached capture failure after a reference return
-
-`Backend/Passes/ReferenceCallCaptureFailure.lean` retains the actual successful
-memory/tuple call output, selected address map, full representation, exact
-allocation cost, cursor and private frame before every saved tail. It derives
-the receiving capture Input at each tailed machine and proves joined emitted
-revert iff the reached operand ordinarily reverts. The intrinsic joined
-call/capture program also reverts when that operand does. No post-failure state
-or map is constructed.
-
-The controls return the old array alias after default allocation, then actually
-read index one of its length-one array during capture. Both intrinsic and target
-joined executions revert; a local receiver read still returns seven at that same
-reached representation. All fourteen selected prefix cells and the full saved
-stack are observed. The next physical local slot contains the old pointer 128
-before declaration, not zero; `wrong_zero_capture_cell` refutes the false zero
-assumption from an unvalidated draft. The earlier post-capture vector, whose
-same cell contains seven, is unchanged. No failed-machine observation, Source
-frontend correspondence or public resource/session claim follows. Separate
-read-only finder and skeptic source reviews found no confirmed defect.
-
-### Runtime argument failure before return allocation
-
-`Backend/Passes/ReferenceCallArgumentFailure.lean` uses one checked tuple call
-for both runtime cases. Its first primitive argument reads the old array at the
-caller index. Index zero succeeds and reaches default return allocation with
-exact cost one; index two fails in that argument with exact reached cost zero,
-even though the emitted program's static allocation flag is true. Original
-Entry, frame and capacity predicates remain intact. The emitted first-value
-prefix precedes its parameter store and the return/body suffix. The successful
-return retains the old array alias and the distinctive primitive seven.
-
-`Backend/Passes/ReferenceCallArgumentPrefix.lean` consumes the published context
-capture certificate to derive actual save execution, full caller representation
-and zero allocator growth. The argument then reverts under that reached
-representation for every saved tail and arbitrary unreachable suffix. All
-fourteen selected prefix cells and the complete stack are observed; the heap
-cursor remains 130 while the private save pointer advances to 22. A successful
-branch of the same emitted call refutes an always-revert claim. These are
-intrinsic/symbolic-word results, not independent Source or public ABI/resource
-adequacy. Separate read-only finder and skeptic reviews found no confirmed defect.
-
-### Independent Source arithmetic effects and emitted captures
-
-`Backend/Passes/AssignmentSubtractionPass.lean` consumes the published V07
-`assignment_subtraction_transport` for `(i = a) - i`. It retains original
-Source/target reads, integer ranges, result-range guard, frame and `fuel + 4`
-quantification, actual accepted memory-prefix certificate/Input and compiled
-subtraction value. It derives the reached value through the existing arithmetic
-proof, then retains full prefix MappedOutput and actual joined code execution
-with one canonical machine, selected map and result word before every saved tail.
-No P8 producer or desired-preservation premise is introduced.
-
-The controls align Source locals `a = 9`, `i = 7` with a represented target
-containing an independent old array. Both Source and emitted code yield legacy
-result two versus via-IR zero, while both retain `i = 9`. All eleven selected
-target cells, the allocator, old array, sentinel and full saved stack remain
-observed. Executing the reversed operand code after the actual legacy prefix
-reverts; stale RHS, corrupted tail and insufficient frame are rejected. This is
-a local integer/result correspondence plus physical target preservation, not a
-global Source-heap/world relation or general overflow/wrapping/ABI adequacy.
-Separate independent finder and skeptic source reviews found no confirmed defect.
+General source/world/backend composition remains open. Concrete intrinsic
+whole-program acceptance, such as `FreshBooleanCompilation.public_whole`,
+is not general Source closure. G24 requires the actual Source/Lowering/world
+and full public Cert producers. G24.01 also retains the abstract slot/root/hash/
+data/offset interface and state/decode export; G24.03 retains its statement
+freeze obligation. G25/G26 retain their stated scalar, general
+source-admission and execution prerequisites. G31 belongs to VY4. ABI entry
+premises do not close G24.03 by themselves. Whole-lane completion still
+requires the original combined validation and producer obligations.
