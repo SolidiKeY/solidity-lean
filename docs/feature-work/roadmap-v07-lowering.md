@@ -380,7 +380,7 @@ is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B remain
 partial, G18 admission/composition prerequisites stay open, and no constructor
 or external compiler/EVM coverage is added.
 The historical axiom suite and the `*Checks.lean` fixtures cited above remain
-lane-only. `HeadlineAxioms` registers115 exact guards (88 theorems and27 inhabited clients) for selected arithmetic,
+lane-only. `HeadlineAxioms` registers131 exact guards (96 theorems and35 inhabited clients) for selected arithmetic,
 cast, conditional, reference and structural graph theorems in the default
 closure. It does not add entries to `scripts/g07-axiom-pins.json` or discharge
 missing admission, producer, production or coverage obligations.
@@ -434,3 +434,26 @@ skeptic source reviews found no proof issue. These are kernel and evaluator
 controls, not external solc/EVM tests. Other source widths, signed narrowing,
 full casts, failure payloads, graph admission and production lowering stay open;
 all original queue statuses remain partial or delegated as recorded above.
+
+## All unsigned source and destination widths
+
+`UnsignedWidthCasts` extends the explicit-cast clauses to every approved unsigned
+source/destination width pair, deriving the word embedding from published
+Source implicit-range laws. It reuses `UnsignedCasts.castValue` and the actual
+assignment/capture program. The reached Source state is preserved; initial
+family transport derives both executions, returned value agreement and the
+post-family. Caller locals keep their source type, including when the result
+is narrowed or widened. Context extension uses the existing operand law.
+
+`UnsignedWidthCastControls` supplies eight inhabited headline clients and20,480
+actual Source/target cases:32 source widths ×32 destination widths ×both
+pipelines ×both checked flags ×five source-wrapped boundary inputs. The raw
+input−1 represents each source type's maximum after wrapping; it is no claim
+of negative unsigned constant admission. The uint16-to-uint8 assignment returns1
+and stores257, with old/reached alias captures7/257. Repeated aliases, distinct
+equal contents, stale/omitted casts, fresh context and live caller references
+are covered. Independent finder and skeptic source reviews found no proof
+issue. Signed casts, constant admission, generic elaboration, graph admission,
+recursive lifetimes and production composition remain open; queue statuses
+stay partial or delegated. These controls are kernel/evaluator evidence, not
+external compiler or EVM tests.

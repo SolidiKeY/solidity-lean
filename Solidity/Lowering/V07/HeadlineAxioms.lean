@@ -1,3 +1,4 @@
+import Solidity.Lowering.V07.UnsignedWidthCastControls
 import Solidity.Lowering.V07.UnsignedCastControls
 import Solidity.Lowering.V07.SignedArithmeticControls
 import Solidity.Lowering.V07.UnsignedAddition
@@ -579,3 +580,77 @@ guards add no admission, missing producer, production or coverage theorem. -/
 /-- info: 'Solidity.Lowering.V07.UnsignedCastControls.extension' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedCastControls.extension
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.word_range' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.word_range
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.allowed' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.allowed
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.value_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.value_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.source_of_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.source_of_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.source_local_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.source_local_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.assigned_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.assigned_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.assignment_transport' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.assignment_transport
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCasts.assignment_extension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCasts.assignment_extension
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.embedding' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.embedding
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.admissible' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.admissible
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.value
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.source_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.source_value
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.source_local' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.source_local
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.target_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.target_assignment
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.assignment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.assignment
+
+/-- info: 'Solidity.Lowering.V07.UnsignedWidthCastControls.extension' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedWidthCastControls.extension

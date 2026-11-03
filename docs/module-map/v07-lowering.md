@@ -73,3 +73,6 @@
 
 | `Lowering/V07/UnsignedCasts.lean` | Actual uint256-to-uintN casts and initial-family assignment transport |
 | `Lowering/V07/UnsignedCastControls.lean` | All unsigned widths, capture order, caller identity and live-reference frames |
+
+| `Lowering/V07/UnsignedWidthCasts.lean` | Actual unsigned cast transport for every approved source and destination width |
+| `Lowering/V07/UnsignedWidthCastControls.lean` | All unsigned width pairs, cast order and caller frame controls |
