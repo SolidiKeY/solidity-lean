@@ -1283,6 +1283,8 @@ import Solidity.Backend.WorldCalls.SourceBridge
 import Solidity.Backend.WorldCalls.SourceBridgeControls
 import Solidity.Backend.WorldCalls.UnknownSourceCall
 import Solidity.Backend.WorldCalls.UnknownSourceControls
+import Solidity.Backend.Aggregates.ByteParameterControls
+import Solidity.Backend.Aggregates.ByteParameters
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls

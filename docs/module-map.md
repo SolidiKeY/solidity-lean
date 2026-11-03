@@ -1396,6 +1396,7 @@ see [the checkpoint boundary](feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/CalldataChildren.lean` | Actual decoded child correspondence at the output heap. Separation is a |
 | `Backend/MemoryOps/CalldataNestedChildren.lean` | Compose existing typed child-table observations for reference-containing |
 | `Backend/MemoryOps/StructDefaults/*.lean` | G33 finite struct defaults: pair and nested struct `zeroVal`, intrinsic default allocation and compiled `DefaultPlan` runs, with controls ([G33](feature-work/roadmap-g33-struct-defaults.md)). |
+| `Backend/Aggregates/ByteParameters.lean`, `Backend/Aggregates/ByteParameterControls.lean` | G18.04/.05 groundwork: Source `cdArg`/`cdToMem` for a `bytes`/`string` parameter paired with a target state allocating the payload object (single-object relation); no target program or lowering run. |
 | `Backend/MemoryOps/CalldataRead.lean` | Published decoded calldata objects and typed memory slice reads |
 | `Backend/MemoryOps/CalldataSequence.lean` | Option composition of actual immutable decoded transfers. No payload is an |
 | `Backend/MemoryOps/CalldataSequenceChildren.lean` | Existing immutable child-table correspondence at actual sequence outputs. |
