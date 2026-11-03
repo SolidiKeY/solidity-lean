@@ -314,3 +314,8 @@ finite iteration witnesses and whole forward model runs from actual
 `StructuredExec`, with terminating countdown and separate no-finite-outcome
 controls. This does not reopen loop admission or close source/G24/native
 correspondence; see [VY3](inline-assembly-vy3.md#finite-target-loop-realization).
+
+VY3 target-loop follow-up: finite-prefix reverse classification and a separate
+recursive target selector now construct existing whole-iff/failure certificates
+for nested loops. Model macro-turns are distinct from native/source divergence
+prefixes; [source/G24/native closure remains open](inline-assembly-vy3.md#target-loop-classification-and-selection).

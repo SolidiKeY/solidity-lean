@@ -821,3 +821,30 @@ in these proofs and controls; neither reviewer ran Lean or a server. Focused
 module checks and per-file diagnostics pass; the original failed recursion
 and scratch/control checks are retained in the checkpoint evidence. No
 external compiler/client EVM validation is added by this model proof.
+
+### Target-loop classification and selection
+
+`SolidityBridge.Yul.LoopClassification` derives one-turn outcomes from actual
+condition/body runs, then classifies every finite model prefix while deriving
+backwards structured-execution transport. Finite model exits reconstruct
+`StructuredExec`; the no-finite-outcome case uses the existing mathematical
+loop denotation. The helper's body classification premise is explicit.
+`SolidityBridge.Yul.LoopSelection` recursively constructs it from real selected
+bodies, including nested loops, in the existing `Selected` package. Thus
+existing whole-iff lowering and exact failure transport apply to these
+selected target blocks without a caller-supplied loop simulation theorem.
+
+Controls instantiate actual countdown/nested/branch certificates, preserve
+dirty caller data and full non-stack fields, and exercise empty conditions,
+body failure, high-bit truth, DUP16 underflow, unsupported opcodes and separate
+1024 capacity. Existing selectors and source admission are unchanged.
+Macro-iterations use denotational child runs: nested divergence may already
+yield mathematical fault in one turn. Neither native instruction prefixes nor
+source horizons/divergence, source-loop lowering, G24/views, native byte/PC/
+resource/world/trace or final frontend adequacy is established here.
+
+Independent read-only finder and skeptic reviews found no proof/control defect.
+The skeptic's ambiguous wording about the no-finite-outcome case was fixed
+and confirmed. Focused kernel checks and all three per-file diagnostics pass;
+four guarded reports pin standard axioms. Broad checkpoint and final lane
+validation remain separate obligations.

@@ -56,3 +56,5 @@
 | `Yul/Views/RetainedLocalAliasControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Bridge/SolidityBridge/Yul/**` | VY3 concrete numeric instruction certificates, typed stack/frame and structured source/model lowering adapters; native/G24/full composition remains scoped ([lane](../feature-work/inline-assembly-vy3.md)). |
+
+| `Bridge/SolidityBridge/Yul/LoopClassification.lean`, `Bridge/SolidityBridge/Yul/LoopSelection.lean`, `Bridge/SolidityBridge/Yul/LoopSelectionControls.lean` | Derived finite macro-prefix classification and concrete nested target-loop whole-iff selection; source/native horizons remain open. |
