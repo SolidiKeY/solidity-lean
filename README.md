@@ -64,7 +64,7 @@ proof checking run entirely in the browser, including offline. See the
 and the remaining semantic gaps.
 
 ```sh
-lake build Solidity     # the formalization; elaboration is the test suite
+lake build              # the formalization and its examples; elaboration is the test suite
 ./run-lean.sh           # default targets, SolkeyTestSuite, then the solkey cross-check
 ```
 

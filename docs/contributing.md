@@ -17,6 +17,8 @@ each proof iteration. Documentation-only edits need path and link checks.
 |---|---|
 | `./run-lean.sh` | Layer check, then the default targets and `SolkeyTestSuite` in one Lake invocation, then the SolKey sort check; see the checkout caveat below |
 | `bash scripts/coord-tools/register.sh --check` | The generated library roots match the file tree (`register.sh` rewrites them); no Lean |
+| `lake build Solidity` | The library without the examples: a lane checkpoint (`scripts/coord-tools/gate.sh checkpoint`) |
+| `lake build SolidityExamples SolkeyTestSuite` | The examples and the TestSuite: a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
 | `node scripts/check-layers.mjs` | No core module reaches an elaborator, printer or tactic front end; no Lean |
 | `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose |
@@ -25,6 +27,14 @@ each proof iteration. Documentation-only edits need path and link checks.
 | `./scripts/check-testsuite.sh` | TestSuite rows against `TestSuite/Report.lean`'s pin and SolKey functions; no Lean |
 | `node scripts/check-automatic.mjs --strict` | Every TestSuite obligation has an automatic proof/replay or refutation, none pending; no Lean |
 | `node scripts/solidity-upstream.mjs` | Pinned solc tests on the typed interpreter, per pipeline; [runner documentation](solidity-upstream-tests.md) |
+
+The examples are their own library, `SolidityExamples`, still a default
+target: `lake build` and `./run-lean.sh` build them.  A lane checkpoint builds
+`lake build Solidity` alone and adds `SolidityExamples SolkeyTestSuite` when
+it touches `Syntax`, `Semantics` or `Calculus` (otherwise only the examples
+and TestSuite modules it edits, with what imports them); the executables and
+the SolKey sort check also wait for the lane's last gate, `./run-lean.sh`
+(`gate.sh full`).  Integration builds everything.
 
 Run long builds in the background and inspect the log for errors.
 `run-lean.sh`'s sort-check wrapper warns and skips when the sibling SolKey

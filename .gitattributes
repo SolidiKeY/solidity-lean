@@ -1,2 +1,3 @@
 Solidity.lean merge=union
+SolidityExamples.lean merge=union
 Bridge/SolidityBridge.lean merge=union

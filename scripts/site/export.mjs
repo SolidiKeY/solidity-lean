@@ -8,7 +8,7 @@
 //
 // Usage: node scripts/site/export.mjs --project <id> [--out _site]
 //          [--only <file>] [--server <cmd>]
-// Run it after building the project's libraries (`lake build Solidity`, or
+// Run it after building the project's libraries (`lake build Solidity SolidityExamples`, or
 // in `Bridge/` the Velvet libraries): the file workers then load every import
 // from the build and only re-elaborate the example itself.
 //

@@ -28,7 +28,7 @@ test('KeY mappings preserve frozen classifications and separate payment evidence
       'the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), ' +
         'but the problem\'s invariant `CInv` reads the ledger `net`, which no term reads']);
     assert.doesNotMatch(corpus, /PaymentCorpus/);
-    assert.match(readFileSync(join(root, 'Solidity.lean'), 'utf8'),
+    assert.match(readFileSync(join(root, 'SolidityExamples.lean'), 'utf8'),
       /^import Solidity\.Examples\.Tactics\.PaymentCorpus$/m);
     const legacy = rows.find(row => row[0] === 'net' && row[2] === 'net_transfer_simple');
     assert.equal(legacy[3], 'proved');

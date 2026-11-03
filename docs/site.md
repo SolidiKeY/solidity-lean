@@ -23,7 +23,7 @@ Its complete runtime is embedded in one downloadable HTML file. See
 `.github/workflows/pages.yml` runs on every push to the default branch, and
 by hand (`workflow_dispatch`) on any branch:
 
-1. **Build** the project's libraries: `lake build Solidity`, then
+1. **Build** the project's libraries: `lake build Solidity SolidityExamples`, then
    `lake build SolkeyTestSuite` (solkey's test suite, allowed to fail: its
    pages then show Lean's errors and the rest still records) in the root, or
    `lake build Velvet VelvetExamples SolidityVelvet` in `Bridge/` (Mathlib
@@ -70,8 +70,8 @@ stand-in language server, without Lean; `lean.yml` runs it.
 
 Add a row to `site/examples.json` under its project: the `file` relative to
 the project's `root`, and a `group` for the picker. The file must be built by
-the project's step 1 (for the core, imported from `Solidity.lean` or
-`SolkeyTestSuite.lean`). The title and summary come from the file's module
+the project's step 1 (for the core, imported from `Solidity.lean`,
+`SolidityExamples.lean` or `SolkeyTestSuite.lean`). The title and summary come from the file's module
 docstring; give `title` in the row for a file without one. A long file costs
 its elaboration time again in the site's build, plus one or two goal requests
 per line.
@@ -79,7 +79,7 @@ per line.
 To look at the viewer locally, record one example and serve the result:
 
 ```sh
-lake build Solidity
+lake build Solidity SolidityExamples
 node scripts/site/export.mjs --project Solidity --out _site --only Solidity/Examples/Tactics/Tour.lean
 cp site/index.html site/app.js site/style.css site/examples.json _site/
 python3 -m http.server -d _site 8000

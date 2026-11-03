@@ -1,4 +1,5 @@
 import Solidity
+import SolidityExamples
 
 /-!
 # Axiom audit of every declaration under `Solidity`
@@ -12,8 +13,8 @@ defined through `lcProof`, and putting `lcProof` on the global allow list would
 let a safe theorem use it.
 
 The audit, over every constant declared in a module `Solidity` or
-`Solidity.*` that `import Solidity` reaches (the default library CI builds,
-as lean-action's `axiom-audit-root: Solidity` read it; the `SolidityCorpus`
+`Solidity.*` that `import Solidity` and `import SolidityExamples` reach (the
+two default libraries CI builds; the `SolidityCorpus`
 and `SolkeyTestSuite` libraries' `Solidity.Corpus.*`/`Solidity.TestSuite.*`
 modules are not imported, so not audited here):
 
