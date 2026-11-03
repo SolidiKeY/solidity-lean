@@ -1,3 +1,4 @@
+import Solidity.Lowering.V07.SignedArithmeticControls
 import Solidity.Lowering.V07.UnsignedAddition
 import Solidity.Lowering.V07.UnsignedMultiplication
 import Solidity.Lowering.V07.WordCasts
@@ -9,7 +10,7 @@ import Solidity.Lowering.V07.ReferenceOrderRelated
 import Solidity.Lowering.V07.LocationGraphCompleteness
 
 /-! Exact axiom guards for selected V07 arithmetic, cast, effect, reference and
-structural graph headlines. Registered in the default import closure. These
+structural graph headlines and inhabited clients. Registered in the default import closure. These
 guards add no admission, missing producer, production or coverage theorem. -/
 
 /-- info: 'Solidity.Lowering.V07.UnsignedAddition.source_add_unchecked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -295,3 +296,227 @@ guards add no admission, missing producer, production or coverage theorem. -/
  Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.LocationGraphCompleteness.producer_success
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.unsigned_add_wrap' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.unsigned_add_wrap
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.source_add_unchecked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.source_add_unchecked
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.add_value_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.add_value_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.source_from_pair' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.source_from_pair
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.source_locals_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.source_locals_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.locals_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.locals_transport
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.source_assign_read_run' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.source_assign_read_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.assign_read_operand_run' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.assign_read_operand_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.assignment_transport' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.assignment_transport
+
+/-- info: 'Solidity.Lowering.V07.SignedWordAddition.assignment_extension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordAddition.assignment_extension
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.unsigned_mul_wrap' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.unsigned_mul_wrap
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.source_mul_unchecked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.source_mul_unchecked
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.mul_value_run' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.mul_value_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.source_from_pair' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.source_from_pair
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.source_locals_run' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.source_locals_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.locals_transport' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.locals_transport
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.source_assign_read_run' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.source_assign_read_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.assign_read_operand_run' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.assign_read_operand_run
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.assignment_transport' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.assignment_transport
+
+/-- info: 'Solidity.Lowering.V07.SignedWordMultiplication.assignment_extension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedWordMultiplication.assignment_extension
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.mod_word' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.mod_word
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_value
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.target_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.target_value
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.pair' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.pair
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_locals' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_locals
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.locals' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.locals
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_assignment
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.target_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.target_assignment
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.assignment
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Addition.extension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Addition.extension
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.mod_word' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.mod_word
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_value
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.target_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.target_value
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.pair' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.pair
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_locals' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_locals
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.locals' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.locals
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_assignment
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.target_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.target_assignment
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.assignment
+
+/-- info: 'Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.extension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.extension

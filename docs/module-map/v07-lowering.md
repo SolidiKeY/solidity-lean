@@ -66,3 +66,7 @@
 | `Lowering/V07/SignedSubtractionControls.lean` | Signed subtraction clients, boundaries, capture/sign negatives and mixed frames |
 
 | `Lowering/V07/HeadlineAxioms.lean` | Registered exact axiom guards for selected scalar, effect, reference and structural graph headlines |
+
+| `Lowering/V07/SignedWordAddition.lean` | Actual full-range unchecked int256 addition and initial-family effect transport |
+| `Lowering/V07/SignedWordMultiplication.lean` | Actual full-range unchecked int256 multiplication and initial-family effect transport |
+| `Lowering/V07/SignedArithmeticControls.lean` | Inhabited signed add/multiply clients, boundaries, captures, frames and wrong-program controls |

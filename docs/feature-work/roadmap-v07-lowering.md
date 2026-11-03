@@ -380,7 +380,7 @@ is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B remain
 partial, G18 admission/composition prerequisites stay open, and no constructor
 or external compiler/EVM coverage is added.
 The historical axiom suite and the `*Checks.lean` fixtures cited above remain
-lane-only. `HeadlineAxioms` registers61 exact guards for selected arithmetic,
+lane-only. `HeadlineAxioms` registers101 exact guards (81 theorems and20 inhabited clients) for selected arithmetic,
 cast, conditional, reference and structural graph theorems in the default
 closure. It does not add entries to `scripts/g07-axiom-pins.json` or discharge
 missing admission, producer, production or coverage obligations.
@@ -396,3 +396,21 @@ relations; both pipeline operand positions and private captures are preserved.
 cases, aliases, mixed live-reference frames and wrong-sign/order/stale controls.
 Checked-overflow fixtures compare success classification only. Narrow signed
 widths, other operators, failure payloads and production lowering remain open.
+
+
+## Full-range int256 addition and multiplication
+
+`SignedWordAddition` and `SignedWordMultiplication` reuse the signed wrapping
+identities, actual sign casts and published word operators. For all int256
+input pairs, unchecked Source evaluation agrees with the intrinsic result,
+including overflow, without output-range premises. Initial-family local and
+assignment/read clauses derive executions and post-families; typed captures
+preserve semantic operand positions, caller effects and fresh context extension.
+
+`SignedArithmeticControls` registers20 inhabited clients and executes18 signed
+boundary cases in both Source pipelines and the target. Effectful capture/caller
+observations distinguish legacy MAX−1 from viaIR−2 for addition and MIN+1 from1
+for multiplication. Same-slot, equal-content distinct locals, live references,
+missing sign readback and stale/deferred reads are covered. Checked overflow
+comparisons concern success only. Narrower signed widths, other operators,
+failure payloads and production lowering remain open; queue statuses unchanged.

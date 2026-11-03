@@ -2193,7 +2193,10 @@ import Solidity.Lowering.V07.ShortCircuit
 import Solidity.Lowering.V07.ShortCircuitControls
 import Solidity.Lowering.V07.SignedNarrowing
 import Solidity.Lowering.V07.SignedWidthCasts
+import Solidity.Lowering.V07.SignedArithmeticControls
 import Solidity.Lowering.V07.SignedSubtractionControls
+import Solidity.Lowering.V07.SignedWordAddition
+import Solidity.Lowering.V07.SignedWordMultiplication
 import Solidity.Lowering.V07.SignedWordSubtraction
 import Solidity.Lowering.V07.SourceReads
 import Solidity.Lowering.V07.UnsignedAddition
