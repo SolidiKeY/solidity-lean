@@ -131,3 +131,29 @@ no World/CREATE rollback, paid-world relation, EVM or G43 completion claim. H19
 balance-dependent work remains with typed premises pending the VY5 producer.
 Four standard-axiom guards and focused native checks are separate from unresolved
 full/import-root and combined-helper validation. No budgets were increased.
+
+## Checked immutable/link table ordering
+
+`CreationPatchOrder.patch_links` transports one bounded immutable overwrite
+through every disjoint typed library site. `tables` derives equality for both
+complete folds, preserving their internal orders; length is derived at every
+intermediate update. `installs` consumes `compatible_iff` and the published
+`combined_installs` to return the opposite-order runtime. No desired byte
+equality is a premise. Typed locations, the original code length and cross-table
+disjointness remain explicit; checked `LinkTable` retains assembler-origin and
+internal-disjointness evidence.
+
+`CreationPatchOrderControls` inhabits two immutable slots and two library sites
+in 105 bytes, with a nonzero byte prefix and link origin 7. `opposite_runtime`
+exercises the new fold theorem; `constructor_returns` exercises the new
+installation theorem. Overlap is refused, omitting the prefix changes bytes,
+nonempty arguments do not leak into runtime, and an empty runtime returns empty
+for arbitrary arguments. Separate finder and skeptic reviews identified the
+initial missing direct consumer control; both confirmed its correction.
+
+These are kernel byte-layout/constructor-copy results, not source initializer
+lowering, fetched runtime execution, account installation or payment simulation.
+H22 ExtCall is untouched; H19 balance-dependent facts remain pending. Scoped
+standard-axiom guards and focused checks pass. The earlier bounded import-root
+exit 124 and historical documentation failures remain failures, with full and
+combined-helper closure pending; no unchanged failed heavy gate was rerun.
