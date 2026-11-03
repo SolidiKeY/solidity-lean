@@ -498,3 +498,4 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 
 See [P8 admission](../feature-work/p8-admission.md).
 
+| `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |

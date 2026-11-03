@@ -3906,3 +3906,14 @@ populated Source machine. Wrong-branch, stale-snapshot, skipped-write, static-fr
 and low-horizon controls distinguish returned values and effects. This is an
 argument/caller-local component, not general callee, heap, ABI or runtime-frame
 compilation. The sufficient indices do not restrict source admission.
+
+### Cast arguments and raw caller values
+
+`WordCastCallable` consumes V07's signed-assignment/unsigned-cast producer before
+an actual selected Source `uint256` echo call. It derives the reached numeric
+caller relation from initial values and alias reflection. The populated clients
+retain the whole Source machine and exact target Out/vector: storing signed `-1`
+and returning unsigned `2^256 - 1` are distinct observations. Boundary, static,
+raw-timeout and wrong-snapshot/return controls preserve this distinction. This is
+argument/result transport, not general target callee, heap/world, ABI, runtime
+frame, source admission or bytecode adequacy.
