@@ -20,5 +20,6 @@ theorem nat_encodable_resource_impossible (S : Spec) (F : FailureProjection S)
   intro n p
   rw [roundtrip, S.failures_with, F.points_ofPoints]
 
-#print axioms nat_encodable_resource_impossible
+/-- info: 'Solidity.Lowering.P8.ResourceContractLaw1.nat_encodable_resource_impossible' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms nat_encodable_resource_impossible
 end Solidity.Lowering.P8.ResourceContractLaw1

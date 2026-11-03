@@ -1756,7 +1756,7 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Frontend/Admission/RootObservations.lean` | Typed traversal of local observation sites over supplied roots; no callee closure. |
 | `Frontend/Admission/Controls.lean` | Root, refusal, combination and `NoFail` controls. |
 | `Frontend/Admission/ProgramObservations.lean` | Container scan of a `Program` (`program_observation_iff`), modifier declarations and written base names. |
-| `Frontend/Admission/ProgramObservationControls.lean` | Seven-site container and omission controls; its modifier target is a constant, not a real modifier. |
+| `Frontend/Admission/ProgramObservationControls.lean` | Seven-site container and omission controls; function host and modifier declaration/carried frame parameter checks. |
 | `Lowering/P8/CheckedSyntax.lean` | Byte/piece/layout parse certificates with settings and main; raw-input checks; units-only settings obstruction. |
 | `Lowering/V07/Scalar.lean`, `Lowering/V07/DeclarationGraph.lean` | Integer value transport; `DeclarationGraph` between Source types and schemas. |
 | `Lowering/P8/ScalarSchema.lean`, `Lowering/P8/ShapeSchema.lean`, `Lowering/P8/GraphSchema.lean` | Singleton struct schemas built from actual declaration fields. |
@@ -1779,6 +1779,20 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Lowering/P8/ResourceContractLaw1.lean` | `nat_encodable_resource_impossible`: the frozen V1 failure projection has no inhabitant over a `Nat`-encodable resource (P8-SPEC-LAW1). |
 | `Lowering/P8/FailureContractV2.lean` | V2 rebundling: `Projection` and `FullPlanCoverage` separated, `toV1`/`ofV1` roundtrips; still uninhabited over `Nat`. |
 | `Frontend/Admission/SyntaxOccurrences.lean`, `SyntaxOccurrenceLaws.lean`, `SyntaxOccurrenceControls.lean` | Typed syntax subtree inventory, `syntaxOccurrences_iff` against `Source.Syn.Sub`, order/multiplicity controls; not semantic-root extraction. |
+
+| `Frontend/Admission/ProgramRoots.lean`, `ProgramRootControls.lean` | Typed carried-field inventory and exact observation flattening; independent finite-roster lookup relation and refusal controls. |
+
+| `Frontend/Admission/NameResolutionRoots.lean`, `NameResolutionControls.lean` | Initial target registration from actual source lookup/Resolves/function selection, with local-shadowing and refusal controls; not full runtime-root closure. |
+
+| `Frontend/Admission/ModifierRoots.lean`, `ModifierRootControls.lean` | Initial modifier selection registration through actual typed paths and parameter forms, with qualified/wrong-kind/deep-path controls; not runtime closure. |
+| `Frontend/Admission/TypedObservationPolicy.lean` | Axiom-free local observation allowance from actual builtin/member typing; whole-visitor/Program closure remains unproved. |
+| `Frontend/Admission/TypedExpressionPolicy.lean` | General intrinsic expression visitor allowance via mutual constructor induction; statement/items and complete Program closure remain open. |
+| `Frontend/Admission/TypedStatementPolicy.lean` | Actual statement/item and all carried-Program observation closure conditional on explicit A11/A13 proofs; no unconditional policy witness. |
+
+| `Lowering/P8/SourcePrograms.lean`, `SourceProgramControls.lean` | Checked original-byte frontend stages to actual all-unit Source elaboration and failure propagation; nonempty contract component proofs are in the acceptance modules. |
+| `Lowering/P8/SourceProgramAcceptance.lean`, `SourceProgramAcceptanceControls.lean` | Exact actual elaborator success-bit laws and the full original kernel contract-control conjunction; ordered expectations unchanged. |
+| `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; pending root transport, not executed-entry or full admission adequacy. |
+| `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard; composed independent ProgramSite soundness, not full feature/profile adequacy. |
 
 See [P8 admission](feature-work/p8-admission.md).
 

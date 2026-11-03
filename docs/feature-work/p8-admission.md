@@ -166,10 +166,10 @@ container of a `Source.Program`.
   written base names; base names are not resolved.
 - Controls (`ProgramObservationControls.lean`): seven ordered sites across all
   containers; body-only, roster-omission and missing-body expectations are
-  refuted. The fixture's modifier invocation targets `constantDecl` (kind
-  `.constant`, also given a body), so `modifier_targets_retained` does not
-  exercise a real modifier; `DispatchCoverageControls.modifierDecl` is the real
-  modifier control. The carrier is not `Elaborated`.
+  refuted. The invoking body belongs to a `.function` declaration and targets
+  a `.modifier` with one `uint256` parameter. Declaration-derived parameter
+  frames match the carried bodies; invocation parameter types match the
+  modifier body. The carrier is not an `Elaborated` witness.
 
 Open: proof that every executed dispatch, modifier, constant and construction
 target is in these rosters.
@@ -307,11 +307,10 @@ checks stayed on the lane.
 Integrated from the P8a lane head 6cb9a10b and the P8b consumer interface
 (93df5839), without the lane's task list and scripts. Read-only finder and
 skeptic reviews found no Lean defect. They found the failure-projection
-conflict above, the ill-kinded modifier fixture (the target is now a real modifier
-declaration with a placeholder body, but the invoking body still hangs on the
-constant declaration `seed` and passes one argument to the parameterless
-modifier `guard`: synthetic, not signature-coherent) and overstated or dangling
-references in the lane documents; these are recorded or removed here.
+conflict above, the synthetic modifier fixture and overstated or dangling
+references in the lane documents. The fixture now uses a function host and
+one-parameter modifier, with declaration/carried-frame parameter equalities
+checked by the kernel; other fixture coherence is not an `Elaborated` claim.
 
 ## Certified syntax inventory; semantic extraction open
 
@@ -337,3 +336,289 @@ The syntactic theorem does not identify execution/observation roots in a
 resolved program and supplies no `Extractor` or profile-completeness witness.
 Complete semantic-root extraction, exact profile classification and frontend
 agreement remain open.
+
+## Typed carried-program roots
+
+`Frontend/Admission/ProgramRoots.lean` enumerates declaration bodies,
+constants, constructors, state initializers and base-constructor arguments
+from actual `Source.Program` fields and their finite declaration/contract
+rosters. `ProgramRoot` retains the actual declaration/contract and carried
+value; base arguments retain the locals indexed by their constructor. Body
+roots include their modifier arguments. Modifier bodies are separate
+registered declaration roots.
+
+`programRoots_exact` proves membership iff the independent `Occurs`
+roster-and-lookup relation holds. `programRoots_observations` proves that
+flattening these roots gives the existing `programObservations` list exactly,
+including order and repetitions. Both report standard axioms only
+(`propext`, `Classical.choice`, `Quot.sound`). These are not proofs that every
+runtime query or dynamic dispatch target lies in the rosters.
+
+`ProgramRootControls.lean` checks an inhabited exact six-root inventory,
+body/constant tag distinction, and refusal of a constructor removed from the
+roster even though its body lookup remains populated. The fixture is
+synthetic; function/modifier parameter agreement is checked, but it is not
+an `Elaborated` or full execution-coherence witness. Removing a contract changes the root count from six to three.
+
+`RootAdmissionEquivalence` is a typechecked proposition alias for routine
+Boolean observation-classifier glue, not a theorem or supplied witness.
+Task A01 in the lane's `TERRA-TODO.md` delegates that glue. It would still
+classify observations alone, not every source feature or feature combination.
+
+Open: prove actual source entry and call/modifier/dispatch queries remain in
+the enumerated rosters, connect written syntax to resolved roots, and complete
+exact feature/profile extraction plus checked-frontend agreement. The
+on-demand `Source.progOf` body lookup does not itself restrict arbitrary
+queries to the finite declaration roster; no such premise is silently added.
+
+## Dispatch reuse and proof pins
+
+`P9.WholeProgram.dispatch_mem` and `P8.DispatchCoverage.dispatchMod_mem`
+already prove that dispatch stays in the declaration roster for an initially
+registered target. These published results are reused; no duplicate theorem
+is introduced. Connecting actual runtime queries to their initial membership
+and to the typed roots remains open.
+
+The V2 contract, subtree inventory, carried roots and control modules guard
+their reported axiom sets with `#guard_msgs`. The frozen V1 module and source
+evaluator are unchanged. These pins detect changes in proof dependencies;
+they do not establish any missing semantic adequacy result.
+
+## Initial name-selected target registration
+
+`Frontend/Admission/NameResolutionRoots.lean` proves `lookup_registered`
+for every actual `Env.lookup` result, including inherited visible scopes and
+file-level fallback. `resolved_registered` consumes the independent source
+`Resolves` relation through `Env.resolve_sound`; `functions_registered`
+then shows that every declaration in `Ctx.functions` belongs to the same
+environment's roster. No manually supplied target-membership premise is
+accepted in place of the source resolution/selection evidence. All three
+reports are pinned to `propext`.
+
+`NameResolutionControls.lean` checks populated function lookup, local
+shadowing/precedence, refusal of an unknown name and refusal of a constant as
+a function. The roster is synthetic, not an `Elaborated` or SourceSpec
+witness. These controls do not replace the universal resolver proofs.
+
+Task A02 delegates the routine singleton-overload corollary to Terra using
+the typechecked `SelectedFunctionMembership` proposition. No proof is
+supplied for that alias. Connecting the source derivation's selected targets
+to the complete resolved-tree visitor, modifier/external-call selections,
+actual execution roots and exact profile remains open. Published P9/P8
+dispatch results provide the later dispatch-membership step; they are not
+reproved here.
+
+## Initial modifier and qualified-path targets
+
+`NameResolutionRoots.path_registered` covers actual unqualified and
+single-qualified `Env.lookupPath` results, preserving the current deeper-path
+refusal. Its axiom report is pinned to `propext`.
+
+`Frontend/Admission/ModifierRoots.lean` proves `modifier_registered`: every
+successful actual `Env.modifierAt` result belongs to the environment roster.
+The proof consumes the singleton path result and both parameter forms;
+failed kind/type selections are not treated as successful. No caller-supplied
+initial roster-membership premise or body-availability assumption is added.
+Its exact report is guarded to the standard axioms.
+
+`ModifierRootControls.lean` exercises unqualified and qualified selection
+with a primitive parameter, omitted parameters, wrong-kind refusal and
+unchanged deeper-path refusal. These are populated selector controls, not
+full `Elaborated`, execution-root or profile witnesses.
+
+A03 and A04 in `TERRA-TODO.md` delegate typechecked routine derivation-field
+and external-overload transports (`DerivedModifierMembership` and
+`ExternalOverloadMembership`). Neither alias has a supplied proof. The main
+source-selector soundness arguments stay in this lane. Wiring all derived
+callee occurrences and actual execution queries to these initial-target
+facts and published dispatch closure remains open.
+
+Published VY5 modules `P8/FailureProjection.lean` and
+`P8/SourceRealization.lean` now provide `SpecFailures` Bound operations and
+`SpecExecution.run`/`Executes` anchored to actual Source execution. They do
+not provide a concrete SourceSpec, failure-aware OperationalReference,
+SourceOrigins or SourceRealization inhabitant. The runner still accepts a
+Nat horizon. Their publication is consumed; it is not treated as completion
+of H16 carrier-aware execution or the final Producer prerequisites.
+
+## Checked frontend to actual unit programs
+
+`Lowering/P8/SourcePrograms.lean` adds `admit`: existing original-byte parse,
+resolution and component-metadata checks, followed by the actual
+`Source.elaborate` on every resolved unit in order. No failed unit is dropped.
+`elaborateUnits_sound` proves the independent per-position graph of the
+upstream elaborator; `admit_sound` returns `Input.Ok`, the checked parse and
+resolution judgments, existing `ComponentOK`, and that full-list graph.
+`elaborateUnits_tail_failure` proves that a failed later unit forces the
+whole result to fail, independently of the first program's proof data.
+All three axiom reports are guarded to the standard axioms.
+
+The candidate `produce` wrapper uses `CheckedSyntax.produce` and rechecks
+through `admit`. It does not reroute the existing public solc-JSON compiler.
+Its routine transport proof `ProduceInputSound` (A06) and all-position source
+program identity packaging `UnitsProgramIdentity` (A05) are typechecked
+propositions, not supplied proofs; the latter consumes the published
+`P9.elaborate_program` theorem through the positional `UnitsRealize` relation.
+
+`SourceProgramControls.lean` kernel-checks a separate minimal empty-unit
+input returning one actual elaborated unit, an invalid-body refusal, and
+retention of a failure in the second unit. This is not a SourceSpec
+`NonVacuous` witness or a replacement for contract controls. The original direct
+`ContractControls` attempts encountered the unchanged heartbeat/recursion
+limits and a dependent rewrite-motive error; those failures remain failed.
+The acceptance-projection control proof below now kernel-checks the four
+original component observations, and the original conjunction is exported by `packed_controls`.
+Earlier native evaluator observations remain separate historical evidence;
+no limit or expected observation was changed.
+
+This is a checked component-stage soundness result, not approved-profile
+completeness, whole imported-name execution, public compiler/frontend
+agreement, failure-aware SourceSpec or Source/EVM correspondence. The
+remaining runtime-root and exact admission obligations above remain open.
+
+## Actual entry-selector registration
+
+`Lowering/P8/EntryRoots.lean` proves `function_entry`: an actual
+`Glob.pickFn` hit yields initial environment membership, a present body after
+virtual dispatch, and dispatched declaration membership. The published
+`P9.WholeProgram.dispatch_mem` is reused. `special_entry` proves environment
+membership and exact declaration kind from the actual inherited
+receive/fallback lookup. That lookup does not check body availability; the
+body premise remains explicit in the pending coverage transport.
+
+These are selector facts, not executed-entry or receiver-reachability
+proofs. Nonempty calldata, payment and argument-decoding checks, getters,
+contract/account coherence, exact feature combinations and full admission
+remain separate. `SelectedEntryRootCoverage` and `SpecialEntryBodyCoverage`
+are unproved routine transport propositions (A07–A08), not supplied witnesses.
+No Source evaluator, interface or policy is replaced.
+
+`EntryRootControls.lean` kernel-checks eight inhabited selector observations:
+a public-function hit, wrong selector, missing body, absent contract,
+receive and fallback identity, missing receive contract and wrong special
+kind. The selected body contains a timestamp observation. This fixture
+supplies an intrinsic `Program` and a deliberately constant hash; it is not
+an elaboration, cryptographic, Source execution or EVM witness. Exact axiom
+reports are guarded. Complete semantic admission and the original remaining
+Producer obligations are still open.
+
+## Whole-output observation admission
+
+`Lowering/P8/SourceObservationAdmission.lean` composes the checked original-byte
+frontend and actual all-unit elaboration with an executable observation guard.
+Every returned elaborated unit is checked; order, names and intrinsic program
+values are returned unchanged. `sound` proves the original input/parse,
+resolution and component judgments, the full upstream elaboration graph,
+`Allowed` for every independent `ProgramSite` in every output, and the exact
+upstream admission equation. No caller chooses a smaller program subset.
+
+This guard uses the existing local observation policy; it does not establish
+complete feature extraction, feature-combination classification, runtime
+receiver/getter closure, imported-name execution or full approved-profile
+admission. `ExactObservationGuard` is an unproved routine Boolean-equivalence
+proposition (A09), not a supplied proof or replacement for those obligations.
+
+`SourceObservationControls.lean` kernel-checks the minimal original-byte
+empty-unit path, refusal after its bytes change, and the existing supplied
+Program's seven populated observations. The byte refusal tests frontend
+certificate checking, not a post-elaboration out-of-profile witness. The
+populated fixture is not claimed to be canonical elaboration or execution.
+These controls are separate from the nonempty contract component controls
+below and do not instantiate SourceSpec nonvacuity. Full semantic admission/Producer obligations remain.
+
+Control limitation: no actual elaborated-output observation rejection, or
+later-unit observation rejection, is supplied here. The inspected
+`Builtin.memberTy` admits only sender/value/timestamp magic members, and
+`Builtin.callTy` provides no excluded gasleft/blockhash/selfdestruct typing
+case. Existing raw-metadata refusals cannot manufacture such an intrinsic
+expression. This inspection is not a proof that all intrinsic Programs pass
+this guard; an inhabited negative or an appropriate general theorem remains
+open. The byte-refusal control must not be reported as exercising that branch.
+
+## Intrinsic typing and observation rejection
+
+`Frontend/Admission/TypedObservationPolicy.lean` proves `builtin_allowed`
+and `magic_allowed`: actual successful `Builtin.callTy` and
+`Builtin.memberTy` judgments imply local observation allowance. Both axiom
+reports are pinned to no axioms. The namespace premise is essential; a
+forbidden raw member is not a typed expression witness.
+
+These facts narrow the rejection-control search without settling it.
+The following constructor-induction theorem discharges `ExpressionPolicy`.
+`WholeProgramPolicy` remains an unproved Sol-owned obligation. An older
+recursive-function expression/argument/lvalue draft failed structural
+recursion checking under unchanged limits and is not registered, imported or
+claimed as a proof. Statements/items and every carried Program container
+are still required. Full policy redundancy has not been established;
+neither an actual rejected whole output nor its impossibility is claimed. If
+`WholeProgramPolicy` is eventually proved, the observation guard would add
+no restriction on intrinsic Programs; that still would not establish full
+profile admission, feature completeness or semantic adequacy.
+
+## Intrinsic expression observation closure
+
+`Frontend/Admission/TypedExpressionPolicy.lean` proves `expression_allowed`
+for every actual intrinsic `RExpr`, with all argument/conversion/lvalue
+motives generalized in the existing mutual recursor. Both branches, call
+arguments and lvalue children are covered without a fuel or sample bound. Actual
+magic/member and builtin typing witnesses discharge their policy cases.
+Thus no observation rejected by this local policy can occur in the current
+expression visitor. This result does not invent a forbidden expression or
+change a policy to construct a negative test.
+
+Statement/item closure and every carried Program container remain unproved;
+no whole-output observation-rejection impossibility follows yet. The
+`ArgumentsPolicy`, `ConversionsPolicy`, `LvaluePolicy` and `OptionalPolicy`
+corollaries are explicit unproved routine obligations (A10–A13), and
+`StatementPolicy` is the next Sol-owned structural obligation. The preserved
+older recursive draft remains failed/unvalidated; it is not the proof used
+here. Even eventual full observation-policy redundancy would not establish
+feature-combination classification, complete profile admission, runtime
+root closure or SourceSpec/Source-EVM adequacy.
+
+## Statement and carried-Program closure assembly
+
+`Frontend/Admission/TypedStatementPolicy.lean` proves
+`statement_from_containers` by the existing mutual statement/item recursor
+and `program_from_containers` through the independent `ProgramSite` relation.
+The latter covers body items and modifier arguments, constants, constructor
+bodies, initializers and base arguments at every carried occurrence. No
+constructor/default-body assumption, finite sample or runtime premise is
+introduced, and no actual program field is replaced.
+
+Both theorems explicitly require proofs of the existing `ConversionsPolicy`
+and `OptionalPolicy` obligations (A11 and A13). They do not supply those
+proofs, or unconditional `StatementPolicy`/`WholeProgramPolicy` inhabitants.
+`ClosedPolicies` is the unproved routine specialization A14. Thus the
+whole-output observation-rejection question now reduces to these two local
+producer proofs; it is not declared closed. Missing container proofs cannot
+be replaced by parameters when claiming complete admission. A10/A12 remain
+separate routine exports. Full feature/profile, runtime-root, frontend and
+SourceSpec/Producer obligations above remain unchanged.
+
+## Acceptance projection and nonempty contract controls
+
+`Lowering/P8/SourceProgramAcceptance.lean` proves `elaborate_acceptance`
+and `units_acceptance` for the actual algorithms: their success bits equal
+the existing elaboration flag and its all-unit conjunction. These laws do
+not replace returned program values, weaken graph/identity judgments or
+assert source/profile completeness. `AdmitAcceptance` is a typed unproved
+routine composition with the existing frontend guard (A15).
+
+`SourceProgramAcceptanceControls.lean` reuses the original nonempty contract
+input, parse certificates and component checks. Case analysis on the actual
+optional elaboration result keeps successful proof payloads opaque. The
+published P9 base-argument acceptance proof pattern establishes the actual
+contract flag without the failed dependent-payload normalization.
+`single_control` kernel-checks the unchanged `C.sol` output for both pipelines;
+`two_control` preserves both original names and their order, and
+`corrupted_control` kernel-checks the original changed-byte refusal.
+`packed_controls : PackedControls` supplies the full original conjunction
+(A16), using the existing component proofs. The original `ContractControls`
+proposition is unchanged.
+
+These are checked original-byte/per-unit Source stage observations. Duplicate
+contract syntax across the two named files does not certify global imported
+name typing. No source execution, SourceSpec `NonVacuous`, bytecode/world or
+full admission claim follows. All prior failures and native observations are
+retained separately; the new proofs add no premise or changed expectation.

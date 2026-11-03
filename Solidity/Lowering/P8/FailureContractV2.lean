@@ -88,7 +88,10 @@ theorem nat_encodable_resource_impossible (S : Spec) (f : CompleteProjection S)
     (roundtrip : ∀ r, decode (encode r) = r) : False :=
   ResourceContractLaw1.nat_encodable_resource_impossible S f.toV1 encode decode roundtrip
 
-#print axioms CompleteProjection.toV1_ofV1
-#print axioms Producer.toV1_ofV1
-#print axioms nat_encodable_resource_impossible
+/-- info: 'Solidity.Lowering.P8.FailureContractV2.CompleteProjection.toV1_ofV1' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms CompleteProjection.toV1_ofV1
+/-- info: 'Solidity.Lowering.P8.FailureContractV2.Producer.toV1_ofV1' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Producer.toV1_ofV1
+/-- info: 'Solidity.Lowering.P8.FailureContractV2.nat_encodable_resource_impossible' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms nat_encodable_resource_impossible
 end Solidity.Lowering.P8.FailureContractV2

@@ -33,8 +33,12 @@ theorem omitted_child_refused :
   change 2 = 1 at hl
   cases hl
 
-#print axioms exact_pair_inventory
-#print axioms distinct_payload_order
-#print axioms repeated_payloads_retained
-#print axioms omitted_child_refused
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.exact_pair_inventory' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms exact_pair_inventory
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.distinct_payload_order' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms distinct_payload_order
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.repeated_payloads_retained' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms repeated_payloads_retained
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.omitted_child_refused' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms omitted_child_refused
 end Solidity.Frontend.Admission.OccurrenceControls

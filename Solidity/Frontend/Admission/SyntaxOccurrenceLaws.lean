@@ -1243,8 +1243,12 @@ theorem syntaxOccurrences_iff {c : Cat} (s : Syn c) (x : SyntaxOccurrence) :
     x ∈ syntaxOccurrences s ↔ Syn.Sub x ⟨c, s⟩ :=
   ⟨syntaxOccurrences_sound c s x, syntaxOccurrences_complete x ⟨c, s⟩⟩
 
-#print axioms syntaxDescendants_children
-#print axioms syntaxOccurrences_sound
-#print axioms syntaxOccurrences_complete
-#print axioms syntaxOccurrences_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxDescendants_children' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxDescendants_children
+/-- info: 'Solidity.Frontend.Admission.syntaxOccurrences_sound' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxOccurrences_sound
+/-- info: 'Solidity.Frontend.Admission.syntaxOccurrences_complete' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxOccurrences_complete
+/-- info: 'Solidity.Frontend.Admission.syntaxOccurrences_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxOccurrences_iff
 end Solidity.Frontend.Admission

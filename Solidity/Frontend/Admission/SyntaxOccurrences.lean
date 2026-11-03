@@ -133,6 +133,7 @@ theorem syntaxOccurrences_root : ∀ (c : Cat) (s : Syn c),
   intro c s
   exact List.mem_cons_self
 
-#print axioms syntaxOccurrences_root
+/-- info: 'Solidity.Frontend.Admission.syntaxOccurrences_root' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxOccurrences_root
 
 end Solidity.Frontend.Admission

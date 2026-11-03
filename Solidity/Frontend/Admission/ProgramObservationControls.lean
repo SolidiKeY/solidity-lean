@@ -7,10 +7,19 @@ open Solidity.Source
 
 def constantDecl : Decl :=
   ⟨.constant, "seed", none, true, .constant (.elem (.int false 256 (by decide +kernel))) "seed" (.lit (.num (.dec 0 0 0)))⟩
+def functionDecl : Decl :=
+  ⟨.function, "run", some "C", false,
+    .function (.ident "run") .nil none none
+      (.cons (.modInv ⟨"guard", []⟩
+        (.some (.positional (.cons (.member (.ident "block") "timestamp") .nil)))) .nil)
+      false none .nil
+      (.some (.block (.cons (.stmtItem (.simpleStmt
+        (.exprStmt (.member (.ident "msg") "sender")))) .nil)))⟩
 def modifierDecl : Decl :=
-  ⟨.modifier, "guard", none, true,
-    .modifier "guard" .none false none (.some (.block (.cons (.stmtItem (.simpleStmt (.exprStmt (.ident "_")))) .nil)))⟩
-def env : Env := ⟨[constantDecl, modifierDecl]⟩
+  ⟨.modifier, "guard", some "C", false,
+    .modifier "guard" (.some (.cons
+      (.param (.elem (.int false 256 (by decide +kernel))) none (some "stamp")) .nil)) false none (.some (.block (.cons (.stmtItem (.simpleStmt (.exprStmt (.ident "_")))) .nil)))⟩
+def env : Env := ⟨[functionDecl, constantDecl, modifierDecl]⟩
 def time : RExpr env [] (.int IntTy.u256) := .magic .block "timestamp" rfl
 def sender : RExpr env [] (.address false) := .magic .msg "sender" rfl
 
@@ -21,13 +30,15 @@ def body : RBody env := {
   items := .stmt (.expr sender) .nil
   mods := [⟨modifierDecl, [.int IntTy.u256], args⟩] }
 def modifierBody : RBody env := {
-  ps := [], rs := [], inModifier := true, locals := [], out := []
+  ps := [.int IntTy.u256], rs := [], inModifier := true,
+  locals := [.int IntTy.u256], out := [.int IntTy.u256]
   items := .stmt (.placeholder rfl) .nil
   mods := [] }
 def init : RInit env := ⟨constantDecl, .int IntTy.u256, rfl, time⟩
 def base : RBaseArg env [] := ⟨"Base", [.int IntTy.u256], args⟩
 def program : Program env := {
-  body := fun d => if d.name == "seed" then some body else some modifierBody
+  body := fun d => if d.name == "run" then some body else
+    if d.name == "guard" then some modifierBody else none
   consts := fun d => if d.name == "seed" then some init else none
   inits := fun _ => [init]
   ctor := fun _ => some body
@@ -82,10 +93,35 @@ theorem missing_body_visible :
   change 5 = 7 at hl
   cases hl
 
-#print axioms all_containers
-#print axioms all_containers_admitted
-#print axioms body_only_refuted
-#print axioms missing_contract_changes_scan
-#print axioms Solidity.Frontend.Admission.program_observation_iff
-#print axioms Solidity.Frontend.Admission.elaborated_constructor_in_declarations
+/-- Parameters derived from the actual declarations match the carried frames. -/
+theorem modifier_frame_parameters :
+    (modifierDecl.frame? env).map Frame.ps = some modifierBody.ps := rfl
+
+theorem function_frame_parameters :
+    (functionDecl.frame? env).map Frame.ps = some body.ps := rfl
+
+theorem invocation_parameter_types : body.mods.map (·.ps) = [modifierBody.ps] := rfl
+
+theorem host_is_function : functionDecl.kind = .function := rfl
+
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.modifier_frame_parameters' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms modifier_frame_parameters
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.function_frame_parameters' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms function_frame_parameters
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.invocation_parameter_types' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms invocation_parameter_types
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.host_is_function' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms host_is_function
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.all_containers' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms all_containers
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.all_containers_admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms all_containers_admitted
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.body_only_refuted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms body_only_refuted
+/-- info: 'Solidity.Frontend.Admission.ProgramControls.missing_contract_changes_scan' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms missing_contract_changes_scan
+/-- info: 'Solidity.Frontend.Admission.program_observation_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Frontend.Admission.program_observation_iff
+/-- info: 'Solidity.Frontend.Admission.elaborated_constructor_in_declarations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Frontend.Admission.elaborated_constructor_in_declarations
 end Solidity.Frontend.Admission.ProgramControls
