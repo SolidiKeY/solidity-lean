@@ -1802,6 +1802,8 @@ import Solidity.Lowering.StorageOps.SourceStorageCopy
 import Solidity.Lowering.StorageOps.SourceStorageCopyBarrier
 import Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyControls
+import Solidity.Lowering.StorageOps.SourceStorageCopyPayload
+import Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyPrefix
 import Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyTarget

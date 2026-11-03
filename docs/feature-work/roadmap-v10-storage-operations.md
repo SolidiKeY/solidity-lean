@@ -90,6 +90,18 @@ success and empty-array fuel boundary. Finder and skeptic reviewed the actual
 constructor thresholds and complete controls without running Lean. These laws
 are intrinsic Source execution, not an implicit rollback or compiler bridge.
 
+`SourceStorageCopyPayload.copy_prefix` closes the nonempty primitive payload
+boundary: at original fuel sourceLength+3, actual capture finishes and exactly
+sourceLength−1 elements are written before the final leaf times out. The exact
+poststate contains that journal prefix; cleanup and header commit are skipped.
+The source-header/read and destination-header/type premises remain explicit.
+Populated two/three-element and empty/short-destination clients retain complete
+ordered outcomes, raw/default views, contexts and journals. Actual fresh indexing
+can reject a newly written retained cell under the unchanged old header, while
+an existing location still reads it. Static/type/self-copy and next-fuel controls
+distinguish false extensions. The proof reuses published capture/leaf operations;
+it does not implement memory-to-storage lowering or infer automatic rollback.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

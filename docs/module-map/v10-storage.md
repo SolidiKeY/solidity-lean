@@ -79,3 +79,6 @@
 
 | `Lowering/StorageOps/SourceStorageCopyBarrier.lean` | Actual primitive capture timeout: arbitrary runtime fuel/count and full-state preservation before destination work |
 | `Lowering/StorageOps/SourceStorageCopyBarrierControls.lean` | Populated complete barrier/boundary outcomes, ordered raw/default/context/journal controls and source/self-copy negatives |
+
+| `Lowering/StorageOps/SourceStorageCopyPayload.lean` | Actual nonempty Source copy payload-boundary timeout with exact runtime write prefix |
+| `Lowering/StorageOps/SourceStorageCopyPayloadControls.lean` | Complete payload-failure outcomes/journals and actual fresh-versus-retained alias readbacks |
