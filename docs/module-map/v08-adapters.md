@@ -230,6 +230,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean` | H7-checked populated invocation controls: complete expected States, distinct identities, legal capacity and gas/fuel/overflow ordering. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironment.lean` | Charged fetched TIMESTAMP and SELFBALANCE at arbitrary emitted sites, exact costs2/5 and whole-State/X observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironmentControls.lean` | Populated owner-ledger/time controls, raw word wrapping and absent-account behavior, capacity/resource order and complete ordered States. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadata.lean` | Charged native COINBASE/NUMBER/PREVRANDAO/GASLIMIT/BASEFEE reads for arbitrary supplied arrays, paired with unchanged six-opcode environment-slice refusals. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadataControls.lean` | Distinct populated header values, raw number wrapping, complete ordered States and gas/fuel/capacity/refusal controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean` | Charged final PUSH32 continuation of the nonzero linked prefix; explicit gas, stack and fuel bounds. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean` | Complete populated state and ordered-byte controls, boundary capacity and resource refusals. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean` | One charged nonzero fetched cycle to byte zero, consuming the existing linked reference certificate. |

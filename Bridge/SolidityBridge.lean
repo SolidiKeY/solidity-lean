@@ -155,6 +155,8 @@ import SolidityBridge.RoadmapV15.P10.BitwiseConsumer
 import SolidityBridge.RoadmapV15.P10.BitwiseControls
 import SolidityBridge.RoadmapV15.P10.BitwiseFixtures
 import SolidityBridge.RoadmapV15.P10.BitwiseWords
+import SolidityBridge.RoadmapV15.P10.BlockMetadata
+import SolidityBridge.RoadmapV15.P10.BlockMetadataControls
 import SolidityBridge.RoadmapV15.P10.BooleanNotConsumer
 import SolidityBridge.RoadmapV15.P10.BooleanNotControls
 import SolidityBridge.RoadmapV15.P10.BooleanNotFixtures

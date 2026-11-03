@@ -1295,3 +1295,34 @@ opcode/full-row claim. Independent finder and skeptic reviews found no defect
 in the statements, complete observations or proof boundaries. The new focused
 module checks do not discharge the failed registered Bridge closure or the
 remaining source/compiler/Osaka/account/world/resource/transaction obligations.
+
+## Native metadata and source-slice refusals
+
+[BlockMetadata.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadata.lean)
+proves charged fetched COINBASE, NUMBER, PREVRANDAO, GASLIMIT and BASEFEE
+observations from explicitly Backend-encoded sites. Each reads the actual
+pinned header field, costs 2, preserves the complete native State except its
+specified gas/PC/count/stack update, and has an `X` continuation. Adequate gas,
+stack capacity and fuel remain explicit. The supplied destination array is
+arbitrary because these operations do not branch; no global scanner or later
+jump correctness is inferred. PREVRANDAO reads the supplied word only, without
+any randomness-generation or cryptographic interpretation claim.
+
+These native reads are **not** new source support. The same module proves that
+all five remain refused by the existing six-opcode `Backend.Environment`
+slice: `admittedOp` is false and its local `step` returns `none` for every frame
+and tail. This neither changes nor independently characterizes the broader
+source parser/profile. No compiler emission, source/world origin or Osaka
+approval follows from constructing the explicit Backend opcode sites.
+
+[BlockMetadataControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadataControls.lean)
+checks five independent complete expected States, both permission flags, a
+noncanonical supplied array, empty/maximal legal stacks, overflow and gas/fuel
+ordering. Values distinguish beneficiary 23 from owner 7, block number 257 from
+time 513, randomness word 43 from difficulty 13, fee 59 from gas price 61 and
+call value 37, and gas limit 30000000 from remaining gas 7. A raw header number
+`2^256 + 513` becomes word 513 without asserting consensus/source reachability.
+Complete ordered code/stack/buffer/account observations and all five local
+source-slice refusals remain explicit. Independent finder and skeptic reviews
+found no defect. Full opcode rows, registered-root validation, WorldCalls and
+source/compiler/account/transaction composition remain open.
