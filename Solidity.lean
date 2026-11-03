@@ -288,6 +288,7 @@ import Solidity.Backend.MemoryCopies.SourceFramesInterface
 import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryCopies.SourceRootCopies
 import Solidity.Backend.MemoryCopies.SourceSize
+import Solidity.Backend.MemoryCopies.SourceSizeInputs
 import Solidity.Backend.MemoryCopies.SourceStorageFrames
 import Solidity.Backend.MemoryOps.CalldataAgreementChildren
 import Solidity.Backend.MemoryOps.CalldataArrayRead

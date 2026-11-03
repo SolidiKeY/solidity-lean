@@ -47,20 +47,22 @@ represented allocator input whose cursor fits the cost. `StorageWordCertificate`
 also requires `0 < cost`. `InterfaceV2Laws.lean` derives `cost < W`, rules out
 empty code (`code_ne_nil`), and refutes `cost := W` (`default_cost_W_impossible`,
 `word_cost_W_impossible`). V1 stays for compatibility; consumers should use V2.
-`SourceInterface.lean` holds the Source-side default, storage-load, copy and
-outcome certificates at their existing qualified names. The finite intrinsic
-`Interface.lean` no longer imports `Source.Hoare`; Source consumers import
-`SourceInterface` explicitly.
+The published `Interface.lean`, `InterfaceV2.lean` and `Premises.lean`
+remain byte-identical to the integration base. `SourceInterface.lean` is a
+compatibility import; the existing Source certificate definitions stay in
+`Interface`, including its published `Source.Hoare` import.
 
-V2 word correctness additionally fixes `base' g.val.id = cursor` and retains
-every old `Objects.Gap` below the old cursor. These observations supplement the
-allocator, address-map extension, machine shape and lower-cell frame.
+`InterfaceV2Roots.lean` adds an optional `StorageWordRootCertificate` companion
+to an existing V2 word certificate. It fixes `base' g.val.id = cursor` and
+preserves each old `Objects.Gap` below the cursor without changing V2's fields
+or strengthening its existing `correct` projection.
 
-`NewArrayLengthPanicPremise` contains length evaluation, successful index
-conversion and the oversized-length condition only. The published `2^64`
-length-panic equation is derived from those inputs in `SourceSize`, not
-assumed as another premise. Finalize-allocation/cursor-overflow semantics
-remain the separate S03-PANIC41 boundary.
+`NewArrayLengthPanicPremise` retains all four published fields, including
+`failure`. The additive `NewArrayLengthPanicInputs` in `SourceSizeInputs.lean`
+has only length evaluation, successful conversion and the oversized condition.
+`SourceSize` derives its panic equation and constructs the unchanged public
+premise. Neither the public failure projection nor Source semantics is replaced.
+Finalize-allocation/cursor-overflow semantics remain S03-PANIC41 obligations.
 
 `ControlsV2.lean` inhabits both V2 certificates using the existing empty-array
 builder and a represented allocator. Its concrete execution observes root 40,
@@ -79,9 +81,9 @@ state. Concrete controls distinguish zero-length success, oversized-length
 panic and horizon timeout. The generic theorem permits a changed reached
 state; the concrete local-expression witness has no side effects.
 
-Independent finder and skeptic reviews checked the strengthened root/gap
-contract, positive inhabitants and removal of the assumed local panic result.
-Per-file diagnostics pass; full checkpoint validation is recorded separately.
+Earlier finder and skeptic reviews checked the root/gap contract, positive
+inhabitants and derived local panic result. The additive compatibility update
+requires fresh reviews and validation; its signature modules have zero MCP errors.
 Full G33/G35 implementation, total size-failure coverage, recursive traversal
 and mixed-location composition remain open.
 
@@ -128,3 +130,11 @@ Independent read-only finder and skeptic reviews found no semantic defect in
 these Source frame laws or controls. Both retain the compiler/layout/size
 boundaries above. The bytes children are empty; this control does not establish
 populated byte-payload copying.
+
+## Published-interface compatibility
+
+The integration receipt rejected a theorem named like the existing `failure`
+projection. The additive correction preserves all existing public definitions,
+fields and import paths, using separate input and optional root/gap records.
+The signature-only companion commit precedes their constructors and controls.
+No Source, admission, exclusion, dependency premise or proof budget is changed.

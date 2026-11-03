@@ -170,3 +170,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceStorageFrames.lean` | Generic allocation-frame proofs for all five Source storage-load traversals and exact outcome certificates. |
 | `Backend/MemoryCopies/SourceRootCopies.lean` | Derives a fresh-parent Source copy certificate from an actual successful load, preserving old objects and nonheap state. |
 | `Backend/MemoryCopies/SourceFramesControls.lean` | Declared nested bytes-array copy, fixed reference-array default and partial-timeout controls with retained child allocation. |
+| `Backend/MemoryCopies/SourceSizeInputs.lean` | Additive evaluation/conversion/oversize inputs; preserves the published panic premise and failure field. |
+| `Backend/MemoryCopies/InterfaceV2Roots.lean` | Optional fresh-root and preserved-gap companion without changing the published V2 certificate. |

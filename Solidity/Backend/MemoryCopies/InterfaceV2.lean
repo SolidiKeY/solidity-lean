@@ -54,9 +54,6 @@ structure StorageWordCertificate {R : RefTy} (value : SVal (.ref R))
     ∃ base' m', run code m = .ok (m'.push (.val (base' g.val.id))) 0 ∧
       Objects.AllocatorRepr g.heap base' frame ⟨cursor.val + cost, hs⟩ m' ∧
       BaseExtends H base base' ∧ m' = {m with mem := m'.mem} ∧
-      (∀ addr, 0 < addr → addr < cursor.val → m'.mem addr = m.mem addr) ∧
-      base' g.val.id = cursor ∧
-      (∀ lo hi, Objects.Gap hp base lo hi → hi ≤ cursor.val →
-        Objects.Gap g.heap base' lo hi)
+      (∀ addr, 0 < addr → addr < cursor.val → m'.mem addr = m.mem addr)
 
 end Solidity.Backend.MemoryCopies.V2

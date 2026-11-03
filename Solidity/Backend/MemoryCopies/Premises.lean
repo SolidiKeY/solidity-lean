@@ -40,8 +40,7 @@ structure AliasPathPremise {C : Contract} {Γ : Ctx} {R : RefTy}
 /-- Concrete existing Source newArray length-panic boundary. Length evaluation
 and conversion are explicit at the reached state; their side effects are not
 rolled back. This covers the published 2^64 branch only. S03-PANIC41's missing
-finalize-allocation/cursor-overflow semantics is NOT supplied by this record.
-The existing length-panic equation is derived in SourceSize, not an input field. -/
+finalize-allocation/cursor-overflow semantics is NOT supplied by this record. -/
 structure NewArrayLengthPanicPremise {E : Source.Env} {Γ : Source.RCtx}
     {τ σ : Source.STy} (global : Source.Glob E) (frame : Source.Fr)
     (fuel : Nat) (newable : τ.newable = true) (length : Source.RExpr E Γ σ)
@@ -50,5 +49,8 @@ structure NewArrayLengthPanicPremise {E : Source.Env} {Γ : Source.RCtx}
   evaluation : (Source.evalE global frame fuel length).run before = (.ok value, reached)
   conversion : (Source.indexNat (E := E) (Γ := Γ) value).run reached = (.ok count, reached)
   oversized : 2 ^ 64 ≤ count
+  failure : (Source.evalE global frame (fuel + 1)
+    (Source.RExpr.newArray (τ := τ) newable length index)).run before =
+      (Source.panic .alloc, reached)
 
 end Solidity.Backend.MemoryCopies
