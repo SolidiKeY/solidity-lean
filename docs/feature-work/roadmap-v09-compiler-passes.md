@@ -283,6 +283,27 @@ finder and skeptic reviews found no defect. This remains local Source integer
 alignment plus intrinsic/physical execution, not Source heap/world or public
 resource/session adequacy.
 
+## Effectful assignment and unchecked multiplication
+
+[AssignmentMultiplicationPass](../../Solidity/Backend/Passes/AssignmentMultiplicationPass.lean)
+uses the published V07 multiplication transport with the actual assignment
+capture prefix and compiled operand. It retains the original width/range,
+Source-local alignment, unchecked frame/fuel and full compiler Input premises.
+It derives post-assignment alignment and full reached MappedOutput, choosing
+the machine, map and word before all saved tails and joining both actual runs.
+Existing arithmetic and compiler producers supply the soundness arguments.
+
+[Controls](../../Solidity/Backend/Passes/AssignmentMultiplicationControls.lean)
+use `a = 255`, `i = 1`: legacy gives 255 while via-IR wraps `255 * 255` to 1.
+All eleven existing fixture cells and the full saved stack are preserved.
+The same reached via-IR prefix followed by actual accepted unmasked multiplication
+gives 65025, distinguishing omitted narrowing. Stale RHS, frame and saved-tail
+controls remain explicit. [Pins](../../Solidity/Backend/Passes/AssignmentMultiplicationPins.lean)
+guard the actual standard axiom sets. Independent finder and skeptic reviews
+found no defect. This is local numeric/effect correspondence and physical
+intrinsic execution, not public Source heap/world, checked-overflow, ABI or
+resource/session adequacy. H22 external-call construction is untouched.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

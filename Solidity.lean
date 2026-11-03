@@ -745,6 +745,9 @@ import Solidity.Backend.Passes.SourceAdditionValuePins
 import Solidity.Backend.Passes.AssignmentAdditionControls
 import Solidity.Backend.Passes.AssignmentAdditionPass
 import Solidity.Backend.Passes.AssignmentAdditionPins
+import Solidity.Backend.Passes.AssignmentMultiplicationControls
+import Solidity.Backend.Passes.AssignmentMultiplicationPass
+import Solidity.Backend.Passes.AssignmentMultiplicationPins
 
 
 import Solidity.Lowering.V08.Audit

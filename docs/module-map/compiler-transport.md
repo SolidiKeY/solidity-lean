@@ -43,3 +43,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 
 
 | `Backend/Passes/AssignmentAdditionPass.lean`, `AssignmentAdditionControls.lean`, `AssignmentAdditionPins.lean` | Effectful Source assignment/addition through actual captured-prefix maps and value code, with pipeline-sensitive mixed-heap controls. |
+
+| `Backend/Passes/AssignmentMultiplicationPass.lean`, `AssignmentMultiplicationControls.lean`, `AssignmentMultiplicationPins.lean` | Unchecked Source assignment/multiplication through actual capture maps and compiled values, pipeline and unmasked-code controls. |
