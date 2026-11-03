@@ -21,7 +21,7 @@ def extra_private(p,pat):
  return iter(values)
 with patch.object(pathlib.Path,'glob',extra_private):reject(f)
 check=subprocess.check_output
-for suffix in ['312ed47a9ff23fd6b0e9f0206770e8deac0246e2:Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean','312ed47a9ff23fd6b0e9f0206770e8deac0246e2:Solidity/Lowering/V07/SourceReads.lean']:
+for suffix in ['24149fd567ec273e5c72760ecf0a25a940c4c4fc:Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean','24149fd567ec273e5c72760ecf0a25a940c4c4fc:Solidity/Lowering/V07/SourceReads.lean']:
  def bad(command,*a,**kw):
   if command[-1]==suffix:return 'bad\n' if kw.get('text') else b'bad'
   return check(command,*a,**kw)
