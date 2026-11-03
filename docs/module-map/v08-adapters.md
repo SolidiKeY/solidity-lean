@@ -448,3 +448,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 |---|---|
 | `Lowering/V08/LiteralFailureMixedCustomError.lean` | Actual identity-converted local arguments and custom-error execution from generic mixed codec field facts. |
 | `Lowering/V08/LiteralFailureMixedCustomErrorControls.lean` | Member/type witnesses for mixed and empty errors, populated state, selector transport and exact stuck/timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureStringPrefix.lean` | Actual typed string-prefix encoding and declared error execution over a represented mixed tail; G38 encoding premise consumer. |
+| `Solidity/Lowering/V08/LiteralFailureStringPrefixControls.lean` | Populated typed string/custom-error controls, shared string/bytes reference, exact bytes and distinct stuck/timeout outcomes. |

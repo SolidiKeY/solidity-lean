@@ -1964,6 +1964,8 @@ import Solidity.Lowering.V08.LiteralFailureStatementReasonControls
 import Solidity.Lowering.V08.LiteralFailureStorageDecode
 import Solidity.Lowering.V08.LiteralFailureStorageDecodeControls
 import Solidity.Lowering.V08.LiteralFailureStorageSuccessControls
+import Solidity.Lowering.V08.LiteralFailureStringPrefix
+import Solidity.Lowering.V08.LiteralFailureStringPrefixControls
 import Solidity.Lowering.V08.LiteralFailureTupleAbort
 import Solidity.Lowering.V08.LiteralFailureTupleAbortControls
 import Solidity.Lowering.V08.LocalCallableTransport
