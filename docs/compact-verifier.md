@@ -51,7 +51,10 @@ timeouts and explicit restarts replace the worker.
 ## Rebuild
 
 Build the pinned Lean/GMP browser runtime first with
-`bash web/tools/build-lean-browser.sh`. With the matching Emscripten SDK activated:
+`bash web/tools/build-lean-browser.sh`; it now also builds the compact module in
+its pinned Emscripten container and writes `direct/` beside `assets/`. Pages
+caches and packages both. To rebuild only the compact module with an activated
+matching Emscripten SDK:
 
 ```sh
 LEAN_NUM_THREADS=1 python3 scripts/build-direct-runtime.py \
@@ -99,3 +102,6 @@ and negative specifications, and reverting executions. A read-only finder and
 skeptic review found scope, builtin-identity, stale-job, worker ownership, build
 race and deadline issues; those confirmed findings were fixed and covered.
 The final semantic review found no further blocker.
+
+Pages wiring was checked for shell/YAML syntax and asset paths locally; the full
+container rebuild and hosted deployment remain CI work, not claimed local passes.

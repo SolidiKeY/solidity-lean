@@ -30,7 +30,8 @@ npm ci --prefix web
 # Builds GMP64, Lean 4.24 WASM and serialized proof libraries.
 bash web/tools/build-lean-browser.sh
 
-SOLIDITY_BROWSER_LEAN="$PWD/web/.lean-browser-build/assets" npm run build --prefix web
+SOLIDITY_BROWSER_LEAN="$PWD/web/.lean-browser-build/assets" \
+SOLIDITY_BROWSER_DIRECT="$PWD/web/.lean-browser-build/direct" npm run build --prefix web
 npm run build:single --prefix web
 npm run start:single --prefix web
 ```

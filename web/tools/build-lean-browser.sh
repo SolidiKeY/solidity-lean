@@ -22,7 +22,7 @@ if [[ ! -d "$work/gmp/.git" ]]; then git clone --depth 1 --branch v6.2.1 https:/
 bash "$repository/web/tools/lean-wasm/test-replace.sh" "$work/lean4" "$native" "$work"
 
 cd "$repository"
-LEAN_NUM_THREADS=1 lake build Solidity.Frontend.Testing
+LEAN_NUM_THREADS=1 lake build Solidity.Tools.DirectRuntime
 LEAN_NUM_THREADS=1 "$native/bin/lean" -j1 --tstack=131072 \
   -o "$work/BrowserFrontend.olean" -c "$work/BrowserFrontend.c" web/browser/BrowserFrontend.lean
 LEAN_NUM_THREADS=1 "$native/bin/lean" -j1 --run web/tools/lean-wasm/ImportGraph.lean "$native/src/lean" "$repository" > "$work/import-graph.json"
@@ -45,5 +45,14 @@ container_args=(--rm --memory=4g --memory-swap=4g --cpus=4
 docker run "${container_args[@]}" "${run_args[@]}" "$image" bash /work/build-gmp.sh
 docker run "${container_args[@]}" "${run_args[@]}" "$image" bash /work/build-lean.sh
 docker run "${container_args[@]}" "$image" chmod -R a+rX /work/build64
+# Compile the compact verifier from the same generated C/runtime before the
+# serialized general-frontend assets are packaged. The SDK stays in Docker.
+docker run --rm --memory=4g --memory-swap=4g --cpus=2 --user "$(id -u):$(id -g)" \
+  --mount "type=bind,src=$repository,dst=$repository" \
+  --mount "type=bind,src=$work,dst=$work" \
+  --mount "type=bind,src=$native,dst=$native,readonly" \
+  --workdir "$repository" \
+  --env "NATIVE_LEAN_PREFIX=$native" --env "LEAN_BROWSER_WORK=$work" \
+  "$image" bash "$repository/web/tools/lean-wasm/build-direct.sh"
 SOLIDITY_BROWSER_IMPORT_GRAPH="$work/import-graph.json" node web/tools/package-lean.mjs "$work/build64/stage1" "$native" "$work/assets"
-printf 'Lean website assets: %s\nBuild the website with SOLIDITY_BROWSER_LEAN=%q npm run build --prefix web\n' "$work/assets" "$work/assets"
+printf 'Lean website assets: %s\nBuild the website with SOLIDITY_BROWSER_LEAN=%q SOLIDITY_BROWSER_DIRECT=%q npm run build --prefix web\n' "$work/assets" "$work/assets" "$work/direct"
