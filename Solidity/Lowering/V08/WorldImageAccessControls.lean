@@ -1,6 +1,7 @@
 import Solidity.Lowering.V08.WorldImageAccess
 import Solidity.Lowering.V08.WorldCatalogueControls
 import Solidity.Lowering.V08.RoleControls
+import Solidity.Lowering.V08.SourceRethrow
 
 /-! Concrete clients of typed image lookup. These retain the actual source
 persistent/transient relation before/after reset and complete intrinsic stores.
@@ -1176,3 +1177,272 @@ theorem actual_client (pipeline : Roadmap.Pipeline) :
 #guard_msgs in
 #print axioms actual_client
 end Solidity.Lowering.V08.InstalledPaymentImageControls
+
+
+/-! Actual funded prefixes followed by canonical rethrow. Source journal rollback
+is explicit and retains the newly allocated heap. Intrinsic atomic rollback
+returns its original world; no Source catch/admission/compiler selection follows. -/
+namespace Solidity.Lowering.V08.FundedRethrowRollbackControls
+open Solidity
+open SourceEnvironmentControls
+open InstalledPaymentImageControls
+
+def mark : Source.CallFrame :=
+  opened.ex.enter self sender WorldPaymentImageControls.amount [] false
+
+def reached (bytes : Roadmap.Bytes) : Source.St E := SourceKeccak.afterLiteral paid bytes
+
+def rolled (bytes : Roadmap.Bytes) : Source.St E :=
+  {reached bytes with ex := mark.rollback (reached bytes).ex}
+
+theorem source_raw (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    (SourceRethrow.allocated (global pipeline) sourceFrame 4 1 bytes).run (locals,paid) =
+      (.error (.revert bytes),(locals,reached bytes)) :=
+  SourceRethrow.literal_rethrow (global pipeline) sourceFrame 0 0 bytes locals paid
+
+theorem restored_execution (bytes : Roadmap.Bytes) :
+    (rolled bytes).ex = opened.ex :=
+  Source.rollback_run opened.ex WorldPaymentImageControls.operations self sender
+    WorldPaymentImageControls.amount [] false
+
+theorem source_rollback_image (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment opened.events (rolled bytes) (world pipeline) := by
+  have restored := restored_execution bytes
+  constructor
+  · intro address
+    unfold WorldImage.AccountImage
+    rw [restored]
+    exact (initial_image pipeline).accounts address
+  · rw [restored]
+    exact (initial_image pipeline).funds
+  · exact (initial_image pipeline).roles
+
+/-- Consume the actual paid entry, nil-body run and settlement producers.
+No whole failing continuation equation is assumed. -/
+theorem paid_frame (pipeline : Roadmap.Pipeline) :
+    ∃ state : State WorldResetControls.Cell [],
+      (world pipeline).callFrame (⟨EnvironmentProjection.liftAddress self⟩ : ContractWorld.Handle ())
+        entry context = .ok (after pipeline,state) := by
+  have lookup : (world pipeline).storage?
+      (⟨EnvironmentProjection.liftAddress self⟩ : ContractWorld.Handle ()) =
+      some (WorldResetControls.store true true) := by
+    simp only [ContractWorld.World.storage?,owner_account,bind,Option.bind]
+    rfl
+  have role : (world pipeline).isLibrary () = false := rfl
+  refine ⟨entered pipeline,?_⟩
+  simp only [ContractWorld.World.callFrame,role,
+    (show context.isStatic = false from rfl),Bool.false_and,Bool.false_or,
+    Bool.false_eq_true,↓reduceIte,lookup,entry,ContractWorld.Entry.unit,TRes.ofOpt,
+    bind,Except.bind,enter_actual,Prog.run_nil,finish_actual]
+  rfl
+
+def targetAttempt (bytes : Roadmap.Bytes) (before : ContractWorld.World WorldResetControls.catalog) :
+    TRes (ContractWorld.World WorldResetControls.catalog × Unit) := do
+  let (next,state) ← before.callFrame
+    (⟨EnvironmentProjection.liftAddress self⟩ : ContractWorld.Handle ()) entry context
+  let _ ← (Stmt.revertData [.bytes bytes] : Stmt WorldResetControls.Cell [] []).runC state
+  pure (next,())
+
+theorem target_failure (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    targetAttempt bytes (world pipeline) = .error (THalt.ofData bytes) := by
+  obtain ⟨state,frameRun⟩ := paid_frame pipeline
+  simp only [targetAttempt,frameRun,bind,Except.bind,
+    SourceRethrow.intrinsic_rethrow]
+
+theorem target_atomic (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    ContractWorld.atomic (world pipeline) (targetAttempt bytes (world pipeline)) =
+      (world pipeline,.error (THalt.ofData bytes)) := by
+  rw [target_failure]
+  exact ContractWorld.atomic_failure _ _
+
+theorem ordered_states (bytes : Roadmap.Bytes) :
+    ((opened.ex.world.accounts sender).balance.val,(opened.ex.world.accounts self).balance.val,
+     opened.ex.journal.length,(paid.ex.world.accounts sender).balance.val,
+     (paid.ex.world.accounts self).balance.val,paid.ex.journal.length,
+     ((reached bytes).ex.world.accounts sender).balance.val,
+     ((reached bytes).ex.world.accounts self).balance.val,(reached bytes).ex.journal.length,
+     ((rolled bytes).ex.world.accounts sender).balance.val,
+     ((rolled bytes).ex.world.accounts self).balance.val,(rolled bytes).ex.journal.length) =
+      (93,7,4,88,12,6,88,12,6,93,7,4) := by
+  rw [show (rolled bytes).ex = opened.ex from restored_execution bytes]
+  rfl
+
+theorem raw_state_and_heap (bytes : Roadmap.Bytes) :
+    (reached bytes).ex = paid.ex ∧ (reached bytes).heap.next = 2 ∧
+    (reached bytes).heap.get 0 = some ⟨.bytes .memory,.bytes [0,255]⟩ ∧
+    (reached bytes).heap.get 1 = some ⟨.bytes .memory,.bytes bytes⟩ ∧
+    (reached bytes).events = opened.events ∧ (reached bytes).logs = opened.logs ∧
+    (reached bytes).fnLocals = opened.fnLocals :=
+  ⟨rfl,rfl,rfl,SourceKeccak.allocated paid bytes,rfl,rfl,rfl⟩
+
+/-- Only the execution journal is rolled back. Fresh byte memory and full
+caller event/log/function-local payloads remain as published Source specifies. -/
+theorem rollback_fields (bytes : Roadmap.Bytes) :
+    (rolled bytes).ex.world = opened.ex.world ∧
+    (rolled bytes).ex.transient = opened.ex.transient ∧
+    (rolled bytes).ex.journal = opened.ex.journal ∧
+    (rolled bytes).heap = (reached bytes).heap ∧
+    (rolled bytes).events = opened.events ∧ (rolled bytes).logs = opened.logs ∧
+    (rolled bytes).fnLocals = opened.fnLocals := by
+  rw [show (rolled bytes).ex = opened.ex from restored_execution bytes]
+  exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+def wrongRolled (bytes : Roadmap.Bytes) : Source.St E :=
+  {reached bytes with ex := ((paid.ex.enter self sender WorldPaymentImageControls.amount [] false).rollback (reached bytes).ex)}
+
+theorem wrong_mark (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    ¬ WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment opened.events (wrongRolled bytes) (world pipeline) := by
+  intro image
+  have funds := congrArg (fun f => (f (EnvironmentProjection.liftAddress self)).1) image.funds
+  change (7 : Int) = 12 at funds
+  omega
+
+theorem wrong_heap_undo (bytes : Roadmap.Bytes) : rolled bytes ≠ opened := by
+  intro same
+  have count := congrArg (fun state : Source.St E => state.heap.next) same
+  change (2 : Nat) = 1 at count
+  omega
+
+theorem allocation_timeout (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    (SourceRethrow.allocated (global pipeline) sourceFrame 0 1 bytes).run (locals,paid) =
+      (.error .timeout,(locals,paid)) :=
+  SourceRethrow.allocation_timeout (global pipeline) sourceFrame 1 bytes locals paid
+
+theorem statement_timeout (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    (SourceRethrow.allocated (global pipeline) sourceFrame 4 0 bytes).run (locals,paid) =
+      (.error .timeout,(locals,reached bytes)) :=
+  SourceRethrow.statement_timeout (global pipeline) sourceFrame 0 bytes locals paid
+
+theorem halt_data (bytes : Roadmap.Bytes) : (THalt.ofData bytes).data = bytes := by
+  cases bytes <;> rfl
+
+/-- Empty, binary and word-boundary data keep exact halt constructors. These
+are real supplied reverts, not catchability classification or panic execution. -/
+theorem halt_cases :
+    (THalt.ofData [],THalt.ofData ([0,255,128] : Roadmap.Bytes),
+      THalt.ofData (List.replicate 33 254 : Roadmap.Bytes)) =
+    (.revert,.revertWith [0,255,128],.revertWith (List.replicate 33 254)) := rfl
+
+theorem wrong_payload (pipeline : Roadmap.Pipeline) :
+    ContractWorld.atomic (world pipeline)
+      (targetAttempt ([0,255,128] : Roadmap.Bytes) (world pipeline)) ≠
+      (world pipeline,.error (.revertWith [0,255,127])) := by
+  rw [target_atomic]
+  intro same
+  have observed := congrArg (fun result : ContractWorld.World WorldResetControls.catalog × TRes Unit =>
+    result.2.halt?.map THalt.data) same
+  exact (by decide +kernel : (some [0,255,128] : Option (List UInt8)) ≠ some [0,255,127]) observed
+
+/-- Stepwise actual payment, canonical Source rethrow, intrinsic atomic error
+and explicit Source rollback relation. No desired handler equation is a premise. -/
+theorem funded_client (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    opened.ex.transfer sender self WorldPaymentImageControls.amount = some paid.ex ∧
+    (SourceRethrow.allocated (global pipeline) sourceFrame 4 1 bytes).run (locals,paid) =
+      (.error (.revert bytes),(locals,reached bytes)) ∧
+    ContractWorld.atomic (world pipeline) (targetAttempt bytes (world pipeline)) =
+      (world pipeline,.error (THalt.ofData bytes)) ∧
+    WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment opened.events (rolled bytes) (world pipeline) :=
+  ⟨source_payment,source_raw pipeline bytes,target_atomic pipeline bytes,
+    source_rollback_image pipeline bytes⟩
+
+
+/-- Executed atomic results, not classification alone, retain each complete
+empty/binary/33-byte payload. -/
+theorem payload_results (pipeline : Roadmap.Pipeline) :
+    ((ContractWorld.atomic (world pipeline) (targetAttempt [] (world pipeline))).2.halt?.map THalt.data,
+     (ContractWorld.atomic (world pipeline) (targetAttempt [0,255,128] (world pipeline))).2.halt?.map THalt.data,
+     (ContractWorld.atomic (world pipeline) (targetAttempt (List.replicate 33 254) (world pipeline))).2.halt?.map THalt.data) =
+      (some [],some [0,255,128],some (List.replicate 33 254)) := by
+  rw [target_atomic,target_atomic,target_atomic]
+  simp only [TRes.halt?,Option.map,halt_data]
+
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.source_raw' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms source_raw
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.restored_execution' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms restored_execution
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.source_rollback_image' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms source_rollback_image
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.paid_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms paid_frame
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.target_failure' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms target_failure
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.target_atomic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms target_atomic
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.ordered_states' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms ordered_states
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.raw_state_and_heap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms raw_state_and_heap
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.rollback_fields' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms rollback_fields
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.wrong_mark' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_mark
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.wrong_heap_undo' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_heap_undo
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.allocation_timeout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms allocation_timeout
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.statement_timeout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms statement_timeout
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.halt_data' does not depend on any axioms -/
+#guard_msgs in
+#print axioms halt_data
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.halt_cases' does not depend on any axioms -/
+#guard_msgs in
+#print axioms halt_cases
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.wrong_payload' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_payload
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.funded_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms funded_client
+/-- info: 'Solidity.Lowering.V08.FundedRethrowRollbackControls.payload_results' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms payload_results
+end Solidity.Lowering.V08.FundedRethrowRollbackControls

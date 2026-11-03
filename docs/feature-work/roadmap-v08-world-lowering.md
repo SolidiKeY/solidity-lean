@@ -3935,3 +3935,7 @@ The published feature-catalogue/HashingNames split justified a new bounded Decis
 ### Installed-account funded fragment
 
 `InstalledPaymentImageControls.actual_client` joins an actual Source transfer and actual payable intrinsic empty-entry call with a proved full reached WorldImage, including funds at every address. Both accounts are explicitly supplied as installed; no deployment or external-call admission is inferred. Complete account/journal/nonworld observations, reset composition and a stale-funds negative retain the boundary: this is a funded fragment, not canonical source dispatch/body/frame/bytecode or whole-unit adequacy.
+
+### Funded rethrow and explicit rollback
+
+`FundedRethrowRollbackControls.funded_client` consumes the actual funded prefix, canonical Source allocation/rethrow and intrinsic paid-frame/revert execution. Exact atomic halts and an explicit Source journal rollback restore the earlier account/funds image while the newly allocated Source heap remains. Ordered states, wrong-mark/heap/payload controls and real timeout boundaries distinguish raw errors from rollback; this does not establish catch selection, source call admission or compiler/frame/bytecode adequacy.
