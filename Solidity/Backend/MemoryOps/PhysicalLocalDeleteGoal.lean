@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.PhysicalArrayReframe
+import Solidity.Backend.MemoryOps.PhysicalPointerImage
 import Solidity.Backend.MemoryOps.PhysicalReferenceChild
 import Solidity.Backend.MemoryOps.PhysicalMemoryControls
 
@@ -804,4 +805,91 @@ end Controls
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.uint_array_reframe' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms uint_array_reframe
+
+private def pointerImageContract : Contract := {vars := []}
+private def pointerImageState : State pointerImageContract [] :=
+  { storage := Storage.init pointerImageContract, H := ClientHT, heap := clientHeap, env := () }
+private def pointerImage (p : Evm.TryByteImage.Pipeline) : Evm.TryByteImage.FrameMem pointerImageContract [] :=
+  { st := pointerImageState
+    key := ⟨91,2,p,19,lenU 1 (by decide),lenU 2 (by decide),lenU 0 (by decide)⟩
+    scalar := by intro R i;cases i
+    capacity := 640
+    aligned := ⟨20,rfl⟩
+    data := fun i => clientBytes i.val
+    highWaterWords := 20
+    resident := by decide
+    zeroAbove := by intro i hi;have hh := i.isLt;omega }
+private def pointerImageSpan (p : Evm.TryByteImage.Pipeline) : Evm.TryByteImage.WordSpan (pointerImage p).capacity :=
+  ⟨lenU 544 (by decide),by change 544+32≤640;decide⟩
+private theorem pointer_image_bytes (p : Evm.TryByteImage.Pipeline) :
+    frameBytes (pointerImage p)=clientBytes := by
+  funext k
+  by_cases hk : k<640
+  · simp only [frameBytes,pointerImage,dif_pos hk]
+  · simp only [frameBytes,pointerImage,dif_neg hk]
+    symm
+    simp only [clientBytes,List.foldl_cons,List.foldl_nil]
+    repeat (rw [Environment.writeBytes_frame _ _ k _ (by simp only [Environment.wordBytes_length];omega)])
+
+/-- Populated old shared parent, actual checked redirection, full existing word
+program and scaled frame MSTORE. Both pipeline tags are retained identities,
+not Source pipeline executions. The frame carries its OLD heap unchanged;
+only the external typed result and byte side image are updated. -/
+theorem reference_array_frame_client (p : Evm.TryByteImage.Pipeline) (tail : List Environment.Word) :
+    let μ := pointerImage p
+    let stored := Evm.TryByteImage.store32 μ (pointerImageSpan p) (Evm.Memory.indexValue ⟨256,by decide⟩)
+    ∃ out : Heap ClientHT,
+      clientHeap.writeAddr (.index clientRoot .dyn (Evm.Memory.indexValue (Evm.wmod 0))) clientRight=some out ∧
+      Evm.run (Evm.Memory.writeArrayCode (clientBase clientRoot.id))
+        ((clientMachine.push (.val (clientBase clientRight.id))).push (.val (Evm.wmod 0)))=
+          .ok (Evm.Memory.writeMachine clientMachine 17 (.val (Evm.wmod 8))) 0 ∧
+      Environment.cryptoStep (.op .MSTORE)
+        ⟨(pointerImageSpan p).offset::Evm.Memory.indexValue ⟨256,by decide⟩::tail,frameBytes μ⟩=
+          some ⟨tail,frameBytes stored⟩ ∧
+      ReferenceArrayAt out clientRoot clientBase
+        (Evm.Memory.writeMachine clientMachine 17 (.val (Evm.wmod 8))) (frameBytes stored) ∧
+      (MObj.elems .dyn (out.get clientRoot)).map HRef.id=[2,1] ∧
+      [MObj.elems .dyn (out.get clientLeft),MObj.elems .dyn (out.get clientRight)]=[[true,false],[false]] ∧
+      [(Evm.Memory.writeMachine clientMachine 17 (.val (Evm.wmod 8))).mem 16,
+       (Evm.Memory.writeMachine clientMachine 17 (.val (Evm.wmod 8))).mem 17,
+       (Evm.Memory.writeMachine clientMachine 17 (.val (Evm.wmod 8))).mem 18]=
+        [.val (Evm.wmod 2),.val (Evm.wmod 8),.val (Evm.wmod 1)] ∧
+      [Environment.readMemory (frameBytes stored) 512 32,Environment.readMemory (frameBytes stored) 544 32,
+       Environment.readMemory (frameBytes stored) 576 32]=
+        [Semantics.wordBytes 2,Semantics.wordBytes 256,Semantics.wordBytes 32] ∧
+      stored.st=μ.st ∧ stored.key=μ.key ∧
+      (MObj.elems .dyn (stored.st.heap.get clientRoot)).map HRef.id=[1,1] ∧
+      out≠stored.st.heap := by
+  dsimp only
+  have initial : ReferenceArrayAt clientHeap clientRoot clientBase clientMachine (frameBytes (pointerImage p)) := by
+    rw [pointer_image_bytes]
+    exact client_initial
+  have bound : (Evm.wmod 0).val<clientHeap.len clientRoot .dyn := by rw [client_parent_length];decide
+  obtain ⟨out,ht,hw,hb,hr,hs,hk,_⟩ := initial.store_frame (pointerImage p)
+    (Evm.wmod 0) bound clientRight (by decide) (pointerImageSpan p) rfl tail
+  obtain ⟨old,hot,_,ids,children,words,bytes,_⟩ := reference_array_client.2
+  have same : out=old := Option.some.inj (ht.symm.trans hot)
+  subst old
+  have image : frameBytes (Evm.TryByteImage.store32 (pointerImage p) (pointerImageSpan p)
+      (Evm.Memory.indexValue ⟨256,by decide⟩))=
+      Environment.writeBytes clientBytes 544 (Semantics.wordBytes 256) := by
+    rw [frameBytes_store32,pointer_image_bytes]
+    rfl
+  refine ⟨out,ht,hw,hb,hr,ids,children,words,?_,hs,hk,?_,?_⟩
+  · rw [image]
+    exact bytes
+  · change (MObj.elems .dyn (clientHeap.get clientRoot)).map HRef.id=[1,1]
+    exact congrArg (List.map HRef.id) client_parent_elements
+  · intro bad
+    have initialIds : (MObj.elems .dyn ((Evm.TryByteImage.store32 (pointerImage p) (pointerImageSpan p)
+        (Evm.Memory.indexValue ⟨256,by decide⟩)).st.heap.get clientRoot)).map HRef.id=[1,1] := by
+      change (MObj.elems .dyn (clientHeap.get clientRoot)).map HRef.id=[1,1]
+      exact congrArg (List.map HRef.id) client_parent_elements
+    rw [bad] at ids
+    have impossible : [1,1]=([2,1] : List Nat) := initialIds.symm.trans ids
+    cases impossible
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.reference_array_frame_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_array_frame_client
+
 end Solidity.Backend.MemoryOps.Physical
