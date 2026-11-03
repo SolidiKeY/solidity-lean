@@ -53,3 +53,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/CompilerCallScopeRecognition.lean`, `CompilerCallScopeControls.lean`, `CompilerCallScopePins.lean` | Actual public scoped-call selection, checked Input/resource/fragment projections, correlated consumer composition and complete runtime controls. |
 
 | `Backend/Passes/CompilerWholeScope.lean`, `CompilerWholeScopeControls.lean`, `CompilerWholeScopePins.lean` | Actual public whole-fixture recognition, physical Input/output and exact allocator growth, with independently typed scope contrast. |
+
+| `Backend/Passes/CompilerScopedFailure{,Pins}.lean` | Actual public whole scoped-call failure certificates, reached costs and arbitrary saved tails. |

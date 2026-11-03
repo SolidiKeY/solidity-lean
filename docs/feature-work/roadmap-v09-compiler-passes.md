@@ -415,6 +415,21 @@ reviews found no defect. This is one inhabited intrinsic program family;
 general compiler coverage, independent Source/world and bytecode adequacy
 remain open. H22 external-call construction is untouched.
 
+## Whole scoped-call failure recognition
+
+[CompilerScopedFailure](../../Solidity/Backend/Passes/CompilerScopedFailure.lean)
+uses the actual public compiler results for the complete allocation/scoped-call/
+unreachable-consumer programs. Argument and body failures are inhabited by the
+existing independent intrinsic runs, with exact reached costs 2 and 3. The
+unreachable allocating suffix remains in the program and contributes no reached
+cost. Original initial representation, private frame and allocator premises
+supply Input. Typed compiler transport proves ordinary target revert for every
+saved stack; source panic/divergence and target fault are separately excluded.
+No post-failure state/map or ABI bytes are inferred. These fixed fixtures extend
+the existing reached-prefix certificates rather than proving general Source or
+compiler coverage. [Pins](../../Solidity/Backend/Passes/CompilerScopedFailurePins.lean)
+retain exact observed standard-only axiom sets.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
