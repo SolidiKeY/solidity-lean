@@ -2063,6 +2063,24 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/Passes/DivergenceWitness.lean`, `Backend/Passes/TailDivergence.lean`, `Backend/Passes/Spin.lean`, `Backend/Passes/FaultReached.lean`, `Backend/Passes/FaultTail.lean` | Divergence witnesses; reached faults. |
 | `Backend/Passes/LoopCallsBoundary.lean`, `Backend/Passes/LoopAllocatingSuffix.lean` | Loop-to-call budgeted links. |
 | `Backend/Passes/WidthApplication.lean`, `Backend/Passes/SignedWidthGuard.lean`, `Backend/Passes/ShortCircuitBoundary.lean`, `Backend/Passes/EntryReception.lean` | Width masks, signed guards, short-circuit Booleans, ABI word admission (fixture). |
+| `Backend/Passes/AssignmentSubtractionControls.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/AssignmentSubtractionPass.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/AssignmentSubtractionPins.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/CapturedReadback.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ConditionalReferenceInput.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/QueueCompletionControls.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/QueueCompletionPins.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallArgumentFailure.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallArgumentPins.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallArgumentPrefix.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallCaptureFailure.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallCaptureFailureControls.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallCaptureFailurePins.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallReadback.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallReadbackControls.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ReferenceCallReadbackPins.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/RuntimeCaptureReflection.lean` | Typed compiler transport or control proof component. |
+| `Backend/Passes/ShortCircuitWitness.lean` | Typed compiler transport or control proof component. |
 | Other `Backend/Passes/*Controls.lean` and `*Pins.lean` | Controls on the `CompileExamples` fixture; axiom guards. |
 
 ## V10 storage operations
@@ -2118,8 +2136,21 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/StorageOps/SourceTwoArrayDeleteNumeric.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
 | `Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
 | `Lowering/StorageOps/TwoClearRepresentationControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
+| `Lowering/StorageOps/SourceWordWrite.lean` | Actual Source scalar-word store execution and runtime-stack target correspondence |
+| `Lowering/StorageOps/SourceWordWriteControls.lean` | Populated actual Source/target readbacks, ordered context and refusal/operand controls |
+| `Lowering/StorageOps/SourceWordRead.lean` | Total typed Source reads and SLOAD correspondence under explicit raw input observations |
+| `Lowering/StorageOps/SourceWordReadControls.lean` | Inhabited certificate and complete ordered read/context/refusal controls |
+| `Lowering/StorageOps/SourceArrayIndex.lean` | Raw-header Source indexing, represented primitive read and exact bounds-failure composition |
+| `Lowering/StorageOps/SourceArrayIndexControls.lean` | Inhabited representation/target inputs and complete live/retained/wrong-guard observations |
+| `Lowering/StorageOps/SourceArrayWrite.lean` | Fresh Source indexed writes with PUBLIC represented frames and per-run numeric transport |
+| `Lowering/StorageOps/SourceArrayWriteControls.lean` | Actual arbitrary-budget writes, retained-location distinction and complete context observations |
+| `Lowering/StorageOps/SourceArrayWriteNumericControls.lean` | Concrete finite-region Source/target/represented/numeric write client and complete numeric readbacks |
+| `Lowering/StorageOps/SourceArrayWriteFailure.lean` | Bounds-first actual Source panic and guarded target revert for arbitrary payload types |
+| `Lowering/StorageOps/SourceArrayWriteFailureControls.lean` | Complete retained/default/raw-absence, type/static/fuel precedence controls |
+| `Lowering/StorageOps/SourceArrayWriteFrameControls.lean` | Nonempty live/retained owner frames through actual Source, represented and numeric writes |
 | `Backend/StorageOps/LoopLaws.lean` | Shared intrinsic loop-turn/exit/single-loop adapters with explicit operational premises |
 | `Backend/StorageOps/LoopLawsControls.lean` | Populated ordered positive/negative loop controls and concrete termination witness |
+| `Backend/StorageOps/StackWordWrite.lean` | Destination-only SSTORE code with runtime word operand and full context preservation |
 | Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
 
 ## Inline assembly (Yul)
@@ -2213,7 +2244,9 @@ See [P8 admission](feature-work/p8-admission.md).
 - Yul/LocalBoolIfElse.lean and Yul/Checks/LocalBoolIfElse.lean: conditional selection of independently indexed item scopes with concrete clean Source agreement.
 | `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
 | `Yul/Adapters/P6CalldataHash{,Controls}` | Actual calldata conversion/allocation, bounded P6 copy and target KECCAK256 composition with explicit per-input concrete hash premise. |
+
 ## Executable bytecode selection
+
 | Module | Role |
 |---|---|
 | `Backend/Selection/Interface.lean` | Selection, frame, structured-control and same-program composition certificate statements; see [executable bytecode selection](feature-work/executable-bytecode-selection.md). |
@@ -2222,16 +2255,11 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/Selection/PremisesV2.lean` | Nonempty compiler premise and admitted numeric-case runtime-consumer statement; reuses the existing decoder contract. |
 | `Backend/Selection/FrameCapacityV2.lean` | Required V2 capacity yields empty-tail, prefix and output bounds; inhabited identity and DUP frame certificates. |
 | `Backend/Selection/InterfaceV2Controls.lean` | Actual legacy 1025-PUSH witness, V2 output/program rejection, admitted frames and false-relation/wrong-IR-result controls; no G49 proof. |
-| `Backend/StorageOps/StackWordWrite.lean` | Destination-only SSTORE code with runtime word operand and full context preservation |
-| `Lowering/StorageOps/SourceWordWrite.lean` | Actual Source scalar-word store execution and runtime-stack target correspondence |
-| `Lowering/StorageOps/SourceWordWriteControls.lean` | Populated actual Source/target readbacks, ordered context and refusal/operand controls |
-| `Lowering/StorageOps/SourceWordRead.lean` | Total typed Source reads and SLOAD correspondence under explicit raw input observations |
-| `Lowering/StorageOps/SourceWordReadControls.lean` | Inhabited certificate and complete ordered read/context/refusal controls |
-| `Lowering/StorageOps/SourceArrayIndex.lean` | Raw-header Source indexing, represented primitive read and exact bounds-failure composition |
-| `Lowering/StorageOps/SourceArrayIndexControls.lean` | Inhabited representation/target inputs and complete live/retained/wrong-guard observations |
-| `Lowering/StorageOps/SourceArrayWrite.lean` | Fresh Source indexed writes with PUBLIC represented frames and per-run numeric transport |
-| `Lowering/StorageOps/SourceArrayWriteControls.lean` | Actual arbitrary-budget writes, retained-location distinction and complete context observations |
-| `Lowering/StorageOps/SourceArrayWriteNumericControls.lean` | Concrete finite-region Source/target/represented/numeric write client and complete numeric readbacks |
-| `Lowering/StorageOps/SourceArrayWriteFailure.lean` | Bounds-first actual Source panic and guarded target revert for arbitrary payload types |
-| `Lowering/StorageOps/SourceArrayWriteFailureControls.lean` | Complete retained/default/raw-absence, type/static/fuel precedence controls |
-| `Lowering/StorageOps/SourceArrayWriteFrameControls.lean` | Nonempty live/retained owner frames through actual Source, represented and numeric writes |
+| `Backend/FailurePaths/Interface.lean`, `Backend/FailurePaths/Premises.lean` | G38 failure-path predicates over the indexed source statement and its execution, and explicit producer boundaries (see [G38 failure paths](feature-work/g38-failure-paths.md)). |
+| `Backend/FailurePaths/Statements.lean` | Completed failure statements compiled with G21's literal recognizer and Boolean custom-error encoder. |
+| `Backend/FailurePaths/Parametric.lean`, `Backend/FailurePaths/ParametricControls.lean` | Failure statements independent of the function return signature, with reference-returning controls. |
+| `Backend/FailurePaths/Returns.lean` | Payload return after the actual source encoder; the encoding equation is an explicit G41 premise. |
+| `Backend/FailurePaths/BooleanReturn.lean`, `Backend/FailurePaths/BooleanReturnControls.lean` | Literal Boolean return statements and executed controls. |
+| `Backend/FailurePaths/TransientUnwind.lean`, `Backend/FailurePaths/TransientControls.lean` | Empty-failure transient rollback consuming P7 unchanged, with empty-failure and nonempty-refusal controls. |
+| `Backend/FailurePaths/WorldUnwind.lean` | Explicit world unwind after a completed failure statement. |
+| `Backend/FailurePaths/Controls.lean` | Inhabited G38 statement and payload controls. |
