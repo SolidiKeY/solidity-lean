@@ -104,27 +104,6 @@ physical address even though the selected logical child is the same. -/
 theorem pointer_eight_not_numeric : Semantics.wordBytes 8≠Semantics.wordBytes (32*8) := by
   decide
 
-/-- Statement only; unproved target: establish a repeated-pointer footprint
-at slots17/18, then redirect17 from logical1 to8. Every selected/retained word
-and byte span is explicit; initial arbitrary exterior memory is not zeroed. -/
-def PointerFrameAliasClientGoal : Prop :=
-  ∀ (m : Evm.Machine) (bytes : Environment.Memory),
-  let old := Evm.Memory.writeMachine
-    (Evm.Memory.writeMachine m 18 (.val (Evm.wmod 1))) 17 (.val (Evm.wmod 1))
-  let oldBytes := Environment.writeBytes
-    (Environment.writeBytes bytes 576 (Semantics.wordBytes 32))
-    544 (Semantics.wordBytes 32)
-  let next := Evm.Memory.writeMachine old 17 (.val (Evm.wmod 8))
-  let nextBytes := Environment.writeBytes oldBytes 544 (Semantics.wordBytes 256)
-  PointerFrame old oldBytes (fun c => c=17 ∨ c=18) ∧
-  PointerFrame next nextBytes (fun c => c=17 ∨ c=18) ∧
-  [old.mem 17,old.mem 18,next.mem 17,next.mem 18]=
-    [.val (Evm.wmod 1),.val (Evm.wmod 1),.val (Evm.wmod 8),.val (Evm.wmod 1)] ∧
-  [Environment.readMemory oldBytes 544 32,Environment.readMemory oldBytes 576 32,
-    Environment.readMemory nextBytes 544 32,Environment.readMemory nextBytes 576 32]=
-    [Semantics.wordBytes 32,Semantics.wordBytes 32,
-      Semantics.wordBytes 256,Semantics.wordBytes 32]
-
 /-- info: 'Solidity.Backend.MemoryOps.Physical.pointer_eight_not_numeric' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms pointer_eight_not_numeric
 /-- info: 'Solidity.Backend.MemoryOps.Physical.PointerFrame.write' depends on axioms: [propext, Quot.sound] -/

@@ -124,6 +124,42 @@ theorem source_rollback_to {E : Source.Env} {Γ : Source.RCtx}
   have logCount : newLogs.length+initial.logs.length-initial.logs.length=newLogs.length := by omega
   rw [logCount,List.drop_left]
 
+/-- The caller checkpoint is the actual output of the paired store prefix.
+The restored word machine is that prefix's reached machine; no frame on an
+arbitrary saved caller is a premise. World/transient changes remain the actual
+published journal operations, with no Source heap encoding asserted. -/
+theorem world_reason_saved_store {D : Source.Layout}
+    {L T : Roadmap.Address → Source.SPath → Source.STy}
+    (state : Source.ExecState D L T) (ops : List (Source.Op D L T))
+    (m : Evm.Machine) (bytes : Environment.Memory) (cells : Nat → Prop)
+    (cell w : Fin Evm.W) (tail : List Roadmap.Word)
+    (initial : WordFrame m bytes cells) (fits : 32*cell.val+32≤2^256)
+    (live : Failure.Slice.Machine) (a : Nat) (reason : Roadmap.Bytes)
+    (hf : Failure.Fits a (Semantics.encodeError reason))
+    (hs : live.stack.length+2≤1024) :
+    let word := Evm.Memory.writeMachine m cell.val (.val w)
+    let savedBytes := Environment.writeBytes bytes (32*cell.val) (Semantics.wordBytes w.val)
+    let saved : Failure.Slice.Machine := ⟨tail,savedBytes⟩
+    Evm.run [.mstoreAt] ((m.push (.val w)).push (.val cell))=.ok word 0 ∧
+    Environment.cryptoStep (.op .MSTORE)
+      ⟨lenU (32*cell.val) (by change 32*cell.val<2^256;omega)::
+        lenU w.val w.isLt::tail.map (fun (v : Roadmap.Word) => lenU v.val v.isLt),bytes⟩=
+        some ⟨tail.map (fun (v : Roadmap.Word) => lenU v.val v.isLt),savedBytes⟩ ∧
+    ∃ output, Failure.Local.execute (Failure.Local.save (worldJournal state saved))
+      a (.reason reason) (worldJournal (state.run ops) live)=
+        some (output,.revert (Source.errorData reason)) ∧
+      WordFrame word output.machine.memory (fun c => cells c ∨ c=cell.val) ∧
+      output.machine=saved ∧ output.persistent=state.world ∧ output.transient=state.transient := by
+  dsimp only
+  have store := checkpoint_mstore_frame state.world state.transient
+    m bytes cells cell w tail (worldJournal (state.run ops) live) (Source.errorData reason) fits initial
+  refine ⟨store.1,store.2.1,worldJournal state _,?_,store.2.2,rfl,rfl,rfl⟩
+  rw [Lowering.V08.errorData_transport_total]
+  exact Failure.Local.execute_failure _ a (Semantics.encodeError reason) _ hf hs
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.world_reason_saved_store' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms world_reason_saved_store
+
 /-- info: 'Solidity.Backend.MemoryOps.Physical.source_mark' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_mark
 /-- info: 'Solidity.Backend.MemoryOps.Physical.source_rollback_to' depends on axioms: [propext, Classical.choice, Quot.sound] -/

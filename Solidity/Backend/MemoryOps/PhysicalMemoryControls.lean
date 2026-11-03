@@ -1,9 +1,9 @@
+import Solidity.Backend.MemoryOps.PhysicalArrayReframe
 import Solidity.Backend.MemoryOps.PhysicalSourceUint
 import Solidity.Backend.MemoryOps.PhysicalUintWrite
 import Solidity.Backend.MemoryOps.PhysicalByteJournal
 import Solidity.Source.Semantics
 import Solidity.Backend.MemoryOps.PhysicalUintDelete
-import Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal
 import Solidity.Roadmap.Controls
 
 /-! Inhabited INITIAL source, typed heap and real target word/byte cells. The
@@ -435,13 +435,39 @@ theorem physical_delete_typed_program (pipeline : Roadmap.Pipeline) :
 #guard_msgs (whitespace := lax) in #print axioms wrong_unscaled_offset
 /-- info: 'Solidity.Backend.MemoryOps.Physical.Controls.live_payload_then_local_restore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms live_payload_then_local_restore
-/-- Statement only; unproved target (not assumed anywhere).
-The existing initial array is inhabited; a different target stack must not be
-mistaken for whole-machine equality by the new observational producer. -/
-def ReframeStackClientGoal : Prop :=
+/-- An inhabited client of uint_array_cells_eq: use both actual array
+representations to transport complete physical observations to a distinct stack.
+The source/heap/neighbor fixture is unchanged; the whole machines differ. -/
+theorem reframe_stack_client :
+    let next : Evm.Machine := {machine with stack:=[.val (Evm.wmod 11),.val (Evm.wmod 22)]}
+    UintArrayAt sourceState 0 hp root (Evm.wmod 1) next bytes ∧
+    next.stack=[.val (Evm.wmod 11),.val (Evm.wmod 22)] ∧
+    machine.stack=[.val (Evm.wmod 77),.val (Evm.wmod 88)] ∧ next≠machine := by
+  dsimp only
   let next : Evm.Machine := {machine with stack:=[.val (Evm.wmod 11),.val (Evm.wmod 22)]}
-  UintArrayAt sourceState 0 hp root (Evm.wmod 1) next bytes ∧
-  next.stack=[.val (Evm.wmod 11),.val (Evm.wmod 22)] ∧
-  machine.stack=[.val (Evm.wmod 77),.val (Evm.wmod 88)] ∧ next≠machine
+  have words : Evm.Memory.ArrayRepr hp root (Evm.wmod 1) next := initial.words.stack _
+  have cells : ∀ c, (Evm.wmod 1).val≤c ∧ c<(Evm.wmod 1).val+1+hp.len root .dyn →
+      next.mem c=machine.mem c := fun c hc => uint_array_cells_eq words initial.words c hc
+  have represented : UintArrayAt sourceState 0 hp root (Evm.wmod 1) next bytes := by
+    refine ⟨initial.source,words,initial.physical.fits,?_⟩
+    intro c hc
+    obtain ⟨w,hw,hb⟩ := initial.physical.cells c hc
+    exact ⟨w,(cells c hc).trans hw,hb⟩
+  refine ⟨represented,rfl,rfl,?_⟩
+  intro same
+  have distinct : ([.val (Evm.wmod 11),.val (Evm.wmod 22)] : List Evm.Word)≠
+      [.val (Evm.wmod 77),.val (Evm.wmod 88)] := by decide
+  exact distinct (congrArg Evm.Machine.stack same)
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.Controls.reframe_stack_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reframe_stack_client
+
+/-- Existing inhabited control inputs, exported only as a fixture tuple so
+assembly contracts can live outside the proved-control module. -/
+def reframeStackClientInput :
+    Source.EMState (⟨[]⟩ : Source.Env) [] ×
+    Heap [.array (.prim .uint),.array (.prim .uint)] ×
+    HRef [.array (.prim .uint),.array (.prim .uint)] (.array (.prim .uint)) ×
+    Evm.Machine × Environment.Memory := (sourceState,hp,root,machine,bytes)
 
 end Solidity.Backend.MemoryOps.Physical.Controls

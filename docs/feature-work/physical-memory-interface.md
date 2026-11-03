@@ -31,14 +31,39 @@ Producers quantify over arbitrary states; their post-relations are derived.
 
 ## Unproved targets
 
-`PhysicalLocalDeleteGoal.lean` and the `*ClientGoal` definitions in
-`PhysicalReferenceStore`, `PhysicalPointerFrame` and `PhysicalMemoryControls`
-are type-checked statements, not facts; nothing assumes them. In particular
-`reference_store`, `reference_store_frames` and `uint_array_cells_eq` have no
-proved client yet, and the compiled local delete (`ResolvedDeletePhysicalGoal`)
-is open.
+All seven unproved target definitions now live in `PhysicalLocalDeleteGoal.lean`:
+`UintArrayReframeGoal`, `ResolvedDeletePhysicalGoal`, `ReferenceStoreClientGoal`,
+`PointerFrameAliasClientGoal`, `ReferenceArrayClientGoal`, `PrimitiveChildStoreGoal`
+and `Controls.ReframeStackClientGoal`. They are type-checked propositions, not
+facts or assumptions. The private reference-client fixtures move with their
+targets; the proved control module exports its unchanged input fixture tuple.
+Producer modules no longer carry client targets or dead reference fixtures.
+The three producers `reference_store`, `reference_store_frames` and
+`uint_array_cells_eq` still have no proved client. The compiled local delete
+assembly remains open.
+
+`PhysicalWordFrame.word_bytes_length` keeps its compatibility name but delegates
+the exact statement to `Environment.wordBytes_length`; there is no second proof.
 
 ## Open
 
 General compiled delete and reframe, journal/world/ABI unwind beyond the local
 checkpoint (P6b), a physical encoding of Source accounts and storage.
+
+## Local typed reference parent
+
+PhysicalReferenceArray combines the published RefArrayRepr with the numeric
+header and a pointer-aware footprint at the parent's actual live slots.
+child_bytes derives the selected typed child's serialized address from initial
+word equality, without assuming an injective address map. set/store derive the
+reached relation from actual writes. This is one dynamic parent, not child-body
+representation, physical child liveness or a recursive graph. The client target
+is unproved.
+
+## Primitive-write noninterference
+
+PhysicalReferenceChild derives typed object separation from incompatible
+reference/primitive parent types and requires physical header/slot separation
+independently. Its frame law is not checked child execution or Source path
+reachability. The numeric8/pointer256 counterexample refutes unconditional
+preservation; the execution-composition target remains unproved.

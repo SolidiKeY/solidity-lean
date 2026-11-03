@@ -67,57 +67,6 @@ theorem reference_store {H : HTy} {R : RefTy}
   · intro Q q hne
     exact Heap.get_set_ne hp root q hne _
 
-private abbrev Leaf : RefTy := .array (.prim .bool)
-private abbrev Parent : RefTy := .array (.ref Leaf)
-private abbrev HT : HTy := [Parent,Leaf,Leaf]
-private def parent : HRef HT Parent := ⟨0,rfl⟩
-private def left : HRef HT Leaf := ⟨1,rfl⟩
-private def right : HRef HT Leaf := ⟨2,rfl⟩
-private def heap : Heap HT :=
-  (⟨[left,left],by decide⟩,⟨[true,false],by decide⟩,⟨[false],by decide⟩,())
-private def bases (id : Nat) : Fin Evm.W :=
-  if id=0 then Evm.wmod 16 else if id=1 then Evm.wmod 1 else Evm.wmod 8
-private def machine : Evm.Machine :=
-  { Evm.Machine.init with stack:=[.val (Evm.wmod 77),.val (Evm.wmod 88)], mem:=(fun a => if a=16 then .val (Evm.wmod 2) else if a=17 ∨ a=18 then .val (Evm.wmod 1) else if a=1 then .val (Evm.wmod 2) else if a=2 ∨ a=8 then .val (Evm.wmod 1) else .val (Evm.wmod 0)) }
-private def bytes : Environment.Memory :=
-  [(1,2),(2,1),(3,0),(8,1),(9,0),(16,2),(17,32),(18,32)].foldl
-    (fun memory pair => Environment.writeBytes memory (32*pair.1) (Semantics.wordBytes pair.2))
-    (fun _ => 0)
-private def changed : Evm.Machine := Evm.Memory.writeMachine machine 17 (.val (Evm.wmod 8))
-private def changedBytes : Environment.Memory := Environment.writeBytes bytes 544 (Semantics.wordBytes 256)
-private def wordVector (m : Evm.Machine) := [1,2,3,8,9,16,17,18].map m.mem
-private def byteVector (m : Environment.Memory) :=
-  [32,64,96,256,288,512,544,576].map (fun a => Environment.readMemory m a 32)
-
-/-- Statement only; unproved target. It discriminates selected child
-identity2, word address8 and physical byte address256; repeated old aliases and
-both child contents remain explicit, with every header/data/pointer span. -/
-def ReferenceStoreClientGoal : Prop :=
-  ∃ out : Heap HT,
-    heap.writeAddr (.index parent .dyn (Evm.Memory.indexValue (Evm.wmod 0))) right=some out ∧
-    out.index parent .dyn (Evm.Memory.indexValue (Evm.wmod 0))=some right ∧
-    out.index parent .dyn (Evm.Memory.indexValue (Evm.wmod 1))=some left ∧
-    [(MObj.elems .dyn (heap.get parent)).map HRef.id,
-      (MObj.elems .dyn (out.get parent)).map HRef.id]=[[1,1],[2,1]] ∧
-    [MObj.elems .dyn (heap.get left),MObj.elems .dyn (heap.get right),
-      MObj.elems .dyn (out.get left),MObj.elems .dyn (out.get right)]=
-        [[true,false],[false],[true,false],[false]] ∧
-    Evm.run (Evm.Memory.writeArrayCode (Evm.wmod 16))
-      ((machine.push (.val (Evm.wmod 8))).push (.val (Evm.wmod 0)))=.ok changed 0 ∧
-    Environment.cryptoStep (.op .MSTORE)
-      ⟨lenU 544 (by decide)::lenU 256 (by decide)::[lenU 11 (by decide),lenU 22 (by decide)],bytes⟩=
-        some ⟨[lenU 11 (by decide),lenU 22 (by decide)],changedBytes⟩ ∧
-    [wordVector machine,wordVector changed]=
-      [[.val (Evm.wmod 2),.val (Evm.wmod 1),.val (Evm.wmod 0),.val (Evm.wmod 1),
-        .val (Evm.wmod 0),.val (Evm.wmod 2),.val (Evm.wmod 1),.val (Evm.wmod 1)],
-       [.val (Evm.wmod 2),.val (Evm.wmod 1),.val (Evm.wmod 0),.val (Evm.wmod 1),
-        .val (Evm.wmod 0),.val (Evm.wmod 2),.val (Evm.wmod 8),.val (Evm.wmod 1)]] ∧
-    [byteVector bytes,byteVector changedBytes]=
-      [[2,1,0,1,0,2,32,32].map Semantics.wordBytes,
-       [2,1,0,1,0,2,256,32].map Semantics.wordBytes] ∧
-    changed.stack=[.val (Evm.wmod 77),.val (Evm.wmod 88)] ∧
-    Semantics.wordBytes 8≠Semantics.wordBytes 256
-
 /-- info: 'Solidity.Backend.MemoryOps.Physical.reference_store' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms reference_store
 end Solidity.Backend.MemoryOps.Physical

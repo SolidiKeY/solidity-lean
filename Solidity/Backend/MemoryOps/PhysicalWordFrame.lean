@@ -1,5 +1,5 @@
 import Solidity.Evm.Memory
-import Solidity.Backend.Environment.Crypto
+import Solidity.Backend.Environment.Namespace
 
 /-!
 # P6 numeric word cells and physical byte spans
@@ -24,8 +24,8 @@ structure WordFrame (m : Evm.Machine) (bytes : Environment.Memory) (live : Nat �
   fits : ∀ cell, live cell → 32*cell+32≤2^256
   cells : ∀ cell, live cell → CellAt m bytes cell
 
-theorem word_bytes_length (w : Nat) : (Semantics.wordBytes w).length=32 := by
-  simp only [Semantics.wordBytes,List.length_map,List.length_range]
+theorem word_bytes_length (w : Nat) : (Semantics.wordBytes w).length=32 :=
+  Environment.wordBytes_length w
 
 /-- Byte reads respect pointwise equality on exactly their selected interval. -/
 theorem readMemory_congr (a n : Nat) (bytes other : Environment.Memory)

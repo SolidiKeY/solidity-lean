@@ -118,6 +118,88 @@ theorem restored_numeric_observer :
   world_reason_restored_frame populated.ex ops callerByte liveByte wordMachine represented initial_frame
     64 reason (by unfold Failure.Fits; decide +kernel) (by decide)
 
+private def prefixWord : Evm.Machine := Evm.Memory.writeMachine wordMachine 2 (.val (Evm.wmod 8))
+private def prefixBytes : Environment.Memory := Environment.writeBytes savedBytes 64 (Semantics.wordBytes 8)
+private def dirtyWord : Evm.Machine := Evm.Memory.writeMachine prefixWord 2 (.val (Evm.wmod 9))
+private def dirtyBytes : Environment.Memory := Environment.writeBytes prefixBytes 64 (Semantics.wordBytes 9)
+private def savedPrefix : Failure.Slice.Machine := ⟨callerByte.stack,prefixBytes⟩
+private def dirtyPrefix : Failure.Slice.Machine := ⟨liveByte.stack,dirtyBytes⟩
+
+private theorem written_read (memory : Environment.Memory) (n : Nat) :
+    Environment.readMemory (Environment.writeBytes memory 64 (Semantics.wordBytes n)) 64 32=
+      Semantics.wordBytes n := by
+  simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes n) 64 memory
+
+/-- Actual word/byte prefix saves8 and a real second store reaches9. Two
+SEPARATE terminal observations start at that dirty state: raw REVERT reads9,
+while the independently invoked ABI-reason emitter unwinds to saved8. No byte
+program continues after REVERT. Source remains dirty in both pipelines; all
+older full vectors stay unchanged. This is not a call/transaction trace. -/
+theorem saved_prefix_unwind (pipeline : Roadmap.Pipeline) (horizon : Nat) :
+    (Source.evalE (global pipeline) frame (horizon+5)
+      (Lowering.V08.SourceFailures.reason reason)).run (locals,reached)=
+        (.error (.revert (Source.errorData reason)),(locals,reached)) ∧
+    Evm.run [.mstoreAt] ((wordMachine.push (.val (Evm.wmod 8))).push (.val (Evm.wmod 2)))=
+      .ok prefixWord 0 ∧
+    Environment.cryptoStep (.op .MSTORE)
+      ⟨lenU 64 (by decide)::lenU 8 (by decide)::[lenU 77 (by decide),lenU 88 (by decide)],savedBytes⟩=
+        some ⟨[lenU 77 (by decide),lenU 88 (by decide)],prefixBytes⟩ ∧
+    Evm.run [.mstoreAt] ((prefixWord.push (.val (Evm.wmod 9))).push (.val (Evm.wmod 2)))=
+      .ok dirtyWord 0 ∧
+    Environment.cryptoStep (.op .MSTORE)
+      ⟨lenU 64 (by decide)::lenU 9 (by decide)::[lenU 11 (by decide),lenU 22 (by decide)],prefixBytes⟩=
+        some ⟨[lenU 11 (by decide),lenU 22 (by decide)],dirtyBytes⟩ ∧
+    Failure.Slice.run [.op .REVERT,.op .INVALID]
+      ⟨(⟨64,by decide⟩ : Roadmap.Word)::(⟨32,by decide⟩ : Roadmap.Word)::dirtyPrefix.stack,dirtyBytes⟩=
+        some (dirtyPrefix,some (.revert (Semantics.wordBytes 9))) ∧
+    [wordMachine.mem 2,prefixWord.mem 2,dirtyWord.mem 2]=
+      [.val (Evm.wmod 7),.val (Evm.wmod 8),.val (Evm.wmod 9)] ∧
+    [Environment.readMemory savedBytes 64 32,Environment.readMemory prefixBytes 64 32,
+      Environment.readMemory dirtyBytes 64 32]=[Semantics.wordBytes 7,Semantics.wordBytes 8,Semantics.wordBytes 9] ∧
+    prefixWord.stack=wordMachine.stack ∧ dirtyWord.stack=wordMachine.stack ∧
+    (∀ c,c≠2 → prefixWord.mem c=wordMachine.mem c ∧ dirtyWord.mem c=wordMachine.mem c) ∧
+    (∀ a,a<64 ∨ 96≤a → prefixBytes a=savedBytes a ∧ dirtyBytes a=savedBytes a) ∧
+    ∃ output,Failure.Local.execute (Failure.Local.save (worldJournal populated.ex savedPrefix))
+      64 (.reason reason) (worldJournal reached.ex dirtyPrefix)=
+        some (output,.revert (Source.errorData reason)) ∧
+      WordFrame prefixWord output.machine.memory (fun c => represented c ∨ c=2) ∧
+      output.machine=savedPrefix ∧ output.persistent=populated.ex.world ∧
+      output.transient=populated.ex.transient := by
+  have result := world_reason_saved_store populated.ex ops wordMachine savedBytes represented
+    (Evm.wmod 2) (Evm.wmod 8) callerByte.stack initial_frame (by decide) dirtyPrefix
+    64 reason (by unfold Failure.Fits;decide +kernel) (by decide)
+  obtain ⟨hw,hb,out,run,restored,hm,hp,ht⟩ := result
+  refine ⟨(source_and_byte_unwind pipeline horizon).1,hw,hb,
+    word_mstore prefixWord (Evm.wmod 2) (Evm.wmod 9),
+    byte_mstore prefixBytes [lenU 11 (by decide),lenU 22 (by decide)] (Evm.wmod 2) (Evm.wmod 9) (by decide),
+    ?_,rfl,?_,rfl,rfl,?_,?_,out,run,restored,hm,hp,ht⟩
+  · exact revert_written_word prefixBytes (Evm.wmod 2) (Evm.wmod 9) (by decide) dirtyPrefix.stack [.op .INVALID]
+  · rw [show Environment.readMemory savedBytes 64 32=Semantics.wordBytes 7 from written_read _ 7,
+      show Environment.readMemory prefixBytes 64 32=Semantics.wordBytes 8 from written_read _ 8,
+      show Environment.readMemory dirtyBytes 64 32=Semantics.wordBytes 9 from written_read _ 9]
+  · intro c hc
+    exact ⟨Evm.upd_other _ _ hc,(Evm.upd_other _ _ hc).trans (Evm.upd_other _ _ hc)⟩
+  · intro a ha
+    have first : prefixBytes a=savedBytes a := Environment.writeBytes_frame _ _ a _
+      (by simp only [Environment.wordBytes_length];omega)
+    have second : dirtyBytes a=prefixBytes a := Environment.writeBytes_frame _ _ a _
+      (by simp only [Environment.wordBytes_length];omega)
+    exact ⟨first,second.trans first⟩
+
+/-- Restoring the dirty child or the pre-prefix caller is observably wrong. -/
+theorem saved_prefix_wrong_restoration :
+    Environment.readMemory prefixBytes 64 32≠Environment.readMemory dirtyBytes 64 32 ∧
+    Environment.readMemory prefixBytes 64 32≠Environment.readMemory savedBytes 64 32 := by
+  rw [show Environment.readMemory prefixBytes 64 32=Semantics.wordBytes 8 from written_read _ 8,
+    show Environment.readMemory dirtyBytes 64 32=Semantics.wordBytes 9 from written_read _ 9,
+    show Environment.readMemory savedBytes 64 32=Semantics.wordBytes 7 from written_read _ 7]
+  decide
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.WorldControls.saved_prefix_unwind' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms saved_prefix_unwind
+/-- info: 'Solidity.Backend.MemoryOps.Physical.WorldControls.saved_prefix_wrong_restoration' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms saved_prefix_wrong_restoration
+
 /-- info: 'Solidity.Backend.MemoryOps.Physical.WorldControls.restored_numeric_observer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms restored_numeric_observer
 /-- info: 'Solidity.Backend.MemoryOps.Physical.WorldControls.initial_frame' depends on axioms: [propext, Quot.sound] -/

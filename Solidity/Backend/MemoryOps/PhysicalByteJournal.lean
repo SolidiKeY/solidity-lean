@@ -82,6 +82,33 @@ theorem revert_written_word (bytes : Environment.Memory) (cell w : Fin Evm.W)
     simpa only [word_bytes_length] using Environment.read_written (Semantics.wordBytes w.val) (32*cell.val) bytes
   exact (revert_live _ _ _ _ _).trans (by rw [hb])
 
+/-- Save the caller produced by an actual paired word/byte store. The saved
+word frame is DERIVED from the initial frame and these executions, rather than
+supplied as a relation on an arbitrary checkpoint. Restore is still exactly the
+published component-local operation, not Source transaction rollback. -/
+theorem checkpoint_mstore_frame {P T : Type} (persistent : P) (transient : T)
+    (m : Evm.Machine) (bytes : Environment.Memory) (cells : Nat → Prop)
+    (cell w : Fin Evm.W) (tail : List Roadmap.Word)
+    (live : Failure.Local.Journal P T) (payload : List UInt8)
+    (fits : 32*cell.val+32≤2^256) (initial : WordFrame m bytes cells) :
+    let word := Evm.Memory.writeMachine m cell.val (.val w)
+    let savedBytes := Environment.writeBytes bytes (32*cell.val) (Semantics.wordBytes w.val)
+    let saved : Failure.Slice.Machine := ⟨tail,savedBytes⟩
+    Evm.run [.mstoreAt] ((m.push (.val w)).push (.val cell))=.ok word 0 ∧
+    Environment.cryptoStep (.op .MSTORE)
+      ⟨lenU (32*cell.val) (by change 32*cell.val<2^256;omega)::
+        lenU w.val w.isLt::tail.map (fun (v : Roadmap.Word) => lenU v.val v.isLt),bytes⟩=
+        some ⟨tail.map (fun (v : Roadmap.Word) => lenU v.val v.isLt),savedBytes⟩ ∧
+    WordFrame word (Failure.Local.finish
+      (Failure.Local.save ⟨persistent,transient,saved⟩) (.revert payload) live).machine.memory
+      (fun c => cells c ∨ c=cell.val) := by
+  exact ⟨word_mstore m cell w,
+    byte_mstore bytes (tail.map (fun (v : Roadmap.Word) => lenU v.val v.isLt)) cell w fits,
+    initial.write cell.val w fits⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.checkpoint_mstore_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms checkpoint_mstore_frame
+
 /-- info: 'Solidity.Backend.MemoryOps.Physical.getBytes_length' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms getBytes_length
 /-- info: 'Solidity.Backend.MemoryOps.Physical.getBytes_at' depends on axioms: [propext, Quot.sound] -/

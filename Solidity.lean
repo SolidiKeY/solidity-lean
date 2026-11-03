@@ -1225,6 +1225,10 @@ import Solidity.Backend.MemoryOps.PhysicalUintWrite
 import Solidity.Backend.MemoryOps.PhysicalWordFrame
 import Solidity.Backend.MemoryOps.PhysicalWorldUnwind
 import Solidity.Backend.MemoryOps.PhysicalWorldUnwindControls
+import Solidity.Backend.MemoryOps.PhysicalResolvedDeleteControls
+import Solidity.Backend.MemoryOps.PhysicalStructChild
+import Solidity.Backend.MemoryOps.PhysicalStructChildControls
+import Solidity.Backend.MemoryOps.PhysicalUintSequence
 
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.CoreBoundary

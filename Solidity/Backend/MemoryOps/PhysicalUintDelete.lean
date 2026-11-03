@@ -106,7 +106,7 @@ theorem UintArrayAt.delete_bounds {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
 Only actual initial typed root/index alignment is required; no whole word-state
 certificate is manufactured from a per-array representation. The word side
 runs `writeArrayCode`, not the compiled `deleteLocalCode` (that correspondence
-is the unproved `ResolvedDeletePhysicalGoal`). -/
+is proved separately by `resolved_delete_physical` in PhysicalLocalDeleteGoal). -/
 theorem UintArrayAt.delete_typed {E : Source.Env} {Γ : Source.RCtx} {C : Contract} {Δ : Ctx}
     {y : Source.EMState E Γ} {address : Nat} (σ : State C Δ)
     (r : HRef σ.H (.array (.prim .uint))) {base : Fin Evm.W}

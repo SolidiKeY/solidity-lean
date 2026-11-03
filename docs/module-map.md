@@ -1149,7 +1149,6 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Nonvacuity.lean` | A normally returning program's true result proved and false result refuted and unprovable; strict primitive capture realizability and delayed landed-binder macro regressions. |
 | `Examples/Tactics/Latex.lean` | Both LaTeX backends pinned: formulas, judgements, line breaking, proved chains, a derivation with the filter, `tests/solc/FixedLength.sol`'s obligation and derivation, the symbol table's coverage, definition links. |
 | `Examples/Tactics/ProgramTrace.lean` | Checked program traces: capture order, read continuations, JSON rows, parameters, kernel submission, budget failure. |
-
 | `Examples/Tactics/SelfPowerData.lean` | Both-pipeline concrete kernel executions for unsigned-power panic bytes in ordinary self-call frames, conditional/index ordering, rollback and negative expectations. |
 
 At the root, the notation's own tests:
@@ -1163,7 +1162,6 @@ At the root, the notation's own tests:
 | `Examples/Verify.lean`, `Tools.lean` | `#verify`, `#counterexample` and the other commands, pinned. |
 | `Examples/ProofTree.lean` | The proof tree's commands, `sol_derive?` and `sol_prove?`, pinned. |
 | `Examples/Benchmark/*.lean` | solkey's benchmark contracts with their `@custom:key` clauses proved (`Counter`, `SimpleStorage`, `Mapping`, `Purchase`, `Coin`, `EtherWallet`, `ERC20`), and `Syntax`, which pins what elaborates away (units, casts, events, errors, enums, struct constructors, modifiers). |
-
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
 
@@ -1240,7 +1238,6 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Examples/Tactics/TryPanicCarrier.lean` | Nonvacuous constructed-call controls; no source or target adequacy is claimed. |
 | `Evm/TryPanicSourcePlan.lean`, `Evm/TryPanicSourceFrame.lean`, `Evm/TryPanicSourceDeterminism.lean` | H8 bounded try/panic source model: `ThreeOp` plan, `BodyCompletedAt`, `FiniteEntry`, completion uniqueness ([H8](feature-work/diamond-try-h8-source-model.md)). |
 | `Frontend/SolcJson/TryPanicSourceData.lean`, `Frontend/SolcJson/TryPanicSourcePlan.lean`, `Frontend/SolcJson/TryPanicSourceCaller.lean`, `Examples/Tactics/TryPanicSource{Plan,Determinism,Whole}.lean` | Quoted pinned AST/input and structural derivations; controls. |
-
 | `Semantics/ContractWorldCertificates.lean` | Published paid-run/source-wrapper operation certificates, reused unchanged from origin/master cc155f36. |
 | `Semantics/PaymentWorld.lean` | Typed stipend source frames over actual world calls; send completed-failure handling, transfer exact halt transport, no-op/funding and atomic rollback laws. |
 | `Frontend/PaymentPlan.lean` | Complete declaration-resolved creation/send and initializer/receive/transfer/getter source shapes; unknown effects and full-gas calls refused. |
@@ -1248,27 +1245,19 @@ admits physical assembly or proves target-byte/original-callee transport.
 | `Tools/PaymentReplay.lean` | Ordered deterministic source-world observations with actual nested bytes and committed-world audits; gas remains an independent obligation. |
 | `Examples/Tactics/PaymentSource.lean` | Kernel-checked original send and debug transfer source snapshots, initialized handle/funding/getter witnesses and wrong handle/kind/bytes controls. |
 | `Backend/Creation/Artifact.lean` | G44.02 intrinsic artifact sections, executable CODECOPY/RETURN wrapper, exact minimal PUSH widths, layout and argument extraction laws. |
-
 | `Backend/Creation/ArtifactChecks.lean` | G44.02 inhabited layout, argument separation and negative controls with headline kernel axiom pins. |
-
 | `Backend/Creation/Execution.lean` | Independent byte-consuming PUSH/CODECOPY/RETURN/REVERT slice semantics and exact installed runtime proof. |
 | `Backend/Creation/ExecutionChecks.lean` | Inhabited empty, word and PUSH-width boundary installation witnesses, byte-range negative controls and axiom pins. |
-
 | `Backend/Creation/Placement.lean` | Relocated runtime-return slice with arithmetic alignment certificate and minimal offset PUSH width. |
 | `Backend/Creation/PlacementChecks.lean` | Inhabited PUSH1/PUSH2 offset transition controls with nonempty runtime and arguments. |
-
 | `Backend/Creation/Regions.lean` | Bounded typed patch regions, assembler overwrite length/frame laws and disjoint commutation. |
 | `Backend/Creation/Linking.lean` | Certified absolute/local link metadata, exact 20-byte addresses, unresolved refusal and existing assembler linking through wrapper/arguments. |
-
 | `Backend/Creation/LinkLayout.lean` | Bounds and pairwise disjointness derived from actual assembler link metadata for every successful assembly. |
 | `Backend/Creation/LinkingChecks.lean` | Inhabited library-link/install controls, unresolved/missing/wrong-origin/truncated-argument negatives and axiom pins. |
-
 | `Backend/Creation/Immutables.lean` | Typed bounded immutable words, disjoint table checks, per-patch readback/frame laws and certified link/immutable combination. |
 | `Backend/Creation/ImmutableChecks.lean` | Immutable bounds/overlap/readback/frame/install and combined library/immutable controls with axiom pins. |
-
 | `Backend/Creation/Constructor.lean` | Independently checked byte-prefix steps composed with exact runtime-return or exact-byte revert wrappers, over arbitrary prefix memory. |
 | `Backend/Creation/ConstructorChecks.lean` | Actual copying constructor-prefix witnesses, return/revert separation and nonempty argument controls. |
-
 | `Backend/Creation/ArtifactLaws.lean` | Arbitrary disjoint link permutations, payload determinism, section uniqueness and wrapper decode law. |
 | `Backend/Creation/Provenance.lean` | Intrinsic generated/source range records, section bounds and exact provenance byte extraction. |
 | `Backend/Creation/LawChecks.lean` | Three-link permutation, overlapping-order negative, metadata/layout and inhabited provenance controls. |
@@ -1779,16 +1768,12 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Lowering/P8/ResourceContractLaw1.lean` | `nat_encodable_resource_impossible`: the frozen V1 failure projection has no inhabitant over a `Nat`-encodable resource (P8-SPEC-LAW1). |
 | `Lowering/P8/FailureContractV2.lean` | V2 rebundling: `Projection` and `FullPlanCoverage` separated, `toV1`/`ofV1` roundtrips; still uninhabited over `Nat`. |
 | `Frontend/Admission/SyntaxOccurrences.lean`, `SyntaxOccurrenceLaws.lean`, `SyntaxOccurrenceControls.lean` | Typed syntax subtree inventory, `syntaxOccurrences_iff` against `Source.Syn.Sub`, order/multiplicity controls; not semantic-root extraction. |
-
 | `Frontend/Admission/ProgramRoots.lean`, `ProgramRootControls.lean` | Typed carried-field inventory and exact observation flattening; independent finite-roster lookup relation and refusal controls. |
-
 | `Frontend/Admission/NameResolutionRoots.lean`, `NameResolutionControls.lean` | Initial target registration from actual source lookup/Resolves/function selection, with local-shadowing and refusal controls; not full runtime-root closure. |
-
 | `Frontend/Admission/ModifierRoots.lean`, `ModifierRootControls.lean` | Initial modifier selection registration through actual typed paths and parameter forms, with qualified/wrong-kind/deep-path controls; not runtime closure. |
 | `Frontend/Admission/TypedObservationPolicy.lean` | Axiom-free local observation allowance from actual builtin/member typing; whole-visitor/Program closure remains unproved. |
 | `Frontend/Admission/TypedExpressionPolicy.lean` | General intrinsic expression visitor allowance via mutual constructor induction; statement/items and complete Program closure remain open. |
 | `Frontend/Admission/TypedStatementPolicy.lean` | Actual statement/item and all carried-Program observation closure conditional on explicit A11/A13 proofs; no unconditional policy witness. |
-
 | `Lowering/P8/SourcePrograms.lean`, `SourceProgramControls.lean` | Checked original-byte frontend stages to actual all-unit Source elaboration and failure propagation; nonempty contract component proofs are in the acceptance modules. |
 | `Lowering/P8/SourceProgramAcceptance.lean`, `SourceProgramAcceptanceControls.lean` | Exact actual elaborator success-bit laws and the full original kernel contract-control conjunction; ordered expectations unchanged. |
 | `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; pending root transport, not executed-entry or full admission adequacy. |
@@ -1912,19 +1897,17 @@ See [P8 admission](feature-work/p8-admission.md).
 |---|---|
 | `Backend/LabelExec/Step.lean`, `Backend/LabelExec/Fetch.lean`, `Backend/LabelExec/Packets.lean` | Byte-PC step over the numeric slice and JUMP/JUMPI/JUMPDEST; fetch behind a prefix; branch packets ([label execution](feature-work/backend-label-exec.md)). |
 | `Backend/LabelExec/Assembly.lean`, `Backend/LabelExec/Loops.lean`, `Backend/LabelExec/ScalarTransfer.lean` | Assembled jumps and tests; top-level loop header/backedge; `Scalar.step` lifting. |
-
 | `Backend/Aggregates/G18StorageValues.lean` | Actual Source/IR integer cell relation, derived save availability and disjoint write preservation. |
 | `Backend/Aggregates/G18StorageClient.lean` | Inhabited declared Basket array client and composed actual writes with ordered observations. |
 | `Backend/Aggregates/G18StorageCellControls.lean` | Populated wrong-output/order/phase, path/slot and width controls for scoped storage consumers. |
-
 | `Backend/Aggregates/G18ScalarMapping.lean` | All-key Source/intrinsic mapping write and published symbolic SLOAD/SSTORE copy consumer. |
 | `Backend/Aggregates/G18ScalarMappingControls.lean` | Populated unsigned/signed mapping certificates, complete frame and outcome/alias/width controls. |
-
 | `Backend/Aggregates/G18SourceMapping.lean` | Actual persistent Source read/write phases composed with the captured-key mapping target certificate; static refusal remains distinct. |
 | `Backend/Aggregates/G18SourceMappingControls.lean` | Populated actual Env.cellTy client, account postcondition, journal undo, complete Source frame and stale/static controls. |
-
 | `Backend/Aggregates/G18MappingExpression.lean` | Actual resolved Boolean-key integer mapping reference/read/capture/assignment execution, complete success and static empty-revert outcomes. |
 | `Backend/Aggregates/G18MappingExpressionControls.lean` | Inhabited Source globals, pipeline/sample baselines, exact low horizons and certificate-derived wrong-output/stale-state controls. |
-
 | `Backend/Aggregates/G18ArrayAccess.lean` | Declared dynamic-array cell typing, actual stored-length/bounds executions and Source-to-intrinsic selected-cell read transport. |
 | `Backend/Aggregates/G18ArrayAccessControls.lean` | Populated Basket length/data witness, exact panic branches and missing-length/wrong-location/type-versus-bounds controls. |
+| `Backend/MemoryOps/PhysicalReferenceArray.lean` | Typed reference-parent pointer-byte layout and redirection. |
+| `Backend/MemoryOps/PhysicalReferenceChild.lean` | Reference parent framing across separated primitive writes. |
+| `Backend/MemoryOps/PhysicalLocalDeleteGoal.lean` | Centralized unproved physical assembly/client targets; existing fixture inputs are exported by PhysicalMemoryControls. |
