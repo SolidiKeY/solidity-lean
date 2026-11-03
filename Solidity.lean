@@ -1568,6 +1568,17 @@ import Solidity.Backend.Aggregates.G18Physical
 import Solidity.Backend.Aggregates.G18PhysicalControls
 import Solidity.Backend.Aggregates.G18ReferenceSequence
 import Solidity.Backend.Aggregates.G18Storage
+import Solidity.Backend.Aggregates.G18ArrayAccess
+import Solidity.Backend.Aggregates.G18ArrayAccessControls
+import Solidity.Backend.Aggregates.G18MappingExpression
+import Solidity.Backend.Aggregates.G18MappingExpressionControls
+import Solidity.Backend.Aggregates.G18ScalarMapping
+import Solidity.Backend.Aggregates.G18ScalarMappingControls
+import Solidity.Backend.Aggregates.G18SourceMapping
+import Solidity.Backend.Aggregates.G18SourceMappingControls
+import Solidity.Backend.Aggregates.G18StorageCellControls
+import Solidity.Backend.Aggregates.G18StorageClient
+import Solidity.Backend.Aggregates.G18StorageValues
 import Solidity.Backend.StructuredFlow.BranchControls
 import Solidity.Backend.StructuredFlow.BranchSelector
 import Solidity.Backend.StructuredFlow.CoreScopeControls

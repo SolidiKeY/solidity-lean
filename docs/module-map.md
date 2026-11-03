@@ -1912,3 +1912,19 @@ See [P8 admission](feature-work/p8-admission.md).
 |---|---|
 | `Backend/LabelExec/Step.lean`, `Backend/LabelExec/Fetch.lean`, `Backend/LabelExec/Packets.lean` | Byte-PC step over the numeric slice and JUMP/JUMPI/JUMPDEST; fetch behind a prefix; branch packets ([label execution](feature-work/backend-label-exec.md)). |
 | `Backend/LabelExec/Assembly.lean`, `Backend/LabelExec/Loops.lean`, `Backend/LabelExec/ScalarTransfer.lean` | Assembled jumps and tests; top-level loop header/backedge; `Scalar.step` lifting. |
+
+| `Backend/Aggregates/G18StorageValues.lean` | Actual Source/IR integer cell relation, derived save availability and disjoint write preservation. |
+| `Backend/Aggregates/G18StorageClient.lean` | Inhabited declared Basket array client and composed actual writes with ordered observations. |
+| `Backend/Aggregates/G18StorageCellControls.lean` | Populated wrong-output/order/phase, path/slot and width controls for scoped storage consumers. |
+
+| `Backend/Aggregates/G18ScalarMapping.lean` | All-key Source/intrinsic mapping write and published symbolic SLOAD/SSTORE copy consumer. |
+| `Backend/Aggregates/G18ScalarMappingControls.lean` | Populated unsigned/signed mapping certificates, complete frame and outcome/alias/width controls. |
+
+| `Backend/Aggregates/G18SourceMapping.lean` | Actual persistent Source read/write phases composed with the captured-key mapping target certificate; static refusal remains distinct. |
+| `Backend/Aggregates/G18SourceMappingControls.lean` | Populated actual Env.cellTy client, account postcondition, journal undo, complete Source frame and stale/static controls. |
+
+| `Backend/Aggregates/G18MappingExpression.lean` | Actual resolved Boolean-key integer mapping reference/read/capture/assignment execution, complete success and static empty-revert outcomes. |
+| `Backend/Aggregates/G18MappingExpressionControls.lean` | Inhabited Source globals, pipeline/sample baselines, exact low horizons and certificate-derived wrong-output/stale-state controls. |
+
+| `Backend/Aggregates/G18ArrayAccess.lean` | Declared dynamic-array cell typing, actual stored-length/bounds executions and Source-to-intrinsic selected-cell read transport. |
+| `Backend/Aggregates/G18ArrayAccessControls.lean` | Populated Basket length/data witness, exact panic branches and missing-length/wrong-location/type-versus-bounds controls. |
