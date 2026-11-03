@@ -1439,3 +1439,25 @@ and ordered code/stack/buffer/account observations are explicit controls.
 Finder and skeptic reviews found no semantic defect. Raw primitive agreement
 and the Scalar source certificate are prior work; this new fetched composition
 does not prove compiler/frame origin, Osaka approval or close a full opcode row.
+
+
+### General fetched unsigned order
+
+[UnsignedOrderConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderConsumer.lean)
+extends prior fixed-entry LT/GT coverage to arbitrary emitted sites, words,
+caller tails, gas and supplied destination arrays. Actual unsigned word order,
+code decoding, cost-three charged gates and native dispatch are derived, then
+the published `Scalar.uintLt` and `Scalar.uintGt` certificates connect the same
+typed operands and optional Boolean results. PC fit, input capacity, gas and
+fuel remain explicit. Array independence is local to these nonbranching
+instructions; no scanner or later jump claim follows.
+
+[UnsignedOrderControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderControls.lean)
+applies both typed producers directly and compares complete independent
+expected States. The word encoding of minus one is unsigned-greater than zero,
+while the existing signed comparator gives the opposite order. Reversed
+operands, high-bit/max/zero words, a legal 1024-word input, gas/fuel/arity
+refusals and ordered code/stack/buffer/account observations are controls.
+Independent finder and skeptic reviews cover premises, non-vacuity and prior
+coverage. Existing raw word bridges and source certificates remain read-only;
+compiler/frame origin, Osaka approval and full opcode correspondence stay open.

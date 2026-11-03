@@ -285,6 +285,8 @@ import SolidityBridge.RoadmapV15.P10.UnsignedCleanupFixtures
 import SolidityBridge.RoadmapV15.P10.UnsignedCleanupLayout
 import SolidityBridge.RoadmapV15.P10.UnsignedDivisionConsumer
 import SolidityBridge.RoadmapV15.P10.UnsignedDivisionControls
+import SolidityBridge.RoadmapV15.P10.UnsignedOrderConsumer
+import SolidityBridge.RoadmapV15.P10.UnsignedOrderControls
 import SolidityBridge.RoadmapV15.P10.WordPushConsumer
 import SolidityBridge.RoadmapV15.P10.WordPushControls
 import SolidityBridge.RoadmapV15.P10.WordPushFixtures
