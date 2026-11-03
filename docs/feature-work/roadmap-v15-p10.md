@@ -1241,3 +1241,13 @@ restored tail and a future source operand is assumed or proved. Repeated or
 infinite cycles, full source/compiler and Osaka correspondence, account/world,
 resource abstraction and transaction/trace composition remain open. All full
 opcode rows remain open.
+
+The independent finder and skeptic reviews identified confounded negative
+controls during development. The backedge-operand test was strengthened from
+gas 19 to gas 22 so that only its nonzero premise changes. For the finite cycle,
+the zero-operand test now retains the certified array, gas 30, fuel 9 and spill,
+and derives a separate complete terminal State at PC 73, gas 11 and instruction
+count 48 with cleared return data. Missing byte-zero membership remains a
+separate JUMP refusal test. Both corrected controls were kernel checked; the
+reviews found no remaining source defect. These controls establish distinctions
+between the particular native executions and do not close source correspondence.
