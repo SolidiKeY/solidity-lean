@@ -167,5 +167,8 @@ the original launch authorization from the subsequent integration authorization.
 
 ## Handoffs
 
-No implementation handoffs yet. Each checkpoint appends its handoff here (revision, theorems and
-premises, checks, remaining obligations).
+Each checkpoint appends its handoff here (revision, theorems and premises,
+checks, remaining obligations).
+
+- VY1 (2026-11-03): Yul syntax, static checks, closed execution and word
+  logic; see [inline-assembly-vy1.md](inline-assembly-vy1.md).

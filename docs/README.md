@@ -134,6 +134,7 @@ G18.02/.03 aggregates: [storage path typing, graph fields, memory writes and ali
 G36.01 structured flow: [target branch and exit selectors](feature-work/roadmap-g36-structured-flow.md).
 V09 compiler passes: [G24–G31 pass components](feature-work/roadmap-v09-compiler-passes.md).
 V10 storage operations: [copy, clear, push and pop over storage graphs and targets](feature-work/roadmap-v10-storage-operations.md).
+Inline assembly VY1: [Yul syntax, checking and word semantics](feature-work/inline-assembly-vy1.md).
 
 P8 partial checkpoints: [admission and failure resources](feature-work/p8-admission.md), including the [P8a frozen interface](feature-work/p8-admission.md#frozen-interface) and [settings and assembly boundary](feature-work/p8-admission.md#all-settings-and-producer-assembly), and the [P8b frozen consumer interface](feature-work/p8b-frozen-interface.md).
 

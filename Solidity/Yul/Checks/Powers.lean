@@ -1,0 +1,73 @@
+import Solidity.Yul.Words
+
+set_option Elab.async false
+
+/-! Kernel controls generated from integer-oracle vectors (generator not on master).
+Integer-oracle vectors are finite tests, not universal opcode agreement proofs. -/
+namespace Solidity.Yul.Checks.Powers
+
+theorem v0000 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 0)).val = 1 := by decide +kernel
+theorem v0001 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 1)).val = 0 := by decide +kernel
+theorem v0002 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 2)).val = 0 := by decide +kernel
+theorem v0003 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 3)).val = 0 := by decide +kernel
+theorem v0004 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 255)).val = 0 := by decide +kernel
+theorem v0005 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 256)).val = 0 := by decide +kernel
+theorem v0006 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 57896044618658097711785492504343953926634992332820282019728792003956564819967)).val = 0 := by decide +kernel
+theorem v0007 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 57896044618658097711785492504343953926634992332820282019728792003956564819968)).val = 0 := by decide +kernel
+theorem v0008 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 115792089237316195423570985008687907853269984665640564039457584007913129639935)).val = 0 := by decide +kernel
+theorem v0009 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 0)).val = 1 := by decide +kernel
+theorem v0010 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 1)).val = 1 := by decide +kernel
+theorem v0011 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 2)).val = 1 := by decide +kernel
+theorem v0012 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 3)).val = 1 := by decide +kernel
+theorem v0013 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 255)).val = 1 := by decide +kernel
+theorem v0014 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 256)).val = 1 := by decide +kernel
+theorem v0015 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 57896044618658097711785492504343953926634992332820282019728792003956564819967)).val = 1 := by decide +kernel
+theorem v0016 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 57896044618658097711785492504343953926634992332820282019728792003956564819968)).val = 1 := by decide +kernel
+theorem v0017 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 1 else word 115792089237316195423570985008687907853269984665640564039457584007913129639935)).val = 1 := by decide +kernel
+theorem v0018 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 0)).val = 1 := by decide +kernel
+theorem v0019 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 1)).val = 2 := by decide +kernel
+theorem v0020 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 2)).val = 4 := by decide +kernel
+theorem v0021 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 3)).val = 8 := by decide +kernel
+theorem v0022 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 255)).val = 57896044618658097711785492504343953926634992332820282019728792003956564819968 := by decide +kernel
+theorem v0023 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 256)).val = 0 := by decide +kernel
+theorem v0024 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 57896044618658097711785492504343953926634992332820282019728792003956564819967)).val = 0 := by decide +kernel
+theorem v0025 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 57896044618658097711785492504343953926634992332820282019728792003956564819968)).val = 0 := by decide +kernel
+theorem v0026 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 2 else word 115792089237316195423570985008687907853269984665640564039457584007913129639935)).val = 0 := by decide +kernel
+theorem v0027 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 0)).val = 1 := by decide +kernel
+theorem v0028 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 1)).val = 3 := by decide +kernel
+theorem v0029 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 2)).val = 9 := by decide +kernel
+theorem v0030 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 3)).val = 27 := by decide +kernel
+theorem v0031 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 255)).val = 30105856329313121259034165984855370080505235931950749611910678530185834636971 := by decide +kernel
+theorem v0032 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 256)).val = 90317568987939363777102497954566110241515707795852248835732035590557503910913 := by decide +kernel
+theorem v0033 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 57896044618658097711785492504343953926634992332820282019728792003956564819967)).val = 77194726158210796949047323339125271902179989777093709359638389338608753093291 := by decide +kernel
+theorem v0034 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 57896044618658097711785492504343953926634992332820282019728792003956564819968)).val = 1 := by decide +kernel
+theorem v0035 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 3 else word 115792089237316195423570985008687907853269984665640564039457584007913129639935)).val = 77194726158210796949047323339125271902179989777093709359638389338608753093291 := by decide +kernel
+theorem v0036 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 0)).val = 1 := by decide +kernel
+theorem v0037 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 1)).val = 57896044618658097711785492504343953926634992332820282019728792003956564819968 := by decide +kernel
+theorem v0038 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 2)).val = 0 := by decide +kernel
+theorem v0039 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 3)).val = 0 := by decide +kernel
+theorem v0040 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 255)).val = 0 := by decide +kernel
+theorem v0041 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 256)).val = 0 := by decide +kernel
+theorem v0042 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 57896044618658097711785492504343953926634992332820282019728792003956564819967)).val = 0 := by decide +kernel
+theorem v0043 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 57896044618658097711785492504343953926634992332820282019728792003956564819968)).val = 0 := by decide +kernel
+theorem v0044 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819968 else word 115792089237316195423570985008687907853269984665640564039457584007913129639935)).val = 0 := by decide +kernel
+theorem v0045 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 0)).val = 1 := by decide +kernel
+theorem v0046 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 1)).val = 57896044618658097711785492504343953926634992332820282019728792003956564819969 := by decide +kernel
+theorem v0047 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 2)).val = 1 := by decide +kernel
+theorem v0048 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 3)).val = 57896044618658097711785492504343953926634992332820282019728792003956564819969 := by decide +kernel
+theorem v0049 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 255)).val = 57896044618658097711785492504343953926634992332820282019728792003956564819969 := by decide +kernel
+theorem v0050 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 256)).val = 1 := by decide +kernel
+theorem v0051 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 57896044618658097711785492504343953926634992332820282019728792003956564819967)).val = 57896044618658097711785492504343953926634992332820282019728792003956564819969 := by decide +kernel
+theorem v0052 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 57896044618658097711785492504343953926634992332820282019728792003956564819968)).val = 1 := by decide +kernel
+theorem v0053 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 57896044618658097711785492504343953926634992332820282019728792003956564819969 else word 115792089237316195423570985008687907853269984665640564039457584007913129639935)).val = 57896044618658097711785492504343953926634992332820282019728792003956564819969 := by decide +kernel
+theorem v0054 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 0)).val = 1 := by decide +kernel
+theorem v0055 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 1)).val = 115792089237316195423570985008687907853269984665640564039457584007913129639935 := by decide +kernel
+theorem v0056 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 2)).val = 1 := by decide +kernel
+theorem v0057 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 3)).val = 115792089237316195423570985008687907853269984665640564039457584007913129639935 := by decide +kernel
+theorem v0058 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 255)).val = 115792089237316195423570985008687907853269984665640564039457584007913129639935 := by decide +kernel
+theorem v0059 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 256)).val = 1 := by decide +kernel
+theorem v0060 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 57896044618658097711785492504343953926634992332820282019728792003956564819967)).val = 115792089237316195423570985008687907853269984665640564039457584007913129639935 := by decide +kernel
+theorem v0061 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 57896044618658097711785492504343953926634992332820282019728792003956564819968)).val = 1 := by decide +kernel
+theorem v0062 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 115792089237316195423570985008687907853269984665640564039457584007913129639935 else word 115792089237316195423570985008687907853269984665640564039457584007913129639935)).val = 115792089237316195423570985008687907853269984665640564039457584007913129639935 := by decide +kernel
+
+end Solidity.Yul.Checks.Powers

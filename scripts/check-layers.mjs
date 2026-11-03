@@ -12,6 +12,79 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.RawSourceAdapterFor$/, // Generated VY1 new-module registration.
+  /^Solidity\.Yul\.RawSourceForIter$/, // Generated VY1 new-module registration.
+  /^Solidity\.Yul\.RawSourceAdapterUnchecked$/, // Generated VY1 new-module registration.
+  /^Solidity\.Yul\.RawSourceAdapterDoWhile$/, // Generated VY1 new-module registration.
+  /^Solidity\.Yul\.RawSourceAdapterIfElse$/, // Generated VY1 new-module registration.
+  /^Solidity\.Yul\.(RawCondition|RawIfElse|RawIfThen|RawWhile|RawLoopBody|RawControlledWhile|RawControlSequence|RawSequenceWhile|RawSourceAdapter|RawSourceAdapterLoop)$/, // VY1 concrete conditional Source transport.
+  /^Solidity\.Yul\.(RawCoherent|RawSequence)$/, // VY1 actual coherent Source block transport.
+  /^Solidity\.Yul\.RawSource$/, // VY1 additive actual Source statement adapter.
+  /^Solidity\.Yul\.(RawFrame|RawBoundary)$/, // VY1 H11 raw frame and explicit return boundary.
+  /^Solidity\.Yul\.BuiltinUse$/, // VY1 independent bare-builtin-use judgement.
+  /^Solidity\.Yul\.StatementTags$/, // VY1 intrinsic constructor metadata.
+  /^Solidity\.Yul\.TypingStatements$/, // VY1 actual direct statement certificate observer.
+  /^Solidity\.Yul\.TypingTargetPaths$/, // VY1 original target certificate/path laws.
+  /^Solidity\.Yul\.TypingLeafPaths$/, // VY1 exact relative leaf-path transport.
+  /^Solidity\.Yul\.(TypingLeaves|TypingLeafScope)$/, // VY1 intrinsic typed leaves and scoped preservation.
+  /^Solidity\.Yul\.TypingSites$/, // VY1 actual typing-context site observer.
+  /^Solidity\.Yul\.(LocalExprStatement|Checks\.LocalExprStatement)$/, // VY1 actual Source expression statements.
+  /^Solidity\.Yul\.(LocalCompareControl|Checks\.LocalCompareControl)$/, // VY1 comparison-selected LOCAL control.
+  /^Solidity\.Yul\.(LocalU8Compare|Checks\.LocalU8Compare)$/, // VY1 actual Source u8 comparisons.
+  /^Solidity\.Yul\.(OpenFunctions|OpenRun|OpenAgreement|OpenExpressionAgreement|OpenStatementAgreement|OpenCasesAgreement|OpenLoopAgreement|OpenComposition|OpenCalculus|OpenScoped|OpenLocal|Checks\.(OpenRun|OpenControls))$/, // VY1 full independent AST execution.
+  /^Solidity\.Yul\.(LocalCoordinates|CoordinateUpdates|CoordinateControl|DirectBindings|Checks\.DirectBindings)$/, // VY1 concrete direct binder composition.
+  /^Solidity\.Yul\.(DirectControl|Checks\.DirectControl)$/, // VY1 actual direct sequencing/control composition.
+  /^Solidity\.Yul\.(DirectUpdates|Checks\.DirectUpdates)$/, // VY1 direct raw assignment transport.
+  /^Solidity\.Yul\.(DirectWords|Checks\.DirectWords)$/, // VY1 direct original-AST expression agreement.
+  /^Solidity\.Yul\.(LocalU8Expr|LocalU8Source|LocalU8Agreement|Checks\.LocalU8Expr)$/, // VY1 checked Source u8 consumer.
+  /^Solidity\.Yul\.(LocalBoolControl|LocalBoolControlSource|LocalBoolControlAgreement|LocalBoolControlEvidence|Checks\.LocalBoolControl)$/, // VY1 actual Source short-circuit consumer.
+  /^Solidity\.Yul\.(LocalBoolExpr|LocalBoolAgreement|Checks\.LocalBoolExpr)$/, // VY1 actual Source bool/local consumer.
+  /^Solidity\.Yul\.(LocalOperations|Checks\.LocalOperations)$/, // VY1 explicit LOCAL operation boundaries.
+  /^Solidity\.Yul\.(LocalBlockLogic|Checks\.(LocalBlockLogic|LocalBlockDivergence))$/, // VY1 concrete LOCAL modal bridge.
+  /^Solidity\.Yul\.(LocalWordWrite|LocalWriteback|LocalBlock|Checks\.LocalBlock)$/, // VY1 actual pure-local block/writeback.
+  /^Solidity\.Yul\.(CleanFunctions|LocalWordView|Checks\.LocalWordView)$/, // VY1 actual Source pure-local word view.
+  /^Solidity\.Yul\.(CleanLocals|Checks\.CleanLocals)$/, // VY1 actual clean Source scalar initialization.
+  /^Solidity\.Yul\.(LocalState|Checks\.LocalState)$/, // VY1 actual Source state/clean bridge.
+  /^Solidity\.Yul\.(LocalValues|Checks\.LocalValues)$/, // VY1 intrinsic raw LOCAL extension.
+  /^Solidity\.Yul\.(SourceBoundary|Checks\.SourceBoundary)$/, // VY1 exact clean Source representation boundary.
+  /^Solidity\.Yul\.(WordInputs|WordAdapter|WordAdapterLogic|ScopedWordSyntax|Checks\.(WordAdapterFixtures|WordAdapterCode|WordAdapter|RawWordLogic|RawDivergence))$/, // VY1 actual pure raw-cell execution/rules.
+  /^Solidity\.Yul\.(WordLocals|Checks\.WordLocals)$/, // VY1 concrete logical raw-word/local bijection.
+  /^Solidity\.Yul\.(WordCells|Checks\.WordCells)$/, // VY1 logical raw mutable word fields.
+  /^Solidity\.Yul\.(ScopedSyntax|Checks\.ScopedSyntax)$/, // VY1 combined scoped static/tier preparation.
+  /^Solidity\.Yul\.(BlockScope|ScopedBlockTyping|Checks\.ScopedBlocks)$/, // VY1 single shared scoped checker/extraction.
+  /^Solidity\.Yul\.(OccurrenceCheck|OccurrenceSyntax|Checks\.Occurrences)$/, // VY1 original local-variable occurrence isolation.
+  /^Solidity\.Yul\.(ScopedAssignments|Checks\.ScopedAssignments)$/, // VY1 actual assignment namespace composition.
+  /^Solidity\.Yul\.BlockEnvironment$/, // VY1 unchanged shared block-name environment.
+  /^Solidity\.Yul\.(ScopedExpressions|Checks\.ScopedExpressions)$/, // VY1 supplemental expression namespace certificates.
+  /^Solidity\.Yul\.(ExternalKeys|ScopedNames|Checks\.ScopedNames)$/, // VY1 constructed scoped external-name inputs.
+  /^Solidity\.Yul\.(BlockExtract|BlockExtractLogic|WordPolicy|WordSyntax|Checks\.BlockExtract|Checks\.WordSyntax|Checks\.ExtractDivergence)$/, // VY1 actual closed source extraction/composition.
+  /^Solidity\.Yul\.(BlockTyping|ClosedSyntax|Checks\.BlockTyping|Checks\.ClosedSyntax)$/, // VY1 constructed closed-root typing.
+  /^Solidity\.Yul\.(DeclarationScope|DeclarationParse|Checks\.DeclarationScopes|Checks\.DeclarationParsing)$/, // VY1 whole-block declaration visibility.
+  /^Solidity\.Yul\.(WordArguments|WordExpressions|Checks\.WordExpressions)$/, // VY1 actual expression/call composition.
+  /^Solidity\.Yul\.(WordLoops|WordCoverage|Checks\.WordLoops)$/, // VY1 loop composition/closed statement coverage.
+  /^Solidity\.Yul\.(WordSwitch|Checks\.WordSwitch)$/, // VY1 actual switch composition.
+  /^Solidity\.Yul\.(WordBranches|Checks\.WordBranches)$/, // VY1 actual branch/binder composition.
+  /^Solidity\.Yul\.(WordTerms|Checks\.WordTerms)$/, // VY1 actual RHS modal composition.
+  /^Solidity\.Yul\.(LocalProjection|Checks\.LocalProjection)$/, // VY1 total raw scalar projection.
+  /^Solidity\.Yul\.(SourceContext|Checks\.SourceContext)$/, // VY1 concrete Source local contexts.
+  /^Solidity\.Yul\.(ScalarLocals|Checks\.ScalarLocals)$/, // VY1 intrinsic scalar projections.
+  /^Solidity\.Yul\.(WordLogic|WordRules|WordNotation|WordAgreement|Checks\.WordLogic)$/, // VY1 closed word logic.
+  /^Solidity\.Yul\.(WordUpdates|Checks\.WordUpdates)$/, // VY1 exact local word updates.
+  /^Solidity\.Yul\.(SourceTypes|Checks\.SourceTypes)$/, // VY1 declaration-backed local shapes.
+  /^Solidity\.Yul\.(SourceBindings|Checks\.SourceBindings)$/, // VY1 actual S01 local identities.
+  /^Solidity\.Yul\.(ExternalScope|Checks\.ExternalScopes)$/, // VY1 nested external contexts.
+  /^Solidity\.Yul\.(PlacementCheck|Checks\.Placement)$/, // VY1 source control placement.
+  /^Solidity\.Yul\.ReservedNames$/, // VY1 pinned inline identifier reservations.
+  /^Solidity\.Yul\.(DeclarationCheck|Checks\.Declarations)$/, // VY1 declaration legality.
+  /^Solidity\.Yul\.(TierPolicy|Checks\.Tiers)$/, // VY1 intrinsic tier policy.
+  /^Solidity\.Yul\.(AssignmentCheck|Checks\.Assignments)$/, // VY1 assignment checking.
+  /^Solidity\.Yul\.(ClosedHorizon|HorizonAdapter|Checks\.Horizons)$/, // VY1 horizon proofs/adapters.
+  /^Solidity\.Yul\.(ClosedRun|Checks\.ClosedRun)$/, // VY1 closed word execution.
+  /^Solidity\.Yul\.(ClosedPure|ClosedProfile|Checks\.ClosedPure)$/, // VY1 word effect profiles.
+  /^Solidity\.Yul\.(ClosedFunctions|Checks\.ClosedFunctions)$/, // VY1 finite lexical environments.
+  /^Solidity\.Yul\.(BlockHeaders|Checks\.Headers)$/, // VY1 direct syntax-to-header collection.
+  /^Solidity\.Yul\.(ExternalCheck|GlobalExternal|Checks\.External|Checks\.GlobalExternal)$/, // VY1 checked external resolution.
+  /^Solidity\.Yul(?:$|\.(?:Builtins|Words|WordLaws|Syntax|Static|CatalogLaws|ExpressionCheck|LocalScope|FunctionScope)$|\.Checks\.(?:(?:Arithmetic|Shifts)(?:\.Part[0-9][0-9])?|Bytes|Powers|Static|Contracts|Expressions|Scope)$)/, // Intrinsic assembly core; frontend adapters stay separate.
   /^Solidity\.(KeySort|Eqns|AST|TypeGraph|Scope|SpecSyntax|Hashes|Keccak|ERC7201|Secp256k1|RevertBytes|Syntax|Semantics|Signature|Update)$/,
   /^Solidity\.Syntax\.(Raw|Grammar|Contract|Scoped|Checked|Inlined|PushSource|Join)$/,
   /^Solidity\.(Semantics|Typing|Theory)\./,
@@ -30,6 +103,7 @@ const CORE = [
   /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|LoopInvariantWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary|KIntTwoAnchors)$/,
 ];
 const ELABORATOR = [
+  /^Solidity\.Yul\.WordPrint$/, // VY1 DSL printers stay outside the core.
   /^Solidity\.Tools\.SolCases$/, // External-source printer stays outside the core.
   /^Solidity\.Syntax\.(Elab|Quote|Splice)(\.|$)/,
   /^Solidity\.Calculus\.(Print[^.]*|Surface[^.]*|TacticSyntax|Quote|NamedTerm)(\.|$)/,

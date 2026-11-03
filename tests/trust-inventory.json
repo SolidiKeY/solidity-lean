@@ -1343,5 +1343,85 @@
     "file": "Solidity/Tools/LibraryTryReplay.lean",
     "kind": "unsafe",
     "code": "unsafe evalExpr Json (mkConst ``Json) expression"
+  },
+  {
+    "file": "Solidity/Yul/Builtins.lean",
+    "kind": "recovery",
+    "code": "def Builtin.admit {a r : Nat} (tier : Tier) (b : Builtin a r) : Except Refusal Unit :="
+  },
+  {
+    "file": "Solidity/Yul/Checks/Expressions.lean",
+    "kind": "recovery",
+    "code": "theorem gas_admission_refused : Builtin.admit .C .gas = .error (.compilerDependent gas\") := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem pure_at_A : Builtin.admit .A (.pure .\u00abmulmod\u00bb) = .ok () := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem physical_needs_B : Builtin.admit .A .mload = .error (.needsTier .B) := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem effects_need_C : Builtin.admit .B .call = .error (.needsTier .C) := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem gas_refused : Builtin.admit .C .gas = .error (.compilerDependent gas\") := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem msize_refused : Builtin.admit .C .msize = .error (.compilerDependent msize\") := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem pc_refused : Builtin.admit .C .pc = .error (.compilerDependent pc\") := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem codesize_refused : Builtin.admit .C .codesize = .error (.compilerDependent codesize\") := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem codecopy_refused : Builtin.admit .C .codecopy = .error (.compilerDependent codecopy\") := rfl"
+  },
+  {
+    "file": "Solidity/Yul/Checks/Static.lean",
+    "kind": "recovery",
+    "code": "theorem callcode_refused : Builtin.admit .C .callcode = .error .unsupportedCallcode := rfl"
+  },
+  {
+    "file": "Solidity/Yul/ClosedPure.lean",
+    "kind": "recovery",
+    "code": "(checkWordBuiltin b).isSome = true \u2194 b.admit .A = .ok () := by"
+  },
+  {
+    "file": "Solidity/Yul/TierPolicy.lean",
+    "kind": "recovery",
+    "code": "b.admit tier = .ok () \u2194 BuiltinP tier b := by"
+  },
+  {
+    "file": "Solidity/Yul/TierPolicy.lean",
+    "kind": "recovery",
+    "code": "unfold Builtin.admit BuiltinP"
+  },
+  {
+    "file": "Solidity/Yul/TierPolicy.lean",
+    "kind": "recovery",
+    "code": "b.admit tier"
+  },
+  {
+    "file": "Solidity/Yul/TierPolicy.lean",
+    "kind": "recovery",
+    "code": "change ((b.admit tier >>= fun _ => allFin _ (fun i => checkExpr tier (args i))) = .ok ()) \u2194 _"
   }
 ]

@@ -1867,3 +1867,13 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/StorageOps/TargetArrayCopy.lean`, `Backend/StorageOps/TargetArrayClear.lean`, `Backend/StorageOps/OutputRootComplete.lean` | Structured target loops; nested-array root composition. |
 | `Backend/StorageOps/RuntimeCopyRepeat.lean`, `Backend/StorageOps/RuntimeCopyComposition.lean`, `Backend/StorageOps/TargetArrayRepeat.lean` | Runtime-header repetition and footprint shrinkage. |
 | Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
+
+## Inline assembly (Yul)
+
+| Modules | Purpose |
+|---|---|
+| `Yul.lean`, `Yul/Words.lean`, `Yul/Builtins.lean`, `Yul/Syntax.lean`, `Yul/ExpressionCheck.lean` | Yul library root; words, builtins, intrinsic syntax and checking ([VY1](feature-work/inline-assembly-vy1.md)). |
+| `Yul/BlockTyping.lean`, `Yul/ClosedRun.lean`, `Yul/OpenComposition.lean` | Block typing; closed fuelled execution; direct tier-A runner. |
+| `Yul/WordLogic.lean`, `Yul/WordRules.lean`, `Yul/WordAdapterLogic.lean` | Shallow Lean-only word logic and raw-cell runner. |
+| `Yul/RawSource.lean`, `Yul/RawSourceAdapter.lean` | Concrete bool-control Source statement adapters. |
+| `Yul/Checks/**`, `Frontend/SolcJson/Yul*.lean` | Kernel controls and integer-oracle vectors; solc JSON ingress. |
