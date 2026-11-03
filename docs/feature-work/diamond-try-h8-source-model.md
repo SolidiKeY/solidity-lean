@@ -32,7 +32,6 @@ Generic Panic body (sched 2026-11-03), core only:
 - Still not on master: the Bridge `TryPanicOperational` adapter, which imports
   the relative closure above.
 
-
 ## Checked try-call producer checkpoint
 
 `Backend/TryCall/ProducerInterface.lean` states the intrinsic try-call site and the
@@ -51,8 +50,8 @@ Original compiled-site provenance remains the readonly-external P3 premise.
 
 ### Inhabited bounded producer
 
-`Backend/TryCall/PanicNormalization.lean` reuses the primitive proofs from
-owned checkpoint `2ae124d153a2` without editing the source modules. It derives
+`Backend/TryCall/PanicNormalization.lean` proves the two primitive glue steps
+without editing the source modules. It derives
 both outcomes of the generic known-self Panic body at every caller state.
 `PanicEmitter.lean` proves its conditional/store/revert expansion equivalent
 to that intrinsic `tryCall`, then supplies the V1 `ReturnClaim` and

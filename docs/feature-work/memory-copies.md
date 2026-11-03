@@ -49,4 +49,8 @@ empty code (`code_ne_nil`), and refutes `cost := W` (`default_cost_W_impossible`
 `word_cost_W_impossible`). V1 stays for compatibility; consumers should use V2.
 `Interface.lean` also gains Source-side default, storage-load and outcome
 certificates indexed by the actual Source run. Tying `cost` to the copied
-object's allocation size is still open.
+object's allocation size is still open, no V2 certificate is inhabited yet
+(only negative laws), and V2 `StorageWordCertificate.correct` does not pin the
+pushed address to the old cursor or keep V1's `Gap` clause. The new V1
+Source certificates are not yet inhabited; `NewArrayLengthPanicPremise.failure`
+assumes the panic equation.

@@ -12,13 +12,12 @@ from the terminal slice interface.
 
 `Premises.EncodingAt` requires actual `Source.encodeVals` execution. General
 custom-error and return encoding remains G41, v13-abi-world's
-`Backend/AbiWorld/ErrorLayout` and `ErrorRoundtrip` (not on this published base).
-`InternalBareRevert` is the existing P1 interface; internal-frame transport stays
-with v12-flow-calls. `IncompleteAt` retains source timeout and does not turn
-resource exhaustion into revert (VY5 H16). `TransientRestored` is only a source
-projection: physical transient representation/reset/rollback remains VY4 P7's
-`Backend/Transient`. It is consumed from published master (`e80eae28`, base `24149fd5`)
-for the supported empty-failure case below. No unavailable producer instance is
+`Backend/AbiWorld/ErrorLayout` and `ErrorRoundtrip` (not on this published
+base). `InternalBareRevert` is the existing P1 interface; internal-frame
+transport stays with v12-flow-calls. `IncompleteAt` retains source timeout and
+does not turn resource exhaustion into revert (VY5 H16). `TransientRestored` is
+only a source projection: physical transient representation/reset/rollback
+remains VY4 P7's `Backend/Transient`. No unavailable producer instance is
 postulated. These are explicit remaining obligations, not axioms.
 
 ## Checked statement increment
@@ -65,31 +64,19 @@ are checked-slice observations, not solc/EVM differential or whole-program tests
 
 ## Validation and limitations
 
-The same managed VM reports Lean 4.24.0 and Lake 5.0.0-src+797c613. The runtime
-`lake -f lakefile.g38.toml build Solidity.KeySort` passed (0.304 s, peak group
-RSS 48,553,984 bytes). All Lean checks use one thread, explicit `-j1` and the
-unchanged 300-second bound under the authorized `bounded.py` fallback: hard
-12 GiB per-process address space, sampled 10 GiB group-RSS and 12 GiB whole-VM
-stops, existing 16 GiB VM cgroup and actual disabled swap. This is not a writable
-12 GiB group-cgroup guarantee.
-
-The initial interface build failed on two namespace qualifications after
-150.077 s and 988,758,016 bytes peak RSS; the corrected build passed. A direct
-statement proof failed before unfolding the hypothesis's `ExceptT.run`; the
-shared scratch-tactic workflow found the retained proof. Further syntax,
+A direct statement proof failed before unfolding the hypothesis's `ExceptT.run`;
+the shared scratch-tactic workflow found the retained proof. Further syntax,
 instantiation and diagnostic import-map failures are retained as failures in the
 external checkpoint evidence. Plain per-file `lake env lean` initially could not
 locate content-addressed fetched artifacts; diagnostics use the matching actual
 Lake setup file, without copying artifacts or forging traces.
 
-The final affected target command is
-`lake -f lakefile.g38.toml build Solidity.Backend.FailurePaths.Controls`:
-exit 0, 5.257 s, peak group RSS 920,707,072 bytes. Printed axioms of the new
-simulation theorems are only `propext`, `Classical.choice`, `Quot.sound`.
-Independent read-only finder and skeptic reviews found no confirmed defect in
-the checked increment, while explicitly retaining the source/physical and
-return-statement boundaries above. Full end-of-lane gates remain for a completed
-G38 checkpoint; none is asserted passed by this focused increment.
+Printed axioms of the new simulation theorems are only `propext`,
+`Classical.choice`, `Quot.sound`. Independent read-only finder and skeptic
+reviews found no confirmed defect in the checked increment, while explicitly
+retaining the source/physical and return-statement boundaries above. Full
+end-of-lane gates remain for a completed G38 checkpoint; none is asserted passed
+by this focused increment.
 
 Remaining G38 work includes general runtime condition/argument and nonliteral return
 statement lowering, general G41 payload encoding, v12 internal-frame failure
@@ -134,17 +121,12 @@ The remaining exact producer boundaries are:
   unwind and G39 composition can be claimed; the source modules remain read-only.
 
 The sealed pre-publication checkpoint retained the authorized relay and all
-integration attempts. The active branch is rebased onto published `24149fd5`,
-which contains P7 as `e80eae28`; the relay dependency commits are absent from the
-active task range. P7 differs from `55c76891` only in three corrected docstrings.
-The active shared edit is the script-generated `Solidity.lean` registration;
-no P7 implementation or shared documentation is changed by the task range. The remaining P7 dependency targets (`SourceCallback`, `Mixed`,
-`WordControls`) built successfully in this VM: 5.958 s, peak group RSS
-725,331,968 bytes. The final owned typed-refusal target passed in 2.736 s,
-peak group RSS 884,117,504 bytes. Both independent reviewers found no confirmed
-issue in the empty-failure composition or residual typed boundary. Printed
-axioms remain only the three standard axioms (empty-code identity uses only
-`propext`). Full G38 completion and its full end-of-lane gates remain outstanding.
+integration attempts. The active shared edit is the script-generated
+`Solidity.lean` registration; no P7 implementation or shared documentation is
+changed by the task range. Both independent reviewers found no confirmed issue
+in the empty-failure composition or residual typed boundary. Printed axioms
+remain only the three standard axioms (empty-code identity uses only `propext`).
+Full G38 completion and its full end-of-lane gates remain outstanding.
 
 ## Published-base related-state check
 
@@ -157,14 +139,11 @@ unconditional; it is not mistaken for a general initial-state simulation.
 Neither `callback_load`, `callback_then_reset` nor the arbitrary-target
 `SourceCallback.source_target` is used as a simulation premise.
 
-The published-base affected command built both
-`Solidity.Backend.FailurePaths.TransientControls` and
-`Solidity.Backend.FailurePaths.Controls`: exit 0, 16.672 s, peak group RSS
-918,130,688 bytes. Core source, P1, existing Failure and V11 dependencies and the
-toolchain were unchanged across the published-base update. Independent finder
-and skeptic reviews found no confirmed defect in the related-state theorem,
-its inhabited control or the additive compatibility diff. General payload and
-whole-program completion claims remain outside this checkpoint.
+Core source, P1, existing Failure and V11 dependencies and the toolchain were
+unchanged across the published-base update. Independent finder and skeptic
+reviews found no confirmed defect in the related-state theorem, its inhabited
+control or the additive compatibility diff. General payload and whole-program
+completion claims remain outside this checkpoint.
 
 ## Return signatures and literal Boolean return statements
 
@@ -194,8 +173,6 @@ The return matcher is polymorphic in contexts and uses G21's polymorphic literal
 view, with syntax evidence eliminated only into its Prop certificate. This
 avoids indexed `declTuple`/call-result elimination without changing Source ASTs,
 representations or budgets. Failed direct attempts and successful scratch syntax
-transport checks are retained. The combined Boolean-return-control/parametric
-compiler build passed in 6.269 s (peak group RSS 903,401,472 bytes); the parametric
-reference controls passed in 3.031 s (908,365,824 bytes). Printed axioms remain
-standard only. Both independent reviewers found no confirmed defect; neither
-review promotes these statement boundaries to frontend or whole-program support.
+transport checks are retained. Printed axioms remain standard only. Both
+independent reviewers found no confirmed defect; neither review promotes these
+statement boundaries to frontend or whole-program support.

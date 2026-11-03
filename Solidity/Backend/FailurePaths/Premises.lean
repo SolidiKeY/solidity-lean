@@ -7,7 +7,7 @@ import Solidity.Backend.MemoryOps.PhysicalByteJournal
 # Explicit G38 producer boundaries
 
 These are signatures, not assumed instances. General ABI error encoding belongs
-to G41 (v13-abi-world); internal frame transport belongs to v12-flow-calls;
+to G41; internal frame transport belongs to the P1 runtime-frame work;
 resource/exhaustion classification belongs to VY5 H16; physical transient
 rollback belongs to VY4 P7. The authorized P7 relay is consumed by
 TransientUnwind for its supported empty-failure case; general payload transport

@@ -4,7 +4,7 @@ import Solidity.Evm.MemoryStructCopySource
 /-! Version 2: capacity-conditional certificates have a concrete fitting input.
 No V1 DefaultCertificate or StorageWordCertificate is used by this interface.
 Keeps/freshness, dynamic lengths and list overlap correctness are existing
-master theorems, not new certificate fields. See the lane document for sources.
+master theorems, not new certificate fields. See docs/feature-work/memory-copies.md.
 Alias heap identity alone is not a compiled alias certificate. -/
 namespace Solidity.Backend.MemoryCopies.V2
 open Solidity.Evm Solidity.Evm.Memory

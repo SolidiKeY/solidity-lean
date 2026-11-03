@@ -104,8 +104,11 @@ loop. Shared adapters alone do not prove arbitrary-loop termination.
 
 `Backend/StorageOps/StackWordWrite.lean` supplies a destination-only SSTORE
 program whose value arrives on the runtime stack. The above-core
-`Lowering/StorageOps/SourceWordWrite.lean` connects actual independent Source
-`storeVal` execution and typed word readback to that target operation. Positive
+`Lowering/StorageOps/SourceWordWrite.lean` states actual Source `storeVal`
+execution with typed word readback beside that target operation; the Source
+path and target slot are independent parameters sharing only the word, so no
+address correspondence is claimed (likewise `SourceArrayWrite.complete_numeric`
+relates path and base only through length, index and payload). Positive
 budget, writable ordinary storage and input word agreement are explicit. The
 existing `Val.word` excludes function/reference values; no new admission or
 encoding is inferred. Concrete controls preserve ordered Source/target context

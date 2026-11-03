@@ -1,8 +1,8 @@
 import Solidity.Evm.TryPanicSourceBodyImage
 
-/-! Existing Prog execution of the H8 normalized generic body. Only the two
-single-operation glue goals `PutThen` and `AllocateRun` remain open premises
-here; no desired reply, Xi result, source frame or whole-body execution is
+/-! Existing Prog execution of the H8 normalized generic body. The two
+single-operation glue goals `PutThen` and `AllocateRun` are premises here
+(proved for the known-self case in `Backend/TryCall/PanicNormalization`); no desired reply, Xi result, source frame or whole-body execution is
 assumed. -/
 namespace Solidity.Evm.TryPanicSourceExecution
 open TryByteImage TryPanicProducer TryPanicCarrier TryPanicSourceBody TryPanicSourceBodyImage

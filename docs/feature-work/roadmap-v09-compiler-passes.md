@@ -199,7 +199,6 @@ General source/world/backend composition remains open. Some concrete intrinsic w
 by `FreshBooleanCompilation.public_whole`; this is not general source closure.
 Remaining G25/G26 obligations stay explicit; G31 is owned by VY4.
 
-
 ### Reference-call capture and readback
 
 `Backend/Passes/ReferenceCallReadback.lean` consumes the published memory/tuple
@@ -222,11 +221,7 @@ independent Source evaluation, frontend correspondence, external EVM validation,
 public ABI or session/resource adequacy.
 
 Separate read-only finder and skeptic reviews found no confirmed defect.
-Thirteen generated guards pin the actual standard-only axiom reports. Two
-unvalidated control proofs exceeded the fixed 12-GiB cap; after splitting
-opaque run extraction and giving the selected certificate its complete call type,
-the complete controls passed without changing any budget or observation.
-
+Thirteen generated guards pin the actual standard-only axiom reports.
 
 ### Reached capture failure after a reference return
 
@@ -249,7 +244,6 @@ same cell contains seven, is unchanged. No failed-machine observation, Source
 frontend correspondence or public resource/session claim follows. Separate
 read-only finder and skeptic source reviews found no confirmed defect.
 
-
 ### Runtime argument failure before return allocation
 
 `Backend/Passes/ReferenceCallArgumentFailure.lean` uses one checked tuple call
@@ -270,7 +264,6 @@ cursor remains 130 while the private save pointer advances to 22. A successful
 branch of the same emitted call refutes an always-revert claim. These are
 intrinsic/symbolic-word results, not independent Source or public ABI/resource
 adequacy. Separate read-only finder and skeptic reviews found no confirmed defect.
-
 
 ### Independent Source arithmetic effects and emitted captures
 

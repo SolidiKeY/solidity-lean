@@ -36,7 +36,7 @@ structure CalldataSlice {D : Source.Layout} {element : Source.STy} {fixed : Opti
 This schema does not supply an emitted program or a runtime certificate.
 Its reference retains an intrinsically typed source table and destination
 state. Copy/slice bounds and representation hypotheses belong to the actual
-producer reference, not an invented admission condition in this lane. -/
+producer reference, not an invented admission condition here. -/
 structure CopyAgreement {D : Source.Layout} {C : Contract} {Γ Δ : Ctx}
     (copy : Source.Calldata D → Nat → Nat → Nat →
       (initial : State C Γ) → TRes (Out C initial.H Δ))

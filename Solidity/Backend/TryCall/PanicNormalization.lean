@@ -1,8 +1,8 @@
 import Solidity.Evm.TryPanicSourceExecution
 
 /-! Known-self Panic normalization for the checked try-call specialization.
-The two primitive proofs reuse the owned source checkpoint 2ae124d153a2;
-master still exposes them as parameters. No H16 source module is edited.
+It proves the two primitive glue steps that `TryPanicSourceExecution`
+takes as parameters. No H16 source module is edited.
 This is a source equation, not a compiled-code or deployment association. -/
 namespace Solidity.Backend.TryCall.PanicNormalization
 open Evm Evm.TryByteImage Evm.TryPanicProducer Evm.TryPanicSourceBody

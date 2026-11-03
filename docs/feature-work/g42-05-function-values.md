@@ -58,14 +58,10 @@ logs, resource measurements, failed attempts and checksums accompany the worker
 handoff; the original full gate remains dependent on VA1's H6 TypeExamples split.
 
 The per-theorem axiom audit reports only `propext`, `Quot.sound` and, for
-Evm.run theorems, `Classical.choice`; several observations are axiom-free.
-The five final per-file checks took 4.331 s with aggregate peak RSS 761,257,984
-bytes; evaluator observations plus the axiom audit took 2.514 s and 816,140,288
-bytes. These are whole-operation measurements, not per-proof timing claims.
-The authorized fallback enforces inherited 12 GiB address-space limits per
-process and sampled process-group/VM stops; it is not a 12 GiB cgroup guarantee.
-Registration, layering, trust and whitespace checks passed. Full cumulative
-build/TestSuite gates are not claimed by this partial checkpoint.
+Evm.run theorems, `Classical.choice`; several observations are axiom-free. These
+are whole-operation measurements, not per-proof timing claims. Registration,
+layering, trust and whitespace checks passed. Full cumulative build/TestSuite
+gates are not claimed by this partial checkpoint.
 
 The inequality extension received separate read-only finder and skeptic review;
 both found no defect. The earlier five-module measurements above remain the
