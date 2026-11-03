@@ -66,6 +66,19 @@ fails before static refusal. Heap/events/locals survive because these writes
 never changed them. This does not prove general frame or compiler rollback.
 The routine generic pair adapter remains uncompiled in TERRA-TODO.
 
+`SourceStorageCopyPrefix.prepared` proves the actual distinct-path Source
+`storeVal(storRef)` result for primitive integer arrays at original fuel
+`count+padding+4`. Snapshot and payload phases finish; cleanup reuses its phase
+fuel. Success commits the header last; timeout retains exactly the corresponding
+prefix of the existing copy journal and the old header. Runtime counts and
+padding are arbitrary naturals, with the original OLD-read/type premises.
+Uniform and populated controls distinguish shorter payload failure, snapshot
+failure, partial cleanup, the sharper success threshold, empty/varying lengths,
+self-copy and refusal. Complete outcomes, contexts and journal snapshots retain
+both raw absent cells and defaulted zero reads. Generic smaller-fuel cases,
+Source AST/address compilation and target realization remain open; this is not
+G35 memory-to-storage work.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

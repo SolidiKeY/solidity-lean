@@ -73,5 +73,6 @@
 
 | `Lowering/StorageOps/SourceWriteRollback.lean` | Typed static refusal and actual original-mark rollback for a captured account-write poststate |
 | `Lowering/StorageOps/SourceWriteRollbackControls.lean` | Full captured failure/restoration outcomes, nonempty prefixes, wrong-mark, skipped-bind and type/static order controls |
-| `Lowering/StorageOps/SourceStorageCopyPrefix.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Lowering/StorageOps/SourceStorageCopyPrefixControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Lowering/StorageOps/SourceStorageCopyPrefix.lean` | Prepared-fuel actual storage-to-storage Source copy: exact runtime journal prefix or header-last success |
+| `Lowering/StorageOps/SourceStorageCopyPrefixControls.lean` | Uniform and populated length/fuel controls, raw/default observations and complete outcomes/context/journal snapshots |
