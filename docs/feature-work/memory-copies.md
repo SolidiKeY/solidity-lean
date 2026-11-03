@@ -37,3 +37,16 @@ and exact reached machine execution at location boundaries (G27.05,
 G35.02/.03). They are not yet the producers' frozen APIs: the S03 size
 predicate and the layout/path/location/refusal observations still need exact
 statements.
+
+## Interface V2: fitting allocator witnesses
+
+`InterfaceV2.lean` (namespace `Solidity.Backend.MemoryCopies.V2`) replaces
+the vacuous capacity condition. `DefaultCertificate` and
+`StorageWordCertificate` each carry an `AllocatorWitness cost`: an actual
+represented allocator input whose cursor fits the cost. `StorageWordCertificate`
+also requires `0 < cost`. `InterfaceV2Laws.lean` derives `cost < W`, rules out
+empty code (`code_ne_nil`), and refutes `cost := W` (`default_cost_W_impossible`,
+`word_cost_W_impossible`). V1 stays for compatibility; consumers should use V2.
+`Interface.lean` also gains Source-side default, storage-load and outcome
+certificates indexed by the actual Source run. Tying `cost` to the copied
+object's allocation size is still open.
