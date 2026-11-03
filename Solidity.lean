@@ -1107,6 +1107,17 @@ import Solidity.Backend.MemoryOps.SourceUintMemory
 import Solidity.Backend.MemoryOps.SourceUintSequence
 import Solidity.Backend.MemoryOps.SourceUintWrite
 import Solidity.Backend.MemoryOps.SourceWrite
+import Solidity.Backend.MemoryOps.StructDefaults.Controls
+import Solidity.Backend.MemoryOps.StructDefaults.Frame
+import Solidity.Backend.MemoryOps.StructDefaults.Intrinsic
+import Solidity.Backend.MemoryOps.StructDefaults.Nested
+import Solidity.Backend.MemoryOps.StructDefaults.NestedIntrinsic
+import Solidity.Backend.MemoryOps.StructDefaults.NestedObservers
+import Solidity.Backend.MemoryOps.StructDefaults.NestedWord
+import Solidity.Backend.MemoryOps.StructDefaults.NestedWordControls
+import Solidity.Backend.MemoryOps.StructDefaults.SourcePair
+import Solidity.Backend.MemoryOps.StructDefaults.Word
+import Solidity.Backend.MemoryOps.StructDefaults.WordControls
 
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.CoreBoundary
@@ -1231,6 +1242,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveActivation
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveDescent
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn
+import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRef
 import Solidity.Backend.InternalDispatch
 import Solidity.Backend.InternalDispatch.Agreement
 import Solidity.Backend.InternalDispatch.Chain

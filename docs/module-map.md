@@ -1395,6 +1395,7 @@ see [the checkpoint boundary](feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/CalldataChildExtension.lean` | Context/heap extension of actual child-table correspondence. The initial |
 | `Backend/MemoryOps/CalldataChildren.lean` | Actual decoded child correspondence at the output heap. Separation is a |
 | `Backend/MemoryOps/CalldataNestedChildren.lean` | Compose existing typed child-table observations for reference-containing |
+| `Backend/MemoryOps/StructDefaults/*.lean` | G33 finite struct defaults: pair and nested struct `zeroVal`, intrinsic default allocation and compiled `DefaultPlan` runs, with controls ([G33](feature-work/roadmap-g33-struct-defaults.md)). |
 | `Backend/MemoryOps/CalldataRead.lean` | Published decoded calldata objects and typed memory slice reads |
 | `Backend/MemoryOps/CalldataSequence.lean` | Option composition of actual immutable decoded transfers. No payload is an |
 | `Backend/MemoryOps/CalldataSequenceChildren.lean` | Existing immutable child-table correspondence at actual sequence outputs. |
@@ -1684,6 +1685,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3RecursiveUnwind.lean` | Runtime descent prefixes at every horizon and LIFO return loop with captured caller recovery (target side only). |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean` | Actual `callRec` countdown family: all-horizon execution and `RecursiveReturnCoherence`; no v3 recursive instance. |
 | `Backend/InternalFlow/RuntimeFrameV3CallProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3CallProducerControls.lean` | v3 `PendingCallProducer` for primitive value-returning calls (`coverage`, `returns`, `bare_revert`, `make`) and an applied control with real success and revert runs. |
+| `Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean` | Typed memory-return and tuple call forms and the remaining `PendingCallProducer` target for them; no inhabitant. |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveActivation.lean`, `RuntimeFrameV3RecursiveDescent.lean`, `RuntimeFrameV3RecursiveHistory.lean` | Countdown family: checked activation bridge, descent at every reached horizon, saved parent history and nearest-parent pop. |
 | `Backend/InternalFlow/RuntimeFrameV3PairedUnwind.lean`, `RuntimeFrameV3RecursiveReturn.lean` | Countdown family: paired all-parent unwind and the descent-plus-unwind endpoint in the original `StateRepr` (hand-written image). |
 | `Backend/InternalFlow/RuntimeFrameMutation.lean`, `RuntimeFrameNested.lean`, `RuntimeFrameReferenceProgram.lean`, `RuntimeFrameCodeEquality.lean` | One-level and nested call compilers (`compileCall`), reference-returning programs, Boolean instruction-list equality. |
