@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceCalldataUintTransfer
 import Solidity.Backend.MemoryOps.SourceCalldataUintCopy
 import Solidity.Source.SemanticsExamples
 import Solidity.Evm.Memory
@@ -199,4 +200,125 @@ theorem paired_zero_runtime (off n : Nat) (capacity : n<2^256) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms paired_zero_runtime
+
+/-! Additional actual checked-transfer agreement clients. -/
+private def zeros : MObj H A := ⟨[u 0,u 0,u 0],by decide⟩
+private def zeroPair := hp.alloc (R := A) zeros
+
+/-- Both actual Source executions and actual decoded-table transfer reach the
+same computed intrinsic heap, rather than independently supplied successes. -/
+theorem checked_copy_client (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) frame (fuel+2) (sourceUintCalldataCopy (E := E0) (Γ := Γ) .here)).run (sy 0 3)=
+      (.ok (.val (.memRef rfl 2)),z) ∧
+    (Source.execS (G0 p) frame (fuel+3) nps none
+      (.expr (sourceUintCalldataCopy .here) : Source.RStmt E0 [] false .body Γ Γ)
+      (sy 0 3).1).run (.nil,(sy 0 3).2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+    checkedCalldataUints (sourceUintTable frame 0 decoded) 0 zeroPair.1 zeroPair.2 .dyn 0 3 0=some out ∧
+    checkedSourceFreshUints (E := E0) frame 0 3 hp (by decide)=.ok (some out) ∧
+    Heap.Keeps (List.prefix_append H [A]) hp out ∧
+    SourceUintMemoryAt z 2 out fresh .dyn ∧ Source.MemOK E0 SH z := by
+  have result := source_cd_uint_checked_copy (sy 0 3) hp id frame 0 3 (by decide) SH (memOK 0 3)
+  rw [actually_decoded] at result
+  obtain ⟨valid,direct,wrapped,run,keep,new,mok,old,loc,ex,events,logs,fn⟩ := result
+  have expression : (Source.evalE (G0 p) frame (fuel+2)
+      (sourceUintCalldataCopy (E := E0) (Γ := Γ) .here)).run (sy 0 3)=(.ok (.val (.memRef rfl 2)),z) := by
+    rw [source_cd_uint_eval (G0 p) frame fuel (sy 0 3) .here 0 3 rfl]
+    exact run
+  exact ⟨expression,source_expr_statement_run (G0 p) frame (fuel+2) nps _ (sy 0 3) z
+    (.val (.memRef rfl 2)) expression,direct,wrapped,keep,new,mok⟩
+
+/-- All old/zero-stage/final contents and IDs, actual immutable input, payload
+and absent unrelated table key are retained as ordered observations. -/
+theorem checked_stage_vectors :
+    [MObj.elems .dyn (hp.get left),MObj.elems .dyn (hp.get right)]=[old,neighbor] ∧
+    [MObj.elems .dyn (zeroPair.1.get (left.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (zeroPair.1.get (right.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (zeroPair.1.get zeroPair.2)]=[old,neighbor,[u 0,u 0,u 0]] ∧
+    [MObj.elems .dyn (out.get (left.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (out.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (out.get fresh)]=
+      [old,neighbor,payload] ∧
+    [left.id,right.id,zeroPair.2.id,fresh.id]=[0,1,2,2] ∧
+    (sourceUintTable frame 0 decoded).input=frame.cd ∧
+    calldataUints (sourceUintTable frame 0 decoded) 0=some payload ∧
+    (sourceUintTable frame 0 decoded).objects 1=none := by
+  refine ⟨?_,?_,complete_vectors.2.2.2.2.1,rfl,rfl,?_,sourceUintTable_other frame 0 1 decoded (by decide)⟩
+  · simp only [MObj.elems_dyn]
+    rfl
+  · unfold zeroPair
+    rw [(hp.keeps_alloc (R := A) zeros) left,(hp.keeps_alloc (R := A) zeros) right,
+      Heap.get_alloc,MObj.elems_wk,MObj.elems_wk,MObj.elems_wk]
+    simp only [MObj.elems_dyn,List.map_id'' (f := MVal.wk (List.prefix_append H [A]) (.prim .uint)) (fun _ => rfl)]
+    rfl
+  · rw [sourceUintTable_payload]
+    rfl
+
+/-- Omitting the write retains zeros, while the real checked operation changes
+both value2 and the high word. Capacity rejection remains Except.ok None. -/
+theorem checked_rejection_and_omission :
+    zeroPair.1≠out ∧
+    checkedSourceFreshUints (E := E0) frame 0 3 hp (by decide)≠.ok (some zeroPair.1) ∧
+    checkedSourceUints (E := E0) frame 0 3 hp left .dyn 1=.ok none ∧
+    checkedSourceUints (E := E0) frame 0 3 hp right .dyn 0=.ok none := by
+  have zeroRead : zeroPair.1.index fresh .dyn (u 0)=some (u 0) := by
+    change (MObj.elems .dyn _)[0]?=some (u 0)
+    rw [MObj.elems_dyn]
+    rfl
+  have newRead : out.index fresh .dyn (u 0)=some (u 2) := by
+    change (MObj.elems .dyn _)[0]?=some (u 2)
+    rw [MObj.elems_dyn]
+    rfl
+  have moved : zeroPair.1≠out := by
+    intro same
+    have observed := congrArg (fun h : Heap (H++[A]) => h.index fresh .dyn (u 0)) same
+    dsimp only at observed
+    rw [zeroRead,newRead] at observed
+    exact (by decide : u 0≠u 2) (Option.some.inj observed)
+  refine ⟨moved,?_,?_,?_⟩
+  · intro same
+    rw [(checked_copy_client .legacy 0 0).2.2.2.1] at same
+    exact moved (Option.some.inj (Except.ok.inj same)).symm
+  · apply (checkedSourceUints_none_iff frame 0 3 hp left .dyn 1 decoded actually_decoded).mpr
+    simp only [Heap.len,MObj.elems_dyn]
+    decide
+  · apply (checkedSourceUints_none_iff frame 0 3 hp right .dyn 0 decoded actually_decoded).mpr
+    simp only [Heap.len,MObj.elems_dyn]
+    decide
+
+/-- The actual combined copy/checked law also applies at every valid runtime
+zero-padding count, including the literal empty and element32 witnesses. -/
+theorem checked_zero_runtime (off n : Nat) (capacity : n<2^256) :
+    ∃ valid : (List.replicate n (u 0)).length<2^256,
+    let t := hp.alloc (R := A) (⟨List.replicate n (u 0),valid⟩ : MObj H A)
+    let q : Source.EMState E0 Γ :=
+      ((sy off n).1,{(sy off n).2 with heap := ((sy off n).2.heap.alloc ⟨SU,sourceUintMemory (List.replicate n (u 0))⟩).1})
+    checkedSourceFreshUints (E := E0) {F0 with cd := []} off n hp capacity=.ok (some t.1) ∧
+    (Source.cdToMem {F0 with cd := []} SU off n).run (sy off n)=(.ok (.val (.memRef rfl 2)),q) ∧
+    Heap.Keeps (List.prefix_append H [A]) hp t.1 ∧
+    SourceUintMemoryAt q 2 t.1 t.2 .dyn ∧ Source.MemOK E0 SH q := by
+  have result := source_cd_uint_checked_copy (sy off n) hp id {F0 with cd := []} off n capacity SH (memOK off n)
+  rw [sourceCalldataUintValues_empty _ rfl] at result
+  simp only [sourceUintValuePayload,List.map_replicate,calldataUint_sourceUint] at result
+  obtain ⟨valid,direct,wrapped,run,keep,new,mok,rest⟩ := result
+  exact ⟨valid,wrapped,run,keep,new,mok⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.checked_copy_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms checked_copy_client
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.checked_stage_vectors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms checked_stage_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.checked_rejection_and_omission' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms checked_rejection_and_omission
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.checked_zero_runtime' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms checked_zero_runtime
 end Solidity.Backend.MemoryOps.UintCopyControls
