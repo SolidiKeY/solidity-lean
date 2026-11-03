@@ -206,3 +206,28 @@ validation. Program, initializer and baseArgs remain supplied typed fixtures,
 not canonical elaboration or source-to-backend constructor lowering. No Source
 implementation, H19 balance fact, H22 ExtCall, profile, budget or transaction
 rollback semantics changed. General G44.01 and the full lane remain incomplete.
+
+## H21/H22 published-base integration
+
+The isolated constructor candidate is rebased onto published `603eef89`
+(including H22 `b4d2b5aa`). No owned constructor/aggregate modules construct
+`ExtCall`, so no call fields or semantics are changed. The affected constructor,
+creation-freshness and patch-order import closure and their scoped axiom guards
+pass against H22. H22 is no longer a hold; balance-dependent H19 and the other
+producer obligations remain open.
+
+H21 roots are regenerated with the published script. Owned module-map entries
+move from the index to the script-proposed memory-operations area. The private
+runtime Lake configuration mirrors the published library/cache configuration
+with explicit serial Lean arguments, preserving all proof and wall budgets.
+The helper branch retains the held Source extension; this published-base
+candidate does not replay it or claim combined-helper validation.
+
+The repaired H21 checkpoint's touched-module build passes (87 jobs,148s).
+The enclosing fixed180s command expires during the subsequent library build:
+exit124, with the library and later gates incomplete. It is not an H21 checkpoint
+pass or an inherited-failure waiver. No unchanged retry is made. A premature
+attempt was deliberately stopped (137) after staging treated the module-map
+helper's expected missing-row exit1 as a command error; that raw exit is retained.
+
+H21/H22 integration candidate: `38e5831c43f2a490228051611b6f703129b176a1` on published `603eef898f3a4a058a59e8fa7331b77f8cf6ec05`, in `/workspace/v14-constructor-master`. The held Source extension stays on this helper branch; its complete branch is not rebased or validated against H22. Consume the isolated candidate bundle for the published-base integration.
