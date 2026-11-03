@@ -430,14 +430,42 @@ the existing reached-prefix certificates rather than proving general Source or
 compiler coverage. [Pins](../../Solidity/Backend/Passes/CompilerScopedFailurePins.lean)
 retain exact observed standard-only axiom sets.
 
+## Effectful conditional-expression consumer
+
+[EffectfulConditionalAssignment](../../Solidity/Backend/Passes/EffectfulConditionalAssignment.lean)
+consumes V07's published `ConditionalAssignments.transport` and the same intrinsic
+assignment/capture/conditional program. Initial heterogeneous context alignment,
+Boolean reflection, all six slot mappings, the actual memory compilation Input
+and the result-value certificate remain explicit. Independent Source execution
+and the full caller post-relation compose with emitted execution, full
+MappedOutput and result readback. The machine, selected map and result word are
+chosen before all saved tails. No P8 producer or desired final relation is assumed.
+
+[Controls](../../Solidity/Backend/Passes/EffectfulConditionalControls.lean)
+instantiate one emitted program for both runtime Booleans. The selected true arm
+overwrites the caller's original condition while the fresh snapshot stays true.
+Complete observations include all five original locals, both captures, allocator
+cursor, independent sentinels and stack. Actual compiled eager and recapture/
+re-evaluation suffixes produce different complete vectors. Joined readback,
+saved tails and insufficient-frame refusal are checked.
+[Exact axiom guards](../../Solidity/Backend/Passes/EffectfulConditionalPins.lean)
+use only observed standard axioms. These are kernel and symbolic-word results,
+not public admission, world/ABI or external compiler/EVM adequacy.
+
+The changed-tree checkpoint attempt stopped at its original 300-second bound
+while checking the pre-existing Source/Horizon dependency; later global gates
+were not reached. The exact published conditional producer and these consumer
+files pass separate serial per-file checks against their checked imports.
+The failed combined attempt remains a failure, not a substituted passing gate.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
 whole-program acceptance, such as `FreshBooleanCompilation.public_whole`,
 is not general Source closure. G24 requires the actual Source/Lowering/world
 and full public Cert producers. G24.01 also retains the abstract slot/root/hash/
-data/offset interface and state/decode export; G24.03 retains its statement
-freeze obligation. G25/G26 retain their stated scalar, general
+data/offset interface and state/decode export; G24.03 remains unfrozen under C7; these adapters do not authorize its final
+interface freeze. G25/G26 retain their stated scalar, general
 source-admission and execution prerequisites. G31 belongs to VY4. ABI entry
 premises do not close G24.03 by themselves. Whole-lane completion still
 requires the original combined validation and producer obligations.

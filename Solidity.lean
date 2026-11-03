@@ -765,6 +765,9 @@ import Solidity.Backend.Passes.CompilerWholeScopeControls
 import Solidity.Backend.Passes.CompilerWholeScopePins
 import Solidity.Backend.Passes.CompilerScopedFailure
 import Solidity.Backend.Passes.CompilerScopedFailurePins
+import Solidity.Backend.Passes.EffectfulConditionalAssignment
+import Solidity.Backend.Passes.EffectfulConditionalControls
+import Solidity.Backend.Passes.EffectfulConditionalPins
 
 
 import Solidity.Lowering.V08.Audit
