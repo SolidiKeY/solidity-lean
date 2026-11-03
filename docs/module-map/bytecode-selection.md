@@ -63,3 +63,7 @@
 | `Backend/AbiEntry/LengthCheckInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/IRBranchPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/IRLoopPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Operational adapter for the H8 proof-only normalization. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicRelative.lean` | H8 relative closure over explicit missing P1/P3 producers. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicSourcePadding.lean` | H8 consumers of the published H7 logical padding supplier. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean` | H8 original-runtime consumers of the published H7 bounded scanner. |

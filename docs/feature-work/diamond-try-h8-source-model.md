@@ -82,3 +82,20 @@ remain separate unproved adapter inputs; installation and same-invocation
 frame provenance remain explicit P3 premises. No original-site
 instance, native provider correctness or complete compiled-EVM correspondence
 is asserted.
+
+### H22 call fields
+
+`Evm/TryPanicCallMetadata.lean` carries mode and invocation on the actual
+intrinsic call consumed by the caller. `Frontend/SolcJson/TryPanicCallMetadata.lean`
+derives the original call's static mode from f's pure callee metadata and
+its site79 tag from the resolved call node, rather than c's nonpayable metadata
+or argument78/function7. No generic lowering/default is changed.
+
+The Bridge `Site.call` is now consumed by `callerForm`; P3 names that same
+record with `call.mode = .static` and `call.invocation = .site 79` hypotheses.
+There is no call-kind type index or detached source-invocation relation.
+The dynamic frame invocation counter remains separate. Current source semantics
+and oracle keys ignore both fields, as the metadata transport/control lemmas
+show; static restrictions and original execution/frame association are not
+inferred from a tag. Original-site normalization, emitted-plan association and
+all other P3 frame/installation/input/resource premises remain open.
