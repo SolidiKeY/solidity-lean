@@ -423,3 +423,39 @@ physical base-map, bytecode or end-to-end compiler correspondence claim. It does
 not discharge the remaining P8 concrete-producer/adequacy, runtime-frame payload
 transport or H16/H19 obligations. Source evaluator and intrinsic representations
 are unchanged.
+
+
+## Finite forwarding-chain certificates
+
+`Progress/ForwardingChain.lean` records a ready base catalogue and finitely many
+single-return forwarding extensions. Each added entry has actual source-function
+membership, signature and selected-body equality, supported defaults, plain
+extraction and a composed expression referring to the earlier certified set.
+`forwardFresh` refuses an added declaration already present in either the value
+or prior-call list. No semantic correctness oracle for the new body is stored.
+
+`forwarding_chain_sound` derives call progress and conditional memory
+preservation by induction on this certificate. With the separate union-coverage
+check, `forwarding_chain_program_calls` derives `ReadyProgramCalls` for every
+function in the source unit, and `forwarding_chain_composition` admits those
+functions inside composed expressions and arguments. The declaration-provenance
+helper uses the existing P9 check's environment/unit correspondence.
+
+This is finite proof construction, not an automatic graph recognizer or a
+statement that the whole runtime graph is acyclic. The base may contain duplicate
+entries or overlap the value list; existing value callees may recurse; distinct
+declarations may dispatch to one implementation. Freshness applies to each new
+extension. Coverage is inclusion, not an exact disjoint partition. Progress
+retains the existing horizon/timeout semantics and does not imply termination.
+
+`ForwardingChainControls` consumes the complete-unit theorem on the actual
+legacy-elaborated allocating/relay unit. Both evaluator pipelines execute the
+base leaf and the added relay, validate their returned references and retain the
+caller prefix. The complete composition theorem validates caller success and
+callee-panic restoration. Duplicate-addition, value-list overlap and omission of
+either function have explicit negative controls; these test certificate guards,
+not executable frontend refusal. Finder and skeptic reviews found no confirmed
+defect. Validation targets are `Solidity.Source.Progress.ForwardingChain` and
+`ForwardingChainControls`; printed axioms are standard only. General body shapes,
+recursive-memory compiler support, source recognizer completeness, physical
+base-map and compiler/EVM agreement remain outside this source-only result.

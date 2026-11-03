@@ -439,3 +439,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/CallCompositionControls.lean` | Inhabited nested alias returns, argument growth and exact halt/refusal controls. |
 | `Source/Progress/ForwardingReturns.lean` | Actual single-return forwarding bodies and calls derive progress and memory preservation from composed expressions. |
 | `Source/Progress/ForwardingControls.lean` | Elaborated primitive-argument memory-return relay with escaped references and callee-panic restoration. |
+| `Source/Progress/ForwardingChain.lean` | Finite source forwarding certificates derive per-entry and whole-unit call guarantees. |
+| `Source/Progress/ForwardingChainControls.lean` | Inhabited base/relay, caller restoration and freshness/coverage controls. |
