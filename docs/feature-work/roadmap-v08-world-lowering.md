@@ -3931,3 +3931,7 @@ The published feature-catalogue/HashingNames split justified a new bounded Decis
 ### Payment account-image framing
 
 `WorldImageAccess.account_transfer` derives preservation of code/store AccountImage fields from an actual successful Source transfer, including same-owner and two-update cases. Its populated client retains full account/nonworld observations and ordered journal entries, proves explicit rollback and end without refund, and refutes full Image preservation with unchanged target funds. This is neither a payment-dispatch/compiler theorem nor a replacement for ledger/body/frame/admission producers.
+
+### Installed-account funded fragment
+
+`InstalledPaymentImageControls.actual_client` joins an actual Source transfer and actual payable intrinsic empty-entry call with a proved full reached WorldImage, including funds at every address. Both accounts are explicitly supplied as installed; no deployment or external-call admission is inferred. Complete account/journal/nonworld observations, reset composition and a stale-funds negative retain the boundary: this is a funded fragment, not canonical source dispatch/body/frame/bytecode or whole-unit adequacy.

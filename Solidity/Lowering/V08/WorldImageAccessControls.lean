@@ -725,3 +725,454 @@ theorem wrong_journal_identity : paid.ex ≠ populated.ex := by
 #guard_msgs in
 #print axioms wrong_journal_identity
 end Solidity.Lowering.V08.WorldPaymentImageControls
+
+/-! A funded fragment with two explicitly supplied installed accounts. This is
+not deployment or external-call admission. The actual source transfer and paid
+intrinsic entry are connected by a full reached Image, not just paired runs. -/
+namespace Solidity.Lowering.V08.InstalledPaymentImageControls
+open Solidity
+open SourceEnvironmentControls
+
+def opened : Source.St E :=
+  {populated with ex := populated.ex.apply (.account sender (fun account => {account with code:=some 0}))}
+
+theorem opened_code (address : Roadmap.Address) :
+    (opened.ex.world.accounts address).code =
+      if address=sender ∨ address=self then some 0 else none := by
+  by_cases same : address=sender
+  · subst address; rfl
+  · simp only [opened,Source.ExecState.apply,Source.World.set,same,↓reduceDIte]
+    rw [WorldCatalogueControls.source_code]
+    simp only [false_or]
+
+theorem locate {address : Roadmap.Address} {code : Nat}
+    (present : (opened.ex.world.accounts address).code = some code) :
+    (address=sender ∨ address=self) ∧ code=0 := by
+  rw [opened_code] at present
+  split at present
+  · rename_i owner
+    exact ⟨owner,(Option.some.inj present).symm⟩
+  · cases present
+
+def inputs (pipeline : Roadmap.Pipeline) :
+    WorldCatalogue.Inputs (global pipeline) WorldResetControls.kindOf WorldResetControls.relation opened where
+  installed address code present := by
+    have zero := (locate present).2
+    subst code
+    by_cases same : address=self
+    · subst address
+      exact ⟨"C",(),WorldResetControls.store true true,rfl,rfl,⟨true,true,rfl,rfl,rfl⟩⟩
+    · have atSender := (locate present).1.resolve_right same
+      subst address
+      exact ⟨"C",(),WorldResetControls.store false false,rfl,rfl,⟨false,false,rfl,rfl,rfl⟩⟩
+  roles := fun _ => .contractCode
+  library_role _ _ _ := rfl
+
+def world (pipeline : Roadmap.Pipeline) : ContractWorld.World WorldResetControls.catalog :=
+  WorldCatalogue.assemble (inputs pipeline) WorldCatalogueControls.environment opened.events
+    (EnvironmentProjection.liftWord (global pipeline).timestamp)
+
+theorem initial_image (pipeline : Roadmap.Pipeline) :
+    WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment opened.events opened (world pipeline) :=
+  WorldCatalogue.assembled_image (inputs pipeline) _ _ _
+
+def paid : Source.St E :=
+  {opened with ex := opened.ex.run WorldPaymentImageControls.operations}
+
+theorem source_payment :
+    opened.ex.transfer sender self WorldPaymentImageControls.amount = some paid.ex := rfl
+
+def context : ContractWorld.Context :=
+  {sender:=EnvironmentProjection.liftAddress sender,
+   mode:=.ordinary (EnvironmentProjection.liftWord WorldPaymentImageControls.amount)}
+def entry : ContractWorld.Entry WorldResetControls.Cell Unit := .unit .nil true
+
+def after (pipeline : Roadmap.Pipeline) : ContractWorld.World WorldResetControls.catalog :=
+  {world pipeline with
+    accounts:=fun address => if address=EnvironmentProjection.liftAddress self
+      then some ⟨(),WorldResetControls.store true true⟩ else (world pipeline).accounts address
+    funds:=fun address => if address=EnvironmentProjection.liftAddress self then ⟨12,by decide +kernel⟩
+      else if address=EnvironmentProjection.liftAddress sender then ⟨88,by decide +kernel⟩
+      else (world pipeline).funds address}
+
+theorem owner_account (pipeline : Roadmap.Pipeline) :
+    (world pipeline).accounts (EnvironmentProjection.liftAddress self) =
+      some ⟨(),WorldResetControls.store true true⟩ := rfl
+
+theorem sender_funds (pipeline : Roadmap.Pipeline) :
+    (world pipeline).funds (EnvironmentProjection.liftAddress sender) = ⟨93,by decide +kernel⟩ := rfl
+
+theorem owner_funds (pipeline : Roadmap.Pipeline) :
+    (world pipeline).funds (EnvironmentProjection.liftAddress self) = ⟨7,by decide +kernel⟩ := rfl
+
+def entered (pipeline : Roadmap.Pipeline) : State WorldResetControls.Cell [] :=
+  {storage:=WorldResetControls.store true true,H:=[],heap:=Heap.empty,env:=(),
+   net:=[((EnvironmentProjection.liftAddress sender).1,5)],selfBalance:=⟨12,by decide +kernel⟩,
+   tx:=context.tx (world pipeline) (EnvironmentProjection.liftAddress self)}
+
+theorem enter_actual (pipeline : Roadmap.Pipeline) :
+    (world pipeline).enter (k:=()) (EnvironmentProjection.liftAddress self) context
+      (WorldResetControls.store true true) true = .ok (entered pipeline) := by
+  simp only [ContractWorld.World.enter, context, ContractWorld.Context.value,
+    ContractWorld.Context.isStatic,sender_funds,owner_funds]
+  rfl
+
+theorem settle_actual (pipeline : Roadmap.Pipeline) :
+    ContractWorld.settle (world pipeline).funds (EnvironmentProjection.liftAddress self)
+      [((EnvironmentProjection.liftAddress sender).1,5)] =
+      .ok (fun address => if address=EnvironmentProjection.liftAddress sender
+        then ⟨88,by decide +kernel⟩ else (world pipeline).funds address) := by
+  have different : (EnvironmentProjection.liftAddress sender).1 ≠
+      (EnvironmentProjection.liftAddress self).1 := by decide +kernel
+  have address : ContractWorld.Address.ofWord? (EnvironmentProjection.liftAddress sender).1 =
+      some (EnvironmentProjection.liftAddress sender) := by decide +kernel
+  have balance : PrimTy.ofInt? .uint (((world pipeline).funds
+      (EnvironmentProjection.liftAddress sender)).1 - 5) =
+      some (show PrimTy.uint.Denote from ⟨88,by decide +kernel⟩) := by
+    rw [sender_funds]
+    decide +kernel
+  unfold ContractWorld.settle
+  rw [ContractWorld.settle.go.eq_2]
+  rw [if_neg (show ¬ ((EnvironmentProjection.liftAddress sender).1 ∈
+      ([] : List ContractWorld.Word) ∨ (EnvironmentProjection.liftAddress sender).1 =
+      (EnvironmentProjection.liftAddress self).1) from
+    fun h => h.elim List.not_mem_nil different)]
+  rw [address]
+  have decoded : TRes.ofOpt (some (EnvironmentProjection.liftAddress sender)) =
+      Except.ok (EnvironmentProjection.liftAddress sender) := rfl
+  rw [decoded]
+  change (do
+    let value ← TRes.ofOpt (PrimTy.ofInt? .uint (((world pipeline).funds
+      (EnvironmentProjection.liftAddress sender)).1 - 5))
+    pure (fun address => if address=EnvironmentProjection.liftAddress sender then value
+      else (world pipeline).funds address)) = _
+  rw [balance]
+  rfl
+
+theorem finish_actual (pipeline : Roadmap.Pipeline) :
+    (world pipeline).finish (k:=()) (EnvironmentProjection.liftAddress self) (entered pipeline) =
+      .ok (after pipeline) := by
+  unfold ContractWorld.World.finish
+  rw [show (entered pipeline).net = [((EnvironmentProjection.liftAddress sender).1,5)] from rfl,
+    settle_actual]
+  rfl
+
+theorem target_payment (pipeline : Roadmap.Pipeline) :
+    (world pipeline).call (⟨EnvironmentProjection.liftAddress self⟩ : ContractWorld.Handle ())
+      entry context = .ok (after pipeline,()) := by
+  have lookup : (world pipeline).storage?
+      (⟨EnvironmentProjection.liftAddress self⟩ : ContractWorld.Handle ()) =
+      some (WorldResetControls.store true true) := by
+    simp only [ContractWorld.World.storage?,owner_account,bind,Option.bind]
+    rfl
+  have role : (world pipeline).isLibrary () = false := rfl
+  simp only [ContractWorld.World.call,ContractWorld.World.callFrame,role,
+    (show context.isStatic = false from rfl),Bool.false_and,Bool.false_or,
+    Bool.false_eq_true,↓reduceIte,lookup,entry,ContractWorld.Entry.unit,TRes.ofOpt,
+    bind,Except.bind,enter_actual,Prog.run_nil,finish_actual]
+  rfl
+
+theorem after_accounts (pipeline : Roadmap.Pipeline) :
+    (after pipeline).accounts = (world pipeline).accounts := by
+  funext address
+  by_cases same : address=EnvironmentProjection.liftAddress self
+  · subst address
+    simp only [after]
+    exact (owner_account pipeline).symm
+  · simp only [after,same,if_false]
+
+theorem paid_code (address : Roadmap.Address) :
+    (paid.ex.world.accounts address).code = (opened.ex.world.accounts address).code := by
+  by_cases atSelf : address=self
+  · subst address; rfl
+  · by_cases atSender : address=sender
+    · subst address; rfl
+    · simp only [paid,WorldPaymentImageControls.operations,Source.ExecState.run,
+        Source.ExecState.apply,Source.World.set,atSelf,atSender,↓reduceDIte]
+
+theorem post_accounts (pipeline : Roadmap.Pipeline) (address : ContractWorld.Address) :
+    WorldImage.AccountImage (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      paid (after pipeline) address := by
+  have represented := (WorldImageAccess.account_transfer (g:=global pipeline) (source:=opened)
+    sender self WorldPaymentImageControls.amount paid.ex source_payment address).2
+      ((initial_image pipeline).accounts address)
+  unfold WorldImage.AccountImage at represented ⊢
+  rw [after_accounts]
+  exact represented
+
+theorem post_funds (pipeline : Roadmap.Pipeline) :
+    (after pipeline).funds = EnvironmentProjection.sessionFunds paid.ex.world
+      (global pipeline).fixed WorldCatalogueControls.environment paid.events := by
+  funext address
+  by_cases atSelf : address=EnvironmentProjection.liftAddress self
+  · subst address
+    rw [show (after pipeline).funds (EnvironmentProjection.liftAddress self) =
+      (⟨12,by decide +kernel⟩ : Semantics.Word) from rfl]
+    rw [EnvironmentProjection.session_funds_installed paid.ex.world
+      (global pipeline).fixed WorldCatalogueControls.environment paid.events self (by rfl)]
+    rfl
+  · by_cases atSender : address=EnvironmentProjection.liftAddress sender
+    · subst address
+      rw [show (after pipeline).funds (EnvironmentProjection.liftAddress sender) =
+        (⟨88,by decide +kernel⟩ : Semantics.Word) from rfl]
+      rw [EnvironmentProjection.session_funds_installed paid.ex.world
+        (global pipeline).fixed WorldCatalogueControls.environment paid.events sender (by rfl)]
+      rfl
+    · have notSelf : EnvironmentProjection.lowerAddress address ≠ self := by
+        intro same
+        apply atSelf
+        rw [← EnvironmentProjection.lift_lower_address address,same]
+      have notSender : EnvironmentProjection.lowerAddress address ≠ sender := by
+        intro same
+        apply atSender
+        rw [← EnvironmentProjection.lift_lower_address address,same]
+      have absent : (opened.ex.world.accounts (EnvironmentProjection.lowerAddress address)).code = none := by
+        rw [opened_code]
+        simp only [notSender,notSelf,false_or,if_false]
+      have paidAbsent := (paid_code (EnvironmentProjection.lowerAddress address)).trans absent
+      simp only [after,atSelf,atSender,if_false]
+      change EnvironmentProjection.sessionFunds opened.ex.world (global pipeline).fixed
+          WorldCatalogueControls.environment opened.events address = _
+      simp only [EnvironmentProjection.sessionFunds,absent,paidAbsent,
+        Option.isSome_none,Bool.false_eq_true,if_false]
+      rfl
+
+theorem post_image (pipeline : Roadmap.Pipeline) :
+    WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment paid.events paid (after pipeline) where
+  accounts := post_accounts pipeline
+  funds := post_funds pipeline
+  roles := (initial_image pipeline).roles
+
+def sourceFrame : Source.Fr := {frame with value:=WorldPaymentImageControls.amount}
+
+theorem frame_inputs : LibraryFrameTransport.FrameInputs sourceFrame
+    (⟨EnvironmentProjection.liftAddress self⟩ : ContractWorld.Handle ()) context :=
+  ⟨rfl,rfl,rfl,rfl⟩
+
+/-- Exact ordered raw balances, returned-entry context, journals, installed
+identities and selected persistent/transient cells at all paid boundaries. -/
+theorem ordered_observations (pipeline : Roadmap.Pipeline) :
+    ((opened.ex.world.accounts sender).balance.val,(opened.ex.world.accounts self).balance.val,
+     opened.ex.journal.length,(paid.ex.world.accounts sender).balance.val,
+     (paid.ex.world.accounts self).balance.val,paid.ex.journal.length,
+     ((world pipeline).balance (EnvironmentProjection.liftAddress sender)).1,
+     ((world pipeline).balance (EnvironmentProjection.liftAddress self)).1,
+     ((after pipeline).balance (EnvironmentProjection.liftAddress sender)).1,
+     ((after pipeline).balance (EnvironmentProjection.liftAddress self)).1,
+     (paid.ex.world.accounts sender).code,(paid.ex.world.accounts self).code,
+     (paid.ex.world.accounts sender).nonce,(paid.ex.world.accounts self).nonce,
+     (paid.ex.world.accounts sender).storage.read saved,
+     (paid.ex.world.accounts self).storage.read saved,
+     (paid.ex.transient.cells sender).read scratch,(paid.ex.transient.cells self).read scratch) =
+      (93,7,4,88,12,6,93,7,88,12,some 0,some 0,0,1,
+       some (.bool false),some (.bool true),some (.bool false),some (.bool true)) ∧
+    ((entered pipeline).tx.msgSender.1,(entered pipeline).tx.selfAddress.1,
+     (entered pipeline).tx.msgValue.1,(entered pipeline).tx.timestamp.1,
+     (entered pipeline).selfBalance.1,(entered pipeline).net) =
+      (1,2,5,12345,12,[(Controls.sender.1,5)]) := ⟨rfl,rfl⟩
+
+theorem nonworld_retained :
+    paid.heap = opened.heap ∧ paid.events = opened.events ∧ paid.logs = opened.logs ∧
+    paid.fnLocals = opened.fnLocals ∧ paid.ex.transient = opened.ex.transient ∧
+    paid.heap.get 0 = some ⟨.bytes .memory,.bytes [0,255]⟩ ∧ paid.heap.next = 1 ∧
+    paid.ex.journal = .account self (opened.ex.world.accounts self) ::
+      .account sender (opened.ex.world.accounts sender) :: opened.ex.journal :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+theorem other_accounts (address : Roadmap.Address) (notSelf : address ≠ self)
+    (notSender : address ≠ sender) :
+    paid.ex.world.accounts address = opened.ex.world.accounts address := by
+  simp only [paid,WorldPaymentImageControls.operations,Source.ExecState.run,
+    Source.ExecState.apply,Source.World.set,notSelf,notSender,↓reduceDIte]
+
+theorem source_reads (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (global pipeline) sourceFrame 3
+      (.balance (.addressLit [⟨1,by decide +kernel⟩]) :
+        Source.RExpr E [.bool] (.int Source.IntTy.u256))).run (locals,paid) =
+      (.ok (.val (Source.intWrap Source.IntTy.u256 88)),(locals,paid)) ∧
+    (Source.evalE (global pipeline) sourceFrame 3
+      (.balance (.addressLit [⟨2,by decide +kernel⟩]) :
+        Source.RExpr E [.bool] (.int Source.IntTy.u256))).run (locals,paid) =
+      (.ok (.val (Source.intWrap Source.IntTy.u256 12)),(locals,paid)) := ⟨rfl,rfl⟩
+
+/-- Explicitly paired reset operations, not an admitted transaction or an
+inferred rollback. The actual paid funds remain in the resulting image. -/
+theorem reset_image (pipeline : Roadmap.Pipeline) :
+    WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment paid.events (SourceTransient.endExecution paid)
+      (after pipeline).resetTransient :=
+  WorldImage.image_reset WorldResetControls.slots (post_image pipeline)
+
+theorem reset_observations (pipeline : Roadmap.Pipeline) :
+    ((SourceTransient.endExecution paid).ex.world,
+     (SourceTransient.endExecution paid).ex.journal.length,
+     ((SourceTransient.endExecution paid).ex.transient.cells sender).read scratch,
+     ((SourceTransient.endExecution paid).ex.transient.cells self).read scratch,
+     ((after pipeline).resetTransient.balance (EnvironmentProjection.liftAddress sender)).1,
+     ((after pipeline).resetTransient.balance (EnvironmentProjection.liftAddress self)).1) =
+      (paid.ex.world,0,some (.bool false),some (.bool false),88,12) := rfl
+
+theorem wrong_funds_snapshot (pipeline : Roadmap.Pipeline) :
+    ¬ WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment paid.events paid (world pipeline) := by
+  intro image
+  have funds := congrArg (fun f => (f (EnvironmentProjection.liftAddress self)).1) image.funds
+  change (7 : Int) = 12 at funds
+  omega
+
+theorem wrong_skipped_payment (pipeline : Roadmap.Pipeline) :
+    ((after pipeline).balance (EnvironmentProjection.liftAddress sender)).1 ≠ 93 := by
+  change (88 : Int) ≠ 93
+  decide +kernel
+
+
+theorem owner_accounts :
+    paid.ex.world.accounts sender = (opened.ex.world.accounts sender).withBalance ⟨88,by decide +kernel⟩ ∧
+    paid.ex.world.accounts self = (opened.ex.world.accounts self).withBalance ⟨12,by decide +kernel⟩ :=
+  ⟨rfl,rfl⟩
+
+/-- Two independently executed operations are joined by the proved full
+post-image; neither run nor this relation is assumed as a client premise. -/
+theorem actual_client (pipeline : Roadmap.Pipeline) :
+    opened.ex.transfer sender self WorldPaymentImageControls.amount = some paid.ex ∧
+    (world pipeline).call (⟨EnvironmentProjection.liftAddress self⟩ : ContractWorld.Handle ())
+      entry context = .ok (after pipeline,()) ∧
+    WorldImage.Image (global pipeline) WorldResetControls.kindOf WorldResetControls.relation
+      WorldCatalogueControls.environment paid.events paid (after pipeline) :=
+  ⟨source_payment,target_payment pipeline,post_image pipeline⟩
+
+
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.opened_code' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms opened_code
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.locate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms locate
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.initial_image' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms initial_image
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.source_payment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms source_payment
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.owner_account' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms owner_account
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.sender_funds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sender_funds
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.owner_funds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms owner_funds
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.enter_actual' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms enter_actual
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.settle_actual' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms settle_actual
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.finish_actual' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms finish_actual
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.target_payment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms target_payment
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.after_accounts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms after_accounts
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.paid_code' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms paid_code
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.post_accounts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms post_accounts
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.post_funds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms post_funds
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.post_image' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms post_image
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.frame_inputs' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms frame_inputs
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.ordered_observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms ordered_observations
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.nonworld_retained' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms nonworld_retained
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.other_accounts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms other_accounts
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.source_reads' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms source_reads
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.reset_image' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms reset_image
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.reset_observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms reset_observations
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.wrong_funds_snapshot' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_funds_snapshot
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.wrong_skipped_payment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms wrong_skipped_payment
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.owner_accounts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms owner_accounts
+/-- info: 'Solidity.Lowering.V08.InstalledPaymentImageControls.actual_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms actual_client
+end Solidity.Lowering.V08.InstalledPaymentImageControls
