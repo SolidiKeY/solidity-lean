@@ -125,6 +125,7 @@ import SolidityBridge.HashBridge.PrefixControls
 import SolidityBridge.HashBridge.Queries
 import SolidityBridge.HashBridge.QueryControls
 import SolidityBridge.HashBridge.QueryCut
+import SolidityBridge.HashBridge.QueryPrepend
 import SolidityBridge.HashBridge.QueryShape
 import SolidityBridge.HashBridge.QueryUnique
 import SolidityBridge.HashBridge.StaticQueries
