@@ -1261,3 +1261,8 @@ no heartbeat, recursion, resource, fuel or test bound was increased. The native
 CALL/RETURNDATA laws still do not construct `WorldCalls.FetchedPremises`: its
 source Step, same invocation identity, raw outcome and execution relations must
 come from concrete source/world/compiler producers, not an arbitrary relation.
+
+The subsequent registered-root checkpoint did not complete: a process monitor
+refused the closure after the focused checks and KeySort had passed. This is a
+failed closure gate, separate from the passing per-file and four-target H7
+checks above. Full import and cumulative validation remain open.
