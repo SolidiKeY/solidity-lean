@@ -17,7 +17,8 @@ def store {E : Source.Env} {Γ : Source.RCtx}
   | none => none
   | some result => some (result, Transient.callbackInFrame F (Transient.storeCode slot raw) target)
 
-theorem load_agreement {D : Source.Layout} {L T : Roadmap.Address → Source.SPath → Source.STy}
+/-- Conditional transport: pointwise view agreement is an input, not derived. -/
+theorem load_assuming_view_agreement {D : Source.Layout} {L T : Roadmap.Address → Source.SPath → Source.STy}
     (ts : (a : Roadmap.Address) → List (ScalarPath D (T a)))
     (source : ResidualCompanion D L T complementCarrierOwnership)
     (target : Transient.State) (a : Roadmap.Address) (slot : Roadmap.Word) (static : Bool)
@@ -58,7 +59,8 @@ theorem store_static {E : Source.Env} {Γ : Source.RCtx}
   simp only [store, transientSlot_static F slot raw s r static prepared,
       Transient.framed_static_store F static]
 
-theorem reset_agreement {D : Source.Layout} {L T : Roadmap.Address → Source.SPath → Source.STy}
+/-- Both resets read zero under actual source codec defaults, for any target. -/
+theorem reset_readback_zero {D : Source.Layout} {L T : Roadmap.Address → Source.SPath → Source.STy}
     (ts : (a : Roadmap.Address) → List (ScalarPath D (T a)))
     (source : ResidualCompanion D L T complementCarrierOwnership)
     (target : Transient.State)
@@ -68,4 +70,18 @@ theorem reset_agreement {D : Source.Layout} {L T : Roadmap.Address → Source.SP
       some ((Transient.endTx target).bank a slot) := by
   simp only [transientSlot_endTx ts source defaults, Transient.endTx, Transient.empty]
   rfl
+/-- Readback derived after the actual checked write; no initial agreement premise. -/
+theorem stored_load_readback {E : Source.Env} {Γ : Source.RCtx}
+    {ps ts : (a : Roadmap.Address) → List (ScalarPath E.layout (E.lay a))}
+    (F : Source.Fr) (slot raw : Roadmap.Word) (s : Source.EMState E Γ)
+    (r : ResidualJournal complementCarrierOwnership) (target : Transient.State) (result)
+    (checked : transientSlotStore? (ps:=ps) (ts:=ts) F slot raw s r = some result)
+    (normal : F.static = false) (separate : finiteSeparated (ts F.this)) :
+    (transientSlotLoad ts ⟨result.1.2.2.ex,result.2⟩ F.this slot,
+      Transient.callbackObserved F.this F.static (Transient.loadCode slot)
+        (Transient.write target F.this slot raw)) =
+      (some raw,(.ok (Transient.write target F.this slot raw),some (.val raw))) := by
+  simp only [transientSlot_load_store F slot raw s r result checked normal separate,
+    Transient.callbackObserved_load,Transient.write,Transient.put_same]
+
 end Solidity.Yul.World.TransientTarget

@@ -138,13 +138,13 @@ Source timeout. When static preparation succeeds, it returns the producer's unch
 Source/residual result carrying `.revert []`, paired with the local target's
 `.staticWrite` error and unchanged target. These distinct verdicts are kept.
 
-`load_agreement` observes the actual loaded target word before restoring the
+`load_assuming_view_agreement` observes the actual loaded target word before restoring the
 caller machine and requires pointwise agreement with `transientSlotLoad`.
 `store_exact` derives the actual paired target run from checked physical
 preparation and a nonstatic frame. `store_readback` uses VY2's real
 `transientSlot_load_store` law and finite separation to establish full-word
 agreement at the written slot. It does not claim preservation of every other
-physical slot or a whole-bank representation invariant. `reset_agreement`
+physical slot or a whole-bank representation invariant. `reset_readback_zero`
 uses actual typed default/codec zero facts to relate every slot after both
 transaction resets. No new world, layout or caller-reachability assumption is
 introduced; the matching-view premise is explicit and remains to be derived
@@ -446,9 +446,14 @@ pass. These are interface/port checks, not full Lake/TestSuite/strict/runtime
 KeySort or final source/joint gates; historical G07 failures are retained.
 No budget, expected observation or producer implementation changed.
 
-Scope note (review): in `Yul/World/TransientTargetPort.lean`, `load_agreement`
-takes the target load equation as a premise and `reset_agreement` holds for any
-target, so neither derives a source/target agreement by itself.
+Review correction: `load_assuming_view_agreement` transports an assumed
+pointwise physical-read/target-bank relation. `reset_readback_zero` reads zero
+after both resets for any prior target; neither constructs an initial view
+agreement. `stored_load_readback` instead derives the written-slot physical
+read and executed target read from the actual checked store, nonstatic frame
+and producer separation fact, with no initial agreement premise. Its control
+starts mismatched and invokes that law explicitly after the write. The three
+LOG port-rule controls now use direct `exact` law calls, with no `rfl` fallback.
 
 The intrinsic terminal leaf binds STOP/RETURN/REVERT to exact loaded bytes,
 with missing-memory refusal kept distinct from a genuine revert. It only
@@ -460,3 +465,9 @@ refused payloads.
 pre-existing `Lifecycle.destructKnown` and `Lifecycle.rollbackDestruction`.
 Their existing public proofs retain their premises; local lifecycle snapshot
 rollback was already implemented, not a newly closed adequacy obligation.
+
+Review-fix validation: explicit LOG law controls, actual mismatched-entry store
+readback and affected consumers pass. Combined 25-declaration signature/axiom
+audit is standard-only; independent finder/skeptic report no findings.
+No initial view or universal adequacy claim is added. Full lane gates remain
+open; earlier failed separation-decision attempt and historical gates are retained.
