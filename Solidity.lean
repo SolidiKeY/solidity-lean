@@ -636,6 +636,7 @@ import Solidity.Backend.Selection.Premises
 import Solidity.Backend.Selection.PremisesV2
 import Solidity.Backend.Selection.ScalarSequence
 import Solidity.Backend.Selection.ScalarSequenceControls
+import Solidity.Backend.Selection.ScalarSequenceFrameControls
 import Solidity.Backend.Selection.ScalarSequenceFrames
 import Solidity.Backend.Selection.ScalarSequenceResources
 import Solidity.Backend.StorageOps.AbsentRootQueries

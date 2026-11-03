@@ -27,3 +27,4 @@
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoad.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
+| `Backend/Selection/ScalarSequenceFrameControls.lean` | Inhabited V2 consumers with nonempty suffixes; corrupted-tail and hidden-peak rejection. |

@@ -28,9 +28,9 @@ as executable behaviour.
 | G45.04/.05 | `assemble`, `assemble_eq`, `assemble_pushTag`, `decode_encode` | Composition of these, without equating roundtrip with execution |
 | G45.06 | The layers above | Same-program control/assembly/bytes composition |
 
-Partial scalar-sequence and artifact results from the V14 branch (not on
-master) are to be ported under Selection rather than reproved; none is ported
-yet.
+The relayed scalar-sequence proofs are now ported under Selection (below).
+The constructor-artifact results remain unported; no theorem is attributed
+to an unintegrated Executable module.
 
 ## Premises
 
@@ -56,7 +56,7 @@ coverage: the concrete source observation relation and its preservation are
 still the G24.03 producer's responsibility. The decoder and exact-byte control
 contracts are reused, and no G49.02 theorem is proved here.
 
-V14 branch proofs are not on master; no master theorem is attributed to them.
+The relayed scalar-sequence proofs below are ported into Selection; no theorem is attributed to the unintegrated Executable modules.
 
 V2 signature finder/skeptic reviews confirmed empty-tail admission and rejection
 of relation := False. Skeptic additionally found that a bare relation witness
@@ -79,7 +79,29 @@ the premise changes. They are not a G24.03 or G49.02 theorem.
 
 Limits (review): `peak` need not be least, so a certificate with
 `peak := 1024 - input.length` claims capacity only for the empty tail.
-`CompilerPremise` V2 is inhabited only by source-independent relations such as
-`identityCompiler`; nonemptiness is not coverage. No `RuntimeConsumer` V2
+The constructed `CompilerPremise` V2 example `identityCompiler` uses a
+source-independent relation; nonemptiness is not coverage. The contract does
+not exclude source-dependent preserving relations. No `RuntimeConsumer` V2
 instance exists yet; `runtime_witness_inhabited` shows only that its witness
 domain is nonempty.
+
+## Relayed scalar-sequence port
+
+ScalarSequence.lean, ScalarSequenceResources.lean and ScalarSequenceControls.lean
+port the corresponding scalar sequence, resources and checks from the verified
+relay commit 22a1b53ecd0d50272d26e2758bafaead52bf247d. Only namespace/import
+renaming and scoped axiom-report scaffolding change; the proof bodies are reused.
+They establish actual staged scalar behavior, selected opcode/byte order, typed
+protected caller words and exact physical peaks (+3 and +6). Controls include
+wrong operand order, insufficient intermediate capacity and full emitted bytes.
+
+This is reuse of a proved scalar consumer, not yet compiler-IR instruction
+selection or fetched runtime execution. The typed caller-frame producer and
+G24.03/G45.05-BR obligations remain explicit; no source coverage or runtime
+consumer instance is claimed. The accepted V2 limits above remain unchanged.
+
+ScalarSequenceFrames.lean consumes the relayed formulas through V2 with actual
+peaks 3 and 6, including both typed caller words. ScalarSequenceFrameControls
+instantiates both certificates on populated frames with nonempty physical
+tails, rejects a corrupted protected word and excludes intermediate overflow
+even where final height fits. No V1 capacity field or runtime producer is used.
