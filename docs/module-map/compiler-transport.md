@@ -47,3 +47,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/AssignmentMultiplicationPass.lean`, `AssignmentMultiplicationControls.lean`, `AssignmentMultiplicationPins.lean` | Unchecked Source assignment/multiplication through actual capture maps and compiled values, pipeline and unmasked-code controls. |
 
 | `Backend/Passes/MemoryScopeBoundary.lean`, `MemoryScopeControls.lean`, `MemoryScopeAllocation.lean`, `MemoryScopePins.lean` | Exact physical scope cost/Input/maps, actual local-slot reuse and reached failure, positive allocation and axiom guards. |
+
+| `Backend/Passes/MemoryCallScopeBoundary.lean`, `MemoryCallScopeControls.lean`, `MemoryCallScopeObservations.lean`, `MemoryCallScopeFailures.lean`, `MemoryCallScopePins.lean` | Expanded-call scope Input equivalence, private bounds/cost/maps, actual old-alias consumer, failure-prefix transport and complete fixture observations. |

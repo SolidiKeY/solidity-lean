@@ -335,6 +335,39 @@ observed standard axiom sets. Independent finder and skeptic source reviews
 found no defect. Public Source/world/ABI/session adequacy remains open; H22
 external-call construction is untouched.
 
+## Expanded-call scope and old-alias consumption
+
+[MemoryCallScopeBoundary](../../Solidity/Backend/Passes/MemoryCallScopeBoundary.lean)
+transports the separate `Memory.Calls.Program` branch through the published
+block/sequence constructors. It retains the original push-free witness, exact
+reached cost and maximum of the private call need and caller context length.
+Original and scoped Inputs are equivalent; the full output heap/map/allocator
+relation survives dropping the extra caller locals. Checked projection lemmas
+keep large concrete certificates from being unfolded during client proofs.
+
+[Controls](../../Solidity/Backend/Passes/MemoryCallScopeControls.lean) consume an
+actual allocating memory-return call, drop its return/capture locals, and derive
+an old-alias consumer Input from the same reached map. All three actual maps
+and machines precede saved tails; all three MappedOutputs and both intrinsic
+source/code associations are retained. The private-frame underestimate remains
+refused. [Observations](../../Solidity/Backend/Passes/MemoryCallScopeObservations.lean)
+include all four heap objects, both elements of the owned array, caller/private
+cells, sentinel, allocator and two saved stack words: 11 intrinsic fields and
+18 target words (two stack plus 16 selected memory words). Correct code updates
+the old object to 8 while retaining the dropped object's 33; raw code compiled
+for the old extended context changes that 33 to 42. It is not a valid typed
+joined consumer. Skipped suffix and corrupted-tail observations are refused.
+
+[Failures](../../Solidity/Backend/Passes/MemoryCallScopeFailures.lean) retain the
+actual successful allocation prefix and scoped failing-stage Input. Argument
+failure costs 0; reached body failure costs 1. Both associations revert without
+requiring an Input or run for the typed unreachable suffix, and no failed-state
+map is invented. [Pins](../../Solidity/Backend/Passes/MemoryCallScopePins.lean)
+guard observed standard axiom sets. Independent finder and skeptic reviews
+found no defect. These are intrinsic/symbolic-word internal-call results;
+independent Source/world, public ABI/session and general recursion adequacy
+remain open. H22 external-call construction is untouched.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
