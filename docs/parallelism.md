@@ -307,3 +307,37 @@ longer checks the examples, the TestSuite, the executables or the SolKey sort
 check; those wait for `run-lean.sh` at the lane's end.  Examples have broken
 after `Tools`/`Frontend` edits before (4a7632415), so a lane editing those
 should set `GATE_EXAMPLES=1`.
+
+### Master's artifacts relayed to the lanes
+
+After a scheduled merge the coordinator runs
+`scripts/coord-tools/ship-cache.sh CHECKOUT` on the integration checkout
+whose gates just passed at `origin/master`.  Lake 4.24's artifact cache is
+content-addressed (`artifacts/<hash>.olean|ilean|c|o`) and indexed by input
+hash (`inputs/<package>.jsonl`); the integration build writes the host's
+under `~/.elan/toolchains/leanprover--lean4---v4.24.0/lake/cache` (112 GB;
+`~/.cache/lake` is another tool's), and a VM's is
+`$XDG_CACHE_HOME/lake` = `/workspace/.setup/cache/lake` (no elan there).  The
+script reads each module's trace (`depHash` = input hash, `outputs` =
+artifact hashes) in the checkout, keeps those whose outputs are cached, and
+for each active lane ships, zstd-packed and sha256-checked, exactly the
+artifacts that VM lacks (the shared pack is the delta against the previous
+shipment), then appends the input lines the VM lacks under Lake's own lock.
+Nothing is overwritten: a pack is extracted into a staging directory,
+checked file by file, and moved in with `mv -n`.  A VM short of disk for pack + contents + 2 GiB is
+skipped and listed.  A VM with the Bridge's Mathlib checkout at the host's
+pin but no Mathlib build gets the `lake exe cache` files it lacks.  Lanes need no extra
+step: after `git fetch` and a merge of master, `lake build` fetches every
+module whose sources and options match master (`Fetched` lines) instead of rebuilding it.
+
+Measured 2026-11-03 at 2c79634c7: master's set is 10,676 artifacts, 5.11 GB
+(oleans 4.2 GB; zstd packs them about 3.4×), 3,564 mappings.  A dry run over
+the 27 active lanes (548 s, read-only) found 28 to 10,676 missing per VM
+(0.19–5.11 GB): most VMs' caches were cleaned for disk.  The first real
+shipment to one lane (`memory-copies`: 28 artifacts, a 53 MB pack, 1,029
+mappings and 1,321 Mathlib cache files) took 105 s; a second run found
+nothing missing.  Uploads run at about 1.2 MB/s per VM (`vmexec.py --put`,
+4 MB parts), so a full first shipment (~1.5 GB packed) takes ~20 min per VM
+and is skipped on VMs short of disk; later shipments carry only the merge's
+delta.  The gain per lane, a rebuild of master's changes at the VMs' few
+workers (0.5–3.2 h after a core change in the receipts), is not yet measured.
