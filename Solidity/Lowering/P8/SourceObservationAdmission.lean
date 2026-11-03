@@ -3,8 +3,9 @@ import Solidity.Frontend.Admission.ProgramObservations
 import Solidity.Frontend.Admission.TypedStatementPolicy
 
 /-! Whole-output observation admission after actual checked frontend and
-Source elaboration. This adds a fail-closed observation guard; it is not
-exact all-feature/profile extraction, dispatch reachability or SourceSpec. -/
+Source elaboration, followed by an observation guard that `accept_eq_upstream`
+proves never refuses. It is not exact all-feature/profile extraction, dispatch
+reachability or SourceSpec. -/
 namespace Solidity.Lowering.P8.SourceObservationAdmission
 open Source Roadmap.Frontend Frontend.Admission
 open SourcePrograms

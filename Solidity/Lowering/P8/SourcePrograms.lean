@@ -10,7 +10,7 @@ open CheckedSyntax SourceResolutions
 
 abbrev Programs := List (String × Elaborated)
 
-/-- Independent graph of the upstream Source elaborator at every position. -/
+/-- Positional graph of the upstream Source elaborator at every position. -/
 def UnitsElaborate : List (String × Resolution) → Programs → Prop
   | [], [] => True
   | u :: us, e :: es => e.1 = u.1 ∧ elaborate u.2 = some e.2 ∧ UnitsElaborate us es

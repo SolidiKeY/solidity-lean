@@ -28,9 +28,9 @@ as executable behaviour.
 | G45.04/.05 | `assemble`, `assemble_eq`, `assemble_pushTag`, `decode_encode` | Composition of these, without equating roundtrip with execution |
 | G45.06 | The layers above | Same-program control/assembly/bytes composition |
 
-V14's `Executable.ScalarSequence`, `ScalarSequenceResources` and
-`ScalarArtifact` partial results are to be ported under Selection rather than
-reproved; none is ported yet.
+Partial scalar-sequence and artifact results from the V14 branch (not on
+master) are to be ported under Selection rather than reproved; none is ported
+yet.
 
 ## Premises
 

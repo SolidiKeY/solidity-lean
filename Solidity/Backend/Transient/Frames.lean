@@ -95,7 +95,8 @@ theorem callback_store_revert (owner : Roadmap.Address) (k v : Word) (entry : St
   have restored := rollback_write {entry with machine := {entry.machine with stack := []}} owner k v
   rw [show entry.journal.length=({entry with machine := {entry.machine with stack := []}} : State).journal.length from rfl,restored]
 
-/-- A callback success does not clear the transient bank. Only endTx does. -/
+/-- Reset after a write equals reset of the state before it: endTx discards
+the write. This involves no callback. -/
 theorem callback_then_reset (owner : Roadmap.Address) (k v : Word) (entry : State) :
     endTx (write entry owner k v)=endTx entry := rfl
 

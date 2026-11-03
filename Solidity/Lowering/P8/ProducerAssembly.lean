@@ -2,12 +2,12 @@ import Solidity.Lowering.P8.FrozenInterface
 import Solidity.Lowering.P8.SourceAllSettings
 
 /-! Frozen H14D admission/assembly boundary and checked conditional glue.
-No actual AdmissionHalf or concrete Source Producer witness is supplied. VY5's actual reference/origins/failure/realization fields
-remain external typed inputs. Original FrozenInterface is unchanged. -/
+No actual AdmissionHalf or concrete Source Producer witness is supplied. The
+reference/origins/failure/realization fields remain external typed inputs. Original FrozenInterface is unchanged. -/
 namespace Solidity.Lowering.P8.ProducerAssembly
 open Solidity.Roadmap P8a
 
-/-- This lane owns these fields and their actual-source proofs. Merely
+/-- The admission fields, whose actual-source proofs are still owed. Merely
 accepting them as parameters does not implement admission. -/
 structure AdmissionHalf (S : Spec) (roots : RootModel S) where
   extraction : Extractor roots

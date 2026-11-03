@@ -11,11 +11,11 @@ introduced.
 | Obligation | Reuse | Remaining work |
 | --- | --- | --- |
 | G33 | `Objects.DefaultBuilder`, `DefaultBuildResult`, `referenceArray_correct`, `ReferenceDefaults.compileDefault_correct`, `Objects.AllocatorRepr` | General nested/dynamic defaults; S03-PANIC41 size failure |
-| G33 structs | `StructDefaults.source_pair_default`, `Evm.DefaultPlan.sound` | Reused as is; their capacity premise is not a runtime panic |
+| G33 structs | `StructDefaults.source_pair_default`, `DefaultPlanSound` | Reused as is; their capacity premise is not a runtime panic |
 | G35.01 | `copiedStruct_*` laws, `SVal`/`SFields`/`SVec.copyStToM` | Nonprimitive members, nested and dynamic aggregates |
-| G35.04 | `MemoryOps.checkedSnapshotCopy`, `SnapshotSchedule`, `Heap.Keeps` | Alias versus deep-copy code and Source proofs, overlapping regions |
+| G35.04 | `MemoryOps.checkedSnapshotCopy`, `SnapshotSchedule`, `Heap.Keeps` | Alias versus deep-copy code and Source proofs (overlap laws `checkedSnapshotCopy_correct` exist) |
 | G35.05 | `TypeGraph.Schema`, Source `zero*`/`load*` | Generic representation and traversal |
-| G35.06 | `MemoryStorageCopy`, `MemoryFixedStorageCopy`, `MemoryFixedMixedCopy` | Location/traversal certificates, mixed-location witnesses |
+| G35.06 | `MemoryStorageCopy{Code,Compile,Laws,Source}`, `MemoryFixedMixedCopy` | Location/traversal certificates, mixed-location witnesses |
 
 Source bytes and strings use `Source.STy`; `GraphTypeRel` has no bytes/string
 constructors, and neither boundary may silently exclude approved shapes.

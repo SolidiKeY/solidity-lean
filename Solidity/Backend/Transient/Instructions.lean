@@ -1,7 +1,7 @@
 import Solidity.Backend.Transient.State
 import Solidity.Backend.Assembler
 
-/-! Actual Osaka TLOAD/TSTORE instruction slices. Stack head is top; static
+/-! TLOAD/TSTORE instruction slices (not yet related to the Bridge EVM). Stack head is top; static
 writes, underflow, symbolic (non-numeric) slots and unsupported opcodes retain
 separate failures. REVERT is supported only at zero length; nonempty return
 windows are refused, not erased. No gas/1024-stack/call-depth correspondence is asserted. -/

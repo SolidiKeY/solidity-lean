@@ -22,7 +22,8 @@ theorem statement_from_containers : StatementBuilder := by
     Solidity.Frontend.Admission.TypedObservationPolicy.expression_allowed, ho.1, ho.2]
   all_goals simp only [Solidity.Frontend.Admission.ObservationSite.allowed, Solidity.Frontend.Admission.ObservationSite.status] <;> decide
 
-/-- Complete output closure still requires both routine proof inputs. -/
+/-- Builder shape: complete output closure from both routine proof inputs
+(discharged by `closed_policies`). -/
 abbrev ProgramBuilder : Prop := ConversionsPolicy → OptionalPolicy → WholeProgramPolicy
 
 theorem program_from_containers : ProgramBuilder := by

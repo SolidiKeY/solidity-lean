@@ -1868,7 +1868,7 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Lowering/P8/SourcePrograms.lean`, `SourceProgramControls.lean` | Checked original-byte frontend stages to actual all-unit Source elaboration and failure propagation; nonempty contract component proofs are in the acceptance modules. |
 | `Lowering/P8/SourceProgramAcceptance.lean`, `SourceProgramAcceptanceControls.lean` | Exact actual elaborator success-bit laws and the full original kernel contract-control conjunction; ordered expectations unchanged. |
 | `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; selected and special-entry root coverage, not executed-entry or full admission adequacy. |
-| `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard; composed independent ProgramSite soundness, not full feature/profile adequacy. |
+| `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard proved redundant (`accept_eq_upstream`); composed independent ProgramSite soundness, not full feature/profile adequacy. |
 
 See [P8 admission](feature-work/p8-admission.md).
 

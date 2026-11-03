@@ -265,8 +265,9 @@ Open: any theorem that G00 `InProfile` implies this component check.
 
 These constructions supply neither an actual `AdmissionHalf` nor a concrete
 source `Producer`. The actual source extraction, exact classification,
-frontend agreement and nonvacuity obligations remain; VY5 supplies the
-approved SourceSpec/reference/origins/failure/realization boundary under H16.
+frontend agreement and nonvacuity obligations remain; the approved
+SourceSpec/reference/origins/failure/realization boundary remains a typed
+input (see [VY5 composition](vy5-composition.md)).
 The component controls and conditional assembler use only the standard
 `propext`, `Classical.choice` and `Quot.sound` axioms, pinned in their modules.
 
@@ -421,7 +422,7 @@ full `Elaborated`, execution-root or profile witnesses.
 
 `derived_modifier_membership` and `external_overload_membership` prove
 `DerivedModifierMembership` and `ExternalOverloadMembership` (A03–A04).
-The source-selector soundness arguments stay in this lane. Wiring all derived
+Wiring all derived
 callee occurrences and actual execution queries to these initial-target
 facts and published dispatch closure remains open.
 
@@ -438,7 +439,7 @@ of H16 carrier-aware execution or the final Producer prerequisites.
 `Lowering/P8/SourcePrograms.lean` adds `accept`: existing original-byte parse,
 resolution and component-metadata checks, followed by the actual
 `Source.elaborate` on every resolved unit in order. No failed unit is dropped.
-`elaborateUnits_sound` proves the independent per-position graph of the
+`elaborateUnits_sound` proves the positional graph of the
 upstream elaborator; `accept_sound` returns `Input.Ok`, the checked parse and
 resolution judgments, existing `ComponentOK`, and that full-list graph.
 `elaborateUnits_tail_failure` proves that a failed later unit forces the
@@ -557,7 +558,6 @@ removed, output replaced, parser completeness assumed or profile premise
 weakened. These are exact component algorithm laws, not a proof that every
 approved-profile input passes the guard or elaborates. Their axiom sets are
 pinned to the standard three axioms in the module.
-
 
 `Lowering/P8/SourceProgramAcceptance.lean` proves `elaborate_acceptance`
 and `units_acceptance` for the actual algorithms: their success bits equal

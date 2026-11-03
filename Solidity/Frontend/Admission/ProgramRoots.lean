@@ -65,7 +65,7 @@ theorem programRoots_observations {E : Env} (P : Program E) :
     List.flatMap_assoc, hd, hc]
 
 /-- Exact observation-admission proposition, proved below.
-Even this equivalence would classify observations, not all source features. -/
+This equivalence classifies observations, not all source features. -/
 abbrev RootAdmissionEquivalence {E : Env} (P : Program E) : Prop :=
   (programObservations P).all ObservationSite.allowed = true ↔
     ∀ r : ProgramRoot P, r.Occurs → ∀ site ∈ r.observations, site.allowed = true
