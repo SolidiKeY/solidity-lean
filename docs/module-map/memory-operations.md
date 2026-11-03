@@ -172,3 +172,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceCalldataBoolSlice.lean` | Actual Boolean calldata slice/conversion with computed shifted decoder and pre-allocation bounds errors. |
 | `Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean` | Real Source RItems retain the actual first sliced-copy allocation on a later malformed Boolean decoder error. |
 | `Backend/MemoryOps/SourceCalldataBoolSliceControls.lean` | Both-pipeline populated valid/malformed-window clients, complete Source/native alias frames, order/timeout/empty and Option-capacity distinctions. |
+
+| `Backend/MemoryOps/SourceCalldataSliceRead.lean` | Actual one-word calldata indexing through a computed slice, with ordered slice/index/selected-decoder outcomes and unchanged Source state. |
+| `Backend/MemoryOps/SourceCalldataSliceReadCopy.lean` | Selected Source reads agree with the read from a separately executed actual checked fresh Boolean copy after computed window-decoder success. |
+| `Backend/MemoryOps/SourceCalldataSliceReadControls.lean` | Both-pipeline Bool/uint/max/lazy-versus-eager clients, complete old alias/neighbour data, selected-word failure, empty/index panic and timeout. |

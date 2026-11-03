@@ -334,6 +334,9 @@ import Solidity.Backend.MemoryOps.SourceCalldataMixedCopy
 import Solidity.Backend.MemoryOps.SourceCalldataMutation
 import Solidity.Backend.MemoryOps.SourceCalldataSlice
 import Solidity.Backend.MemoryOps.SourceCalldataSliceControls
+import Solidity.Backend.MemoryOps.SourceCalldataSliceRead
+import Solidity.Backend.MemoryOps.SourceCalldataSliceReadControls
+import Solidity.Backend.MemoryOps.SourceCalldataSliceReadCopy
 import Solidity.Backend.MemoryOps.SourceCalldataTransfer
 import Solidity.Backend.MemoryOps.SourceCalldataUintBinding
 import Solidity.Backend.MemoryOps.SourceCalldataUintCopy
