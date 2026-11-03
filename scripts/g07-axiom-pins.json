@@ -20743,6 +20743,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/ModifierRoots.lean:Solidity.Frontend.Admission.ModifierRoots.derived_modifier_membership": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ModifierRoots.lean:Solidity.Frontend.Admission.ModifierRoots.external_overload_membership": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/ModifierRoots.lean:Solidity.Frontend.Admission.ModifierRoots.modifier_registered": [
   "Classical.choice",
   "Quot.sound",
@@ -20759,6 +20769,9 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/NameResolutionRoots.lean:Solidity.Frontend.Admission.NameResolutionRoots.resolved_registered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/NameResolutionRoots.lean:Solidity.Frontend.Admission.NameResolutionRoots.selected_function_membership": [
   "propext"
  ],
  "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.elaborated_constructor_in_declarations": [
@@ -20837,6 +20850,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/ProgramRoots.lean:Solidity.Frontend.Admission.root_admission_equivalence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.distinct_payload_order": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.exact_pair_inventory": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.omitted_child_refused": [
@@ -20858,14 +20876,49 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrences.lean:Solidity.Frontend.Admission.syntaxOccurrences_root": [],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.arguments_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.conversions_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.expression_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.lvalue_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.optional_allowed": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Frontend/Admission/TypedObservationPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.builtin_allowed": [],
  "Solidity/Frontend/Admission/TypedObservationPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.magic_allowed": [],
+ "Solidity/Frontend/Admission/TypedStatementPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.closed_policies": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedStatementPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.program_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/TypedStatementPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.program_from_containers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedStatementPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.statement_allowed": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -21674,7 +21727,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/EntryRoots.lean:Solidity.Lowering.P8.EntryRoots.selected_entry_root_coverage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/EntryRoots.lean:Solidity.Lowering.P8.EntryRoots.special_entry": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/EntryRoots.lean:Solidity.Lowering.P8.EntryRoots.special_entry_body_coverage": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ],
@@ -21685,13 +21748,63 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.assemble": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.checked_glue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.component_pipeline_closure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/ResourceContractLaw1.lean:Solidity.Lowering.P8.ResourceContractLaw1.nat_encodable_resource_impossible": [],
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.checked_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.nontrivial_positive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.override_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.strict_before_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceObservationAdmission.lean:Solidity.Lowering.P8.SourceObservationAdmission.accept_eq_upstream": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceObservationAdmission.lean:Solidity.Lowering.P8.SourceObservationAdmission.exact_observation_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceObservationAdmission.lean:Solidity.Lowering.P8.SourceObservationAdmission.sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Lowering/P8/SourceObservationControls.lean:Solidity.Lowering.P8.SourceObservationControls.controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptance.lean:Solidity.Lowering.P8.SourceProgramAcceptance.acceptance_projection": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -21751,7 +21864,22 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.accept_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.accept_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.elaborateUnits_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.elaborateUnits_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -21762,6 +21890,16 @@
   "propext"
  ],
  "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.elaborateUnits_tail_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.produce_input_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.units_program_identity": [
   "Classical.choice",
   "Quot.sound",
   "propext"
