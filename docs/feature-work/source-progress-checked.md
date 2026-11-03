@@ -295,3 +295,48 @@ no confirmed defect. Validation targets are
 `Solidity.Source.Progress.ReadyBodies`, `ReadyBodyCalls`, `ReadyBodyControls`
 and `ReadyScopeControls`; printed axioms are standard only. No compiler/EVM or
 universal source-coverage claim follows.
+
+
+## Elaborated ready-body catalogues
+
+`Progress/ReadyCatalogue.lean` removes caller-supplied frame metadata equations
+from the ready-body program adapter. Each catalogue entry supplies declaration
+membership, source and selected-target signatures, actual selected body,
+empty modifiers, return-default readiness and `ReadyItems`. Actual elaboration
+then derives the selected body's parameter types, return types and local-frame
+layout. No semantic body-progress or preservation oracle is accepted.
+
+`ready_memory_from_elaborate` derives call progress and conditional memory
+preservation for these entries. `ready_memory_expr_from_elaborate` also handles
+exact ready arguments, including reference locals, through the actual call
+expression and caller restoration. `ready_memory_program_calls` checks union
+coverage by the supplied value and ready catalogues and covers every function
+in that unit. Overlap and extra catalogue entries are not excluded; coverage is
+not an exact disjoint partition. The derived expression context applies to the
+existing expression fragment, while the explicit ready-argument theorem admits
+the reference-argument clients. Memory bodies still call only the checked value
+catalogue: arbitrary memory-call graphs and recursion are not added.
+
+`ReadyCatalogueControls` consumes this interface on the elaborated nested
+allocation, memory-parameter identity and mixed value/memory source units.
+Inhabited success, allocation panic and timeout witnesses retain their existing
+exact observations. The identity call expression passes and returns the same
+reference while restoring its caller; the allocating call returns a fresh
+reference and retains the caller's live prefix. These call-expression nodes are
+built intrinsically over the elaborated programs, not new function-value
+reference-argument elaboration controls. Omitting either mixed-unit function
+fails coverage. A separate negative theorem rejects an invented empty-frame
+body's equality with the actual selected body; this is a certificate refusal,
+not an executable frontend rejection test.
+
+`ReadyDispatchControls` puts an inherited primitive-return override in the ready
+catalogue, exercising metadata derivation when the selected declaration differs
+from the called base declaration. The actual legacy-elaborated body returns the
+derived `true` result, preserving an inhabited caller and state in both evaluator
+pipelines. This is not a reference-return override control. Finder and skeptic
+reviews found no confirmed defect. Validation targets are
+`Solidity.Source.Progress.ReadyCatalogue`, `ReadyCatalogueControls` and
+`ReadyDispatchControls`; printed axioms are standard only. Memory validity still
+requires the separate Hoare entry witnesses. No executable memory recognizer,
+frontend completeness, compiler/EVM refinement or universal source-coverage
+claim follows.

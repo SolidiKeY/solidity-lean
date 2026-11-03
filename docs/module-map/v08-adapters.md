@@ -390,3 +390,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ReadyBodyCalls.lean` | Actual modifier-free calls and call expressions over ready memory sequences. |
 | `Source/Progress/ReadyBodyControls.lean` | Elaborated nested allocation scopes, returned references and exact halt controls. |
 | `Source/Progress/ReadyScopeControls.lean` | Intrinsic conditional, unchecked restoration and reference-tuple controls. |
+| `Source/Progress/ReadyCatalogue.lean` | Ready-body call progress and preservation with frame metadata derived from elaboration. |
+| `Source/Progress/ReadyCatalogueControls.lean` | Inhabited elaborated ready-unit, reference-input and hybrid coverage clients. |
+| `Source/Progress/ReadyDispatchControls.lean` | Nonidentity inherited dispatch consumes elaboration-derived ready-frame metadata. |

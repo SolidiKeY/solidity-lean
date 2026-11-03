@@ -2142,7 +2142,10 @@ import Solidity.Source.Progress.ReadyArguments
 import Solidity.Source.Progress.ReadyBodies
 import Solidity.Source.Progress.ReadyBodyCalls
 import Solidity.Source.Progress.ReadyBodyControls
+import Solidity.Source.Progress.ReadyCatalogue
+import Solidity.Source.Progress.ReadyCatalogueControls
 import Solidity.Source.Progress.ReadyDefaults
+import Solidity.Source.Progress.ReadyDispatchControls
 import Solidity.Source.Progress.ReadyExpressionControls
 import Solidity.Source.Progress.ReadyExpressions
 import Solidity.Source.Progress.ReadyProgram
