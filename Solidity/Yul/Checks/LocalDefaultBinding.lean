@@ -93,4 +93,60 @@ theorem values : ((Solidity.Yul.LocalValues.get (Solidity.Yul.Checks.LocalDefaul
 #print axioms dirtyProjection
 #print axioms sourceControls
 #print axioms values
+
+theorem restoration : Solidity.Yul.LocalDefaultBinding.restore
+ (Solidity.Yul.Checks.LocalDefaultBinding.proof (.int Solidity.Source.IntTy.u8))
+ (Solidity.Yul.Checks.LocalDefaultBinding.finalState Solidity.Yul.Checks.LocalDefaultBinding.zero8) =
+ Solidity.Yul.Checks.LocalDefaultBinding.assigned false ∧
+ Solidity.Yul.LocalDefaultBinding.restore
+ (Solidity.Yul.Checks.LocalDefaultBinding.proof .bool)
+ (Solidity.Yul.Checks.LocalDefaultBinding.finalState Solidity.Yul.Checks.LocalDefaultBinding.zeroBool) =
+ Solidity.Yul.Checks.LocalDefaultBinding.assigned false := by
+  exact ⟨rfl,rfl⟩
+
+theorem blockControls : Solidity.Yul.LocalDefaultBinding.blockRun
+ Solidity.Yul.Checks.LocalDefaultBinding.zero8
+ (Solidity.Yul.Checks.LocalDefaultBinding.proof (.int Solidity.Source.IntTy.u8))
+ 7 Solidity.Yul.Checks.LocalDefaultBinding.initial =
+ .normal (Solidity.Yul.Checks.LocalDefaultBinding.assigned false) ∧
+ Solidity.Yul.LocalDefaultBinding.blockRun
+ Solidity.Yul.Checks.LocalDefaultBinding.zero8
+ (Solidity.Yul.Checks.LocalDefaultBinding.proof (.int Solidity.Source.IntTy.u8))
+ 6 Solidity.Yul.Checks.LocalDefaultBinding.initial =
+ .halted .timeout (Solidity.Yul.Checks.LocalDefaultBinding.bodyEntered Solidity.Yul.Checks.LocalDefaultBinding.zero8) ∧
+ Solidity.Yul.LocalBoolItems.project Solidity.Yul.Checks.LocalDefaultBinding.Fixture.ctx.tys
+ (Solidity.Yul.LocalDefaultBinding.blockRun Solidity.Yul.Checks.LocalDefaultBinding.zero8
+ (Solidity.Yul.Checks.LocalDefaultBinding.proof (.int Solidity.Source.IntTy.u8))
+ 7 Solidity.Yul.Checks.LocalDefaultBinding.initial) = none := by
+  exact ⟨rfl,rfl,rfl⟩
+
+theorem sourceBlockControls : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.LocalDefaultBinding.Fixture.env) (frame : Solidity.Source.Fr)
+ (nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.LocalDefaultBinding.Fixture.env)),
+ (Solidity.Source.execS glob frame 6 nps ph (.block (Solidity.Yul.Checks.LocalDefaultBinding.program (.int Solidity.Source.IntTy.u8)))
+   (Solidity.Yul.Checks.LocalDefaultBinding.Fixture.initial.clean.set .here (.bool true))).run
+ (Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultBinding.Fixture.env,Solidity.Yul.Checks.LocalDefaultBinding.Fixture.initial.world) =
+ (.error .timeout,(Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultBinding.Fixture.env,Solidity.Yul.Checks.LocalDefaultBinding.Fixture.initial.world)) ∧
+ (Solidity.Source.execS glob frame 7 nps ph (.block (Solidity.Yul.Checks.LocalDefaultBinding.program (.int Solidity.Source.IntTy.u8)))
+   (Solidity.Yul.Checks.LocalDefaultBinding.Fixture.initial.clean.set .here (.bool true))).run
+ (Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultBinding.Fixture.env,Solidity.Yul.Checks.LocalDefaultBinding.Fixture.initial.world) =
+ (.ok (.normal (Solidity.Yul.Checks.LocalDefaultBinding.Fixture.initial.clean.set .here (.bool false))),
+ (Solidity.Source.L0 Solidity.Yul.Checks.LocalDefaultBinding.Fixture.env,Solidity.Yul.Checks.LocalDefaultBinding.Fixture.initial.world)) := by
+  intro glob frame nps ph
+  exact ⟨rfl,rfl⟩
+
+def concreteBlockInt (ty : Solidity.Source.IntTy) (glob : Solidity.Source.Glob Fixture.env)
+    (frame : Solidity.Source.Fr) (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Fixture.env)) :=
+  Solidity.Yul.LocalDefaultBinding.block_source_agrees Fixture.env [] false ⟨false,false⟩
+    Fixture.ctx.tys (.bool :: .int ty :: Fixture.ctx.tys) (.int ty)
+    (items (.int ty)) (proof (.int ty)) (RawDefaultDeclaration.intDefault Fixture.env ty)
+    glob frame fuel nps ph Fixture.initial.clean Fixture.initial.world
+
+#print axioms Solidity.Yul.LocalDefaultBinding.suffix
+#print axioms Solidity.Yul.LocalDefaultBinding.source_restore
+#print axioms Solidity.Yul.LocalDefaultBinding.restore_project
+#print axioms Solidity.Yul.LocalDefaultBinding.block_source_agrees
+#print axioms restoration
+#print axioms blockControls
+#print axioms sourceBlockControls
+#print axioms concreteBlockInt
 end Solidity.Yul.Checks.LocalDefaultBinding

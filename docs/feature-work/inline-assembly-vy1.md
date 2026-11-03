@@ -737,8 +737,22 @@ Integer and Boolean witnesses cover shifted enclosing writes, partial contexts,
 default zero and preserved dirty sibling bits. Independent Source controls
 check timeout and completion. A missing constant default for memory bytes is
 not a general refusal of allocating reference declarations. Compiler
-representation, dirty ordinary reads, final enclosing-scope composition and
-full P16/lane validation remain open.
+representation, dirty ordinary reads and full P16/lane validation remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.
+
+### Constant-default enclosing scopes
+
+LocalDefaultBinding now closes the declaration and body scope using the proved
+context suffix. Restoration drops only the added raw locals and preserves the
+world and surviving words. Halts retain their reached context. The concrete
+all-fuel block theorem composes Source execution from clean input; its internal
+restoration projection requires a successful decoder before dropping locals.
+Integer and Boolean witnesses check restoration, enclosing writes, timeout
+contexts and dirty sibling preservation. Independent Source controls distinguish
+fuel-six timeout from fuel-seven completion. General P16, dirty compiler
+adequacy and final lane gates remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.

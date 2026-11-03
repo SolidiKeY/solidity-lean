@@ -251,3 +251,5 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolUnchecked adds concrete clean Source item/block composition across unchecked and ordinary scopes, retaining reached failure contexts. Full lane remains open.
 
 - VY1: LocalDefaultBinding adds concrete clean Source constant-default declaration/body composition with typed context growth; allocating references and dirty compiler adequacy remain separate obligations.
+
+VY1: constant-default scopes now have concrete clean-input Source block agreement and raw restoration controls; full P16 and lane validation remain open.
