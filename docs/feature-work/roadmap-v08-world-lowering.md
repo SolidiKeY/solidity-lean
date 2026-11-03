@@ -3761,3 +3761,23 @@ Integrated from the v08-world-lowering lane (2026-11-03).
 Open: proving `ResetInputs`, P8-SPEC-LAW1, the constructor body (`ssNew_body`),
 library dispatch, a P1 V3 runtime-frame consumer (the lane's V2 consumer was not
 merged). No `Producer` instance exists.
+
+### World-image follow-ups (sched 2026-11-03)
+
+- `WorldImageAccess.account_lookup` / `installed_lookup` keep the exact dependent
+  store and the persistent/transient relation; populated before/reset clients
+  cover both pipelines. These are image lookup facts, not body, admission or
+  compiler adequacy.
+- `WorldImageAccess.library_inputs` derives caller/library accounts and roles
+  from source catalogue equations and `Image` witnesses; it proves no general
+  Source library call.
+- `WorldImage` now imports only its projection/source types (no
+  `LibraryPremises`, no P8 admission interface). `TimeAligned` states the
+  source-global/intrinsic-world clock equation, and
+  `WorldImageAccess.timestamp_frame` runs `Source.evalE` on a supplied
+  `Context.tx` frame. An image alone cannot discharge the clock obligation (a
+  populated `atTime` world has the same image but a different timestamp).
+
+Open: `ResetInputs` stays assumed; layout/reset producers, general library
+execution, admission, unit transport and bytecode obligations.
+

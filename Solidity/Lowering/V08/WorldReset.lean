@@ -1,4 +1,5 @@
 import Solidity.Lowering.V08.WorldImage
+import Solidity.Lowering.V08.SourceTransient
 
 /-! Relative transaction-boundary reset transport. ResetInputs is an explicit
 per-store P7/layout duty. This does not identify raw/reset worlds or reset internal

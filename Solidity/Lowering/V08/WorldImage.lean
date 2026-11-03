@@ -1,5 +1,5 @@
-import Solidity.Lowering.V08.LibraryPremises
-import Solidity.Lowering.V08.SourceTransient
+import Solidity.Lowering.V08.EnvironmentProjection
+import Solidity.Source.Eval
 
 /-! Proof-side account/session image, not a state layer or interpreter.
 It covers tracked code identities, typed store relation, supplied session funds
@@ -43,5 +43,10 @@ structure ResetInputs {E : Source.Env} {K : Type} {contracts : K → Contract}
       (persistent temporary : Source.Storage E.layout (E.lay address)) (store : Storage (contracts kind)),
     relation address kind persistent temporary store →
     relation address kind persistent Source.Storage.empty (Storage.resetTransient store)
+
+/-- Clock agreement is separate: Image itself covers no timestamp. -/
+def TimeAligned {E : Source.Env} {K : Type} {contracts : K → Contract}
+    (global : Source.Glob E) (world : ContractWorld.World contracts) : Prop :=
+  world.timestamp = EnvironmentProjection.liftWord global.timestamp
 
 end Solidity.Lowering.V08.WorldImage
