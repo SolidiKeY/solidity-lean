@@ -243,3 +243,5 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolDoDivergence adds universal raw/clean-Source no-normal-completion laws for constant-true certified do/while bodies; full lane remains open.
 
 - VY1: LocalBoolFor adds concrete clean Source agreement for a Boolean for initializer and scoped item body without post, preserving enclosing effects and partial contexts. Full lane remains open.
+
+- VY1: LocalBoolPostIter/LocalBoolForPost add concrete all-fuel clean Source composition for present Boolean posts, preserving post effects and scoped failure contexts. Full lane remains open.

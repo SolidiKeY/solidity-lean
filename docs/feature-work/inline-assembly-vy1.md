@@ -671,3 +671,21 @@ adequacy. Full P16 and final lane validation remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Scoped for post expressions
+
+LocalBoolPostIter and LocalBoolForPost add present Boolean posts to the
+certified iteration and context-growing initializer composition. Guard, body
+and post use Source's predecessor horizon; post values are discarded while
+their effects survive. Both source_agrees theorems prove concrete all-fuel
+Source equality from completely clean input, using actual producer equations
+and decoder inversion. Successful exit closes only declared scopes; failures
+retain their reached context.
+Controls distinguish a false-valued post from a false guard, exercise post
+writes before timeout, skipped posts, initializer failures and enclosing writes
+through final cleanup. This remains the Boolean initializer/guard/post and
+certified item-body slice, without dirty compiler adequacy or full P16 coverage.
+Final joint/full lane validation remains open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

@@ -44,3 +44,5 @@
 - Yul/LocalBoolDoDivergence.lean and Yul/Checks/LocalBoolDoDivergence.lean: constant-true do/while noncompletion laws and guard controls.
 
 - Yul/LocalBoolFor.lean and Yul/Checks/LocalBoolFor.lean: Boolean initializer and context-growing for-body scope composition, without post.
+
+- Yul/LocalBoolPostIter.lean, Yul/LocalBoolForPost.lean and Yul/Checks/LocalBoolForPost.lean: scoped for posts and initializer composition.
