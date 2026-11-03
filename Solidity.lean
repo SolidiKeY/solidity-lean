@@ -1769,10 +1769,14 @@ import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteControls
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteNumeric
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteNumericControls
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeletes
+import Solidity.Lowering.StorageOps.SourceWordCommutation
+import Solidity.Lowering.StorageOps.SourceWordCommutationControls
 import Solidity.Lowering.StorageOps.SourceWordRead
 import Solidity.Lowering.StorageOps.SourceWordReadControls
 import Solidity.Lowering.StorageOps.SourceWordWrite
 import Solidity.Lowering.StorageOps.SourceWordWriteControls
+import Solidity.Lowering.StorageOps.SourceWriteRollback
+import Solidity.Lowering.StorageOps.SourceWriteRollbackControls
 import Solidity.Lowering.StorageOps.TwoClearRepresentationControls
 import Solidity.Lowering.V07.AcceptedGraphProducer
 import Solidity.Lowering.V07.AliasRhsSubtraction

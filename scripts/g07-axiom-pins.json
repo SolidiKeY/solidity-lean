@@ -24731,6 +24731,91 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.journal_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.storage_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.world_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.explicit_undo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.forward_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.journal_forward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.journal_reverse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.journals_differ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.overlap_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.overlap_worlds_differ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.reverse_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.seed_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.states_differ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.world_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean:Solidity.Lowering.StorageOps.SourceWordCommutationControls.world_equal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceWordRead.lean:Solidity.Lowering.StorageOps.SourceWordRead.complete": [
   "Classical.choice",
   "Quot.sound",
@@ -24792,6 +24877,41 @@
   "propext"
  ],
  "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.target_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollback.lean:Solidity.Lowering.StorageOps.SourceWriteRollback.rollback_once": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollback.lean:Solidity.Lowering.StorageOps.SourceWriteRollback.static_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.prefix_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.refusal_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.rollback_certificate": [
   "Classical.choice",
   "Quot.sound",
   "propext"
