@@ -1153,6 +1153,10 @@ import Solidity.Backend.Passes.TailLoop
 import Solidity.Backend.Passes.TailMachine
 import Solidity.Backend.Passes.TripleSequence
 import Solidity.Backend.Passes.CompilerProofChecks
+import Solidity.Backend.Passes.SourceCallBoundary
+import Solidity.Backend.Passes.SourceCallControls
+import Solidity.Backend.Passes.SourceCallFrame
+import Solidity.Backend.Passes.SourceTypedCall
 
 
 import Solidity.Lowering.V08.Audit
@@ -1202,6 +1206,9 @@ import Solidity.Lowering.V08.SourceTransientBytesEmitControls
 import Solidity.Lowering.V08.H1Audit
 
 import Solidity.Lowering.V08.CallableReflection
+import Solidity.Lowering.V08.SourceCallPhase
+import Solidity.Lowering.V08.SourceCallPhaseControls
+import Solidity.Lowering.V08.SourceExternalPhaseControls
 
 import Solidity.Calculus.CallFunctionAffine
 import Solidity.Tools.CallFunctionShare
@@ -1257,6 +1264,18 @@ import Solidity.Backend.InternalDispatch.FrozenV2Controls
 import Solidity.Backend.InternalDispatch.FrozenV3
 import Solidity.Backend.InternalDispatch.FrozenV3Controls
 import Solidity.Backend.InternalDispatch.Typed
+import Solidity.Backend.WorldCalls.Callbacks
+import Solidity.Backend.WorldCalls.ExternalCalls
+import Solidity.Backend.WorldCalls.ExternalControls
+import Solidity.Backend.WorldCalls.P1Consumers
+import Solidity.Backend.WorldCalls.PaymentControl
+import Solidity.Backend.WorldCalls.Premises
+import Solidity.Backend.WorldCalls.SelfCalls
+import Solidity.Backend.WorldCalls.SelfControls
+import Solidity.Backend.WorldCalls.SourceBridge
+import Solidity.Backend.WorldCalls.SourceBridgeControls
+import Solidity.Backend.WorldCalls.UnknownSourceCall
+import Solidity.Backend.WorldCalls.UnknownSourceControls
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
@@ -1290,6 +1309,36 @@ import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen
 import Solidity.Lowering.P8b.P8aInterface
+import Solidity.Lowering.Readonly.ArgumentControls
+import Solidity.Lowering.Readonly.CallableControls
+import Solidity.Lowering.Readonly.CallerResume
+import Solidity.Lowering.Readonly.CaptureFailureControls
+import Solidity.Lowering.Readonly.CaptureFailures
+import Solidity.Lowering.Readonly.CapturePhases
+import Solidity.Lowering.Readonly.CapturedArguments
+import Solidity.Lowering.Readonly.Controls
+import Solidity.Lowering.Readonly.EnvironmentControls
+import Solidity.Lowering.Readonly.EnvironmentCredit
+import Solidity.Lowering.Readonly.EnvironmentCreditControls
+import Solidity.Lowering.Readonly.EnvironmentHistory
+import Solidity.Lowering.Readonly.EnvironmentHistoryControls
+import Solidity.Lowering.Readonly.EnvironmentSteps
+import Solidity.Lowering.Readonly.FullCaptureControls
+import Solidity.Lowering.Readonly.InvocationFrame
+import Solidity.Lowering.Readonly.JournalLeaves
+import Solidity.Lowering.Readonly.LoweringControls
+import Solidity.Lowering.Readonly.PrimitiveCallable
+import Solidity.Lowering.Readonly.PrimitiveFields
+import Solidity.Lowering.Readonly.PrimitiveInitialization
+import Solidity.Lowering.Readonly.PrimitiveLocals
+import Solidity.Lowering.Readonly.PrimitiveReads
+import Solidity.Lowering.Readonly.PrimitiveValues
+import Solidity.Lowering.Readonly.ReadStatement
+import Solidity.Lowering.Readonly.ReceiverCapture
+import Solidity.Lowering.Readonly.ReceiverControls
+import Solidity.Lowering.Readonly.ResumeControls
+import Solidity.Lowering.Readonly.RootControls
+import Solidity.Lowering.Readonly.StaticJournal
 import Solidity.Source.Preservation.EncodingVariantControls
 import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.LiteralBuiltinControls

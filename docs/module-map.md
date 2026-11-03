@@ -1757,3 +1757,33 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 See [P8 admission](feature-work/p8-admission.md).
 
 
+
+## Read-only calls and world-call consumers (G22, G42)
+
+| Module | Purpose |
+|---|---|
+| `Backend/Passes/SourceTypedCall.lean` | Typed factorisation of the resolved source external call into capture (`CapturedAt`), encoding/code check and resume ([G22](feature-work/g22-readonly-calls.md)). |
+| `Backend/Passes/SourceCallBoundary.lean` | Source call-boundary equations: horizon/depth/static-value refusal, static journal refusal, declared-return revert/short failures ([G22](feature-work/g22-readonly-calls.md)). |
+| `Backend/Passes/SourceCallFrame.lean` | Child `dispatch` success/revert/halt transport through `enterInstance`; live mark ([G22](feature-work/g22-readonly-calls.md)). |
+| `Backend/Passes/SourceCallControls.lean` | Unknown nonself, reentry, rollback, return-shape and argument-checkpoint source call controls ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/CapturePhases.lean`, `Lowering/Readonly/CaptureFailures.lean` | Capture run from per-phase equations; five capture-failure equations (no callee started) ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/CallerResume.lean`, `Lowering/Readonly/ReceiverCapture.lean` | Raw `callAddr` run to caller `extReturn` transport; injective address-to-`uint` receiver literal ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/FullCaptureControls.lean`, `Lowering/Readonly/CaptureFailureControls.lean`, `Lowering/Readonly/ReceiverControls.lean`, `Lowering/Readonly/ResumeControls.lean` | Capture, failure, receiver and resume controls on typed source fixtures ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/EnvironmentSteps.lean`, `Lowering/Readonly/EnvironmentCredit.lean` | `envLoop` step equations: answer, refusal, child outcome/halt, missing instance and credit cases ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/EnvironmentHistory.lean` | `CallbackHistories` P1 input; horizon induction `loop` giving `StaticJournal.History` and static storage equality ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/EnvironmentControls.lean`, `Lowering/Readonly/EnvironmentCreditControls.lean`, `Lowering/Readonly/EnvironmentHistoryControls.lean` | Read-only callback, static credit (balance changes, storage fixed), overflow and bounded-history controls ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/StaticJournal.lean` | Guarded journal `History` (balance, ordinary write, child, rollback) and its static storage-preservation induction ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/JournalLeaves.lean` | `History` leaves for debit/operation/cell writes and composition through bind and subframes ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/InvocationFrame.lean` | `Invocation`, `RawAt`, `RuntimeFrames`, `StorageRepresentation`; caller storage frame and typed transport ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/Controls.lean` | Static-world frame controls: balance change with storage kept, reentry, spoofed declaration and wrong-raw refusals ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/PrimitiveValues.lean`, `Lowering/Readonly/PrimitiveLocals.lean` | Intrinsic/source uint-int-bool value bijections and typed local-context correspondence ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/PrimitiveFields.lean` | Fieldwise primitive storage relation `Rel`, ownership-checked `CallLayout`, exit-relation construction ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/PrimitiveReads.lean`, `Lowering/Readonly/ReadStatement.lean` | Source/intrinsic primitive root-read simulation and lowered read statement with arbitrary tail ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/CapturedArguments.lean`, `Lowering/Readonly/PrimitiveInitialization.lean`, `Lowering/Readonly/PrimitiveCallable.lean` | Intrinsic `Args` from captured values; primitive return-slot initialization; source callable composition ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/Readonly/LoweringControls.lean`, `Lowering/Readonly/RootControls.lean`, `Lowering/Readonly/ArgumentControls.lean`, `Lowering/Readonly/CallableControls.lean` | Primitive lowering controls: field relation, non-head root, argument non-reevaluation, callable success/revert ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/V08/SourceCallPhase.lean` | Same-invocation raw `callAddr` phase before caller decoding; `extCall` phase equation ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/V08/SourceCallPhaseControls.lean`, `Lowering/V08/SourceExternalPhaseControls.lean` | Answer-driven unknown-call raw phase and typed external expression controls (signed word, short, revert, no code) ([G22](feature-work/g22-readonly-calls.md)). |
+| `Backend/WorldCalls/Premises.lean` | Conditional compiler world-call interfaces: `Identity`, `Code`, `ReturnedFrame`, `Premises`, `FetchedCall`, `FetchedPremises` ([G42](feature-work/g42-world-call-consumers.md)). |
+| `Backend/WorldCalls/Callbacks.lean`, `Backend/WorldCalls/ExternalCalls.lean`, `Backend/WorldCalls/SelfCalls.lean`, `Backend/WorldCalls/P1Consumers.lean` | Conditional callback, external, self-call and frozen P1 V3 consumers projecting producer premises ([G42](feature-work/g42-world-call-consumers.md)). |
+| `Backend/WorldCalls/SourceBridge.lean`, `Backend/WorldCalls/UnknownSourceCall.lean` | P3 bridge from `RawAt` to the source raw phase; zero-value unknown-call transport and joint `RawAt`/`RuntimeFrames` ([G42](feature-work/g42-world-call-consumers.md)). |
+| `Backend/WorldCalls/PaymentControl.lean`, `Backend/WorldCalls/ExternalControls.lean`, `Backend/WorldCalls/SelfControls.lean`, `Backend/WorldCalls/SourceBridgeControls.lean`, `Backend/WorldCalls/UnknownSourceControls.lean` | Restricted paired payment-CALL fixture and source controls for the world-call consumers ([G42](feature-work/g42-world-call-consumers.md)). |
