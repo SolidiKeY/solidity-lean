@@ -2110,6 +2110,7 @@ import Solidity.Source.Preservation.NewArrayFragmentControls
 import Solidity.Source.Preservation.ReferenceReturnControls
 import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.LiteralBuiltinControls
+import Solidity.Source.Progress.EffectCatalogueControls
 import Solidity.Source.FailureResources
 import Solidity.Source.FailureCursor
 import Solidity.Source.FailureResources

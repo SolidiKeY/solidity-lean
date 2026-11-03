@@ -74,3 +74,45 @@ callee-body catalogue checker to builtin/emit-containing bodies. Arbitrary
 memory/storage/calldata byte expressions and aggregate event encodings are
 outside this new admission. NS permits revert, panic and timeout and proves
 neither memory preservation nor termination.
+
+
+## Nonrecursive effect-body catalogues
+
+`EffectBodies.lean` adds `EffectItems`, a syntactic body-sequence predicate.
+It admits the existing value statements and their operations checks, builtin
+expression statements from the existing `BuiltinFragment`, and scalar emits
+whose converted arguments remain in the value fragment. `effect_items_ns`
+proves progress of the containing sequence, including early return and every
+non-stuck halt. New builtin/emit nodes occur at sequence positions; a nested
+conditional or loop admitted as an old value statement keeps the old fragment
+restriction. Builtin arguments retain the scalar/literal boundaries above.
+
+`EffectCatalogue.lean` defines a finite, declaration-ordered proof certificate:
+each function's actual selected body may call only its certified suffix.
+The certificate contains body/signature/default/modifier and syntactic admission
+facts, with no assumed progress theorem. Actual successful `elaborate`, program
+identity and environment coherence supply the selected declaration's typing and
+call-frame layout. `effect_catalogue_progress` derives all-horizon internal-call
+progress; `effect_from_elaborate` consumes the actual elaborator result.
+`checked_effect_call` additionally checks that the finite catalogue covers every
+source function. Coverage is inclusion; uniqueness and exact list equality are
+not asserted. No function may be silently omitted.
+
+This is proof-carrying admission, not a new executable effect-body recognizer.
+It is additive: the old `CallsOK` predicate, executable P9 checker and recursive
+value-fragment theorems are unchanged. Recursive effect-body graphs are outside
+this new certificate. No ABI/world entrypoint, termination, memory-preservation
+or compiler/EVM refinement claim follows.
+
+`EffectCatalogueControls` elaborates a source unit containing all three
+functions: a leaf emits `Flag(true)` and returns true, its caller requires the
+leaf's result, and a separate function asserts false. The complete certificate
+is inhabited and consumed by `checked_effect_call`. The fixture uses legacy
+resolution and executes both evaluator pipelines. Exact kernel-checked runs
+retain the event log, static `revert []`, assertion panic, timeout, and a live
+caller reference/memory prefix. Incomplete function coverage, a wrong Boolean
+result and the unchanged old checker refusal are negative controls. Body sharing
+for reduction is proved equal to the actual inferred program. These are Source
+model observations, not solc acceptance or differential EVM results. Both
+independent read-only reviews found no confirmed defect. Printed axioms are
+`propext`, `Classical.choice` and `Quot.sound` only.
