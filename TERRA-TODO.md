@@ -7,3 +7,5 @@ These statements are NOT proved or assumed by the checked storage client. Add th
 - `missing_find_exact`: `target.find (selected ⟨99,by decide⟩) = none`. Routine: project the checked negative_controls isNone result and apply the existing Option.isNone equivalence.
 
 Try shared standard automation first. No sorry/axiom stubs, frozen signature edits, Source edits, proof-budget increases or whole-profile claims. Keep Option failure distinct from source/EVM failures. These are G18 helper consequences, not paused G48-G51 premise-only work.
+
+- `selected_type` in the new G18StorageFrames module: `∀ i, env.pathTy (cell i) = some (.int .u8)`. Routine actual client of published `array_path`: use this client's declared Basket field path `⟨⟨none,"root"⟩,[.field 0]⟩`, storage location, `.int .u8`, dynamic length `none`, and the actual field-type equation. This proves typing only, not source bounds or full path lowering. Additional inhabited `path_append` and `mapping_path` applications remain unproved; do not mark them done from the existing bare-definition controls.
