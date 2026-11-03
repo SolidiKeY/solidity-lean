@@ -200,3 +200,12 @@ test('reset stops an in-flight build and cannot clear a replacement build handle
     s.service.dispose();await replacement;
   }finally{s.dispose();}
 });
+
+test('direct and certificate requests never share a result cache entry',async()=>{
+  const s=setup({verify:async task=>({results:[{source:task.source,sourceHash:hash(task.text),contract:'C',function:'f',status:'proved',...(task.options.certify?{}:{verification:'direct'})}],errors:[]})});
+  try{
+    const first=await s.service.verify(s.uri);assert.equal(first.results[0].verification,'direct');
+    const certified=await s.service.verify(s.uri,{certify:true});assert.equal(certified.results[0].verification,undefined);
+    assert.equal((await s.service.verify(s.uri)).results[0].verification,'direct');
+  }finally{s.dispose();}
+});

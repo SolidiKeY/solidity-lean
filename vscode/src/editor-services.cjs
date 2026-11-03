@@ -76,7 +76,7 @@ function install(vscode,context,servers,reportError){
     const active=vscode.window.activeTextEditor;
     if(active?.document.uri.toString()===params.uri&&active.document.version===params.version){
       statusBar.text=['queued','compiling','running'].includes(params.state)?'$(sync~spin) Solidity Lean':`$(beaker) Solidity Lean: ${params.state}`;
-      statusBar.tooltip='Kernel-checked Solidity verification';statusBar.show();
+      statusBar.tooltip='Solidity verification';statusBar.show();
     }
     vscode.window.visibleTextEditors.forEach(draw);
   };

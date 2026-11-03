@@ -70,3 +70,14 @@ test('does not present unvalidated transport fields as certificate observations'
   validateCounterexample(row(witness));
   assert.doesNotMatch(counterexampleDetail(row(witness)), /futureClaim|not validated/);
 });
+
+test('direct verdicts show correct, wrong and unknown without claiming a certificate',()=>{
+  const witness=evidence({certified:false});delete witness.certificateDeclaration;delete witness.axioms;
+  const direct={...row(witness),verification:'direct'};
+  assert.doesNotThrow(()=>parse(direct));assert.match(model.status(direct),/^wrong/);
+  assert.doesNotMatch(counterexampleDetail(direct),/certified|Certificate:/);
+  assert.match(model.status({...direct,status:'proved',counterexample:undefined}),/^correct/);
+  const unknown={source:'/tmp/C.sol',contract:'C',function:'f',status:'pending',verification:'direct'};
+  assert.equal(model.status(unknown),'unknown');assert.equal(model.resultKind(unknown),'skipped');
+  assert.throws(()=>parse({...direct,verification:undefined}),/invalid certified/);
+});

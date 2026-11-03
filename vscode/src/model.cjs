@@ -9,6 +9,7 @@ function validRange(range) {
 function rangeOf(row) { return validRange(row.range) ? row.range : { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }; }
 function label(row) { return `${row.contract}.${row.signature || row.function}`; }
 function status(row) {
+  if(row.verification==='direct')return ({proved:'correct',refuted:'wrong; counterexample',pending:'unknown',unsupported:'unknown'})[row.status]||row.status;
   if (row.status === 'refuted') return 'refuted; certified model prestate';
   if (row.preconditions === 'impossible') return `${row.status}; vacuous specification`;
   if (row.preconditions === 'unknown') return `${row.status}; entry audit unknown`;
@@ -22,7 +23,7 @@ function entryDetail(row) {
   return '';
 }
 function detail(row) {
-  return `${label(row)}: ${row.status}${row.reason ? ` — ${row.reason}` : ''}${row.reading ? `\nObligation reading: ${row.reading}` : ''}${entryDetail(row)}${counterexampleDetail(row)}`;
+  return `${label(row)}: ${row.verification==='direct'?status(row):row.status}${row.reason ? ` — ${row.reason}` : ''}${row.reading ? `\nObligation reading: ${row.reading}` : ''}${entryDetail(row)}${counterexampleDetail(row)}`;
 }
 function diagnostics(report) {
   return [
@@ -35,7 +36,8 @@ function diagnostics(report) {
   ];
 }
 function resultKind(row) {
-  if (row.status === 'proved') return incompleteAudit.has(row.preconditions) ? 'errored' : 'passed';
+  if(row.verification==='direct'&&['pending','unsupported'].includes(row.status))return 'skipped';
+  if (row.status === 'proved') return row.verification==='direct'||!incompleteAudit.has(row.preconditions) ? 'passed' : 'errored';
   if (['skip', 'skipped', 'internal'].includes(row.status)) return 'skipped';
   if (['pending', 'refuted'].includes(row.status)) return 'failed';
   return 'errored';

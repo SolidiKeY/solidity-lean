@@ -1,29 +1,25 @@
 # Solidity Lean Verification
 
 Verify open Solidity buffers with the repository's compiler frontend and
-kernel-checked Lean proofs. Run **Solidity Lean: Verify File** from the Command
-Palette. **Discover Obligations** lists functions without attempting proofs.
+verifier. Run **Solidity Lean: Verify File** from the Command Palette.
+**Discover Obligations** lists functions without running the verifier.
 The Testing view can run a file or an individual overloaded function.
 
-Pending obligations appear as warnings: they are open proof goals, not certified
-counterexamples. Import gaps, interrupted runs and backend errors remain visible.
+The default IDE path reports **correct**, **wrong** when it finds a concrete
+counterexample, or **unknown** when the verifier cannot decide. It trusts the
+verifier implementation and does not construct or replay a per-result Lean
+certificate. Counterexamples show model inputs and initial state; constructor
+reachability is a separate property. Unsupported readings remain unknown.
+Import gaps, interrupted runs and backend errors remain visible.
+
 Hover over a function to see its result and obligation reading. Edits clear
 obsolete results and cancel verification. **Cancel Verification** stops active
 jobs. Automatic verification after edits is enabled by default.
 
-Enable `solidityLean.auditPreconditions` to check that specified functions have
-possible entry states. A proved postcondition with an impossible entry is shown
-as a vacuous-specification warning. Unknown audits require attention too. This
-option is off by default and discovery does not run audits. See the repository's
-verification notes for the certificates and their model limits.
-
-Enable `solidityLean.counterexamples` to search open goals for a certified model
-prestate. A refuted result is an error diagnostic and a failed test. Its hover,
-output and failure details show the model parameter names, exact decimal values,
-initial model state and certificate declaration. Source names appear only when
-the backend provides a declaration mapping. These certificates concern the
-verification model; constructor reachability is a separate property. Discovery
-does not search for model prestates. The option is disabled initially.
+The backend API accepts `certify: true` for the separate certificate-producing
+path; the command-line frontend also retains certified checking by default.
+The optional precondition audit is available on that path. Direct results do
+not establish that a specification's precondition is satisfiable.
 
 Proof status refers to the selected obligation. Ordinary box proofs establish
 partial correctness. Supported ordinary diamond loops check tuple `decreases`
@@ -32,11 +28,9 @@ successful body turn. Unsupported shapes remain pending. Ordinary diamonds
 accept exhaustion; separate successful-termination certificates are described in
 [the loop notes](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/loops.md#typed-tuple-measures).
 
-Version 0.5.1 uses a bounded derivation proposal for small state-writing
-specifications. The original source obligation and every proposed proof still
-pass Lean's kernel and axiom checks. Open or rejected proposals use the existing
-verification path. Build the matching `Solidity.Frontend.Testing` backend after
-updating. [Measurements and limits](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/extension-proof-performance.md).
+Version 0.5.3 defaults to direct checking and supports an optional generated-C
+backend library. Build the matching `Solidity.Frontend.Testing` backend after
+updating. [Measurements and limits](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/native-extension-performance.md).
 
 ## Setup
 
@@ -64,8 +58,32 @@ To build an installable package from this directory:
 
 ```sh
 npx @vscode/vsce package
-code --install-extension solidity-lean-0.5.0.vsix
+code --install-extension solidity-lean-0.5.3.vsix
 ```
+
+## Native library
+
+After building the backend, compile the optional library from the repository root:
+
+```sh
+lake build Solidity.Frontend.Testing
+python3 scripts/build-frontend-plugin.py "$(lake env lean --print-prefix)"
+```
+
+Version 0.5.3 automatically loads a matching library from `.lake/frontend-native`.
+It checks the Lean runtime, platform and backend source/artifact identities.
+A stale library uses the ordinary backend until rebuilt. Native process failures
+retry the ordinary backend within the request's original timeout. This path is
+tested on Linux x64; compiled libraries are specific to their platform and Lean
+runtime. Python and a C compiler are build-time requirements. This desktop
+library does not run in the offline website.
+
+`SOLIDITY_LEAN_NATIVE=0` disables native loading for a control run.
+`SOLIDITY_LEAN_NATIVE_DIR` selects a separate build directory. Backend reports
+record whether a library was active. Direct checking trusts the verifier;
+explicit certified requests retain kernel and axiom checks. [Measurements](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/native-extension-performance.md)
+separate the modest gains from native loading from the larger gains from
+skipping result certification. A 100× complete-check improvement is not claimed.
 
 ## Tests
 

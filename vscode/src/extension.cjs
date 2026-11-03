@@ -84,7 +84,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     const hashes = new Set([hash(doc.getText()), hash('\uFEFF' + doc.getText())]);
     if (report.results.some(row => !hashes.has(row.sourceHash))) throw new Error('Verifier source hash does not match the open file; use a current backend and save the file');
     for (const row of report.results) validateCounterexample(row);
-    if ((!config.counterexamples || options.listing) && report.results.some(row => row.status === 'refuted')) throw new Error('Verifier returned unrequested certified model prestate evidence');
+    if ((!config.counterexamples || options.listing) && report.results.some(row => row.status === 'refuted' && row.verification !== 'direct')) throw new Error('Verifier returned unrequested certified model prestate evidence');
     const existing = reports.get(key(doc.uri));
     const merged = options.function && existing ? {...report,results:[...existing.results.filter(old => !report.results.some(row => row.contract === old.contract && (row.signature || row.function) === (old.signature || old.function))),...report.results]} : report;
     publish(doc, merged);

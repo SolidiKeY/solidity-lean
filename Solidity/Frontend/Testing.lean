@@ -11,7 +11,9 @@ import Solidity.Tools.SourceCounterexample
 # Testing imported Solidity files
 
 The machine-readable entry point used by `scripts/test-solidity.mjs`.
-Every proved result has a kernel-checked declaration and an axiom check.
+The default CLI mode retains a kernel-checked declaration and an axiom check.
+The explicit `sol.testing.direct` mode returns trusted runtime decisions with
+no per-result certificate, marked `verification: direct` in the report.
 An unfinished search stays pending; import gaps remain visible.
 
 A plain obligation whose formula hands control to a callee that may call
@@ -37,6 +39,11 @@ open Lean Elab Command Meta
 register_option sol.benchmark : Bool := {
   defValue := false
   descr := "emit wall-clock phase timings for imported Solidity verification"
+}
+
+register_option sol.testing.direct : Bool := {
+  defValue := false
+  descr := "return direct verifier results without constructing per-result proof certificates"
 }
 
 register_option sol.testing.closedSpecs : Bool := {
@@ -339,6 +346,75 @@ def quoteResidue (steps : Nat) (R : RuleSet) (c : Lean.Expr) (np : Option Nat)
 
 end SpecProposal
 
+/-- Run the executable checker and bounded counterexample search. This is a
+trusted-verifier result: no proof term or declaration is constructed. -/
+def directResult (C : Contract) (φ : Fml C []) : Json :=
+  if Fml.callsBack false φ then
+    Json.mkObj [("status", toJson "unsupported"), ("reason", toJson "unknown: callback reading")]
+  else
+    match SpecProposal.residue 128 .all .nil φ with
+    | some [] => Json.mkObj [("status", toJson "proved"), ("reason", toJson "")]
+    | _ => match Tools.directSourceWitness C φ with
+      | some witness => Json.mkObj [("status", toJson "refuted"), ("reason", toJson "counterexample found"),
+          ("counterexample", witness)]
+      | none => Json.mkObj [("status", toJson "pending"), ("reason", toJson "checker did not decide")]
+
+/-- Reuse the existing symbolic/arithmetic solver as a trusted decision
+procedure when the executable leaf checker is incomplete. Any proof-shaped
+intermediates and auxiliary declarations are discarded, not certified. -/
+private def directSemantic (C φ : Expr) : TermElabM Bool := do
+  let saved ← Term.saveState
+  let solved ← tryCatchRuntimeEx (withOptions (debug.skipKernelTC.set · true) do
+    Term.withoutErrToSorry do
+      let g ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Fml.Valid) C φ)
+      let goals ← Tactic.run g.mvarId! (Tactic.evalTactic (← `(tactic| sol_spec_try)))
+      let result ← instantiateMVars g
+      return goals.isEmpty && !result.hasMVar && !result.hasFVar && !result.hasSorry)
+    (fun _ => pure false)
+  saved.restore
+  return solved
+
+/-- Check the source obligation directly, without adding a theorem to Lean's
+logical environment. Unsupported readings remain unknown. -/
+def testDirectObligation (N : Lean.Name) (r : ImportRow)
+    (counterexampleOutput : IO.Ref (Option Json)) : CommandElabM (String × String × TailMode) :=
+  withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
+    liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
+      unless r.tag == .specified || (← getEnv).contains (r.declName N ++ `problem) do
+        return ("unsupported", "unknown: no scoped obligation", .solc)
+      let directStart ← benchmarkStart
+      let φ ← testFormula N r
+      benchmarkEnd "direct-formula" r.name directStart
+      if ← hasCallRec N φ then
+        return ("unsupported", "unknown: direct checker does not handle recursive or callback readings", .solc)
+      benchmarkEnd "direct-classify" r.name directStart
+      let executableStart ← benchmarkStart
+      let C := mkConst N
+      let value := mkApp2 (mkConst ``directResult) C (← Symex.evaluable φ)
+      -- Only a throwaway executable returning JSON is compiled here. No
+      -- theorem is added, and evalExpr restores the temporary environment.
+      let result ← withOptions (debug.skipKernelTC.set · true) <|
+        unsafe Meta.evalExpr Json (mkConst ``Json) value
+      benchmarkEnd "direct-executable" r.name executableStart
+      let status ← Lean.ofExcept (result.getObjValAs? String "status")
+      let reason ← Lean.ofExcept (result.getObjValAs? String "reason")
+      if status == "pending" then
+        if ← directSemantic C φ then
+          benchmarkEnd "direct" r.name directStart
+          return ("proved", "", .solc)
+      if let .ok witness := result.getObjVal? "counterexample" then
+        let arguments ← Lean.ofExcept (witness.getObjValAs? (Array Json) "arguments")
+        let arguments := arguments.map fun argument =>
+          match argument.getObjValAs? String "modelName" with
+          | .error _ => argument
+          | .ok modelName => match List.findIdx? (fun (p : String × String) => p.1 == modelName) r.params with
+            | none => argument
+            | some index => argument.setObjVal! "paramIndex" (toJson index)
+        counterexampleOutput.set (some (witness.setObjVal! "arguments" (toJson arguments)))
+      benchmarkEnd "direct" r.name directStart
+      return (status, reason, .solc))
+    (fun e => do pure ("error", ← e.toMessageData.toString, .solc))
+
 /-- Propose a small, closed derivation. The compiled walk is only an oracle:
 its equality certificate remains explicitly typed in the returned proof and
 is checked by the final addDecl. Open residues do not pay for a kernel replay.
@@ -618,6 +694,8 @@ def elabSolkeyTest : CommandElab := fun stx => do
   let counterexamples := !stx[7].isNone
   if listing && audit then throwError "precondition auditing requires verification, not listing"
   if listing && counterexamples then throwError "counterexample search requires verification, not listing"
+  let direct := sol.testing.direct.get (← getOptions)
+  let directFields := if direct then [("verification", toJson "direct")] else []
   let auditFields (status reason : String) : List (String × Json) :=
     if audit then [("preconditions", toJson status), ("preconditionReason", toJson reason)] else []
   let allRows ← reportRows N
@@ -634,12 +712,12 @@ def elabSolkeyTest : CommandElab := fun stx => do
     ("sourceId", toJson r.sourceId),
     ("invalidSpecification", toJson ((r.sourceDiagnostic.map (·.name)) == some `solidity.specificationSyntax)),
     ("status", toJson "notRun"), ("reason", toJson "contract run interrupted"),
-    ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))] ++
+    ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))] ++ directFields ++
       auditFields "notRun" "contract run interrupted")
   IO.FS.writeFile output (Json.arr results).pretty
   -- the tails reading (O6): clean where every function exposes nothing
   let tailStart ← liftCoreM benchmarkStart
-  let tail ← contractTailMode N allRows
+  let tail ← if direct then pure TailMode.solc else contractTailMode N allRows
   liftCoreM <| benchmarkEnd "tails" "" tailStart
   for r in rows, i in [:rows.length] do
     let t0 ← IO.monoMsNow
@@ -650,10 +728,12 @@ def elabSolkeyTest : CommandElab := fun stx => do
       else if r.tag != .specified && r.tag.modality?.isNone then
         pure ("unsupported", s!"{r.tag.toStr}: no obligation", .solc)
       else if listing then pure ("ready", "", tail)
+      else if direct then testDirectObligation N r witnessOutput
       else testObligation N r tail (counterexampleOutput := if counterexamples then some witnessOutput else none)
     let (preconditions, preconditionReason) ← if !audit then pure ("notRequested", "")
       else if r.status != .elaborated || r.tag != .specified then
         pure ("notApplicable", "no admitted function specification")
+      else if direct then pure ("unknown", "entry certificate audit is not run in direct mode")
       else testPreconditions N r
     let elapsed ← IO.monoMsNow
     let witness ← witnessOutput.get
@@ -664,7 +744,7 @@ def elabSolkeyTest : CommandElab := fun stx => do
       ("invalidSpecification", toJson ((r.sourceDiagnostic.map (·.name)) == some `solidity.specificationSyntax)),
       ("status", toJson status), ("reason", toJson reason),
       ("reading", toJson (if mode == .clean then "clean" else "solc")),
-      ("elapsedMs", toJson (elapsed - t0))] ++ auditFields preconditions preconditionReason ++
+      ("elapsedMs", toJson (elapsed - t0))] ++ directFields ++ auditFields preconditions preconditionReason ++
         (witness.map (fun value => [("counterexample", value)]) |>.getD []))
     IO.FS.writeFile output (Json.arr results).pretty
 

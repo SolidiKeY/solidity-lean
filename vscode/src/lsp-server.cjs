@@ -215,7 +215,7 @@ class SolidityService {
     const prepared=await this.analyze(doc);checkVersion(this.docs.get(uri),doc.version);
     const projectDigest=prepared.project?.digest??'';
     const key=JSON.stringify([uri,hash(doc.text),this.generation,projectDigest,!!options.listing,options.contract||'',options.function||'',
-      options.counterexamples??this.settings.counterexamples,options.auditPreconditions??this.settings.auditPreconditions]);
+      options.counterexamples??this.settings.counterexamples,options.auditPreconditions??this.settings.auditPreconditions,options.certify===true]);
     if(doc.verifyPromise&&doc.verifyKey===key&&!doc.verifyAbort?.signal.aborted)return this.wait(doc.verifyPromise,signal);
     doc.verifyAbort?.abort();const controller=new AbortController();doc.verifyAbort=controller;doc.verifyKey=key;
     const abort=()=>controller.abort();signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)controller.abort();
@@ -239,11 +239,11 @@ class SolidityService {
         if(!this.current(doc,version,generation)||doc.verifyAbort!==controller||this.fingerprint()!==generation||controller.signal.aborted||compiled.project&&!projects.current(compiled.project,[...this.docs.values()]))throw failure('Document or backend changed',-32801);
         parseReport(JSON.stringify(report));
         if(report.results.some(row=>row.source!==doc.path||row.sourceHash!==hash(text)))throw new Error('Verification source identity mismatch');
-        if((!task.options.counterexamples||options.listing)&&report.results.some(r=>r.status==='refuted'))throw new Error('Unrequested counterexample evidence');
+        if((!task.options.counterexamples||options.listing)&&report.results.some(r=>r.status==='refuted'&&r.verification!=='direct'))throw new Error('Unrequested counterexample evidence');
         if(task.options.auditPreconditions&&!options.listing&&report.results.some(r=>r.preconditions===undefined))throw new Error('Missing requested precondition audit');
         report.timings={compileMs:doc.compileMs,proofMs:Date.now()-start};
         // Recompute the key after the initial build changed artifact identities.
-        const storedKey=JSON.stringify([uri,hash(text),generation,compiled.project?.digest??'',!!options.listing,options.contract||'',options.function||'',task.options.counterexamples,task.options.auditPreconditions]);
+        const storedKey=JSON.stringify([uri,hash(text),generation,compiled.project?.digest??'',!!options.listing,options.contract||'',options.function||'',task.options.counterexamples,task.options.auditPreconditions,task.options.certify===true]);
         this.cache.set(storedKey,report);while(this.cache.size>32)this.cache.delete(this.cache.keys().next().value);
         this.publish(doc,report,false,options);return report;
       }catch(error){

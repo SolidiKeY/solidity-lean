@@ -5,6 +5,7 @@ const {mkdirSync,readFileSync,readdirSync,statSync}=require('node:fs');
 const {createHash}=require('node:crypto');
 const {terminateTree}=require('./backend.cjs');
 const {failure}=require('./rpc.cjs');
+const {nativeFingerprint}=require('./native-plugin.cjs');
 
 /** Relevant sources and artifact identities invalidate caches and live Lean
  * environments together. Proof results are never reused across generations. */
@@ -32,6 +33,7 @@ function fingerprint(root){
     const name=readFileSync(gradle,'utf8').match(/ext\.soljsonFile\s*=\s*"([^"]+)"/)?.[1];
     if(name){const s=statSync(join(solkey,'keyext.solidity.core/build/soljson',name));hash.update(JSON.stringify([s.size,s.mtimeMs,s.ctimeMs,s.ino]));}
   }
+  hash.update(nativeFingerprint(root));
   return hash.digest('hex');
 }
 

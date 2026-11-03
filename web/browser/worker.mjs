@@ -111,7 +111,7 @@ async function service(method,p){
   if(method==='restart'){resetProofs(true);invalidate();return {restarted:true};}
   if(method==='cancel'){resetProofs();invalidate();for(const doc of docs.values())if(!p.name||p.name===doc.name){clearTimeout(doc.timer);emit('status',doc,{state:'cancelled'});}return null;}
   if(method==='stats')return {runtime:'browser',documents:docs.size,compilerReady:true,proofReady,compilations};
-  if(method==='verify')return verify(document(p.name,p.version),{listing:!!p.listing,benchmark:!!p.benchmark,contract:p.contract,function:p.function,auditPreconditions:p.auditPreconditions??settings.auditPreconditions,counterexamples:p.counterexamples??settings.counterexamples});
+  if(method==='verify')return verify(document(p.name,p.version),{listing:!!p.listing,benchmark:!!p.benchmark,contract:p.contract,function:p.function,auditPreconditions:p.auditPreconditions??settings.auditPreconditions,certify:p.certify,counterexamples:p.counterexamples??settings.counterexamples});
   if(method==='workspace/symbol'){const results=[];for(const doc of workspaceRoots()){let c;try{c=await analyze(doc);}catch{continue;}const walk=rows=>{for(const s of rows){if(s.name.toLowerCase().includes(String(p.query||'').toLowerCase()))results.push({name:s.name,kind:s.kind,location:{uri:uri(doc.name),range:s.selectionRange}});walk(s.children||[]);}};walk(c.index.symbols);}return results;}
   const doc=document(p.name,p.version);let compiled;try{compiled=await analyze(doc);}catch(error){if(method!=='textDocument/completion')throw error;}
   const index=compiled?.index;

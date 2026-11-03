@@ -26,7 +26,7 @@ test('real Solidity LSP keeps Lean warm and verifies versioned in-memory snapsho
   const original=`// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Editor {\n  /// @custom:key ensures \\result == 1\n  function f() public pure returns(uint256 result) { return 1; }\n  function helper(uint x) public pure returns(uint) { return x; }\n  function caller() public pure returns(uint) { return helper(1); }\n}\n`;
   let text=original,version=1,cold;
   const change=next=>{text=next;rpc.notify('textDocument/didChange',{textDocument:{uri,version:++version},contentChanges:[{text}]});};
-  const verify=options=>rpc.request('solidityLean/verify',{textDocument:{uri,version},options:{function:'f()',...options}},{timeoutMs:60000});
+  const verify=options=>rpc.request('solidityLean/verify',{textDocument:{uri,version},options:{function:'f()',certify:true,...options}},{timeoutMs:60000});
   try{
     const initialization=await rpc.request('initialize',{rootUri:pathToFileURL(root).href,initializationOptions:{settings:{workers:2,automaticVerification:'never',timeoutMs:60000}}});
     assert.equal(initialization.capabilities.textDocumentSync.change,2);rpc.notify('initialized',{});rpc.notify('textDocument/didOpen',{textDocument:{uri,version,text}});
@@ -34,11 +34,24 @@ test('real Solidity LSP keeps Lean warm and verifies versioned in-memory snapsho
       cold=await verify();assert.equal(cold.results.find(r=>r.function==='f').status,'proved');assert.equal(cold.errors.length,0);
       assert.equal(cold.results[0].sourceHash,createHash('sha256').update(text).digest('hex'));assert.equal(readFileSync(source,'utf8'),saved);
       assert.ok(cold.backend.leanServerPid);assert.ok(cold.backend.workerPid);
+      if(process.env.SOLIDITY_LEAN_EXPECT_NATIVE!==undefined)assert.equal(cold.backend.native.active,process.env.SOLIDITY_LEAN_EXPECT_NATIVE==='1',JSON.stringify(cold.backend.native));
     });
     await t.test('exact snapshots reuse checked reports',async()=>{
       const second=await verify();assert.equal(second.backend.leanServerPid,cold.backend.leanServerPid);
       assert.equal(second.backend.leanDocumentVersion,cold.backend.leanDocumentVersion);
       assert.ok((await rpc.request('solidityLean/stats',{})).cacheHits>=1);
+    });
+    await t.test('direct mode returns decisions without certified cache reuse',async()=>{
+      const direct=await verify({certify:false});
+      assert.equal(direct.results.find(r=>r.function==='f').verification,'direct');
+      assert.equal(direct.results.find(r=>r.function==='f').status,'proved');
+      assert.notEqual(direct.backend.leanDocumentVersion,cold.backend.leanDocumentVersion);
+      change(original.replace('return 1;', 'return 2;'));
+      const wrong=await verify({certify:false});
+      const row=wrong.results.find(r=>r.function==='f');
+      assert.equal(row.status,'refuted');assert.equal(row.counterexample.certified,false);
+      assert.equal(row.counterexample.certificateDeclaration,undefined);
+      change(original);
     });
     await t.test('completion, definitions, references, symbols, signatures and rename use current source',async()=>{
       const point=position(text,text.indexOf('helper(1)')+2);

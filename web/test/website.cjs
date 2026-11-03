@@ -63,10 +63,10 @@ async function main(){
     if(!withProofs)await check('compiler success never silently claims a kernel proof',async()=>{await page.evaluate(()=>solidityIDE.openFile('Counter.sol'));if(!single&&!fs.existsSync(path.resolve(__dirname,'../dist/lean/manifest.json'))){const proof=await page.evaluate(async()=>{try{return await solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId()});}catch(error){return {error:error.message};}});assert.match(proof.error,/proof runtime is not installed/);}assert.equal(await page.evaluate(()=>solidityIDE.state.reports.size),0);});
     if(withProofs){
       await check('the exact Lean kernel boots entirely in a browser worker',async()=>{await page.waitForFunction(()=>solidityIDE.state.runtime.proofReady||solidityIDE.state.runtime.error,null,{timeout:600000});report.runtime=await page.evaluate(()=>solidityIDE.state.runtime);assert.equal(report.runtime.proofReady,true,report.runtime.error);assert.equal(report.runtime.lean,'4.24.0');});
-      await check('real browser proofs match the extension and a false specification stays pending',async()=>{
+      await check('direct browser verification reports correct programs and a wrong specification',async()=>{
         await page.evaluate(()=>solidityIDE.openFile('Counter.sol'));report.proofTrials=[];
-        for(let trial=0;trial<2;trial++){const start=performance.now();const result=await page.evaluate(()=>solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId()}));report.proofTrials.push({elapsedMs:+(performance.now()-start).toFixed(1),report:result});assert.deepEqual(result.errors,[]);assert.deepEqual(result.results.map(r=>[r.function,r.status]),[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','pending']]);}
-        const native=path.join(artifacts,'native-report.json');if(fs.existsSync(native)){const expected=JSON.parse(fs.readFileSync(native,'utf8')).trials[0].report.results.map(r=>[r.function,r.status]);assert.deepEqual(report.proofTrials[0].report.results.map(r=>[r.function,r.status]),expected);}
+        for(let trial=0;trial<2;trial++){const start=performance.now();const result=await page.evaluate(()=>solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId()}));report.proofTrials.push({elapsedMs:+(performance.now()-start).toFixed(1),report:result});assert.deepEqual(result.errors,[]);assert.deepEqual(result.results.map(r=>[r.function,r.status]),[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','refuted']]);}
+        const native=path.join(artifacts,'native-report.json');if(fs.existsSync(native)){const reference=JSON.parse(fs.readFileSync(native,'utf8')).trials[0].report.results;const actual=report.proofTrials[0].report.results;if(reference.every(r=>r.verification==='direct')&&reference[0]?.sourceHash===actual[0]?.sourceHash){assert.deepEqual(actual.map(r=>[r.function,r.status]),reference.map(r=>[r.function,r.status]));report.nativeComparison='matching direct reference';}else report.nativeComparison='historical reference uses a different mode or source';}
         await page.evaluate(()=>{solidityIDE.setView('testing');solidityIDE.showPanel('problems');});await page.mouse.move(1300,650);await page.screenshot({path:path.join(artifacts,'website-proofs.png')});
       });
       await check('editing terminates an active obsolete browser proof',async()=>{
@@ -78,13 +78,13 @@ async function main(){
       });
       await check('an edited false result cannot retain a green proof',async()=>{
         await page.evaluate(()=>solidityIDE.editor.setValue(solidityIDE.editor.getValue().replace('return 1;','return 2;')));await page.waitForFunction(()=>!solidityIDE.state.reports.has('Counter.sol'));
-        const result=await page.evaluate(async()=>{await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());return solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId(),function:'one()'});});assert.deepEqual(result.errors,[]);assert.equal(result.results.find(r=>r.function==='one').status,'pending');
+        const result=await page.evaluate(async()=>{await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());return solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId(),function:'one()'});});assert.deepEqual(result.errors,[]);assert.equal(result.results.find(r=>r.function==='one').status,'refuted');
         await page.evaluate(()=>solidityIDE.editor.setValue(solidityIDE.state.baselines['Counter.sol']));await page.waitForFunction(()=>!solidityIDE.state.reports.has('Counter.sol'));
       });
     }
-    if(withProofs)await check('opt-in counterexamples are certified by the browser kernel',async()=>{
+    if(withProofs)await check('direct counterexamples do not claim kernel certificates',async()=>{
       const result=await page.evaluate(async()=>{await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());return solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId(),function:'openGoal()',counterexamples:true});});
-      assert.deepEqual(result.errors,[]);const row=result.results.find(r=>r.function==='openGoal');assert.equal(row.status,'refuted');assert.ok(row.counterexample);report.counterexample=row;
+      assert.deepEqual(result.errors,[]);const row=result.results.find(r=>r.function==='openGoal');assert.equal(row.status,'refuted');assert.ok(row.counterexample);assert.equal(row.verification,'direct');assert.equal(row.counterexample.certified,false);assert.equal(row.counterexample.certificateDeclaration,undefined);report.counterexample=row;
     });
     await check(single&&!localFile?'a fully disconnected fresh browser runtime still compiles and proves new edits':'after one visit a fully disconnected reload still compiles new edits',async()=>{
       await page.evaluate(()=>solidityIDE.save());await app.close();serverClosed=true;report.staticServerStopped=true;await context.setOffline(true);
@@ -104,7 +104,7 @@ async function main(){
         const source=await page.evaluate(()=>solidityIDE.editor.getValue()),sourceHash=require('node:crypto').createHash('sha256').update(source).digest('hex');
         report.offlineProof={elapsedMs:+(performance.now()-start).toFixed(1),sourceHash,report:result};
         assert.deepEqual(result.errors,[]);
-        assert.deepEqual(result.results.map(r=>[r.function,r.status]),[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','pending']]);
+        assert.deepEqual(result.results.map(r=>[r.function,r.status]),[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','refuted']]);
         for(const row of result.results)assert.equal(row.sourceHash,sourceHash);
       }
       await page.screenshot({path:path.join(artifacts,withProofs?'website-offline-proofs.png':'website-offline-compiler.png')});

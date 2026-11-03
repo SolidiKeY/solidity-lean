@@ -69,6 +69,24 @@ private def primitivePrefix {C : Contract} : {Γ : Ctx} → Fml C Γ → Bool
   | _, .bind .. => false
   | _, _ => true
 
+/-- Execute the bounded model search directly. This returns a runtime
+counterexample, not a Lean proof or certificate. -/
+def directSourceWitness (C : Contract) (φ : Fml C []) : Option Json := do
+  unless C.vars.all (fun (_, type) => type.isPrimitive) && primitivePrefix φ do none
+  let ps := Fml.params φ
+  let names := ps.filterMap fun
+    | (.user name, _) => some name
+    | _ => none
+  unless names.length == ps.length && names.eraseDups.length == names.length &&
+      names.all (fun name => !name.isEmpty) do none
+  let witness ← (searchFml C φ 256).witness
+  let c := witness.cand
+  unless c.tx.ext.isEmpty do none
+  unless Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ == .ff do none
+  return sourceWitnessJson C witness
+    |>.setObjVal! "certified" (toJson false)
+    |>.setObjVal! "goalKind" (toJson "fmlValid")
+
 /-- Search a narrow source-friendly fragment and return a proof of the exact
 original `Fml.Valid` goal's negation with the same model witness. Budget zero
 does no search; the initial search budget is capped at 256 candidates, followed

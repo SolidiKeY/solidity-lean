@@ -36,7 +36,7 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
     const output='/output/result-'+(++sequence)+'-'+contract.id+'.json',namespace=`SolTests.«${contract.name}»`;
     const command=`#solkey_test ${namespace}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
     const timed=(phase,command)=>options.benchmark?`#solkey_benchmark ${JSON.stringify(phase)} in ${command}`:command;
-    const wrapper=`import Solidity.Frontend.Testing\n${options.benchmark?'set_option sol.benchmark true\n':''}${timed('import',`solc_import "source.ast.json" hash ${compiled.hash} as ${namespace} testing`)}\n${timed('obligations',`solc_scoped_problems ${namespace} decl`)}\n${timed('test',command)}\n`;
+    const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.direct ${options.certify!==true}\n${options.benchmark?'set_option sol.benchmark true\n':''}${timed('import',`solc_import "source.ast.json" hash ${compiled.hash} as ${namespace} testing`)}\n${timed('obligations',`solc_scoped_problems ${namespace} decl`)}\n${timed('test',command)}\n`;
     let timer;
     const checked=await Promise.race([
       request('check',{source:wrapper,files:{'/workspace/source.ast.json':compiled.text},outputs:[output]}),
@@ -60,7 +60,7 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
   if(!contracts.length)errors.push({source,stage:'discovery',reason:'No contracts selected'});
   const report=parseReport(JSON.stringify({results,errors}));
   report.timings={kernelChecks};
-  if((!options.counterexamples||options.listing)&&results.some(row=>row.status==='refuted'))throw new Error('Kernel returned unrequested model prestate evidence');
+  if((!options.counterexamples||options.listing)&&results.some(row=>row.status==='refuted'&&row.verification!=='direct'))throw new Error('Kernel returned unrequested model prestate evidence');
   if(options.auditPreconditions&&!options.listing&&results.some(row=>row.preconditions===undefined))throw new Error('Kernel did not return the requested precondition audit');
   return report;
 }
