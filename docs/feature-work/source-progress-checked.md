@@ -146,3 +146,37 @@ pipelines, and applies the joint progress/preservation result to a live caller
 reference. Read-only finder and skeptic reviews found no confirmed defect.
 Printed axioms remain `propext`, `Classical.choice` and `Quot.sound`; these are
 Source observations, not compiler or EVM refinement.
+
+## Ready allocating expressions and exact arguments
+
+`Progress/ReadyExpressions.lean` decorates the existing `AllocatingExpr` subset
+with allocation readiness. `ReadyExpr` covers the original checked value
+fragment, reference locals, same-type conversions, reference-result conditionals
+and ready dynamic-new nodes. `eval_ready_expr_ns` proves non-stuckness at every
+horizon; its projection to `AllocatingExpr` supplies the existing full memory
+preservation theorem. Panic and timeout remain possible.
+
+`Progress/ReadyArguments.lean` adds `ReadyArgs` for exact-type converted lists.
+`PlainResultType` permits value types or memory-reference types, making `getV`
+non-stuck without silently adding raw constants or other reference locations.
+The certificate projects to `ExactArgs`, so preservation retains an earlier
+reference through a later allocation. Non-stuckness holds independently of
+heap validity; the separate preservation conclusion still needs `MemOK` at
+entry. Passing a dangling reference can be non-stuck without being valid.
+
+The `ready_from_elaborate` and `ready_args_from_elaborate` adapters derive the
+value-callee `CallsOK` premise from actual elaboration and the P9 executable
+check on a supplied closed allowlist. They do not require complete-function
+coverage, certify the supplied expression's frontend acceptance, or add general
+memory-body progress, new memory-callee graphs or a new executable recognizer.
+Cross-type argument conversions and storage/calldata argument locations remain
+outside `ReadyArgs`.
+
+`ReadyExpressionControls` consumes actual inhabited reference-conditional and
+argument runs in both evaluator pipelines: alias versus fresh result, earlier
+alias plus later allocation, allocation panic, low-horizon timeout and unchanged
+raw-string exclusion. `ReadyProgramControls` consumes a real legacy elaboration
+and P9 certificate, then observes the supplied intrinsic conditional and exact
+arguments in both pipelines while preserving a live caller reference. Finder
+and skeptic reviews found no confirmed issue. Printed axioms are standard only;
+no compiler/EVM refinement or universal source-coverage claim follows.

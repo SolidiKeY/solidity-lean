@@ -378,3 +378,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Preservation/MemoryProgramControls.lean` | A source-elaborated memory parameter and ordinary single-reference return. |
 | `Source/Progress/NewArray.lean` | Non-stuck dynamic allocation for explicit ready memory types. |
 | `Source/Progress/NewArrayControls.lean` | Inhabited allocation progress and exact observations. |
+| `Source/Progress/ReadyArguments.lean` | Exact-type ready arguments combine non-stuck extraction with the existing reference-preserving argument evaluator. |
+| `Source/Progress/ReadyExpressionControls.lean` | Ready reference conditionals and exact argument lists over inhabited memory. |
+| `Source/Progress/ReadyExpressions.lean` | Readiness-decorated allocating expressions, over the existing intrinsic syntax and preservation admission. |
