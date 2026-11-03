@@ -37,9 +37,6 @@ theorem observed :
 /-- Omitting the pointer copy does not produce the intended tuple payload. -/
 theorem missing_copy_refused : input.mem 3 ≠ w[128] := by decide +kernel
 
-/-- No invocation of the ownership lemma covers a write to the cursor cell. -/
-theorem cursor_destination_refused : ¬ (0 < (0 : Nat)) := by decide
-
 #print axioms executed
 #print axioms retained
 #print axioms owned

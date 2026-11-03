@@ -36,6 +36,8 @@ reached heap, map and cursor through positive reserved-frame writes, including
 live array/struct representations, separation and the zeroed free region.
 copy_retained preserves the complete post-body caller StateRepr below the
 result interval. FrameControls instantiates both with an actual nonempty array.
+Its negative control rejects omitting the actual pointer copy. Positive
+destination and frame capacity remain explicit premises of copy_allocator.
 
 RuntimeFrameV3CallProducerRefTupleTyped.ResultWords.of_repr derives typed value
 words and actual HRefs from the reached expanded-body StateRepr. ResultWords.copy
