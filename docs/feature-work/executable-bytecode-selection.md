@@ -132,3 +132,24 @@ require no adapter here. The finder identified module-map rows detached from
 the table during migration; the owned rows now share its existing header.
 The pre-rebase validation applies to its original head; post-rebase checks
 are recorded separately. No coverage or certificate premise changed.
+
+## Numeric ADD/MUL component
+
+ArithmeticSelection.lean extends the existing InstructionCertificate with
+actual compiler-IR ADD and MUL selection to one Osaka opcode each. A complete
+IR-step equation constructs success and refusal equivalences, using the
+existing injective numeric-stack representation. Both operations preserve all
+nonstack machine fields and refuse operand underflow. No capacity claim follows
+from the gasless step certificate; physical admission still requires V2.
+
+Controls execute wraparound at the 256-bit boundary with arbitrary suffixes,
+transport it to arbitrary complete IR caller frames, reject missing operands,
+wrong results and corrupted tails, and check the emitted opcode bytes.
+selectArithmetic covers only ADD/MUL; absence for another instruction does not
+classify its source execution. Remaining arithmetic operations, instruction
+sequences, general stack/control lowering and assembly composition remain open.
+
+Independent read-only finder and skeptic reviews passed the ADD/MUL component
+and controls without confirmed findings. Both checked actual runner equality,
+non-vacuous input cases, modular bounds, complete-frame preservation and the
+separation from capacity, symbolic-slot behavior and checked source arithmetic.
