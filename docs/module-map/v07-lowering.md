@@ -63,3 +63,4 @@
 | `Lowering/V07/P12AssignedConditionControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V07/P12ContextExtension.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V07/P12ContextExtensionControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/SignedSubtractionControls.lean` | Signed subtraction clients, boundaries, capture/sign negatives and mixed frames |

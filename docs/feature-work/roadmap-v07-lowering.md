@@ -381,3 +381,16 @@ partial, G18 admission/composition prerequisites stay open, and no constructor
 or external compiler/EVM coverage is added.
 The V07 axiom guards and the `*Checks.lean` fixtures cited above are lane-only;
 master has no V07 entries in `scripts/g07-axiom-pins.json`.
+
+
+## Full-range int256 subtraction
+
+`SignedWordSubtraction` relates actual unchecked Source subtraction to existing
+signed-to-word casts, word subtraction and signed readback for every int256
+input pair, with no output-range premise. Local and assignment/read transports
+derive executions, value agreement and selected post-family from initial
+relations; both pipeline operand positions and private captures are preserved.
+`SignedSubtractionControls` supplies inhabited headline clients, signed boundary
+cases, aliases, mixed live-reference frames and wrong-sign/order/stale controls.
+Checked-overflow fixtures compare success classification only. Narrow signed
+widths, other operators, failure payloads and production lowering remain open.
