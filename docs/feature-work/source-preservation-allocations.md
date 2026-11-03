@@ -231,7 +231,12 @@ no confirmed soundness issue; none of these statements asserts general source
 progress or compiler refinement.
 
 Not covered: arbitrary reference-call bodies, automatic recognition of this
-memory subset, unrestricted allocation nesting or cross-type argument conversion, progress or termination,
+memory subset, unrestricted allocation nesting or cross-type argument conversion, general memory-body progress or termination,
 compiler/EVM refinement, `SourceSpec` and rollback. The existing standalone
 allocation-arm rules above retain their stated premises. All printed axioms are
 `propext`, `Classical.choice` and `Quot.sound`.
+
+The standalone dynamic-new parent also has a progress adapter under explicit
+ready-type and checked length-fragment conditions; see
+[source-progress-checked.md](source-progress-checked.md#dynamic-allocation-with-a-checked-length).
+This does not extend the memory-body certificate to general progress.

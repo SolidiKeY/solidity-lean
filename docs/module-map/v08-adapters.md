@@ -376,3 +376,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Preservation/EncodingArguments.lean` | Syntactic ABI arguments with allocating expression children and raw string literals. |
 | `Source/Preservation/MemoryProgram.lean` | Source memory-call admission tied to actual elaborated bodies. |
 | `Source/Preservation/MemoryProgramControls.lean` | A source-elaborated memory parameter and ordinary single-reference return. |
+| `Source/Progress/NewArray.lean` | Non-stuck dynamic allocation for explicit ready memory types. |
+| `Source/Progress/NewArrayControls.lean` | Inhabited allocation progress and exact observations. |

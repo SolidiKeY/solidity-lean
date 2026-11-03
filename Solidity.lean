@@ -2136,6 +2136,8 @@ import Solidity.Source.Progress.EffectCatalogueControls
 import Solidity.Source.Progress.EmitBuiltins
 import Solidity.Source.Progress.LiteralBuiltinControls
 import Solidity.Source.Progress.LiteralBuiltins
+import Solidity.Source.Progress.NewArray
+import Solidity.Source.Progress.NewArrayControls
 import Solidity.Source.Progress.RecoveryBuiltin
 import Solidity.Source.Progress.ScalarBuiltinControls
 import Solidity.Source.Resolve

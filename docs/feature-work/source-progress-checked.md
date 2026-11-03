@@ -116,3 +116,33 @@ for reduction is proved equal to the actual inferred program. These are Source
 model observations, not solc acceptance or differential EVM results. Both
 independent read-only reviews found no confirmed defect. Printed axioms are
 `propext`, `Classical.choice` and `Quot.sound` only.
+
+## Dynamic allocation with a checked length
+
+`Progress/NewArray.lean` proves non-stuckness for a standalone dynamic-new parent
+whose length is in the original checked value-call fragment. `NewReady` admits
+memory bytes and strings, and one-word dynamic memory arrays whose element
+default exists. The extra default condition is necessary: syntactic `newable`
+alone does not rule out the evaluator's `new of this element type` refusal.
+`new_fragment_all_ns` covers every horizon, including timeout at zero. Allocation
+panic remains allowed; non-stuckness asserts neither success nor termination.
+
+`new_from_elaborate` derives length-call `CallsOK` from actual elaboration and
+the executable P9 check, and pairs progress with the existing `MemOK` allocation
+rule. It uses a supplied closed value-callee allowlist, not complete-function
+coverage. The allocation parent is supplied intrinsic syntax; this adapter is
+not a new frontend acceptance result or whole-program memory-body progress.
+The original `ValFragC` and its checker are unchanged.
+
+`NewArrayControls` consumes inhabited nonempty memory witnesses, including a
+compound length, fresh allocation, escaping reference validity, oversized-length
+panic and low-horizon timeout in both evaluator pipelines. A missing enum in the
+intrinsic layout has no element default: its type remains `newable`, the actual
+named stuck outcome persists, and a control refutes `NS` for that input. This
+negative layout is not asserted to be an elaborated Solidity enum declaration.
+`NewArrayProgramControls` additionally consumes an actual legacy-elaborated
+program/P9 certificate, executes the supplied allocation parent in both evaluator
+pipelines, and applies the joint progress/preservation result to a live caller
+reference. Read-only finder and skeptic reviews found no confirmed defect.
+Printed axioms remain `propext`, `Classical.choice` and `Quot.sound`; these are
+Source observations, not compiler or EVM refinement.
