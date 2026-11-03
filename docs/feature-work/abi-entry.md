@@ -64,4 +64,10 @@ MSIZE, MLOAD, MSTORE, MSTORE8 and CALLDATACOPY. Its active-byte word-fit field
 prevents MSIZE wrap; it does not bound reserved capacity or calldata admission.
 Finder/skeptic reviews found no false signature and required this boundary to
 stay explicit: P6 MLOAD payload agreement and store/copy image preservation
-remain open. No implementation instance is supplied by this signature module.
+remain open. `MemoryCharged.lean` inhabits these signatures; `MemoryControls.lean` checks
+initial P6 images, arbitrary reserved-capacity growth, per-operation successes,
+expansion charges and refusals, empty-copy endpoints and MSTORE8 low bytes.
+MSIZE successful native execution reuses the existing P10 theorem. Independent
+reviews found no semantic gap; the requested stack-overflow control is included.
+Scoped guards pin standard axioms. P6 MLOAD payload and store/copy image
+preservation remain open.
