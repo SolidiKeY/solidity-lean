@@ -1,0 +1,4490 @@
+{
+  "startedAt": "2026-11-03T20:55:07.474Z",
+  "inventorySha256": "a4c66b77ffbdc4337be20a8822f176a4b22d50a91247b159acd8024969c11f43",
+  "trials": [
+    {
+      "name": "additionStorageWrite",
+      "round": 0,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "wallMs": 712.125207,
+      "results": [
+        {
+          "function": "additionStorageWrite",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 73,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "additionStorageWrite(uint,uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/additionStorageWrite-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 1,
+            "checkMs": 169.90750200000002
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 360,
+        "proofMs": 327
+      }
+    },
+    {
+      "name": "additionSimple",
+      "round": 0,
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "wallMs": 77.63682300000005,
+      "results": [
+        {
+          "function": "additionSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "additionSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/additionSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 2,
+            "checkMs": 1.970010000000002
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 27,
+        "proofMs": 28
+      }
+    },
+    {
+      "name": "additionStorageRead",
+      "round": 0,
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "wallMs": 85.38182699999993,
+      "results": [
+        {
+          "function": "additionStorageRead",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 59,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "additionStorageRead()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/additionStorageRead-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 3,
+            "checkMs": 6.2632750000000215
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 29,
+        "proofMs": 34
+      }
+    },
+    {
+      "name": "subtractionSimple",
+      "round": 0,
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "wallMs": 88.73298199999999,
+      "results": [
+        {
+          "function": "subtractionSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "subtractionSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/subtractionSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 4,
+            "checkMs": 1.708340000000021
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 37,
+        "proofMs": 27
+      }
+    },
+    {
+      "name": "subtractionStorageRead",
+      "round": 0,
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "wallMs": 81.53943299999992,
+      "results": [
+        {
+          "function": "subtractionStorageRead",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 59,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "subtractionStorageRead()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/subtractionStorageRead-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 5,
+            "checkMs": 6.096406999999999
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 26,
+        "proofMs": 33
+      }
+    },
+    {
+      "name": "multiplicationSimple",
+      "round": 0,
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "wallMs": 81.12282400000004,
+      "results": [
+        {
+          "function": "multiplicationSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "multiplicationSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/multiplicationSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 6,
+            "checkMs": 1.6519859999999653
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 34
+      }
+    },
+    {
+      "name": "divisionSimple",
+      "round": 0,
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "wallMs": 68.29420299999992,
+      "results": [
+        {
+          "function": "divisionSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "divisionSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/divisionSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 7,
+            "checkMs": 1.6785370000000057
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "moduloSimple",
+      "round": 0,
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "wallMs": 85.03069600000003,
+      "results": [
+        {
+          "function": "moduloSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "moduloSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/moduloSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 8,
+            "checkMs": 1.922038999999927
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 25,
+        "proofMs": 36
+      }
+    },
+    {
+      "name": "powerSimple",
+      "round": 0,
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "wallMs": 111.99511000000007,
+      "results": [
+        {
+          "function": "powerSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "powerSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/powerSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 9,
+            "checkMs": 1.7799679999999398
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 29,
+        "proofMs": 38
+      }
+    },
+    {
+      "name": "localArithmeticInRange",
+      "round": 0,
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "wallMs": 105.75139399999989,
+      "results": [
+        {
+          "function": "localArithmeticInRange",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 79,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "localArithmeticInRange(uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/localArithmeticInRange-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 26,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 10,
+            "checkMs": 14.246398
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 29,
+        "proofMs": 47
+      }
+    },
+    {
+      "name": "greaterEqualSimple",
+      "round": 0,
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "wallMs": 94.74858900000004,
+      "results": [
+        {
+          "function": "greaterEqualSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 54,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "greaterEqualSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/greaterEqualSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 11,
+            "checkMs": 1.7316450000000714
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 30,
+        "proofMs": 35
+      }
+    },
+    {
+      "name": "greaterThanSimple",
+      "round": 0,
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "wallMs": 87.36866299999997,
+      "results": [
+        {
+          "function": "greaterThanSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 53,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "greaterThanSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/greaterThanSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 12,
+            "checkMs": 1.771645000000035
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 25,
+        "proofMs": 33
+      }
+    },
+    {
+      "name": "lessEqualSimple",
+      "round": 0,
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "wallMs": 78.5714280000002,
+      "results": [
+        {
+          "function": "lessEqualSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 53,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "lessEqualSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/lessEqualSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 13,
+            "checkMs": 1.816101000000117
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 26
+      }
+    },
+    {
+      "name": "lessThanSimple",
+      "round": 0,
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "wallMs": 68.14320899999984,
+      "results": [
+        {
+          "function": "lessThanSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 53,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "lessThanSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/lessThanSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 14,
+            "checkMs": 2.5191859999999906
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "notEqualSimple",
+      "round": 0,
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "wallMs": 63.72958399999993,
+      "results": [
+        {
+          "function": "notEqualSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 53,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "notEqualSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/notEqualSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 15,
+            "checkMs": 1.5470100000000002
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 23
+      }
+    },
+    {
+      "name": "logicalAndSimple",
+      "round": 0,
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "wallMs": 66.57087100000012,
+      "results": [
+        {
+          "function": "logicalAndSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 54,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "logicalAndSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/logicalAndSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 16,
+            "checkMs": 1.5763139999999112
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "round": 0,
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "wallMs": 76.36285300000009,
+      "results": [
+        {
+          "function": "logicalAndShortCircuitRhs",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 63,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "logicalAndShortCircuitRhs()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/logicalAndShortCircuitRhs-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 17,
+            "checkMs": 7.0285630000000765
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 31
+      }
+    },
+    {
+      "name": "logicalNotSimple",
+      "round": 0,
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "wallMs": 70.31469900000002,
+      "results": [
+        {
+          "function": "logicalNotSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 52,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "logicalNotSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/logicalNotSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 18,
+            "checkMs": 1.5344720000000507
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 26
+      }
+    },
+    {
+      "name": "logicalOrSimple",
+      "round": 0,
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "wallMs": 78.85303699999986,
+      "results": [
+        {
+          "function": "logicalOrSimple",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 53,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "logicalOrSimple()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/logicalOrSimple-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 19,
+            "checkMs": 1.4253400000000056
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 29,
+        "proofMs": 29
+      }
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "round": 0,
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "wallMs": 69.36605699999973,
+      "results": [
+        {
+          "function": "logicalOrShortCircuitRhs",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 63,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "logicalOrShortCircuitRhs()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/logicalOrShortCircuitRhs-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 20,
+            "checkMs": 1.9761190000001534
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "round": 0,
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "wallMs": 72.88871699999982,
+      "results": [
+        {
+          "function": "ternaryCaptureCond",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 64,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ternaryCaptureCond()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ternaryCaptureCond-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 21,
+            "checkMs": 4.303530000000137
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 28
+      }
+    },
+    {
+      "name": "ternaryToIf",
+      "round": 0,
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "wallMs": 67.46009200000026,
+      "results": [
+        {
+          "function": "ternaryToIf",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 60,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ternaryToIf()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ternaryToIf-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 22,
+            "checkMs": 1.8875880000000507
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "ifUnfold",
+      "round": 0,
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "wallMs": 78.9126339999998,
+      "results": [
+        {
+          "function": "ifUnfold",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 65,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifUnfold()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifUnfold-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 23,
+            "checkMs": 5.204449999999724
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 28
+      }
+    },
+    {
+      "name": "ifElseUnfold",
+      "round": 0,
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "wallMs": 70.41227300000037,
+      "results": [
+        {
+          "function": "ifElseUnfold",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 69,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifElseUnfold()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifElseUnfold-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 24,
+            "checkMs": 2.0921809999999823
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 26
+      }
+    },
+    {
+      "name": "ifSplit",
+      "round": 0,
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "wallMs": 74.23146299999962,
+      "results": [
+        {
+          "function": "ifSplit",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 63,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifSplit()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifSplit-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 25,
+            "checkMs": 1.8335469999997258
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 31
+      }
+    },
+    {
+      "name": "ifElseSplit",
+      "round": 0,
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "wallMs": 72.81284199999982,
+      "results": [
+        {
+          "function": "ifElseSplit",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 69,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifElseSplit()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifElseSplit-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 28,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 26,
+            "checkMs": 2.551234000000022
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 27
+      }
+    },
+    {
+      "name": "ifTrue",
+      "round": 0,
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "wallMs": 67.04838000000018,
+      "results": [
+        {
+          "function": "ifTrue",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 59,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifTrue()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifTrue-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 27,
+            "checkMs": 1.7497530000000552
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "ifFalse",
+      "round": 0,
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "wallMs": 64.27953200000002,
+      "results": [
+        {
+          "function": "ifFalse",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 59,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifFalse()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifFalse-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 28,
+            "checkMs": 1.6007409999997435
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "ifElseTrue",
+      "round": 0,
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "wallMs": 68.49752500000022,
+      "results": [
+        {
+          "function": "ifElseTrue",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 63,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifElseTrue()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifElseTrue-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 29,
+            "checkMs": 4.83548699999983
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 27
+      }
+    },
+    {
+      "name": "ifElseFalse",
+      "round": 0,
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "wallMs": 65.836186,
+      "results": [
+        {
+          "function": "ifElseFalse",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 63,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifElseFalse()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifElseFalse-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 30,
+            "checkMs": 1.8033519999999044
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 23
+      }
+    },
+    {
+      "name": "ifElseNegated",
+      "round": 0,
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "wallMs": 65.58376099999987,
+      "results": [
+        {
+          "function": "ifElseNegated",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 68,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "ifElseNegated()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/ifElseNegated-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 31,
+            "checkMs": 2.073203999999805
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "requireTrueLiteral",
+      "round": 0,
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "wallMs": 64.84078599999975,
+      "results": [
+        {
+          "function": "requireTrueLiteral",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 51,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "requireTrueLiteral()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/requireTrueLiteral-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 32,
+            "checkMs": 1.261054999999942
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 23
+      }
+    },
+    {
+      "name": "requireFalseLiteral",
+      "round": 0,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "wallMs": 66.0983269999997,
+      "results": [
+        {
+          "function": "requireFalseLiteral",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 51,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "requireFalseLiteral()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/requireFalseLiteral-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 33,
+            "checkMs": 1.0861949999998615
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "requireGuardBox",
+      "round": 0,
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "wallMs": 66.87022500000012,
+      "results": [
+        {
+          "function": "requireGuardBox",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 65,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "requireGuardBox(uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/requireGuardBox-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 34,
+            "checkMs": 2.8036090000000513
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "round": 0,
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "wallMs": 66.35325600000033,
+      "results": [
+        {
+          "function": "requireHoldsDiamond",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 67,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "requireHoldsDiamond()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/requireHoldsDiamond-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 35,
+            "checkMs": 1.9611360000003515
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "testSimpleAssert",
+      "round": 0,
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "wallMs": 64.3484540000004,
+      "results": [
+        {
+          "function": "testSimpleAssert",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 57,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "testSimpleAssert()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/testSimpleAssert-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 36,
+            "checkMs": 1.6385169999998652
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootReadWrite",
+      "round": 0,
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "wallMs": 64.44013099999984,
+      "results": [
+        {
+          "function": "storageRootReadWrite",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 57,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootReadWrite()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootReadWrite-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 37,
+            "checkMs": 1.7201979999999821
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootAddAssign",
+      "round": 0,
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "wallMs": 64.49417099999982,
+      "results": [
+        {
+          "function": "storageRootAddAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootAddAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootAddAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 38,
+            "checkMs": 1.8539770000002136
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootSubAssign",
+      "round": 0,
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "wallMs": 68.29943000000003,
+      "results": [
+        {
+          "function": "storageRootSubAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootSubAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootSubAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 39,
+            "checkMs": 1.88780799999995
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 26,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootMulAssign",
+      "round": 0,
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "wallMs": 64.40393700000004,
+      "results": [
+        {
+          "function": "storageRootMulAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootMulAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootMulAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 40,
+            "checkMs": 2.234303000000182
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "storageRootDivAssign",
+      "round": 0,
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "wallMs": 63.86131000000023,
+      "results": [
+        {
+          "function": "storageRootDivAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootDivAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootDivAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 41,
+            "checkMs": 1.8090309999997771
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootModAssign",
+      "round": 0,
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "wallMs": 68.05208200000015,
+      "results": [
+        {
+          "function": "storageRootModAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootModAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootModAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 42,
+            "checkMs": 4.983971999999994
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 28
+      }
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "round": 0,
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "wallMs": 66.64123900000004,
+      "results": [
+        {
+          "function": "storageRootMultipleWrites",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootMultipleWrites()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootMultipleWrites-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 43,
+            "checkMs": 1.762471000000005
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootPostincrement",
+      "round": 0,
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "wallMs": 64.97965199999999,
+      "results": [
+        {
+          "function": "storageRootPostincrement",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 60,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootPostincrement()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootPostincrement-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 44,
+            "checkMs": 1.78961100000015
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "storageRootPreincrement",
+      "round": 0,
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "wallMs": 65.1958239999999,
+      "results": [
+        {
+          "function": "storageRootPreincrement",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 60,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootPreincrement()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootPreincrement-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 45,
+            "checkMs": 1.7244849999997314
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootPredecrement",
+      "round": 0,
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "wallMs": 63.67451099999971,
+      "results": [
+        {
+          "function": "storageRootPredecrement",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 60,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootPredecrement()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootPredecrement-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 46,
+            "checkMs": 1.6762529999996332
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 23
+      }
+    },
+    {
+      "name": "storageRootDelete",
+      "round": 0,
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "wallMs": 64.08816699999988,
+      "results": [
+        {
+          "function": "storageRootDelete",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 60,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootDelete()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootDelete-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 47,
+            "checkMs": 2.401542000000063
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootDisjoint",
+      "round": 0,
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "wallMs": 65.2849669999996,
+      "results": [
+        {
+          "function": "storageRootDisjoint",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootDisjoint()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootDisjoint-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 48,
+            "checkMs": 2.8197839999997996
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "round": 0,
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "wallMs": 77.17306800000006,
+      "results": [
+        {
+          "function": "storageRootWriteRhsCapture",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 81,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageRootWriteRhsCapture(uint,uint,uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageRootWriteRhsCapture-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 49,
+            "checkMs": 9.426378999999997
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 35
+      }
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "round": 0,
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "wallMs": 62.75642700000026,
+      "results": [
+        {
+          "function": "storageBoolRootReadWrite",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageBoolRootReadWrite()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageBoolRootReadWrite-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 50,
+            "checkMs": 1.5308970000000954
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 20,
+        "proofMs": 23
+      }
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "round": 0,
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "wallMs": 65.31033399999978,
+      "results": [
+        {
+          "function": "storageIndexRootMapping",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 61,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexRootMapping()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexRootMapping-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 51,
+            "checkMs": 3.3035390000000007
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "round": 0,
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "wallMs": 64.80340000000069,
+      "results": [
+        {
+          "function": "storageIndexMappingAddAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 67,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexMappingAddAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexMappingAddAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 52,
+            "checkMs": 2.003179000000273
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "round": 0,
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "wallMs": 66.53935300000012,
+      "results": [
+        {
+          "function": "storageIndexReadMappingStoreRoot",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 73,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexReadMappingStoreRoot(uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexReadMappingStoreRoot-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 53,
+            "checkMs": 3.0883029999999962
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "round": 0,
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "wallMs": 80.19200899999942,
+      "results": [
+        {
+          "function": "storageIndexWriteNseChain",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 87,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexWriteNseChain(uint,uint,uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexWriteNseChain-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 54,
+            "checkMs": 8.446711999999934
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 29,
+        "proofMs": 32
+      }
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "round": 0,
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "wallMs": 65.77932200000032,
+      "results": [
+        {
+          "function": "storageIndexDeleteMappingBool",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 65,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexDeleteMappingBool()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexDeleteMappingBool-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 55,
+            "checkMs": 1.8836920000003374
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "round": 0,
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "wallMs": 66.27612099999988,
+      "results": [
+        {
+          "function": "storageIndexDeleteNseIndex",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 76,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexDeleteNseIndex(uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexDeleteNseIndex-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 56,
+            "checkMs": 3.014984000000368
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "round": 0,
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "wallMs": 72.48872000000028,
+      "results": [
+        {
+          "function": "testStorageMapReadWriteAndDelete",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 100,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "testStorageMapReadWriteAndDelete()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/testStorageMapReadWriteAndDelete-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 29,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 57,
+            "checkMs": 5.625641999999971
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 25,
+        "proofMs": 28
+      }
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "round": 0,
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "wallMs": 85.24160900000061,
+      "results": [
+        {
+          "function": "storageIndexCopyValue",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 90,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexCopyValue(uint,uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexCopyValue-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 26,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 58,
+            "checkMs": 12.058925000000272
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 27,
+        "proofMs": 38
+      }
+    },
+    {
+      "name": "storageGridWriteRead",
+      "round": 0,
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "wallMs": 68.25229000000036,
+      "results": [
+        {
+          "function": "storageGridWriteRead",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 73,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageGridWriteRead()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageGridWriteRead-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 59,
+            "checkMs": 2.8389619999998104
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "round": 0,
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "wallMs": 65.04198499999984,
+      "results": [
+        {
+          "function": "storageBoolKeyedMapping",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 63,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageBoolKeyedMapping()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageBoolKeyedMapping-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 60,
+            "checkMs": 1.8679879999999685
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 24
+      }
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "round": 0,
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "wallMs": 70.01893699999982,
+      "results": [
+        {
+          "function": "storageIndexAddAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 74,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexAddAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexAddAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 61,
+            "checkMs": 4.93669299999965
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 27
+      }
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "round": 0,
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "wallMs": 71.13662000000022,
+      "results": [
+        {
+          "function": "storageIndexSubAssign",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 74,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexSubAssign()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexSubAssign-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 62,
+            "checkMs": 4.883332999999766
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 29
+      }
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "round": 0,
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "wallMs": 68.91675900000064,
+      "results": [
+        {
+          "function": "storageIndexMultipleWrites",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 74,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexMultipleWrites()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexMultipleWrites-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 63,
+            "checkMs": 3.7961059999997815
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 26
+      }
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "round": 0,
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "wallMs": 72.18646100000024,
+      "results": [
+        {
+          "function": "storageIndexPostincrement",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 73,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexPostincrement()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexPostincrement-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 64,
+            "checkMs": 7.852108000000044
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 30
+      }
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "round": 0,
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "wallMs": 72.08283699999993,
+      "results": [
+        {
+          "function": "storageIndexPostdecrement",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 73,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexPostdecrement()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexPostdecrement-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 65,
+            "checkMs": 7.2477200000002995
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 30
+      }
+    },
+    {
+      "name": "storageIndexDelete",
+      "round": 0,
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "wallMs": 71.37234100000023,
+      "results": [
+        {
+          "function": "storageIndexDelete",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 73,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexDelete()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexDelete-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 66,
+            "checkMs": 3.836457000000337
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 29
+      }
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "round": 0,
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "wallMs": 73.44236000000001,
+      "results": [
+        {
+          "function": "storageIndexReadNseIndex",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 78,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexReadNseIndex(uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexReadNseIndex-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 67,
+            "checkMs": 4.291543000000274
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 30
+      }
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "round": 0,
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "wallMs": 71.1309769999998,
+      "results": [
+        {
+          "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 60,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexArrayAddAssignOutOfBoundsReverts()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexArrayAddAssignOutOfBoundsReverts-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 68,
+            "checkMs": 2.708857999999964
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 30
+      }
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "round": 0,
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "wallMs": 71.55375499999991,
+      "results": [
+        {
+          "function": "storageIndexArrayReadOutOfBoundsReverts",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 62,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageIndexArrayReadOutOfBoundsReverts()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageIndexArrayReadOutOfBoundsReverts-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 69,
+            "checkMs": 2.8102200000002995
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 30
+      }
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "round": 0,
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "wallMs": 72.47725300000002,
+      "results": [
+        {
+          "function": "storageMatrixWriteRead",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 81,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageMatrixWriteRead()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageMatrixWriteRead-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 70,
+            "checkMs": 6.416804000000411
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 29
+      }
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "round": 0,
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "wallMs": 98.13566499999979,
+      "results": [
+        {
+          "function": "storageMatrixNseIndex",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 109,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storageMatrixNseIndex(uint,uint,uint,uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storageMatrixNseIndex-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 71,
+            "checkMs": 28.726873999999953
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 27,
+        "proofMs": 52
+      }
+    },
+    {
+      "name": "storagePushEmpty",
+      "round": 0,
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "wallMs": 68.41709499999979,
+      "results": [
+        {
+          "function": "storagePushEmpty",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 62,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storagePushEmpty()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storagePushEmpty-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 72,
+            "checkMs": 3.360779000000548
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 26
+      }
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "round": 0,
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "wallMs": 69.87259100000028,
+      "results": [
+        {
+          "function": "storagePushLengthPositive",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 55,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storagePushLengthPositive()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storagePushLengthPositive-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 73,
+            "checkMs": 2.002738999999565
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 30
+      }
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "round": 0,
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "wallMs": 83.92379800000072,
+      "results": [
+        {
+          "function": "storagePushNonsimpleArg",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 87,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storagePushNonsimpleArg(uint,uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storagePushNonsimpleArg-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 74,
+            "checkMs": 9.215066000000661
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 37
+      }
+    },
+    {
+      "name": "storagePushReadBack",
+      "round": 0,
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "wallMs": 71.08906899999965,
+      "results": [
+        {
+          "function": "storagePushReadBack",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 64,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storagePushReadBack()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storagePushReadBack-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 23,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 75,
+            "checkMs": 7.9776150000006965
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 29
+      }
+    },
+    {
+      "name": "storagePopAfterPush",
+      "round": 0,
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "wallMs": 71.85848400000032,
+      "results": [
+        {
+          "function": "storagePopAfterPush",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 67,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storagePopAfterPush()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storagePopAfterPush-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 24,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 76,
+            "checkMs": 2.9791910000003554
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 31
+      }
+    },
+    {
+      "name": "storagePopNonempty",
+      "round": 0,
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "wallMs": 68.2385489999997,
+      "results": [
+        {
+          "function": "storagePopNonempty",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 75,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storagePopNonempty()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storagePopNonempty-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 25,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 77,
+            "checkMs": 3.7514689999998154
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 22,
+        "proofMs": 26
+      }
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "round": 0,
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "wallMs": 62.30305200000021,
+      "results": [
+        {
+          "function": "storagePopUnknownLength",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 53,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "storagePopUnknownLength()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/storagePopUnknownLength-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 22,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 78,
+            "checkMs": 1.0368119999993723
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 21,
+        "proofMs": 22
+      }
+    },
+    {
+      "name": "whileCountsUp",
+      "round": 0,
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "wallMs": 87.04712300000028,
+      "results": [
+        {
+          "function": "whileCountsUp",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 64,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "whileCountsUp()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/whileCountsUp-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 27,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 79,
+            "checkMs": 21.84875600000032
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 23,
+        "proofMs": 44
+      }
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "round": 0,
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "wallMs": 239.75630400000045,
+      "results": [
+        {
+          "function": "whileBodyDeclaresLocal",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 80,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "whileBodyDeclaresLocal()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/whileBodyDeclaresLocal-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 30,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 80,
+            "checkMs": 173.53532499999983
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 24,
+        "proofMs": 196
+      }
+    },
+    {
+      "name": "forWritesStorageArray",
+      "round": 0,
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "wallMs": 115.34950800000024,
+      "results": [
+        {
+          "function": "forWritesStorageArray",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 79,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "forWritesStorageArray()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/forWritesStorageArray-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 28,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 81,
+            "checkMs": 48.70204300000023
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 25,
+        "proofMs": 72
+      }
+    },
+    {
+      "name": "invariantCountsToBound",
+      "round": 0,
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "wallMs": 70.62256499999967,
+      "results": [
+        {
+          "function": "invariantCountsToBound",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 72,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "invariantCountsToBound(uint)",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/invariantCountsToBound-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 28,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 82,
+            "checkMs": 2.800154000000475
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 27,
+        "proofMs": 25
+      }
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "round": 0,
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "wallMs": 82.98246300000028,
+      "results": [
+        {
+          "function": "invariantForCountsArrayLength",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 73,
+          "status": "proved",
+          "tag": "box",
+          "verification": "direct",
+          "signature": "invariantForCountsArrayLength()",
+          "source": "/workspace/solidity-lean/.lake/testsuite-performance/invariantForCountsArrayLength-0.sol",
+          "contract": "TestSuite",
+          "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+          "range": {
+            "start": {
+              "line": 19,
+              "character": 2
+            },
+            "end": {
+              "line": 27,
+              "character": 3
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "backend": {
+        "workerPid": 84722,
+        "directChecks": [
+          {
+            "contract": "TestSuite",
+            "backend": "generated-c-wasm",
+            "environmentImports": 0,
+            "checkSequence": 83,
+            "checkMs": 13.803439999999682
+          }
+        ],
+        "kind": "generated-c-wasm",
+        "wasmBuild": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+        "native": {
+          "active": false,
+          "reason": "standalone-wasm-or-unavailable"
+        }
+      },
+      "timings": {
+        "compileMs": 27,
+        "proofMs": 37
+      }
+    }
+  ],
+  "initializationMs": 87.75491699999999,
+  "passed": true
+}

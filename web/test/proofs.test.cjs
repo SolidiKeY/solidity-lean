@@ -7,7 +7,7 @@ const {buildSync}=require('esbuild');
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'browser-proof-protocol-'));
 buildSync({entryPoints:[path.resolve(__dirname,'../browser/proofs.mjs')],outfile:path.join(directory,'proofs.cjs'),bundle:true,platform:'node',format:'cjs'});
 const proofs=require(path.join(directory,'proofs.cjs'));
-const declaration={id:2,nodeType:'FunctionDefinition',name:'f',src:'0:1:0'};
+const declaration={id:2,nodeType:'FunctionDefinition',name:'f',src:'0:1:0',visibility:'public',parameters:{parameters:[]}};
 const compiled={fixture:{},primaryAst:{src:'0:1:0',nodes:[{id:1,nodeType:'ContractDefinition',name:'C',nodes:[declaration]}]},text:'{}',hash:'0',sourceHash:'source-hash'};
 let response,bootResponse;
 const workers=[];
@@ -17,10 +17,26 @@ class FakeKernelWorker {
   terminate(){this.stopped=true;}
 }
 global.Worker=FakeKernelWorker;
-const check=timeoutMs=>proofs.verifyInBrowser({compiled,text:'x',name:'C.sol',timeoutMs});
+const check=timeoutMs=>proofs.verifyInBrowser({compiled,text:'x',name:'C.sol',timeoutMs,options:{certify:true}});
 function reply(worker,id,params,code,rows){worker.onmessage({data:{id,result:{code,diagnostics:[],stderr:[],outputs:rows?{[params.outputs[0]]:JSON.stringify(rows)}:{}}}});}
 test.after(()=>{proofs.cancelProofs();fs.rmSync(directory,{recursive:true,force:true});delete global.Worker;});
 test.afterEach(()=>{proofs.cancelProofs();bootResponse=undefined;});
+test('ordinary checks never start a Lean worker when the compiled runtime is missing',async()=>{
+  const before=workers.length;
+  const report=await proofs.verifyInBrowser({compiled,text:'x',name:'C.sol',timeoutMs:1000});
+  assert.deepEqual(workers.slice(before).map(w=>w.url),['/direct-worker.js']);
+  assert.equal(report.results[0].status,'unsupported');
+  assert.equal(report.results[0].verification,'direct');
+  assert.deepEqual(report.timings.kernelChecks,[]);
+});
+test('an undecided compiled check stays unknown without a Lean fallback',async()=>{
+  const before=workers.length;
+  bootResponse=(worker,id)=>worker.onmessage({data:{id,result:{kind:'generated-c-wasm',version:'4.24.0'}}});
+  response=(worker,id)=>worker.onmessage({data:{id,result:{results:[{sourceId:2,function:'f',status:'pending',reason:'bounded search exhausted',verification:'direct'}]}}});
+  const report=await proofs.verifyInBrowser({compiled,text:'x',name:'C.sol',timeoutMs:1000});
+  assert.deepEqual(workers.slice(before).map(w=>w.url),['/direct-worker.js']);
+  assert.equal(report.results[0].status,'pending');assert.deepEqual(report.timings.kernelChecks,[]);
+});
 test('a nonzero Lean exit stays an error even with a partial checkpoint',async()=>{
   response=(worker,id,params)=>reply(worker,id,params,2,[{sourceId:2,function:'f',status:'pending'}]);
   const report=await check(1000);assert.equal(report.results.length,1);assert.equal(report.errors.length,1);assert.match(report.errors[0].reason,/exit 2/);

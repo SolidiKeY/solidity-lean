@@ -1,0 +1,13 @@
+{ runtime: undefined, logs: undefined }
+page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at file:///workspace/solidity-lean/web/single-file/index.html?backend=native
+Call log:
+[2m  - navigating to "file:///workspace/solidity-lean/web/single-file/index.html?backend=native", waiting until "domcontentloaded"[22m
+
+    at /workspace/solidity-lean/web/test/website.cjs:31:48
+    at check (/workspace/solidity-lean/web/test/website.cjs:27:70)
+    at main (/workspace/solidity-lean/web/test/website.cjs:29:11) {
+  log: [
+    '  - navigating to "file:///workspace/solidity-lean/web/single-file/index.html?backend=native", waiting until "domcontentloaded"'
+  ],
+  name: 'Error'
+}

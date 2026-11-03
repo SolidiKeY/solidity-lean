@@ -3,7 +3,7 @@
 Usage: build-direct-runtime.py NATIVE_LEAN_PREFIX WASM_STAGE OUTPUT
 Set EMCC when emcc is not on PATH. Run under the repository memory guard.
 """
-import hashlib, importlib.util, json, os, pathlib, re, subprocess, sys
+import hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys
 prefix, stage, output = map(lambda x:pathlib.Path(x).resolve(),sys.argv[1:])
 output.mkdir(parents=True,exist_ok=True)
 emcc=os.environ.get('EMCC','emcc')
@@ -103,4 +103,15 @@ manifest={'toolchain':toolchain,'sourceFiles':source_files,'bridgeSha256':hashli
  'wasm':hashlib.sha256((output/'direct.wasm').read_bytes()).hexdigest(),
  'wasmBytes':(output/'direct.wasm').stat().st_size}
 (output/'build.json').write_text(json.dumps(manifest,indent=2)+'\n')
+licenses=output/'licenses';licenses.mkdir(exist_ok=True)
+for name in ['LICENSE','LICENSES']:shutil.copyfile(prefix/name,licenses/('Lean-'+name+'.txt'))
+for name in ['COPYING','COPYING.LESSERv3','COPYINGv2','COPYINGv3']:
+    file=stage.parent.parent/'gmp'/name
+    if file.is_file():shutil.copyfile(file,licenses/('GMP-'+name+'.txt'))
+for name in ['LICENSE','LICENSE-extra','LICENSE-docs']:
+    file=stage/'libuv/src/libuv'/name
+    if file.is_file():shutil.copyfile(file,licenses/('libuv-'+name+'.txt'))
+emscripten=compiler.parent
+for name in ['LICENSE','AUTHORS']:
+    if (emscripten/name).is_file():shutil.copyfile(emscripten/name,licenses/('Emscripten-'+name+'.txt'))
 print(json.dumps({k:v for k,v in manifest.items() if k!='modules'}),flush=True)

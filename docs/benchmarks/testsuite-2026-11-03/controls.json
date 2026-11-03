@@ -1,0 +1,363 @@
+{
+  "backend": "generated-c-native",
+  "executableSha256": "636eadbe0d8f4d510370120a7c61686f45cfac57a9e010316d2874e82dcc237f",
+  "manifestSha256": "6d79acc0dc52080ef33e7afc548e1520d17f016401c3fe1106b7b2f82fd95dd4",
+  "leanCommit": "797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+  "trials": [
+    {
+      "name": "additionSimple",
+      "round": 0,
+      "sourceHash": "bf0d887de89ea546b502595fed2314cb9a5642909d29646adff2fdd7c2045532",
+      "wallMs": 1.8490489999999795,
+      "result": {
+        "results": [
+          {
+            "function": "additionSimple",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 55,
+            "status": "pending",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootReadWrite",
+      "round": 0,
+      "sourceHash": "12ac133902388a42534f6ab7d0c0f829d15e612e100d334e0c4a743ad6121769",
+      "wallMs": 1.5053079999999568,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootReadWrite",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 57,
+            "status": "pending",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "round": 0,
+      "sourceHash": "f6249d544cee21b975a911ca07897ebcbdc01f3fc0de7be8eb6dca789e08e166",
+      "wallMs": 1.4936109999999871,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexRootMapping",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 61,
+            "status": "pending",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileCountsUp",
+      "round": 0,
+      "sourceHash": "8fbaa26fae89aa854f88bdcca628fbef8deb86c0e92fe43263ef238af4a1f246",
+      "wallMs": 4.038374999999974,
+      "result": {
+        "results": [
+          {
+            "function": "whileCountsUp",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 64,
+            "status": "pending",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invariantCountsToBound",
+      "round": 0,
+      "sourceHash": "12fe08c7ebcb4bced15227fa6d6829b63cce545b88229ff173f03b4ad4efc0fd",
+      "wallMs": 4640.575551,
+      "result": {
+        "results": [
+          {
+            "function": "invariantCountsToBound",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 72,
+            "status": "pending",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireFalseLiteral",
+      "round": 0,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "wallMs": 0.7959129999999277,
+      "result": {
+        "results": [
+          {
+            "function": "requireFalseLiteral",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 51,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "maximum",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 141.88188399999945,
+      "result": {
+        "results": [
+          {
+            "function": "maximum",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 22,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "falseMaximum",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 5.568760000000111,
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [
+                {
+                  "modelName": "x",
+                  "paramIndex": 0,
+                  "type": "uint",
+                  "value": "0"
+                },
+                {
+                  "modelName": "y",
+                  "paramIndex": 1,
+                  "type": "uint",
+                  "value": "0"
+                }
+              ],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "value = 0",
+              "kind": "model-state",
+              "lines": [
+                "x = 0, y = 0, msg.sender = 1, msg.value = 0",
+                "before: value = 0",
+                "after: value = 0"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "value = 0"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "falseMaximum",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 41,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storeMaximum",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 310.2524709999998,
+      "result": {
+        "results": [
+          {
+            "function": "storeMaximum",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "twoChoices",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 3.412543999999798,
+      "result": {
+        "results": [
+          {
+            "function": "twoChoices",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 102,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "constantOne",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 1.0987539999996443,
+      "result": {
+        "results": [
+          {
+            "function": "constantOne",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 111,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "falseConstant",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 1.6472589999993943,
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "value = 0",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: value = 0",
+                "after: value = 0"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "value = 0"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "falseConstant",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 120,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "store",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 1.123870999999781,
+      "result": {
+        "results": [
+          {
+            "function": "store",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 131,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "falseStore",
+      "round": 0,
+      "sourceHash": "fixture:ClosedSpecs",
+      "wallMs": 2.034244999999828,
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "value = 0",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: value = 0",
+                "after: value = 2"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "value = 2"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "falseStore",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 140,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    }
+  ],
+  "startupMs": 5.88640399999997
+}

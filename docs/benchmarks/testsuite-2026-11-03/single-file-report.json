@@ -1,0 +1,856 @@
+{
+  "singleFile": true,
+  "proofs": true,
+  "startedAt": "2026-11-03T20:54:00.735Z",
+  "assetBuild": "3491afe47f49e1cb454a60ee6879fbc8ab2929d2866cfb234a1005b63b3f87a1",
+  "protocolHistoryLimit": 100,
+  "checks": [
+    {
+      "name": "a plain static website boots a real Solidity WASM compiler without any backend",
+      "elapsedMs": 2988.1
+    },
+    {
+      "name": "the unchanged compiler helpers produce exact source provenance and AST language services",
+      "elapsedMs": 500.7
+    },
+    {
+      "name": "Monaco rename and compiler-validated formatting run in the worker",
+      "elapsedMs": 704.2
+    },
+    {
+      "name": "compiler errors come from solc running inside the browser",
+      "elapsedMs": 319.4
+    },
+    {
+      "name": "unopened imports and cross-file definitions use the browser filesystem",
+      "elapsedMs": 583.9
+    },
+    {
+      "name": "rename includes and validates a closed sibling importer",
+      "elapsedMs": 1438.6
+    },
+    {
+      "name": "an unresolved import produces a positioned Problems error",
+      "elapsedMs": 174.1
+    },
+    {
+      "name": "failed browser storage never marks an unsaved edit clean",
+      "elapsedMs": 9
+    },
+    {
+      "name": "the compiled verifier boots entirely in a browser worker",
+      "elapsedMs": 12.1
+    },
+    {
+      "name": "direct browser verification reports correct programs and a wrong specification",
+      "elapsedMs": 865.1
+    },
+    {
+      "name": "editing clears obsolete results even when a compiled check finishes first",
+      "elapsedMs": 214.6
+    },
+    {
+      "name": "an edited false result cannot retain a green proof",
+      "elapsedMs": 238.8
+    },
+    {
+      "name": "direct counterexamples do not claim kernel certificates",
+      "elapsedMs": 210
+    },
+    {
+      "name": "compiled branch checks preserve all eight positive and negative controls",
+      "elapsedMs": 1319.7
+    },
+    {
+      "name": "a fully disconnected fresh browser runtime still compiles and proves new edits",
+      "elapsedMs": 5137.8
+    }
+  ],
+  "webSockets": [],
+  "requests": [],
+  "errors": [],
+  "documentRequests": [
+    "http://127.0.0.1:43769/index.html?backend=native",
+    "http://127.0.0.1:43769/index.html?backend=native"
+  ],
+  "startupMs": 1636.5,
+  "embedded": {
+    "build": "3491afe47f49e1cb454a60ee6879fbc8ab2929d2866cfb234a1005b63b3f87a1",
+    "assets": 19,
+    "preparationMs": 418.8,
+    "reused": false,
+    "remainingDataNodes": 0
+  },
+  "reopenMs": 1230.5,
+  "runtime": {
+    "mode": "browser",
+    "proofReady": true,
+    "compilerReady": true,
+    "error": null,
+    "message": "The verifier and Solidity compiler run entirely in this browser.",
+    "lean": "4.24.0",
+    "verifier": "generated-c-wasm",
+    "wasmBytes": 16378262,
+    "build": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884"
+  },
+  "proofTrials": [
+    {
+      "elapsedMs": 442,
+      "report": {
+        "results": [
+          {
+            "function": "increment",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 14,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "increment()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 4
+              },
+              "end": {
+                "line": 9,
+                "character": 5
+              }
+            }
+          },
+          {
+            "function": "reset",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 23,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "reset()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 12,
+                "character": 4
+              },
+              "end": {
+                "line": 14,
+                "character": 5
+              }
+            }
+          },
+          {
+            "function": "one",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 32,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "one()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 17,
+                "character": 4
+              },
+              "end": {
+                "line": 19,
+                "character": 5
+              }
+            }
+          },
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "count = 0",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: count = 0",
+                "after: count = 0"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "count = 0"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "openGoal",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 41,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "openGoal()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 22,
+                "character": 4
+              },
+              "end": {
+                "line": 24,
+                "character": 5
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "timings": {
+          "kernelChecks": [],
+          "directChecks": [
+            {
+              "contract": "Counter",
+              "checkSequence": 1,
+              "checkMs": 413.74500000011176,
+              "environmentImports": 0,
+              "backend": "generated-c-wasm"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "elapsedMs": 35,
+      "report": {
+        "results": [
+          {
+            "function": "increment",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 14,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "increment()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 4
+              },
+              "end": {
+                "line": 9,
+                "character": 5
+              }
+            }
+          },
+          {
+            "function": "reset",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 23,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "reset()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 12,
+                "character": 4
+              },
+              "end": {
+                "line": 14,
+                "character": 5
+              }
+            }
+          },
+          {
+            "function": "one",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 32,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "one()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 17,
+                "character": 4
+              },
+              "end": {
+                "line": 19,
+                "character": 5
+              }
+            }
+          },
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "count = 0",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: count = 0",
+                "after: count = 0"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "count = 0"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "openGoal",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 41,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct",
+            "signature": "openGoal()",
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+            "range": {
+              "start": {
+                "line": 22,
+                "character": 4
+              },
+              "end": {
+                "line": 24,
+                "character": 5
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "timings": {
+          "kernelChecks": [],
+          "directChecks": [
+            {
+              "contract": "Counter",
+              "checkSequence": 1,
+              "checkMs": 413.74500000011176,
+              "environmentImports": 0,
+              "backend": "generated-c-wasm"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "counterexample": {
+    "counterexample": {
+      "arguments": [],
+      "certified": false,
+      "goalKind": "fmlValid",
+      "initialBalance": "0",
+      "initialLedger": [],
+      "initialStorage": "count = 0",
+      "kind": "model-state",
+      "lines": [
+        "msg.sender = 1, msg.value = 0",
+        "before: count = 0",
+        "after: count = 0"
+      ],
+      "outcome": {
+        "kind": "postStorage",
+        "storage": "count = 0"
+      },
+      "transaction": {
+        "ext": [],
+        "msgSender": "1",
+        "msgValue": "0",
+        "selfAddress": "0",
+        "timestamp": "0"
+      }
+    },
+    "function": "openGoal",
+    "reading": "solc",
+    "reason": "counterexample found",
+    "sourceId": 41,
+    "status": "refuted",
+    "tag": "specified",
+    "verification": "direct",
+    "signature": "openGoal()",
+    "source": "/workspace/Counter.sol",
+    "contract": "Counter",
+    "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+    "range": {
+      "start": {
+        "line": 22,
+        "character": 4
+      },
+      "end": {
+        "line": 24,
+        "character": 5
+      }
+    }
+  },
+  "branchControls": {
+    "elapsedMs": 1275.103717,
+    "report": {
+      "results": [
+        {
+          "function": "maximum",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 22,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "maximum(uint,uint)",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 5,
+              "character": 4
+            },
+            "end": {
+              "line": 8,
+              "character": 5
+            }
+          }
+        },
+        {
+          "counterexample": {
+            "arguments": [
+              {
+                "modelName": "x",
+                "paramIndex": 0,
+                "type": "uint",
+                "value": "0",
+                "sourceName": "x",
+                "sourceType": "uint256"
+              },
+              {
+                "modelName": "y",
+                "paramIndex": 1,
+                "type": "uint",
+                "value": "0",
+                "sourceName": "y",
+                "sourceType": "uint256"
+              }
+            ],
+            "certified": false,
+            "goalKind": "fmlValid",
+            "initialBalance": "0",
+            "initialLedger": [],
+            "initialStorage": "value = 0",
+            "kind": "model-state",
+            "lines": [
+              "x = 0, y = 0, msg.sender = 1, msg.value = 0",
+              "before: value = 0",
+              "after: value = 0"
+            ],
+            "outcome": {
+              "kind": "postStorage",
+              "storage": "value = 0"
+            },
+            "transaction": {
+              "ext": [],
+              "msgSender": "1",
+              "msgValue": "0",
+              "selfAddress": "0",
+              "timestamp": "0"
+            }
+          },
+          "function": "falseMaximum",
+          "reading": "solc",
+          "reason": "counterexample found",
+          "sourceId": 41,
+          "status": "refuted",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "falseMaximum(uint,uint)",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 10,
+              "character": 4
+            },
+            "end": {
+              "line": 13,
+              "character": 5
+            }
+          }
+        },
+        {
+          "function": "storeMaximum",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 69,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "storeMaximum(uint,uint)",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 15,
+              "character": 4
+            },
+            "end": {
+              "line": 19,
+              "character": 5
+            }
+          }
+        },
+        {
+          "function": "twoChoices",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 102,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "twoChoices(uint,uint,uint)",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 21,
+              "character": 4
+            },
+            "end": {
+              "line": 25,
+              "character": 5
+            }
+          }
+        },
+        {
+          "function": "constantOne",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 111,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "constantOne()",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 27,
+              "character": 4
+            },
+            "end": {
+              "line": 27,
+              "character": 74
+            }
+          }
+        },
+        {
+          "counterexample": {
+            "arguments": [],
+            "certified": false,
+            "goalKind": "fmlValid",
+            "initialBalance": "0",
+            "initialLedger": [],
+            "initialStorage": "value = 0",
+            "kind": "model-state",
+            "lines": [
+              "msg.sender = 1, msg.value = 0",
+              "before: value = 0",
+              "after: value = 0"
+            ],
+            "outcome": {
+              "kind": "postStorage",
+              "storage": "value = 0"
+            },
+            "transaction": {
+              "ext": [],
+              "msgSender": "1",
+              "msgValue": "0",
+              "selfAddress": "0",
+              "timestamp": "0"
+            }
+          },
+          "function": "falseConstant",
+          "reading": "solc",
+          "reason": "counterexample found",
+          "sourceId": 120,
+          "status": "refuted",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "falseConstant()",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 29,
+              "character": 4
+            },
+            "end": {
+              "line": 29,
+              "character": 76
+            }
+          }
+        },
+        {
+          "function": "store",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 131,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "store(uint)",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 31,
+              "character": 4
+            },
+            "end": {
+              "line": 31,
+              "character": 48
+            }
+          }
+        },
+        {
+          "counterexample": {
+            "arguments": [],
+            "certified": false,
+            "goalKind": "fmlValid",
+            "initialBalance": "0",
+            "initialLedger": [],
+            "initialStorage": "value = 0",
+            "kind": "model-state",
+            "lines": [
+              "msg.sender = 1, msg.value = 0",
+              "before: value = 0",
+              "after: value = 2"
+            ],
+            "outcome": {
+              "kind": "postStorage",
+              "storage": "value = 2"
+            },
+            "transaction": {
+              "ext": [],
+              "msgSender": "1",
+              "msgValue": "0",
+              "selfAddress": "0",
+              "timestamp": "0"
+            }
+          },
+          "function": "falseStore",
+          "reading": "solc",
+          "reason": "counterexample found",
+          "sourceId": 140,
+          "status": "refuted",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "falseStore()",
+          "source": "/workspace/Counter.sol",
+          "contract": "ClosedSpecs",
+          "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+          "range": {
+            "start": {
+              "line": 33,
+              "character": 4
+            },
+            "end": {
+              "line": 33,
+              "character": 47
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "ClosedSpecs",
+            "checkSequence": 5,
+            "checkMs": 1029.8549999995157,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    }
+  },
+  "staticServerStopped": true,
+  "offlineProof": {
+    "elapsedMs": 903,
+    "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+    "report": {
+      "results": [
+        {
+          "function": "increment",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 14,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "increment()",
+          "source": "/workspace/Counter.sol",
+          "contract": "Counter",
+          "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+          "range": {
+            "start": {
+              "line": 7,
+              "character": 4
+            },
+            "end": {
+              "line": 9,
+              "character": 5
+            }
+          }
+        },
+        {
+          "function": "reset",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 23,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "reset()",
+          "source": "/workspace/Counter.sol",
+          "contract": "Counter",
+          "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+          "range": {
+            "start": {
+              "line": 12,
+              "character": 4
+            },
+            "end": {
+              "line": 14,
+              "character": 5
+            }
+          }
+        },
+        {
+          "function": "one",
+          "reading": "solc",
+          "reason": "",
+          "sourceId": 32,
+          "status": "proved",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "one()",
+          "source": "/workspace/Counter.sol",
+          "contract": "Counter",
+          "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+          "range": {
+            "start": {
+              "line": 17,
+              "character": 4
+            },
+            "end": {
+              "line": 19,
+              "character": 5
+            }
+          }
+        },
+        {
+          "counterexample": {
+            "arguments": [],
+            "certified": false,
+            "goalKind": "fmlValid",
+            "initialBalance": "0",
+            "initialLedger": [],
+            "initialStorage": "count = 0",
+            "kind": "model-state",
+            "lines": [
+              "msg.sender = 1, msg.value = 0",
+              "before: count = 0",
+              "after: count = 0"
+            ],
+            "outcome": {
+              "kind": "postStorage",
+              "storage": "count = 0"
+            },
+            "transaction": {
+              "ext": [],
+              "msgSender": "1",
+              "msgValue": "0",
+              "selfAddress": "0",
+              "timestamp": "0"
+            }
+          },
+          "function": "openGoal",
+          "reading": "solc",
+          "reason": "counterexample found",
+          "sourceId": 41,
+          "status": "refuted",
+          "tag": "specified",
+          "verification": "direct",
+          "signature": "openGoal()",
+          "source": "/workspace/Counter.sol",
+          "contract": "Counter",
+          "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+          "range": {
+            "start": {
+              "line": 22,
+              "character": 4
+            },
+            "end": {
+              "line": 24,
+              "character": 5
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "Counter",
+            "checkSequence": 1,
+            "checkMs": 350.8300000000745,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    }
+  },
+  "passed": true
+}

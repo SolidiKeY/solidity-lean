@@ -1,5 +1,36 @@
 # Compact compiled verifier
 
+Version 0.5.5 uses generated C for ordinary desktop and browser requests,
+including assertion obligations, arrays, mappings and loops. Unsupported and
+undecided results stay unknown without starting Lean. The default single HTML
+omits the kernel and serialized environments. A matching native executable in
+`.lake/direct-native` takes precedence over WASM on the desktop.
+
+Build the browser runtime with `bash web/tools/build-lean-browser.sh --compact-only`.
+Package with `SOLIDITY_BROWSER_DIRECT=... npm run build --prefix web`, then
+`npm run build:single --prefix web`. `build:single -- --with-legacy` explicitly
+embeds the general frontend if the static build contains its assets.
+
+To build the native CPU version, use the pinned native Lean prefix and a
+matching Lean source checkout (its `stage0/stdlib` supplies generated C):
+
+```sh
+LEAN_NUM_THREADS=1 python3 scripts/build-direct-native.py \
+  /path/to/lean-4.24.0 /path/to/lean4-source .lake/direct-native
+```
+
+Both backends use the existing intrinsic source elaborator and `Seq.run`
+sequent walk. Arithmetic is applied to individual leaves, and primitive
+anonymous loop locals use the proved fresh-local transformation. Short loops
+can retry exact bounded unrolling; exhausting the bound remains unknown.
+`DirectArithmetic.directArithmeticProof` and the leaf preparation carry erased
+soundness proofs. Results retain the direct verifier trust model.
+
+[The TestSuite comparison](testsuite-performance.md) records all 83 functions,
+real source-to-result timings, startup scopes and the SolKey reference.
+
+The records below describe the earlier 0.5.4 implementation and measurements.
+
 Version 0.5.4 runs supported Solidity specifications through Lean-generated C
 compiled to a standalone WebAssembly module. The website and desktop extension
 use the same module. It imports no Lean environment, constructs no Lean syntax
