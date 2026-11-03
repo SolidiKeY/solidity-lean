@@ -748,6 +748,10 @@ import Solidity.Backend.Passes.AssignmentAdditionPins
 import Solidity.Backend.Passes.AssignmentMultiplicationControls
 import Solidity.Backend.Passes.AssignmentMultiplicationPass
 import Solidity.Backend.Passes.AssignmentMultiplicationPins
+import Solidity.Backend.Passes.MemoryScopeAllocation
+import Solidity.Backend.Passes.MemoryScopeBoundary
+import Solidity.Backend.Passes.MemoryScopeControls
+import Solidity.Backend.Passes.MemoryScopePins
 
 
 import Solidity.Lowering.V08.Audit

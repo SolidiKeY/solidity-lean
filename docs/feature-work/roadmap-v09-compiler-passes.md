@@ -304,6 +304,37 @@ found no defect. This is local numeric/effect correspondence and physical
 intrinsic execution, not public Source heap/world, checked-overflow, ABI or
 resource/session adequacy. H22 external-call construction is untouched.
 
+## Memory scope exit and local-slot reuse
+
+[MemoryScopeBoundary](../../Solidity/Backend/Passes/MemoryScopeBoundary.lean)
+adds physical transport beyond structural block compilation: the existing
+block certificate keeps its exact emitted code, allocation cost and original
+Input. Scope exit restricts the actual output fragment and drops only typed
+locals, retaining the full heap relation, selected map, old-reference identities
+and allocator growth. The canonical machine and map precede every saved tail.
+Exact intrinsic `THalt` reflection keeps revert, panic and divergence distinct;
+target observation transport is equality of the actual code. Here source
+means intrinsic `Prog.run`, not independent `Solidity.Source` semantics.
+
+[Controls](../../Solidity/Backend/Passes/MemoryScopeControls.lean) drop two
+capture locals, then derive a fresh declaration's Input at the actual shortened
+context. Both actual maps precede all tails; full prefix and final MappedOutput,
+joined intrinsic execution and emitted execution are retained. The declaration
+reuses cell 4; all twelve listed cells and the full saved stack are observed.
+Accepted code for the wrong extended context writes cell 6 instead; that raw
+code contrast is not a valid typed joined program. Cell 5 retains its old 255,
+so scope exit does not claim physical erasure. A reached revert follows the
+actual successful capture prefix, with no post-failure state invented.
+
+[Allocation](../../Solidity/Backend/Passes/MemoryScopeAllocation.lean) independently
+inhabits positive cost: an accepted zero-length array allocation consumes one
+cell and transports actual selected allocator ownership from cursor 64 to 65
+across all tails, despite dropping its reference binder. No heap deallocation
+is inferred. [Pins](../../Solidity/Backend/Passes/MemoryScopePins.lean) guard the
+observed standard axiom sets. Independent finder and skeptic source reviews
+found no defect. Public Source/world/ABI/session adequacy remains open; H22
+external-call construction is untouched.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
