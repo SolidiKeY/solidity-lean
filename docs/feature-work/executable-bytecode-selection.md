@@ -122,3 +122,13 @@ only this component: None does not classify another IR constructor's execution
 or a complete compiler's verdict. Physical admission still needs V2 capacity.
 Other numeric IR operations, sequence selection, general stack/frame lowering,
 whole labelled control execution and assembly composition remain open.
+
+## H21/H22 compatibility review
+
+Independent finder and skeptic reviews confirmed that the Selection proof
+sources are unchanged after the H21/H22 integration rebase. No Selection
+module constructs an ExtCall, so the explicit call mode and invocation fields
+require no adapter here. The finder identified module-map rows detached from
+the table during migration; the owned rows now share its existing header.
+The pre-rebase validation applies to its original head; post-rebase checks
+are recorded separately. No coverage or certificate premise changed.
