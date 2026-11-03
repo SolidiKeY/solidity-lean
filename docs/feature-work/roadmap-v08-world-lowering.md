@@ -3921,3 +3921,5 @@ frame, source admission or bytecode adequacy.
 ### Reached memory-byte hashing
 
 `SourceMemoryKeccak` consumes actual argument execution and reached heap lookup, then derives builtin Keccak execution without another allocation. Real ABI literal and populated write/read/hash/ABI producers inhabit these obligations, retaining the complete reached machine and existing ordered vector. Input-order and allocator controls are not hash noncollision claims. The intrinsic byte observation uses the existing explicit `Fixed.Keccak` contract; canonical compiler, admission, body/frame and unit transport remain open.
+
+The memory-byte hash adapter also propagates exact argument halts and refuses dangling reached references. Its actual mixed-ABI timeout retains the earlier caller-local write; valid old-object hashing retains the whole populated machine. These are explicit Source execution/refusal controls, not automatic rollback, admitted malformed programs, or compiler/frame adequacy.
