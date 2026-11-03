@@ -180,3 +180,10 @@ checks, remaining obligations).
   [inline-assembly-vy4.md](inline-assembly-vy4.md).
 - VY5 (2026-11-03): composition pieces; see
   [vy5-composition.md](vy5-composition.md).
+
+### VY4 native returndata bridge
+
+The optional `SolidityBridge.YulWorld.Returndata` consumer joins real P10
+charged-copy execution to exact copy-source windows and native world/buffer
+framing. It leaves source/physical/compiler and complete calculus adequacy
+open. See inline-assembly-vy4.md for scope and typed premises.

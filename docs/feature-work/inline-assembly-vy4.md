@@ -24,3 +24,27 @@ back with it.
 Open: real port producers (physical completion, caller frames, effectful emit
 rollback, static environment invocation), the P7 transient target (TLOAD/TSTORE
 consumers), port laws for the step rules.
+
+## Native returndata bridge checkpoint
+
+`SolidityBridge.YulWorld.Returndata` consumes the actual P10 frozen API and
+`ReturnCopyBounds`. Successful native gate and operand facts yield natural
+copy-source bounds, exact `Raw.returnWindow` bytes and the full charged native
+successor. Complete native world, returndata and `H_return` are preserved;
+memory equals the reference `ByteArray.write` expression. This does not prove
+byte readback, untouched destination tails, padding or source/compiler origin.
+Rejected windows produce native range exceptions only after the two actual gas
+checks, preserving resource-error priority and strict zero-length bounds.
+
+`ReturndataControls` contains populated persistent/transient accounts, code,
+ordered logs, static copy, distinct buffers and exact-end/out-of-source zero
+controls. Six headline proofs have standard-only axiom sets. Targeted joint
+imports passed on master `27edf590`; this is optional Bridge evidence, not
+source-world/Osaka/transaction/G01/calculus or final lane adequacy.
+
+The published memory Views/Adapters and `FrameHeap` are now available. The
+older private full-slot adapter additionally needs `OwnedBoolFrame` and its
+represented-slot/encoding-journal dependencies, absent from this published
+Views tree. Routine step projections/continuation are listed in TERRA-TODO.md.
+The integrated preparation-rule determinism and scripted-port limitations
+above remain open; no admission row is reopened.
