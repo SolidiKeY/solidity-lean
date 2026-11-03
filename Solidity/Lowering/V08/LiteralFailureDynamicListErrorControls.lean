@@ -27,7 +27,7 @@ def refs : List (Source.Idx context (.bytes .memory)) := [.here,.there .here,.he
 def repeated (n : Nat) : List (Source.Idx context (.bytes .memory)) := List.replicate n .here
 
 def empty (n : Nat) : St (environment n) :=
- ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩⟩
+ ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩
 def frame := SourceCustomErrorControls.frame
 def state (n : Nat) (first second : Roadmap.Bytes) : St (environment n) :=
  {empty n with

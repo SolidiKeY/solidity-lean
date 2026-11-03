@@ -98,7 +98,7 @@ def ps (a : Roadmap.Address) := mapping.registry fixed keys a
 def ts (_ : Roadmap.Address) : List (ScalarPath env.layout (env.lay account)) := []
 def frame : Source.Fr := {this:=account,sender:=account,value:=0,static:=false,contract:="Nested",checked:=true,depth:=0,cd:=[]}
 def state : Source.EMState env [] :=
-  ⟨.nil,⟨⟨⟨fun _=>Source.Account.empty (D:=env.layout) (env.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _=>Source.Account.empty (D:=env.layout) (env.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def complement := initialPackedComplement ps ts (fun _=>0xa5)
 def plan1 := (preparePackedFrame (ps:=ps) (ts:=ts) frame false 304 77).get (by decide)
 def plan2 := (preparePackedFrame (ps:=ps) (ts:=ts) frame false 320 999).get (by decide)

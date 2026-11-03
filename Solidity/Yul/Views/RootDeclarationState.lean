@@ -19,7 +19,7 @@ def rootResidual := initialPackedComplement rootRegistry rootTempRegistry (fun k
 def rootState : Source.EMState rootEnv [] :=
   ⟨.nil,⟨⟨⟨fun a => if a = account then
     {Source.Account.empty (D := rootEnv.layout) (rootEnv.lay account) with storage := rootInitialStore}
-    else Source.Account.empty (D := rootEnv.layout) (rootEnv.lay a)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+    else Source.Account.empty (D := rootEnv.layout) (rootEnv.lay a)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem root_initial_MemOK : Source.MemOK rootEnv rootState.2.heap.ty rootState :=
   ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩

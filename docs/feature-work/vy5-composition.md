@@ -109,3 +109,23 @@ start at tx1, with initcode frame coverage retained. H19 resolves BAL1 by
 extending the monetary representation. Those questions are not pending now.
 Next, Source.Account and actual balance operations must migrate under measured
 checking; no field bound may substitute for the explicit EVM-reachable invariant.
+
+
+### H16 consumer-constructor migration (2026-11-03)
+
+The coordinator authorized the Source writer to mechanically migrate all
+consumer construction sites affected by the new cursor. The manifest
+`vy5-cursor-consumers.json` lists39 files and their owners:26 VY2,11 V08,
+one V16 and one V11. Each change appends only an explicit empty cursor;
+removing that addition reproduces every original file byte-for-byte. No
+statement, proof body, prior state field, observation or budget changes.
+Independent read-only finder/skeptic reviews found no remaining common
+five-field empty-local constructor pattern. All39 per-file checks pass.
+The full checkpoint follows these focused checks, rather than searching
+for sites by repeating the full build. Monetary migration drafts remain
+unapplied outside this checkout.
+
+Horizon checking was339.65 seconds both before and after the Source change.
+That exceeds the300-second per-module bound: kernel completion is recorded
+separately from this pre-existing policy failure. This checkpoint does not
+fix that baseline debt or raise its budget. The lane remains partial.

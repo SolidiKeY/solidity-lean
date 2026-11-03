@@ -117,7 +117,7 @@ def recordError : Source.Decl :=
 def E2 : Source.Env := ⟨[savedDecl,scratchDecl,recordDecl,recordError]⟩
 def empty2 : Source.St E2 :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩, Source.Transient.empty, []⟩,
-    Source.Heap.empty, [], [], ⟨[], .nil⟩⟩
+    Source.Heap.empty, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩
 def populated2 : Source.St E2 :=
   { empty2 with
     ex := empty2.ex.run [

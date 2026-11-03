@@ -16,7 +16,7 @@ def packedTypedAddress : ScalarPath packedTypedEnv.layout (packedTypedEnv.lay ac
 def packedTypedRegistry (a : Roadmap.Address) : List (ScalarPath packedTypedEnv.layout (packedTypedEnv.lay a)) := [packedTypedFlag,packedTypedSmall,packedTypedBytes,packedTypedAddress]
 
 def packedTypedState : Source.EMState packedTypedEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := packedTypedEnv.layout) (packedTypedEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := packedTypedEnv.layout) (packedTypedEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def packedTypedResidual := initialPackedComplement packedTypedRegistry packedTypedRegistry (fun _ => packedZeroRaw)
 
 theorem packed_typed_frame_prepares : (preparePackedFrame (ps := packedTypedRegistry) (ts := packedTypedRegistry) packedStepFrame false 7 packedRawA).isSome := by decide

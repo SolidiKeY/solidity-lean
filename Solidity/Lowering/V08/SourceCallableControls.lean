@@ -33,7 +33,7 @@ def saved : Source.SPath := ⟨⟨some "C", "saved"⟩, []⟩
 def scratch : Source.SPath := ⟨⟨some "C", "scratch"⟩, []⟩
 def empty : Source.St E :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩, Source.Transient.empty, []⟩,
-    Source.Heap.empty, [], [], ⟨[], .nil⟩⟩
+    Source.Heap.empty, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩
 def populated : Source.St E :=
   { empty with
     ex := empty.ex.run [

@@ -12,7 +12,7 @@ def path : Source.SPath := declaration.path
 theorem typed : environment.pathTy path = some (.bytes .storage) := rfl
 
 def empty : St environment :=
- ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩⟩
+ ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩
 def frame := SourceCustomErrorControls.frame
 
 def populated : St environment :=

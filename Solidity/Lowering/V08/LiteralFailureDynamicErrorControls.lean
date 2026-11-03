@@ -13,7 +13,7 @@ theorem member : declaration ∈ environment.decls := List.mem_cons_self
 theorem typed : declaration.paramTys environment = some types := rfl
 
 def empty : St environment :=
- ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩⟩
+ ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩
 def frame := SourceCustomErrorControls.frame
 
 def object (bytes : Roadmap.Bytes) (asString : Bool) : Σ τ, Data environment.layout τ :=

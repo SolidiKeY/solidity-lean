@@ -12,7 +12,7 @@ def caller : Source.Locals environment.layout context := .cons (.bool false) (.c
 def frame := SourceCustomErrorControls.frame
 def initial : Source.St environment :=
  ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,
-  (Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [0,255]⟩).1,[],[],⟨[],.nil⟩⟩
+  (Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [0,255]⟩).1,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩
 def state : Source.St environment :=
  {initial with ex := initial.ex.run [.account frame.this (fun a => {a with balance := ⟨73,by decide +kernel⟩,nonce:=4})]}
 def program : Source.Program environment :=
