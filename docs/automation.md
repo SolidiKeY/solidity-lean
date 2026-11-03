@@ -1045,4 +1045,5 @@ proofs reuse actual kernel-certified per-corpus observations. All twenty files p
 individual diagnostics/builds below the unchanged 300 s bound. This closes that
 focused performance repair, not AU01/AU02 or the full build: the full attempt
 stopped for disk exhaustion, and the general Residue/target/hash and remaining
-pipeline obligations stay open. See [VA1 handoff](feature-work/after-roadmap-va1.md).
+pipeline obligations stay open. The isolated master relay and its focused timings are recorded in
+[H6 type split](feature-work/va1-h6-type-split.md).
