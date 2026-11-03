@@ -241,3 +241,7 @@ import SolidityBridge.RoadmapV15.P10.LinkedProgram
 import SolidityBridge.RoadmapV15.P10.LinkedProgramControls
 import SolidityBridge.RoadmapV15.P10.LinkedFallthrough
 import SolidityBridge.RoadmapV15.P10.LinkedFallthroughControls
+import SolidityBridge.ExternalEvm.PaddingInterface
+import SolidityBridge.ExternalEvm.BoundedScannerInterface
+import SolidityBridge.ExternalEvm.BoundedScannerPrefix
+import SolidityBridge.ExternalEvm.H7InterfaceChecks
