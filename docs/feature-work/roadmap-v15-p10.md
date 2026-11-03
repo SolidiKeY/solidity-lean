@@ -1195,87 +1195,48 @@ The final PUSH/JUMP cycle, arbitrary repeated nonzero iterations, compiler
 origin, scanner/D_J correctness, Osaka approval, account/world/transaction
 and complete resource/trace correspondence remain separate obligations.
 
-## Nonzero backedge operand
+## Backedge and finite-cycle consumers
 
-[LinkedBackedgePush.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean)
-consumes the existing checked word-push producer at PC 38 of the complete
-74-byte linked image. For an arbitrary seed, nonzero scalar operand and caller
-tail with `tail.length + 2 ≤ 1024`, gas at least 22 and fuel `fuel + 8`, it
-proves seven actual counted fetched steps and the corresponding `X` continuation
-to PC 71. The zero word is above the original ordered tail; the natural gas
-debit is exactly 22. The supplied jump array is arbitrary for this prefix.
-The code/PC/stack alignment is derived, with no decoder, successful-run or
-caller-frame premise. Separate construction-level frame and debit laws acquire
-execution meaning through that prefix theorem.
+| Modules | Native result and exact premises |
+|---|---|
+| [LinkedBackedgePush.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean), [controls](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean) | Nonzero operand, arbitrary seed/tail and supplied array; `tail.length + 2 ≤ 1024`, gas ≥ 22, fuel `fuel + 8`: seven fetched steps reach PC 71 with zero above the original ordered tail; debit 22. |
+| [LinkedCycle.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean), [controls](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycleControls.lean) | Same nonzero/seed/capacity premises, certified linked array, gas ≥ 30, fuel `fuel + 9`: eight fetched steps return to PC 0 with the original tail; debit 30. JUMP0 membership is derived from the existing linked certificate. |
 
-[LinkedBackedgePushControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean)
-checks an independently stated complete result State, populated nonzero and
-signed inputs, both permissions, empty and maximal legal tails, insufficient
-gas and fuel, and the genuinely different zero branch. It retains the complete
-ordered byte image and memory, return data, calldata, accounts and substate.
-The final JUMP has not executed: gas 22 permits the prefix and then refuses
-that next opcode. This is neither a completed cycle nor source/compiler,
-Osaka approval, account/world or transaction/trace correspondence. All full
-opcode obligations remain open.
+Both consumers derive emitted code/state alignment and the actual charged
+step/`X` continuation. They retain complete native state, memory, active words,
+return data and return buffer; instruction count increases by seven/eight.
+Construction-level frame/debit laws acquire execution meaning through the
+corresponding prefix theorem. Controls retain independent complete expected
+States, signed/nonzero values, both permissions, legal capacity boundaries,
+ordered code/stack/buffer/account observations and real gas/fuel failures.
+Thirty gas completes one cycle and then refuses the next JUMPDEST charge;
+there is no termination, invariant or repeated/infinite execution claim.
 
-## One finite linked cycle
+Independent reviews corrected confounded negatives: the PUSH test now changes
+only the operand at gas 22; the cycle test retains the certified array, gas 30,
+fuel 9 and spill and derives the zero-path terminal State at PC 73, gas 11,
+count 48 with cleared return data. Missing JUMP0 membership is tested separately.
+These sources match the previously checked checkpoints; validation against the
+new published H7 reference baseline remains pending. No source/compiler, Osaka,
+account/world, resource-abstraction or transaction/trace closure follows.
 
-[LinkedCycle.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean)
-executes the remaining fetched JUMP at PC 71. Byte-zero membership is derived
-from the existing linked-program reference certificate, rather than assumed as
-a successful gate or inferred from opaque scanner equality. For any seed,
-nonzero typed scalar operand and caller tail with `tail.length + 2 ≤ 1024`,
-gas at least 30 and fuel `fuel + 9`, eight actual counted steps return to PC 0
-with the original caller tail. The `X` continuation and exact natural debit 30
-are proved. The complete native state, memory, active-word count, return data
-and return buffer are preserved as specified; instruction count increases by 8.
-Construction-level frame/debit facts have execution meaning via this theorem.
-
-[LinkedCycleControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycleControls.lean)
-provides a separate full expected State, signed/nonzero inputs, both permissions,
-empty and maximal legal tails, insufficient gas/fuel and an actual bad-target
-refusal when the supplied table omits byte zero. The complete ordered image,
-stack, memory, return data, calldata, accounts and substate are retained.
-Exactly 30 gas completes the cycle and then refuses the next JUMPDEST charge;
-it does not terminate successfully. No loop invariant or relation between the
-restored tail and a future source operand is assumed or proved. Repeated or
-infinite cycles, full source/compiler and Osaka correspondence, account/world,
-resource abstraction and transaction/trace composition remain open. All full
-opcode rows remain open.
-
-The independent finder and skeptic reviews identified confounded negative
-controls during development. The backedge-operand test was strengthened from
-gas 19 to gas 22 so that only its nonzero premise changes. For the finite cycle,
-the zero-operand test now retains the certified array, gas 30, fuel 9 and spill,
-and derives a separate complete terminal State at PC 73, gas 11 and instruction
-count 48 with cleared return data. Missing byte-zero membership remains a
-separate JUMP refusal test. Both corrected controls were kernel checked; the
-reviews found no remaining source defect. These controls establish distinctions
-between the particular native executions and do not close source correspondence.
-
-## Invocation environment observations
+## Invocation environment consumers
 
 [InvocationEnvironment.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean)
-proves charged fetched ADDRESS, CALLER and CALLVALUE at arbitrary Backend sites,
-with gas at least 2, one available stack slot and explicit fuel. It derives the
-actual emitted decoder result, ordered driver checks and step, preserving the
-whole native State and proving the `X` continuation. ADDRESS reads code owner;
-CALLER reads execution source, whereas ORIGIN reads the transaction sender.
-CALLVALUE reads the exact native value word, under either permission flag.
-Earlier private environment-production work already proves fixed-PC, exact-gas
-fetched agreement. This increment generalizes the native wrappers to arbitrary
-emitted sites and adequate gas; it is not first opcode coverage or a new full-row
-discharge. These are reference-driver laws, not source-frame origin, CALL/world
-or Osaka correspondence. The existing raw environment adapter remains unchanged.
+generalizes earlier fixed-PC/exact-gas native coverage to arbitrary Backend
+sites, gas ≥ 2, one available stack slot and explicit fuel. ADDRESS reads code
+owner, CALLER reads execution source (distinct from ORIGIN's transaction sender),
+and CALLVALUE reads the exact native value word under either permission flag.
+It derives emitted decode, ordered driver checks, whole-State charged steps and
+`X` continuation. Its three producer laws were checked before the H7 rebase;
+new-baseline validation is pending. This is neither first opcode coverage nor
+source-frame/CALL/world or full-row correspondence.
 
 [InvocationEnvironmentControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean)
-is a **source-only proposal**, not a checked or registered module. Its seven
-proposed controls use distinct owner/caller/origin identities, value 37, a full
-independent expected State, populated ordered observations, legal capacity and
-gas/fuel/overflow ordering. The initial record-layout errors were corrected,
-but the subsequent guarded check stopped on an unobservable Lean argv before
-validation completed. No control theorem or full import gate is counted passed.
-Independent read-only finder and skeptic reviews found no producer defect and
-confirmed this checked-versus-proposed boundary; execution validation remains
-required. All full opcode and source/transaction composition obligations stay
-open. The previously delegated universal environment-fact packet is separate.
+is an **unverified, unregistered source proposal**. Seven proposed controls
+retain distinct owner/caller/origin identities, value 37, complete expected
+States and ordered observations, legal capacity and gas/fuel/overflow order.
+The corrected source has no passing kernel check: a fail-closed process monitor
+could not verify a transient Lean argv. No runtime restoration, control pass or
+full import closure is inferred. The delegated universal environment-fact packet
+is separate. All full opcode and parent composition obligations remain open.
