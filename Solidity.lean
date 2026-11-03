@@ -1484,6 +1484,7 @@ import Solidity.Frontend.Cli
 import Solidity.Frontend.CreationTryImport
 import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
+import Solidity.Frontend.OverrideValidation.Identity
 import Solidity.Frontend.PaymentImport
 import Solidity.Frontend.PaymentPlan
 import Solidity.Frontend.Problems

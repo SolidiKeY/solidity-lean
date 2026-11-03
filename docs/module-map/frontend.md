@@ -70,3 +70,4 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and rows without statements (excluded, skipped, unsupported and internal helpers). |
 | `TestSuite/Suggestions.lean` | `#solkey_derive?` suggestions pinned by name, off the `Derived` modules' import path; `returnEarly` and `tupleReturnDiscardsComponents` pinned as derived since ground splits are pruned. |
 | `Frontend/QualifiedUnits/Relation.lean` | Bounded qualified-units checkpoint; typed scope and retained premises are in the module. |
+| `Frontend/OverrideValidation/Identity.lean` | Bounded override-validation checkpoint; typed scope and retained premises are in the module. |
