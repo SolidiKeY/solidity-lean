@@ -66,3 +66,5 @@
 | `Yul/Views/NominalInventoryView{,Controls}` | Constructive changed-snapshot Source result, output placement/history and exact full-map realization for canonical nominal inventories. |
 | `Yul/Views/NominalInventoryTransport`, `Yul/Views/NominalInventoryReplay{,Controls}` | Actual source-prefix decoder refresh and whole-poststate replay for permutations of nominal output inventories. |
 | `Yul/Views/NominalInventoryDynamic{,Controls}` | Exact retained-array/inventory result compatibility, shrink-to-zero/regrowth, original-capacity and constructed output-view controls. |
+| `Yul/Views/InventoryTraversal` | Shared typed decode/write/placement/history step with finite inventory traversal. |
+| `Yul/Views/NominalInventorySequential{,Controls}` | Exact nominal snapshot/sequential Source-result agreement with refreshed candidates, duplicates and capacity controls. |

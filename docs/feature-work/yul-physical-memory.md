@@ -230,6 +230,19 @@ original owner typing. Canonical data that fits a free-pointer gap still fails
 preparation when it exceeds the original owned allocation. This is not a Yul
 refusal or a new capacity policy.
 
+`InventoryTraversal.inventoryStep` factors the existing typed planning step:
+decode, original-capacity check, actual heap write, placement/history and candidate
+refresh. The canonical traversal retains its signature and structural equations.
+`NominalInventorySequential` uses that same step and proves exact snapshot and
+complete Source-result agreement, including `None` and repeated roots. No decoder
+agreement premise is supplied at the public entry point. Controls cover a generated
+mixed inventory, retained regrowth, duplicate visits, an invalid first scalar and
+a later capacity failure after a changed nominal prefix. Byte length 4 fits the
+existing rounded payload; length 33 exceeds it although canonical decoding succeeds.
+The initial mistaken length-4 negative expectation is retained in raw evidence.
+Legacy frozen behavior and exact cons-equation checks pass; the existing mixed
+control check measured 22 seconds before and 21 after in the same serial runtime.
+
 Executable sequential re-preparation across changing snapshots, broader mixed
 and nested dynamic history, dirty-word transport, universal ownership,
 allocator reachability and compiler adequacy remain open.

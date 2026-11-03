@@ -2948,6 +2948,7 @@ import Solidity.Yul.Views.InventoryRetainedControls
 import Solidity.Yul.Views.InventorySequential
 import Solidity.Yul.Views.InventorySnapshot
 import Solidity.Yul.Views.InventorySourceReads
+import Solidity.Yul.Views.InventoryTraversal
 import Solidity.Yul.Views.InventoryUnchanged
 import Solidity.Yul.Views.InventoryView
 import Solidity.Yul.Views.JointMemory
@@ -3037,6 +3038,8 @@ import Solidity.Yul.Views.NominalInventoryLaws
 import Solidity.Yul.Views.NominalInventoryPreparation
 import Solidity.Yul.Views.NominalInventoryReplay
 import Solidity.Yul.Views.NominalInventoryReplayControls
+import Solidity.Yul.Views.NominalInventorySequential
+import Solidity.Yul.Views.NominalInventorySequentialControls
 import Solidity.Yul.Views.NominalInventoryTransport
 import Solidity.Yul.Views.NominalInventoryUnchanged
 import Solidity.Yul.Views.NominalInventoryUnchangedControls
