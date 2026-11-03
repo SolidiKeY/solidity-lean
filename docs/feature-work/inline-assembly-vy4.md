@@ -68,3 +68,21 @@ Original Y07.01/Y07.02/Y09.03 and both backfill queues remain partial. Actual
 callee/initcode execution, physical carrier closure, common source emit/G01,
 compiler returndata noninterference, resources and final calculus/joint gates
 remain open. The scripted WorldPort static-write weakness is unchanged.
+
+## Concrete target-call output memory
+
+`TargetCallMemory.call_output_exact` composes actual input loading and supplied
+producer invocation with the concrete target byte-memory output store. Output
+acceptance discharges write existence; the full completed outcome and ordered
+observed carrier are retained. `call_output_readback` proves all copied bytes;
+`call_output_frame` preserves every byte outside the actual truncated prefix,
+including unused output capacity. These apply to both success and revert.
+
+Premises remain explicit: preflight, full requested output extent, exact input
+load, and the producer invocation equation. This is a concrete target-memory
+consumer law, not a reachable Source/EVM callee, source-heap placement, static
+world, gas, allocation, G01 or calculus adequacy certificate. Scripted controls
+check complete observed carriers, reverted output truncation, successful short
+output with an untouched tail, and zero output retaining full returndata.
+Independent finder/skeptic reviews found no issues. Final lane gates and the
+original producer/composition obligations above remain open.
