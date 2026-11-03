@@ -471,3 +471,23 @@ readback and affected consumers pass. Combined 25-declaration signature/axiom
 audit is standard-only; independent finder/skeptic report no findings.
 No initial view or universal adequacy claim is added. Full lane gates remain
 open; earlier failed separation-decision attempt and historical gates are retained.
+
+## Intrinsic SELFDESTRUCT binding
+
+`SelfDestructBuiltin` binds the existing one-operand intrinsic builtin to
+`Lifecycle.destructAtFrame`, reusing the shared low160 address projection.
+It derives the actual lifecycle result, empty-success tag, local snapshot
+rollback and full non-endpoint account preservation from existing laws.
+The tag is not an interpreter-exit proof; `none` is not a callee revert.
+
+Controls cover dirty beneficiary bits, delegated storage owner versus a
+separate funded code target, old/fresh self/other beneficiary behavior,
+deferred deletion, complete code-target preservation, static refusal and
+actual-result rollback. They are typed context/metadata preparations, not
+code/creation reachability certificates. Environment credit, physical/G01/G51,
+compiler/resource and original Y07/Y09/Backfill A/B joint closure remain open.
+
+Both modules and twenty signature/axiom reports pass serial per-file checks;
+standard axioms only. Independent finder/skeptic report no findings. Failed
+scratch automation/layout attempts are retained. Layering, reachability,
+doc paths and trust pass; mandatory full lane gates remain pending.

@@ -3404,6 +3404,8 @@ import Solidity.Yul.World.TransientTargetRollbackControls
 import Solidity.Yul.World.WorldChecks
 import Solidity.Yul.World.TerminalBuiltin
 import Solidity.Yul.World.TerminalBuiltinControls
+import Solidity.Yul.World.SelfDestructBuiltin
+import Solidity.Yul.World.SelfDestructBuiltinControls
 import Solidity.Yul.Composition.CorrectnessControls
 import Solidity.Yul.Composition.CorrectnessInstances
 import Solidity.Yul.Composition.CorrectnessPublic
