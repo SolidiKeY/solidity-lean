@@ -88,8 +88,6 @@ adequacy, common Source emit/G01, compiler last-source-frame noninterference,
 resource and final joint closure remain open. Previous kernel and finite
 compiler/EVM evidence remains separate.
 
-Validation: both new modules and a combined import/signature/axiom file pass
-serial Lean 4.24.0 per-file checks under the existing 12 GiB/no-swap bound.
 All ten declarations have either no axioms or only `propext`,
 `Classical.choice`, `Quot.sound`; no `sorryAx` or custom axiom. Independent
 read-only finder and skeptic reviews found no confirmed issues. A failed

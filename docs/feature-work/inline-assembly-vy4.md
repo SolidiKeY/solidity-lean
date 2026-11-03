@@ -53,15 +53,12 @@ Open: actual callee/initcode execution, the full-slot carrier (needs
 source emit/G01, compiler returndata noninterference, the scripted `WorldPort`
 static-write weakness.
 
-
 ## Source-compatible physical consumer input
 
-Private consumer checkpoint `1073928b746523fd03123d91ddd45d3ec733fe8d`
-checks VY2 input `913a6a2fa81084aa0ea5830c5075170ab3946d3f`. Actual
-frame calldata is retained through `sourceFrameOfCall` and source entry.
+Actual frame calldata is retained through `sourceFrameOfCall` and source entry.
 Ordinary success, nonempty error, static and low-fuel helpers quantify calldata
-without changing their bodies, results or horizons. Original failed checks
-are retained; affected rechecks and source/object identities cover the original
+without changing their bodies, results or horizons. Original failed checks are
+retained; affected rechecks and source/object identities cover the original
 273-module request plus its added actual input adapter. The generated scoped
 audit checks 527 declarations and 351 standard-only theorem axiom reports.
 Source and producer files are unchanged. This private input is not published
@@ -71,24 +68,20 @@ The registered target-control audit separately checks 15 declarations and 11
 theorem axiom reports. Both checkpoints have independent read-only finder and
 skeptic reviews with no findings. Full lane/joint gates remain open.
 
-On integration base `312ed47a9ff23fd6b0e9f0206770e8deac0246e2`, layering,
-root reachability, documentation paths and trust checks pass. G07 still exits1
-on an unrecorded `foo []` pin in the preserved external Mathlib test cache;
-the official collector/compare yields the same finding on that exact integration
-base with the same cache. This equality is not G07 passage or an original
-pinned-base comparison. Historical failures remain retained separately.
+G07 still exits1 on an unrecorded `foo []` pin in the preserved external Mathlib
+test cache; the official collector/compare yields the same finding on that exact
+integration base with the same cache. This equality is not G07 passage or an
+original pinned-base comparison. Historical failures remain retained separately.
 
 ## Selected delegate consumer compatibility
 
-Private checkpoint `02dc4a3e14bce6a5db068162ad6e312ba1da3106`, on the
-source-compatible VY2 input above, checks 35 existing owned modules and their
-308-module actual import closure. Calldata-parameterized body helpers preserve
-old empty defaults and use actual input at entry. The selected registered code
-executes its real typed persistent write at caller storage, with inherited
-sender/value and no transfer. Existing success, nonempty revert, pending timeout,
-static write-refusal, full-carrier rollback and bounded output controls pass.
-Their code/classification/depth, representation, shared-world and memory
-premises remain explicit; no desired run or outcome premise is introduced.
+Calldata-parameterized body helpers preserve old empty defaults and use actual
+input at entry. The selected registered code executes its real typed persistent
+write at caller storage, with inherited sender/value and no transfer. Existing
+success, nonempty revert, pending timeout, static write-refusal, full-carrier
+rollback and bounded output controls pass. Their code/classification/depth,
+representation, shared-world and memory premises remain explicit; no desired run
+or outcome premise is introduced.
 
 The generated audit checks 363 declarations and 250 standard-only theorem
 axiom reports. Source and VY2 definitions and all budgets are unchanged;
@@ -100,26 +93,21 @@ input, not universal delegate/environment, allocation/G01/compiler/resource,
 intrinsic G51 or final joint adequacy. Original work/backfill queues remain
 partial and the persistent goal is unchanged.
 
-Private checkpoint `9ca133f3bb8f3f1b8e60b93306ddc1e1c1acc7f5` additionally
-checks twenty unchanged prior-owned memory-event, heap and modifier consumers.
 Their twenty fresh file checks pass; the scoped audit checks 207 declarations
 and 106 standard-only theorem reports. All 287 transitive source identities
-match the committed tree. Reused objects are bound by exact source/object
-pairs to prior verified seals, not modification times alone. Independent
-reviews are clear. Local-only arguments, formatting/placement premises and
-selected execution scope remain explicit; universal G01/allocator/world and
-final calculus/compiler adequacy are not established. Peer agreement consumers
-remain separate work.
+match the committed tree. Reused objects are bound by exact source/object pairs
+to prior verified seals, not modification times alone. Independent reviews are
+clear. Local-only arguments, formatting/placement premises and selected
+execution scope remain explicit; universal G01/allocator/world and final
+calculus/compiler adequacy are not established. Peer agreement consumers remain
+separate work.
 
-Private checkpoint `496d7fe063def6e4c5bbc560f191a91eb51767ca` checks the
-three remaining prior peer consumers against the published memory harness and
-read-only V13 WorldFrames input `66c08fdefbbb53c0eee111b09d1baa6277fedff5`.
 Eleven additional files and the generated 17-declaration/12-theorem audit pass.
 These are concrete byte transport, typed account framing and journal laws;
 creation outcomes remain scripted. No initcode or callback reachability,
 Source/compiler/static/world adequacy follows. Actual intrinsic world-builtin
-binding and G51 effect closure remain owned/open work; executable creation
-still requires V08 P15 CTOR/SS-NEW and VY5 H16. The original goal is unchanged.
+binding and G51 effect closure remain owned/open work; executable creation still
+requires V08 P15 CTOR/SS-NEW and VY5 H16. The original goal is unchanged.
 
 ## Intrinsic LOG leaf
 
@@ -446,11 +434,9 @@ while inheriting the static flag.
 These are interface/binding controls, **not** reachable known/environment code
 certificates. An arbitrary `WorldPort` may still supply illegal operations in
 static context: this leaf does not certify those operations or discard that
-obligation. Source timeout/stuck transport, real account/code eligibility,
-value transfer, depth, physical journals and common observations need actual
-producer composition. G01/G51, creation/initcode (V08 P15/SS-NEW and VY5 H16),
-compiler last-call interference, allocator/resource and final joint adequacy
-remain open across the original Y07/Y09 and Backfill A/B queues.
+obligation. G01/G51, creation/initcode (V08 P15/SS-NEW and VY5 H16), compiler
+last-call interference, allocator/resource and final joint adequacy remain open
+across the original Y07/Y09 and Backfill A/B queues.
 
 Validation: final modules and thirty-one complete declaration/axiom reports
 pass serial per-file checks, standard axioms only. Independent read-only
@@ -459,3 +445,7 @@ delegate control. Layering, generated root reachability, doc paths and trust
 pass. These are interface/port checks, not full Lake/TestSuite/strict/runtime
 KeySort or final source/joint gates; historical G07 failures are retained.
 No budget, expected observation or producer implementation changed.
+
+Scope note (review): in `Yul/World/TransientTargetPort.lean`, `load_agreement`
+takes the target load equation as a premise and `reset_agreement` holds for any
+target, so neither derives a source/target agreement by itself.

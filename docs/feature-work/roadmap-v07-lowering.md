@@ -239,11 +239,9 @@ Independent finder and skeptic reviews found the composition sound and requested
 all alias partitions, real wrong-program, width and mixed-caller controls; these
 were supplied. Finder's initial-cell wording was corrected: initial cells hold
 200 and250; equal contents arise after some writes without merging identities.
-Four exact standard-axiom guards extend the registry to484, preserving480 prior
-sets and every old ordered observation. G16/G17 and BackfillA/B remain partial;
-accepted-source graph coverage/ranks/refusal and ordered G18 composition remain
-open. Constructor coverage stays zero; no checked-payload or external EVM proof
-is implied.
+G16/G17 and BackfillA/B remain partial; accepted-source graph
+coverage/ranks/refusal and ordered G18 composition remain open. Constructor
+coverage stays zero; no checked-payload or external EVM proof is implied.
 
 ## Unchecked unsigned multiplication
 
@@ -273,14 +271,13 @@ and fresh-context transport are retained. Multiplication commutes, so capture
 observations distinguish operand roles rather than a reversed-product claim.
 Checked Source overflow controls do not prove target panic-payload transport.
 
-Independent finder and skeptic reviews found no proof defect. Ten exact
-standard-axiom guards extend the owned registry to494, preserving all484 prior
-sets and existing ordered fixtures. The new public P8 stage/cursor and aggregate
-components are retained; no concrete P8 producer, accepted-source graph totality
-or final aggregate/production composition is supplied here. G16/G17 and
-BackfillA/B remain partial; G18.01 prerequisites and ordered G18.06 applications
-remain open. G18.02/.03 belong to V16, .04/.05 to V14 and G19 to V17. Constructor
-coverage remains zero; no new external compiler/EVM experiment is claimed.
+Independent finder and skeptic reviews found no proof defect. The new public P8
+stage/cursor and aggregate components are retained; no concrete P8 producer,
+accepted-source graph totality or final aggregate/production composition is
+supplied here. G16/G17 and BackfillA/B remain partial; G18.01 prerequisites and
+ordered G18.06 applications remain open. G18.02/.03 belong to V16, .04/.05 to
+V14 and G19 to V17. Constructor coverage remains zero; no new external
+compiler/EVM experiment is claimed.
 
 ## Registered headline clients
 
@@ -295,14 +292,13 @@ controls. Reference clients allocate distinct live objects and preserve the
 typed storage root. Graph clients retain the original nontrivial chain and
 negative controls. All prior lane tests and observations remain unchanged.
 
-The owned exact registry covers494 general theorems and25 registered proof
-clients (519 exports). Changed/omitted copied client pins are rejected alongside
-the old mutation controls. The reference theorem binders move from explicit
-forall types to normal headers, preserving names, order, implicitness, premises
-and conclusions; the15 signature-linter warnings disappear without suppression.
-Focused kernel checks and independent reviews confirm the layout-only change.
-These clients add checking to the default closure; they close no additional
-source-admission, lifetime, production or constructor obligation.
+Changed/omitted copied client pins are rejected alongside the old mutation
+controls. The reference theorem binders move from explicit forall types to
+normal headers, preserving names, order, implicitness, premises and conclusions;
+the15 signature-linter warnings disappear without suppression. Focused kernel
+checks and independent reviews confirm the layout-only change. These clients add
+checking to the default closure; they close no additional source-admission,
+lifetime, production or constructor obligation.
 
 
 ## Effectful multiplication pairs
@@ -319,13 +315,12 @@ supplied. The target captures operands before dropping fresh temporaries.
 inhabited controls for every alias partition, three distinct locations, live
 memory/storage callers, stale/uncaptured negatives and all32 approved widths.
 Legacy250 squared wraps to36; the distinct IR200*250 wraps to80. Equal numeric
-products do not claim reversed operand positions are distinguishable.
-Finder and skeptic found no proof defect; two copied comments were corrected.
-The exact owned registry now covers528 exports, preserving all519 prior sets.
-These are kernel and Lean observation controls, not external compiler/EVM
-experiments. G16/G17 and both backfills remain partial. G18.01 graph admission,
-G18.06 ordered V16/V14 applications, source failure/lifetime/production closure
-and constructor coverage remain open; G19 remains delegated to V17.
+products do not claim reversed operand positions are distinguishable. Finder and
+skeptic found no proof defect; two copied comments were corrected. These are
+kernel and Lean observation controls, not external compiler/EVM experiments.
+G16/G17 and both backfills remain partial. G18.01 graph admission, G18.06
+ordered V16/V14 applications, source failure/lifetime/production closure and
+constructor coverage remain open; G19 remains delegated to V17.
 
 
 ## Full-word integer sign casts
@@ -347,12 +342,12 @@ fresh Boolean extension, live memory/storage callers, eight signed/unsigned
 threshold boundaries in both pipelines and actual stale/checked-cast negatives
 pass focused kernel/Lean observation checks. Finder and skeptic found no proof
 or control defect; the two new module-map rows were placed inside the V07 table
-with complete paths after the finder flagged their initial placement. No narrower cast, constant conversion, checked-panic payload,
-Source admission, compiler/EVM experiment or production lowering is claimed.
-The owned registry now covers555 exports; all528 previous exact sets and every
-existing ordered fixture remain unchanged. G16/G17/BackfillA/B remain partial;
-G18.01 and G18.06 prerequisites, delegated G18 children and G19, five Terra
-rank-glue proposals and zero constructor coverage retain their prior status.
+with complete paths after the finder flagged their initial placement. No
+narrower cast, constant conversion, checked-panic payload, Source admission,
+compiler/EVM experiment or production lowering is claimed. G16/G17/BackfillA/B
+remain partial; G18.01 and G18.06 prerequisites, delegated G18 children and G19,
+five Terra rank-glue proposals and zero constructor coverage retain their prior
+status.
 
 
 ## Effectful conditional expressions
@@ -379,9 +374,10 @@ selection and read an aliased donor at its reached value. Actual eager, stale
 condition and post-drop consumers return11 instead of7. Live memory/storage,
 all-role aliases and fresh context controls are inhabited. A separate actual
 Source/target division-zero conditional fixture distinguishes skipped and
-selected failure by success classification only; it proves no general payload
-or arbitrary-branch lowering theorem. Finder/skeptic reviews found no defect.
-All571 owned axiom guards retain the555 prior sets and all old ordered fixtures.
-This is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B
-remain partial, G18 admission/composition prerequisites stay open, and no
-constructor or external compiler/EVM coverage is added.
+selected failure by success classification only; it proves no general payload or
+arbitrary-branch lowering theorem. Finder/skeptic reviews found no defect. This
+is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B remain
+partial, G18 admission/composition prerequisites stay open, and no constructor
+or external compiler/EVM coverage is added.
+The V07 axiom guards and the `*Checks.lean` fixtures cited above are lane-only;
+master has no V07 entries in `scripts/g07-axiom-pins.json`.

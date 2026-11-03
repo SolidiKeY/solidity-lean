@@ -276,15 +276,10 @@ evidence; original-site embedding and Source/Core representation remain separate
 
 The21 statement-cut signatures are unchanged and deterministic regeneration was
 checked. Filtering unrelated helper attempts reduces the measured Part2 build
-from58s to11s without raising any limit. The first closure check timed out at300s
-and remains BLOCKED; the changed proof search then checked the closed induction
-in18.81s. Controls/frame checks passed in6.36s; the29-declaration axiom audit
-passed in20.39s with peak aggregate192032768 bytes, dependencies only propext,
-Classical.choice and Quot.sound or none. All used the verified hard12GiB/swap0
-scope, CPU1/Lean-j1, unchanged300s/stack/proof limits and4GiB reserve.
-Independent finder and skeptic cleared the source laws, controls and unchanged
-statements. A scratch audit lacking module import-cache setup failed before
-checking and remains failed; the module-aware audit passed.
+from58s to11s without raising any limit. Independent finder and skeptic cleared
+the source laws, controls and unchanged statements. A scratch audit lacking
+module import-cache setup failed before checking and remains failed; the
+module-aware audit passed.
 
 ## Status
 

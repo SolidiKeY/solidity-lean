@@ -569,14 +569,40 @@ definitions and proofs are unchanged.
 
 LocalBoolIf.run executes a certified Boolean condition and actual certified item block with Source's predecessor fuel. False conditions retain condition effects and skip the block; true conditions restore only a successful block's local scope. A halted block retains its reached context and world. source_agrees universally relates execution to Source.execS ifThen from a completely clean local frame, using concrete LocalBoolControl and LocalBoolItemScope proofs. restore_self accounts for Source's additional close.
 
-Checks.LocalBoolIf inhabits the Source conditional and tests timeout/success horizons, branch skipping, condition assignment, partial condition failure, and dirty nonzero truth with an observable branch timeout. Dirty frames still fail clean projection. Finder caught and corrected an initially nondiscriminating empty-branch dirty control. No Source/** changes, solc/EVM evidence or admission expansion occur here. Full VY1/general P16, dirty Source adequacy and final joint/checkpoint gates remain open. Automation-first attempts and resource evidence are under /workspace/vy1-words-evidence/bool-if-*; immutable head-named packets carry review and check evidence.
+Checks.LocalBoolIf inhabits the Source conditional and tests timeout/success
+horizons, branch skipping, condition assignment, partial condition failure, and
+dirty nonzero truth with an observable branch timeout. Dirty frames still fail
+clean projection. Finder caught and corrected an initially nondiscriminating
+empty-branch dirty control. No Source/** changes, solc/EVM evidence or admission
+expansion occur here. Full VY1/general P16, dirty Source adequacy and final
+joint/checkpoint gates remain open.
 
-Validation: serial affected build and two per-file gates pass; MCP reports zero errors in both modules; layer/registration/orphan/doc-path/diff checks pass (40 existing ambiguous doc references all resolve). Scoped reports contain only propext, Classical.choice and Quot.sound. Independent semantic, controls and foundation finder/skeptic reviews completed; the controls finding above was fixed and re-reviewed. Full gates were not rerun in this incremental turn. Lean 4.24.0 / Lake 5.0.0-src+797c613; cgroup 12 GiB, no swap, serial Lean -j1; raw failed attempts remain in evidence. The persistent goal read API is unavailable; no goal was created or changed.
+Validation: serial affected build and two per-file gates pass; MCP reports zero
+errors in both modules; layer/registration/orphan/doc-path/diff checks pass (40
+existing ambiguous doc references all resolve). Scoped reports contain only
+propext, Classical.choice and Quot.sound. Independent semantic, controls and
+foundation finder/skeptic reviews completed; the controls finding above was
+fixed and re-reviewed. Full gates were not rerun in this incremental turn. The
+persistent goal read API is unavailable; no goal was created or changed.
 
 ### Two-branch Boolean scope adapter
 
 LocalBoolIfElse.run selects between two independently indexed certified Boolean item lists. Their output contexts may differ: each successful block drops only its own declarations; a halted block retains its actual reached context. Both the condition and selected block use the actual Source predecessor horizon. source_agrees quantifies all supported conditions/branches, globals, frames, horizons, parameters, phases, typed clean input locals and world, and concretely agrees with Source.execS ifElse. It invokes the existing expression and scoped-item proofs and accounts for Source's additional close; no caller agreement assumption is introduced.
 
-Checks.LocalBoolIfElse inhabits the actual Source ifElse with a three-declaration true branch and two-declaration false branch. Controls distinguish their timeout/success horizons and partial contexts, condition assignment and condition timeout effects, and raw word 2 selecting the true branch rather than false. Raw 257 remains dirty, so final clean projection fails. Dirty execution is retained; dirty Source/compiler adequacy is not claimed. Source/** and frontend admission remain unchanged. Full lane, general P16, dirty per-pipeline boundaries and final joint/full gates remain open. Kernel proof evidence and automation-first attempts are in the head-named packet; no new external solc/EVM validation is claimed.
+Checks.LocalBoolIfElse inhabits the actual Source ifElse with a
+three-declaration true branch and two-declaration false branch. Controls
+distinguish their timeout/success horizons and partial contexts, condition
+assignment and condition timeout effects, and raw word 2 selecting the true
+branch rather than false. Raw 257 remains dirty, so final clean projection
+fails. Dirty execution is retained; dirty Source/compiler adequacy is not
+claimed. Source/** and frontend admission remain unchanged. Full lane, general
+P16, dirty per-pipeline boundaries and final joint/full gates remain open.
 
-All six independent read-only reviews found no issues. Both per-file MCP diagnostics report zero errors; serial affected build (130 jobs), two per-file gates, layer/registration/orphan/doc-path/diff checks pass. Layer check: 540 core modules, zero reach elaborator or checked parser adapters; 3331 reachable, zero orphans. Forty existing ambiguous doc references all resolve. Scoped theorem/control reports use only propext, Classical.choice and Quot.sound. Lean 4.24.0 / Lake 5.0.0-src+797c613; hard 12 GiB/no-swap bound, serial Lean -j1 with OS headroom. Final lane gates are pending, not claimed. get_goal remains unavailable; persistent goal unchanged.
+All six independent read-only reviews found no issues. Both per-file MCP
+diagnostics report zero errors; serial affected build (130 jobs), two per-file
+gates, layer/registration/orphan/doc-path/diff checks pass. Layer check: 540
+core modules, zero reach elaborator or checked parser adapters; 3331 reachable,
+zero orphans. Forty existing ambiguous doc references all resolve. Scoped
+theorem/control reports use only propext, Classical.choice and Quot.sound. Final
+lane gates are pending, not claimed. get_goal remains unavailable; persistent
+goal unchanged.

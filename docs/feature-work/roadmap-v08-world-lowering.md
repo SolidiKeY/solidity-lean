@@ -3877,3 +3877,11 @@ while Source still reports code C; no library is installed or Source library
 execution claimed. Its complete role/account/store/funds vector is retained.
 Source H16/H19 execution files remain untouched. General creation/library/unit
 body/frame/layout/ledger/ABI/bytecode and canonical Backfill applications stay open.
+
+Scope note (review): `EffectfulCallableArgument.transport` and
+`AssignedIntegerCallable.transport` in `LocalCallableTransport.lean` pair a
+closed Source fixture with an independent target clause linked only by the
+initial read; they state no post-state relation. `AssignedCallableContext.transport`
+adds the before/after `Related` relation for the integer case only. The target
+run in `SourceClockTransactions.lean` is hand-written, so `paired` is the
+conjunction of two runs, not a derived correspondence.

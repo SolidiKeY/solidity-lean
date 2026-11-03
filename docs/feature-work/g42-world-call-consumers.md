@@ -148,12 +148,10 @@ both endpoint representation facts; source_environment has no callback-history
 premise. No original-site provenance or target call implementation is supplied.
 
 ClosedConsumerControls applies this adapter to the inhabited restricted payment
-fixture, rejects unrelated bytes, exercises actual read-only Source reentry,
-and proves any explicitly represented typed output equals the entry projection.
-The final touched controls and nine-declaration standard-axiom audit passed
-in15.08s, peak aggregate186613760 bytes, hard12GiB/swap0, CPU1/Lean-j1,
-unchanged300s deadline and4GiB host reserve. Independent finder and skeptic
-found no defect; no original full or native gate was retried or relabeled.
+fixture, rejects unrelated bytes, exercises actual read-only Source reentry, and
+proves any explicitly represented typed output equals the entry projection.
+Independent finder and skeptic found no defect; no original full or native gate
+was retried or relabeled.
 
 SourceExpressionConsumer.after_capture connects the actual resolved extCall
 expression at horizon+1 to its capture execution and remaining resume run.
@@ -166,16 +164,14 @@ not whole-body/original-source-site embedding or compiler/Core correspondence.
 
 SourceExpressionControls has13 kernel assertions: an ordinary nonself call's
 argument3→4 and old3 calldata, declared int failure on one-byte successful
-callee data, and actual inherited-static read-only reentry through the expression.
-The argument-effect fixture is ordinary; it does not independently witness a
-combined view-call/postincrement fixture. The generic law retains the actual
-Invocation declaration/signature/capture and effective mode. No new source,
-fixture, admission, expected observation, native observation or target behavior
-is introduced. Per-file controls passed in7.45s;17-declaration axiom audit passed
-in10.27s, peak184778752 bytes, only standard axioms. Both used unchanged hard12GiB/
-swap0 CPU1/Lean-j1/300s limits and4GiB host reserve. The initial ambiguous caller
-context check failed; explicitly indexing the existing caller context fixed it.
-Independent finder and skeptic cleared the statements and boundary.
+callee data, and actual inherited-static read-only reentry through the
+expression. The argument-effect fixture is ordinary; it does not independently
+witness a combined view-call/postincrement fixture. The generic law retains the
+actual Invocation declaration/signature/capture and effective mode. No new
+source, fixture, admission, expected observation, native observation or target
+behavior is introduced. The initial ambiguous caller context check failed;
+explicitly indexing the existing caller context fixed it. Independent finder and
+skeptic cleared the statements and boundary.
 
 SourceExpressionIssuer.capture_of_success derives actual CapturedAt and resumed
 execution from a successful resolved extCall expression; it no longer asks for
@@ -189,12 +185,9 @@ unknown receiver bytecode implements the selected declaration.
 
 SourceIssuerControls includes inhabited argument-effect and inherited-static
 reentry issuance, a view-labelled declaration rejected by actual registration,
-and missing-code refusal before capture can succeed. Ten declaration/definition
-axiom reports passed with only standard axioms; final controls/audit took5.73s,
-peak210087936 bytes under unchanged hard12GiB/swap0 CPU1/Lean-j1/300s limits
-and4GiB host reserve. Independent finder and skeptic cleared final proofs.
-Initial contradiction/type/lookup-normalization attempts remain failed receipts.
-No original full or native gate was repeated or relabeled.
+and missing-code refusal before capture can succeed. Independent finder and
+skeptic cleared final proofs. No original full or native gate was repeated or
+relabeled.
 
 SourceExpressionFailure.classify separates an actual failing resolved external
 expression into an exact capture failure or an actual successful capture followed
@@ -208,12 +201,9 @@ SourceFailureControls adds eight kernel assertions: missing-code failure after
 postincrement keeps3→4 and emits no call event; malformed successful return data
 fails after a successful capture; a real static callee revert retains ordered
 bytes7,9 and protects caller storage. These are expression-level Source facts,
-not transaction rollback or target/native observations. Controls passed in2.92s;
-the15-declaration/definition standard-axiom audit passed in4.72s, peak189632512
-bytes, under unchanged hard12GiB/swap0 CPU1/Lean-j1/300s limits and4GiB reserve.
-Independent finder/skeptic review found no defect. Two initial typed error-carrier/
-dependent-elimination proof failures remain failed receipts. Whole-body/source-text,
-Source/Core and target/native correspondence and original final gates remain open.
+not transaction rollback or target/native observations. Independent
+finder/skeptic review found no defect. Whole-body/source-text, Source/Core and
+target/native correspondence and original final gates remain open.
 
 SourceSelfDispatch now follows the actual external-self Source path rather than
 substituting callInternal. funded_self retains the live balance check without
@@ -227,11 +217,9 @@ Arbitrary admitted values remain guarded; no payment or halt policy changes.
 SourceSelfDispatchControls has nine assertions, including applications of all
 three dispatch outcome laws to real Source runs, ordinary mutation, static
 refusal/storage preservation, timeout, insufficient value and depth refusal.
-The corrected controls passed in7.63s;19-declaration/definition standard-axiom
-audit passed in3.73s, peak169558016 bytes, hard12GiB/swap0 CPU1/Lean-j1/300s
-and4GiB reserve. Independent finder and skeptic cleared final proofs.
-The initial control used core Heap.empty instead of Source.Heap.empty and hit
-unchanged200000-heartbeat isDefEq failures after that type error; the failed
-attempt remains failed. Explicit Source heap typing fixed the input, without
-raising budgets. This supplies no target self-call/ABI-frame instance, native
-adequacy, whole-body binding or unknown-receiver-to-self substitution.
+Independent finder and skeptic cleared final proofs. The initial control used
+core Heap.empty instead of Source.Heap.empty and hit unchanged200000-heartbeat
+isDefEq failures after that type error; the failed attempt remains failed.
+Explicit Source heap typing fixed the input, without raising budgets. This
+supplies no target self-call/ABI-frame instance, native adequacy, whole-body
+binding or unknown-receiver-to-self substitution.
