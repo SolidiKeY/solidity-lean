@@ -1326,3 +1326,26 @@ Complete ordered code/stack/buffer/account observations and all five local
 source-slice refusals remain explicit. Independent finder and skeptic reviews
 found no defect. Full opcode rows, registered-root validation, WorldCalls and
 source/compiler/account/transaction composition remain open.
+
+
+### Fetched signed-negation body
+
+[NegationBody.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean)
+connects the actual G25 selected signed-negation body (`PUSH32 0; SUB`) to
+two fetched reference steps. For arbitrary typed signed operands, surrounding
+Backend code, seed State and spill, `negation_body_execution` derives the Scalar
+word result, exact two-step output and continuation equality. Post-PUSH PC fit,
+peak stack capacity (`spill.length + 2 ≤ 1024`), gas at least six and explicit
+fuel remain premises. Code, intermediate alignment, gas debit and retained
+State/memory/return buffers are proved separately; no execution or decoder
+agreement is assumed as an input.
+
+[NegationBodyControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean)
+checks independent complete expected States for positive, negative, zero,
+minimum and maximum signed inputs, empty/full legal spills, wrong gas/fuel,
+and ordered code/stack/buffer/account observations. The minimum wraps in the
+native body while the existing Scalar guard returns the overflow payload and
+the source evaluator fails. Native execution of that guard and panic path is
+not proved here. Independent finder and skeptic reviews found no defect.
+This body sequence establishes no compiler/frame origin, Osaka approval or
+account/world/transaction closure; full opcode obligations remain open.
