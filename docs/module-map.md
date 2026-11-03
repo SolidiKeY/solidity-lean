@@ -1238,6 +1238,8 @@ admits physical assembly or proves target-byte/original-callee transport.
 |---|---|
 | `Evm/TryPanicCarrier.lean` | Closed intrinsic constructed-call carrier; no original-source construction, bytecode adequacy, callback change or source admission is asserted. |
 | `Examples/Tactics/TryPanicCarrier.lean` | Nonvacuous constructed-call controls; no source or target adequacy is claimed. |
+| `Evm/TryPanicSourcePlan.lean`, `Evm/TryPanicSourceFrame.lean`, `Evm/TryPanicSourceDeterminism.lean` | H8 bounded try/panic source model: `ThreeOp` plan, `BodyCompletedAt`, `FiniteEntry`, completion uniqueness ([H8](feature-work/diamond-try-h8-source-model.md)). |
+| `Frontend/SolcJson/TryPanicSourceData.lean`, `Frontend/SolcJson/TryPanicSourcePlan.lean`, `Frontend/SolcJson/TryPanicSourceCaller.lean`, `Examples/Tactics/TryPanicSource{Plan,Determinism,Whole}.lean` | Quoted pinned AST/input and structural derivations; controls. |
 
 | `Semantics/ContractWorldCertificates.lean` | Published paid-run/source-wrapper operation certificates, reused unchanged from origin/master cc155f36. |
 | `Semantics/PaymentWorld.lean` | Typed stipend source frames over actual world calls; send completed-failure handling, transfer exact halt transport, no-op/funding and atomic rollback laws. |
@@ -1885,3 +1887,10 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](feature-work/inline-assembly-vy4.md)). |
 | `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](feature-work/vy5-composition.md)). |
 | `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
+
+## Label execution
+
+| Module | Purpose |
+|---|---|
+| `Backend/LabelExec/Step.lean`, `Backend/LabelExec/Fetch.lean`, `Backend/LabelExec/Packets.lean` | Byte-PC step over the numeric slice and JUMP/JUMPI/JUMPDEST; fetch behind a prefix; branch packets ([label execution](feature-work/backend-label-exec.md)). |
+| `Backend/LabelExec/Assembly.lean`, `Backend/LabelExec/Loops.lean`, `Backend/LabelExec/ScalarTransfer.lean` | Assembled jumps and tests; top-level loop header/backedge; `Scalar.step` lifting. |

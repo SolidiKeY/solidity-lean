@@ -850,6 +850,9 @@ import Solidity.Frontend.SolcJson.YulTargetPath
 import Solidity.Frontend.SolcJson.YulTypedChildren
 import Solidity.Frontend.SolcJson.YulWalkPath
 import Solidity.Frontend.SolcJson.YulWords
+import Solidity.Frontend.SolcJson.TryPanicSourceCaller
+import Solidity.Frontend.SolcJson.TryPanicSourceData
+import Solidity.Frontend.SolcJson.TryPanicSourcePlan
 import Solidity.Examples.Tactics.SourceLiteralsImport
 import Solidity.Examples.Tactics.SourceIdentifiersImport
 import Solidity.Examples.Tactics.SourceUnitsMetadata
@@ -1024,6 +1027,9 @@ import Solidity.Evm.MemoryRecursiveNesting
 import Solidity.Evm.MemoryRecursiveNestingBudget
 import Solidity.Evm.MemoryRecursiveRoom
 import Solidity.Evm.MemoryRecursiveSound
+import Solidity.Evm.TryPanicSourceDeterminism
+import Solidity.Evm.TryPanicSourceFrame
+import Solidity.Evm.TryPanicSourcePlan
 
 import Solidity.Storage.Representation.Model
 import Solidity.Storage.Representation.Controls
@@ -1459,6 +1465,9 @@ import Solidity.Examples.Tactics.CallFunctionShare
 import Solidity.Examples.Tactics.CallFunctionShareControls
 import Solidity.Calculus.CloseCallSharing
 import Solidity.Examples.Tactics.CallSharingDefault
+import Solidity.Examples.Tactics.TryPanicSourceDeterminism
+import Solidity.Examples.Tactics.TryPanicSourcePlan
+import Solidity.Examples.Tactics.TryPanicSourceWhole
 
 -- V12 P1 runtime-frame foundation and frozen interface v1.
 import Solidity.Backend.InternalFlow.RuntimeFrameSemantics
@@ -1765,6 +1774,12 @@ import Solidity.Backend.StorageOps.TargetSnapshotRepeatControls
 import Solidity.Backend.StorageOps.Touched
 import Solidity.Backend.StorageOps.Traversal
 import Solidity.Backend.StorageOps.TwoClearRepresentation
+import Solidity.Backend.LabelExec.Assembly
+import Solidity.Backend.LabelExec.Fetch
+import Solidity.Backend.LabelExec.Loops
+import Solidity.Backend.LabelExec.Packets
+import Solidity.Backend.LabelExec.ScalarTransfer
+import Solidity.Backend.LabelExec.Step
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
