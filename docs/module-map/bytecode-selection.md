@@ -36,10 +36,6 @@
 | `Backend/FailurePaths/TransientComposition.lean` | G39 actual target composition: transient write, ordinary persistent/memory instructions, and a later observed same-owner read. |
 | `Backend/FailurePaths/TransientSharing.lean` | G39 selected-slot sharing under supplied source frames. |
 | `Backend/FailurePaths/TransientSharingControls.lean` | Nonempty-prefix sharing, reset, mixed-root and refusal controls. |
-| `Backend/Selection/ScalarSequence.lean` | Bounded executable-bytecode checkpoint; typed scope and retained premises are in the module. |
-| `Backend/Selection/ScalarSequenceControls.lean` | Bounded executable-bytecode checkpoint; typed scope and retained premises are in the module. |
-| `Backend/Selection/ScalarSequenceFrames.lean` | Bounded executable-bytecode checkpoint; typed scope and retained premises are in the module. |
-| `Backend/Selection/ScalarSequenceResources.lean` | Bounded executable-bytecode checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/Interface.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryControls.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
@@ -79,8 +75,6 @@
 | `Backend/AbiEntry/CalldataWordInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationFreshness.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationFreshnessControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/ArithmeticSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/BitwiseSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/AbiEntry/ValueGateBodyInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/AbiEntry/ValueGateInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationLinkIdentity.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
@@ -90,21 +84,13 @@
 | `Backend/AbiEntry/TailGuardInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationReturnProducer.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationReturnProducerControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/SignedSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/UnsignedSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationReturnPartition.lean` | Complete byte observations of actual finite constructor RETURN. |
 | `Backend/Executable/CreationReturnPartitionControls.lean` | Actual constructor return with all three byte classes and adjacent regions. |
-| `Backend/Selection/NumericSequence.lean` | Numeric compiler-IR selection and straight-line composition use the existing instruction and lowering certificates. |
-| `Backend/Selection/StackSelection.lean` | Native stack-family selection and physical frame capacity. |
 | `Backend/AbiEntry/HeadCheck.lean` | Actual short-head predicate in the existing numeric bytecode slice. |
 | `Backend/AbiEntry/HeadCheckInterface.lean` | Ordinary indexed ABI entry's initial selector-inclusive head predicate. |
-| `Backend/Selection/FramedLowering.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/MixedSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/AbiEntry/LengthCheck.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/AbiEntry/LengthCheckControls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/AbiEntry/LengthCheckInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/IRBranchPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/IRLoopPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 
 
 ## V15 selected stack consumers
@@ -119,3 +105,4 @@
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicRelative.lean` | H8 relative closure over explicit missing P1/P3 producers. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourcePadding.lean` | H8 consumers of the published H7 logical padding supplier. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean` | H8 original-runtime consumers of the published H7 bounded scanner. |
+| `Bridge/SolidityBridge/AccessBridge/Calldata.lean` | Actual CALLDATALOAD payload and charged execution over the existing pinned state/driver, reusing its decoder, byte readers and H7 padding. |
