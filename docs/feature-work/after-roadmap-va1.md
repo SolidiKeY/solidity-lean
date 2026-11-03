@@ -4716,3 +4716,55 @@ neither pending T4/T5 nor VA2 sharing. T7 is only a Markdown statement, unproved
 and unused; there is no new Lean assumption. The hard producer remains checked,
 while normalization, global Residue/DecisionTheorem-prime/exhaustive hash bridge,
 all open AU02/backfill and full-validation obligations remain open.
+
+
+## Two-binder normalization producer — 2026-11-03
+
+H22 freeze respected: no ExtCall structure, helper or construction changed.
+Fetched origin/master4b43613e; no published replacement for this owned producer
+was found. The assigned branch/base remain unchanged. This is an additive proof,
+not a normalizer refactor; prior exact-work/speed history was inspected.
+
+`qfUIntTwoPrefix_normalization_sourceFuel` in
+`Solidity/Calculus/DecisionNumericNormalization.lean` has explicit quantifiers over
+any contract, two names, and a body in two uint locals. Its premises are actual
+QFUIntLinear syntax and body.uintQFWeight≤2046. It proves the actual public
+2048-budget normalizer returns two binders around a body retaining the grammar
+and a nonincreasing source-weight bound. The existing state-producer theorem and
+two actual_all equations account for both visits. No successful-normalization,
+coverage, validity or future-helper premise is assumed. This sufficient source
+weight criterion is not presented as a necessary bound or the full511-node
+coverage theorem. T4/T5/T7 remain unproved and unused.
+
+Required automation was attempted first. An initial scratch-goal namespace error
+was corrected and its raw failures retained. rfl/decide/omega/simp only did not
+solve the valid goal; sol_prove/sol_chain implementations were unavailable in
+that core-only import environment. The producer then passed a focused kernel
+file check in9.647s; emitting its private checked output took about10s. No shared
+build/cache output was overwritten.
+
+The committed client
+`docs/feature-work/after-roadmap-va1/two-prefix-normalization-client.lean`
+uses both locals in a sum compared to five, wrapped by conjunction with truth.
+Its actual public2048 normalization certificate passes, while fuel1 returns
+none. Guarded evaluation is[true,false], and actual decision controls remain
+[proved,refuted,unknown]. The client passed in7.453s against the new private
+producer output. All three public axiom reports contain only propext,
+Classical.choice and Quot.sound. These are kernel/source and interpreted
+controls, with no external EVM claim.
+
+Per-file MCP diagnostics were attempted but remain FAILED/unavailable, reporting
+“Lean did not finish; the file is not known clean.” The initial private socket
+permission failure was repaired. Private writable output/cache views and server
+stderr capture did not resolve the diagnostic failure; the raw result has
+success=false, timed_out=false, failed_dependencies=[]. Server stderr reports
+“Watchdog error: Cannot read LSP message: Stream was closed”. No diagnostic pass
+is inferred from the independent kernel passes. The checkpoint therefore remains
+partial for diagnostic/final validation. Raw commands, permission/import/diagnostic
+failures and outputs remain in
+`/workspace/va1-evidence/two-prefix-normalization-next`.
+
+All checks used the actual local Docker daemon, memory.max12884901888,
+memory.swap.max0, H1 reserve4GiB, -j1/threads1 and the original writer lock.
+No build/LSP overlap occurred. General Residue/DecisionTheorem-prime/exhaustive
+hash bridge, remaining AU02/backfill and whole-lane gates remain open.

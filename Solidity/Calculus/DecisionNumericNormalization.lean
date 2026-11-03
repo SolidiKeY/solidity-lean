@@ -451,6 +451,22 @@ theorem qfUIntPrefix_normalization_sourceFuel {C : Contract} (name : Var)
   rw [actual_all 2047 2047 name .uint φ, hd]
   rfl
 
+/-- Two real uint binders consume two visits of the unchanged public budget.
+The returned body retains its grammar and original source-weight bound. -/
+theorem qfUIntTwoPrefix_normalization_sourceFuel {C : Contract} (x y : Var)
+    {φ : Fml C [.val .uint, .val .uint]} (h : φ.QFUIntLinear)
+    (hw : φ.uintQFWeight ≤ 2046) :
+    ∃ χ : Fml C [.val .uint, .val .uint],
+      (ProgramNormalization.ofFormula? 2048 (.all x .uint (.all y .uint φ))).map (·.formula) =
+        some (.all x .uint (.all y .uint χ)) ∧ χ.QFUIntLinear ∧ χ.uintQFWeight ≤ φ.uintQFWeight := by
+  obtain ⟨d, rest, hd, hg, hs, hc⟩ :=
+    qfUIntLinear_normalizer_state 2046 2046 h hw hw
+  refine ⟨d.formula, ?_, hg, hs⟩
+  change ((actualNormalization 2048 (.all x .uint (.all y .uint φ)) 2048).map
+    Prod.fst).map (·.formula) = _
+  rw [actual_all 2047 2047 x .uint (.all y .uint φ), actual_all 2046 2046 y .uint φ, hd]
+  rfl
+
 /-- Compose through the actual normalized source, which can differ syntactically
 from its input. This is an equation about the real existing pipeline. -/
 theorem leafOf_of_normalized_to {C : Contract} (φ χ : Fml C []) (ψ : LFml C)
