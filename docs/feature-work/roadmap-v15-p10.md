@@ -1216,3 +1216,28 @@ The final JUMP has not executed: gas 22 permits the prefix and then refuses
 that next opcode. This is neither a completed cycle nor source/compiler,
 Osaka approval, account/world or transaction/trace correspondence. All full
 opcode obligations remain open.
+
+## One finite linked cycle
+
+[LinkedCycle.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean)
+executes the remaining fetched JUMP at PC 71. Byte-zero membership is derived
+from the existing linked-program reference certificate, rather than assumed as
+a successful gate or inferred from opaque scanner equality. For any seed,
+nonzero typed scalar operand and caller tail with `tail.length + 2 ≤ 1024`,
+gas at least 30 and fuel `fuel + 9`, eight actual counted steps return to PC 0
+with the original caller tail. The `X` continuation and exact natural debit 30
+are proved. The complete native state, memory, active-word count, return data
+and return buffer are preserved as specified; instruction count increases by 8.
+Construction-level frame/debit facts have execution meaning via this theorem.
+
+[LinkedCycleControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycleControls.lean)
+provides a separate full expected State, signed/nonzero inputs, both permissions,
+empty and maximal legal tails, insufficient gas/fuel and an actual bad-target
+refusal when the supplied table omits byte zero. The complete ordered image,
+stack, memory, return data, calldata, accounts and substate are retained.
+Exactly 30 gas completes the cycle and then refuses the next JUMPDEST charge;
+it does not terminate successfully. No loop invariant or relation between the
+restored tail and a future source operand is assumed or proved. Repeated or
+infinite cycles, full source/compiler and Osaka correspondence, account/world,
+resource abstraction and transaction/trace composition remain open. All full
+opcode rows remain open.

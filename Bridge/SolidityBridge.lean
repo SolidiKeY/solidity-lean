@@ -189,6 +189,8 @@ import SolidityBridge.RoadmapV15.P10.LinkedBackedgePushControls
 import SolidityBridge.RoadmapV15.P10.LinkedCompletion
 import SolidityBridge.RoadmapV15.P10.LinkedCompletionControls
 import SolidityBridge.RoadmapV15.P10.LinkedCompletionLayout
+import SolidityBridge.RoadmapV15.P10.LinkedCycle
+import SolidityBridge.RoadmapV15.P10.LinkedCycleControls
 import SolidityBridge.RoadmapV15.P10.LinkedEntry
 import SolidityBridge.RoadmapV15.P10.LinkedEntryControls
 import SolidityBridge.RoadmapV15.P10.LinkedFallthrough
