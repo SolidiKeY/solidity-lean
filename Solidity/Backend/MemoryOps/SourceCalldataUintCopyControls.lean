@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceCalldataUintMutation
 import Solidity.Backend.MemoryOps.SourceCalldataUintBinding
 import Solidity.Backend.MemoryOps.SourceCalldataUintTransfer
 import Solidity.Backend.MemoryOps.SourceCalldataUintCopy
@@ -529,4 +530,246 @@ theorem empty_prefix_vectors :
  Quot.sound] -/
 #guard_msgs in
 #print axioms empty_prefix_vectors
+
+/-! Additional actual fresh-binding/mutation clients. -/
+private def mType : bMid.2.heap.ty 2=some SU := rfl
+private def mPayload : List PrimTy.uint.Denote := [u 0,u 0,maximum]
+private def mSource : Source.EMState E0 BΓ :=
+  (bMid.1,{bMid.2 with heap := bMid.2.heap.write 2 (sourceUintMemory mPayload) mType})
+private def mOut : Heap (H++[A]) := out.set fresh (MObj.setElem .dyn (out.get fresh) 0 (u 0))
+private def mProgram : Source.RItems E0 [] false .body BΓ BΓ :=
+  .stmt (.expr (sourceUintCalldataBind bDst bSrc))
+    (.stmt (.expr (sourceUintIndexedAssign bDst bIndex bIndex)) .nil)
+
+/-- Actual copy/bind then material numeric mutation in ONE Source program,
+linked to the same checked-copy heap and a real intrinsic writeAddr. -/
+theorem bound_mutation_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 0 3 (u 0))=
+      (.ok (.val (.memRef rfl 2)),bMid) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedAssign bDst bIndex bIndex)).run bMid=
+      (.ok (.val (sourceUint (u 0))),mSource) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none mProgram (bInput 0 3 (u 0)).1).run (.nil,(bInput 0 3 (u 0)).2)=
+      (.ok (.normal mSource.1),(.nil,mSource.2)) ∧
+    checkedSourceFreshUints (E := E0) frame 0 3 hp (by decide)=.ok (some out) ∧
+    out.writeAddr (.index fresh .dyn (u 0)) (u 0)=some mOut ∧
+    SourceUintMemoryAt mSource 2 mOut fresh .dyn ∧ Source.MemOK E0 SH mSource ∧
+    Heap.Keeps (List.prefix_append H [A]) hp mOut ∧
+    SourceUintMemoryAt mSource 0 mOut (left.wk (List.prefix_append H [A])) .dyn ∧
+    SourceUintMemoryAt mSource 1 mOut (right.wk (List.prefix_append H [A])) .dyn := by
+  have result := source_cd_uint_bind_assign (bInput 0 3 (u 0)) hp (G0 p) frame fuel nps
+    bDst bSrc bIndex bIndex 0 3 (u 0) (u 0) rfl rfl rfl (by decide) (by decide) SH (bMemOK 0 3 (u 0))
+  rw [actually_decoded] at result
+  obtain ⟨valid,native,zs,first,second,program,adapter,hw,new,mok,keep,values,occupied,locals,ex,events,logs,fn⟩ := result
+  have nativeBound : (u 0).1.toNat<(MObj.elems .dyn (out.get fresh)).length := by
+    unfold out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.length_map]
+    decide
+  have nativeRun : out.writeAddr (.index fresh .dyn (u 0)) (u 0)=some mOut := by
+    simp only [Heap.writeAddr,Heap.setIndex,nativeBound,↓reduceIte]
+    rfl
+  have equalNative : native=mOut := Option.some.inj (hw.symm.trans nativeRun)
+  subst native
+  have before : SourceUintMemoryAt bMid 2 out fresh .dyn := (copy_client p 0).2.2.1
+  have bound : (u 0).1.toNat<out.len fresh .dyn := by
+    simp only [Heap.len,MObj.elems_dyn]
+    decide
+  obtain ⟨ht,write⟩ := source_uint_write bMid 2 payload (by rfl) 0 (by decide) (u 0)
+  have actualWrite : (Source.writeLoc (E := E0) (Γ := BΓ) frame (fuel+2) (.mem 2 0) (sourceUint (u 0))).run bMid=
+      (.ok (),mSource) := write
+  have actual := before.eval_assign_of_run (G0 p) frame fuel bDst bIndex bIndex (u 0) (u 0) rfl rfl rfl bound actualWrite
+  have equalSource : zs=mSource := congrArg Prod.snd (second.symm.trans actual)
+  subst zs
+  have oldInitial : SourceUintMemoryAt (bInput 0 3 (u 0)) 0 hp left .dyn := old_at 0 3
+  have neighborInitial : SourceUintMemoryAt (bInput 0 3 (u 0)) 1 hp right .dyn := neighbor_at 0 3
+  exact ⟨first,second,program,adapter,nativeRun,new,mok,keep,
+    oldInitial.transport keep occupied,neighborInitial.transport keep occupied⟩
+
+/-- Full post-mutation local/Source object/world vector. Previous full initial,
+copied and typed vectors remain available unchanged. -/
+theorem mutation_vectors :
+    mSource.1=bMid.1 ∧
+    [mSource.2.heap.get 0,mSource.2.heap.get 1,mSource.2.heap.get 2,mSource.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory mPayload⟩,none] ∧
+    [MObj.elems .dyn (mOut.get (left.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (mOut.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (mOut.get fresh)]=
+      [old,neighbor,mPayload] ∧
+    [left.id,right.id,fresh.id]=[0,1,2] ∧ mSource.2.heap.next=3 ∧
+    mSource.2.ex=(bInput 0 3 (u 0)).2.ex ∧ mSource.2.events=(bInput 0 3 (u 0)).2.events ∧
+    mSource.2.logs=(bInput 0 3 (u 0)).2.logs ∧ mSource.2.fnLocals=(bInput 0 3 (u 0)).2.fnLocals := by
+  refine ⟨rfl,rfl,?_,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  obtain ⟨_,_,_,_,hw,_,_,keep,_,_⟩ := bound_mutation_program .legacy 0 0
+  have original : MObj.elems .dyn (out.get fresh)=payload := by
+    unfold out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+    exact List.map_id'' (fun _ => rfl) _
+  rw [keep left,keep right,MObj.elems_wk,MObj.elems_wk,
+    indexedWrite_elems out mOut fresh .dyn (u 0) (u 0) hw,original]
+  simp only [MObj.elems_dyn,List.map_id'' (f := MVal.wk (List.prefix_append H [A]) (.prim .uint)) (fun _ => rfl)]
+  rfl
+
+private def staleType : (bInput 0 3 (u 0)).2.heap.ty 0=some SU := rfl
+private def staleSource : Source.EMState E0 BΓ :=
+  let initial := bInput 0 3 (u 0)
+  (initial.1,{initial.2 with heap := initial.2.heap.write 0 (sourceUintMemory (old.set 0 (u 0))) staleType})
+
+/-- Skipping the binding actually writes old object0; skipping the write keeps
+fresh2. Complete stored values distinguish both from the supported execution. -/
+theorem mutation_negatives (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedAssign bDst bIndex bIndex)).run (bInput 0 3 (u 0))=
+      (.ok (.val (sourceUint (u 0))),staleSource) ∧
+    [staleSource.2.heap.get 0,staleSource.2.heap.get 1,staleSource.2.heap.get 2,staleSource.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory [u 0,u 0,maximum]⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none] ∧
+    (Source.memElem (E := E0) (Γ := BΓ) 2 0 (.int .u256)).run bMid=(.ok (sourceUint (u 2)),bMid) ∧
+    (Source.memElem (E := E0) (Γ := BΓ) 2 0 (.int .u256)).run mSource=(.ok (sourceUint (u 0)),mSource) ∧
+    (Source.memElem (E := E0) (Γ := BΓ) 0 0 (.int .u256)).run mSource=(.ok (sourceUint (u 7)),mSource) := by
+  have oldAt : SourceUintMemoryAt (bInput 0 3 (u 0)) 0 hp left .dyn := old_at 0 3
+  have bound : (u 0).1.toNat<hp.len left .dyn := by
+    simp only [Heap.len,MObj.elems_dyn]
+    decide
+  obtain ⟨ht,write⟩ := source_uint_write (bInput 0 3 (u 0)) 0 old (by rfl) 0 (by decide) (u 0)
+  have actualWrite : (Source.writeLoc (E := E0) (Γ := BΓ) frame (fuel+2) (.mem 0 0) (sourceUint (u 0))).run (bInput 0 3 (u 0))=
+      (.ok (),staleSource) := write
+  have actual := oldAt.eval_assign_of_run (G0 p) frame fuel bDst bIndex bIndex (u 0) (u 0) rfl rfl rfl bound actualWrite
+  exact ⟨actual,rfl,rfl,rfl,rfl⟩
+
+/-- A successful empty allocating/binding prefix followed by an actual write
+bounds panic retains the prefix Source.St; native write rejection is None. -/
+theorem empty_mutation_error (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    let initial := bInput 0 0 (u 0)
+    let mid : Source.EMState E0 BΓ :=
+      (initial.1.set bDst (.memRef rfl 2),{initial.2 with heap := (initial.2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})
+    let pair := hp.alloc (R := A) (⟨[],by decide⟩ : MObj H A)
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run initial=
+      (.ok (.val (.memRef rfl 2)),mid) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedAssign bDst bIndex bIndex)).run mid=
+      (.error (.revert (Source.panicData .index)),mid) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none mProgram initial.1).run (.nil,initial.2)=
+      (.error (.revert (Source.panicData .index)),(.nil,mid.2)) ∧
+    checkedSourceFreshUints (E := E0) frame 0 0 hp (by decide)=.ok (some pair.1) ∧
+    pair.1.writeAddr (.index pair.2 .dyn (u 0)) (u 0)=none ∧
+    mid.2.heap.get 2=some ⟨SU,sourceUintMemory []⟩ ∧ mid.2.heap.next=3 := by
+  dsimp only
+  let initial := bInput 0 0 (u 0)
+  let mid : Source.EMState E0 BΓ :=
+    (initial.1.set bDst (.memRef rfl 2),{initial.2 with heap := (initial.2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})
+  have binding := source_cd_uint_bind_copy initial hp (G0 p) frame (fuel+1) nps bDst bSrc 0 0 rfl (by decide) SH (bMemOK 0 0 (u 0))
+  have decodedEmpty : sourceCalldataUintValues E0 frame 0 0=.ok [] := rfl
+  rw [decodedEmpty] at binding
+  obtain ⟨valid,first,firstStatement,adapter,keep,freshRep,mok,selected,other,identity,preserved,ex,events,logs,fn⟩ := binding
+  have second : (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedAssign bDst bIndex bIndex)).run mid=
+      (.error (.revert (Source.panicData .index)),mid) :=
+    freshRep.eval_assign_bounds (G0 p) frame fuel bDst bIndex bIndex (u 0) (u 0) selected rfl rfl
+      (by simp only [Heap.len,Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,sourceUintValuePayload,List.map_nil,List.length_nil];exact Nat.le_refl _)
+  have secondStatement := source_expr_statement_error (G0 p) frame (fuel+3) nps _ mid mid _ second
+  refine ⟨first,second,source_items_pair_error (G0 p) frame fuel nps _ _ initial mid mid
+    (.revert (Source.panicData .index)) firstStatement secondStatement,adapter,?_,rfl,rfl⟩
+  simp only [Heap.writeAddr,Heap.setIndex,Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.map_nil,List.length_nil]
+  rfl
+
+private def rType : (bFinal (u 2)).2.heap.ty 2=some SU := rfl
+private def rPayload : List PrimTy.uint.Denote := [u 2,u 0,u 2]
+private def rSource : Source.EMState E0 BΓ :=
+  let initial := bFinal (u 2)
+  (initial.1,{initial.2 with heap := initial.2.heap.write 2 (sourceUintMemory rPayload) rType})
+private def rOut : Heap (H++[A]) := out.set fresh (MObj.setElem .dyn (out.get fresh) 2 (u 2))
+
+/-- Three REAL Source statements: copy/bind, read into the index scalar, then
+write through the COMPUTED reached index2, materially changing max to2. -/
+theorem read_driven_mutation_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) frame (fuel+5) (sourceUintCalldataBind bDst bSrc)).run (bInput 0 3 (u 0))=
+      (.ok (.val (.memRef rfl 2)),bMid) ∧
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintReadInto bDst bIndex bIndex)).run bMid=
+      (.ok (.val (sourceUint (u 2))),bFinal (u 2)) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedAssign bDst bIndex bIndex)).run (bFinal (u 2))=
+      (.ok (.val (sourceUint (u 2))),rSource) ∧
+    (Source.execItems (G0 p) frame (fuel+7) nps none
+      (.stmt (.expr (sourceUintCalldataBind bDst bSrc))
+        (.stmt (.expr (sourceUintReadInto bDst bIndex bIndex))
+          (.stmt (.expr (sourceUintIndexedAssign bDst bIndex bIndex)) .nil)) : Source.RItems E0 [] false .body BΓ BΓ)
+      (bInput 0 3 (u 0)).1).run (.nil,(bInput 0 3 (u 0)).2)=(.ok (.normal rSource.1),(.nil,rSource.2)) ∧
+    out.writeAddr (.index fresh .dyn (u 2)) (u 2)=some rOut ∧
+    SourceUintMemoryAt rSource 2 rOut fresh .dyn ∧ Source.MemOK E0 SH rSource ∧
+    Heap.Keeps (List.prefix_append H [A]) hp rOut := by
+  obtain ⟨first,_,second,_,adapter,oldKeep,before,mokBefore,_,_,_,_⟩ := bound_read_program p (fuel+1) nps
+  have nativeBound : (u 2).1.toNat<(MObj.elems .dyn (out.get fresh)).length := by
+    unfold out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.length_map]
+    decide
+  have expectedNative : out.writeAddr (.index fresh .dyn (u 2)) (u 2)=some rOut := by
+    simp only [Heap.writeAddr,Heap.setIndex,nativeBound,↓reduceIte]
+    rfl
+  obtain ⟨native,zs,hw,hs,new,mok,values,frames,sourceFrames,locals,ex,events,logs,fn⟩ :=
+    before.write_observed frame (fuel+2) (u 2) (u 2) nativeBound SH mokBefore
+  have equalNative : native=rOut := Option.some.inj (hw.symm.trans expectedNative)
+  subst native
+  obtain ⟨ht,write⟩ := source_uint_write (bFinal (u 2)) 2 payload (by rfl) 2 (by decide) (u 2)
+  have actualWrite : (Source.writeLoc (E := E0) (Γ := BΓ) frame (fuel+2) (.mem 2 2) (sourceUint (u 2))).run (bFinal (u 2))=
+      (.ok (),rSource) := write
+  have equalSource : zs=rSource := congrArg Prod.snd (hs.symm.trans actualWrite)
+  subst zs
+  have third := before.eval_assign_of_run (G0 p) frame fuel bDst bIndex bIndex (u 2) (u 2) rfl rfl rfl nativeBound actualWrite
+  have firstStatement := source_expr_statement_run (G0 p) frame (fuel+5) nps _ (bInput 0 3 (u 0)) bMid _ first
+  have secondStatement := source_expr_statement_run (G0 p) frame (fuel+4) nps _ bMid (bFinal (u 2)) _ second
+  have thirdStatement := source_expr_statement_run (G0 p) frame (fuel+3) nps _ (bFinal (u 2)) rSource _ third
+  have tail := source_items_pair_run (G0 p) frame fuel nps _ _ bMid (bFinal (u 2)) rSource secondStatement thirdStatement
+  have program := source_items_cons_run (G0 p) frame (fuel+6) nps _ _ (bInput 0 3 (u 0)) bMid rSource firstStatement tail
+  have keep : Heap.Keeps (List.prefix_append H [A]) hp rOut := by
+    intro Q q
+    have different : fresh.id≠(q.wk (List.prefix_append H [A])).id := Ne.symm (Nat.ne_of_lt q.id_lt)
+    exact (frames Q (q.wk (List.prefix_append H [A])) different).trans (oldKeep q)
+  exact ⟨first,second,third,program,expectedNative,new,mok,keep⟩
+
+/-- Complete final observations of the data-dependent write, preserving the
+old aliases/neighbor and scalar2 while the fresh LAST element changes. -/
+theorem read_driven_vectors :
+    rSource.1=(bFinal (u 2)).1 ∧
+    [rSource.2.heap.get 0,rSource.2.heap.get 1,rSource.2.heap.get 2,rSource.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory rPayload⟩,none] ∧
+    [MObj.elems .dyn (rOut.get (left.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (rOut.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (rOut.get fresh)]=
+      [old,neighbor,rPayload] ∧
+    rSource.2.heap.next=3 ∧ rSource.2.ex=(bInput 0 3 (u 0)).2.ex ∧
+    rSource.2.events=(bInput 0 3 (u 0)).2.events ∧ rSource.2.logs=(bInput 0 3 (u 0)).2.logs ∧
+    rSource.2.fnLocals=(bInput 0 3 (u 0)).2.fnLocals := by
+  refine ⟨rfl,rfl,?_,rfl,rfl,rfl,rfl,rfl⟩
+  obtain ⟨_,_,_,_,hw,_,_,keep⟩ := read_driven_mutation_program .legacy 0 0
+  have original : MObj.elems .dyn (out.get fresh)=payload := by
+    unfold out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+    exact List.map_id'' (fun _ => rfl) _
+  rw [keep left,keep right,MObj.elems_wk,MObj.elems_wk,
+    indexedWrite_elems out rOut fresh .dyn (u 2) (u 2) hw,original]
+  simp only [MObj.elems_dyn,List.map_id'' (f := MVal.wk (List.prefix_append H [A]) (.prim .uint)) (fun _ => rfl)]
+  rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.bound_mutation_program' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bound_mutation_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mutation_vectors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms mutation_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mutation_negatives' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms mutation_negatives
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.empty_mutation_error' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms empty_mutation_error
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.read_driven_mutation_program' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms read_driven_mutation_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.read_driven_vectors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms read_driven_vectors
 end Solidity.Backend.MemoryOps.UintCopyControls
