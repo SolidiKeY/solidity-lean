@@ -1952,6 +1952,8 @@ import Solidity.Backend.Transient.CallbackObservation
 import Solidity.Backend.Transient.CallbackObservationControls
 import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.Premises
+import Solidity.Backend.MemoryCopies.InterfaceV2
+import Solidity.Backend.MemoryCopies.InterfaceV2Laws
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.Premises
 import Solidity.Backend.AbiWorld.CallerWordBytes

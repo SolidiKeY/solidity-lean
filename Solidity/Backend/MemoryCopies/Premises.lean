@@ -27,4 +27,30 @@ structure LocationStepPremise (code : List Evm.Instr)
     (before after : Evm.Machine) : Prop where
   execution : Evm.run code before = .ok after 0
 
+/-- G34 resolved-path/rebinding boundary at existing intrinsic types. Unlike
+AliasPremise, this fixes the actual path evaluator and rebind operation. It is
+a local success premise, not the missing physical path/compiler certificate. -/
+structure AliasPathPremise {C : Contract} {Γ : Ctx} {R : RefTy}
+    (before : State C Γ) (path : MPath C Γ (.ref R))
+    (destination : Idx Γ (.mem R)) (reference : HRef before.H R) : Prop where
+  resolution : path.mvalT before = .ok reference
+  rebinding : TRun.rebindMem destination (.alias path) before =
+    .ok ⟨before.setLocal destination (some reference), List.prefix_refl _⟩
+
+/-- Concrete existing Source newArray length-panic boundary. Length evaluation
+and conversion are explicit at the reached state; their side effects are not
+rolled back. This covers the published 2^64 branch only. S03-PANIC41's missing
+finalize-allocation/cursor-overflow semantics is NOT supplied by this record. -/
+structure NewArrayLengthPanicPremise {E : Source.Env} {Γ : Source.RCtx}
+    {τ σ : Source.STy} (global : Source.Glob E) (frame : Source.Fr)
+    (fuel : Nat) (newable : τ.newable = true) (length : Source.RExpr E Γ σ)
+    (index : σ.isIndex = true) (value : Source.RVal E.layout σ) (count : Nat)
+    (before reached : Source.EMState E Γ) : Prop where
+  evaluation : (Source.evalE global frame fuel length).run before = (.ok value, reached)
+  conversion : (Source.indexNat (E := E) (Γ := Γ) value).run reached = (.ok count, reached)
+  oversized : 2 ^ 64 ≤ count
+  failure : (Source.evalE global frame (fuel + 1)
+    (Source.RExpr.newArray (τ := τ) newable length index)).run before =
+      (Source.panic .alloc, reached)
+
 end Solidity.Backend.MemoryCopies
