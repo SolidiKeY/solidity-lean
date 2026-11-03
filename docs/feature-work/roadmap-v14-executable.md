@@ -57,3 +57,36 @@ Eval-dependent G18.04/.05 modules remain on preserved helper bb5c88a8, awaiting
 VY5 under H16. The five-file request and dependent inventory are sealed at
 `/workspace/v14-master-rebase-artifacts/vy5-eval-request/`; its CalldataLayout
 prerequisite is explicit. This checkpoint changes no Source implementation.
+
+## Inherited constructor binding consumer
+
+`ConstructorBaseArguments` adds actual `Source.giveArgs` transport over arbitrary
+constructor-local indices. `evaluated` derives the pure local argument run from
+initial reads and existing identity-conversion judgments. `bound` then derives
+the appended base frame, real `Vals.onto` reversal and unchanged complete state.
+Its other premises are actual program metadata (base parameter context) and
+absence from the accumulated frames, not a desired execution or simulation.
+`lookup_appended` derives the frame subsequently read by `ctorLocalsOf`.
+`already_given` proves the existing priority branch skips arbitrary argument
+execution, independently of argument effects or budget.
+
+`ConstructorBaseArgumentControls` uses real Base/Derived declarations and
+constructor contexts computed from those declarations. Its Program, empty bodies
+and baseArgs are manually supplied typed fixtures: this is not a proof of
+elaboration, Program.Derived, WellTyped or admitted SourceSpec provenance.
+The native controls exercise actual giveArgs, lookup and empty-body construct
+in both pipelines, populated old heap/aliases, zero-budget timeout, already-given
+priority and exact rejection of deliberately uncertified arity metadata.
+That structural `.stuck` refusal is not presented as an admitted-program halt.
+
+Six additional scoped guards require only standard axioms. Per-file/focused
+Source checks and automation attempts are recorded with raw failures. Prior
+full/import-closure timeout remains unresolved; no unchanged failed heavy gate
+is repeated or relabelled passed. No EVM/compiler/World installation claim follows.
+
+On 2026-11-03 the coordinator moved G45.01/.02/.06 to
+solidity-parallel-20261103/executable-bytecode (`Backend/Selection/**`). Original
+partials remain at 22a1b53ecd0d50272d26e2758bafaead52bf247d for relay; no new G45
+implementation was added here. G43/P14, G44.01-.03, G18.04/.05, S02-CD-AGG and
+G36.03 remain with V14. Earlier G45 completion obligations are integration
+obligations against that producer, not authorization to duplicate its work.

@@ -295,3 +295,17 @@ No unproved Lean declarations or axioms are introduced by this list.
 Hard work retained by V14: general n-ary/effectful argument lowering, constructor
 selection/body/inheritance binding, source/frame/world and failure correspondence,
 G43 and final executable closure. No P8a coverage or P1 profile provenance inferred.
+
+## Inherited argument routines (H14)
+
+- ConstructorBaseArguments.old_acc_prefix: after bound, the original CtorLocals
+  list is a prefix of the returned accumulator; routine List.prefix_append.
+- ConstructorBaseArguments.new_frame_keys: project the two appended/retrieved
+  integer keys in constructor-frame order; routine bound/lookup projections.
+- ConstructorBaseArguments.fresh_zero_timeout: for any RBaseArg and absent base,
+  giveArgs at zero returns exact timeout with original state; routine reduction
+  of the existing evaluator. Keep priority for an already-given base separate.
+
+Hard work remains with V14: general effectful/n-ary argument transport, actual
+constructor/body/initializer lowering and admitted Program provenance; the
+current manually supplied fixture is not an elaborator certificate.
