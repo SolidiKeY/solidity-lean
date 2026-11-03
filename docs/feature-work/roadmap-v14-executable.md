@@ -231,3 +231,29 @@ attempt was deliberately stopped (137) after staging treated the module-map
 helper's expected missing-row exit1 as a command error; that raw exit is retained.
 
 H21/H22 integration candidate: `38e5831c43f2a490228051611b6f703129b176a1` on published `603eef898f3a4a058a59e8fa7331b77f8cf6ec05`, in `/workspace/v14-constructor-master`. The held Source extension stays on this helper branch; its complete branch is not rebased or validated against H22. Consume the isolated candidate bundle for the published-base integration.
+
+## Published 059eb83d adoption and ready argument-frame consumer
+
+The isolated candidate adopts published `059eb83d4e1d494f42c532513ffbcd3e65adaf75`.
+Its V14 integration imports only `ConstructorLocalArguments` and
+`ConstructorArgumentObservations`; the other owned modules remain separate.
+The rebase retains those published modules and all other owners' map entries,
+and roots are regenerated. H24's `DeclarationGraphAdmission.Producer` is a
+companion premise structure, not a concrete admission inhabitant.
+
+The new `InternalFlow.RuntimeFrame.ArgumentEntry.endpoint` enables a ready
+constructor-argument declaration consumer. A draft selects new scalar1 and old
+scalar9 from the producer's populated caller frame. Completion must derive the
+actual `Calls.compile` certificate, argument evaluation, room and capacity,
+then consume the real reached `StateRepr`, retaining caller heap and stack.
+Source numeric argument agreement remains separate from full physical-frame
+correspondence. No new G45 selector, semantics or P8 inhabitant is proposed.
+
+The unchanged180s dependency check expires before the draft per-file check.
+No source-level error or proof success is inferred; its raw exit124 is retained.
+The definition draft is preserved outside the registered tree in the adoption
+packet, not committed as validated Lean. Resume requires a demonstrated build
+repair or the announced source-keyed master cache transfer, within the existing
+caps. The held Source helper and all previous seals remain preserved.
+
+Published-adoption candidate: `bc61895c17820f9a887042fe3637056428897db0` on `059eb83d4e1d494f42c532513ffbcd3e65adaf75`. Held Source work stays on this helper; no combined-helper or new argument-frame proof pass is claimed.

@@ -331,3 +331,19 @@ provenance, source/body compilation and G43 remain substantive V14 work.
 
 G44.02/.03 and balance-independent G43/P14 remain next substantive work. H19
 balance representation facts must stay explicit typed producer premises.
+
+## Published ArgumentEntry consumer (pending bounded dependency validation)
+
+Draft: `/workspace/v14-master-rebase-artifacts/published-059eb83d-adoption/draft/ConstructorFrameSelection.lean`.
+Intended owned module: `Solidity/Backend/Executable/ConstructorFrameSelection.lean`.
+Do not treat these statements as assumptions or completed theorems. Import closure
+currently times out under unchanged180s; wait for verified source-keyed cache or
+an independently demonstrated repair before checking. No proof-budget increase.
+
+- `arguments`: `args.evalT caller = .ok (PrimTy.ofLit .uint 9 rfl, (PrimTy.ofLit .uint 1 rfl, ()))`. Routine local reads from the existing reached caller; keeps actual innermost parameter order.
+- `selection`: `(Calls.compile 1 F program).isSome = true`. Routine actual compiler reduction; no hypothetical Program certificate.
+- `cost_zero`: after deriving `checked` from selection, `checked.cost caller = 0`. Derive nonallocation and use existing zeroCost law.
+- `room`: `1 + checked.need ≤ 16`. Derive real selected need; do not assume available capacity.
+
+Sol retains source/native constructor composition, physical endpoint consumption,
+full caller/heap/stack observations and negative controls. These remain OPEN.
