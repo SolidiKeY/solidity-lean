@@ -126,7 +126,8 @@ The required implementation/proof footprint is:
   proofs: re-establish horizon approximation/event-prefix monotonicity at fixed
   plan, stable frame/event indexing across horizons and exact halt/state/rollback
   behavior at cuts. No larger fuel or proof budgets are proposed.
-- `Source/Funds.lean`/`FundsControls.lean` and affected progress/preservation
+- Deferred funds-validity modules (retained on the pre-isolation helper
+  branch, not present in this checkpoint) and affected progress/preservation
   consumers: retain actual validity/refusal distinctions and recheck imports
   against the extended execution parameter.
 - P8 `FailureProjection`/`SourceRealization`: construct actual failure projection,
