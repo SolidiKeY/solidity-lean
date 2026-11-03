@@ -56,9 +56,9 @@ none adds an AST, evaluator, decoder or admission rule.
   reads with fresh allocation, signature encoding with alias preservation,
   selector-local expression execution, rethrow of allocated ABI payloads.
 
-Not on master: `LiteralFailureBytesReadback{,Controls}` (they import
-`Solidity.Backend.AbiWorld.ErrorRoundtrip`, which does not exist). No runtime
-target encoder, source/target simulation or admission theorem is claimed.
+`LiteralFailureBytesReadback{,Controls}` consume the published
+`Solidity.Backend.AbiWorld.ErrorRoundtrip` readback facts. No runtime target
+encoder, source/target simulation or admission theorem is claimed.
 
 
 ### Tuple-return argument failure
