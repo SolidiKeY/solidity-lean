@@ -52,3 +52,5 @@
 - Yul/LocalBoolUnchecked.lean and Yul/Checks/LocalBoolUnchecked.lean: unchecked/ordinary Boolean item scope composition and concrete Source laws.
 
 - Yul/LocalDefaultBinding.lean and Yul/Checks/LocalDefaultBinding.lean: constant-default declarations followed by certified local item bodies.
+
+- Yul/LocalDefaultItems.lean and Yul/Checks/LocalDefaultItems.lean: certified heterogeneous constant-default declaration sequences and concrete Source item composition.

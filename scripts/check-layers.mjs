@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalDefaultItems|Checks\.LocalDefaultItems)$/, // Typed constant-default declaration sequences.
   /^Solidity\.Yul\.(LocalDefaultBinding|Checks\.LocalDefaultBinding)$/, // Actual constant-default declaration/body composition.
   /^Solidity\.Yul\.(LocalBoolUnchecked|Checks\.LocalBoolUnchecked)$/, // Concrete unchecked and ordinary scope composition.
   /^Solidity\.Yul\.(LocalBoolForNoGuard|Checks\.LocalBoolForNoGuard)$/, // Exact omitted-guard transport and concrete adapters.

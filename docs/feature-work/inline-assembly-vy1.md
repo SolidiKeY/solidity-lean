@@ -756,3 +756,20 @@ adequacy and final lane gates remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Heterogeneous constant-default sequences
+
+LocalDefaultItems certifies arbitrary finite sequences of actual constant-default
+declarations before a supported Boolean item body. Contexts, declared types and
+the original Source item syntax index every certificate. Execution preserves raw
+surviving locals and reached-context failures; no cleanup or allocation choice is
+introduced. The all-fuel clean-input theorem composes concrete Source declaration
+and body proofs rather than requiring a supplied simulation law.
+A uint8/uint256 sequence checks shifted enclosing writes, multiple partial
+contexts, preserved dirty sibling bits and refusal of clean projection. Independent
+Source controls distinguish timeout from successful execution. General enclosing
+scope closure for this sequence family, broader P16 and final lane gates remain
+open. Existing single-default block closure remains available.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.
