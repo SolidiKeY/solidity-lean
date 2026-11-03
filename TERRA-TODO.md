@@ -74,3 +74,20 @@ checked and registered clients: `cold_distinct_client`, `warm_distinct_client`,
 proof bodies were accepted unchanged after the published-base rebase. This
 routine continuation is complete; do not duplicate it. The original delegated
 environment packet remains unchanged and pending.
+
+## Invocation control continuation (source-only)
+
+The three charged fetched producers in `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean`
+are checked. Seven routine control bodies in the sibling `InvocationEnvironmentControls.lean`
+are proposals only: corrected record layout has not passed the guarded kernel check.
+Do not treat them as proved or register them before actual passing diagnostics.
+
+| Module | Lemmas | Why routine |
+|---|---|---|
+| `SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls` | `address_client`, `caller_client`, `callvalue_client` | Instantiate checked producers in independent full expected records. |
+| same module | `legal_capacity`, `resource_order` | Existing finite native checks at legal stack boundaries, exact gas and fuel. |
+| same module | `distinct_identities`, `complete_ordered_observation` | Concrete nonzero identity/order distinctions and complete populated observations. |
+
+Keep every statement and expected value; do not weaken resource or identity distinctions.
+Monitor refusal is not a passing Lean check. The earlier EnvironmentObservationBatch
+packet remains independent and pending; these proposals do not replace it.

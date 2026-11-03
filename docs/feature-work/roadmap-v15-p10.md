@@ -3,9 +3,10 @@
 Partial checkpoint of roadmap item V15 (EVM agreement), producer P10: single
 fetched EVM steps over Backend-emitted code, checked against the pinned
 EvmYul reference (`Bridge/vendor/EvmYul`). All modules live in
-`Bridge/SolidityBridge/RoadmapV15/P10/`; nothing in the core changed. Every
-theorem is proved; there is no `sorry`, no new axiom, and the printed axiom
-sets are subsets of `propext`, `Classical.choice`, `Quot.sound`.
+`Bridge/SolidityBridge/RoadmapV15/P10/`; nothing in the core changed. Checked registered producer theorems have no `sorry` or new axiom; their
+printed axiom sets are subsets of `propext`, `Classical.choice`, `Quot.sound`.
+Source-only control proposals, where explicitly identified below, remain
+unverified and are not registered.
 
 ## Sites
 
@@ -1251,3 +1252,27 @@ count 48 with cleared return data. Missing byte-zero membership remains a
 separate JUMP refusal test. Both corrected controls were kernel checked; the
 reviews found no remaining source defect. These controls establish distinctions
 between the particular native executions and do not close source correspondence.
+
+## Invocation environment observations
+
+[InvocationEnvironment.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean)
+proves charged fetched ADDRESS, CALLER and CALLVALUE at arbitrary Backend sites,
+with gas at least 2, one available stack slot and explicit fuel. It derives the
+actual emitted decoder result, ordered driver checks and step, preserving the
+whole native State and proving the `X` continuation. ADDRESS reads code owner;
+CALLER reads execution source, whereas ORIGIN reads the transaction sender.
+CALLVALUE reads the exact native value word, under either permission flag.
+These are reference-driver laws, not source-frame origin, CALL/world or Osaka
+correspondence. The existing raw environment adapter remains unchanged.
+
+[InvocationEnvironmentControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean)
+is a **source-only proposal**, not a checked or registered module. Its seven
+proposed controls use distinct owner/caller/origin identities, value 37, a full
+independent expected State, populated ordered observations, legal capacity and
+gas/fuel/overflow ordering. The initial record-layout errors were corrected,
+but the subsequent guarded check stopped on an unobservable Lean argv before
+validation completed. No control theorem or full import gate is counted passed.
+Independent read-only finder and skeptic reviews found no producer defect and
+confirmed this checked-versus-proposed boundary; execution validation remains
+required. All full opcode and source/transaction composition obligations stay
+open. The previously delegated universal environment-fact packet is separate.
