@@ -177,3 +177,34 @@ transitive paths from enumerated core modules to these adapters and to
 Frontend.Checked.Check or Frontend.Checked.Parser. The existing lexer and pure
 structural precedence predicate remain reusable prerequisites. Dedicated legacy
 Yul parser modules are compatibility imports outside the core.
+
+## P5. Build and integration throughput
+
+Changes to how the package is built, registered and relayed to the lanes
+(decision H21, 2026-11-03), each measured before and after.  Host times are
+wall clock on 32 cores with Lake's artifact cache warm; "rebuilt" counts
+Lake's `Built` lines.  A probe edit appends `theorem h21Probe… : True :=
+trivial` to `Calculus/Close.lean` (it and its dependents: 414 modules, 205
+of them examples, 49 TestSuite modules and its root), a different name each time so that nothing
+comes from the cache.
+
+### One Lake invocation
+
+`run-lean.sh` builds the default targets (read from `lakefile.toml`'s
+`defaultTargets`) and `SolkeyTestSuite` in one `lake build`, so the
+TestSuite's chain (the memory-loop `Discover` modules, `Derived17`, `Report`)
+runs beside the default build's tail instead of after it.  The targets are
+the union of the two former calls; the exit is Lake's, under `set -e`, as
+before (a failure in either set fails the script, and Lake now also reports
+the other set's failures in the same run).  Lake's job limit and
+`LEAN_NUM_THREADS` apply as before.  The work is the same, so a VM building
+with one or few workers gains little; not measured there.
+
+| Probe edit | Rebuilt | Lake wall |
+|---|---|---|
+| two calls (before) | 364 + 50 | 606.7 + 249.4 = 856.1 s |
+| one call (after) | 414 (the same modules) | 697.6 s (−158.5 s, −18.5 %) |
+
+The one-call run shared the host with another session's Lake build (two
+other Lean/Lake processes at its start; the two-call run had none), so the
+gain is if anything understated.

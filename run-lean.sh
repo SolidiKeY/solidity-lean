@@ -21,11 +21,15 @@ export PATH="$HOME/.elan/bin:$repo_root/scripts/lean-vscode/bin:$PATH"
 
 # The core reaches no elaborator module (`docs/parallelism.md`): no Lean.
 node scripts/check-layers.mjs
-lake build
-# solkey's TestSuite through the solc import: not a default target, and the
-# import reports a function that stops elaborating as a row, so only its
-# pinned report (`#guard_msgs` in Solidity/Solkey/TestSuite.lean) catches it.
-lake build SolkeyTestSuite
+# One Lake invocation: the default targets (read from `lakefile.toml`) and
+# solkey's TestSuite through the solc import. The TestSuite is not a default
+# target, and the import reports a function that stops elaborating as a row,
+# so only its pinned report (`#guard_msgs` in Solidity/Solkey/TestSuite.lean)
+# catches it. One call lets its chain overlap the default build's tail
+# instead of starting after it (`docs/parallelism.md`, P5).
+mapfile -t default_targets < <(sed -n 's/^defaultTargets[[:space:]]*=[[:space:]]*\[\(.*\)\][[:space:]]*\(#.*\)\{0,1\}$/\1/p' lakefile.toml | tr ',' '\n' | tr -d " \t\"'" | grep -v '^$' || true)
+[[ ${#default_targets[@]} -gt 0 ]] || { echo "run-lean: no defaultTargets in lakefile.toml" >&2; exit 2; }
+lake build "${default_targets[@]}" SolkeyTestSuite
 if [[ "$with_bridge" -eq 1 ]]; then
   ./scripts/check-bridge.sh
 fi
