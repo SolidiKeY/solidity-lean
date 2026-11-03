@@ -2947,6 +2947,9 @@ import Solidity.Yul.Views.InventoryReplayControls
 import Solidity.Yul.Views.InventoryRetainedControls
 import Solidity.Yul.Views.InventorySequential
 import Solidity.Yul.Views.InventorySnapshot
+import Solidity.Yul.Views.InventorySnapshotCursor
+import Solidity.Yul.Views.InventorySnapshotHistory
+import Solidity.Yul.Views.InventorySnapshotHistoryControls
 import Solidity.Yul.Views.InventorySourceReads
 import Solidity.Yul.Views.InventoryTraversal
 import Solidity.Yul.Views.InventoryUnchanged

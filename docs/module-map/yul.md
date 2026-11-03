@@ -67,4 +67,6 @@
 | `Yul/Views/NominalInventoryTransport`, `Yul/Views/NominalInventoryReplay{,Controls}` | Actual source-prefix decoder refresh and whole-poststate replay for permutations of nominal output inventories. |
 | `Yul/Views/NominalInventoryDynamic{,Controls}` | Exact retained-array/inventory result compatibility, shrink-to-zero/regrowth, original-capacity and constructed output-view controls. |
 | `Yul/Views/InventoryTraversal` | Shared typed decode/write/placement/history step with finite inventory traversal. |
+| `Yul/Views/InventorySnapshotCursor` | Actual Source-state-indexed physical step, exact Source projection, owner safety and complete raw reencoding. |
+| `Yul/Views/InventorySnapshotHistory{,Controls}` | Changing supplied snapshots with refreshed retained ownership, exact successful prefixes, pending suffix/resumption and final-map reconstruction. |
 | `Yul/Views/NominalInventorySequential{,Controls}` | Exact nominal snapshot/sequential Source-result agreement with refreshed candidates, duplicates and capacity controls. |

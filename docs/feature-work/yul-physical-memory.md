@@ -243,6 +243,26 @@ The initial mistaken length-4 negative expectation is retained in raw evidence.
 Legacy frozen behavior and exact cons-equation checks pass; the existing mixed
 control check measured 22 seconds before and 21 after in the same serial runtime.
 
-Executable sequential re-preparation across changing snapshots, broader mixed
-and nested dynamic history, dirty-word transport, universal ownership,
-allocator reachability and compiler adequacy remain open.
+`InventorySnapshotCursor` pairs physical evidence with the actual Source state.
+Each successful step executes `runInventoryUpdates`, derives its new placement,
+images and original retained history from `realizeInventory_run`, and projects
+exactly to the existing writeback API. Completeness is a preserved initial
+coverage property, not a cursor field. Every initial owner typing, heap types/next,
+entry IDs, placement/free choice and whole administrative state are preserved.
+Each successful snapshot reconstructs its entire supplied byte map, including
+residual bytes. This does not claim that selected entries cover missing objects.
+
+`InventorySnapshotHistory.runSnapshots` processes arbitrary finite changing input
+snapshots. Unsupported preparation stops before executing any write from that
+snapshot and returns the exact prior Source state/cursor and unexecuted suffix.
+Append/resume and suffix laws preserve chronology; completion of a nonempty input
+list reconstructs the last raw map. Controls include retained zero/regrowth,
+negative values, both aliases, mixed nominal/bytes roots, partial-snapshot and
+suffix-execution discriminators, duplicate visits, original-capacity loss and
+nonzero tails. Safety for the inhabited fixture is proved for every input list;
+factoring avoids concrete byte-function normalization under unchanged limits.
+
+These are supplied-snapshot transport laws. Generation of successive physical
+maps by execution, arbitrary frame/call/rollback adequacy, broader mixed and
+nested dynamic history, dirty-word transport, universal ownership, allocator
+reachability and compiler adequacy remain open.
