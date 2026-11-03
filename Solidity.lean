@@ -3265,6 +3265,8 @@ import Solidity.Yul.World.ReturnSizeChecks
 import Solidity.Yul.World.ReturndataBuiltin
 import Solidity.Yul.World.ReturndataBuiltinControls
 import Solidity.Yul.World.SelfDestruct
+import Solidity.Yul.World.SelfDestructBuiltin
+import Solidity.Yul.World.SelfDestructBuiltinControls
 import Solidity.Yul.World.SelfDestructControls
 import Solidity.Yul.World.TargetCallControls
 import Solidity.Yul.World.TargetCallMemory
