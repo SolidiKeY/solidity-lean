@@ -19,3 +19,13 @@ Keep the proved producer modules unchanged. Add routine consequences in a NEW `S
 - `copy_self`: `∀ (c : Sample) (key : Bool), Evm.run (StorageOps.TargetOperations.copyCode (slot (K := .bool) base key) (slot (K := .bool) base key)) (beforeTarget c) = .ok (beforeTarget c) 0`. Apply published `run_copy_self`. Do NOT infer raw Source-cell identity: writing an implicit default may change cell presence.
 
 All three remain unproved/not assumed by the current copy certificate. Their Source/target profile and physical-hash boundaries remain unchanged.
+
+## Source mapping phase consequences
+
+Add routine glue only in NEW `Solidity.Backend.Aggregates.G18SourceMappingCorollaries`, importing G18SourceMappingControls. Namespace ScalarMapping.SourceMachine.Controls. These statements remain unproved and unused by the producer.
+
+- `sequence` for each actual `c : ScalarMapping.Controls.Sample`: the existing Source EM computation `do let v ← Source.readAt frame (ScalarMapping.Controls.path true) (.int c.ty); Source.writeAt frame (ScalarMapping.Controls.path false) v; pure v`, run at `(locals c,state c)`, equals `(.ok (.int c.a c.ha),(locals c,afterState c))`. Routine: published Hoare.run_bind and the two actual results of certificate. This is a client of existing helpers, not a new execution semantics or an elaborated assignment theorem.
+- `account_frame`: afterState retains the selected account's balance, nonce and code and every other account. Routine published ExecState.apply/World.set_get/set_other; keep actual address inequality. No physical Source-target frame inference.
+- `zero_horizon` for actual `c` and `G : Source.Glob (E c)`: instantiate existing ScalarMapping.Controls.zero_horizon at `[.bool]`, frame, `(locals c,state c)`. No claim that a Glob or SourceSpec instance is inhabited, no timeout-to-divergence conversion.
+
+Try shared automation first. No Source edits, profile assumptions, budget increases, new axioms or sorry stubs.
