@@ -1240,3 +1240,7 @@ The corrected source has no passing kernel check: a fail-closed process monitor
 could not verify a transient Lean argv. No runtime restoration, control pass or
 full import closure is inferred. The delegated universal environment-fact packet
 is separate. All full opcode and parent composition obligations remain open.
+
+A read-only metadata review found an unqualified “checked” label in the new
+module-map row. It now explicitly separates the pre-H7 check from pending
+validation on the published H7 baseline, matching the boundaries above.
