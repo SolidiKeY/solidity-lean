@@ -2107,6 +2107,7 @@ import Solidity.Source.Preservation.MemberPacking
 import Solidity.Source.Preservation.MemoryBodies
 import Solidity.Source.Preservation.MemoryBodyCalls
 import Solidity.Source.Preservation.MemoryBodyControls
+import Solidity.Source.Preservation.MemoryBranchControls
 import Solidity.Source.Preservation.MemoryExpressions
 import Solidity.Source.Preservation.NewArrayFragment
 import Solidity.Source.Preservation.NewArrayFragmentControls

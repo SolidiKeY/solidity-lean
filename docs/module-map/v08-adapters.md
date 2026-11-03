@@ -357,3 +357,18 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard proved redundant (`accept_eq_upstream`); composed independent ProgramSite soundness, not full feature/profile adequacy. |
 
 See [P8 admission](../feature-work/p8-admission.md).
+| `Source/Preservation/AllocatingControls.lean` | Inhabited memory-expression and exact-argument witnesses in both source pipelines. |
+| `Source/Preservation/AllocatingFragment.lean` | An additive memory-expression admission over intrinsic resolved syntax. |
+| `Source/Preservation/MemoryBodies.lean` | An additive memory-body certificate and joint statement/sequence Hoare proof. |
+| `Source/Preservation/MemoryBodyCalls.lean` | Actual modifier-free internal calls with syntactically admitted memory bodies. |
+| `Source/Preservation/MemoryBodyControls.lean` | An inhabited intrinsic memory-call body: mutate through alias a, rebind a to a fresh allocation, and return alias b. |
+| `Source/Preservation/MemoryBranchControls.lean` | Conditional memory statements over inhabited runtime inputs. |
+| `Source/Preservation/MemoryExpressions.lean` | Memory body expressions over the existing intrinsic source syntax. |
+| `Source/Preservation/NewArrayFragment.lean` | Dynamic-new consumer of published allocation preservation. |
+| `Source/Preservation/NewArrayFragmentControls.lean` | Computed local length with a live caller reference: two plus two allocates four elements; oversized lengths and low horizons keep their halts. |
+| `Source/Preservation/ReferenceArguments.lean` | Exact-type arguments may be reference locals or allocating expressions. |
+| `Source/Preservation/ReferenceReturnControls.lean` | An actual intrinsic return-only call with a memory parameter and two reference results. |
+| `Source/Preservation/ReferenceReturns.lean` | Reference-return consumers of actual sub/body/call frames. |
+| `Source/Progress/EffectBodies.lean` | Callee-body sequences containing the proved builtin and emit statements. |
+| `Source/Progress/EffectCatalogue.lean` | A finite declaration-order certificate for nonrecursive effect bodies. |
+| `Source/Progress/EffectCatalogueControls.lean` | Actual elaborated source functions with an emit in the leaf, a require that calls the leaf, and an assert-failing callee. |

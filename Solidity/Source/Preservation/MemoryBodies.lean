@@ -17,6 +17,12 @@ inductive MemoryStmt {E : Env} (A : Decl → Prop) (R : List STy) (M : Bool) :
   | declInit {k Γ τ} {e : RExpr E Γ τ} (h : τ.implicit E.isBase τ = true) :
       BodyExpr A e → MemoryStmt A R M (.declInit (k := k) e h)
   | returns {k Γ} {args : RConvArgs E Γ R} : ExactArgs A args → MemoryStmt A R M (.retTuple (k := k) args)
+  | ifThen {k Γ Δ} {cond : RExpr E Γ .bool} {t : RStmt E R M k Γ Δ} :
+      BodyExpr A cond → MemoryStmt A R M t → MemoryStmt A R M (.ifThen cond t)
+  | ifElse {k Γ Δ Ξ} {cond : RExpr E Γ .bool}
+      {t : RStmt E R M k Γ Δ} {f : RStmt E R M k Γ Ξ} :
+      BodyExpr A cond → MemoryStmt A R M t → MemoryStmt A R M f →
+      MemoryStmt A R M (.ifElse cond t f)
   | block {k Γ Δ} {b : RItems E R M k Γ Δ} : MemoryItems A R M b → MemoryStmt A R M (.block b)
 inductive MemoryItems {E : Env} (A : Decl → Prop) (R : List STy) (M : Bool) :
     {k : SCtx} → {Γ Δ : RCtx} → RItems E R M k Γ Δ → Prop
@@ -75,6 +81,26 @@ theorem memory_stmt_step {A : Decl → Prop} {G : Glob E} {c : String} {n : Nat}
       (fun _ h => h) (fun o y h => ?_) (fun _ _ h => h)
     rcases h.2 with ⟨last,rfl,valid⟩
     exact ⟨h.1,valid⟩
+  | ifThen condition branch =>
+    rw [execS]
+    have hm : MemPres (evalE G F n _) := fun H' =>
+      Hoare.conseq (eval_body_expr_mem calls F hc n _ condition H')
+        (fun _ h => h) (fun _ _ h => h.1) (fun _ _ h => h)
+    refine Hoare.bind (sub_mem_locals l _ hm) (fun p => ?_)
+    refine Hoare.bind (getV_frame_mem p.2 p.1 H) (fun x => ?_)
+    split
+    · exact Hoare.bind (ih.stmt F hc nps ph _ branch p.2 H) (fun o => close_mem o H)
+    · exact Hoare.pure' (fun _ h => h)
+  | ifElse condition yes no =>
+    rw [execS]
+    have hm : MemPres (evalE G F n _) := fun H' =>
+      Hoare.conseq (eval_body_expr_mem calls F hc n _ condition H')
+        (fun _ h => h) (fun _ _ h => h.1) (fun _ _ h => h)
+    refine Hoare.bind (sub_mem_locals l _ hm) (fun p => ?_)
+    refine Hoare.bind (getV_frame_mem p.2 p.1 H) (fun x => ?_)
+    split
+    · exact Hoare.bind (ih.stmt F hc nps ph _ yes p.2 H) (fun o => close_mem o H)
+    · exact Hoare.bind (ih.stmt F hc nps ph _ no p.2 H) (fun o => close_mem o H)
   | block h =>
     rw [execS]
     exact Hoare.bind (ih.items F hc nps ph _ h l H) (fun o => close_mem o H)

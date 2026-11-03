@@ -16,3 +16,9 @@
 | `Backend/FailurePaths/TransientUnwind.lean`, `Backend/FailurePaths/TransientControls.lean` | Empty-failure transient rollback consuming P7 unchanged, with empty-failure and nonempty-refusal controls. |
 | `Backend/FailurePaths/WorldUnwind.lean` | Explicit world unwind after a completed failure statement. |
 | `Backend/FailurePaths/Controls.lean` | Inhabited G38 statement and payload controls. |
+| `Backend/FailurePaths/ReasonCodec.lean` | Source Error(string) failures, checked emission and published G41 readback. |
+| `Backend/FailurePaths/ReasonCodecControls.lean` | Inhabited G41 consumer: actual reference-signature source statements, constant-packet execution, complete readback and malformed-selector refusal. |
+| `Backend/FailurePaths/TransientCallback.lean` | Selected-cell consumer of the actual registered Source callback fixture. |
+| `Backend/FailurePaths/TransientComposition.lean` | G39 actual target composition: transient write, ordinary persistent/memory instructions, and a later observed same-owner read. |
+| `Backend/FailurePaths/TransientSharing.lean` | G39 selected-slot sharing under supplied source frames. |
+| `Backend/FailurePaths/TransientSharingControls.lean` | Nonempty-prefix sharing, reset, mixed-root and refusal controls. |

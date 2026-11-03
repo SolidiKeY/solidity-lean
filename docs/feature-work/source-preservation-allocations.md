@@ -133,7 +133,9 @@ change the shared object. Reference-element writes are outside this admission.
 `MemoryBodies.lean` defines syntactic `MemoryStmt` and `MemoryItems`
 certificates. A joint horizon induction derives `MemOK` and outcome-local
 validity for declarations, admitted expression statements, exact-type returns,
-blocks, sequences and unchecked blocks. Existing value-fragment statements
+blocks, conditionals, sequences and unchecked blocks. Conditional evaluation
+uses `BodyExpr`, retaining condition updates and heap effects before executing
+the selected branch; branch scope is then closed. Existing value-fragment statements
 retain their original operations and call premises. The proof covers every
 success and halt; declaration admission does not assert allocation success.
 
@@ -156,6 +158,15 @@ array, then restores its incoming local frame. Preservation theorems consume
 these actual evaluator equalities over inhabited, nonempty memory. Timeout is
 also retained. Independent read-only finder and skeptic reviews found no
 confirmed soundness defect.
+
+`MemoryBranchControls` checks both branches of an actual conditional: one
+allocates block locals and restores its frame, while the other persistently
+rebinds a reference parameter. An effectful Boolean condition updates the local
+seen by the selected allocating branch. The same bounds-failing write is skipped
+on a false condition and panics on a true condition. All preservation conclusions
+consume the corresponding exact evaluator runs on inhabited memory, in both
+pipelines. Finder and skeptic reviews found no confirmed soundness issue in the
+conditional induction; these controls do not imply frontend or compiler admission.
 
 Not covered: arbitrary reference-call bodies, whole-program admission of this
 memory subset, other allocating arms inside this subset, progress or termination,
