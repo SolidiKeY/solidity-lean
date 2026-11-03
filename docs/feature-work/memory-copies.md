@@ -47,10 +47,23 @@ represented allocator input whose cursor fits the cost. `StorageWordCertificate`
 also requires `0 < cost`. `InterfaceV2Laws.lean` derives `cost < W`, rules out
 empty code (`code_ne_nil`), and refutes `cost := W` (`default_cost_W_impossible`,
 `word_cost_W_impossible`). V1 stays for compatibility; consumers should use V2.
-`Interface.lean` also gains Source-side default, storage-load and outcome
-certificates indexed by the actual Source run. Tying `cost` to the copied
-object's allocation size is still open, no V2 certificate is inhabited yet
-(only negative laws), and V2 `StorageWordCertificate.correct` does not pin the
-pushed address to the old cursor or keep V1's `Gap` clause. The new V1
-Source certificates are not yet inhabited; `NewArrayLengthPanicPremise.failure`
-assumes the panic equation.
+`SourceInterface.lean` holds the Source-side default, storage-load, copy and
+outcome certificates at their existing qualified names. The finite intrinsic
+`Interface.lean` no longer imports `Source.Hoare`; Source consumers import
+`SourceInterface` explicitly.
+
+V2 word correctness additionally fixes `base' g.val.id = cursor` and retains
+every old `Objects.Gap` below the old cursor. These observations supplement the
+allocator, address-map extension, machine shape and lower-cell frame.
+
+`NewArrayLengthPanicPremise` contains length evaluation, successful index
+conversion and the oversized-length condition only. The published `2^64`
+length-panic equation is to be derived from those inputs in `SourceSize`, not
+assumed as another premise. Finalize-allocation/cursor-overflow semantics
+remain the separate S03-PANIC41 boundary.
+
+Positive V2 and Source certificate controls and the derived local panic law
+are separate registered modules. Their implementation and validation receipts
+must pass before the integration-review findings are considered closed. Full
+G33/G35 implementation, total size-failure coverage, recursive traversal and
+mixed-location composition remain open.

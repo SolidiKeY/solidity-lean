@@ -280,6 +280,7 @@ import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFresh
 import Solidity.Backend.MemoryCopies.TraversalInterface
+import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryOps.CalldataAgreementChildren
 import Solidity.Backend.MemoryOps.CalldataArrayRead
 import Solidity.Backend.MemoryOps.CalldataChildExtension
