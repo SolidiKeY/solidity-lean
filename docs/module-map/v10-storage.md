@@ -67,3 +67,7 @@
 | `Backend/StorageOps/LoopLawsControls.lean` | Populated ordered positive/negative loop controls and concrete termination witness |
 | `Backend/StorageOps/StackWordWrite.lean` | Destination-only SSTORE code with runtime word operand and full context preservation |
 | Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
+| `Lowering/StorageOps/SourceWordCommutation.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/StorageOps/SourceWordCommutationControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/StorageOps/SourceWriteRollback.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/StorageOps/SourceWriteRollbackControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |

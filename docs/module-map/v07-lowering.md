@@ -43,3 +43,8 @@
 | `Lowering/V07/ConditionalControls.lean` | Inhabited conditional clients, aliases, ordered observations and bounded failure controls |
 | `Lowering/V07/WrappedMultiplicationPair` | Actual effectful unsigned multiplication pairs with all local aliases |
 | `Lowering/V07/WrappedMultiplicationControls` | Closed multiplication-pair clients and ordered alias/width controls |
+| `Lowering/V07/SignedNarrowing.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V07/SignedWidthCasts.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V07/SignedWordSubtraction.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V07/UnsignedCasts.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V07/UnsignedWidthCasts.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |

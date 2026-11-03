@@ -50,7 +50,10 @@ theorem self_share {E : Source.Env} {Γ : RCtx} (slot : Transient.BoolSlot E)
         (state.1, Transient.sourceWrite slot parent.this value state.2)
         (Transient.write target parent.this slot.key (Transient.boolWord value)) := by
   obtain ⟨old, found, word⟩ := initial
-  have after := Transient.write_represents slot parent.this value state target
+  have after : Transient.Represents slot parent.this
+      (state.1, Transient.sourceWrite slot parent.this value state.2)
+      (Transient.write target parent.this slot.key (Transient.boolWord value)) :=
+    Transient.write_represents slot parent.this value state target
   have written : ((Transient.sourceWrite slot parent.this value state.2).ex.transient.cells parent.this).read
       slot.path = some (Transient.boolValue slot value) := by
     change ((state.2.ex.transient.set parent.this

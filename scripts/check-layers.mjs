@@ -12,6 +12,9 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.Views\.NominalInventory(?:Laws|Controls)?$/, // Intrinsic nominal view inventory.
+  /^Solidity\.Yul\.World\.SelfDestructBuiltin(?:Controls)?$/, // Typed builtin binding and controls.
+  /^Solidity\.Yul\.(LocalBoolWhile|LocalBoolDivergence|Checks\.LocalBoolWhile|Checks\.LocalBoolDivergence)$/, // Typed loop checkpoints.
   /^Solidity\.Yul\.(LocalBoolIfElse|Checks\.LocalBoolIfElse)$/, // Conditional selection of independently indexed scopes.
   /^Solidity\.Yul\.(LocalBoolIf|Checks\.LocalBoolIf)$/, // Conditional execution of a certified Boolean item scope.
   /^Solidity\.Yul\.(LocalBoolItemScope|Checks\.LocalBoolItemScope)$/, // Typed Boolean item-list scope closure.
@@ -113,6 +116,7 @@ const CORE = [
   /^Solidity\.(Semantics|Typing|Theory)\./,
   /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Preconditions|FiniteMembership|FilteredMembership|Hyp|Correct|FirstOrder|Transient|Lifetime|ContractWorld|PaymentWitness|PaymentConditions)$/,
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
+  /^Solidity\.Calculus\.StaticInvocation$/, // Intrinsic static callback transport.
   // Owned intrinsic capture/join producers: their imports stay below elaborators.
   /^Solidity\.Calculus\.(AnonLocalCapture|CallResultCapture|CallResultRestore|JoinSequence|JoinSequenceSize)$/,
   /^Solidity\.Calculus\.RuleSyntax\./,

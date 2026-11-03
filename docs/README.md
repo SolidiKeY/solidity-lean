@@ -8,6 +8,7 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [feature-work/integration-20261103-checkpoints.md](feature-work/integration-20261103-checkpoints.md) | Reviewed scheduled lane increments, fixes, validation requirements and retained producer boundaries. |
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
 | [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |

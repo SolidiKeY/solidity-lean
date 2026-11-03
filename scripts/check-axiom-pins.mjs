@@ -72,7 +72,7 @@ export function collect(root) {
   (function walk(dir) {
     for (const f of readdirSync(join(root, dir)).sort()) {
       const p = dir ? join(dir, f) : f;
-      if (p === "Solidity/Scratch" || p.startsWith(".") || p === "vendor" || p === "node_modules") continue;
+      if (f === ".lake" || p === "Solidity/Scratch" || p.startsWith(".") || p === "vendor" || p === "node_modules") continue;
       if (statSync(join(root, p)).isDirectory()) { if (!dir && !["Solidity", "Bridge", "tests"].includes(p)) continue; walk(p); }
       else if (p.endsWith(".lean")) files.push(p);
     }
