@@ -451,3 +451,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureStringPrefix.lean` | Actual typed string-prefix encoding and declared error execution over a represented mixed tail; G38 encoding premise consumer. |
 | `Solidity/Lowering/V08/LiteralFailureStringPrefixControls.lean` | Populated typed string/custom-error controls, shared string/bytes reference, exact bytes and distinct stuck/timeout outcomes. |
+
+| `Solidity/Lowering/V08/LiteralFailureStringInterleaving.lean` | Indexed memory-string/byte witness relation; actual encoder computation equality and Source error/expression consumers. |
+| `Solidity/Lowering/V08/LiteralFailureStringInterleavingControls.lean` | Populated multi-string typed controls, aliases, old-object preservation, allocation and late failure observations. |
