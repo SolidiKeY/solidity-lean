@@ -1794,3 +1794,34 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/WorldCalls/Callbacks.lean`, `Backend/WorldCalls/ExternalCalls.lean`, `Backend/WorldCalls/SelfCalls.lean`, `Backend/WorldCalls/P1Consumers.lean` | Conditional callback, external, self-call and frozen P1 V3 consumers projecting producer premises ([G42](feature-work/g42-world-call-consumers.md)). |
 | `Backend/WorldCalls/SourceBridge.lean`, `Backend/WorldCalls/UnknownSourceCall.lean` | P3 bridge from `RawAt` to the source raw phase; zero-value unknown-call transport and joint `RawAt`/`RuntimeFrames` ([G42](feature-work/g42-world-call-consumers.md)). |
 | `Backend/WorldCalls/PaymentControl.lean`, `Backend/WorldCalls/ExternalControls.lean`, `Backend/WorldCalls/SelfControls.lean`, `Backend/WorldCalls/SourceBridgeControls.lean`, `Backend/WorldCalls/UnknownSourceControls.lean` | Restricted paired payment-CALL fixture and source controls for the world-call consumers ([G42](feature-work/g42-world-call-consumers.md)). |
+
+## V07 source lowering
+
+| Module | Purpose |
+|---|---|
+| `Lowering/V07/Conversions.lean`, `Lowering/V07/Controls.lean` | Implicit/explicit integer, address and UDVT conversion runs (value-level); width, sign and narrowing controls. |
+| `Lowering/V07/SourceReads.lean`, `Lowering/V07/Operands.lean`, `Lowering/V07/ReadControls.lean` | Source local reads against `Val.evalT`; pure-pair order; local `DeferredSource.Operand` transport and `Thin` extension. |
+| `Lowering/V07/AssignmentOperands.lean`, `Lowering/V07/AssignmentOrder.lean`, `Lowering/V07/AssignmentControls.lean` | Local assignment operand and assignment/read pairs in legacy and via-IR order; capture/drop controls. |
+| `Lowering/V07/IntegerSubtraction.lean`, `Lowering/V07/AssignmentSubtraction.lean`, `Lowering/V07/AssignmentBoundaries.lean` | In-range subtraction at every width and over an assignment operand; signed and underflow boundary controls. |
+| `Lowering/V07/IntegerLocalFamily.lean`, `Lowering/V07/IntegerAssignmentPrefixes.lean`, `Lowering/V07/LocalFamilyControls.lean` | Fixed-width selected local family with alias reflection; writes and arbitrary assignment prefixes. |
+| `Lowering/V07/ContextMap.lean`, `Lowering/V07/ContextMapWrite.lean` | P12 `ContextMap` between Source and intrinsic contexts; `Related` and its write laws. |
+| `Lowering/V07/EffectfulCondition.lean`, `Lowering/V07/P12Controls.lean`, `Lowering/V07/ConditionLoopControl.lean` | `x = y` Boolean condition transport; P12 nonvacuity controls; stale once-captured loop condition negative. |
+| `Lowering/V07/ReferenceCapture.lean`, `Lowering/V07/ReferenceEffects.lean`, `Lowering/V07/ReferenceControls.lean`, `Lowering/V07/MixedAssignmentControls.lean` | Memory/storage alias captures keep `HRef`/`SRef` identity across rebinds; live mixed-reference frames. |
+| `Lowering/V07/DoubleAssignment.lean`, `Lowering/V07/DoubleAssignmentFamily.lean`, `Lowering/V07/DoubleSubtraction.lean`, `Lowering/V07/DoubleControls.lean`, `Lowering/V07/DoubleNegativeControls.lean` | `(i = a) - (a = b)` under `i ≠ b`; the counterexample showing that premise is needed. |
+| `Lowering/V07/AllAliasPair.lean`, `Lowering/V07/AliasRhsSubtraction.lean`, `Lowering/V07/AllAliasControls.lean` | Two assignments without disjointness; the `i = b` subtraction clause. |
+| `Lowering/V07/ShortCircuit.lean`, `Lowering/V07/ShortCircuitControls.lean` | `&&`/`||` over two Boolean local assignments, all alias patterns; skipped-RHS law. |
+| `Lowering/V07/UnsignedNarrowing.lean`, `Lowering/V07/UnsignedNarrowingControls.lean` | Unchecked unsigned subtraction wrap at every width; assignment-operand transport. |
+| `Lowering/V07/WrappedAssignmentPair.lean`, `Lowering/V07/WrappedPairControls.lean` | Wrapped subtraction of two assignment operands, all alias patterns. |
+| `Lowering/V07/GraphControls.lean`, `Lowering/V07/GraphIdentityControls.lean` | Inhabited `DeclarationGraph` certificates; distinct identity for equal-field structs. |
+| `Lowering/V07/PrimitiveGraph.lean`, `Lowering/V07/PrimitiveGraphControls.lean` | Computed graph producer for int/bool/address fields. |
+| `Lowering/V07/RecursiveGraph.lean`, `Lowering/V07/GraphRanks.lean`, `Lowering/V07/RecursiveGraphControls.lean` | Computed recursive graph producer (arrays, structs, mappings, enums, UDVTs) and rank monotonicity; mapping-in-memory obstruction. |
+| `Lowering/V07/GraphAdmissionBoundary.lean` | Inline self-struct accepted by current metadata yet not certifiable; guarded recursive witness. |
+| `Lowering/V07/P8Bindings.lean` | Consumers of the frozen `P8a.Producer`; `AcceptedGraph` at the accepted source origin. |
+| `Lowering/V07/AcceptedGraphProducer.lean` | `RecursiveGraph.produce` bound to the P8a accepted source. |
+| `Lowering/V07/LocationGraphInterface.lean` | Admissible-location policy, `LocationDeclarationGraph` and the per-location `Admission` target. |
+| `Lowering/V07/LocationGraphLaws.lean` | Mixed-location certificates; `refusal_missing` (Source admits a memory local of a mapping struct). |
+| `Lowering/V07/LocationGraphProducer.lean`, `Lowering/V07/LocationProducerControls.lean` | Computed admissible-location graph producer. |
+| `Lowering/V07/RankConvergence.lean` | `rankIter` stabilization past a valid comparison rank. |
+| `Lowering/V07/NodeRank.lean` | Stabilization at the node count; discharges the producer's rank check. |
+| `Lowering/V07/FieldCompleteness.lean` | Graph lowering succeeds for every `GraphTypeRel` under global UDVT support. |
+| `Lowering/V07/LocalFieldSupport.lean` | Same completeness with support only for traversed UDVTs. |
