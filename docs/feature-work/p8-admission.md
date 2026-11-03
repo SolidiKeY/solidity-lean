@@ -31,26 +31,49 @@ value of any structure is exported.
 
 ### Failure projection conflict
 
-Open question P8-SPEC-LAW1. `points_ofPoints` asks for a retraction of
+Contract issue P8-SPEC-LAW1 (carrier direction decided by H16). `points_ofPoints` asks for a retraction of
 `S.Failures` onto all of `Evm.FailurePoints`. `SourceSpec.failures_with`
 (`Roadmap/Contracts.lean`) already makes `S.failures` a retraction of
 `S.lang.Res` onto `S.Failures`. Composed, they give a resource-indexed
 extract/replace pair for the whole failure plan, and
 `Source.FailureResources.no_horizon_retraction` proves that no `Nat`-indexed
-pair of that kind exists. So for any `S` whose resources or failures are
-countable, `FailureProjection S`, and with it `Producer S …`, is uninhabited.
-That covers the current `Nat`-only Source resource and the toy `toySource`
-(`Failures := Bool`). `ProducerAssembly.AssemblyType` and `PendingGlue` would
-then be inhabited only vacuously. No theorem on master states this corollary.
+pair of that kind exists. So for any `S` whose resources have an encoding/decoding roundtrip through
+`Nat`, `FailureProjection S`, and with it `Producer S …`, is uninhabited
+(proved: `ResourceContractLaw1.nat_encodable_resource_impossible`). That covers
+the current `Nat`-only Source resource. The same argument suggests countable
+inhabited failures (such as the toy `toySource`, `Failures := Bool`) also
+suffice; no theorem states that case. `ProducerAssembly.AssemblyType` and `PendingGlue` would
+then be inhabited only vacuously.
 
 This is not a kernel inconsistency. A resource that carries the failure plan,
-such as `FailureResources.Bound = Nat × FailurePoints` with
-`points = ofPoints = id`, satisfies the law. The module docstring's "Retraction
+such as `FailureResources.Bound = Nat × FailurePoints`, can satisfy the law:
+use `Failures = FailurePoints`, resource extraction `snd`, replacement
+`(horizon, newPlan)`, and failure projection `points = ofPoints = id`. The module docstring's "Retraction
 is already required by SourceSpec.failures_with" is inaccurate:
 `points_ofPoints` is a second retraction. The frozen file is unchanged; a
-revised interface (V2) is pending with the P8a owner.
+V2 explanation is in `Lowering/P8/FailureContractV2.lean`.
 
-Open: the revision; any inhabitant; adequacy of the reference, origins and
+V2 separates `Projection` (points and NoFail consequences) from
+`FullPlanCoverage` (a section onto every complete EVM failure plan).
+`CompleteProjection` and V2 `Producer` require both. The `toV1`/`ofV1`
+adapters and both roundtrip laws preserve every field, including the dependent
+realization. V2 does not weaken coverage to realizable samples or finite
+prefixes. `nat_encodable_resource_impossible` therefore still applies.
+The corrected attribution is explicit: `failures_with` provides the first
+retraction; `FullPlanCoverage` is the independent second retraction.
+
+This is a lossless interface clarification, not a Nat-compatible semantic
+repair. Neither V1 nor V2 can be inhabited over the current Nat resource.
+Human decision H16 authorizes VY5, as single writer, to extend the source
+semantic carrier to `FailureResources.Bound`.
+This interface implements no extension: VY5's published carrier interface,
+operational failure wiring, rollback/order and resource-consistency proofs
+remain prerequisites for concrete realization. Generic consumers can retain V1
+via `toV1`; concrete Nat consumers remain blocked. A source carrier extension
+requires revalidating resource order, realization and all resource-based
+semantics.
+
+Open: VY5's published H16 carrier interface and operational realization; any inhabitant; adequacy of the reference, origins and
 root parameters against the actual source machine.
 
 ## Admission, profile and root observations
@@ -284,5 +307,33 @@ checks stayed on the lane.
 Integrated from the P8a lane head 6cb9a10b and the P8b consumer interface
 (93df5839), without the lane's task list and scripts. Read-only finder and
 skeptic reviews found no Lean defect. They found the failure-projection
-conflict above, the ill-kinded modifier fixture and overstated or dangling
+conflict above, the ill-kinded modifier fixture (the target is now a real modifier
+declaration with a placeholder body, but the invoking body still hangs on the
+constant declaration `seed` and passes one argument to the parameterless
+modifier `guard`: synthetic, not signature-coherent) and overstated or dangling
 references in the lane documents; these are recorded or removed here.
+
+## Certified syntax inventory; semantic extraction open
+
+`Frontend/Admission/SyntaxOccurrences.lean` structurally enumerates the actual
+intrinsic syntax with its category and payload (all 112 constructors,
+maintained by hand when `Syn` changes). The root cons is outside the structurally recursive descendant
+walk, so `syntaxOccurrences_root` proves that each actual typed root occurs
+without unfolding that walk. It does not alter the source evaluator.
+
+`SyntaxOccurrenceLaws.lean` exports `syntaxDescendants_children`, the outer
+recursion equation for all 112 constructors. `syntaxOccurrences_sound` and
+`syntaxOccurrences_complete` identify enumeration membership exactly with
+the existing independent `Source.Syn.Sub` relation; `syntaxOccurrences_iff`
+combines them. Categories and full syntax payloads are preserved. The
+structural proof uses no fuel, finite sample or added premise.
+
+`SyntaxOccurrenceControls` checks two branches with distinct payloads in
+exact preorder, repeated payloads without deduplication, and rejection of
+an omitted child. These list equalities additionally check concrete order
+and multiplicity, which do not follow from membership equivalence alone.
+
+The syntactic theorem does not identify execution/observation roots in a
+resolved program and supplies no `Extractor` or profile-completeness witness.
+Complete semantic-root extraction, exact profile classification and frontend
+agreement remain open.

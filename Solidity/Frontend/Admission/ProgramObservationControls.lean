@@ -7,7 +7,10 @@ open Solidity.Source
 
 def constantDecl : Decl :=
   ⟨.constant, "seed", none, true, .constant (.elem (.int false 256 (by decide +kernel))) "seed" (.lit (.num (.dec 0 0 0)))⟩
-def env : Env := ⟨[constantDecl]⟩
+def modifierDecl : Decl :=
+  ⟨.modifier, "guard", none, true,
+    .modifier "guard" .none false none (.some (.block (.cons (.stmtItem (.simpleStmt (.exprStmt (.ident "_")))) .nil)))⟩
+def env : Env := ⟨[constantDecl, modifierDecl]⟩
 def time : RExpr env [] (.int IntTy.u256) := .magic .block "timestamp" rfl
 def sender : RExpr env [] (.address false) := .magic .msg "sender" rfl
 
@@ -16,12 +19,16 @@ def args : RConvArgs env [] [.int IntTy.u256] := .cons time (by decide +kernel) 
 def body : RBody env := {
   ps := [], rs := [], inModifier := false, locals := [], out := []
   items := .stmt (.expr sender) .nil
-  mods := [⟨constantDecl, [.int IntTy.u256], args⟩] }
+  mods := [⟨modifierDecl, [.int IntTy.u256], args⟩] }
+def modifierBody : RBody env := {
+  ps := [], rs := [], inModifier := true, locals := [], out := []
+  items := .stmt (.placeholder rfl) .nil
+  mods := [] }
 def init : RInit env := ⟨constantDecl, .int IntTy.u256, rfl, time⟩
 def base : RBaseArg env [] := ⟨"Base", [.int IntTy.u256], args⟩
 def program : Program env := {
-  body := fun _ => some body
-  consts := fun _ => some init
+  body := fun d => if d.name == "seed" then some body else some modifierBody
+  consts := fun d => if d.name == "seed" then some init else none
   inits := fun _ => [init]
   ctor := fun _ => some body
   ctorLocals := fun _ => []
@@ -43,7 +50,9 @@ theorem populated_constructor_site :
   .inr ⟨"C", List.mem_cons_self, .inl ⟨body, rfl, List.mem_append_left _ List.mem_cons_self⟩⟩
 
 theorem modifier_targets_retained : programModifierTargets program =
-    [constantDecl, constantDecl] := rfl
+    [modifierDecl, modifierDecl] := rfl
+
+theorem modifier_target_kind : modifierDecl.kind = .modifier := rfl
 
 theorem base_targets_retained : programBaseTargets program = ["Base"] := rfl
 

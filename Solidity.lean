@@ -907,6 +907,9 @@ import Solidity.Frontend.Admission.Profile
 import Solidity.Frontend.Admission.ProgramObservationControls
 import Solidity.Frontend.Admission.ProgramObservations
 import Solidity.Frontend.Admission.RootObservations
+import Solidity.Frontend.Admission.SyntaxOccurrenceControls
+import Solidity.Frontend.Admission.SyntaxOccurrenceLaws
+import Solidity.Frontend.Admission.SyntaxOccurrences
 import Solidity.Tools.PaymentReplay
 import Solidity.Examples.Tactics.PaymentSource
 import Solidity.Backend.Creation.Artifact
@@ -1279,6 +1282,8 @@ import Solidity.Lowering.P8.SourceMetadataControls
 import Solidity.Lowering.P8.SourceMetadataObligations
 import Solidity.Lowering.P8.SourceResolutionControls
 import Solidity.Lowering.P8.SourceResolutions
+import Solidity.Lowering.P8.FailureContractV2
+import Solidity.Lowering.P8.ResourceContractLaw1
 import Solidity.Lowering.V07.DeclarationGraph
 import Solidity.Lowering.V07.Scalar
 import Solidity.Lowering.P8b.Controls

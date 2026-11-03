@@ -1750,5 +1750,10 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Lowering/P8b/Frozen.lean`, `Lowering/P8b/P8aInterface.lean` | Frozen P8b consumer signatures over G01 `Lowering` and P8a `Producer`; no inhabitant. |
 | `Lowering/P8b/Domain.lean` | Structural pass/dom/agrees for a given emitter; `assemble`; wrong-emitter refutation. |
 | `Lowering/P8b/Controls.lean` | Toy identity certificate, wrong-emitter refusal, loop divergence. |
+| `Lowering/P8/ResourceContractLaw1.lean` | `nat_encodable_resource_impossible`: the frozen V1 failure projection has no inhabitant over a `Nat`-encodable resource (P8-SPEC-LAW1). |
+| `Lowering/P8/FailureContractV2.lean` | V2 rebundling: `Projection` and `FullPlanCoverage` separated, `toV1`/`ofV1` roundtrips; still uninhabited over `Nat`. |
+| `Frontend/Admission/SyntaxOccurrences.lean`, `SyntaxOccurrenceLaws.lean`, `SyntaxOccurrenceControls.lean` | Typed syntax subtree inventory, `syntaxOccurrences_iff` against `Source.Syn.Sub`, order/multiplicity controls; not semantic-root extraction. |
 
 See [P8 admission](feature-work/p8-admission.md).
+
+
