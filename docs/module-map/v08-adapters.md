@@ -434,3 +434,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 |---|---|
 | `Lowering/V08/LiteralFailureMixedSelector.lean` | Actual heterogeneous encodeWithSelector allocation, raw rethrow and post-allocation timeout. |
 | `Lowering/V08/LiteralFailureMixedSelectorControls.lean` | Mixed/empty-tail clients, body-relative offsets, supplied-selector decoder observations and full reached outputs. |
+
+## Mixed signature-prefixed ABI packets
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedSignature.lean` | Actual mixed-tail encodeWithSignature allocation, raw rethrow and post-allocation timeout from existing field/read/hash semantics. |
+| `Lowering/V08/LiteralFailureMixedSignatureControls.lean` | Signature/payload aliasing, existing Keccak pin, four-byte prefix, empty tail, timeouts and complete reached outputs. |
