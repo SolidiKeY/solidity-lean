@@ -489,6 +489,8 @@ import Solidity.Roadmap.Frontend
 import Solidity.Roadmap.Evm
 import Solidity.Roadmap.TypedRun
 import Solidity.Roadmap.Controls
+import Solidity.Roadmap.V16.SSCP2.NewAllocation
+import Solidity.Roadmap.V16.SSCP2.NewAllocationControls
 import Solidity.Source.Syntax
 import Solidity.Source.Ctor
 import Solidity.Source.Upstream

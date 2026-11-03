@@ -2098,3 +2098,5 @@ See [P8 admission](feature-work/p8-admission.md).
 - Yul/RawLocalScope: executed Boolean declaration/scope closure, exact Source restoration and existing adapter implementation. Yul/Checks/RawLocalScope: precise horizons, dirty-frame and two-scope composition controls.
 - Yul/RawDefaultDeclaration: typed constant-default lookup and Source declaration correspondence, including all integer widths. Yul/Checks/RawDefaultDeclaration: actual uint8/uint256, shifted dirty-prefix and helper-boundary controls.
 | `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
+| `Roadmap/V16/SSCP2/NewAllocation.lean` | Actual dynamic-new data validity and MemOK preservation, with a closed local-length consumer. |
+| `Roadmap/V16/SSCP2/NewAllocationControls.lean` | Live caller references, both pipelines, exact allocation-size/timeout/refusal phases and wrong-reference controls. |
