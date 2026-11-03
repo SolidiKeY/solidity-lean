@@ -57,3 +57,11 @@ budgets zero/one remain distinct from positive-fuel `X` continuation; a negative
 control exhibits their different low-budget failures. CALLDATASIZE reuses P10's
 existing source-input theorem. Memory/copy and storage bridges remain open, and
 no whole Source/world or external EVM adequacy is inferred from these accesses.
+
+`AccessBridge/MemoryInterface.lean` specifies initial P6 byte-image and active-word
+representation, MSIZE payload agreement and full charged/fuel behavior for
+MSIZE, MLOAD, MSTORE, MSTORE8 and CALLDATACOPY. Its active-byte word-fit field
+prevents MSIZE wrap; it does not bound reserved capacity or calldata admission.
+Finder/skeptic reviews found no false signature and required this boundary to
+stay explicit: P6 MLOAD payload agreement and store/copy image preservation
+remain open. No implementation instance is supplied by this signature module.
