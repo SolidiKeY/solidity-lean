@@ -34,3 +34,18 @@ theorem scalar_observation_agrees (pipeline : Roadmap.Pipeline) (choice : Bool) 
 
 Draft statement only, not a compiled declaration or completed coverage row.
 Do not change either observation list, expected result or producer interface.
+
+
+## Conditional sequence scalar observation corollary
+
+Module: Solidity/Lowering/G19/ConditionalSequenceControls.lean
+Lemma: scalar_observation_agrees. Routine: rewrite the existing
+source_observation and target_observation endpoints, preserving every field.
+
+```lean
+theorem scalar_observation_agrees (pipeline : Roadmap.Pipeline) (choice : Bool) :
+    sourceObs pipeline choice = observeTarget (code tci tca ti ta tj tb tb ti) choice
+```
+
+Draft only; no placeholder declaration or completed coverage claim.
+Soundness, generic reached-context proof and negative controls stay with Sol.
