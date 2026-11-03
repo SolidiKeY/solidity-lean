@@ -182,3 +182,16 @@ import SolidityBridge.ExternalEvm.RequireLocalState
 import SolidityBridge.ExternalEvm.StaticcallDriver
 import SolidityBridge.HashBridge.StaticQueries
 import SolidityBridge.HashBridge.StaticQueryControls
+import SolidityBridge.Yul.BinaryPlacement
+import SolidityBridge.Yul.ChargedQuotientPrefix
+import SolidityBridge.Yul.ChargedQuotientPrefixControls
+import SolidityBridge.Yul.ChargedQuotients
+import SolidityBridge.Yul.ChargedQuotientsControls
+import SolidityBridge.Yul.QuotientPlacement
+import SolidityBridge.Yul.QuotientPlacementControls
+import SolidityBridge.Yul.QuotientSuffix
+import SolidityBridge.Yul.QuotientSuffixControls
+import SolidityBridge.Yul.SignedPlacement
+import SolidityBridge.Yul.SignedPlacementControls
+import SolidityBridge.Yul.SignextendPlacement
+import SolidityBridge.Yul.SignextendPlacementControls

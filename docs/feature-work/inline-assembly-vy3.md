@@ -26,3 +26,32 @@ consumed, so this is not yet the P20 state relation.
 
 Open: a Yul AST/semantics relation (P20), run theorems for arithmetic and
 control code, whole-block execution.
+
+## Expression, statement and machine slices (sched 2026-11-03)
+
+Core `Yul/Compilation/` modules (each `*Machine`/`*Branch`/`*Placement` with a
+`*Controls` module) over the original VY1 AST and evaluator; none adds an AST,
+word semantics, state or calling convention.
+
+- Expression compilers: `WordExpressions`, `QuotientExpressions` (unsigned
+  DIV/MOD with zero divisors), `SignedExpressions`, `BitExpressions`,
+  `ModularExpressions`, `PureExpressions`, `ProducerExpressions`,
+  `RemainingWordBridges`, `OpenExpressions` (raw external cells through the VY1
+  `WordAdapter`).
+- Statements and control: `ProducerStatements`, `PureStatements`,
+  `OpenStatements`, `ScopedStatements`, `ScopedRawStatements`, `NormalControl`,
+  `NormalStackTransport`.
+- Compiler-model execution: `ArithmeticMachine` (ADD/MUL), `ShiftSubMachine`,
+  `BitMachineExecution`, `QuotientMachine`, `UnaryMachine`, `ComparisonMachine`;
+  concrete branches `UnaryBranch`, `ComparisonBranch`.
+- Physical memory: `PhysicalStore` (constant-operand stores on the VY2 byte
+  view), `PhysicalHash` (Keccak over the canonical `withKeccak` field).
+
+Bridge `SolidityBridge/Yul/`: `ChargedQuotients`, `ChargedQuotientPrefix`,
+`QuotientPlacement`, `QuotientSuffix`, `SignedPlacement`, `BinaryPlacement`,
+`SignextendPlacement` — compiler-origin sites with the charged P10 producers
+at arbitrary encoded offsets.
+
+Open: native/G24 closure, general branches, finite-code transport,
+source-update pairing.
+
