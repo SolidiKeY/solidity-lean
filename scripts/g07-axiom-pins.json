@@ -28140,6 +28140,46 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_active_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_balance_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_dropped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_dropped_then_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_halt_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_revert_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.requestScope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.preflight": [
   "Classical.choice",
   "Quot.sound",
@@ -28260,6 +28300,103 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.dropped_then_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.earlier_tx_debits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.exact_balance_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.funded_revert_is_not_drop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.funded_timeout_is_not_drop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.invalid_advances_to_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.invalid_then_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.prior_credit_funds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.rejected_stress_fields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.rejected_whole_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.wrong_recipient_balance": [],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.zero_value_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.requestFunded_false_iff": [
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.requestFunded_true_iff": [
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_invalid_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_result_funded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.sessionGo_drop_unfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.sessionGoEvents_drop_unfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/Horizon.lean:Solidity.Source.belowAt": [
   "Classical.choice",
   "Quot.sound",
@@ -28290,6 +28427,12 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.credit_success_fits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_fits": [],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_without_range": [],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.wide_zero_debit": [],
  "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Env.fieldTy?_of_fieldAt": [
   "Classical.choice",
   "Quot.sound",
