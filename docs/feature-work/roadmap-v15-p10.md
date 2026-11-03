@@ -465,3 +465,511 @@ inequality premise is needed.
 
 Open: source/compiler origin of keys, physical allocation and padding, full
 resource adequacy, Osaka world/transaction composition, opcode-row coverage.
+
+## Charged execution of the existing word emitter
+
+`Bridge/SolidityBridge/RoadmapV15/P10/WordPushConsumer.lean` connects the actual
+`Scalar.pushWord` emitter to the pinned reader, decoder, checked driver and X.
+The emitter always uses PUSH32 and exactly 32 big-endian payload bytes, including
+for zero. Its payload value is derived using the existing backend roundtrip and
+`Bridge/SolidityBridge/RoadmapV15/ReferenceReader.lean`; pure encoding dependencies
+are reused unchanged rather than counted as new proofs.
+
+`push_word_value`, `decode_word_push` and `word_push_agreement` hold for arbitrary
+words, seed state, represented caller tail and encoded prefix/suffix. The input
+constructs the exact code image, selected nonwrapping PC and mapped stack.
+Successful execution retains the Scalar result, complete charged native State
+and actual X continuation. Explicit premises are gas at least 3, input length
+at most 1023, selected PC fitting the native word and the stated positive fuel.
+The actual instruction adds 33 to the native PC, charges 3 and advances the
+execution count once. Prefix execution, source/frame origin, subsequent-PC fit,
+whole-program resource adequacy and Osaka approval do not follow from this
+constructed representation.
+
+`word_push_full_stack` derives both driver and X overflow from a valid input of
+1024 words after adequate gas. This is a valid-input local capacity refusal; it
+does not rely on an already over-limit input. It contrasts with the explicit
+success bound without weakening source or target resource requirements.
+
+Thirteen controls directly use the producer and preserve complete State.
+They cover nonzero data, zero still using PUSH32/gas 3, maximum and typed signed
+words, constructor wrapping before emission, writable/static contexts, input
+1023 success/input 1024 refusal, gas before overflow, counted-driver fuel
+refusal, wrong byte order and wrong payload length. The populated fixture has
+32 resident memory bytes with one active word, nonzero accounts and matching
+initial account snapshot, complete caller tail, calldata and return buffers.
+Full ordered code/stack/buffer observations are retained. Constructor wrapping
+is not a source integer-overflow policy conclusion, and the X continuation
+does not assert terminal buffer behavior.
+
+The earlier selected-program PUSH fixtures remain valid separate evidence.
+This consumer generalizes to the actual word emitter at arbitrary encoded
+sites and adequate gas, and adds no full opcode-row closure. The two-instruction
+signed-cleanup composition is proved below; original compiler/world/driver
+obligations remain separate. Independent read-only finder and skeptic reviews cleared
+payload derivation, checked state transport, the valid full-stack refusal and
+all populated controls.
+
+## Different-owner storage cost probes
+
+`Bridge/SolidityBridge/RoadmapV15/P10/StorageOwnerControls.lean` adds
+`different_owner_cost`, a direct instance of `sload_distinct_cost` with the same
+numeric slot 13 at different owners 7 and 11. `populated_controls` distinguishes
+the other owner's cold charge 2100, its prewarmed charge 100 and the read owner's
+newly warm charge 100. Ordered code, stack, memory, calldata and return buffers
+are explicit, with populated accounts and a retained caller tail.
+
+These are observations of the actual vendor SLOAD update with a constructed
+cost probe; they prove neither a following fetched read nor its gas adequacy.
+The fixture's supplied charge 2100 is not a new resource-adequacy theorem.
+No symbolic-path distinctness, hash injectivity, physical-memory validity or
+source/world correspondence is inferred. This adds two control declarations,
+not opcode-row closure. Independent read-only finder and skeptic reviews
+confirmed the distinct-owner premise and these boundaries.
+
+## Signed-cleanup tail at the emitted byte site
+
+`Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupSites.lean` constructs the
+SIGNEXTEND site after the actual word-index emitter in `Scalar.signedCode`.
+`signed_cleanup_index_word` transports that emitted byte index through the
+published all-width reference word law. In
+`Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupTail.lean`,
+`signed_cleanup_code` proves equality with the complete encoded signedCode image,
+and `signed_cleanup_tail` pairs the full intrinsic cleanup result with the
+actual fetched SIGNEXTEND driver step and X continuation. All widths and words
+are quantified, including negative residues and truncation. The native entry
+stack contains the explicit represented width index, value and arbitrary tail.
+The selected PC fit, gas at least 5, capacity and positive fuel remain explicit.
+
+Three declarations in
+`Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupControls.lean` provide a direct
+universal producer client, populated complete-State execution with gas/fuel
+refusals, and signed/truncation/boundary/wrong-index plus ordered observations.
+The negative 8-bit example uses 128; the input 2^200 + 384, whose low byte
+is 128, also becomes -128. The 16-bit negative and full-width boundary are checked separately.
+The wrong-index control distinguishes a byte index from the bit count 8.
+The fixture retains populated accounts, a coherent 32-byte memory buffer,
+caller tail, complete code, calldata and return buffers.
+
+This is a tail-entry theorem. It neither assumes nor proves native execution
+of the preceding PUSH, even though the complete emitted code image is exact.
+Connecting the first step's output PC, gas and stack to this entry is proved
+in the two-instruction composition below. Source/compiler origin, full resource
+adequacy and Osaka/world/transaction correspondence remain separate, and no
+full opcode row is closed. Independent read-only finder and skeptic reviews
+confirmed these statement and non-vacuity boundaries.
+
+## Complete two-instruction signed cleanup
+
+`Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupAlignment.lean` proves native
+gas subtraction leaves at least 5 after charging 3 from an initial budget of 8,
+the modulo-word PC addition by 33, and complete equality of the actual PUSH
+output with the represented SIGNEXTEND tail entry. Alignment includes the code
+image, stack, all account/memory/buffer fields and the actual charged counters;
+no intermediate frame is supplied as a premise.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupComposition.lean` then proves
+`signed_cleanup_composition` for every admitted width, value, caller tail,
+seed and encoded prefix/suffix. It pairs the existing intrinsic signedCode run
+with actual `driverSteps 2 (fuel+3)` and X continuation at `fuel+1`. The proof
+consumes the word-emitter and tail results and the existing `fetched_steps_cons`
+law; a redundant draft helper is not exported or counted as new coverage.
+
+The initial stack is value followed by the arbitrary tail. Explicit premises
+are gas at least 8, tail length plus 2 at most 1024, and the post-PUSH instruction
+PC fitting the reference word. First-step fit, capacity, remaining gas and the
+intermediate State equality are derived. Native PC arithmetic stays modular;
+no subsequent-PC nonwrapping or prefix-origin claim follows. This establishes
+adequacy for these two reference instructions, not a whole-program resource
+abstraction or Osaka approval.
+
+Four control declarations in
+`Bridge/SolidityBridge/RoadmapV15/P10/SignedCompositionControls.lean` directly
+consume the producer and check complete final States for negative, truncating
+and full-width maximum examples. Exactly 8 gas becomes 0, PC 3 becomes 37 and
+execution count 41 becomes 43. Gas 2 fails at PUSH, gas 7 fails at SIGNEXTEND,
+and counted fuel 2 refuses the second instruction. Native underflow/wrap and
+complete ordered code, caller tail, memory, calldata and return buffers are
+retained. Direct dispatcher reduction hit the original heartbeat budget; the
+passing controls use modular execution and simplify only resulting State fields.
+No proof budget or observation was changed.
+
+Independent read-only finder and skeptic reviews confirmed the actual step
+composition and populated controls. Compiler/source/frame origin, whole-program
+resources, account/world/transaction/trace correspondence and full opcode-row
+coverage remain open. The theorem gives an X continuation, not STOP termination
+or a terminal return-buffer assertion.
+
+## Bitwise words at arbitrary emitted sites
+
+Earlier private fixed-entry checks in module
+`SolidityBridge.RoadmapV15.NumericRows01` at revision
+`94901eb8590cddfe8858b91de33c1229dcbdd66d` already cover these operations.
+The delta here is arbitrary emitted Site and adequate-gas transport plus reusable
+public word equations, with zero new opcode rows. The immutable predecessor
+source binding is retained in the interface handoff.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/BitwiseWords.lean` exposes three reusable
+native-word consequences for AND, OR and XOR. Each actual reference operation's
+modulo is discharged by the existing intrinsic result bound. In
+`Bridge/SolidityBridge/RoadmapV15/P10/BitwiseConsumer.lean`, three consumers pair
+the existing Scalar result with charged fetched execution and complete-State X
+continuation for arbitrary emitted sites, operands, tails and adequate gas.
+The existing decoder theorem supplies each actual opcode. Gas at least 3,
+capacity and selected-PC fit stay explicit; the gate, stack arity, both static
+permissions and actual dispatcher step are derived.
+
+Six declarations in
+`Bridge/SolidityBridge/RoadmapV15/P10/BitwiseControls.lean` include direct
+populated full-State clients distinguishing overlapping-bit AND/OR/XOR results.
+OR uses writable permission and nonminimal gas 11 becoming 8; AND and XOR use
+static permission and gas 3. All sites have a nonempty encoded prefix. A valid
+1024-word binary input succeeds with 1023 output words. Gas, arity and counted
+fuel failures retain their order. The extra overflow probe starts with 1026
+items and is explicitly outside the well-formed profile; it proves no reachable
+valid-profile overflow case. Symbolic length reasoning avoids unfolding the
+large stack, with no recursion-budget increase.
+
+Zero, maximum, high-bit, overlapping and nonoverlapping bit patterns and wrong
+operation selection are checked alongside complete ordered code, stack, memory,
+calldata and return buffers. These are local site/gas and word-transport results,
+not full opcode-row closure. Source/compiler/frame origin, subsequent-PC fit,
+whole-program resources and Osaka/account/world/transaction/trace correspondence
+remain open. Independent read-only finder and skeptic reviews checked the
+statements, non-vacuity and explicit profile boundaries.
+
+## Complete unsigned-cleanup emitter execution
+
+`Bridge/SolidityBridge/RoadmapV15/P10/UnsignedCleanupLayout.lean` consumes the
+existing intrinsic `Scalar.unsigned_correct` theorem to obtain the emitted mask
+result; it does not reimplement width arithmetic. Its reference gas-debit law
+proves exact natural subtraction under `cost ≤ g.toNat`, deriving that the
+encoded cost fits the native word. The actual complete unsignedCode image and
+complete PUSH-output/AND-entry State equality are proved separately.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/UnsignedCleanupExecution.lean` composes the
+actual PUSH32 mask and AND, for every byte width, value, tail, seed and encoded
+prefix/suffix. The existing Scalar result is paired with `driverSteps 2` and the
+actual X continuation. Gas at least 6, peak capacity (tail length plus 2 at most
+1024), selected post-PUSH PC fit and fuel stay explicit. First-step fit, capacity,
+remaining gas and the intermediate State equality are derived, not supplied as
+an execution or frame premise. Existing word-emitter, AND and counted-prefix
+producers are reused. This adds local emitter composition, not new arithmetic
+or complete opcode-row coverage.
+
+Six declarations in
+`Bridge/SolidityBridge/RoadmapV15/P10/UnsignedCleanupControls.lean` directly
+consume the producer on populated complete States. They cover nonzero and high-
+bit truncation, 8/16-bit observations, full-width maximum identity, and strict
+unsigned-versus-signed 128. An initial stack of 1023 succeeds at a peak of 1024;
+a valid initial stack of 1024 refuses the emitted PUSH in both driver and X.
+Gas of 2 fails at PUSH, gas of 5 fails at AND and counted fuel of 2 refuses the
+second instruction. Exactly 6 gas becomes 0, PC 3 becomes 37 and count 41 becomes
+43. Wrong byte order and an oversized
+wrapping-cost counterexample retain the encoding and adequacy requirements.
+Complete ordered code, caller tail, memory, calldata and return buffers remain
+explicit. Independent read-only finder and skeptic reviews confirmed these
+statement, capacity and non-vacuity boundaries.
+
+The result does not establish source/compiler/frame origin, subsequent-PC fit,
+whole-program resource abstraction, STOP termination or Osaka/account/world/
+transaction/trace correspondence. All complete opcode rows remain open.
+
+## Selected Boolean-not fetched consumer
+
+The BooleanNotWords and BooleanNotConsumer modules consume the actual
+`Scalar.selectUnary .not .bool` certificate. The word equation is universal;
+the typed consequence uses an already evaluated canonical Boolean. At an
+arbitrary emitted ISZERO site, the producer derives decoding, charged gate,
+Scalar result, complete fetched-step State and full X continuation. Adequate
+gas (at least 3), legal stack capacity and counted fuel remain explicit. The
+supplied jump array is arbitrary, with no claim about scanner correctness.
+No source expression evaluation, short-circuit or source-frame origin is proved.
+
+Earlier private NumericRows02 coverage was a fixed-entry raw ISZERO law. This
+increment adds arbitrary-site/resource/array transport and the selected typed
+certificate consumer; it counts no new complete opcode row. BooleanNotControls
+uses populated writable true and static false clients at PC 3, with distinct
+caller-tail words, account fields, memory, calldata and both return buffers.
+Raw zero, maximum and noncanonical 2 remain separate from canonical Booleans.
+A legal 1024-word input succeeds without growth. Gas precedes arity failure;
+counted-fuel refusal precedes gas. Exact ordered bytes distinguish ISZERO from
+bitwise NOT, and complete State equalities retain all untouched observations.
+The nonempty array is only a supplied-parameter probe. Independent read-only
+finder and skeptic reviews inspect these non-vacuity and scope boundaries.
+
+The result leaves all complete opcode rows open. It does not discharge compiler
+representation/source origins, full driver/resource adequacy, fork approval,
+physical allocation/padding, account/world, call/create, transaction or trace
+composition. The frozen P10 signatures are unchanged.
+
+## Selected unsigned bitwise-NOT fetched consumer
+
+UintNotWords and UintNotConsumer connect actual `Scalar.selectUnary .bnot .uint`
+and its `uintNot.correct` certificate to the native NOT operation. The typed
+law retains the actual intrinsic evaluator's optional result; the native word
+is the full 256-bit complement. The input is an already evaluated intrinsic
+uint, not a source expression or compiler frame. Decoding and charged gates
+are proved for arbitrary emitted sites, adequate gas, legal unary capacity,
+counted fuel and arbitrary supplied jump arrays. Neither a desired native
+execution nor a decoder result is assumed. Complete State and X conclusions
+retain caller tails and untouched seed observations under the represented
+initial code, PC and stack.
+
+The private NumericRows01 fixed-entry raw NOT law is prior coverage. This
+increment adds arbitrary-site/resource/array and selected-certificate consumer
+transport, not new opcode arithmetic coverage or any complete opcode row.
+Inhabited typed258 uses the existing source certificate and a writable populated
+state. Static raw clients cover zero, maximum and the high bit; a legal
+1024-word input succeeds without growth. Gas-before-arity and fuel-before-gas
+refusals are explicit. Full ordered code, stack, memory, calldata and both
+return buffers distinguish NOT from logical ISZERO, with exact gas, PC and
+instruction-count changes. Constructor wrapping is a word probe, not a source
+overflow-policy theorem; the nonempty supplied array is not scanner evidence.
+Independent read-only finder and skeptic reviews confirmed these boundaries.
+All complete opcode rows and the broader source/compiler, physical allocation,
+resource/driver, fork, account/world and transaction/trace obligations remain
+open. Frozen P10 signatures are unchanged.
+
+## Selected wrapping arithmetic consumers
+
+WrappingArithmeticWords and WrappingArithmeticConsumer connect the actual
+`wrappingAdd`, `wrappingSub` and `wrappingMul` selections to emitted ADD, SUB
+and MUL. Existing word-ring representation is reused. Each typed consumer
+retains its actual optional intrinsic evaluator certificate, with already
+evaluated uint inputs. It derives decoding, charged gates, native dispatch,
+complete State and X continuation at arbitrary represented sites and supplied
+jump arrays. ADD and SUB charge 3; MUL charges 5. Legal input capacity and
+counted fuel stay explicit. No desired trace, decoder or intermediate-frame
+premise is supplied by the client.
+
+Private NumericReference already proves word morphisms, arbitrary-seed supplied
+ADD/SUB/MUL steps and typed wrapping-certificate transport to complete supplied
+steps (including an actual source result). NumericRows01 fixed-entry SUB/MUL is
+also prior coverage. The new contribution is emitted-site decoding, actual
+resource-gate admission, driver/X composition, selected code images and supplied-
+array generality. This is not the first typed certificate/reference transport;
+it counts no new arithmetic or complete opcode row. WrappingArithmeticControls applies all three selected laws and includes an
+inhabited typed 0 minus 1 result with the actual full State/X. Raw maximum-plus-
+one, zero-minus-one and high-bit-times-two wrap at exactly 256 bits. A legal
+1024-word input becomes 1023 while retaining every caller-tail word. Operand
+order, opcode bytes, differing MUL cost, gas-before-arity and fuel-before-gas
+refusals are explicit, alongside complete ordered memory/calldata/return data.
+Checked subtraction still rejects 0 minus 1; the wrapping result does not change
+its profile or failure policy. Independent read-only finder and skeptic reviews
+confirmed these boundaries.
+
+The represented code/PC/stack and arbitrary jump-array parameters do not prove
+source-frame origin, scanner validity, physical allocation, whole driver/resource
+adequacy, approved fork correspondence, account/world or transaction/trace
+composition. All complete opcode rows and the broader lane remain open. The
+frozen P10 signatures are unchanged.
+
+## Selected unsigned shift sequence consumers
+
+LogicalShiftExecution connects the actual `uintShl` and `uintShr` emitters to
+both fetched instructions: SWAP1 followed by SHL or SHR. Source operands are
+value/count; the native shift consumes count/value. The first actual SWAP law,
+complete intermediate-State alignment, post-SWAP PC and exact remaining gas
+are derived, then the second charged gate and fetched step are composed into
+driverSteps and X. The selected typed consequences retain the existing optional
+intrinsic evaluator certificates on already evaluated uint values. Legal
+capacity, gas at least 6, counted fuel and nonwrapping post-SWAP prefix remain
+explicit. The first PC bound follows from that prefix. These sequence laws use
+the empty supplied jump array; they make no scanner-correctness claim.
+
+The prior private NumericRows05 word/saturation and fixed-entry raw shift laws,
+published Scalar.Shifts two-instruction source certificates and published
+StackFamilyConsumer fetched SWAP laws are existing coverage. The increment is
+the actual selected two-instruction fetched composition and derived complete
+intermediate state/resources, not new word arithmetic or first source-certificate
+correctness. No complete opcode row is closed.
+
+LogicalShiftControls consumes the typed producers on nonzero 3 shifted left by
+2 and 128 shifted right by 7, including complete State/X. Static clients cover
+counts 0, 255, 256 and maximum; the full count word is never reduced modulo 256.
+Legal 1024-word inputs pass SWAP unchanged in height, then shift to 1023 words
+with the original tail. Gas 2 fails at SWAP, gas 5 fails at the shift, and counted
+fuel 2 fails before the second instruction. Omitted SWAP, wrong operand order,
+low-byte count reduction and logical-versus-arithmetic right shift are negative
+controls. Exact ordered code, intermediate/final stacks, PC, gas, instruction
+count, memory, calldata and both return buffers are explicit. Independent
+read-only finder and skeptic reviews checked these non-vacuity boundaries.
+
+The X continuation law does not assert STOP success, source/compiler/frame
+origin, physical allocation/padding, whole driver/resource adequacy, approved
+fork, account/world or transaction/trace correspondence. Signed source counts
+are outside these uint statements, without changing any profile or refusal.
+All full opcode rows and broader lane obligations remain open. Frozen P10
+signatures are unchanged.
+
+## Selected signed non-strict comparison
+
+SignedLeExecution connects the actual `intLe` emitter, SGT followed by ISZERO,
+to both charged fetched instructions. It derives the strict signed predicate,
+complete intermediate State and second-instruction resource/PC requirements.
+The existing `flag_not_lt` lemma turns that predicate into the non-strict
+result, including equality. The typed consequence retains the actual optional
+intrinsic certificate on already evaluated signed inputs. Legal capacity, gas
+at least 6, counted fuel, post-SGT prefix fit and the empty supplied jump array
+remain explicit. No desired trace, decoder, source frame or flag premise is
+provided by the caller.
+
+The reserved SignedOps word bridge, private NumericRows03 word/fixed-entry
+strict-comparison and typed strict-source results, published Comparisons.intLe
+source certificate, prior ISZERO and local PC/gas transport are existing
+coverage. This increment is selected SGT/ISZERO fetched composition and its
+derived complete intermediate state/resources. It is not first signed arithmetic,
+strict-source, source-certificate or ISZERO correctness; no full opcode row closes.
+
+SignedLeControls applies the selected producer to -1 versus 0 in both orders,
+with source result, full State and X. Static clients include signed minimum,
+signed maximum and equality. A legal 1024-word input becomes 1023 after SGT
+and keeps that height through ISZERO, preserving its caller tail. Gas 2 fails
+at SGT, gas 5 at ISZERO, and counted fuel 2 before the second instruction.
+Unsigned comparison, strict comparison at equality and omission of ISZERO are
+negative controls. Exact code, intermediate/final stack, gas, PC, instruction
+count, memory, calldata and both return buffers remain ordered observations.
+Independent read-only finder and skeptic reviews checked these boundaries.
+
+The local continuation law asserts no STOP success, scanner validity, source/
+compiler/frame origin, physical allocation, whole-resource or approved-fork
+adequacy, account/world or transaction/trace correspondence. All full rows and
+broader lane obligations remain open; frozen P10 signatures are unchanged.
+
+## Value-directed consecutive storage reads
+
+StorageChaseExecution composes two actual emitted, fetched SLOAD instructions.
+The first loaded word supplies the second key; it is never assumed equal to
+the initial key. Both charges are computed from the actual intermediate states.
+Their sum is an explicit exact resource-adequacy condition, from which the
+second gate's remaining gas is derived. A separate 4200-gas sufficient bound
+covers both reads. The complete State/X continuation, exact natural gas debit,
+persistent storage-read function and transient read observations are proved.
+Post-first prefix fit, legal stack capacity, counted fuel and the empty supplied
+jump array stay explicit.
+
+StorageChaseCost consumes the published warmth/isolation results: when the
+loaded value equals the original key, the second charge is 100; otherwise it
+is the original state's charge at that loaded value. This exhaustive numeric
+case split adds no hash injectivity or symbolic-path premise. The intermediate
+record and cost observations alone are recipes; the execution theorem ties
+them to actual fetched execution under the stated resource condition.
+
+Prior StorageReadConsumer charged/source-slot transport, StorageWarmTransport
+reinstalled-key/frame/isolation laws, the same-value-as-key two-read fixture and
+explicit-key reload sequences remain prior coverage. The increment is general
+value-directed two-read composition and successful value-not-key clients. It
+does not add compiler admission for pointer chasing or complete a symbolic
+compiler-path, storage-layout, source or world correspondence clause.
+
+StorageChaseControls executes 13 to 17 to 99 with two cold charges, and the alias
+13 to 13 with a warm second read. A locally warm slot 17 reduces the charge;
+a warm pair for another owner does not. Direct consumers exercise both arms of
+the charge theorem. Legal 1024-word inputs retain their height and full tail.
+Exact 2200-gas alias success is distinguished from nonalias second-read failure,
+first-read gas failure, fuel failure and actual empty-stack refusal. Storage
+and transient observations remain separate, with complete ordered code, stack,
+accessed-key pairs, gas, PC, instruction count, memory, calldata and both return
+buffers. Independent read-only finder and skeptic reviews checked these limits.
+
+This numeric-reference consumer claims no compiler pointer feature, scanner or
+STOP result, physical allocator/padding, whole-program resource abstraction,
+approved fork, account/world or transaction/rollback/trace correspondence.
+All complete opcode rows remain open; frozen P10 signatures are unchanged.
+
+### Arbitrary-site charged POP
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/PopConsumer.lean` consumes the
+published decoder and actual checked/fetched reference step. `pop_agreement`
+removes exactly the Scalar head and transports the complete resulting native
+State and X continuation. It quantifies over emitted sites, adequate initial
+gas, caller tails, fuel and supplied jump arrays. The input is explicitly
+nonempty and at most 1024 words; the supplied array is a parameter, not a
+proved jump set. Both static permissions are allowed. No decoder, execution
+or caller-frame result is taken as a premise.
+
+Earlier private `NumericRows01.row_pop_agreement` already covered a fixed-entry
+POP with gas 2. The new result generalizes site, gas and array parameters;
+it does not count POP as a newly handled primitive or close a full opcode row.
+The two StackFamily consumers continue to own the existing DUP/SWAP coverage.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/PopControls.lean` instantiates the
+producer on nonzero 17, zero and maximum words, writable and inherited-static
+states, singleton and legal 1024-word inputs. Complete State equality preserves
+accounts and ordered memory/calldata/return buffers. Distinct ordered-tail and
+retained-head negatives reject incorrect stack observations. Actual driver
+refusals retain fuel-before-gas and gas-before-stack ordering.
+
+Independent finder and skeptic source reviews found no proof defect and
+identified the earlier fixed-entry coverage for explicit accounting. These are
+kernel reference-model consumers; source/compiler origin, valid-jump-set
+adequacy, Osaka approval and global resource/account/transaction correspondence
+remain separate. All full opcode rows remain open.
+
+### Zero-condition JUMPI
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/JumpZeroConsumer.lean` discharges the
+actual reference gate for any destination word and supplied jump array when
+the second stack word is zero. The destination is not checked on this branch.
+The emitted site supplies the real decoded JUMPI byte; no successful gate,
+decoder result or desired execution is assumed. The complete native output
+removes both operands, charges 10 gas, increments execLength and falls through
+using the reference word PC addition. The theorem retains explicit initial gas,
+nonempty two-operand representation, legal input capacity and fuel bounds.
+It transports the actual X continuation without asserting later termination.
+
+The earlier `checked_jump_if` exposes both outcomes of the gate, and
+`ExecutionControls.jump_if_skipped` already exercises a fixed skipped branch.
+This adds a universal discharged-zero-gate consequence, not first JUMPI
+correctness, general scanner agreement or a completed full opcode row.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/JumpZeroControls.lean` consumes the
+producer with the maximum destination and an empty supplied array, with a
+nonempty array and writable excess-gas state, and with minimum/full legal input
+stacks. Nonzero conditions 1 and 2 restore bad-destination refusal. Additional
+contrasts retain fuel-before-gas and gas-before-stack/destination ordering in
+the checked driver. Complete State equalities retain account maps and ordered
+memory, calldata, returnData and H_return bytes; wrong tail order and a taken
+PC observation are rejected. Supplied arrays are parameter probes, not proved
+scanner results or permission to accept bad targets on a nonzero branch.
+
+Separate independent finder and skeptic source reviews found no defect.
+These are conditional-on-resources kernel reference-model consumers, not
+source control-flow, compiler origin, scanner, Osaka, account/world or global
+resource adequacy proofs. All full opcode rows remain open.
+
+### Supplied-membership JUMPI
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/JumpMemberConsumer.lean` proves
+`jump_member_agreement` for arbitrary emitted sites and condition words when
+the actual supplied array contains the destination. It derives the checked
+gate and decoded step, retaining the exact conditional PC, complete charged
+State and X continuation. Adequate gas, two represented operands and legal
+initial stack capacity remain explicit. Array membership is a data premise;
+it is neither successful execution assumed as a premise nor scanner agreement.
+
+`jump_missing_refusal` proves actual driver and X BadJumpDestination refusal
+when the condition is nonzero and the supplied array lacks the destination.
+It retains adequate gas and the represented two operands. No capacity premise
+is needed because this target failure precedes capacity and static checks.
+The shorter X fuel in this refusal theorem admits only the gate failure, not
+a successful continuation or later termination.
+
+Earlier `checked_jump_if` exposes the gate, and `ExecutionControls` already
+contains fixed taken/skipped clients. The zero-condition consumer above has
+no membership premise. These new consequences discharge membership and missing
+target clauses universally; they do not count a new primitive or full row.
+
+`../../Bridge/SolidityBridge/RoadmapV15/P10/JumpMemberControls.lean` consumes both
+producers with a real fixture JUMPDEST at byte 5, static condition 2, writable
+zero/maximum conditions, minimum and full legal stacks, and missing-target
+contrasts. Gas, arity and fuel failure ordering is retained. Complete State
+and ordered-tail/PC negatives retain account maps and ordered memory, calldata,
+returnData and H_return. Computing the backend scanner on these exact bytes
+yields `[5]`; this is only a finite fixture fact, not agreement with the reference
+scanner or correctness of arbitrary supplied arrays.
+
+Independent finder and skeptic source reviews found no defect. Compiler/source
+control-flow, scanner, Osaka, global resources, account/world and transaction
+correspondence remain separate. All full opcode rows remain open.

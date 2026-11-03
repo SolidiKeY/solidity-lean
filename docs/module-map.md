@@ -1670,6 +1670,65 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedDivisionControls.lean` | Populated unsigned high-word, zero, maximum, stack-capacity and ordered refusal/observation controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageWarmTransport.lean` | SLOAD warm cost after the vendor update, distinct-key cost isolation, TLOAD separation, fetched SLOAD resource frame. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageWarmControls.lean`, `Bridge/SolidityBridge/RoadmapV15/P10/StorageIsolationControls.lean` | Populated warm/cold, owner/key, transient and equal-pair controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageOwnerFixtures.lean` | Populated same-slot/different-owner post-SLOAD cost-probe data. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageOwnerControls.lean` | Direct distinct-owner client, cold/prewarmed cost separation and complete ordered observations. |
+| `Bridge/SolidityBridge/RoadmapV15/WordByteTransport.lean` | Reused pure backend immediate/word/byte transport; unchanged original owned proof package. |
+| `Bridge/SolidityBridge/RoadmapV15/EncodingUniqueness.lean` | Reused exact length/value byte-encoding uniqueness; no allocator or hash interpretation. |
+| `Bridge/SolidityBridge/RoadmapV15/ReferenceReader.lean` | Reused actual pinned reader versus backend big-endian decoding. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/WordPushConsumer.lean` | Exact Scalar.pushWord payload, decode, charged fetched State/X and legal full-stack overflow. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/WordPushFixtures.lean` | Typed populated account/memory/code fixture data; no new machine relation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/WordPushControls.lean` | Complete-State word/zero/signed/wrap controls, legal capacity bounds, gas/fuel and endian/length negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupSites.lean` | Actual signedCode tail site and emitted byte-index/native cleanup word transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupTail.lean` | Exact signedCode image and complete charged fetched SIGNEXTEND tail paired with intrinsic signed cleanup. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupFixtures.lean` | Populated explicit tail-entry fixtures; no preceding PUSH execution witness. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupControls.lean` | Universal producer client, complete-State signed execution, gas/fuel and truncation/width/index/order controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupAlignment.lean` | Actual gas subtraction, modulo-PC addition and complete PUSH-output/tail-entry State equality. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCleanupComposition.lean` | Both emitted signedCode instructions: intrinsic result, counted fetched execution and X continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCompositionFixtures.lean` | Exact-gas populated initial/final state data for both instructions. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedCompositionControls.lean` | Direct producer client, signed/truncating/full-width complete-State controls, gas/fuel and wrap/order negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BitwiseWords.lean` | Actual pinned AND/OR/XOR modulo versus intrinsic bounded words. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BitwiseConsumer.lean` | Arbitrary emitted-Site/adequate-gas AND/OR/XOR Scalar, checked driver and complete-State X correspondence. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BitwiseFixtures.lean` | Populated static/writable bitwise code, gas and expected State data. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BitwiseControls.lean` | Distinct per-operation State/X clients, legal stack boundary, resource/refusal and ordered observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedCleanupLayout.lean` | Actual unsigned mask/result, adequate native gas debit, emitted code image and complete PUSH/tail State alignment. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedCleanupExecution.lean` | Both actual emitted unsignedCode instructions with exact local gas6 and full-State X continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedCleanupFixtures.lean` | Populated exact-gas initial/final States and actual emitted PC-fit witness. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedCleanupControls.lean` | Truncating/full-width direct clients, legal peak-stack success/refusal, gas/fuel and ordered encoding/buffer controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BooleanNotWords.lean` | Universal ISZERO word transport and actual canonical Boolean-not instruction selection. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BooleanNotConsumer.lean` | Arbitrary-site charged fetched ISZERO and selected typed Boolean-not complete-State/X consumers. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BooleanNotFixtures.lean` | Populated static/writable clients and a nonempty supplied jump-array parameter probe. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BooleanNotControls.lean` | Canonical/raw separation, full legal unary capacity, ordered observations and gas/arity/fuel negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UintNotWords.lean` | Existing word complement transport and actual unsigned-not certificate selection. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UintNotConsumer.lean` | Arbitrary-site charged fetched NOT, complete-State/X and optional intrinsic uint evaluation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UintNotFixtures.lean` | Populated static/writable unsigned-not client data and supplied-array probe. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UintNotControls.lean` | Inhabited typed258, word boundaries, full legal unary capacity, ordered observations and refusal controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/WrappingArithmeticWords.lean` | Existing ADD/SUB/MUL word representation and actual wrapping certificate selection. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/WrappingArithmeticConsumer.lean` | Arbitrary-site charged ADD/SUB/MUL, selected optional intrinsic uint evaluation and complete State/X. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/WrappingArithmeticFixtures.lean` | Populated original Op/Site/State data with explicit per-opcode observation cost. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/WrappingArithmeticControls.lean` | Inhabited typed wrapping, order/high-bit/boundary clients, legal capacity and distinct gas/fuel/checked-operation negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LogicalShiftWords.lean` | Existing full-word SHL/SHR saturation and word-representation transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LogicalShiftConsumer.lean` | Actual charged fetched count/value SHL/SHR steps and complete State/X. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LogicalShiftLayout.lean` | Selected SWAP1-plus-shift bytes, one-byte prefix/PC transport and full intermediate-State alignment. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LogicalShiftExecution.lean` | Both emitted selected unsigned shift instructions, derived intermediate resources and actual typed optional evaluation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LogicalShiftFixtures.lean` | Populated source-order shift inputs, post-SWAP PC-fit witness and exact two-instruction output data. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LogicalShiftControls.lean` | Typed nonzero clients, full-count saturation, legal capacity, two-stage gas/fuel failures and complete ordered observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedLeWord.lean` | Existing signed-word SGT bridge consumed through exact representation equality. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedLePrimitive.lean` | Actual charged fetched SGT on arbitrary represented sites, retaining complete State/X. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedLeLayout.lean` | Selected intLe SGT/ISZERO code, prefix extent and complete intermediate-State alignment. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedLeExecution.lean` | Both selected signed-le instructions with derived predicate/resources and optional intrinsic source evaluation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedLeFixtures.lean` | Populated typed signed comparison inputs and actual code-position witness. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedLeControls.lean` | Negative/equal/signed-boundary clients, legal capacity, staged refusals and complete ordered observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseLayout.lean` | Actual two-SLOAD bytes, value-directed intermediate State, PC alignment and computed charge bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseExecution.lean` | Both fetched reads with exact computed adequacy/debit, full State/X and persistent/transient observation preservation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseCost.lean` | Exhaustive numeric equal/distinct next-key charge classification from published warmth/isolation facts. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PopConsumer.lean` | Arbitrary-site charged POP, exact Scalar tail, complete native State and X continuation with explicit legal input/resources. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PopControls.lean` | Populated static/writable, zero/max, legal stack boundaries, ordered state and gas/arity/fuel refusals. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/JumpZeroConsumer.lean` | Universal zero-condition JUMPI: actual destination-check bypass, charged fetched fallthrough/full State/X under legal input and gas bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/JumpZeroControls.lean` | Maximum destination, arbitrary-array, static/writable, legal stack boundaries and nonzero/refusal contrasts with ordered observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/JumpMemberConsumer.lean` | Supplied-membership JUMPI charged State/X transport and nonzero missing-target driver/X refusal derived from actual checks. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/JumpMemberControls.lean` | Taken/zero/max condition clients, legal stack boundaries, missing-target priority and complete ordered byte/state controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseFixtures.lean` | Populated value-not-key chain, alias and owner-specific warmth data with coherent memory. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseControls.lean` | Full-state nonalias/alias clients, direct charge-law consumers, exact gas/fuel/stack and ordered observation controls. |
 
 ### P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
 
