@@ -1486,6 +1486,7 @@ import Solidity.Frontend.LibraryTryImport
 import Solidity.Frontend.PaymentImport
 import Solidity.Frontend.PaymentPlan
 import Solidity.Frontend.Problems
+import Solidity.Frontend.QualifiedUnits.Relation
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Frontend.SolcJson.Body
