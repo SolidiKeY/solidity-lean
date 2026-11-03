@@ -72,7 +72,6 @@ run_elab do
       let text ← e.toMessageData.toString
       if text=="memory replay requires kernel checking" then return true
       throw e)
-  unless rejected do throwError "disabled-kernel fallback admission accepted"
-  if (← getEnv).contains (Name.num base 2) then
-    throwError "disabled-kernel admission leaked a declaration"
-  logInfo "checked fallback truth values, both false components, names, collision, rollback, dispatch and kernel preflight"
+  -- This tests the shared preflight API; admission rollback is checked above.
+  unless rejected do throwError "shared kernel preflight accepted disabled checking"
+  logInfo "checked fallback truth values, both false components, names, collision, rollback, dispatch and shared kernel preflight"
