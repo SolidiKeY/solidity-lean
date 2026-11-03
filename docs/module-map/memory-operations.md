@@ -27,7 +27,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Aggregates/G18MappingExpressionControls.lean` | Inhabited Source globals, pipeline/sample baselines, exact low horizons and certificate-derived wrong-output/stale-state controls. |
 | `Backend/Aggregates/G18ArrayAccess.lean` | Declared dynamic-array cell typing, actual stored-length/bounds executions and Source-to-intrinsic selected-cell read transport. |
 | `Backend/Aggregates/G18ArrayAccessControls.lean` | Populated Basket length/data witness, exact panic branches and missing-length/wrong-location/type-versus-bounds controls. |
-| `Backend/MemoryCopies/Interface.lean` | Draft typed memory default/copy certificate signatures (see [memory copies](../feature-work/memory-copies.md)); Source outcomes, finite heap, dynamic length, alias and overlap obligations. |
+| `Backend/MemoryCopies/Interface.lean` | Draft typed memory default/copy certificate signatures (see [memory copies](../feature-work/memory-copies.md)); Finite heap, dynamic length, alias and overlap obligations; Source outcomes are in SourceInterface. |
 | `Backend/MemoryCopies/Premises.lean` | Explicit unfinished producer boundaries for allocation panic, aliases and reached location steps; no assumed instances. |
 | `Backend/MemoryCopies/InterfaceV2.lean` | Non-vacuous default/copy signatures with concrete fitting allocator witnesses; only the new live-content heap obligation. |
 | `Backend/MemoryCopies/InterfaceV2Laws.lean` | Fitting-witness cost bounds, empty-code impossibility and cost-W refutations for both V2 certificates. |
@@ -165,3 +165,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceControls.lean` | Inhabited Source certificates with populated storage-copy observations, default/timeout controls and size-boundary witnesses. |
 | `Backend/MemoryCopies/SourceSize.lean` | Derives new-array oversized-length panic from evaluation, conversion and size hypotheses. |
 | `Backend/MemoryCopies/SourceFramesInterface.lean` | Exact Source allocation-frame obligations for all default and storage-load traversal families, including halted runs. |
+| `Backend/MemoryCopies/SourceFramesCore.lean` | Source allocation-frame reflexivity/transitivity and bind/read/allocation preservation over the existing Hoare rules. |
+| `Backend/MemoryCopies/SourceDefaultFrames.lean` | Generic allocation-frame proofs for all four Source default traversals and exact success-or-Halt outcome certificates. |
+| `Backend/MemoryCopies/SourceStorageFrames.lean` | Generic allocation-frame proofs for all five Source storage-load traversals and exact outcome certificates. |
+| `Backend/MemoryCopies/SourceRootCopies.lean` | Derives a fresh-parent Source copy certificate from an actual successful load, preserving old objects and nonheap state. |
+| `Backend/MemoryCopies/SourceFramesControls.lean` | Declared nested bytes-array copy, fixed reference-array default and partial-timeout controls with retained child allocation. |

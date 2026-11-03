@@ -97,3 +97,34 @@ these signatures neither guarantee success nor impose a new shape filter.
 The proofs must use the existing Source allocation and Hoare operations.
 Physical compilation, size/finalization failures, and layout agreement remain
 separate obligations; no missing producer result is assumed here.
+
+`SourceFramesCore.lean` proves allocation-frame composition through the existing
+Source bind rule and proves the allocator and typed storage reads preserve that
+frame. `SourceDefaultFrames.lean` discharges all four default traversal fields;
+`SourceStorageFrames.lean` discharges all five load traversal fields. These
+proofs quantify over every environment, locals context, Source type, path and
+horizon. They retain the real success or Halt and its reached state, even when
+a child was allocated before timeout. No capacity, success or producer premise
+is required for these frame laws.
+
+`SourceRootCopies.lean` derives the complete fresh-parent Source copy
+certificate from an explicit successful `loadMem` execution; its frame and
+freshness observations are proved, not independent assumptions. Requested
+memory type/path agreement with compiled storage layout is still separate.
+`SourceFramesControls.lean` uses a declared dynamic storage array of bytes:
+two empty bytes child objects are allocated at 1 and 2 and the copied parent at 3, while
+the old Boolean at 0 and all nonheap state are preserved. The parent returns
+the distinct child references, and index 2 panics. A fixed memory array of two
+bytes references also has an inhabited default certificate. Lower horizons
+time out after the first child allocation; the reached heap differs from the
+input heap and is never silently rolled back.
+
+These are Source traversal/frame and fresh-parent results. They do not prove
+physical emitted-code correspondence, total successful traversal, contents for
+every graph, checked allocation-size/finalization failures, or whole G33/G35
+coverage. The remaining compiler and representation work stays open.
+
+Independent read-only finder and skeptic reviews found no semantic defect in
+these Source frame laws or controls. Both retain the compiler/layout/size
+boundaries above. The bytes children are empty; this control does not establish
+populated byte-payload copying.
