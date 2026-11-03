@@ -80,3 +80,38 @@ theorem captured_false :
 
 Draft only; no placeholder declaration or completed coverage claim.
 The Source loop proof and mapped transport stay with Sol.
+
+
+## Mapped condition false-branch adapter
+
+Module: Solidity/Backend/StructuredFlow/MappedBranch.lean (new, not created).
+Lemma: false_run. Routine: append the fresh-cell load to the checked emitter,
+combine run_append_ok/run_exact/upd_same with entry.vals and the initial false
+read, then apply the published Branch.false_run. The true arm's exact pending
+skip and complete compiler integration remain with Sol.
+
+```lean
+namespace Solidity.Backend.StructuredFlow.MappedBranch
+open Solidity.Evm Solidity.Lowering.V07
+open Solidity.Lowering.G19.AssignmentReturnFlag
+
+def condition {srcΓ : Source.RCtx} {Γ : Ctx} (b : Nat) (m : ContextMap srcΓ Γ)
+    (i a : Source.Idx srcΓ .bool) (hi : (m.slot i).1 = .val .bool)
+    (ha : (m.slot a).1 = .val .bool) : List Instr :=
+  MappedCondition.emit b m i a hi ha ++ [.mload (cell (b + Γ.length))]
+
+theorem false_run {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    {L b : Nat} {F : Frag Γ} {caller : State C Γ} {machine : Machine}
+    (m : ContextMap srcΓ Γ) (i a : Source.Idx srcΓ .bool)
+    (hi : (m.slot i).1 = .val .bool) (ha : (m.slot a).1 = .val .bool)
+    (entry : Sim C L b F caller machine)
+    (read : TEnv.get (boolSlot m a ha) caller.env = false) (left right : List Instr) :
+    run (Branch.emit (condition b m i a hi ha) left right) machine =
+      run right (MappedCondition.after b m i a hi ha machine)
+
+end Solidity.Backend.StructuredFlow.MappedBranch
+```
+
+Draft statement only, not elaborated or counted as proof evidence. Import the
+published BranchSelector and the new checked MappedCondition; do not define a
+new representation or assume the condition's run.
