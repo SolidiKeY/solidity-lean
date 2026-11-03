@@ -1604,6 +1604,8 @@ import Solidity.Lowering.G19.AssignmentReturnFlag
 import Solidity.Lowering.G19.AssignmentReturnFlagControls
 import Solidity.Lowering.G19.AssignmentWhileBreak
 import Solidity.Lowering.G19.AssignmentWhileBreakControls
+import Solidity.Lowering.G19.AssignmentWhileReset
+import Solidity.Lowering.G19.AssignmentWhileResetControls
 import Solidity.Lowering.G19.ConditionalSequence
 import Solidity.Lowering.G19.ConditionalSequenceControls
 import Solidity.Lowering.G19.ConditionalStatement

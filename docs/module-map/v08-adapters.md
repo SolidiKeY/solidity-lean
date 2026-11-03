@@ -432,3 +432,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/G19/WhileReturnControls.lean` | Inhabited map-guided G19 clients over V07's actual mixed Bool/integer/ memory/storage fixture. |
 | `Backend/StructuredFlow/ConditionalSequenceCompiler.lean` | Compiler connection for the existing V07-related conditional followed by an assignment in its reached caller context. |
 | `Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean` | Inhabited Source/compiler continuation witnesses, frame observations and wrong-slot controls. |
+| `Lowering/G19/AssignmentWhileReset.lean` | Mapped Boolean assignment while with an actual resetting body and intrinsic loop. |
+| `Lowering/G19/AssignmentWhileResetControls.lean` | Inhabited Source/compiler loop, alias and prefix-only omission controls. |
