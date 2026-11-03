@@ -79,6 +79,17 @@ both raw absent cells and defaulted zero reads. Generic smaller-fuel cases,
 Source AST/address compilation and target realization remain open; this is not
 G35 memory-to-storage work.
 
+`SourceStorageCopyBarrier` proves the complementary primitive snapshot barrier:
+`loadElems` fuel≤count, array capture fuel≤count+1 and distinct-path
+`storeVal(storRef)` fuel≤count+2 return timeout with the entire initial state.
+Valid source-header/element reads are explicit; no destination-header/type or
+writable premise is needed before capture completes. Populated controls preserve
+complete ordered raw/default reads, contexts and journals, and distinguish the
+first payload write, malformed-source failure, malformed destination, same-path
+success and empty-array fuel boundary. Finder and skeptic reviewed the actual
+constructor thresholds and complete controls without running Lean. These laws
+are intrinsic Source execution, not an implicit rollback or compiler bridge.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

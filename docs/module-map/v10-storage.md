@@ -76,3 +76,6 @@
 
 | `Lowering/StorageOps/SourceStorageCopyPrefix.lean` | Prepared-fuel actual storage-to-storage Source copy: exact runtime journal prefix or header-last success |
 | `Lowering/StorageOps/SourceStorageCopyPrefixControls.lean` | Uniform and populated length/fuel controls, raw/default observations and complete outcomes/context/journal snapshots |
+
+| `Lowering/StorageOps/SourceStorageCopyBarrier.lean` | Actual primitive capture timeout: arbitrary runtime fuel/count and full-state preservation before destination work |
+| `Lowering/StorageOps/SourceStorageCopyBarrierControls.lean` | Populated complete barrier/boundary outcomes, ordered raw/default/context/journal controls and source/self-copy negatives |
