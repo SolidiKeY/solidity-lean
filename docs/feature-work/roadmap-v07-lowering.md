@@ -48,7 +48,8 @@ no Source declaration execution or heap-content relation is asserted.
 references in each actual pipeline order. It derives both captured value
 relations and every reached caller binding from initial alignment; two drops
 restore the updated caller exactly. No operand-separation premise is required.
-No control module on master instantiates these theorems yet. An
+`ReferenceRegisteredControls` supplies closed memory/storage capture and
+distinct-reference assignment clients in the default import closure. An
 arbitrary input value relation does not establish global heap alias reflection.
 These supported clauses do not supply a general elaborator/operand producer,
 copy/delete/lifetime validity or graph admission. G16/G17 and Backfill A/B stay
@@ -155,8 +156,8 @@ and are proved by `integer_related` and `source_assign_local_run`.
 
 ## Open
 
-- Arithmetic beyond in-range and unchecked unsigned addition/subtraction; checked payloads;
-  constants, enums, cast programs; tuples, conditionals, updates, other conditions.
+- Arithmetic beyond in-range and unchecked unsigned addition/subtraction/multiplication; checked payloads;
+  constants, enums, cast programs beyond full-word integer sign conversion; tuples, conditional clauses beyond local assignments, updates, other conditions.
 - Elaborator agreement: relate `captureExpr`/`captureBefore`
   (`Syntax/Elab/Values.lean`) to these prefixes via a `Source.RExpr` to
   `DeferredSource.Operand` producer.
@@ -174,7 +175,9 @@ from `SelectionOK`, those field premises, nonempty/distinct fields and any valid
 comparison rank. The rank is proof-only; neither successful execution of the
 lowerer nor the producer's computed rank checks are premises.
 
-No control module on master instantiates these theorems yet. This establishes component completeness relative to
+`LocationGraphCompletenessControls` supplies a three-node client for both
+headlines, distinguishing physical declaration index2 from graph index0 and
+comparison rank30 from computed rank3. This establishes component completeness relative to
 structural premises; deriving them from accepted Source remains open. No P8
 producer instance, independent Source execution preservation or constructor
 coverage is supplied. G16/G17 and Backfill A/B remain partial; G18.01 still needs
@@ -195,7 +198,8 @@ postbinding from the initial `IntegerLocalFamily` and two initial reads/ranges.
 output-range, desired-run or postrelation premise. `source_from_pair` alone is a
 conditional composition helper; the concrete clauses discharge its pair premise.
 
-No control module on master instantiates these theorems yet. Checked Source
+`RegisteredScalarClients` supplies a closed mixed-caller client for every
+addition headline, including actual pair execution and context extension. Checked Source
 overflow does not establish target panic-payload transport.
 
 Queue: G16/G17 and Backfill A/B remain partial. G18.01 retains component
@@ -204,3 +208,180 @@ Source refusal repair. G18.02/.03 belong to V16, .04/.05 to V14, and G19 to
 V17. G18.06 requires their ordered accepted-source applications. Constructor
 coverage remains zero; checked payloads, signed wrapping and broader operand
 producers remain open.
+
+## Two effectful addition operands
+
+`WrappedAdditionPair.source_run` executes actual Source addition with operands
+`i = a` and `a = b`; `operand_run` runs the actual typed capture prefix and
+CP20 addition value, reading captures before dropping temporaries. Both reuse
+`WrappedAssignmentPair.sourcePost`/`targetPost` as observations of existing
+operations. They introduce no execution or state layer.
+
+`transport` derives both runs, the wrapped value relation and every selected
+postbinding from an initial `IntegerLocalFamily` and initial input reads/ranges.
+All aliases are permitted. Identity reflection selects the reached RHS when
+`i = b`; no separation, output-range, desired-run or postrelation premise is
+supplied. `extension` transports the actual operand through arbitrary thinning.
+All approved unsigned widths, both pipelines and arbitrary available fuel are
+quantified. These are supported operational clauses, not a general elaborator.
+
+the lane-only fixture WrappedAdditionPairChecks.lean (not on master) covers all five partitions of the
+three local roles, repeated family aliases, three-distinct overflow and in-range
+controls, physical captures, complete scalar caller observations, live memory/
+storage and world/global frames, and fresh-context transport. Actual stale and
+deferred reads produce incorrect values. Max-plus-one runs in both Source and
+target at all 32 approved widths give viaIR zero and legacy two, including256.
+Addition commutes: ordered captures/caller writes distinguish schedules.
+The small `dropCorrect` Boolean checks one slot; whole-caller restoration follows
+from the exact generic operand run, not that Boolean alone.
+
+Independent finder and skeptic reviews found the composition sound and requested
+all alias partitions, real wrong-program, width and mixed-caller controls; these
+were supplied. Finder's initial-cell wording was corrected: initial cells hold
+200 and250; equal contents arise after some writes without merging identities.
+Four exact standard-axiom guards extend the registry to484, preserving480 prior
+sets and every old ordered observation. G16/G17 and BackfillA/B remain partial;
+accepted-source graph coverage/ranks/refusal and ordered G18 composition remain
+open. Constructor coverage stays zero; no checked-payload or external EVM proof
+is implied.
+
+## Unchecked unsigned multiplication
+
+`UnsignedMultiplication` reuses the existing unsigned type, range, word-then-
+narrow and modulo laws. `word_mul_eval` proves actual intrinsic `mulW` word
+wrapping; `mul_value_run` narrows that actual result below256 and retains the
+word branch at256. All approved unsigned widths and arbitrary input ranges
+within their types are supported; result bounds derive from Source wrapping.
+
+`source_locals_run` and `source_assign_read_run` execute actual Source `.mul`
+expressions, the latter assigning a local and observing its alias in the
+published pipeline order. `assign_read_operand_run` reads real captures before
+dropping temporaries. `assignment_transport` derives target reads, both actual
+runs, the wrapped value relation and every selected postbinding from the initial
+`IntegerLocalFamily` and source input reads/ranges. No output-range, desired-run
+or postrelation premise. `assignment_extension` uses actual operand weakening.
+`source_from_pair` is a conditional helper; concrete clauses discharge it.
+
+the lane-only fixture UnsignedMultiplicationChecks.lean (not on master) instantiates mixed callers: assigning
+200 into old250 gives legacy80 and viaIR64, with physical captures `[200,250]`
+and `[200,200]`. Same-slot200² gives64;7×3 gives21; zero is proved at every
+approved width. Actual Source and target max-squared runs give1 at all32 widths,
+including256; a bare checked word multiply rejects that full-width product.
+Actual unnarrowed50000, deferred64 and stale80 programs discriminate wrong
+lowerings. Live memory/storage references, source world, target global state
+and fresh-context transport are retained. Multiplication commutes, so capture
+observations distinguish operand roles rather than a reversed-product claim.
+Checked Source overflow controls do not prove target panic-payload transport.
+
+Independent finder and skeptic reviews found no proof defect. Ten exact
+standard-axiom guards extend the owned registry to494, preserving all484 prior
+sets and existing ordered fixtures. The new public P8 stage/cursor and aggregate
+components are retained; no concrete P8 producer, accepted-source graph totality
+or final aggregate/production composition is supplied here. G16/G17 and
+BackfillA/B remain partial; G18.01 prerequisites and ordered G18.06 applications
+remain open. G18.02/.03 belong to V16, .04/.05 to V14 and G19 to V17. Constructor
+coverage remains zero; no new external compiler/EVM experiment is claimed.
+
+## Registered headline clients
+
+`ReferenceRegisteredControls`, `LocationGraphCompletenessControls` and
+`RegisteredScalarClients` are registered through the shared import generator.
+They supply25 closed proof clients:3 reference,2 graph and10 each for addition
+and multiplication. None accepts a SourceSpec/P8 producer or the desired run.
+The pair-helper clients discharge their pair premise with actual local reads.
+Scalar clients use the existing mixed7/3 caller: assignment/read gives addition
+10/14 and multiplication21/49 in legacy/viaIR order, plus concrete wrapping
+controls. Reference clients allocate distinct live objects and preserve the
+typed storage root. Graph clients retain the original nontrivial chain and
+negative controls. All prior lane tests and observations remain unchanged.
+
+The owned exact registry covers494 general theorems and25 registered proof
+clients (519 exports). Changed/omitted copied client pins are rejected alongside
+the old mutation controls. The reference theorem binders move from explicit
+forall types to normal headers, preserving names, order, implicitness, premises
+and conclusions; the15 signature-linter warnings disappear without suppression.
+Focused kernel checks and independent reviews confirm the layout-only change.
+These clients add checking to the default closure; they close no additional
+source-admission, lifetime, production or constructor obligation.
+
+
+## Effectful multiplication pairs
+
+`WrappedMultiplicationPair` transports two actual integer assignments followed
+by unchecked multiplication, with runtime aliasing of any of the three local
+roles. Its source_run, operand_run, transport and extension theorems derive
+both published pipeline runs, wrapped value agreement and the entire selected
+post-family from initial reads, ranges and IntegerLocalFamily. Alias reflection
+derives the reached-donor branch; no separation or desired-result premise is
+supplied. The target captures operands before dropping fresh temporaries.
+
+`WrappedMultiplicationControls` registers four closed headline clients and
+inhabited controls for every alias partition, three distinct locations, live
+memory/storage callers, stale/uncaptured negatives and all32 approved widths.
+Legacy250 squared wraps to36; the distinct IR200*250 wraps to80. Equal numeric
+products do not claim reversed operand positions are distinguishable.
+Finder and skeptic found no proof defect; two copied comments were corrected.
+The exact owned registry now covers528 exports, preserving all519 prior sets.
+These are kernel and Lean observation controls, not external compiler/EVM
+experiments. G16/G17 and both backfills remain partial. G18.01 graph admission,
+G18.06 ordered V16/V14 applications, source failure/lifetime/production closure
+and constructor coverage remain open; G19 remains delegated to V17.
+
+
+## Full-word integer sign casts
+
+`WordCasts` proves actual uint256/int256 conversion execution in both directions.
+Source `convExplicit` and intrinsic `toInt`/`toUint` agree with the existing
+wrapping definition for all input values in range, including the signed threshold.
+Its assignment transports convert a fresh captured value before dropping the
+existing local-assignment prefix. Initial IntegerLocalFamily and a Source read
+derive the target read, actual runs, returned value relation and whole selected
+post-family. Caller locals retain their original type and assigned value.
+The two context-extension theorems use the actual Operand weakening runner.
+
+`WordCastControls` registers13 inhabited clients, one for each generic theorem,
+plus an inhabited mixed-family theorem. Both pipeline controls preserve semantic
+operand positions: a cast assignment returns−1 while an alias read observes old7
+in legacy order and reached uint256 maximum viaIR. Same-slot/repeated aliases,
+fresh Boolean extension, live memory/storage callers, eight signed/unsigned
+threshold boundaries in both pipelines and actual stale/checked-cast negatives
+pass focused kernel/Lean observation checks. Finder and skeptic found no proof
+or control defect; the two new module-map rows were placed inside the V07 table
+with complete paths after the finder flagged their initial placement. No narrower cast, constant conversion, checked-panic payload,
+Source admission, compiler/EVM experiment or production lowering is claimed.
+The owned registry now covers555 exports; all528 previous exact sets and every
+existing ordered fixture remain unchanged. G16/G17/BackfillA/B remain partial;
+G18.01 and G18.06 prerequisites, delegated G18 children and G19, five Terra
+rank-glue proposals and zero constructor coverage retain their prior status.
+
+
+## Effectful conditional expressions
+
+`ConditionalAssignments` transports actual Source `cond` with a local Boolean
+assignment condition and local assignment branches. Its typed target prefix
+captures the condition in one fresh binder, reserves a separate result binder,
+executes only the selected assignment, captures its reached value and reads the
+result before dropping both temporaries. Branches and condition may alias when
+their types permit it, including all roles naming one cell.
+
+The initial ContextMap relation and Boolean value reflection derive the choice,
+reached reads, actual Source/target runs, returned value relation and full
+post-context alignment. No branch purity, disjointness, desired run or final
+relation is supplied. The exact caller state and untouched Source machine,
+target storage/heap/net/balance/transaction fields remain explicit. Arbitrary
+Thin extension uses the existing Operand runner. Generic value correspondence
+is an explicit component parameter, not source admission or a heap compiler.
+
+`ConditionalControls` supplies seven closed headline clients and two inhabited
+mixed context witnesses. Both branches and pipelines have complete ordered
+numeric observations; Boolean controls overwrite the original condition after
+selection and read an aliased donor at its reached value. Actual eager, stale
+condition and post-drop consumers return11 instead of7. Live memory/storage,
+all-role aliases and fresh context controls are inhabited. A separate actual
+Source/target division-zero conditional fixture distinguishes skipped and
+selected failure by success classification only; it proves no general payload
+or arbitrary-branch lowering theorem. Finder/skeptic reviews found no defect.
+All571 owned axiom guards retain the555 prior sets and all old ordered fixtures.
+This is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B
+remain partial, G18 admission/composition prerequisites stay open, and no
+constructor or external compiler/EVM coverage is added.

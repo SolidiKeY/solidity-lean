@@ -2049,6 +2049,17 @@ import Solidity.Lowering.V07.LocationGraphCompleteness
 import Solidity.Lowering.V07.ReferenceCaptureRelated
 import Solidity.Lowering.V07.ReferenceOrderRelated
 import Solidity.Lowering.V07.UnsignedAddition
+import Solidity.Lowering.V07.ConditionalAssignments
+import Solidity.Lowering.V07.ConditionalControls
+import Solidity.Lowering.V07.LocationGraphCompletenessControls
+import Solidity.Lowering.V07.ReferenceRegisteredControls
+import Solidity.Lowering.V07.RegisteredScalarClients
+import Solidity.Lowering.V07.UnsignedMultiplication
+import Solidity.Lowering.V07.WordCastControls
+import Solidity.Lowering.V07.WordCasts
+import Solidity.Lowering.V07.WrappedAdditionPair
+import Solidity.Lowering.V07.WrappedMultiplicationControls
+import Solidity.Lowering.V07.WrappedMultiplicationPair
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen

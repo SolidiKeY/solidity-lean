@@ -1983,6 +1983,15 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/V07/ReferenceCaptureRelated.lean` | Initial context-derived reference captures, fresh context extensions and exact caller restoration. |
 | `Lowering/V07/ReferenceOrderRelated.lean` | Actual pipeline-ordered reference assignment/read captures and all mapped caller bindings from initial alignment. |
 | `Lowering/V07/UnsignedAddition.lean` | Actual unchecked unsigned addition, width narrowing, pipeline-ordered assignment/read capture transport and context extension. |
+| `Lowering/V07/WrappedAdditionPair.lean` | Two effectful unchecked unsigned-addition operands, all local aliases, reached RHS captures and initial-derived postfamilies. |
+| `Lowering/V07/UnsignedMultiplication.lean` | Unchecked unsigned multiplication over all approved widths, actual pipeline assignment/read capture transport and initial-derived postfamilies. |
+| `Lowering/V07/ReferenceRegisteredControls.lean` | Closed mixed-location memory/storage capture and distinct-reference assignment clients. |
+| `Lowering/V07/LocationGraphCompletenessControls.lean` | Inhabited three-node executable field/producer completeness clients and negative controls. |
+| `Lowering/V07/RegisteredScalarClients.lean` | Closed actual clients for every unsigned addition/multiplication headline, including pair premise discharge and fresh context transport. |
+| `Lowering/V07/WordCasts.lean` | Actual full-word integer sign casts and initial-family assignment transport |
+| `Lowering/V07/WordCastControls.lean` | Inhabited cast clients, thresholds, alias/capture and mixed-reference controls |
+| `Lowering/V07/ConditionalAssignments.lean` | Actual effectful conditional expressions, selected-only captures and initial context transport |
+| `Lowering/V07/ConditionalControls.lean` | Inhabited conditional clients, aliases, ordered observations and bounded failure controls |
 
 ## V09 compiler-pass components
 
@@ -2192,3 +2201,5 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/Views/SnapshotHashBinding{,Controls}` | Actual source keccak after changed physical-snapshot writeback, using derived exact raw payload and preserved aliases. |
 | `Yul/Views/CalldataHashBinding{,Controls}` | Actual calldata-local keccak with implicit memory allocation, clipped payload copy, complete source result and MemOK. |
 | `Yul/Adapters/P6CalldataHash{,Controls}` | Actual calldata conversion/allocation, bounded P6 copy and target KECCAK256 composition with explicit per-input concrete hash premise. |
+| `Lowering/V07/WrappedMultiplicationPair` | Actual effectful unsigned multiplication pairs with all local aliases |
+| `Lowering/V07/WrappedMultiplicationControls` | Closed multiplication-pair clients and ordered alias/width controls |

@@ -11,8 +11,8 @@ namespace Solidity.Lowering.V07
 
 /-- Actual memory capture, its initial value relation and both context
 extensions. The caller state is recovered exactly after the temporary drops. -/
-theorem related_memory_capture :
-∀ {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+theorem related_memory_capture
+ {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
  (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
  (source : Source.EMState E srcΓ) (target : State C Γ)
  (m : ContextMap srcΓ Γ)
@@ -22,7 +22,7 @@ theorem related_memory_capture :
  (address : Nat) (r : HRef target.H bytesR)
  (slot : m.slot i = ⟨.mem bytesR,j⟩)
  (sourceRead : source.1.get i = .memRef rfl address)
- (targetRead : TEnv.get j target.env = some r),
+ (targetRead : TEnv.get j target.env = some r) :
  (Source.evalE G F (fuel+1) (.local i)).run source = (.ok (.val (.memRef rfl address)),source) ∧
  (memoryCapture j rfl).run target =
    .ok (⟨target.push (t := .mem bytesR) (some r),List.prefix_refl _⟩) ∧
@@ -33,7 +33,6 @@ theorem related_memory_capture :
  (m.wk (Thin.drop (t := .mem bytesR) .refl)).Related Rel
    source.1 (target.push (t := .mem bytesR) (some r)).env ∧
  (target.push (t := .mem bytesR) (some r)).drop (.push .refl) = target := by
-  intro E srcΓ C Γ G F fuel source target m Rel aligned i j address r slot sourceRead targetRead
   have linked : Rel (.bytes .memory) (.mem bytesR) (.memRef rfl address) (some r) := by
     simpa only [sourceRead,targetRead] using
       (ContextMap.value_at m Rel source.1 target.env aligned i j slot)
@@ -44,8 +43,8 @@ theorem related_memory_capture :
 
 /-- Actual storage capture, its initial value relation and both context
 extensions. The caller state is recovered exactly after the temporary drops. -/
-theorem related_storage_capture :
-∀ {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+theorem related_storage_capture
+ {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
  (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
  (source : Source.EMState E srcΓ) (target : State C Γ)
  (m : ContextMap srcΓ Γ)
@@ -55,7 +54,7 @@ theorem related_storage_capture :
  (path : Source.SPath) (r : SRef C (.ref bytesR))
  (slot : m.slot i = ⟨.alias bytesR,j⟩)
  (sourceRead : source.1.get i = .storRef rfl path)
- (targetRead : TEnv.get j target.env = some r),
+ (targetRead : TEnv.get j target.env = some r) :
  (Source.evalE G F (fuel+1) (.local i)).run source = (.ok (.val (.storRef rfl path)),source) ∧
  (storageCapture j).run target =
    .ok (⟨target.push (t := .alias bytesR) (some r),List.prefix_refl _⟩) ∧
@@ -66,7 +65,6 @@ theorem related_storage_capture :
  (m.wk (Thin.drop (t := .alias bytesR) .refl)).Related Rel
    source.1 (target.push (t := .alias bytesR) (some r)).env ∧
  (target.push (t := .alias bytesR) (some r)).drop (.push .refl) = target := by
-  intro E srcΓ C Γ G F fuel source target m Rel aligned i j path r slot sourceRead targetRead
   have linked : Rel (.bytes .storage) (.alias bytesR) (.storRef rfl path) (some r) := by
     simpa only [sourceRead,targetRead] using
       (ContextMap.value_at m Rel source.1 target.env aligned i j slot)

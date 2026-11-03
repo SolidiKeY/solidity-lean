@@ -10,8 +10,8 @@ namespace Solidity.Lowering.V07
 
 /-- Both actual pipeline runs, semantic left/right reference captures and all
 reached bindings. Dropping the two captures restores exactly the updated caller. -/
-theorem related_reference_assignment_pair :
-∀ {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+theorem related_reference_assignment_pair
+ {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
  (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
  (source : Source.EMState E srcΓ) (target : State C Γ)
  (m : ContextMap srcΓ Γ)
@@ -21,7 +21,7 @@ theorem related_reference_assignment_pair :
  (oldAddress newAddress : Nat) (old assigned : HRef target.H bytesR)
  (writeMap : m.slot i = ⟨.mem bytesR,j⟩) (readMap : m.slot a = ⟨.mem bytesR,b⟩)
  (readI : source.1.get i = .memRef rfl oldAddress) (readA : source.1.get a = .memRef rfl newAddress)
- (targetI : TEnv.get j target.env = some old) (targetA : TEnv.get b target.env = some assigned),
+ (targetI : TEnv.get j target.env = some old) (targetA : TEnv.get b target.env = some assigned) :
  (Source.evalPair G F (fuel+3) (.assign (.local i) (.local a)) (.local i)).run source =
    (.ok (.val (.memRef rfl newAddress),.val (.memRef rfl (if G.pipeline = .legacy then oldAddress else newAddress))),
      (source.1.set i (.memRef rfl newAddress),source.2)) ∧
@@ -42,7 +42,6 @@ theorem related_reference_assignment_pair :
      (.push (.push .refl)) = target.setLocal j (some assigned) ∧
  (((target.setLocal j (some assigned)).push (t := .mem bytesR)
    (some (if G.pipeline = .legacy then old else assigned))).push (t := .mem bytesR) (some assigned)).glob = target.glob := by
-  intro E srcΓ C Γ G F fuel source target m Rel aligned i a j b oldAddress newAddress old assigned writeMap readMap readI readA targetI targetA
   have oldRel : Rel (.bytes .memory) (.mem bytesR) (.memRef rfl oldAddress) (some old) := by
     simpa only [readI,targetI] using (ContextMap.value_at m Rel source.1 target.env aligned i j writeMap)
   have newRel : Rel (.bytes .memory) (.mem bytesR) (.memRef rfl newAddress) (some assigned) := by
