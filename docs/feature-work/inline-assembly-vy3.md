@@ -596,3 +596,25 @@ selector is not automatically extended. Native byte/charged/Bridge/G24, wider
 operators, functions/loops/views and full frontend/joint closure remain open.
 No source admission or H22 ExtCall construction changes occur. Routine named
 projections remain evidence-only; optional registrations are generated later.
+
+### Concrete arithmetic table in structured selection
+
+The existing selector and constructive classifier now factor over a typed leaf
+compiler returning the same dependent `Slice p`, with real instruction
+certificates and exact emitted-program identity. The legacy entry points and
+theorem contracts retain their original table and verdicts. Generic whole iff
+and refusal proofs derive classification from actual leaf results rather than
+accepting a simulation premise; no new AST, evaluator or lowering algorithm is
+copied into a separate compiler.
+
+`SolidityBridge.Yul.QuotientControl` plugs the concrete SUB/DIV/MOD table into
+that recursion. Actual source `if div(x,y) { mixed assignments }` is compiled,
+selected and proved against the source evaluator and model, with whole iff
+certificates at depth0 and under two newer words. Selection/emission identities
+close by rfl. Controls cover zero/truncating DIV false paths, true/MAX paths,
+updated locals, caller/newer/full-machine preservation, underflow, old refusals,
+unsupported operators, loops, width/fuel/depth and uncapped capacity boundaries.
+Scoped reports are enforced by generated pins. This closes the earlier table
+integration gap for these slices; native/G24/views/functions/divergence and full
+frontend/joint closure remain open. H22 ExtCall construction remains untouched;
+routine projections remain evidence-only and registrations are generated later.

@@ -258,3 +258,8 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   and exact emitted-program iff lowering witness. Earlier refusal tables and
   admission remain unchanged; native/G24/full-lane work stays open. See the
   [lane document](inline-assembly-vy3.md).
+
+- VY3 structured selection now consumes the concrete arithmetic table through
+  typed leaf certificates, with source/whole-iff witnesses for DIV-controlled
+  mixed arithmetic under live prefixes. Legacy verdicts remain unchanged;
+  native/G24/full-lane closure stays open. See the [lane document](inline-assembly-vy3.md).
