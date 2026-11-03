@@ -203,6 +203,13 @@ inhabits this result with nominal aliases, an unrelated byte object and nonzero
 residual bytes.
 
 Valid placement, retained history and the canonical/declaration profile remain
-real premises. Changed-snapshot placement/history and replay integration,
+real premises. `NominalInventoryView` connects successful changed snapshots to the existing
+inventory realizer. It constructs retained output placement/history and proves
+exact complete Source output, refreshed coverage, preserved heap metadata and
+full raw-map reencoding. Its generated variant derives initial coverage from
+owner preparation. A kernel control ties this output view to the actual changed
+nominal source state and its owner invariant.
+
+Sequential resnapshot/replay integration, broader dynamic history controls,
 dirty-word transport, universal ownership, allocator reachability and compiler
 adequacy remain open.

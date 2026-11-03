@@ -3035,6 +3035,8 @@ import Solidity.Yul.Views.NominalInventoryLaws
 import Solidity.Yul.Views.NominalInventoryPreparation
 import Solidity.Yul.Views.NominalInventoryUnchanged
 import Solidity.Yul.Views.NominalInventoryUnchangedControls
+import Solidity.Yul.Views.NominalInventoryView
+import Solidity.Yul.Views.NominalInventoryViewControls
 import Solidity.Yul.Views.NominalMemory
 import Solidity.Yul.Views.NominalMemoryControls
 import Solidity.Yul.Views.NominalRetained
