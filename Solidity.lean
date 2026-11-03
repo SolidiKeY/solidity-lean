@@ -865,6 +865,8 @@ import Solidity.Backend.StructuredFlow.CoreSequence
 import Solidity.Backend.StructuredFlow.CoreSequenceControls
 import Solidity.Backend.StructuredFlow.ExitControls
 import Solidity.Backend.StructuredFlow.ExitSelector
+import Solidity.Backend.StructuredFlow.MappedCondition
+import Solidity.Backend.StructuredFlow.MappedConditionControls
 import Solidity.Backend.Transient.CallbackObservation
 import Solidity.Backend.Transient.CallbackObservationControls
 import Solidity.Backend.Transient.Code
@@ -1568,6 +1570,7 @@ import Solidity.Language.FixedPoint.Conformance
 import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
+import Solidity.Lowering.G19.AssignmentReturnFlag
 import Solidity.Lowering.P8.CheckedSyntax
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.P8.DeclarationGraphCheck
