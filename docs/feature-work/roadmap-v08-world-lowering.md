@@ -3885,3 +3885,13 @@ initial read; they state no post-state relation. `AssignedCallableContext.transp
 adds the before/after `Related` relation for the integer case only. The target
 run in `SourceClockTransactions.lean` is hand-written, so `paired` is the
 conjunction of two runs, not a derived correspondence.
+
+### Boolean caller-local post relation
+
+`EffectfulCallableArgument.transport_context` strengthens the paired execution
+fixture with a derived `ContextMap.Related` post-local relation, using initial
+value alignment and exact typed slot maps. Its inhabited client skips an unrelated
+target integer slot; stale-source and mutated-live-binding controls reject wrong
+post relations. The actual Source hash allocation and complete existing fixture
+observations remain. This relates caller locals, not Source/target heaps, general
+callee compilation, external frames, library dispatch or complete unit execution.
