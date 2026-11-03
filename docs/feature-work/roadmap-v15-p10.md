@@ -1417,3 +1417,25 @@ a large concrete spill. Gas eight and fuel three remain failures. Ordered
 Independent finder and skeptic reviews prompted precise capacity wording;
 no semantic defect was found. Conditional branching, panic execution,
 compiler/frame origin, Osaka approval and full G46/G47 closure remain open.
+
+
+### Fetched typed inequality
+
+[InequalityConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InequalityConsumer.lean)
+composes the existing fetched EQ and ISZERO consumers for the actual
+`Scalar.scalarNe` two-instruction encoding. It derives the intermediate full
+State, code/PC alignment and remaining gas, then consumes the published typed
+certificate for every intrinsic primitive type. The resource premises retain
+gas at least six, initial `tail.length + 2 ≤ 1024`, post-EQ PC fit and explicit
+fuel. Supplied destination arrays are arbitrary for these two nonbranching
+instructions; no scanner or subsequent-jump correctness is asserted. Gas debit
+and State/memory/return-buffer preservation are separate consequences.
+
+[InequalityControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InequalityControls.lean)
+applies the combined typed producer directly to Boolean, signed and unsigned
+clients, with independent complete expected States. High-bit-distinct words,
+negative equality, zero/max words, empty/maximal legal tails, gas five, fuel two
+and ordered code/stack/buffer/account observations are explicit controls.
+Finder and skeptic reviews found no semantic defect. Raw primitive agreement
+and the Scalar source certificate are prior work; this new fetched composition
+does not prove compiler/frame origin, Osaka approval or close a full opcode row.

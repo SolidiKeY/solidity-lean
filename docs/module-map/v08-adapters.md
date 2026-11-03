@@ -379,3 +379,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationTest.lean` | Three actual fetched DUP1/PUSH32-minimum/EQ steps to the existing Scalar overflow flag, exact resources/frame and legal-entry peak overflow refusal. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationTestControls.lean` | Complete ordinary/minimum States, legal peak1024 and refused peak1025, gas/fuel negatives and ordered code/buffer/account observations. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityConsumer.lean` | Actual fetched EQ/ISZERO composition with typed scalarNe certificate, exact resource premises and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityControls.lean` | Direct all-primitive clients, complete expected States, high-bit/signed/capacity/resource and ordered-observation controls. |

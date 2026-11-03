@@ -185,6 +185,8 @@ import SolidityBridge.RoadmapV15.P10.FrozenInterface
 import SolidityBridge.RoadmapV15.P10.FrozenWitness
 import SolidityBridge.RoadmapV15.P10.HeaderEnvironment
 import SolidityBridge.RoadmapV15.P10.HeaderEnvironmentControls
+import SolidityBridge.RoadmapV15.P10.InequalityConsumer
+import SolidityBridge.RoadmapV15.P10.InequalityControls
 import SolidityBridge.RoadmapV15.P10.Interface
 import SolidityBridge.RoadmapV15.P10.InvocationEnvironment
 import SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls
