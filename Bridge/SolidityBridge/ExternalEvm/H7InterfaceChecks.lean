@@ -3,9 +3,9 @@ import SolidityBridge.ExternalEvm.BoundedScannerPrefix
 
 /-! Kernel controls requiring the explicitly declared H7 vendor dependency.
 A PUSH payload is not a jump destination; native allocator/scanner compatibility
-and source execution are not supplied by these checks. Requires the exact H7
-logical dependency bodies in EvmYul/FFI/ffi.lean and EvmYul/EVM/Semantics.lean
-from commit34f742da; those vendor changes are NOT in this Bridge-only publication. -/
+and source execution are not supplied by these checks. They use the H7
+logical bodies in the vendored EvmYul/FFI/ffi.lean and EvmYul/EVM/Semantics.lean
+(see vendor/EvmYul/VENDOR.md). -/
 namespace Solidity.Evm.External.H7Checks
 open EvmYul EvmYul.EVM
 
