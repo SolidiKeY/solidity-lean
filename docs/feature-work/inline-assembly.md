@@ -249,3 +249,5 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolForNoGuard adds exact Source omitted-guard transport and concrete clean adapters for both post modes, with independent Source and raw guard controls. Full lane remains open.
 
 - VY1: LocalBoolUnchecked adds concrete clean Source item/block composition across unchecked and ordinary scopes, retaining reached failure contexts. Full lane remains open.
+
+- VY1: LocalDefaultBinding adds concrete clean Source constant-default declaration/body composition with typed context growth; allocating references and dirty compiler adequacy remain separate obligations.

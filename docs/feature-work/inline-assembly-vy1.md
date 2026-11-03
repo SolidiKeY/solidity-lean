@@ -724,3 +724,21 @@ Full P16 and final lane validation remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Constant-default local bindings
+
+LocalDefaultBinding composes an actual constant-default declaration with a
+certified Boolean item body in the extended typed context. Its certificate
+retains the real Source.Val.default lookup; it makes no allocation promise.
+The all-fuel clean-input Source item theorem uses concrete declaration/body
+proofs and intrinsic outcome transport. Raw execution prepends only the new
+default and preserves existing values until the body acts.
+Integer and Boolean witnesses cover shifted enclosing writes, partial contexts,
+default zero and preserved dirty sibling bits. Independent Source controls
+check timeout and completion. A missing constant default for memory bytes is
+not a general refusal of allocating reference declarations. Compiler
+representation, dirty ordinary reads, final enclosing-scope composition and
+full P16/lane validation remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

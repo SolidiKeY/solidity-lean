@@ -2366,6 +2366,7 @@ import Solidity.Yul.Checks.LocalBoolFor
 import Solidity.Yul.Checks.LocalBoolForPost
 import Solidity.Yul.Checks.LocalBoolForNoGuard
 import Solidity.Yul.Checks.LocalBoolUnchecked
+import Solidity.Yul.Checks.LocalDefaultBinding
 import Solidity.Yul.WordPrint
 import Solidity.Yul.Adapters.FrameHeap
 import Solidity.Yul.Adapters.FrameHeapControls
@@ -3403,3 +3404,4 @@ import Solidity.Yul.LocalBoolForPost
 import Solidity.Yul.LocalBoolPostIter
 import Solidity.Yul.LocalBoolForNoGuard
 import Solidity.Yul.LocalBoolUnchecked
+import Solidity.Yul.LocalDefaultBinding

@@ -50,3 +50,5 @@
 - Yul/LocalBoolForNoGuard.lean and Yul/Checks/LocalBoolForNoGuard.lean: exact omitted-guard Source transport and concrete scoped adapters.
 
 - Yul/LocalBoolUnchecked.lean and Yul/Checks/LocalBoolUnchecked.lean: unchecked/ordinary Boolean item scope composition and concrete Source laws.
+
+- Yul/LocalDefaultBinding.lean and Yul/Checks/LocalDefaultBinding.lean: constant-default declarations followed by certified local item bodies.
