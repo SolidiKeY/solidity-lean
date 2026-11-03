@@ -259,3 +259,5 @@ VY1: heterogeneous constant-default declaration sequences have concrete clean-in
 VY1: heterogeneous default sequences now have raw scope closure and concrete clean-input Source block agreement; general P16 and final lane validation remain open.
 
 VY1: unchecked heterogeneous default scopes and ordinary continuations now have concrete clean-input Source item/block composition; full P16 and lane gates remain open.
+
+VY1: pure local item/default/unchecked runners now preserve the existing world for all raw inputs and fuel values; local effects and broader P16 remain distinct.

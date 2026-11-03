@@ -804,3 +804,21 @@ compiler claim. Broader P16, admission and final lane validation remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### World preservation on raw local inputs
+
+LocalItemWorld proves world preservation for every supported Boolean item list,
+constant-default sequence, successful or halted scope closure, and unchecked
+scope/continuation execution. These laws quantify arbitrary raw local states and
+all fuel values without a cleanliness premise. They use the existing expression
+purity and concrete item runners, introducing no physical/world-effect model.
+Any observation depending only on the existing Source world is consequently
+preserved. This does not freeze local values or views depending on them.
+An inhabited default/unchecked witness instantiates the law for every world and
+horizon. Success and timeout controls retain local writes and dirty decoder
+refusal. Proofs use bounded one-step rewrites rather than recursive unfolding;
+failed scratch attempts remain in external evidence. General P16, admission,
+dirty compiler adequacy and final lane gates remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

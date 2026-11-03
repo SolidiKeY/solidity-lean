@@ -56,3 +56,5 @@
 - Yul/LocalDefaultItems.lean and Yul/Checks/LocalDefaultItems.lean: certified heterogeneous constant-default declaration sequences and concrete Source item composition.
 
 - Yul/LocalDefaultUnchecked.lean and Yul/Checks/LocalDefaultUnchecked.lean: unchecked heterogeneous default scopes, ordinary continuations and concrete Source composition.
+
+- Yul/LocalItemWorld.lean and Yul/Checks/LocalItemWorld.lean: universal raw-input world preservation for pure local item/default/unchecked execution.
