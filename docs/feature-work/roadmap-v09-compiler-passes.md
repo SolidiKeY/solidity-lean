@@ -521,8 +521,13 @@ No checker exclusion, language profile or proof premise changed.
 
 The cold post-sync import attempt stopped at the existing 300-second bound.
 Separate published MemoryCompile and Compiler prerequisites then passed under
-the same bound. These prerequisite checks do not establish the final combined
-lane gates or discharge the remaining Source/world/resource producers.
+the same bound. The Source capture prerequisite, KeySort and the storage-capture
+closure with thirteen exact guards also passed on the rebased tree. The broader
+changed-module import attempt stopped at its unchanged 300-second bound and
+remains incomplete. Two further old untracked scratch drafts were preserved
+outside the production tree, resolving the orphan findings without an allow-list.
+These checks do not establish the final combined lane gates or discharge the
+remaining Source/world/resource producers.
 
 ## Open
 
