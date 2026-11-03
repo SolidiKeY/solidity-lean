@@ -420,3 +420,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 |---|---|
 | `Lowering/V08/LiteralFailureMixedEncoding.lean` | Indexed field-evidence relation and actual arbitrary word/bytes Source encoder agreement with the existing typed ABI codec. |
 | `Lowering/V08/LiteralFailureMixedEncodingControls.lean` | Four-field tuple return/extraction, heap encoding, aliases, offsets and bounded local RETURN controls. |
+
+## Mixed ABI expression allocation
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedExpression.lean` | Actual local argument evaluation, mixed ABI expression allocation, input-field preservation and raw rethrow with phase-specific timeouts. |
+| `Lowering/V08/LiteralFailureMixedExpressionControls.lean` | Populated mixed input, fresh result, aliases, cursor, timeout and both Source pipeline observations. |
