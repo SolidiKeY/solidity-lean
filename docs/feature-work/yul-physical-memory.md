@@ -288,6 +288,19 @@ exact last valid word boundary, dirty final target bytes, and a reserved FMP
 corruption despite unchanged Source data. Outside-image separation alone is not
 reserved-memory safety, allocation adequacy or language admission.
 
+`CheckedResidualStore` consumes the existing `prepareResidualWindow p destination 1`
+result. Its actual inventory and checked geometry derive byte exclusion and
+reserved separation. Initial `ReservedOK` concerns the residual carrier;
+encoding and the compiled byte update derive validity of both reserved words on
+the complete map. The output reconstructs the changed raw complement while
+preserving the entire Source state and every initial heap typing. No planner or
+admission predicate is added. A kernel witness uses the actual computed nominal
+and byte-object inventory. Controls preserve byte254 in current padding, then
+run actual header growth: Source reads that retained fourth byte and a new plan
+rejects its now-live location. Reserved/owned preparation rejection stays separate
+from the actual target byte instruction's ability to execute. Current checked
+padding does not establish future ownership, allocator provenance or gas bounds.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary

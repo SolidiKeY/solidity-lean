@@ -2396,6 +2396,8 @@ import Solidity.Update
 import Solidity.Yul
 import Solidity.Yul.Adapters.AllocatedComputedFrame
 import Solidity.Yul.Adapters.AllocatedComputedFrameControls
+import Solidity.Yul.Adapters.CheckedResidualStore
+import Solidity.Yul.Adapters.CheckedResidualStoreControls
 import Solidity.Yul.Adapters.ComputedFrameHeap
 import Solidity.Yul.Adapters.ComputedFrameHeapControls
 import Solidity.Yul.Adapters.FrameHeap
