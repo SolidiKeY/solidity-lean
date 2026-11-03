@@ -2121,7 +2121,7 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
         Prog C (ρ ++ ps) Γf × Bool := match sb with
       | some ⟨ps, Γf, sargs, sbody⟩ => ⟨ps, Γf, sargs, sbody, true⟩
       | none => ⟨[], ρ ++ [], .nil, .nil, false⟩
-    let call : ExtCall C Γ.ctx := ⟨addr', g, args'⟩
+    let call : ExtCall C Γ.ctx := ⟨addr', g, args', .call, .unknown⟩
     let clause (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
       match RawStmt.catchBinder? ss with
       | (some kind, ss) =>

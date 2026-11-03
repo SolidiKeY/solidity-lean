@@ -15,8 +15,9 @@ inference and general world/compiler expansion remain outside this repair.
 
 The current integration contains the zero-divisor, callback-continuation,
 literal-reason and modifier-only repairs. No content conflict markers were
-found in the affected source, tests or scripts. Its `ExtCall` still has only
-receiver, name and arguments, and `ExecS.tryOk` still permits arbitrary
+found in the affected source, tests or scripts. Its `ExtCall` then had only
+receiver, name and arguments (H22 later added `mode` and `invocation`, still
+uninterpreted), and `ExecS.tryOk` still permits arbitrary
 invariant-preserving storage/net/balance replacement. The original pending
 payments residual remains relevant; it was not rerun or reported as passing.
 
@@ -119,8 +120,9 @@ The source evaluates `postinc()` before the external `id(int)` call and reads
 `.lake/entrypoints-repair/payments-current.log` contains a success leaf with
 `{ havoc }` between those operations. Its expected result remains `proved`.
 
-* [`ExtCall`](../../Solidity/Syntax/Scoped.lean) has only `addr`, `fn` and
-  `args`. There is no static invocation certificate. The solc try printer in
+* [`ExtCall`](../../Solidity/Syntax/Scoped.lean) had only `addr`, `fn` and
+  `args`; since H22 it also records `mode` and `invocation`, which nothing
+  reads yet. There is no static invocation certificate. The solc try printer in
   `Frontend/SolcJson/Body.lean` and the reconstruction in
   `Syntax/Elab/Arms.lean` do not transport one.
 * [`ExecS.tryOk`](../../Solidity/Semantics/Callback.lean) permits arbitrary

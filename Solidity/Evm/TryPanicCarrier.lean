@@ -70,7 +70,7 @@ theorem call_halt (σ : State C Γ) :
 
 /-- Actual receiver, arbitrary caller heap; no oracle or synthetic address. -/
 def selfCall : ExtCall C Γ :=
-  ⟨.env .selfAddress rfl, "f", [⟨.uint, .lit 36 rfl⟩]⟩
+  ⟨.env .selfAddress rfl, "f", [⟨.uint, .lit 36 rfl⟩], .call, .unknown⟩
 
 theorem catch_halt (σ : State C Γ) (hnz : σ.tx.selfAddress.val ≠ 0) :
     TRun.catchBytes selfCall .nil args36 .refl carrier36.runR true σ =

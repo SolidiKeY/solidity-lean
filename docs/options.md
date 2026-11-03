@@ -71,7 +71,8 @@ back is a resumption that changed nothing).
 The send rules match either kind: the deterministic run is the same.
 
 **Not done.** solkey's 5D (a `view`/`pure` callee keeps storage): an
-`ExtCall` names its function, not its mutability. The oracle answers a call
+`ExtCall` records its call mode (H22), but neither the oracle nor the rules
+read it ("Callee mutability" below). The oracle answers a call
 by its key alone (`ExtKey`), so two equal calls return the same in a
 deterministic run; the callback runs have no such restriction.
 
@@ -487,9 +488,20 @@ over the callback runs (`ProvesC.recContract`, `ProvesC.recContractM`,
 `⊢ N.f.problem`: with nothing calling back `Fml.Valid` is the reading
 (`validT_noCallback_iff`).
 
-**Callee mutability.** The operational `ExtCall` does not yet record static
-call restrictions (O1, 5D). Consequently even a `view` or `pure` external
-call receives the conservative callback reading. Static-call rows may stay pending until that restriction is represented
+**Callee mutability.** `ExtCall` records its call mode (`CallMode`:
+`CALL` or `STATICCALL`) and its invocation (`InvocationId`, the call site),
+decision H22 (2026-11-03); every call built today is `.call` with an `.unknown` site.
+Neither the semantics nor the rules read them yet, so static call
+restrictions are not represented (O1, 5D), and even a `view` or `pure`
+external call receives the conservative callback reading.  The text
+printer `ppExtCallS` escapes a call with a non-default mode or site rather
+than print it as an ordinary one; `Stmt.toStr` drops both.  H22 changed no
+statement's meaning: the one statement naming a call literal
+(`zero_receiver_refused`) gained the two default fields, and
+`ExtCall.keyT_mode_invocation` records that the oracle key ignores them.
+Checking time is unchanged: 20 modules (`Syntax/Scoped.lean` and its
+heaviest importers), each rebuilt alone with `LEAN_NUM_THREADS=1`, took
+534 s before and 530 s after; `Syntax/Scoped.lean` itself 4.1–4.8 s both. Static-call rows may stay pending until that restriction is represented
 and proved; metadata alone does not justify plain validity.
 
 **Where it lives.** In the runner alone: `N.f.problem` is still one table

@@ -14,7 +14,7 @@ def caller : State contract Γ :=
   ((older.push (t:=.mem bytesR) (TEnv.get .here older.env)).push
     (t:=.val .uint) ⟨77,by decide⟩).push (t:=.val .uint) ⟨0,by decide⟩
 def call (a : Nat := 7) (ha : a < 2^256 := by decide) : ExtCall contract Γ :=
-  ⟨.lit a (PrimTy.inRange_uint_of_lt ha),"callee",[]⟩
+  ⟨.lit a (PrimTy.inRange_uint_of_lt ha),"callee",[],.call,.unknown⟩
 def branch (n : Nat) (hn : n < 2^256) : Prog contract Γ (.val .bool :: Γ) :=
   .cons (.assignLocal .here (.simple (.lit n (PrimTy.inRange_uint_of_lt hn))))
     (.cons (.declLocal .bool (.user "clauseLocal") (some (.simple (.bool true)))) .nil)

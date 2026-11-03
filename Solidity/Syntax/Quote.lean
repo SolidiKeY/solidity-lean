@@ -203,7 +203,8 @@ def ExtCall.quote (call : ExtCall C Γ) : Lean.Expr :=
       mkAppN (mkConst ``Sigma.mk [0, 0]) #[mkConst ``PrimTy, mkAppN (mkConst ``Simple) #[c, Γe],
         toExpr a.1, Simple.quote c Γe a.2], acc])
     (mkAppN (mkConst ``List.nil [0]) #[argTy])
-  mkAppN (mkConst ``ExtCall.mk) #[c, Γe, Simple.quote c Γe call.addr, toExpr call.fn, args]
+  mkAppN (mkConst ``ExtCall.mk) #[c, Γe, Simple.quote c Γe call.addr, toExpr call.fn, args,
+    toExpr call.mode, toExpr call.invocation]
 
 /-- A quantified invariant clause, its body under the bound local's
 context. -/

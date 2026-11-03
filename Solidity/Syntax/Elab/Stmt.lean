@@ -747,7 +747,7 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let (_, k) ← get
   set (Γe, k)
   let other ← elabScope Γ' (setOk false)
-  let call : ExtCall C Γ'.ctx := ⟨addr', "receive", []⟩
+  let call : ExtCall C Γ'.ctx := ⟨addr', "receive", [], .call, .unknown⟩
   let tryS : Stmt C Γ'.ctx Γ'.ctx :=
     .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
   pure (P ++ [.of Γ1 (.declLocal .bool x (some c)),

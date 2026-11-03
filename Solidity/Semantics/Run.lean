@@ -453,6 +453,12 @@ def sendT (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : PrimTy.uint.D
 def ExtCall.keyT (σ : State C Γ) (c : ExtCall C Γ) : ExtKey :=
   ⟨c.addr.evalT σ, c.fn, c.args.map fun a => Semantics.CallValue.ofTyped (a.2.evalT σ)⟩
 
+/-- The key does not read the call's mode or invocation (decision H22: they
+are recorded, not yet interpreted). -/
+theorem ExtCall.keyT_mode_invocation (σ : State C Γ) (c : ExtCall C Γ) (m : CallMode)
+    (i : InvocationId) : ({ c with mode := m, invocation := i } : ExtCall C Γ).keyT σ = c.keyT σ :=
+  rfl
+
 /-- A call's arguments, each read in the caller's state, in order. -/
 def Args.evalT (σ : State C Γ) : {ps : Ctx} → Args C Γ ps → TRes (TEnv C σ.H ps)
   | _, as => Args.casesOn (motive := fun ps _ => TRes (TEnv C σ.H ps)) as (pure ())

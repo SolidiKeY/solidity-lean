@@ -687,11 +687,18 @@ partial def ppLoopQ (ns : List Expr) (q : Expr) : PrM (Option (TSyntax `sol_loop
     return some (← `(sol_loop_inv| \forall $(mkIdent (Name.mkSimple T)):ident $xi:ident; $body))
   | _ => return none
 
-/-- `address(a).f(e₁, …)`: an external call. -/
+/-- `address(a).f(e₁, …)`: an external call.  Only an ordinary call with no
+recorded invocation is printed: `sol{}` cannot yet say that a call is
+`static` (in Solidity that follows from the callee's `view`/`pure`
+declaration) or name its site, so such a call escapes rather than print as
+an ordinary one.  `Stmt.toStr` (`Syntax/Scoped.lean`), a debugging string,
+does not show the two fields. -/
 partial def ppExtCallS (ns : List Expr) (c : Expr) : PrM (Option (TSyntax `sol_expr)) := do
   let c ← whnf c
-  unless c.isAppOfArity ``ExtCall.mk 5 do return none
+  unless c.isAppOfArity ``ExtCall.mk 7 do return none
   let a := c.getAppArgs
+  unless (← whnf a[5]!).isConstOf ``CallMode.call do return none
+  unless (← whnf a[6]!).isConstOf ``InvocationId.unknown do return none
   let some f ← nameOf? a[3]! | return none
   let some args ← listElems? a[4]! | return none
   let mut es : Array (TSyntax `sol_expr) := #[]

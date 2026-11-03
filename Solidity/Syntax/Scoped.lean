@@ -278,11 +278,36 @@ inductive CallRet (Γ : Ctx) : Ctx → Ctx → Type where
 /-- An argument of an external call, at its type. -/
 abbrev ExtArg (C : Contract) (Γ : Ctx) := (p : PrimTy) × Simple C Γ p
 
-/-- `a.f(e₁, …, eₙ)`: an external call, its receiver and arguments simple. -/
+/-- How an external call reaches its receiver (EIP-214): `call` is a
+`CALL`; `static` is a `STATICCALL`, which solc issues for a `view` or `pure`
+callee and under which neither the callee nor anything it calls may change
+state. -/
+inductive CallMode where
+  | call
+  | static
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+/-- Which source invocation an external call is.  `site n` is the
+compiler's call site (solc's AST node id of the call), meant to keep equal
+calls at different sites apart once the oracle key reads it (it does not
+yet: `ExtCall.keyT`); `unknown` is a call with no recorded site, which is
+every call today: neither `sol{}` nor the solc import records sites yet. -/
+inductive InvocationId where
+  | unknown
+  | site (id : Nat)
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+/-- `a.f(e₁, …, eₙ)`: an external call, its receiver and arguments simple,
+with its call mode and its invocation.  The semantics and the rules do not
+read `mode` or `invocation` yet: a `static` call still gets the
+conservative callback reading (`docs/options.md`, O1, "Callee
+mutability"). -/
 structure ExtCall (C : Contract) (Γ : Ctx) where
   addr : Simple C Γ .uint
   fn : Name
   args : List (ExtArg C Γ)
+  mode : CallMode
+  invocation : InvocationId
 
 /-- A quantified clause of a loop's invariant, `/// @custom:key invariant
 \forall T x; a -> c` (solkey's specification language above a loop): its
@@ -1067,7 +1092,14 @@ theorem OpLoc.recvSimple_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} (l : OpL
   cases l <;> first | rfl | exact SPath.isSimple_wk h _ | exact MPath.isSimple_wk h _
 
 def ExtCall.wk {Γ Δ : Ctx} (h : Thin Γ Δ) (c : ExtCall C Γ) : ExtCall C Δ :=
-  ⟨c.addr.wk h, c.fn, c.args.map fun a => ⟨a.1, a.2.wk h⟩⟩
+  ⟨c.addr.wk h, c.fn, c.args.map fun a => ⟨a.1, a.2.wk h⟩, c.mode, c.invocation⟩
+
+/-- Weakening keeps a call's mode and its invocation. -/
+@[simp] theorem ExtCall.mode_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (c : ExtCall C Γ) :
+    (c.wk h).mode = c.mode := rfl
+
+@[simp] theorem ExtCall.invocation_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (c : ExtCall C Γ) :
+    (c.wk h).invocation = c.invocation := rfl
 
 def LoopQ.wk : {Γ Δ : Ctx} → Thin Γ Δ → LoopQ C Γ → LoopQ C Δ
   | _, _, h, .val a => .val (a.wk h)
@@ -1304,7 +1336,7 @@ private def example₁ : Prog SE [] [.val .uint, .val .uint, .mem P, .mem P, .al
     .nil) <|
   .cons (.assignLocal (.there (.there (.there (.there (.there .here))))) (loc .here)) <|
   .cons (.tryCall ⟨.local (.there (.there (.there (.there (.there .here))))), "ping",
-      [⟨.uint, .local .here⟩]⟩ (Binders.nil.snoc .uint (.user "v"))
+      [⟨.uint, .local .here⟩], .call, .unknown⟩ (Binders.nil.snoc .uint (.user "v"))
     (.cons (.assignLocal (.there (.there (.there (.there (.there (.there .here)))))) (loc .here))
       .nil)
     .nil (.some (.user "c")) .nil (.cons .revert .nil) .nil .nil false) .nil

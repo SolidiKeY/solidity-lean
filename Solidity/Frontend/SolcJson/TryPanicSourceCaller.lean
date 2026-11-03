@@ -125,7 +125,7 @@ inductive DerivesWholeC36 {p : Pipeline} {input unit owner decl caller : Json}
   | call (n : U256) (literal : argument? TryPanicSourceData.argumentNode = some n) :
       DerivesWholeC36 c
         { args := .snoc .nil .uint (.user "size") (.simple (.lit n.val n.property))
-          call := ⟨.env .selfAddress rfl,"f",[⟨.uint,.lit n.val n.property⟩]⟩
+          call := ⟨.env .selfAddress rfl,"f",[⟨.uint,.lit n.val n.property⟩],.call,.unknown⟩
           slot74 := .here, binder87 := .here, target74 := .there .here }
 
 def originalCallerOps : CallerOperands C :=

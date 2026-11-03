@@ -185,7 +185,7 @@ theorem constructed_call_halt (p : Pipeline) (n depth : Nat) (σ : State C Γ) :
   rw [constructedBody_halt]
 
 /-- The manually constructed call retains its raw bytes through self catch. -/
-def call7 : ExtCall C Γ := ⟨.lit 7 rfl, "f", [⟨.uint, .lit 36 rfl⟩]⟩
+def call7 : ExtCall C Γ := ⟨.lit 7 rfl, "f", [⟨.uint, .lit 36 rfl⟩], .call, .unknown⟩
 
 /-- The manual self call catches its own computed bytes with self=true. -/
 theorem constructed_raw_catch (p : Pipeline) (n depth : Nat) (σ : State C Γ)
@@ -263,7 +263,7 @@ theorem long_zero_suffix (σ : State C Input) (k : FrameKey) (i : Nat)
 
 /-- The zero receiver fails before any body/catch dispatch, unchanged. -/
 theorem zero_receiver_refused (p : Pipeline) (n depth : Nat) (σ : State C Input) :
-    TRun.catchBytes (⟨.lit 0 rfl, "f", []⟩ : ExtCall C Input) .nil args36
+    TRun.catchBytes (⟨.lit 0 rfl, "f", [], .call, .unknown⟩ : ExtCall C Input) .nil args36
       (.push .refl) (constructedBody p n depth) true σ = .error .revert := rfl
 
 /-- An unexpected receiver cannot reuse the constructed self-call proof. -/

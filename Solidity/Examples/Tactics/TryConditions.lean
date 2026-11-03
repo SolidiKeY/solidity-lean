@@ -14,7 +14,7 @@ open scoped Scoped
 
 /-- The address and signature are fixed source syntax; the oracle premise is
 explicit and local to the theorem, not an added global source profile. -/
-def guardedCall : ExtCall Probe [] := ⟨.lit 7 rfl, "fetch", []⟩
+def guardedCall : ExtCall Probe [] := ⟨.lit 7 rfl, "fetch", [], .call, .unknown⟩
 
 /-- Ordinary source-shaped conditional success for *any* typed starting state.
 The actual oracle witness discharges the specialized condition/formula interface. -/

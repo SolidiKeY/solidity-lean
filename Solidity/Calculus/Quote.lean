@@ -245,7 +245,8 @@ def qExtCall (Γ : Ctx) (call : ExtCall C Γ) : QM Expr := do
     let ae := mkAppN (mkConst ``Sigma.mk [levelZero, levelZero])
       #[mkConst ``PrimTy, simpleF, toExpr a.1, ← qSimple Γ a.1 a.2]
     args := mkApp3 (mkConst ``List.cons [levelZero]) argTy ae args
-  ctor ``ExtCall.mk Γ #[← qSimple Γ .uint call.addr, toExpr call.fn, args]
+  ctor ``ExtCall.mk Γ #[← qSimple Γ .uint call.addr, toExpr call.fn, args, toExpr call.mode,
+    toExpr call.invocation]
 
 /-- A quantified invariant clause. -/
 def qLoopQ : (Γ : Ctx) → LoopQ C Γ → QM Expr
