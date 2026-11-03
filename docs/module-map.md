@@ -98,3 +98,4 @@ area's file (`docs/parallelism.md`, "Shared registries").
 | Inline assembly (Yul) | [yul.md](module-map/yul.md) |
 | Label execution | [label-execution.md](module-map/label-execution.md) |
 | Executable bytecode selection | [bytecode-selection.md](module-map/bytecode-selection.md) |
+| ABI packet consumers | [abi-world.md](module-map/abi-world.md) |

@@ -399,3 +399,10 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
+
+## Exact return-slot consumers
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureReturnSlots.lean` | Exact heterogeneous Source return-slot overwrite, older-parameter preservation, declaration-order extraction and tuple-statement composition. |
+| `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Actual mixed bytes/uint tuple return, extraction, encoding and local terminal transport; wrong-type order and stale-slot controls. |
