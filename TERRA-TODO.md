@@ -320,3 +320,14 @@ current manually supplied fixture is not an elaborator certificate.
 
 General state-effectful arguments, multiple bases/initializers, canonical Program
 provenance, source/body compilation and G43 remain substantive V14 work.
+
+## Storage-failure routine projections (H14)
+
+- ConstructorStorageFailure.old_aliases: project caller memory aliases and the
+  retained old heap object through before/written; routine definitions/equality.
+- ConstructorStorageFailure.not_old_state: specialize giveArgs_failed with
+  state_distinct to exclude an arithmetic halt paired with before; routine pair
+  and Except injectivity, preserving the full returned state.
+
+G44.02/.03 and balance-independent G43/P14 remain next substantive work. H19
+balance representation facts must stay explicit typed producer premises.

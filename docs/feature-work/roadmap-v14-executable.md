@@ -110,3 +110,24 @@ fixtures remain manually supplied, without canonical elaboration or profile
 provenance. No failed CREATE/account/World rollback or EVM behavior is proved.
 Four further scoped guards require only standard axioms. Full/global validation
 and the original joint payment/world obligations remain open.
+
+## Journaled storage effects before argument failure
+
+`ConstructorStorageFailure` extends the native failure consumer with a real
+storage write. The Source unit adds a uint8 state declaration to Base; its
+constructor contexts remain declaration-derived. First argument stores zero as
+the bitwise complement of saved uint8(255); the next argument overflows checked
+negation of int16(-32768). At Source argument budget 4, `run_inner` derives the
+exact arithmetic-panic bytes and the journaled post-state. `giveArgs_failed`
+discharges native transport with that producer. `observations` runs the actual
+constructor stage in both pipelines and exposes saved values 255/0, journal
+lengths 1/2 and an unchanged old heap object. `state_distinct` rules out silently
+restoring the pre-argument state. Dropping inner locals is not state rollback.
+
+No balance field is read or updated by these claims; account record updates
+mention storage only. Program/bodies/baseArgs remain manually supplied typed
+fixtures, not canonical elaboration or admitted compiler certificates. There is
+no World/CREATE rollback, paid-world relation, EVM or G43 completion claim. H19
+balance-dependent work remains with typed premises pending the VY5 producer.
+Four standard-axiom guards and focused native checks are separate from unresolved
+full/import-root and combined-helper validation. No budgets were increased.
