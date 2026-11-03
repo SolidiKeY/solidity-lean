@@ -87,6 +87,21 @@ def observations (p : Roadmap.Pipeline) : List String :=
   observe p (List.replicate 31 255) (List.replicate 32 0) y x,
   observe p (List.replicate 33 128) [] ⟨2^255,by decide +kernel⟩ y,
   observe p (List.replicate 33 128) (List.replicate 33 128) ⟨2^256-1,by omega⟩ ⟨2^255,by decide +kernel⟩]
+def observeRevert (p : Roadmap.Pipeline) (first second : Roadmap.Bytes) (a b : Roadmap.Word) : String :=
+ let result := (SourceRethrow.fromExpression (global p) frame 8 1
+  (.abiEncode .encode arguments)).run (locals a b,state first second)
+ match result.1 with
+ | .error (.revert bs) =>
+  "{\"cursor\":"++toString result.2.2.heap.next++",\"bytes\":"++render bs++"}"
+ | _ => "{\"bad_run\":true}"
+def rethrows (p : Roadmap.Pipeline) : List String :=
+ [observeRevert p [] [] ⟨0,by decide +kernel⟩ ⟨2^256-1,by omega⟩,
+  observeRevert p [0,255] [128] x y,
+  observeRevert p (List.replicate 31 255) (List.replicate 32 0) y x,
+  observeRevert p (List.replicate 33 128) [] ⟨2^255,by decide +kernel⟩ y,
+  observeRevert p (List.replicate 33 128) (List.replicate 33 128) ⟨2^256-1,by omega⟩ ⟨2^255,by decide +kernel⟩]
+#eval IO.println ("MIXED_RETHROW_LEGACY=["++String.intercalate "," (rethrows .legacy)++"]")
+#eval IO.println ("MIXED_RETHROW_VIAIR=["++String.intercalate "," (rethrows .viaIR)++"]")
 #eval IO.println ("MIXED_EXPRESSION_LEGACY=["++String.intercalate "," (observations .legacy)++"]")
 #eval IO.println ("MIXED_EXPRESSION_VIAIR=["++String.intercalate "," (observations .viaIR)++"]")
 #print axioms arguments_run
