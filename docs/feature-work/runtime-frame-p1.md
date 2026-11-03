@@ -96,10 +96,10 @@ producer branch. Read-only reviews confirmed that each `SuccessfulEntry` or
 remaining weaknesses now listed above.
 
 Version 1 was merged from f4fa6f12: the interface and its import closure only.
-The other `RuntimeFrame*` modules (Bytes, CodeEquality, Mutation, Nested,
-Result, Reference, ReferenceProgram; Result and Reference were merged later
-with v3), the `tests/runtime-frame/` fixtures and
-the modules of other lanes on that branch were not merged.
+The other `RuntimeFrame*` modules were merged later (Result and Reference
+with v3, the recursive components and call compilers below; Bytes is still
+out); the `tests/runtime-frame/` fixtures and the modules of other lanes on that
+branch were not merged.
 
 Read-only finder and skeptic reviews found no `sorry`, axiom or heartbeat
 change, and no import or layer problem. They found the vacuity weakness above,
@@ -195,9 +195,9 @@ signatures and pending duties only.
   Its only revert path (an unset memory reference) has no `StateRepr`, so the
   family cannot supply v3's dual-outcome witnesses.
 
-These are target-side and source-side pieces; connecting recursive source
-transitions to the descent and LIFO code, recursive target divergence and
-approved-profile provenance remain open (P1 lane).
+These are target-side and source-side pieces; the countdown components
+below connect them for this family only. General bodies, recursive target
+divergence and approved-profile provenance remain open (P1 lane).
 
 ## Integration record (v3)
 
@@ -205,8 +205,58 @@ Merged from the lane head fd08f0c1: `RuntimeFrameInterfaceV3` and its import
 closure (the modules above). Not merged: the `tests/runtime-frame/` clients
 and controls, including the v3 interface controls, the void-call and
 recursive descent/unwind/countdown clients and their axiom-check scripts, the
-other `RuntimeFrame*` modules, staged modules of other lanes, and the lane's
-uncommitted recursive-activation work. The lane documents those clients; on
+other `RuntimeFrame*` modules (most merged later, see below) and staged
+modules of other lanes. The lane documents those clients; on
 master the producers above are checked, but no client of them except
 `RuntimeFrameV3CallProducerControls` is. Read-only finder and skeptic reviews
 confirmed the bare-revert closure and the remaining limits above.
+
+
+## Recursive countdown components and call compilers
+
+Merged from the lane head b232ca6d. All concern the effect-free countdown
+family of `RuntimeFrameV3RecursiveSource` and hand-written target images (no
+compiler maps source syntax to them); none inhabits `PendingRecursiveReturns`.
+
+- `RuntimeFrameV3RecursiveActivation`: `parameter_projection` rebases the
+  caller's represented head into the callee parameter frame;
+  `source_activation` matches the scalar update with the native call's
+  evaluated arguments; `activation` executes the checked activation code from
+  a `StateRepr` and derives the child `StateRepr`, stack, `BaseExtends`, cursor
+  and saved words. Room, pointer separation, no-wrap and represented
+  counter/reference stay explicit premises. `decrement_failure`: a reverting
+  decrement makes the checked code revert; `zero_turn`: the false guard skips
+  it. Zero allocation cost does not establish allocator ownership.
+- `RuntimeFrameV3RecursiveDescent`: `complete` and `reached_prefix` give the
+  descent at every `steps ≤ count` (counter `count - steps`, cursor advanced by
+  `2 * steps`), from the reached `StateRepr` and the activation bridge, with no
+  target run as premise. It reaches the deepest child, not the caller.
+- `RuntimeFrameV3RecursiveHistory`: `activation_exterior` bounds one
+  activation's writes to counter, cursor and the new two-word payload;
+  `saved_history` derives every saved reference and parent counter in call
+  order; `descend_then_pop` restores the nearest parent with
+  `Restore.restoreCells`.
+- `RuntimeFrameV3PairedUnwind.iter`: given a saved history, the paired return
+  loop (reusing `RecursiveUnwind.condition`) restores the original reference
+  and counter when `frames > 0`, with protected words, stack and bottom cursor.
+- `RuntimeFrameV3RecursiveReturn.initialized_endpoint`: descent, private bottom
+  initialization and all-parent unwind end in the original source `StateRepr`.
+  Since the source returns its state unchanged, this is an endpoint
+  correspondence; no per-parent representation during the unwind is proved.
+  Native success holds at every depth above the count; too little unrolling
+  stays exhaustion.
+- `RuntimeFrameMutation.compileCall`: one call level whose callee body is
+  call-free; `RuntimeFrameNested` composes nested calls.
+  `Mutation.compileRecursive` and `Nested.compileNormalized` return `none` for
+  every elaborated recursive unrolling (`Prog.recBase` is not compiled).
+  `RuntimeFrameReferenceProgram` relates a reference-returning program without
+  capture/restore; `RuntimeFrameCodeEquality` is a Boolean instruction-list
+  equality that rejects `.loop` and has no client yet.
+
+Open: general recursive bodies, signatures and layouts, divergence,
+allocator-growth transport, approved-domain provenance (P1-PROFILE) and the
+recursive V3 producer. The family has no represented bare-revert case.
+The populated clients and controls (`tests/runtime-frame/`) are not on master,
+so no in-tree instance shows the premises of `complete`/`endpoint` jointly
+satisfiable. Read-only finder and skeptic reviews found no Lean defect; their
+doc and docstring findings are fixed here.

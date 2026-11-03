@@ -1222,6 +1222,15 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducer
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerControls
+import Solidity.Backend.InternalFlow.RuntimeFrameCodeEquality
+import Solidity.Backend.InternalFlow.RuntimeFrameMutation
+import Solidity.Backend.InternalFlow.RuntimeFrameNested
+import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
+import Solidity.Backend.InternalFlow.RuntimeFrameV3PairedUnwind
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveActivation
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveDescent
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn
 import Solidity.Backend.InternalDispatch
 import Solidity.Backend.InternalDispatch.Agreement
 import Solidity.Backend.InternalDispatch.Chain
