@@ -128,3 +128,33 @@ checked all 20 direct Mathlib roots appear in the 898-key request. Both approve
 only the source inventory, with kernel proofs, EVM controls and final acceptance
 explicitly pending. See `evidence/reviews.md`. Any new modules' central root/module-map
 registration is deferred to H21 integration; no central files are changed.
+
+## Published dependency adoption
+
+Coordinator publication `059eb83d4e1d494f42c532513ffbcd3e65adaf75` was
+fetched from origin/master and adopted on this same lane branch by merge
+`2ee2266425da6b950a1731103289e71f97902299`. Its parents preserve the
+sealed lane head `f99245421406baa70a89f1015e393f19fe56ea19` and the exact
+published commit. The original assignment base remains unchanged in the lane
+report. No lane work was reset or discarded; no push or default-branch merge.
+
+Read `integration-20261103-checkpoints.md`: this lane is not among the imported
+checkpoints, and no lane-specific precompile integration document is present.
+All pinned precompile inputs and this lane's payload were byte-identical after
+adoption. Inventory-only check, 12 Python mutation controls, and the original
+19-file seal verification passed again. This is not a new kernel or runtime
+pass; the earlier KeySort evidence is historical, not a post-merge full build.
+
+H24's declaration-graph companion supplies no concrete P8 inhabitant and does
+not change this optional B16 task's premises or add a new producer dependency.
+H16/H19 and Core ExtCall freezes remain binding. The coordinator announced the
+master Lake/Mathlib transfer separately; `Mathlib/Data/Nat/Log.olean` is still
+absent on this VM. No cache retry, rebuild or new proof composition was attempted.
+The existing Q-CACHE request is pending that transfer; no new decision is asked.
+The original sealed handoff remains historical evidence for its payload commit.
+
+Separate read-only dependency-adoption finder and skeptic reviews both passed
+with no findings and without Lean/server use. They confirmed exact merge parents,
+unchanged precompile inputs, passing inventory/12 controls and the retained cache
+blocker. Evidence and current handoff: `evidence/dependency-adoption.md` and
+`evidence/dependency-adoption-gates.log`.
