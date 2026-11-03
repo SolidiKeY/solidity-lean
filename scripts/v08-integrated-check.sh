@@ -16,7 +16,7 @@ while IFS= read -r module; do
     @shared-file)
       file=$(cat /workspace/v08-world-lowering-evidence/integrated-source-deployment-20261102/coord-access/current-file.txt)
       case "$file" in
-        /workspace/v08-world-lowering-published/Solidity/Lowering/V08/WorldImageAccess.lean|/workspace/v08-world-lowering-published/Solidity/Lowering/V08/WorldImageAccessControls.lean|/workspace/v08-world-lowering-published/Solidity/Lowering/V08/SourceClockTransactions.lean) ;;
+        /workspace/v08-world-lowering-published/Solidity/Lowering/V08/WorldImageAccess.lean|/workspace/v08-world-lowering-published/Solidity/Lowering/V08/WorldImageAccessControls.lean|/workspace/v08-world-lowering-published/Solidity/Lowering/V08/SourceClockTransactions.lean|/workspace/v08-world-lowering-published/Solidity/Lowering/V08/LocalCallableTransport.lean) ;;
         *) echo 'Unapproved per-file target' >&2; exit 2 ;;
       esac
       /opt/lean/bin/lake -f /workspace/v08-world-lowering-evidence/integrated-source-deployment-20261102/runtime-integrated.toml env lean --tstack=131072 -j1 "$file"

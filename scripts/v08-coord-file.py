@@ -10,7 +10,7 @@ fcntl.flock(9,fcntl.LOCK_EX|fcntl.LOCK_NB)
 assert len(sys.argv)==5 and sys.argv[1:4]==['env','lean','--tstack=131072'],'only exact gate.sh per-file command'
 file=pathlib.Path(sys.argv[4]);file=file if file.is_absolute() else root/file
 assert not file.is_symlink();file=file.resolve()
-assert file in [root/'Solidity/Lowering/V08/WorldImageAccess.lean',root/'Solidity/Lowering/V08/WorldImageAccessControls.lean',root/'Solidity/Lowering/V08/SourceClockTransactions.lean'] and file.is_file()
+assert file in [root/'Solidity/Lowering/V08/WorldImageAccess.lean',root/'Solidity/Lowering/V08/WorldImageAccessControls.lean',root/'Solidity/Lowering/V08/SourceClockTransactions.lean',root/'Solidity/Lowering/V08/LocalCallableTransport.lean'] and file.is_file()
 (evidence/'coord-access/current-file.txt').write_text(str(file)+'\n')
 previous={p.name for p in evidence.glob('run-*')}
 runner=root/'scripts/v08-coord-file-run.py';sys.argv=[str(runner)]
