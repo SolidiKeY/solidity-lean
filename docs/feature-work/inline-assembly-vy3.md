@@ -772,3 +772,25 @@ certificates, width/native-op refusals and real prefix capacity. Twenty guards
 pin standard axiom reports. Structured-selector integration/completeness,
 native byte/PC/resource correspondence, full Source/G24/views/readback,
 functions/loops/divergence and frontend/joint closure remain open.
+
+### Positional structured control
+
+`SolidityBridge.Yul.OccurrenceControl` connects positional leaves to the existing
+block realization and classification contracts. Its recursive code/sequence/
+conditional selector constructs both proofs with each result; it does not ask
+a caller to supply a classification or simulation theorem. Conditional proofs
+derive actual condition failure, empty result, full-word zero/nonzero truth and
+taken-arm outcomes. Existing sequence/branch/lowering lemmas are reused, giving
+published whole-block iff and exact failure transport. Loops remain refused;
+older selectors and interfaces remain unchanged.
+
+An original mixed-width BYTE31 guard with BYTE0 assignment followed by ISZERO of
+the updated local closes source/model and whole-iff instances at depths0/2,
+with arbitrary represented locals, newer/caller frames and full machine fields.
+Controls cover true/false source paths, high-bit truth, untaken failing arms,
+empty condition failure and stack consumption, condition/taken-arm/early/later
+faults, dirty data and static refusals. Twenty guards pin standard axioms.
+This closes the positional structured integration gap for these supported
+constructors, not selector completeness, loops/divergence/functions,
+native byte/PC/ExpansionRoom/capacity/resources, full Source/G24/views/readback
+or frontend/joint adequacy.

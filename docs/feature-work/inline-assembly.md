@@ -303,3 +303,8 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   assignment source/model instances at depths0/2. Legacy interfaces remain;
   structured/native/full Source/G24/frontend closure is pending. See
   [lane](inline-assembly-vy3.md).
+
+- VY3 positional structured selection: constructed realization/classification
+  for code/sequence/conditional blocks, whole iff/failure transport and original
+  mixed-width BYTE conditional instances at depths0/2. Loop/native/full Source/
+  G24/frontend obligations remain open; see [lane](inline-assembly-vy3.md).
