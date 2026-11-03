@@ -103,8 +103,8 @@ the input of `restoration`.
 
 ## Open
 
-- `Step`/`Observed` producers tied to the source state, and P2 histories for
-  reverting, value-bearing and reentrant calls.
+- `Step`/`Observed` producers tied to the source state, including actual target execution and source/target correspondence.
+  Source P2 histories are closed by SourceAllHistories; target correspondence is not.
 - A P10 `Returndata` adapter from
   `Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean` (reference EVM,
   7-argument CALL) to `FetchedPremises`; see [P10](roadmap-v15-p10.md).
@@ -122,5 +122,116 @@ distinct from P1 runtime frames; see [Source histories](g22-source-history-produ
 bytes, retaining a supplied prior caller write, undoing the credit balance and
 keeping its observable event. Its nil arguments do not execute the prior write.
 The concrete strategy's callback-history premise is proved from its moves, not
-from mutability metadata. General callback histories and Source/target adequacy
-remain open.
+from mutability metadata. General bounded Source callback histories are now proved by
+SourceAllHistories; Source/target adequacy remains open.
+
+Actual Source histories in SourceCallHistory now cover guarded known-instance
+calls and unknown zero-value calls from smaller-bound SourceHistory.At, across
+success, revert and halt. Static projection preserves typed storage, not balances
+or the whole world. The27 controls and exact Source equalities do not discharge
+compiler target steps, frontend capture provenance or Source-to-Core representation.
+
+ClosedSourceFrame.history_of_raw derives P2 directly from the exact invocation's
+Source RawAt run, for arbitrary values, outcomes and halts. frames_of_raw,
+evaluated_frame and caller_storage remove the independent Source-history
+premise for static invocations while retaining local capture and post-capture
+state. This does not supply original-site provenance, Source/Core representation
+or a target/native execution producer. No checked-emitter ReturnClaim or external
+function-value producer is implemented here; those remain separate consumers.
+
+ClosedSourceConsumers.premises is the closed-P2 adapter: it accepts the existing
+same-invocation raw-phase, identity, target execution and observation inputs,
+then derives p2History from the proved Source run instead of asking for a
+separate history. Empty Step remains possible and is not promoted to target
+coverage. typed_storage retains the explicit functional representation and
+both endpoint representation facts; source_environment has no callback-history
+premise. No original-site provenance or target call implementation is supplied.
+
+ClosedConsumerControls applies this adapter to the inhabited restricted payment
+fixture, rejects unrelated bytes, exercises actual read-only Source reentry,
+and proves any explicitly represented typed output equals the entry projection.
+The final touched controls and nine-declaration standard-axiom audit passed
+in15.08s, peak aggregate186613760 bytes, hard12GiB/swap0, CPU1/Lean-j1,
+unchanged300s deadline and4GiB host reserve. Independent finder and skeptic
+found no defect; no original full or native gate was retried or relabeled.
+
+SourceExpressionConsumer.after_capture connects the actual resolved extCall
+expression at horizon+1 to its capture execution and remaining resume run.
+resume_history includes real callAddr plus the declared-return decoder, without
+assuming callee success or successful decoding. expression_history and storage
+protect persistent caller storage relative to the post-capture checkpoint when
+the declaration-requested or inherited mode is static. Argument effects before
+that checkpoint are retained. This proves the local resolved-expression link,
+not whole-body/original-source-site embedding or compiler/Core correspondence.
+
+SourceExpressionControls has13 kernel assertions: an ordinary nonself call's
+argument3→4 and old3 calldata, declared int failure on one-byte successful
+callee data, and actual inherited-static read-only reentry through the expression.
+The argument-effect fixture is ordinary; it does not independently witness a
+combined view-call/postincrement fixture. The generic law retains the actual
+Invocation declaration/signature/capture and effective mode. No new source,
+fixture, admission, expected observation, native observation or target behavior
+is introduced. Per-file controls passed in7.45s;17-declaration axiom audit passed
+in10.27s, peak184778752 bytes, only standard axioms. Both used unchanged hard12GiB/
+swap0 CPU1/Lean-j1/300s limits and4GiB host reserve. The initial ambiguous caller
+context check failed; explicitly indexing the existing caller context fixed it.
+Independent finder and skeptic cleared the statements and boundary.
+
+SourceExpressionIssuer.capture_of_success derives actual CapturedAt and resumed
+execution from a successful resolved extCall expression; it no longer asks for
+a separately supplied capture witness at that boundary. bind retains exact
+environment declaration membership, typed signature, expressions, horizon,
+states and captured values. storage_of_success uses that derived checkpoint
+and the closed Source law to preserve static caller storage without a frame
+premise. It covers successful expressions only; earlier all-outcome Source laws
+remain unchanged. This is not whole-body/source-text provenance, nor proof that
+unknown receiver bytecode implements the selected declaration.
+
+SourceIssuerControls includes inhabited argument-effect and inherited-static
+reentry issuance, a view-labelled declaration rejected by actual registration,
+and missing-code refusal before capture can succeed. Ten declaration/definition
+axiom reports passed with only standard axioms; final controls/audit took5.73s,
+peak210087936 bytes under unchanged hard12GiB/swap0 CPU1/Lean-j1/300s limits
+and4GiB host reserve. Independent finder and skeptic cleared final proofs.
+Initial contradiction/type/lookup-normalization attempts remain failed receipts.
+No original full or native gate was repeated or relabeled.
+
+SourceExpressionFailure.classify separates an actual failing resolved external
+expression into an exact capture failure or an actual successful capture followed
+by resume failure. capture_failure propagates the former's halt and reached state
+unchanged. storage retains that alternative and proves static storage preservation
+only from a successful post-argument capture checkpoint in the latter. This does
+not freeze argument evaluation, turn capture errors into callee reverts, or assume
+successful decoding. Earlier success/all-outcome Source laws are unchanged.
+
+SourceFailureControls adds eight kernel assertions: missing-code failure after
+postincrement keeps3→4 and emits no call event; malformed successful return data
+fails after a successful capture; a real static callee revert retains ordered
+bytes7,9 and protects caller storage. These are expression-level Source facts,
+not transaction rollback or target/native observations. Controls passed in2.92s;
+the15-declaration/definition standard-axiom audit passed in4.72s, peak189632512
+bytes, under unchanged hard12GiB/swap0 CPU1/Lean-j1/300s limits and4GiB reserve.
+Independent finder/skeptic review found no defect. Two initial typed error-carrier/
+dependent-elimination proof failures remain failed receipts. Whole-body/source-text,
+Source/Core and target/native correspondence and original final gates remain open.
+
+SourceSelfDispatch now follows the actual external-self Source path rather than
+substituting callInternal. funded_self retains the live balance check without
+transfer/credit. enter equates guarded callAddr to enterInstance at the live
+checkpoint, using actual self-code lookup, depth, static-value and funding
+premises. success/reverted/halted transport the actual smaller-bound dispatch:
+success restores caller heap, revert rolls back the live child checkpoint and
+retains raw bytes, and non-revert halt keeps reached state while restoring heap.
+Arbitrary admitted values remain guarded; no payment or halt policy changes.
+
+SourceSelfDispatchControls has nine assertions, including applications of all
+three dispatch outcome laws to real Source runs, ordinary mutation, static
+refusal/storage preservation, timeout, insufficient value and depth refusal.
+The corrected controls passed in7.63s;19-declaration/definition standard-axiom
+audit passed in3.73s, peak169558016 bytes, hard12GiB/swap0 CPU1/Lean-j1/300s
+and4GiB reserve. Independent finder and skeptic cleared final proofs.
+The initial control used core Heap.empty instead of Source.Heap.empty and hit
+unchanged200000-heartbeat isDefEq failures after that type error; the failed
+attempt remains failed. Explicit Source heap typing fixed the input, without
+raising budgets. This supplies no target self-call/ABI-frame instance, native
+adequacy, whole-body binding or unknown-receiver-to-self substitution.

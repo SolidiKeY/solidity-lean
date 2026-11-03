@@ -2126,12 +2126,10 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
 
 ## Executable bytecode selection
-
 | Module | Role |
 |---|---|
 | `Backend/Selection/Interface.lean` | Selection, frame, structured-control and same-program composition certificate statements; see [executable bytecode selection](feature-work/executable-bytecode-selection.md). |
 | `Backend/Selection/Premises.lean` | Typed G24.03 and G45.05-BR premises and G49.02 runtime-consumer statement; no external result assumed or runtime proof claimed. |
-
 | Module (`Solidity/` omitted) | Role |
 |---|---|
 | `Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean` | Public checked array-probe adapter, exact success identity and bare-failure suffix transport with represented/owned controls. |
@@ -2147,3 +2145,24 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean` | Exact allocating-family source-return coherence at all quotation pairs and a populated all-sufficient-index caller control. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean` | Actual allocating fixed-image running prefixes, reached active parameter frames and exact allocator growth, with populated horizon/stop/countercontrols. |
 | `Roadmap/V16/SourceTransactionConsumer.lean` | Bounded actual Source transaction pairs, exact states, rollback and Hoare consumer; no compiler/session closure |
+| `Lowering/Readonly/SourceStatementParts/*.lean`, `Lowering/Readonly/SourceStatementEffects.lean` | Generated21 intrinsically typed actual statement cuts and exhaustive successor journal effect; smaller-bound At retained. |
+| `Lowering/Readonly/SourceTryEffects.lean` | Exact typed try computation factoring, kernel equality to execS and real payload/finish effects, without native/frame oracle. |
+| `Lowering/Readonly/SourceStatementControls.lean` |20 actual populated-state statement/try controls and inhabited successful At0 client; no native adequacy claim. |
+| `Lowering/Readonly/SourceEnvironmentEffects.lean`, `Lowering/Readonly/SourceEnvironmentControls.lean` | Actual environment successor history from smaller-bound child/loop execution;23 reentry/refusal/credit/rollback/raw-data/exhaustion controls. |
+| `Lowering/Readonly/SourceCallPrefix.lean` | Exact known-instance Source prefix and guarded callAddr run equality, with balance-only and live-child histories. |
+| `Backend/WorldCalls/SourceCallHistory.lean`, `Backend/WorldCalls/SourceCallHistoryControls.lean` | Actual known-call and unknown zero-value histories/static storage projection;27 nonself/reentry/rollback/code-identity controls, no native adequacy. |
+| `Lowering/Readonly/SourceCallUnknown.lean` | Exact all-value unknown Source call branch, debit refusal and live rollback histories. |
+| `Lowering/Readonly/SourceCallAddressEffects.lean` | Complete actual callAddr successor history, known/unknown instances and original guards. |
+| `Lowering/Readonly/SourceAllHistories.lean` | Closed seventeen-component bounded Source induction, actual callbacks and static storage law. |
+| `Backend/WorldCalls/ClosedSourceControls.lean` | 18 all-value/reentry/rollback/refusal controls and inhabited closed Source clients. |
+| `Backend/WorldCalls/ClosedSourceFrame.lean` | Same-invocation post-capture Source raw history/frame/storage facts; no target/Core adequacy. |
+| `Backend/WorldCalls/ClosedSourceConsumers.lean` | Compiler consumer adapter deriving Source P2 from exact raw-phase execution, with target/correspondence and representation premises retained. |
+| `Backend/WorldCalls/ClosedConsumerControls.lean` | Inhabited restricted target client, raw-byte mismatch refusal, actual Source reentry and generic typed projection. |
+| `Backend/WorldCalls/SourceExpressionConsumer.lean` | Exact resolved external-expression capture/resume link and closed call/declared-decoder static storage law at post-capture state. |
+| `Backend/WorldCalls/SourceExpressionControls.lean` |13 actual Source expression assertions for argument effects, old-value calldata, caller decode failure and permitted read-only reentry. |
+| `Backend/WorldCalls/SourceExpressionIssuer.lean` | Actual successful resolved-expression run produces typed capture/invocation binding and post-argument static caller storage law. |
+| `Backend/WorldCalls/SourceIssuerControls.lean` | Inhabited local issuance, forged view-registration rejection and missing-code capture refusal. |
+| `Backend/WorldCalls/SourceExpressionFailure.lean` | Exact capture-error versus resumed-error classification and static storage from the successful post-argument checkpoint only. |
+| `Backend/WorldCalls/SourceFailureControls.lean` | Eight Source assertions retaining dirty argument failure, no call event, caller-decoder failure and ordered callee revert data. |
+| `Backend/WorldCalls/SourceSelfDispatch.lean` | Actual guarded Source external-self funding/entry/dispatch transport for success, revert and non-revert halt. |
+| `Backend/WorldCalls/SourceSelfDispatchControls.lean` | Nine actual self-dispatch API/outcome/guard assertions; no target CALL or callInternal substitution. |

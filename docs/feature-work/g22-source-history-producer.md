@@ -223,13 +223,74 @@ The same inherited static frame is used throughout.
 Dispatch proofs share the actual selector-case lemmas; no Source definition,
 statement, premise or budget changed.
 
+SourceStatementEffects closes execS at n+1 from strictly smaller At G n,
+using21 exact intrinsic constructor cuts and exhaustive assembly. SourceTryEffects
+shares the actual payload/finish computations; its equation kernel-proves their
+composition equal to execS.tryCall, retaining target/argument order, mode, guard,
+decoding, catches, bytes and intermediate failure states.20 populated-state
+controls include successful At0 skip, scoped locals, static refusal and exact
+catch/rethrow behavior. No Source semantics or supported fragment changes.
+
+SourceEnvironmentEffects closes envLoop at n+1 using only the actual smaller-bound
+loop and child-entry histories. Requested-or-inherited mode and live pre-credit
+checkpoints retain answers, credits, refusals, child outcomes/halts and recursion.
+23 actual controls distinguish permitted nonempty read-only reentry, mutating-child
+refusal with outer success, live-prefix rollback, raw bytes and exhaustion.
+Static credit changes balance without storage changes; no whole-world equality,
+frontend provenance or native adequacy is inferred.
+
+SourceCallPrefix proves balance-only history for the existing self/nonself
+funding computation, exact known-branch equality to callAddr under actual
+lookup/depth/static-value guards, and live-checkpoint child history from smaller
+At. This introduces no payment admission or settlement rule.
+Backend.WorldCalls.SourceCallHistory transports these facts to actual known
+calls and proves unknown zero-value histories for every success, revert and
+halt using smaller-bound envLoop. Reverts undo precisely the actual descendant
+journal; static projection concludes storage only.
+
+27 actual controls distinguish known nonself zero-value success, pre-child7/3
+funding and nonpayable rollback to10/0. Unknown nonself calls distinguish
+ordinary reentry changing a supplied caller prefix4 to5 from requested-static
+refusal and permitted read-only reentry preserving4. Both Source pipelines
+assert exact successful return bytes and the completed read-only callback.
+The supplied prefix is input state, not proved argument-capture provenance.
+The initial value3/nonpayable success draft failed and is retained as evidence;
+its correction was semantically justified and independently reviewed, with all
+universal theorem statements unchanged. No original fixture/assertion changed.
+
+SourceCallUnknown proves the exact unknown branch for every value: the live
+mark precedes debit, insufficient funds returns before the call event, completed
+reverts restore precisely that checkpoint, and halts retain reached state.
+SourceCallAddressEffects.callAddr_succ covers known and unknown instances plus
+the actual depth and static-value guards. SourceAllHistories.all_at closes all
+seventeen mutually recursive components by induction on the existing bound.
+all_callbacks supplies actual bounded callback histories for every Source
+global, mode and bound; no endpoint frame or no-reentry premise is used.
+
+ClosedSourceControls adds18 kernel-checked controls/clients for nonzero debit,
+insufficient funds, reentrant mutation, live rollback, inherited static refusal,
+guard ordering and positive-bound closed histories. ClosedSourceFrame derives
+history, RuntimeFrames and caller storage equality from the exact Invocation
+RawAt run at its post-capture state. Capture is retained as supplied local
+evidence; original-site embedding and Source/Core representation remain separate.
+
+The21 statement-cut signatures are unchanged and deterministic regeneration was
+checked. Filtering unrelated helper attempts reduces the measured Part2 build
+from58s to11s without raising any limit. The first closure check timed out at300s
+and remains BLOCKED; the changed proof search then checked the closed induction
+in18.81s. Controls/frame checks passed in6.36s; the29-declaration axiom audit
+passed in20.39s with peak aggregate192032768 bytes, dependencies only propext,
+Classical.choice and Quot.sound or none. All used the verified hard12GiB/swap0
+scope, CPU1/Lean-j1, unchanged300s/stack/proof limits and4GiB reserve.
+Independent finder and skeptic cleared the source laws, controls and unchanged
+statements. A scratch audit lacking module import-cache setup failed before
+checking and remains failed; the module-aware audit passed.
+
 ## Status
 
-Thirteen of the seventeen successor components are proved: four sequencing
-components, lvalue, pay, builtin, expression, callInternal, execItems, runMods,
-forIter and dispatch. The remaining four (execS, callAddr, enterInstance and
-envLoop), and hence general positive-bound At and CallbackHistories, are open.
-Source-target/native correspondence, P1 profile hypotheses and P10 actual call
-execution keep the boundaries stated above. Checked declarations depend only on
-propext, Classical.choice and Quot.sound, or on none; no proof limit was raised.
-Independent finder and skeptic reviews cleared the producers and controls.
+Actual bounded Source histories and static persistent-storage preservation are
+proved for all seventeen evaluator components, including permitted reentry,
+reverting descendants and value-bearing calls. These Source facts do not prove
+frontend original-site capture, intrinsic/Core representation, compiler target
+or native adequacy. P1 profile hypotheses, P10 execution and original full O1
+validation obligations remain open. No whole-world or balance equality follows.
