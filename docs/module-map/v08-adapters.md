@@ -386,3 +386,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ReadyReturns.lean` | Actual single-return memory bodies and calls. |
 | `Source/Progress/ReadyProgram.lean` | Complete hybrid value and ready memory function catalogues derive call progress and preservation. |
 | `Source/Progress/ReadyProgramControls.lean` | Elaborated mixed and identity units with inhabited call and expression witnesses. |
+| `Source/Progress/ReadyBodies.lean` | Ready memory statement and sequence progress with explicit frame and readiness certificates. |
+| `Source/Progress/ReadyBodyCalls.lean` | Actual modifier-free calls and call expressions over ready memory sequences. |
+| `Source/Progress/ReadyBodyControls.lean` | Elaborated nested allocation scopes, returned references and exact halt controls. |
+| `Source/Progress/ReadyScopeControls.lean` | Intrinsic conditional, unchecked restoration and reference-tuple controls. |

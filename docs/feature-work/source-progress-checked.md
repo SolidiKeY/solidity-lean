@@ -251,3 +251,47 @@ checker still refuses the memory body. A separate elaborated identity unit
 consumes the complete-catalogue theorem with a valid reference parameter and
 returns the same alias. Finder and skeptic reviews found no confirmed defect.
 Printed axioms are standard only.
+
+
+## Ready memory statement sequences
+
+`Progress/ReadyBodies.lean` adds `ReadyStmt` and `ReadyItems`: ready expression
+statements, explicit default-ready declarations, same-type initialized locals,
+plain single returns, exact ready return tuples, conditionals, blocks and
+unchecked sequences. Existing value statements and loops retain their old
+fragment and operation-domain checks. The new memory admission does not add
+mutation, rebinding, memory loops, modifiers or general effects.
+
+The horizon induction proves progress through the actual statement evaluator,
+including return-slot writes, scope restoration and escape checks. It needs the
+explicit `BodyFrame` premise. Each certificate projects to the existing memory
+preservation certificate, giving a joint progress and `MemOK` theorem. Progress
+alone does not establish heap validity; the preservation triple requires valid
+memory and explicit local-reference witnesses at entry.
+
+`Progress/ReadyBodyCalls.lean` lifts these sequences through modifier-free
+internal calls and actual call expressions. It retains explicit selected-body,
+parameter/return/frame-layout equations and return-default readiness. The
+elaboration adapter derives checked value-callee admission through P9; it does
+not automatically derive those frame metadata equations. Ready memory callees
+may call the old checked value catalogue; arbitrary memory-call graphs and
+recursive memory calls remain outside this result.
+
+`ReadyBodyControls` actually elaborates a legacy source function that declares
+an empty memory array, allocates a temporary inside a nested block, allocates a
+result after leaving that block, then returns the result. Both evaluator
+pipelines preserve object 0 and retain default objects 1 and 2 and the scoped
+temporary 3 while returning object 4. Its call-expression witness restores a
+live caller reference and validates the escaped result. Oversized allocation
+panics after the two defaults; a low-horizon timeout also retains those
+allocations. The storage-reference default refusal and old value-checker
+refusal remain explicit.
+
+`ReadyScopeControls` supplies direct intrinsic controls for both conditional
+choices, unchecked-local restoration followed by allocation, and the singleton
+reference `retTuple` constructor. These are not separately elaborated source
+units or a multiple-reference return control. Finder and skeptic reviews found
+no confirmed defect. Validation targets are
+`Solidity.Source.Progress.ReadyBodies`, `ReadyBodyCalls`, `ReadyBodyControls`
+and `ReadyScopeControls`; printed axioms are standard only. No compiler/EVM or
+universal source-coverage claim follows.

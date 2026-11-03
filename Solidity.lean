@@ -2139,6 +2139,9 @@ import Solidity.Source.Progress.LiteralBuiltins
 import Solidity.Source.Progress.NewArray
 import Solidity.Source.Progress.NewArrayControls
 import Solidity.Source.Progress.ReadyArguments
+import Solidity.Source.Progress.ReadyBodies
+import Solidity.Source.Progress.ReadyBodyCalls
+import Solidity.Source.Progress.ReadyBodyControls
 import Solidity.Source.Progress.ReadyDefaults
 import Solidity.Source.Progress.ReadyExpressionControls
 import Solidity.Source.Progress.ReadyExpressions
@@ -2146,6 +2149,7 @@ import Solidity.Source.Progress.ReadyProgram
 import Solidity.Source.Progress.ReadyProgramControls
 import Solidity.Source.Progress.ReadyReturnControls
 import Solidity.Source.Progress.ReadyReturns
+import Solidity.Source.Progress.ReadyScopeControls
 import Solidity.Source.Progress.RecoveryBuiltin
 import Solidity.Source.Progress.ScalarBuiltinControls
 import Solidity.Source.Resolve
