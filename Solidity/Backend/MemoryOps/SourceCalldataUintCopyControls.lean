@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceCalldataUintDelete
 import Solidity.Backend.MemoryOps.SourceCalldataUintMutation
 import Solidity.Backend.MemoryOps.SourceCalldataUintBinding
 import Solidity.Backend.MemoryOps.SourceCalldataUintTransfer
@@ -772,4 +773,255 @@ theorem read_driven_vectors :
  Quot.sound] -/
 #guard_msgs in
 #print axioms read_driven_vectors
+
+/-! Actual copy/bind/delete clients; all preceding fixtures remain unchanged. -/
+private def dPayload : List PrimTy.uint.Denote := [u 2,u 0,u 0]
+private def dSource : Source.EMState E0 BΓ :=
+  let mid := bFinal (u 2)
+  (mid.1,{mid.2 with heap := mid.2.heap.write 2 (sourceUintMemory dPayload) rType})
+private def dOut : Heap (H++[A]) := out.set fresh (MObj.setElem .dyn (out.get fresh) 2 (PrimTy.dflt .uint))
+private def dProgram : Source.RItems E0 [] false .body BΓ BΓ :=
+  .stmt (.expr (sourceUintCalldataBind bDst bSrc))
+    (.stmt (.expr (sourceUintIndexedDelete bDst bIndex)) .nil)
+
+/-- Both pipelines copy/bind then actually DELETE the maximum last word. -/
+theorem bound_delete_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 0 3 (u 2))=
+      (.ok (.val (.memRef rfl 2)),bFinal (u 2)) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedDelete bDst bIndex)).run (bFinal (u 2))=
+      (.ok Source.RVal.unit,dSource) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none dProgram (bInput 0 3 (u 2)).1).run (.nil,(bInput 0 3 (u 2)).2)=
+      (.ok (.normal dSource.1),(.nil,dSource.2)) ∧
+    checkedSourceFreshUints (E := E0) frame 0 3 hp (by decide)=.ok (some out) ∧
+    out.writeAddr (.index fresh .dyn (u 2)) (PrimTy.dflt .uint)=some dOut ∧
+    SourceUintMemoryAt dSource 2 dOut fresh .dyn ∧ Source.MemOK E0 SH dSource ∧
+    Heap.Keeps (List.prefix_append H [A]) hp dOut ∧
+    SourceUintMemoryAt dSource 0 dOut (left.wk (List.prefix_append H [A])) .dyn ∧
+    SourceUintMemoryAt dSource 1 dOut (right.wk (List.prefix_append H [A])) .dyn := by
+  have result := source_cd_uint_bind_delete (bInput 0 3 (u 2)) hp (G0 p) frame fuel nps
+    bDst bSrc bIndex 0 3 (u 2) rfl rfl (by decide) (by decide) SH (bMemOK 0 3 (u 2))
+  rw [actually_decoded] at result
+  obtain ⟨valid,native,zs,first,second,program,adapter,hw,new,mok,keep,values,occupied,locals,ex,events,logs,fn⟩ := result
+  have nativeBound : (u 2).1.toNat<(MObj.elems .dyn (out.get fresh)).length := by
+    unfold out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.length_map]
+    decide
+  have nativeRun : out.writeAddr (.index fresh .dyn (u 2)) (PrimTy.dflt .uint)=some dOut := by
+    simp only [Heap.writeAddr,Heap.setIndex,nativeBound,↓reduceIte]
+    rfl
+  have equalNative : native=dOut := Option.some.inj (hw.symm.trans nativeRun)
+  subst native
+  have before : SourceUintMemoryAt (bFinal (u 2)) 2 out fresh .dyn := (copy_client p 0).2.2.1
+  obtain ⟨ht,write⟩ := source_uint_write (bFinal (u 2)) 2 payload (by rfl) 2 (by decide) (PrimTy.dflt .uint)
+  have actualWrite : (Source.deleteLoc (E := E0) (Γ := BΓ) frame (fuel+2) (τ := .int .u256) (.mem 2 2)).run (bFinal (u 2))=
+      (.ok (),dSource) := write
+  have actual := before.eval_delete_of_run (G0 p) frame fuel bDst bIndex (u 2) rfl rfl nativeBound actualWrite
+  have equalSource : zs=dSource := congrArg Prod.snd (second.symm.trans actual)
+  subst zs
+  have oldInitial : SourceUintMemoryAt (bInput 0 3 (u 2)) 0 hp left .dyn := old_at 0 3
+  have neighborInitial : SourceUintMemoryAt (bInput 0 3 (u 2)) 1 hp right .dyn := neighbor_at 0 3
+  exact ⟨first,second,program,adapter,nativeRun,new,mok,keep,
+    oldInitial.transport keep occupied,neighborInitial.transport keep occupied⟩
+
+/-- Ordered full Source/native tables, locals, identities and world frames.
+The separate delete_prefix_vectors records the exact index2 prefix. -/
+theorem delete_vectors :
+    dSource.1=(bFinal (u 2)).1 ∧
+    [dSource.2.heap.get 0,dSource.2.heap.get 1,dSource.2.heap.get 2,dSource.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory dPayload⟩,none] ∧
+    [MObj.elems .dyn (dOut.get (left.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (dOut.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (dOut.get fresh)]=
+      [old,neighbor,dPayload] ∧
+    [left.id,right.id,fresh.id]=[0,1,2] ∧ dSource.2.heap.next=3 ∧
+    dSource.2.ex=(bInput 0 3 (u 2)).2.ex ∧ dSource.2.events=(bInput 0 3 (u 2)).2.events ∧
+    dSource.2.logs=(bInput 0 3 (u 2)).2.logs ∧ dSource.2.fnLocals=(bInput 0 3 (u 2)).2.fnLocals := by
+  refine ⟨rfl,rfl,?_,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  obtain ⟨_,_,_,_,hw,_,_,keep,_,_⟩ := bound_delete_program .legacy 0 0
+  have original : MObj.elems .dyn (out.get fresh)=payload := by
+    unfold out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+    exact List.map_id'' (fun _ => rfl) _
+  rw [keep left,keep right,MObj.elems_wk,MObj.elems_wk,
+    indexedWrite_elems out dOut fresh .dyn (u 2) (PrimTy.dflt .uint) hw,original]
+  simp only [MObj.elems_dyn,List.map_id'' (f := MVal.wk (List.prefix_append H [A]) (.prim .uint)) (fun _ => rfl)]
+  rfl
+
+/-- Literal empty copy succeeds before the reached deletion rejects index0. -/
+theorem empty_delete_error (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    let initial := bInput 0 0 (u 0)
+    let mid : Source.EMState E0 BΓ :=
+      (initial.1.set bDst (.memRef rfl 2),{initial.2 with heap := (initial.2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})
+    let pair := hp.alloc (R := A) (⟨[],by decide⟩ : MObj H A)
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run initial=
+      (.ok (.val (.memRef rfl 2)),mid) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedDelete bDst bIndex)).run mid=
+      (.error (.revert (Source.panicData .index)),mid) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none dProgram initial.1).run (.nil,initial.2)=
+      (.error (.revert (Source.panicData .index)),(.nil,mid.2)) ∧
+    checkedSourceFreshUints (E := E0) frame 0 0 hp (by decide)=.ok (some pair.1) ∧
+    pair.1.writeAddr (.index pair.2 .dyn (u 0)) (PrimTy.dflt .uint)=none ∧
+    [mid.2.heap.get 0,mid.2.heap.get 1,mid.2.heap.get 2,mid.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory []⟩,none] ∧
+    mid.2.heap.next=3 := by
+  dsimp only
+  have result := source_cd_uint_bind_delete_bounds (bInput 0 0 (u 0)) hp (G0 p) frame fuel nps
+    bDst bSrc bIndex 0 0 (u 0) rfl rfl (by decide) (by decide) SH (bMemOK 0 0 (u 0))
+  have decodedEmpty : sourceCalldataUintValues E0 frame 0 0=.ok [] := rfl
+  rw [decodedEmpty] at result
+  obtain ⟨valid,first,second,program,adapter,failed,new,mok,keep,preserved⟩ := result
+  exact ⟨first,second,program,adapter,failed,rfl,rfl⟩
+
+/-- Exact nonempty endpoint3 rejects after the real copied prefix, not before it. -/
+theorem endpoint_delete_error (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    let mid := bFinal (u 3)
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 0 3 (u 3))=
+      (.ok (.val (.memRef rfl 2)),mid) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintIndexedDelete bDst bIndex)).run mid=
+      (.error (.revert (Source.panicData .index)),mid) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none dProgram (bInput 0 3 (u 3)).1).run (.nil,(bInput 0 3 (u 3)).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,mid.2)) ∧
+    out.writeAddr (.index fresh .dyn (u 3)) (PrimTy.dflt .uint)=none ∧
+    mid.2.heap.get 2=some ⟨SU,sourceUintMemory payload⟩ ∧ mid.2.heap.next=3 := by
+  dsimp only
+  have result := source_cd_uint_bind_delete_bounds (bInput 0 3 (u 3)) hp (G0 p) frame fuel nps
+    bDst bSrc bIndex 0 3 (u 3) rfl rfl (by decide) (by decide) SH (bMemOK 0 3 (u 3))
+  rw [actually_decoded] at result
+  obtain ⟨valid,first,second,program,adapter,failed,new,mok,keep,preserved⟩ := result
+  exact ⟨first,second,program,failed,rfl,rfl⟩
+
+/-- Omitting deletion retains maximum; stale retained alias still reads7.
+The returned deletion value is unit, not the removed maximum. -/
+theorem delete_omission_and_alias (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) frame (fuel+2) (.indexArray (.local bDst) (.local bIndex) rfl)).run (bFinal (u 2))=
+      (.ok (.val (sourceUint maximum)),bFinal (u 2)) ∧
+    (Source.evalE (G0 p) frame (fuel+2) (.indexArray (.local bDst) (.local bIndex) rfl)).run dSource=
+      (.ok (.val (sourceUint (u 0))),dSource) ∧
+    (Source.evalE (G0 p) frame (fuel+2) (.indexArray (.local bAlias) (.local bIndex) rfl)).run
+      (dSource.1.set bIndex (sourceUint (u 0)),dSource.2)=
+      (.ok (.val (sourceUint (u 7))),(dSource.1.set bIndex (sourceUint (u 0)),dSource.2)) ∧
+    (sourceUint maximum : Source.Val E0.layout (.int .u256))≠sourceUint (u 0) := by
+  have before : SourceUintMemoryAt (bFinal (u 2)) 2 out fresh .dyn := (copy_client p 0).2.2.1
+  have size : (u 2).1.toNat<out.len fresh .dyn := by
+    unfold Heap.len out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.length_map]
+    decide
+  have first := before.eval_index (G0 p) frame fuel bDst bIndex (u 2) rfl rfl size
+  have original : MObj.elems .dyn (out.get fresh)=payload := by
+    unfold out fresh
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+    exact List.map_id'' (fun _ => rfl) _
+  simp only [original] at first
+  obtain ⟨_,_,_,_,_,after,mok,keep,oldAt,_⟩ := bound_delete_program p fuel 0
+  have values : MObj.elems .dyn (dOut.get fresh)=dPayload :=
+    (List.cons.inj (List.cons.inj (List.cons.inj delete_vectors.2.2.1).2).2).1
+  have sizeAfter : (u 2).1.toNat<dOut.len fresh .dyn := by
+    unfold Heap.len
+    rw [values]
+    decide
+  have second := after.eval_index (G0 p) frame fuel bDst bIndex (u 2) rfl rfl sizeAfter
+  simp only [values] at second
+  have different : (sourceUint maximum : Source.Val E0.layout (.int .u256))≠sourceUint (u 0) := by
+    intro same
+    have converted := congrArg (fun v : Source.Val E0.layout (.int .u256) => calldataUint (.val v)) same
+    have unequal : maximum≠u 0 := by decide
+    exact unequal (by simpa only [calldataUint_sourceUint] using converted)
+  refine ⟨first,second,?_,different⟩
+  have oldRep : SourceUintMemoryAt (dSource.1.set bIndex (sourceUint (u 0)),dSource.2) 0 dOut
+      (left.wk (List.prefix_append H [A])) .dyn := oldAt
+  have oldBound : (u 0).1.toNat<dOut.len (left.wk (List.prefix_append H [A])) .dyn := by
+    unfold Heap.len
+    rw [keep left,MObj.elems_wk,MObj.elems_dyn,List.length_map]
+    decide
+  have read := oldRep.eval_index (G0 p) frame fuel bAlias bIndex (u 0) rfl rfl oldBound
+  simp only [keep left,MObj.elems_wk,MObj.elems_dyn] at read
+  exact read
+
+
+private def dOldType : (bInput 0 3 (u 2)).2.heap.ty 0=some SU := rfl
+private def dOldSource : Source.EMState E0 BΓ :=
+  let initial := bInput 0 3 (u 2)
+  (initial.1,{initial.2 with heap := initial.2.heap.write 0 (sourceUintMemory [u 7,u 0,u 0]) dOldType})
+private def dReverse : Source.EMState E0 BΓ :=
+  (dOldSource.1.set bDst (.memRef rfl 2),
+    {dOldSource.2 with heap := (dOldSource.2.heap.alloc ⟨SU,sourceUintMemory payload⟩).1})
+
+/-- Reversing actual DELETE and binding changes the OLD object and then copies
+an uncleared maximum into the fresh object, unlike the supported order. -/
+theorem delete_wrong_order (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) frame (fuel+4) (sourceUintIndexedDelete bDst bIndex)).run (bInput 0 3 (u 2))=
+      (.ok Source.RVal.unit,dOldSource) ∧
+    (Source.evalE (G0 p) frame (fuel+3) (sourceUintCalldataBind bDst bSrc)).run dOldSource=
+      (.ok (.val (.memRef rfl 2)),dReverse) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none
+      (.stmt (.expr (sourceUintIndexedDelete bDst bIndex))
+        (.stmt (.expr (sourceUintCalldataBind bDst bSrc)) .nil) : Source.RItems E0 [] false .body BΓ BΓ)
+      (bInput 0 3 (u 2)).1).run (.nil,(bInput 0 3 (u 2)).2)=(.ok (.normal dReverse.1),(.nil,dReverse.2)) ∧
+    [dOldSource.2.heap.get 0,dOldSource.2.heap.get 1,dOldSource.2.heap.get 2,dOldSource.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory [u 7,u 0,u 0]⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none] ∧
+    [dReverse.2.heap.get 0,dReverse.2.heap.get 1,dReverse.2.heap.get 2,dReverse.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory [u 7,u 0,u 0]⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none] := by
+  have oldAt : SourceUintMemoryAt (bInput 0 3 (u 2)) 0 hp left .dyn := old_at 0 3
+  have bound : (u 2).1.toNat<hp.len left .dyn := by
+    simp only [Heap.len,MObj.elems_dyn]
+    decide
+  obtain ⟨ht,write⟩ := source_uint_write (bInput 0 3 (u 2)) 0 old (by rfl) 2 (by decide) (PrimTy.dflt .uint)
+  have actualWrite : (Source.deleteLoc (E := E0) (Γ := BΓ) frame (fuel+3) (τ := .int .u256) (.mem 0 2)).run
+      (bInput 0 3 (u 2))=(.ok (),dOldSource) := write
+  have first := oldAt.eval_delete_of_run (G0 p) frame (fuel+1) bDst bIndex (u 2) rfl rfl bound actualWrite
+  have second := source_cd_uint_bind_run (G0 p) frame fuel dOldSource bDst bSrc 0 3 rfl
+  rw [actually_decoded] at second
+  have firstStatement := source_expr_statement_run (G0 p) frame (fuel+4) nps _ (bInput 0 3 (u 2)) dOldSource _ first
+  have secondStatement := source_expr_statement_run (G0 p) frame (fuel+3) nps _ dOldSource dReverse _ second
+  exact ⟨first,second,source_items_pair_run (G0 p) frame fuel nps _ _ _ _ _ firstStatement secondStatement,rfl,rfl⟩
+
+/-- Insufficient deletion horizon stops at the actual reached copied state.
+It does not undo that already executed copy or expose a target revert machine. -/
+theorem delete_reached_timeout (p : Roadmap.Pipeline) :
+    (Source.evalE (G0 p) frame 2 (sourceUintIndexedDelete bDst bIndex)).run (bFinal (u 2))=
+      (.error .timeout,bFinal (u 2)) ∧
+    (bFinal (u 2)).2.heap.get 2=some ⟨SU,sourceUintMemory payload⟩ ∧
+    (bFinal (u 2)).2.heap.next=3 := by
+  exact ⟨rfl,rfl,rfl⟩
+
+
+/-- Exact ordered locals and object tables of THIS deletion's index2 prefix,
+not the different scalar-producing read prefix from prior controls. -/
+theorem delete_prefix_vectors :
+    (bInput 0 3 (u 2)).1=.cons (sourceUint (u 2)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 0) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    (bFinal (u 2)).1=.cons (sourceUint (u 2)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    [(bInput 0 3 (u 2)).2.heap.get 0,(bInput 0 3 (u 2)).2.heap.get 1,
+      (bInput 0 3 (u 2)).2.heap.get 2,(bInput 0 3 (u 2)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none] ∧
+    [(bFinal (u 2)).2.heap.get 0,(bFinal (u 2)).2.heap.get 1,
+      (bFinal (u 2)).2.heap.get 2,(bFinal (u 2)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none] ∧
+    (bInput 0 3 (u 2)).2.heap.next=2 ∧ (bFinal (u 2)).2.heap.next=3 := by
+  exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.bound_delete_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms bound_delete_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms delete_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.empty_delete_error' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms empty_delete_error
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.endpoint_delete_error' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms endpoint_delete_error
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.delete_omission_and_alias' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms delete_omission_and_alias
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.delete_wrong_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms delete_wrong_order
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.delete_reached_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms delete_reached_timeout
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.delete_prefix_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms delete_prefix_vectors
 end Solidity.Backend.MemoryOps.UintCopyControls
