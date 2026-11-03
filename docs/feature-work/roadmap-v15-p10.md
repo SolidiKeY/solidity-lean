@@ -3,7 +3,7 @@
 Partial checkpoint of roadmap item V15 (EVM agreement), producer P10: single
 fetched EVM steps over Backend-emitted code, checked against the pinned
 EvmYul reference (`Bridge/vendor/EvmYul`). All modules live in
-`Bridge/SolidityBridge/RoadmapV15/P10/`; nothing in the core changed. Checked registered producer theorems have no `sorry` or new axiom; their
+`Bridge/SolidityBridge/RoadmapV15/P10/`; nothing in the core changed. Checked registered producer and control theorems have no `sorry` or new axiom; their
 printed axiom sets are subsets of `propext`, `Classical.choice`, `Quot.sound`.
 Source-only control proposals, where explicitly identified below, remain
 unverified and are not registered.
@@ -1219,8 +1219,8 @@ Independent reviews corrected confounded negatives: the PUSH test now changes
 only the operand at gas 22; the cycle test retains the certified array, gas 30,
 fuel 9 and spill and derives the zero-path terminal State at PC 73, gas 11,
 count 48 with cleared return data. Missing JUMP0 membership is tested separately.
-These sources match the previously checked checkpoints; validation against the
-new published H7 reference baseline remains pending. No source/compiler, Osaka,
+These sources have now passed focused target checks against the published H7
+reference baseline, including their populated controls. No source/compiler, Osaka,
 account/world, resource-abstraction or transaction/trace closure follows.
 
 ## Invocation environment consumers
@@ -1231,23 +1231,33 @@ sites, gas ≥ 2, one available stack slot and explicit fuel. ADDRESS reads code
 owner, CALLER reads execution source (distinct from ORIGIN's transaction sender),
 and CALLVALUE reads the exact native value word under either permission flag.
 It derives emitted decode, ordered driver checks, whole-State charged steps and
-`X` continuation. Its three producer laws were checked before the H7 rebase;
-new-baseline validation is pending. This is neither first opcode coverage nor
+`X` continuation. Its three producer laws have been revalidated against the published H7 baseline. This is neither first opcode coverage nor
 source-frame/CALL/world or full-row correspondence.
 
 [InvocationEnvironmentControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean)
-is an **unverified, unregistered source proposal**. Seven proposed controls
-retain distinct owner/caller/origin identities, value 37, complete expected
-States and ordered observations, legal capacity and gas/fuel/overflow order.
-The corrected source has no passing kernel check: a fail-closed process monitor
-could not verify a transient Lean argv. No runtime restoration, control pass or
-full import closure is inferred. The delegated universal environment-fact packet
-is separate. All full opcode and parent composition obligations remain open.
+now has seven checked and registered controls. They retain distinct owner 7,
+caller 11 and origin 19, value 37, independent complete expected States,
+ordered observations, legal stack capacity and gas/fuel/overflow ordering.
+Private proof glue establishes concrete gas/PC arithmetic and rewrites symbolic
+stack length before the overflow check, avoiding deep list reduction without
+changing statements, expected values or proof budgets. Independent reviews
+confirmed those boundaries. The initial failed controls and cold dependency
+closure timeout remain failures; subsequent focused H7 checks are separate
+passing evidence. No source-frame/CALL/world or full-row correspondence follows.
+The delegated universal environment-fact packet remains separate and open.
 
 A read-only metadata review found an unqualified “checked” label in the new
-module-map row. It now explicitly separates the pre-H7 check from pending
-validation on the published H7 baseline, matching the boundaries above.
+module-map row. It was qualified to separate prior evidence from then-pending H7 validation.
+The subsequent focused H7 checks now discharge that validation for these modules.
 
 The H7 documentation correction also separates its published bounded logical
 padding proof from the still-separate native allocation/extern boundary. V15
 does not reimplement or claim completion of the transferred memory bridge.
+
+The invocation controls were repaired after actual diagnostics identified three
+whole-State equality goals and a recursion limit in full-stack reduction. The
+repairs preserve all seven public statements and the original expected records;
+no heartbeat, recursion, resource, fuel or test bound was increased. The native
+CALL/RETURNDATA laws still do not construct `WorldCalls.FetchedPremises`: its
+source Step, same invocation identity, raw outcome and execution relations must
+come from concrete source/world/compiler producers, not an arbitrary relation.

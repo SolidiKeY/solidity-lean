@@ -17,26 +17,61 @@ def observed (op : Backend.Op) (perm : Bool) (words : Scalar.Stack) (value : UIn
     pc := u 4,gasAvailable := u 7,execLength := 42
     stack := value::words.map (fun w => UInt256.mk w.toFin)}
 
+private theorem expected_state (op : Backend.Op) (perm : Bool)
+    (words : Scalar.Stack) (value : UInt256) :
+    (Assembly.chargedPrepare (entry op 9 perm words).state 2).replaceStackAndIncrPC
+      (value::(entry op 9 perm words).state.stack) = observed op perm words value := by
+  change ({(entry op 9 perm words).state with
+    pc := u 3 + u 1,gasAvailable := u 9 - u 2,execLength := 42,
+    stack := value::words.map (fun w => UInt256.mk w.toFin)} : EVM.State) = _
+  have gas : u 9 - u 2 = u 7 := by rfl
+  have pc : u 3 + u 1 = u 4 := by rfl
+  rw [gas,pc]
+  rfl
+
+private theorem value_overflow (site : Site .CALLVALUE)
+    (gas : 2 ≤ site.state.gasAvailable.toNat) (full : site.state.stack.length = 1024) :
+    Assembly.driverSteps 1 2 #[] site.state = .error .StackOverflow := by
+  have expansion : EVM.memoryExpansionCost site.state .CALLVALUE = 0 := by
+    simp only [EVM.memoryExpansionCost,EVM.memoryExpansionCost.μᵢ',Nat.sub_self]
+  have charge : site.state.gasAvailable-UInt256.ofNat 0 = site.state.gasAvailable := by
+    change UInt256.mk (site.state.gasAvailable.val-0) = site.state.gasAvailable
+    rw [sub_zero]
+  have cost : EVM.C' site.state .CALLVALUE = 2 := rfl
+  have decoded := DecoderAgreement.decode_all site
+  simp only [Assembly.driverSteps,decoded,Option.option,bind,Except.bind]
+  simp only [Assembly.driverGate,DecoderAgreement.referenceOp]
+  rw [expansion,charge]
+  simp only [cost,EVM.δ,EVM.α,Option.getD_some,Nat.sub_zero,
+    if_neg (Nat.not_lt_zero _),if_neg (Nat.not_lt_of_ge gas),full]
+  rfl
+
 theorem address_client (perm : Bool) (words : Scalar.Stack) (room : words.length+1 ≤ 1024) :
     Assembly.driverSteps 1 2 #[] (entry .ADDRESS 9 perm words).state =
       .ok (observed .ADDRESS perm words (u 7)) := by
   have capacity : (entry .ADDRESS 9 perm words).state.stack.length+1 ≤ 1024 := by
     simpa only [entry,Site.state,List.length_map] using room
-  exact (address_fetched (entry .ADDRESS 9 perm words) 0 (by change 2 ≤ 9;decide) capacity).1
+  have h := (address_fetched (entry .ADDRESS 9 perm words) 0 (by change 2 ≤ 9;decide) capacity).1
+  rw [expected_state] at h
+  exact h
 
 theorem caller_client (perm : Bool) (words : Scalar.Stack) (room : words.length+1 ≤ 1024) :
     Assembly.driverSteps 1 2 #[] (entry .CALLER 9 perm words).state =
       .ok (observed .CALLER perm words (u 11)) := by
   have capacity : (entry .CALLER 9 perm words).state.stack.length+1 ≤ 1024 := by
     simpa only [entry,Site.state,List.length_map] using room
-  exact (caller_fetched (entry .CALLER 9 perm words) 0 (by change 2 ≤ 9;decide) capacity).1
+  have h := (caller_fetched (entry .CALLER 9 perm words) 0 (by change 2 ≤ 9;decide) capacity).1
+  rw [expected_state] at h
+  exact h
 
 theorem callvalue_client (perm : Bool) (words : Scalar.Stack) (room : words.length+1 ≤ 1024) :
     Assembly.driverSteps 1 2 #[] (entry .CALLVALUE 9 perm words).state =
       .ok (observed .CALLVALUE perm words (u 37)) := by
   have capacity : (entry .CALLVALUE 9 perm words).state.stack.length+1 ≤ 1024 := by
     simpa only [entry,Site.state,List.length_map] using room
-  exact (callvalue_fetched (entry .CALLVALUE 9 perm words) 0 (by change 2 ≤ 9;decide) capacity).1
+  have h := (callvalue_fetched (entry .CALLVALUE 9 perm words) 0 (by change 2 ≤ 9;decide) capacity).1
+  rw [expected_state] at h
+  exact h
 
 theorem legal_capacity :
     Assembly.driverSteps 1 2 #[] (entry .CALLER 9 false []).state =
@@ -50,7 +85,9 @@ theorem resource_order :
     Assembly.driverSteps 1 1 #[] (entry .CALLER 0 false spill).state = .error .OutOfFuel ∧
     Assembly.driverSteps 1 2 #[] (entry .CALLVALUE 9 false (List.replicate 1024 513)).state = .error .StackOverflow ∧
     Assembly.driverSteps 1 2 #[] (entry .CALLVALUE 1 true (List.replicate 1024 513)).state = .error .OutOfGass := by
-  first | rfl | exact ⟨rfl,rfl,rfl,rfl⟩
+  exact ⟨rfl,rfl,value_overflow (entry .CALLVALUE 9 false (List.replicate 1024 513))
+    (by change 2 ≤ 9;decide)
+    (by simp only [entry,Site.state,List.length_map,List.length_replicate]),rfl⟩
 
 theorem distinct_identities :
     (observed .ADDRESS false spill (u 7)).stack = [u 7,u 258,u 513] ∧
