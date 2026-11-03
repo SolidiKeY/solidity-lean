@@ -1595,7 +1595,32 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingActivation.Checks.whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCoherence.source_coherence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingPrefixes.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSource.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatorReturn.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatorReturn.Checks.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ArrayProbe.failure_suffix": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -1605,7 +1630,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerPrefixes.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CountdownWitness.call_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DomainTransport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DomainTransport.probe_keeps": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -1670,6 +1705,21 @@
   "propext"
  ],
  "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.successful_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GuardedCaller.lean:Solidity.Backend.InternalFlow.RuntimeFrame.GuardedCaller.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GuardedPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.GuardedPrefixes.success_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3HeapDomain.lean:Solidity.Backend.InternalFlow.RuntimeFrame.HeapDomain.domain_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -25077,6 +25127,51 @@
   "propext"
  ],
  "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Digests.identity_list": [
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.after_revert_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.after_success_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.revert_success_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.success_revert_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.success_revert_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_event_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_original_rollback": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
  "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.allocation_mem": [
