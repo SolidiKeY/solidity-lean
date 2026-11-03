@@ -64,3 +64,19 @@ theorem scalar_observation_agrees (pipeline : Roadmap.Pipeline) (choice : Bool) 
 
 Draft only; no placeholder declaration or completed coverage claim.
 Soundness, captured-selector proof and alias negatives stay with Sol.
+
+
+## Immediate-return while false selector
+
+Module: Solidity/Lowering/G19/WhileReturnControls.lean
+Lemma: captured_false. Routine: map the already proved no target endpoint,
+then reduce the fresh Boolean head. Preserve the complete target outcome.
+
+```lean
+theorem captured_false :
+    ((AssignmentReturnFlag.code P.mapping (.there .here) .here rfl rfl : Prog P.C _ _).run P.target).map
+      (fun out => TEnv.get .here out.st.env) = .ok false
+```
+
+Draft only; no placeholder declaration or completed coverage claim.
+The Source loop proof and mapped transport stay with Sol.
