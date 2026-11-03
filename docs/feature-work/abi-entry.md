@@ -25,8 +25,12 @@ need no new decoder.
   `Semantics/AbiEntryProofs.eager_cref` directly, without a duplicate wrapper.
   `Consumers.lean` inhabits the rejection and composition interfaces.
 - **Premises.** `Premises.lean` and `Premises/CalldataViews.lean` (with its
-  additive extension `CalldataViewExtensions.lean`) name the pending G34
-  overlapping-view, G35.03 and G24.03 producers. No instance is supplied.
+  additive extension `CalldataViewExtensions.lean`) retain the typed G34,
+  G35.03 and G24.03 boundaries. V11 now supplies V1 structural packing through
+  `Backend/MemoryOps/CalldataViewPacking.lean` (`overlappingCalldataViews`).
+  V2 extension preserving arbitrary prior keys, native paths/copies and the
+  G24.03 statement producer remain open. Packing consumes already-decoded
+  coherent payloads; it does not derive them from calldata bytes.
 
 Open: emitted calldata decoding, dispatch and full entry composition against
 the backend, and the G46.02/G46.03 Bridge backfill.
@@ -63,14 +67,14 @@ representation, MSIZE payload agreement and full charged/fuel behavior for
 MSIZE, MLOAD, MSTORE, MSTORE8 and CALLDATACOPY. Its active-byte word-fit field
 prevents MSIZE wrap; it does not bound reserved capacity or calldata admission.
 Finder/skeptic reviews found no false signature and required this boundary to
-stay explicit: P6 MLOAD payload agreement and store/copy image preservation
-remain open. `MemoryCharged.lean` inhabits these signatures; `MemoryControls.lean` checks
+stay explicit: store/copy image preservation remains open; MLOAD payload
+agreement is supplied separately by `MemoryLoad.payload`. `MemoryCharged.lean` inhabits these signatures; `MemoryControls.lean` checks
 initial P6 images, arbitrary reserved-capacity growth, per-operation successes,
 expansion charges and refusals, empty-copy endpoints and MSTORE8 low bytes.
 MSIZE successful native execution reuses the existing P10 theorem. Independent
 reviews found no semantic gap; the requested stack-overflow control is included.
-Scoped guards pin standard axioms. P6 MLOAD payload and store/copy image
-preservation remain open.
+Scoped guards pin standard axioms. Store/copy image preservation and post-load
+active-image adequacy remain open.
 
 `Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean` exhibits a successful
 charged MSTORE8 whose reached state fails the P6 post-image relation. The initial
@@ -98,3 +102,13 @@ with ordered nonzero bytes across a word boundary, right padding, both zero
 guards, large offsets, unchanged bytes and wrong-endian refusal for either
 pipeline tag. Independent finder/skeptic reviews found no issue; scoped guards
 pin standard axioms. Post-load active-image adequacy remains open.
+
+The published checkpoint supplies seven AccessBridge modules and the V11 V1
+packing producer. Its packing keys are first representatives of typed raw
+identities; this does not preserve arbitrary keys in a separately supplied
+prior packing, as the V2 contract requires. The lane retains `Calldata.lean`
+and `HostWriteControls.lean`, which that checkpoint did not import. Independent
+finder/skeptic reviews confirmed unchanged proofs and retained the published
+MLOAD documentation correction; the stale V1 and MLOAD status claims above
+have been corrected. General P1 selection, P10 decoding/call correspondence,
+physical origin, concrete P8 admission and whole-program adequacy remain open.
