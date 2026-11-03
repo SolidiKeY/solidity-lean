@@ -449,3 +449,9 @@ No budget, expected observation or producer implementation changed.
 Scope note (review): in `Yul/World/TransientTargetPort.lean`, `load_agreement`
 takes the target load equation as a premise and `reset_agreement` holds for any
 target, so neither derives a source/target agreement by itself.
+
+The intrinsic terminal leaf binds STOP/RETURN/REVERT to exact loaded bytes,
+with missing-memory refusal kept distinct from a genuine revert. It only
+produces an outcome; interpreter exit, frame completion and Source/G51
+integration remain open. Registered controls cover cross-word, empty and
+refused payloads.
