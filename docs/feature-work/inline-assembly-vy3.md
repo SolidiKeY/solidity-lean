@@ -688,3 +688,25 @@ supply physical capacity. Generated optional-root registration and focused
 checks cover this extension; full Source/G24/views/native/frontend/joint
 adequacy and the wider operator set remain open. No external pipeline result,
 ExtCall construction or admission change is inferred.
+
+### Unary word selection
+
+`SolidityBridge.Yul.UnarySelection` derives unary Scalar/model outcomes and
+published success/refusal certificates from exact empty-stack and one-word
+executor laws. ISZERO and NOT discharge those premises with existing compiler
+word bridges and VY1 word steps. No desired execution result is assumed. A
+separate table preserves earlier selector refusals. Original source guarded by
+`iszero(not a)` performs ordered NOT/ISZERO/NOT writes, with concrete source/model
+and whole-iff artifacts at depths0/2 for arbitrary represented locals, newer
+prefix and caller tail; full nonstack machine fields are retained.
+
+Controls cover zero/MAX, high-bit-only values, dirty words, nested unary
+expressions, ordered writes, underflow, incorrect candidates and static
+refusals. General unary capacity laws show `stackBound` equals `safeHeight` at
+the unchanged entry height. This height-only predicate accepts height0 even
+though the actual unary executor refuses missing operands. An initially wrong
+new assertion conflated those facts; its failed exit is preserved and the
+corrected control checks both independently. Oversized Scalar success is
+separate from the 1024-word bound. Twenty guards enforce observed standard
+axiom reports. Full Source/G24/views/raw-readback, native/world/resource,
+function/loop/divergence/frontend and final joint adequacy remain open.

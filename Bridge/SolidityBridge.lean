@@ -355,6 +355,8 @@ import SolidityBridge.Yul.StackSelection
 import SolidityBridge.Yul.StackSelectionControls
 import SolidityBridge.Yul.StructuredSource
 import SolidityBridge.Yul.StructuredSourceControls
+import SolidityBridge.Yul.UnarySelection
+import SolidityBridge.Yul.UnarySelectionControls
 import SolidityBridge.Yul.WriteSelection
 import SolidityBridge.Yul.WriteSelectionControls
 import SolidityBridge.YulWorld.Returndata
