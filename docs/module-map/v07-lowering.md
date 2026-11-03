@@ -82,3 +82,5 @@
 | `Lowering/V07/SignedNarrowMultiplication.lean` | Unchecked signed multiplication at every approved width, including wide intermediate overflow |
 | `Lowering/V07/SignedNarrowArithmeticControls.lean` | Inhabited all-width arithmetic clients, captures, checked-classification and wrong-program controls |
 | `Lowering/V07/SignedNegation.lean` | Actual unchecked signed negation at all widths, local/reached-state laws and minimum-value controls |
+| `Lowering/V07/SignedNegationEffects.lean` | Actual unchecked negation of local assignment, fresh result capture and initial alias-family transport. |
+| `Lowering/V07/SignedNegationEffectControls.lean` | Inhabited alias/context/mixed-reference clients, ordered observations and incorrect capture/store/narrowing controls. |

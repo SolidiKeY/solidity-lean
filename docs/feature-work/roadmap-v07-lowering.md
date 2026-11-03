@@ -526,3 +526,38 @@ passed; no assignment/family producer or general lowering is asserted.
 Full checkpoint closure/default/TestSuite/fixtures and global gates remain
 pending for this addition. Whole G16/G17/backfill queues remain partial and
 G18 admission/composition prerequisites and delegated children remain open.
+
+## Effectful signed negation
+
+`SignedNegationEffects` proves `-(i = a)` using actual Source assignment and
+unary evaluation, and a typed target program that writes the caller before
+capturing the wrapped negation in a fresh local. Initial integer-family
+alignment supplies target reads and derives all selected postbindings and
+alias reflection. The caller stores the assigned value; the expression returns
+its negation. The exact states frame the Source heap/world and target heap,
+global state and other caller bindings. No desired run or post-relation is an
+input premise, and no production frontend agreement is claimed.
+
+`SignedNegationEffectControls` supplies repeated-alias, self-assignment,
+equal-content distinct-identity and fresh-context clients with live memory and
+storage references. Both pipelines retain complete assignment/capture/return
+observations.384 wrapped-value runs cover all32 signed widths, both pipelines,
+minimum/maximum and near-zero inputs. Concrete wrong programs expose stale
+reads, omitted writes, storing the negated value, dropping the capture before
+reading it, omitted narrowing and collapsed equal-content identities.13 exact
+three-standard-axiom guards cover the new headlines and closed clients.
+
+The published H24 companion is `Lowering.P8.DeclarationGraphAdmission.Producer`,
+with the unchanged frozen producer as `base` and H15 graph/refusal evidence as
+`declarationGraphs`. Its existence is a typed prerequisite, not a concrete
+inhabitant or Source-to-EVM adequacy result. Foundational interfaces stay below
+the companion to preserve the import DAG. Concrete P8/H16 realization and
+ordered admitted-source aggregate applications remain open. G16/G17, G18.01,
+G18.06 and both backfills remain partial or blocked; delegated G18 children
+and G19 retain their owners. Checked panic/payload/rollback, general
+production, recursive copy/delete/lifetimes and constructor coverage are not
+added. The controls are Lean execution checks, not external compiler/EVM tests.
+
+Independent finder and skeptic source/control reviews passed. The finder found
+that the two new module-map rows were outside the headered table; their
+placement was corrected without changing the module descriptions.
