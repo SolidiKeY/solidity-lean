@@ -434,3 +434,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean` | Inhabited Source/compiler continuation witnesses, frame observations and wrong-slot controls. |
 | `Lowering/G19/AssignmentWhileReset.lean` | Mapped Boolean assignment while with an actual resetting body and intrinsic loop. |
 | `Lowering/G19/AssignmentWhileResetControls.lean` | Inhabited Source/compiler loop, alias and prefix-only omission controls. |
+| `Lowering/G19/AssignmentWhileContinue.lean` | Mapped resetting while proves continue skips arbitrary suffixes and retests the condition. |
+| `Lowering/G19/AssignmentWhileContinueControls.lean` | Inhabited continue/retest and donor-observation controls with reused compiled loop witnesses. |

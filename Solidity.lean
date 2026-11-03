@@ -878,8 +878,6 @@ import Solidity.Backend.StructuredFlow.CoreSequence
 import Solidity.Backend.StructuredFlow.CoreSequenceControls
 import Solidity.Backend.StructuredFlow.ExitControls
 import Solidity.Backend.StructuredFlow.ExitSelector
-import Solidity.Backend.StructuredFlow.MappedCondition
-import Solidity.Backend.StructuredFlow.MappedConditionControls
 import Solidity.Backend.StructuredFlow.MappedBranch
 import Solidity.Backend.StructuredFlow.MappedBranchControls
 import Solidity.Backend.StructuredFlow.MappedCondition
@@ -1593,7 +1591,6 @@ import Solidity.Language.FixedPoint.Conformance
 import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
-import Solidity.Lowering.G19.AssignmentReturnFlag
 import Solidity.Lowering.G19.AssignmentDoWhileBreak
 import Solidity.Lowering.G19.AssignmentDoWhileBreakControls
 import Solidity.Lowering.G19.AssignmentDoWhileContinue
@@ -1604,6 +1601,8 @@ import Solidity.Lowering.G19.AssignmentReturnFlag
 import Solidity.Lowering.G19.AssignmentReturnFlagControls
 import Solidity.Lowering.G19.AssignmentWhileBreak
 import Solidity.Lowering.G19.AssignmentWhileBreakControls
+import Solidity.Lowering.G19.AssignmentWhileContinue
+import Solidity.Lowering.G19.AssignmentWhileContinueControls
 import Solidity.Lowering.G19.AssignmentWhileReset
 import Solidity.Lowering.G19.AssignmentWhileResetControls
 import Solidity.Lowering.G19.ConditionalSequence
