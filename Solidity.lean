@@ -768,6 +768,9 @@ import Solidity.Backend.Passes.CompilerScopedFailurePins
 import Solidity.Backend.Passes.EffectfulConditionalAssignment
 import Solidity.Backend.Passes.EffectfulConditionalControls
 import Solidity.Backend.Passes.EffectfulConditionalPins
+import Solidity.Backend.Passes.RelatedMemoryCapture
+import Solidity.Backend.Passes.RelatedMemoryCaptureControls
+import Solidity.Backend.Passes.RelatedMemoryCapturePins
 
 
 import Solidity.Lowering.V08.Audit

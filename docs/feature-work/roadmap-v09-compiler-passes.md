@@ -458,6 +458,30 @@ were not reached. The exact published conditional producer and these consumer
 files pass separate serial per-file checks against their checked imports.
 The failed combined attempt remains a failure, not a substituted passing gate.
 
+## Context-correlated memory-reference capture
+
+[RelatedMemoryCapture](../../Solidity/Backend/Passes/RelatedMemoryCapture.lean)
+consumes V07's published `related_memory_capture`. Independent initial context
+alignment derives the selected Source-reference relation, both context-extension
+relations and exact caller recovery after dropping the temporary. The actual
+memory certificate's original Input supplies emitted execution and full
+MappedOutput with one selected map and machine before all tails. Pointer
+readback uses that selected map; identity with the original reference address
+follows from BaseExtends. It is not assumed as an output relation.
+
+[Controls](../../Solidity/Backend/Passes/RelatedMemoryCaptureControls.lean)
+inhabit the context relation with two live Source objects, two aliased old
+intrinsic locals and an independent reference. Complete eleven-cell observations
+retain all caller locals, the fresh capture, an independent cell, both array
+lengths and every element, plus saved stack words. Actual wrong-reference and
+skipped-capture runs differ; an incorrect initial reference relation is refused.
+[Guards](../../Solidity/Backend/Passes/RelatedMemoryCapturePins.lean) pin the
+observed standard axiom sets. The concrete client is nonallocating with base
+zero; it does not claim positive-base allocator growth. The general theorem
+retains the original branch allocator obligations. Extended Source locals
+classify the returned reference; no Source declaration execution, general heap
+content relation, admission/world or bytecode theorem follows.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
