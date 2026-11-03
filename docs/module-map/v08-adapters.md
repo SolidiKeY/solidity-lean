@@ -388,5 +388,6 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/StructuredFlow/MappedCondition.lean` | Bounded v17-validation-release checkpoint; typed scope and retained premises are in the module. |
 | `Backend/StructuredFlow/MappedConditionControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/G19/AssignmentReturnFlag.lean` | Bounded v17-validation-release checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/SourceMemoryKeccak.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained premises are in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).

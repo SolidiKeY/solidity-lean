@@ -25942,6 +25942,86 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.argument_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.dangling_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.dangling_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.literal_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.literal_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.mixed_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.mixed_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.mixed_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.old_object_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.stale_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.wrong_allocator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.wrong_dangling_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.wrong_timeout_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceMemoryKeccak.lean:Solidity.Lowering.V08.SourceMemoryKeccak.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.concrete_observation_transport": [
   "Classical.choice",
   "Quot.sound",

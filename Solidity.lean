@@ -1955,6 +1955,7 @@ import Solidity.Lowering.V08.SourceFailureControls
 import Solidity.Lowering.V08.SourceFailures
 import Solidity.Lowering.V08.SourceKeccak
 import Solidity.Lowering.V08.SourceKeccakControls
+import Solidity.Lowering.V08.SourceMemoryKeccak
 import Solidity.Lowering.V08.SourcePayableDeploymentControls
 import Solidity.Lowering.V08.SourcePrefixedRethrowControls
 import Solidity.Lowering.V08.SourceRethrow
