@@ -4,3 +4,4 @@
 import Solidity.Solkey.TestSuite
 import Solidity.TestSuite.Report
 import Solidity.TestSuite.Suggestions
+import Solidity.TestSuite.MemoryLoopReplay.FallbackPairControls

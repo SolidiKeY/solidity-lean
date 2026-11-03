@@ -733,3 +733,78 @@ This shared prerequisite does not itself complete the MEMORY compiler
 assignment. That assignment's typed scope/loop simulation, source/machine
 observations, four-mode upstream execution, bounds and remaining validation
 are owned by `compiler-verification.md`.
+
+The fallback-sibling sharing checks an exactly two-entry, both-absent hint
+pair by admitting a safe Prop-valued definition containing the two original
+guard equations. Both original per-guard auxiliary theorems are still kernel
+checked, in their original order and with their original types. Their proof
+bodies use the checked projections. Certificate names use a separate,
+collision-checked namespace; a failed admission restores the environment.
+The new `Solidity.TestSuite.MemoryLoopReplay.FallbackPairControls` covers both
+Boolean results, each false component, actual dispatch and nonselection cases,
+rollback, collisions, both name generators and the shared kernel-preflight
+refusal API.
+
+A serial comparison on the same worker VM freshly checked all 24 modules on
+published base `e1e212977fba02a0cc4c1691d45334053a3a6c19` and the candidate.
+Each used `lean -j1 --tstack=32768 --setup … SOURCE -o … -c …`,
+`LEAN_NUM_THREADS=1`, the same external input artifacts/options and the
+unchanged 300-second per-module guard. Group imports point to freshly checked
+predecessors on their own side. Times include the guard's sampling interval.
+
+| Module | Base (s) | Candidate (s) |
+|---|---:|---:|
+| MemoryLoopReplay | 7.46 | 7.67 |
+| Discover00 | 39.42 | 41.06 |
+| Discover01 | 16.75 | 11.30 |
+| Discover02 | 19.56 | 14.42 |
+| Discover03 | 18.75 | 17.66 |
+| Discover04 | 21.48 | 15.92 |
+| Discover05 | 53.34 | 33.39 |
+| Discover06 | 56.36 | 36.70 |
+| Discover07 | 69.19 | 45.07 |
+| Discover08 | 57.37 | 39.65 |
+| Discover09 | 99.51 | 71.28 |
+| Assemble00 | 1.31 | 1.11 |
+| Assemble01 | 1.31 | 1.22 |
+| Assemble02 | 1.31 | 1.21 |
+| Assemble03 | 1.41 | 1.11 |
+| Assemble04 | 1.52 | 1.11 |
+| Assemble05 | 1.62 | 1.11 |
+| Assemble06 | 1.52 | 1.11 |
+| Assemble07 | 1.42 | 1.11 |
+| Assemble08 | 1.42 | 1.21 |
+| Assemble09 | 1.42 | 1.11 |
+| Derived17MemoryLoop | 0.91 | 0.91 |
+| Refusals | 5.85 | 5.54 |
+| Derived17 | 46.78 | 46.27 |
+| **Sum** | **526.97** | **398.24** |
+
+The sum fell by 24.43%; Discover00 and the helper were slightly slower.
+These sums are the authorized separate-module VM comparison. The unchanged
+300-second **cumulative** gate remains a coordinator-host integration check.
+Earlier whole-group VM attempts stopped at 300 seconds; those incomplete
+records remain failed and are not used as passing timing evidence.
+
+The maximum sampled per-module process-group RSS was 2,663,297,024 bytes
+before and 2,650,591,232 bytes after. The existing fallback enforced a 12 GiB
+per-process address-space limit, sampled 10 GiB group-RSS stop and 12 GiB
+VM-current stop, with an existing 16 GiB VM hard limit and actual disabled swap.
+It was not a 12 GiB workload cgroup. No proof, search, fuel or resource limit
+was increased.
+
+All 2,541 original theorem names, types, universe-parameter lists and individual
+axiom sets match across the complete fixed roster. The axiom union on both
+sides is `propext`, `Quot.sound`, `Classical.choice`; there are no new axiom
+declarations. The exact dependency-graph audit follows Lean's `CollectAxioms`
+cases, handles cycles, and verifies the library's unions and 24 direct anchors
+per side. Independent read-only finder and skeptic reviews found no confirmed
+defect. The original 987 visits, final 87-step checkpoint, refusal node 973,
+statements, source outcomes and roster are unchanged.
+
+There are 39 added safe, closed Prop-valued certificate definitions. The shared
+helper applies in every Discover module, including Discover00 (2), Discover06
+(5), Discover07 (5), Discover08 (4) and Discover09 (4). Original proof terms and
+the declaration inventory therefore change, while original theorem statements
+and axioms remain identical. Hinted-only interning and whole-array quotation
+experiments were rejected; production quotation remains unchanged.

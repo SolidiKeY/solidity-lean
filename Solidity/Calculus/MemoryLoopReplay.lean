@@ -464,11 +464,40 @@ partial def checkedRigidFunction (C Γ H : Expr) : MetaM (Expr × Expr) := do
   modifyEnv (rigidFunctions.addEntry · (original,run,proof))
   return (run,proof)
 
+-- A separate safe definition lets fallback siblings share kernel reduction
+-- caches without consuming the original auxiliary-theorem name generator.
+-- Both original equations and both later per-guard theorems remain checked.
+def checkedFallbackPair (C Γ H c c' : Expr) (wanted wanted' : Bool) : MetaM (Array Expr) := do
+  let saved ← getEnv
+  tryCatchRuntimeEx (do
+    checkEnabled
+    let boolTy := Lean.mkConst ``Bool
+    let cs := ([(c,wanted),(c',wanted')].toArray).map fun (condition,result) =>
+      let choice := toExpr result
+      let call := mkAppN (Lean.mkConst ``refuteLanded) #[C,Γ,H,condition]
+      (⟨knownEq boolTy call choice,knownRefl boolTy choice⟩ : LayerCandidate)
+    let (type,value) ← layerConjunction cs 0 cs.size
+    let base := (← getEnv).mainModule ++ `_memoryReplayFallbackCertificate
+    let mut suffix := 0
+    while (← getEnv).contains (Name.num base suffix) do suffix := suffix+1
+    let name := Name.num base suffix
+    withOptions (Elab.async.set · false) <| addDecl <| Declaration.defnDecl {
+      name, levelParams := [], type, value, hints := .opaque, safety := .safe }
+    (Array.range cs.size).mapM (layerComponent type (Lean.mkConst name) 0 cs.size)
+  ) fun e => do
+    setEnv saved
+    throw e
+
 -- Check both ORIGINAL sibling projections in one kernel call so their
 -- common typed substitution reductions can share the kernel's local cache.
 def checkedRigidPair (j : Job) (id : Nat) (Γ H c c' : Expr) : MetaM (Array Expr) := do
   checkEnabled
   let hints := j.hints[id]!.guardHints
+  if hints.size==2 && hints[0]!.isNone && hints[1]!.isNone then
+    let guards := j.hints[id]!.guards
+    unless guards.size==2 do throwError "memory replay: missing fallback sibling guard"
+    return ← timedMeta "fallbackPairKernel" <|
+      checkedFallbackPair j.C Γ H c c' guards[0]! guards[1]!
   let some (q,_) := hints[0]?.join | return #[]
   let some (q',_) := hints[1]?.join | return #[]
   let (run,correct) ← checkedRigidFunction j.C Γ H
@@ -531,7 +560,7 @@ def checkedGuard (j : Job) (id index : Nat) (Γ H c : Expr) (wanted : Bool) (rig
       proof := mkApp proof fact
       type := body.instantiate1 fact
     return ← Derive.kernelLemma goal proof
-  Derive.kernelLemma goal (knownRefl boolTy choice)
+  Derive.kernelLemma goal (rigid.getD (knownRefl boolTy choice))
 
 partial def layer (j : Job) (id : Nat) (input : Input) (actual next start e hp : Expr)
     (left : List Nat) (hyps : Array Expr) : MetaM LayerCandidate := do
