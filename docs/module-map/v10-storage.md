@@ -67,9 +67,11 @@
 | `Backend/StorageOps/LoopLawsControls.lean` | Populated ordered positive/negative loop controls and concrete termination witness |
 | `Backend/StorageOps/StackWordWrite.lean` | Destination-only SSTORE code with runtime word operand and full context preservation |
 | Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
-| `Lowering/StorageOps/SourceWordCommutation.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
-| `Lowering/StorageOps/SourceWordCommutationControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
-| `Lowering/StorageOps/SourceWriteRollback.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
-| `Lowering/StorageOps/SourceWriteRollbackControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
+
+| `Lowering/StorageOps/SourceWordCommutation.lean` | Captured typed Source writes: full-world commutation, actual execution and exact journal order |
+| `Lowering/StorageOps/SourceWordCommutationControls.lean` | Heterogeneous writes, nonempty journal/locals, state-order and overlap negatives, explicit undo |
+
+| `Lowering/StorageOps/SourceWriteRollback.lean` | Typed static refusal and actual original-mark rollback for a captured account-write poststate |
+| `Lowering/StorageOps/SourceWriteRollbackControls.lean` | Full captured failure/restoration outcomes, nonempty prefixes, wrong-mark, skipped-bind and type/static order controls |
 | `Lowering/StorageOps/SourceStorageCopyPrefix.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/StorageOps/SourceStorageCopyPrefixControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |

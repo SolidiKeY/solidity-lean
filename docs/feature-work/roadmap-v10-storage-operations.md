@@ -57,6 +57,15 @@ prefix: worlds agree while journals/states differ; overlap changes worlds.
 Explicit undo restores the seeded execution state. The routine combined adapter
 is pending in [TERRA-TODO](../../TERRA-TODO.md), without a compiled stub.
 
+`SourceWriteRollback` proves typed static refusal and actual `rollbackTo`
+restoration for a captured account-write-only poststate. Populated controls
+execute the original mark, retain a successful write through a later refusal,
+show that a failed bind skips its rollback continuation, and invoke rollback
+separately. A wrong mark loses older journal/log prefixes; a wrong payload type
+fails before static refusal. Heap/events/locals survive because these writes
+never changed them. This does not prove general frame or compiler rollback.
+The routine generic pair adapter remains uncompiled in TERRA-TODO.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI
