@@ -5828,6 +5828,39 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.accepted_roots": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.Controls.two_roots_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.Controls.wrong_roots_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.ObservationSite.allowed_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Source.ScopeScan.certify_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Source.ScopeScan.certify_rejected_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Source.FailureResources.no_horizon_retraction": [],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Source.FailureResources.noFail_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Checked/Certificate.lean:Solidity.Frontend.Checked.checkUnits_sound": [
   "propext"
  ],
@@ -6596,6 +6629,22 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.check_sound": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.Controls.actual_source_parses": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.produce_accepted": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.rawB_iff": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.units_only_resolver_obstruction": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.unrecorded_settings_obstruction": [],
  "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.ecrecover_exceeds_stipend": [],
  "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.gas_mono": [
   "Quot.sound",
