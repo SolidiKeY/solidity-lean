@@ -24,6 +24,22 @@ theorem positive_normalization :
   qfUIntTwoPrefix_normalization_sourceFuel (.user "x") (.user "y") clientGrammar
     (by decide +kernel)
 
+/-- The original source work is three visits even though truth reduction
+shrinks the returned body; the two quantifiers make the exact threshold five. -/
+theorem exact_work_client (budget : Nat) :
+    (ProgramNormalization.ofFormula? budget clientFormula).isSome = true ↔ 5 ≤ budget :=
+  qfUIntTwoPrefix_normalization_iff_work (.user "x") (.user "y") clientGrammar budget
+
+theorem adjacent_fuel_controls :
+    (ProgramNormalization.ofFormula? 4 clientFormula).isSome = false ∧
+      (ProgramNormalization.ofFormula? 5 clientFormula).isSome = true := by
+  decide +kernel
+
+/-- info: [false, true] -/
+#guard_msgs in
+#eval [(ProgramNormalization.ofFormula? 4 clientFormula).isSome,
+       (ProgramNormalization.ofFormula? 5 clientFormula).isSome]
+
 theorem insufficient_fuel : ProgramNormalization.ofFormula? 1 clientFormula = none := by
   rfl
 
@@ -36,7 +52,10 @@ theorem insufficient_fuel : ProgramNormalization.ofFormula? 1 clientFormula = no
 #guard_msgs in
 #eval [verdict positive, verdict clientFormula, verdict gapHashNegForall]
 
+#print axioms qfUIntTwoPrefix_normalization_iff_work
 #print axioms qfUIntTwoPrefix_normalization_sourceFuel
 #print axioms positive_normalization
+#print axioms exact_work_client
+#print axioms adjacent_fuel_controls
 #print axioms insufficient_fuel
 end Solidity.Examples.VA1TwoPrefixNormalization

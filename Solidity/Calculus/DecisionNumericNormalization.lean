@@ -467,6 +467,39 @@ theorem qfUIntTwoPrefix_normalization_sourceFuel {C : Contract} (x y : Var)
   rw [actual_all 2047 2047 x .uint (.all y .uint φ), actual_all 2046 2046 y .uint φ, hd]
   rfl
 
+/-- On the existing numeric body grammar, both binder visits contribute to
+an exact source-derived characterization of public normalization success. -/
+theorem qfUIntTwoPrefix_normalization_iff_work {C : Contract} {Γ : Ctx}
+    (x y : Var) {φ : Fml C (.val .uint :: .val .uint :: Γ)}
+    (h : φ.QFUIntLinear) (budget : Nat) :
+    (ProgramNormalization.ofFormula? budget (.all x .uint (.all y .uint φ))).isSome = true ↔
+      φ.normalizationWork + 2 ≤ budget := by
+  cases budget with
+  | zero =>
+    change false = true ↔ φ.normalizationWork + 2 ≤ 0
+    constructor
+    · intro hs; cases hs
+    · intro hw; omega
+  | succ budget =>
+    cases budget with
+    | zero =>
+      change false = true ↔ φ.normalizationWork + 2 ≤ 1
+      constructor
+      · intro hs; cases hs
+      · intro hw; omega
+    | succ budget =>
+      have hs :
+          (ProgramNormalization.ofFormula? (budget + 2) (.all x .uint (.all y .uint φ))).isSome =
+            (ProgramNormalization.ofFormula? budget φ).isSome := by
+        change ((actualNormalization (budget + 2) (.all x .uint (.all y .uint φ))
+          (budget + 2)).map Prod.fst).isSome =
+            ((actualNormalization budget φ budget).map Prod.fst).isSome
+        rw [actual_all (budget + 1) (budget + 1) x .uint (.all y .uint φ),
+          actual_all budget budget y .uint φ]
+        cases actualNormalization budget φ budget <;> rfl
+      rw [hs, qfUIntLinear_normalization_iff_work h budget]
+      omega
+
 /-- Compose through the actual normalized source, which can differ syntactically
 from its input. This is an equation about the real existing pipeline. -/
 theorem leafOf_of_normalized_to {C : Contract} (φ χ : Fml C []) (ψ : LFml C)

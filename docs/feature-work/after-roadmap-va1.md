@@ -4768,3 +4768,53 @@ All checks used the actual local Docker daemon, memory.max12884901888,
 memory.swap.max0, H1 reserve4GiB, -j1/threads1 and the original writer lock.
 No build/LSP overlap occurred. General Residue/DecisionTheorem-prime/exhaustive
 hash bridge, remaining AU02/backfill and whole-lane gates remain open.
+
+
+## Exact two-binder work and repaired MCP — 2026-11-03, pre-H21/H22 rebase
+
+`qfUIntTwoPrefix_normalization_iff_work` quantifies over any contract/context,
+two binder names, a body in `.val .uint :: .val .uint :: Γ`, QFUIntLinear evidence
+and an arbitrary budget. It proves actual public normalization succeeds iff
+`body.normalizationWork + 2 ≤ budget`. This is an exact traversal-work statement,
+not CPU cost, decision completeness or the whole511-node bound. The proof handles
+budgets0/1, unfolds two actual binder visits, and reuses the checked body iff.
+No output-success, coverage, validity, future-helper or new hash premise is assumed.
+
+The inhabited both-local sum=5 ANDtt client now proves success iff5≤budget.
+Adjacent4/5 controls evaluate[false,true], despite smart output collapse. Existing
+2048/1 controls and[proved,refuted,unknown] observations are retained unchanged.
+Producer and client pass complete actual-file MCP diagnostics and focused kernel
+checks. The producer's focused build is9.407s with one compiler. The actual-file
+checks, not candidate snippets, establish proof acceptance. Standard automation
+was tried through lean_multi_attempt first. Candidate failures and an interrupted
+client attempt with no recorded exit remain raw failures/incomplete evidence.
+All public reports contain only the existing standard axioms.
+
+The old MCP failure is now diagnosed and repaired, without changing installed
+tools/guards. Raw LSP diagnostics exposed read-only private `.hash`/setup/output
+aliases hidden by the summary. Private metadata and each target's output files
+were materialized; canonical build/cache files stayed read-only. A serial291-module
+core import preparation and93 additional client/KeySort imports passed:384 unique
+modules, maximum141.017s, at most one compiler, unchanged300s bound. An independent
+skeptic found an unbounded termination wait; the runner now uses a2s TERM grace,
+then process-group KILL and a bounded wait. Exit137 for that repair stop and the
+37 retained prefix results are preserved. All later results passed.
+
+Actual bounded KeySort passes: parsed377 taclets,131 read-bearing, table covers131;
+annotations match. Lean4.24.0, Lake5.0.0-src+797c613. The child cgroup verifies
+memory.max12884901888 and memory.swap.max0; -j1/threads1, H1reserve4GiB, original
+writerlock and no simultaneous LSP/build. This establishes runtime setup only,
+not whole-lane success. Old superseded bundle copies were checksum-recorded and
+removed only with retaining Git refs. Private cache blobs were removed only after
+byte equality with retained checked build outputs. Latest sealed exports remained.
+Raw evidence is `/workspace/va1-evidence/mcp-recovery-20261103`.
+
+Independent read-only finder and skeptic report no proof/control findings; their
+runner termination finding was fixed and re-reviewed. These checks concern the
+pre-rebase source only. H6 is published and closed, not resubmitted. The coordinator
+has now announced H22 and H21 landings: next action is a preservation-first rebase
+onto current origin/master at/after b4d2b5aa9, regeneration via the new repository
+registration script, and focused replay. No post-rebase pass is claimed here.
+General Residue/DecisionTheorem-prime/exhaustive hash bridge, all remaining AU02
+and backfill children, newer-master integration and full end-of-lane gates remain
+open. Earlier failed gates/seals and original approved decisions are not erased.
