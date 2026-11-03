@@ -45,10 +45,15 @@ and skeptic reviews checked exact predicates, suffix preservation and capacity;
 these are local runner and stack-bound controls, not external EVM tests.
 
 The partial G46 access interface lives in
-`Bridge/SolidityBridge/AccessBridge/Interface.lean`. It states raw calldata-word,
-charged fetched-step and continuation obligations over the pinned EVM state,
-with explicit low driver budgets. No instance is supplied. CALLDATASIZE reuses
-P10's existing source-input theorem; memory/copy and storage bridges remain open.
-Its positive-fuel continuation makes no `X` equality claim at budgets zero or
-one. Read-only finder and skeptic review checked that budget partition and the
-exact initial byte identity.
+`Bridge/SolidityBridge/AccessBridge/Interface.lean`. `Calldata.lean` inhabits its
+CALLDATALOAD contract: exact Source word reads at every native offset, charged
+fetched-step outcomes and original driver fuel. H7 padding and existing reader
+proofs are reused. A constructor installs the exact Source bytes; controls cover
+endianness, unaligned/large offsets, zero padding, gas and stack refusal. A
+successful charged control checks the exact reached state and preserved tail.
+Independent finder/skeptic reviews found no semantic gap; the skeptic requested
+this successful control in addition to refusal cases, and it now passes. Driver
+budgets zero/one remain distinct from positive-fuel `X` continuation; a negative
+control exhibits their different low-budget failures. CALLDATASIZE reuses P10's
+existing source-input theorem. Memory/copy and storage bridges remain open, and
+no whole Source/world or external EVM adequacy is inferred from these accesses.
