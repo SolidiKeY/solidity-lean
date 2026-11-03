@@ -1844,6 +1844,10 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/V07/NodeRank.lean` | Stabilization at the node count; discharges the producer's rank check. |
 | `Lowering/V07/FieldCompleteness.lean` | Graph lowering succeeds for every `GraphTypeRel` under global UDVT support. |
 | `Lowering/V07/LocalFieldSupport.lean` | Same completeness with support only for traversed UDVTs. |
+| `Lowering/V07/LocationGraphCompleteness.lean` | Exact ordered field output and executable location-graph success from structural correspondence, local support and comparison ranks; accepted-Source completeness remains open. |
+| `Lowering/V07/ReferenceCaptureRelated.lean` | Initial context-derived reference captures, fresh context extensions and exact caller restoration. |
+| `Lowering/V07/ReferenceOrderRelated.lean` | Actual pipeline-ordered reference assignment/read captures and all mapped caller bindings from initial alignment. |
+| `Lowering/V07/UnsignedAddition.lean` | Actual unchecked unsigned addition, width narrowing, pipeline-ordered assignment/read capture transport and context extension. |
 
 ## V09 compiler-pass components
 

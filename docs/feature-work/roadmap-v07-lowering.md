@@ -38,6 +38,23 @@ Operands run in pipeline order; captures are read before their binders drop.
   captures (`reference_assignment_pair_transport`), from an input address
   relation; no heap content, copy, allocation or lifetime result.
 
+`ReferenceCaptureRelated` derives selected address/path agreement from initial
+`ContextMap.Related` and mapped slots (`related_memory_capture`,
+`related_storage_capture`). It proves the actual local read, target capture,
+getter before scope exit, both context extensions and exact caller restoration
+on dropping the temporary. Extended Source locals classify the returned value;
+no Source declaration execution or heap-content relation is asserted.
+`ReferenceOrderRelated.related_reference_assignment_pair` handles `(i = a, i)`
+references in each actual pipeline order. It derives both captured value
+relations and every reached caller binding from initial alignment; two drops
+restore the updated caller exactly. No operand-separation premise is required.
+Controls use distinct live objects, a typed storage path/root, both pipelines,
+same-slot operands, wrong maps and equal-content distinct identities. An
+arbitrary input value relation does not establish global heap alias reflection.
+These supported clauses do not supply a general elaborator/operand producer,
+copy/delete/lifetime validity or graph admission. G16/G17 and Backfill A/B stay
+partial; the remaining G18.01/G18.06 prerequisites are unchanged.
+
 **P12 context-map interfaces.** `Lowering/V07/ContextMap.lean`: `ContextMap`
 maps Source typed indices to intrinsic type/index pairs, reflecting positions
 across all types (`wk_identity`, `wk_composition`, `related_cons`, `related_wk`;
@@ -139,7 +156,7 @@ and are proved by `integer_related` and `source_assign_local_run`.
 
 ## Open
 
-- Arithmetic beyond in-range and unchecked unsigned subtraction; checked payloads;
+- Arithmetic beyond in-range and unchecked unsigned addition/subtraction; checked payloads;
   constants, enums, cast programs; tuples, conditionals, updates, other conditions.
 - Elaborator agreement: relate `captureExpr`/`captureBefore`
   (`Syntax/Elab/Values.lean`) to these prefixes via a `Source.RExpr` to
@@ -148,3 +165,53 @@ and are proved by `integer_related` and `source_assign_local_run`.
   bytes/string/function/fixed-point fields; a valid rank from admitted Source;
   the Source refusal fix; parameter/return and whole-program admission.
 - G18.06: blocked until ordered G18.02–G18.05 child certificates exist.
+
+## Executable location-graph component completeness
+
+`LocationGraphCompleteness.fields_exact` derives the exact ordered target fields
+from `GraphFieldsRel`, injective declaration names and support for the traversed
+fields. `producer_success` then proves the actual per-location producer succeeds
+from `SelectionOK`, those field premises, nonempty/distinct fields and any valid
+comparison rank. The rank is proof-only; neither successful execution of the
+lowerer nor the producer's computed rank checks are premises.
+
+An inhabited three-node Source environment distinguishes physical declaration
+index 2 from graph index 0 and comparison rank 30 from computed rank 3. Controls
+reject an incorrect target node, invalid rank, inline cycle, unsupported bytes
+and duplicate field keys. This establishes component completeness relative to
+structural premises; deriving them from accepted Source remains open. No P8
+producer instance, independent Source execution preservation or constructor
+coverage is supplied. G16/G17 and Backfill A/B remain partial; G18.01 still needs
+accepted-source coverage, rank existence and the Source refusal repair. G18.06
+requires the ordered G18.02–G18.05 child applications; G19 is delegated to V17.
+
+## Unchecked unsigned addition
+
+`UnsignedAddition` reuses `UnsignedNarrowing` width/range/modulo laws.
+`add_value_run` relates actual intrinsic `addW` followed by width narrowing to
+Source wrapping at every approved unsigned width, including 256.
+`source_locals_run` and `source_assign_read_run` execute the actual Source
+`.binary .add` expression with unchecked arithmetic; the latter assigns a local
+before observing its alias in the published pipeline order.
+`assignment_transport` derives target reads, captured result and every selected
+postbinding from the initial `IntegerLocalFamily` and two initial reads/ranges.
+`assignment_extension` uses actual operand weakening/run transport. There is no
+output-range, desired-run or postrelation premise. `source_from_pair` alone is a
+conditional composition helper; the concrete clauses discharge its pair premise.
+
+Lane controls (VM-only, not on master) execute assignment of 200
+to a local initially 250: legacy observes result 194 and captures `[200,250]`;
+viaIR observes 144 and `[200,200]`. Both restore the complete updated caller,
+including live memory/storage references and world/global fields. Same-slot,
+fresh Boolean context, nonwrapping 7+3 and all 32 approved max+1 boundaries
+are covered. Actual unnarrowed and uncaptured/stale-read programs distinguish
+incorrect results. Addition is commutative; operand roles are distinguished by
+ordered captures rather than a reversed-argument result claim. Checked Source
+overflow controls do not establish target panic-payload transport.
+
+Queue: G16/G17 and Backfill A/B remain partial. G18.01 retains component
+completeness but still needs accepted-source coverage, rank existence and the
+Source refusal repair. G18.02/.03 belong to V16, .04/.05 to V14, and G19 to
+V17. G18.06 requires their ordered accepted-source applications. Constructor
+coverage remains zero; checked payloads, signed wrapping and broader operand
+producers remain open.

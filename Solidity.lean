@@ -1871,6 +1871,10 @@ import Solidity.Lowering.V07.UnsignedNarrowing
 import Solidity.Lowering.V07.UnsignedNarrowingControls
 import Solidity.Lowering.V07.WrappedAssignmentPair
 import Solidity.Lowering.V07.WrappedPairControls
+import Solidity.Lowering.V07.LocationGraphCompleteness
+import Solidity.Lowering.V07.ReferenceCaptureRelated
+import Solidity.Lowering.V07.ReferenceOrderRelated
+import Solidity.Lowering.V07.UnsignedAddition
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen

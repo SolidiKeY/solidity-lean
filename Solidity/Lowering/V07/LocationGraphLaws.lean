@@ -46,17 +46,13 @@ def mixed : Source.Env := ⟨[RecursiveGraphControls.mapDecl,plain]⟩
 def memorySchema : TypeGraph.Schema 1 where
   origin := "h15-mixed-memory"
   declId := fun _ => 1
-  declId_injective := by first | (simp only []; done) | decide | omega | rfl
+  declId_injective := by decide
   name := fun _ => "Plain"
   fields := fun _ => [("value",.prim .uint)]
   rank := fun _ => 1
-  nonempty := by first | (simp only []; done) | decide | omega | rfl
-  distinct := by first | (simp only []; done) | decide | omega | rfl
-  guarded := by first
-    | (simp only [List.mem_cons,List.not_mem_nil,or_false,forall_eq,TypeGraph.Ty.inlineRank]; done)
-    | decide
-    | omega
-    | rfl
+  nonempty := by decide
+  distinct := by decide
+  guarded := by decide
 
 def memoryCertificate : LocationDeclarationGraph mixed .memory memorySchema where
   sourceName := fun _ => ⟨none,"Plain"⟩
@@ -67,17 +63,17 @@ def memoryCertificate : LocationDeclarationGraph mixed .memory memorySchema wher
     have hj := j.isLt
     omega
   sourceIndex := fun _ => ⟨1,by decide⟩
-  identity := by first | (simp only []; done) | decide | omega | rfl
-  source_kind := by first | (simp only []; done) | decide | omega | rfl
-  source_scope := by first | (simp only []; done) | decide | omega | rfl
-  source_name := by first | (simp only []; done) | decide | omega | rfl
+  identity := by decide
+  source_kind := by decide
+  source_scope := by decide
+  source_name := by decide
   source_resolves := fun _ => rfl
-  source_admissible := by first | (simp only []; done) | decide | omega | rfl
-  target_name := by first | (simp only []; done) | decide | omega | rfl
+  source_admissible := by decide
+  target_name := by decide
   sourceFields := fun _ => [("value",.int .u8)]
-  fields_resolve := by first | (simp only []; done) | decide | omega | rfl
+  fields_resolve := by decide
   fields_relate := fun _ => .cons rfl (.int .u8) .nil
-  complete := by first | (simp only []; done) | decide | omega | rfl
+  complete := by decide
 
 def storageResult :=
   (RecursiveGraph.produce "mapping-guard" E .storage).get RecursiveGraphControls.mapping_storage_success
@@ -85,17 +81,17 @@ def storageResult :=
 def storageCertificate := LocationGraphInterface.ofStorage storageResult.2
 
 theorem memory_plain_physical_id : (memoryCertificate.sourceIndex ⟨0,by decide⟩).val = 1 := by
-  first | (simp only []; done) | decide | omega | rfl
+  decide
 
 theorem memory_excludes_storage_only : ∀ i : Fin 1, (memoryCertificate.sourceName i).name ≠ "Loop" := by
-  first | (simp only []; done) | decide | omega | rfl
+  decide
 
 theorem mixed_location_policy : StructAdmissible mixed ⟨none,"Plain"⟩ .memory ∧
     ¬ StructAdmissible mixed loop .memory ∧ StructAdmissible mixed loop .storage := by
-  first | (simp only []; done) | decide | omega | rfl
+  decide
 
 theorem storage_original_preserved : storageResult.1.declId ⟨0,by decide⟩ = 0 ∧
     (storageCertificate.sourceIndex ⟨0,by decide⟩).val = 0 := by
-  first | (simp only []; done) | decide | omega | rfl
+  decide
 
 end Solidity.Lowering.V07.LocationGraphLaws
