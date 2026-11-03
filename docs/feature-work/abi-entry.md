@@ -14,14 +14,16 @@ need no new decoder.
   and empty-relation controls. Dispatch helper equalities are bookkeeping and
   may be definitional; they do not establish runtime dispatch.
 - **Proofs.** `WordValidation.lean` gives actual numeric bytecode for
-  unsigned, bool and enum word bounds. Bounds at or above 2^256 accept every
-  word. `EntryTransport.lean`, `RawFreeTransport.lean`,
+  every semantic word kind: uint/address, signed integer, bool, enum and
+  left-aligned bytesN. Oversized unsigned bounds accept every word without
+  immediate truncation. `validator` supplies each exact predicate certificate;
+  `frameCertificate` exports its code through Selection V2.
+  `EntryTransport.lean`, `RawFreeTransport.lean`,
   `EntryComposition.lean` and `EnumEntry.lean` hold the entry-only part of the
   V13 ABI-world work over the existing indexed decoder; the codec and window
   proofs stay in `Backend/AbiWorld`. Eager/lazy correspondence reuses
   `Semantics/AbiEntryProofs.eager_cref` directly, without a duplicate wrapper.
-  `Consumers.lean` inhabits the rejection
-  and composition interfaces.
+  `Consumers.lean` inhabits the rejection and composition interfaces.
 - **Premises.** `Premises.lean` and `Premises/CalldataViews.lean` (with its
   additive extension `CalldataViewExtensions.lean`) name the pending G34
   overlapping-view, G35.03 and G24.03 producers. No instance is supplied.
@@ -31,10 +33,13 @@ the backend, and the G46.02/G46.03 Bridge backfill.
 
 Numeric validation uses the existing gasless scalar runner, retains arbitrary
 stack suffixes and checks every stack boundary with an inhabited scratch bound.
-It does not certify calldata loads or external EVM execution. Signed and bytesN
-validators remain open. Future consumers use Selection and MemoryCopies V2;
-the weaker V1 capacity fields are not evidence for this work.
+It does not certify calldata loads or external EVM execution. Concrete emitted
+controls cover dirty sign/padding bits, signed ranges, full-width words, all
+factory branches and stack-capacity boundaries. Frame export uses Selection V2;
+future memory-copy consumers must use MemoryCopies V2. The weaker V1 capacity
+fields are not evidence for this work.
 
-Validation of the interface cleanup: targeted Lean import closure and scoped
-standard-axiom guards. Independent finder and skeptic reviews found no remaining
-issues after correcting the contract-scope wording.
+Validation covers source-graph controls, emitted numeric cases and concrete V2
+frame witnesses/refusals. Scoped guards pin standard axioms. Independent finder
+and skeptic reviews checked exact predicates, suffix preservation and capacity;
+these are local runner and stack-bound controls, not external EVM tests.
