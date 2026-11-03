@@ -70,3 +70,6 @@
 | `Lowering/V07/SignedWordAddition.lean` | Actual full-range unchecked int256 addition and initial-family effect transport |
 | `Lowering/V07/SignedWordMultiplication.lean` | Actual full-range unchecked int256 multiplication and initial-family effect transport |
 | `Lowering/V07/SignedArithmeticControls.lean` | Inhabited signed add/multiply clients, boundaries, captures, frames and wrong-program controls |
+
+| `Lowering/V07/UnsignedCasts.lean` | Actual uint256-to-uintN casts and initial-family assignment transport |
+| `Lowering/V07/UnsignedCastControls.lean` | All unsigned widths, capture order, caller identity and live-reference frames |

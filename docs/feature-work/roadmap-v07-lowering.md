@@ -380,7 +380,7 @@ is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B remain
 partial, G18 admission/composition prerequisites stay open, and no constructor
 or external compiler/EVM coverage is added.
 The historical axiom suite and the `*Checks.lean` fixtures cited above remain
-lane-only. `HeadlineAxioms` registers101 exact guards (81 theorems and20 inhabited clients) for selected arithmetic,
+lane-only. `HeadlineAxioms` registers115 exact guards (88 theorems and27 inhabited clients) for selected arithmetic,
 cast, conditional, reference and structural graph theorems in the default
 closure. It does not add entries to `scripts/g07-axiom-pins.json` or discharge
 missing admission, producer, production or coverage obligations.
@@ -414,3 +414,23 @@ for multiplication. Same-slot, equal-content distinct locals, live references,
 missing sign readback and stale/deferred reads are covered. Checked overflow
 comparisons concern success only. Narrower signed widths, other operators,
 failure payloads and production lowering remain open; queue statuses unchanged.
+
+## Explicit unsigned narrowing
+
+`UnsignedCasts` proves actual uint256-to-uintN explicit conversion for all32
+approved unsigned destination widths. Width256 preserves the input; smaller
+widths use the existing intrinsic modulo operation. The Source run helper keeps
+the reached state, and the local and assignment clauses discharge its execution
+premise. Initial-family assignment transport derives the target read, returned
+value relation and whole selected post-family; caller locals retain uint256.
+Fresh capture extension uses the published operand weakening law.
+
+`UnsignedCastControls` supplies seven inhabited clients, all32 widths across
+both pipelines and checked flags, five input boundaries, repeated aliases,
+equal-content distinct locals and live reference frames. Actual ordered runs
+return1 and caller257 while the alias read is7 under legacy and257 under viaIR.
+Stale-local and omitted-cast executions return7 and257. Independent finder and
+skeptic source reviews found no proof issue. These are kernel and evaluator
+controls, not external solc/EVM tests. Other source widths, signed narrowing,
+full casts, failure payloads, graph admission and production lowering stay open;
+all original queue statuses remain partial or delegated as recorded above.

@@ -1,3 +1,4 @@
+import Solidity.Lowering.V07.UnsignedCastControls
 import Solidity.Lowering.V07.SignedArithmeticControls
 import Solidity.Lowering.V07.UnsignedAddition
 import Solidity.Lowering.V07.UnsignedMultiplication
@@ -520,3 +521,61 @@ guards add no admission, missing producer, production or coverage theorem. -/
  Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.extension
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCasts.allowed' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCasts.allowed
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCasts.value_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCasts.value_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCasts.source_of_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCasts.source_of_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCasts.source_local_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCasts.source_local_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCasts.assigned_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCasts.assigned_run
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCasts.assignment_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCasts.assignment_transport
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCasts.assignment_extension' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCasts.assignment_extension
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCastControls.admissible' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCastControls.admissible
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCastControls.value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCastControls.value
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCastControls.source_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCastControls.source_value
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCastControls.source_local' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCastControls.source_local
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCastControls.target_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCastControls.target_assignment
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCastControls.assignment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCastControls.assignment
+
+/-- info: 'Solidity.Lowering.V07.UnsignedCastControls.extension' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V07.UnsignedCastControls.extension
