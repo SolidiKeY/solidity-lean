@@ -988,3 +988,15 @@ dispatch, total correctness or compiler refinement.
 | Logic.Rule.yulLocal | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
 | Logic.Rule.yulBuiltin | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
 | Logic.Rule.yulCall | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+
+### VY4 normal-return LOG port rules
+
+These are Lean-only port laws (YQ5), not `Logic.Rule` constructors or G51
+intrinsic Yul/source rules. They use existing `AdapterRules.LogStep`/`Box`;
+no `dl{}` rule printer, frontend admission or source embedding is certified.
+
+| Declaration (`Solidity.Yul.World.AdapterRules`) | SolKey correspondence | Checked premises and scope |
+|---|---|---|
+| `log_loaded_continuation` | None; Lean-only extension (YQ5) | Nonstatic and actual payload read; constructive normal `LogStep` witness in `Solidity/Yul/World/LogPortRules.lean`. |
+| `log_loaded_box` | None; Lean-only extension (YQ5) | Same real premises; complete emitted observer and unchanged memory for every normal continuation. |
+| `log_missing_box` | None; Lean-only extension (YQ5) | Actual missing payload read; no normal continuation, without classifying exceptional halt. |
