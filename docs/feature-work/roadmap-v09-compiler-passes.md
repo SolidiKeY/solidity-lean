@@ -240,6 +240,26 @@ rejected. This is local integer/result correspondence and physical target
 preservation, not a global Source-heap/world relation, general overflow or
 narrow wrapping theorem. No P8 producer is assumed.
 
+## Unchecked unsigned addition
+
+[SourceAdditionValue](../../Solidity/Backend/Passes/SourceAdditionValue.lean)
+consumes the published V07 addition transport and an actual `CompiledVal`.
+Valid widths, Source integer-local alignment, operand ranges and reads, the
+explicit unchecked frame, `fuel + 3` and full target `StateRepr` remain premises.
+It derives independent Source/intrinsic results and their value relation, then
+chooses one representing word before every saved tail. Successful emitted code
+preserves every non-stack machine component.
+
+[Controls](../../Solidity/Backend/Passes/SourceAdditionValueControls.lean) use
+actual accepted code: uint8 `255 + 1` gives 0, the same code on `1 + 1` gives 2,
+and emitted unmasked full-word addition gives 256 on the first input. All six
+fixture cells and the full stack are observed; wrong unmasked value and saved
+tail controls discriminate the results. Exact standard-only axiom guards are
+in [Pins](../../Solidity/Backend/Passes/SourceAdditionValuePins.lean). Independent
+finder/skeptic reviews requested the nonzero and actual unmasked controls;
+both were added. This is a local arithmetic/value application, not effectful
+assignment sequencing, general Source heap/world or byte-level EVM adequacy.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
