@@ -10,3 +10,4 @@
 | `Roadmap/V16/SSCP2/NewAllocation.lean` | Actual dynamic-new data validity and MemOK preservation, with a closed local-length consumer. |
 | `Roadmap/V16/SSCP2/NewAllocationControls.lean` | Live caller references, both pipelines, exact allocation-size/timeout/refusal phases and wrong-reference controls. |
 | `Roadmap/V16/SourceTransactionConsumer.lean` | Bounded actual Source transaction pairs, exact states, rollback and Hoare consumer; no compiler/session closure |
+| `Roadmap/V16/H24Input.lean` | Frozen typed V16 request boundary using the exact H24 graph/local-refusal companion and checked P8b receipt; no inhabitant or lowering certificate. |
