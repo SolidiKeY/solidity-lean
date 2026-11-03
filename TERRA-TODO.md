@@ -40,3 +40,13 @@ Routine glue in NEW `Solidity.Backend.Aggregates.G18MappingStatementCorollaries`
 - `statement_static` similarly from Expression.static_run: exact `.error (.revert [])`, unchanged outer locals/state; no normal continuation. Preserve exact payload, do not treat it as timeout/divergence or claim target failure agreement.
 
 Use shared automation first; no Source/producer edits, axioms/sorry stubs, budget increases or full-profile claims.
+
+## Dynamic array routine consequences
+
+NEW `Solidity.Backend.Aggregates.G18ArrayAccessCorollaries`, imports G18ArrayAccessControls. All statements below remain unproved and unused.
+
+- Generic `read_failure`: under EXACT same declared-path/initial-length/range/persistence hypotheses as SourceArray.index_failure and `¬ i < len`, `(Source.indexLoc ... >>= fun loc => Source.readLoc ... loc).run (l,s) = (.error (.revert (Source.panicData .index)),(l,s))`. Routine Hoare.run_bind + index_failure; no element read or continuation after failure. Do not conflate with intrinsic Option.none.
+- `index_live_all`: instantiate index_success for every `i < 2` in Controls.live, preserving complete state. Routine apply; input index validity stays explicit.
+- `selected_not_whole`: extract the existing read_element consequences without claiming the arbitrary target Path establishes target-array length or layout. Whole aggregate correspondence still needs its actual producer.
+
+Try shared tactics first; no Source edits, simulated execution premise, missing-length admission, profile/budget changes or axiom/sorry stubs.
