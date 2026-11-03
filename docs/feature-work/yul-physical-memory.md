@@ -190,6 +190,19 @@ initial owner typing. The controls inhabit an exact changed whole-source result
 with two real aliases and the actual owner invariant. Canonical failure remains
 preparation `None`, not source refusal or cleaning.
 
-Complete computed-inventory nominal coverage, whole-store unchanged/replay and
-constructed output placement/history still need integration. These laws do not
-discharge dirty-word transport, allocator reachability, or compiler adequacy.
+`NominalInventoryUnchanged` derives unchanged typed data from actual image
+reads and derives update capacity from retained placement. Its encoded-view
+law preserves the complete source state, including administration. Repeated
+visits need no distinct-root premise; constructing encoded reads still does.
+
+`NominalInventoryPreparation` proves completeness of the existing heap-image
+preparer for this explicit profile using actual owner `MemOK`. The existing
+finite enumerator then derives coverage and unique IDs. `generated_roundtrip`
+requires no supplied complete inventory or inverse law. The mixed-heap control
+inhabits this result with nominal aliases, an unrelated byte object and nonzero
+residual bytes.
+
+Valid placement, retained history and the canonical/declaration profile remain
+real premises. Changed-snapshot placement/history and replay integration,
+dirty-word transport, universal ownership, allocator reachability and compiler
+adequacy remain open.

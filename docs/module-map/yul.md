@@ -62,3 +62,4 @@
 | `Yul/Views/RetainedLocalAliasImage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/NominalInventory{,Laws,Controls}` | Declared UDVT-array snapshot/update dispatch into the existing typed inventory; canonical decode/encode, complete raw reencoding and actual Source safety. |
+| `Yul/Views/NominalInventoryUnchanged{,Controls}`, `Yul/Views/NominalInventoryPreparation` | Actual image-derived unchanged-source identity and owner-MemOK completeness of the existing finite heap preparer for the nominal decoder profile. |
