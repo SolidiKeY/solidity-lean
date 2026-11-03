@@ -1564,6 +1564,9 @@ import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
 import Solidity.Lowering.P8.CheckedSyntax
+import Solidity.Lowering.P8.DeclarationGraphAdmission
+import Solidity.Lowering.P8.DeclarationGraphCheck
+import Solidity.Lowering.P8.DeclarationGraphControls
 import Solidity.Lowering.P8.DispatchCoverage
 import Solidity.Lowering.P8.DispatchCoverageControls
 import Solidity.Lowering.P8.EntryRootControls

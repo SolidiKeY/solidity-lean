@@ -373,5 +373,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8/SourceProgramAcceptance.lean`, `SourceProgramAcceptanceControls.lean` | Exact actual elaborator success-bit laws and the full original kernel contract-control conjunction; ordered expectations unchanged. |
 | `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; selected and special-entry root coverage, not executed-entry or full admission adequacy. |
 | `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard proved redundant (`accept_eq_upstream`); composed independent ProgramSite soundness, not full feature/profile adequacy. |
+| `Lowering/P8/DeclarationGraphAdmission.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
+| `Lowering/P8/DeclarationGraphCheck.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
+| `Lowering/P8/DeclarationGraphControls.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module docstring. |
 
 See [P8 admission](../feature-work/p8-admission.md).
