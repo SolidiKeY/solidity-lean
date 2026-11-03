@@ -16,6 +16,7 @@
 | `Backend/Selection/LiteralSelection.lean` | Existing compiler-IR numeric PUSH literal to actual PUSH32 certificate, injective numeric-stack representation and full machine-frame equality; literal component only. |
 | `Backend/Selection/LiteralSelectionControls.lean` | Populated-tail IR/scalar correspondence, all emitted bytes, wrong-value/encoding/tail negatives and component-local symbolic-literal refusal. |
 | `Backend/Selection/ArithmeticSelection.lean` | Actual numeric IR ADD/MUL/SUB/EXP selection, success/refusal and full caller-frame preservation; wraparound, underflow, operand-order, output/tail and opcode controls; capacity remains V2. |
+| `Backend/Selection/BitwiseSelection.lean` | Actual numeric IR bitwise/unsigned-comparison certificates, Boolean/word representation bridges, full-frame/underflow and width/flag/tail/opcode controls; physical capacity remains V2. |
 | `Backend/FailurePaths/Interface.lean`, `Backend/FailurePaths/Premises.lean` | G38 failure-path predicates over the indexed source statement and its execution, and explicit producer boundaries (see [G38 failure paths](../feature-work/g38-failure-paths.md)). |
 | `Backend/FailurePaths/Statements.lean` | Completed failure statements compiled with G21's literal recognizer and Boolean custom-error encoder. |
 | `Backend/FailurePaths/Parametric.lean`, `Backend/FailurePaths/ParametricControls.lean` | Failure statements independent of the function return signature, with reference-returning controls. |

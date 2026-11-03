@@ -166,3 +166,26 @@ Independent read-only finder and skeptic reviews also passed the SUB/EXP
 extension and controls. The documentation and map row now state the four-op
 component scope, addressing the skeptic's scope-description finding. No
 capacity, checked-source, or whole-selector result is inferred.
+
+## Bitwise and unsigned comparison component
+
+BitwiseSelection.lean reuses the existing instruction-certificate constructor
+for numeric AND/OR/XOR/NOT, unsigned LT/GT, EQ and ISZERO. Word and Boolean
+representation lemmas relate the actual IR operations to Scalar steps over
+the common intrinsic 256-bit words. Each certificate proves success and
+operand-underflow equivalence while retaining every nonstack machine field.
+Symbolic slots, checked source arithmetic and physical capacity are not
+covered by these numeric-step certificates; capacity remains a V2 obligation.
+
+Each operation has executed positive, arbitrary-suffix, complete-caller-frame,
+underflow and wrong-result controls. Additional controls distinguish unsigned
+high-bit comparisons, full-width complement and both Boolean outcomes, reject
+corrupted suffixes and check all eight opcode bytes. A local ADD absence is
+paired with its existing arithmetic selection, so component absence is not
+presented as a whole-selector or source refusal. Division, shifts, signed
+operations, instruction sequences and the remaining stack/control/composition
+queue remain open.
+
+Independent read-only finder and skeptic reviews passed this component and
+its controls without confirmed findings, including unsigned ordering, flag
+conversion, complement width, all input lengths and the component boundaries.
