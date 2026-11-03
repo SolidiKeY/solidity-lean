@@ -3895,3 +3895,14 @@ target integer slot; stale-source and mutated-live-binding controls reject wrong
 post relations. The actual Source hash allocation and complete existing fixture
 observations remain. This relates caller locals, not Source/target heaps, general
 callee compilation, external frames, library dispatch or complete unit execution.
+
+### Conditional callable arguments
+
+`ConditionalCallable` consumes V07's actual conditional-assignment transport
+before an independently executed, explicitly selected Source integer echo body.
+It derives reached caller-local alignment from initial typed slot/value alignment;
+its heterogeneous client preserves an unrelated target integer and the whole
+populated Source machine. Wrong-branch, stale-snapshot, skipped-write, static-frame
+and low-horizon controls distinguish returned values and effects. This is an
+argument/caller-local component, not general callee, heap, ABI or runtime-frame
+compilation. The sufficient indices do not restrict source admission.
