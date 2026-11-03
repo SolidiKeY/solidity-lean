@@ -750,3 +750,25 @@ spare height, separately from uncapped Scalar/model success. Thirteen guards
 pin observed standard axioms. This adds neither a native BYTE instruction nor
 frontend admission; native bytes/PC/resources, full Source/G24/views/readback,
 functions/loops/divergence and joint adequacy remain open.
+
+### Occurrence-indexed exact selection
+
+`SolidityBridge.Yul.OccurrenceSelection` indexes proof certificates by finite
+positions in the existing instruction list. Its `Step` and `Slice` are proof
+packages over existing instructions/programs, not another AST or evaluator.
+The selector checks each occurrence against its original instruction and
+constructs exact whole-program origin. A general execution theorem derives
+success and fault outcomes from those real certificates; published scalar-leaf
+lowering iff and source/compiler transport follow without assumed executions.
+Older membership-indexed interfaces remain unchanged.
+
+Concrete PUSH32/PUSH1 uses of the same value now retain distinct encodings in
+one leaf. An original BYTE assignment with literal31 and compact expansion
+constants closes actual compilation/selection, source/model and scalar-leaf
+whole-iff instances at depths0/2. Earlier selectors still refuse that code;
+the new positional factory accepts it. Controls check exact occurrence code,
+dirty values, protected frames/full machine fields, underflow, mismatched
+certificates, width/native-op refusals and real prefix capacity. Twenty guards
+pin standard axiom reports. Structured-selector integration/completeness,
+native byte/PC/resource correspondence, full Source/G24/views/readback,
+functions/loops/divergence and frontend/joint closure remain open.

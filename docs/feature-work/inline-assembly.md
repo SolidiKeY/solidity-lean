@@ -297,3 +297,9 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   source/model/whole-iff artifacts at depths0/2. Mixed-width refusals and native/
   full Source/G24/frontend limits remain explicit; see
   [lane](inline-assembly-vy3.md).
+
+- VY3 occurrence-indexed selection: exact mixed PUSH32/PUSH1 certificates,
+  constructive success/fault and scalar-leaf iff, and original BYTE literal
+  assignment source/model instances at depths0/2. Legacy interfaces remain;
+  structured/native/full Source/G24/frontend closure is pending. See
+  [lane](inline-assembly-vy3.md).

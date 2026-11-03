@@ -339,6 +339,8 @@ import SolidityBridge.Yul.FrameCertificatesV2
 import SolidityBridge.Yul.FrameCertificatesV2Controls
 import SolidityBridge.Yul.LiteralSelection
 import SolidityBridge.Yul.LiteralSelectionControls
+import SolidityBridge.Yul.OccurrenceSelection
+import SolidityBridge.Yul.OccurrenceSelectionControls
 import SolidityBridge.Yul.QuotientControl
 import SolidityBridge.Yul.QuotientControlControls
 import SolidityBridge.Yul.QuotientPlacement
