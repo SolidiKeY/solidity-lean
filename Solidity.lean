@@ -2128,6 +2128,8 @@ import Solidity.Source.Progress.ArithmeticBuiltins
 import Solidity.Source.Progress.BuiltinAdmission
 import Solidity.Source.Progress.BuiltinControls
 import Solidity.Source.Progress.BuiltinStatements
+import Solidity.Source.Progress.CallComposition
+import Solidity.Source.Progress.CallCompositionControls
 import Solidity.Source.Progress.CheckedPrograms
 import Solidity.Source.Progress.Controls
 import Solidity.Source.Progress.EffectBodies

@@ -393,3 +393,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ReadyCatalogue.lean` | Ready-body call progress and preservation with frame metadata derived from elaboration. |
 | `Source/Progress/ReadyCatalogueControls.lean` | Inhabited elaborated ready-unit, reference-input and hybrid coverage clients. |
 | `Source/Progress/ReadyDispatchControls.lean` | Nonidentity inherited dispatch consumes elaboration-derived ready-frame metadata. |
+| `Source/Progress/CallComposition.lean` | Finite nested certified calls and exact arguments preserve source memory and progress. |
+| `Source/Progress/CallCompositionControls.lean` | Inhabited nested alias returns, argument growth and exact halt/refusal controls. |

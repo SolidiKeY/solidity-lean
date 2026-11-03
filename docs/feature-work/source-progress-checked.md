@@ -340,3 +340,47 @@ reviews found no confirmed defect. Validation targets are
 requires the separate Hoare entry witnesses. No executable memory recognizer,
 frontend completeness, compiler/EVM refinement or universal source-coverage
 claim follows.
+
+
+## Composed call expressions and arguments
+
+`Progress/CallComposition.lean` adds `ComposedExpr` and `ComposedArgs` over the
+existing intrinsic syntax. Certified memory calls may occur inside exact-type
+arguments, identity conversions, reference conditionals and dynamic-new
+expressions. Arguments use plain result types and preserve earlier reference
+witnesses across later allocating calls. The joint horizon induction proves
+non-stuckness and `MemOK`/result validity on success, retaining `MemOK` on every
+halt. Actual `EM.sub` restores caller locals while keeping the reached heap.
+
+The generic `composition_at` theorem takes the existing value-call hypothesis
+and an explicit `ReadyMemoryCalls` result. The public
+`composition_from_elaborate` derives both from actual elaboration, P9 and the
+ready catalogue, certifying the supplied entries. The separate
+`composition_program_from_elaborate` additionally requires union coverage and
+derives admission for every function in the unit. Neither adapter changes the
+callee-body fragment: ready memory bodies still call only the checked value
+catalogue. Finite expression nesting is not recursive memory-callee-body
+support or an executable frontend recognizer.
+
+`CallCompositionControls` uses an actual legacy-elaborated memory-identity
+function. Intrinsic expression nodes allocate fresh object 1, pass it through
+two alias-returning calls and return it while retaining default allocations 2
+and 3. A two-element argument control keeps the earlier alias to object 0 valid
+while its later argument performs an allocating call. Both conditional choices
+and an identity conversion consume the theorem. Allocation panic occurs before
+callee entry; a low-horizon timeout retains fresh object 1 and the first
+callee's default object 2. Exact runs and inhabited preservation clients cover
+both evaluator pipelines and consume the complete-unit adapter.
+
+Raw rational arguments without conversion remain outside plain extraction.
+A missing-callee theorem refuses a call certificate when neither catalogue
+admits its head declaration; this is syntactic admission refusal, not a claim
+that its runtime body is absent. The controls build call nodes intrinsically
+over the elaborated callee and do not establish function-value reference-argument
+elaboration. Finder and skeptic reviews found no confirmed defect. Validation
+targets are `Solidity.Source.Progress.CallComposition` and
+`CallCompositionControls`; printed axioms are standard only. This proves source
+heap-typing preservation, not a physical base-map relation or compiler/EVM
+composition. General memory mutation/loop bodies, recursive memory-call graphs,
+external/world/transaction progress and universal source coverage remain outside
+this result.
