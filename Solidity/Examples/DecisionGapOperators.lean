@@ -1,4 +1,5 @@
 import Solidity.Examples.Decision
+import Solidity.Examples.DecisionThreeKindProof
 
 /-!
 # The closer's decision (M7): literal operators and hash kinds over `Gaps`
@@ -78,7 +79,6 @@ with no hash of the first (feature 27) and several such strings (feature
 `gapThreeKinds` proved, `gapMixedKinds` and `gapMixedPairs` refuted (their
 variants in `Examples/DecisionHashes.lean`). -/
 
-theorem gapThreeKinds_covered : gapThreeKinds.hashCovered = true := by decide +kernel
 theorem gapMixedKinds_covered : gapMixedKinds.hashCovered = true := by decide +kernel
 theorem gapThreeKinds_answers : decideGoal gapThreeKinds ≠ .unknown :=
   decideGoal_complete_hash gapThreeKinds_covered

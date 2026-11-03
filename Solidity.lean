@@ -850,6 +850,7 @@ import Solidity.Examples.DecisionAPF
 import Solidity.Examples.DecisionBlocks
 import Solidity.Examples.DecisionRefutations
 import Solidity.Examples.DecisionOperators
+import Solidity.Examples.DecisionThreeKindProof
 import Solidity.Examples.DecisionThreeKindCoverage
 import Solidity.Examples.DecisionGapHashes
 import Solidity.Examples.DecisionStorageArrays

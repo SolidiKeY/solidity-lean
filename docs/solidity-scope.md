@@ -474,3 +474,17 @@ not an exclusion, premise, profile or semantic change. AQ1/AQ2, Q1's certified-b
 revision and H6's exact “VA1 splits it” authorization remain as recorded above.
 No AU05 work or further walk change has started; the announced987/1024 memory-loop
 visits and unchanged300s timing guard must be preserved and revalidated when relevant.
+
+### VA1 H1 resource recovery (relayed 2026-11-03)
+
+The coordinator relayed the human resource decision H1 verbatim:
+
+> Free disk + 4 GiB reserve
+
+This authorizes the task-owned host-available admission/monitor reserve of
+4 GiB and cleanup of owned regenerable data. The aggregate child cap remains
+12 GiB, swap remains zero, and Lean remains serial with explicit `-j1` and
+`LEAN_NUM_THREADS=1`. No semantic, premise, observation, proof, test or timeout
+budget changes follow from this resource authorization. Existing AQ1/AQ2, Q1
+and H6 records remain unchanged. Cache reclamation was attempted through both
+provided kernel interfaces and denied permission; the failures are retained.

@@ -4,7 +4,7 @@ These are unproved statements, not axioms or completion certificates. Implement
 in a separate commit using the unchanged toolchain/budgets and H14 automation
 first. No source translation or soundness argument is delegated here.
 
-Planned module: `Solidity/Calculus/DecisionNumericTwoPrefixGlue.lean`.
+Planned module: `Solidity.Calculus.DecisionNumericTwoPrefixGlue` (proposed; no file exists yet).
 Import `Solidity.Calculus.DecisionNumericLogic`; namespace `Solidity.Decide`.
 Register the module by the coordinator script only after implementation.
 
@@ -50,7 +50,8 @@ polarity translations, parameter support from real source, source node bounds,
 normalizer/reducer facts, coverage composition and semantic soundness. These
 helpers alone do not establish the two-prefix boundary or global Residue.
 
-Local validation blocker: the unchanged HashReduction dependency exceeds the
-required 12GiB host-available reserve during cold checking. All guards remain;
-no passing rebased tree is claimed. Existing integration edits remain separately
-uncommitted until their required checks pass.
+H1 recovery (2026-11-03): the human-authorized 4GiB host reserve resolves the
+previous HashReduction reserve stop while retaining the hard12GiB/no-swap cap.
+HashReduction and the404-entry focused closure now pass. The above helper
+statements remain unproved and are not used as assumptions. The full lane and
+its general two-prefix source/coverage boundary remain incomplete.
