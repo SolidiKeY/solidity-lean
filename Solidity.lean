@@ -281,6 +281,7 @@ import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFresh
 import Solidity.Backend.MemoryCopies.TraversalInterface
 import Solidity.Backend.MemoryCopies.SourceControls
+import Solidity.Backend.MemoryCopies.SourceFramesInterface
 import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryCopies.SourceSize
 import Solidity.Backend.MemoryOps.CalldataAgreementChildren

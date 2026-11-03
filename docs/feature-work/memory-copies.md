@@ -84,3 +84,16 @@ contract, positive inhabitants and removal of the assumed local panic result.
 Per-file diagnostics pass; full checkpoint validation is recorded separately.
 Full G33/G35 implementation, total size-failure coverage, recursive traversal
 and mixed-location composition remain open.
+
+## Source traversal frame interface
+
+`SourceFramesInterface.lean` states the next local obligations: nonheap state
+is unchanged, the heap frontier grows monotonically, and every old object
+retains its identity and contents. The default and storage-load families range
+over every Source type and horizon, including bytes/string, nested aggregates
+and recursive declarations. Outcomes are those of the existing interpreter;
+these signatures neither guarantee success nor impose a new shape filter.
+`Source.Horizon.Grow` and `Const` preserve events and do not prove heap growth.
+The proofs must use the existing Source allocation and Hoare operations.
+Physical compilation, size/finalization failures, and layout agreement remain
+separate obligations; no missing producer result is assumed here.
