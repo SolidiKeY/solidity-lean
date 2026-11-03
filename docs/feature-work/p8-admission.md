@@ -595,7 +595,7 @@ its universal agreement with this checked path is not proved.
 
 Concrete extraction/classification and full frontend/Producer agreement must
 use the approved SourceSpec's Resolved/InProfile/meaning and independently
-supplied source origins/realization. VY5's P8a-SPEC producer owns that contract
-and H16 resource extension; its partial e7242f2b checkpoint still has H16-TX1
-open. Those fields remain typed premises. No unapproved profile, root model,
+supplied source origins/realization. That contract and the H16 resource
+extension belong to P8a-SPEC, which is not yet complete. Those fields remain
+typed premises. No unapproved profile, root model,
 countable-resource replacement or extra semantic premise is chosen here.
