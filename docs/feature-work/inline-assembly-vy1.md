@@ -638,3 +638,18 @@ rechecks restoration consumers; it does not replace final lane validation.
 
 Restoration reuse passed affected and per-file kernel checks and independent
 finder/skeptic review. Agreement statements and control expectations are unchanged.
+
+### Constant-true do/while
+
+LocalBoolDoDivergence.no_normal excludes normal completion at every finite
+horizon for arbitrary raw frames and any certified Boolean item body.
+source_no_normal derives the corresponding actual Source result from clean
+input through concrete do/while agreement. Body halts are permitted; neither
+body success nor a caller simulation law is assumed. Theorems do not classify
+all halts, cover unsupported exits or establish dirty compiler correspondence.
+Nonempty scoped-body witnesses clear an outer flag; false/mutable-guard controls
+terminate, distinguishing the literal-true premise. Full P16 and lane gates
+remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

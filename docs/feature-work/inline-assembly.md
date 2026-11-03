@@ -239,3 +239,5 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolDoWhile adds concrete clean Source agreement for body-first context-growing scoped loops, with partial-body/condition and recursion controls. See [lane handoff](inline-assembly-vy1.md); full P16 and lane gates remain open.
 
 - VY1 integration review: conditional and scoped-loop proofs reuse RawSequence.restore_self; the duplicate was removed, with unchanged agreement statements and control expectations.
+
+- VY1: LocalBoolDoDivergence adds universal raw/clean-Source no-normal-completion laws for constant-true certified do/while bodies; full lane remains open.

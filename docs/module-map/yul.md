@@ -40,3 +40,5 @@
 - Yul/LocalBoolDivergence.lean and Yul/Checks/LocalBoolDivergence.lean: universal no-normal-completion laws for literal-true certified scoped loops.
 
 - Yul/LocalBoolDoWhile.lean and Yul/Checks/LocalBoolDoWhile.lean: body-first scoped iteration and concrete all-fuel clean Source agreement.
+
+- Yul/LocalBoolDoDivergence.lean and Yul/Checks/LocalBoolDoDivergence.lean: constant-true do/while noncompletion laws and guard controls.
