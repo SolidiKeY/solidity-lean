@@ -575,3 +575,24 @@ pins enforce the scoped reports. This closes V2 frame/capacity obligations for
 these target slices, not native expanded control, charged execution, functions,
 source/G24/views or full-lane composition. Routine projections stay archived
 in evidence; registrations remain coordinator-generated.
+
+### SUB/DIV/MOD instruction certificates
+
+`SolidityBridge.Yul.QuotientSelection` supplies actual published instruction
+success/refusal certificates for SUB/DIV/MOD. The generic binary helper states
+its real one-step and underflow premises; all concrete facts are discharged
+using existing Scalar selections, compiler word bridges and VY1's arithmetic
+step proofs. No arithmetic semantics or source evaluator is duplicated.
+
+A separate certificate table preserves the original selector/refusal controls.
+The actual original-source compiler's mixed SUB→DIV→MOD assignment sequence
+closes its emitted-code identity and all instruction-certificate inputs, proving
+source evaluation and full model execution for arbitrary represented words.
+Controls also inhabit the published iff lowering contract for that exact
+emitted program. Operand order, wrap, dirty bits, zero-divisor zero results,
+caller/nonstack preservation, underflow, depth/fuel and capacity distinctions
+are checked, with generated scoped axiom pins. The older recursive checked
+selector is not automatically extended. Native byte/charged/Bridge/G24, wider
+operators, functions/loops/views and full frontend/joint closure remain open.
+No source admission or H22 ExtCall construction changes occur. Routine named
+projections remain evidence-only; optional registrations are generated later.

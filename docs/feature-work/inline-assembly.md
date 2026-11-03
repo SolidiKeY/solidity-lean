@@ -253,3 +253,8 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   certificates with real caller-tail capacity and transient-prefix witnesses.
   Native/function/G24 and full-lane obligations remain open; see the
   [lane document](inline-assembly-vy3.md).
+
+- VY3 SUB/DIV/MOD certificates now compose with an actual mixed source sequence
+  and exact emitted-program iff lowering witness. Earlier refusal tables and
+  admission remain unchanged; native/G24/full-lane work stays open. See the
+  [lane document](inline-assembly-vy3.md).
