@@ -1262,8 +1262,11 @@ actual emitted decoder result, ordered driver checks and step, preserving the
 whole native State and proving the `X` continuation. ADDRESS reads code owner;
 CALLER reads execution source, whereas ORIGIN reads the transaction sender.
 CALLVALUE reads the exact native value word, under either permission flag.
-These are reference-driver laws, not source-frame origin, CALL/world or Osaka
-correspondence. The existing raw environment adapter remains unchanged.
+Earlier private environment-production work already proves fixed-PC, exact-gas
+fetched agreement. This increment generalizes the native wrappers to arbitrary
+emitted sites and adequate gas; it is not first opcode coverage or a new full-row
+discharge. These are reference-driver laws, not source-frame origin, CALL/world
+or Osaka correspondence. The existing raw environment adapter remains unchanged.
 
 [InvocationEnvironmentControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean)
 is a **source-only proposal**, not a checked or registered module. Its seven
