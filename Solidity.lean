@@ -2194,6 +2194,11 @@ import Solidity.Lowering.V07.ShortCircuitControls
 import Solidity.Lowering.V07.SignedNarrowing
 import Solidity.Lowering.V07.SignedWidthCasts
 import Solidity.Lowering.V07.SignedArithmeticControls
+import Solidity.Lowering.V07.SignedNarrowAddition
+import Solidity.Lowering.V07.SignedNarrowArithmeticControls
+import Solidity.Lowering.V07.SignedNarrowMultiplication
+import Solidity.Lowering.V07.SignedNarrowSubtraction
+import Solidity.Lowering.V07.SignedNarrowing
 import Solidity.Lowering.V07.SignedSubtractionControls
 import Solidity.Lowering.V07.SignedWidthCastControls
 import Solidity.Lowering.V07.SignedWidthCasts

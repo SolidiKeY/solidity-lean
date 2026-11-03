@@ -380,7 +380,7 @@ is G17 expression work; G19 remains delegated to V17. G16/G17/BackfillA/B remain
 partial, G18 admission/composition prerequisites stay open, and no constructor
 or external compiler/EVM coverage is added.
 The historical axiom suite and the `*Checks.lean` fixtures cited above remain
-lane-only. `HeadlineAxioms` registers149 exact guards (105 theorems and44 inhabited clients) for selected arithmetic,
+lane-only. `HeadlineAxioms` registers207 exact guards (134 theorems and73 inhabited clients) for selected arithmetic,
 cast, conditional, reference and structural graph theorems in the default
 closure. It does not add entries to `scripts/g07-axiom-pins.json` or discharge
 missing admission, producer, production or coverage obligations.
@@ -478,8 +478,37 @@ returns255 where the correct cast returns−1. Repeated aliases, equal-content
 distinct locals, fresh context and live memory/storage frames are covered.
 Independent finder and skeptic source/control reviews found no proof issue. The finder's module-map table placement finding was corrected.
 
-Narrow signed arithmetic, mixed-sign casts outside the supplied clauses,
+Other signed operators and checked arithmetic, mixed-sign casts outside the supplied clauses,
 constants/enums, general effects/elaborator production, graph admission,
 recursive lifetimes and aggregate composition remain open. G16/G17 and both
 backfills remain partial; G18.01/G18.06 dependencies and delegated children
 are unchanged. No external compiler/EVM test or constructor is added.
+
+## Unchecked signed arithmetic at every width
+
+`SignedNarrowing` proves canonical signed wrapping is identity and narrowing
+after int256 wrapping equals direct narrowing. `SignedNarrowAddition`,
+`SignedNarrowSubtraction` and `SignedNarrowMultiplication` reuse the existing
+int256 value programs followed by signed casts. For every approved signed
+width and every input pair, unchecked Source evaluation agrees with that
+actual typed target, including mathematical products overflowing int256.
+No output-range premise is added. Initial-family local and assignment/read
+transports derive executions, returned agreement and post-families; semantic
+operand positions and capture-before-drop are preserved under both pipelines.
+
+`SignedNarrowArithmeticControls` supplies29 inhabited clients,2,304 pure cases
+and192 effect cases across all32 widths/both pipelines. Source-wrapped boundary
+inputs include minimum/maximum products; these are not constant admission.
+Intermediate captures and final caller observations are pinned. Asymmetric
+subtraction distinguishes reversed, stale and deferred reads; pure initial
+arithmetic misses the assignment even when its returned value agrees. Actual
+wrong unsigned cleaning/omitted narrowing, collapsed equal-content identities,
+repeated aliases, mixed references and fresh context are covered. Independent
+finder and skeptic source/control reviews found no proof issue.
+
+The frame is explicitly unchecked. Checked overflow controls compare Source
+success classification only, not failure payloads or rollback. Other operators,
+general operand/elaborator production, graph admission, aggregate/copy/delete/
+lifetimes and constructor coverage remain open. G16/G17 and both backfills
+stay partial; delegated G18 children/G19 and G18.06 dependencies are unchanged.
+No external compiler or EVM testing is claimed.

@@ -77,3 +77,7 @@
 | `Lowering/V07/UnsignedWidthCasts.lean` | Actual unsigned cast transport for every approved source and destination width |
 | `Lowering/V07/UnsignedWidthCastControls.lean` | All unsigned width pairs, cast order and caller frame controls |
 | `Lowering/V07/SignedWidthCastControls.lean` | Signed thresholds, all width pairs, negative extension and caller frame controls |
+| `Lowering/V07/SignedNarrowAddition.lean` | Unchecked signed addition at every approved width, with initial-family effect transport |
+| `Lowering/V07/SignedNarrowSubtraction.lean` | Unchecked signed subtraction at every approved width, preserving operand positions |
+| `Lowering/V07/SignedNarrowMultiplication.lean` | Unchecked signed multiplication at every approved width, including wide intermediate overflow |
+| `Lowering/V07/SignedNarrowArithmeticControls.lean` | Inhabited all-width arithmetic clients, captures, checked-classification and wrong-program controls |
