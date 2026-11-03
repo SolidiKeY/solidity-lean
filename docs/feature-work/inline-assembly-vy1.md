@@ -860,3 +860,20 @@ remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Body-first default-scope loops
+
+LocalDefaultDoWhile executes the actual certified default scope before its guard,
+restoring the successful scope before guard evaluation and recursion. Its all-fuel
+clean Source agreement uses concrete block/condition execution and actual Source
+restoration. Raw world preservation includes partial halts. Constant-true raw and
+clean-Source loops have no finite normal result, without classifying their halts.
+The witness reuses the existing heterogeneous body. Controls check partial
+contexts, restored exit, body execution despite a false guard, and a post-body
+assignment retained during a later body timeout. Independent actual Source
+checks distinguish do/while from while with the same false guard and body.
+Dirty siblings remain observable. General P16, admission, dirty compiler
+adequacy and final lane gates remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

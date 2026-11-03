@@ -265,3 +265,5 @@ VY1: pure local item/default/unchecked runners now preserve the existing world f
 VY1: conditional selection between independently typed default scopes now has concrete Source agreement, raw world preservation and condition-effect controls; full P16 remains open.
 
 VY1: loops over heterogeneous default scopes have concrete Source agreement, raw world preservation and constant-true finite-normal exclusion; full P16 remains open.
+
+VY1: body-first default-scope loops now have concrete Source agreement, raw world preservation and finite-normal exclusion; full P16 remains open.

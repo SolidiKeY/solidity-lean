@@ -62,3 +62,5 @@
 - Yul/LocalDefaultIfElse.lean and Yul/Checks/LocalDefaultIfElse.lean: conditional default scopes, concrete Source agreement and raw world preservation.
 
 - Yul/LocalDefaultWhile.lean and Yul/Checks/LocalDefaultWhile.lean: scoped default-loop Source agreement, raw purity and finite-normal exclusion.
+
+- Yul/LocalDefaultDoWhile.lean and Yul/Checks/LocalDefaultDoWhile.lean: body-first default scopes, Source agreement, raw purity and finite-normal exclusion.
