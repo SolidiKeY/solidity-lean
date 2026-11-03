@@ -667,3 +667,24 @@ Solidity raw-local readback, frontend admission and final joint composition
 remain open. No external solc/client-EVM result follows from these kernel
 checks. Existing scope decisions and the ExtCall construction freeze are
 preserved. Routine named projections remain evidence-only.
+
+### Unsigned comparison selection
+
+`SolidityBridge.Yul.ComparisonSelection` concretely supplies LT/GT/EQ
+certificates from existing `WordExpressions` bridges and VY1 `EvmBitwise`
+steps. A separate table preserves prior selector refusals. Equality observes
+all raw bits; unsigned order is distinct from the signed table. An original
+source EQ-guarded sequence computes LT into its first local, GT of the second
+against the updated first into its second, then EQ of both updated locals into
+its flag. Actual source/model and whole-iff artifacts inhabit depths0/2 for
+all represented inputs with arbitrary protected newer/caller frames; exact
+compilation/emission/selection identities are discharged.
+
+Controls distinguish dirty-high-word equality from low-bit equality, unsigned
+MAX/zero order, zero/equal/unequal branch outcomes, ordered local updates,
+nonstack fields, underflow and old/unsupported/fuel/depth/loop/width refusals.
+Sixteen guards pin observed standard axioms. Gasless oversized success does not
+supply physical capacity. Generated optional-root registration and focused
+checks cover this extension; full Source/G24/views/native/frontend/joint
+adequacy and the wider operator set remain open. No external pipeline result,
+ExtCall construction or admission change is inferred.

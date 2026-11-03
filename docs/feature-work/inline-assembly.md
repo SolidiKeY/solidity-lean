@@ -273,3 +273,9 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   whole-iff artifacts at depths0/2, exact candidate validation and negative
   controls. Generated Bridge import closure passes. Full source/G24/native/
   frontend composition remains partial; see [lane](inline-assembly-vy3.md).
+
+- VY3 unsigned comparison selection: concrete LT/GT/EQ certificates and an
+  original-source EQ conditional with ordered updates, general source/model
+  and whole-iff artifacts at depths0/2, full-word/unsigned/refusal controls.
+  Full source/G24/native/frontend closure remains partial; see
+  [lane](inline-assembly-vy3.md).

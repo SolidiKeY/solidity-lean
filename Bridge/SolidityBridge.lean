@@ -324,6 +324,8 @@ import SolidityBridge.Yul.ChargedQuotients
 import SolidityBridge.Yul.ChargedQuotientsControls
 import SolidityBridge.Yul.ChargedShifts
 import SolidityBridge.Yul.ChargedShiftsControls
+import SolidityBridge.Yul.ComparisonSelection
+import SolidityBridge.Yul.ComparisonSelectionControls
 import SolidityBridge.Yul.ControlCompleteness
 import SolidityBridge.Yul.ControlRealization
 import SolidityBridge.Yul.ControlCompletenessControls
