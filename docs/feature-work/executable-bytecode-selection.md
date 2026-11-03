@@ -95,8 +95,8 @@ They establish actual staged scalar behavior, selected opcode/byte order, typed
 protected caller words and exact physical peaks (+3 and +6). Controls include
 wrong operand order, insufficient intermediate capacity and full emitted bytes.
 
-This is reuse of a proved scalar consumer, not yet compiler-IR instruction
-selection or fetched runtime execution. The typed caller-frame producer and
+The port itself reuses a proved scalar consumer; it does not establish
+compiler-IR instruction selection or fetched runtime execution. The typed caller-frame producer and
 G24.03/G45.05-BR obligations remain explicit; no source coverage or runtime
 consumer instance is claimed. The accepted V2 limits above remain unchanged.
 
@@ -105,3 +105,20 @@ peaks 3 and 6, including both typed caller words. ScalarSequenceFrameControls
 instantiates both certificates on populated frames with nonempty physical
 tails, rejects a corrupted protected word and excludes intermediate overflow
 even where final height fits. No V1 capacity field or runtime producer is used.
+
+
+## Compiler-IR literal component
+
+LiteralSelection.lean constructs the existing InstructionCertificate for every
+IR numeric PUSH literal. Numeric-stack injectivity makes the success equivalence
+exact for every output stack; actual IR execution preserves all nonstack machine
+fields and agrees with Scalar.run of an actual PUSH32. Fault/None correspondence
+is also proved. The common 256-bit bound is used explicitly.
+
+LiteralSelectionControls checks a populated suffix and arbitrary complete caller
+machine frame, all 33 big-endian bytes of a two-byte value, incorrect value/byte
+order, corrupted tails and symbolic-literal component refusal. selectLiteral is
+only this component: None does not classify another IR constructor's execution
+or a complete compiler's verdict. Physical admission still needs V2 capacity.
+Other numeric IR operations, sequence selection, general stack/frame lowering,
+whole labelled control execution and assembly composition remain open.
