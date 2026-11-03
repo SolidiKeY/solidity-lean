@@ -528,3 +528,30 @@ sets with `#guard_msgs`. The excluded routine ledger is preserved in checkpoint
 evidence rather than resubmitted as a repository file. Earlier integrated
 Bridge registrations remain done; only new unpublished modules need generated
 registration at their integration.
+
+### Whole selected-block iff and refusal transport
+
+`SolidityBridge.Yul.ControlCompleteness` closes the earlier reverse-lowering
+obligation for the actual `ControlRealization.selectBlock` numeric domain.
+`selected_classified` proves every represented input really faults or returns
+an actual `StructuredExec` result with the identical nonstack frame and zero
+pending skip. It derives condition faults, empty condition results and exactly
+the taken arm; no untaken-arm success or blanket totality premise is assumed.
+`selected_lowering` therefore inhabits the published whole-block iff
+`Selection.LoweringCertificate`. Its selection identity is the only additional
+compiler premise; concrete sequence/nested/prefixed instances close it by rfl.
+`fault_iff` equates actual model fault with absence of a structured successful
+output, without reinterpreting source horizons or native EVM failures.
+
+Controls include a source-derived prefixed success witness through the whole
+iff certificate, taken versus untaken ADD underflow, left/right sequence faults,
+faulting and empty-result conditions, dirty/high-only words, wrap, caller and
+metadata preservation, encoding/opcode refusals and oversized uncapped success.
+Scoped axiom reports are enforced by generated `#guard_msgs` pins. This adds no
+selector forms or admission: loops, unsupported certificates and unequal PUSH
+encodings still refuse. Native bytes/PC/charged/trace, expanded capacity, full
+Source/G24/views, functions/divergence and final joint artifacts remain open.
+Routine projection requests remain archived in evidence; no excluded ledger
+or tests are resubmitted. New optional Bridge registrations remain generated
+at integration. Independent read-only reviews and focused checks are recorded
+in the checkpoint handoff.

@@ -243,3 +243,8 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
 - VY3 review follow-up: selection imports use published V2, signed quotient
   axiom reports are enforced, and the excluded routine ledger stays archived.
   No capacity or full-lane closure is inferred; see the lane handoff.
+
+- VY3 whole selected-block lowering now supplies the published iff certificate
+  and exact model-fault transport for supported scalar/sequence/conditional
+  blocks, with original source prefix witnesses. Native/G24/capacity and full
+  lane closure remain open; see the [lane document](inline-assembly-vy3.md).
