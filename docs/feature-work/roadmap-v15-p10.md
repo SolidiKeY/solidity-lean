@@ -1508,3 +1508,32 @@ corrected to signed `toInt` before commit and the failure retained. Finder and
 skeptic reviews found no substantive defect; a mistaken LT docstring was fixed
 to SLT. Existing signed-less-or-equal work is unchanged. Compiler/frame origin,
 Osaka approval and full opcode/world correspondence remain open.
+
+
+### Charged fetched metadata constants
+
+[MetadataPushConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushConsumer.lean)
+consumes the published `Backend.Environment.constant` emitter for every bounded
+width from zero through 32. Actual emitted bytes, decoded payload and native
+word agree with the typed uint result of the existing metadata PUSH slice.
+PUSH0's zero value follows its intrinsic bound; its actual cost is two, while
+positive widths cost three. The decoder, width-dependent charged gate and
+dispatch are discharged, yielding the complete native State and X continuation
+under explicit starting-PC, gas, fuel and push-capacity bounds. Full input
+stack refusal is proved against the same gate after its gas check.
+
+Prior private `MetadataReference` reader and supplied-opcode selector/ABI/function
+laws, published `PushDecoderAgreement`, `ReferenceReader` and PUSH32 consumers
+remain prior coverage. The new contribution is arbitrary-width emitted,
+charged fetched execution and refusal, not first metadata encoding semantics.
+Pure payload reading does not supply `Memory.PaddingCorrect`, an allocator,
+scanner correctness, source declaration resolution or Osaka/driver adequacy.
+
+[MetadataPushControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushControls.lean)
+checks independent complete States for PUSH0, a nonzero byte, a numeric selector,
+ABI-left-aligned selector and full-width boundary value. Empty/maximal legal
+stacks, full-stack refusal, exact differing costs, gas/fuel failures and wrong
+endian/length/order observations are retained. Memory, return buffers, calldata
+and accounts are observed. Independent finder and skeptic reviews found no
+substantive defect and requested the explicit prior-coverage distinction above.
+Compiler/frame origin and full G46/G47 correspondence remain open.

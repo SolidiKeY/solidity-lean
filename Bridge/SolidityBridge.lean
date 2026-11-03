@@ -222,6 +222,8 @@ import SolidityBridge.RoadmapV15.P10.LogicalShiftLayout
 import SolidityBridge.RoadmapV15.P10.LogicalShiftWords
 import SolidityBridge.RoadmapV15.P10.MachineObservation
 import SolidityBridge.RoadmapV15.P10.MachineObservationControls
+import SolidityBridge.RoadmapV15.P10.MetadataPushConsumer
+import SolidityBridge.RoadmapV15.P10.MetadataPushControls
 import SolidityBridge.RoadmapV15.P10.Modular
 import SolidityBridge.RoadmapV15.P10.ModularControls
 import SolidityBridge.RoadmapV15.P10.NegationBody

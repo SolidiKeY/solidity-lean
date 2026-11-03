@@ -391,3 +391,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeConsumer.lean` | General actual signed SLT and SLT/ISZERO typed intGe transport with reserved word bridge, explicit resources and complete State continuation. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeControls.lean` | Direct typed signed LT/GE clients, unsigned contrast/min/max/equality, complete States and capacity/resource/order negatives. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushConsumer.lean` | Published bounded metadata emitter to actual fetched PUSH0–PUSH32 with precise width/value, charged gas, full State/X and full-stack refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushControls.lean` | Complete zero/byte/selector/ABI/full-width States, cost/capacity/resource and endian/length/order controls; no allocator premise. |
