@@ -364,7 +364,7 @@ at the AFTER-BODY, BEFORE-RESTORE machine. Final old caller words do not model
 arbitrary source assignments to those locals: source-frame/return/export
 agreement and runtime return control remain separate P1 obligations.
 
-`ContextRestoreControls.lean` closes this full generic pipeline using the real
+the lane-only control ContextRestoreControls (not on master) closes this full generic pipeline using the real
 populated prefix, prefix producer, real capacity, selected nested memory-result
 call, source output and growth7. The complete34-word target vector retains
 all aliases/scalars, both defaults/private objects, cursor268, saved payloads
@@ -387,7 +387,7 @@ its reached WordFrame and exact word bytes. `scalar` derives the captured-word
 match from genuine source ReprV and retains full reached StateRepr. Symbolic
 slots are explicitly unrepresentable at this numeric byte boundary.
 
-`ByteRestoreControls.lean` discharges initial representation and W-fit from
+the lane-only control ByteRestoreControls (not on master) discharges initial representation and W-fit from
 the SAME real nested-call endpoint. The saved scalar9 is temporarily257, then
 recovered into caller cell2; both word and byte tails retain77. Exact byte
 observations include both exterior sentinels17/23, all32 bytes, embedded zeros
@@ -445,7 +445,7 @@ G37.03 remain with their registry owners. Original raw/full/cached/doc failures
 and all prior seals remain preserved; no unchanged final-gate retry is claimed.
 
 P1-08 checked evidence: the final module/import closure passes (95 jobs), and
-`ResultExportControls.lean` passes in3.278s with15 exact ordered builtin axiom
+the lane-only control ResultExportControls (not on master) passes in 3.278 s with 15 exact ordered builtin axiom
 reports. The populated reached frame also comes from actual `entryCode`
 execution; `whole_run` composes entry and export using `run_append_ok`.
 Only standard axioms occur. The generic zero-cost allocator law retains its
