@@ -38,4 +38,32 @@ theorem memory_compile_join {C : Contract} {b : Nat} {Γ Δ Ξ : Ctx} {F : Frag 
 termination_by sizeOf P
 decreasing_by decreasing_tactic
 
+/-- The actual compiler wraps an accepted body in a single block without
+changing emitted code. This is code/certificate composition, not a new
+source evaluator or a premise about preservation. -/
+theorem memory_compile_single_block {C : Contract} {Γ Δ : Ctx} {b : Nat} {F : Frag Γ}
+    {P : Prog C Γ Δ} (body : CompiledProg b F P)
+    (accepted : Memory.compileProg b F P = some body) :
+    ∃ outer : CompiledProg b F (.cons (.block P) .nil),
+      Memory.compileProg b F (.cons (.block P) .nil) = some outer ∧
+      outer.code = body.code := by
+  let outer : CompiledProg b F (.cons (.block P) .nil) :=
+    ⟨body.frag.restrict Γ,body.code ++ [],
+      .cons (.block P body.code body.cert) (.nil _)⟩
+  have blockAccepted : Memory.compileStmt b F (.block P) =
+      some (⟨body.frag.restrict Γ,body.code,.block P body.code body.cert⟩ : CompiledStmt b F (.block P)) := by
+    change (do
+      let result ← Memory.compileProg b F P
+      pure (⟨result.frag.restrict Γ,result.code,.block P result.code result.cert⟩ :
+        CompiledStmt b F (.block P))) = _
+    rw [accepted]
+    rfl
+  refine ⟨outer,?_,?_⟩
+  · simp only [Memory.compileProg,blockAccepted,bind,Option.bind,pure]
+    rfl
+  · exact List.append_nil _
+
 end Solidity.Backend.Passes
+
+/-- info: 'Solidity.Backend.Passes.memory_compile_single_block' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.Passes.memory_compile_single_block

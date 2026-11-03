@@ -148,3 +148,4 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [Integer-valued mapping copy](feature-work/g18-scalar-mapping-copy.md): all-key storage relations and a captured-slot copy consumer; physical/runtime closure remains open.
 - [Dynamic storage array access](feature-work/g18-array-access.md): actual length/bounds and selected-cell transports, with invalid-representation controls.
 Source callback history producer components: [G22 Source histories](feature-work/g22-source-history-producer.md).
+Compiler-pass integration checks and retained local applications are described in [the compiler-pass record](feature-work/roadmap-v09-compiler-passes.md#integration-checks).

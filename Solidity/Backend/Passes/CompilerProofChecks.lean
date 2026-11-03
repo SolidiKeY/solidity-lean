@@ -1,3 +1,13 @@
+import Solidity.Backend.Passes.AxiomPins
+import Solidity.Backend.Passes.ContinuationPins
+import Solidity.Backend.Passes.FixedBooleanPins
+import Solidity.Backend.Passes.FreshBooleanPins
+import Solidity.Backend.Passes.LoopPins
+import Solidity.Backend.Passes.MemoryCallPins
+import Solidity.Backend.Passes.RevertPins
+import Solidity.Backend.Passes.TriplePins
+import Solidity.Backend.Passes.ValueContextPins
+import Solidity.Backend.Passes.ReframedTriplePins
 import Solidity.Backend.Passes.LoopReframedFailureControls
 import Solidity.Backend.Passes.LoopReframedCompletion
 

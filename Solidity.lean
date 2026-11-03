@@ -1389,6 +1389,30 @@ import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
+import Solidity.Backend.Passes.AssignedBareRevert
+import Solidity.Backend.Passes.AssignedBareRevertControls
+import Solidity.Backend.Passes.AssignedBareRevertPins
+import Solidity.Backend.Passes.EffectfulReferencePair
+import Solidity.Backend.Passes.EffectfulReferencePairControls
+import Solidity.Backend.Passes.EffectfulReferencePairPins
+import Solidity.Backend.Passes.EffectfulShortCircuit
+import Solidity.Backend.Passes.EffectfulShortCircuitControls
+import Solidity.Backend.Passes.EffectfulShortCircuitPins
+import Solidity.Backend.Passes.PositiveAllocationFailure
+import Solidity.Backend.Passes.PositiveAllocationFailureControls
+import Solidity.Backend.Passes.PositiveAllocationFailurePins
+import Solidity.Backend.Passes.RuntimeReturnFailure
+import Solidity.Backend.Passes.RuntimeReturnFailureControls
+import Solidity.Backend.Passes.RuntimeReturnFailurePins
+import Solidity.Backend.Passes.RuntimeVoidCapture
+import Solidity.Backend.Passes.RuntimeVoidCaptureControls
+import Solidity.Backend.Passes.RuntimeVoidCapturePins
+import Solidity.Backend.Passes.RuntimeVoidReflection
+import Solidity.Backend.Passes.RuntimeVoidReflectionControls
+import Solidity.Backend.Passes.RuntimeVoidReflectionPins
+import Solidity.Backend.Passes.SourceNarrowingValue
+import Solidity.Backend.Passes.SourceNarrowingValueControls
+import Solidity.Backend.Passes.SourceNarrowingValuePins
 
 
 import Solidity.Lowering.V08.Audit
