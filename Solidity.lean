@@ -1414,6 +1414,7 @@ import Solidity.Evm.Stmt
 import Solidity.Evm.StorageLemmas
 import Solidity.Evm.TryByteCapture
 import Solidity.Evm.TryByteImage
+import Solidity.Evm.TryPanicCallMetadata
 import Solidity.Evm.TryPanicCarrier
 import Solidity.Evm.TryPanicProducer
 import Solidity.Evm.TryPanicSourceBody
