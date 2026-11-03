@@ -1,8 +1,8 @@
 import Solidity.Source.Machine
 import Solidity.Backend.StorageOps.SourceSelfCopy
 
-/-! Upper-layer lane-specific Source/target operation tests. The unchanged
-StorageOps core closure forbids Source imports; this test preserves that
+/-! Above-core Source/target self-copy correspondence. The StorageOps core
+closure forbids Source imports, so this module sits above it and preserves that
 boundary and every typed Source fixture/observation. It is not a production
 Source lowering, address compiler, static-call/gas or world-refinement bridge. -/
 namespace Solidity.Backend.StorageOps.SourceSelfCopy

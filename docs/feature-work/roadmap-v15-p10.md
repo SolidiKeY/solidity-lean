@@ -76,14 +76,13 @@ and error-order negatives.
 
 ## Master integration review
 
-Merged from producer head 515ac91d over master eba99fe7. Read-only finder and
+Read-only finder and
 skeptic reviews confirmed: no `sorry`/axiom/heartbeat changes, all imports and
 module-map paths exist, core untouched. Fixed on merge: the producer's ten
-per-step notes (VM paths, run logs, coordinator text) were replaced by this
-page; the frozen-interface docstring now says its fields are discharged by
+per-step notes were replaced by this page; the frozen-interface docstring now says its fields are discharged by
 `FrozenV1.api` from existing theorems; `api` is a `theorem`; module-map rows
-for `Site`, BALANCE and the frozen modules were made precise. Left out: the
-producer's VM job-runner script, its test and its runtime-completion note. Noted, not changed: per-opcode `opcode_at`
+for `Site`, BALANCE and the frozen modules were made precise. Noted, not
+changed: per-opcode `opcode_at`
 lemmas are duplicated across modules, and most `#print axioms` are unguarded,
 as elsewhere in `Bridge/`.
 
@@ -221,7 +220,7 @@ physical/source/Osaka closure remain explicit.
 
 ### Source-input calldata extent at arbitrary emitted sites
 
-A fixed-PC, fixed-gas predecessor stayed on the lane and is not on master.
+A fixed-PC, fixed-gas predecessor is not on master.
 [CalldataExtent.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/CalldataExtent.lean)
 extends the native clause to arbitrary Backend before/after programs, the
 actual emitted instruction PC, and an explicit gas-at-least-2 bound.
@@ -246,8 +245,8 @@ boundaries.
 
 ### Generated environment task signatures
 
-`EnvironmentTasksV1.lean` was generated on the lane from a specification; the
-generator and specification are not on master. It contains claim types only. `OriginClaim`, `GasPriceClaim` and `ChainIdClaim` describe
+`EnvironmentTasksV1.lean` was generated from a specification; the generator
+and specification are not on master. It contains claim types only. `OriginClaim`, `GasPriceClaim` and `ChainIdClaim` describe
 actual fetched whole-State and `X` producer goals, with explicit gas and stack
 bounds. They have no proofs or instances. ORIGIN observes the pinned reference
 `sender`, GASPRICE observes its transaction price, and CHAINID uses the existing
@@ -391,7 +390,7 @@ profiles are unchanged.
 Independent read-only finder and skeptic reviews cleared the negative fill,
 all-index case composition and unified clients. The arithmetic producer has
 no sign/residue premise, while gas, capacity, explicit operand representation
-and the remaining full-lane boundaries stay visible.
+and the remaining full-V15 boundaries stay visible.
 
 ## Unsigned quotient and remainder at arbitrary emitted sites
 
@@ -403,8 +402,7 @@ continuation. Public word equations expose the unsigned zero-divisor policy;
 `div_capacity_refusal` derives actual overflow from the gate after gas and
 operand checks, without assuming a refused storage or state frame.
 
-A fixed-site predecessor (PC 0, single-byte code, gas 5) stayed on the lane
-and is not on master. This checkpoint covers arbitrary encoded
+A fixed-site predecessor (PC 0, single-byte code, gas 5) is not on master. This checkpoint covers arbitrary encoded
 prefixes/suffixes, program counters and adequate initial gas. It adds no
 opcode-row coverage.
 
@@ -424,19 +422,14 @@ resolved by recording the fixed-site predecessor explicitly; their capacity
 finding was resolved with the general gate refusal and populated overflow
 client. No earlier arithmetic coverage is counted twice.
 
-## Integration record (lane head 606729a8)
+## Integration record
 
 Merged: the 21 modules above and their Bridge root imports. The DIV, BYTE and
 SIGNEXTEND overflow refusals start from 1026 input words and EXTCODESIZE from
 1025; they check the gate arithmetic on an over-limit stack that no
 well-formed state reaches. Only the PC/GAS/MSIZE capacity boundary is
-reachable. Left out: the
-lane's bounded-capture/completion and serial-shim runner scripts and their
-tests, the environment-task generator and its JSON specification, the
-per-module registration scripts, its routine-task list and its
-runtime-completion note. Read-only finder and skeptic reviews found no Lean
-defect; stale references to lane-only predecessors and checklists were
-removed from this record.
+reachable. The environment-task generator and its JSON specification are not
+on master. Read-only finder and skeptic reviews found no Lean defect.
 
 ## Storage warmth and key isolation (SLOAD/TLOAD)
 
@@ -602,12 +595,9 @@ or a terminal return-buffer assertion.
 
 ## Bitwise words at arbitrary emitted sites
 
-Earlier private fixed-entry checks in module
-`SolidityBridge.RoadmapV15.NumericRows01` at revision
-`94901eb8590cddfe8858b91de33c1229dcbdd66d` already cover these operations.
-The delta here is arbitrary emitted Site and adequate-gas transport plus reusable
-public word equations, with zero new opcode rows. The immutable predecessor
-source binding is retained in the interface handoff.
+Earlier fixed-entry checks of these operations are not on master. The delta
+here is arbitrary emitted Site and adequate-gas transport plus reusable public
+word equations, with zero new opcode rows.
 
 `Bridge/SolidityBridge/RoadmapV15/P10/BitwiseWords.lean` exposes three reusable
 native-word consequences for AND, OR and XOR. Each actual reference operation's
@@ -762,7 +752,7 @@ confirmed these boundaries.
 The represented code/PC/stack and arbitrary jump-array parameters do not prove
 source-frame origin, scanner validity, physical allocation, whole driver/resource
 adequacy, approved fork correspondence, account/world or transaction/trace
-composition. All complete opcode rows and the broader lane remain open. The
+composition. All complete opcode rows and the broader V15 obligations remain open. The
 frozen P10 signatures are unchanged.
 
 ## Selected unsigned shift sequence consumers
@@ -800,7 +790,7 @@ The X continuation law does not assert STOP success, source/compiler/frame
 origin, physical allocation/padding, whole driver/resource adequacy, approved
 fork, account/world or transaction/trace correspondence. Signed source counts
 are outside these uint statements, without changing any profile or refusal.
-All full opcode rows and broader lane obligations remain open. Frozen P10
+All full opcode rows and broader V15 obligations remain open. Frozen P10
 signatures are unchanged.
 
 ## Selected signed non-strict comparison
@@ -835,7 +825,7 @@ Independent read-only finder and skeptic reviews checked these boundaries.
 The local continuation law asserts no STOP success, scanner validity, source/
 compiler/frame origin, physical allocation, whole-resource or approved-fork
 adequacy, account/world or transaction/trace correspondence. All full rows and
-broader lane obligations remain open; frozen P10 signatures are unchanged.
+broader V15 obligations remain open; frozen P10 signatures are unchanged.
 
 ## Value-directed consecutive storage reads
 

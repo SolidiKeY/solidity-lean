@@ -2073,10 +2073,10 @@ See [P8 admission](feature-work/p8-admission.md).
 ### G46.05 direct hash-query receipts (optional Bridge)
 | Module (under `Bridge/SolidityBridge/`) | Purpose |
 |---|---|
-| `HashBridge/Queries.lean`, `HashBridge/Step.lean`, `HashBridge/Layout.lean` | Reused actual opaque digest/query and conditional storage-region interfaces from owned998ffef7. |
+| `HashBridge/Queries.lean`, `HashBridge/Step.lean`, `HashBridge/Layout.lean` | Reused actual opaque digest/query and conditional storage-region interfaces. |
 | `HashBridge/Prefix.lean`, `HashBridge/PrefixControls.lean` | Actual explicit-step query receipts, derived KECCAK frame, repeated-input and fuel controls; [scope](feature-work/hash-direct-prefix.md). |
 | `HashBridge/ChargedGuard.lean`, `HashBridge/Charged.lean`, `HashBridge/ChargedControls.lean` | Exact KECCAK memory/base/check order and all-fuel fetched-X-to-query receipt with full actual successor fields; logical charge/fuel/static controls. |
-| `ExternalEvm/OutcomeDriver.lean` | Reused owned generic observation of pinned X checks/step/terminal dispatch from3d4f8d7f; no replacement evaluator. |
+| `ExternalEvm/OutcomeDriver.lean` | Reused owned generic observation of pinned X checks/step/terminal dispatch; no replacement evaluator. |
 | `HashBridge/Frame.lean`, `HashBridge/FrameSound.lean`, `HashBridge/FrameHash.lean`, `HashBridge/FrameControls.lean` | Recursive direct-query refinement of existing driver cuts; all-fuel existence/erasure and same-KECCAK-head continuation; error-retains-query control. |
 | `HashBridge/QueryShape.lean`, `HashBridge/QueryUnique.lean`, `HashBridge/QueryControls.lean` | Fixed-state/fuel query-list uniqueness and unique existence; forbids favorable empty receipts after an executed hash. |
 | `HashBridge/{QueryCut,CutSound,HashCuts,CutControls}.lean` | Checked same-run query cuts, residual execution and actual hash/error client |

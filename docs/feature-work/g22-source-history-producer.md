@@ -14,13 +14,12 @@ own descendant journal entries and preserves its outcome bytes. callbacks derive
 the bounded CallbackHistories predicate from smaller dispatch components. This
 is an induction step, not general callback closure.
 
-SourceHistory.At is generated from the published evaluator signature inventory
-by scripts/o1-source-history-interface.py. It has seventeen actual mode-indexed
+SourceHistory.At was generated from the published evaluator signature inventory
+by a script that is not in this repository. It has seventeen actual mode-indexed
 run-effect components and specializes child entry to live-checkpoint ancestry;
 it is not byte-identical GrowAt extraction or a producer theorem.
 SourceHistoryBase.at_zero proves the exhausted base. The positive-bound
-expression/conversion/statement helpers and evaluator/call induction remain
-owned, unfinished work.
+successor components are listed below; the status section records which remain.
 
 UnknownSourceCall.history links actual unknown zero-value call execution to its
 environment history for success, revert and all halts. evaluated_frame pairs the
@@ -75,24 +74,10 @@ permitted no-op. Type mismatch and exhaustion remain distinct. All-mode/all-boun
 loader/store clients use the closed producers, and the ordinary-change negative
 retains the counterexample to false preservation.
 
-Validation uses automation-first candidates and shared per-file kernel gates.
-The latest fourteen-declaration signature/axiom audit passed in3.230s with
-aggregate peak161718272bytes under hard12GiB/no-swap, CPU1, thread1/-j1 and the
-unchanged proof/time limits. Only propext, Classical.choice and Quot.sound or
-none occur. Broad aggregate-copy search exhausted200000 heartbeats and triggered
-a subsequent Lean diagnostic panic; it remains a failed/blocked experiment.
-Explicit typed constructor cuts repaired the proof without relaxing any statement,
-premise or budget. Raw successful/failed receipts and earlier audit measurements
-remain in immutable handoffs. Finder and skeptic independently cleared the
-recursive producers and final inhabited controls.
-
-No full/global/native gate or original O1 completion is claimed here.
-General positive-bound At and CallbackHistories remain owned proof obligations.
 P1 profile provenance stays an explicit hprof hypothesis; published P1 bare-revert
 production does not supply Source callback histories or payload/rollback linkage.
 P10 actual CALL/RETURNDATA execution and Source/target correspondence remain
 separate compiler-side obligations. These Source-only laws do not close them.
-
 
 EvalEffectsBase adds actual lifted-result/state-read effects and permits modSt
 only under exact ex preservation. LocationEffects now covers memory element
@@ -106,12 +91,7 @@ LocationControls executes25 concrete observations, including successful static
 memory-byte/array/local changes, ordinary scalar storage mutation, static storage
 refusal, calldata refusal, bounds/type failures and local deletion exhaustion.
 Deletion preserves zeroVal-before-write ordering. Two inhabited effect clients
-and an ordinary-storage-change negative retain these distinctions. The final
-fourteen-declaration signature/axiom audit passed in3.224s with aggregate
-peak167170048bytes under unchanged hard12GiB/no-swap/serial limits. Only standard
-axioms occur. Independent finder/skeptic review cleared the source branches and
-final stored controls. General evaluator/callback closure remains open.
-
+and an ordinary-storage-change negative retain these distinctions.
 
 LocalInitializationEffects closes zeroVals and zeroInner effects for all modes,
 bounds and separately indexed caller/result local contexts. Empty/skipped work
@@ -119,15 +99,7 @@ keeps its actual success behavior at zero bound. The19 stored initialization
 observations show a fresh memory reference in the returned slots with unchanged
 caller locals and retained outer slot; later default refusal keeps earlier raw
 heap allocation. No implicit rollback is inferred. Its all-mode/bound client is
-inhabited. Finder and skeptic independently cleared these exact distinctions.
-
-The combined eighteen-declaration signature/axiom audit passed in3.828s with
-aggregate peak164491264bytes under the unchanged hard limits and only standard
-axioms. Source code, profiles, expected verdicts and runtime observations are
-unchanged; these are proof-only helper additions. Remaining expression/statement/
-dispatch helpers and the positive-bound seventeen-way evaluator/callback
-induction are still owned work. Compiler/native and full-lane obligations remain
-open as described above.
+inhabited.
 
 CallSupportEffects closes actual instance lookup, event observation, live mark
 and outcome re-raising effects. It does not grant permission for Solidity LOG
@@ -149,22 +121,6 @@ allocation, explicit fixed bytes, memory-to-value refusal, timeout, calldata
 conversion/refusal, and tuple conversion with retained allocation before an
 arity failure. Discarding a slot succeeds at bound0 without allocating.
 
-The final eighteen-declaration signature/axiom audit and changed-module kernel
-check passed in31.128s with aggregate peak707883008bytes. Checks used hard
-memory.max12884901888, memory.swap.max0, CPU1, serial Lean-j1 and a4GiB available
-host reserve. Only propext, Classical.choice and Quot.sound or none occur.
-Automation was attempted first. Failed namespace resolution and dependent-match
-candidates remain failed; explicit qualification and matching the missing
-constructor repaired them without a changed statement, expectation or budget.
-The conversion join-point search failures and original full-gate failures are
-retained. Finder and skeptic independently cleared all five stored modules and
-the32 controls without Lean server use. No Source file, fixture or runtime
-profile changed, and no full/global/native gate was rerun or claimed passed.
-
-Ready owned work remains: positive-bound expression/statement/dispatch and the
-seventeen-component evaluator/callback induction. This checkpoint does not
-supply a general CallbackHistories or source-to-target/native correspondence.
-
 SourceSequenceEffects proves four successor steps for evalPair, evalArgs,
 evalConvArgs and evalArgsRev. They use At G n for strictly smaller-bound actual
 evaluations and conclude the corresponding effect at n+1, keeping the same
@@ -175,40 +131,26 @@ static local mutation remains permitted, empty work succeeds and exhaustion
 preserves its reached locals. An inhabited empty-list client uses the proved
 At G0 base; it does not assume a positive-bound full At.
 
-The combined25-declaration signature/axiom check passed in6.838s with aggregate
-peak173338624bytes under the same hard limits. Its initial partial-import scratch
-setup failed on a missing cached AST object; the actual combined-import audit
-module gives Lake the complete graph and passes. That failure remains failed.
-A scratch control namespace typo was corrected without changing an observation.
-Finder and skeptic cleared the exact stored sequencing proofs and controls.
-The remaining evaluator/callback induction, Source/target correspondence and
-original O1 final gates are still open.
-
 KeyStepEffects closes the journal effect of the existing key conversion helper,
 including storage byte reads, literal/scalar keys, refusal and exhaustion.
 SourceLvalueCallEffects adds evalLoc and pay successor components. Their At G n
 premise is strictly smaller than the n+1 conclusion; they preserve actual F.static.
 The existing payment call keeps its requested false flag and inherits parent
 mode through Effect.parent. No stipend rule, callback exclusion or payment
-semantics is added. Together with the four sequencing steps, six of the
-seventeen successor components are now available; full At is not constructed.
+semantics is added. Full At is not constructed.
 
 SourceLvalueCallControls stores17 observations and a genuine At0 local client.
 They distinguish storage/literal/bool keys, refused keys and exhausted reads,
 a bound1 location from bound0 exhaustion, arbitrary zero-value success/revert
 bytes, static nonzero-value caller halt from an ordinary unaffordable child
 revert, and the respective absence of pre-call events. Its explicit negative
-proves the caller halt and child revert differ. Direct normalization hit the
-unchanged200000-heartbeat limit; rewriting the already proved actual outcomes
-before constructor discrimination repairs that proof. The failed attempt remains
-a blocked proof experiment, not a passing check.
+proves the caller halt and child revert differ.
 
 SourcePayloadEffects and SourcePayloadDecodeEffects prove only journal effects
 of existing payload helpers: tailBytes, encodeOne/Parts/Vals, decodeArg/Args,
 abiDecodeData and extReturn. All types, refusals, partial state and list order
 remain as implemented. Byte/string/array constructor cuts share the proof;
-explicit array composition avoids the broad search's heartbeat failures.
-The isolated array cut passed in2.430s after those failures. There is no ABI
+explicit array composition keeps the proof within the default budget. There is no ABI
 value correctness, new input admission, enum/nominal certificate extension,
 algorithm change or target/native correspondence claim.
 
@@ -220,16 +162,6 @@ returns. Nil declarations retain unused-byte acceptance; this does not validate
 discarding a nonempty declaration before checking it. A parameterized draft word
 constructor was made total using existing toWord, retaining tested values1/2
 and every observation.
-
-The combined eighteen-declaration signature/axiom audit passed in6.542s with
-aggregate peak274239488bytes under the same hard12GiB/no-swap scope, CPU1,
-thread1/-j1, stack, heartbeat and300s limits, and4GiB host reserve. Dependencies
-are only propext, Classical.choice and Quot.sound or none. Finder and skeptic
-independently cleared the exact stored helpers and36 observations without Lean
-server use. Source files, fixtures, profiles, pins and expected verdicts are
-unchanged. Full/global/native gates and original C5 were not rerun; helper work
-consumes none of its remaining allowance. Remaining expression/builtin/statement/
-call/dispatch induction and actual source-target/native correspondence are open.
 
 SourceAggregateReadEffects now closes ret32, fieldsOf and getterPath journal
 effects. Arity/type refusals, key decoding and bounds failures remain actual
@@ -243,18 +175,10 @@ SourceExpressionEffects.evalE_succ proves the actual expression component at
 n+1 from At G n for the same global, frame and real static flag. Its41 typed
 constructor cuts retain every original guard and argument, including external
 call signatures and ABI decoding restrictions. Their telescopes and exhaustive
-assembly are generated by scripts/o1-source-expression-effects.py from actual
-Resolved.lean declarations, with source hash/inventory in the adjacent JSON.
-The generator is proof tooling, not replacement semantics. Nested Lean comments
-are handled; fixing that review finding regenerated byte-identical checked cuts.
-No Source file or representation is changed.
-
-Broad delta-unfolding and early generated attempts reached the unchanged200000
-heartbeat bound. The existing Source equation-rewrite strategy repairs the
-proof: seven read/literal cuts passed in22.918s, the next seven in19.008s, and
-the remaining27 serially in132.421s. No limit or premise was raised. Failed
-prototypes and their source snapshots remain failed evidence. No unchanged
-full-lane timed gate was rerun, and this repair is not a pass for those gates.
+assembly were generated from the actual Resolved.lean declarations by proof
+tooling that is not in this repository; it is not replacement semantics. The
+proofs use the existing Source equation-rewrite strategy. No Source file or
+representation is changed.
 
 SourceReadBuiltinControls adds24 actual observations: a typed array environment
 with three seeding writes, retained checkpoint, successful path/value read and
@@ -264,21 +188,6 @@ argument refusals. The arithmetic controls assert(7+5) mod3=0 under both pipelin
 not zero modulus. The helper's bound0 array-path success is retained; it is not
 a full interpreter bound0 success. A genuine At0 Boolean-expression client and
 explicit gas-refusal negative are kernel checked.
-
-The combined49-declaration signature/axiom audit passed in19.290s with aggregate
-peak182812672bytes under the unchanged hard12GiB/no-swap, CPU1, thread1/-j1,
-stack, heartbeat,300s and4GiB host-reserve limits. Dependencies are standard
-propext, Classical.choice and Quot.sound or none. Finder and skeptic independently
-cleared the exact final proof tooling, typed cuts and controls without Lean use.
-
-Thirteen successor components are now proved: four sequencing components, lvalue,
-pay, builtin, expression, callInternal, execItems, runMods, forIter and dispatch.
-execS, callAddr, enterInstance and envLoop, and hence general positive-bound
-At/CallbackHistories, remain owned work. Source-target/native correspondence,
-P1 profile hypotheses and P10 actual call execution retain their prior boundaries.
-Original O1 and its mandatory final gates are incomplete; original C5 allowance
-and every prior failed receipt/seal remain unchanged.
-
 
 SourceBodyEffects adds actual callInternal, typed item sequencing and modifier
 successor histories from strictly smaller At premises. Modifier arguments and
@@ -292,19 +201,6 @@ modifier fixture: static legacy return2, static viaIR return1, single-placeholde
 return1, nonzero local updates, both journals unchanged, and saved function
 locals restored. The numeric observations use decide; state equalities use rfl
 because the dependent/function-containing states have no Decidable equality.
-The failed decide attempt is retained rather than treated as a gate pass.
-
-The final body module, controls and ten-declaration signature/axiom audit passed
-separately in3.030s,4.129s and3.134s, respectively. The modifier prototype passed
-in37.460s. Hard memory.max12884901888 and memory.swap.max0 were read back for
-each serial Docker workload; CPU1, Lean-j1, unchanged proof limits and4GiB host
-reserve applied. No OOM or descendant process remained. Dependencies are only
-propext, Classical.choice and Quot.sound (or none). Finder and skeptic separately
-cleared the proofs and seven controls without Lean. Earlier bounded failed
-prototypes, including compiler diagnostic panics and heartbeat failures, remain
-failed evidence; no original timed/full gate was repeated. The original C5
-remaining allowance is20.294037341996614s and helper work consumes none of it.
-
 
 SourceLoopEffects.forIter_succ proves the actual optional-condition/body/post
 step, including break, continue, return and exhaustion, from strictly smaller
@@ -324,17 +220,16 @@ absent special function, payability and exhaustion. The At0 selected-function
 client is inhabited conditional history at bound1, not successful-call coverage.
 The same inherited static frame is used throughout.
 
-Full dispatch proof search and a duplicated getter proof reached the unchanged
-200000 heartbeat limit. Sharing actual selector-case lemmas repaired that
-checking cost; no Source definition, statement, premise or budget changed.
-Failed attempts and recoverable split-tactic compiler diagnostics are retained.
-The final four-module check passed in81.955s with aggregate peak254820352bytes.
-An initially empty audit generated by an overescaped regex is rejected as axiom
-evidence, despite its process exit0. The corrected asserted35-declaration audit
-passed in8.454s with peak114524160bytes; it reports only propext, Classical.choice
-and Quot.sound or none. All checks used the verified hard12GiB/swap0 Docker
-scope, CPU1, serial Lean-j1, unchanged stack/heartbeat/300s guard and4GiB host
-reserve. Finder and skeptic separately cleared all leaves, exhaustive assembly
-and28 controls without Lean. Four source induction fields remain; full At,
-CallbackHistories, source/target/native adequacy and original mandatory final
-gates are still open. No original C5 time was consumed by this H10 helper work.
+Dispatch proofs share the actual selector-case lemmas; no Source definition,
+statement, premise or budget changed.
+
+## Status
+
+Thirteen of the seventeen successor components are proved: four sequencing
+components, lvalue, pay, builtin, expression, callInternal, execItems, runMods,
+forIter and dispatch. The remaining four (execS, callAddr, enterInstance and
+envLoop), and hence general positive-bound At and CallbackHistories, are open.
+Source-target/native correspondence, P1 profile hypotheses and P10 actual call
+execution keep the boundaries stated above. Checked declarations depend only on
+propext, Classical.choice and Quot.sound, or on none; no proof limit was raised.
+Independent finder and skeptic reviews cleared the producers and controls.

@@ -1,7 +1,7 @@
 # V09 compiler-pass components (G24–G31)
 
 Backend pass components over the existing memory compiler
-(`Backend/Passes/`), from the v09-compiler-passes lane. Headline results are
+(`Backend/Passes/`). Headline results are
 parameterised over any `Compilation`/`CompiledVal` with explicit link or
 budget premises (`MappedBoundaryLink`, `ReachedMappedLink`, reached-cost
 budgets), and controls instantiate them (`LinkedControls.concrete_link`,
@@ -49,12 +49,11 @@ axiom-free and smaller sets retained. No theorem statement or premise changes.
 `ReframedTripleWrongOrder.block_code_split` uses accepted compiler join and
 single-block certificates instead of unfolding the whole concrete compiler.
 The default heartbeat budget, failure behavior and complete ordered vectors
-are unchanged. Controller publication is separate from local validation.
-The branch-local `RuntimeReturnFailure*` and `AssignedBareRevert*` applications
-remain registered and retained; their earlier private seals are unchanged.
+are unchanged. The `RuntimeReturnFailure*` and `AssignedBareRevert*`
+applications remain registered.
 
-`P8Admission` and `CheckedCallBoundary` remain private, unused components;
-neither supplies an inhabited source-admission or whole-source result.
+`P8Admission` and `CheckedCallBoundary` were not integrated and are not on
+master; neither supplied an inhabited source-admission or whole-source result.
 
 ## Void-call heap effects followed by capture
 

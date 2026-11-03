@@ -63,9 +63,5 @@ checked for the complete declared input height; adding a protected tail needs
 its own capacity check. The reused fetch refuses a truncated PUSH, unlike full
 EVM padding. A local assembled packet witness does not prove entry reachability.
 
-The prior lane checkpoint remains archived at `0ea60175`; this increment is
-based on integration `e1e21297`, preserves its docstring corrections, and does
-not restore the omitted peer Executable modules. Focused checks and axiom
-reports are per-file evidence; no full-root, cold-build or original Revert
-source/native completion is claimed. Independent source/evidence reviews are
-recorded in the accompanying checkpoint handoff.
+The omitted peer Executable modules are not restored. No original Revert
+source/native completion is claimed.

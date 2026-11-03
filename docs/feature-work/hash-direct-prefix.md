@@ -1,9 +1,8 @@
 # Direct EVM hash-query prefix receipts (G46.05)
 
 The optional `Bridge/SolidityBridge/HashBridge/` interface records byte inputs
-of successful **explicit** pinned evaluator steps. It reuses the exact owned
-`Queries`, `Step`, and `Layout` sources from checkpoint `998ffef7`, rechecked
-against current master; those three files are reused work, not new proofs.
+of successful **explicit** pinned evaluator steps. Its `Queries`, `Step` and
+`Layout` sources are reused earlier work, not new proofs.
 
 `Prefix.directQueries` computes a direct KECCAK256 input from actual memory
 and stack operands. `ExplicitPrefix` is a proof-only indexed receipt whose
@@ -66,8 +65,8 @@ needed for this non-jump instruction.
 capacity, fuel ordering and a real one-byte KECCAK/static-mode control with
 remaining gas2 and PC1. Its actual zero-size read remains symbolic, never
 canonical-empty hash input. These are kernel controls, not original fixtures.
-The generic X observation API is exact reused owned `OutcomeDriver` from
-`3d4f8d7f`, rechecked, not a second driver implementation.
+The generic X observation API is the reused `OutcomeDriver`, not a second
+driver implementation.
 
 ## Recursive checked frame-query account
 
@@ -251,15 +250,8 @@ controls: X0 exhausts, X1 can fail its gas check, and X2 reaches call0/exhausts
 before handled-depth policy even at depth1024. This is not a positive original
 Solidity-source/native run or canonical byte realization.
 
-Six existing owned driver files were reused from committed `3d4f8d7f…`, with
-exact original seals retained. Five remain byte-identical; StaticcallDriver only
-loses one unused `and_false` simp argument (types unchanged). Import preparation
-first hit two aggregate60s stops, both retained. The unchanged master Dispatch
-closure was then prepared separately (144s), as allowed for unchanged inputs;
-restored owning stages still used60s, with RequireLocalCut52s. The initial
-scratch import map missed a lazy cached module; the corrected setup comes from
-Lake's full import map. The repository-tactic fallback reported an unknown tactic in this
-narrow import; primitive tactics did not close the soundness goal.
+Six existing driver files are reused. Five are unchanged; StaticcallDriver only
+loses one unused `and_false` simp argument (types unchanged).
 
 Next owned hard edge: a concrete successful call/continuation split or repeated
 call-boundary composition. Separate lists do not certify a flattened nested or
@@ -268,9 +260,3 @@ compatibility remain open.
 Generic receipt append/split/count and guard projection glue remain open
 routine obligations. Original source/compiler/native/heap/call/catch
 correspondence and G45.03 whole structured simulation remain open.
-
-Focused owning diagnostics, exact public types/axioms and source/evidence
-reviews are in the accompanying sealed handoff. The first plain-lean attempt
-failed on lazy artifact-cache setup; corrected checks use Lake-generated import
-maps. No full optional/root/TestSuite/docs/strict lane gate was run under H12,
-and mixed cached/fetched importing closures are not cold timing evidence.

@@ -130,8 +130,10 @@ const { graph } = loadGraph();
 const isCore = (m) => CORE.some((r) => r.test(m)) && !ELABORATOR.some((r) => r.test(m));
 const isElab = (m) => ELABORATOR.some((r) => r.test(m));
 const core = [...graph.keys()].filter(isCore).sort();
+// The Yul parser shims moved out of CORE still must not reach the elaborator.
+const yulShims = [...graph.keys()].filter((m) => /^Solidity\.Yul\./.test(m) && PARSER_ADAPTER.some((r) => r.test(m)) && !isCore(m)).sort();
 let bad = 0;
-for (const m of core) {
+for (const m of [...core, ...yulShims]) {
   const hit = [...reach(graph, m)].filter(isElab).sort()[0];
   if (!hit) continue;
   bad++;

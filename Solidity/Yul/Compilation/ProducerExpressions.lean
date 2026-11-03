@@ -1,7 +1,7 @@
 import Solidity.Yul.Compilation.PureLowering
 import Solidity.Yul.WordUpdates
 
-/-! Concrete consumer of VY1 8087164d's original intrinsic Expr and evaluator.
+/-! Concrete consumer of VY1's original intrinsic Expr and evaluator.
 Fuel is the SAME source expression horizon, not target gas or a new budget.
 This initial compiler may refuse forms/depths; no admission change follows.
 Source word Fin and target BitVec are transported without cleaning any bits. -/

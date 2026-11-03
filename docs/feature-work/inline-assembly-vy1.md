@@ -1,7 +1,7 @@
 # Inline assembly VY1: Yul syntax, checking and word semantics
 
 The `Solidity/Yul/**` library (root `Yul.lean`) and its JSON ingress
-`Frontend/SolcJson/Yul*.lean`, from the vy1-words lane.
+`Frontend/SolcJson/Yul*.lean`.
 
 ## Proved
 
@@ -59,10 +59,10 @@ remain the semantic contract; none of these changes promotes admission status.
   any refusal. Its 16 false-positive recovery inventory rows are removed.
 - Checks use exact message guards for the 16 evaluation blocks and carry no
   Elab.async overrides. Existing predicates, values and success messages remain.
-- The lane-owned tests, JSON fixtures, pinned compiler harnesses and
-  scripts/yul-word-vectors.py are included. The generator supports --check;
-  generated integer vectors remain finite kernel controls, not universal EVM
-  agreement. Six routine laws remain open.
+- The tests, JSON fixtures, pinned compiler harnesses and the integer-vector
+  generator script are not on master; the generated `Yul/Checks/**` vectors
+  are. They remain finite kernel controls, not universal EVM agreement. Six
+  routine laws remain open.
 
 The full source boundary and pure calculus assignment remains unfinished.
 
@@ -100,7 +100,7 @@ move with the adapters, while pure preparation controls remain in the core.
 This separation establishes no new admission or general Source adequacy claim.
 Read-only finder review caught a missing explicit parser import in TypingSites;
 that consumer and its dependent parser tests were corrected. Skeptic review found
-no semantic changes on inspection. Kernel validation is recorded in the handoff.
+no semantic changes on inspection.
 
 ## Unsigned target-word agreement
 
@@ -120,7 +120,7 @@ tail. A concrete unbounded-product control distinguishes the two meanings.
 Automation was tried before final proofs. Independent proof and control finder
 and skeptic reviews reported no findings. These are kernel proofs about the
 repository target machine, not compiler lowering or external EVM validation.
-General Source embedding, other word-operation agreements and final lane gates
+General Source embedding, other word-operation agreements and final gates
 remain open; no Source definitions or peer modules change.
 
 ## Comparisons, bits, shifts and powers
@@ -146,7 +146,7 @@ They do not establish compiler lowering, external EVM adequacy or general Source
 embedding. The existing target has no corresponding Instr constructors for CLZ,
 BYTE, SAR, SIGNEXTEND, ADDMOD or MULMOD; those pure operations retain their
 existing Yul meanings and controls, without a target agreement claim here.
-Final joint import/composition and full-lane gates remain open.
+Final joint import/composition and full gates remain open.
 
 ## Void return beside raw locals
 
@@ -201,7 +201,7 @@ Independent proof and controls finder/skeptic reviews reported no findings.
 
 This adds no ordinary dirty-read policy, valued returns, arbitrary returning
 loop adapter, Yul RETURN semantics, compiler theorem or frontend admission.
-Existing Source definitions remain unchanged; general P16 and final lane gates
+Existing Source definitions remain unchanged; general P16 and final gates
 remain open.
 
 ## Executed Boolean declaration
@@ -230,7 +230,7 @@ theorem name; it was renamed without changing its statement or proof.
 Existing Source/RawFrame representations are unchanged. This is one Boolean
 declaration producer, not arbitrary declarations, partial-context sequencing,
 scope restoration, frontend-name reconstruction or a dirty-read policy.
-General P16 and final joint/full-lane gates remain open.
+General P16 and final joint/full gates remain open.
 
 ## Closing an executed Boolean scope
 
@@ -259,7 +259,7 @@ and full-input-state equations at zero, one and two were added and reviewed.
 This closes one temporary Boolean declaration without intervening reads, not
 arbitrary context-changing sequencing, general restoration into named contexts,
 dirty reads, valued-return integration, frontend admission or compiler adequacy.
-General P16 and final full-lane gates remain open.
+General P16 and final full gates remain open.
 
 ## Constant-default declarations
 
@@ -285,4 +285,4 @@ controls finder/skeptic reviews reported no findings.
 
 Reference allocation, arbitrary initialization, scope/sequence integration for
 these declarations, dirty reads, frontend-name construction, compiler adequacy
-and final full-lane gates remain separate obligations.
+and final full gates remain separate obligations.
