@@ -90,3 +90,5 @@
 | `Source/FailureRuntimeControls.lean` | Actual explicit-plan Source execution through existing registered code. |
 
 | `Source/MonetaryLaws.lean` | H19 primitive credit-produced and debit-preserved range facts; constructive out-of-range successful debit control. No Account/ledger migration or execution reachability claim. |
+
+| `Source/FailureRequest.lean` | Actual EM request-budget scope: dropped/scheduled requests, exact Nat balance argument, zero-cut and active-owner refusal, halt/local retention and sequential ordinal controls. Session funding, rollback and consistency not claimed. |

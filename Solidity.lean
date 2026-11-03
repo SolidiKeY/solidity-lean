@@ -2161,7 +2161,14 @@ import Solidity.Source.Eval
 import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
 import Solidity.Source.FailureCursor
+import Solidity.Source.FailureEventControls
+import Solidity.Source.FailureEventLaws
+import Solidity.Source.FailureMachine
+import Solidity.Source.FailureMachineControls
+import Solidity.Source.FailurePrimitives
+import Solidity.Source.FailureRequest
 import Solidity.Source.FailureResources
+import Solidity.Source.FailureRuntimeControls
 import Solidity.Source.Hoare
 import Solidity.Source.Horizon
 import Solidity.Source.HorizonDeploy
@@ -2170,6 +2177,8 @@ import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger
 import Solidity.Source.Machine
+import Solidity.Source.Monetary
+import Solidity.Source.MonetaryLaws
 import Solidity.Source.Observe
 import Solidity.Source.Overloads
 import Solidity.Source.Preservation.AllocationControls
@@ -3334,30 +3343,3 @@ import Solidity.Yul.World.TransientTargetPort
 import Solidity.Yul.World.TransientTargetRollback
 import Solidity.Yul.World.TransientTargetRollbackControls
 import Solidity.Yul.World.WorldChecks
-import Solidity.Yul.Composition.CorrectnessControls
-import Solidity.Yul.Composition.CorrectnessInstances
-import Solidity.Yul.Composition.CorrectnessPublic
-import Solidity.Yul.Composition.CorrectnessPublicControls
-import Solidity.Yul.Composition.P6FrameControls
-import Solidity.Yul.Composition.P6FrameCorrectness
-import Solidity.Yul.CheckedParse
-import Solidity.Yul.DeclarationParse
-import Solidity.Yul.EvmArithmetic
-import Solidity.Yul.EvmBitwise
-import Solidity.Yul.EvmSigned
-import Solidity.Yul.RawDefaultDeclaration
-import Solidity.Yul.RawLocalDeclaration
-import Solidity.Yul.RawLocalScope
-import Solidity.Yul.RawSourceReturnControl
-import Solidity.Yul.RawSourceVoidReturn
-
-
-import Solidity.Source.FailureCursor
-import Solidity.Source.FailureMachine
-import Solidity.Source.FailureMachineControls
-import Solidity.Source.Monetary
-import Solidity.Source.FailurePrimitives
-import Solidity.Source.FailureEventLaws
-import Solidity.Source.FailureEventControls
-import Solidity.Source.FailureRuntimeControls
-import Solidity.Source.MonetaryLaws

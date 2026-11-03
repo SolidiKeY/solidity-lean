@@ -260,3 +260,30 @@ Automation trials and the exact axiom reports are retained under
 the other three laws are axiom-free. Independent read-only finder and skeptic
 reviews approved the explicit premises and scope, with no findings. No native
 execution was added, and all24 full obligations/six combinations stay open.
+
+## Actual request-budget scope (H16 leaf)
+
+`Source/FailureRequest.lean` consumes the actual next request ordinal in EM.
+Dropped fates skip an arbitrary body; running fates pass the exact Nat balance
+to it, with entry/exit budget checks and request-pop cleanup on every halt.
+Seven full-state laws cover drops, exact balance, all Halt constructors, full
+revert bytes/local mutation, zero cuts, active-frame refusal and actual
+sequential scopes (poison dropped body at0; running body at1; final ordinal2).
+These are not deployment/session or affordability proofs. A root driver must
+check value against exact balance, install H19 balances, do world rollback,
+run deployment/request code with the same plan and emit receipts outside the
+scope. General-body cursor coherence and balanced frames remain obligations.
+
+Independent read-only finder and skeptic approved after the affordability
+boundary was made explicit; neither ran checks. Per-file kernel checking
+takes about2.23s, without changing existing Source modules or budgets. Eight
+exact axiom guards (operation plus seven laws) use only propext, choice and
+Quot.sound. Initial constructor/setup/tactic failures are preserved separately.
+No fresh native comparison, full checkpoint or P8 realization is claimed.
+H19, all24 original Y10 obligations and six full combinations remain open.
+
+Rebased onto H22 master b4d2b5aa9f71257a00793d1372a37db75ca9042d.
+No ExtCall construction or other-owner source body was changed. The shared
+disk tool initially failed on root-owned extra-worktree build files; authorized
+removal of only that regenerable build recovered about13GB, preserving source,
+Git and sealed evidence.
