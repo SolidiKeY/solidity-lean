@@ -20,7 +20,7 @@ def source : Source.EMState env [.bool] :=
   ⟨.cons (.bool true) .nil,
    ⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
     (Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [0xa1,0,0xff]⟩).1,
-    [.call other ⟨3,by decide⟩ [0x12] false],[(owner,[0x99,0x42])],⟨[.bool],.cons (.bool false) .nil⟩⟩⟩
+    [.call other ⟨3,by decide⟩ [0x12] false],[(owner,[0x99,0x42])],⟨[.bool],.cons (.bool false) .nil⟩,Source.FailureExecution.Cursor.empty⟩⟩
 def prefixedSource : Source.EMState env [.bool] :=
   ⟨source.1,{ source.2 with ex := source.2.ex.run [
     .account owner (fun a => { a with

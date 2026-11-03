@@ -70,3 +70,15 @@ Horizon300s policy overrun is not reclassified as a pass. Funds0.2536s and
 FundsControls2.3571s. All five per-file kernel checks exit0;21 new laws have
 exact generated standard-axiom guards. Finder/skeptic independently approved
 with no findings. Full current-tree checkpoint remains pending.
+
+Combined checkpoint attempt: a transport reconnect lost the original supervisor
+while its bounded container survived. The same container was adopted under
+the writer lock; the monitoring gap is retained. The actual checkpoint found
+Source.St.mk expecting6 fields in Backend/Transient/Controls (five provided).
+It was stopped to prevent a duplicate failing library retry: actual exit137,
+OOMKilled=false, with an explicit non-resource stop reason. No full checkpoint
+was restarted in that turn. Three authorized empty-cursor constructor fixes
+in Backend/Transient/{Controls,WordControls,SourceCallback} pass individually;
+reviewers confirmed no statement, observation or budget changes. Full closure
+remains pending. New Source changes are still only World/Semantics/Session
+and Funds/FundsControls; Eval/Machine/Horizon bodies are unchanged.
