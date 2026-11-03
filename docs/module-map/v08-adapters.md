@@ -383,5 +383,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Backend/Executable/ConstructorArgumentObservations.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained premises are in the module. |
+| `Backend/Executable/ConstructorLocalArguments.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained premises are in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
