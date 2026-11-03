@@ -775,6 +775,128 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.orderedEntry": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.enter_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.heads_append": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.heads_cons": [],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.prefix_failure": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.tail_failure": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.blocked_not_rejected": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.body_from_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.body_witness": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.calldata_handoff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.eager_lazy_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.entry_revert_exec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.rejection_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.run_not_rejected": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.single_calldata_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.verdict_of_values": [],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.verdict_revert_exec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EnumEntry.lean:Solidity.Backend.AbiEntry.EnumEntry.invalid_entry": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EnumEntry.lean:Solidity.Backend.AbiEntry.EnumEntry.invalid_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EnumEntry.lean:Solidity.Backend.AbiEntry.EnumEntry.truncated_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.calldata_step": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.cref_free": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.enter_free": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.entry_free": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.word_free": [],
+ "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.word_step": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.below_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.below_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.boolValidator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.enumValidator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.uintValidator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/AbiWorld/ErrorLayout.lean:Solidity.Backend.AbiWorld.error_payload": [
   "propext"
  ],
