@@ -500,3 +500,14 @@ World leaf closure does not import `Syntax/Scoped`. No static/provenance
 interpretation of the new fields is claimed. Generated roots were regenerated
 and checked after rebasing; existing area-map coverage includes the carried
 modules. Original Source/world/G01/G51/resource and final obligations remain open.
+
+## Published dependency reconciliation
+
+The lane adopts published integration `059eb83d`; carried World/P7 source
+bodies are unchanged. The earlier library checkpoint stopped at the disk
+reserve and remains failed. Its axiom-pin failure is also retained. With the
+published nested-cache collection fix, the new inventory check passes with
+6,252 pins, zero errors and zero unrecorded changes; this is not full-library
+or lane completion. H24's declaration-graph companion is present but supplies
+no concrete admission inhabitant or creation/initcode executor. Original
+world/G01/G51/compiler/resource and joint obligations remain open.
