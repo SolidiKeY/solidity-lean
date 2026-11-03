@@ -113,7 +113,7 @@ def ltCertificate : InstructionCertificate .lt :=
         simp only [Evm.Instr.step, stack, irStack, List.map_cons,
           Evm.Machine.next, Scalar.run, Scalar.step, Scalar.numericStep,
           Scalar.unary, Scalar.binary, Scalar.applyBinary, Option.bind_some,
-          ir_word_nat, ir_flag_word, word_beq_nat])
+          ir_word_nat, ir_flag_word])
 
 /-- Numeric IR GT selects one Osaka GT, including operand-underflow refusal. -/
 def gtCertificate : InstructionCertificate .gt :=
@@ -132,7 +132,7 @@ def gtCertificate : InstructionCertificate .gt :=
         simp only [Evm.Instr.step, stack, irStack, List.map_cons,
           Evm.Machine.next, Scalar.run, Scalar.step, Scalar.numericStep,
           Scalar.unary, Scalar.binary, Scalar.applyBinary, Option.bind_some,
-          ir_word_nat, ir_flag_word, word_beq_nat])
+          ir_word_nat, ir_flag_word])
 
 /-- Numeric IR EQ selects one Osaka EQ, including operand-underflow refusal. -/
 def eqCertificate : InstructionCertificate .eq :=
@@ -155,7 +155,7 @@ def eqCertificate : InstructionCertificate .eq :=
 
 theorem ir_not_word (a : Scalar.Word) :
     (⟨Evm.W - 1 - (Evm.wmod a.toNat).val,
-      by have positive : 0 < Evm.W := Evm.W_pos; omega⟩ : Fin Evm.W) =
+      by omega⟩ : Fin Evm.W) =
       Evm.wmod (~~~a).toNat := by
   apply Fin.ext
   rw [ir_word_nat (~~~a)]

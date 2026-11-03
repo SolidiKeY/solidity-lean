@@ -189,3 +189,6 @@ queue remain open.
 Independent read-only finder and skeptic reviews passed this component and
 its controls without confirmed findings, including unsigned ordering, flag
 conversion, complement width, all input lengths and the component boundaries.
+
+Per-file lint cleanup removed unused LT/GT rewrite arguments and a redundant
+NOT-bound fact. Both reviewers confirmed unchanged statements and controls.
