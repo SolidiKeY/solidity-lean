@@ -131,7 +131,7 @@ checks. Rebinding a pointer changes that local, while writes through an alias
 change the shared object. Reference-element writes are outside this admission.
 
 `MemoryBodies.lean` defines syntactic `MemoryStmt` and `MemoryItems`
-certificates. A joint horizon induction derives `MemOK` and outcome-local
+certificates, including ordinary same-type single-value returns. A joint horizon induction derives `MemOK` and outcome-local
 validity for declarations, admitted expression statements, exact-type returns,
 blocks, conditionals, sequences and unchecked blocks. Conditional evaluation
 uses `BodyExpr`, retaining condition updates and heap effects before executing
@@ -198,7 +198,39 @@ preservation consumers have inhabited inputs. Independent finder and skeptic
 reviews found no confirmed defect; neither inferred frontend, progress or
 compiler coverage from these source controls.
 
-Not covered: arbitrary reference-call bodies, whole-program admission of this
+## Admission from elaborated programs
+
+`MemoryProgram.lean` ties a finite `MemoryCatalogue` to actual selected source
+bodies. Each member supplies syntactic `MemoryItems` and signature/dispatch
+membership. `memory_catalogue_sound` derives parameter, return and local-frame
+coherence from `Elaborated`; it does not accept caller-provided frame equations.
+The separate value-callee graph is checked by P9, which derives its original
+`CallsOK`. Memory-body preservation is derived by the joint induction, not
+stored as a semantic premise.
+
+`memory_from_elaborate` consumes actual successful elaboration.
+`checked_memory_call` additionally requires coverage of every source function,
+so an omitted function cannot silently escape admission. The expression bridge
+`memory_expr_from_elaborate` handles exact-type arguments, arbitrary valid caller
+locals, escaping reference validity and every halt using the same catalogue.
+This is a proof certificate for the admitted memory subset, not an executable
+memory-body recognizer. Calls within these bodies still use the separate
+value-fragment catalogue; arbitrary nesting or recursion of memory-body calls
+is not admitted.
+
+`MemoryProgramControls` elaborates a source function with a `uint256[] memory`
+parameter and ordinary `return a`. A complete one-function catalogue proves
+preservation for the actual internal call and call expression over nonempty
+memory in both evaluator pipelines. The caller keeps reference 0; the result
+also aliases 0 and the default return-slot allocation at object 1 persists.
+The resolution uses the legacy elaborator; both evaluator pipelines execute
+that elaborated body. Omitting the function fails the coverage check, and the
+old value-only function checker still refuses the memory-returning function.
+The exact zero-horizon timeout is retained. Finder and skeptic reviews found
+no confirmed soundness issue; none of these statements asserts general source
+progress or compiler refinement.
+
+Not covered: arbitrary reference-call bodies, automatic recognition of this
 memory subset, unrestricted allocation nesting or cross-type argument conversion, progress or termination,
 compiler/EVM refinement, `SourceSpec` and rollback. The existing standalone
 allocation-arm rules above retain their stated premises. All printed axioms are

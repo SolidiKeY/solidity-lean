@@ -374,3 +374,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/EffectCatalogueControls.lean` | Actual elaborated source functions with an emit in the leaf, a require that calls the leaf, and an assert-failing callee. |
 | `Source/Preservation/AllocationBodyControls.lean` | Actual typed allocation nodes composed in admitted memory-body statements. |
 | `Source/Preservation/EncodingArguments.lean` | Syntactic ABI arguments with allocating expression children and raw string literals. |
+| `Source/Preservation/MemoryProgram.lean` | Source memory-call admission tied to actual elaborated bodies. |
+| `Source/Preservation/MemoryProgramControls.lean` | A source-elaborated memory parameter and ordinary single-reference return. |

@@ -2111,6 +2111,8 @@ import Solidity.Source.Preservation.MemoryBodyCalls
 import Solidity.Source.Preservation.MemoryBodyControls
 import Solidity.Source.Preservation.MemoryBranchControls
 import Solidity.Source.Preservation.MemoryExpressions
+import Solidity.Source.Preservation.MemoryProgram
+import Solidity.Source.Preservation.MemoryProgramControls
 import Solidity.Source.Preservation.NewArrayFragment
 import Solidity.Source.Preservation.NewArrayFragmentControls
 import Solidity.Source.Preservation.Reads

@@ -16,6 +16,9 @@ inductive MemoryStmt {E : Env} (A : Decl → Prop) (R : List STy) (M : Bool) :
   | declVar {k Γ} (τ : STy) : MemoryStmt A R M (.declVar (k := k) (Γ := Γ) τ)
   | declInit {k Γ τ} {e : RExpr E Γ τ} (h : τ.implicit E.isBase τ = true) :
       BodyExpr A e → MemoryStmt A R M (.declInit (k := k) e h)
+  | returnValue {k Γ τ} {e : RExpr E Γ τ} (hR : R = [τ])
+      (same : τ.implicit E.isBase τ = true) :
+      BodyExpr A e → MemoryStmt A R M (.retVal (k := k) hR e same)
   | returns {k Γ} {args : RConvArgs E Γ R} : ExactArgs A args → MemoryStmt A R M (.retTuple (k := k) args)
   | ifThen {k Γ Δ} {cond : RExpr E Γ .bool} {t : RStmt E R M k Γ Δ} :
       BodyExpr A cond → MemoryStmt A R M t → MemoryStmt A R M (.ifThen cond t)
@@ -76,6 +79,16 @@ theorem memory_stmt_step {A : Decl → Prop} {G : Glob E} {c : String} {n : Nat}
     refine Hoare.bind (sub_result_mem l _ (fun v st => v.RefOK E st.heap.ty)
       (fun H' => plain_body_expr_mem calls F hc n _ h H') H) (fun r => ?_)
     exact Hoare.pure' (fun _ h => ⟨h.1,h.2.2,h.2.1⟩)
+  | returnValue hR same h =>
+    rw [execS]
+    refine Hoare.bind (sub_result_mem l _ (fun v st => v.RefOK E st.heap.ty)
+      (fun H' => plain_body_expr_mem calls F hc n _ h H') H) (fun r => ?_)
+    refine Hoare.bind (Hoare.lift' (r := r.2.setAt (Γ.length - (nps + R.length)) r.1)
+      (Q := fun l' y => MemOK E H y ∧ LocalsOK E y.2.heap.ty l') (fun y valid => ?_))
+      (fun l' => Hoare.pure' (fun _ valid => valid))
+    cases actual : r.2.setAt (Γ.length - (nps + R.length)) r.1 with
+    | error e => exact valid.1
+    | ok last => exact ⟨valid.1,localsSetAt_ok _ r.2 r.1 last valid.2.1 valid.2.2 actual⟩
   | returns h =>
     refine Hoare.conseq (return_exact_mem calls F hc n nps ph _ h l H)
       (fun _ h => h) (fun o y h => ?_) (fun _ _ h => h)
