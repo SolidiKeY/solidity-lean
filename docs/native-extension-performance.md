@@ -1,5 +1,55 @@
 # Generated C in the extension
 
+## Compact runtime: version 0.5.4
+
+Supported scalar checks now use a standalone optimized generated-C/WASM module
+in both the extension and website. They bypass Lean environment loading, syntax
+construction and per-result kernel replay. Compiled affine propagation handles
+the simple branch examples. Unsupported or undecided programs still use the
+general frontend. [Implementation and rebuilding](compact-verifier.md).
+
+Final warm medians, milliseconds (two fresh submissions per case):
+
+| Program | Compiled worker, precompiled AST | Solidity LSP, compilation included | Dafny 4.11.0 LSP |
+|---|---:|---:|---:|
+| constant | 14.4 | 144.3 | 156.6 |
+| identity | 14.1 | 147.2 | 207.2 |
+| assignment | 12.5 | 125.7 | 207.1 |
+| increment | 12.8 | 139.0 | 207.3 |
+| branch | 41.8 | 163.2 | 156.0 |
+| false-constant | 9.7 | 133.4 | 156.7 |
+
+The LSP comparison uses persistent servers, fresh document URIs and declaration
+names, one worker/core, and Dafny verification caching disabled. All 18 Solidity
+submissions used one compiled worker and matched the exact source hash. The
+first constant took 978 ms versus 1140 ms in Dafny. Warm source-submission
+latencies are comparable on this small sample; this is not a universal claim or
+an identical-semantics comparison. Compiler time, repository freshness scans
+and transport still exceed the few milliseconds normally spent in the checker.
+No new SolKey comparison or universal 100× improvement is claimed.
+
+In the real browser, the four-function Counter check took 414 ms on its first
+call after startup. Fresh comment/body/specification edits took 22/24/20 ms;
+the unchanged cached retrieval was measured separately at 13 ms. These checks
+imported zero Lean environments. The complete fresh-profile single-HTML startup
+still took 18.5 seconds because the HTML embeds all fallback assets. A calldata
+listing used the general frontend and took 23.5 seconds; it was admission only,
+not a successful proof search. Unsupported features remain an important limit.
+
+The single HTML passed all 15 browser checks, including eight positive/negative
+branch controls and new proofs after the static server was stopped. Its peak
+owned RSS was 3.08 GiB; the performance run including general fallback peaked at
+4.07 GiB. Direct file navigation was blocked by the managed browser policy before
+execution. The VSIX contains the matching 15,450,994-byte WASM and source hashes.
+120 unit tests passed, two environment-dependent cases skipped; all 13 real LSP
+checks passed with native certified fallback required. The generated-C closure
+unit tests, per-file Lean diagnostics, 319-job target build and core layer check
+passed. The umbrella Lean diagnostic timed out and is not claimed as passed.
+The new soundness declarations use only `propext`, `Classical.choice`, `Quot.sound`.
+
+[Complete measurement and validation record](benchmarks/compact-verifier-2026-11-03.json).
+The remaining sections preserve the earlier 0.5.3 measurements.
+
 Version 0.5.3 defaults to direct verifier results in the desktop extension and
 offline website. This follows the requested trust model: run the verifier and
 report correct, wrong (a concrete counterexample), or unknown. These results
@@ -25,7 +75,7 @@ second. The regression fixture checks eight true/false source specifications,
 uncertified witness identity, absence of result theorem declarations and scoped
 option restoration.
 
-Current clean-library measurements use the same 18 source snapshots and an
+The earlier clean-library measurements used the same 18 source snapshots and an
 active generated-C library, once with certification and once without. Warm
 medians (rounds 1–2, two samples per case), milliseconds:
 

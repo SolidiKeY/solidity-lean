@@ -3072,3 +3072,6 @@ import Solidity.Yul.RawIntegerInitialization
 import Solidity.Yul.RawIntegerScope
 import Solidity.Yul.RawLiteralInitialization
 import Solidity.Yul.RawLiteralScope
+
+import Solidity.Tools.DirectArithmetic
+import Solidity.Tools.DirectRuntime

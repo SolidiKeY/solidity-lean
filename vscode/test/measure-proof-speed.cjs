@@ -29,7 +29,8 @@ async function main(){
       compiled:{text:fixtureText,fixture,hash,sourceHash:input.sourceHash},options:{timeoutMs:90000,closedSpecs,benchmark,certify:!direct}});
    });
    if(process.env.PROOF_SPEED_EXPECT_NATIVE!==undefined)assert.equal(result.backend.native.active,process.env.PROOF_SPEED_EXPECT_NATIVE==='1',JSON.stringify(result.backend.native));
-   if(benchmark){
+   if(process.env.PROOF_SPEED_EXPECT_DIRECT==='1')assert.equal(result.backend.kind,'generated-c-wasm');
+   if(benchmark&&result.backend.kind!=='generated-c-wasm'){
     assert.ok(result.backend.phases.length>0,'Missing backend phase timings');
     if(direct)assert.equal(result.backend.phases.filter(p=>p.phase==='kernel').length,0,'Direct mode replayed a certificate');
     if(direct&&process.env.PROOF_SPEED_EXPECT_NATIVE==='1'&&result.backend.native.probe)assert.equal(result.backend.nativeDirectNanos.length,1,'Missing native direct checker timer');
@@ -40,8 +41,18 @@ async function main(){
    const trial={name:input.name,repeat:input.repeat,sourceHash:input.sourceHash,elapsedMs:performance.now()-start,...result};
    report.trials.push(trial);console.log(JSON.stringify({name:trial.name,repeat:trial.repeat,elapsedMs:trial.elapsedMs,backend:trial.backend}));
   }
-  assert.equal(new Set(report.trials.map(t=>t.backend.leanServerPid)).size,1);
-  assert.deepEqual(report.trials.map(t=>t.backend.leanDocumentVersion),Array.from({length:18},(_,i)=>i+1));
+  assert.equal(new Set(report.trials.map(t=>t.backend.workerPid)).size,1);
+  const interpreted=report.trials.filter(t=>t.backend.kind!=='generated-c-wasm');
+  if(interpreted.length){
+    assert.equal(new Set(interpreted.map(t=>t.backend.leanServerPid)).size,1);
+    assert.deepEqual(interpreted.map(t=>t.backend.leanDocumentVersion),Array.from({length:interpreted.length},(_,i)=>i+1));
+  }
+  const standalone=report.trials.filter(t=>t.backend.kind==='generated-c-wasm');
+  if(standalone.length){
+    assert.equal(new Set(standalone.map(t=>t.backend.wasmBuild)).size,1);
+    assert.deepEqual(standalone.map(t=>t.backend.directChecks[0].checkSequence),Array.from({length:standalone.length},(_,i)=>i+1));
+    assert.ok(standalone.every(t=>t.backend.directChecks.every(c=>c.environmentImports===0)));
+  }
   report.passed=true;
  }finally{child.disconnect();await new Promise(resolve=>child.once('exit',resolve));fs.rmSync(directory,{recursive:true,force:true});fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');}
 }

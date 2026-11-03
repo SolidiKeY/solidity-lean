@@ -5,11 +5,20 @@ const {mkdirSync,readFileSync,readdirSync,statSync}=require('node:fs');
 const {createHash}=require('node:crypto');
 const {terminateTree}=require('./backend.cjs');
 const {failure}=require('./rpc.cjs');
+const {directFingerprint}=require('./direct-runtime.cjs');
 const {nativeFingerprint}=require('./native-plugin.cjs');
+
+const contentDigests=new Map();
+function fileDigest(file){
+  const s=statSync(file,{bigint:true}),identity=[s.dev,s.ino,s.size,s.mtimeNs,s.ctimeNs].map(String).join(':');
+  const old=contentDigests.get(file);if(old?.identity===identity)return old.digest;
+  const digest=createHash('sha256').update(readFileSync(file)).digest();
+  if(contentDigests.size>32768)contentDigests.clear();contentDigests.set(file,{identity,digest});return digest;
+}
 
 /** Relevant sources and artifact identities invalidate caches and live Lean
  * environments together. Proof results are never reused across generations. */
-function fingerprint(root){
+function fingerprint(root,{sourcesOnly=false,buildInputs=false}={}){
   const hash=createHash('sha256');
   const visit=(directory,extensions,artifact=false)=>{
     if(!require('node:fs').existsSync(directory))return;
@@ -19,21 +28,49 @@ function fingerprint(root){
       else if(extensions.some(e=>entry.name.endsWith(e))){
         hash.update(path);
         if(artifact){const s=statSync(path);hash.update(JSON.stringify([s.size,s.mtimeMs,s.ctimeMs,s.ino]));}
-        else hash.update(readFileSync(path));
+        else hash.update(fileDigest(path));
       }
     }
   };
-  for(const file of ['lean-toolchain','lakefile.toml','lake-manifest.json'])hash.update(readFileSync(join(root,file)));
-  visit(join(root,'Solidity'),['.lean']);visit(join(root,'scripts'),['.mjs']);
+  for(const file of ['lean-toolchain','lakefile.toml','lake-manifest.json'])hash.update(fileDigest(join(root,file)));
+  // Lake records the complete transitive frontend closure. Unrelated model
+  // developments cannot affect this verifier. A changed import declaration is
+  // itself in this set and invalidates the generation before the next build.
+  let modules;
+  if(!sourcesOnly&&!buildInputs)try{
+    const setup=join(root,'.lake/build/ir/Solidity/Frontend/Testing.setup.json');
+    const raw=readFileSync(setup),parsed=JSON.parse(raw);
+    if(!parsed.importArts||typeof parsed.importArts!=='object')throw new Error('Invalid setup');
+    modules=new Set([...Object.keys(parsed.importArts).filter(n=>n.startsWith('Solidity.')),'Solidity.Frontend.Testing','Solidity.Tools.DirectRuntime']);
+    hash.update(raw);
+  }catch{}
+  if(modules){
+    for(const name of [...modules].sort()){
+      const path=join(root,name.replaceAll('.','/')+'.lean');hash.update(path);
+      try{hash.update(fileDigest(path));}catch{hash.update('missing');}
+    }
+  }else visit(join(root,'Solidity'),['.lean']);
+  visit(join(root,'scripts'),['.mjs']);
   visit(join(root,'vscode/src'),['.cjs']);
-  visit(join(root,'.lake/build/lib/lean'),['.olean','.hash'],true);
+  if(!sourcesOnly&&!buildInputs){
+    if(modules){
+      const directories=new Map();
+      for(const name of [...modules].sort()){
+        const stem=join(root,'.lake/build/lib/lean',name.replaceAll('.','/')),directory=require('node:path').dirname(stem),base=require('node:path').basename(stem);
+        if(!directories.has(directory))try{directories.set(directory,readdirSync(directory).sort());}catch{directories.set(directory,[]);}
+        for(const entry of directories.get(directory))if(entry===base+'.olean'||entry.startsWith(base+'.')&&entry.endsWith('.hash')){
+          const file=join(directory,entry),s=statSync(file);hash.update(file);hash.update(JSON.stringify([s.size,s.mtimeMs,s.ctimeMs,s.ino]));
+        }
+      }
+    }else visit(join(root,'.lake/build/lib/lean'),['.olean','.hash'],true);
+  }
   const solkey=process.env.SOLKEY_ROOT||join(root,'../solkey');
   {
     const gradle=join(solkey,'keyext.solidity.core/build.gradle');hash.update(readFileSync(gradle));
     const name=readFileSync(gradle,'utf8').match(/ext\.soljsonFile\s*=\s*"([^"]+)"/)?.[1];
     if(name){const s=statSync(join(solkey,'keyext.solidity.core/build/soljson',name));hash.update(JSON.stringify([s.size,s.mtimeMs,s.ctimeMs,s.ino]));}
   }
-  hash.update(nativeFingerprint(root));
+  if(!sourcesOnly){hash.update(nativeFingerprint(root,process.env,{inputsOnly:buildInputs}));hash.update(directFingerprint(root));}
   return hash.digest('hex');
 }
 

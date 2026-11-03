@@ -28,9 +28,13 @@ successful body turn. Unsupported shapes remain pending. Ordinary diamonds
 accept exhaustion; separate successful-termination certificates are described in
 [the loop notes](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/loops.md#typed-tuple-measures).
 
-Version 0.5.3 defaults to direct checking and supports an optional generated-C
-backend library. Build the matching `Solidity.Frontend.Testing` backend after
-updating. [Measurements and limits](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/native-extension-performance.md).
+Version 0.5.4 includes a compact verifier compiled from Lean-generated C to
+WebAssembly. Supported scalar specifications run without loading Lean or its
+environment. Other programs use the general Lean frontend; that fallback still
+requires the matching `Solidity.Frontend.Testing` build.
+Set `SOLIDITY_LEAN_DIRECT=0` to compare the general frontend.
+The compact build is accepted only when its toolchain and complete project
+source closure match the selected backend. [Measurements and limits](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/native-extension-performance.md).
 
 ## Setup
 

@@ -41,7 +41,7 @@ function inspectNative(root,{env=process.env,platform=process.platform,arch=proc
   }catch{return {reason:'stale-or-unavailable'};}
 }
 
-function nativeFingerprint(root,env=process.env){
+function nativeFingerprint(root,env=process.env,{inputsOnly=false}={}){
   const location=directory(root,env),hash=createHash('sha256');
   hash.update(JSON.stringify([env.SOLIDITY_LEAN_NATIVE||'auto',location]));
   if(env.SOLIDITY_LEAN_NATIVE==='0')return hash.digest('hex');
@@ -53,10 +53,10 @@ function nativeFingerprint(root,env=process.env){
     for(const module of manifest.modules||[]){
       if(!/^Solidity(?:\.[A-Za-z0-9_']+)+$/.test(module.module))continue;
       const stem=module.module.replaceAll('.','/');
-      for(const file of [stem+'.lean','.lake/build/ir/'+stem+'.c',...extensions.map(e=>'.lake/build/lib/lean/'+stem+e)])stat(join(root,file));
+      for(const file of inputsOnly?[stem+'.lean']:[stem+'.lean','.lake/build/ir/'+stem+'.c',...extensions.map(e=>'.lake/build/lib/lean/'+stem+e)])stat(join(root,file));
     }
   }catch{hash.update('missing-or-invalid-manifest');}
-  stat(join(root,'.lake/build/ir/Solidity/Frontend/Testing.setup.json'));
+  if(!inputsOnly)stat(join(root,'.lake/build/ir/Solidity/Frontend/Testing.setup.json'));
   return hash.digest('hex');
 }
 module.exports={inspectNative,nativeFingerprint};

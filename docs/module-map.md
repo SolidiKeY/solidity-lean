@@ -222,6 +222,8 @@ commands; it never enters the core import graph.
 | `Calculus/FiniteMembership.lean` | Typed finite equality-membership and its general denotation theorem against Theory equality. |
 | `Calculus/FilteredMembership.lean` | Typed finite literal-domain filters with an outer key, a genuine typed guard binder and an exact scoped denotation theorem. |
 | `Tools/Preconditions.lean` | Bounded kernel-checked entry-condition audits, the reusable runner API and `#audit_preconditions`. |
+| `Tools/DirectArithmetic.lean` | Bounded affine propagation with erased soundness proofs for the compiled direct verifier; implication and conjunction handling reuse the existing typed input reduction. |
+| `Tools/DirectRuntime.lean` | Pure compiler-AST admission through existing raw source syntax into intrinsic specification obligations; direct JSON API for the compact generated-C/WASM runtime, with conservative refusal and general-frontend fallback. |
 | `Tools/SourceCounterexample.lean` | Exact-goal refutation proofs coupled to the same serialized typed model prestate; primitive storage and input binders, bounded initial search and shrinking. |
 | `Examples/Termination.lean` | Lexicographic reset proofs for generic and source-elaborated Solidity loops, with actual divergent/exhausted/reverting negative cases. |
 | `Examples/LexMetrics.lean` | An actual tuple-annotated source program proved to return successfully; equal, increasing, undefined and exhausted-body certificates rejected. |

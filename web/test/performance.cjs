@@ -27,11 +27,11 @@ async function main(){
     report.startupMs=performance.now()-start;
     if(single)report.embedded=await page.evaluate(()=>({build:singleFileIDE.build,preparationMs:singleFileIDE.preparationMs,reused:singleFileIDE.reused}));
     await page.evaluate(()=>solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel()));
-    const expected=[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','pending']];
+    const expected=[['increment','proved'],['reset','proved'],['one','proved'],['openGoal','refuted']];
     async function verify(label,expected,options={}){
       const start=performance.now();const result=await page.evaluate(options=>solidityIDE.rpc('verify',{name:'Counter.sol',version:solidityIDE.editor.getModel().getVersionId(),...options}),{benchmark,...options});
       assert.deepEqual(result.errors,[]);const statuses=result.results.map(r=>[r.function,r.status]);assert.deepEqual(statuses,expected);
-      if(benchmark&&!options.listing)assert.equal(result.timings.kernelChecks.flatMap(check=>check.phases.filter(phase=>phase.phase==='search')).length,expected.filter(([,status])=>status==='proved'||status==='pending').length,'keep every function timing beyond the diagnostic log tail');
+      if(benchmark&&!options.listing&&result.timings.kernelChecks.length)assert.equal(result.timings.kernelChecks.flatMap(check=>check.phases.filter(phase=>phase.phase==='search')).length,expected.filter(([,status])=>status==='proved'||status==='pending'||status==='refuted').length,'keep every function timing beyond the diagnostic log tail');
       const elapsedMs=performance.now()-start;
       const sourceHash=createHash('sha256').update(await page.evaluate(()=>solidityIDE.editor.getValue())).digest('hex');
       for(const row of result.results)assert.equal(row.sourceHash,sourceHash,'each result must belong to the exact edited source');
@@ -46,11 +46,13 @@ async function main(){
       assert.ok(check.libraries.inflatedBytes<=report.serializedLibraryBytes*1.01,'a cold import must not reinflate the environment in its IR pass');
       if(single){assert.equal(check.libraries.prefetchedBytes,0);assert.equal(check.libraries.fallbacks,0);assert.ok(check.libraries.directReads>0);}
     }
+    assert.equal(report.trials[0].timings.kernelChecks.length,0,'Simple checks must not load a Lean environment');
+    assert.ok(report.trials[0].timings.directChecks.every(c=>c.environmentImports===0));
     await verify('unchanged cached result',expected);
     await page.evaluate(async()=>{solidityIDE.editor.setValue(solidityIDE.editor.getValue()+'\n// new source: measure a real recheck\n');await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());});
     await verify('real proof after comment edit',expected);
     await page.evaluate(async()=>{solidityIDE.editor.setValue(solidityIDE.editor.getValue().replace('return 1;','return 2;'));await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());});
-    await verify('real proof after false-result edit',[['increment','proved'],['reset','proved'],['one','pending'],['openGoal','pending']]);
+    await verify('real proof after false-result edit',[['increment','proved'],['reset','proved'],['one','refuted'],['openGoal','refuted']]);
     await page.evaluate(async()=>{solidityIDE.editor.setValue(solidityIDE.editor.getValue().replace('ensures \\result == 1','ensures \\result == 2'));await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());});
     await verify('real proof after updating the changed result specification',expected);
     // Exercise admission in the actual interpreter. Listing does not claim a

@@ -25,6 +25,8 @@ function settings(value={}){
   return result;
 }
 
+const VERIFIER_GENERATION=Symbol('verifier generation');
+
 class SolidityService {
   constructor(peer,root,configuration={},testing={}){
     this.peer=peer;this.root=resolve(root);this.settings=settings(configuration);this.docs=new Map();this.cache=new Map();this.requests=new Map();this.hits=0;this.misses=0;
@@ -136,15 +138,17 @@ class SolidityService {
     this.analysisPool.dispose();this.pool.dispose();this.cache.clear();this.settings=settings(configuration);
     this.analysisPool=new WorkerPool(this.root,join(this.directory,'analysis-'+Date.now()),1);
     this.pool=new WorkerPool(this.root,join(this.directory,'proof-'+Date.now()),this.settings.workers);
-    this.buildPromise=null;
+    this.buildPromise=null;this.buildInputSnapshot=null;this.legacyBuilt=false;
     for(const doc of this.docs.values())Object.assign(doc,{compiled:null,index:null,analysisPromise:null,verifyPromise:null,report:null});
   }
-  refresh(){const next=this.fingerprint();if(next!==this.generation){this.reset();this.generation=next;}}
+  buildInputs(){return this.testing.fingerprint?this.fingerprint():fingerprint(this.root,{buildInputs:true});}
+  refresh(){if(this.buildInputSnapshot&&this.buildInputs()===this.buildInputSnapshot)return;const next=this.fingerprint();if(next!==this.generation){this.reset();this.generation=next;}}
   async build(){
     if(this.testing.verify)return;
     if(this.buildPromise)return this.buildPromise;
     const epoch=this.buildEpoch||0;
     const operation=(async()=>{
+      const sourceBefore=this.buildInputs();this.buildInputSnapshot=sourceBefore;
       const {lakeCommand}=await import(pathToFileURL(join(this.root,'scripts/lake-command.mjs')).href);
       if(this.closed||epoch!==(this.buildEpoch||0))throw failure('Backend build cancelled',-32800);
       await new Promise((resolvePromise,reject)=>{
@@ -155,14 +159,15 @@ class SolidityService {
         child.once('close',code=>{clearTimeout(timer);if(this.buildChild===child)this.buildChild=null;if(code===0)resolvePromise();else reject(new Error('Backend build failed: '+log));});
       });
       if(this.closed||epoch!==(this.buildEpoch||0))throw failure('Backend build cancelled',-32800);
+      if(this.buildInputs()!==sourceBefore)throw failure('Backend sources changed during build',-32801);
       // A successful build updates artifact identities. Nothing is cached yet.
-      this.generation=this.fingerprint();this.cache.clear();
+      this.generation=this.fingerprint();this.cache.clear();this.legacyBuilt=true;this.buildInputSnapshot=null;
     })();
-    const pending=operation.catch(error=>{if(this.buildPromise===pending)this.buildPromise=null;throw error;});
+    const pending=operation.catch(error=>{if(this.buildPromise===pending){this.buildPromise=null;this.buildInputSnapshot=null;this.legacyBuilt=false;}throw error;});
     this.buildPromise=pending;return pending;
   }
-  async analyze(doc){
-    this.refresh();
+  async analyze(doc,{refresh=true}={}){
+    if(refresh)this.refresh();
     if(doc.compiled){
       const contentCurrent=!doc.compiled.project||projects.current(doc.compiled.project,this.projectDocuments());
       if(contentCurrent&&(!doc.compiled.project||projects.current(doc.compiled.project,this.projectDocuments(),true)))return doc.compiled;
@@ -212,7 +217,7 @@ class SolidityService {
     const doc=this.docs.get(uri);checkVersion(doc,options.version);clearTimeout(doc.timer);
     if(options.timeoutMs!==undefined&&(!Number.isSafeInteger(options.timeoutMs)||options.timeoutMs<1||options.timeoutMs>3600000))throw failure('Invalid verification timeout',-32602);
     this.refresh();
-    const prepared=await this.analyze(doc);checkVersion(this.docs.get(uri),doc.version);
+    const prepared=await this.analyze(doc,{refresh:false});checkVersion(this.docs.get(uri),doc.version);
     const projectDigest=prepared.project?.digest??'';
     const key=JSON.stringify([uri,hash(doc.text),this.generation,projectDigest,!!options.listing,options.contract||'',options.function||'',
       options.counterexamples??this.settings.counterexamples,options.auditPreconditions??this.settings.auditPreconditions,options.certify===true]);
@@ -231,11 +236,12 @@ class SolidityService {
       }
       this.misses++;this.status(doc,'queued');
       try{
-        const compiled=await this.analyze(doc);if(controller.signal.aborted)throw failure('Request cancelled',-32800);await this.wait(this.build(),controller.signal);
+        const compiled=prepared;if(controller.signal.aborted)throw failure('Request cancelled',-32800);
         if(!this.current(doc,version)||controller.signal.aborted)throw failure('Request cancelled',-32800);
-        const generation=this.generation;this.status(doc,'running');const start=Date.now();
+        let generation=this.generation;this.status(doc,'running');const start=Date.now();
         const task={action:'verify',source:doc.path,text,compiled,options:{...this.settings,...options}};
         const report=this.testing.verify?await this.testing.verify(task,controller.signal):await this.prove(task,controller.signal);
+        generation=report[VERIFIER_GENERATION]??generation;
         if(!this.current(doc,version,generation)||doc.verifyAbort!==controller||this.fingerprint()!==generation||controller.signal.aborted||compiled.project&&!projects.current(compiled.project,[...this.docs.values()]))throw failure('Document or backend changed',-32801);
         parseReport(JSON.stringify(report));
         if(report.results.some(row=>row.source!==doc.path||row.sourceHash!==hash(text)))throw new Error('Verification source identity mismatch');
@@ -261,23 +267,34 @@ class SolidityService {
       promise.then(resolvePromise,reject).finally(()=>signal.removeEventListener('abort',abort));
     });
   }
-  async prove(task,signal){
-    const deadline=Date.now()+task.options.timeoutMs,controller=new AbortController();
+  async prove(task,signal,deadline=Date.now()+task.options.timeoutMs){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),Math.max(1,deadline-Date.now()));
     const abort=()=>controller.abort();signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();
-    const run=work=>this.pool.run(work,{signal:controller.signal,timeoutMs:Math.max(1,deadline-Date.now())});
+    let usedGeneration=this.generation;
+    const run=async work=>{
+      let report=await this.pool.run({...work,deferLegacyBuild:!this.legacyBuilt},{signal:controller.signal,timeoutMs:Math.max(1,deadline-Date.now())});
+      if(report.needsLegacyBuild){
+        await this.wait(this.build(),controller.signal);usedGeneration=this.generation;
+        if(controller.signal.aborted)throw failure('Request cancelled',-32800);
+        report=await this.pool.run({...work,deferLegacyBuild:false},{signal:controller.signal,timeoutMs:Math.max(1,deadline-Date.now())});
+      }
+      Object.defineProperty(report,VERIFIER_GENERATION,{value:usedGeneration});return report;
+    };
     try{
       if(this.settings.workers===1||task.options.function||task.options.listing)return await run(task);
       const listing=await run({...task,options:{...task.options,listing:true}}),ready=listing.results.filter(r=>r.status==='ready');
       if(listing.errors.length||ready.length<2||task.options.auditPreconditions&&listing.results.some(r=>r.status!=='ready'))return await run(task);
       const reports=await Promise.all(ready.map(row=>run({...task,options:{...task.options,contract:row.contract,function:row.signature||row.function}})));
+      if(listing[VERIFIER_GENERATION]!==usedGeneration||reports.some(r=>r[VERIFIER_GENERATION]!==usedGeneration))return await this.prove(task,signal,deadline);
       const results=listing.results.map(row=>{
         if(row.status!=='ready')return row;
         const report=reports[ready.indexOf(row)],matches=report.results.filter(r=>r.contract===row.contract&&(r.signature||r.function)===(row.signature||row.function));
         if(matches.length!==1)throw new Error('Function worker returned a different verification selection');return matches[0];
       });
-      return {results,errors:[...new Map(reports.flatMap(r=>r.errors).map(e=>[JSON.stringify(e),e])).values()],
+      return {[VERIFIER_GENERATION]:usedGeneration,results,errors:[...new Map(reports.flatMap(r=>r.errors).map(e=>[JSON.stringify(e),e])).values()],
         backend:{...reports[0].backend,verificationMode:'functions',workers:[...new Map(reports.map(r=>[r.backend.workerPid,r.backend])).values()]}};
-    }catch(error){controller.abort();throw error;}finally{signal?.removeEventListener('abort',abort);}
+    }catch(error){controller.abort();throw error;}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
   }
   async language(method,params,signal){
     const doc=this.docs.get(params.textDocument.uri);checkVersion(doc,params.textDocument.version);

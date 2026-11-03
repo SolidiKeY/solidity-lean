@@ -209,3 +209,48 @@ test('direct and certificate requests never share a result cache entry',async()=
     assert.equal((await s.service.verify(s.uri)).results[0].verification,'direct');
   }finally{s.dispose();}
 });
+
+test('analysis during an owned build ignores intermediate artifacts but detects changed inputs',async()=>{
+  const s=setup({verify:undefined});mkdirSync(join(s.root,'scripts'));
+  const lake=join(s.root,'fake-lake');writeFileSync(lake,`#!${process.execPath}\nprocess.on('SIGUSR1',()=>process.exit(0));setInterval(()=>{},1000);\n`,{mode:0o700});
+  writeFileSync(join(s.root,'scripts/lake-command.mjs'),`export const lakeCommand=()=>${JSON.stringify(lake)};`);
+  let input='source-1';s.service.buildInputs=()=>input;
+  try{
+    const pending=s.service.build().catch(e=>e);
+    while(!s.service.buildChild)await tick();const child=s.service.buildChild;
+    s.state.generation='artifact-half-written';await s.service.analyze(s.service.docs.get(s.uri));
+    assert.equal(s.service.buildChild,child);assert.equal(s.service.generation,'generation-1');
+    input='source-2';s.service.refresh();assert.equal(s.service.buildChild,null);
+    await pending;
+  }finally{s.dispose();}
+});
+test('a short verification deadline also bounds a shared lazy build wait',async()=>{
+  const s=setup(),build=deferred();s.service.build=()=>build.promise;
+  s.service.pool.run=async()=>({needsLegacyBuild:true});
+  try{
+    const start=Date.now();await assert.rejects(s.service.prove({options:{timeoutMs:25}},undefined),e=>e.code===-32800);
+    assert.ok(Date.now()-start<1000);build.resolve();
+  }finally{s.dispose();}
+});
+
+test('frontend dependency fingerprints track imported models and keep owned build inputs stable',()=>{
+  const base=mkdtempSync(join(tmpdir(),'lsp-closure-')),root=join(base,'repo'),solkey=join(base,'solkey'),previous=process.env.SOLKEY_ROOT;
+  process.env.SOLKEY_ROOT=solkey;
+  try{
+    mkdirSync(root,{recursive:true});for(const file of ['lean-toolchain','lakefile.toml','lake-manifest.json'])writeFileSync(join(root,file),'fixture');
+    mkdirSync(join(solkey,'keyext.solidity.core/build/soljson'),{recursive:true});writeFileSync(join(solkey,'keyext.solidity.core/build.gradle'),'ext.soljsonFile = "stub.cjs"');writeFileSync(join(solkey,'keyext.solidity.core/build/soljson/stub.cjs'),'compiler');
+    for(const d of ['Solidity/Frontend','Solidity/Tools','.lake/build/ir/Solidity/Frontend','.lake/build/lib/lean/Solidity'])mkdirSync(join(root,d),{recursive:true});
+    for(const name of ['Frontend/Testing','Tools/DirectRuntime','Dependency','Unrelated'])writeFileSync(join(root,'Solidity',name+'.lean'),'-- '+name);
+    const setupFile=join(root,'.lake/build/ir/Solidity/Frontend/Testing.setup.json');
+    writeFileSync(setupFile,JSON.stringify({importArts:{'Solidity.Dependency':{}}}));
+    const artifact=join(root,'.lake/build/lib/lean/Solidity/Dependency.olean');writeFileSync(artifact,'built');
+    const first=fingerprint(root),inputs=fingerprint(root,{buildInputs:true});
+    writeFileSync(join(root,'Solidity/Unrelated.lean'),'-- changed outside verifier closure');
+    assert.equal(fingerprint(root),first);assert.notEqual(fingerprint(root,{buildInputs:true}),inputs);
+    const stableInputs=fingerprint(root,{buildInputs:true});writeFileSync(artifact,'rebuilt');
+    assert.notEqual(fingerprint(root),first);assert.equal(fingerprint(root,{buildInputs:true}),stableInputs);
+    const before=fingerprint(root);writeFileSync(join(root,'Solidity/Dependency.lean'),'import Solidity.NewDependency');assert.notEqual(fingerprint(root),before);
+    writeFileSync(join(root,'Solidity/NewDependency.lean'),'-- new');writeFileSync(setupFile,JSON.stringify({importArts:{'Solidity.Dependency':{},'Solidity.NewDependency':{}}}));
+    const updated=fingerprint(root);writeFileSync(join(root,'Solidity/NewDependency.lean'),'-- new model changed');assert.notEqual(fingerprint(root),updated);
+  }finally{if(previous===undefined)delete process.env.SOLKEY_ROOT;else process.env.SOLKEY_ROOT=previous;rmSync(base,{recursive:true,force:true});}
+});

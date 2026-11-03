@@ -110,6 +110,15 @@ test('real Solidity LSP keeps Lean warm and verifies versioned in-memory snapsho
       assert.equal(report.backend.verificationMode,'functions');assert.equal(report.backend.workers.length,2);
       assert.notEqual(functions[0].sourceId,functions[1].sourceId);assert.notEqual(functions[0].range.start.line,functions[1].range.start.line);
     });
+    await t.test('scalar specifications use compiled WASM without a Lean environment',async()=>{
+      const simpleUri=pathToFileURL(join(scratch,'Compact.sol')).href;
+      const body=`// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Compact {\n/// @custom:key ensures \\result == 1\nfunction f() public pure returns(uint) { return 1; }\n}\n`;
+      rpc.notify('textDocument/didOpen',{textDocument:{uri:simpleUri,version:1,text:body}});
+      const report=await rpc.request('solidityLean/verify',{textDocument:{uri:simpleUri,version:1},options:{function:'f()'}},{timeoutMs:60000});
+      assert.deepEqual(report.errors,[]);assert.equal(report.results[0].status,'proved');
+      assert.equal(report.backend.kind,'generated-c-wasm');assert.equal(report.backend.leanServerPid,undefined);
+      assert.ok(report.backend.directChecks.every(c=>c.environmentImports===0));
+    });
     await t.test('a crashed native Lean server reopens its document in the replacement session',async()=>{
       const session=new (require('../src/lean-session.cjs').LeanSession)(root,join(scratch,'native-restart'));
       try{

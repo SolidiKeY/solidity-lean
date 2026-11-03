@@ -6,6 +6,7 @@ import Solidity.Calculus.RecursionCallback
 import Solidity.Calculus.ProveChunked
 import Solidity.Tools.Preconditions
 import Solidity.Tools.SourceCounterexample
+import Solidity.Tools.DirectArithmetic
 
 /-!
 # Testing imported Solidity files
@@ -354,7 +355,9 @@ def directResult (C : Contract) (φ : Fml C []) : Json :=
   else
     match SpecProposal.residue 128 .all .nil φ with
     | some [] => Json.mkObj [("status", toJson "proved"), ("reason", toJson "")]
-    | _ => match Tools.directSourceWitness C φ with
+    | _ => if Tools.directArithmetic φ then
+        Json.mkObj [("status", toJson "proved"), ("reason", toJson "")]
+      else match Tools.directSourceWitness C φ with
       | some witness => Json.mkObj [("status", toJson "refuted"), ("reason", toJson "counterexample found"),
           ("counterexample", witness)]
       | none => Json.mkObj [("status", toJson "pending"), ("reason", toJson "checker did not decide")]

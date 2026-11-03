@@ -7,11 +7,16 @@ WebSocket or account is required.
 
 Open the [GitHub Pages IDE](https://solidikey.github.io/solidity-lean/ide/).
 **File → Download Offline IDE** saves the complete website as one HTML file
-(about 873 MB). Reopen that file in a modern desktop browser for offline use,
+(about 900 MB). Reopen that file in a modern desktop browser for offline use,
 including fresh proof checking. Keep the original download: the live page removes
 embedded data nodes after preparing tools, so the browser's Save Page command
 does not produce the original self-contained artifact. A disconnected hosted
 tab keeps working; reopening the hosted URL without a connection is not guaranteed.
+
+Supported scalar checks use a compact generated-C/WASM verifier without loading
+a Lean environment. Other programs load the general verifier on demand. The
+[compact verifier notes](../docs/compact-verifier.md) describe its limits,
+measurements and build step; pass `SOLIDITY_BROWSER_DIRECT` to package that build.
 
 ## Build the website
 

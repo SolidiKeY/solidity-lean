@@ -4,7 +4,7 @@ import textTools from '../../vscode/src/solidity-text.cjs';
 import projects from '../../vscode/src/project.cjs';
 import model from '../../vscode/src/model.cjs';
 import {files,writeFileSync,readFileSync,createHash} from './platform.mjs';
-import {prepareProofs,verifyInBrowser,cancelProofs} from './proofs.mjs';
+import {prepareProofs,verifyInBrowser,cancelProofs,abandonProofs} from './proofs.mjs';
 
 const docs=new Map();let generation=0,compilations=0,compiledCache=new Map(),proofCache=new Map(),proofReady=false,proofChain=Promise.resolve(),activeProof,proofBoot=0,compilerReady,settings={automaticVerification:'never',workers:1};
 const uri=name=>'file:///workspace/'+name;
@@ -14,7 +14,7 @@ function emit(method,doc,extra={}){send(method,{name:doc.name,uri:uri(doc.name),
 const hash=text=>createHash('sha256').update(text).digest('hex');
 const document=(name,version)=>{const doc=docs.get(name);if(!doc)throw new Error('Unknown Solidity document');if(version!==undefined&&version!==doc.version)throw Object.assign(new Error('Document content changed'),{code:-32801});return doc;};
 const snapshots=()=>[...docs.values()].map(d=>({path:'/workspace/'+d.name,uri:uri(d.name),text:d.text,version:d.version}));
-function invalidate(){if(activeProof)resetProofs(true);generation++;compiledCache.clear();proofCache.clear();for(const doc of docs.values()){doc.report=null;emit('invalidated',doc);}}
+function invalidate(){if(activeProof){abandonProofs();activeProof=undefined;proofChain=Promise.resolve();}generation++;compiledCache.clear();proofCache.clear();for(const doc of docs.values()){doc.report=null;emit('invalidated',doc);}}
 
 async function loadCompiler(){
   const response=await fetch('/compiler/soljson-v0.8.34+commit.80d5c536.js');if(!response.ok)throw new Error('The bundled Solidity compiler is missing');
@@ -33,9 +33,8 @@ function resetProofs(replayAutomatic=false){cancelProofs();proofReady=false;acti
 async function initializeProofs(replayAutomatic=true){
   const boot=++proofBoot;
   try{
-    const manifest=await fetch('/lean/manifest.json');if(!manifest.ok){if(boot===proofBoot)send('runtime',{mode:'browser',compilerReady:true,proofReady:false,error:'This build does not include the Lean proof assets.',message:'This build does not include the Lean proof assets.'});return;}
-    const runtime=await prepareProofs(event=>{if(event.method==='log')send('log',{message:event.message});});
-    if(boot!==proofBoot)return;proofReady=true;send('runtime',{mode:'browser',compilerReady:true,proofReady:true,error:null,lean:runtime.version,build:runtime.build,message:'The pinned Lean kernel and Solidity compiler run entirely in this browser.'});if(replayAutomatic&&settings.automaticVerification==='change')for(const doc of docs.values())schedule(doc);
+    const runtime=await prepareProofs(event=>{if(event.method==='log')send('log',{message:event.message});if(event.method==='restartRequired')resetProofs(true);});
+    if(boot!==proofBoot)return;proofReady=true;send('runtime',{mode:'browser',compilerReady:true,proofReady:true,error:null,lean:runtime.version,verifier:runtime.kind||'lean-frontend',wasmBytes:runtime.wasmBytes,build:runtime.build,message:'The verifier and Solidity compiler run entirely in this browser.'});if(replayAutomatic&&settings.automaticVerification==='change')for(const doc of docs.values())schedule(doc);
   }catch(error){if(boot!==proofBoot)return;cancelProofs();proofReady=false;send('runtime',{mode:'browser',compilerReady:true,proofReady:false,error:error.message,message:'Unable to start Lean: '+error.message});}
 }
 async function verify(doc,options){
@@ -48,7 +47,7 @@ async function verify(doc,options){
   let report=proofCache.get(key),cacheHit=!!report;
   if(!report){
     const work=proofChain.then(async()=>{if(epoch!==generation)throw Object.assign(new Error('Document content changed'),{code:-32801});const job={epoch};activeProof=job;try{return await verifyInBrowser({compiled,text,name:doc.name,options,timeoutMs:settings.timeoutMs||600000});}finally{if(activeProof===job)activeProof=undefined;}});
-    proofChain=work.catch(()=>{});try{report=await work;}catch(error){if(epoch===generation&&docs.get(doc.name)?.version===version){emit('status',doc,{state:error.code==='CANCELLED'?'cancelled':'error',functions:[]});if(error.code!=='CANCELLED'&&error.code!==-32801)resetProofs();}throw error;}
+    proofChain=work.catch(()=>{});try{report=await work;}catch(error){if(epoch===generation&&docs.get(doc.name)?.version===version){emit('status',doc,{state:error.code==='CANCELLED'?'cancelled':'error',functions:[]});if(error.code!=='CANCELLED'&&error.code!==-32801&&!error.preserveRuntime)resetProofs();}throw error;}
   }
   if(epoch!==generation||docs.get(doc.name)?.version!==version)throw Object.assign(new Error('Document content changed'),{code:-32801});
   proofCache.set(key,report);const full=options.function&&doc.report?{...report,results:[...doc.report.results.filter(old=>!report.results.some(row=>row.contract===old.contract&&(row.signature||row.function)===(old.signature||old.function))),...report.results]}:report;doc.report=full;

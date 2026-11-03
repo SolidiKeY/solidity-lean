@@ -15,3 +15,7 @@ tests/cloud/groups.json
 tests/cloud/managed-launches.json
 tests/cloud/resumed-work-*.json
 tests/cloud/runtime-checks.json
+
+# Generated compact verifier assets (packaged in the extension release)
+vscode/runtime/
+scripts/__pycache__/

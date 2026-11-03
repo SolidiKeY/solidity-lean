@@ -2,46 +2,55 @@ import {Buffer} from 'buffer';
 import {parseReport} from '../../vscode/src/report.cjs';
 import {sourceLocations,sourceRange,sourceWitness} from '../../scripts/source-locations.mjs';
 
-let worker,booting,sequence=0;
-const pending=new Map();
-function request(method,params={}){
-  const id=++sequence;
-  return new Promise((resolve,reject)=>{pending.set(id,{resolve,reject});worker.postMessage({id,method,params});});
-}
-export function cancelProofs(reason=Object.assign(new Error('Verification cancelled'),{code:'CANCELLED'})){
-  worker?.terminate();worker=undefined;booting=undefined;
-  for(const task of pending.values())task.reject(reason);pending.clear();
-}
-export async function prepareProofs(progress){
-  if(!booting){
-    worker=new Worker('/kernel-worker.js');
-    worker.onmessage=event=>{const message=event.data;if(message.method){progress?.(message);return;}const task=pending.get(message.id);if(!task)return;pending.delete(message.id);if(message.error){if(message.error.stack)progress?.({method:'log',message:message.error.stack});task.reject(Object.assign(new Error(message.error.message),{code:message.error.code}));}else task.resolve(message.result);};
-    worker.onerror=event=>{for(const task of pending.values())task.reject(new Error(event.message||'Browser Lean worker failed'));pending.clear();booting=undefined;worker?.terminate();worker=undefined;};
-    booting=request('boot');
-  }
-  return booting;
+import {VerifierWorker} from './verifier-worker.mjs';
+import {prepareDirect,checkDirect,cancelDirect,abandonDirect} from './direct.mjs';
+let legacy,sequence=0,progress;
+const jobs=new Set();
+function cancelJobs(){for(const job of jobs)job.cancelled=true;}
+export function cancelProofs(reason){cancelJobs();legacy?.dispose(reason);legacy=undefined;cancelDirect(reason);}
+export function abandonProofs(reason){cancelJobs();legacy?.abandon(reason);abandonDirect(reason);}
+async function prepareLegacyProofs(){legacy??=new VerifierWorker('/kernel-worker.js',progress);return legacy.boot();}
+export async function prepareProofs(onProgress){
+  if(onProgress)progress=onProgress;
+  return await prepareDirect(progress)||await prepareLegacyProofs();
 }
 export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=600000}){
+  const job={cancelled:false};jobs.add(job);
   const deadline=Date.now()+timeoutMs;
-  await prepareProofs();
+  const expired=()=>Object.assign(new Error('Verification timed out'),{code:'TIMEOUT',preserveRuntime:true});
+  const live=()=>{if(Date.now()>=deadline)throw expired();if(job.cancelled)throw Object.assign(new Error('Verification cancelled'),{code:'CANCELLED'});};
+  try{
+  const bootWithinDeadline=async promise=>{
+    let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(expired()),Math.max(1,deadline-Date.now()));})]);}finally{clearTimeout(timer);}
+  };
+  live();await bootWithinDeadline(prepareProofs());live();
   const source='/workspace/'+name;
   if(compiled.proofGap)return {results:[],errors:[{source,stage:'admission',reason:compiled.proofGap}]};
   const primary=compiled.primaryAst??compiled.fixture.ast;
   const allAsts=compiled.fixture.sourceUnits?.map(u=>u.ast)??[primary];
   const allContracts=allAsts.flatMap(a=>a.nodes).filter(n=>n.nodeType==='ContractDefinition');
   const contracts=primary.nodes.filter(n=>n.nodeType==='ContractDefinition'&&(!options.contract||n.name===options.contract));
-  const results=[],errors=[],kernelChecks=[],locate=sourceLocations(primary,Buffer.from(text));
+  const results=[],errors=[],kernelChecks=[],directChecks=[],locate=sourceLocations(primary,Buffer.from(text));
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
+    live();
+    const direct=await checkDirect(contract,options,Math.max(1,deadline-Date.now()));
+    live();
+    if(direct){
+      directChecks.push({contract:contract.name,...direct.timings});
+      for(const row of direct.results){
+        const range=locate(contract.name,row);
+        results.push({...row,source,contract:contract.name,sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{}),...(row.counterexample?{counterexample:sourceWitness(primary,contract.name,row)}:{})});
+      }
+      continue;
+    }
+    await bootWithinDeadline(prepareLegacyProofs());live();
     const output='/output/result-'+(++sequence)+'-'+contract.id+'.json',namespace=`SolTests.«${contract.name}»`;
     const command=`#solkey_test ${namespace}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
     const timed=(phase,command)=>options.benchmark?`#solkey_benchmark ${JSON.stringify(phase)} in ${command}`:command;
     const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.direct ${options.certify!==true}\n${options.benchmark?'set_option sol.benchmark true\n':''}${timed('import',`solc_import "source.ast.json" hash ${compiled.hash} as ${namespace} testing`)}\n${timed('obligations',`solc_scoped_problems ${namespace} decl`)}\n${timed('test',command)}\n`;
-    let timer;
-    const checked=await Promise.race([
-      request('check',{source:wrapper,files:{'/workspace/source.ast.json':compiled.text},outputs:[output]}),
-      new Promise((_,reject)=>{timer=setTimeout(()=>{const error=Object.assign(new Error('Browser verification timed out'),{code:'TIMEOUT'});cancelProofs(error);reject(error);},Math.max(1,deadline-Date.now()));})
-    ]).finally(()=>clearTimeout(timer));
+    const checked=await legacy.request('check',{source:wrapper,files:{'/workspace/source.ast.json':compiled.text},outputs:[output]},Math.max(1,deadline-Date.now()));
+    live();
     if(checked.timings)kernelChecks.push({contract:contract.name,...checked.timings});
     if(checked.code!==0)errors.push({source,contract:contract.name,stage:'lean',reason:`Lean browser check failed (exit ${checked.code})${checked.stderr?.length?': '+checked.stderr.join('\n'):''}`});
     for(const diagnostic of checked.diagnostics)if(diagnostic.severity==='error'||diagnostic.severity==='warning'&&diagnostic.message.includes('solc_import:'))errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});
@@ -59,8 +68,9 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
   }
   if(!contracts.length)errors.push({source,stage:'discovery',reason:'No contracts selected'});
   const report=parseReport(JSON.stringify({results,errors}));
-  report.timings={kernelChecks};
+  report.timings={kernelChecks,directChecks};
   if((!options.counterexamples||options.listing)&&results.some(row=>row.status==='refuted'&&row.verification!=='direct'))throw new Error('Kernel returned unrequested model prestate evidence');
   if(options.auditPreconditions&&!options.listing&&results.some(row=>row.preconditions===undefined))throw new Error('Kernel did not return the requested precondition audit');
   return report;
+  }finally{jobs.delete(job);}
 }
