@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalBoolWhile|LocalBoolDivergence|Checks\.LocalBoolWhile|Checks\.LocalBoolDivergence)$/, // Typed loop checkpoints.
   /^Solidity\.Yul\.(LocalBoolIfElse|Checks\.LocalBoolIfElse)$/, // Conditional selection of independently indexed scopes.
   /^Solidity\.Yul\.(LocalBoolIf|Checks\.LocalBoolIf)$/, // Conditional execution of a certified Boolean item scope.
   /^Solidity\.Yul\.(LocalBoolItemScope|Checks\.LocalBoolItemScope)$/, // Typed Boolean item-list scope closure.
