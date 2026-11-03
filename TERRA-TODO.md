@@ -127,3 +127,23 @@ statement remains the routine Terra item, unimplemented and not counted as
 proof evidence. Use condition_represented plus the initial false-read fact and
 published Branch.false_run; do not copy condition into a parallel module.
 The prior draft is preserved verbatim as historical handoff context.
+
+
+## ConditionalSourceCompiler source field projection
+
+- Module: Solidity/Backend/StructuredFlow/ConditionalSourceCompilerControls.lean
+- Lemma: source_fields (draft below, unimplemented and not evidence).
+- Routine: rewrite joined.1, split flag, reduce the three local reads. Do not change joined or any premise. Keep MappedBranch.false_run with its existing Terra owner.
+
+```lean
+namespace Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls
+open Solidity.Lowering.G19
+open Source.SemanticsExamples (G0 F0)
+theorem source_fields (pipeline : Roadmap.Pipeline) (fuel : Nat) (flag : Bool) :
+    (match (Source.execS (G0 pipeline) F0 (fuel+4) 0 none (R := []) (M := false)
+      (ConditionalStatement.statement (k := ⟨false,false⟩) sci sca sci .here sca sci)
+      (source flag).1).run (.nil,(source flag).2) with
+    | (.ok (.normal ls),_) => [(ls.get sca).key,(ls.get sci).key,(ls.get .here).key]
+    | _ => []) = [some (if flag then 1 else 0),some 0,some 0]
+end Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls
+```

@@ -399,3 +399,34 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
+
+## Pending mapped lowering and compiler components
+
+| Module | Responsibility |
+|---|---|
+| `Backend/StructuredFlow/ConditionalSourceCompiler.lean` | Compile the existing V07-related conditional statement, preserving its actual Source run and reached map as well as the intrinsic compiler contract. |
+| `Backend/StructuredFlow/ConditionalSourceCompilerControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Backend/StructuredFlow/MappedBranch.lean` | Branch code over the actual V07-mapped effectful condition. |
+| `Backend/StructuredFlow/MappedBranchControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Backend/StructuredFlow/MappedCondition.lean` | Actual published compiler code and reached machine for the V07 mapped assignment condition. |
+| `Backend/StructuredFlow/MappedConditionControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Backend/StructuredFlow/ScopedMappedSequence.lean` | Drop the mapped branch's private capture in the existing intrinsic block, then compile a continuation in the reached caller context. |
+| `Backend/StructuredFlow/ScopedMappedSequenceControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Lowering/G19/AssignmentDoWhileBreak.lean` | A mapped assignment in a do-while body followed by unconditional break. |
+| `Lowering/G19/AssignmentDoWhileBreakControls.lean` | Mixed mapped clients: body writes once, arbitrary trailing condition is skipped. |
+| `Lowering/G19/AssignmentDoWhileContinue.lean` | A mapped assignment followed by continue skips every remaining body item. |
+| `Lowering/G19/AssignmentDoWhileContinueControls.lean` | Actual mixed mapped clients and effectful/declaration suffix rejection. |
+| `Lowering/G19/AssignmentForBreak.lean` | One mapped for-loop initializer followed by an immediate break. |
+| `Lowering/G19/AssignmentForBreakControls.lean` | Real mapped initializer writes and skipped optional for-loop post expressions. |
+| `Lowering/G19/AssignmentReturnFlag.lean` | G19 client of the existing V07 ContextMap and assignment operand. |
+| `Lowering/G19/AssignmentReturnFlagControls.lean` | Inhabited map-guided G19 clients over V07's actual mixed Bool/integer/ memory/storage fixture. |
+| `Lowering/G19/AssignmentWhileBreak.lean` | One mapped effectful while shape: a Boolean local-assignment condition and an immediate break body. |
+| `Lowering/G19/AssignmentWhileBreakControls.lean` | Actual mixed V07/P12 inputs. |
+| `Lowering/G19/ConditionalSequence.lean` | Actual conditional statement followed by an assignment in its caller context. |
+| `Lowering/G19/ConditionalSequenceControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Lowering/G19/ConditionalStatement.lean` | Statement-level consumer of the published V07 conditional assignment producer. |
+| `Lowering/G19/ConditionalStatementControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Lowering/G19/ReturnTail.lean` | Consume the existing mapped return selector to suppress a real caller assignment. |
+| `Lowering/G19/ReturnTailControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Lowering/G19/WhileReturn.lean` | The mapped assignment selector lowers a while whose body immediately bare-returns. |
+| `Lowering/G19/WhileReturnControls.lean` | Inhabited map-guided G19 clients over V07's actual mixed Bool/integer/ memory/storage fixture. |
