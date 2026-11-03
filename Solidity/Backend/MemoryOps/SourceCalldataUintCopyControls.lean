@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceCalldataMixedCopy
 import Solidity.Backend.MemoryOps.SourceCalldataUintDelete
 import Solidity.Backend.MemoryOps.SourceCalldataUintMutation
 import Solidity.Backend.MemoryOps.SourceCalldataUintBinding
@@ -1024,4 +1025,205 @@ theorem delete_prefix_vectors :
 /-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.delete_prefix_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms delete_prefix_vectors
+
+/-! Ordered actual heterogeneous Source copies and a late decode rejection. -/
+private abbrev MCtx : Source.RCtx := (.array .calldata .bool none)::BΓ
+private abbrev BA : RefTy := .array (.prim .bool)
+private def mixFrame : Source.Fr := {frame with cd := (frame.cd ++ (List.replicate 31 0 ++ [1]) ++ (List.replicate 32 0) ++ (List.replicate 31 0 ++ [1]))}
+private def mixBadFrame : Source.Fr := {frame with cd := (frame.cd ++ (List.replicate 31 0 ++ [1]) ++ (List.replicate 32 0) ++ (List.replicate 31 0 ++ [2]))}
+private def mixInput : Source.EMState E0 MCtx := (.cons (.cdRef rfl 96 3) (bInput 0 3 (u 0)).1,(bInput 0 3 (u 0)).2)
+private def mixUDst : Source.Idx MCtx SU := .there bDst
+private def mixUSrc : Source.Idx MCtx CD := .there bSrc
+private def mixBSrc : Source.Idx MCtx (.array .calldata .bool none) := .here
+private def mixMid : Source.EMState E0 MCtx := (mixInput.1.set mixUDst (.memRef rfl 2),bMid.2)
+private def mixBPayload : List Bool := [true,false,true]
+private def mixBObject : MObj (H++[A]) BA := ⟨mixBPayload,by decide⟩
+private def mixPair := out.alloc mixBObject
+private def mixBe := List.prefix_append (H++[A]) [BA]
+private def mixExt := (List.prefix_append H [A]).trans mixBe
+private def mixFinal : Source.EMState E0 MCtx :=
+  (mixMid.1,{mixMid.2 with heap := (mixMid.2.heap.alloc ⟨SourceBoolArrayTy,sourceBoolMemory mixBPayload⟩).1})
+private def mixProgram : Source.RItems E0 [] false .body MCtx MCtx :=
+  .stmt (.expr (sourceUintCalldataBind mixUDst mixUSrc)) (.stmt (.expr (sourceBoolCalldataCopy mixBSrc)) .nil)
+private theorem mixMemOK : Source.MemOK E0 SH mixInput :=
+  ⟨⟨(bMemOK 0 3 (u 0)).1.1,⟨trivial,(bMemOK 0 3 (u 0)).1.2⟩⟩,(bMemOK 0 3 (u 0)).2⟩
+private theorem mixUintDecoded : sourceCalldataUintValues E0 mixFrame 0 3=.ok decoded := rfl
+private theorem mixBoolDecoded : sourceCalldataBoolValues E0 mixFrame 96 3=.ok [.bool true,.bool false,.bool true] := rfl
+private theorem mixBadUintDecoded : sourceCalldataUintValues E0 mixBadFrame 0 3=.ok decoded := rfl
+private theorem mixBadBoolDecoded : sourceCalldataBoolValues E0 mixBadFrame 96 3=.error (.revert []) := rfl
+
+/-- Both pipelines execute two different real decoders and allocations, with
+uint binding retained while the Boolean expression result is discarded. -/
+theorem mixed_copy_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) mixFrame (fuel+4) (sourceUintCalldataBind mixUDst mixUSrc)).run mixInput=
+      (.ok (.val (.memRef rfl 2)),mixMid) ∧
+    (Source.evalE (G0 p) mixFrame (fuel+3) (sourceBoolCalldataCopy mixBSrc)).run mixMid=
+      (.ok (.val (.memRef rfl 3)),mixFinal) ∧
+    (Source.execItems (G0 p) mixFrame (fuel+6) nps none mixProgram mixInput.1).run (.nil,mixInput.2)=
+      (.ok (.normal mixFinal.1),(.nil,mixFinal.2)) ∧
+    checkedSourceFreshUints (E := E0) mixFrame 0 3 hp (by decide)=.ok (some out) ∧
+    checkedSourceFreshBools (E := E0) mixFrame 96 3 out (by decide)=.ok (some mixPair.1) ∧
+    Heap.Keeps mixBe out mixPair.1 ∧ Heap.Keeps mixExt hp mixPair.1 ∧
+    SourceUintMemoryAt mixFinal 2 mixPair.1 (fresh.wk mixBe) .dyn ∧
+    SourceBoolMemoryAt mixFinal 3 mixPair.1 mixPair.2 .dyn ∧ Source.MemOK E0 SH mixFinal ∧
+    SourceUintMemoryAt mixFinal 0 mixPair.1 (left.wk mixExt) .dyn ∧
+    SourceUintMemoryAt mixFinal 1 mixPair.1 (right.wk mixExt) .dyn ∧
+    fresh.id=2 ∧ mixPair.2.id=3 ∧ fresh.id≠mixPair.2.id := by
+  have result := source_cd_uint_bind_bool_copy mixInput hp (G0 p) mixFrame fuel nps mixUDst mixUSrc mixBSrc
+    0 3 96 3 rfl rfl (by decide) (by decide) SH mixMemOK
+  rw [mixUintDecoded,mixBoolDecoded] at result
+  obtain ⟨uv,first,ua,uk,ur,um,bv,second,program,ba,bk,fu,fb,fm,occupied,uid,bid,ne,sne,locals,ex,events,logs,fn⟩ := result
+  have keep : Heap.Keeps mixExt hp mixPair.1 := uk.trans bk
+  have initialOld : SourceUintMemoryAt mixInput 0 hp left .dyn := old_at 0 3
+  have initialNeighbor : SourceUintMemoryAt mixInput 1 hp right .dyn := neighbor_at 0 3
+  exact ⟨first,second,program,ua,ba,bk,keep,fu,fb,fm,
+    initialOld.transport keep occupied,initialNeighbor.transport keep occupied,uid,bid,ne⟩
+
+/-- Complete ordered Source tables/local vectors and both native element types. -/
+theorem mixed_copy_vectors :
+    mixInput.1=.cons (.cdRef rfl 96 3) (.cons (sourceUint (u 0)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 0) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil))))) ∧
+    mixMid.1=.cons (.cdRef rfl 96 3) (.cons (sourceUint (u 0)) (.cons (.cdRef rfl 0 3)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil))))) ∧ mixFinal.1=mixMid.1 ∧
+    [mixInput.2.heap.get 0,mixInput.2.heap.get 1,mixInput.2.heap.get 2,mixInput.2.heap.get 3,mixInput.2.heap.get 4]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none,none] ∧
+    [mixMid.2.heap.get 0,mixMid.2.heap.get 1,mixMid.2.heap.get 2,mixMid.2.heap.get 3,mixMid.2.heap.get 4]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none,none] ∧
+    [mixFinal.2.heap.get 0,mixFinal.2.heap.get 1,mixFinal.2.heap.get 2,mixFinal.2.heap.get 3,mixFinal.2.heap.get 4]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,
+        some ⟨SourceBoolArrayTy,sourceBoolMemory mixBPayload⟩,none] ∧
+    [MObj.elems .dyn (mixPair.1.get (left.wk mixExt)),MObj.elems .dyn (mixPair.1.get (right.wk mixExt)),
+      MObj.elems .dyn (mixPair.1.get (fresh.wk mixBe))]=[old,neighbor,payload] ∧
+    MObj.elems .dyn (mixPair.1.get mixPair.2)=mixBPayload ∧
+    [mixInput.2.heap.next,mixMid.2.heap.next,mixFinal.2.heap.next]=[2,3,4] ∧
+    mixFinal.2.ex=mixInput.2.ex ∧ mixFinal.2.events=mixInput.2.events ∧ mixFinal.2.logs=mixInput.2.logs ∧
+    mixFinal.2.fnLocals=mixInput.2.fnLocals := by
+  refine ⟨rfl,rfl,rfl,rfl,rfl,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl⟩
+  · obtain ⟨_,_,_,_,_,bk,keep,_,_,_,_,_,_,_,_⟩ := mixed_copy_program .legacy 0 0
+    have original : MObj.elems .dyn (out.get fresh)=payload := by
+      unfold out fresh
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    rw [keep left,keep right,bk fresh,MObj.elems_wk,MObj.elems_wk,MObj.elems_wk,original]
+    simp only [MObj.elems_dyn,
+      List.map_id'' (f := MVal.wk mixExt (.prim .uint)) (fun _ => rfl),
+      List.map_id'' (f := MVal.wk mixBe (.prim .uint)) (fun _ => rfl)]
+    rfl
+  · unfold mixPair
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+    exact List.map_id'' (fun _ => rfl) _
+
+/-- The Boolean decoder reads true/false before its actual third word2 fails.
+The UINT copy, changed destination binding and allocation survive that halt. -/
+theorem mixed_copy_late_error (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    sourceCalldataBoolValues E0 mixBadFrame 96 2=.ok [.bool true,.bool false] ∧
+    (Source.evalE (G0 p) mixBadFrame (fuel+4) (sourceUintCalldataBind mixUDst mixUSrc)).run mixInput=
+      (.ok (.val (.memRef rfl 2)),mixMid) ∧
+    (Source.evalE (G0 p) mixBadFrame (fuel+3) (sourceBoolCalldataCopy mixBSrc)).run mixMid=
+      (.error (.revert []),mixMid) ∧
+    (Source.execItems (G0 p) mixBadFrame (fuel+6) nps none mixProgram mixInput.1).run (.nil,mixInput.2)=
+      (.error (.revert []),(.nil,mixMid.2)) ∧
+    checkedSourceFreshUints (E := E0) mixBadFrame 0 3 hp (by decide)=.ok (some out) ∧
+    checkedSourceFreshBools (E := E0) mixBadFrame 96 3 out (by decide)=.error (.revert []) ∧
+    SourceUintMemoryAt mixMid 2 out fresh .dyn ∧ Source.MemOK E0 SH mixMid ∧
+    [mixMid.2.heap.get 0,mixMid.2.heap.get 1,mixMid.2.heap.get 2,mixMid.2.heap.get 3,mixMid.2.heap.get 4]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none,none] ∧
+    mixMid.2.heap.next=3 ∧ mixMid.1.get mixUDst=.memRef rfl 2 := by
+  have result := source_cd_uint_bind_bool_copy mixInput hp (G0 p) mixBadFrame fuel nps mixUDst mixUSrc mixBSrc
+    0 3 96 3 rfl rfl (by decide) (by decide) SH mixMemOK
+  rw [mixBadUintDecoded,mixBadBoolDecoded] at result
+  obtain ⟨uv,first,ua,uk,ur,um,second,program,ba⟩ := result
+  exact ⟨rfl,first,second,program,ua,ba,ur,um,rfl,rfl,rfl⟩
+
+private def mixReverseMid : Source.EMState E0 MCtx :=
+  (mixInput.1,{mixInput.2 with heap := (mixInput.2.heap.alloc ⟨SourceBoolArrayTy,sourceBoolMemory mixBPayload⟩).1})
+private def mixReverseFinal : Source.EMState E0 MCtx :=
+  (mixInput.1.set mixUDst (.memRef rfl 3),
+    {mixReverseMid.2 with heap := (mixReverseMid.2.heap.alloc ⟨SU,sourceUintMemory payload⟩).1})
+
+/-- Swapping the real statements swaps allocation types/IDs and changes the
+retained numeric local2 to3, even though both input payloads are unchanged. -/
+theorem mixed_copy_wrong_order (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) mixFrame (fuel+4) (sourceBoolCalldataCopy mixBSrc)).run mixInput=
+      (.ok (.val (.memRef rfl 2)),mixReverseMid) ∧
+    (Source.evalE (G0 p) mixFrame (fuel+3) (sourceUintCalldataBind mixUDst mixUSrc)).run mixReverseMid=
+      (.ok (.val (.memRef rfl 3)),mixReverseFinal) ∧
+    (Source.execItems (G0 p) mixFrame (fuel+6) nps none
+      (.stmt (.expr (sourceBoolCalldataCopy mixBSrc)) (.stmt (.expr (sourceUintCalldataBind mixUDst mixUSrc)) .nil) :
+        Source.RItems E0 [] false .body MCtx MCtx) mixInput.1).run (.nil,mixInput.2)=
+      (.ok (.normal mixReverseFinal.1),(.nil,mixReverseFinal.2)) ∧
+    [mixReverseMid.2.heap.get 0,mixReverseMid.2.heap.get 1,mixReverseMid.2.heap.get 2,mixReverseMid.2.heap.get 3,mixReverseMid.2.heap.get 4]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SourceBoolArrayTy,sourceBoolMemory mixBPayload⟩,none,none] ∧
+    [mixReverseFinal.2.heap.get 0,mixReverseFinal.2.heap.get 1,mixReverseFinal.2.heap.get 2,mixReverseFinal.2.heap.get 3,mixReverseFinal.2.heap.get 4]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SourceBoolArrayTy,sourceBoolMemory mixBPayload⟩,
+        some ⟨SU,sourceUintMemory payload⟩,none] ∧
+    mixFinal.1.get mixUDst=.memRef rfl 2 ∧ mixReverseFinal.1.get mixUDst=.memRef rfl 3 := by
+  have first := source_cd_bool_eval (G0 p) mixFrame (fuel+2) mixInput mixBSrc 96 3 rfl
+  rw [source_cd_bool_run,mixBoolDecoded] at first
+  have second := source_cd_uint_bind_run (G0 p) mixFrame fuel mixReverseMid mixUDst mixUSrc 0 3 rfl
+  rw [mixUintDecoded] at second
+  have firstStmt := source_expr_statement_run (G0 p) mixFrame (fuel+4) nps _ mixInput mixReverseMid _ first
+  have secondStmt := source_expr_statement_run (G0 p) mixFrame (fuel+3) nps _ mixReverseMid mixReverseFinal _ second
+  exact ⟨first,second,source_items_pair_run (G0 p) mixFrame fuel nps _ _ _ _ _ firstStmt secondStmt,rfl,rfl,rfl,rfl⟩
+
+
+/-- Actual final reads distinguish the retained old alias/neighbor from the
+rebound fresh uint local, plus the independently typed fresh Boolean contents. -/
+theorem mixed_copy_reached_reads (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) mixFrame (fuel+2)
+      (.indexArray (.local mixUDst) (.local (.there bIndex)) rfl)).run mixFinal=
+      (.ok (.val (sourceUint (u 2))),mixFinal) ∧
+    (Source.evalE (G0 p) mixFrame (fuel+2)
+      (.indexArray (.local (.there bAlias)) (.local (.there bIndex)) rfl)).run mixFinal=
+      (.ok (.val (sourceUint (u 7))),mixFinal) ∧
+    (Source.evalE (G0 p) mixFrame (fuel+2)
+      (.indexArray (.local (.there bNeighbor)) (.local (.there bIndex)) rfl)).run mixFinal=
+      (.ok (.val (sourceUint (u 8))),mixFinal) ∧
+    (Source.readLoc (E := E0) (Γ := MCtx) mixFrame (τ := .bool) (.mem 3 1)).run mixFinal=
+      (.ok (.bool false),mixFinal) := by
+  obtain ⟨_,_,_,_,_,_,_,ur,br,_,oldAt,neighborAt,_,_,_⟩ := mixed_copy_program p fuel 0
+  obtain ⟨_,_,_,_,_,_,vs,bs,_,_,_,_,_⟩ := mixed_copy_vectors
+  have oldValues : MObj.elems .dyn (mixPair.1.get (left.wk mixExt))=old := (List.cons.inj vs).1
+  have neighborValues : MObj.elems .dyn (mixPair.1.get (right.wk mixExt))=neighbor := (List.cons.inj (List.cons.inj vs).2).1
+  have freshValues : MObj.elems .dyn (mixPair.1.get (fresh.wk mixBe))=payload :=
+    (List.cons.inj (List.cons.inj (List.cons.inj vs).2).2).1
+  have oldBound : (u 0).1.toNat<mixPair.1.len (left.wk mixExt) .dyn := by
+    unfold Heap.len
+    rw [oldValues]
+    decide
+  have neighborBound : (u 0).1.toNat<mixPair.1.len (right.wk mixExt) .dyn := by
+    unfold Heap.len
+    rw [neighborValues]
+    decide
+  have freshBound : (u 0).1.toNat<mixPair.1.len (fresh.wk mixBe) .dyn := by
+    unfold Heap.len
+    rw [freshValues]
+    decide
+  have readFresh := ur.eval_index (G0 p) mixFrame fuel mixUDst (.there bIndex) (u 0) rfl rfl freshBound
+  have readOld := oldAt.eval_index (G0 p) mixFrame fuel (.there bAlias) (.there bIndex) (u 0) rfl rfl oldBound
+  have readNeighbor := neighborAt.eval_index (G0 p) mixFrame fuel (.there bNeighbor) (.there bIndex) (u 0) rfl rfl neighborBound
+  simp only [freshValues] at readFresh
+  simp only [oldValues] at readOld
+  simp only [neighborValues] at readNeighbor
+  refine ⟨readFresh,readOld,readNeighbor,?_⟩
+  apply (br.read_iff mixFrame (u 1) false).mpr
+  change (MObj.elems .dyn (mixPair.1.get mixPair.2))[1]?=some false
+  rw [bs]
+  rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms mixed_copy_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms mixed_copy_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_late_error' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms mixed_copy_late_error
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_wrong_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms mixed_copy_wrong_order
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_reached_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms mixed_copy_reached_reads
 end Solidity.Backend.MemoryOps.UintCopyControls
