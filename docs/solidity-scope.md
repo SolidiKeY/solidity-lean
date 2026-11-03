@@ -28,12 +28,15 @@ extension proposals do not change the profile without explicit approval.
 | [Feature inventory](solidity-feature-inventory.md) | Every classified feature, its syntax, scope, current support, requirement/reason, and upstream/local evidence. |
 | [Feature manifest](solidity-features.json) | Machine-readable authority for feature families, source pin, Git blob IDs and SHA-256 hashes of inspected upstream files. |
 | [Upstream coverage ledger](solidity-upstream-inventory.json) | 783 source symbols mapped explicitly to feature families, including assembly features excluded as a group. |
-| `Solidity/Language/Features.lean` | Generated, dependency-free Lean catalog, structured diagnostics and subset interface. |
+| `Solidity/Language/Features.lean` | Generated, dependency-free Lean catalog (features, scope, requirement text), structured diagnostics and subset interface. |
+| `Solidity/Language/FeatureInfo.lean` | Generated leaf: each feature's inspection record (`Feature.info`), the status lists and the consistency theorems. |
 | `scripts/solidity-feature-audit.py` | Regeneration, metadata validation, source-drift and symbol-coverage checks. |
 
-The Lean API (`Solidity.Language`): `Feature.all`/`Feature.info`; the scope lists
-`modelFeatures`, `abstractFeatures`, `targetFeatures`; the status lists
-`presentFeatures`, `partialFeatures`, `missingFeatures`, `requirements`;
+The Lean API (`Solidity.Language`): `Feature.all`, `Feature.scope`,
+`Feature.requirement`; the scope lists `modelFeatures`, `abstractFeatures`,
+`targetFeatures`; `requirements`; in `Language/FeatureInfo.lean`,
+`Feature.info` and the status lists `presentFeatures`, `partialFeatures`,
+`missingFeatures`;
 `outsideScope : List Unmodelled` with `Unmodelled.reason`/`errorName`; and
 `rejectedByUpstream`.
 
@@ -262,7 +265,7 @@ Diagnostics are stable structured names such as `solidity.inlineAssembly`,
 `solidity.rawCalldata`, and `solidity.blockField.number`, with the exact
 one-line reason stored in the manifest and returned by `Unmodelled.reason`.
 The Lean theorems `Unmodelled.excluded` and `Feature.exclusion_complete`
-prove that every diagnostic denotes an excluded feature and every excluded
+(`Language/FeatureInfo.lean`) prove that every diagnostic denotes an excluded feature and every excluded
 feature has a diagnostic. `Feature.all_complete` proves the list enumerates
 the feature type.
 
@@ -337,6 +340,7 @@ python3 scripts/solidity-feature-audit.py --check --upstream /path/to/solidity
 
 # Check the Lean definitions and metadata consistency theorems independently.
 lake env lean Solidity/Language/Features.lean
+lake env lean Solidity/Language/FeatureInfo.lean
 ```
 
 An upstream hash/symbol change requires a new review and explicit ledger

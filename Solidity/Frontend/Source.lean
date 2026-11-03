@@ -309,12 +309,12 @@ private def outsideDiagnostic (use : Use) : Diagnostic :=
       line := use.line, feature := some use.feature }
   | none => {
       kind := .upstream, name := .str (.str .anonymous "solidity") use.feature.id
-      reason := use.feature.info.requirement, line := use.line, feature := some use.feature }
+      reason := use.feature.requirement, line := use.line, feature := some use.feature }
 
 def ScopeScan.certify : List Use → ScopeScan
   | [] => default
   | use :: rest =>
-    if allowed : use.feature.info.scope = .model ∨ use.feature.info.scope = .abstract then
+    if allowed : use.feature.scope = .model ∨ use.feature.scope = .abstract then
       match certify rest with
       | .admitted fs within => .admitted (use.feature :: fs) (by
           intro f member

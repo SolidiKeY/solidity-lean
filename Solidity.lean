@@ -1434,6 +1434,7 @@ import Solidity.Examples.DecisionFeatures
 import Solidity.Examples.DecisionGapOperators
 import Solidity.Examples.DecisionGaps
 import Solidity.Examples.DecisionHashes
+import Solidity.Examples.DecisionHashesChecks
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionMemory
 import Solidity.Examples.DecisionQuantLedger
@@ -1544,6 +1545,7 @@ import Solidity.Examples.Tactics.FilteredSets
 import Solidity.Examples.Tactics.FiniteSets
 import Solidity.Examples.Tactics.FunctionTypes
 import Solidity.Examples.Tactics.Hashing
+import Solidity.Examples.Tactics.HashingNames
 import Solidity.Examples.Tactics.Inheritance
 import Solidity.Examples.Tactics.InheritedSelectorsImport
 import Solidity.Examples.Tactics.Join
@@ -1801,6 +1803,7 @@ import Solidity.Hash.CollisionBound
 import Solidity.Hashes
 import Solidity.Keccak
 import Solidity.KeySort
+import Solidity.Language.FeatureInfo
 import Solidity.Language.Features
 import Solidity.Language.FixedPoint
 import Solidity.Language.FixedPoint.Abi

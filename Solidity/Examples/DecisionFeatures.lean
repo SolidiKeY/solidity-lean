@@ -1,4 +1,5 @@
 import Solidity.Examples.Decision
+import Solidity.Tools.Common
 
 /-!
 # The closer's decision (M7): the features on `Bank` and `Allow`

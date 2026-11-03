@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'docs/solidity-features.json'
 LEDGER = ROOT / 'docs/solidity-upstream-inventory.json'
 LEAN = ROOT / 'Solidity/Language/Features.lean'
+LEAN_INFO = ROOT / 'Solidity/Language/FeatureInfo.lean'
 REPORT = ROOT / 'docs/solidity-feature-inventory.md'
 
 
@@ -81,7 +82,12 @@ def render_lean(data):
              'Generated from docs/solidity-features.json by scripts/solidity-feature-audit.py.',
              'The catalog classifies language features; it does not implement a Solidity parser,',
              'a feature extractor, or a proof of frontend/solc equivalence. The subset wrapper',
-             'is meaningful only with a complete, declaration-aware feature extractor.',
+             'is meaningful only with a complete, declaration-aware feature extractor.', '',
+             'This module holds what the frontend reads: the features, their scope and their',
+             'requirement text. The inspection record of each feature (`Feature.info`: status,',
+             'upstream source lines, local evidence) is in `Language/FeatureInfo.lean`, which',
+             'only the library root imports, so editing a source-line reference rebuilds that',
+             'module alone (`docs/parallelism.md`, P5).',
              '-/', '', 'namespace Solidity.Language', '',
              'inductive Scope where', '  | model | abstract | exclude | upstream',
              '  deriving Repr, DecidableEq, Inhabited', '',
@@ -97,15 +103,10 @@ def render_lean(data):
     lines.extend('  | '+r['id'] for r in rows)
     lines += ['  deriving Repr, DecidableEq, Inhabited', '', 'def Feature.id : Feature → String']
     lines.extend('  | .'+r['id']+' => '+q(r['id']) for r in rows)
-    lines += ['', 'def Feature.info : Feature → FeatureInfo']
-    for r in rows:
-        refs = ', '.join('{ path := '+q(s['path'])+', line := '+str(s['line'])+' }' for s in r['upstream'])
-        ev = ', '.join(q(s) for s in r['localEvidence'])
-        current = 'limited' if r['current'] == 'partial' else r['current']
-        lines += ['  | .'+r['id']+' =>', '    { category := '+q(r['category'])+', spelling := '+q(r['syntax'])+',',
-                  '      scope := .'+r['scope']+', current := .'+current+',',
-                  '      requirement := '+raw_text(r['requirement'])+',',
-                  '      upstream := ['+refs+'], localEvidence := ['+ev+'] }']
+    lines += ['', 'def Feature.scope : Feature → Scope']
+    lines.extend('  | .'+r['id']+' => .'+r['scope'] for r in rows)
+    lines += ['', 'def Feature.requirement : Feature → String']
+    lines.extend('  | .'+r['id']+' => '+raw_text(r['requirement']) for r in rows)
     lines += ['', 'def Feature.all : List Feature :=', '  [ '+',\n    '.join('.'+r['id'] for r in rows)+' ]', '',
               '/-- The catalog list enumerates the entire feature type. -/',
               'theorem Feature.all_complete (f : Feature) : f ∈ Feature.all := by',
@@ -120,7 +121,7 @@ def render_lean(data):
     lines += ['  deriving Repr, DecidableEq, Inhabited', '', 'def Unmodelled.feature : Unmodelled → Feature']
     lines += ['  | .blockField .'+r['syntax'].split('.')[1]+' => .'+r['id'] for r in block]
     lines += ['  | .'+r['id']+' => .'+r['id'] for r in ordinary]
-    lines += ['', 'def Unmodelled.reason (u : Unmodelled) : String := u.feature.info.requirement', '',
+    lines += ['', 'def Unmodelled.reason (u : Unmodelled) : String := u.feature.requirement', '',
               'def Unmodelled.errorName (u : Unmodelled) : Lean.Name :=', '  match u with',
               '  | .blockField f => .str (.str (.str .anonymous "solidity") "blockField") f.id',
               '  | _ => .str (.str .anonymous "solidity") u.feature.id', '',
@@ -130,31 +131,61 @@ def render_lean(data):
     lines += ['  | _ => none', '', 'def Unmodelled.all : List Unmodelled :=',
               '  Feature.all.filterMap Feature.unmodelled?', '',
               'def modelFeatures : List Feature :=',
-              '  Feature.all.filter fun f => f.info.scope == .model', '',
+              '  Feature.all.filter fun f => f.scope == .model', '',
               'def abstractFeatures : List Feature :=',
-              '  Feature.all.filter fun f => f.info.scope == .abstract', '',
+              '  Feature.all.filter fun f => f.scope == .abstract', '',
               'def targetFeatures : List Feature :=',
-              '  Feature.all.filter fun f => f.info.scope == .model || f.info.scope == .abstract', '',
+              '  Feature.all.filter fun f => f.scope == .model || f.scope == .abstract', '',
               'def outsideScope : List Unmodelled := Unmodelled.all', '',
-              'def presentFeatures : List Feature :=',
-              '  targetFeatures.filter fun f => f.info.current == .present', '',
-              'def missingFeatures : List Feature :=',
-              '  targetFeatures.filter fun f => f.info.current == .missing', '',
-              'def partialFeatures : List Feature :=',
-              '  targetFeatures.filter fun f => f.info.current == .limited', '',
               'def rejectedByUpstream : List Feature :=',
-              '  Feature.all.filter fun f => f.info.scope == .upstream', '',
+              '  Feature.all.filter fun f => f.scope == .upstream', '',
               'def requirements : List (Feature × String) :=',
-              '  targetFeatures.map fun f => (f, f.info.requirement)', '',
+              '  targetFeatures.map fun f => (f, f.requirement)', '',
               '/-- A policy decision; no assertion of current implementation support. -/',
               'def Feature.inProfile (f : Feature) : Prop :=',
-              '  f.info.scope = .model ∨ f.info.scope = .abstract', '',
+              '  f.scope = .model ∨ f.scope = .abstract', '',
               'def WithinProfile (features : List Feature) : Prop :=',
               '  ∀ f ∈ features, f.inProfile', '',
               '/-- Restrict an actual syntax representation using a supplied feature extractor.',
               'Completeness of `uses` must be established separately; this is not a fake full AST. -/',
               'def ProfileSyntax (Syntax : Type u) (uses : Syntax → List Feature) : Type u :=',
               '  { ast : Syntax // WithinProfile (uses ast) }', '',
+              'end Solidity.Language', '']
+    return '\n'.join(lines)
+
+
+
+def render_lean_info(data):
+    rows = data['features']
+    excluded = [r for r in rows if r['scope'] == 'exclude']
+    block = [r for r in excluded if r['id'].startswith('block') and r['syntax'].startswith('block.')]
+    ordinary = [r for r in excluded if r not in block]
+    lines = ['import Solidity.Language.Features', '', '/-!', '# Solidity feature inspection records', '',
+             'Generated from docs/solidity-features.json by scripts/solidity-feature-audit.py.',
+             'Each feature\'s inspection record: category, spelling, scope, status, requirement,',
+             'upstream source lines and local evidence. `Feature.info_scope` and',
+             '`Feature.info_requirement` tie it to `Language/Features.lean`, which the frontend',
+             'imports; this module is a leaf, so its line references change without rebuilding',
+             'the frontend (`docs/parallelism.md`, P5).',
+             '-/', '', 'namespace Solidity.Language', '', 'def Feature.info : Feature → FeatureInfo']
+    for r in rows:
+        refs = ', '.join('{ path := '+q(s['path'])+', line := '+str(s['line'])+' }' for s in r['upstream'])
+        ev = ', '.join(q(s) for s in r['localEvidence'])
+        current = 'limited' if r['current'] == 'partial' else r['current']
+        lines += ['  | .'+r['id']+' =>', '    { category := '+q(r['category'])+', spelling := '+q(r['syntax'])+',',
+                  '      scope := .'+r['scope']+', current := .'+current+',',
+                  '      requirement := '+raw_text(r['requirement'])+',',
+                  '      upstream := ['+refs+'], localEvidence := ['+ev+'] }']
+    lines += ['', 'theorem Feature.info_scope (f : Feature) : f.info.scope = f.scope := by',
+              '  cases f <;> rfl', '',
+              'theorem Feature.info_requirement (f : Feature) : f.info.requirement = f.requirement := by',
+              '  cases f <;> rfl', '',
+              'def presentFeatures : List Feature :=',
+              '  targetFeatures.filter fun f => f.info.current == .present', '',
+              'def missingFeatures : List Feature :=',
+              '  targetFeatures.filter fun f => f.info.current == .missing', '',
+              'def partialFeatures : List Feature :=',
+              '  targetFeatures.filter fun f => f.info.current == .limited', '',
               '/-- The diagnostic metadata and exclusion decision cannot disagree. -/',
               'theorem Unmodelled.excluded (u : Unmodelled) : u.feature.info.scope = .exclude := by',
               '  cases u with', '  | blockField f => cases f <;> rfl']
@@ -167,7 +198,6 @@ def render_lean(data):
               'def upstreamVersion : String := '+q(data['upstream']['tag']), '',
               'end Solidity.Language', '']
     return '\n'.join(lines)
-
 
 def render_report(data):
     up = data['upstream']
@@ -297,7 +327,7 @@ def main():
     args = p.parse_args()
     data, ledger = json.loads(MANIFEST.read_text()), json.loads(LEDGER.read_text())
     validate(data, ledger, args.upstream)
-    for path, content in [(LEAN, render_lean(data)), (REPORT, render_report(data))]:
+    for path, content in [(LEAN, render_lean(data)), (LEAN_INFO, render_lean_info(data)), (REPORT, render_report(data))]:
         if args.check:
             assert path.read_text() == content, f'stale generated file: {path}'
         else:

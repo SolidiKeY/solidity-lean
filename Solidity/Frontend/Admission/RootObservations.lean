@@ -52,7 +52,7 @@ def ObservationSite.allowed (site : ObservationSite) : Bool :=
   match site.status with
   | some (.admitted name) =>
     (Feature.all.find? (fun f => f.id == name)).any fun f =>
-      decide (f.info.scope = .model ∨ f.info.scope = .abstract)
+      decide (f.scope = .model ∨ f.scope = .abstract)
   | _ => false
 
 /-- A local acceptance must name a real feature in the frozen profile, with

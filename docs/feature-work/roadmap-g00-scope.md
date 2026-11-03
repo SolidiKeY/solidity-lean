@@ -307,8 +307,8 @@ decision. (First audit: 0 confirmed, 30 unresolved, each an open scope
 question.) Admission keeps refusing these rows with their structured
 diagnostics; no exclusion was added. The Lean catalog
 proves the diagnostics match the recorded rows — `Solidity.Language.Unmodelled.excluded`
-(`Solidity/Language/Features.lean:1910`) and
-`Solidity.Language.Feature.exclusion_complete` (`:1936`), over
+(`Solidity/Language/FeatureInfo.lean:1094`) and
+`Solidity.Language.Feature.exclusion_complete` (`:1120`), over
 `Solidity.Language.Unmodelled` (`:1771`) and `BlockField` (`:1748`). Those
 theorems are about the recorded classification, not approval.
 

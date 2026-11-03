@@ -2339,8 +2339,8 @@ Upstream symbols mapped to in-profile and non-profile rows (G00's `combination-*
 | D25 | Shared compiler foundation: frozen slot, state and statement interfaces as children of G24 ahead of wave 3 | G03 Q1 — shared compiler foundation; Roadmap (G03) | backend: G24.01 G24.02 G24.03 G24.04 | — |
 
 - **D01 Precise refusal of the 30 confirmed exclusions**
-  - admission: `Solidity.Language.Feature.exclusion_complete` (Solidity.Language.Features, `Solidity/Language/Features.lean:1936`) — every excluded feature has a structured diagnostic
-  - admission: `Solidity.Language.Unmodelled.excluded` (Solidity.Language.Features, `Solidity/Language/Features.lean:1910`) — every diagnostic denotes an excluded feature
+  - admission: `Solidity.Language.Feature.exclusion_complete` (Solidity.Language.FeatureInfo, `Solidity/Language/FeatureInfo.lean:1120`) — every excluded feature has a structured diagnostic
+  - admission: `Solidity.Language.Unmodelled.excluded` (Solidity.Language.FeatureInfo, `Solidity/Language/FeatureInfo.lean:1094`) — every diagnostic denotes an excluded feature
   - admission: `Solidity.Frontend.Source.ScopeScan.within` (Solidity.Frontend.Source, `Solidity/Frontend/Source.lean:300`) — a successful scan's feature list is within the profile
   - missing: refusal is decided on solc's JSON AST (`ScopeScan`), not by a checked parser against S00's grammar
   - missing: no theorem that `Admission.sound` rejects exactly the excluded IDs and their G00 combinations

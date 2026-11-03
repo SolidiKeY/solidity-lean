@@ -52,7 +52,7 @@ theorem excluded_after_allowed : (ScopeScan.certify [⟨.msgSender, 1⟩, ⟨.de
 theorem mixed_group_refused : (ScopeScan.certify [⟨.msgSender, 1⟩, ⟨.delegatecall, 2⟩]).diagnostic? ≠ none := by
   apply (ScopeScan.certify_rejected_iff _).mpr
   refine ⟨⟨.delegatecall, 2⟩, List.mem_cons_of_mem _ (List.mem_cons_self ..), ?_⟩
-  change ¬ (Feature.delegatecall.info.scope = .model ∨ Feature.delegatecall.info.scope = .abstract)
+  change ¬ (Feature.delegatecall.scope = .model ∨ Feature.delegatecall.scope = .abstract)
   decide
 
 private def dropped : Roadmap.Evm.FailurePoints := {

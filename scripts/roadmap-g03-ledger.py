@@ -1671,9 +1671,9 @@ class D:
     DECISION_COVER = {
         "D23": [("backend", "Solidity.Evm.compile_net", "Solidity/Evm/Correct.lean",
                  "machine success gives net payments; no external credit")],
-        "D01": [('admission', "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/Features.lean",
+        "D01": [('admission', "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/FeatureInfo.lean",
                  "every excluded feature has a structured diagnostic"),
-                ('admission', "Solidity.Language.Unmodelled.excluded", "Solidity/Language/Features.lean",
+                ('admission', "Solidity.Language.Unmodelled.excluded", "Solidity/Language/FeatureInfo.lean",
                  "every diagnostic denotes an excluded feature"),
                 ('admission', "Solidity.Frontend.Source.ScopeScan.within", "Solidity/Frontend/Source.lean",
                  "a successful scan's feature list is within the profile")],
