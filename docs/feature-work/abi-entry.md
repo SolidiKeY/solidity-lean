@@ -71,3 +71,15 @@ MSIZE successful native execution reuses the existing P10 theorem. Independent
 reviews found no semantic gap; the requested stack-overflow control is included.
 Scoped guards pin standard axioms. P6 MLOAD payload and store/copy image
 preservation remain open.
+
+`Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean` exhibits a successful
+charged MSTORE8 whose reached state fails the P6 post-image relation. The initial
+image is inhabited, its one-byte span fits reserved capacity, and the reached
+active byte extent fits the EVM word. At offset `2^64`, the pinned logical
+`ByteArray.write` casts its destination gap to USize zero and writes at address
+zero; P6 preserves that exterior byte. The original gate accepts maximum-word
+gas. Thus unrestricted P6 store-image preservation needs resolution by the
+read-only pinned-writer owner. No capacity/gas exclusion or changed relation is
+introduced. This is a logical-model counterexample, without a source-program
+reachability or external-runtime claim. Independent reviews confirmed the
+obstruction and requested the combined charged-post witness, now included.
