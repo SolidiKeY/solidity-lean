@@ -362,7 +362,7 @@ an `Elaborated` or full execution-coherence witness. Removing a contract changes
 
 `RootAdmissionEquivalence` is a typechecked proposition alias for routine
 Boolean observation-classifier glue, not a theorem or supplied witness.
-Task A01 in the lane's `TERRA-TODO.md` delegates that glue. It would still
+Proving it remains open. It would still
 classify observations alone, not every source feature or feature combination.
 
 Open: prove actual source entry and call/modifier/dispatch queries remain in
@@ -400,8 +400,8 @@ shadowing/precedence, refusal of an unknown name and refusal of a constant as
 a function. The roster is synthetic, not an `Elaborated` or SourceSpec
 witness. These controls do not replace the universal resolver proofs.
 
-Task A02 delegates the routine singleton-overload corollary to Terra using
-the typechecked `SelectedFunctionMembership` proposition. No proof is
+The routine singleton-overload corollary is the open typechecked
+`SelectedFunctionMembership` proposition. No proof is
 supplied for that alias. Connecting the source derivation's selected targets
 to the complete resolved-tree visitor, modifier/external-call selections,
 actual execution roots and exact profile remains open. Published P9/P8
@@ -426,10 +426,9 @@ with a primitive parameter, omitted parameters, wrong-kind refusal and
 unchanged deeper-path refusal. These are populated selector controls, not
 full `Elaborated`, execution-root or profile witnesses.
 
-A03 and A04 in `TERRA-TODO.md` delegate typechecked routine derivation-field
-and external-overload transports (`DerivedModifierMembership` and
-`ExternalOverloadMembership`). Neither alias has a supplied proof. The main
-source-selector soundness arguments stay in this lane. Wiring all derived
+The routine derivation-field and external-overload transports are the open
+typechecked aliases `DerivedModifierMembership` and
+`ExternalOverloadMembership`. Neither alias has a supplied proof. Wiring all derived
 callee occurrences and actual execution queries to these initial-target
 facts and published dispatch closure remains open.
 

@@ -35,7 +35,7 @@ abbrev ComponentPipelineClosure : Prop :=
       {p with settings := Frontend.Settings.ofPipeline q}
       (SourceResolutions.produce {p with settings := Frontend.Settings.ofPipeline q}) c = true
 
-/-- Terra fills routine glue only. No instance is supplied or assumed. A
+/-- Open routine glue only. No instance is supplied or assumed. A
 conditional assembler is not a concrete actual-source Producer. -/
 structure PendingGlue (S : Spec) (reference : OperationalReference)
     (origins : SourceOrigins S) (roots : RootModel S) where

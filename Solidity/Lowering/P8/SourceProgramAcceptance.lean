@@ -45,7 +45,7 @@ theorem units_acceptance : UnitsAcceptance := by
           exact ih.symm
         simp only [bind, pure, Option.bind, List.all_cons, hf, hh, Bool.and_self, Option.isSome_some]
 
-/-- Routine component-guard composition for Terra; no witness supplied. -/
+/-- Open component-guard composition; no witness supplied. -/
 abbrev AdmitAcceptance : Prop := ∀ (i : Input) (p : CheckedSyntax.Parsed)
   (r : SourceResolutions.Packet) (cert : CheckedSyntax.Cert),
   (SourcePrograms.accept i p r cert).isSome =

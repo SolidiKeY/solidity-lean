@@ -47,6 +47,12 @@ copying, arbitrary source graph refinement, solc physical addresses.
 `Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean` proves typed
 memory/tuple call-form transport and constructs the frozen V3 producer from
 a checked call, explicit alias/profile agreement and real success/revert
-witnesses. RefArrayControls supplies an allocating array-call instance. Full
-tuple-call certification and finite-struct default framing for that call
-selector remain open; see [reference expansion](p1-call-reference-expansion.md).
+witnesses. RefArrayControls supplies an allocating array-call instance.
+`RuntimeFrameV3CallProducerRefTupleCall.lean` certifies tuple-call emission and
+`RuntimeFrameV3CallProducerRefTupleControls.lean` inhabits a mixed tuple call.
+`RuntimeFrameV3CallProducerRefStructDefaultTarget.lean` proves target execution
+and reserved-word framing for finite default plans,
+`RuntimeFrameV3CallProducerRefStructDefaultCompile.lean` uses them in the call
+compiler, and `RuntimeFrameV3CallProducerRefStructDefaultControls.lean` inhabits
+a nested finite-struct return; see
+[reference expansion](p1-call-reference-expansion.md).

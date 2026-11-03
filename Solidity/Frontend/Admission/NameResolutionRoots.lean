@@ -48,8 +48,8 @@ theorem path_registered (E : Env) (scope : Option String) (path : IdPath) (d : D
     exact h.1
   · cases h
 
-/-- Routine selected-overload corollary to be supplied by Terra; no proof is
-exported. This is the singleton-selection field of the source call rule. -/
+/-- Open selected-overload corollary; no proof is exported. This is the
+singleton-selection field of the source call rule. -/
 abbrev SelectedFunctionMembership : Prop :=
   ∀ (Γ : Ctx) (name : String) (filter : Decl → Bool) (d : Decl),
     (Γ.functions name).filter filter = [d] → d ∈ Γ.env.decls

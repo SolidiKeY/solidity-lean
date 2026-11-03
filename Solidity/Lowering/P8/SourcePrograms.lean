@@ -79,7 +79,7 @@ abbrev ProduceInputSound : Prop :=
     UnitsElaborate (SourceResolutions.produce p).units es ∧
     accept i p (SourceResolutions.produce p) cert = some es
 
-/-- Routine output identity packaging for Terra; no proof is supplied.
+/-- Open output identity packaging; no proof is supplied.
 The single-unit identity theorem is the published P9.elaborate_program. -/
 def UnitsRealize : List (String × Resolution) → Programs → Prop
   | [], [] => True

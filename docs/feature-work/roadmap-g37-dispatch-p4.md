@@ -68,10 +68,6 @@ Finite reference-struct default framing and the owned default-return selector
 are now proved, with a real cost5 nested-return dual-outcome producer. Concrete
 struct-argument and whole-return rebinding controls now derive a live old nested
 graph from actual checked allocation and retain its alias through another
-cost5 allocation, with real success/revert and kernel/evaluator observations;
-see `p1-call-reference-expansion.md`. The lane's
-last full VM gate attempt failed at `Calculus/TermSize.lean` with Lean exit134
-(`failed to create thread`). The coordinator's combined gates build it; this
-historical failure is not a passing VM gate or a reason to stop independent
-producer work. Full lane gates have not been rerun in this increment. G33
+cost5 allocation, with real success/revert and kernel-checked observations;
+see `p1-call-reference-expansion.md`. G33
 `Backend/MemoryOps/StructDefaults/` support is now published on master.

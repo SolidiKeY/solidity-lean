@@ -12,7 +12,7 @@ abbrev StrictBeforeRefusal : Prop :=
   Solidity.Frontend.Static.strictMetadataChecker.check (Solidity.Frontend.Static.InheritanceExamples.res Solidity.Frontend.Static.InheritanceExamples.missingVirtual) () () = true
 abbrev OverrideRefusal : Prop := SourceMetadata.unitCheck (Solidity.Frontend.Static.InheritanceExamples.res Solidity.Frontend.Static.InheritanceExamples.missingVirtual) = false
 
-/-- Unimplemented proof fields for Terra; no inhabitant is supplied. -/
+/-- Open proof fields; no inhabitant is supplied. -/
 structure PendingControls where
   positive : NontrivialPositive
   strictBeforeRefusal : StrictBeforeRefusal

@@ -1,8 +1,9 @@
 import Solidity.Evm.TryPanicSourceBodyImage
 
 /-! Existing Prog execution of the H8 normalized generic body. Only the two
-single-operation glue goals in TERRA-TODO remain parameters here; no desired
-reply, Xi result, source frame or whole-body execution is assumed. -/
+single-operation glue goals `PutThen` and `AllocateRun` remain open premises
+here; no desired reply, Xi result, source frame or whole-body execution is
+assumed. -/
 namespace Solidity.Evm.TryPanicSourceExecution
 open TryByteImage TryPanicProducer TryPanicCarrier TryPanicSourceBody TryPanicSourceBodyImage
 variable {C : Contract}

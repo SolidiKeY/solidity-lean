@@ -33,7 +33,5 @@ a real assembly instance.
 - `P6FrameControls`: a fresh represented cell (byte 64, not initially owned)
   through the actual MSTORE and Slice REVERT.
 
-The H16 Source edits (immutables, funds) are not on master: VY5 has recorded
-only the before timings (15-file Source closure, 492.5 s single-thread), no
-after timings.
+The H16 Source edits (immutables, funds) are not on master.
 

@@ -49,7 +49,7 @@ theorem program_from_containers : ProgramBuilder := by
   · obtain ⟨a, _, hs⟩ := ha
     exact List.all_eq_true.mp (hc a.args) site hs
 
-/-- Routine final specialization for Terra, not a supplied closed witness. -/
+/-- Open final specialization, not a supplied closed witness. -/
 abbrev ClosedPolicies : Prop := StatementPolicy ∧ WholeProgramPolicy
 
 /-- info: 'Solidity.Frontend.Admission.TypedObservationPolicy.statement_from_containers' depends on axioms: [propext, Classical.choice, Quot.sound] -/

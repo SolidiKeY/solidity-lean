@@ -48,8 +48,7 @@ no Source declaration execution or heap-content relation is asserted.
 references in each actual pipeline order. It derives both captured value
 relations and every reached caller binding from initial alignment; two drops
 restore the updated caller exactly. No operand-separation premise is required.
-Lane controls (VM-only, not on master) use distinct live objects, a typed storage path/root, both pipelines,
-same-slot operands, wrong maps and equal-content distinct identities. An
+No control module on master instantiates these theorems yet. An
 arbitrary input value relation does not establish global heap alias reflection.
 These supported clauses do not supply a general elaborator/operand producer,
 copy/delete/lifetime validity or graph admission. G16/G17 and Backfill A/B stay
@@ -175,10 +174,7 @@ from `SelectionOK`, those field premises, nonempty/distinct fields and any valid
 comparison rank. The rank is proof-only; neither successful execution of the
 lowerer nor the producer's computed rank checks are premises.
 
-A lane-only (not on master) three-node Source environment distinguishes physical declaration
-index 2 from graph index 0 and comparison rank 30 from computed rank 3. Controls
-reject an incorrect target node, invalid rank, inline cycle, unsupported bytes
-and duplicate field keys. This establishes component completeness relative to
+No control module on master instantiates these theorems yet. This establishes component completeness relative to
 structural premises; deriving them from accepted Source remains open. No P8
 producer instance, independent Source execution preservation or constructor
 coverage is supplied. G16/G17 and Backfill A/B remain partial; G18.01 still needs
@@ -199,15 +195,8 @@ postbinding from the initial `IntegerLocalFamily` and two initial reads/ranges.
 output-range, desired-run or postrelation premise. `source_from_pair` alone is a
 conditional composition helper; the concrete clauses discharge its pair premise.
 
-Lane controls (VM-only, not on master) execute assignment of 200
-to a local initially 250: legacy observes result 194 and captures `[200,250]`;
-viaIR observes 144 and `[200,200]`. Both restore the complete updated caller,
-including live memory/storage references and world/global fields. Same-slot,
-fresh Boolean context, nonwrapping 7+3 and all 32 approved max+1 boundaries
-are covered. Actual unnarrowed and uncaptured/stale-read programs distinguish
-incorrect results. Addition is commutative; operand roles are distinguished by
-ordered captures rather than a reversed-argument result claim. Checked Source
-overflow controls do not establish target panic-payload transport.
+No control module on master instantiates these theorems yet. Checked Source
+overflow does not establish target panic-payload transport.
 
 Queue: G16/G17 and Backfill A/B remain partial. G18.01 retains component
 completeness but still needs accepted-source coverage, rank existence and the

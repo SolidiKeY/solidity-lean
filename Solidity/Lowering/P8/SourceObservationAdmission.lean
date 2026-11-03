@@ -47,7 +47,7 @@ theorem sound : Sound := by
     · cases h
 
 /-- Routine exact-guard equivalence, not full approved-profile equivalence.
-Delegated to Terra; no inhabitant is supplied by this alias. -/
+Open obligation; no inhabitant is supplied by this alias. -/
 abbrev ExactObservationGuard : Prop := ∀ es, check es = true ↔ Allowed es
 /-- info: 'Solidity.Lowering.P8.SourceObservationAdmission.sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms sound

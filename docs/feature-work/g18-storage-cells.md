@@ -12,4 +12,4 @@ This is partial G18.02 preparation. Mapping/fixed-array inhabited applications, 
 
 
 
-Routine derived frame-law statements are in [TERRA-TODO](../../TERRA-TODO.md); no missing routine proof is assumed by the checked updated theorem. The nine generated #guard_msgs pins check the scoped standard axiom observations.
+Routine derived frame-law statements remain open obligations; no missing routine proof is assumed by the checked updated theorem. The nine generated #guard_msgs pins check the scoped standard axiom observations.

@@ -73,10 +73,7 @@ Source identity0 is related to target address128, not equated with it.
 source_observation, target_observation and missing_export_refused are
 kernel-checked in addition to the general simulation and inhabited producer.
 
-Independent #eval source/compiled checks are in
-the lane-only fixture ReferenceCallEvaluation.lean (not on master) and
-the lane-only fixture TupleCallEvaluation.lean (not on master). Omitting the tuple export copies
-leaves private parameter words0/128 in result slots instead of128/7. Capacity
+Omitting the tuple export copies leaves private parameter words0/128 in result slots instead of128/7. Capacity
 refusal rejects the real cost1 premise at W-1; it is not a runtime panic claim.
 Literal revert stays selector-refused. The old core tuple selector's refusal
 is retained; these modules expose a new checked emitter rather than modifying
@@ -115,8 +112,7 @@ Source graph identities are root3/inner2/child1, old array0, heap size4, empty
 child and zero primitive defaults. Target root133 links to inner131 and
 child130; cursor135, old array128, stack77, runtime cursor20 and sentinel99
 remain correct. These are identity/base relations, not raw ID/address equality.
-Both observations and missing-export refusal are kernel-checked and independently
-#eval-checked in the lane-only fixture StructDefaultCallEvaluation.lean (not on master).
+Both observations and missing-export refusal are kernel-checked.
 Capacity refusal is the real cost5 premise at W-1, not a Panic41 claim. Literal
 revert, zero frame base and reference-element-array defaults stay refused.
 
@@ -135,9 +131,8 @@ Index0 succeeds and index2 really bare-reverts after allocation. Source returns
 old identity3, retained caller identity3 and old child identities2/1, with heap
 size7. Target retains both old pointers133 and the old graph131/130, while the
 unused fresh default graph occupies135..139 and the cursor advances135→140.
-The full source/target observations and missing-export refusal are kernel-checked
-and independently #eval-checked in
-the lane-only fixture StructRebindEvaluation.lean (not on master). default_root_refused rejects
+The full source/target observations and missing-export refusal are kernel-checked.
+default_root_refused rejects
 returning the fresh identity6 instead of the required old alias3. The V3
 producer keeps hprof explicit, supplies real dual witnesses and proves universal
 same-input physical coverage.
@@ -146,13 +141,7 @@ seed_executed and machine_runtime reuse actual checked execution/footprint to
 preserve the runtime cursor word. This proof sharing avoids re-normalizing the
 allocation prefix; no representation or simulation premise is added.
 
-## Remaining validation
-
-These owned semantic increments are proved with inhabited controls. Full lane
-gates and coordinator-generated root registrations remain outstanding. The
-original gate remains subject to the coordinator's VA1 H6 TypeExamples split
-queue; no host result substitutes for VM validation. S03-PANIC41 remains under
-VY5's serial Source evaluator ownership until release.
+## Source default bridge
 
 StructDefaults.SelectionControls ties the separate G33 source bridge's
 pair/nested controls to actual defaultPlan? results and checks the source
@@ -162,8 +151,7 @@ CallSite lowering is enabled.
 
 ## Validation and review
 
-Use the shared per-file gate for the three new tuple modules and evaluator
-fixture; build RuntimeFrameV3CallProducerRefTupleControls for their affected
+Use the shared per-file gate for the three new tuple modules; build RuntimeFrameV3CallProducerRefTupleControls for their affected
 closure. Actual axiom prints use only a subset of propext, Classical.choice and
 Quot.sound. Basic automation precedes the hard prefix/compaction/emitter proofs.
 For the exact target observation, rfl and ordinary decide hit the unchanged
@@ -171,5 +159,5 @@ heartbeat limit; decide +kernel succeeds without increasing any budget.
 Independent read-only finder and skeptic found no soundness/vacuity defect.
 Their stale typed-module header finding was corrected. Both also reviewed the
 new selected-plan framing, declaration selector and genuine nested-return
-controls without Lean/server/build use and reported no defect. Full lane gates remain
-for the lane checkpoint; no original-assignment completion is claimed here.
+controls without Lean/server/build use and reported no defect. No
+original-assignment completion is claimed here.

@@ -62,7 +62,7 @@ remain the semantic contract; none of these changes promotes admission status.
 - The lane-owned tests, JSON fixtures, pinned compiler harnesses and
   scripts/yul-word-vectors.py are included. The generator supports --check;
   generated integer vectors remain finite kernel controls, not universal EVM
-  agreement. Six routine laws remain delegated in TERRA-TODO.md.
+  agreement. Six routine laws remain open.
 
 The full source boundary and pure calculus assignment remains unfinished.
 

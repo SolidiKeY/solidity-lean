@@ -29,18 +29,21 @@ Producers quantify over arbitrary states; their post-relations are derived.
 - `Physical{Memory,FrameImage,WorldUnwind}Controls.lean`: concrete `WordFrame`,
   `UintArrayAt` and frame-image instances.
 
-## Unproved targets
+## Assembly targets and clients
 
-All seven unproved target definitions now live in `PhysicalLocalDeleteGoal.lean`:
-`UintArrayReframeGoal`, `ResolvedDeletePhysicalGoal`, `ReferenceStoreClientGoal`,
-`PointerFrameAliasClientGoal`, `ReferenceArrayClientGoal`, `PrimitiveChildStoreGoal`
-and `Controls.ReframeStackClientGoal`. They are type-checked propositions, not
-facts or assumptions. The private reference-client fixtures move with their
-targets; the proved control module exports its unchanged input fixture tuple.
-Producer modules no longer carry client targets or dead reference fixtures.
-The three producers `reference_store`, `reference_store_frames` and
-`uint_array_cells_eq` still have no proved client. The compiled local delete
-assembly remains open.
+`PhysicalLocalDeleteGoal.lean` states seven target propositions and proves each
+from actual producer executions, not by assuming a contract:
+`uint_array_reframe` (`UintArrayReframeGoal`, a client of
+`uint_array_cells_eq`), `resolved_delete_physical`
+(`ResolvedDeletePhysicalGoal`: the compiled `deleteLocalCode` run for an indexed
+`uint` delete with the reached byte relation), `reference_store_client` and
+`reference_store_frames_client` (clients of `reference_store` and
+`reference_store_frames`), `pointer_frame_alias_client`,
+`reference_array_client`, `primitive_child_store` (with the populated
+`primitive_child_store_client`, a stale-state negative and an out-of-bounds
+revert endpoint) and `Controls.reframe_stack_client_goal`. These are local
+symbolic word/byte relations, not whole Source transaction or external
+compiler/EVM adequacy.
 
 `PhysicalWordFrame.word_bytes_length` keeps its compatibility name but delegates
 the exact statement to `Environment.wordBytes_length`; there is no second proof.
@@ -57,8 +60,8 @@ header and a pointer-aware footprint at the parent's actual live slots.
 child_bytes derives the selected typed child's serialized address from initial
 word equality, without assuming an injective address map. set/store derive the
 reached relation from actual writes. This is one dynamic parent, not child-body
-representation, physical child liveness or a recursive graph. The client target
-is unproved.
+representation, physical child liveness or a recursive graph. Its populated
+client is `reference_array_client`.
 
 ## Primitive-write noninterference
 
@@ -66,4 +69,4 @@ PhysicalReferenceChild derives typed object separation from incompatible
 reference/primitive parent types and requires physical header/slot separation
 independently. Its frame law is not checked child execution or Source path
 reachability. The numeric8/pointer256 counterexample refutes unconditional
-preservation; the execution-composition target remains unproved.
+preservation; the execution composition is `primitive_child_store`.

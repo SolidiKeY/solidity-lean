@@ -90,16 +90,16 @@ profile coverage. `PendingRestoration` stays in v1.
 
 ## Master integration review
 
-Version 2 was merged from c3765ded: the module only; its controls stay on the
+Version 2 was merged as the module only; its controls stay on the
 producer branch. Read-only reviews confirmed that each `SuccessfulEntry` or
 `RevertingEntry` witness instantiates the matching claim, and found the
 remaining weaknesses now listed above.
 
-Version 1 was merged from f4fa6f12: the interface and its import closure only.
+Version 1 was merged as the interface and its import closure only.
 The other `RuntimeFrame*` modules were merged later (Result and Reference
-with v3, the recursive components and call compilers below; Bytes is still
-out); the the lane-only fixture  (not on master) fixtures and the modules of other lanes on that
-branch were not merged.
+with v3, the recursive components and call compilers below, and
+`RuntimeFrameBytes.lean`); lane fixtures and the modules of other lanes on that
+branch are not on master.
 
 Read-only finder and skeptic reviews found no `sorry`, axiom or heartbeat
 change, and no import or layer problem. They found the vacuity weakness above,
@@ -201,20 +201,21 @@ divergence and approved-profile provenance remain open (P1 lane).
 
 ## Integration record (v3)
 
-Merged from the lane head fd08f0c1: `RuntimeFrameInterfaceV3` and its import
-closure (the modules above). Not merged: the the lane-only fixture  (not on master) clients
-and controls, including the v3 interface controls, the void-call and
-recursive descent/unwind/countdown clients and their axiom-check scripts, the
-other `RuntimeFrame*` modules (most merged later, see below) and staged
-modules of other lanes. The lane documents those clients; on
-master the producers above are checked, but no client of them except
-`RuntimeFrameV3CallProducerControls` is. Read-only finder and skeptic reviews
+Merged: `RuntimeFrameInterfaceV3` and its import closure (the modules above).
+The lane's v3 interface controls, void-call and recursive descent/unwind
+clients, their axiom-check scripts and the staged modules of other lanes are
+not on master; most other `RuntimeFrame*` modules were merged later (see
+below). On master the producers above are checked; their clients are
+`RuntimeFrameV3CallProducerControls.lean`, the RefArray, RefTuple,
+RefTupleFrame, StructDefault and StructRebind controls of
+`RuntimeFrameV3CallProducerRef.lean`, and `RuntimeFrameV3CountdownWitness.lean`.
+Read-only finder and skeptic reviews
 confirmed the bare-revert closure and the remaining limits above.
 
 
 ## Recursive countdown components and call compilers
 
-Merged from the lane head b232ca6d. All concern the effect-free countdown
+All concern the effect-free countdown
 family of `RuntimeFrameV3RecursiveSource` and hand-written target images (no
 compiler maps source syntax to them); none inhabits `PendingRecursiveReturns`.
 

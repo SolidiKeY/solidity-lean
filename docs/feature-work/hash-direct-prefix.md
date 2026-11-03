@@ -265,8 +265,8 @@ Next owned hard edge: a concrete successful call/continuation split or repeated
 call-boundary composition. Separate lists do not certify a flattened nested or
 global trace. Source/native adequacy, canonical input realization and native hash
 compatibility remain open.
-Generic receipt append/split/count and guard projection glue are routine Terra
-tasks in `TERRA-TODO.md`. Original source/compiler/native/heap/call/catch
+Generic receipt append/split/count and guard projection glue remain open
+routine obligations. Original source/compiler/native/heap/call/catch
 correspondence and G45.03 whole structured simulation remain open.
 
 Focused owning diagnostics, exact public types/axioms and source/evidence

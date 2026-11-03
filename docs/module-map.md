@@ -1391,11 +1391,24 @@ see [the checkpoint boundary](feature-work/memory-operation-proofs.md).
 | `Backend/Aggregates/G18Storage.lean`, `Backend/Aggregates/G18Graph.lean` | G18.02: `Env.pathTy` composition and step typing; `DeclarationGraph` field and storage-path typing ([G18](feature-work/g18-aggregates.md)). |
 | `Backend/Aggregates/G18Memory.lean`, `Backend/Aggregates/G18ReferenceSequence.lean`, `Backend/Aggregates/G18Physical.lean` | G18.03: nested child write with alias observations; rebind then mutate; ordered `uint`-array observations and REVERT endpoint. |
 | `Backend/Aggregates/G18{Memory,Distinct}Client.lean`, `Backend/Aggregates/G18{,Distinct,Physical,GraphRoot}Controls.lean` | Fixtures instantiating the consumers; typing, sequencing and wrong-candidate controls. |
+| `Backend/Aggregates/G18StorageValues.lean` | Actual Source/IR integer cell relation, derived save availability and disjoint write preservation. |
+| `Backend/Aggregates/G18StorageClient.lean` | Inhabited declared Basket array client and composed actual writes with ordered observations. |
+| `Backend/Aggregates/G18StorageCellControls.lean` | Populated wrong-output/order/phase, path/slot and width controls for scoped storage consumers. |
+| `Backend/Aggregates/G18ScalarMapping.lean` | All-key Source/intrinsic mapping write and published symbolic SLOAD/SSTORE copy consumer. |
+| `Backend/Aggregates/G18ScalarMappingControls.lean` | Populated unsigned/signed mapping certificates, complete frame and outcome/alias/width controls. |
+| `Backend/Aggregates/G18SourceMapping.lean` | Actual persistent Source read/write phases composed with the captured-key mapping target certificate; static refusal remains distinct. |
+| `Backend/Aggregates/G18SourceMappingControls.lean` | Populated actual Env.cellTy client, account postcondition, journal undo, complete Source frame and stale/static controls. |
+| `Backend/Aggregates/G18MappingExpression.lean` | Actual resolved Boolean-key integer mapping reference/read/capture/assignment execution, complete success and static empty-revert outcomes. |
+| `Backend/Aggregates/G18MappingExpressionControls.lean` | Inhabited Source globals, pipeline/sample baselines, exact low horizons and certificate-derived wrong-output/stale-state controls. |
+| `Backend/Aggregates/G18ArrayAccess.lean` | Declared dynamic-array cell typing, actual stored-length/bounds executions and Source-to-intrinsic selected-cell read transport. |
+| `Backend/Aggregates/G18ArrayAccessControls.lean` | Populated Basket length/data witness, exact panic branches and missing-length/wrong-location/type-versus-bounds controls. |
 | `Backend/MemoryOps/PhysicalWordFrame.lean`, `Backend/MemoryOps/PhysicalByteJournal.lean` | P6: word cell to 32-byte span; paired word/byte MSTORE; byte journal and REVERT reads ([P6](feature-work/physical-memory-interface.md)). |
 | `Backend/MemoryOps/PhysicalSourceUint.lean`, `Backend/MemoryOps/PhysicalUintWrite.lean`, `Backend/MemoryOps/PhysicalUintDelete.lean`, `Backend/MemoryOps/PhysicalArrayReframe.lean` | `UintArrayAt` Source/intrinsic/word/byte relation; read, write, delete as zero write; reframe cell agreement. |
 | `Backend/MemoryOps/PhysicalReferenceStore.lean`, `Backend/MemoryOps/PhysicalPointerFrame.lean` | Reference-array store with scaled-pointer bytes; `PointerFrame`. |
 | `Backend/MemoryOps/PhysicalFrameImage.lean`, `Backend/MemoryOps/PhysicalWorldUnwind.lean` | Frame-memory byte image; world journal, reason emitter and local checkpoint unwind. |
-| `Backend/MemoryOps/PhysicalLocalDeleteGoal.lean`, `Backend/MemoryOps/Physical{Memory,FrameImage,WorldUnwind}Controls.lean` | Unproved target statements; concrete controls. |
+| `Backend/MemoryOps/PhysicalReferenceArray.lean` | Typed reference-parent pointer-byte layout and redirection. |
+| `Backend/MemoryOps/PhysicalReferenceChild.lean` | Reference parent framing across separated primitive writes. |
+| `Backend/MemoryOps/PhysicalLocalDeleteGoal.lean`, `Backend/MemoryOps/Physical{Memory,FrameImage,WorldUnwind}Controls.lean` | Assembly/client target statements with their proofs; concrete controls (`PhysicalMemoryControls` exports the fixture inputs). |
 | `Backend/MemoryOps/CalldataRead.lean` | Published decoded calldata objects and typed memory slice reads |
 | `Backend/MemoryOps/CalldataSequence.lean` | Option composition of actual immutable decoded transfers. No payload is an |
 | `Backend/MemoryOps/CalldataSequenceChildren.lean` | Existing immutable child-table correspondence at actual sequence outputs. |
@@ -1755,9 +1768,18 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3RecursiveUnwind.lean` | Runtime descent prefixes at every horizon and LIFO return loop with captured caller recovery (target side only). |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean` | Actual `callRec` countdown family: all-horizon execution and `RecursiveReturnCoherence`; no v3 recursive instance. |
 | `Backend/InternalFlow/RuntimeFrameV3CallProducer.lean`, `Backend/InternalFlow/RuntimeFrameV3CallProducerControls.lean` | v3 `PendingCallProducer` for primitive value-returning calls (`coverage`, `returns`, `bare_revert`, `make`) and an applied control with real success and revert runs. |
-| `Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean` | Typed memory-return and tuple call forms and the remaining `PendingCallProducer` target for them; no inhabitant. |
+| `Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean` | v3 `PendingCallProducer` for typed memory-return and tuple call forms (`coverage`, `returns`, `bare_revert`, `make`); success/revert witnesses and profile agreement stay explicit inputs. |
 | `Backend/InternalFlow/RuntimeFrameV3BareRevertProducer.lean` | P1-REVERT: `bare_revert` for any statement; `directProducer`/`callProducer` inhabit `PendingBareRevertProducer` on one fixture with real reverting runs. |
 | `Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean` | P1-THUNK: `PendingFixedCallRecProducer` for one array-writing thunk with real success and out-of-bounds revert runs. |
+| `Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean` | Populated core-only countdown endpoint; actual prefixes/arguments, full caller reconstruction and ordered observations. No general recursive producer claim. |
+| `Backend/InternalFlow/RuntimeFrameV3BarePrefix.lean` | Derived reached entry/allocation input and exact bare-revert execution after a successful checked prefix; no rollback/profile closure. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatorReturn.lean` | Recursive return allocator transport and inhabited callee-only ownership client; zero source allocation, with initial ownership explicit. |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveResult.lean` | Actual allocator-backed native body/runtime `GrowingResult` client; retains shallow exhaustion mismatch. |
+| `Backend/InternalFlow/RuntimeFrameV3ParentRestore.lean` | Actual first-parent typed restore and allocator transport from reached child/saved words, with inhabited countdown client. |
+| `Backend/InternalFlow/RuntimeFrameV3ParentPrefixes.lean` | Typed actual running unwind prefixes, remaining payload transport and inhabited ordered-observation controls. |
+| `Backend/InternalFlow/RuntimeFrameV3ParentStop.lean` | Final false guard, typed completed unwind and stable later horizons, with populated and empty-history controls. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeParents.lean` | Actual indexed native child-call/return clauses and represented parent poststate linkage; exhaustion and child-export controls. |
+| `Backend/InternalFlow/RuntimeFrameBytes.lean` | P6-backed numeric caller-cell restoration: byte-image save/clobber/restore runs on the existing machines; no dynamic loads or source/world rollback. |
 | `Backend/StructuredFlow/BranchSelector.lean`, `Backend/StructuredFlow/ExitSelector.lean`, `Backend/StructuredFlow/CoreScopes.lean`, `Backend/StructuredFlow/CoreSequence.lean` | G36.01 target branch/exit selectors and core-compiler scope adapters ([G36](feature-work/roadmap-g36-structured-flow.md)). |
 | `Backend/StructuredFlow/{Branch,Exit,CoreScope,CoreSequence}Controls.lean` | Concrete selector, exit and scope controls. |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveActivation.lean`, `RuntimeFrameV3RecursiveDescent.lean`, `RuntimeFrameV3RecursiveHistory.lean` | Countdown family: checked activation bridge, descent at every reached horizon, saved parent history and nearest-parent pop. |
@@ -1899,6 +1921,9 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/Readonly/SourceBuiltinEffects.lean` | Strictly smaller-bound actual builtin sequencing/history step, including refusals and opaque precompile handling. |
 | `Lowering/Readonly/SourceExpressionParts/*.lean`, `Lowering/Readonly/SourceExpressionEffects.lean` | Generated exact constructor cuts and exhaustive actual expression successor history; full evaluator induction remains separate. |
 | `Lowering/Readonly/SourceReadBuiltinControls.lean` | Typed seeded path/construction/builtin observations, an actual At0 expression client and named gas-refusal negative. |
+| `Lowering/Readonly/SourceBodyEffects.lean`, `Lowering/Readonly/SourceBodyControls.lean` | Actual internal-body, typed item and modifier successor journal effects; inhabited static modifier observations. Full history induction remains open. |
+| `Lowering/Readonly/SourceLoopEffects.lean`, `Lowering/Readonly/SourceLoopControls.lean` | Actual loop successor journal effects and15 populated-state exit/refusal/exhaustion controls; smaller-bound premise retained. |
+| `Lowering/Readonly/SourceDispatchEffects.lean`, `Lowering/Readonly/SourceDispatchControls.lean` | Exact selector leaves and exhaustive dispatch successor journal effect;13 finite observations and inhabited client, not full call/native adequacy. |
 
 
 ## V07 source lowering
@@ -1959,86 +1984,6 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/StorageOps/NumericTraversal.lean`, `Backend/StorageOps/CopyTransport.lean`, `Backend/StorageOps/LayoutAccess.lean` | `FiniteRun` numeric transport, footprints, G27 layout access. |
 | `Backend/StorageOps/TargetArrayCopy.lean`, `Backend/StorageOps/TargetArrayClear.lean`, `Backend/StorageOps/OutputRootComplete.lean` | Structured target loops; nested-array root composition. |
 | `Backend/StorageOps/RuntimeCopyRepeat.lean`, `Backend/StorageOps/RuntimeCopyComposition.lean`, `Backend/StorageOps/TargetArrayRepeat.lean` | Runtime-header repetition and footprint shrinkage. |
-| Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
-
-## Inline assembly (Yul)
-| Modules | Purpose |
-|---|---|
-| `Yul.lean`, `Yul/Words.lean`, `Yul/Builtins.lean`, `Yul/Syntax.lean`, `Yul/ExpressionCheck.lean` | Yul library root; words, builtins, intrinsic syntax and checking ([VY1](feature-work/inline-assembly-vy1.md)). |
-| `Yul/BlockTyping.lean`, `Yul/ClosedRun.lean`, `Yul/OpenComposition.lean` | Block typing; closed fuelled execution; direct tier-A runner. |
-| `Yul/WordLogic.lean`, `Yul/WordRules.lean`, `Yul/WordAdapterLogic.lean` | Shallow Lean-only word logic and raw-cell runner. |
-| `Yul/RawSource.lean`, `Yul/RawSourceAdapter.lean` | Concrete bool-control Source statement adapters. |
-| `Yul/Checks/**`, `Frontend/SolcJson/Yul*.lean` | Kernel controls and integer-oracle vectors; solc JSON ingress. |
-| `Evm/MemoryLoopHorizon.lean`, `Evm/MemoryLoopFiniteHorizon.lean` (+`Controls`) | P5 all-depth and finite-horizon loop transport ([VY2](feature-work/yul-physical-memory.md)). |
-| `Evm/MemoryRecursiveDemandViews.lean`, `Evm/MemoryRecursiveDemandBounds.lean` | Typed recursive demand/cost cases and allocation-word bounds from computed finite heads and stopping bodies. |
-| `Evm/MemoryRecursiveOneTurn.lean` | Stopping-body prefix-room reduction and full recursive loop transport with initial body room. |
-| `Evm/MemoryRecursiveCert.lean`, `Evm/MemoryRecursiveCompile.lean`, `Evm/MemoryRecursiveSound.lean`, `Evm/MemoryRecursiveDispatch.lean`, `Evm/MemoryMixedLoop.lean` | Recursive and mixed-body loop certificates, compiler, correctness, dispatch fallback. |
-| `Yul/Views/**` | Byte/word memory views, codecs, arrays, objects, heap inventories. |
-| `Yul/Adapters/P6ByteWriteOrder{,Controls}` | Complete typed-frame disjoint byte-write commutation, metadata and empty-span controls. |
-| `Yul/Adapters/MemoryBytes{,Controls}` | Exact byte-view/backend snapshot-copy and unchanged-map agreement; overlap controls. |
-| `Yul/Adapters/RawPhysical{,Controls}` | Existing H11 raw-local frame to bounded P6 physical bytes; explicit readback boundaries and overlay administration |
-| `Yul/Views/ComputedPlacement{,Controls}` | Checked actual-heap ordinary placement witness with exact unsupported/overflow accounting. |
-| `Yul/Views/ComputedAllocation{,Controls}` | Actual Source allocation preserves computed old geometry and derives fresh extent and every-initial-H MemOK; target refinement remains separate. |
-| `Yul/Adapters/ComputedFrameHeap{,Controls}` | Computed geometry, canonical inventory and complete Source/frame roundtrip; allocator refinement remains separate. |
-| `Yul/Adapters/**` | Source/frame-memory agreement with the P6 interface; writeback and slices. |
-| `Yul/Compilation/**` | Target-side Yul compilation combinators: stack slots, lowering, opcodes, control ([VY3](feature-work/inline-assembly-vy3.md)). |
-| `Yul/Compilation/PureStatements.lean`, `Yul/Compilation/ScopedStatements.lean` | Intrinsic Yul skip/assignment/sequence and initialized/zero scope compilation; actual Yul evaluator/Scalar certificates, not full Source/G24 adequacy. |
-| `Yul/Compilation/OpenExpressions.lean`, `Yul/Compilation/OpenStatements.lean`, `Yul/Compilation/ScopedRawStatements.lean` | Actual VY1 raw binding pack/evaluation/writeback consumers; same-fuel raw Yul/Scalar compilation, with typed Solidity/G24 embedding still open. |
-| `Yul/Compilation/NormalControl.lean`, `Yul/Compilation/NormalStackTransport.lean` | Actual intrinsic nested-normal-control compiler evidence; complete stack-only block execution in the existing model, with native/Source/G24 adequacy open. |
-| `Yul/Compilation/PhysicalStore.lean` | Actual VY2 byte-view/typed-image agreement with the existing constant-byte compiler slice; native/Source/G24/MemOK closure remains open. |
-| `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](feature-work/inline-assembly-vy4.md)). |
-| `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](feature-work/vy5-composition.md)). |
-| `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
-## Label execution
-| Module | Purpose |
-|---|---|
-| `Backend/LabelExec/Step.lean`, `Backend/LabelExec/Fetch.lean`, `Backend/LabelExec/Packets.lean` | Byte-PC step over the numeric slice and JUMP/JUMPI/JUMPDEST; fetch behind a prefix; branch packets ([label execution](feature-work/backend-label-exec.md)). |
-| `Backend/LabelExec/Assembly.lean`, `Backend/LabelExec/Loops.lean`, `Backend/LabelExec/ScalarTransfer.lean` | Assembled jumps and tests; top-level loop header/backedge; `Scalar.step` lifting. |
-| `Backend/Aggregates/G18StorageValues.lean` | Actual Source/IR integer cell relation, derived save availability and disjoint write preservation. |
-| `Backend/Aggregates/G18StorageClient.lean` | Inhabited declared Basket array client and composed actual writes with ordered observations. |
-| `Backend/Aggregates/G18StorageCellControls.lean` | Populated wrong-output/order/phase, path/slot and width controls for scoped storage consumers. |
-| `Backend/Aggregates/G18ScalarMapping.lean` | All-key Source/intrinsic mapping write and published symbolic SLOAD/SSTORE copy consumer. |
-| `Backend/Aggregates/G18ScalarMappingControls.lean` | Populated unsigned/signed mapping certificates, complete frame and outcome/alias/width controls. |
-| `Backend/Aggregates/G18SourceMapping.lean` | Actual persistent Source read/write phases composed with the captured-key mapping target certificate; static refusal remains distinct. |
-| `Backend/Aggregates/G18SourceMappingControls.lean` | Populated actual Env.cellTy client, account postcondition, journal undo, complete Source frame and stale/static controls. |
-| `Backend/Aggregates/G18MappingExpression.lean` | Actual resolved Boolean-key integer mapping reference/read/capture/assignment execution, complete success and static empty-revert outcomes. |
-| `Backend/Aggregates/G18MappingExpressionControls.lean` | Inhabited Source globals, pipeline/sample baselines, exact low horizons and certificate-derived wrong-output/stale-state controls. |
-| `Backend/Aggregates/G18ArrayAccess.lean` | Declared dynamic-array cell typing, actual stored-length/bounds executions and Source-to-intrinsic selected-cell read transport. |
-| `Backend/Aggregates/G18ArrayAccessControls.lean` | Populated Basket length/data witness, exact panic branches and missing-length/wrong-location/type-versus-bounds controls. |
-| `Backend/MemoryOps/PhysicalReferenceArray.lean` | Typed reference-parent pointer-byte layout and redirection. |
-| `Backend/MemoryOps/PhysicalReferenceChild.lean` | Reference parent framing across separated primitive writes. |
-| `Backend/MemoryOps/PhysicalLocalDeleteGoal.lean` | Centralized unproved physical assembly/client targets; existing fixture inputs are exported by PhysicalMemoryControls. |
-### Runtime countdown witness
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean` | Populated core-only countdown endpoint; actual prefixes/arguments, full caller reconstruction and ordered observations. No general recursive producer claim. |
-### Bare failure after a checked prefix
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3BarePrefix.lean` | Derived reached entry/allocation input and exact bare-revert execution after a successful checked prefix; no rollback/profile closure. |
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3AllocatorReturn.lean` | Recursive return allocator transport and inhabited callee-only ownership client; zero source allocation, with initial ownership explicit. |
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3RecursiveResult.lean` | Actual allocator-backed native body/runtime `GrowingResult` client; retains shallow exhaustion mismatch. |
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3ParentRestore.lean` | Actual first-parent typed restore and allocator transport from reached child/saved words, with inhabited countdown client. |
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3ParentPrefixes.lean` | Typed actual running unwind prefixes, remaining payload transport and inhabited ordered-observation controls. |
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3ParentStop.lean` | Final false guard, typed completed unwind and stable later horizons, with populated and empty-history controls. |
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3NativeParents.lean` | Actual indexed native child-call/return clauses and represented parent poststate linkage; exhaustion and child-export controls. |
-| `Lowering/Readonly/SourceBodyEffects.lean`, `Lowering/Readonly/SourceBodyControls.lean` | Actual internal-body, typed item and modifier successor journal effects; inhabited static modifier observations. Full history induction remains open. |
-| `Lowering/Readonly/SourceLoopEffects.lean`, `Lowering/Readonly/SourceLoopControls.lean` | Actual loop successor journal effects and15 populated-state exit/refusal/exhaustion controls; smaller-bound premise retained. |
-| `Lowering/Readonly/SourceDispatchEffects.lean`, `Lowering/Readonly/SourceDispatchControls.lean` | Exact selector leaves and exhaustive dispatch successor journal effect;13 finite observations and inhabited client, not full call/native adequacy. |
-| the lane-only fixture SourceCopyCommutation.lean (not on master) | Above-core Source copy runtime footprints and word commutation; Source-layer integration pending. |
-| the lane-only fixture SourceCopyCommutationControls.lean (not on master) | Actual Source both-order clients; journal/state and overlap/order controls. |
 | `Lowering/StorageOps/SourceScalarDeleteLog.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
 | `Lowering/StorageOps/SourceArrayDeleteTarget.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
 | `Lowering/StorageOps/SourceReadFrames.lean` | Registered above-core actual Source storage operation law/client; independent Source semantics, no whole-pipeline closure. |
@@ -2084,10 +2029,47 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/StorageOps/TwoClearRepresentationControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
 | `Backend/StorageOps/LoopLaws.lean` | Shared intrinsic loop-turn/exit/single-loop adapters with explicit operational premises |
 | `Backend/StorageOps/LoopLawsControls.lean` | Populated ordered positive/negative loop controls and concrete termination witness |
+| Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
+
+## Inline assembly (Yul)
+| Modules | Purpose |
+|---|---|
+| `Yul.lean`, `Yul/Words.lean`, `Yul/Builtins.lean`, `Yul/Syntax.lean`, `Yul/ExpressionCheck.lean` | Yul library root; words, builtins, intrinsic syntax and checking ([VY1](feature-work/inline-assembly-vy1.md)). |
+| `Yul/BlockTyping.lean`, `Yul/ClosedRun.lean`, `Yul/OpenComposition.lean` | Block typing; closed fuelled execution; direct tier-A runner. |
+| `Yul/WordLogic.lean`, `Yul/WordRules.lean`, `Yul/WordAdapterLogic.lean` | Shallow Lean-only word logic and raw-cell runner. |
+| `Yul/RawSource.lean`, `Yul/RawSourceAdapter.lean` | Concrete bool-control Source statement adapters. |
+| `Yul/Checks/**`, `Frontend/SolcJson/Yul*.lean` | Kernel controls and integer-oracle vectors; solc JSON ingress. |
+| `Evm/MemoryLoopHorizon.lean`, `Evm/MemoryLoopFiniteHorizon.lean` (+`Controls`) | P5 all-depth and finite-horizon loop transport ([VY2](feature-work/yul-physical-memory.md)). |
+| `Evm/MemoryRecursiveDemandViews.lean`, `Evm/MemoryRecursiveDemandBounds.lean` | Typed recursive demand/cost cases and allocation-word bounds from computed finite heads and stopping bodies. |
+| `Evm/MemoryRecursiveOneTurn.lean` | Stopping-body prefix-room reduction and full recursive loop transport with initial body room. |
+| `Evm/MemoryRecursiveCert.lean`, `Evm/MemoryRecursiveCompile.lean`, `Evm/MemoryRecursiveSound.lean`, `Evm/MemoryRecursiveDispatch.lean`, `Evm/MemoryMixedLoop.lean` | Recursive and mixed-body loop certificates, compiler, correctness, dispatch fallback. |
+| `Yul/Views/**` | Byte/word memory views, codecs, arrays, objects, heap inventories. |
+| `Yul/Adapters/P6ByteWriteOrder{,Controls}` | Complete typed-frame disjoint byte-write commutation, metadata and empty-span controls. |
+| `Yul/Adapters/MemoryBytes{,Controls}` | Exact byte-view/backend snapshot-copy and unchanged-map agreement; overlap controls. |
+| `Yul/Adapters/RawPhysical{,Controls}` | Existing H11 raw-local frame to bounded P6 physical bytes; explicit readback boundaries and overlay administration |
+| `Yul/Views/ComputedPlacement{,Controls}` | Checked actual-heap ordinary placement witness with exact unsupported/overflow accounting. |
+| `Yul/Views/ComputedAllocation{,Controls}` | Actual Source allocation preserves computed old geometry and derives fresh extent and every-initial-H MemOK; target refinement remains separate. |
+| `Yul/Adapters/ComputedFrameHeap{,Controls}` | Computed geometry, canonical inventory and complete Source/frame roundtrip; allocator refinement remains separate. |
+| `Yul/Adapters/**` | Source/frame-memory agreement with the P6 interface; writeback and slices. |
+| `Yul/Compilation/**` | Target-side Yul compilation combinators: stack slots, lowering, opcodes, control ([VY3](feature-work/inline-assembly-vy3.md)). |
+| `Yul/Compilation/PureStatements.lean`, `Yul/Compilation/ScopedStatements.lean` | Intrinsic Yul skip/assignment/sequence and initialized/zero scope compilation; actual Yul evaluator/Scalar certificates, not full Source/G24 adequacy. |
+| `Yul/Compilation/OpenExpressions.lean`, `Yul/Compilation/OpenStatements.lean`, `Yul/Compilation/ScopedRawStatements.lean` | Actual VY1 raw binding pack/evaluation/writeback consumers; same-fuel raw Yul/Scalar compilation, with typed Solidity/G24 embedding still open. |
+| `Yul/Compilation/NormalControl.lean`, `Yul/Compilation/NormalStackTransport.lean` | Actual intrinsic nested-normal-control compiler evidence; complete stack-only block execution in the existing model, with native/Source/G24 adequacy open. |
+| `Yul/Compilation/PhysicalStore.lean` | Actual VY2 byte-view/typed-image agreement with the existing constant-byte compiler slice; native/Source/G24/MemOK closure remains open. |
+| `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](feature-work/inline-assembly-vy4.md)). |
+| `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](feature-work/vy5-composition.md)). |
+| `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
+
+## Label execution
+| Module | Purpose |
+|---|---|
+| `Backend/LabelExec/Step.lean`, `Backend/LabelExec/Fetch.lean`, `Backend/LabelExec/Packets.lean` | Byte-PC step over the numeric slice and JUMP/JUMPI/JUMPDEST; fetch behind a prefix; branch packets ([label execution](feature-work/backend-label-exec.md)). |
+| `Backend/LabelExec/Assembly.lean`, `Backend/LabelExec/Loops.lean`, `Backend/LabelExec/ScalarTransfer.lean` | Assembled jumps and tests; top-level loop header/backedge; `Scalar.step` lifting. |
 | `Backend/LabelExec/Placement.lean`, `Backend/LabelExec/Checks.lean` | Arbitrarily placed local loop packets at whole-runtime base zero; standalone assembled-loop witness and negative controls. |
 | `Backend/LabelExec/LiteralLoops.lean`, `Backend/LabelExec/LiteralChecks.lean` | Actual head/PUSH-to-test composition for literal conditions; zero/nonzero assembled entry controls, no reached-test premise. |
 | `Backend/LabelExec/Boundaries.lean`, `Backend/LabelExec/LoopExit.lean`, `Backend/LabelExec/LoopExitControls.lean` | Actual indexed fetch/tag execution and six-step zero-loop exit; skipped unsupported-body and EOF controls. |
 | `Backend/LabelExec/Fragment.lean`, `Backend/LabelExec/FragmentSound.lean`, `Backend/LabelExec/FragmentControls.lean` | Intrinsic stack-height/capacity refinement of existing numeric code and Block; actual one-step successor derivation and value-frame/capacity countercontrols. |
+
 ### G46.05 direct hash-query receipts (optional Bridge)
 | Module (under `Bridge/SolidityBridge/`) | Purpose |
 |---|---|

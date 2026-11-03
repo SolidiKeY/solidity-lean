@@ -28,7 +28,7 @@ theorem expression_allowed : ExpressionPolicy := by
   all_goals simp_all only [List.all_append, List.all_cons, List.all_nil, Bool.and_true]
   all_goals simp only [Solidity.Frontend.Admission.ObservationSite.allowed, Solidity.Frontend.Admission.ObservationSite.status] <;> decide
 
-/-- Routine container corollaries for Terra; no inhabitants supplied. -/
+/-- Open container corollaries; no inhabitants supplied. -/
 abbrev ArgumentsPolicy : Prop := ∀ {E : Env} {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs),
   (argsObservations es).all ObservationSite.allowed = true
 abbrev ConversionsPolicy : Prop := ∀ {E : Env} {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs),

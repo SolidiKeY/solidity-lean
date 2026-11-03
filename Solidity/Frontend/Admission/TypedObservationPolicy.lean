@@ -18,7 +18,8 @@ theorem magic_allowed : ∀ (b : Builtin) (m : String) (t : STy),
   all_goals repeat' split at h
   all_goals first | contradiction | decide
 
-/-- Sol-owned structural visitor obligation; no proof is supplied. -/
+/-- Structural expression-visitor obligation; proved by `expression_allowed`
+in `TypedExpressionPolicy.lean`. -/
 abbrev ExpressionPolicy : Prop := ∀ {E : Env} {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ),
   (observations e).all ObservationSite.allowed = true
 
