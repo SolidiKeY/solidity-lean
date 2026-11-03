@@ -373,3 +373,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Derives non-minimum source range/result and relates its encoding to the actual fetched negation body; minimum failure separate. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Typed signed/zero/max clients, ordered native output and simultaneous minimum source-failure/body-success control. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean` | General fetched EQ word/typed-certificate agreement with actual decoder, charged gate, full State and continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean` | Populated typed/same/high-bit-distinct/boundary clients, gas/fuel/arity refusals and complete ordered State observations. |

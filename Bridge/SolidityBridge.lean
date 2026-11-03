@@ -174,6 +174,8 @@ import SolidityBridge.RoadmapV15.P10.DecoderAgreementControls
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationProducer
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationWitness
 import SolidityBridge.RoadmapV15.P10.EnvironmentTasksV1
+import SolidityBridge.RoadmapV15.P10.EqualityConsumer
+import SolidityBridge.RoadmapV15.P10.EqualityControls
 import SolidityBridge.RoadmapV15.P10.Execution
 import SolidityBridge.RoadmapV15.P10.ExecutionControls
 import SolidityBridge.RoadmapV15.P10.ExponentConsumer

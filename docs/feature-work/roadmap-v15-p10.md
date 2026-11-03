@@ -1370,3 +1370,26 @@ Finder and skeptic reviews prompted a direct populated application of the new
 combined producer; this was added while retaining the expected observations.
 Independent read-only reviews cover the branch boundary
 and absence of a desired-execution premise. Broader correspondence remains open.
+
+
+### General fetched equality consumer
+
+[EqualityConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean)
+generalizes earlier fixed-entry EQ coverage to arbitrary emitted instruction
+sites, supplied destination arrays, words and caller tails. The consumer proves
+representation equality from the actual word constructors, then discharges the
+actual decoder, cost-three gate, binary dispatcher and continuation clauses.
+Input capacity and gas/fuel remain explicit. `selected_equality_agreement`
+consumes the published `Scalar.scalarEq` certificate for each intrinsic primitive
+type; source evaluation is not supplied as an oracle. Existing raw word bridges
+and the Scalar certificate remain read-only.
+
+[EqualityControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean)
+checks independent full expected States, a directly applied typed signed client,
+equal versus high-bit-distinct words, zero/max words, empty/maximal legal tails,
+and gas/fuel/arity refusals. Ordered code, stack, return buffers, calldata,
+accounts and substate are retained. Boundary words are constructed with
+`BitVec.ofNat`; symbolic list lengths avoid larger recursion budgets. Finder and
+skeptic reviews found no semantic defect. This is reference-model instruction
+transport, not compiler/frame origin, Osaka approval or closure of a full opcode
+row. The full G46/G47 obligations remain open.
