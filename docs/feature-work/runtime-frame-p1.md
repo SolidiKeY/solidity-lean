@@ -731,7 +731,8 @@ length bound, and frame/heap room for the reached turns. Each induction step
 consumes the checked allocating activation, evaluated native arguments and
 entry representation; no running endpoint or desired midpoint is an input.
 
-The result includes the active child representation, exact counter and weakened
+The result includes some active child representation (an existential Source
+state fitting the reached machine, not tied to a Source run), exact counter and weakened
 old reference, object growth by the horizon, older-object preservation, stack,
 address-map extension, allocator growth of four cells per reached turn, actual
 reached allocator ownership and runtime cursor. A horizon is an observation

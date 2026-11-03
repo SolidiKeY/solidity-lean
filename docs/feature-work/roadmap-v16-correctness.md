@@ -75,7 +75,8 @@ event shape are fixed fixtures. Complete state equalities retain every field; `c
 extracts selected storage/transient/journal/heap/local/log observations and the
 whole ordered event history. `wrong_original_rollback` rejects the incorrect
 original-world endpoint for the actual two-run composition; `wrong_event_order`
-rejects exchanging the two completed transaction statuses. Nine generated
+shows the two fixture event histories differ; with `revert_success_prefix` and
+`success_revert_prefix` this separates the two run orders. Nine generated
 axiom guards pin the observed standard axiom sets. Independent read-only finder
 and skeptic review found no semantic defect.
 
