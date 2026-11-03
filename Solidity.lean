@@ -1907,6 +1907,17 @@ import Solidity.Backend.LabelExec.LiteralLoops
 import Solidity.Backend.LabelExec.LoopExit
 import Solidity.Backend.LabelExec.LoopExitControls
 import Solidity.Backend.LabelExec.Placement
+import Solidity.Backend.Transient.Code
+import Solidity.Backend.Transient.Controls
+import Solidity.Backend.Transient.Frames
+import Solidity.Backend.Transient.Instructions
+import Solidity.Backend.Transient.Mixed
+import Solidity.Backend.Transient.SourceCallback
+import Solidity.Backend.Transient.SourceFrames
+import Solidity.Backend.Transient.State
+import Solidity.Backend.Transient.TypedSource
+import Solidity.Backend.Transient.WordControls
+import Solidity.Backend.Transient.WordSource
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
