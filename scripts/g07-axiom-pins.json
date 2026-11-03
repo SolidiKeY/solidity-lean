@@ -21751,7 +21751,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.admit_sound": [
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.accept_sound": [
   "Classical.choice",
   "Quot.sound",
   "propext"
