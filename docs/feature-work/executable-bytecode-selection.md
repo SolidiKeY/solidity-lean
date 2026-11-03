@@ -192,3 +192,23 @@ conversion, complement width, all input lengths and the component boundaries.
 
 Per-file lint cleanup removed unused LT/GT rewrite arguments and a redundant
 NOT-bound fact. Both reviewers confirmed unchanged statements and controls.
+
+## Unsigned division and logical shifts
+
+UnsignedSelection.lean reuses the existing certificate constructor for numeric
+DIV/MOD and SHL/SHR. Quotient/remainder bounds follow from the intrinsic
+dividend; divisor zero produces word zero in both actual runners, with no
+nonzero-divisor premise. Shifts retain the entire top-of-stack count, return
+zero at counts at least 256, discard high bits for SHL and never sign-extend
+SHR. The certificates preserve all nonstack IR fields and reflect operand
+shortages. These results do not establish checked source guard/panic behavior
+or physical capacity; V2 admission remains separate.
+
+Controls cover ordinary and zero-divisor execution, arbitrary physical tails
+and complete IR caller frames, empty/singleton operands, wrong operand order,
+full-width unsigned values, counts 0/255/256/maximum, SHL overflow, logical SHR,
+corrupted suffixes and all four opcode bytes. Component absence is paired with
+another component's supported selection. Independent read-only finder and
+skeptic reviews passed without confirmed findings; no hidden divisor, count,
+capacity or source-coverage premise was introduced. Signed operations,
+instruction sequences and the stack/control/composition queue remain open.
