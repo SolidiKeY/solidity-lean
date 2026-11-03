@@ -69,8 +69,11 @@ and error-order negatives.
 - The reference accepts the truncated raw PUSH2 `[0x61, 0x01]` (value 1),
   which `Backend.decode` refuses; the PUSH laws cover complete emitted payloads.
 - `valid` (the jump-destination array) is an input, not a scanner certificate.
-- RETURNDATACOPY uses the reference byte-memory operation; no physical
-  padding (`PaddingCorrect`) witness is supplied.
+- RETURNDATACOPY uses the reference byte-memory operation. The published
+  [padding interface](../../Bridge/SolidityBridge/ExternalEvm/PaddingInterface.lean)
+  supplies `paddingCorrect_bounded` under explicit host-width bounds and
+  `paddingCorrect32` for the H7 logical zeroes body. Native allocation/extern
+  correctness remains separate; this is not a physical allocator witness.
 - Open: compiler/source origin of sites, G45.03 execution meaning, Osaka
   agreement, resource abstraction, and source/ABI/world/account/transaction/
   trace closure; the full per-opcode rows remain open.
@@ -1244,3 +1247,7 @@ is separate. All full opcode and parent composition obligations remain open.
 A read-only metadata review found an unqualified “checked” label in the new
 module-map row. It now explicitly separates the pre-H7 check from pending
 validation on the published H7 baseline, matching the boundaries above.
+
+The H7 documentation correction also separates its published bounded logical
+padding proof from the still-separate native allocation/extern boundary. V15
+does not reimplement or claim completion of the transferred memory bridge.
