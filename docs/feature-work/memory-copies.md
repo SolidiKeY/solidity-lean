@@ -1,0 +1,36 @@
+# Memory defaults and copies
+
+`Solidity/Backend/MemoryCopies/**` holds a partial, signature-only draft for
+G33 and G35.01/.04/.05/.06. It is not a frozen complete interface, and no
+G33/G35 coverage is claimed. The existing intrinsic heap, storage-copy fold
+and word allocator remain the only models; no second heap or evaluator is
+introduced.
+
+## Reused results
+
+| Obligation | Reuse | Remaining work |
+| --- | --- | --- |
+| G33 | `Objects.DefaultBuilder`, `DefaultBuildResult`, `referenceArray_correct`, `ReferenceDefaults.compileDefault_correct`, `Objects.AllocatorRepr` | General nested/dynamic defaults; S03-PANIC41 size failure |
+| G33 structs | `StructDefaults.source_pair_default`, `Evm.DefaultPlan.sound` | Reused as is; their capacity premise is not a runtime panic |
+| G35.01 | `copiedStruct_*` laws, `SVal`/`SFields`/`SVec.copyStToM` | Nonprimitive members, nested and dynamic aggregates |
+| G35.04 | `MemoryOps.checkedSnapshotCopy`, `SnapshotSchedule`, `Heap.Keeps` | Alias versus deep-copy code and Source proofs, overlapping regions |
+| G35.05 | `TypeGraph.Schema`, Source `zero*`/`load*` | Generic representation and traversal |
+| G35.06 | `MemoryStorageCopy`, `MemoryFixedStorageCopy`, `MemoryFixedMixedCopy` | Location/traversal certificates, mixed-location witnesses |
+
+Source bytes and strings use `Source.STy`; `GraphTypeRel` has no bytes/string
+constructors, and neither boundary may silently exclude approved shapes.
+
+## Draft signatures
+
+`Interface.lean` has the default builder certificate, storage-to-memory heap
+and capacity-conditional word certificates, dynamic-length observations,
+alias identity and overlap snapshots, and a finite heap traversal record that
+claims no guarded-schema or total compiler coverage. A capacity-conditional
+helper cannot certify a total compiler by choosing an impossible capacity.
+
+`Premises.lean` has explicit boundary records with no assumed instances: the
+S03-PANIC41 allocation failure and final Source state, G34 alias agreement,
+and exact reached machine execution at location boundaries (G27.05,
+G35.02/.03). They are not yet the producers' frozen APIs: the S03 size
+predicate and the layout/path/location/refusal observations still need exact
+statements.

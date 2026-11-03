@@ -1918,6 +1918,10 @@ import Solidity.Backend.Transient.State
 import Solidity.Backend.Transient.TypedSource
 import Solidity.Backend.Transient.WordControls
 import Solidity.Backend.Transient.WordSource
+import Solidity.Backend.MemoryCopies.Interface
+import Solidity.Backend.MemoryCopies.Premises
+import Solidity.Backend.Selection.Interface
+import Solidity.Backend.Selection.Premises
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
