@@ -455,3 +455,8 @@ with missing-memory refusal kept distinct from a genuine revert. It only
 produces an outcome; interpreter exit, frame completion and Source/G51
 integration remain open. Registered controls cover cross-word, empty and
 refused payloads.
+
+`selfDestruct` and `rollbackLifecycle` are compatibility abbreviations for the
+pre-existing `Lifecycle.destructKnown` and `Lifecycle.rollbackDestruction`.
+Their existing public proofs retain their premises; local lifecycle snapshot
+rollback was already implemented, not a newly closed adequacy obligation.
