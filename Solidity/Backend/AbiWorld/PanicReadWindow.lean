@@ -24,7 +24,9 @@ theorem decode (n : Nat) (hn : n < 2^256) (suffix : List UInt8) :
     omega
   simp only [decodePanic,hs,hl,and_self,ite_true,hb,hw,read_word n hn,dif_pos hn,word]
 
-/-- Panic packets cannot select the preceding Error decoder branch. -/
+/-- Suffix-stable extension of `Semantics.decodeError_encodePanic` in
+`Calculus.SoundCatch`. The selector remains unchanged under append. The core
+keeps its local selector argument instead of importing the calculus layer. -/
 theorem error_reject (n : Nat) (suffix : List UInt8) :
     decodeError (encodePanic n ++ suffix) = none := by
   have hs : (encodePanic n ++ suffix).take 4 = panicSelector := by
