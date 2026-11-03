@@ -716,6 +716,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Roadmap/Controls.lean` | Roadmap G07: inhabited and negative controls for the G01 contracts: a toy source, intrinsic layer, EVM and compiler meeting `PublicCorrectness` (`toy_publicCorrectness`), and refutations of an always-reverting, a byte-altering, a data-erasing and a malformed-source-accepting compiler; `PublicCorrectness.observes`, `PublicCorrectness.rejects`, `SourceSpec.not_nonVacuous_of_no_parse`. |
 | `Roadmap/V16/SSCP2/NewAllocation.lean` | Actual dynamic-new data validity and MemOK preservation, with a closed local-length consumer. |
 | `Roadmap/V16/SSCP2/NewAllocationControls.lean` | Live caller references, both pipelines, exact allocation-size/timeout/refusal phases and wrong-reference controls. |
+| `Roadmap/V16/SourceTransactionConsumer.lean` | Bounded actual Source transaction pairs, exact states, rollback and Hoare consumer; no compiler/session closure |
 
 ## Independent source definitions
 
@@ -1750,6 +1751,8 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionLayout.lean` | Arbitrary native caller-state entry/output records and actual JUMPDEST/STOP resource gates. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletion.lean` | Modular linked JUMPI/JUMPDEST/STOP X completion with eleven-gas adequacy and exact natural debit. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCompletionControls.lean` | Exact/excess gas, legal stack boundaries, fuel/gas refusals and full ordered terminal State including STOP returnData clearing. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseFixtures.lean` | Populated value-not-key chain, alias and owner-specific warmth data with coherent memory. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseControls.lean` | Full-state nonalias/alias clients, direct charge-law consumers, exact gas/fuel/stack and ordered observation controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedResourceBounds.lean` | Universal legal-tail ten-gas and three-fuel refusals through the actual linked fetched suffix. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedResourceControls.lean` | Both permissions, full legal stack and populated ordered buffer observations at resource boundaries. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/NonbranchTables.lean` | Actual nonbranch charged-gate table independence and all-outcome/fetched-State/X PUSH32 transport for arbitrary destination arrays. |
@@ -1763,8 +1766,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedProgramControls.lean` | Both permissions, legal capacity, exact gas/fuel and wrong-table refusals, nonzero prefix and complete ordered terminal State. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthrough.lean` | Derived nonzero ISZERO flag and actual five/six-step fallthrough prefixes to PC37/38, exact resource and native-frame transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthroughControls.lean` | Arbitrary tables, both permissions, nonzero/signed capacity clients, zero counterexample and ordered resource failures/state. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseFixtures.lean` | Populated value-not-key chain, alias and owner-specific warmth data with coherent memory. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/StorageChaseControls.lean` | Full-state nonalias/alias clients, direct charge-law consumers, exact gas/fuel/stack and ordered observation controls. |
 
 ### P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
 
@@ -1808,6 +1809,18 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveActivation.lean`, `RuntimeFrameV3RecursiveDescent.lean`, `RuntimeFrameV3RecursiveHistory.lean` | Countdown family: checked activation bridge, descent at every reached horizon, saved parent history and nearest-parent pop. |
 | `Backend/InternalFlow/RuntimeFrameV3PairedUnwind.lean`, `RuntimeFrameV3RecursiveReturn.lean` | Countdown family: paired all-parent unwind and the descent-plus-unwind endpoint in the original `StateRepr` (hand-written image). |
 | `Backend/InternalFlow/RuntimeFrameMutation.lean`, `RuntimeFrameNested.lean`, `RuntimeFrameReferenceProgram.lean`, `RuntimeFrameCodeEquality.lean` | One-level and nested call compilers (`compileCall`), reference-returning programs, Boolean instruction-list equality. |
+| `Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean` | Public checked array-probe adapter, exact success identity and bare-failure suffix transport with represented/owned controls. |
+| `Backend/InternalFlow/RuntimeFrameV3GuardedRecursion.lean` | Actual scoped recursive probe, native child-call transport, initialized bare-failure coupling and witnessed same-image success/revert with exhaustion controls. |
+| `Backend/InternalFlow/RuntimeFrameV3GuardedPrefixes.lean` | Arbitrary-counter source horizons, actual guarded/unprobed same-state target prefixes and returning endpoint with witnessed read domain/capacity. |
+| `Backend/InternalFlow/RuntimeFrameV3GuardedCaller.lean` | Native guarded call enter/leave at all horizons and full target caller-tail reconstruction, with populated success/failure and complete observations. |
+| `Backend/InternalFlow/RuntimeFrameV3CallerPrefixes.lean` | Actual saved history and full active-parameter/protected-tail representation at running recursive horizons, with populated snapshots and stopped stability. |
+| `Backend/InternalFlow/RuntimeFrameV3HeapDomain.lean` | Derive exact guarded read success/failure and local recursive read domain from selected typed heap length; witnessed same-program prefix and failure transport. |
+| `Backend/InternalFlow/RuntimeFrameV3DomainTransport.lean` | Exact old read/domain transport through real typed allocation, scoped source/target client and actual mutation counterexample to heap preservation. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean` | Actual allocating callRec family, generic checked child entry and witnessed paired return with grown heap, exact cost and complete frame observations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSource.lean` | Actual allocating recursive success/exhaustion induction, exact object growth and native full-caller export with a populated two-activation source client. |
+| `Backend/InternalFlow/RuntimeFrameResultAgreement.lean` | Successful-output agreement under existing typed result and execution operators, with no failed-state or termination assertion. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean` | Exact allocating-family source-return coherence at all quotation pairs and a populated all-sufficient-index caller control. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean` | Actual allocating fixed-image running prefixes, reached active parameter frames and exact allocator growth, with populated horizon/stop/countercontrols. |
 | `Backend/InternalDispatch.lean`, `Backend/InternalDispatch/Typed.lean`, `Backend/InternalDispatch/Agreement.lean`, `Backend/InternalDispatch/Chain.lean` | G37.03/P4 typed dispatch tables, full-signature checks and the typed equality-guard chain (not emitted bytecode). |
 | `Backend/InternalDispatch/FrozenV1.lean`, `Backend/InternalDispatch/FrozenV2.lean`, `Backend/InternalDispatch/FrozenV3.lean` | Dispatch consumers of the frozen P1 v1–v3 `Pending*` families; v3 transports an approved input through profile agreement and coverage. |
 | `Backend/InternalDispatch/Controls.lean`, `Backend/InternalDispatch/FrozenV1Controls.lean`, `Backend/InternalDispatch/FrozenV2Controls.lean`, `Backend/InternalDispatch/FrozenV3Controls.lean` | Source-backed selector controls and refusals; empty-domain refusal for v3. |
@@ -1912,6 +1925,7 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/Readonly/LoweringControls.lean`, `Lowering/Readonly/RootControls.lean`, `Lowering/Readonly/ArgumentControls.lean`, `Lowering/Readonly/CallableControls.lean` | Primitive lowering controls: field relation, non-head root, argument non-reevaluation, callable success/revert ([G22](feature-work/g22-readonly-calls.md)). |
 | `Lowering/V08/SourceCallPhase.lean` | Same-invocation raw `callAddr` phase before caller decoding; `extCall` phase equation ([G22](feature-work/g22-readonly-calls.md)). |
 | `Lowering/V08/SourceCallPhaseControls.lean`, `Lowering/V08/SourceExternalPhaseControls.lean` | Answer-driven unknown-call raw phase and typed external expression controls (signed word, short, revert, no code) ([G22](feature-work/g22-readonly-calls.md)). |
+| `Lowering/V08/SourceClockTransactions.lean` | Actual Source.runTx and typed-world request-clock execution with raw/end/reset observations; handwritten RBody/entry, not canonical compilation. |
 | `Backend/WorldCalls/Premises.lean` | Conditional compiler world-call interfaces: `Identity`, `Code`, `ReturnedFrame`, `Premises`, `FetchedCall`, `FetchedPremises` ([G42](feature-work/g42-world-call-consumers.md)). |
 | `Backend/WorldCalls/Callbacks.lean`, `Backend/WorldCalls/ExternalCalls.lean`, `Backend/WorldCalls/SelfCalls.lean`, `Backend/WorldCalls/P1Consumers.lean` | Conditional callback, external, self-call and frozen P1 V3 consumers projecting producer premises ([G42](feature-work/g42-world-call-consumers.md)). |
 | `Backend/WorldCalls/SourceBridge.lean`, `Backend/WorldCalls/UnknownSourceCall.lean` | P3 bridge from `RawAt` to the source raw phase; zero-value unknown-call transport and joint `RawAt`/`RuntimeFrames` ([G42](feature-work/g42-world-call-consumers.md)). |
@@ -1921,6 +1935,19 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/Readonly/HistoryRollbackControls.lean` | Actual ordinary/static child dispatch, live/stale checkpoint and both-pipeline controls. |
 | `Lowering/Readonly/SourceHistory.lean`, `SourceHistoryBase.lean` | Generated typed 17-way Source induction predicate and exhausted base only; positive bound remains open. |
 | `Backend/WorldCalls/UnknownRevertControls.lean` | Actual computed unknown-call credit/revert frame at a supplied prior-effect state; no general target correspondence. |
+| `Backend/WorldCalls/SourceCallHistory.lean`, `Backend/WorldCalls/SourceCallHistoryControls.lean` | Actual known-call and unknown zero-value histories/static storage projection;27 nonself/reentry/rollback/code-identity controls, no native adequacy. |
+| `Backend/WorldCalls/ClosedSourceControls.lean` | 18 all-value/reentry/rollback/refusal controls and inhabited closed Source clients. |
+| `Backend/WorldCalls/ClosedSourceFrame.lean` | Same-invocation post-capture Source raw history/frame/storage facts; no target/Core adequacy. |
+| `Backend/WorldCalls/ClosedSourceConsumers.lean` | Compiler consumer adapter deriving Source P2 from exact raw-phase execution, with target/correspondence and representation premises retained. |
+| `Backend/WorldCalls/ClosedConsumerControls.lean` | Inhabited restricted target client, raw-byte mismatch refusal, actual Source reentry and generic typed projection. |
+| `Backend/WorldCalls/SourceExpressionConsumer.lean` | Exact resolved external-expression capture/resume link and closed call/declared-decoder static storage law at post-capture state. |
+| `Backend/WorldCalls/SourceExpressionControls.lean` |13 actual Source expression assertions for argument effects, old-value calldata, caller decode failure and permitted read-only reentry. |
+| `Backend/WorldCalls/SourceExpressionIssuer.lean` | Actual successful resolved-expression run produces typed capture/invocation binding and post-argument static caller storage law. |
+| `Backend/WorldCalls/SourceIssuerControls.lean` | Inhabited local issuance, forged view-registration rejection and missing-code capture refusal. |
+| `Backend/WorldCalls/SourceExpressionFailure.lean` | Exact capture-error versus resumed-error classification and static storage from the successful post-argument checkpoint only. |
+| `Backend/WorldCalls/SourceFailureControls.lean` | Eight Source assertions retaining dirty argument failure, no call event, caller-decoder failure and ordered callee revert data. |
+| `Backend/WorldCalls/SourceSelfDispatch.lean` | Actual guarded Source external-self funding/entry/dispatch transport for success, revert and non-revert halt. |
+| `Backend/WorldCalls/SourceSelfDispatchControls.lean` | Nine actual self-dispatch API/outcome/guard assertions; no target CALL or callInternal substitution. |
 | `Lowering/Readonly/EffectRules.lean` | Source journal-effect composition: live bind, subframes, caught halt and inherited mode; no arbitrary state overwrite. |
 | `Lowering/Readonly/MachineEffects.lean`, `Lowering/Readonly/MachineEffectControls.lean` | Actual allocation/replacement journal effects, type-refusal/caught-halt memory controls and ordinary-write negative. |
 | `Lowering/Readonly/ReadEffects.lean` | Actual read/reference/guarded-write journal producers, retaining refusal branches. |
@@ -1947,6 +1974,14 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/Readonly/SourceBodyEffects.lean`, `Lowering/Readonly/SourceBodyControls.lean` | Actual internal-body, typed item and modifier successor journal effects; inhabited static modifier observations. Full history induction remains open. |
 | `Lowering/Readonly/SourceLoopEffects.lean`, `Lowering/Readonly/SourceLoopControls.lean` | Actual loop successor journal effects and15 populated-state exit/refusal/exhaustion controls; smaller-bound premise retained. |
 | `Lowering/Readonly/SourceDispatchEffects.lean`, `Lowering/Readonly/SourceDispatchControls.lean` | Exact selector leaves and exhaustive dispatch successor journal effect;13 finite observations and inhabited client, not full call/native adequacy. |
+| `Lowering/Readonly/SourceStatementParts/*.lean`, `Lowering/Readonly/SourceStatementEffects.lean` | Generated21 intrinsically typed actual statement cuts and exhaustive successor journal effect; smaller-bound At retained. |
+| `Lowering/Readonly/SourceTryEffects.lean` | Exact typed try computation factoring, kernel equality to execS and real payload/finish effects, without native/frame oracle. |
+| `Lowering/Readonly/SourceStatementControls.lean` |20 actual populated-state statement/try controls and inhabited successful At0 client; no native adequacy claim. |
+| `Lowering/Readonly/SourceEnvironmentEffects.lean`, `Lowering/Readonly/SourceEnvironmentControls.lean` | Actual environment successor history from smaller-bound child/loop execution;23 reentry/refusal/credit/rollback/raw-data/exhaustion controls. |
+| `Lowering/Readonly/SourceCallPrefix.lean` | Exact known-instance Source prefix and guarded callAddr run equality, with balance-only and live-child histories. |
+| `Lowering/Readonly/SourceCallUnknown.lean` | Exact all-value unknown Source call branch, debit refusal and live rollback histories. |
+| `Lowering/Readonly/SourceCallAddressEffects.lean` | Complete actual callAddr successor history, known/unknown instances and original guards. |
+| `Lowering/Readonly/SourceAllHistories.lean` | Closed seventeen-component bounded Source induction, actual callbacks and static storage law. |
 
 
 ## V07 source lowering
@@ -1992,6 +2027,8 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/V07/WordCastControls.lean` | Inhabited cast clients, thresholds, alias/capture and mixed-reference controls |
 | `Lowering/V07/ConditionalAssignments.lean` | Actual effectful conditional expressions, selected-only captures and initial context transport |
 | `Lowering/V07/ConditionalControls.lean` | Inhabited conditional clients, aliases, ordered observations and bounded failure controls |
+| `Lowering/V07/WrappedMultiplicationPair` | Actual effectful unsigned multiplication pairs with all local aliases |
+| `Lowering/V07/WrappedMultiplicationControls` | Closed multiplication-pair clients and ordered alias/width controls |
 
 ## V09 compiler-pass components
 
@@ -2081,6 +2118,14 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/Adapters/RawPhysical{,Controls}` | Existing H11 raw-local frame to bounded P6 physical bytes; explicit readback boundaries and overlay administration |
 | `Yul/Views/ComputedPlacement{,Controls}` | Checked actual-heap ordinary placement witness with exact unsupported/overflow accounting. |
 | `Yul/Views/ComputedAllocation{,Controls}` | Actual Source allocation preserves computed old geometry and derives fresh extent and every-initial-H MemOK; target refinement remains separate. |
+| `Yul/Views/ComputedAllocationWrite{,Controls}` | Incremental typed allocation encoding with computed geometry, whole-map/source identity and exact residual/ReservedOK transport. |
+| `Yul/Views/MemoryImageOrder{,Controls}` | All existing typed image constructors: point locality, whole-map disjoint order, generic allocation/FMP order and actual Source program order. |
+| `Yul/Views/MixedHeapOrder{,Controls}` | Complete typed-inventory encoding permutation/idempotence and actual unchanged source writeback, with derived separation and tail bounds. |
+| `Yul/Views/InventoryDecodeOrder{,Controls}` | Fixed-candidate changed-snapshot visit permutations with exact None, actual Source result and sequential placement/history refresh. |
+| `Yul/Views/InventoryCandidateOrder{,Controls}` | Derived owned-pointer candidate order, object decoder invariance, and complete candidate/visit writeback plus sequential refresh permutation. |
+| `Yul/Views/InventoryReplay{,Controls}` | Successful changed-snapshot output profile and whole-source replay identity from actual type preservation and retained allocation history. |
+| `Yul/Views/SnapshotHashBinding{,Controls}` | Actual source keccak after changed physical-snapshot writeback, using derived exact raw payload and preserved aliases. |
+| `Yul/Views/CalldataHashBinding{,Controls}` | Actual calldata-local keccak with implicit memory allocation, clipped payload copy, complete source result and MemOK. |
 | `Yul/Adapters/ComputedFrameHeap{,Controls}` | Computed geometry, canonical inventory and complete Source/frame roundtrip; allocator refinement remains separate. |
 | `Yul/Adapters/**` | Source/frame-memory agreement with the P6 interface; writeback and slices. |
 | `Yul/Compilation/**` | Target-side Yul compilation combinators: stack slots, lowering, opcodes, control ([VY3](feature-work/inline-assembly-vy3.md)). |
@@ -2132,54 +2177,6 @@ See [P8 admission](feature-work/p8-admission.md).
 - Yul/RawLocalDeclaration: context-indexed local snapshot and concrete Boolean declaration Source correspondence. Yul/Checks/RawLocalDeclaration: executed context growth, shifted dirty-word, timeout and full-prefix controls.
 - Yul/RawLocalScope: executed Boolean declaration/scope closure, exact Source restoration and existing adapter implementation. Yul/Checks/RawLocalScope: precise horizons, dirty-frame and two-scope composition controls.
 - Yul/RawDefaultDeclaration: typed constant-default lookup and Source declaration correspondence, including all integer widths. Yul/Checks/RawDefaultDeclaration: actual uint8/uint256, shifted dirty-prefix and helper-boundary controls.
-
-### Physical memory adapters
-
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
-## Executable bytecode selection
-| Module | Role |
-|---|---|
-| `Backend/Selection/Interface.lean` | Selection, frame, structured-control and same-program composition certificate statements; see [executable bytecode selection](feature-work/executable-bytecode-selection.md). |
-| `Backend/Selection/Premises.lean` | Typed G24.03 and G45.05-BR premises and G49.02 runtime-consumer statement; no external result assumed or runtime proof claimed. |
-| Module (`Solidity/` omitted) | Role |
-|---|---|
-| `Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean` | Public checked array-probe adapter, exact success identity and bare-failure suffix transport with represented/owned controls. |
-| `Backend/InternalFlow/RuntimeFrameV3GuardedRecursion.lean` | Actual scoped recursive probe, native child-call transport, initialized bare-failure coupling and witnessed same-image success/revert with exhaustion controls. |
-| `Backend/InternalFlow/RuntimeFrameV3GuardedPrefixes.lean` | Arbitrary-counter source horizons, actual guarded/unprobed same-state target prefixes and returning endpoint with witnessed read domain/capacity. |
-| `Backend/InternalFlow/RuntimeFrameV3GuardedCaller.lean` | Native guarded call enter/leave at all horizons and full target caller-tail reconstruction, with populated success/failure and complete observations. |
-| `Backend/InternalFlow/RuntimeFrameV3CallerPrefixes.lean` | Actual saved history and full active-parameter/protected-tail representation at running recursive horizons, with populated snapshots and stopped stability. |
-| `Backend/InternalFlow/RuntimeFrameV3HeapDomain.lean` | Derive exact guarded read success/failure and local recursive read domain from selected typed heap length; witnessed same-program prefix and failure transport. |
-| `Backend/InternalFlow/RuntimeFrameV3DomainTransport.lean` | Exact old read/domain transport through real typed allocation, scoped source/target client and actual mutation counterexample to heap preservation. |
-| `Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean` | Actual allocating callRec family, generic checked child entry and witnessed paired return with grown heap, exact cost and complete frame observations. |
-| `Backend/InternalFlow/RuntimeFrameV3AllocatingSource.lean` | Actual allocating recursive success/exhaustion induction, exact object growth and native full-caller export with a populated two-activation source client. |
-| `Backend/InternalFlow/RuntimeFrameResultAgreement.lean` | Successful-output agreement under existing typed result and execution operators, with no failed-state or termination assertion. |
-| `Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean` | Exact allocating-family source-return coherence at all quotation pairs and a populated all-sufficient-index caller control. |
-| `Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean` | Actual allocating fixed-image running prefixes, reached active parameter frames and exact allocator growth, with populated horizon/stop/countercontrols. |
-| `Roadmap/V16/SourceTransactionConsumer.lean` | Bounded actual Source transaction pairs, exact states, rollback and Hoare consumer; no compiler/session closure |
-| `Lowering/Readonly/SourceStatementParts/*.lean`, `Lowering/Readonly/SourceStatementEffects.lean` | Generated21 intrinsically typed actual statement cuts and exhaustive successor journal effect; smaller-bound At retained. |
-| `Lowering/Readonly/SourceTryEffects.lean` | Exact typed try computation factoring, kernel equality to execS and real payload/finish effects, without native/frame oracle. |
-| `Lowering/Readonly/SourceStatementControls.lean` |20 actual populated-state statement/try controls and inhabited successful At0 client; no native adequacy claim. |
-| `Lowering/Readonly/SourceEnvironmentEffects.lean`, `Lowering/Readonly/SourceEnvironmentControls.lean` | Actual environment successor history from smaller-bound child/loop execution;23 reentry/refusal/credit/rollback/raw-data/exhaustion controls. |
-| `Lowering/Readonly/SourceCallPrefix.lean` | Exact known-instance Source prefix and guarded callAddr run equality, with balance-only and live-child histories. |
-| `Backend/WorldCalls/SourceCallHistory.lean`, `Backend/WorldCalls/SourceCallHistoryControls.lean` | Actual known-call and unknown zero-value histories/static storage projection;27 nonself/reentry/rollback/code-identity controls, no native adequacy. |
-| `Lowering/Readonly/SourceCallUnknown.lean` | Exact all-value unknown Source call branch, debit refusal and live rollback histories. |
-| `Lowering/Readonly/SourceCallAddressEffects.lean` | Complete actual callAddr successor history, known/unknown instances and original guards. |
-| `Lowering/Readonly/SourceAllHistories.lean` | Closed seventeen-component bounded Source induction, actual callbacks and static storage law. |
-| `Backend/WorldCalls/ClosedSourceControls.lean` | 18 all-value/reentry/rollback/refusal controls and inhabited closed Source clients. |
-| `Backend/WorldCalls/ClosedSourceFrame.lean` | Same-invocation post-capture Source raw history/frame/storage facts; no target/Core adequacy. |
-| `Backend/WorldCalls/ClosedSourceConsumers.lean` | Compiler consumer adapter deriving Source P2 from exact raw-phase execution, with target/correspondence and representation premises retained. |
-| `Backend/WorldCalls/ClosedConsumerControls.lean` | Inhabited restricted target client, raw-byte mismatch refusal, actual Source reentry and generic typed projection. |
-| `Backend/WorldCalls/SourceExpressionConsumer.lean` | Exact resolved external-expression capture/resume link and closed call/declared-decoder static storage law at post-capture state. |
-| `Backend/WorldCalls/SourceExpressionControls.lean` |13 actual Source expression assertions for argument effects, old-value calldata, caller decode failure and permitted read-only reentry. |
-| `Backend/WorldCalls/SourceExpressionIssuer.lean` | Actual successful resolved-expression run produces typed capture/invocation binding and post-argument static caller storage law. |
-| `Backend/WorldCalls/SourceIssuerControls.lean` | Inhabited local issuance, forged view-registration rejection and missing-code capture refusal. |
-| `Backend/WorldCalls/SourceExpressionFailure.lean` | Exact capture-error versus resumed-error classification and static storage from the successful post-argument checkpoint only. |
-| `Backend/WorldCalls/SourceFailureControls.lean` | Eight Source assertions retaining dirty argument failure, no call event, caller-decoder failure and ordered callee revert data. |
-| `Backend/WorldCalls/SourceSelfDispatch.lean` | Actual guarded Source external-self funding/entry/dispatch transport for success, revert and non-revert halt. |
-| `Backend/WorldCalls/SourceSelfDispatchControls.lean` | Nine actual self-dispatch API/outcome/guard assertions; no target CALL or callInternal substitution. |
-### Yul scope extensions
 - Yul/RawDefaultScope: concrete certified-default declaration/scope composition, integer Source laws and adapters. Yul/Checks/RawDefaultScope: exact scope/mixed-adapter horizons and full dirty-frame controls.
 - Yul/RawLiteralInitialization: concrete Boolean literal initializer Source law and exact snapshot preservation. Yul/Checks/RawLiteralInitialization: inhabited true initializer, both-value/horizon, dirty-prefix and nondefault controls.
 - Yul/RawLiteralScope: concrete Boolean initializer/scope Source composition, frame correspondence and typed adapters. Yul/Checks/RawLiteralScope: both literals, exact horizons and mixed literal/default dirty-frame controls.
@@ -2192,18 +2189,12 @@ See [P8 admission](feature-work/p8-admission.md).
 - Yul/LocalBoolItemScope: certificate-derived raw suffix restoration and concrete Source scope composition. Yul/Checks/LocalBoolItemScope: multi-declaration closure, retained partial contexts, dirty-temporary and Source controls.
 - Yul/LocalBoolIf.lean and Yul/Checks/LocalBoolIf.lean: conditional scope execution and clean-input Source agreement with partial-effect controls.
 - Yul/LocalBoolIfElse.lean and Yul/Checks/LocalBoolIfElse.lean: conditional selection of independently indexed item scopes with concrete clean Source agreement.
-| `Yul/Views/ComputedAllocationWrite{,Controls}` | Incremental typed allocation encoding with computed geometry, whole-map/source identity and exact residual/ReservedOK transport. |
-| `Yul/Views/MemoryImageOrder{,Controls}` | All existing typed image constructors: point locality, whole-map disjoint order, generic allocation/FMP order and actual Source program order. |
-| `Yul/Views/MixedHeapOrder{,Controls}` | Complete typed-inventory encoding permutation/idempotence and actual unchanged source writeback, with derived separation and tail bounds. |
-| `Yul/Views/InventoryDecodeOrder{,Controls}` | Fixed-candidate changed-snapshot visit permutations with exact None, actual Source result and sequential placement/history refresh. |
-| `Yul/Views/InventoryCandidateOrder{,Controls}` | Derived owned-pointer candidate order, object decoder invariance, and complete candidate/visit writeback plus sequential refresh permutation. |
-| `Yul/Views/InventoryReplay{,Controls}` | Successful changed-snapshot output profile and whole-source replay identity from actual type preservation and retained allocation history. |
-| `Yul/Views/SnapshotHashBinding{,Controls}` | Actual source keccak after changed physical-snapshot writeback, using derived exact raw payload and preserved aliases. |
-| `Yul/Views/CalldataHashBinding{,Controls}` | Actual calldata-local keccak with implicit memory allocation, clipped payload copy, complete source result and MemOK. |
+| `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
 | `Yul/Adapters/P6CalldataHash{,Controls}` | Actual calldata conversion/allocation, bounded P6 copy and target KECCAK256 composition with explicit per-input concrete hash premise. |
-| `Lowering/V07/WrappedMultiplicationPair` | Actual effectful unsigned multiplication pairs with all local aliases |
-| `Lowering/V07/WrappedMultiplicationControls` | Closed multiplication-pair clients and ordered alias/width controls |
-### V08 transaction request-clock client
-| Module | Purpose |
+
+## Executable bytecode selection
+
+| Module | Role |
 |---|---|
-| `Lowering/V08/SourceClockTransactions.lean` | Actual Source.runTx and typed-world request-clock execution with raw/end/reset observations; handwritten RBody/entry, not canonical compilation. |
+| `Backend/Selection/Interface.lean` | Selection, frame, structured-control and same-program composition certificate statements; see [executable bytecode selection](feature-work/executable-bytecode-selection.md). |
+| `Backend/Selection/Premises.lean` | Typed G24.03 and G45.05-BR premises and G49.02 runtime-consumer statement; no external result assumed or runtime proof claimed. |
