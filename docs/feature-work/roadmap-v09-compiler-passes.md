@@ -532,6 +532,16 @@ and their reverse imports in 130.17 seconds. Earlier stops remain retained.
 These checks do not establish the final combined lane gates or discharge the
 remaining Source/world/resource producers.
 
+## Exact documentation comparison
+
+On public base `f303d134583906548c2e4fa2f3de077c993038b1`, the unchanged
+path checker produces exactly the same complete output for the public and
+lane trees: 46 ambiguity warnings, no missing paths, and default exit 0.
+Strict mode exits 1 in both trees with identical complete output; it remains
+a failed gate. The original frozen base has a different checker and its native
+run exits 1. These results do not establish same-checker equality against the
+frozen base, nor replace the pending combined validation or producer proofs.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
