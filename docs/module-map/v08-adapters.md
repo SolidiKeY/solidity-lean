@@ -226,6 +226,12 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedProgramControls.lean` | Both permissions, legal capacity, exact gas/fuel and wrong-table refusals, nonzero prefix and complete ordered terminal State. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthrough.lean` | Derived nonzero ISZERO flag and actual five/six-step fallthrough prefixes to PC37/38, exact resource and native-frame transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthroughControls.lean` | Arbitrary tables, both permissions, nonzero/signed capacity clients, zero counterexample and ordered resource failures/state. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean` | H7-checked charged fetched ADDRESS, CALLER and CALLVALUE, whole native State/X continuation and explicit resource bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean` | H7-checked populated invocation controls: complete expected States, distinct identities, legal capacity and gas/fuel/overflow ordering. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean` | Charged final PUSH32 continuation of the nonzero linked prefix; explicit gas, stack and fuel bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean` | Complete populated state and ordered-byte controls, boundary capacity and resource refusals. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean` | One charged nonzero fetched cycle to byte zero, consuming the existing linked reference certificate. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycleControls.lean` | Populated finite-cycle states, exact gas/fuel boundaries and missing-target refusal. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 
