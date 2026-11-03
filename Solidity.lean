@@ -1887,6 +1887,16 @@ import Solidity.Backend.LabelExec.Loops
 import Solidity.Backend.LabelExec.Packets
 import Solidity.Backend.LabelExec.ScalarTransfer
 import Solidity.Backend.LabelExec.Step
+import Solidity.Backend.LabelExec.Boundaries
+import Solidity.Backend.LabelExec.Checks
+import Solidity.Backend.LabelExec.Fragment
+import Solidity.Backend.LabelExec.FragmentControls
+import Solidity.Backend.LabelExec.FragmentSound
+import Solidity.Backend.LabelExec.LiteralChecks
+import Solidity.Backend.LabelExec.LiteralLoops
+import Solidity.Backend.LabelExec.LoopExit
+import Solidity.Backend.LabelExec.LoopExitControls
+import Solidity.Backend.LabelExec.Placement
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls

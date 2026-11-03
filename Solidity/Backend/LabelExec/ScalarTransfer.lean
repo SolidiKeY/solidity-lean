@@ -13,8 +13,10 @@ theorem effect_of_scalar (code : List UInt8) (pc : Nat) (i : Instr)
   cases i with
   | push n imm => simp only [effect, h, Option.map_some]
   | op o =>
-    cases o <;> first
-    | exact (by cases h)
-    | simp only [effect, h, Option.map_some]
+    cases o
+    case JUMP => cases h
+    case JUMPI => cases h
+    case JUMPDEST => cases h
+    all_goals simp only [effect, h, Option.map_some]
 
 end Solidity.Backend.LabelExec

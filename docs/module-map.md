@@ -2072,3 +2072,24 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/StorageOps/TwoClearRepresentationControls.lean` | Actual Source storage-operation correspondence or complete ordered client above the core |
 | `Backend/StorageOps/LoopLaws.lean` | Shared intrinsic loop-turn/exit/single-loop adapters with explicit operational premises |
 | `Backend/StorageOps/LoopLawsControls.lean` | Populated ordered positive/negative loop controls and concrete termination witness |
+| `Backend/LabelExec/Placement.lean`, `Backend/LabelExec/Checks.lean` | Arbitrarily placed local loop packets at whole-runtime base zero; standalone assembled-loop witness and negative controls. |
+| `Backend/LabelExec/LiteralLoops.lean`, `Backend/LabelExec/LiteralChecks.lean` | Actual head/PUSH-to-test composition for literal conditions; zero/nonzero assembled entry controls, no reached-test premise. |
+| `Backend/LabelExec/Boundaries.lean`, `Backend/LabelExec/LoopExit.lean`, `Backend/LabelExec/LoopExitControls.lean` | Actual indexed fetch/tag execution and six-step zero-loop exit; skipped unsupported-body and EOF controls. |
+| `Backend/LabelExec/Fragment.lean`, `Backend/LabelExec/FragmentSound.lean`, `Backend/LabelExec/FragmentControls.lean` | Intrinsic stack-height/capacity refinement of existing numeric code and Block; actual one-step successor derivation and value-frame/capacity countercontrols. |
+### G46.05 direct hash-query receipts (optional Bridge)
+| Module (under `Bridge/SolidityBridge/`) | Purpose |
+|---|---|
+| `HashBridge/Queries.lean`, `HashBridge/Step.lean`, `HashBridge/Layout.lean` | Reused actual opaque digest/query and conditional storage-region interfaces from owned998ffef7. |
+| `HashBridge/Prefix.lean`, `HashBridge/PrefixControls.lean` | Actual explicit-step query receipts, derived KECCAK frame, repeated-input and fuel controls; [scope](feature-work/hash-direct-prefix.md). |
+| `HashBridge/ChargedGuard.lean`, `HashBridge/Charged.lean`, `HashBridge/ChargedControls.lean` | Exact KECCAK memory/base/check order and all-fuel fetched-X-to-query receipt with full actual successor fields; logical charge/fuel/static controls. |
+| `ExternalEvm/OutcomeDriver.lean` | Reused owned generic observation of pinned X checks/step/terminal dispatch from3d4f8d7f; no replacement evaluator. |
+| `HashBridge/Frame.lean`, `HashBridge/FrameSound.lean`, `HashBridge/FrameHash.lean`, `HashBridge/FrameControls.lean` | Recursive direct-query refinement of existing driver cuts; all-fuel existence/erasure and same-KECCAK-head continuation; error-retains-query control. |
+| `HashBridge/QueryShape.lean`, `HashBridge/QueryUnique.lean`, `HashBridge/QueryControls.lean` | Fixed-state/fuel query-list uniqueness and unique existence; forbids favorable empty receipts after an executed hash. |
+| `HashBridge/{QueryCut,CutSound,HashCuts,CutControls}.lean` | Checked same-run query cuts, residual execution and actual hash/error client |
+| `HashBridge/CutComposition.lean`, `HashBridge/TwoHashCuts.lean` | Same-run cut grafting and conditional two-checked-hash client with derived residual receipt. |
+| `HashBridge/PairControls.lean` | Concrete two-KECCAK edge producer and composed symbolic two-query/error cut. |
+| `HashBridge/XiQueries.lean`, `HashBridge/XiControls.lean` | Actual public-Xi direct-query soundness/existence/uniqueness and fresh-empty-stack underflow control. |
+| `HashBridge/ThetaQueries.lean`, `HashBridge/ThetaControls.lean` | Public CODE-message direct-query soundness/existence/uniqueness, exact result policy and handled-child checkpoint control. |
+| `HashBridge/CallQueries.lean`, `HashBridge/CallControls.lean` | Actual call-operation CODE query receipt, reply/state installation and nonuniform low-fuel/depth control. |
+| `ExternalEvm/{DriverPush,ChargedDispatch,RequireCut,RequireLocalCut,RequireLocalState,StaticcallDriver}.lean` | Reused committed owned driver closure; five exact files, one unused-simp deletion in StaticcallDriver. |
+| `HashBridge/StaticQueries.lean`, `HashBridge/StaticQueryControls.lean` | Checked STATICCALL child/caller query provenance and actual fuel/check ordering controls. |
