@@ -236,6 +236,24 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean` | Complete populated state and ordered-byte controls, boundary capacity and resource refusals. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean` | One charged nonzero fetched cycle to byte zero, consuming the existing linked reference certificate. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycleControls.lean` | Populated finite-cycle states, exact gas/fuel boundaries and missing-target refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean` | Actual selected G25 signed-negation body to two fetched steps, exact resources and frame; checked guard/panic execution remains open. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Complete signed/zero/boundary States, peak capacity, gas/fuel refusals and minimum-wrap versus Scalar-guard controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Derives non-minimum source range/result and relates its encoding to the actual fetched negation body; minimum failure separate. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Typed signed/zero/max clients, ordered native output and simultaneous minimum source-failure/body-success control. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean` | General fetched EQ word/typed-certificate agreement with actual decoder, charged gate, full State and continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean` | Populated typed/same/high-bit-distinct/boundary clients, gas/fuel/arity refusals and complete ordered State observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTest.lean` | Three actual fetched DUP1/PUSH32-minimum/EQ steps to the existing Scalar overflow flag, exact resources/frame and legal-entry peak overflow refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTestControls.lean` | Complete ordinary/minimum States, legal peak1024 and refused peak1025, gas/fuel negatives and ordered code/buffer/account observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityConsumer.lean` | Actual fetched EQ/ISZERO composition with typed scalarNe certificate, exact resource premises and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityControls.lean` | Direct all-primitive clients, complete expected States, high-bit/signed/capacity/resource and ordered-observation controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderConsumer.lean` | General fetched LT/GT word and typed-certificate agreement with actual decoder, charged gate and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderControls.lean` | Direct typed clients, unsigned-versus-signed/reversed order, boundary/capacity/resource negatives and complete ordered States. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictConsumer.lean` | Actual fetched GT/ISZERO and LT/ISZERO typed LE/GE transport, exact resource premises and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictControls.lean` | Direct typed clients, equality-versus-strict/directional negatives, complete States and capacity/resource/ordered-observation controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeConsumer.lean` | General actual signed SLT and SLT/ISZERO typed intGe transport with reserved word bridge, explicit resources and complete State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeControls.lean` | Direct typed signed LT/GE clients, unsigned contrast/min/max/equality, complete States and capacity/resource/order negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushConsumer.lean` | Published bounded metadata emitter to actual fetched PUSH0–PUSH32 with precise width/value, charged gas, full State/X and full-stack refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushControls.lean` | Complete zero/byte/selector/ABI/full-width States, cost/capacity/resource and endian/length/order controls; no allocator premise. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 
@@ -367,30 +385,3 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard proved redundant (`accept_eq_upstream`); composed independent ProgramSite soundness, not full feature/profile adequacy. |
 
 See [P8 admission](../feature-work/p8-admission.md).
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean` | Actual selected G25 signed-negation body to two fetched steps, exact resources and frame; checked guard/panic execution remains open. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Complete signed/zero/boundary States, peak capacity, gas/fuel refusals and minimum-wrap versus Scalar-guard controls. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Derives non-minimum source range/result and relates its encoding to the actual fetched negation body; minimum failure separate. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Typed signed/zero/max clients, ordered native output and simultaneous minimum source-failure/body-success control. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean` | General fetched EQ word/typed-certificate agreement with actual decoder, charged gate, full State and continuation. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean` | Populated typed/same/high-bit-distinct/boundary clients, gas/fuel/arity refusals and complete ordered State observations. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTest.lean` | Three actual fetched DUP1/PUSH32-minimum/EQ steps to the existing Scalar overflow flag, exact resources/frame and legal-entry peak overflow refusal. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTestControls.lean` | Complete ordinary/minimum States, legal peak1024 and refused peak1025, gas/fuel negatives and ordered code/buffer/account observations. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityConsumer.lean` | Actual fetched EQ/ISZERO composition with typed scalarNe certificate, exact resource premises and full State continuation. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityControls.lean` | Direct all-primitive clients, complete expected States, high-bit/signed/capacity/resource and ordered-observation controls. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderConsumer.lean` | General fetched LT/GT word and typed-certificate agreement with actual decoder, charged gate and full State continuation. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderControls.lean` | Direct typed clients, unsigned-versus-signed/reversed order, boundary/capacity/resource negatives and complete ordered States. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictConsumer.lean` | Actual fetched GT/ISZERO and LT/ISZERO typed LE/GE transport, exact resource premises and full State continuation. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictControls.lean` | Direct typed clients, equality-versus-strict/directional negatives, complete States and capacity/resource/ordered-observation controls. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeConsumer.lean` | General actual signed SLT and SLT/ISZERO typed intGe transport with reserved word bridge, explicit resources and complete State continuation. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeControls.lean` | Direct typed signed LT/GE clients, unsigned contrast/min/max/equality, complete States and capacity/resource/order negatives. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushConsumer.lean` | Published bounded metadata emitter to actual fetched PUSH0–PUSH32 with precise width/value, charged gas, full State/X and full-stack refusal. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushControls.lean` | Complete zero/byte/selector/ABI/full-width States, cost/capacity/resource and endian/length/order controls; no allocator premise. |
