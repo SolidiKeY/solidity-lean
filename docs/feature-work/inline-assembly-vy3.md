@@ -879,3 +879,33 @@ doc-path and global axiom-pin gates pass; its library gate is resource-stopped
 in unchanged `Frontend/Checked/UnitExamples.lean`. The broader optional Bridge
 check was interrupted by runtime restart and remains pending. These outcomes
 do not establish final lane validation.
+
+### Original scopes with structured bodies
+
+`SolidityBridge.Yul.ScopedControl` composes existing initializer compilation and
+normal-control derivations for original Yul `let` and zero-initialized scopes.
+Four general source/`StructuredExec` laws derive initialization, body execution
+and exact fresh-prefix retirement; arbitrary caller suffixes remain identical.
+The zero scope supports arbitrary arity, including zero. Emission selects at
+temporary depth zero and retains actual code-selection equations. No source
+AST, state, function convention or blanket simulation premise is introduced.
+
+Controls instantiate nested branches under a fresh local, live old-local
+updates with dirty full words, two fresh zero locals and zero arity. They check
+both branch directions, nonselected locals, full machine fields, underflow,
+last accessible live position 15 versus intrinsically valid position 16,
+and separate prefix capacity versus oversized mathematical model success.
+Finite selector witnesses do not replace the four general laws.
+
+Independent read-only finder/skeptic reviews found no confirmed defect. Focused
+kernel checks pass; failed scratch formatting/control-index attempts and the
+default-heartbeat limit for a generic selector fixture are retained without
+budget changes. These are scope/body combinators, not a complete recursive
+scope visitor, source-loop/function compilation, Solidity Source attachment,
+physical/G24 or native correspondence. Broad import/final gates remain open;
+the unchanged library resource blocker is not retried for this component.
+
+Both new per-file MCP diagnostics report zero errors. Focused/touched kernel,
+scoped trust, layer, generated-root, doc-path and global axiom-pin checks pass.
+The existing library headroom stop and interrupted optional Bridge closure
+remain recorded limitations; they are not reclassified as passes.

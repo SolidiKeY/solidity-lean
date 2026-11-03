@@ -357,6 +357,8 @@ import SolidityBridge.Yul.QuotientSelection
 import SolidityBridge.Yul.QuotientSelectionControls
 import SolidityBridge.Yul.QuotientSuffix
 import SolidityBridge.Yul.QuotientSuffixControls
+import SolidityBridge.Yul.ScopedControl
+import SolidityBridge.Yul.ScopedControlControls
 import SolidityBridge.Yul.SelectionSequence
 import SolidityBridge.Yul.SelectionSequenceControls
 import SolidityBridge.Yul.SignedPlacement

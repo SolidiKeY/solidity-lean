@@ -1955,6 +1955,26 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/ScopedControl.lean:SolidityBridge.Yul.ScopedControl.letOne_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedControl.lean:SolidityBridge.Yul.ScopedControl.letOne_structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedControl.lean:SolidityBridge.Yul.ScopedControl.zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedControl.lean:SolidityBridge.Yul.ScopedControl.zero_structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.ControlRealization.selectSliceUsing": [
   "Classical.choice",
   "Quot.sound",

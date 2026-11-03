@@ -60,3 +60,5 @@
 | `Bridge/SolidityBridge/Yul/LoopClassification.lean`, `Bridge/SolidityBridge/Yul/LoopSelection.lean`, `Bridge/SolidityBridge/Yul/LoopSelectionControls.lean` | Derived finite macro-prefix classification and concrete nested target-loop whole-iff selection; source/native horizons remain open. |
 
 | `Bridge/SolidityBridge/Yul/JsonCompilation.lean`, `Bridge/SolidityBridge/Yul/JsonCompilationControls.lean` | Closed checked JSON word preparation to scoped instruction/model certificates; synthetic decoder, arithmetic and refusal controls. Source attachment, Body admission and full G24/native adequacy remain open. |
+
+| `Bridge/SolidityBridge/Yul/ScopedControl.lean`, `Bridge/SolidityBridge/Yul/ScopedControlControls.lean` | Original Yul let/zero scopes with concrete normal structured bodies; exact source/target prefix entry and retirement, arbitrary caller tail and explicit depth-zero domain. |

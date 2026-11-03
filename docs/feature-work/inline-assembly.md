@@ -319,3 +319,9 @@ VY3 target-loop follow-up: finite-prefix reverse classification and a separate
 recursive target selector now construct existing whole-iff/failure certificates
 for nested loops. Model macro-turns are distinct from native/source divergence
 prefixes; [source/G24/native closure remains open](inline-assembly-vy3.md#target-loop-classification-and-selection).
+
+VY3 additional bounded handoff: actual closed checked-JSON preparation now
+feeds scoped scalar compilation, and original let/zero scopes compose with
+normal structured bodies. General kernel laws and synthetic controls are in
+[the VY3 lane record](inline-assembly-vy3.md); complete Source/G24/native and
+frontend adequacy, broad imports and final lane validation remain open.
