@@ -43,3 +43,12 @@ Validation covers source-graph controls, emitted numeric cases and concrete V2
 frame witnesses/refusals. Scoped guards pin standard axioms. Independent finder
 and skeptic reviews checked exact predicates, suffix preservation and capacity;
 these are local runner and stack-bound controls, not external EVM tests.
+
+The partial G46 access interface lives in
+`Bridge/SolidityBridge/AccessBridge/Interface.lean`. It states raw calldata-word,
+charged fetched-step and continuation obligations over the pinned EVM state,
+with explicit low driver budgets. No instance is supplied. CALLDATASIZE reuses
+P10's existing source-input theorem; memory/copy and storage bridges remain open.
+Its positive-fuel continuation makes no `X` equality claim at budgets zero or
+one. Read-only finder and skeptic review checked that budget partition and the
+exact initial byte identity.
