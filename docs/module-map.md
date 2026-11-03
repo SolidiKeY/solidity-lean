@@ -1855,3 +1855,15 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/Passes/LoopCallsBoundary.lean`, `Backend/Passes/LoopAllocatingSuffix.lean` | Loop-to-call budgeted links. |
 | `Backend/Passes/WidthApplication.lean`, `Backend/Passes/SignedWidthGuard.lean`, `Backend/Passes/ShortCircuitBoundary.lean`, `Backend/Passes/EntryReception.lean` | Width masks, signed guards, short-circuit Booleans, ABI word admission (fixture). |
 | Other `Backend/Passes/*Controls.lean` and `*Pins.lean` | Controls on the `CompileExamples` fixture; axiom guards. |
+
+## V10 storage operations
+
+| Modules | Purpose |
+|---|---|
+| `Backend/StorageOps/Traversal.lean`, `Backend/StorageOps/RecursiveCopy.lean`, `Backend/StorageOps/RecursiveClear.lean`, `Backend/StorageOps/RecursivePop.lean` | Runtime-shaped graph copy/clear/pop, equal to `Value.overlay` ([V10](feature-work/roadmap-v10-storage-operations.md)). |
+| `Backend/StorageOps/CommonPrefix.lean`, `Backend/StorageOps/PrefixLaws.lean`, `Backend/StorageOps/PathOperations.lean`, `Backend/StorageOps/Commutation.lean` | Prefix transport and disjoint-path commutation. |
+| `Backend/StorageOps/PathRepresentation.lean`, `Backend/StorageOps/RepresentedOperations.lean`, `Backend/StorageOps/TargetOperations.lean` | Operations against `Represented`; scalar save/copy to numeric stores and `Evm.Slot`. |
+| `Backend/StorageOps/NumericTraversal.lean`, `Backend/StorageOps/CopyTransport.lean`, `Backend/StorageOps/LayoutAccess.lean` | `FiniteRun` numeric transport, footprints, G27 layout access. |
+| `Backend/StorageOps/TargetArrayCopy.lean`, `Backend/StorageOps/TargetArrayClear.lean`, `Backend/StorageOps/OutputRootComplete.lean` | Structured target loops; nested-array root composition. |
+| `Backend/StorageOps/RuntimeCopyRepeat.lean`, `Backend/StorageOps/RuntimeCopyComposition.lean`, `Backend/StorageOps/TargetArrayRepeat.lean` | Runtime-header repetition and footprint shrinkage. |
+| Other `Backend/StorageOps/*.lean`, `*Controls.lean` | Lifecycles, snapshots, cycles, fixed/nested targets; inhabited fixtures and counterexamples. |
