@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
+import Solidity.Backend.MemoryCopies.InterfaceV2Roots
 import Solidity.Evm.MemoryObjectArrayExamples
 
 /-! Inhabited V2 controls reuse master's populated, separated allocator input.
@@ -42,12 +43,24 @@ private def word : StorageWordCertificate value rfl 1 where
       default.builder.correct hp base frame cursor machine represented fits
     have selected : base' (value.copyStToM hp rfl).val.id = cursor := by
       simpa only [Heap.allocDefault, SVal.dflt_array, value] using root
+    refine ⟨base', machine', ?_, allocator, extension, shape, preserved⟩
+    · rw [selected]
+      exact execution
+
+private def wordRoots : StorageWordRootCertificate word where
+  rootGap := by
+    intro H hp base frame cursor machine represented fits
+    obtain ⟨base', machine', execution, allocator, root, extension, shape, preserved, gaps⟩ :=
+      default.builder.correct hp base frame cursor machine represented fits
+    have selected : base' (value.copyStToM hp rfl).val.id = cursor := by
+      simpa only [Heap.allocDefault, SVal.dflt_array, value] using root
     refine ⟨base', machine', ?_, allocator, extension, shape, preserved, selected, ?_⟩
     · rw [selected]
       exact execution
     · intro lo hi gap below
       intro R reference
       exact gaps lo hi gap below reference
+
 
 theorem default_inhabited : Nonempty (DefaultCertificate (.array (.prim .uint)) rfl 1) :=
   ⟨default⟩
@@ -86,11 +99,14 @@ theorem actual_reserved_gap :
     intro R reference
     exact .inr (witness.represented.heap.owner.above reference)
   obtain ⟨base', machine', execution, _, _, _, _, root, gaps⟩ :=
-    word.correct witness.heap witness.base witness.frame witness.cursor witness.machine
+    wordRoots.rootGap witness.heap witness.base witness.frame witness.cursor witness.machine
       witness.represented witness.fits
   rw [root] at execution
   exact ⟨base', machine', execution, gaps 0 witness.frame gap witness.represented.free.above⟩
 
+theorem word_roots_inhabited : Nonempty (StorageWordRootCertificate word) := ⟨wordRoots⟩
+
+#print axioms word_roots_inhabited
 #print axioms default_inhabited
 #print axioms word_inhabited
 #print axioms default_cost_W_rejected

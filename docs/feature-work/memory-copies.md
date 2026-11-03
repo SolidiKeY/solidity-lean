@@ -82,8 +82,12 @@ panic and horizon timeout. The generic theorem permits a changed reached
 state; the concrete local-expression witness has no side effects.
 
 Earlier finder and skeptic reviews checked the root/gap contract, positive
-inhabitants and derived local panic result. The additive compatibility update
-requires fresh reviews and validation; its signature modules have zero MCP errors.
+inhabitants and derived local panic result. Fresh independent finder and skeptic reviews found no semantic/API defect in
+the additive correction. They verified byte-identical published interfaces,
+independent panic inputs, the existing public result type and an inhabited
+optional root/gap companion. Neither used Lean, builds or edits. All six
+changed/new modules have zero MCP errors; the five input/proof/control modules
+have no warning diagnostics. Checkpoint gates and axiom audit remain required.
 Full G33/G35 implementation, total size-failure coverage, recursive traversal
 and mixed-location composition remain open.
 

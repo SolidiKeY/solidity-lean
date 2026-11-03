@@ -106,10 +106,15 @@ private def lengthInput : Source.EMState E [.int .u256] := (.cons large .nil, be
 private def zeroInput : Source.EMState E [.int .u256] := (.cons (.int 0 (by decide)) .nil, before.2)
 private def lengthExpr : Source.RExpr E [.int .u256] (.int .u256) := .local .here
 
-/-- All premises of the current length-panic law are actual evaluations. -/
+/-- Independent inputs contain no assumed final panic equation. -/
+def oversized_inputs (global : Source.Glob E) :
+    NewArrayLengthPanicInputs global frame 1 (τ := .bytes .memory) rfl lengthExpr rfl
+      (.val large) (2 ^ 64) lengthInput lengthInput := ⟨rfl, rfl, Nat.le_refl _⟩
+
+/-- Construct the unchanged published premise from actual evaluations. -/
 def oversized_length (global : Source.Glob E) :
     NewArrayLengthPanicPremise global frame 1 (τ := .bytes .memory) rfl lengthExpr rfl
-      (.val large) (2 ^ 64) lengthInput lengthInput := ⟨rfl, rfl, Nat.le_refl _⟩
+      (.val large) (2 ^ 64) lengthInput lengthInput := (oversized_inputs global).toPremise
 
 theorem oversized_length_panics (global : Source.Glob E) :
     (Source.evalE global frame 2
