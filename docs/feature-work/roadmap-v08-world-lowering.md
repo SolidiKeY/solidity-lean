@@ -3917,3 +3917,7 @@ and returning unsigned `2^256 - 1` are distinct observations. Boundary, static,
 raw-timeout and wrong-snapshot/return controls preserve this distinction. This is
 argument/result transport, not general target callee, heap/world, ABI, runtime
 frame, source admission or bytecode adequacy.
+
+### Reached memory-byte hashing
+
+`SourceMemoryKeccak` consumes actual argument execution and reached heap lookup, then derives builtin Keccak execution without another allocation. Real ABI literal and populated write/read/hash/ABI producers inhabit these obligations, retaining the complete reached machine and existing ordered vector. Input-order and allocator controls are not hash noncollision claims. The intrinsic byte observation uses the existing explicit `Fixed.Keccak` contract; canonical compiler, admission, body/frame and unit transport remain open.
