@@ -1,4 +1,5 @@
 import Solidity.Yul.LocalBoolItemScope
+import Solidity.Yul.RawSequence
 
 /-! Conditional execution of a concrete certified Boolean item scope.
 Condition and branch partial effects retain their actual reached contexts. -/
@@ -18,22 +19,6 @@ def run {env returns modifier control types out condition items}
       if LocalBoolControl.truth value then LocalBoolItemScope.run branch fuel actual.2
       else .normal actual.2
 
-
-
-theorem restore_self : ∀ (layout : Solidity.Source.Layout) (types : Solidity.Source.RCtx)
- (locals : Solidity.Source.Locals layout types), locals.restore types = .ok locals := by
-  intro layout types locals
-  unfold Solidity.Source.Locals.restore
-  have same : types.drop (types.length - types.length) = types := by
-    rw [Nat.sub_self]
-    rfl
-  rw [dif_pos same]
-  have dropped : ∀ (count : Nat) (zero : count = 0) (back : types.drop count = types),
-      (back ▸ Solidity.Source.Locals.drop count locals) = locals := by
-    intro count zero back
-    subst count
-    rfl
-  rw [dropped _ (Nat.sub_self _) same] <;> rfl
 
 
 /-- Agreement with the existing Source conditional, from a completely clean input frame.
@@ -125,7 +110,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
                   simp only [Solidity.Yul.LocalBoolItems.project,decoded,Option.map_some]
                   rw [Solidity.Source.Hoare.run_bind,child]
                   dsimp only []
-                  rw [Solidity.Source.Out.close,Solidity.Yul.LocalBoolIf.restore_self] <;> rfl
+                  rw [Solidity.Source.Out.close,Solidity.Yul.RawSequence.restore_self] <;> rfl
           | memRef impossible _ => cases impossible
           | storRef impossible _ => cases impossible
           | cdRef impossible _ => cases impossible

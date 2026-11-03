@@ -67,7 +67,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
           rw [rebuilt]
         rw [Solidity.Source.execS,Solidity.Source.Hoare.run_bind,child]
         dsimp only []
-        rw [Solidity.Yul.LocalBoolIf.restore_self]
+        rw [Solidity.Yul.RawSequence.restore_self]
         have liftSelf : (Solidity.Source.EM.lift (E := env) (Γ := [])
             (Except.ok afterLocals : Solidity.Source.R (Solidity.Source.Locals env.layout types))).run
             (Solidity.Source.L0 env,final.2) =

@@ -567,7 +567,7 @@ definitions and proofs are unchanged.
 
 ### Boolean conditional scope adapter
 
-LocalBoolIf.run executes a certified Boolean condition and actual certified item block with Source's predecessor fuel. False conditions retain condition effects and skip the block; true conditions restore only a successful block's local scope. A halted block retains its reached context and world. source_agrees universally relates execution to Source.execS ifThen from a completely clean local frame, using concrete LocalBoolControl and LocalBoolItemScope proofs. restore_self accounts for Source's additional close.
+LocalBoolIf.run executes a certified Boolean condition and actual certified item block with Source's predecessor fuel. False conditions retain condition effects and skip the block; true conditions restore only a successful block's local scope. A halted block retains its reached context and world. source_agrees universally relates execution to Source.execS ifThen from a completely clean local frame, using concrete LocalBoolControl and LocalBoolItemScope proofs. RawSequence.restore_self accounts for Source's additional close.
 
 Checks.LocalBoolIf inhabits the Source conditional and tests timeout/success
 horizons, branch skipping, condition assignment, partial condition failure, and
@@ -606,32 +606,35 @@ zero orphans. Forty existing ambiguous doc references all resolve. Scoped
 theorem/control reports use only propext, Classical.choice and Quot.sound. Final
 lane gates are pending, not claimed. get_goal remains unavailable; persistent
 goal unchanged.
-### Scoped Boolean while adapter
+### Scoped loops
 
-LocalBoolWhile.run iterates an actual certified Source Boolean condition and a context-growing certified item body. Successful iterations drop body declarations and retain enclosing effects; halts retain the actual reached context. Condition, scoped body and recursive loop use Source's predecessor horizon. source_agrees proves all-fuel agreement with actual Source.execS whileLoop from a completely clean frame. After successful bodies it obtains the real decoder result from scope agreement, reconstructs the raw clean frame through values_inverse, and applies fuel induction. No cleanliness/simulation law is assumed from a caller.
+LocalBoolWhile and LocalBoolDoWhile execute certified Boolean conditions and
+context-growing item scopes with Source's predecessor horizons. Successful
+bodies restore their declarations; halts retain their reached context and
+partial effects. Their source_agrees theorems prove all-fuel correspondence
+with Source.execS from completely clean input, using concrete condition/scope
+proofs and decoder inversion. Do/while executes the body before its condition.
 
-Checks.LocalBoolWhile inhabits an actual loop that declares a temporary copy and clears its enclosing condition. Controls show partial declared context at fuel five, termination at seven, false-condition skipping, condition partial effects, dirty nonzero truth and preservation of dirty sibling bits with refused clean projection. A universal iteration lemma factors constant-true repetition, tested at horizons eight and twelve; these finite controls do not claim a general divergence theorem. Direct repeated reduction hit the unchanged 200000-heartbeat limit; the factored proof passes without raising budgets. Scratch failures are retained.
+Controls cover declaration/outer-write combinations, partial body and condition
+effects, recursive iteration, false-guard ordering and dirty projection refusal.
+LocalBoolDivergence proves no finite normal completion for literal-true guards
+and certified bodies, for arbitrary raw frames and actual clean Source execution.
+It does not classify all halts or cover unsupported break/return bodies.
 
-No Source/** changes, frontend admission expansion, or new solc/EVM evidence. Clean Source correspondence does not establish dirty Source/compiler adequacy. Full VY1/general P16, other statement/type classes, dirty pipeline boundaries and final joint/full gates remain unfinished. Exact signatures, automation, review and bounded check evidence are sealed in the head-named parallel packet.
+The shared restoration fact is RawSequence.restore_self; the duplicate
+LocalBoolIf.restore_self was removed. Conditional and loop consumers reuse the
+existing theorem without changing their Source agreement statements.
 
-Six independent read-only reviews reported no findings. Both per-file MCP diagnostics have zero errors. Serial affected build (130 jobs), two per-file gates, layer/registration/orphan/doc-path/diff checks pass; scoped axiom reports list only propext, Classical.choice and Quot.sound. Forty existing ambiguous documentation references all resolve. Lean 4.24.0 / Lake 5.0.0-src+797c613; hard 12 GiB/no-swap bound and serial Lean -j1 with OS-headroom monitoring. Full lane gates were not rerun or claimed. Persistent goal unchanged; get_goal read API remains unavailable.
+These extensions do not expand frontend admission or establish dirty
+Source/compiler adequacy. General P16, remaining statement/type cases and final
+joint/full lane validation remain open. No new external solc/EVM evidence is
+claimed.
 
-### Constant-true scoped loop noncompletion
+The loop checkpoints passed scoped kernel checks and independent finder/skeptic
+reviews. Repeated-loop controls use a proved iteration step after direct
+reduction reached the unchanged heartbeat limit. Raw failed attempts remain
+preserved with the external handoff evidence. This integration correction
+rechecks restoration consumers; it does not replace final lane validation.
 
-LocalBoolDivergence.no_normal proves, for every horizon and arbitrary raw input/output frame, that a literal-true loop with any certified Boolean item body cannot produce a normal result. No body-success, cleanliness or simulation premise is assumed. Successful bodies recur at the predecessor horizon; halted bodies stay halted. source_no_normal derives the corresponding actual Source.execS statement from concrete clean-input loop agreement, universally over globals/frame/phase/parameters and final locals/world.
-
-The body certificate covers Boolean expressions/declarations, not break, continue or return statements. These theorems exclude finite normal completion; they do not classify all halt reasons or establish dirty Source/compiler/EVM correspondence. Checks.LocalBoolDivergence inhabits a nonempty scoped body that clears an outer flag, exports universal raw/Source witnessed uses, and verifies false/mutable guards can terminate. Constant-true guards remain noncompleting even when that body clears the outer flag.
-
-No Source/** changes, admission expansion or new external compiler/EVM evidence. Full VY1/general P16 and final joint/full gates remain open. Exact signatures, automation-first attempts, bounded checks and independent reviews accompany the immutable head-named package.
-
-All six independent read-only reviews found no issues. MCP diagnostics: zero errors in both modules. Affected build (132 jobs), per-file gates, layer/registration/orphan/doc-path/diff checks pass; forty existing ambiguous doc references all resolve. Scoped axiom reports list only propext, Classical.choice and Quot.sound. Lean 4.24.0 / Lake 5.0.0-src+797c613; hard 12 GiB/no-swap cap, serial -j1 and OS headroom monitored. Final lane gates not rerun/claimed. Persistent goal unchanged; get_goal read API remains unavailable.
-
-### Body-first scoped Boolean iteration
-
-LocalBoolDoWhile.run executes a certified item scope before its Boolean condition. Body, condition and recursive iteration use Source's predecessor horizon. Successful scopes drop only their declarations; a halted body keeps its reached context and skips the condition. Condition side effects survive completion, recursion or failure. source_agrees proves concrete all-fuel equality with Source.execS doWhile from a completely clean frame, deriving the body's clean output through actual scope agreement and decoder inversion, handling Source's additional restoration, and closing recursion by fuel induction. No caller simulation or cleanliness premise is substituted.
-
-Checks.LocalBoolDoWhile inhabits the real Source statement with a declaration/copy followed by an outer write. A false guard still executes the body: fuel two times out, fuel seven changes the outer local, whereas while skips that body. Controls also retain the declared context at fuel five, terminate a mutable guard at seven, preserve condition writes before a nested-condition timeout, exercise a true recursive iteration, and refuse clean projection while dirty sibling bits survive. No new Source constructors, frontend admission or external solc/EVM claim.
-
-Rebased onto master after its integration of earlier scope interfaces, preserving the old branch and exact loop proof bodies. Shared root registrations are generated and master editorial corrections preserved. Full VY1/general P16, dirty per-pipeline correspondence and final joint/full gates remain open.
-
-Six independent read-only reviews found no issues, including unchanged prior loop proof bodies across rebase. MCP: zero errors in both new files. Serial affected build (134 jobs), two per-file gates, layer/registration/orphan/doc-path/diff checks pass: 553 core modules reach neither elaborator nor checked parser adapters; 3531 reachable, zero orphans. Forty-six current ambiguous doc references all resolve. Scoped axiom reports use only propext, Classical.choice and Quot.sound. Lean 4.24.0 / Lake 5.0.0-src+797c613; hard 12 GiB/no-swap cap, serial -j1 and OS headroom monitored. Final lane gates not rerun/claimed; persistent goal unchanged.
+Restoration reuse passed affected and per-file kernel checks and independent
+finder/skeptic review. Agreement statements and control expectations are unchanged.
