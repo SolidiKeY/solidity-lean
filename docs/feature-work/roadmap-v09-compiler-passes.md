@@ -260,6 +260,29 @@ finder/skeptic reviews requested the nonzero and actual unmasked controls;
 both were added. This is a local arithmetic/value application, not effectful
 assignment sequencing, general Source heap/world or byte-level EVM adequacy.
 
+## Effectful assignment and unchecked addition
+
+[AssignmentAdditionPass](../../Solidity/Backend/Passes/AssignmentAdditionPass.lean)
+extends the local-value application to `(i = a) + i` using the published Source
+assignment transport and actual captured operand order. It retains valid
+widths, initial integer-local alignment/reads/ranges, unchecked frame and fuel,
+original compiled-prefix Input and actual operand certificate. The theorem
+derives post-assignment local alignment and chooses the canonical machine,
+selected address map and result word before all saved tails. Each tail retains
+the full reached MappedOutput, prefix execution, operand execution and joined
+execution. No wrapped result-range premise is required.
+
+[Controls](../../Solidity/Backend/Passes/AssignmentAdditionControls.lean) inhabit
+both pipelines with `a = 255`, `i = 1`: legacy returns 0, via-IR returns 254,
+and both retain `i = 255`, all eleven fixture cells, old array, allocator,
+sentinel and full saved stack. Stale RHS, insufficient frame and corrupted
+tail are refused. The difference comes from assignment/capture effects, not
+from swapping commutative addition operands. Exact guards are in
+[Pins](../../Solidity/Backend/Passes/AssignmentAdditionPins.lean). Independent
+finder and skeptic reviews found no defect. This remains local Source integer
+alignment plus intrinsic/physical execution, not Source heap/world or public
+resource/session adequacy.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

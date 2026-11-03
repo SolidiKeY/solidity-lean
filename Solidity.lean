@@ -742,6 +742,9 @@ import Solidity.Backend.Passes.ShortCircuitWitness
 import Solidity.Backend.Passes.SourceAdditionValue
 import Solidity.Backend.Passes.SourceAdditionValueControls
 import Solidity.Backend.Passes.SourceAdditionValuePins
+import Solidity.Backend.Passes.AssignmentAdditionControls
+import Solidity.Backend.Passes.AssignmentAdditionPass
+import Solidity.Backend.Passes.AssignmentAdditionPins
 
 
 import Solidity.Lowering.V08.Audit
