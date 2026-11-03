@@ -115,3 +115,15 @@ end Solidity.Backend.StructuredFlow.MappedBranch
 Draft statement only, not elaborated or counted as proof evidence. Import the
 published BranchSelector and the new checked MappedCondition; do not define a
 new representation or assume the condition's run.
+
+
+## MappedBranch interface now implemented
+
+The previously drafted Solidity/Backend/StructuredFlow/MappedBranch.lean
+condition signature is now implemented unchanged. code_exact, condition_run,
+condition_represented, true_run, true_pending_skip, admitted and correct are
+proved by Sol with inhabited compiler/exit controls. The earlier false_run
+statement remains the routine Terra item, unimplemented and not counted as
+proof evidence. Use condition_represented plus the initial false-read fact and
+published Branch.false_run; do not copy condition into a parallel module.
+The prior draft is preserved verbatim as historical handoff context.
