@@ -54,3 +54,5 @@
 - Yul/LocalDefaultBinding.lean and Yul/Checks/LocalDefaultBinding.lean: constant-default declarations followed by certified local item bodies.
 
 - Yul/LocalDefaultItems.lean and Yul/Checks/LocalDefaultItems.lean: certified heterogeneous constant-default declaration sequences and concrete Source item composition.
+
+- Yul/LocalDefaultUnchecked.lean and Yul/Checks/LocalDefaultUnchecked.lean: unchecked heterogeneous default scopes, ordinary continuations and concrete Source composition.

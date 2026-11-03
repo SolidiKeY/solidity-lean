@@ -786,3 +786,21 @@ general admission, dirty compiler adequacy and final lane validation remain open
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Unchecked default scopes and ordinary continuations
+
+LocalDefaultUnchecked composes certified heterogeneous default sequences inside
+an unchecked scope and its ordinary continuation. Successful inner execution
+restores the enclosing context before running the tail; failures retain their
+reached locals and partial effects. The all-fuel clean-input item and block
+theorems use actual Source execution with the inner frame checked flag false
+and the original continuation frame, concrete decoder inversion and restoration.
+A two-default inner scope and a delayed default/Boolean tail check both partial
+contexts, final cleanup, enclosing writes and preserved dirty sibling bits.
+Independent Source controls expose the intermediate true-to-false write and the
+final false-to-true continuation. Controls are separate lemmas to stay within
+the unchanged proof budget. This adds no arithmetic, pipeline or general dirty
+compiler claim. Broader P16, admission and final lane validation remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.
