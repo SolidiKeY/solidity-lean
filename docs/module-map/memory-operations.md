@@ -172,3 +172,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceFramesControls.lean` | Declared nested bytes-array copy, fixed reference-array default and partial-timeout controls with retained child allocation. |
 | `Backend/MemoryCopies/SourceSizeInputs.lean` | Additive evaluation/conversion/oversize inputs; preserves the published panic premise and failure field. |
 | `Backend/MemoryCopies/InterfaceV2Roots.lean` | Optional fresh-root and preserved-gap companion without changing the published V2 certificate. |
+| `Backend/MemoryCopies/HeapContentsInterface.lean` | Live-content roundtrip obligation over the existing intrinsic heap mirror, without a new copy evaluator. |

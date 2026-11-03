@@ -142,3 +142,13 @@ projection. The additive correction preserves all existing public definitions,
 fields and import paths, using separate input and optional root/gap records.
 The signature-only companion commit precedes their constructors and controls.
 No Source, admission, exclusion, dependency premise or proof budget is changed.
+
+## Intrinsic live-copy contents
+
+`HeapContentsInterface.lean` states the remaining live-content obligation over
+the existing `SVal.Mirrors` relation. The implementation will reuse
+`SVal.mirrors_copyStToM`, `MVal.copyBelow_eq` and the existing strip operation.
+The target is generic V2 `StorageHeapCertificate` inhabitants, preserving
+dynamic live lengths and nested contents. It does not establish compiled
+storage loading, Source layout agreement or recursive Source graph adequacy.
+The signature precedes proofs; implementation and controls remain pending.
