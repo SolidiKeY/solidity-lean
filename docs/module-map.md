@@ -1842,3 +1842,16 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Lowering/V07/NodeRank.lean` | Stabilization at the node count; discharges the producer's rank check. |
 | `Lowering/V07/FieldCompleteness.lean` | Graph lowering succeeds for every `GraphTypeRel` under global UDVT support. |
 | `Lowering/V07/LocalFieldSupport.lean` | Same completeness with support only for traversed UDVTs. |
+
+## V09 compiler-pass components
+
+| Modules | Purpose |
+|---|---|
+| `Backend/Passes/ValueCertificate.lean`, `Backend/Passes/ValueSequence.lean`, `Backend/Passes/SharedPair.lean`, `Backend/Passes/StatefulValues.lean` | `CompiledVal` success/revert over a saved tail; ordered value pairs; state-dependent operands ([V09](feature-work/roadmap-v09-compiler-passes.md)). |
+| `Backend/Passes/CaptureCases.lean`, `Backend/Passes/CapturedValueStability.lean`, `Backend/Passes/RuntimeReturnCapture.lean` | Value and reference captures; P1 V3 primitive return followed by a capture. |
+| `Backend/Passes/HeapBoundary.lean`, `Backend/Passes/HeapPrefix.lean`, `Backend/Passes/ReindexedMemory.lean`, `Backend/Passes/MemoryCompilerSequence.lean` | Branch-indexed physical heap links; `compileProg` join. |
+| `Backend/Passes/TerminalReflection.lean`, `Backend/Passes/TripleSuffix.lean`, `Backend/Passes/TripleFailures.lean` | Three-stage composition; success reflection. |
+| `Backend/Passes/DivergenceWitness.lean`, `Backend/Passes/TailDivergence.lean`, `Backend/Passes/Spin.lean`, `Backend/Passes/FaultReached.lean`, `Backend/Passes/FaultTail.lean` | Divergence witnesses; reached faults. |
+| `Backend/Passes/LoopCallsBoundary.lean`, `Backend/Passes/LoopAllocatingSuffix.lean` | Loop-to-call budgeted links. |
+| `Backend/Passes/WidthApplication.lean`, `Backend/Passes/SignedWidthGuard.lean`, `Backend/Passes/ShortCircuitBoundary.lean`, `Backend/Passes/EntryReception.lean` | Width masks, signed guards, short-circuit Booleans, ABI word admission (fixture). |
+| Other `Backend/Passes/*Controls.lean` and `*Pins.lean` | Controls on the `CompileExamples` fixture; axiom guards. |
