@@ -1956,6 +1956,10 @@ import Solidity.Backend.MemoryCopies.InterfaceV2
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.Premises
+import Solidity.Backend.Selection.FrameCapacityV2
+import Solidity.Backend.Selection.InterfaceV2
+import Solidity.Backend.Selection.InterfaceV2Controls
+import Solidity.Backend.Selection.PremisesV2
 import Solidity.Backend.AbiWorld.CallerWordBytes
 import Solidity.Backend.AbiWorld.CallerWordBytesControls
 import Solidity.Backend.AbiWorld.ErrorLayout
