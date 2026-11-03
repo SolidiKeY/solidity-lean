@@ -25,3 +25,14 @@ load_bytes/load_memory/bytes_ok/arm/local_ok proofs stay with Sol. The host
 deferred statement are sealed with this checkpoint. Do not edit Source or
 replace any read/decoder result by an assumption. No sorry/axiom placeholder
 is added to Lean sources.
+
+### Resolved: storage ABI finite success control
+
+The deferred decode_true statement above is now proved, without budget changes,
+as LiteralFailureStorageSuccessControls.decode_true in commit
+364b2a8d319fa133e49f860faeba175f28fa4d2e. copied_observed is actual kernel
+computation (decide +kernel), copied_full combines it with stored_bytes state
+preservation through an abstract run_from_observation lemma, and word_decoder
+isolates actual Source bool decoding before the final evaluator rewrite.
+No Terra work remains for this item. Original failed attempts/seal remain
+immutable; generic and all-profile/runtime obligations are unchanged.
