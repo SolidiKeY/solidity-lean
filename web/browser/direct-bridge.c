@@ -1,5 +1,9 @@
 #include <lean/lean.h>
+#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
+#else
+#define EMSCRIPTEN_KEEPALIVE
+#endif
 #ifdef SOLIDITY_DIRECT_FULL
 extern void lean_initialize(void);
 #else
@@ -31,3 +35,17 @@ EMSCRIPTEN_KEEPALIVE const char* direct_check(const char* input) {
   previous_result=solidity_direct_check(lean_mk_string(input));
   return lean_string_cstr(previous_result);
 }
+
+#ifdef SOLIDITY_DIRECT_NATIVE
+#include <stdio.h>
+#include <stdlib.h>
+int main(void) {
+  if (direct_init()) return 2;
+  puts("{\"ready\":true}");fflush(stdout);
+  char *line = NULL;size_t capacity = 0;
+  while (getline(&line, &capacity, stdin) >= 0) {
+    puts(direct_check(line));fflush(stdout);
+  }
+  free(line);return 0;
+}
+#endif

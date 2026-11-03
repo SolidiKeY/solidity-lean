@@ -1,0 +1,7 @@
+gradle.projectsEvaluated {
+    def core = gradle.rootProject.project(':keyext.solidity.core')
+    core.configurations.implementation.dependencies.removeAll { it.group == 'org.hyperledger.besu' }
+    core.dependencies.add('implementation', core.files(
+        '/workspace/.setup/tools/besu-24.12.2/lib/besu-evm-24.12.2.jar',
+        '/workspace/.setup/tools/besu-24.12.2/lib/besu-datatypes-24.12.2.jar'))
+}

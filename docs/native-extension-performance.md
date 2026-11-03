@@ -1,5 +1,11 @@
 # Generated C in the extension
 
+Version 0.5.5 extends the compiled path to all 83 Velvet TestSuite functions,
+adds a standalone native executable and removes normal general-frontend fallback.
+[Current source-matched measurements](testsuite-performance.md) include native,
+packaged extension, offline browser and SolKey startup/throughput. The records
+below describe earlier versions.
+
 ## Compact runtime: version 0.5.4
 
 Supported scalar checks now use a standalone optimized generated-C/WASM module

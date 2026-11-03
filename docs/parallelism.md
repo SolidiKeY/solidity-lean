@@ -31,6 +31,9 @@ elaborator.
 - what those import: `Calculus.{TermEval,TermEq,TermWk,LoopInvariantWk,Lower,LowerRun,Shift,
   WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
   CallSummary,KIntTwoAnchors}`;
+- static callback transport: `Calculus.StaticInvocation`; the typed Boolean
+  loop, nominal-view inventory and selfdestruct binding checkpoints under
+  `Yul/` are registered by exact names in `CORE`.
 - intrinsic sharing/join foundations: `Calculus.{AnonLocalCapture,CallResultCapture,
   CallResultRestore,JoinSequence,JoinSequenceSize}`.
 - the hash bound and hashed layout: `Hash.{CollisionBound,Adaptive}`,

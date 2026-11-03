@@ -2,7 +2,9 @@
 
 The packaged verifier includes Lean 4.24.0 (Apache-2.0), GMP 6.2.1
 (LGPL-3.0-or-later or GPL-2.0-or-later), libuv and Emscripten 4.0.15 runtime
-components. License texts and upstream notices are in `runtime/direct/licenses/`.
+components. License texts and upstream notices are in `runtime/direct/licenses/` and
+`runtime/native/licenses/`. The optional standalone native executable uses the
+pinned Lean runtime and is built by `scripts/build-direct-native.py`.
 
 Corresponding sources and rebuild instructions:
 

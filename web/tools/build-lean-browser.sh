@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ ${1:-} == --compact-only ]]; then
+  exec bash "$(dirname "${BASH_SOURCE[0]}")/build-compact-browser.sh"
+fi
 repository=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 work=${LEAN_BROWSER_WORK:-"$repository/web/.lean-browser-build"}
 native=${LEAN_BROWSER_NATIVE_PREFIX:-$(lean --print-prefix)}

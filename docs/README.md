@@ -8,9 +8,11 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [feature-work/integration-20261103-checkpoints.md](feature-work/integration-20261103-checkpoints.md) | Reviewed scheduled lane increments, fixes, validation requirements and retained producer boundaries. |
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
 | [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |
+| [testsuite-performance.md](testsuite-performance.md) | All 83 Velvet TestSuite functions: compiled native, extension, offline browser and matched SolKey timings. |
 | [compact-verifier.md](compact-verifier.md) | Standalone generated-C/WASM verifier, admission limits, rebuild instructions and fresh-source benchmark method. |
 | [extension-proof-performance.md](extension-proof-performance.md) | Desktop closed-derivation proposals, checked fallback, worker timings and limits. |
 | [generated-c-performance.md](generated-c-performance.md) | Generated C call paths, native walk/certificate timings and optimization limits. |

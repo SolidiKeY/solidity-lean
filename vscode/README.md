@@ -28,18 +28,20 @@ successful body turn. Unsupported shapes remain pending. Ordinary diamonds
 accept exhaustion; separate successful-termination certificates are described in
 [the loop notes](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/loops.md#typed-tuple-measures).
 
-Version 0.5.4 includes a compact verifier compiled from Lean-generated C to
-WebAssembly. Supported scalar specifications run without loading Lean or its
-environment. Other programs use the general Lean frontend; that fallback still
-requires the matching `Solidity.Frontend.Testing` build.
+Version 0.5.5 runs ordinary IDE requests through generated C, using a matching
+native executable when available and WebAssembly otherwise. It supports plain
+assertion obligations, scalar specifications, arrays, mappings and loops.
+Undecided and unsupported programs remain unknown without starting Lean.
+Explicit certificate/audit requests require the general frontend build.
 Set `SOLIDITY_LEAN_DIRECT=0` to compare the general frontend.
 The compact build is accepted only when its toolchain and complete project
 source closure match the selected backend. [Measurements and limits](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/native-extension-performance.md).
 
 ## Setup
 
-Install Node.js 18 or later and the Lean/Lake version in the repository's
-`lean-toolchain`. Both `node` and `lake` must be on the editor's process PATH.
+Install Node.js 18 or later. Normal compiled checks need `node` on the editor's
+process PATH and a matching packaged runtime. Building the verifier or requesting
+certificates/audits also needs the Lean/Lake version in `lean-toolchain`.
 Follow the repository's compiler setup in
 [docs/solidity-testing.md](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/solidity-testing.md),
 including the pinned soljson compiler and `SOLKEY_ROOT` when needed. The
@@ -62,10 +64,30 @@ To build an installable package from this directory:
 
 ```sh
 npx @vscode/vsce package
-code --install-extension solidity-lean-0.5.3.vsix
+code --install-extension solidity-lean-0.5.5.vsix
 ```
 
-## Native library
+## Standalone native verifier
+
+Build the pinned Lean-generated C closure from the repository root:
+
+```sh
+LEAN_NUM_THREADS=1 python3 scripts/build-direct-native.py \
+  /path/to/lean-4.24.0 /path/to/lean4-source .lake/direct-native
+```
+
+The Lean source checkout must match the pinned compiler commit. This executable
+uses the Lean allocator and arithmetic runtime; it loads no Lean environment or
+kernel. Workers keep it alive between requests. Source and binary hashes reject
+stale builds. `SOLIDITY_LEAN_DIRECT_DIR` selects another build directory.
+For packaging, copy `direct-check`, `build.json` and the Lean license notices to
+`vscode/runtime/native`; package the portable WASM build and its notices under
+`vscode/runtime/direct` as the fallback for other operating systems.
+
+The complete 83-function comparison is in
+[the TestSuite measurements](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/testsuite-performance.md).
+
+## Optional general-frontend native library
 
 After building the backend, compile the optional library from the repository root:
 

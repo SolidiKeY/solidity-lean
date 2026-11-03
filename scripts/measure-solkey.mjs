@@ -18,13 +18,17 @@ let server;
 function trial(input,mode){
   assert.equal(digest(fs.readFileSync(input.source)),input.sourceHash,'SolKey must read the exact matched source bytes');
   const start=performance.now();
-  const run=spawnSync(path.join(root,'run-key.sh'),[input.source,'--contract','Simple','--function','run','--json'],{cwd:root,env:{...env,SOLKEY_SERVER:mode==='cold'?'0':'1'},encoding:'utf8',timeout:300000,maxBuffer:16*1024**2});
+  const functionName=input.function||'run';
+  const run=spawnSync(path.join(root,'run-key.sh'),[input.source,'--contract',input.contract||'Simple','--function',functionName,'--json'],{cwd:root,env:{...env,SOLKEY_SERVER:mode==='cold'?'0':'1'},encoding:'utf8',timeout:300000,maxBuffer:16*1024**2});
   if(run.error)throw run.error;
   assert.equal(digest(fs.readFileSync(path.join(root,'keyext.solidity.core/build/libs/keyext.solidity.core-exe.jar'))),report.jarSha256,'benchmark JAR changed during execution; build it first');
   assert.equal(digest(fs.readFileSync(input.source)),input.sourceHash,'benchmark source changed during execution');
   const results=run.stdout.split('\n').filter(line=>line.startsWith('{')).map(line=>JSON.parse(line)).filter(row=>row.function);
-  assert.deepEqual(results.map(row=>[row.function,row.status]),[['run',input.status==='proved'?'PROVED':'OPEN']],run.stdout+'\n'+run.stderr);
-  assert.equal(run.status,input.status==='proved'?0:1,run.stderr);
+  assert.deepEqual(results.map(row=>row.function),[functionName],run.stdout+'\n'+run.stderr);
+  if(input.status!==undefined){
+    assert.deepEqual(results.map(row=>row.status),[input.status==='proved'?'PROVED':'OPEN'],run.stdout+'\n'+run.stderr);
+    assert.equal(run.status,input.status==='proved'?0:1,run.stderr);
+  }else assert.ok(run.status===0||run.status===1,run.stdout+'\n'+run.stderr);
   const result={name:input.name,repeat:input.repeat,sourceHash:input.sourceHash,mode,wallMs:performance.now()-start,results};
   report.trials.push(result);console.log(JSON.stringify(result));
 }
