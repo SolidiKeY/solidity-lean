@@ -1,6 +1,4 @@
 import Solidity.Yul.WordLocals
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.WordLocals
 def X : List ExternalType :=
   [.memory,.value (.unsigned 0),.externalFunction,.constant (word 11),

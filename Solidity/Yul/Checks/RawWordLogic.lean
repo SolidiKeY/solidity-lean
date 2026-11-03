@@ -1,6 +1,5 @@
 import Solidity.Yul.WordAdapterLogic
 import Solidity.Yul.Checks.WordAdapterFixtures
-set_option Elab.async false
 namespace Solidity.Yul.Checks.RawWordLogic
 open Solidity.Yul.Checks.WordAdapter
 

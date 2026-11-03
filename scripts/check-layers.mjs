@@ -12,6 +12,15 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(RawDefaultDeclaration|Checks\.RawDefaultDeclaration)$/, // Certified constant-default Source declarations.
+  /^Solidity\.Yul\.(RawLocalScope|Checks\.RawLocalScope)$/, // Executed Boolean scope closure and Source adapter.
+  /^Solidity\.Yul\.(RawLocalDeclaration|Checks\.RawLocalDeclaration)$/, // Context-growing Boolean local declaration.
+  /^Solidity\.Yul\.(RawSourceReturnControl|Checks\.RawSourceReturnControl)$/, // Read-free Source return/control transport.
+  /^Solidity\.Yul\.(RawSourceVoidReturn|Checks\.RawSourceVoidReturn)$/, // Source void-return transport.
+  /^Solidity\.Yul\.(EvmBitwise|Checks\.EvmBitwise)$/, // Bitwise/comparison/shift/power correspondence.
+  /^Solidity\.Yul\.(EvmArithmetic|Checks\.EvmArithmetic)$/, // Unsigned word/target correspondence.
+  /^Solidity\.Yul\.(EvmSigned|Checks\.EvmSigned)$/, // Signed word/machine agreement.
+  /^Solidity\.Yul\.RawSourceForPost$/, // Generated VY1 module registration.
   /^Solidity\.Yul\.Compilation\./, // Yul compilation (target-side combinators).
   /^Solidity\.Yul\.World\.(Raw|Observations|Frames|Lifecycle|Adapters|ByteMemory|AdapterRules|LifecycleAdapter|CreationFrames|CreationRules|CreationAddressing|ReturnSize)$/, // Yul world consumer core.
   /^Solidity\.Yul\.RawSourceAdapterFor$/, // Generated VY1 new-module registration.
@@ -60,8 +69,8 @@ const CORE = [
   /^Solidity\.Yul\.(ScopedExpressions|Checks\.ScopedExpressions)$/, // VY1 supplemental expression namespace certificates.
   /^Solidity\.Yul\.(ExternalKeys|ScopedNames|Checks\.ScopedNames)$/, // VY1 constructed scoped external-name inputs.
   /^Solidity\.Yul\.(BlockExtract|BlockExtractLogic|WordPolicy|WordSyntax|Checks\.BlockExtract|Checks\.WordSyntax|Checks\.ExtractDivergence)$/, // VY1 actual closed source extraction/composition.
-  /^Solidity\.Yul\.(BlockTyping|ClosedSyntax|Checks\.BlockTyping|Checks\.ClosedSyntax)$/, // VY1 constructed closed-root typing.
-  /^Solidity\.Yul\.(DeclarationScope|DeclarationParse|Checks\.DeclarationScopes|Checks\.DeclarationParsing)$/, // VY1 whole-block declaration visibility.
+  /^Solidity\.Yul\.(BlockTyping|ClosedSyntax|Checks\.BlockTyping)$/, // VY1 constructed closed-root typing.
+  /^Solidity\.Yul\.(DeclarationScope|Checks\.DeclarationScopes)$/, // VY1 whole-block declaration visibility.
   /^Solidity\.Yul\.(WordArguments|WordExpressions|Checks\.WordExpressions)$/, // VY1 actual expression/call composition.
   /^Solidity\.Yul\.(WordLoops|WordCoverage|Checks\.WordLoops)$/, // VY1 loop composition/closed statement coverage.
   /^Solidity\.Yul\.(WordSwitch|Checks\.WordSwitch)$/, // VY1 actual switch composition.
@@ -111,6 +120,12 @@ const ELABORATOR = [
   /^Solidity\.Calculus\.(Print[^.]*|Surface[^.]*|TacticSyntax|Quote|NamedTerm)(\.|$)/,
 ];
 
+const PARSER_ADAPTER = [
+  /^Solidity\.Frontend\.Yul(?:\.|$)/,
+  /^Solidity\.Frontend\.Checked\.(Check|Parser)(?:\.|$)/,
+  /^Solidity\.Yul\.(CheckedParse|DeclarationParse)$/,
+  /^Solidity\.Yul\.Checks\.(Parsing|DeclarationParsing|ClosedSyntax)$/,
+];
 const { graph } = loadGraph();
 const isCore = (m) => CORE.some((r) => r.test(m)) && !ELABORATOR.some((r) => r.test(m));
 const isElab = (m) => ELABORATOR.some((r) => r.test(m));
@@ -123,4 +138,12 @@ for (const m of core) {
   console.log(`LAYER  ${findPath(graph, m, hit).map((x) => x.replace(/^Solidity\./, "")).join(" → ")}`);
 }
 console.log(`${core.length} core modules, ${bad} reach the elaborator`);
-process.exit(bad ? 1 : 0);
+let parserBad = 0;
+for (const m of core) {
+  const hit = [...reach(graph, m)].filter((n) => PARSER_ADAPTER.some((r) => r.test(n))).sort()[0];
+  if (!hit) continue;
+  parserBad++;
+  console.log(`PARSER_LAYER  ${findPath(graph, m, hit).join(" → ")}`);
+}
+console.log(`${core.length} core modules, ${parserBad} reach the checked parser adapters`);
+process.exit(bad || parserBad ? 1 : 0);

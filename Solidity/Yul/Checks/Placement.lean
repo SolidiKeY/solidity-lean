@@ -1,5 +1,4 @@
 import Solidity.Yul.PlacementCheck
-set_option Elab.async false
 namespace Solidity.Yul.Checks.Placement
 open Solidity.Source (Syn)
 open Solidity.Yul.Placement

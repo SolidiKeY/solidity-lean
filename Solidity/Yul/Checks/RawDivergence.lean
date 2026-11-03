@@ -1,7 +1,6 @@
 import Solidity.Yul.Checks.WordAdapterCode
 import Solidity.Yul.Checks.ClosedRun
 import Solidity.Yul.WordAdapterLogic
-set_option Elab.async false
 /-! An actual scoped raw-cell source program diverges at EVERY fuel. The proof
 uses its RFL-linked code and the existing no-argument recursive call theorem,
 not a finite timeout or a Source/compiler/prefix assumption. -/

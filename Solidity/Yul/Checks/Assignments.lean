@@ -1,7 +1,5 @@
 import Solidity.Yul.AssignmentCheck
 import Solidity.Yul.ClosedRun
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.Assignments
 open Solidity.Source (Syn)
 open Solidity.Yul.Closed

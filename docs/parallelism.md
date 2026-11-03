@@ -168,3 +168,12 @@ the cost that design avoided, so the prototype was not written.  Changing
 it is the closer owner's decision, gated on measuring
 `Calculus/CloseTests.lean`, `Examples/Tactics/Decide.lean`, two
 `TestSuite/Derived*` modules and the whole `SolkeyTestSuite`.
+
+### Yul parser boundary
+
+The core Yul preparation modules retain intrinsic certificates and checker laws.
+Source parsing composition lives in Frontend/Yul; the layer gate also forbids
+transitive paths from enumerated core modules to these adapters and to
+Frontend.Checked.Check or Frontend.Checked.Parser. The existing lexer and pure
+structural precedence predicate remain reusable prerequisites. Dedicated legacy
+Yul parser modules are compatibility imports outside the core.

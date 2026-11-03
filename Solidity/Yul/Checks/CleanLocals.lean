@@ -79,6 +79,8 @@ def viewWitness : Nonempty (ScalarView (localExternalTypes ctx)) := ⟨cleanLoca
 #check @cleanLocalScalars_agree
 #print axioms DeclaredSourceTypeD.word_isSome
 #print axioms cleanLocalScalars_agree
+/-- info: CLEAN_LOCAL_COMPILED_PASS: actual Source signed/bytes/UDVT/occurrence encoding; raw257 retained -/
+#guard_msgs in
 #eval do
   unless LocalValue.readScalar (.clean negative) i8Shape == some (iword (-128)) &&
       LocalValue.readScalar (.clean byteValue) bytesShape == some (word (171*2^248)) do

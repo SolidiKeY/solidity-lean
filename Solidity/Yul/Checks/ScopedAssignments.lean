@@ -1,7 +1,5 @@
 import Solidity.Yul.ScopedAssignments
 import Solidity.Yul.Checks.ScopedExpressions
-set_option Elab.async false
-
 /-! These controls concern concrete scope/arity/assignment certificates, not
 Source admission, function bodies or physical/dirty execution. -/
 namespace Solidity.Yul.Checks.ScopedAssignments

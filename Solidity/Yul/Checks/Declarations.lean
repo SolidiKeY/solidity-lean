@@ -1,6 +1,5 @@
 import Solidity.Yul.DeclarationCheck
 import Solidity.Yul.Checks.Headers
-set_option Elab.async false
 namespace Solidity.Yul.Checks.Declarations
 open Solidity.Source (Syn)
 

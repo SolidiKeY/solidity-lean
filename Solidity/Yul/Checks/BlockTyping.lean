@@ -1,6 +1,5 @@
 import Solidity.Yul.ClosedSyntax
 import Solidity.Yul.TierPolicy
-set_option Elab.async false
 namespace Solidity.Yul.Checks.BlockTyping
 open Solidity.Source (Syn YulLit)
 open Solidity.Yul.BlockTyping

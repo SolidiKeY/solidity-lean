@@ -1,8 +1,6 @@
 import Solidity.Yul.ScopedNames
 import Solidity.Yul.TierPolicy
 import Solidity.Yul.Checks.ExternalScopes
-set_option Elab.async false
-
 /-! Constructed-table controls over the original supplied typed declarations.
 These are not Source namespace, lexer/occurrence or physical/dirty semantics proofs. -/
 namespace Solidity.Yul.Checks.ScopedNames

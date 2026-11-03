@@ -41,3 +41,20 @@ theorem rule_sound {X c n} (mode : Solidity.Modality) (code : Stmt [] X c n)
   obtain ⟨premise,sound⟩ := WordAdapter.rule_sound mode code policy post
   exact ⟨premise,fun state => (holds_iff_raw mode code policy post state).trans (sound state)⟩
 end Solidity.Yul.OpenRun
+
+namespace Solidity.Yul.OpenRun
+
+/-- Soundness for the displayed premise of a concrete Rule. Atoms/substitutions
+remain shallow Lean functions; this is not a deep syntax calculus. -/
+theorem rule_premise_sound : ∀ {X c n} (mode : Solidity.Modality) (code : Solidity.Yul.Stmt [] X c n)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.WordAdapter.Outcome X c n → Prop)
+ {premise : Solidity.Yul.Logic.Fml (n + Solidity.Yul.wordCellCount X)},
+ Solidity.Yul.Logic.Rule (Solidity.Yul.OpenRun.formula mode code policy post) premise →
+ ∀ state : Solidity.Yul.WordState X n,
+ Solidity.Yul.OpenRun.holds mode code policy post state ↔ premise.holds state.pack := by
+  intro X c n mode code policy post premise rule state
+  exact (Solidity.Yul.OpenRun.formula_iff mode code policy post state).symm.trans
+    (Solidity.Yul.Logic.Rule.sound rule state.pack)
+
+end Solidity.Yul.OpenRun

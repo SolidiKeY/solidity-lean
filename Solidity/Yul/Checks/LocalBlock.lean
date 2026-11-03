@@ -56,6 +56,8 @@ example (fuel : Nat) :
 def snapshot (state : LocalState env ctx.tys) : List Nat :=
   (List.finRange (wordCellCount X)).map (fun i => (localWordCells ctx state.1 (wordCellAt X i)).val)
 
+/-- info: LOCAL_BLOCK_COMPILED_PASS: dirty bool/u8/two Fn fields; seven-cell writeback and completed horizons -/
+#guard_msgs in
 #eval do
   let expected := [2,2^256-1,2309737967,257,22136,2^256-1,171*2^248]
   let some result := runLocalBlock ctx code policy 32 initial |

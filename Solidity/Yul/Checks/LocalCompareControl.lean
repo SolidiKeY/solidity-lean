@@ -90,6 +90,8 @@ def cleanLocals (s : LocalState env ctx.tys) : Solidity.Source.Locals env.layout
         (.cons (.bool (LocalBoolControl.truth (s.1.get target)))
           (.cons (.bool (LocalBoolControl.truth (s.1.get other))) .nil))))
 
+/-- info: LOCAL_COMPARE_CONTROL_PASS:112 actual clean Source comparisons; dirty branch/skip/prefix controls -/
+#guard_msgs in
 #eval do
   for c in fixtures ++ [partialCase] do
     for pipeline in [Solidity.Roadmap.Pipeline.legacy,.viaIR] do

@@ -1,7 +1,5 @@
 import Solidity.Yul.FunctionScope
 
-set_option Elab.async false
-
 /-! Exact binder positions combined with no-shadow controls. -/
 namespace Solidity.Yul.Checks.Scope
 

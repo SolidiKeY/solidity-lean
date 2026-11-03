@@ -1,5 +1,4 @@
 import Solidity.Yul.Checks.WordAdapterCode
-set_option Elab.async false
 namespace Solidity.Yul.Checks.WordAdapter
 open Solidity.Yul.Checks.BlockTyping
 example : prepared dirty = true := by decide

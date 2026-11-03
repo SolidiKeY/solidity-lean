@@ -1,7 +1,6 @@
 import Solidity.Yul.SourceBoundary
 import Solidity.Yul.ScalarLocals
 import Solidity.Yul.WordAdapter
-set_option Elab.async false
 /-! An actual S01 bool occurrence and declared scalar binding, a clean initial
 value, and a concrete raw writer accepting EVERY word. This is not an S02/S03
 statement embedding or solc-ID provider. -/

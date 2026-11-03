@@ -96,6 +96,8 @@ example (fuel : Nat) (pipeline : Solidity.Roadmap.Pipeline) :
 def certWitness : Nonempty (Supported env ctx.tys prefixExpr) := ⟨prefixProof⟩
 def caseWitness : Nonempty Case := ⟨orAssign⟩
 
+/-- info: LOCAL_BOOL_CONTROL_COMPILED_PASS:96 actual clean Source comparisons; dirty raw selection/skipped effects/partial timeout controls -/
+#guard_msgs in
 #eval do
   for c in fixtures do
     for pipeline in [Solidity.Roadmap.Pipeline.legacy,.viaIR] do

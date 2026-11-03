@@ -1,8 +1,6 @@
 import Solidity.Yul.WordSyntax
 import Solidity.Yul.Checks.BlockTyping
 import Solidity.Yul.Checks.ClosedRun
-set_option Elab.async false
-
 /-! Universal divergence of an ACTUAL source-derived recursive program.
 This is not inferred from a finite timeout, and not a Source state/compiler
 theorem. The emitted cache equality is kernel checked. -/

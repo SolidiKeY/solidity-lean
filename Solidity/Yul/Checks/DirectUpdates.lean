@@ -1,6 +1,5 @@
 import Solidity.Yul.DirectUpdates
 import Solidity.Yul.Checks.DirectWords
-set_option Elab.async false
 namespace Solidity.Yul.Checks.DirectUpdates
 open Closed
 open Solidity.Yul.Checks.DirectWords
@@ -65,6 +64,8 @@ def witness : Nonempty Case := ⟨fixtures[7]⟩
 def dirtyWitness : ∃ s : WordState types 1,
     snapshot s = [7,257,257,2^256-1,2^32+1] :=
   ⟨Solidity.Yul.DirectUpdates.write (.external flag.writeRef) True.intro (word 257) state,by decide⟩
+/-- info: DIRECT_UPDATES_COMPILED_PASS:81 actual direct/packed assignment comparisons including full state and normal-flow observation; not EVM -/
+#guard_msgs in
 #eval do
   let mut count := 0
   for c in fixtures do

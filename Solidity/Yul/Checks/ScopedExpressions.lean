@@ -1,7 +1,5 @@
 import Solidity.Yul.ScopedExpressions
 import Solidity.Yul.Checks.ScopedNames
-set_option Elab.async false
-
 /-! Supplemental external-scope controls; local/function table validity and
 Source occurrence attachment are deliberately not asserted by this property. -/
 namespace Solidity.Yul.Checks.ScopedExpressions

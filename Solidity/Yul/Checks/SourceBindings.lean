@@ -1,6 +1,4 @@
 import Solidity.Yul.SourceBindings
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.SourceBindings
 open Solidity.Source
 

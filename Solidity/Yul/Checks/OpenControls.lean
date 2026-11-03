@@ -1,6 +1,5 @@
 import Solidity.Yul.Checks.OpenRun
 import Solidity.Yul.Checks.DirectControl
-set_option Elab.async false
 namespace Solidity.Yul.Checks.OpenControls
 open Closed
 namespace Fixture
@@ -75,6 +74,8 @@ example : mutualPrepared.openRun 0 Fixture.initial = none := rfl
 def mutualWitness : Nonempty (ScopedSyntax.Prepared Fixture.scope .A Fixture.outside Fixture.localNames (list mutualSource)) :=
   ⟨mutualPrepared⟩
 
+/-- info: OPEN_DISCRIMINATORS_PASS:6 exact runtime discriminators;8 actual checked mutual-recursion comparisons; not EVM -/
+#guard_msgs in
 #eval do
   unless observe (switchCode (word 1)) (switchPolicy _) 12 == none &&
       observe (switchCode (word 2)) (switchPolicy _) 12 == some ([99,2,0,0],"normal") do

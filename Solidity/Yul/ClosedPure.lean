@@ -24,7 +24,7 @@ theorem WordBuiltinD.complete {a r b} (d : @WordBuiltinD a r b) :
 /-- The builtin subset is exactly the existing tier-A builtin admission. No
 new exclusion or unsupported effect semantics is hidden in this profile. -/
 theorem checkWordBuiltin_iff {a r} (b : Builtin a r) :
-    (checkWordBuiltin b).isSome = true ↔ b.admit .A = .ok () := by
+    (checkWordBuiltin b).isSome = true ↔ b.checkTier .A = .ok () := by
   cases b with
   | pure op => cases op <;> exact ⟨fun _ => rfl, fun _ => rfl⟩
   | pop => exact ⟨fun _ => rfl, fun _ => rfl⟩

@@ -265,7 +265,7 @@ def Tier.includes : Tier → Tier → Bool
   | _, _ => false
 
 /-- Admission does not silently downgrade a compiler-dependent operation. -/
-def Builtin.admit {a r : Nat} (tier : Tier) (b : Builtin a r) : Except Refusal Unit :=
+def Builtin.checkTier {a r : Nat} (tier : Tier) (b : Builtin a r) : Except Refusal Unit :=
   if b.name = "callcode" then .error .unsupportedCallcode
   else match b.tier with
     | none => .error (.compilerDependent b.name)

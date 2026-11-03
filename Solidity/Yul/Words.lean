@@ -1,17 +1,18 @@
 import Solidity.Yul.Builtins
+import Solidity.Roadmap.Contracts
 
 /-!
 # Pure Yul word operations
 
-The word is `Fin (2 ^ 256)`, the same type as `Roadmap.Word` (no agreement
-lemma with `Evm.Machine`'s signed operations is proved here).
+The word reuses `Roadmap.Word`. Target-machine agreement is kept in the
+separate `EvmSigned` adapter, so pure operations do not import the machine.
 Division and remainder explicitly return zero on a zero divisor, including
 signed operations. Large shifts are tested before constructing powers.
 ADDMOD/MULMOD use unbounded intermediates, not wrapped ADD/MUL.
 -/
 namespace Solidity.Yul
 
-abbrev Word := Fin (2 ^ 256)
+abbrev Word := Solidity.Roadmap.Word
 
 def word (n : Nat) : Word := ⟨n % (2 ^ 256), Nat.mod_lt _ (by decide)⟩
 def iword (n : Int) : Word := word (n % (2 ^ 256)).toNat

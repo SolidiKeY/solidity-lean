@@ -1,7 +1,5 @@
 import Solidity.Yul.ExternalCheck
 
-set_option Elab.async false
-
 /-! Static external-reference controls. No physical execution or whole-block
 provenance/capture guarantee follows from a supplied declaration table. -/
 namespace Solidity.Yul.Checks.External

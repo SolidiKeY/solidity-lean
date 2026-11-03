@@ -1,8 +1,6 @@
 import Solidity.Yul.GlobalExternal
 import Solidity.Yul.Checks.External
 
-set_option Elab.async false
-
 /-! Function-boundary resolution controls: preserve declaration occurrence and
 resolve original lexical visibility before testing capture eligibility. -/
 namespace Solidity.Yul.Checks.GlobalExternal

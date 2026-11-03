@@ -62,6 +62,8 @@ def stateWitness : Nonempty (WordState (localExternalTypes ctx) 0) := ⟨initial
 #check @initialLocalWordState
 #print axioms LocalValue.initializeFunction_read
 #print axioms SourceFunctionCell.fields_writeFields
+/-- info: LOCAL_WORD_VIEW_COMPILED_PASS: actual Source function fields, raw updates, mixed 5-word state -/
+#guard_msgs in
 #eval do
   unless functionCell.fields selected == (maxWord,topWord) &&
       initialized.cells (.selector index) == word 2309737967 &&

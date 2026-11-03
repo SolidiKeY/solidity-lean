@@ -1,7 +1,5 @@
 import Solidity.Yul.ExpressionCheck
 
-set_option Elab.async false
-
 /-! Controls of the source-grammar expression judgement and intrinsic elaboration.
 Whole-block environment construction remains pending; tier admission has
 separate primitive controls. -/
@@ -34,6 +32,6 @@ theorem invalid_suffix_refused : (inferExpr extEnv (.yulPath "x" ["slot"])).isSo
 /-- Static construction retains represented compiler-dependent operations so
 admission can issue its precise refusal; static checking is not admission. -/
 theorem represented_gas : (inferExpr empty (.yulCall "gas" .nil)).map (·.1) = some 1 := by decide +kernel
-theorem gas_admission_refused : Builtin.admit .C .gas = .error (.compilerDependent "gas") := rfl
+theorem gas_admission_refused : Builtin.checkTier .C .gas = .error (.compilerDependent "gas") := rfl
 
 end Solidity.Yul.Checks.Expressions

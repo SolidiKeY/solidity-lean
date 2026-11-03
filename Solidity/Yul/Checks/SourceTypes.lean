@@ -1,6 +1,4 @@
 import Solidity.Yul.SourceTypes
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.SourceTypes
 open Solidity.Source
 

@@ -1,6 +1,5 @@
 import Solidity.Yul.TierPolicy
 import Solidity.Yul.Checks.Static
-set_option Elab.async false
 namespace Solidity.Yul.Checks.Tiers
 open Solidity.Yul.Policy
 

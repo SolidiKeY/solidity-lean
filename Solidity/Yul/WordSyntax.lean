@@ -90,34 +90,4 @@ theorem Prepared.rule_sound {outside body} (p : Prepared outside body)
       (.modal mode emptyModel p.program post : Logic.Fml 0).holds vars ↔ premise.holds vars :=
   Logic.sound_program_rule_exists mode emptyModel p.program post
 
-structure Parsed (outside : List String) (src : Bytes) where
-  parsed : AssemblyParse src
-  prepared : Prepared outside parsed.body
-
-def parse (outside : List String) (src : Bytes) : Except Error (Parsed outside src) :=
-  match parseAssembly src with
-  | none => .error (.input .grammar)
-  | some parsed => (prepare outside parsed.body).map (fun prepared => ⟨parsed, prepared⟩)
-
-theorem Parsed.complete {outside src} (p : Parsed outside src) :
-    parse outside src = .ok p := by
-  cases p with
-  | mk parsed prepared =>
-      unfold parse
-      rw [parsed.complete]
-      change (prepare outside parsed.body).map (fun p => (⟨parsed, p⟩ : Parsed outside src)) = _
-      rw [prepared.complete]
-      rfl
-
-theorem parse_iff (outside : List String) (src : Bytes) :
-    (parse outside src).toOption.isSome = true ↔ Nonempty (Parsed outside src) := by
-  constructor
-  · intro h
-    cases hc : parse outside src with
-    | error reason => simp only [hc, Except.toOption, Option.isSome] at h; cases h
-    | ok p => exact ⟨p⟩
-  · rintro ⟨p⟩
-    rw [p.complete]
-    rfl
-
 end Solidity.Yul.WordSyntax

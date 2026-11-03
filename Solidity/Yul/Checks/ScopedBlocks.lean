@@ -1,8 +1,6 @@
 import Solidity.Yul.BlockExtract
 import Solidity.Yul.Checks.BlockTyping
 import Solidity.Yul.Checks.ScopedNames
-set_option Elab.async false
-
 /-! Concrete shared closed/open checker and extraction controls. These certify
 intrinsic scope/arity preparation; original Source/JSON identity, occurrence,
 NoShadow, policy/safety and physical/dirty execution remain separate. -/

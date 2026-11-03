@@ -1,5 +1,5 @@
 import Solidity.Frontend.SolcJson.YulWords
-import Solidity.Yul.ScopedSyntax
+import Solidity.Frontend.Yul.ScopedParse
 
 /-!
 # Guarded scoped source preparation

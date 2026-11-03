@@ -1,6 +1,4 @@
 import Solidity.Yul.WordCells
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.WordCells
 def context : List ExternalType :=
   [.value (.unsigned 0),.externalFunction,.value .boolean,.externalFunction,

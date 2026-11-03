@@ -53,6 +53,8 @@ example (c : Case) (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) :
     (Solidity.Source.SemanticsExamples.G0 pipeline) Solidity.Source.SemanticsExamples.F0
     rfl fuel 0 none [] false ⟨false,false⟩ (cleanLocals c.state) c.state.2
 
+/-- info: LOCAL_EXPR_STATEMENT_PASS:126 actual clean Source.execS comparisons; raw/no-clean/partial-halt controls -/
+#guard_msgs in
 #eval do
   for c in fixtures ++ [partialCase] do
     for pipeline in [Solidity.Roadmap.Pipeline.legacy,.viaIR] do

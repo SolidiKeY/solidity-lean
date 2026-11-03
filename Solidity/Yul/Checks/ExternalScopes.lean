@@ -1,6 +1,4 @@
 import Solidity.Yul.ExternalScope
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.ExternalScopes
 
 def types : List ExternalType :=

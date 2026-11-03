@@ -954,3 +954,37 @@ contradictory unused premises could have closed one in the previous path.
 `sol_share_calls` and `sol_close_call_shared` are Lean-only leaf transformations, not new SolKey-shaped calculus constructors. Their soundness uses `CallFunctionTransform.valid_iff` and `CallFunctionAffine.holds_shared_affine_cases`; actual source-call transport remains the existing certified summary bridge. The affine profile is certified internally with immediate kernel validation. Unsupported profiles keep ordinary handling; no validity premise, observation or SolKey rule name changes.
 
 The default consumer implementation lives in `Calculus/CloseCallSharing.lean`, imported by `Closers.lean`; `Tools/CallFunctionShare.lean` preserves its explicit API. Plain and joined dispatch guards are disjoint per `sol_close` invocation, retaining earlier anon/small-split/alias paths and leaving small joined updates on their existing route. Recursive splits create new goals and may start another pass. Named semantic leaves use their exact laws directly and are not described as newly size-capped emissions. Call sharing changes neither the SolKey calculus nor `Stmt.step`/the one-rule walk; the same lane's `ifElseJoinSequence` does change `Stmt.step` for multi-write `if` arms (row above).
+
+## Lean-only Yul word rules
+
+These intrinsic closed-word rules extend the Lean calculus under decision YQ5.
+They have no SolKey taclet. Each row denotes the concrete constructor of
+[Logic.Rule](../Solidity/Yul/WordRules.lean), whose exact displayed premise is
+proved equivalent by Logic.Rule.sound for boxes and diamonds. Function, local,
+arity and control indices and each constructor certificate remain required.
+The formula language is shallow: atoms and substitutions contain Lean
+functions. These results do not establish a deep syntax calculus, Source/G51
+dispatch, total correctness or compiler refinement.
+
+| Lean constructor | SolKey counterpart | Evidence |
+| --- | --- | --- |
+| Logic.Rule.yulSkip | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulLocalLiteralAssign | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulPureLiteralAssign | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulLeave | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulBreak | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulContinue | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulFunctionScope | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulSequence | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulAssign | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulDiscard | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulIf | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulZero | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulLet | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulSwitch | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulFor | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulLoop | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulLiteral | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulLocal | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulBuiltin | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |
+| Logic.Rule.yulCall | None; Lean-only extension (YQ5) | Logic.Rule.sound, WordRules.lean |

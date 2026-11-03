@@ -1,7 +1,5 @@
 import Solidity.Yul.LocalProjection
 import Solidity.Yul.Checks.SourceContext
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.LocalProjection
 
 def small := SourceContext.targetSmall.ref

@@ -1,7 +1,5 @@
 import Solidity.Yul.WordRules
 import Solidity.Yul.Checks.WordBranches
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.WordSwitch
 open Solidity.Yul.Closed Solidity.Yul.Logic
 open Solidity (Modality)

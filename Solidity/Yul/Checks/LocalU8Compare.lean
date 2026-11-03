@@ -66,6 +66,8 @@ example (c : Case) (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) :
     (Solidity.Source.SemanticsExamples.G0 pipeline) Solidity.Source.SemanticsExamples.F0 rfl fuel _
 def witness : Nonempty Case := ⟨capturedOrder⟩
 
+/-- info: LOCAL_U8_COMPARE_PASS:72 actual clean Source comparisons; raw projection/order/overflow/prefix controls -/
+#guard_msgs in
 #eval do
   for c in fixtures do
     for pipeline in [Solidity.Roadmap.Pipeline.legacy,.viaIR] do

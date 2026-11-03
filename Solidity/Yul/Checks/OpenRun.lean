@@ -3,7 +3,6 @@ import Solidity.Yul.OpenLocal
 import Solidity.Yul.Checks.WordAdapterCode
 import Solidity.Yul.Checks.RawDivergence
 import Solidity.Yul.Checks.LocalBlock
-set_option Elab.async false
 namespace Solidity.Yul.Checks.OpenRun
 open Closed
 open Solidity.Source (Syn)
@@ -149,6 +148,8 @@ example (mode : Solidity.Modality) :
         (fun result => (result.state.cells Fixture.x).val = 13) ⟨Fin.elim0,cells⟩ ↔
           premise.holds (WordState.pack (X := Fixture.types) (n := 0) ⟨Fin.elim0,cells⟩) :=
   Fixture.recursivePrepared.openState_rule_sound mode _
+/-- info: OPEN_RUN_COMPILED_PASS:88 actual checked-source direct/packed complete-state-flow comparisons; not EVM -/
+#guard_msgs in
 #eval do
   let mut count := 0
   for c in cases do

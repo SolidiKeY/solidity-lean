@@ -1,5 +1,4 @@
 import Solidity.Yul.DirectWords
-set_option Elab.async false
 namespace Solidity.Yul.Checks.DirectWords
 open Closed
 def types : List ExternalType :=
@@ -76,6 +75,8 @@ def programWitness : ∃ code : Expr [] types 1 1,
     ∃ policy : Policy.ExprP .A code,
       snapshot (Solidity.Yul.DirectWords.eval 3 code policy state) = some [330] :=
   ⟨mulDiv,by apply (Policy.expr_iff .A _).mp; rfl,by decide⟩
+/-- info: DIRECT_WORDS_COMPILED_PASS:81 original-AST/actual packed-interpreter comparisons; not compiler/EVM tests -/
+#guard_msgs in
 #eval do
   let mut count := 0
   for c in fixtures do

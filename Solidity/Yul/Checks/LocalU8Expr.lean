@@ -96,6 +96,8 @@ example (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) :
 def certWitness : Nonempty (Supported env ctx.tys order.expr) := ⟨order.proof⟩
 def stateWitness : Nonempty (LocalState env ctx.tys) := ⟨order.state⟩
 
+/-- info: LOCAL_U8_COMPILED_PASS:96 actual checked clean Source comparisons; raw copies/order/overflow/prefix effects -/
+#guard_msgs in
 #eval do
   for c in fixtures ++ [leftDeep,rightDeep] do
     for pipeline in [Solidity.Roadmap.Pipeline.legacy,.viaIR] do

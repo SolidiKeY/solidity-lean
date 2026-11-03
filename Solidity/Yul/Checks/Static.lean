@@ -1,7 +1,5 @@
 import Solidity.Yul.Static
 
-set_option Elab.async false
-
 /-! Inhabited syntax and boundary refusals. These are kernel controls for the
 foundation, not end-to-end import or execution claims. -/
 namespace Solidity.Yul.Checks.Static
@@ -62,15 +60,15 @@ theorem too_large_literal : checkLiteral (2 ^ 256) = none := by decide +kernel
 theorem max_literal : (checkLiteral (2 ^ 256 - 1)).isSome = true := by decide +kernel
 
 theorem no_duplicate_builtin_names : (builtins.map (fun e => e.2.2.name)).Nodup := by decide +kernel
-theorem pure_at_A : Builtin.admit .A (.pure .«mulmod») = .ok () := rfl
-theorem physical_needs_B : Builtin.admit .A .mload = .error (.needsTier .B) := rfl
-theorem effects_need_C : Builtin.admit .B .call = .error (.needsTier .C) := rfl
-theorem gas_refused : Builtin.admit .C .gas = .error (.compilerDependent "gas") := rfl
-theorem msize_refused : Builtin.admit .C .msize = .error (.compilerDependent "msize") := rfl
-theorem pc_refused : Builtin.admit .C .pc = .error (.compilerDependent "pc") := rfl
-theorem codesize_refused : Builtin.admit .C .codesize = .error (.compilerDependent "codesize") := rfl
-theorem codecopy_refused : Builtin.admit .C .codecopy = .error (.compilerDependent "codecopy") := rfl
-theorem callcode_refused : Builtin.admit .C .callcode = .error .unsupportedCallcode := rfl
+theorem pure_at_A : Builtin.checkTier .A (.pure .«mulmod») = .ok () := rfl
+theorem physical_needs_B : Builtin.checkTier .A .mload = .error (.needsTier .B) := rfl
+theorem effects_need_C : Builtin.checkTier .B .call = .error (.needsTier .C) := rfl
+theorem gas_refused : Builtin.checkTier .C .gas = .error (.compilerDependent "gas") := rfl
+theorem msize_refused : Builtin.checkTier .C .msize = .error (.compilerDependent "msize") := rfl
+theorem pc_refused : Builtin.checkTier .C .pc = .error (.compilerDependent "pc") := rfl
+theorem codesize_refused : Builtin.checkTier .C .codesize = .error (.compilerDependent "codesize") := rfl
+theorem codecopy_refused : Builtin.checkTier .C .codecopy = .error (.compilerDependent "codecopy") := rfl
+theorem callcode_refused : Builtin.checkTier .C .callcode = .error .unsupportedCallcode := rfl
 theorem unsafe_refused : admitSafety false = .error .nonMemorySafe := rfl
 
 end Solidity.Yul.Checks.Static

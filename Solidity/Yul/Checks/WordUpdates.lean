@@ -1,7 +1,5 @@
 import Solidity.Yul.WordUpdates
 import Solidity.Yul.Checks.Assignments
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.WordUpdates
 open Solidity.Yul.Closed
 

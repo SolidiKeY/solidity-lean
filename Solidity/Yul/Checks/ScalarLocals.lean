@@ -1,6 +1,4 @@
 import Solidity.Yul.ScalarLocals
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.ScalarLocals
 open Solidity.Source
 

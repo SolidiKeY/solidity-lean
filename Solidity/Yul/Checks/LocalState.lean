@@ -68,6 +68,8 @@ def combinedWitness : ∃ state : Solidity.Yul.LocalState ctx.env ctx.tys,
 #check @LocalValues.clean_writeScalar
 #print axioms Solidity.Yul.LocalState.runClean_ofClean
 #print axioms LocalValues.clean_writeScalar
+/-- info: LOCAL_STATE_COMPILED_PASS: actual Source.EM halt/write; raw2 preserved -/
+#guard_msgs in
 #eval do
   unless (Solidity.Yul.LocalState.runClean action extended).map resultKey ==
       some (some (some 1)) do

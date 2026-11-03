@@ -16,8 +16,8 @@ def ExternalP (tier : Tier) (ty : ExternalType) : Prop :=
   | _ => tier.includes .B = true
 
 theorem builtin_iff {a r} (tier : Tier) (b : Builtin a r) :
-    b.admit tier = .ok () ↔ BuiltinP tier b := by
-  unfold Builtin.admit BuiltinP
+    b.checkTier tier = .ok () ↔ BuiltinP tier b := by
+  unfold Builtin.checkTier BuiltinP
   by_cases hc : b.name = "callcode"
   · rw [if_pos hc]
     constructor
@@ -94,7 +94,7 @@ def checkExpr (tier : Tier) {F X n r} (e : Expr F X n r) : Except Refusal Unit :
   case builtin =>
     intro a r b args
     exact do
-      b.admit tier
+      b.checkTier tier
       allFin a (fun i => checkExpr tier (args i))
   case call => intro sig f args; exact allFin sig.args (fun i => checkExpr tier (args i))
 termination_by structural e
@@ -106,7 +106,7 @@ theorem expr_iff (tier : Tier) {F X n r} (e : Expr F X n r) :
   | «local» i => exact ⟨fun _ => True.intro, fun _ => rfl⟩
   | external ref => exact external_iff tier ref.ty
   | builtin b args =>
-    change ((b.admit tier >>= fun _ => allFin _ (fun i => checkExpr tier (args i))) = .ok ()) ↔ _
+    change ((b.checkTier tier >>= fun _ => allFin _ (fun i => checkExpr tier (args i))) = .ok ()) ↔ _
     rw [bind_iff, builtin_iff, allFin_iff]
     exact and_congr Iff.rfl (forall_congr' (fun i => expr_iff tier (args i)))
   | call f args =>

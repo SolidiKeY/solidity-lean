@@ -1,5 +1,4 @@
 import Solidity.Yul.DeclarationScope
-set_option Elab.async false
 namespace Solidity.Yul.Checks.DeclarationScopes
 open Solidity.Source (Syn)
 open Solidity.Yul.DeclarationScope

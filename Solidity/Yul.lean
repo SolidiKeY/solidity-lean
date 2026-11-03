@@ -1,3 +1,4 @@
+import Solidity.Yul.RawSourceForPost
 import Solidity.Yul.RawSourceAdapterFor
 import Solidity.Yul.RawSourceForIter
 import Solidity.Yul.RawSourceAdapterUnchecked
@@ -120,11 +121,8 @@ import Solidity.Yul.Checks.ExtractDivergence
 import Solidity.Yul.BlockTyping
 import Solidity.Yul.ClosedSyntax
 import Solidity.Yul.Checks.BlockTyping
-import Solidity.Yul.Checks.ClosedSyntax
 import Solidity.Yul.DeclarationScope
-import Solidity.Yul.DeclarationParse
 import Solidity.Yul.Checks.DeclarationScopes
-import Solidity.Yul.Checks.DeclarationParsing
 import Solidity.Yul.WordArguments
 import Solidity.Yul.WordExpressions
 import Solidity.Yul.Checks.WordExpressions

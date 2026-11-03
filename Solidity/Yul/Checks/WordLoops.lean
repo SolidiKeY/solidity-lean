@@ -2,8 +2,6 @@ import Solidity.Yul.WordCoverage
 import Solidity.Yul.Checks.WordBranches
 import Solidity.Yul.Checks.ClosedRun
 import Solidity.Yul.PlacementCheck
-set_option Elab.async false
-
 namespace Solidity.Yul.Checks.WordLoops
 open Solidity.Yul.Closed Solidity.Yul.Logic
 open Solidity (Modality)

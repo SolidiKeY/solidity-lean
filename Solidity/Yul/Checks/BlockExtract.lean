@@ -1,6 +1,5 @@
 import Solidity.Yul.WordSyntax
 import Solidity.Yul.Checks.BlockTyping
-set_option Elab.async false
 namespace Solidity.Yul.Checks.BlockExtract
 open Solidity.Source (Syn)
 open Solidity.Yul.BlockTyping

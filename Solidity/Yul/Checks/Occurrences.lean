@@ -1,7 +1,6 @@
 import Solidity.Yul.OccurrenceSyntax
 import Solidity.Yul.Checks.BlockTyping
 import Solidity.Yul.Checks.WordSyntax
-set_option Elab.async false
 /-! Occurrence isolation relative to an original Solidity-local name list;
 actual identity/provenance and general Source admission remain separate. -/
 namespace Solidity.Yul.Checks.Occurrences
@@ -83,18 +82,4 @@ example : (witness.run 16).map (fun outcome => outcome.flow.isNormal) = some tru
 example : Solidity.Yul.WordSyntax.prepare ["x"] (list mulDiv) = .ok witness.words := witness.old_result
 
 def text := Solidity.Yul.Checks.WordSyntax.text
-def parsed : Solidity.Yul.OccurrenceSyntax.Parsed ["x"] ["x"] (ascii text) :=
-  ((Solidity.Yul.OccurrenceSyntax.parse ["x"] ["x"] (ascii text)).toOption).get
-    (by decide +kernel)
-theorem parsed_inhabited : Nonempty (Solidity.Yul.OccurrenceSyntax.Parsed ["x"] ["x"] (ascii text)) :=
-  ⟨parsed⟩
-example : parsed.parsed.flags = ["memory-safe"] := by decide +kernel
-example : (parsed.prepared.run 16).map (fun outcome => outcome.flow.isNormal) =
-    some true := by decide +kernel
-example : (Solidity.Yul.OccurrenceSyntax.parse ["x"] ["x"]
-    (ascii "assembly (\"memory-safe\"){function helper(x)->r{r:=x}}")).isOk = false := by decide +kernel
-example : (Solidity.Yul.OccurrenceSyntax.parse ["x"] ["x"]
-    (ascii "assembly (\"memory-safe\"){function x(){} function helper(){x()}}")).isOk =
-    true := by decide +kernel
-
 end Solidity.Yul.Checks.Occurrences

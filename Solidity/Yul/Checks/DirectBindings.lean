@@ -1,6 +1,5 @@
 import Solidity.Yul.DirectBindings
 import Solidity.Yul.Checks.DirectControl
-set_option Elab.async false
 namespace Solidity.Yul.Checks.DirectBindings
 open Closed
 open Solidity.Yul.DirectBindings
@@ -137,6 +136,8 @@ def witness : Nonempty Case := ⟨fixtures[0]⟩
 def dirtyWitness : ∃ s : WordState types 3,
     (List.ofFn (coordinates.pack s)).map Fin.val = [511,0,7,257,2,2^256-1,2^32+1] :=
   ⟨state.extend front,by decide⟩
+/-- info: DIRECT_BINDINGS_COMPILED_PASS:99 actual direct/packed nested-binder full-state-flow comparisons; not EVM -/
+#guard_msgs in
 #eval do
   let mut count := 0
   for c in fixtures do

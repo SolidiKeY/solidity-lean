@@ -72,6 +72,8 @@ def certWitness : Nonempty (Supported env ctx.tys expr) := ⟨supported⟩
 def stateWitness : Nonempty (LocalState env ctx.tys) := ⟨dirty⟩
 def globWitness : Nonempty (Solidity.Source.Glob env) := ⟨Solidity.Source.SemanticsExamples.G0 .legacy⟩
 
+/-- info: LOCAL_BOOL_EXPR_COMPILED_PASS:12 actual Source horizon/profile comparisons; Yul/Source/Yul dirty-neighbor combination -/
+#guard_msgs in
 #eval do
   for pipeline in [Solidity.Roadmap.Pipeline.legacy,.viaIR] do
     for fuel in [0,1,2,3,4,8] do

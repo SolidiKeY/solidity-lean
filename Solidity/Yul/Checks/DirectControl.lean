@@ -1,6 +1,5 @@
 import Solidity.Yul.DirectControl
 import Solidity.Yul.Checks.DirectUpdates
-set_option Elab.async false
 namespace Solidity.Yul.Checks.DirectControl
 open Closed
 open Solidity.Yul.Checks.DirectWords
@@ -95,6 +94,8 @@ example (fuel : Nat) : eval fuel orderedProof
     WordAdapter.run ordered ((Policy.stmt_iff .A _).mp rfl) fuel state :=
   run_agrees fuel orderedProof _ state
 
+/-- info: DIRECT_CONTROL_COMPILED_PASS:90 direct/actual raw-run full state/flow comparisons; not EVM tests -/
+#guard_msgs in
 #eval do
   let mut count := 0
   for c in fixtures do
