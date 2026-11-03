@@ -210,6 +210,18 @@ full raw-map reencoding. Its generated variant derives initial coverage from
 owner preparation. A kernel control ties this output view to the actual changed
 nominal source state and its owner invariant.
 
-Sequential resnapshot/replay integration, broader dynamic history controls,
-dirty-word transport, universal ownership, allocator reachability and compiler
-adequacy remain open.
+`NominalInventoryTransport` derives decoder refresh through the actual finite
+write realization, including failed canonical preparations. Its prefix law
+pairs each actual finite source-write prefix with fresh decoder transport.
+No member-agreement law is assumed at that public boundary.
+
+`NominalInventoryReplay` derives output support from preserved heap types and
+raw reads from the constructed view. Replaying the same snapshot in any output
+permutation preserves the complete resulting source state and original retained
+history. Controls establish an actual changed state, a nonempty prepared prefix,
+and a reverse replay containing two distinct roots. The mixed reverse fixture
+uses an unchanged input; it is separate from the changed singleton fixture.
+
+Executable sequential re-preparation across changing snapshots, broader dynamic
+history controls, dirty-word transport, universal ownership, allocator
+reachability and compiler adequacy remain open.

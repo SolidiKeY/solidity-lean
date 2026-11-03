@@ -3033,6 +3033,9 @@ import Solidity.Yul.Views.NominalInventory
 import Solidity.Yul.Views.NominalInventoryControls
 import Solidity.Yul.Views.NominalInventoryLaws
 import Solidity.Yul.Views.NominalInventoryPreparation
+import Solidity.Yul.Views.NominalInventoryReplay
+import Solidity.Yul.Views.NominalInventoryReplayControls
+import Solidity.Yul.Views.NominalInventoryTransport
 import Solidity.Yul.Views.NominalInventoryUnchanged
 import Solidity.Yul.Views.NominalInventoryUnchangedControls
 import Solidity.Yul.Views.NominalInventoryView

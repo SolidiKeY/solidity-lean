@@ -64,3 +64,4 @@
 | `Yul/Views/NominalInventory{,Laws,Controls}` | Declared UDVT-array snapshot/update dispatch into the existing typed inventory; canonical decode/encode, complete raw reencoding and actual Source safety. |
 | `Yul/Views/NominalInventoryUnchanged{,Controls}`, `Yul/Views/NominalInventoryPreparation` | Actual image-derived unchanged-source identity and owner-MemOK completeness of the existing finite heap preparer for the nominal decoder profile. |
 | `Yul/Views/NominalInventoryView{,Controls}` | Constructive changed-snapshot Source result, output placement/history and exact full-map realization for canonical nominal inventories. |
+| `Yul/Views/NominalInventoryTransport`, `Yul/Views/NominalInventoryReplay{,Controls}` | Actual source-prefix decoder refresh and whole-poststate replay for permutations of nominal output inventories. |
