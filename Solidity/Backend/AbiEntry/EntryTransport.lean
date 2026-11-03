@@ -1,9 +1,7 @@
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Backend.Failure.Correct
 
-/-! Port of V13 85d13e5c7db386fd832391be5f7d04970ad31f22 EntryTransport.
-Proof statements and structure retained, with namespace/local type annotation
-normalization only. Consumers of the published indexed ABI-entry interface. The classifier
+/-! Entry transport, adapted from the V13 ABI-world entry work. Consumers of the published indexed ABI-entry interface. The classifier
 selects an existing empty REVERT emitter only for certified entry reverts.
 It does not emit the decoder or assert source/native or bytecode simulation. -/
 namespace Solidity.Backend.AbiEntry.EntryTransport

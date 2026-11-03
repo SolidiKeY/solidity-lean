@@ -1,7 +1,6 @@
 import Solidity.Backend.AbiEntry.EntryTransport
 
-/-! Entry-only port of V13 85d13e5c7db386fd832391be5f7d04970ad31f22.
-PacketEmission was incidental; these proofs use only EntryTransport. Nominal-cardinality consumers of the published enum entry decoder.
+/-! Enum entry consumers; these proofs use only EntryTransport. Nominal-cardinality consumers of the published enum entry decoder.
 No uint8-to-enum assumption, decoder replacement or source admission is added. -/
 namespace Solidity.Backend.AbiEntry.EnumEntry
 open Solidity.AbiEntry

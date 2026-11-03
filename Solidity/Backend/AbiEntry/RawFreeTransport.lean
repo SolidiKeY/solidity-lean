@@ -1,10 +1,7 @@
 import Solidity.Semantics.AbiEntry
 
-/-! Ported from V13 85d13e5c7db386fd832391be5f7d04970ad31f22,
-Backend/AbiWorld/RawFreeTransport. Proof structure and statements are retained; only unused simp arguments and
-one inferred local type are normalized. The original
-RawEntryTransport import was incidental; these declarations use only the
-existing indexed semantic decoder. No codec/world modules are copied. -/
+/-! Raw-free entry transport, adapted from the V13 ABI-world entry work.
+These declarations use only the existing indexed semantic decoder. No codec/world modules are copied. -/
 
 namespace Solidity.Backend.AbiEntry.RawFreeTransport
 open Solidity.AbiEntry

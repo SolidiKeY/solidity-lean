@@ -5,7 +5,7 @@ import Solidity.Semantics.Run
 /-!
 # Explicit pending producer boundaries
 
-The coordinator identified overlapping views as V11/G34 (queued); its named
+Overlapping views belong to G34; its named
 premise is imported from CalldataViews. The original G35.03 boundary remains
 separate. G24.03 belongs to V09 and is not frozen. These are
 parameterized obligation records, not claims that either producer is complete.

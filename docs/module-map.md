@@ -1409,6 +1409,26 @@ see [the checkpoint boundary](feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/Premises.lean` | Explicit unfinished producer boundaries for allocation panic, aliases and reached location steps; no assumed instances. |
 | `Backend/MemoryCopies/InterfaceV2.lean` | Non-vacuous default/copy signatures with concrete fitting allocator witnesses; only the new live-content heap obligation. |
 | `Backend/MemoryCopies/InterfaceV2Laws.lean` | Fitting-witness cost bounds, empty-code impossibility and cost-W refutations for both V2 certificates. |
+| `Backend/AbiEntry/Interface.lean` | G40 source-boundary obligation signatures only; no runtime, decoder or admission instance (see [ABI entry](feature-work/abi-entry.md)). |
+| `Backend/AbiEntry/CompositionInterface.lean` | Ordered raw entry recursion obligations with actual entries, fuel, head extent and allocation cursor. |
+| `Backend/AbiEntry/RejectionInterface.lean` | Conditional rejection-consumer signatures against the existing checked byte-slice runner. |
+| `Backend/AbiEntry/WordValidationInterface.lean` | Contracts for emitted primitive word validators in the numeric runner; stack suffix retained. |
+| `Backend/AbiEntry/WordValidation.lean` | Actual numeric bytecode for strict unsigned, bool and enum word bounds, with capacity. |
+| `Backend/AbiEntry/EntryTransport.lean` | Consumers of the indexed ABI-entry decoder; empty-REVERT classifier for certified entry reverts. |
+| `Backend/AbiEntry/RawFreeTransport.lean` | Raw-free entry transport over the existing indexed semantic decoder. |
+| `Backend/AbiEntry/EntryComposition.lean` | Structural composition of the indexed entry recursion with exact fuel, cursor and ordered failures. |
+| `Backend/AbiEntry/EnumEntry.lean` | Nominal-cardinality consumers of the enum entry decoder. |
+| `Backend/AbiEntry/Consumers.lean` | Inhabitants of the rejection and composition interfaces from the entry proofs. |
+| `Backend/AbiEntry/Premises.lean`, `Backend/AbiEntry/Premises/CalldataViews.lean`, `Backend/AbiEntry/Premises/CalldataViewExtensions.lean` | Pending G34 overlapping-calldata-view, G35.03 and G24.03 producer premises; no instances. |
+| `Backend/TryCall/ProducerInterface.lean` | Typed obligations for checked try-call emitters (see [H8 source model](feature-work/diamond-try-h8-source-model.md)). |
+| `Backend/TryCall/PanicNormalization.lean` | Known-self Panic normalization for the checked try-call specialization. |
+| `Backend/TryCall/PanicEmitter.lean` | Checked core emitter for the bounded known-self Panic source. |
+| `Backend/TryCall/PanicControls.lean` | Represented positive and negative entries for the same checked emitter. |
+| `Backend/FunctionValues/Interface.lean`, `Backend/FunctionValues/Premises.lean` | G42.05 external function value boundary and declared-call premises (see [function values](feature-work/g42-05-function-values.md)). |
+| `Backend/FunctionValues/Representation.lean` | Runtime words reuse the 24-byte source codec. |
+| `Backend/FunctionValues/Execution.lean` | Actual `Evm.run` observations for the low-192-bit convention. |
+| `Backend/FunctionValues/Inequality.lean` | External-function inequality via actual EQ/ISZERO and the source key. |
+| `Backend/FunctionValues/Controls.lean` | Inhabited source/compiled value controls. |
 | `Backend/MemoryOps/PhysicalWordFrame.lean`, `Backend/MemoryOps/PhysicalByteJournal.lean` | P6: word cell to 32-byte span; paired word/byte MSTORE; byte journal and REVERT reads ([P6](feature-work/physical-memory-interface.md)). |
 | `Backend/MemoryOps/PhysicalSourceUint.lean`, `Backend/MemoryOps/PhysicalUintWrite.lean`, `Backend/MemoryOps/PhysicalUintDelete.lean`, `Backend/MemoryOps/PhysicalArrayReframe.lean` | `UintArrayAt` Source/intrinsic/word/byte relation; read, write, delete as zero write; reframe cell agreement. |
 | `Backend/MemoryOps/PhysicalReferenceStore.lean`, `Backend/MemoryOps/PhysicalPointerFrame.lean` | Reference-array store with scaled-pointer bytes; `PointerFrame`. |

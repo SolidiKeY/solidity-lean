@@ -1,8 +1,7 @@
 import Solidity.Semantics.AbiEntry
 
-/-! Entry-only port of V13 85d13e5c7db386fd832391be5f7d04970ad31f22.
-The codec equality/window section stays with V13; ordered entry proofs and
-statements are retained. Structural composition of the EXISTING indexed entry recursion. These
+/-! Entry-only part of the V13 ABI-world entry work; the codec equality/window
+section stays in `Backend/AbiWorld`. Structural composition of the EXISTING indexed entry recursion. These
 identities retain the same fuel, exact cursor and ordered failure propagation;
 they are not a new decoder or a desired-execution hypothesis. -/
 namespace Solidity.Backend.AbiEntry.EntryComposition

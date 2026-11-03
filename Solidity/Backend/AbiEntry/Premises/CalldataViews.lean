@@ -3,8 +3,7 @@ import Solidity.Source.State
 /-!
 # V11/G34 typed overlapping-calldata-view premise
 
-Requested by the coordinator after Q-G35-VIEWS. G34 owns paths, aliases and
-slices; its producer is queued, not committed. No producer instance or G34
+G34 owns paths, aliases and slices; its producer is not yet on master. No producer instance or G34
 proof is supplied here. Only already-validated/demanded views are supplied;
 packing never requires eagerly validating all accepted lazy references.
 G40 must derive each supplied typed payload from the
@@ -54,7 +53,7 @@ structure V11G34_PackedViews {D : Source.Layout} (input : List UInt8)
     views[i.val].rawOffset = views[j.val].rawOffset ∧
     views[i.val].rawLength = views[j.val].rawLength
 
-/-- Named pending V11/G34 producer premise for coordinator relay matching.
+/-- Named pending V11/G34 producer premise.
 Coverage is over EVERY coherent finite view family, including repeated raw
 addresses with different element types, without a canonical-layout cutoff.
 This is structural view packing only. Native read/path/slice execution and
