@@ -1974,6 +1974,12 @@ import Solidity.Backend.TryCall.PanicControls
 import Solidity.Backend.TryCall.PanicEmitter
 import Solidity.Backend.TryCall.PanicNormalization
 import Solidity.Backend.TryCall.ProducerInterface
+import Solidity.Backend.FunctionValues.Controls
+import Solidity.Backend.FunctionValues.Execution
+import Solidity.Backend.FunctionValues.Inequality
+import Solidity.Backend.FunctionValues.Interface
+import Solidity.Backend.FunctionValues.Premises
+import Solidity.Backend.FunctionValues.Representation
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
