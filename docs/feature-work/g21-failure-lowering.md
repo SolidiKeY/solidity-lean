@@ -29,3 +29,34 @@ published terminal emitter (`Lowering/V08/`). From the v13-abi-world lane.
 
 Runtime-value encoders, reading unknown memory or calldata, emitted bounds
 checks, catch semantics, source-world simulation.
+
+## Source ABI failure consumers (sched 2026-11-03)
+
+`Lowering/V08/` modules from the V13 help branch, each with a `*Controls`
+module. They consume existing Source definitions, ABI codecs and decoder arms;
+none adds an AST, evaluator, decoder or admission rule.
+
+- `BoolErrorAbi`, `BoolErrorStatement`, `BoolErrorCompleteness`: closed Boolean
+  custom-error payloads agree with the indexed ABI codec; an executable
+  selector on existing typed statements; completeness for the supported
+  literal family only. `LiteralFailureBoolStatement` adds typed Boolean error
+  statement selection with exact error-span bounds.
+- `LiteralFailureCalldataDecode`, `LiteralFailureSliceDecode`,
+  `LiteralFailureChoiceDecode`, `LiteralFailureEffectDecode`: progress and
+  preservation through the calldata `abi.decode` arm, calldata slices,
+  conditional data selection, and local-assignment effects surviving a decode
+  failure.
+- `LiteralFailureStorageDecode`, `LiteralFailureStorageSuccessControls`: storage
+  byte copies and typed local decoding; the canonical success case with the
+  exact caller state.
+- `LiteralFailureDynamicError`, `LiteralFailureDynamicListError`: heap-backed
+  custom-error encoding, mixed and arbitrary-length typed reference lists.
+- `LiteralFailurePackedBytes`, `LiteralFailureSignatureBytes`,
+  `LiteralFailureSelectorBytes`, `LiteralFailureEncodedRethrow`: packed bytes
+  reads with fresh allocation, signature encoding with alias preservation,
+  selector-local expression execution, rethrow of allocated ABI payloads.
+
+Not on master: `LiteralFailureBytesReadback{,Controls}` (they import
+`Solidity.Backend.AbiWorld.ErrorRoundtrip`, which does not exist). No runtime
+target encoder, source/target simulation or admission theorem is claimed.
+
