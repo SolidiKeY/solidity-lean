@@ -71,5 +71,6 @@
 | `Yul/Adapters/PhysicalSnapshotSlice{,Controls}` | Actual environment instruction-slice final bytes into typed Source writeback, separate target/preparation outcomes and whole-map bridge. |
 | `Yul/Adapters/SelectedPhysicalStore{,Controls}` | Published checked word/byte compiler into actual Source writeback; full Source identity for outside-image byte changes, separate reserved-safety controls. |
 | `Yul/Adapters/CheckedResidualStore{,Controls}` | Computed residual-window geometry into compiled byte stores: whole Source identity, complete residual map, both reserved words and state-indexed padding-growth controls. |
+| `Yul/Adapters/P6ResidualCopy{,Controls}` | Actual bounded P6 snapshot copies into complete Source/residual views; overlap, reserved bytes, reached accounting and empty-copy identity. |
 | `Yul/Views/InventorySnapshotHistory{,Controls}` | Changing supplied snapshots with refreshed retained ownership, exact successful prefixes, pending suffix/resumption and final-map reconstruction. |
 | `Yul/Views/NominalInventorySequential{,Controls}` | Exact nominal snapshot/sequential Source-result agreement with refreshed candidates, duplicates and capacity controls. |

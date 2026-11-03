@@ -2421,6 +2421,8 @@ import Solidity.Yul.Adapters.P6InputControls
 import Solidity.Yul.Adapters.P6Inputs
 import Solidity.Yul.Adapters.P6Memory
 import Solidity.Yul.Adapters.P6MemoryControls
+import Solidity.Yul.Adapters.P6ResidualCopy
+import Solidity.Yul.Adapters.P6ResidualCopyControls
 import Solidity.Yul.Adapters.PhysicalObject
 import Solidity.Yul.Adapters.PhysicalObjectControls
 import Solidity.Yul.Adapters.PhysicalSnapshotSlice

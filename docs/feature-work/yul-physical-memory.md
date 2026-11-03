@@ -301,6 +301,20 @@ rejects its now-live location. Reserved/owned preparation rejection stays separa
 from the actual target byte instruction's ability to execute. Current checked
 padding does not establish future ownership, allocator provenance or gas bounds.
 
+`P6ResidualCopy` connects the actual `P6ByteMemory.copySnapshot` operation to
+existing computed residual-copy requests. Genuine initial frame/image agreement,
+separate source/destination capacity room and the request's existing Word-range
+facts derive the full updated image and actual Source identity. Copies read the
+old complete physical snapshot, including owned source payloads. Reserved words
+are preserved by the checked destination. Capacity and reached high-water
+accounting remain distinct; the output uses its own `Fits` fact. Controls build
+the input frame from the computed nominal/byte heap, copy owned byte 7 into
+residual byte 300 (whose residual-only source would be 165), and raise the actual
+high-water field from 8 to 10 words. Both overlap directions and exact empty-copy
+frame identity at maximum Word offsets are checked. Frame carrier state/key
+remain separate from logical Source state. No MCOPY opcode, allocator, gas or
+whole-program theorem is supplied.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
