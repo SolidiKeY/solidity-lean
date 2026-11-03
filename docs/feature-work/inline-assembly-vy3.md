@@ -516,3 +516,15 @@ remain open. Independent finder/skeptic reviews are recorded with focused checks
 in the sealed checkpoint handoff. TERRA49 records routine projections; prior
 routine obligations remain pending. Optional Bridge registration is deferred to
 the coordinator's generator, as required by REG1/H14.
+
+### Selection V2 and enforced signed axiom pins
+
+Selection clients now import the published `Selection.InterfaceV2`. They use
+unchanged instruction and lowering contracts; no lane client consumes V1
+`FrameCertificate.prefixes`, `CompilerPremise` or `RuntimeConsumer`. No physical
+capacity certificate is inferred from the old conditional prefix field.
+`SignedQuotientMachine.sdiv_run` and `smod_run` now enforce their standard axiom
+sets with `#guard_msgs`. The excluded routine ledger is preserved in checkpoint
+evidence rather than resubmitted as a repository file. Earlier integrated
+Bridge registrations remain done; only new unpublished modules need generated
+registration at their integration.

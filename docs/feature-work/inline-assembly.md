@@ -239,3 +239,7 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   including actual nested/prefixed source compiler instances. Exact leaf byte
   origins are checked; loops/native/G24/full-lane closure remain open. See the
   [lane document](inline-assembly-vy3.md) and sealed checkpoint handoff.
+
+- VY3 review follow-up: selection imports use published V2, signed quotient
+  axiom reports are enforced, and the excluded routine ledger stays archived.
+  No capacity or full-lane closure is inferred; see the lane handoff.
