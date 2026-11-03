@@ -48,7 +48,7 @@ no Source declaration execution or heap-content relation is asserted.
 references in each actual pipeline order. It derives both captured value
 relations and every reached caller binding from initial alignment; two drops
 restore the updated caller exactly. No operand-separation premise is required.
-Controls use distinct live objects, a typed storage path/root, both pipelines,
+Lane controls (VM-only, not on master) use distinct live objects, a typed storage path/root, both pipelines,
 same-slot operands, wrong maps and equal-content distinct identities. An
 arbitrary input value relation does not establish global heap alias reflection.
 These supported clauses do not supply a general elaborator/operand producer,
@@ -175,7 +175,7 @@ from `SelectionOK`, those field premises, nonempty/distinct fields and any valid
 comparison rank. The rank is proof-only; neither successful execution of the
 lowerer nor the producer's computed rank checks are premises.
 
-An inhabited three-node Source environment distinguishes physical declaration
+A lane-only (not on master) three-node Source environment distinguishes physical declaration
 index 2 from graph index 0 and comparison rank 30 from computed rank 3. Controls
 reject an incorrect target node, invalid rank, inline cycle, unsupported bytes
 and duplicate field keys. This establishes component completeness relative to

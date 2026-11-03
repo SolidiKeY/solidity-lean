@@ -42,7 +42,8 @@ consumers), port laws for the step rules.
   target output store, the copied prefix and every byte outside it, for success
   and revert. `TargetCallRules.call_output_box` derives the normal-return `Box`
   from preflight, output extent, input loading and the invocation equation (not
-  from the desired `CallStep`).
+  from the desired `CallStep`). No control on master instantiates the
+  `call_output_*` lemmas or `call_output_box` yet.
 
 Open: actual callee/initcode execution, the full-slot carrier (needs
 `OwnedBoolFrame` and its storage closure, not in the published Views), common

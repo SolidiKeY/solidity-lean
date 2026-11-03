@@ -39,7 +39,7 @@ theorem sound : Sound := by
     split at h
     · rename_i ha
       cases h
-      obtain ⟨hi, hp, hr, hm, he⟩ := Solidity.Lowering.P8.SourcePrograms.admit_sound i p r cert es hs
+      obtain ⟨hi, hp, hr, hm, he⟩ := Solidity.Lowering.P8.SourcePrograms.accept_sound i p r cert es hs
       refine ⟨hi, hp, hr, hm, he, ?_, rfl⟩
       intro e hin site hsite
       have hc := List.all_eq_true.mp ha e hin

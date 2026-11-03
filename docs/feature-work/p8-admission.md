@@ -447,7 +447,7 @@ of H16 carrier-aware execution or the final Producer prerequisites.
 resolution and component-metadata checks, followed by the actual
 `Source.elaborate` on every resolved unit in order. No failed unit is dropped.
 `elaborateUnits_sound` proves the independent per-position graph of the
-upstream elaborator; `admit_sound` returns `Input.Ok`, the checked parse and
+upstream elaborator; `accept_sound` returns `Input.Ok`, the checked parse and
 resolution judgments, existing `ComponentOK`, and that full-list graph.
 `elaborateUnits_tail_failure` proves that a failed later unit forces the
 whole result to fail, independently of the first program's proof data.

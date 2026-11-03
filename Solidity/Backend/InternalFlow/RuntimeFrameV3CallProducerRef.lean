@@ -31,7 +31,7 @@ def plan (selected : Composition.Program b F (.cons (.call f args ret body) .nil
  (fun _ => Γ.length+1),selected.checked.cost⟩
 
 /-- Physical resource domain; agreement with approved remains an external
-hypothesis. These fields are the exact Entry resource conditions. -/
+hypothesis. These fields imply the Entry resource conditions (`coverage`). -/
 def admitted (selected : Composition.Program b F (.cons (.call f args ret body) .nil))
  (lo pointer : Nat) : InterfaceV3.Admission C Γ := fun L frame caller base machine start =>
  StateRepr L b frame F caller base machine ∧

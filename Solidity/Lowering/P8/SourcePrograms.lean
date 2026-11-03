@@ -54,7 +54,7 @@ theorem elaborateUnits_tail_failure (u : String × Resolution) (us : List (Strin
     (h : elaborateUnits us = none) : elaborateUnits (u :: us) = none := by
   cases he : elaborate u.2 <;> simp only [elaborateUnits, he, h, bind, pure, Option.bind] <;> rfl
 
-theorem admit_sound (i : Input) (p : Parsed) (r : Packet) (cert : CheckedSyntax.Cert)
+theorem accept_sound (i : Input) (p : Parsed) (r : Packet) (cert : CheckedSyntax.Cert)
     (es : Programs) (h : accept i p r cert = some es) :
     i.Ok ∧ Parses i p ∧ SourceResolutions.Resolves p r ∧ SourceMetadata.ComponentOK r ∧
       UnitsElaborate r.units es := by
@@ -92,8 +92,8 @@ abbrev UnitsProgramIdentity : Prop :=
 
 /-- info: 'Solidity.Lowering.P8.SourcePrograms.elaborateUnits_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms elaborateUnits_sound
-/-- info: 'Solidity.Lowering.P8.SourcePrograms.admit_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms admit_sound
+/-- info: 'Solidity.Lowering.P8.SourcePrograms.accept_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms accept_sound
 /-- info: 'Solidity.Lowering.P8.SourcePrograms.elaborateUnits_tail_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms elaborateUnits_tail_failure
 end Solidity.Lowering.P8.SourcePrograms
