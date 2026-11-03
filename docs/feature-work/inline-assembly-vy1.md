@@ -653,3 +653,21 @@ remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### For initializer and body scopes
+
+LocalBoolFor composes a certified Boolean initializer, a condition in its
+extended context, and a context-growing certified item body, with no post.
+Successful exit drops the initializer head after body scopes close; failures
+retain their reached context and partial effects. source_agrees proves all-fuel
+clean-input Source.execS correspondence using concrete initializer/while laws,
+the existing forIter equivalence, decoder inversion and restore_cons.
+Controls cover initializer/body timeout contexts, false initial flags,
+enclosing writes surviving successful cleanup, partial initializer writes and
+dirty projection refusal. A recursive conversion simplification exceeded the
+unchanged depth limit; the existing clean-frame identity discharges that step.
+This does not cover post expressions, other initializer types or dirty compiler
+adequacy. Full P16 and final lane validation remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

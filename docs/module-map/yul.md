@@ -42,3 +42,5 @@
 - Yul/LocalBoolDoWhile.lean and Yul/Checks/LocalBoolDoWhile.lean: body-first scoped iteration and concrete all-fuel clean Source agreement.
 
 - Yul/LocalBoolDoDivergence.lean and Yul/Checks/LocalBoolDoDivergence.lean: constant-true do/while noncompletion laws and guard controls.
+
+- Yul/LocalBoolFor.lean and Yul/Checks/LocalBoolFor.lean: Boolean initializer and context-growing for-body scope composition, without post.

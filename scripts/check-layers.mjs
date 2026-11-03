@@ -14,5 +14,6 @@ import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 const CORE = [
   /^Solidity\.Yul\.(LocalBoolDivergence|Checks\.LocalBoolDivergence)$/, // No finite normal completion of constant-true scoped loops.
   /^Solidity\.Yul\.(LocalBoolDoDivergence|Checks\.LocalBoolDoDivergence)$/, // No finite normal completion of literal-true do/while.
+  /^Solidity\.Yul\.(LocalBoolFor|Checks\.LocalBoolFor)$/, // Context-growing Boolean for initializer and scoped body.
   /^Solidity\.Yul\.(LocalBoolDoWhile|Checks\.LocalBoolDoWhile)$/, // Body-first iteration of certified Boolean scopes.
   /^Solidity\.Yul\.(LocalBoolWhile|Checks\.LocalBoolWhile)$/, // Iteration of context-growing Boolean scopes.

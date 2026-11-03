@@ -2362,6 +2362,7 @@ import Solidity.Yul.Checks.LocalBoolWhile
 import Solidity.Yul.Checks.LocalBoolDivergence
 import Solidity.Yul.Checks.LocalBoolDoWhile
 import Solidity.Yul.Checks.LocalBoolDoDivergence
+import Solidity.Yul.Checks.LocalBoolFor
 import Solidity.Yul.WordPrint
 import Solidity.Yul.Adapters.FrameHeap
 import Solidity.Yul.Adapters.FrameHeapControls
@@ -3394,3 +3395,4 @@ import Solidity.Yul.LocalBoolWhile
 import Solidity.Yul.LocalBoolDivergence
 import Solidity.Yul.LocalBoolDoWhile
 import Solidity.Yul.LocalBoolDoDivergence
+import Solidity.Yul.LocalBoolFor
