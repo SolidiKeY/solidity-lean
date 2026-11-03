@@ -2123,8 +2123,12 @@ See [P8 admission](feature-work/p8-admission.md).
 - Yul/RawLocalDeclaration: context-indexed local snapshot and concrete Boolean declaration Source correspondence. Yul/Checks/RawLocalDeclaration: executed context growth, shifted dirty-word, timeout and full-prefix controls.
 - Yul/RawLocalScope: executed Boolean declaration/scope closure, exact Source restoration and existing adapter implementation. Yul/Checks/RawLocalScope: precise horizons, dirty-frame and two-scope composition controls.
 - Yul/RawDefaultDeclaration: typed constant-default lookup and Source declaration correspondence, including all integer widths. Yul/Checks/RawDefaultDeclaration: actual uint8/uint256, shifted dirty-prefix and helper-boundary controls.
-| `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
 
+### Physical memory adapters
+
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
 ## Executable bytecode selection
 | Module | Role |
 |---|---|
@@ -2179,3 +2183,12 @@ See [P8 admission](feature-work/p8-admission.md).
 - Yul/LocalBoolItemScope: certificate-derived raw suffix restoration and concrete Source scope composition. Yul/Checks/LocalBoolItemScope: multi-declaration closure, retained partial contexts, dirty-temporary and Source controls.
 - Yul/LocalBoolIf.lean and Yul/Checks/LocalBoolIf.lean: conditional scope execution and clean-input Source agreement with partial-effect controls.
 - Yul/LocalBoolIfElse.lean and Yul/Checks/LocalBoolIfElse.lean: conditional selection of independently indexed item scopes with concrete clean Source agreement.
+| `Yul/Views/ComputedAllocationWrite{,Controls}` | Incremental typed allocation encoding with computed geometry, whole-map/source identity and exact residual/ReservedOK transport. |
+| `Yul/Views/MemoryImageOrder{,Controls}` | All existing typed image constructors: point locality, whole-map disjoint order, generic allocation/FMP order and actual Source program order. |
+| `Yul/Views/MixedHeapOrder{,Controls}` | Complete typed-inventory encoding permutation/idempotence and actual unchanged source writeback, with derived separation and tail bounds. |
+| `Yul/Views/InventoryDecodeOrder{,Controls}` | Fixed-candidate changed-snapshot visit permutations with exact None, actual Source result and sequential placement/history refresh. |
+| `Yul/Views/InventoryCandidateOrder{,Controls}` | Derived owned-pointer candidate order, object decoder invariance, and complete candidate/visit writeback plus sequential refresh permutation. |
+| `Yul/Views/InventoryReplay{,Controls}` | Successful changed-snapshot output profile and whole-source replay identity from actual type preservation and retained allocation history. |
+| `Yul/Views/SnapshotHashBinding{,Controls}` | Actual source keccak after changed physical-snapshot writeback, using derived exact raw payload and preserved aliases. |
+| `Yul/Views/CalldataHashBinding{,Controls}` | Actual calldata-local keccak with implicit memory allocation, clipped payload copy, complete source result and MemOK. |
+| `Yul/Adapters/P6CalldataHash{,Controls}` | Actual calldata conversion/allocation, bounded P6 copy and target KECCAK256 composition with explicit per-input concrete hash premise. |

@@ -15,16 +15,8 @@ theorem allocated_supported {E : Source.Env} {τ : Source.STy}
     (h : Source.Heap E.layout) (data : Source.Data E.layout τ)
     (old : ∀ a σ d,h.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ)
     (new : InventoryTypeSupported E τ) :
-    ∀ a σ d,(h.alloc ⟨τ,data⟩).1.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ := by
-  intro a σ d found
-  by_cases same : a=h.next
-  · subst a
-    have fresh : (h.alloc ⟨τ,data⟩).1.get h.next=some ⟨τ,data⟩ := Source.Heap.alloc_get h ⟨τ,data⟩
-    rw [fresh] at found
-    cases found
-    exact new
-  · rw [Source.Heap.alloc_other h ⟨τ,data⟩ same] at found
-    exact old a σ d found
+    ∀ a σ d,(h.alloc ⟨τ,data⟩).1.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ :=
+  heapAlloc_inventory_supported h data new old
 
 /-- Real source allocation followed by complete frame encoding and whole-source
 unchanged writeback. Both results concern the same actual allocated state. -/
