@@ -15,7 +15,7 @@ changes are in `lean-4.24.patch`; the original hashes are retained.
 `EvmYul/EVM/Semantics.lean` also needs an explicit `UInt256` annotation
 on its existing zero literal in the account-creation branch. This type
 inference compatibility edit is recorded in the same patch. All other
-EvmYul modules are unchanged.
+EvmYul modules are unchanged apart from the H7 patch below.
 
 The closure includes the upstream EVM state, stack, PC update, opcode
 dispatcher, gas/halting driver and `execBinOp` transformer. It also contains upstream FFI declarations and
