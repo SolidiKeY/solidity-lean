@@ -376,3 +376,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean` | General fetched EQ word/typed-certificate agreement with actual decoder, charged gate, full State and continuation. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean` | Populated typed/same/high-bit-distinct/boundary clients, gas/fuel/arity refusals and complete ordered State observations. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTest.lean` | Three actual fetched DUP1/PUSH32-minimum/EQ steps to the existing Scalar overflow flag, exact resources/frame and legal-entry peak overflow refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTestControls.lean` | Complete ordinary/minimum States, legal peak1024 and refused peak1025, gas/fuel negatives and ordered code/buffer/account observations. |

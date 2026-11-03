@@ -1393,3 +1393,27 @@ accounts and substate are retained. Boundary words are constructed with
 skeptic reviews found no semantic defect. This is reference-model instruction
 transport, not compiler/frame origin, Osaka approval or closure of a full opcode
 row. The full G46/G47 obligations remain open.
+
+
+### Fetched negation overflow test
+
+[NegationTest.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationTest.lean)
+composes the actual G25 test (`DUP1; PUSH32 minimumInt; EQ`) through three
+fetched steps and X continuation. For arbitrary typed signed operands, seed
+State, surrounding Backend code and caller tails, the producer derives each
+code/state alignment and the remaining gas, with gas at least nine, peak
+`tail.length + 3 ≤ 1024`, explicit PC fit and fuel. The destination array is
+explicitly empty. The flag equation is extracted from the existing typed
+Scalar test theorem, without an execution, decode or caller-frame premise.
+Gas debit and retained State/memory/return buffers are separate consequences.
+
+[NegationTestControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationTestControls.lean)
+checks independent complete States for ordinary/zero inputs and the minimum's
+true overflow flag. The legal boundary starts with 1022 words and peaks at
+1024; the overflow control starts legally with 1023, passes DUP1, then refuses
+PUSH32's attempted 1025-word peak. A general modular refusal law avoids reducing
+a large concrete spill. Gas eight and fuel three remain failures. Ordered
+39-byte code, operand/tail, buffers, calldata and accounts are observed.
+Independent finder and skeptic reviews prompted precise capacity wording;
+no semantic defect was found. Conditional branching, panic execution,
+compiler/frame origin, Osaka approval and full G46/G47 closure remain open.
