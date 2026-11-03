@@ -22,6 +22,19 @@ Solidity admission, Source/G24/native adequacy or the full original lane.
 No earlier excluded Terra tasks or completed work are restored here.
 
 
+# Current integration status (2026-11-03)
+
+The helper branch is rebased onto published8eec153a. Scalar now comes from
+published Solidity.Lowering.V07.Scalar (exact original0ca869 blob), with NO
+active private Scalar/P1 lookup. Older private-stage notes below are history.
+IntegerReadBoundaryWitness now discharges the populated [255,256] soundness
+witness: real selected uint8 success and eager Source-phase revert[], with
+complete original state preserved. Its word geometry and decoder equations
+are kernel proved. This specific item is DONE; other listed routines and
+controls remain OPEN. Root registrations are generated for BoolArrayDelete,
+IntegerArrays and IntegerReadBoundaryWitness. Full/import closure, whole-lane
+and general lazy-selected-read lowering are not discharged.
+
 # H14 cascade — G18.05 local bool-array deletion
 
 Producer module: `Solidity.Backend.Aggregates.BoolArrayDelete`.

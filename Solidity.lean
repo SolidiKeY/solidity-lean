@@ -48,6 +48,7 @@ import Solidity.Backend.AbiWorld.PanicReadWindow
 import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.Aggregates.BoolArrayControls
+import Solidity.Backend.Aggregates.BoolArrayDelete
 import Solidity.Backend.Aggregates.BoolArrayEntry
 import Solidity.Backend.Aggregates.BoolArrayEntryControls
 import Solidity.Backend.Aggregates.BoolArrayExpression
@@ -81,6 +82,8 @@ import Solidity.Backend.Aggregates.G18Storage
 import Solidity.Backend.Aggregates.G18StorageCellControls
 import Solidity.Backend.Aggregates.G18StorageClient
 import Solidity.Backend.Aggregates.G18StorageValues
+import Solidity.Backend.Aggregates.IntegerArrays
+import Solidity.Backend.Aggregates.IntegerReadBoundaryWitness
 import Solidity.Backend.Aggregates.MemoryLocalDeleteControls
 import Solidity.Backend.Aggregates.NestedCalldataControls
 import Solidity.Backend.Assembler

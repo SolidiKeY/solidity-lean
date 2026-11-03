@@ -443,3 +443,51 @@ Generated registration, standard combined validation, H14 routines/controls,
 low-budget laws and all original Work/Backfill closure remain unfinished.
 Original full124/docsraw1/frozenno-new1 preserved without unchanged reruns;
 no goal, pin, profile, proof/fuel/test/time/resource budget or verdict changes.
+
+
+## Published integration and inhabited eager-validation boundary
+
+Requested H14-F rebase onto8eec153a5670d3153114596f1ccab2b1acbb6afc is complete
+on the SAME helper branch. Old eac8dc8e/all seals are preserved under the
+pre-integration ref and archives. P5 exact61db3cac remains an ancestor.
+Only registration/docs conflicts occurred; published root/order were preserved
+and owned imports regenerated with coord-tools/register.sh. Aggregate code,
+TERRA and tests were byte-identical immediately after rebase. Separate finder
+and skeptic accepted preservation/ownership. Source/Frontend/reserved producer
+implementations were not changed to make the rebase or proofs pass.
+
+V07 Scalar is now published, exact blob0ca8696879e8d121071a1bca38632e572dff7507.
+Active private lookup injection is removed. Focused normal-source build of
+IntegerArrays passes72jobs134.92s within180s, oneLean,peak910936KiB, noOOM/swap.
+P1 V3/P10 published components replace relay-source use; no P1/P10 premise
+occurs in these array consumers. P1-PROFILE remains open (approved:=admitted),
+recursive witness coverage/absence of a recursive V3 instance are not inferred
+away. Original Source/frame/world/fetched-byte obligations remain open.
+
+IntegerReadBoundaryWitness constructs actual ABI head32/length2 and words255,
+256, with correct full second-word encoding30zeros++[1,0]. The Source caller
+contains two old heap byte objects and two aliases to address0. Real geometry,
+selected decode success, traversal error and inhabited_boundary are proved;
+the Source typed read at budget2 returns uint8 255 and the complete BEFORE
+state, while actual eager lowerEntry returns Source.revert[]. No desired-run,
+decoder or representation oracle is a premise of this inhabited theorem.
+This closes the specific pending [255,256] control and substantiates the lazy/
+eager mismatch. It does NOT claim machine revert, G43, an exclusion or a general
+calldata compiler. No profile, expected verdict or semantic definition changed.
+
+Shared try-tactics/gate tools run inside the original guarded Docker runtime
+(j1/LEAN_NUM_THREADS1,12GiB,noSwap,180s,local writer lease). MCP package is absent;
+CLI toolkit fallback used, daemon remains stopped. Initial admission75 failures
+launched no Lean; H1 task-cache advice restored the unchanged guard without
+removing data/seals. Container Git trust is scoped only to this checkout.
+Toolkit-created root-owned logs were made readable without content changes.
+Literal length decide hit the unchanged recursion limit; first successful rfl
+length proof replaced it. All raw refusals/failed trials are retained.
+
+Final focused build/per-file/axiom checks pass: witness-final4.13s,peak759268KiB,
+oneLean,cgroup513335296bytes,noOOM/swap. Geometry has NO axioms; three remaining
+headline witnesses use only standard3. Root imports for the three owned
+modules are generated. Other H14 controls, low-budget/projection/success glue
+and root/import/full/strict/trust/docs final closure remain outstanding. The
+older full124/docs failures remain raw, not renamed green. No goal reset,
+completion, model/pin/budget change, push, merge-master or PR occurred.
