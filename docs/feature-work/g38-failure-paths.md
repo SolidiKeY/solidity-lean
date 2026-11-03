@@ -10,10 +10,11 @@ from the terminal slice interface.
 
 ## Producer boundaries
 
-`Premises.EncodingAt` requires actual `Source.encodeVals` execution. General
-custom-error and return encoding remains G41, v13-abi-world's
-`Backend/AbiWorld/ErrorLayout` and `ErrorRoundtrip` (not on this published
-base). `InternalBareRevert` is the existing P1 interface; internal-frame
+`Premises.EncodingAt` requires actual `Source.encodeVals` execution. The published
+`Backend/AbiWorld/ErrorLayout` and `ErrorRoundtrip` discharge Error(string)
+packet layout and decoder roundtrip in `ReasonCodec`. Their scope does not
+prove general runtime custom-error or return encoding, so `EncodingAt` remains
+explicit for those values. `InternalBareRevert` is the existing P1 interface; internal-frame
 transport stays with v12-flow-calls. `IncompleteAt` retains source timeout and
 does not turn resource exhaustion into revert (VY5 H16). `TransientRestored` is
 only a source projection: physical transient representation/reset/rollback
@@ -176,3 +177,15 @@ representations or budgets. Failed direct attempts and successful scratch syntax
 transport checks are retained. Printed axioms remain standard only. Both
 independent reviewers found no confirmed defect; neither review promotes these
 statement boundaries to frontend or whole-program support.
+## Published Error(string) codec consumer
+
+`ReasonCodec.layout` derives the Source packet offset, length word and exact
+payload from the published G41 codec laws. `roundtrip` derives the decoder's
+word-representability bound from the existing emission `Fits` premise.
+`compiled_readback` connects actual parametric Source statement execution,
+checked emission and decoder readback from the resulting byte memory, without
+an assumed layout, successful emission or roundtrip. The controls use an
+allocated reference return slot, both Source pipelines, boundary bytes and a
+malformed-selector refusal. This discharges packet laws, not general runtime
+ABI encoding, caller transport or full EVM correspondence. Independent finder
+and skeptic reviews found no confirmed issue.
