@@ -301,10 +301,15 @@ import SolidityBridge.Yul.ChargedQuotients
 import SolidityBridge.Yul.ChargedQuotientsControls
 import SolidityBridge.Yul.ChargedShifts
 import SolidityBridge.Yul.ChargedShiftsControls
+import SolidityBridge.Yul.ControlCompleteness
+import SolidityBridge.Yul.ControlRealization
 import SolidityBridge.Yul.LiteralSelection
 import SolidityBridge.Yul.LiteralSelectionControls
+import SolidityBridge.Yul.QuotientControl
+import SolidityBridge.Yul.QuotientControlControls
 import SolidityBridge.Yul.QuotientPlacement
 import SolidityBridge.Yul.QuotientPlacementControls
+import SolidityBridge.Yul.QuotientSelection
 import SolidityBridge.Yul.QuotientSuffix
 import SolidityBridge.Yul.QuotientSuffixControls
 import SolidityBridge.Yul.SelectionSequence
