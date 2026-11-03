@@ -413,3 +413,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 |---|---|
 | `Lowering/V08/LiteralFailureTupleAbort.lean` | Actual tuple argument failure, exact Halt and state transport through the Source statement boundary. |
 | `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Effectful argument ordering, skipped writes, positive tuple return and timeout/Panic controls. |
+
+## Heterogeneous word and byte encoding
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedEncoding.lean` | Indexed field-evidence relation and actual arbitrary word/bytes Source encoder agreement with the existing typed ABI codec. |
+| `Lowering/V08/LiteralFailureMixedEncodingControls.lean` | Four-field tuple return/extraction, heap encoding, aliases, offsets and bounded local RETURN controls. |
