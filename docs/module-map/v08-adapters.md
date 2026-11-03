@@ -379,5 +379,9 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/FunctionValues/RuntimeConstruction.lean` | Bounded memory-reference-structs checkpoint; scope and retained premises are stated in the module docstring. |
 | `Backend/FailurePaths/TransientCallback.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module docstring. |
 | `Backend/FailurePaths/TransientSharing.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module docstring. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
