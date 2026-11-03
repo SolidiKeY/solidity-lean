@@ -32,3 +32,40 @@ Generic Panic body (sched 2026-11-03), core only:
 - Still not on master: the Bridge `TryPanicOperational` adapter, which imports
   the relative closure above.
 
+
+## Checked try-call producer checkpoint
+
+`Backend/TryCall/ProducerInterface.lean` states the intrinsic try-call site and the
+checked emitter duties over the existing runtime-frame relations. It is a
+signature, not a producer instance: both successful and bare-reverting source
+runs must have actual represented entries for the same emitted plan. No
+approved-profile coverage or original-site provenance follows from it.
+
+The first intended producer is the bounded H8 known-self-Panic normalization.
+Its branch must be derived from the generic body execution, not supplied as a
+chosen reply. Core `CALL` currently models a payment flag and has no returndata
+or child execution; this checkpoint does not claim a general unknown-call
+implementation or the G42 world-call producer. Any specialization must prove
+its all-outcome source normalization and actual emitted core instructions.
+Original compiled-site provenance remains the readonly-external P3 premise.
+
+### Inhabited bounded producer
+
+`Backend/TryCall/PanicNormalization.lean` reuses the primitive proofs from
+owned checkpoint `2ae124d153a2` without editing the source modules. It derives
+both outcomes of the generic known-self Panic body at every caller state.
+`PanicEmitter.lean` proves its conditional/store/revert expansion equivalent
+to that intrinsic `tryCall`, then supplies the V1 `ReturnClaim` and
+`BareRevertClaim` through existing checked compiler and footprint laws.
+`PanicControls.lean` constructs represented zero/nonzero receiver entries for
+that SAME statement and plan, and inhabits `Producer`.
+
+This is compile-time known-body specialization in the core model. It emits
+no synthetic CALL and supplies no unknown-call implementation. Success and
+bare revert are real core executions; original solc bytecode, deployment,
+installation and original-site/P3 association are not derived. The scope is
+not V3 profile coverage. Finder and skeptic read all three modules without
+running Lean and found no confirmed defect; kernel diagnostics separately
+check the statements. Failed drafts and resource measurements remain in the
+worker evidence, including the repaired missing-contract-index elaboration
+failure, with no changed proof limit.

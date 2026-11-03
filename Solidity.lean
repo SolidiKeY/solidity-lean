@@ -1970,6 +1970,10 @@ import Solidity.Backend.AbiWorld.PanicCallFrameControls
 import Solidity.Backend.AbiWorld.PanicReadWindow
 import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
+import Solidity.Backend.TryCall.PanicControls
+import Solidity.Backend.TryCall.PanicEmitter
+import Solidity.Backend.TryCall.PanicNormalization
+import Solidity.Backend.TryCall.ProducerInterface
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
