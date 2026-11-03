@@ -50,4 +50,9 @@ def zero : Cursor := (Cursor.empty.enterRequest zeroPlan rfl).2.enterFrame zeroP
 #guard zero.stop?.map (fun stop => stop.isFrame 0) = some true
 #guard zero.advanceEvent.frames.map (fun b => b.emitted) = [0]
 
+-- Full functions are retained as the runtime input; no encoding into Nat.
+#guard (RuntimePlan.ofResource (17,requestPlan)).isSome
+#guard (match RuntimePlan.ofResource (17,requestPlan) with | some p => p.tx 0 | none => .runs 0 none) = .dropped
+#guard (match RuntimePlan.ofResource (17,requestPlan) with | some p => p.frame 3 | none => none) = some 1
+
 end Solidity.Source.FailureCursorControls
