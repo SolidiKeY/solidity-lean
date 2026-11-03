@@ -5370,6 +5370,77 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.corrupted_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.different_pipelines": [],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.prefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.reversed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.short_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.source_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.stale_rhs_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.wrong_order_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.reached_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/AxiomPins.lean:Solidity.Backend.Passes.AllocatingControls.allocating_composition": [
   "Classical.choice",
   "Quot.sound",
@@ -9351,6 +9422,316 @@
   "propext"
  ],
  "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.symbolic_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.capture_stage_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.CapturedValueStability.joined_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.ConditionalReferenceCapture.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.bad_capture_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.capture_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.capture_success_not_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.immediate_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.joined_observations": [],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reached_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reference_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reference_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reference_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.skipped_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.wrong_readback": [],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.ShortCircuitBoundary.revert_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.argument_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.declaration_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.early_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.emitted_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.entered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.flags": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.form": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.goodCapacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.goodEntry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.goodMember": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.member": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.not_always_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.positive_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.positive_source_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.prefix_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.reached_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.save_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.saved_evidence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.source_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.static_allocates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.successful_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.target_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean:Solidity.Backend.Passes.ReferenceCallArgumentFailure.wrong_positive_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.capture_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.joined_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.returned_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.wrong_zero_capture_cell": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.source_capture_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.call_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.body_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.returned_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.source_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.stale_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.execution": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -18070,6 +18451,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/StorageOps/StackWordWrite.lean:Solidity.Backend.StorageOps.StackWordWrite.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.after_data": [
   "Quot.sound",
   "propext"
@@ -22565,6 +22951,46 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndex.lean:Solidity.Lowering.StorageOps.SourceArrayIndex.bounds_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndex.lean:Solidity.Lowering.StorageOps.SourceArrayIndex.locate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndex.lean:Solidity.Lowering.StorageOps.SourceArrayIndex.represented_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndexControls.lean:Solidity.Lowering.StorageOps.SourceArrayIndexControls.before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndexControls.lean:Solidity.Lowering.StorageOps.SourceArrayIndexControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndexControls.lean:Solidity.Lowering.StorageOps.SourceArrayIndexControls.failure_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndexControls.lean:Solidity.Lowering.StorageOps.SourceArrayIndexControls.initial_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndexControls.lean:Solidity.Lowering.StorageOps.SourceArrayIndexControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.Controls.not_state_idempotent": [
   "Classical.choice",
   "Quot.sound",
@@ -22601,6 +23027,149 @@
   "propext"
  ],
  "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.source_array_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWrite.lean:Solidity.Lowering.StorageOps.SourceArrayWrite.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWrite.lean:Solidity.Lowering.StorageOps.SourceArrayWrite.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.fresh_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.retained_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.target_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailure.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailure.bounds_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailure.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailure.source_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.aggregate_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.aggregate_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.bool_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.static_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.wrong_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.nonalias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.retained_live_none": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.separated": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.written_read_changes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.fitting": [
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.initialized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.numeric_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.performed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.run": [
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.transported": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -24091,6 +24660,71 @@
   "propext"
  ],
  "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_second_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordRead.lean:Solidity.Lowering.StorageOps.SourceWordRead.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordRead.lean:Solidity.Lowering.StorageOps.SourceWordRead.read_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordReadControls.lean:Solidity.Lowering.StorageOps.SourceWordReadControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordReadControls.lean:Solidity.Lowering.StorageOps.SourceWordReadControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.read_after": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.source_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.storeVal_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.failure_outcomes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.source_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.target_ordered": [
   "Classical.choice",
   "Quot.sound",
   "propext"
