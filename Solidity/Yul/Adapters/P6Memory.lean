@@ -2,7 +2,7 @@ import Solidity.Backend.MemoryOps.PhysicalUintWrite
 import Solidity.Backend.MemoryOps.PhysicalFrameImage
 import Solidity.Source.WellTyped
 
-/-! Consumer of the P6 physical memory interface (`Backend/MemoryOps/Physical*`). INITIAL typed Source/
+/-! Consumer of the sealed P6 ae7d6636 implementation. INITIAL typed Source/
 array/word/byte agreement plus actual frame geometry derive the reached frame
 image, source result, same-object reads and owner MemOK. FrameMem.st is an
 unchanged side carrier; it is NOT identified with the changed Source/intrinsic
