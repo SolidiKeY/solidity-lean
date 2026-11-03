@@ -427,3 +427,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 |---|---|
 | `Lowering/V08/LiteralFailureMixedExpression.lean` | Actual local argument evaluation, mixed ABI expression allocation, input-field preservation and raw rethrow with phase-specific timeouts. |
 | `Lowering/V08/LiteralFailureMixedExpressionControls.lean` | Populated mixed input, fresh result, aliases, cursor, timeout and both Source pipeline observations. |
+
+## Mixed selector-prefixed ABI packets
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedSelector.lean` | Actual heterogeneous encodeWithSelector allocation, raw rethrow and post-allocation timeout. |
+| `Lowering/V08/LiteralFailureMixedSelectorControls.lean` | Mixed/empty-tail clients, body-relative offsets, supplied-selector decoder observations and full reached outputs. |

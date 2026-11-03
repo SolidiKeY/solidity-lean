@@ -1933,6 +1933,8 @@ import Solidity.Lowering.V08.LiteralFailureMixedEncoding
 import Solidity.Lowering.V08.LiteralFailureMixedEncodingControls
 import Solidity.Lowering.V08.LiteralFailureMixedExpression
 import Solidity.Lowering.V08.LiteralFailureMixedExpressionControls
+import Solidity.Lowering.V08.LiteralFailureMixedSelector
+import Solidity.Lowering.V08.LiteralFailureMixedSelectorControls
 import Solidity.Lowering.V08.LiteralFailureOverflowReason
 import Solidity.Lowering.V08.LiteralFailureOverflowReasonControls
 import Solidity.Lowering.V08.LiteralFailurePackedBytes
