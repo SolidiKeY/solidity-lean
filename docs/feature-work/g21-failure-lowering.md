@@ -60,3 +60,7 @@ Not on master: `LiteralFailureBytesReadback{,Controls}` (they import
 `Solidity.Backend.AbiWorld.ErrorRoundtrip`, which does not exist). No runtime
 target encoder, source/target simulation or admission theorem is claimed.
 
+
+### Tuple-return argument failure
+
+`LiteralFailureTupleAbort` consumes an actual failed `evalConvArgs` execution and derives the exact failed tuple-return statement. Its subcomputation locals are discarded while its actual Source state is retained; this is not transaction rollback. Controls discharge the premise with an assignment followed by division by zero and distinguish a skipped later assignment from a positive divisor-one tuple return. Return-slot extraction, older aliases, timeout and nonempty Panic payload remain explicit. These statement components do not establish complete function admission, target lowering or unknown-memory result encoding.

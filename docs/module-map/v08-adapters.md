@@ -406,3 +406,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 |---|---|
 | `Lowering/V08/LiteralFailureReturnSlots.lean` | Exact heterogeneous Source return-slot overwrite, older-parameter preservation, declaration-order extraction and tuple-statement composition. |
 | `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Actual mixed bytes/uint tuple return, extraction, encoding and local terminal transport; wrong-type order and stale-slot controls. |
+
+## Tuple-return argument failure
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureTupleAbort.lean` | Actual tuple argument failure, exact Halt and state transport through the Source statement boundary. |
+| `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Effectful argument ordering, skipped writes, positive tuple return and timeout/Panic controls. |
