@@ -19,8 +19,9 @@ compiled, from the memory-reference-structs lane.
   use `DefaultPlan.sound` for the run of a given plan's code, reached
   representation, allocator, identity-base extension, separation and the
   zeroed free region, joined to the intrinsic agreement through the shared
-  intrinsic heap. The plans cost three and five cells. The controls build the
-  plans by hand; nothing shows they equal the compiler's `defaultPlan?`.
+  intrinsic heap. The plans cost three and five cells. `SelectionControls.lean` proves the hand-built pair and nested plans equal
+  the actual `defaultPlan?` results and transfers their exact word observations
+  to selected code.
 
 Premises: layout agreement, an actual `DefaultPlan`, `mapFree`, an initial
 `StateRepr` and `StructAllocatorRepr`, a positive local-frame base and
@@ -32,7 +33,10 @@ representation theorem for the whole initial source heap.
 the declarations, layouts and inputs, and check wrong roots, child and inner
 pointers, pair insufficient fuel and the capacity premise arithmetic (which
 denies an input premise; it is not a runtime revert or a `Panic(0x41)` claim).
-Several `wrong_*` controls follow directly from the positive results.
+`SelectionControls.lean` additionally observes the parent object at address2
+and both typed fields, and proves the nested fuel8 timeout leaves the input
+state unchanged. Several `wrong_*` controls follow directly from the positive
+results.
 
 ## Open
 
@@ -40,6 +44,9 @@ Only the finite pair/nested layout with an empty primitive `bool[]` child.
 Not covered: source struct admission, reference-element arrays, recursive graph
 copying, arbitrary source graph refinement, solc physical addresses.
 
-`Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean` states the typed
-memory/tuple call forms and the remaining `PendingCallProducer` target for
-them (`ProducerGoal`); it asserts no inhabitant.
+`Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean` proves typed
+memory/tuple call-form transport and constructs the frozen V3 producer from
+a checked call, explicit alias/profile agreement and real success/revert
+witnesses. RefArrayControls supplies an allocating array-call instance. Full
+tuple-call certification and finite-struct default framing for that call
+selector remain open; see [reference expansion](p1-call-reference-expansion.md).

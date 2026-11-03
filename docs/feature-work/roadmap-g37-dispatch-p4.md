@@ -57,9 +57,21 @@ physical producer and its dual runs are in [P1-CALL](p1-call-producer.md).
 Source-to-intrinsic lowering of `CallSite` arguments, return and body;
 approved-domain provenance; dynamic function-value calls (the source has
 `Val.internalFn` but no dynamic-call `RExpr` evaluator); fixed and recursive
-producers; world restoration; tuple and reference call expansion. The lane's
-full gates are blocked by `Calculus/TermSize.lean`, which failed in the lane
-VM with Lean exit 134 (`failed to create thread`). Its inputs are unchanged
-on master and the coordinator's combined gates build it. Struct-default work
-(`Backend/MemoryOps/StructDefaults/`, G33) on the same branch is not part of
-this integration.
+producers; world restoration; complete tuple and reference call expansion.
+The new reference-expansion checkpoint proves the V3 frame producer for
+memory/tuple return forms, an actual allocating array argument/return case,
+and overlap-safe tuple word compaction. RefTupleTyped now derives the returned
+prefix representation and exact source thinning; RefTupleCall emits the checked
+tuple call with exact allocation cost and footprint. RefTupleControls supplies
+an allocating mixed uint/array-return producer with real dual outcomes.
+Finite reference-struct default framing and the owned default-return selector
+are now proved, with a real cost5 nested-return dual-outcome producer. Concrete
+struct-argument and whole-return rebinding controls now derive a live old nested
+graph from actual checked allocation and retain its alias through another
+cost5 allocation, with real success/revert and kernel/evaluator observations;
+see `p1-call-reference-expansion.md`. The lane's
+last full VM gate attempt failed at `Calculus/TermSize.lean` with Lean exit134
+(`failed to create thread`). The coordinator's combined gates build it; this
+historical failure is not a passing VM gate or a reason to stop independent
+producer work. Full lane gates have not been rerun in this increment. G33
+`Backend/MemoryOps/StructDefaults/` support is now published on master.
