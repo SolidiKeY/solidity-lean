@@ -41,8 +41,12 @@ Lane compiler10/memory-reference-structs. Public module
   success and revert witnesses; `selected_call_return` and
   `selected_call_bare_revert` start from an approved input, pass it through
   `required_profile` and `required_coverage`, and use the same caller's
-  source outcome, with no `Entry` premise. `FrozenV3Controls.empty_domain_refused`:
-  an empty admitted domain cannot inhabit a v3 producer.
+  source outcome, with no `Entry` premise. `required_profile` is only as strong
+  as `approved`: `approved := admitted` with `Iff.rfl` always discharges it.
+  Every candidate needs a real bare-revert witness, so a table with a
+  candidate that never reverts cannot be covered.
+  `FrozenV3Controls.empty_domain_refused`: an empty admitted domain cannot
+  inhabit a v3 producer.
 
 The `*Controls` modules are dependent-selector controls (exact payloads,
 wrong-payload, zero and foreign refusals), not `Pending` instances. The

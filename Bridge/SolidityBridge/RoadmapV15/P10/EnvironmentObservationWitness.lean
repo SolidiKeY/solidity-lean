@@ -1,7 +1,7 @@
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationProducer
 
 /-! Minimal inhabited producer clients. Broader routine control coverage remains
-in the Terra checklist; these clients prove only the actual native clauses. -/
+open; these clients prove only the actual native clauses. -/
 namespace SolidityBridge.RoadmapV15.P10.EnvironmentProducerWitness
 open Solidity Solidity.Backend EvmYul Solidity.Evm.External
 open EnvironmentTasksV1

@@ -1,7 +1,7 @@
 import Solidity.Backend.InternalDispatch.FrozenV1
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2
 
-/-! Active frozen P1 v2 consumer. V1 supplies ONLY unchanged execution relations
+/-! Older frozen P1 v2 consumer (FrozenV3 is the active one). V1 supplies ONLY unchanged execution relations
 and version-independent typed selector/site metadata. All pending producers
 below are the exact V2 types. No instance or universal admission is asserted. -/
 namespace Solidity.Backend.InternalDispatch.FrozenV2

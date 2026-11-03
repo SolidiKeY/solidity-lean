@@ -1652,7 +1652,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentTasksV1.lean` | Generated unproved environment producer statements and separate routine cost/arity/expansion/refusal claims. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentObservationProducer.lean` | Actual fetched ORIGIN/GASPRICE/CHAINID whole-State and X clauses from explicit finite local facts. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentObservationWitness.lean` | Concrete local-fact witnesses and populated producer clients with native resource/origin negatives. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionPositive.lean` | Actual mask/sign-bit arithmetic and intrinsic/fetched SIGNEXTEND agreement below each byte-width sign bit. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionPositive.lean` | Mask/sign-bit arithmetic; positive, residue and all-index SIGNEXTEND word/Scalar/fetched agreement. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionPositiveWitness.lean` | Nonzero 8/16/256-bit clients, strict-bound and byte-index negatives, complete State/code observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionResidueWitness.lean` | High-bit and negative-fullword truncation clients, clear-sign-residue and ordered State controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionAllWitness.lean` | Unified all-index/sign SIGNEXTEND clients, full-width/large-index boundaries and wrong-unsigned/wrap controls. |
@@ -1702,7 +1702,7 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Lowering/P9/ProgramAdmission.lean` | `WholeProgram.check` and `check_sound`: a closed allowlist checked against the elaborated program derives `CallsOK`. |
 | `Lowering/P9/FunctionCatalog.lean` | `functions`/`checkFunctions`: the complete function catalogue of a unit. |
 | `Lowering/P9/CallControls.lean`, `Lowering/P9/AdmissionControls.lean`, `Lowering/P9/ProgramControls.lean`, `Lowering/P9/GraphControls.lean`, `Lowering/P9/RecursiveControls.lean`, `Lowering/P9/ReturnControls.lean`, `Lowering/P9/CatalogControls.lean` | Inhabited admission, two-function and recursive graphs, horizon timeouts, and refusals (no body, wrong return, missing leaf). |
-| `Lowering/P9/OverrideControls.lean` | An elaborated inherited override: dispatch of the base declaration selects the derived body. |
+| `Lowering/P9/OverrideControls.lean` | An elaborated inherited override: dispatch of the base declaration selects the derived body, and an abstract bodyless base dispatched to a concrete override. |
 | `Source/Preservation/Frames.lean`, `Source/Preservation/LocalFrames.lean`, `Source/Preservation/StatementFrames.lean`, `Source/Preservation/CallFrames.lean` | `MemOK` across `EM.sub`, scope and call frames; caller locals restored. |
 | `Source/Preservation/Reads.lean`, `Source/Preservation/ValueConversions.lean`, `Source/Preservation/ResultValidity.lean` | Reads, implicit conversions and result references preserve the invariant. |
 | `Source/Preservation/AllocationSites.lean`, `Source/Preservation/MemberPacking.lean`, `Source/Preservation/Encoding.lean`, `Source/Preservation/ArrayLiterals.lean` | Allocating string, struct, `abi.encode` and inline-array arms. |
@@ -1713,65 +1713,37 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Source/Progress/Controls.lean` | Contract-backed admission, memory-prefix consumer and refusal controls. |
 | `Source/Progress/BuiltinAdmission.lean`, `Source/Progress/ArithmeticBuiltins.lean`, `Source/Progress/RecoveryBuiltin.lean`, `Source/Progress/LiteralBuiltins.lean` | `BuiltinFragment` and progress of the nine implemented builtins on scalar and literal arguments (`checked_builtin`). |
 | `Source/Progress/EmitBuiltins.lean`, `Source/Progress/BuiltinStatements.lean` | Progress of direct `emit` nodes and builtin expression statements. |
-| `Source/Progress/BuiltinControls.lean`, `Source/Progress/ScalarBuiltinControls.lean`, `Source/Progress/LiteralBuiltinControls.lean` | Builtin and event executions, argument order, zero modulus, hashes, messages and refusals. |
+| `Source/Progress/BuiltinControls.lean`, `Source/Progress/ScalarBuiltinControls.lean`, `Source/Progress/LiteralBuiltinControls.lean` | Builtin and event executions, argument order, zero modulus, hashes, messages, refusals and `checked_event`/`checked_call_statement` adapters. |
 
 
 ### P8 admission helper checkpoint
 
 | Module | Role |
 |---|---|
-| `Frontend/Admission/Profile.lean` | Exact existing extracted-use classification, feature preservation and combined-root failure laws; not extraction completeness. |
-| `Frontend/Admission/RootObservations.lean` | Exhaustive typed expression/statement child traversal for local observation sites, exact policy IDs, supplied-root aggregation; callee closure and importer agreement remain open. |
-| `Frontend/Admission/Controls.lean` | Kernel positive, refusal, combination and false-expectation controls for the partial P8 interfaces. |
-| `Source/FailureResources.lean` | G06 failure schedule/horizon algebra and axiom-free obstruction to a Nat-only failure retraction; not wired into source execution. |
+| `Lowering/P8/FrozenInterface.lean` | Frozen P8a producer obligations (`FailureProjection`, `SourceRealization`, `Producer`); no inhabitant. |
+| `Frontend/Admission/Profile.lean` | Exact classification of extracted uses; features and failures kept. |
+| `Frontend/Admission/RootObservations.lean` | Typed traversal of local observation sites over supplied roots; no callee closure. |
+| `Frontend/Admission/Controls.lean` | Root, refusal, combination and `NoFail` controls. |
+| `Frontend/Admission/ProgramObservations.lean` | Container scan of a `Program` (`program_observation_iff`), modifier declarations and written base names. |
+| `Frontend/Admission/ProgramObservationControls.lean` | Seven-site container and omission controls; its modifier target is a constant, not a real modifier. |
+| `Lowering/P8/CheckedSyntax.lean` | Byte/piece/layout parse certificates with settings and main; raw-input checks; units-only settings obstruction. |
+| `Lowering/V07/Scalar.lean`, `Lowering/V07/DeclarationGraph.lean` | Integer value transport; `DeclarationGraph` between Source types and schemas. |
+| `Lowering/P8/ScalarSchema.lean`, `Lowering/P8/ShapeSchema.lean`, `Lowering/P8/GraphSchema.lean` | Singleton struct schemas built from actual declaration fields. |
+| `Lowering/P8/ScalarSchemaControls.lean`, `Lowering/P8/ShapeSchemaControls.lean`, `Lowering/P8/GraphSchemaControls.lean` | Schema positives and refusals. |
+| `Lowering/P8/FieldAdmission.lean` | Field lookup and distinctness through `GraphFieldsRel`. |
+| `Lowering/P8/DispatchCoverage.lean` | Finite dispatch-target check; selected-body observation coverage. |
+| `Lowering/P8/DispatchCoverageControls.lean` | P9 function reuse, recursion, a real modifier, missing-target refusals. |
+| `Lowering/P8/SourceResolutions.lean` | Per-unit `Source.Resolves'` packet checker (`check_iff`, `unique`); raw/parse composition. |
+| `Lowering/P8/SourceResolutionControls.lean` | One- and two-unit chains, pragma coder, corruption and link refusals. |
+| `Lowering/P8/SourceMetadata.lean` | All-unit strict/inheritance metadata and `UnitsOK` (`metadata_iff`). |
+| `Lowering/P8/SourceMetadataControls.lean` | Composed positives; constant, import, duplicate and main refusals. |
+| `Lowering/P8/SourceMetadataObligations.lean` | `PendingControls`: open M01–M03 inheritance controls; no witness. |
+| `Lowering/P8/SourceAllSettings.lean` | Component chain accepted under every admitted settings value (`input_settings`). |
+| `Lowering/P8/ProducerAssembly.lean` | `AdmissionHalf`, `AssemblyType`, `PendingGlue` signatures; no witness. |
+| `Lowering/P8/ResourceBoundary.lean` | `FailureResource`; unchanged Source language cannot carry failure choices. |
+| `Source/FailureResources.lean` | G06 failure-point bound algebra; `no_horizon_retraction`; not wired into execution. |
+| `Lowering/P8b/Frozen.lean`, `Lowering/P8b/P8aInterface.lean` | Frozen P8b consumer signatures over G01 `Lowering` and P8a `Producer`; no inhabitant. |
+| `Lowering/P8b/Domain.lean` | Structural pass/dom/agrees for a given emitter; `assemble`; wrong-emitter refutation. |
+| `Lowering/P8b/Controls.lean` | Toy identity certificate, wrong-emitter refusal, loop divergence. |
 
-See [P8 checkpoint and remaining obligations](feature-work/p8-admission.md).
-
-| `Lowering/P8/CheckedSyntax.lean` | Checked source byte/piece/layout certificates carrying input settings and main; exact raw-input checks and units-only settings obstruction. Full admission and SourceSpec remain open. |
-
-### P8 relayed schema checkpoint
-
-| Module | Role |
-|---|---|
-| `Lowering/V07/Scalar.lean` | Exact relayed V07 source interface; no execution adequacy claim. |
-| `Lowering/V07/DeclarationGraph.lean` | Exact relayed V07 source interface; no execution adequacy claim. |
-| `Lowering/P8/FieldAdmission.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-| `Lowering/P8/ResourceBoundary.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-| `Lowering/P8/ScalarSchema.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-| `Lowering/P8/ScalarSchemaControls.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-| `Lowering/P8/ShapeSchema.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-| `Lowering/P8/ShapeSchemaControls.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-| `Lowering/P8/GraphSchema.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-| `Lowering/P8/GraphSchemaControls.lean` | Partial schema/resource extraction and kernel controls; see P8 schema checkpoint. |
-
-See [schema provenance, premises and checks](feature-work/p8a-schema-checkpoint.md).
-
-| `Frontend/Admission/ProgramObservations.lean` | Finite actual Program container observation scan and modifier/base identity scans; exact occurrence and constructor-origin theorems, not executed-target completeness. |
-| `Frontend/Admission/ProgramObservationControls.lean` | Kernel populated multi-container/order/target controls and false omission expectations; not an Elaborated or execution witness. |
-
-See [program roster checkpoint](feature-work/p8a-program-observations.md).
-
-| `Lowering/P8/DispatchCoverage.lean` | Finite actual target/body coverage: reuse P9 function membership, prove modifier membership, checked selected-body existence and observation inclusion. Not whole admission. |
-| `Lowering/P8/DispatchCoverageControls.lean` | Published P9 function/source observation reuse; populated synthetic recursion/modifier and retained-caller missing-target refusals. |
-
-See [dispatch coverage checkpoint](feature-work/p8a-dispatch-coverage.md).
-
-| `Lowering/P8/SourceResolutions.lean` | Exact ordered per-unit Source.Resolves' packet producer/checker with settings/main preservation and raw/byte-parse composition; not global import typing or SourceSpec. |
-| `Lowering/P8/SourceResolutionControls.lean` | Inhabited one-/two-unit chain, both pipelines, pragma coder and same-label source-resolution corruption/link/order refusals. |
-
-See [source resolution checkpoint](feature-work/p8a-source-resolutions.md).
-
-| `Lowering/P8/SourceMetadata.lean` | Exact all-unit composition of existing strict/inheritance metadata and UnitsOK; original parsed-tree coherence comes from checked resolution. Not full G15. |
-| `Lowering/P8/SourceMetadataControls.lean` | Both-pipeline and two-unit composed positives; impure constant, absent import, duplicate-name and absent-main refusals. Nontrivial inheritance controls (M01–M03) remain open. |
-
-See [component metadata checkpoint](feature-work/p8a-source-metadata.md).
-
-| `Lowering/P8/SourceMetadataObligations.lean` | Script-generated typed proposed M01–M03 control statements and explicit PendingControls proof fields; no witness or completed control. |
-
-| `Lowering/P8/SourceAllSettings.lean` | Acceptance closure of the exact component chain under every admitted settings value; not execution equivalence or full SourceSpec.AllPipelines. |
-| `Lowering/P8/ProducerAssembly.lean` | Generated frozen H14D AdmissionHalf/AssemblyType/PendingGlue signatures; VY5 fields remain typed parameters; no witness. |
-| `Lowering/P8b/Frozen.lean`, `Lowering/P8b/P8aInterface.lean` | Frozen P8b consumer signatures over G01 `Lowering` and the exact P8a `Producer`; no inhabitant. |
-| `Lowering/P8b/Domain.lean` | Structural G01 pass/dom/agrees for a provided emitter; `assemble` from a supplied `Cert`; wrong-emitter refutation. |
-| `Lowering/P8b/Controls.lean` | Toy-model identity certificate, wrong-emitter refusal and loop divergence controls. |
-
-See [admission settings and assembly boundary](feature-work/p8a-all-settings.md) and [P8b frozen interface](feature-work/p8b-frozen-interface.md).
+See [P8 admission](feature-work/p8-admission.md).

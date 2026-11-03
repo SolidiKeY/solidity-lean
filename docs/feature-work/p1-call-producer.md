@@ -8,8 +8,11 @@ claimed. No interface, evaluator, scratch refusal or profile changes.
 The plan captures the caller, runs the checked call, copies the reached
 destination to the private cell `lo-1`, restores the caller and then exports
 that result. The typed physical admission states representation, workspace,
-arena, cursor and allocation-capacity conditions; it mentions neither `Entry`
-nor source outcomes, so it is not an outcome whitelist.
+arena, cursor and allocation-capacity conditions; it mentions no source
+outcome. It is, however, the plan's `Entry` condition field by field (minus
+bounds that follow), so `coverage` mostly repackages it, and with
+`approved := admitted` the `hprof` argument closes by `Iff.rfl`. All
+profile content therefore rests on `approved`, which nothing pins yet.
 
 - `bare_revert`: every represented `Entry` with an actual bare-reverting call
   run reverts on the target (capture/failure transport absorbs the suffix).
@@ -27,10 +30,10 @@ nor source outcomes, so it is not an outcome whitelist.
   witnesses at the same admission and code. `Controls.producer` applies
   `make` to them. A represented machine whose arena does not fit is refused.
 
-Limits: `approved` and its provenance stay parameters (V12 owns
-approved-profile provenance). The fixture has zero heap-allocation cost and
+Limits: `approved` and its provenance stay parameters (approved-profile
+provenance belongs to the P1 lane). The fixture has zero heap-allocation cost and
 no storage-alias locals. A source that never bare-reverts cannot use this
 dual-outcome class, and a literal `.revert` body is still selector-refused.
-The lane's executable test `tests/runtime-frame/ValueCallEvaluation.lean`
-was not integrated. Lane full gates did not run because of the TermSize
+The lane's executable evaluation test (ValueCallEvaluation) was not
+integrated. Lane full gates did not run because of the TermSize
 blocker (see [G37.03/P4 dispatch](roadmap-g37-dispatch-p4.md)).

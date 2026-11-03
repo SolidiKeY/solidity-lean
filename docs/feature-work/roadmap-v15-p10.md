@@ -220,7 +220,7 @@ physical/source/Osaka closure remain explicit.
 
 ### Source-input calldata extent at arbitrary emitted sites
 
-The earlier fixed-PC, fixed-gas calldata-extent consumer remains unchanged.
+A fixed-PC, fixed-gas predecessor stayed on the lane and is not on master.
 [CalldataExtent.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/CalldataExtent.lean)
 extends the native clause to arbitrary Backend before/after programs, the
 actual emitted instruction PC, and an explicit gas-at-least-2 bound.
@@ -240,13 +240,13 @@ its bytes. ABI decoding, physical memory/padding, compiler emission origin and
 full source/Osaka/resource correspondence remain open.
 
 Independent read-only finder and skeptic reviews cleared the extension over
-the earlier fixed fixture, its inhabited clients and its explicit source/ABI
-boundaries. No earlier calldata proof or producer was modified.
+the fixed-site predecessor, its inhabited clients and its explicit source/ABI
+boundaries.
 
 ### Generated environment task signatures
 
-`EnvironmentTasksV1.lean` is generated from a checked specification and contains
-claim types only. `OriginClaim`, `GasPriceClaim` and `ChainIdClaim` describe
+`EnvironmentTasksV1.lean` was generated on the lane from a specification; the
+generator and specification are not on master. It contains claim types only. `OriginClaim`, `GasPriceClaim` and `ChainIdClaim` describe
 actual fetched whole-State and `X` producer goals, with explicit gas and stack
 bounds. They have no proofs or instances. ORIGIN observes the pinned reference
 `sender`, GASPRICE observes its transaction price, and CHAINID uses the existing
@@ -260,9 +260,8 @@ execution and full source/compiler soundness remain separate obligations. The
 module's successful type check proves no claim, discharges no opcode row, and
 does not alter the existing frozen P10 interface.
 
-Independent read-only finder and skeptic reviews cleared the generated
-statement/specification match and the producer-versus-routine-glue split.
-No supplied inhabitant of the pending glue structure is claimed.
+Lane reviews checked the generated statements against that specification
+and the producer-versus-routine-glue split. No supplied inhabitant of the pending glue structure is claimed.
 
 ### Native environment producer clauses from finite facts
 
@@ -277,21 +276,24 @@ and stack length plus one at most 1024 remain explicit.
 `EnvironmentObservationWitness.lean` supplies three populated clients with
 concrete local-fact proofs and complete State/continuation observations. The
 origin client observes sender 19, distinct from caller source 11 and owner 7;
-the price client observes transaction price 37. Entry gas is 9, post-charge
-gas is 7, PC advances from 3 to 4 and the execution count from 41 to 42. The
+the price client observes transaction price 37. The fixtures start with gas
+9, PC 3 and execution count 41; the clients state the next State through
+`chargedPrepare … replaceStackAndIncrPC` rather than as numerals. The
 original tail `[258,513]`, accounts and memory/calldata/return buffers remain
 in the complete resulting State. Chain ID uses the reference's existing
 constant. Gas/fuel refusals and the origin-versus-caller negative are checked.
 
-The universal routine facts and the unconditional frozen producer claims are
+These facts are state-independent for the constant-cost `W_base` opcodes, so
+the producer is only nominally conditional; the universal fact claims would
+follow the `observation_gate` `rfl` pattern but are not proved. They and the
+unconditional claims generated in `EnvironmentTasksV1` are
 still open. Concrete clients demonstrate non-vacuity, not all-site coverage.
 The profile refusals, full source/world/resource/Osaka correspondence and all
 full opcode rows remain unchanged.
 
 Independent read-only finder and skeptic reviews cleared the native producer
-proofs and concrete witnesses. The checklist now labels discharge of the
-unconditional producer claims as Sol follow-up, keeping routine fact proofs
-and broader control coverage separate.
+proofs and concrete witnesses. Discharging the unconditional producer claims,
+the routine fact proofs and broader control coverage remain open.
 
 ### SIGNEXTEND preservation below the selected sign bit
 
@@ -321,7 +323,7 @@ are preserved.
 Independent read-only finder and skeptic reviews cleared the actual mask
 argument, strict-domain witnesses and composition. The new positive case is
 not a weakening or replacement of general in-range correspondence, and it
-does not overlap the delegated environment fact proofs.
+does not overlap the open environment fact claims.
 
 ### Arbitrary high-bit truncation with a clear residue sign bit
 
@@ -400,12 +402,10 @@ continuation. Public word equations expose the unsigned zero-divisor policy;
 `div_capacity_refusal` derives actual overflow from the gate after gas and
 operand checks, without assuming a refused storage or state frame.
 
-The earlier privately staged `NumericRows04` already supplied all-word
-DIV/MOD arithmetic and fetched agreement at PC 0, single-byte code and fixed
-gas 5. This checkpoint extends those execution observations to arbitrary
-encoded prefixes/suffixes, program counters and adequate initial gas. It adds
-no opcode-row coverage. The earlier producer is unchanged and its exact
-provenance is bound in the interface packet.
+A fixed-site predecessor (PC 0, single-byte code, gas 5) stayed on the lane
+and is not on master. This checkpoint covers arbitrary encoded
+prefixes/suffixes, program counters and adequate initial gas. It adds no
+opcode-row coverage.
 
 `UnsignedDivisionControls.lean` observes nonzero quotient/remainder, high-bit
 unsigned values, zero operands/divisors, maximum words, admitted input capacity,
@@ -422,3 +422,17 @@ arithmetic and charged-state transport. Their prior-coverage finding was
 resolved by recording the fixed-site predecessor explicitly; their capacity
 finding was resolved with the general gate refusal and populated overflow
 client. No earlier arithmetic coverage is counted twice.
+
+## Integration record (lane head 606729a8)
+
+Merged: the 21 modules above and their Bridge root imports. The DIV, BYTE and
+SIGNEXTEND overflow refusals start from 1026 input words and EXTCODESIZE from
+1025; they check the gate arithmetic on an over-limit stack that no
+well-formed state reaches. Only the PC/GAS/MSIZE capacity boundary is
+reachable. Left out: the
+lane's bounded-capture/completion and serial-shim runner scripts and their
+tests, the environment-task generator and its JSON specification, the
+per-module registration scripts, its routine-task list and its
+runtime-completion note. Read-only finder and skeptic reviews found no Lean
+defect; stale references to lane-only predecessors and checklists were
+removed from this record.

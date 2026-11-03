@@ -1,4 +1,4 @@
-# P1 runtime frames: foundation and frozen interfaces v1 and v2
+# P1 runtime frames: foundation, frozen interfaces v1–v3 and producers
 
 This is a partial checkpoint of the V12 runtime-frame producer (P1, roadmap
 items G37–G39). It is not a general runtime-call or source-to-EVM theorem.
@@ -97,7 +97,8 @@ remaining weaknesses now listed above.
 
 Version 1 was merged from f4fa6f12: the interface and its import closure only.
 The other `RuntimeFrame*` modules (Bytes, CodeEquality, Mutation, Nested,
-Result, Reference, ReferenceProgram), the `tests/runtime-frame/` fixtures and
+Result, Reference, ReferenceProgram; Result and Reference were merged later
+with v3), the `tests/runtime-frame/` fixtures and
 the modules of other lanes on that branch were not merged.
 
 Read-only finder and skeptic reviews found no `sorry`, axiom or heartbeat
@@ -107,231 +108,105 @@ which is now documented. They also found overstated descriptions of
 docs and docstrings. Signatures are unchanged.
 
 
-## Further proved restoration components
+## Restoration and export components (merged with v3)
 
-`RuntimeFrameRestoredRepresentation` implements the exact v1 restoration
-premise from the actual source-tail equation, reached representation, address
-extension, current fragment compatibility and recovered context.
-`RuntimeFrameCapturedProgram` composes actual capture, checked body and restore,
-deriving full reached representation, stack and allocator transport. Its client
-uses a private binder and actual old-object mutation. Bare failure after capture
-absorbs following code without a failed-state or rollback claim. These results
-still do not supply general call return/export scheduling or a runtime return
-dispatcher, and do not discharge the static-world premises.
+- `RuntimeFrameRestoredRepresentation` implements the v1 restoration premise
+  from the source-tail equation, reached representation, address extension,
+  fragment compatibility and recovered context.
+- `RuntimeFrameCapturedProgram` composes capture, checked body and restore,
+  deriving full reached representation, stack and allocator transport. A bare
+  failure after capture absorbs the following code; no failed-state or
+  rollback claim is made.
+- `RuntimeFrameResult` and `RuntimeFrameReference` export a primitive result
+  or a reached memory reference into old or fresh caller bindings.
+  `RuntimeFrameCapturedReference.after_reference` composes capture, body,
+  restore and reference export; `older_words` preserves the older runtime
+  interval and `then_program` derives the next caller's allocation input.
+  Allocator transport is the existing conditional law, not allocator
+  ownership.
 
+None of these is general call-return dispatch, uncapped recursion,
+full-signature dispatch or byte/world/transient closure.
 
-## Reference export after restoration
-
-`RuntimeFrameCapturedReference.after_reference` composes actual capture, checked
-body execution, restoration and a typed reference export into an old caller
-destination. The exported identity is read from the reached representation;
-private logical binders are dropped without erasing physical cells or changing
-heap contents. Exact source caller-tail agreement and current fragment
-compatibility remain explicit. The theorem exposes separate target phase
-equations and the full exported representation.
-
-`older_words` derives preservation of the older runtime interval, handling the
-header through its restored cursor and other words through the actual capture
-and body footprint. `then_program` derives the following caller's allocation
-input from the reached growth and summed source cost, returning the final
-representation, stack and older interval together with the reached scratch
-footprint and result word. It allows ordinary caller writes.
-
-The populated client captures both old aliases, mutates an old object, restores
-the caller, exports the private reference, then writes through that returned
-alias. The other alias to that object observes the mutation; the distinct
-object retains its own contents. A nonzero older sentinel, restored header,
-caller scalar and private physical word are pinned with the complete ordered
-observations. Wrong reference, cursor, old contents, omitted caller write and
-private erasure are rejected. The snapshot payload is observed at the actual
-capture state, not asserted to be a world journal.
-
-The client has zero heap cost at base zero. Its allocator transport is the
-existing conditional law, not allocator ownership; the runtime header is a
-distinct scratch cell. Bare body failure absorbs the export/use suffix without
-claiming restoration ran after failure or reconstructing an error state.
-These are finite checked-program consumers, not general call-return dispatch,
-uncapped recursion, full-signature dispatch or byte/world/transient closure.
-
-
-## Frozen interface v3: exact-input coverage and both outcomes
+## Frozen interface v3
 
 `RuntimeFrameInterfaceV3.lean`, namespace
-`Solidity.Backend.InternalFlow.RuntimeFrame.InterfaceV3`, adds universal
-coverage relative to explicitly supplied typed initial-input domains. V1 and
-V2 remain unchanged. The module contains signatures and pending duties only.
+`Solidity.Backend.InternalFlow.RuntimeFrame.InterfaceV3`, adds coverage over
+an explicit typed input domain. V1 and V2 are unchanged; the module has
+signatures and pending duties only.
 
-`Admission` is a predicate over the exact layout, frame, caller, address map,
-machine and cursor. `approved` and `admitted` are visible external parameters,
-not fields chosen by an emitter. `AdmissionAgreement` is a named pointwise
-equivalence duty. It does not authenticate the provenance of `approved`: its
-correspondence to the original source/resource profile must be established
-separately. A whitelist, an empty indexed domain or the candidate plan's own
-Entry predicate cannot be presented as original-profile coverage without that
-justification. No admission domain or producer instance is supplied here.
+- `Admission` is a predicate over layout, frame, caller, address map, machine
+  and cursor. `approved` and `admitted` are external parameters.
+  `AdmissionAgreement approved admitted` is a pointwise equivalence duty. It
+  does not authenticate `approved`: taking `approved := admitted` with
+  `Iff.rfl` always discharges it, so it carries profile content only once
+  `approved` is pinned to the source/resource profile, which no module does
+  yet. P8a's frozen interface exists but supplies no `approved` domain.
+- `EntryCoverage` requires `Entry` for each exact admitted input;
+  `FamilyEntryCoverage` keeps the same index in the domain and `plan.at n`.
+- Every structure requires independently quantified admitted success and
+  bare-revert witnesses (`SuccessfulEntry`, `RevertingEntry`). Each
+  `RevertingEntry` binds the same `L frame caller base machine start` that
+  `BareRevertClaim` quantifies over, with the same `b`, `F`, statement and
+  plan, so `required_bare_revert` yields a genuine
+  `Evm.run plan.code machine = .revert`; this closes the v2 bare-revert
+  vacuity for the ordinary call and the fixed thunk (for every `d`).
+  `PendingRecursiveReturns` asks only `∃ n` for each witness, possibly at
+  different indices, so its return and bare-revert claims can still hold
+  vacuously at other indices (index 0 always exhausts).
+- A source that never bare-reverts cannot inhabit these dual-outcome
+  structures; that is an evidence-class limitation, not a source refusal.
+  Panic, payload failures, exhaustion, running prefixes and divergence are
+  not covered.
 
-`EntryCoverage` requires Entry for each exact admitted input, without selecting
-a different convenient caller or machine. `FamilyEntryCoverage` retains the
-same index in the domain and `plan.at n`. It does not assert that every natural
-index physically fits finite word memory; physical feasibility belongs to the
-authenticated domain, without an emitter-imposed source depth cutoff.
+## Producers
 
-Every return structure now requires independently quantified admitted success
-and bare-revert witnesses, in addition to the existing correctness duties.
-Thus it cannot discharge either outcome using only the other one. The fixed
-thunk uses a single index-independent domain and requires both witnesses at
-each quotation index. The recursive family uses one code image and indexed
-coverage, together with its actual successful and reverting members.
+- `RuntimeFrameCallAgreement.output_of_call` inverts an actual intrinsic call
+  success into the evaluated arguments, entered body frame and exported
+  caller result; `none_tail` and `memory_tail` derive caller-environment
+  transport.
+- `RuntimeFrameNoneProducer`: `plan` emits capture, the checked void call and
+  restoration. `returns` and `bare_revert` prove the v1 duties; `make`,
+  `make_failure` and `make_fixed` build the v2 `PendingCallProducer`, the
+  failure producer and the fixed-thunk producer from the checked program,
+  fragment compatibility and real entry witnesses, with no target
+  correctness claim as input. `make_fixed` is not an unbounded recursive
+  family.
+- The v3 value-call producer is `RuntimeFrameV3CallProducer` (see
+  [P1-CALL](p1-call-producer.md)).
 
-A source that never bare-reverts cannot inhabit these dual-outcome structures.
-This is an evidence-class limitation, not a source-language refusal or license
-to fabricate an error. Its success-only transport remains a separate obligation.
-Failure-specialized transport remains separately expressible. Panic, payload
-failures, exhaustion, running prefixes and divergence are not conflated with
-bare revert and are not supplied by this return/bare-revert interface.
+## Recursive components (no v3 recursive instance)
 
+- `RuntimeFrameV3RecursiveProducer.descent_prefix`: every reached
+  `Evm.loopIterN` horizon of the runtime save loop, with one code image;
+  caller representation, address map and stack survive and the cursor
+  advances by the horizon. Bounds require frame room and no word wrap.
+- `RuntimeFrameV3RecursiveUnwind.unwind_nonempty_iter`/`unwind_nonempty_run`:
+  termination of the LIFO return loop for every positive frame count, the
+  destination ending with the bottom saved word; `recover_clobbered` derives
+  the final caller representation from a represented pre-clobber snapshot.
+  Heap/world mutation between capture and return is not covered.
+- `RuntimeFrameV3RecursiveSource`: an effect-free countdown family built from
+  `Stmt.callRec`, `Args`, `CallRet.none` and `recUnroll`. `all_horizons`:
+  for every horizon, `count < depth` returns the original parameter-frame
+  state, otherwise `.exhausted`; `call_all_horizons` adds evaluated outer
+  arguments and caller-environment recovery. `source_coherence` derives
+  `InterfaceV1.RecursiveReturnCoherence` for this family from execution.
+  Its only revert path (an unset memory reference) has no `StateRepr`, so the
+  family cannot supply v3's dual-outcome witnesses.
 
-## Implemented v2 void-call producers
+These are target-side and source-side pieces; connecting recursive source
+transitions to the descent and LIFO code, recursive target divergence and
+approved-profile provenance remain open (P1 lane).
 
-`RuntimeFrameCallAgreement.output_of_call` inverts actual intrinsic success
-into the evaluated arguments, entered body frame and exported caller result.
-`none_tail` and `memory_tail` derive caller-environment transport for the
-respective return forms without assuming that equation from a client.
+## Integration record (v3)
 
-`RuntimeFrameNoneProducer.plan` emits actual capture, the checked native void
-call and restoration, keeping runtime arena words separate from checked heap
-cost. `returns` and `bare_revert` derive the complete v1 duties. `make` therefore
-constructs a v2 `PendingCallProducer` from the actual finite checked program,
-fragment compatibility and successful-entry evidence, without taking a target
-correctness claim as input. `make_failure` constructs the separately witnessed
-failure producer. `make_fixed` transports the same scoped thunk across quotation
-indices using the existing intrinsic callRec equation; it is not an unbounded
-recursive-family implementation.
-
-The populated client executes a caller prefix, evaluates an old memory alias
-as a call argument, mutates the shared object and declares a private callee
-alias. Actual ordinary and fixed-thunk producer values yield target endpoints
-with the same caller scalar and aliases, changed object contents, untouched
-distinct object, protected stack, runtime header and older sentinel. Source
-callee bindings are dropped logically. Dead callee physical cells are not
-observations promised by this `Returned` contract and are not claimed erased
-or otherwise observed by this client.
-
-An admitted bounds-failure body gives a genuine v2 failure producer and exact
-target bare revert. The older scratch selector still refuses an explicit
-`revert` body; the refusal is retained as an admission control, not described
-as runtime rejection. The client has zero heap cost at base zero; allocator
-transport remains conditional, not ownership. Memory-result production,
-primitive result export, arbitrary workspace reuse, general runtime return
-dispatch, unbounded recursion and world/byte/transient coupling remain open.
-
-The separate v3 controls use an illustrative, independently specified resource
-domain and real source success/revert inputs. They reject caller-dependent
-arena masks, index masks and a whitelist disagreeing with that domain. Their
-data-only plan has no asserted target-correctness instance. These controls do
-not authenticate the original approved source/resource domain or produce a v3
-call implementation.
-
-
-## Recursive runtime descent foundation
-
-`RuntimeFrameV3RecursiveProducer.descent_prefix` proves every actual reached
-`Evm.loopIterN` horizon of the existing runtime-addressed save instructions.
-The code is independent of the horizon. Actual caller representation, heap
-address map and evaluation stack survive; the runtime cursor advances by that
-horizon, while heap allocation cost is zero. Bounds require real frame room
-and no word wrap at the requested horizon. Protected earlier words exclude
-the deliberately updated pointer cell. Each turn saves the current source-cell
-word; a general unchanged-source-word assertion is not part of this theorem.
-
-The populated control reuses the previously checked caller prefix and its
-representation. Two actual running turns save address16, retaining two aliases
-to that nonempty object, a distinct object at20, scalar9, stack77 and sentinel99.
-The complete ordered observation also pins both saved words and cursor12.
-Wrong identity, scalar, cursor and horizon observations are rejected. A horizon
-without room fails a theorem premise; there is no emitted runtime capacity
-check in this slice. The base-zero allocator implication does not establish
-allocator ownership.
-
-Independent finder and skeptic source reviews found no correctness issue and
-confirmed these boundaries. This is target descent-prefix evidence only.
-Source recursive argument/body execution, recursive return/unwind and
-termination/divergence correspondence remain to be connected; no
-`InterfaceV3.PendingRecursiveReturns` inhabitant is supplied. Approved-domain
-provenance additionally awaits the actual P8a interface. The frozen V3
-signatures and the transferred ordinary-call, fixed-thunk and bare-revert
-producer modules are unchanged.
-
-
-## Runtime LIFO return control
-
-`RuntimeFrameV3RecursiveUnwind.unwind_nonempty_iter` and `unwind_nonempty_run`
-prove actual termination of the existing target loop for every positive frame
-count, using one code image that reads the bottom cursor at runtime. Each turn
-uses the existing checked pop/restore instructions. Saved frame words may differ;
-the destination may initially be clobbered. The final destination contains the
-actual bottom saved word. Cursor/destination/header separation and real no-wrap
-bounds are explicit. The zero-frame law separately proves that the false guard
-skips the body. No recursion evaluator or source admission cutoff is introduced.
-
-`recover_clobbered` derives the complete final caller representation from an
-actual represented pre-clobber snapshot, the captured bottom word and the actual
-physical destination write. It does not take the desired final representation or
-target run as a premise. Heap/world mutation between capture and return is not
-covered. The earlier same-word special case remains available with its stronger
-saved-equals-current-word premise.
-
-The populated client executes the real caller prefix and two save slices,
-writes a different reference20 into the upper saved frame, and physically
-clobbers the caller alias to99. The first restore yields20; the return loop
-finishes with the original alias16, the other old alias, distinct object20,
-scalar9, complete old-object contents, stack77 and sentinel99 intact. Runtime
-payloads16/20 remain written. The cursor returns from12 to10. A full instruction
-run and complete ordered intermediate/final vectors are proved. The different
-upper frame is an explicit target reserved-word write, not a source recursive
-call frame. Wrong destination/order/alias/scalar/cursor controls and malformed
-pointer fault (distinct from bare revert) are checked.
-
-Independent read-only finder and skeptic reviews confirmed the actual-loop and
-snapshot boundaries. Source recursive frame transitions, heterogeneous typed
-context layouts, general return dispatch and termination/divergence agreement
-remain open; no `InterfaceV3.PendingRecursiveReturns` inhabitant is supplied.
-Approved-profile provenance still awaits the actual P8a producer. All frozen
-interfaces and transferred producer modules remain unchanged.
-
-
-## Actual recursive argument and return family
-
-`RuntimeFrameV3RecursiveSource` defines a countdown solely with existing typed
-`Stmt.callRec`, `Args`, `CallRet.none` and `recUnroll`. Each recursive activation
-evaluates the same memory-reference argument and a checked uint decrement.
-`all_horizons` proves actual execution for every natural unrolling horizon:
-`count < depth` returns the complete original parameter-frame state; otherwise
-the outcome is exactly `.exhausted`. `call_all_horizons` carries this through
-actual evaluated outer arguments and exact caller-environment recovery, reusing
-the published weakening law. This covers the actual shared heap, persistent and
-transient roots, transaction observations and caller locals by full state
-equality on success; it does not supply a target/world simulation.
-
-`source_coherence` discharges `InterfaceV1.RecursiveReturnCoherence` for this
-actual family and typed entry arguments, for every caller and pair of horizons.
-It derives equality from actual execution rather than assuming coherence or
-successful outputs. Unset memory arguments revert before body entry and cannot
-produce a successful output. The populated client starts from a real caller
-prefix and represented nonempty heap with two old aliases, a distinct object
-and scalar2. Actual activations have counters2/1/0 and the same reference0;
-each successful return recovers its own caller counter. Complete ordered
-activation/caller alias/length/content observations and exhaustion/incorrect
-horizon/incorrect private-counter controls are checked.
-
-The mathematical horizon does not change frontend `recDepth`, source admission
-or exhaustion semantics. A too-small horizon is not divergence or bare revert.
-The unset-reference negative has no `StateRepr`, proved explicitly; it is not
-an admitted V3 revert witness. The well-formed countdown success/exhaustion
-family therefore does not supply V3's dual-outcome instance. No target recursive
-call endpoint is asserted here: the shown target prefix only represents the
-source caller setup. Connecting these actual recursive argument/frame/return
-transitions to the runtime descent and LIFO-return code remains open, as do
-general typed layouts, recursive target divergence and approved-profile
-provenance. Independent finder and skeptic source reviews confirmed these
-limits. Frozen interfaces and other owners' producer modules are unchanged.
+Merged from the lane head fd08f0c1: `RuntimeFrameInterfaceV3` and its import
+closure (the modules above). Not merged: the `tests/runtime-frame/` clients
+and controls, including the v3 interface controls, the void-call and
+recursive descent/unwind/countdown clients and their axiom-check scripts, the
+other `RuntimeFrame*` modules, staged modules of other lanes, and the lane's
+uncommitted recursive-activation work. The lane documents those clients; on
+master the producers above are checked, but no client of them except
+`RuntimeFrameV3CallProducerControls` is. Read-only finder and skeptic reviews
+confirmed the bare-revert closure and the remaining limits above.

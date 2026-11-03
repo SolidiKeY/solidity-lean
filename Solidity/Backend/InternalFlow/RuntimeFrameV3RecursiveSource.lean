@@ -127,7 +127,7 @@ theorem call_all_horizons {C : Contract} {Γ : Ctx} {R : RefTy}
    rfl
  · simp only [if_neg enough,error_bind]
 
-/-- The actual source-coherence duty for this nontrivial recursive family.
+/-- The actual source-coherence duty for this effect-free countdown family.
 No successful source output or desired coherence equation is assumed. -/
 theorem source_coherence {C : Contract} {Γ : Ctx} {R : RefTy}
  (hm : (Ty.ref R).mapFree=true) (f : Name)

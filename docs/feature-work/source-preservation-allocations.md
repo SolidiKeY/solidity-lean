@@ -70,8 +70,8 @@ implicit bytes4 condition. This proves preservation, not encoding success or ABI
 correctness. `EncodingVariantControls` observes actual typed encodings in both
 pipelines over a nonempty heap, including exact allocation/caller state and
 missing-head refusals. Its preservation triples are stated for an arbitrary
-heap typing. `packed_inhabited` applies `packed_mem` to `initial_mem` on
-that nonempty heap, obtaining post-state MemOK and validity of the actual
+heap typing. `packed_inhabited` applies `packed_mem` to `initial_mem` with
+the empty heap typing over that nonempty heap, obtaining post-state MemOK and validity of the actual
 allocated bytes reference in both pipelines. The signature digest stays
 parameterized by Fixed.
 
