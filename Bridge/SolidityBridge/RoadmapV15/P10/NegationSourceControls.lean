@@ -29,7 +29,7 @@ theorem fetched_source_clients (valid : Array UInt256) :
   have same : negationBodyOutput (WordPushFixtures.seed 6 true)
       WordPushFixtures.before WordPushFixtures.after negative [258,513] =
       observed true negative [258,513] := by
-    first | rfl | decide | omega
+    rfl
   exact ⟨h.1,h.2.1.trans (congrArg Except.ok same),by decide,by decide⟩
 
 theorem minimum_is_not_a_success (valid : Array UInt256) :
