@@ -1,5 +1,4 @@
 {
- "Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean:foo": [],
  "Bridge/SolidityBridge/AdversaryPolicy.lean:Solidity.Bridge.Adversary.callSafe_iff_reachablePolicy": [
   "Classical.choice",
   "Quot.sound",
