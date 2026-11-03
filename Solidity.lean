@@ -1831,11 +1831,16 @@ import Solidity.Lowering.V07.RegisteredScalarClients
 import Solidity.Lowering.V07.Scalar
 import Solidity.Lowering.V07.ShortCircuit
 import Solidity.Lowering.V07.ShortCircuitControls
+import Solidity.Lowering.V07.SignedNarrowing
+import Solidity.Lowering.V07.SignedWidthCasts
+import Solidity.Lowering.V07.SignedWordSubtraction
 import Solidity.Lowering.V07.SourceReads
 import Solidity.Lowering.V07.UnsignedAddition
+import Solidity.Lowering.V07.UnsignedCasts
 import Solidity.Lowering.V07.UnsignedMultiplication
 import Solidity.Lowering.V07.UnsignedNarrowing
 import Solidity.Lowering.V07.UnsignedNarrowingControls
+import Solidity.Lowering.V07.UnsignedWidthCasts
 import Solidity.Lowering.V07.WordCastControls
 import Solidity.Lowering.V07.WordCasts
 import Solidity.Lowering.V07.WrappedAdditionPair
