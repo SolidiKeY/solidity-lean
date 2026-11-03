@@ -1193,3 +1193,26 @@ reviews found no defect.
 The final PUSH/JUMP cycle, arbitrary repeated nonzero iterations, compiler
 origin, scanner/D_J correctness, Osaka approval, account/world/transaction
 and complete resource/trace correspondence remain separate obligations.
+
+## Nonzero backedge operand
+
+[LinkedBackedgePush.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean)
+consumes the existing checked word-push producer at PC 38 of the complete
+74-byte linked image. For an arbitrary seed, nonzero scalar operand and caller
+tail with `tail.length + 2 ≤ 1024`, gas at least 22 and fuel `fuel + 8`, it
+proves seven actual counted fetched steps and the corresponding `X` continuation
+to PC 71. The zero word is above the original ordered tail; the natural gas
+debit is exactly 22. The supplied jump array is arbitrary for this prefix.
+The code/PC/stack alignment is derived, with no decoder, successful-run or
+caller-frame premise. Separate construction-level frame and debit laws acquire
+execution meaning through that prefix theorem.
+
+[LinkedBackedgePushControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean)
+checks an independently stated complete result State, populated nonzero and
+signed inputs, both permissions, empty and maximal legal tails, insufficient
+gas and fuel, and the genuinely different zero branch. It retains the complete
+ordered byte image and memory, return data, calldata, accounts and substate.
+The final JUMP has not executed: gas 22 permits the prefix and then refuses
+that next opcode. This is neither a completed cycle nor source/compiler,
+Osaka approval, account/world or transaction/trace correspondence. All full
+opcode obligations remain open.

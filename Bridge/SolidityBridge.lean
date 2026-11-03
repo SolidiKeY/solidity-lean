@@ -184,6 +184,8 @@ import SolidityBridge.RoadmapV15.P10.JumpMemberConsumer
 import SolidityBridge.RoadmapV15.P10.JumpMemberControls
 import SolidityBridge.RoadmapV15.P10.JumpZeroConsumer
 import SolidityBridge.RoadmapV15.P10.JumpZeroControls
+import SolidityBridge.RoadmapV15.P10.LinkedBackedgePush
+import SolidityBridge.RoadmapV15.P10.LinkedBackedgePushControls
 import SolidityBridge.RoadmapV15.P10.LinkedCompletion
 import SolidityBridge.RoadmapV15.P10.LinkedCompletionControls
 import SolidityBridge.RoadmapV15.P10.LinkedCompletionLayout
