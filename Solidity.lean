@@ -398,6 +398,27 @@ import Solidity.Backend.Passes.AssignmentSubtractionControls
 import Solidity.Backend.Passes.AssignmentSubtractionPass
 import Solidity.Backend.Passes.AssignmentSubtractionPins
 import Solidity.Backend.Passes.AxiomPins
+import Solidity.Backend.MemoryOps.StructDefaults.SelectionControls
+import Solidity.Backend.MemoryOps.PhysicalArrayReframe
+import Solidity.Backend.MemoryOps.PhysicalByteJournal
+import Solidity.Backend.MemoryOps.PhysicalFrameImage
+import Solidity.Backend.MemoryOps.PhysicalFrameImageControls
+import Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal
+import Solidity.Backend.MemoryOps.PhysicalMemoryControls
+import Solidity.Backend.MemoryOps.PhysicalPointerFrame
+import Solidity.Backend.MemoryOps.PhysicalReferenceStore
+import Solidity.Backend.MemoryOps.PhysicalSourceUint
+import Solidity.Backend.MemoryOps.PhysicalUintDelete
+import Solidity.Backend.MemoryOps.PhysicalUintWrite
+import Solidity.Backend.MemoryOps.PhysicalWordFrame
+import Solidity.Backend.MemoryOps.PhysicalWorldUnwind
+import Solidity.Backend.MemoryOps.PhysicalWorldUnwindControls
+import Solidity.Backend.MemoryOps.PhysicalResolvedDeleteControls
+import Solidity.Backend.MemoryOps.PhysicalStructChild
+import Solidity.Backend.MemoryOps.PhysicalStructChildControls
+import Solidity.Backend.MemoryOps.PhysicalUintSequence
+import Solidity.Backend.MemoryOps.SourceCalldataBinding
+
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.CaptureAliases
 import Solidity.Backend.Passes.CaptureCases

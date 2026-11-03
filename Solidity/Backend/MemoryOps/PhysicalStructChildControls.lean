@@ -5,6 +5,7 @@ import Solidity.Backend.MemoryOps.PhysicalStructDelete
 import Solidity.Backend.MemoryOps.PhysicalStructAlias
 import Solidity.Backend.MemoryOps.SourceCalldataCopy
 import Solidity.Backend.MemoryOps.SourceCalldataTransfer
+import Solidity.Backend.MemoryOps.SourceCalldataBinding
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1863,4 +1864,231 @@ theorem source_checked_copy_boundaries :
 
 /-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_checked_copy_boundaries' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_checked_copy_boundaries
+private abbrev BindingCtx : Source.RCtx := SB::CopyCtx
+private def bindingDst : Source.Idx BindingCtx SB := .there (.there salias)
+private def bindingSrc : Source.Idx BindingCtx (.array .calldata .bool none) := .there .here
+private def bindingIndex : Source.Idx BindingCtx (.int .u256) := .there (.there si)
+private def bindingInput (n : Nat) : Source.EMState E BindingCtx :=
+  (.cons (.memRef rfl 0) (.cons (.cdRef rfl 0 n)
+    (inputSource.1.set si (sourceUint (indexValue (wmod 2))))),inputSource.2)
+private def bindingMid (n : Nat) (bs : List Bool) : Source.EMState E BindingCtx :=
+  ((bindingInput n).1,{inputSource.2 with heap := (inputSource.2.heap.alloc ⟨SB,sourceBoolMemory bs⟩).1})
+private def bindingOutput (n : Nat) (bs : List Bool) : Source.EMState E BindingCtx :=
+  ((bindingInput n).1.set bindingDst (.memRef rfl 3),(bindingMid n bs).2)
+private def bindingRead (root : Source.Idx BindingCtx SB) : Source.RExpr E BindingCtx .bool :=
+  .indexArray (.local root) (.local bindingIndex) rfl
+private theorem binding_at (n : Nat) : SourceBoolStructAt (bindingInput n) 2 hp parent addresses layout :=
+  ⟨source_at.parent,source_at.leaf⟩
+private theorem binding_memOK (n : Nat) : Source.MemOK E SH (bindingInput n) := by
+  have old : Source.Val.RefOK E inputSource.2.heap.ty (.memRef rfl 0 : Source.Val E.layout SB) := ⟨SB,rfl,rfl⟩
+  have locals := Source.LocalsOK.set inputSource.1 si memOK.1.2
+    (v := sourceUint (indexValue (wmod 2))) trivial
+  exact ⟨⟨memOK.1.1,old, trivial,locals⟩,memOK.2⟩
+
+/-- Actual allocating RHS, binding and statement in both pipelines, with the
+same computed checked heap, derived old/fresh observers and retained aliases. -/
+theorem source_copy_binding_client (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G p) copyFrame (fuel+2) (sourceBoolCalldataCopy bindingSrc)).run (bindingInput 3)=
+      (.ok (.val (.memRef rfl 3)),bindingMid 3 [true,false,true]) ∧
+    (Source.evalE (G p) copyFrame (fuel+3) (sourceBoolCalldataBind bindingDst bindingSrc)).run (bindingInput 3)=
+      (.ok (.val (.memRef rfl 3)),bindingOutput 3 [true,false,true]) ∧
+    (Source.execS (G p) copyFrame (fuel+4) nps none
+      (.expr (sourceBoolCalldataBind bindingDst bindingSrc) : Source.RStmt E [] false .body BindingCtx BindingCtx)
+      (bindingInput 3).1).run (.nil,(bindingInput 3).2)=
+        (.ok (.normal (bindingOutput 3 [true,false,true]).1),(.nil,(bindingOutput 3 [true,false,true]).2)) ∧
+    checkedSourceFreshBools (E := E) copyFrame 0 3 hp (by decide)=.ok (some copyHeap.1) ∧
+    SourceBoolStructAt (bindingOutput 3 [true,false,true]) 2 copyHeap.1 (parent.wk copyExt) copyAddresses layout ∧
+    SourceBoolMemoryAt (bindingOutput 3 [true,false,true]) 3 copyHeap.1 copyHeap.2 .dyn ∧
+    Source.MemOK E SH (bindingOutput 3 [true,false,true]) ∧
+    (bindingOutput 3 [true,false,true]).1.get bindingDst=.memRef rfl 3 ∧
+    (bindingOutput 3 [true,false,true]).1.get .here=.memRef rfl 0 ∧
+    (bindingOutput 3 [true,false,true]).1.get bindingIndex=sourceUint (indexValue (wmod 2)) := by
+  have result := (binding_at 3).bind_cd_bool_copy (G p) copyFrame fuel nps bindingDst bindingSrc 0 3 rfl
+    (by decide) SH (binding_memOK 3)
+  rw [copy_decoded] at result
+  obtain ⟨_,run,statement,adapter,_,old,new,mok,selected,other,_⟩ := result
+  refine ⟨?_,run,statement,adapter,old,new,mok,selected,other SB .here (by decide),
+    other (.int .u256) bindingIndex (by decide)⟩
+  rw [source_cd_bool_eval (G p) copyFrame fuel (bindingInput 3) bindingSrc 0 3 rfl,source_cd_bool_run,copy_decoded]
+  rfl
+
+/-- Complete ordered local and Source heap tables; fresh and retained old
+identities differ while all old intrinsic contents and parent fields survive. -/
+theorem source_copy_binding_vectors :
+    (bindingOutput 3 [true,false,true]).1=
+      .cons (.memRef rfl 0) (.cons (.cdRef rfl 0 3) (.cons (.bool true)
+        (.cons (sourceUint (indexValue (wmod 2))) (.cons (.memRef rfl 2)
+          (.cons (.memRef rfl 1) (.cons (.memRef rfl 3) (.cons (.memRef rfl 2) .nil))))))) ∧
+    [(bindingInput 3).1.get bindingDst,(bindingMid 3 [true,false,true]).1.get bindingDst,
+      (bindingOutput 3 [true,false,true]).1.get bindingDst]=[.memRef rfl 0,.memRef rfl 0,.memRef rfl 3] ∧
+    [(bindingOutput 3 [true,false,true]).2.heap.get 0,(bindingOutput 3 [true,false,true]).2.heap.get 1,
+      (bindingOutput 3 [true,false,true]).2.heap.get 2,(bindingOutput 3 [true,false,true]).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory [true,false,true]⟩] ∧
+    [MObj.elems .dyn (copyHeap.1.get copyHeap.2),MObj.elems .dyn (copyHeap.1.get (left.wk copyExt)),
+      MObj.elems .dyn (copyHeap.1.get (right.wk copyExt))]=[[true,false,true],[true,false,false],[false,true,false]] ∧
+    [copyHeap.2.id,(left.wk copyExt).id,(right.wk copyExt).id,(parent.wk copyExt).id]=[3,0,1,2] ∧
+    copyHeap.1.field (parent.wk copyExt) layout.tag_type=u7 ∧
+    copyHeap.1.field (parent.wk copyExt) layout.child_type=left.wk copyExt ∧
+    (bindingOutput 3 [true,false,true]).2.ex=(bindingInput 3).2.ex ∧
+    (bindingOutput 3 [true,false,true]).2.events=(bindingInput 3).2.events ∧
+    (bindingOutput 3 [true,false,true]).2.logs=(bindingInput 3).2.logs ∧
+    (bindingOutput 3 [true,false,true]).2.fnLocals=(bindingInput 3).2.fnLocals := by
+  have keep : Heap.Keeps copyExt hp copyHeap.1 := source_calldata_copy_client.2.1
+  have fresh := source_calldata_copy_client.2.2.2.2.2.2.1
+  refine ⟨rfl,rfl,rfl,?_,rfl,?_,?_,rfl,rfl,rfl,rfl⟩
+  · rw [fresh,keep left,keep right,MObj.elems_wk,MObj.elems_wk,left_values,right_values]
+    rfl
+  · rw [keep.field parent layout.tag_type]
+    rfl
+  · rw [keep.field parent layout.child_type]
+    rfl
+
+/-- Reading through the actual reached binding differs from the retained old
+alias and from reading before/skipping binding. The real RItems pair runs. -/
+theorem source_copy_binding_reads (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G p) copyFrame (fuel+2) (bindingRead bindingDst)).run (bindingOutput 3 [true,false,true])=
+      (.ok (.val (.bool true)),bindingOutput 3 [true,false,true]) ∧
+    (Source.evalE (G p) copyFrame (fuel+2) (bindingRead .here)).run (bindingOutput 3 [true,false,true])=
+      (.ok (.val (.bool false)),bindingOutput 3 [true,false,true]) ∧
+    (Source.evalE (G p) copyFrame (fuel+2) (bindingRead bindingDst)).run (bindingInput 3)=
+      (.ok (.val (.bool false)),bindingInput 3) ∧
+    (Source.evalE (G p) copyFrame (fuel+2) (bindingRead bindingDst)).run (bindingMid 3 [true,false,true])=
+      (.ok (.val (.bool false)),bindingMid 3 [true,false,true]) ∧
+    (Source.execItems (G p) copyFrame (fuel+6) nps none
+      (.stmt (.expr (sourceBoolCalldataBind bindingDst bindingSrc)) (.stmt (.expr (bindingRead bindingDst)) .nil) :
+        Source.RItems E [] false .body BindingCtx BindingCtx) (bindingInput 3).1).run (.nil,(bindingInput 3).2)=
+          (.ok (.normal (bindingOutput 3 [true,false,true]).1),(.nil,(bindingOutput 3 [true,false,true]).2)) := by
+  obtain ⟨_,_,_,_,_,fresh,_,dst,ret,index⟩ := source_copy_binding_client p fuel nps
+  have keep : Heap.Keeps copyExt hp copyHeap.1 := source_calldata_copy_client.2.1
+  have contents := source_calldata_copy_client.2.2.2.2.2.2.1
+  have old : SourceBoolMemoryAt (bindingOutput 3 [true,false,true]) 0 copyHeap.1 (left.wk copyExt) .dyn := by
+    unfold SourceBoolMemoryAt
+    rw [keep left,MObj.elems_wk,left_values]
+    rfl
+  have initial : SourceBoolMemoryAt (bindingInput 3) 0 hp left .dyn := by
+    unfold SourceBoolMemoryAt
+    rw [left_values]
+    rfl
+  have hit : copyHeap.1.index copyHeap.2 .dyn (indexValue (wmod 2))=some true := by
+    change (MObj.elems .dyn (copyHeap.1.get copyHeap.2))[2]?=some true
+    rw [contents]
+    rfl
+  have oldHit : copyHeap.1.index (left.wk copyExt) .dyn (indexValue (wmod 2))=some false := by
+    change (MObj.elems .dyn (copyHeap.1.get (left.wk copyExt)))[2]?=some false
+    rw [keep left,MObj.elems_wk,left_values]
+    rfl
+  have initialHit : hp.index left .dyn (indexValue (wmod 2))=some false := by
+    change (MObj.elems .dyn (hp.get left))[2]?=some false
+    rw [left_values]
+    rfl
+  have read := fresh.eval_local_read (G p) copyFrame fuel bindingDst bindingIndex _ true dst index hit
+  refine ⟨read,old.eval_local_read (G p) copyFrame fuel .here bindingIndex _ false ret index oldHit,
+    initial.eval_local_read (G p) copyFrame fuel bindingDst bindingIndex _ false rfl rfl initialHit,
+    old.eval_local_read (y := bindingMid 3 [true,false,true]) (G p) copyFrame fuel bindingDst bindingIndex _ false rfl rfl oldHit,?_⟩
+  have nextRead := fresh.eval_local_read (G p) copyFrame (fuel+1) bindingDst bindingIndex _ true dst index hit
+  have nextStatement := source_expr_statement_run (G p) copyFrame (fuel+3) nps _ _ _ _ nextRead
+  have first := (source_copy_binding_client p (fuel+1) nps).2.2.1
+  exact source_items_pair_run (G p) copyFrame fuel nps _ _ _ _ _ first nextStatement
+
+/-- Decoder failure does not replace the old local or allocate. Low horizons
+also retain the actual whole input; no invented rollback is asserted. -/
+theorem source_copy_binding_failures (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G p) badCopyFrame (fuel+3) (sourceBoolCalldataBind bindingDst bindingSrc)).run (bindingInput 3)=
+      (.error (.revert []),bindingInput 3) ∧
+    (Source.execS (G p) badCopyFrame (fuel+4) nps none
+      (.expr (sourceBoolCalldataBind bindingDst bindingSrc) : Source.RStmt E [] false .body BindingCtx BindingCtx)
+      (bindingInput 3).1).run (.nil,(bindingInput 3).2)=(.error (.revert []),(.nil,(bindingInput 3).2)) ∧
+    (∀ n,n≤2 → (Source.evalE (G p) copyFrame n (sourceBoolCalldataBind bindingDst bindingSrc)).run (bindingInput 3)=
+      (.error .timeout,bindingInput 3)) := by
+  have run := source_cd_bool_bind_run (G p) badCopyFrame fuel (bindingInput 3) bindingDst bindingSrc 0 3 rfl
+  have bad : sourceCalldataBoolValues E badCopyFrame 0 3=.error (.revert []) := rfl
+  rw [bad] at run
+  exact ⟨run,source_expr_statement_error (G p) badCopyFrame (fuel+3) nps _ _ _ (.revert []) run,
+    source_cd_bool_bind_low (G p) copyFrame (bindingInput 3) bindingDst bindingSrc⟩
+
+/-- A genuine successful EMPTY copy/bind prefix precedes a second-statement
+bounds panic. Its allocated Source heap is retained, not transaction rollback.
+Reversing the statements instead succeeds by reading the old nonempty alias. -/
+theorem source_copy_binding_empty_late (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G p) copyFrame (fuel+3) (sourceBoolCalldataBind bindingDst bindingSrc)).run (bindingInput 0)=
+      (.ok (.val (.memRef rfl 3)),bindingOutput 0 []) ∧
+    SourceBoolMemoryAt (bindingOutput 0 []) 3 (zeroCopyHeap 0 (by decide)).1 (zeroCopyHeap 0 (by decide)).2 .dyn ∧
+    (Source.evalE (G p) copyFrame (fuel+2) (bindingRead bindingDst)).run (bindingOutput 0 [])=
+      (.error (.revert (Source.panicData .index)),bindingOutput 0 []) ∧
+    (Source.execItems (G p) copyFrame (fuel+6) nps none
+      (.stmt (.expr (sourceBoolCalldataBind bindingDst bindingSrc)) (.stmt (.expr (bindingRead bindingDst)) .nil) :
+        Source.RItems E [] false .body BindingCtx BindingCtx) (bindingInput 0).1).run (.nil,(bindingInput 0).2)=
+          (.error (.revert (Source.panicData .index)),(.nil,(bindingOutput 0 []).2)) ∧
+    (Source.execItems (G p) copyFrame (fuel+7) nps none
+      (.stmt (.expr (bindingRead bindingDst)) (.stmt (.expr (sourceBoolCalldataBind bindingDst bindingSrc)) .nil) :
+        Source.RItems E [] false .body BindingCtx BindingCtx) (bindingInput 0).1).run (.nil,(bindingInput 0).2)=
+          (.ok (.normal (bindingOutput 0 []).1),(.nil,(bindingOutput 0 []).2)) ∧
+    (bindingOutput 0 []).2.heap.get 3=some ⟨SB,sourceBoolMemory []⟩ := by
+  have decoded : sourceCalldataBoolValues E copyFrame 0 0=.ok [] := rfl
+  have result := (binding_at 0).bind_cd_bool_copy (G p) copyFrame fuel nps bindingDst bindingSrc 0 0 rfl
+    (by decide) SH (binding_memOK 0)
+  rw [decoded] at result
+  obtain ⟨_,run,statement,_,_,_,fresh,_,dst,other,_⟩ := result
+  change SourceBoolMemoryAt (bindingOutput 0 []) 3 (zeroCopyHeap 0 (by decide)).1 (zeroCopyHeap 0 (by decide)).2 .dyn at fresh
+  obtain ⟨_,_,_,_,length,_⟩ := source_calldata_copy_zero_pair 0 (by decide)
+  have bound : (zeroCopyHeap 0 (by decide)).1.len (zeroCopyHeap 0 (by decide)).2 .dyn≤(indexValue (wmod 2)).1.toNat := by
+    rw [length]
+    decide
+  have index := other (.int .u256) bindingIndex (by decide)
+  have miss := fresh.eval_local_bounds (G p) copyFrame fuel bindingDst bindingIndex _ dst index bound
+  have nextMiss := fresh.eval_local_bounds (G p) copyFrame (fuel+1) bindingDst bindingIndex _ dst index bound
+  have late := source_expr_statement_error (G p) copyFrame (fuel+3) nps _ _ _ (.revert (Source.panicData .index)) nextMiss
+  have first := (binding_at 0).bind_cd_bool_copy (G p) copyFrame (fuel+1) nps bindingDst bindingSrc 0 0 rfl
+    (by decide) SH (binding_memOK 0)
+  rw [decoded] at first
+  obtain ⟨_,_,firstStatement,_⟩ := first
+  have old : SourceBoolMemoryAt (bindingInput 0) 0 hp left .dyn := by
+    unfold SourceBoolMemoryAt
+    rw [left_values]
+    rfl
+  have oldHit : hp.index left .dyn (indexValue (wmod 2))=some false := by
+    change (MObj.elems .dyn (hp.get left))[2]?=some false
+    rw [left_values]
+    rfl
+  have before := old.eval_local_read (G p) copyFrame (fuel+3) bindingDst bindingIndex _ false rfl rfl oldHit
+  have beforeStatement := source_expr_statement_run (G p) copyFrame (fuel+5) nps _ _ _ _ before
+  exact ⟨run,fresh,miss,source_items_pair_error (G p) copyFrame fuel nps _ _ _ _ _ _ firstStatement late,
+    source_items_pair_run (G p) copyFrame (fuel+1) nps _ _ _ _ _ beforeStatement firstStatement,rfl⟩
+
+/-- Whole initial/mid local and heap tables make the allocating prefix
+observable independently of the later local binding and late bounds error. -/
+theorem source_copy_binding_prefix_tables :
+    (bindingInput 3).1=
+      .cons (.memRef rfl 0) (.cons (.cdRef rfl 0 3) (.cons (.bool true)
+        (.cons (sourceUint (indexValue (wmod 2))) (.cons (.memRef rfl 2)
+          (.cons (.memRef rfl 1) (.cons (.memRef rfl 0) (.cons (.memRef rfl 2) .nil))))))) ∧
+    (bindingMid 3 [true,false,true]).1=(bindingInput 3).1 ∧
+    [(bindingInput 3).2.heap.get 0,(bindingInput 3).2.heap.get 1,
+      (bindingInput 3).2.heap.get 2,(bindingInput 3).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,none] ∧
+    [(bindingMid 3 [true,false,true]).2.heap.get 0,(bindingMid 3 [true,false,true]).2.heap.get 1,
+      (bindingMid 3 [true,false,true]).2.heap.get 2,(bindingMid 3 [true,false,true]).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory [true,false,true]⟩] ∧
+    (bindingMid 3 [true,false,true]).2=(bindingOutput 3 [true,false,true]).2 ∧
+    [(bindingOutput 0 []).2.heap.get 0,(bindingOutput 0 []).2.heap.get 1,
+      (bindingOutput 0 []).2.heap.get 2,(bindingOutput 0 []).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory []⟩] := by
+  first | simp only [] | decide | omega | rfl | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_binding_client
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_binding_vectors
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_binding_reads
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_failures' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_binding_failures
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_empty_late' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_binding_empty_late
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_prefix_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_copy_binding_prefix_tables
 end Solidity.Backend.MemoryOps.Physical.StructChildControls
