@@ -55,6 +55,7 @@ and error-order negatives.
 | `SignedDivisionConsumer`, `SignedDivisionControls` | SDIV, SMOD | Bounded signed transport; raw zero and minimum-wrap behaviour kept as EVM semantics. |
 | `ArithmeticShiftConsumer`, `ArithmeticShiftControls` | SAR | `BitVec` agreement including saturation. |
 | `StorageReadConsumer`, `StorageReadControls` | SLOAD, TLOAD | SLOAD 100 warm / 2100 cold, TLOAD 100; existing typed slot observations. |
+| `StorageWarmTransport`, `StorageWarmControls`, `StorageIsolationControls` | SLOAD, TLOAD | Warm cost after any SLOAD update, distinct-key isolation, fetched resource frame (below). |
 | `BalanceEnvironmentConsumer`, `BalanceEnvironmentControls` | BALANCE | Charged read; the frame's `funds` field is defined from the EVM account map, so the funds agreement holds by construction. |
 | `DecoderAgreement`, `DecoderAgreementControls` | 117 non-immediate opcodes | Backend bytes against the reference decoder and fetched dispatch. |
 | `PushDecoderAgreement`, `PushDecoderControls` | PUSH0–32 | Payload extraction against the reference reader. |
@@ -436,3 +437,31 @@ per-module registration scripts, its routine-task list and its
 runtime-completion note. Read-only finder and skeptic reviews found no Lean
 defect; stale references to lane-only predecessors and checklists were
 removed from this record.
+
+## Storage warmth and key isolation (SLOAD/TLOAD)
+
+`StorageWarmTransport.lean`:
+- `sload_warm_cost`: after the vendor `sload` state update, a cost probe that
+  reinstalls the same owner/key is charged the warm cost, for every state,
+  slot, value, tail and cost. The probe installs the key itself; nothing says
+  the next instruction or the returned value supplies it.
+- `sload_distinct_cost`: the update keeps the persistent-read charge of every
+  distinct owner/key pair (`storage_keys_compare_eq` turns the pinned
+  comparator into pair equality). The inequality is about numeric keys; it is
+  not hash injectivity or path distinctness.
+- `tload_retains_sload_cost`: a transient read leaves that charge unchanged.
+- `sload_resource_frame`: from the charged fetched SLOAD result
+  (`driverSteps`) and the storage-preservation law, derives the warm cost and
+  persistent/transient observations. First-read gas, stack room, represented
+  input and fuel stay explicit premises; a following read needs its own.
+
+`StorageWarmControls.lean` (eight controls) and
+`StorageIsolationControls.lean` (four) instantiate these on populated states:
+a two-read success that works only because the stored value equals its key, a
+gas refusal when the returned value is a different cold key, wrong owner/key
+and transient negatives, warm/cold distinct-pair clients (both with the code
+owner, differing only in the key) and an equal-pair counterexample showing the
+inequality premise is needed.
+
+Open: source/compiler origin of keys, physical allocation and padding, full
+resource adequacy, Osaka world/transaction composition, opcode-row coverage.

@@ -109,3 +109,8 @@ import SolidityBridge.RoadmapV15.P10.SignExtensionAllWitness
 
 import SolidityBridge.RoadmapV15.P10.UnsignedDivisionConsumer
 import SolidityBridge.RoadmapV15.P10.UnsignedDivisionControls
+
+import SolidityBridge.RoadmapV15.P10.StorageWarmTransport
+import SolidityBridge.RoadmapV15.P10.StorageWarmControls
+
+import SolidityBridge.RoadmapV15.P10.StorageIsolationControls

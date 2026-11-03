@@ -1659,6 +1659,8 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Bridge/SolidityBridge/RoadmapV15/P10/SignExtensionAllWitness.lean` | Unified all-index/sign SIGNEXTEND clients, full-width/large-index boundaries and wrong-unsigned/wrap controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedDivisionConsumer.lean` | Arbitrary emitted-site DIV/MOD word/Scalar/charged fetched-State and X transport, plus actual output-capacity refusal. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedDivisionControls.lean` | Populated unsigned high-word, zero, maximum, stack-capacity and ordered refusal/observation controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageWarmTransport.lean` | SLOAD warm cost after the vendor update, distinct-key cost isolation, TLOAD separation, fetched SLOAD resource frame. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StorageWarmControls.lean`, `Bridge/SolidityBridge/RoadmapV15/P10/StorageIsolationControls.lean` | Populated warm/cold, owner/key, transient and equal-pair controls. |
 
 ### P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](feature-work/runtime-frame-p1.md))
 
