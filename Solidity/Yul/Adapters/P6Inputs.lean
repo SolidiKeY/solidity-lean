@@ -91,4 +91,66 @@ theorem hash_fixed (F : Source.Fr) (offset length : Nat) :
     (Environment.digest (callBytes F offset length)).val.toNat=
       Roadmap.Evm.keccakWord (callBytes F offset length) := Environment.digest_fixed _
 
+/-- Actual builtin argument evaluation and typed memory lookup, at every
+sufficient horizon. Existing aliases need no fabricated formation history.
+The full Source state is retained; this is not raw-local cleanup. -/
+theorem source_hash_local {E : Source.Env} {Ξ : Source.RCtx} (G : Source.Glob E) (F : Source.Fr)
+    (n address : Nat) (index : Source.Idx Ξ (.bytes .memory)) (y : Source.EMState E Ξ)
+    (bytes : Roadmap.Bytes) (located : y.1.get index=.memRef rfl address)
+    (found : y.2.heap.get address=some ⟨.bytes .memory,.bytes bytes⟩) :
+    (Source.evalBuiltin G F (n+3) .keccak256 (.cons (.local index) .nil) .bytes32).run y=
+      (.ok (.val (Source.mkBytes (n:=32) (h:=by decide) (Source.wordBytes (G.fixed.hash bytes)))),y) := by
+  have args : (Source.evalArgs G F (n+2) (.cons (.local index) .nil)).run y=
+      (.ok (.cons (.val (.memRef rfl address)) .nil),y) := by
+    change ((Except.ok (.cons (.val (y.1.get index)) .nil) : Except Source.Halt (Source.RVals E.layout [.bytes .memory])),y)=_
+    rw [located]
+  have object : (Source.heapObj (E:=E) (Γ:=Ξ) address).run y=
+      (.ok ⟨.bytes .memory,.bytes bytes⟩,y) := by
+    change ((match y.2.heap.get address with
+      | some x => (pure x : Source.EM E Ξ (Σ τ, Source.Data E.layout τ))
+      | none => Source.EM.halt (.stuck "dangling memory reference")).run y)=_
+    rw [found]
+    rfl
+  have payload : (Source.bytesOfRV F (n+2)
+      (Source.RVal.val (Source.Val.memRef (τ:=.bytes .memory) rfl address))).run y=(.ok bytes,y) := by
+    change (Source.heapBytes address : Source.EM E Ξ _).run y=_
+    rw [Source.heapBytes,Source.Hoare.run_bind,object]
+    rfl
+  unfold Source.evalBuiltin
+  change ((do
+    let vs ← Source.evalArgs G F (n+2) (.cons (.local index) .nil)
+    let bs ← match vs with
+      | .cons x _ => do Source.bytesOfRV F (n+2) (← Source.convRV F (n+2) (.bytes .memory) x)
+    Source.ret32 .bytes32 (Source.wordBytes (G.fixed.hash bs)))).run y=_
+  rw [Source.Hoare.run_bind,args]
+  change ((do
+    let bs ← Source.bytesOfRV F (n+2) (Source.RVal.val (.memRef (τ:=.bytes .memory) rfl address))
+    Source.ret32 .bytes32 (Source.wordBytes (G.fixed.hash bs)))).run y=_
+  rw [Source.Hoare.run_bind,payload]
+  rfl
+
+/-- Actual Source and target hash producers consume the SAME copied calldata.
+The Fixed premise is only the real per-input concrete-hash connection; no
+collision, source/heap placement or general compiler adequacy is inferred. -/
+theorem copied_builtin_hash {E : Source.Env} {Ξ : Source.RCtx} (μ : FrameMem C Γ)
+    (G : Source.Glob E) (F : Source.Fr) (n address : Nat)
+    (index : Source.Idx Ξ (.bytes .memory)) (y : Source.EMState E Ξ)
+    (source : Environment.Word) (destination : ByteSpan μ.capacity) (tail : List Environment.Word)
+    (located : y.1.get index=.memRef rfl address)
+    (found : y.2.heap.get address=some ⟨.bytes .memory,
+      .bytes (callBytes F source.val.toNat destination.length.val.toNat)⟩)
+    (fixed : G.fixed.evm.keccak (callBytes F source.val.toNat destination.length.val.toNat)=
+      Roadmap.Evm.keccakWord (callBytes F source.val.toNat destination.length.val.toNat)) :
+    let bytes := callBytes F source.val.toNat destination.length.val.toNat
+    (Source.evalBuiltin G F (n+3) .keccak256 (.cons (.local index) .nil) .bytes32).run y=
+      (.ok (.val (Source.mkBytes (n:=32) (h:=by decide) (Source.wordBytes (G.fixed.hash bytes)))),y) ∧
+    Environment.cryptoStep (.op .KECCAK256)
+      ⟨destination.offset::destination.length::tail,frameBytes (copyCalldata μ F source destination)⟩=
+      some ⟨Environment.digest bytes::tail,frameBytes (copyCalldata μ F source destination)⟩ ∧
+    (Environment.digest bytes).val.toNat=(G.fixed.hash bytes).val := by
+  dsimp only
+  refine ⟨source_hash_local G F n address index y _ located found,hash_after_copy μ F source destination tail,?_⟩
+  rw [Environment.digest_fixed]
+  exact fixed.symm
+
 end Solidity.Yul.Adapters.P6Inputs

@@ -1970,8 +1970,16 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/RawSource.lean`, `Yul/RawSourceAdapter.lean` | Concrete bool-control Source statement adapters. |
 | `Yul/Checks/**`, `Frontend/SolcJson/Yul*.lean` | Kernel controls and integer-oracle vectors; solc JSON ingress. |
 | `Evm/MemoryLoopHorizon.lean`, `Evm/MemoryLoopFiniteHorizon.lean` (+`Controls`) | P5 all-depth and finite-horizon loop transport ([VY2](feature-work/yul-physical-memory.md)). |
+| `Evm/MemoryRecursiveDemandViews.lean`, `Evm/MemoryRecursiveDemandBounds.lean` | Typed recursive demand/cost cases and allocation-word bounds from computed finite heads and stopping bodies. |
+| `Evm/MemoryRecursiveOneTurn.lean` | Stopping-body prefix-room reduction and full recursive loop transport with initial body room. |
 | `Evm/MemoryRecursiveCert.lean`, `Evm/MemoryRecursiveCompile.lean`, `Evm/MemoryRecursiveSound.lean`, `Evm/MemoryRecursiveDispatch.lean`, `Evm/MemoryMixedLoop.lean` | Recursive and mixed-body loop certificates, compiler, correctness, dispatch fallback. |
 | `Yul/Views/**` | Byte/word memory views, codecs, arrays, objects, heap inventories. |
+| `Yul/Adapters/P6ByteWriteOrder{,Controls}` | Complete typed-frame disjoint byte-write commutation, metadata and empty-span controls. |
+| `Yul/Adapters/MemoryBytes{,Controls}` | Exact byte-view/backend snapshot-copy and unchanged-map agreement; overlap controls. |
+| `Yul/Adapters/RawPhysical{,Controls}` | Existing H11 raw-local frame to bounded P6 physical bytes; explicit readback boundaries and overlay administration |
+| `Yul/Views/ComputedPlacement{,Controls}` | Checked actual-heap ordinary placement witness with exact unsupported/overflow accounting. |
+| `Yul/Views/ComputedAllocation{,Controls}` | Actual Source allocation preserves computed old geometry and derives fresh extent and every-initial-H MemOK; target refinement remains separate. |
+| `Yul/Adapters/ComputedFrameHeap{,Controls}` | Computed geometry, canonical inventory and complete Source/frame roundtrip; allocator refinement remains separate. |
 | `Yul/Adapters/**` | Source/frame-memory agreement with the P6 interface; writeback and slices. |
 | `Yul/Compilation/**` | Target-side Yul compilation combinators: stack slots, lowering, opcodes, control ([VY3](feature-work/inline-assembly-vy3.md)). |
 | `Yul/Compilation/PureStatements.lean`, `Yul/Compilation/ScopedStatements.lean` | Intrinsic Yul skip/assignment/sequence and initialized/zero scope compilation; actual Yul evaluator/Scalar certificates, not full Source/G24 adequacy. |
@@ -2107,3 +2115,4 @@ See [P8 admission](feature-work/p8-admission.md).
 - Yul/RawLocalDeclaration: context-indexed local snapshot and concrete Boolean declaration Source correspondence. Yul/Checks/RawLocalDeclaration: executed context growth, shifted dirty-word, timeout and full-prefix controls.
 - Yul/RawLocalScope: executed Boolean declaration/scope closure, exact Source restoration and existing adapter implementation. Yul/Checks/RawLocalScope: precise horizons, dirty-frame and two-scope composition controls.
 - Yul/RawDefaultDeclaration: typed constant-default lookup and Source declaration correspondence, including all integer widths. Yul/Checks/RawDefaultDeclaration: actual uint8/uint256, shifted dirty-prefix and helper-boundary controls.
+| `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |

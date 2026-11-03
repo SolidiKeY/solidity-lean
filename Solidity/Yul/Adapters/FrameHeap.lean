@@ -1,4 +1,6 @@
 import Solidity.Yul.Adapters.MemoryAgreement
+import Solidity.Yul.Adapters.P6ByteMemory
+import Solidity.Yul.Adapters.SourceSliceFrame
 import Solidity.Yul.Views.EnumeratedMemory
 
 /-! Construct the actual P6 byte frame from a computed, complete ordinary
@@ -190,5 +192,79 @@ theorem residual_bytes_unchanged {E : Source.Env} {Γ : Source.RCtx} {origin : S
   · intro e member
     exact image_reads_disjoint_write e.image _ _ offset bs (outside e member)
       (encodeMixedHeap_reads p _ facts.2.2 residual e member)
+
+/-- An actual bounded P6 byte write in the computed object complement keeps
+the WHOLE Source state, while retaining its changed raw bytes. The actual
+span carries capacity; separation does not imply ReservedOK or operation
+admissibility and no allocation/reachability theorem is inferred. -/
+theorem residual_span_unchanged {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout}
+    (H : Source.HeapTy) (s : Source.EMState E Γ) (allocated : Placement origin)
+    (p : Placement s.2.heap) (history : RetainedAllocation allocated p)
+    (residual : ByteView) (ok : Source.MemOK E H s)
+    (supported : ∀ a τ d,s.2.heap.get a=some ⟨τ,d⟩ → InventoryTypeSupported E τ)
+    (carrier : FrameMem C Δ) (fits : MemoryAgreement.Fits carrier residual)
+    (room : p.free.val≤carrier.highWaterWords*32)
+    (span : ByteSpan (frameOf carrier p (generatedHeapEntries p) residual fits room).capacity)
+    (bytes : List UInt8) (length : bytes.length=span.length.val.toNat)
+    (outside : ∀ e∈generatedHeapEntries p,
+      p.address e.id+e.image.span≤span.offset.val.toNat ∨
+      span.offset.val.toNat+bytes.length≤p.address e.id) :
+    let initial := frameOf carrier p (generatedHeapEntries p) residual fits room
+    let reached := P6ByteMemory.writeSpan initial span bytes length
+    writeback s allocated p history reached=.ok (some (.ok (),s)) ∧
+      frameBytes reached=Environment.writeBytes (encodeMixedHeap p (generatedHeapEntries p) residual)
+        span.offset.val.toNat bytes := by
+  dsimp only
+  have image := P6ByteMemory.write_image
+    (frameOf carrier p (generatedHeapEntries p) residual fits room) span bytes length
+  rw [frameOf_bytes] at image
+  refine ⟨?_,image⟩
+  unfold writeback
+  rw [image]
+  exact residual_bytes_unchanged H s allocated p history residual ok supported
+    span.offset.val.toNat bytes outside
+
+/-- Copy an actual Source calldata slice into the computed object complement.
+Source evaluation, complete raw image, readback and whole-state heap writeback
+are derived together. Bounds are the actual reference/span bounds; no source
+admission, allocator or reserved-word safety is inferred from separation. -/
+theorem calldata_residual_unchanged {E : Source.Env} {Γ : Source.RCtx} {origin : Source.Heap E.layout}
+    (H : Source.HeapTy) (s : Source.EMState E Γ) (allocated : Placement origin)
+    (p : Placement s.2.heap) (history : RetainedAllocation allocated p)
+    (residual : ByteView) (ok : Source.MemOK E H s)
+    (supported : ∀ a τ d,s.2.heap.get a=some ⟨τ,d⟩ → InventoryTypeSupported E τ)
+    (carrier : FrameMem C Δ) (fits : MemoryAgreement.Fits carrier residual)
+    (room : p.free.val≤carrier.highWaterWords*32)
+    (span : ByteSpan (frameOf carrier p (generatedHeapEntries p) residual fits room).capacity)
+    (F : Source.Fr) (fuel off len start finish : Nat) (toEnd : Bool)
+    (reference : off+len≤F.cd.length) (ordered : start≤if toEnd then len else finish)
+    (bound : (if toEnd then len else finish)≤len)
+    (length : span.length.val.toNat=(if toEnd then len else finish)-start)
+    (outside : ∀ e∈generatedHeapEntries p,
+      p.address e.id+e.image.span≤span.offset.val.toNat ∨
+      span.offset.val.toNat+span.length.val.toNat≤p.address e.id) :
+    let initial := frameOf carrier p (generatedHeapEntries p) residual fits room
+    let payload := (F.cd.drop (off+start)).take ((if toEnd then len else finish)-start)
+    ∃ image : FrameMem C Δ,
+      (SourceSliceFrame.consume initial span F fuel off len start finish toEnd).run s=
+        (.ok (payload,some image),s) ∧
+      writeback s allocated p history image=.ok (some (.ok (),s)) ∧
+      frameBytes image=Environment.writeBytes (encodeMixedHeap p (generatedHeapEntries p) residual)
+        span.offset.val.toNat payload ∧
+      Environment.readMemory (frameBytes image) span.offset.val.toNat span.length.val.toNat=payload := by
+  dsimp only
+  obtain ⟨image,run,raw,read,metadata⟩ := SourceSliceFrame.consume_image
+    (frameOf carrier p (generatedHeapEntries p) residual fits room) span F
+    fuel off len start finish toEnd s reference ordered bound length
+  rw [frameOf_bytes] at raw
+  refine ⟨image,run,?_,raw,read⟩
+  unfold writeback
+  rw [raw]
+  apply residual_bytes_unchanged H s allocated p history residual ok supported
+  intro e member
+  have sameLength := (SourceSliceFrame.bounded_payload_length F off len start finish toEnd
+    reference ordered bound).trans length.symm
+  rw [sameLength]
+  exact outside e member
 
 end Solidity.Yul.Adapters.FrameHeap

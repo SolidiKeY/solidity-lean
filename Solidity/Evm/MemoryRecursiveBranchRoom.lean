@@ -46,6 +46,20 @@ private theorem prog_shape {b Γ Δ F G P code} {hp : ProgCert (C:=C) b (Γ:=Γ)
     (fun inner ih=>Or.inl inner)
     (fun run cost inner ih=>Or.inr ⟨_,_,_,run,cost,inner,rfl⟩) demand
 
+/-- Typed head/tail elimination, without assuming append is injective. -/
+theorem demand_cons_cases {b Γ Δ Ξ F G K s P head tail}
+    {hs : StmtCert (C:=C) b (Γ:=Γ) (Δ:=Δ) F G s head}
+    {hp : ProgCert b (Γ:=Δ) (Δ:=Ξ) G K P tail} {σ : State C Γ} {amount}
+    (demand : Demand (.cons hs hp) σ amount) :
+    StmtDemand hs σ amount ∨ ∃ (out : Solidity.Out C σ.H Δ) (spent rest : Nat),
+      s.run σ=.ok out ∧ StmtCost hs σ out spent ∧ Demand hp out.st rest ∧ amount=spent+rest := by
+  exact prog_shape demand
+
+/-- The existing nil certificate has no reached demand. -/
+theorem demand_nil_false {b Γ} {F : Frag Γ} {σ : State C Γ} {amount}
+    (demand : Demand (.nil (b:=b) F) σ amount) : False := by
+  exact prog_shape demand
+
 /-- Only the ACTUALLY selected branch's real demands are required. There is
 no all-branches allocator premise or nonallocating compilation restriction. -/
 theorem branch_room_true {b frame Γ Δ Ξ F P Q} {c : Val C Γ .bool}

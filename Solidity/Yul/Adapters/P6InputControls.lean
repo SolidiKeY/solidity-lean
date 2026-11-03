@@ -85,4 +85,54 @@ hashes are discriminated by complete selected byte or256bit observations. -/
   digestObserved .legacy==some (Roadmap.Evm.keccakWord [1,2,255,0]),
   digestObserved .viaIR==some (Roadmap.Evm.keccakWord [0,0,2,255]))
 
+private def hashFixed : Roadmap.Fixed :=
+  ⟨Roadmap.Evm.withKeccak,fun bal _ a=>bal a,1,0⟩
+private def hashGlob (p : Pipeline) : Source.Glob E :=
+  ⟨{body:=fun _=>none,consts:=fun _=>none,inits:=fun _=>[],ctor:=fun _=>none,
+    ctorLocals:=fun _=>[],baseArgs:=fun _=>[],contracts:=[]},(match p with | .legacy=>.legacy | .viaIR=>.viaIR),hashFixed,
+    fun _=>⟨0,by decide⟩,fun _ _=>true,fun _=>.answer (.success []),⟨0,by decide⟩⟩
+private def hashState : Source.EMState E [.bytes .memory] :=
+  (.cons (.memRef rfl 0) .nil,{Source.St.init E with heap:=
+    ((Source.Heap.empty : Source.Heap E.layout).alloc ⟨.bytes .memory,.bytes [2,255,0,0]⟩).1})
+
+/-- Real typed Source hash producer, copied input and target opcode share
+preimages and full results; concrete Fixed discharges the connection premise. -/
+theorem builtin_and_target (p : Pipeline) (n : Nat) :
+    (Source.evalBuiltin (hashGlob p) F (n+3) .keccak256
+      (.cons (.local .here) .nil) .bytes32).run hashState=
+      (.ok (.val (Source.mkBytes (n:=32) (h:=by decide)
+        (Source.wordBytes ((hashGlob p).fixed.hash [2,255,0,0])))),hashState) ∧
+    Environment.cryptoStep (.op .KECCAK256)
+      ⟨(four p).offset::(four p).length::[],frameBytes (copied p)⟩=
+      some ⟨Environment.digest [2,255,0,0]::[],frameBytes (copied p)⟩ ∧
+    (Environment.digest [2,255,0,0]).val.toNat=((hashGlob p).fixed.hash [2,255,0,0]).val :=
+  copied_builtin_hash (image p) (hashGlob p) F n 0 .here hashState inputOffset (four p) [] rfl rfl rfl
+
+/-- info: true -/
+#guard_msgs in #eval
+  match ((Source.evalBuiltin (hashGlob .legacy) F 3 .keccak256
+    (.cons (.local .here) .nil) .bytes32).run hashState).1 with
+  | .ok (.val value) => value.word.map Fin.val==some (Roadmap.Evm.keccakWord [2,255,0,0])
+  | _ => false
+/-- info: false -/
+#guard_msgs in #eval
+  match ((Source.evalBuiltin (hashGlob .viaIR) F 3 .keccak256
+    (.cons (.local .here) .nil) .bytes32).run hashState).1 with
+  | .ok (.val value) => value.word.map Fin.val==some (Roadmap.Evm.keccakWord [1,2,255,0])
+  | _ => true
+
+/-- info: true -/
+#guard_msgs in #eval
+  match ((Source.evalBuiltin (hashGlob .legacy) F 2 .keccak256
+    (.cons (.local .here) .nil) .bytes32).run hashState).1 with
+  | .error .timeout => true
+  | _ => false
+/-- info: true -/
+#guard_msgs in #eval
+  let missing : Source.EMState E [.bytes .memory] := (hashState.1,Source.St.init E)
+  match ((Source.evalBuiltin (hashGlob .viaIR) F 3 .keccak256
+    (.cons (.local .here) .nil) .bytes32).run missing).1 with
+  | .error (.stuck "dangling memory reference") => true
+  | _ => false
+
 end Solidity.Yul.Adapters.P6Inputs.Controls

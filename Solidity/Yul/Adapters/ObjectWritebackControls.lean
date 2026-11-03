@@ -103,4 +103,76 @@ private def observed : List Nat :=
 #guard_msgs in #eval observed
 /-- info: false -/
 #guard_msgs in #eval decide (observed=[1,255,255,0])
+private def accepted : List (Request E) := requests++[(0,⟨.bytes .memory,.bytes [77]⟩)]
+private def failing : List (Request E) :=
+  accepted++[(0,⟨.string .memory,.string [88]⟩),(0,⟨.bytes .memory,.bytes [99]⟩)]
+
+/-- Heterogeneous roots, repeated same-root update and late type error use the
+computed prefix, not a caller-supplied successful run. -/
+theorem checked_mixed : ∃ z,
+    (putAll accepted).run y=(.ok (),z) ∧
+    (putAll failing).run y=(.error (.stuck "memory write type"),z) ∧
+    z.2.heap.ty=y.2.heap.ty ∧ z.2.heap.next=4 ∧ Source.MemOK E y.2.heap.ty z := by
+  have pre : failing.takeWhile (fun request=>decide (y.2.heap.ty request.1=some request.2.1))=accepted := by rfl
+  have prepared : ∀ request∈failing.takeWhile (fun request=>decide (y.2.heap.ty request.1=some request.2.1)),
+      Prepared y request.2 := by
+    rw [pre]
+    intro request member
+    simp only [accepted,List.mem_append,List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with old | rfl
+    · exact (ready request old).2
+    · exact ⟨.bytes _,trivial,trivial⟩
+  obtain ⟨z,run,failed,types,next,locals,state,other,mem⟩ := all_types_checked y failing prepared
+  rw [pre] at run
+  have failed' : (putAll failing).run y=(.error (.stuck "memory write type"),z) := failed
+  exact ⟨z,run,failed',types,next,mem _ initial_MemOK⟩
+
+/-- The two real shared-child reads survive the error and observe the final
+successful same-root write; the later99 packet never executes. -/
+theorem checked_shared_child :
+    let z:=((putAll failing).run y).2
+    (Source.memElem (E:=E) (Γ:=[]) 3 0 (.bytes .memory)).run z=(.ok (.memRef rfl 0),z) ∧
+    (Source.memElem (E:=E) (Γ:=[]) 3 1 (.bytes .memory)).run z=(.ok (.memRef rfl 0),z) ∧
+    (Source.heapBytes (E:=E) (Γ:=[]) 0).run z=(.ok [77],z) := ⟨rfl,rfl,rfl⟩
+
+/-- info: ([77], [128, 255]) -/
+#guard_msgs in #eval
+  let z:=((putAll failing).run y).2
+  (((Source.heapBytes (E:=E) (Γ:=[]) 0).run z).1.toOption.getD [],
+   ((Source.heapBytes (E:=E) (Γ:=[]) 1).run z).1.toOption.getD [])
+/-- info: (false, false) -/
+#guard_msgs in #eval
+  let z:=((putAll failing).run y).2
+  let bs:=((Source.heapBytes (E:=E) (Γ:=[]) 0).run z).1.toOption.getD []
+  (bs==[99],bs==[1,255])
+
+/-- Four actual heterogeneous roots reverse with identical complete Source
+results, including shared-child representation and all nonheap fields. -/
+theorem reverse_runs : (putAll requests).run y=(putAll requests.reverse).run y := by
+  apply putAll_perm y requests requests.reverse (List.reverse_perm requests).symm
+  · intro request member
+    exact (ready request member).1
+  · decide
+
+/-- Actual shared children also read the same object through the reversed run. -/
+theorem reverse_shared_children :
+    let z:=((putAll requests.reverse).run y).2
+    (Source.memElem (E:=E) (Γ:=[]) 3 0 (.bytes .memory)).run z=(.ok (.memRef rfl 0),z) ∧
+    (Source.memElem (E:=E) (Γ:=[]) 3 1 (.bytes .memory)).run z=(.ok (.memRef rfl 0),z) ∧
+    (Source.heapBytes (E:=E) (Γ:=[]) 0).run z=(.ok [9,8,7],z) := by
+  have states := congrArg Prod.snd reverse_runs
+  dsimp only
+  rw [←states]
+  exact shared_child_reads
+
+private def childAfter (xs : List (Request E)) : Roadmap.Bytes :=
+  let z:=((putAll xs).run y).2
+  ((Source.heapBytes (E:=E) (Γ:=[]) 0).run z).1.toOption.getD []
+/-- info: false -/
+#guard_msgs in #eval decide ((accepted.map Prod.fst).Nodup)
+/-- info: (false, false) -/
+#guard_msgs in #eval
+  (childAfter accepted==childAfter accepted.reverse,
+   childAfter failing==childAfter failing.reverse)
+
 end Solidity.Yul.Adapters.ObjectWriteback.Controls

@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.PhysicalFrameImage
+import Solidity.Yul.Adapters.MemoryBytes
 
 /-! Bounded byte operations on the EXISTING typed invocation-frame image.
 Capacity/physical Word fit/Source adequacy are distinct obligations. This module
@@ -114,6 +115,15 @@ theorem copy_image (μ : FrameMem C Γ) (source destination : ByteSpan μ.capaci
   unfold copySnapshot
   rw [touch_image,write_image,frame_snapshot_read]
 
+/-- The actual bounded frame update agrees with the lightweight byte-view
+snapshot copy. Byte-map agreement does not erase access accounting. -/
+theorem copy_view (μ : FrameMem C Γ) (source destination : ByteSpan μ.capacity) (same) :
+    frameBytes (copySnapshot μ source destination same)=
+      Views.mcopy (frameBytes μ) destination.offset.val.toNat source.offset.val.toNat
+        destination.length.val.toNat := by
+  rw [copy_image,←same]
+  exact (MemoryBytes.copy_eq_write_read _ _ _ _ _).symm
+
 theorem copy_empty (μ : FrameMem C Γ) (source destination : ByteSpan μ.capacity) (same)
     (empty : source.length.val.toNat=0) : copySnapshot μ source destination same=μ := by
   have destEmpty : destination.length.val.toNat=0 := by rw [←same];exact empty
@@ -170,21 +180,7 @@ may still record reading a formerly unaccessed zero range. -/
 theorem copy_self_image (μ : FrameMem C Γ) (s : ByteSpan μ.capacity) :
     frameBytes (copySnapshot μ s s rfl)=frameBytes μ := by
   rw [copy_image]
-  funext k
-  by_cases inside : s.offset.val.toNat≤k ∧ k<s.offset.val.toNat+s.length.val.toNat
-  · have add : s.offset.val.toNat+(k-s.offset.val.toNat)=k := by omega
-    have bound : k-s.offset.val.toNat<(Environment.readMemory (frameBytes μ)
-        s.offset.val.toNat s.length.val.toNat).length := by
-      simp only [Environment.readMemory,List.length_map,List.length_range]
-      omega
-    have writtenAt:=Environment.writeBytes_at (Environment.readMemory (frameBytes μ)
-      s.offset.val.toNat s.length.val.toNat) s.offset.val.toNat (k-s.offset.val.toNat) (frameBytes μ) bound
-    rw [add] at writtenAt
-    rw [writtenAt]
-    simp only [Environment.readMemory,List.getElem_map,List.getElem_range,add]
-  · exact Environment.writeBytes_frame _ _ _ _ (by
-      simp only [Environment.readMemory,List.length_map,List.length_range]
-      omega)
+  exact MemoryBytes.write_read_identity _ _ _
 
 /-- Numeric conversion to the existing independent failure-slice Word. -/
 def wireWord (w : Environment.Word) : Roadmap.Word :=
@@ -219,6 +215,16 @@ theorem store8_target (μ : FrameMem C Γ) (offset value : Environment.Word)
     (fits : offset.val.toNat+1≤μ.capacity) (tail : List Environment.Word) :
     Environment.dataStep (.op .MSTORE8) ⟨offset::value::tail,frameBytes μ⟩=
       some ⟨tail,frameBytes (store8 μ offset value fits)⟩ := by
+  unfold store8
+  rw [write_image]
+  rfl
+
+/-- Existing MSTORE8 frame bytes and the byte-view operation agree on exact
+low-byte truncation, with the original physical-fit premise unchanged. -/
+theorem store8_view (μ : FrameMem C Γ) (offset value : Environment.Word)
+    (fits : offset.val.toNat+1≤μ.capacity) :
+    frameBytes (store8 μ offset value fits)=
+      Views.mstore8 (frameBytes μ) offset.val.toNat (wireWord value) := by
   unfold store8
   rw [write_image]
   rfl

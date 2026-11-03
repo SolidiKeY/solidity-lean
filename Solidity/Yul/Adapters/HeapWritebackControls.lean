@@ -145,4 +145,70 @@ private def sourceObservation (xs : List Write) : Nat × Nat :=
 #guard_msgs in #eval sourceObservation (writes++[(Evm.wmod 1,Evm.wmod 9)])
 /-- info: false -/
 #guard_msgs in #eval decide ((sourceObservation (writes++[(Evm.wmod 1,Evm.wmod 9)])).2=7)
+private def accepted : List Write := [(Evm.wmod 0,Evm.wmod 9),(Evm.wmod 0,Evm.wmod 17)]
+private def withLateFailure : List Write :=
+  accepted++[(Evm.wmod 1,Evm.wmod 88),(Evm.wmod 0,Evm.wmod 99)]
+
+/-- Complete error plus coupled reached images; the suffix after the first
+bad index cannot overwrite the caller's successful repeated-write prefix. -/
+theorem checked_failure : ∃ (out : Heap H) (z : Source.EMState E Γ),
+    (sourceWrites F 0 0 accepted).run source=(.ok (),z) ∧
+    (sourceWrites F 0 0 withLateFailure).run source=
+      (.error (.revert (Source.panicData .index)),z) ∧
+    UintArrayAt z 0 out root (Evm.wmod 1) (wordWrites (Evm.wmod 1) m accepted)
+      (byteWrites (Evm.wmod 1) (frameBytes image) accepted) ∧
+    Source.MemOK E source.2.heap.ty z := by
+  obtain ⟨out,z,run,failed,repr,len,locals,other,mem⟩ := run_checked initial F 0 withLateFailure
+  have pre : withLateFailure.takeWhile (fun x=>decide (x.1.val<hp.len root .dyn))=accepted := by
+    rw [length]
+    decide
+  have rest : withLateFailure.dropWhile (fun x=>decide (x.1.val<hp.len root .dyn))≠[] := by
+    rw [length]
+    decide
+  rw [pre] at run repr
+  rw [if_neg rest] at failed
+  exact ⟨out,z,run,failed,repr,mem _ source_initial_MemOK⟩
+
+/-- info: (0, 17) -/
+#guard_msgs in #eval sourceObservation withLateFailure
+/-- info: (17, 170, 1) -/
+#guard_msgs in #eval observe accepted
+/-- info: (false, false, false) -/
+#guard_msgs in #eval
+  ((sourceObservation withLateFailure).2==99,
+   (sourceObservation withLateFailure).2==7,
+   (observe accepted).2.1==0)
+/-- info: true -/
+#guard_msgs in #eval
+  match (sourceWrites F 0 0 withLateFailure).run source with
+  | (.error (.revert payload),_) => payload==Source.panicData .index
+  | _ => false
+
+/-- Both actual retained local expressions observe the reached prefix after
+late failure, at every positive indexing horizon, with exact physical bytes. -/
+theorem checked_aliases (G : Source.Glob E) (n : Nat) :
+    let result := (sourceWrites F 0 0 withLateFailure).run source
+    ∃ value : PrimTy.uint.Denote,
+      result.1=.error (.revert (Source.panicData .index)) ∧
+      (Source.evalE G F (n+2) (.indexArray (.local .here)
+        (.local (.there (.there .here))) rfl)).run result.2=
+        (.ok (.val (sourceUint value)),result.2) ∧
+      (Source.evalE G F (n+2) (.indexArray (.local (.there .here))
+        (.local (.there (.there .here))) rfl)).run result.2=
+        (.ok (.val (sourceUint value)),result.2) ∧
+      Environment.readMemory (byteWrites (Evm.wmod 1) (frameBytes image) accepted) 64 32=
+        Semantics.wordBytes value.val.toNat ∧
+      Source.MemOK E source.2.heap.ty result.2 := by
+  obtain ⟨value,status,read,physical,aliases,mem⟩ := checked_reads initial F 0 withLateFailure
+    (Evm.wmod 0) (.there (.there .here)) rfl (by rw [length];decide)
+  have pre : withLateFailure.takeWhile (fun x=>decide (x.1.val<hp.len root .dyn))=accepted := by
+    rw [length]
+    decide
+  have rest : withLateFailure.dropWhile (fun x=>decide (x.1.val<hp.len root .dyn))≠[] := by
+    rw [length]
+    decide
+  rw [if_neg rest] at status
+  rw [pre] at physical
+  exact ⟨value,status,aliases G n .here rfl,aliases G n (.there .here) rfl,physical,mem _ source_initial_MemOK⟩
+
 end Solidity.Yul.Adapters.HeapWriteback.Controls

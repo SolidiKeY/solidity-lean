@@ -150,4 +150,90 @@ theorem retained_aliases {H : HTy} {y : Source.EMState E Γ} {address : Nat} {hp
   have ik : z.1.get index=sourceUint (Evm.Memory.indexValue k) := by rw [locals];exact indexed
   have hk : k.val<out.len r .dyn := by rw [len];exact bound
   exact repr.source.eval_index G F n alias index (Evm.Memory.indexValue k) root ik hk
+/-- Complete execution for ANY finite list, with its first invalid index
+computed from the represented object's actual length. The successful prefix
+retains the refreshed Source/word/byte relation and every initial MemOK.
+The suffix after a real bounds halt is not executed or reclassified as None. -/
+theorem run_checked {E : Source.Env} {Γ : Source.RCtx} {H : HTy} {y : Source.EMState E Γ}
+    {address : Nat} {hp : Heap H} {r : HRef H (.array (.prim .uint))}
+    {base : Fin Evm.W} {m : Evm.Machine} {bytes : Environment.Memory}
+    (initial : UintArrayAt y address hp r base m bytes) (F : Source.Fr) (fuel : Nat) (xs : List Write) :
+    let good := fun x : Write=>decide (x.1.val<hp.len r .dyn)
+    let accepted := xs.takeWhile good
+    let suffix := xs.dropWhile good
+    ∃ (out : Heap H) (z : Source.EMState E Γ),
+      (sourceWrites F fuel address accepted).run y=(.ok (),z) ∧
+      (sourceWrites F fuel address xs).run y=
+        ((if suffix=[] then .ok () else .error (.revert (Source.panicData .index))),z) ∧
+      UintArrayAt z address out r base (wordWrites base m accepted) (byteWrites base bytes accepted) ∧
+      out.len r .dyn=hp.len r .dyn ∧ z.1=y.1 ∧
+      (∀ b,b≠address → z.2.heap.get b=y.2.heap.get b) ∧
+      (∀ initialH : Source.HeapTy,Source.MemOK E initialH y → Source.MemOK E initialH z) := by
+  dsimp only
+  let good := fun x : Write=>decide (x.1.val<hp.len r .dyn)
+  have valid : ∀ x∈xs.takeWhile good,x.1.val<hp.len r .dyn := by
+    intro x member
+    exact of_decide_eq_true (List.all_eq_true.mp (List.all_takeWhile (p:=good) (l:=xs)) x member)
+  obtain ⟨out,z,run,repr,len,locals,other,mem⟩ := run_writes initial F fuel (xs.takeWhile good) valid
+  refine ⟨out,z,run,?_,repr,len,locals,other,mem⟩
+  have split : xs.takeWhile good ++ xs.dropWhile good=xs := List.takeWhile_append_dropWhile
+  have sequence : sourceWrites (E:=E) (Γ:=Γ) F fuel address xs=
+      (sourceWrites F fuel address (xs.takeWhile good) >>= fun _=>
+        sourceWrites F fuel address (xs.dropWhile good)) := by
+    exact (congrArg (fun ws=>sourceWrites (E:=E) (Γ:=Γ) F fuel address ws) split).symm.trans
+      (source_append F fuel address _ _)
+  rw [sequence,Source.Hoare.run_bind,run]
+  change (sourceWrites F fuel address (xs.dropWhile good)).run z=
+    ((if xs.dropWhile good=[] then .ok () else .error (.revert (Source.panicData .index))),z)
+  cases tail : xs.dropWhile good with
+  | nil => rfl
+  | cons x rest =>
+    have bad := List.head?_dropWhile_not good xs
+    rw [tail] at bad
+    have no : ¬x.1.val<hp.len r .dyn := of_decide_eq_false bad
+    have bound : out.len r .dyn≤x.1.val := by rw [len];omega
+    change ((do
+      Source.writeLoc F fuel (.mem address x.1.val) (sourceUint (Evm.Memory.indexValue x.2))
+      sourceWrites F fuel address rest)).run z=(.error (.revert (Source.panicData .index)),z)
+    rw [Source.Hoare.run_bind,P6Memory.source_bounds repr F fuel x.1.val x.2 bound]
+
+/-- Read the ACTUAL returned state after either success or the first bounds
+halt. All retained local aliases and complete physical word bytes observe the
+same reached value. This is local prefix preservation, not rollback or an
+arbitrary recursive-intermediate capture theorem. -/
+theorem checked_reads {E : Source.Env} {Γ : Source.RCtx} {H : HTy} {y : Source.EMState E Γ}
+    {address : Nat} {hp : Heap H} {r : HRef H (.array (.prim .uint))}
+    {base : Fin Evm.W} {m : Evm.Machine} {bytes : Environment.Memory}
+    (initial : UintArrayAt y address hp r base m bytes) (F : Source.Fr) (fuel : Nat) (xs : List Write)
+    (k : Fin Evm.W) (index : Source.Idx Γ (.int .u256))
+    (indexed : y.1.get index=sourceUint (Evm.Memory.indexValue k)) (bound : k.val<hp.len r .dyn) :
+    let good := fun x : Write=>decide (x.1.val<hp.len r .dyn)
+    let accepted := xs.takeWhile good
+    let result := (sourceWrites F fuel address xs).run y
+    ∃ value : PrimTy.uint.Denote,
+      result.1=(if xs.dropWhile good=[] then .ok () else .error (.revert (Source.panicData .index))) ∧
+      (Source.readLoc (E:=E) (Γ:=Γ) F (τ:=.int .u256) (.mem address k.val)).run result.2=
+        (.ok (sourceUint value),result.2) ∧
+      Environment.readMemory (byteWrites base bytes accepted) (32*(base.val+1+k.val)) 32=
+        Semantics.wordBytes value.val.toNat ∧
+      (∀ (G : Source.Glob E) (n : Nat) (alias : Source.Idx Γ (.array .memory (.int .u256) none)),
+        y.1.get alias=.memRef rfl address →
+        (Source.evalE G F (n+2) (.indexArray (.local alias) (.local index) rfl)).run result.2=
+          (.ok (.val (sourceUint value)),result.2)) ∧
+      (∀ initialH : Source.HeapTy,Source.MemOK E initialH y → Source.MemOK E initialH result.2) := by
+  dsimp only
+  obtain ⟨out,z,acceptedRun,complete,repr,len,locals,other,mem⟩ := run_checked initial F fuel xs
+  rw [complete]
+  dsimp only
+  have valid : k.val<out.len r .dyn := by rw [len];exact bound
+  obtain ⟨value,selected,read,physical,load⟩ := repr.read F k valid
+  refine ⟨value,rfl,read,physical,?_,mem⟩
+  intro G n alias found
+  have root : z.1.get alias=.memRef rfl address := by rw [locals];exact found
+  have ik : z.1.get index=sourceUint (Evm.Memory.indexValue k) := by rw [locals];exact indexed
+  have selectedValue : (MObj.elems .dyn (out.get r))[k.val]'valid=value :=
+    Option.some.inj ((List.getElem?_eq_getElem valid).symm.trans selected)
+  have observed := repr.source.eval_index G F n alias index (Evm.Memory.indexValue k) root ik valid
+  simpa only [Evm.Memory.indexValue,Int.toNat_natCast,selectedValue] using observed
+
 end Solidity.Yul.Adapters.HeapWriteback

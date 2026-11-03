@@ -1,5 +1,11 @@
 import Solidity.Evm.MemoryRecursiveRoom
+import Solidity.Evm.MemoryRecursiveDemandBounds
 import Solidity.Evm.MemoryAllocSourceExamples
+
+/-! Allocating recursive-loop controls over the existing intrinsic source.
+The body stops after its first successful turn. Computed recursive demands are
+bounded by one word, and an actual allocator input discharges Room. The original
+conditional correctness API is preserved alongside that concrete proof. -/
 namespace Solidity.Evm.Memory.Recursive.AllocationControls
 private def C : Contract := contract!{}
 private def Γ : Ctx := [.val .uint]
@@ -38,6 +44,50 @@ theorem correct (room : Room compiled.cert 6 state bases machine) :
       (fun out amount=>Cost compiled.cert state out amount)
       (program.run state) (run compiled.code machine) :=
   compiled.correct ⟨initial.1,frame_need,room⟩
+
+private theorem skipped_run (σ : State C Δ) : skipped.run σ=.ok ⟨σ,List.prefix_refl _⟩ := by
+  rw [show skipped=Stmt.loop .auto (.simple (.bool false)) (skippedBody 3) from rfl,Stmt.run_loop]
+  exact TLoop.run_of_iterN (n:=1) rfl
+
+/-- The actual allocating/resetting body stops for every successful source run,
+including its recursively nested but unentered false loops. -/
+theorem body_stops (σ : State C Γ) (out : Solidity.Out C σ.H Δ)
+    (run : body.run σ=.ok out) : condition.evalT (out.st.drop body.ext)=.ok false := by
+  have allocated : allocate.run σ=.ok ⟨σ.allocPush (defaultArray .uint ⟨0,W_pos⟩),List.prefix_append _ _⟩ :=
+    newArray_decl σ .uint (.lit 0 rfl) ⟨0,W_pos⟩ rfl
+  have resetRun : reset.run (σ.allocPush (defaultArray .uint ⟨0,W_pos⟩))=
+      .ok ⟨(σ.allocPush (defaultArray .uint ⟨0,W_pos⟩)).setLocal (.there .here) (indexValue ⟨0,W_pos⟩),List.prefix_refl _⟩ := rfl
+  change (Prog.cons allocate (.cons reset (.cons skipped .nil))).run σ=.ok out at run
+  rw [Prog.run_cons_ok allocated,Prog.run_cons_ok resetRun,Prog.run_cons_ok (skipped_run _)] at run
+  cases run
+  rfl
+
+/-- Actual source allocator representation and cursor room for one word.
+Availability is separate from the source demand bound below. -/
+theorem one_word_input : AllocationInput 1 6 1 state bases machine := by
+  exact .inr ⟨by decide,wmod 16,initial.2,by decide +kernel⟩
+
+/-- Every actual reached demand of the computed recursive certificate consumes
+at most its one allocating word, including completed and partial loop prefixes. -/
+theorem demand_bound (amount : Nat) (demand : Demand compiled.cert state amount) : amount≤1 := by
+  unfold compiled at demand
+  apply demand_cons_nil_le _ state 1 ?_ demand
+  intro amount inner
+  apply stmtDemand_loop_one_turn_le _ _ _ _ state 1 body_stops ?_ ?_ inner
+  · intro amount later
+    apply demand_cons_base_nonallocating_le _ _ state 1 ?_ ?_ later
+    · decide +kernel
+    · decide +kernel
+  · intro out amount cost
+    apply cost_cons_base_nonallocating_le _ _ state 1 ?_ ?_ cost
+    · decide +kernel
+    · decide +kernel
+
+/-- Concrete allocator room derived from the demand bound and represented cursor,
+not from frame capacity or an assumed execution agreement. -/
+theorem actual_room : Room compiled.cert 6 state bases machine := by
+  intro amount demand
+  exact one_word_input.of_le (demand_bound amount demand)
 
 private def sourceObserve (r : TRes (Solidity.Out C [] Γ)) : Option (Int × Nat) := do
   let out ← r.toOption

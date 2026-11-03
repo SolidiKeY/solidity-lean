@@ -121,4 +121,45 @@ private def observedBoth (p : Pipeline) (reverse : Bool) : List Nat :=
 #guard_msgs in #eval observedBoth .viaIR true
 /-- info: false -/
 #guard_msgs in #eval decide (observedBoth .legacy false=[255,0,9,128,255,0,256,0])
+private def checkedSpecs (text : Bool) : List (Bool × Nat × Nat) :=
+  [(text,0,128),(!text,0,128),(text,0,0)]
+
+/-- Both bytes/string and pipeline tags retain the first decoded payload on a
+real Source mismatch; the later header0 request is never executed. -/
+theorem checked_snapshot (text : Bool) (p : Pipeline) : ∃ z,
+    (ObjectWriteback.putAll (packets (E:=E) (image p) (checkedSpecs text))).run (y text)=
+      (.error (.stuck "memory write type"),z) ∧
+    Source.MemOK E (y text).2.heap.ty z ∧
+    (Source.heapBytes (E:=E) (Γ:=[]) 0).run z=(.ok [255,0,9],z) := by
+  let requests := packets (E:=E) (image p) (checkedSpecs text)
+  let good := fun request : ObjectWriteback.Request E=>decide ((y text).2.heap.ty request.1=some request.2.1)
+  obtain ⟨z,run,complete,types,next,locals,state,other,mem,raw⟩ :=
+    commit_many_checked (image p) (checkedSpecs text) (y text)
+  have head : (ObjectWriteback.putAll (requests.takeWhile good)).run (y text)=
+      (commit (image p) text 0 128).run (y text) := by cases text <;> rfl
+  have stop : (requests.dropWhile good).isEmpty=false := by cases text <;> rfl
+  change (ObjectWriteback.putAll (requests.takeWhile good)).run (y text)=(.ok (),z) at run
+  rw [head] at run
+  change (ObjectWriteback.putAll requests).run (y text)=
+    ((if (requests.dropWhile good).isEmpty then .ok () else .error (.stuck "memory write type")),z) at complete
+  simp only [stop,Bool.false_eq_true,if_false] at complete
+  obtain ⟨out,first,ok,read⟩ := changed_source text p
+  have same : z=out := congrArg Prod.snd (run.symm.trans first)
+  refine ⟨z,complete,mem _ (initial_MemOK text),?_⟩
+  rw [same]
+  exact read
+
+private def checkedObserved (text : Bool) (p : Pipeline) : List Nat :=
+  let result := (ObjectWriteback.putAll (packets (E:=E) (image p) (checkedSpecs text))).run (y text)
+  let status := match result.1 with | .error (.stuck "memory write type")=>1 | _=>0
+  let value := ((Source.heapBytes (E:=E) (Γ:=[]) 0).run result.2).1.toOption.getD []
+  status::value.map UInt8.toNat
+/-- info: [1, 255, 0, 9] -/
+#guard_msgs in #eval checkedObserved false .legacy
+/-- info: [1, 255, 0, 9] -/
+#guard_msgs in #eval checkedObserved true .viaIR
+/-- info: (false, false) -/
+#guard_msgs in #eval
+  (checkedObserved false .viaIR==[1],checkedObserved true .legacy==[1,1,2])
+
 end Solidity.Yul.Adapters.PhysicalObject.Controls

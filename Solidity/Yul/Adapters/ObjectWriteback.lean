@@ -150,4 +150,100 @@ theorem late_type_error (y : Source.EMState E Γ) (xs : List (Request E))
   rw [putAll_append,Source.Hoare.run_bind,run]
   change (putAll [(a,x)]).run z=_
   rw [putAll,Source.Hoare.run_bind,failure z a x (by rw [types];exact wrong)]
+/-- Arbitrary finite dependent object requests stop at their first actual
+heapPut type mismatch. Only the computed executed prefix needs the owner's
+DataOK/Top/Inner facts. All metadata, other roots and every initial MemOK
+survive; no suffix executes and no rollback is invented. -/
+theorem all_types_checked {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) (xs : List (Request E))
+    (prepared : ∀ request∈xs.takeWhile (fun request=>decide (y.2.heap.ty request.1=some request.2.1)),
+      Prepared y request.2) :
+    let good := fun request : Request E=>decide (y.2.heap.ty request.1=some request.2.1)
+    let accepted := xs.takeWhile good
+    let suffix := xs.dropWhile good
+    ∃ z, (putAll accepted).run y=(.ok (),z) ∧
+      (putAll xs).run y=((if suffix.isEmpty then .ok () else .error (.stuck "memory write type")),z) ∧
+      z.2.heap.ty=y.2.heap.ty ∧ z.2.heap.next=y.2.heap.next ∧ z.1=y.1 ∧
+      z.2={y.2 with heap:=z.2.heap} ∧
+      (∀ b,(∀ request∈accepted,b≠request.1) → z.2.heap.get b=y.2.heap.get b) ∧
+      (∀ H : Source.HeapTy,Source.MemOK E H y → Source.MemOK E H z) := by
+  dsimp only
+  let good := fun request : Request E=>decide (y.2.heap.ty request.1=some request.2.1)
+  have ready : ∀ request∈xs.takeWhile good,
+      y.2.heap.ty request.1=some request.2.1 ∧ Prepared y request.2 := by
+    intro request member
+    exact ⟨of_decide_eq_true (List.all_eq_true.mp (List.all_takeWhile (p:=good) (l:=xs)) request member),
+      prepared request member⟩
+  obtain ⟨z,run,types,next,locals,state,other,mem⟩ := all_types y (xs.takeWhile good) ready
+  refine ⟨z,run,?_,types,next,locals,state,other,mem⟩
+  have split : xs.takeWhile good ++ xs.dropWhile good=xs := List.takeWhile_append_dropWhile
+  have sequence : putAll (Γ:=Γ) xs=(putAll (xs.takeWhile good) >>= fun _=>putAll (xs.dropWhile good)) :=
+    (congrArg (fun ws=>putAll (Γ:=Γ) ws) split).symm.trans (putAll_append _ _)
+  rw [sequence,Source.Hoare.run_bind,run]
+  change (putAll (xs.dropWhile good)).run z=
+    ((if (xs.dropWhile good).isEmpty then .ok () else .error (.stuck "memory write type")),z)
+  cases tail : xs.dropWhile good with
+  | nil => rfl
+  | cons request rest =>
+    have bad := List.head?_dropWhile_not good xs
+    rw [tail] at bad
+    have no : y.2.heap.ty request.1≠some request.2.1 := of_decide_eq_false bad
+    have wrong : z.2.heap.ty request.1≠some request.2.1 := by rw [types];exact no
+    change ((do Source.heapPut request.1 request.2;putAll rest)).run z=
+      (.error (.stuck "memory write type"),z)
+    rw [Source.Hoare.run_bind,failure z request.1 request.2 wrong]
+
+/-- Distinct typed object updates commute as COMPLETE actual Source runs,
+including locals and all nonheap fields. This operational law does not infer
+data safety or permit reordering same-root aliases or failing type guards. -/
+theorem put_pair_commute {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) (a b : Nat)
+    (x u : Σ τ, Source.Data E.layout τ)
+    (tx : y.2.heap.ty a=some x.1) (tu : y.2.heap.ty b=some u.1) (different : a≠b) :
+    (putAll [(a,x),(b,u)]).run y=(putAll [(b,u),(a,x)]).run y := by
+  simp only [putAll,Source.Hoare.run_bind]
+  rw [success y a x tx,success y b u tu]
+  dsimp only
+  rw [success _ b u ((Source.Heap.write_ty y.2.heap a b x.2 tx).trans tu),
+    success _ a x ((Source.Heap.write_ty y.2.heap b a u.2 tu).trans tx)]
+  dsimp only
+  rw [heap_commute y.2.heap a b x.2 u.2 tx tu different]
+
+/-- Any permutation of type-correct requests to pairwise distinct actual
+object IDs has the identical COMPLETE Source result/state. No data equality,
+no alias exclusion from the language, and no physical decoder is introduced.
+Data safety still uses the separate existing Prepared/MemOK theorems. -/
+theorem putAll_perm {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ)
+    (xs ys : List (Request E)) (permutation : xs.Perm ys)
+    (typed : ∀ request∈xs,y.2.heap.ty request.1=some request.2.1)
+    (distinct : (xs.map Prod.fst).Nodup) :
+    (putAll xs).run y=(putAll ys).run y := by
+  induction permutation generalizing y with
+  | nil => rfl
+  | @cons request left right permutation ih =>
+    obtain ⟨z,run,found,others,types,next,locals,state⟩ := writeback y request.1 request.2
+      (typed request (List.mem_cons_self))
+    have rest : ∀ r∈left,z.2.heap.ty r.1=some r.2.1 := by
+      intro r member
+      rw [types]
+      exact typed r (List.mem_cons_of_mem _ member)
+    have nodup : (left.map Prod.fst).Nodup := (List.nodup_cons.mp distinct).2
+    simp only [putAll,Source.Hoare.run_bind,run]
+    exact ih z rest nodup
+  | swap a b rest =>
+    have different : b.1≠a.1 := by
+      intro same
+      have no := (List.nodup_cons.mp distinct).1
+      apply no
+      rw [same]
+      exact List.mem_cons_self
+    have pair := put_pair_commute y b.1 a.1 b.2 a.2
+      (typed b List.mem_cons_self) (typed a (List.mem_cons_of_mem _ List.mem_cons_self)) different
+    change (putAll ([b,a]++rest)).run y=(putAll ([a,b]++rest)).run y
+    rw [putAll_append,Source.Hoare.run_bind,putAll_append,Source.Hoare.run_bind,pair]
+  | @trans first middle last p q ihp ihq =>
+    have midTyped : ∀ request∈middle,y.2.heap.ty request.1=some request.2.1 := by
+      intro request member
+      exact typed request (p.mem_iff.mpr member)
+    have midDistinct : (middle.map Prod.fst).Nodup := (p.map Prod.fst).nodup_iff.mp distinct
+    exact (ihp y typed distinct).trans (ihq y midTyped midDistinct)
+
 end Solidity.Yul.Adapters.ObjectWriteback

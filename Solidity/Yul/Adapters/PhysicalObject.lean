@@ -129,4 +129,36 @@ theorem unchanged_many (μ : FrameMem C Δ) (specs : List (Bool × Nat × Nat))
   obtain ⟨spec,hs,eq⟩:=List.mem_map.mp member
   subst request
   exact found spec hs
+/-- Decode one actual raw snapshot into dependent byte/string packets and
+execute through the first actual Source type error. The packet codecs derive
+all owner data invariants; no type-success or final-view law is supplied.
+Raw reconstruction retains all residual bytes. Allocation ownership and
+physical Within remain separate from this canonical snapshot preparation. -/
+theorem commit_many_checked {E : Source.Env} {Γ : Source.RCtx} {C : Contract} {Δ : Ctx}
+    (μ : FrameMem C Δ) (specs : List (Bool × Nat × Nat)) (y : Source.EMState E Γ) :
+    let requests := packets (E:=E) μ specs
+    let good := fun request : ObjectWriteback.Request E=>decide (y.2.heap.ty request.1=some request.2.1)
+    let accepted := requests.takeWhile good
+    ∃ z, (ObjectWriteback.putAll accepted).run y=(.ok (),z) ∧
+      (ObjectWriteback.putAll requests).run y=
+        ((if (requests.dropWhile good).isEmpty then .ok () else .error (.stuck "memory write type")),z) ∧
+      z.2.heap.ty=y.2.heap.ty ∧ z.2.heap.next=y.2.heap.next ∧ z.1=y.1 ∧
+      z.2={y.2 with heap:=z.2.heap} ∧
+      (∀ b,(∀ request∈accepted,b≠request.1) → z.2.heap.get b=y.2.heap.get b) ∧
+      (∀ H : Source.HeapTy,Source.MemOK E H y → Source.MemOK E H z) ∧
+      (∀ spec∈specs,Solidity.Yul.Views.bytesObjectView (payload (frameBytes μ) spec.2.2)
+        (payload_bound _ _) (frameBytes μ) spec.2.2=frameBytes μ) := by
+  dsimp only
+  have ready : ∀ request∈(packets (E:=E) μ specs).takeWhile
+      (fun request=>decide (y.2.heap.ty request.1=some request.2.1)),
+      ObjectWriteback.Prepared y request.2 := by
+    intro request member
+    have memberAll : request∈packets (E:=E) μ specs := List.takeWhile_subset _ member
+    obtain ⟨spec,hs,eq⟩ := List.mem_map.mp memberAll
+    subst request
+    exact prepared y spec.1 _ _
+  obtain ⟨z,run,complete,types,next,locals,state,other,mem⟩ :=
+    ObjectWriteback.all_types_checked y (packets μ specs) ready
+  exact ⟨z,run,complete,types,next,locals,state,other,mem,fun spec _=>reconstruct _ _⟩
+
 end Solidity.Yul.Adapters.PhysicalObject
