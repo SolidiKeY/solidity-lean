@@ -542,6 +542,18 @@ a failed gate. The original frozen base has a different checker and its native
 run exits 1. These results do not establish same-checker equality against the
 frozen base, nor replace the pending combined validation or producer proofs.
 
+## Published admission companion synchronization
+
+The lane consumes public `059eb83d4e1d494f42c532513ffbcd3e65adaf75`.
+Its H24 declaration-graph admission companion requires both the original P8a
+producer and admissible-location graphs with actual Source refusals. It supplies
+no inhabitant; no V09 admission or full Source closure follows from this import.
+The preserved pass source is unchanged. The warm touched closure passed with
+405 jobs. The library checkpoint stopped at its unchanged 300-second bound;
+that incomplete check remains separate from the passing touched closure and
+the coordinator's published-tree validation. A duplicate owned map row was
+removed after independent review, retaining the published row.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

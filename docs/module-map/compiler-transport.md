@@ -64,4 +64,3 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MemoryCallScopePins.lean` | Exact observed standard-only axiom guards for the corresponding compiler-pass proofs. |
 | `Backend/Passes/MemoryScopeAllocation.lean` | Inhabited positive allocation across scope exit with exact allocator ownership. |
 | `Backend/Passes/MemoryScopePins.lean` | Exact observed standard-only axiom guards for the corresponding compiler-pass proofs. |
-| `Backend/Passes/SourceAdditionValuePins.lean` | Exact observed standard-only axiom guards for the corresponding compiler-pass proofs. |
