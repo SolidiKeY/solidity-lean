@@ -165,3 +165,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceCalldataUintCopyControls.lean` | Actual populated uint Source/intrinsic copy clients. |
 | `Backend/MemoryOps/SourceCalldataUintMutation.lean` | Actual reached uint mutation after raw-input copy/local binding. |
 | `Backend/MemoryOps/SourceCalldataUintTransfer.lean` | One observed typed table object projected from the REAL numeric Source word decoder, then the EXISTING checked transfer. |
+
+| `Backend/MemoryOps/SourceCalldataSlice.lean` | Actual resolved uint calldata slice/conversion: computed shifted offset, ordered bounds and decoder/allocation outcomes. |
+| `Backend/MemoryOps/SourceCalldataSliceControls.lean` | Both-pipeline populated slice/copy with checked native allocation, complete old/alias/neighbour frames, exact-end, omitted-end, bounds, timeout and stale-window controls. |
