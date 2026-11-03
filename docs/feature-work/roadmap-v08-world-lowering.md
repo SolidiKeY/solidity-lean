@@ -3939,3 +3939,7 @@ The published feature-catalogue/HashingNames split justified a new bounded Decis
 ### Funded rethrow and explicit rollback
 
 `FundedRethrowRollbackControls.funded_client` consumes the actual funded prefix, canonical Source allocation/rethrow and intrinsic paid-frame/revert execution. Exact atomic halts and an explicit Source journal rollback restore the earlier account/funds image while the newly allocated Source heap remains. Ordered states, wrong-mark/heap/payload controls and real timeout boundaries distinguish raw errors from rollback; this does not establish catch selection, source call admission or compiler/frame/bytecode adequacy.
+
+### H24 admission companion
+
+Creation and library premise inputs now consume the published `DeclarationGraphAdmission.Producer`, retaining its original P8a producer through `.base` and the exact H15 declaration-graph admission/refusal obligation. The two consumers and their import closure kernel-check with all 27 existing axiom guards unchanged. This supplies no producer inhabitant or new constructor/body/frame/whole-unit adequacy.
