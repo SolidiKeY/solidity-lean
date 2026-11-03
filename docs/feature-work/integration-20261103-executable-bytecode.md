@@ -1,0 +1,14 @@
+# executable-bytecode integration checkpoint
+
+Producer: `a984969689f65ce934bb2eb29ff75383b1cfc02d`. This imports only the following modules:
+
+- `Solidity/Backend/Selection/ScalarSequence.lean`
+- `Solidity/Backend/Selection/ScalarSequenceControls.lean`
+- `Solidity/Backend/Selection/ScalarSequenceFrames.lean`
+- `Solidity/Backend/Selection/ScalarSequenceResources.lean`
+
+The increment preserves the producer statements, hypotheses and exclusions;
+it does not establish completion of the remaining lane queue.
+Touched-module and library checkpoint gates pass: trust, roots, orphans,
+layers, documentation paths and axiom inventory.
+Independent read-only finder and skeptic reviews are required before publication.
