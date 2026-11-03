@@ -21,9 +21,6 @@ so a leaf of `n` strings needs `n` strings with distinct hashes.  Up to
 `famCheck` computes the family's `3n` hashes (`famN`, `famOKAll`), and a
 coverage check asks for the same (`famCovered`). -/
 
-/-- **Two of five strings read alike**: refuted only by five classes, five
-strings with distinct bytes (`gapFiveStrings` until 2026-10-25). -/
-/-- A chain of equal hashes: proved. -/
 /-- info: ["refuted", "proved"] -/
 #guard_msgs in #eval [fiveStrings, fiveChain].map verdict
 

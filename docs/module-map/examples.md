@@ -136,3 +136,82 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/*.lean` | solkey's benchmark contracts with their `@custom:key` clauses proved (`Counter`, `SimpleStorage`, `Mapping`, `Purchase`, `Coin`, `EtherWallet`, `ERC20`), and `Syntax`, which pins what elaborates away (units, casts, events, errors, enums, struct constructors, modifiers). |
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+## VA1 decision automation
+
+| Module | What it defines |
+|---|---|
+| `Examples/DecisionAPF.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 802–825). |
+| `Examples/DecisionArithmetic.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 246–371). |
+| `Examples/DecisionArrayCore.lean` | Original array regression fixtures and coverage/answer certificates, preserved from DecisionArrays. |
+| `Examples/DecisionArrayGaps.lean` | Actual admitted unknown controls for fixed blocks, arrays below keys/fields and arrays of structs/arrays; kernel classification pins, direct positive validity and a typed negative state, without pipeline changes. |
+| `Examples/DecisionArrayReasons.lean` | Five actual class members, covered fixed-root nonmembers, mismatch/range/false-model controls and unchanged global unknowns. |
+| `Examples/DecisionArrayReplay.lean` | Original normalized arithmetic templates, exact private replay certificate and unchanged guarded verdict output; imports the fixture/coverage module. |
+| `Examples/DecisionBlocks.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 826–865). |
+| `Examples/DecisionBoundedInstance.lean` | Real keyed/field source clients, retained global unknowns, partial equality and mismatched consequent countermodel controls. |
+| `Examples/DecisionBoundedInstanceSearch.lean` | Nonfirst keyed/field hits, optional mismatch, zero/maximum-bound refusals, valid-but-refused and retained unknown controls. |
+| `Examples/DecisionBoundedUInt.lean` | Actual fixed-leaf expansion, guard refusals, zero/oversized bounds, partial operands and omitted-sample countermodel. |
+| `Examples/DecisionCoefficientBoundary.lean` | Inhabited covered/proved, covered/refuted and folded-source controls for the exact coefficient boundary, with kernel semantic certificates and unchanged validity/hash premises. |
+| `Examples/DecisionCompoundCertificate.lean` | Defined/undefined RHS readings, exact producer-state equalities, ordinary/hash countermodels and preserved target/unknown controls. |
+| `Examples/DecisionCompoundFieldReason.lean` | Buried-RHS exact-class decisions, literal/reversal/partial controls and same-child-heap ordinary/hash countermodel; global unknown preserved. |
+| `Examples/DecisionCore.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 1–245). |
+| `Examples/DecisionFixedArrayPair.lean` | Inhabited two-key saves, changed/frame reads, missing sibling refusal and overlapping-prefix countercontrol. |
+| `Examples/DecisionFixedArrayPath.lean` | Inhabited nested-array and mapping-key reconstruction, changed/interior reads, absent prefix and missing-length controls. |
+| `Examples/DecisionFixedArrayStorage.lean` | Non-default keyed/nested storage observations, absence and necessary length-breakpoint controls. |
+| `Examples/DecisionGapCensus.lean` | Kernel target/unknown/not-Covered pins for existing hidden-memory parameters and struct-equation near misses; original fixtures and observations unchanged. |
+| `Examples/DecisionGapCore.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 476–747). |
+| `Examples/DecisionGapData.lean` | Original typed Gaps contract without regression imports |
+| `Examples/DecisionGapHashes.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 960–979). |
+| `Examples/DecisionGapKInt.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 748–773). |
+| `Examples/DecisionGivenHeapComputedReason.lean` | Certified computed-index improvements, contextual/nonlinear controls, unchanged defined/partial/unset reads and two-defined-cell countermodel. |
+| `Examples/DecisionGivenHeapFixed.lean` | Real fixed-object observations, unequal-read/program-equality countermodels and pointer/length/binder/grammar refusals. |
+| `Examples/DecisionGivenHeapReason.lean` | Inhabited source/decidability controls, defined/unset/out-of-bounds observations, retained unknowns and given-heap/alias countermodels. |
+| `Examples/DecisionHaltingOrCertificate.lean` | Positive-key clients, zero-key halted guard and preserved unknown observations. |
+| `Examples/DecisionHaltingOrGaps.lean` | Actual negative mapping-block halting-OR unknowns, positive validity/false countermodel, illustrative floor-definedness hazard; separate existing Boolean lowering controls. |
+| `Examples/DecisionHaltingOrReason.lean` | Valid/false class members, actual full-leaf guard refusal, accepted total sibling and unchanged unknown controls. |
+| `Examples/DecisionHashCore.lean` | Basic hash verdict and coverage controls; fixtures and the noinline verdict observer are in `DecisionHashes`. |
+| `Examples/DecisionHashFamilies.lean` | Five-string family coverage clients, using the separately checked family facts. |
+| `Examples/DecisionHashFamilyCheck.lean` | Independent kernel checks of the five-word family and their axiom reports. |
+| `Examples/DecisionHashKeys.lean` | Mixed mapping-key verdict and coverage controls over shared definitions. |
+| `Examples/DecisionHashKinds.lean` | Compatibility entry point for three-kind and mixed-kind checks. |
+| `Examples/DecisionHashMixed.lean` | Partly linked mixed-kind verdict and coverage controls. |
+| `Examples/DecisionHashQuantifiers.lean` | Quantifier and hidden-memory refusal controls over unchanged hash fixtures. |
+| `Examples/DecisionHashThreeKinds.lean` | Three-kind verdict and coverage controls over shared fixture definitions. |
+| `Examples/DecisionHashUpdates.lean` | Written/update hash verdict and kernel coverage controls over the shared definitions. |
+| `Examples/DecisionLeafPreparation.lean` | False/halting sequencing, optional/strict equality, node-growth, environment restrictions and actual source numeric-preparation controls. |
+| `Examples/DecisionLedger.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 774–801). |
+| `Examples/DecisionMapping.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 372–475). |
+| `Examples/DecisionMappingFieldReason.lean` | Two inhabited mapping-bearing literals, constructive decisions, distinct-shape negatives and retained global unknowns. |
+| `Examples/DecisionMemoryFixtureData.lean` | Original literal, Boolean and universal helpers plus the memory fixture, without regression imports. |
+| `Examples/DecisionMemoryParameterData.lean` | Original typed repeated-read fixture without later regression imports |
+| `Examples/DecisionNegativeInstantiation.lean` | Actual inhabited fixed-root sample, preserved positive/halting/unknown controls and false-converse counterexample. |
+| `Examples/DecisionNumericBounds.lean` | Near-cap and uncovered-but-proved controls, large-source folding, failed-operand positive/refuted controls; source bound is not a Residue classifier. |
+| `Examples/DecisionNumericCompiler.lean` | Real517-node compiler/flattened certificates, strict-failure semantics, source composition and shallow nonlinear rejection. |
+| `Examples/DecisionNumericCoverage.lean` | Generic coverage applications, strict/partial/failed operands, positive and refuted certificates, larger-source and preserved unknown controls. |
+| `Examples/DecisionNumericFlatten.lean` | A 517-node optional partial body flattening/zero remainder, unchanged exact cap, strict/optional semantics and isolated depth/shared-node refusal controls. |
+| `Examples/DecisionNumericFormula.lean` | Partial/refuted source, strict literal/unused-prefix/empty-atom controls, actual proved/ValidH and extra-atom refusal; generic sequencing kept distinct. |
+| `Examples/DecisionNumericGround.lean` | Inhabited true/false coverage, optional failed-reading semantics and free-parameter exclusion controls for the ground numeric interface. |
+| `Examples/DecisionNumericGroundSource.lean` | Partial both-failed/mismatch and logical-combination source grammar, derived weights, global coverage and actual proved/refuted certificates. |
+| `Examples/DecisionNumericLogic.lean` | Actual logical source-to-leaf clients, source-derived coverage bounds, kernel proved/refuted certificates and free-parameter refusal. |
+| `Examples/DecisionNumericNormalization.lean` | Truth normalization, shared-budget refusal, source-bound coverage and certified positive/refuted clients. |
+| `Examples/DecisionNumericStages.lean` | Original517-node source stages and actual refuted ground-source stages with unchanged coverage/hash/verdict controls. |
+| `Examples/DecisionNumericTraversal.lean` | Concrete source certificates, insufficient fuel and sufficient-not-minimal weight controls, retained kernel verdicts. |
+| `Examples/DecisionNumericTwoPrefix.lean` | Inhabited actual two-prefix translation controls Both local positions occur in one arithmetic term. |
+| `Examples/DecisionNumericTwoPrefixFormula.lean` | Non-reflexive two-prefix equality producer client A term using both actual inputs is compared with a distinct literal. |
+| `Examples/DecisionOperators.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 904–959). |
+| `Examples/DecisionRefutations.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 866–903). |
+| `Examples/DecisionResidueReasons.lean` | Inhabited exact source-family decisions, covered/other-gap controls, hash refutation and producer-state equality; global gap pins preserved. |
+| `Examples/DecisionSourceBoundary.lean` | Five original source clients, inhabited antecedent, retained false fixed-array countermodel and fresh-allocation class exclusions. |
+| `Examples/DecisionSourceChain.lean` | Five existing array-source preparation outputs, inherited inhabited state, all-parameter false-source refusal and unchanged unknowns. |
+| `Examples/DecisionSourceDiscovery.lean` | Five actual array discovery/preparation clients, inhabited source, countermodel refusal, covered overlap and absent-value/zero controls; old global verdicts retained. |
+| `Examples/DecisionSourceInstance.lean` | All five remaining array source certificates, arrays-of-struct/arrays leaf refusal, mismatch/out-of-range/false-state controls and preserved global unknowns. |
+| `Examples/DecisionStorageArrays.lean` | Serial decision regression section; preserves the original `Examples.Decision` declarations (original lines 980–1080). |
+| `Examples/DecisionThreeKindCoverage.lean` | Original three-kind gap coverage theorem, with exact staged transformation and instance certificates. |
+| `Examples/DecisionThreeKindProof.lean` | Exact three-kind coverage certificate for the original decision gap pin. |
+| `Examples/DecisionUIntBridge.lean` | Inhabited pushed-local/missing-binding/nonlinear and both-/single-halting controls; actual source translations and certified proved/refuted leaves without pipeline changes. |
+| `Examples/DecisionUIntFormulaRecognizer.lean` | Numeric source membership is not semantic coverage The existing grammar accepts arithmetic logical combinations and rejects a symbolic product. |
+| `Examples/DecisionUIntPrefix.lean` | Exact prefix-zero partial-arithmetic output, both multiplication directions, unused binder, inherited positive/refuted and refusal controls. |
+| `Examples/DecisionUIntShape.lean` | Both literal-product orders, nested grammar, rejected nonlinear/nonliteral products and retained partial countermodel. |
+| `Examples/DecisionVerdictData.lean` | Existing general decision verdict renderer without regression imports. |
+| `Examples/FixedArrayFloor.lean` | Inhabited changed/retained, zero/past-length and nested fixed storage reads, with a missing-length countercontrol. |
+| `Examples/FixedArrayRoot.lean` | Inhabited selected-root, retained/halted, non-default other-root and unretained-formula countercontrols for fixed storage reconstruction. |

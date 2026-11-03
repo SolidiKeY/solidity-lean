@@ -20,12 +20,6 @@ continuation where the update lands (`Fml.HashIn`), so the second kind's
 words may be read there; the first kind's hash of each string is read at
 the top (`Fml.tkBody`). -/
 
-/-- `{ storage := save(storage, ids[0], 1) } φ`: `ids[0] = 1;`. -/
-/-- **`sha256(s) == sha256(t) → [ ids[0] = 1; ] keccak256(s) == keccak256(t)`**:
-proved; without the hypothesis, refuted. -/
-/-- A value local set in the leaf (`{ x := 1 }`): `∀ x s t. sha256(s) ==
-sha256(t) → { x := 1 } (keccak256(s) == keccak256(t) ∧ x == 1)`, proved;
-its false variant (`x == 2`) refuted. -/
 /-- info: ["proved", "refuted", "proved", "refuted"] -/
 #guard_msgs in #eval [namesLanded, namesLandedBad, namesSetLocal, namesSetLocalBad].map verdict
 

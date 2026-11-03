@@ -20,10 +20,6 @@ word is then read nowhere, and a refutation is moved, each such word set to
 follow its extra word's class, before the relabeling (`Fml.tk_complete_move`,
 `Calculus/HashMove.lean`). -/
 
-/-- `d`, `c`, `b`, `a`, innermost first. -/
-/-- **`keccak256(d) == keccak256(c) → sha256(b) == sha256(d) → sha256(b) ==
-sha256(c)`**: `c`, `d` linked, `b` hashed by `sha256` only: proved. -/
-/-- With `!=` last, refuted by one string three times. -/
 /-- info: ["proved", "refuted"] -/
 #guard_msgs in #eval [mixedSome, mixedSomeBad].map verdict
 

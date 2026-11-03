@@ -19,9 +19,6 @@ kind's words a layer of binders linked to the first kind's, the third
 kind's a layer inside it (`Fml.tk3`, `Calculus/HashKinds3.lean`, M7
 feature 28).  Each layer is relabeled in turn (`Fml.tk3_complete`). -/
 
-/-- **`keccak256(s) == keccak256(t) → sha256(s) == sha256(t) →
-ripemd160(s) == ripemd160(t)`** (`gapThreeKinds`): proved; with `!=` last,
-refuted by one string twice. -/
 /-- info: ["proved", "refuted"] -/
 #guard_msgs in #eval [namesThreeKinds, namesThreeKindsBad].map verdict
 

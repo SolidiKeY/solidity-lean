@@ -33,22 +33,6 @@ section Hashes
 
 open Solidity.Examples.Tactics.Hashing (Names)
 
-/-- A string: a `uint[]` in memory. -/
-/-- The two strings' context, `t` innermost. -/
-/-- `find(storage, ids[key])` -/
-/-- `keccak256(memory, s)` and `keccak256(memory, t)`; `sha256(memory, ·)`. -/
-/-- `∀ fresh strings s t. φ` -/
-/-- `{ storage := save(storage, ids[keccak256(t)], 1) } φ`: `ids[t] = 1;`. -/
-/-- **`∀ s t. s ≠ t → ids[s] == 0 → [ ids[t] = 1; ] ids[s] == 0`**, past the
-program. -/
-/-- Without `s ≠ t`: refuted by two strings with the same bytes. -/
-/-- Equal hashes, equal entries; and equal hashes alone, refuted by two
-strings with different bytes. -/
-/-- Two kinds of hash of one string: valid under the premise (equal
-`sha256`s, equal bytes, equal `keccak256`s).  Each string stands for one
-word per kind, the `sha256` words binders of their own linked to the
-`keccak256` ones (`Fml.tk`, `Calculus/HashKinds.lean`): proved.  Its false
-variant, refuted by one string twice. -/
 /-- info: ["proved", "refuted", "proved", "refuted", "proved", "refuted"] -/
 #guard_msgs in
 #eval [namesSet, namesSetBad, namesEq, namesEqBad, namesTwoKinds, namesTwoKindsBad].map verdict
