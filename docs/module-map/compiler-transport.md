@@ -51,3 +51,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MemoryCallScopeBoundary.lean`, `MemoryCallScopeControls.lean`, `MemoryCallScopeObservations.lean`, `MemoryCallScopeFailures.lean`, `MemoryCallScopePins.lean` | Expanded-call scope Input equivalence, private bounds/cost/maps, actual old-alias consumer, failure-prefix transport and complete fixture observations. |
 
 | `Backend/Passes/CompilerCallScopeRecognition.lean`, `CompilerCallScopeControls.lean`, `CompilerCallScopePins.lean` | Actual public scoped-call selection, checked Input/resource/fragment projections, correlated consumer composition and complete runtime controls. |
+
+| `Backend/Passes/CompilerWholeScope.lean`, `CompilerWholeScopeControls.lean`, `CompilerWholeScopePins.lean` | Actual public whole-fixture recognition, physical Input/output and exact allocator growth, with independently typed scope contrast. |

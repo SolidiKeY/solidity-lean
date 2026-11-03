@@ -760,6 +760,9 @@ import Solidity.Backend.Passes.MemoryCallScopePins
 import Solidity.Backend.Passes.CompilerCallScopeControls
 import Solidity.Backend.Passes.CompilerCallScopePins
 import Solidity.Backend.Passes.CompilerCallScopeRecognition
+import Solidity.Backend.Passes.CompilerWholeScope
+import Solidity.Backend.Passes.CompilerWholeScopeControls
+import Solidity.Backend.Passes.CompilerWholeScopePins
 
 
 import Solidity.Lowering.V08.Audit

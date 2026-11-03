@@ -392,6 +392,29 @@ not proved and is not a premise. This proves recognition of the middle scoped
 stage, not public recognition of the whole three-stage join or independent
 Source/world/ABI adequacy. H22 external-call construction is untouched.
 
+## Whole scoped-call fixture recognition
+
+[CompilerWholeScope](../../Solidity/Backend/Passes/CompilerWholeScope.lean)
+closes the preceding fixture's middle-only recognition limit: public
+`Compiler.compile` accepts the entire fixed allocation/scoped-call/consumer
+program from the empty intrinsic context. The actual returned certificate's
+private frame and reached allocation cost 8 supply its initial Input. Actual
+execution and full MappedOutput share a selected map before all tails; exact
+allocator ownership advances from 256 to 264 and all four objects remain.
+
+A generic compiler-code association lemma follows typed syntax equality.
+It is kept separate from execution correctness; the physical result follows
+from independent intrinsic program execution and the actual certificate.
+[Controls](../../Solidity/Backend/Passes/CompilerWholeScopeControls.lean) check
+the complete original 18-word vector, corrupted tail and private-frame refusal.
+A separately typed, publicly accepted unscoped program returns the different
+context and changes the owned value from 33 to 42. It is not another association
+of the scoped program. [Pins](../../Solidity/Backend/Passes/CompilerWholeScopePins.lean)
+guard observed standard axiom sets. Independent finder and skeptic source
+reviews found no defect. This is one inhabited intrinsic program family;
+general compiler coverage, independent Source/world and bytecode adequacy
+remain open. H22 external-call construction is untouched.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
