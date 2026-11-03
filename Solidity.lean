@@ -1542,6 +1542,8 @@ import Solidity.Lowering.V08.LiteralFailureSliceDecodeControls
 import Solidity.Lowering.V08.LiteralFailureStorageDecode
 import Solidity.Lowering.V08.LiteralFailureStorageDecodeControls
 import Solidity.Lowering.V08.LiteralFailureStorageSuccessControls
+import Solidity.Lowering.V08.LiteralFailureBytesReadback
+import Solidity.Lowering.V08.LiteralFailureBytesReadbackControls
 
 import Solidity.Calculus.CallFunctionAffine
 import Solidity.Tools.CallFunctionShare
@@ -1951,6 +1953,22 @@ import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.Premises
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.Premises
+import Solidity.Backend.AbiWorld.CallerWordBytes
+import Solidity.Backend.AbiWorld.CallerWordBytesControls
+import Solidity.Backend.AbiWorld.ErrorLayout
+import Solidity.Backend.AbiWorld.ErrorOffsetWindow
+import Solidity.Backend.AbiWorld.ErrorOffsetWindowControls
+import Solidity.Backend.AbiWorld.ErrorReadWindow
+import Solidity.Backend.AbiWorld.ErrorReadWindowControls
+import Solidity.Backend.AbiWorld.ErrorRoundtrip
+import Solidity.Backend.AbiWorld.LibraryResultPacket
+import Solidity.Backend.AbiWorld.PacketPrefix
+import Solidity.Backend.AbiWorld.PacketPrefixControls
+import Solidity.Backend.AbiWorld.PanicCallFrame
+import Solidity.Backend.AbiWorld.PanicCallFrameControls
+import Solidity.Backend.AbiWorld.PanicReadWindow
+import Solidity.Backend.AbiWorld.ReturnWordTransport
+import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
