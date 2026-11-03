@@ -189,3 +189,31 @@ allocated reference return slot, both Source pipelines, boundary bytes and a
 malformed-selector refusal. This discharges packet laws, not general runtime
 ABI encoding, caller transport or full EVM correspondence. Independent finder
 and skeptic reviews found no confirmed issue.
+
+## Selected G39 sharing and reset composition
+
+`TransientSharing.observed` executes the existing framed P7 body and captures
+its stack head before `finish` restores the caller. `self_share` requires an
+initial selected-slot relation and equal owner addresses, then proves actual
+Source read/write/read and observed target values. `execute` sequences actual
+framed store and read bodies. Static Source refusal and target `staticWrite`
+remain distinct, and wrong-owner observations are discriminated.
+
+`writeReset` performs an actual callback before reset. `reset_relation` links
+actual Source `endTx` and target reset while preserving Source world/heap and
+the complete ordinary target machine. `TransientComposition.mixed` executes
+P7's ordinary persistent/memory instructions between transient store/read;
+`mixedReset` then clears the bank/journal and preserves the reached persistent
+and memory writes. These mixed target results do not provide Source lowering
+for those ordinary instructions or a G24 state relation.
+
+`TransientCallback.cell_port` consumes the registered Source callback fixture
+with an initial relation and actual before/after readback; it retains the
+fixture's Source memory invariants. The target code is its local store body,
+not the complete CALL protocol. Arbitrary outer result bytes are the supplied
+Source environment strategy answer, not the fallback's output or target-store
+returndata. G42 code/account/strategy admission and full EVM correspondence
+remain explicit boundaries. Neither weak `callback_load` nor the no-callback
+`callback_then_reset` law is used. Inhabited and refusal controls execute
+nonempty caller prefixes and both Source callback pipelines. Independent
+finder and skeptic reviews found no confirmed issue.

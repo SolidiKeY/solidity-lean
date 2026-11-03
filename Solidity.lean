@@ -1577,6 +1577,7 @@ import Solidity.Backend.FailurePaths.TransientControls
 import Solidity.Backend.FailurePaths.TransientUnwind
 import Solidity.Backend.FailurePaths.WorldUnwind
 import Solidity.Backend.FailurePaths.ReasonCodecControls
+import Solidity.Backend.FailurePaths.TransientSharingControls
 
 -- P9 checked call graphs; Source preservation and progress.
 import Solidity.Lowering.P9.ProgramControls
