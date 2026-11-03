@@ -276,3 +276,22 @@ new caller-provided typing or representability premise, larger budget or
 source scalar implementation. General selected-element target lowering must
 respect lazy selected-word validation; a blanket eager-validation premise
 cannot close the admitted Source profile. No semantic choice is requested.
+
+
+# V14 constructor argument routines (H14)
+
+No unproved Lean declarations or axioms are introduced by this list.
+
+- ConstructorLocalArguments: derive identity STy.implicit admission for arbitrary
+  integer types from the existing definition (routine Boolean/reflexivity law).
+  The current explicit ha/hb inputs are not a new whole-profile restriction.
+- ConstructorArgumentControls: state and prove exact fuel=1 and fuel=2 timeouts
+  with the same complete before state (routine reduction of the published runner).
+  Do not increase fuel or weaken error observations.
+- ConstructorArgumentControls: factor the existing conjunctive inhabited control
+  into separately named order/old-object/alias lemmas if needed by clients
+  (routine projections; do not replace the complete execution statements).
+
+Hard work retained by V14: general n-ary/effectful argument lowering, constructor
+selection/body/inheritance binding, source/frame/world and failure correspondence,
+G43 and final executable closure. No P8a coverage or P1 profile provenance inferred.
