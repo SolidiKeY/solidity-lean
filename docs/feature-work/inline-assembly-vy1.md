@@ -689,3 +689,21 @@ Final joint/full lane validation remains open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Omitted for guards
+
+LocalBoolForNoGuard proves evaluator equalities replacing an omitted Source
+guard with literal true at every fuel, including zero/one. These transport
+theorems quantify arbitrary actual Source initializers, bodies and optional
+posts without support assumptions. Concrete adapters reuse existing runtimes
+with and without Boolean posts; their Source adequacy retains certified
+Boolean initialization/item scopes and completely clean input.
+Controls distinguish omitted guards from explicit local guards after false
+initialization or flag clearing, retain partial initializer/post effects and
+exercise both post modes. An independent low-fuel Source control demonstrates
+body timeout versus normal guarded exit. Broad evaluator transport does not
+claim arbitrary-syntax runtime admission or dirty compiler correspondence.
+Full P16 and final lane validation remain open.
+
+Scoped kernel checks and independent finder/skeptic reviews pass; final lane
+validation remains pending.

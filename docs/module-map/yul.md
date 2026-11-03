@@ -46,3 +46,5 @@
 - Yul/LocalBoolFor.lean and Yul/Checks/LocalBoolFor.lean: Boolean initializer and context-growing for-body scope composition, without post.
 
 - Yul/LocalBoolPostIter.lean, Yul/LocalBoolForPost.lean and Yul/Checks/LocalBoolForPost.lean: scoped for posts and initializer composition.
+
+- Yul/LocalBoolForNoGuard.lean and Yul/Checks/LocalBoolForNoGuard.lean: exact omitted-guard Source transport and concrete scoped adapters.
