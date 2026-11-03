@@ -24,7 +24,7 @@ Canonical emitted bytes are36long; suffix-bearing call packets can be longer.
 They share a decoded code, not an assumed same-invocation/byte-machine trace.
 No Source PanicCode/profile is extended by testing arbitrary packet codes.
 
-Twelve finite codes include0, all named source-code numbers,300, highbit2^255
+Twelve finite codes include0, selected named source-code numbers,300, highbit2^255
 and maximum2^256-1. Actual emitter Fits/stack premises are discharged; complete
 packet/readback bytes and decoded scalar observations exported. Zero receiver,
 truncated word, wrong selector and300-vs44 controls use actual intrinsic calls.
