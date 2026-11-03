@@ -233,3 +233,5 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolIfElse adds clean-input Source agreement for independently indexed conditional branches, retaining partial effects; see [lane handoff](inline-assembly-vy1.md). General P16 and final gates remain open.
 
 - VY1: LocalBoolWhile adds concrete clean-input Source agreement for context-growing scoped loop bodies; partial contexts and dirty runtime words are retained. See [lane handoff](inline-assembly-vy1.md); full P16 and lane gates remain open.
+
+- VY1: LocalBoolDivergence proves no finite normal completion for constant-true certified scoped loops, for arbitrary raw frames and actual clean Source execution. See [lane handoff](inline-assembly-vy1.md); full lane remains open.
