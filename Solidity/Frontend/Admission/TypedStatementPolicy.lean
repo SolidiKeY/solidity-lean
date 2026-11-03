@@ -1,9 +1,9 @@
 import Solidity.Frontend.Admission.TypedExpressionPolicy
 
-/-! Conditional structural statement closure. Existing routine container
-propositions are explicit unimplemented proof inputs, not assumed facts or
-new Source semantic premises. No StatementPolicy or WholeProgramPolicy
-inhabitant is exported until those producer obligations are proved. -/
+/-! Actual structural statement and Program observation-policy closure.
+Conditional builder interfaces are retained, then instantiated with checked
+container proofs. This does not establish full feature/profile or SourceSpec
+adequacy. -/
 namespace Solidity.Frontend.Admission.TypedObservationPolicy
 open Source
 
@@ -49,8 +49,23 @@ theorem program_from_containers : ProgramBuilder := by
   · obtain ⟨a, _, hs⟩ := ha
     exact List.all_eq_true.mp (hc a.args) site hs
 
-/-- Open final specialization, not a supplied closed witness. -/
+/-- Unconditional statement and whole-Program observation-policy claims. -/
 abbrev ClosedPolicies : Prop := StatementPolicy ∧ WholeProgramPolicy
+
+theorem closed_policies : ClosedPolicies := by
+  exact ⟨statement_from_containers conversions_allowed optional_allowed,
+    program_from_containers conversions_allowed optional_allowed⟩
+
+theorem statement_allowed : StatementPolicy := closed_policies.1
+theorem program_allowed : WholeProgramPolicy := closed_policies.2
+
+/-- info: 'Solidity.Frontend.Admission.TypedObservationPolicy.closed_policies' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms closed_policies
+/-- info: 'Solidity.Frontend.Admission.TypedObservationPolicy.statement_allowed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms statement_allowed
+/-- info: 'Solidity.Frontend.Admission.TypedObservationPolicy.program_allowed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms program_allowed
+
 
 /-- info: 'Solidity.Frontend.Admission.TypedObservationPolicy.statement_from_containers' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms statement_from_containers

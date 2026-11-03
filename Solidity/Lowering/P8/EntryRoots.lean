@@ -40,7 +40,7 @@ theorem special_entry : ∀ (E : Env) (c : String) (k : DeclKind) (d : Decl),
   exact ⟨hm, hp.2⟩
 
 /-- Routine transport into the independent carried-field root relation.
-No inhabitant is supplied; no hypothetical environment membership is assumed. -/
+The proof below derives membership; no hypothetical roster premise is assumed. -/
 abbrev SelectedEntryRootCoverage : Prop :=
   ∀ {E : Env} (G : Glob E) (F : Fr) (input : Roadmap.Bytes) (d : Decl),
     G.pickFn F input = some d → ∃ b,
@@ -60,4 +60,18 @@ abbrev SpecialEntryBodyCoverage : Prop :=
 #guard_msgs (whitespace := lax) in #print axioms function_entry
 /-- info: 'Solidity.Lowering.P8.EntryRoots.special_entry' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms special_entry
+theorem selected_entry_root_coverage : Solidity.Lowering.P8.EntryRoots.SelectedEntryRootCoverage := by
+  intro E G F input d h
+  obtain ⟨_, b, hb, hm⟩ := Solidity.Lowering.P8.EntryRoots.function_entry G F input d h
+  exact ⟨b, hb, ⟨hm, hb⟩, fun site hs => Solidity.Frontend.Admission.body_site_in_program G.prog hm hb hs⟩
+
+/-- info: 'Solidity.Lowering.P8.EntryRoots.selected_entry_root_coverage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms selected_entry_root_coverage
+theorem special_entry_body_coverage : Solidity.Lowering.P8.EntryRoots.SpecialEntryBodyCoverage := by
+  intro E G c k d b h hb
+  obtain ⟨hm, _⟩ := Solidity.Lowering.P8.EntryRoots.special_entry E c k d h
+  exact ⟨⟨hm, hb⟩, fun site hs => Solidity.Frontend.Admission.body_site_in_program G.prog hm hb hs⟩
+
+/-- info: 'Solidity.Lowering.P8.EntryRoots.special_entry_body_coverage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms special_entry_body_coverage
 end Solidity.Lowering.P8.EntryRoots

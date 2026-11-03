@@ -48,8 +48,7 @@ theorem path_registered (E : Env) (scope : Option String) (path : IdPath) (d : D
     exact h.1
   · cases h
 
-/-- Open selected-overload corollary; no proof is exported. This is the
-singleton-selection field of the source call rule. -/
+/-- Selected-overload proposition, proved below. This is the singleton-selection field of the source call rule. -/
 abbrev SelectedFunctionMembership : Prop :=
   ∀ (Γ : Ctx) (name : String) (filter : Decl → Bool) (d : Decl),
     (Γ.functions name).filter filter = [d] → d ∈ Γ.env.decls
@@ -63,4 +62,14 @@ abbrev SelectedFunctionMembership : Prop :=
 #guard_msgs (whitespace := lax) in #print axioms resolved_registered
 /-- info: 'Solidity.Frontend.Admission.NameResolutionRoots.lookup_registered' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms lookup_registered
+theorem selected_function_membership : Solidity.Frontend.Admission.NameResolutionRoots.SelectedFunctionMembership := by
+  intro Γ name pred d h
+  apply Solidity.Frontend.Admission.NameResolutionRoots.functions_registered
+  have hm : d ∈ (Γ.functions name).filter pred := by
+    rw [h]
+    exact List.mem_singleton_self d
+  exact (List.mem_filter.mp hm).1
+
+/-- info: 'Solidity.Frontend.Admission.NameResolutionRoots.selected_function_membership' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms selected_function_membership
 end Solidity.Frontend.Admission.NameResolutionRoots

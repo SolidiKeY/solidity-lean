@@ -1848,9 +1848,9 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Lowering/P8/SourceResolutionControls.lean` | One- and two-unit chains, pragma coder, corruption and link refusals. |
 | `Lowering/P8/SourceMetadata.lean` | All-unit strict/inheritance metadata and `UnitsOK` (`metadata_iff`). |
 | `Lowering/P8/SourceMetadataControls.lean` | Composed positives; constant, import, duplicate and main refusals. |
-| `Lowering/P8/SourceMetadataObligations.lean` | `PendingControls`: open M01–M03 inheritance controls; no witness. |
+| `Lowering/P8/SourceMetadataObligations.lean` | Checked valid-override, strict-before-refusal and missing-virtual refusal controls; `checked_controls`. |
 | `Lowering/P8/SourceAllSettings.lean` | Component chain accepted under every admitted settings value (`input_settings`). |
-| `Lowering/P8/ProducerAssembly.lean` | `AdmissionHalf`, `AssemblyType`, `PendingGlue` signatures; no witness. |
+| `Lowering/P8/ProducerAssembly.lean` | Conditional `assemble`, component pipeline closure and `checked_glue`; actual `AdmissionHalf` and concrete source Producer remain open. |
 | `Lowering/P8/ResourceBoundary.lean` | `FailureResource`; unchanged Source language cannot carry failure choices. |
 | `Source/FailureResources.lean` | G06 failure-point bound algebra; `no_horizon_retraction`; not wired into execution. |
 | `Lowering/P8b/Frozen.lean`, `Lowering/P8b/P8aInterface.lean` | Frozen P8b consumer signatures over G01 `Lowering` and P8a `Producer`; no inhabitant. |
@@ -1862,12 +1862,12 @@ See [p9-checked-callgraphs.md](feature-work/p9-checked-callgraphs.md), [source-p
 | `Frontend/Admission/ProgramRoots.lean`, `ProgramRootControls.lean` | Typed carried-field inventory and exact observation flattening; independent finite-roster lookup relation and refusal controls. |
 | `Frontend/Admission/NameResolutionRoots.lean`, `NameResolutionControls.lean` | Initial target registration from actual source lookup/Resolves/function selection, with local-shadowing and refusal controls; not full runtime-root closure. |
 | `Frontend/Admission/ModifierRoots.lean`, `ModifierRootControls.lean` | Initial modifier selection registration through actual typed paths and parameter forms, with qualified/wrong-kind/deep-path controls; not runtime closure. |
-| `Frontend/Admission/TypedObservationPolicy.lean` | Axiom-free local observation allowance from actual builtin/member typing; whole-visitor/Program closure remains unproved. |
-| `Frontend/Admission/TypedExpressionPolicy.lean` | General intrinsic expression visitor allowance via mutual constructor induction; statement/items and complete Program closure remain open. |
-| `Frontend/Admission/TypedStatementPolicy.lean` | Actual statement/item and all carried-Program observation closure conditional on explicit A11/A13 proofs; no unconditional policy witness. |
+| `Frontend/Admission/TypedObservationPolicy.lean` | Local observation allowance from actual typing; whole expression, arguments, conversion, lvalue, statement and Program closure are proved in the typed policy modules. |
+| `Frontend/Admission/TypedExpressionPolicy.lean` | General intrinsic expression visitor and container policy closure via mutual constructor induction. |
+| `Frontend/Admission/TypedStatementPolicy.lean` | Unconditional statement/item and carried-Program observation closure; actual container proofs discharge retained builder interfaces. |
 | `Lowering/P8/SourcePrograms.lean`, `SourceProgramControls.lean` | Checked original-byte frontend stages to actual all-unit Source elaboration and failure propagation; nonempty contract component proofs are in the acceptance modules. |
 | `Lowering/P8/SourceProgramAcceptance.lean`, `SourceProgramAcceptanceControls.lean` | Exact actual elaborator success-bit laws and the full original kernel contract-control conjunction; ordered expectations unchanged. |
-| `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; pending root transport, not executed-entry or full admission adequacy. |
+| `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; selected and special-entry root coverage, not executed-entry or full admission adequacy. |
 | `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard; composed independent ProgramSite soundness, not full feature/profile adequacy. |
 
 See [P8 admission](feature-work/p8-admission.md).

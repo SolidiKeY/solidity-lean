@@ -64,7 +64,7 @@ theorem programRoots_observations {E : Env} (P : Program E) :
   simp only [programRoots, programObservations, List.flatMap_append,
     List.flatMap_assoc, hd, hc]
 
-/-- Pending routine admission glue only; no proof/witness is supplied.
+/-- Exact observation-admission proposition, proved below.
 Even this equivalence would classify observations, not all source features. -/
 abbrev RootAdmissionEquivalence {E : Env} (P : Program E) : Prop :=
   (programObservations P).all ObservationSite.allowed = true ↔
@@ -74,4 +74,19 @@ abbrev RootAdmissionEquivalence {E : Env} (P : Program E) : Prop :=
 #guard_msgs (whitespace := lax) in #print axioms programRoots_exact
 /-- info: 'Solidity.Frontend.Admission.programRoots_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms programRoots_observations
+theorem root_admission_equivalence : ∀ {E : Solidity.Source.Env} (P : Solidity.Source.Program E), Solidity.Frontend.Admission.RootAdmissionEquivalence P := by
+  intro E P
+  unfold Solidity.Frontend.Admission.RootAdmissionEquivalence
+  rw [← Solidity.Frontend.Admission.programRoots_observations P]
+  constructor
+  · intro h r hr site hs
+    exact List.all_eq_true.mp h site (List.mem_flatMap.mpr ⟨r, (Solidity.Frontend.Admission.programRoots_exact P r).mpr hr, hs⟩)
+  · intro h
+    apply List.all_eq_true.mpr
+    intro site hs
+    obtain ⟨r, hr, hs⟩ := List.mem_flatMap.mp hs
+    exact h r ((Solidity.Frontend.Admission.programRoots_exact P r).mp hr) site hs
+
+/-- info: 'Solidity.Frontend.Admission.root_admission_equivalence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms root_admission_equivalence
 end Solidity.Frontend.Admission

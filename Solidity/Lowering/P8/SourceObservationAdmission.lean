@@ -1,5 +1,6 @@
 import Solidity.Lowering.P8.SourcePrograms
 import Solidity.Frontend.Admission.ProgramObservations
+import Solidity.Frontend.Admission.TypedStatementPolicy
 
 /-! Whole-output observation admission after actual checked frontend and
 Source elaboration. This adds a fail-closed observation guard; it is not
@@ -46,9 +47,35 @@ theorem sound : Sound := by
       exact (Solidity.Frontend.Admission.accepted_program_iff e.2.prog).mp hc site hsite
     · cases h
 
+theorem check_all : ∀ es : Programs, check es = true := by
+  intro es
+  apply List.all_eq_true.mpr
+  intro e he
+  exact Solidity.Frontend.Admission.TypedObservationPolicy.program_allowed e.2.prog
+
 /-- Routine exact-guard equivalence, not full approved-profile equivalence.
-Open obligation; no inhabitant is supplied by this alias. -/
+Implemented below without asserting full profile equivalence. -/
 abbrev ExactObservationGuard : Prop := ∀ es, check es = true ↔ Allowed es
 /-- info: 'Solidity.Lowering.P8.SourceObservationAdmission.sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms sound
+theorem exact_observation_guard : Solidity.Lowering.P8.SourceObservationAdmission.ExactObservationGuard := by
+  intro es
+  constructor
+  · intro h e he site hs
+    exact (Solidity.Frontend.Admission.accepted_program_iff e.2.prog).mp (List.all_eq_true.mp h e he) site hs
+  · intro h
+    apply List.all_eq_true.mpr
+    intro e he
+    exact (Solidity.Frontend.Admission.accepted_program_iff e.2.prog).mpr (fun site hs => h e he site hs)
+
+/-- info: 'Solidity.Lowering.P8.SourceObservationAdmission.exact_observation_guard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms exact_observation_guard
+theorem accept_eq_upstream : ∀ i p r c, Solidity.Lowering.P8.SourceObservationAdmission.accept i p r c = Solidity.Lowering.P8.SourcePrograms.accept i p r c := by
+  intro i p r c
+  unfold Solidity.Lowering.P8.SourceObservationAdmission.accept
+  cases h : Solidity.Lowering.P8.SourcePrograms.accept i p r c <;>
+    simp only [bind, Option.bind, Solidity.Lowering.P8.SourceObservationAdmission.check_all, ↓reduceIte] <;> rfl
+
+/-- info: 'Solidity.Lowering.P8.SourceObservationAdmission.accept_eq_upstream' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms accept_eq_upstream
 end Solidity.Lowering.P8.SourceObservationAdmission

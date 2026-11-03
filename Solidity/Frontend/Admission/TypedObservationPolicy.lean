@@ -23,8 +23,8 @@ in `TypedExpressionPolicy.lean`. -/
 abbrev ExpressionPolicy : Prop := ∀ {E : Env} {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ),
   (observations e).all ObservationSite.allowed = true
 
-/-- Full carried-Program policy obligation, not an inhabitant. Proving it
-would show observation guard redundancy, not full feature/profile adequacy. -/
+/-- Carried-Program policy proposition, proved in TypedStatementPolicy. It
+shows observation guard redundancy, not full feature/profile adequacy. -/
 abbrev WholeProgramPolicy : Prop := ∀ {E : Env} (P : Program E),
   (programObservations P).all ObservationSite.allowed = true
 

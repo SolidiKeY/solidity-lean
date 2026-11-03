@@ -45,12 +45,21 @@ theorem units_acceptance : UnitsAcceptance := by
           exact ih.symm
         simp only [bind, pure, Option.bind, List.all_cons, hf, hh, Bool.and_self, Option.isSome_some]
 
-/-- Open component-guard composition; no witness supplied. -/
+/-- Exact component-guard and actual elaborator acceptance proposition. -/
 abbrev AdmitAcceptance : Prop := ∀ (i : Input) (p : CheckedSyntax.Parsed)
   (r : SourceResolutions.Packet) (cert : CheckedSyntax.Cert),
   (SourcePrograms.accept i p r cert).isSome =
     (SourceMetadata.checkInput i p r cert && r.units.all (fun u => elaborates u.2.env))
 
+theorem acceptance_projection : AdmitAcceptance := by
+  intro i p r cert
+  unfold Solidity.Lowering.P8.SourcePrograms.accept
+  cases h : Solidity.Lowering.P8.SourceMetadata.checkInput i p r cert <;>
+    simp only [Bool.false_eq_true, ↓reduceIte, Option.isSome_none,
+      Solidity.Lowering.P8.SourceProgramAcceptance.units_acceptance, Bool.false_and, Bool.true_and]
+
+/-- info: 'Solidity.Lowering.P8.SourceProgramAcceptance.acceptance_projection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms acceptance_projection
 /-- info: 'Solidity.Lowering.P8.SourceProgramAcceptance.elaborate_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms elaborate_acceptance
 /-- info: 'Solidity.Lowering.P8.SourceProgramAcceptance.units_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
