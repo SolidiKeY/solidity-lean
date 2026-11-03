@@ -75,6 +75,17 @@ the empty heap typing over that nonempty heap, obtaining post-state MemOK and va
 allocated bytes reference in both pipelines. The signature digest stays
 parameterized by Fixed.
 
+`NewArrayFragment.eval_new_fragment_mem` consumes the published V16
+`eval_new_mem` rule and discharges its child-memory premise with the existing
+checked call-fragment theorem. It covers a standalone new-array parent whose
+indexable length belongs to that fragment; it does not add allocating nodes
+to `ValFragC`. `NewArrayFragmentControls` computes the length as two plus two,
+allocates object 1 while preserving the live caller reference to object 0, and
+checks the allocation panic for an oversized computed length in both pipelines.
+The compound expression times out at source horizon 3 and succeeds at horizon 4;
+both observations are retained. Independent finder and skeptic reviews found
+no confirmed defect in this consumer or its controls.
+
 Not covered: reference arguments and returns in the expression fragment,
 allocating expressions inside the fragment, termination,
 compiler/EVM refinement, `SourceSpec` and rollback. All printed axioms are

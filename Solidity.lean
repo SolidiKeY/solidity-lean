@@ -2105,6 +2105,11 @@ import Solidity.Source.Elaborated
 import Solidity.Source.Eval
 import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
+import Solidity.Source.Preservation.EncodingVariantControls
+import Solidity.Source.Preservation.NewArrayFragmentControls
+import Solidity.Source.Progress.BuiltinStatements
+import Solidity.Source.Progress.LiteralBuiltinControls
+import Solidity.Source.FailureResources
 import Solidity.Source.FailureCursor
 import Solidity.Source.FailureResources
 import Solidity.Source.Hoare
