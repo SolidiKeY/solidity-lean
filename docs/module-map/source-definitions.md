@@ -92,3 +92,6 @@
 | `Source/MonetaryLaws.lean` | H19 primitive credit-produced and debit-preserved range facts; constructive out-of-range successful debit control. No Account/ledger migration or execution reachability claim. |
 
 | `Source/FailureRequest.lean` | Actual EM request-budget scope: dropped/scheduled requests, exact Nat balance argument, zero-cut and active-owner refusal, halt/local retention and sequential ordinal controls. Session funding, rollback and consistency not claimed. |
+
+| `Source/Funds.lean` | Actual request-boundary funds validation, invalid whole-state identity, exact valid execution, stable completed horizons and both session-driver drop laws. |
+| `Source/FundsControls.lean` | Actual Source payable requests in both pipelines: stress-state drop, following valid request, timeout/revert distinction, prior debit/credit controls. |

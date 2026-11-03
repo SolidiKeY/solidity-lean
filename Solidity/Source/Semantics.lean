@@ -35,7 +35,9 @@ The source semantics composed into G01's interface
   consistent (`sessionAt_consistent`), so `sourceLang` has the type of G01's
   `Lang Event Outcome`.  Its resources are horizons only: the failure points
   the user decisions require (any external frame or transaction may fail),
-  the stipend rule and sender-funds validity are not modelled, a `stuck`
+  and the stipend rule are not modelled. Sender-funds validity is checked
+  at each request boundary using the external ledger before runTx; invalid
+  requests consume their action index without execution or events. A `stuck`
   run shows as an unfinished prefix (like divergence), and the events of a
   transaction that never completes are not shown (`sourceLangEvents`,
   `Solidity/Source/Session.lean`, shows them).  Horizon independence of
@@ -284,10 +286,12 @@ def sessionGo (P : SrcProg E) (env : SessionEnv) (n : Nat) : Nat → Nat → St 
         if (← instanceAt (P.glob env) t).isSome then credit t v) s 0).2
       sessionGo P env n k (i + 1) { s' with events := s.events ++ [.credit t v] } last
     | some (.request q) =>
-      match firstDone (runAt (fun f => runTx (P.glob env) f q) s) n with
-      | some (_, (.ok o, s')) =>
-        sessionGo P env n k (i + 1) { s' with events := s.events ++ s'.events.drop s.events.length } o
-      | _ => ⟨s.events, none⟩
+      if requestFunded P.fixed env.balance s.events q then
+        match firstDone (runAt (fun f => runTx (P.glob env) f q) s) n with
+        | some (_, (.ok o, s')) =>
+          sessionGo P env n k (i + 1) { s' with events := s.events ++ s'.events.drop s.events.length } o
+        | _ => ⟨s.events, none⟩
+      else sessionGo P env n k (i + 1) s last
 
 theorem prefix_of_append_prefix {α : Type} {a b c : List α} (h : a ++ b <+: c) : a <+: c :=
   (List.prefix_append a b).trans h
@@ -306,9 +310,11 @@ theorem sessionGo_extends_app (P : SrcProg E) (env : SessionEnv) (n : Nat) :
       rw [h]; exact List.prefix_append _ _
     · exact sessionGo_extends_app P env n k _ _ _ xs (ys ++ _) (by simp only [h, List.append_assoc]; rfl)
     · split
-      · exact sessionGo_extends_app P env n k _ _ _ xs (ys ++ _) (by simp only [h, List.append_assoc]; rfl)
-      · show xs <+: s.events
-        rw [h]; exact List.prefix_append _ _
+      · split
+        · exact sessionGo_extends_app P env n k _ _ _ xs (ys ++ _) (by simp only [h, List.append_assoc]; rfl)
+        · show xs <+: s.events
+          rw [h]; exact List.prefix_append _ _
+      · exact sessionGo_extends_app P env n k (i + 1) s last xs ys h
 
 theorem sessionGo_extends (P : SrcProg E) (env : SessionEnv) (n k i : Nat) (s : St E) (last : Outcome) :
     s.events <+: (sessionGo P env n k i s last).events :=
@@ -330,10 +336,12 @@ theorem sessionGo_mono (P : SrcProg E) (env : SessionEnv) :
     · exact sessionGo_mono P env k k' n n' _ _ _ (by omega) hn
     · rename_i q _
       split
-      · rename_i j o s' hf
-        rw [firstDone_mono _ hn hf]
-        exact sessionGo_mono P env k k' n n' _ _ _ (by omega) hn
-      · exact ⟨by split <;> first | exact List.prefix_refl _ | exact sessionGo_extends_app P env _ _ _ _ _ _ _ rfl, .inl rfl⟩
+      · split
+        · rename_i j o s' hf
+          rw [firstDone_mono _ hn hf]
+          exact sessionGo_mono P env k k' n n' _ _ _ (by omega) hn
+        · exact ⟨by split <;> first | exact List.prefix_refl _ | exact sessionGo_extends_app P env _ _ _ _ _ _ _ rfl, .inl rfl⟩
+      · exact sessionGo_mono P env k k' n n' (i + 1) s last (by omega) hn
 
 /-- **A session at horizon `n`**: the deployment of the main contract at
 its least completing horizon, then up to `n` actions. -/

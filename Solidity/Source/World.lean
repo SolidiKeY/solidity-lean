@@ -310,4 +310,29 @@ theorem endTx_world (s : ExecState D L T) : s.endTx.world = s.world := rfl
 theorem endTx_transient (s : ExecState D L T) (a : Address) (p : SPath) :
     (s.endTx.transient.cells a).read p = Val.default D (T a p) := rfl
 
+/-! ## Request-boundary sender funds (S04.04)
+
+External sender balances are the fixed ledger over opening balances and the
+actual boundary history, not the system instance balance map. Invalid requests
+are dropped by session entry before evaluating the transaction body. -/
+
+def RequestFunded (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) : Prop :=
+  q.value.val ≤ (F.ledger opening history q.sender).val
+
+def requestFunded (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) : Bool :=
+  decide (q.value.val ≤ (F.ledger opening history q.sender).val)
+
+theorem requestFunded_true_iff (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) :
+    requestFunded F opening history q = true ↔ RequestFunded F opening history q := by
+  simp only [requestFunded, RequestFunded, decide_eq_true_eq]
+
+theorem requestFunded_false_iff (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) :
+    requestFunded F opening history q = false ↔
+      (F.ledger opening history q.sender).val < q.value.val := by
+  simp only [requestFunded, decide_eq_false_iff_not, Nat.not_le]
+
 end Solidity.Source

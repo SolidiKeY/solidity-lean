@@ -50,11 +50,13 @@ def sessionGoEvents (P : SrcProg E) (env : SessionEnv) (n : Nat) : Nat → Nat �
         if (← instanceAt (P.glob env) t).isSome then credit t v) s 0).2
       sessionGoEvents P env n k (i + 1) { s' with events := s.events ++ [.credit t v] } last
     | some (.request q) =>
-      match firstDone (runAt (fun f => runTx (P.glob env) f q) s) n with
-      | some (_, (.ok o, s')) =>
-        sessionGoEvents P env n k (i + 1) { s' with events := s.events ++ s'.events.drop s.events.length } o
-      | some (_, (.error _, s')) => ⟨s'.events, none⟩
-      | none => ⟨(runAt (fun f => runTx (P.glob env) f q) s n).2.events, none⟩
+      if requestFunded P.fixed env.balance s.events q then
+        match firstDone (runAt (fun f => runTx (P.glob env) f q) s) n with
+        | some (_, (.ok o, s')) =>
+          sessionGoEvents P env n k (i + 1) { s' with events := s.events ++ s'.events.drop s.events.length } o
+        | some (_, (.error _, s')) => ⟨s'.events, none⟩
+        | none => ⟨(runAt (fun f => runTx (P.glob env) f q) s n).2.events, none⟩
+      else sessionGoEvents P env n k (i + 1) s last
 
 theorem sessionGoEvents_extends (P : SrcProg E) (env : SessionEnv) (n : Nat) :
     ∀ k i (s : St E) last, s.events <+: (sessionGoEvents P env n k i s last).events
@@ -67,15 +69,17 @@ theorem sessionGoEvents_extends (P : SrcProg E) (env : SessionEnv) (n : Nat) :
       exact List.prefix_append _ _
     · rename_i q _
       split
-      · rename_i j o s' hf
-        refine List.IsPrefix.trans ?_ (sessionGoEvents_extends P env n k _ _ _)
-        exact List.prefix_append _ _
-      · rename_i j h s' hf
-        obtain ⟨_, hr, _⟩ := firstDone_spec hf
-        have := runTx_extends (P.glob env) q s j
-        rw [← hr] at this
-        exact this
-      · exact runTx_extends (P.glob env) q s n
+      · split
+        · rename_i j o s' hf
+          refine List.IsPrefix.trans ?_ (sessionGoEvents_extends P env n k _ _ _)
+          exact List.prefix_append _ _
+        · rename_i j h s' hf
+          obtain ⟨_, hr, _⟩ := firstDone_spec hf
+          have := runTx_extends (P.glob env) q s j
+          rw [← hr] at this
+          exact this
+        · exact runTx_extends (P.glob env) q s n
+      · exact sessionGoEvents_extends P env n k (i + 1) s last
 
 /-- The events a completed transaction leaves are its run's. -/
 theorem events_drop {s s' : St E} (h : s.events <+: s'.events) :
@@ -97,44 +101,46 @@ theorem sessionGoEvents_mono (P : SrcProg E) (env : SessionEnv) :
     · exact sessionGoEvents_mono P env k k' n n' _ _ _ (by omega) hn
     · rename_i q _
       split
-      · rename_i j o s' hf
-        rw [firstDone_mono _ hn hf]
-        exact sessionGoEvents_mono P env k k' n n' _ _ _ (by omega) hn
-      · rename_i j h s' hf
-        rw [firstDone_mono _ hn hf]
-        exact Prefix.Le.refl _
-      · rename_i hf
-        have hdn := firstDone_none_le hf n (Nat.le_refl _)
-        refine ⟨?_, .inl rfl⟩
-        show (runAt (fun f => runTx (P.glob env) f q) s n).2.events <+: _
-        split
-        · rename_i j o s' hf'
-          obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
-          have hnj : n ≤ j := by
-            by_cases h' : j ≤ n
-            · rw [firstDone_none_le hf j h'] at hd; cases hd
-            · omega
-          have hm := runTx_events_mono (P.glob env) q s hnj hdn
-          rw [← hr] at hm
-          have hx := runTx_extends (P.glob env) q s j
-          rw [← hr] at hx
-          refine hm.trans ?_
-          have := sessionGoEvents_extends P env n' k' (i + 1)
-            { s' with events := s.events ++ s'.events.drop s.events.length } o
-          refine List.IsPrefix.trans ?_ this
-          show s'.events <+: s.events ++ s'.events.drop s.events.length
-          rw [events_drop hx]
-          exact List.prefix_refl _
-        · rename_i j h s' hf'
-          obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
-          have hnj : n ≤ j := by
-            by_cases h' : j ≤ n
-            · rw [firstDone_none_le hf j h'] at hd; cases hd
-            · omega
-          have hm := runTx_events_mono (P.glob env) q s hnj hdn
-          rw [← hr] at hm
-          exact hm
-        · exact runTx_events_mono (P.glob env) q s hn hdn
+      · split
+        · rename_i j o s' hf
+          rw [firstDone_mono _ hn hf]
+          exact sessionGoEvents_mono P env k k' n n' _ _ _ (by omega) hn
+        · rename_i j h s' hf
+          rw [firstDone_mono _ hn hf]
+          exact Prefix.Le.refl _
+        · rename_i hf
+          have hdn := firstDone_none_le hf n (Nat.le_refl _)
+          refine ⟨?_, .inl rfl⟩
+          show (runAt (fun f => runTx (P.glob env) f q) s n).2.events <+: _
+          split
+          · rename_i j o s' hf'
+            obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
+            have hnj : n ≤ j := by
+              by_cases h' : j ≤ n
+              · rw [firstDone_none_le hf j h'] at hd; cases hd
+              · omega
+            have hm := runTx_events_mono (P.glob env) q s hnj hdn
+            rw [← hr] at hm
+            have hx := runTx_extends (P.glob env) q s j
+            rw [← hr] at hx
+            refine hm.trans ?_
+            have := sessionGoEvents_extends P env n' k' (i + 1)
+              { s' with events := s.events ++ s'.events.drop s.events.length } o
+            refine List.IsPrefix.trans ?_ this
+            show s'.events <+: s.events ++ s'.events.drop s.events.length
+            rw [events_drop hx]
+            exact List.prefix_refl _
+          · rename_i j h s' hf'
+            obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
+            have hnj : n ≤ j := by
+              by_cases h' : j ≤ n
+              · rw [firstDone_none_le hf j h'] at hd; cases hd
+              · omega
+            have hm := runTx_events_mono (P.glob env) q s hnj hdn
+            rw [← hr] at hm
+            exact hm
+          · exact runTx_events_mono (P.glob env) q s hn hdn
+      · exact sessionGoEvents_mono P env k k' n n' (i + 1) s last (by omega) hn
 
 /-- The deployment as a session runs it: its outcome recorded as an event. -/
 def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) : EM E [] Outcome := do
