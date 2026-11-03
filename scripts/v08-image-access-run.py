@@ -39,12 +39,12 @@ BASE_RUNNER_SHA='e10b29f13de34a51a698a13ef56afd70d55eb7e2609751c63e878a9642c08c4
 assert sha(BASE_RUNNER)==BASE_RUNNER_SHA
 CAPTURE_LINES=100000
 POLICY_FILE=ROOT/'scripts/v08-published-bindings.json'
-POLICY_SHA='9c1463b9fec152a23ce3c5374d3a90fa9d3c89311050c4888600ecd502843dfe'
+POLICY_SHA='672cf656fbe6150e672336b040a129e22fa824a6e2f70fc7cadde5f82255255d'
 def verify_peer():
  policy_path=ROOT/'scripts/v08-published-bindings.json'
- assert sha(policy_path)=='9c1463b9fec152a23ce3c5374d3a90fa9d3c89311050c4888600ecd502843dfe','published binding policy identity'
+ assert sha(policy_path)=='672cf656fbe6150e672336b040a129e22fa824a6e2f70fc7cadde5f82255255d','published binding policy identity'
  policy=json.loads(policy_path.read_text());base=policy['published_head']
- assert base=='16d713bb3f33519ae57ae3938f5664902c882c44'
+ assert base=='312ed47a9ff23fd6b0e9f0206770e8deac0246e2'
  subprocess.run(['git','--no-optional-locks','-C',str(ROOT),'merge-base','--is-ancestor',base,'HEAD'],check=True)
  actual={str(p.relative_to(ROOT)) for p in (ROOT/'Solidity/Backend/InternalFlow').glob('*.lean')}
  assert actual=={p for p in policy['published_sources'] if p.startswith('Solidity/Backend/InternalFlow/')},'no parallel P1 relay copies'

@@ -4,7 +4,7 @@ import pathlib,runpy,subprocess,types,sys,os,hashlib
 from unittest.mock import patch
 root=pathlib.Path('/workspace/v08-world-lowering-published')
 n=runpy.run_path(str(root/'scripts/v08-image-access-run.py'),run_name='binding_tests')
-f=n['verify_peer'];policy=f();assert len(policy['published_sources'])==100 and len(policy['private_v07_sources'])==0
+f=n['verify_peer'];policy=f();assert len(policy['published_sources'])==124 and len(policy['private_v07_sources'])==0
 count=0
 def reject(action):
  global count
@@ -21,7 +21,7 @@ def extra_private(p,pat):
  return iter(values)
 with patch.object(pathlib.Path,'glob',extra_private):reject(f)
 check=subprocess.check_output
-for suffix in ['16d713bb3f33519ae57ae3938f5664902c882c44:Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean','16d713bb3f33519ae57ae3938f5664902c882c44:Solidity/Lowering/V07/SourceReads.lean']:
+for suffix in ['312ed47a9ff23fd6b0e9f0206770e8deac0246e2:Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean','312ed47a9ff23fd6b0e9f0206770e8deac0246e2:Solidity/Lowering/V07/SourceReads.lean']:
  def bad(command,*a,**kw):
   if command[-1]==suffix:return 'bad\n' if kw.get('text') else b'bad'
   return check(command,*a,**kw)
@@ -38,7 +38,7 @@ def wrong_ancestry(command,*a,**kw):
  return run(command,*a,**kw)
 with patch.object(subprocess,'run',wrong_ancestry):reject(f)
 f();assert count==13
-print('Published100/private0 positives;13 identity-corruption controls PASS')
+print('Published124/private0 positives;13 identity-corruption controls PASS')
 
 # Caller holds the actual inherited writer descriptor9. Every rejection occurs
 # before current-file metadata writes and before loading the bounded runner.
