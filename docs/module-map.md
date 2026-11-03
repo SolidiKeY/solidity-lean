@@ -2166,3 +2166,16 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Backend/WorldCalls/SourceFailureControls.lean` | Eight Source assertions retaining dirty argument failure, no call event, caller-decoder failure and ordered callee revert data. |
 | `Backend/WorldCalls/SourceSelfDispatch.lean` | Actual guarded Source external-self funding/entry/dispatch transport for success, revert and non-revert halt. |
 | `Backend/WorldCalls/SourceSelfDispatchControls.lean` | Nine actual self-dispatch API/outcome/guard assertions; no target CALL or callInternal substitution. |
+### Yul scope extensions
+- Yul/RawDefaultScope: concrete certified-default declaration/scope composition, integer Source laws and adapters. Yul/Checks/RawDefaultScope: exact scope/mixed-adapter horizons and full dirty-frame controls.
+- Yul/RawLiteralInitialization: concrete Boolean literal initializer Source law and exact snapshot preservation. Yul/Checks/RawLiteralInitialization: inhabited true initializer, both-value/horizon, dirty-prefix and nondefault controls.
+- Yul/RawLiteralScope: concrete Boolean initializer/scope Source composition, frame correspondence and typed adapters. Yul/Checks/RawLiteralScope: both literals, exact horizons and mixed literal/default dirty-frame controls.
+- Yul/RawIntegerInitialization: all-width in-range literal conversion, typing and Source declaration execution beside raw locals. Yul/Checks/RawIntegerInitialization: signed/unsigned/wide boundaries, refusals, dirty-prefix and actual Source item composition.
+- Yul/RawIntegerScope: concrete in-range integer initializer/scope Source composition, frame correspondence and typed adapters. Yul/Checks/RawIntegerScope: boundaries, precise horizons, mixed scopes and nonempty-execution controls preserving dirty locals.
+- Yul/LocalBoolInitialization: actual certified Boolean expression declaration execution, typed success/failure contexts and clean Source correspondence. Yul/Checks/LocalBoolInitialization: partial-effect timeout, raw-copy refusal, short-circuit and concrete Source controls.
+- Yul/LocalBoolScope: actual Boolean initializer scope closure with retained partial effects and concrete Source block correspondence. Yul/Checks/LocalBoolScope: assignment/short-circuit horizons, raw-copy and independent Source controls.
+- Yul/LocalBoolBinding: concrete context-growing declaration/body composition with stage-typed failures and Source correspondence. Yul/Checks/LocalBoolBinding: new-local reads/writes, partial-state stages, raw-copy and independent Source controls.
+- Yul/LocalBoolItems: intrinsic Boolean item-list certificates, reached-context partial states and concrete Source induction. Yul/Checks/LocalBoolItems: multiple bindings, cross-binding writes, staged failures, raw-copy and Source controls.
+- Yul/LocalBoolItemScope: certificate-derived raw suffix restoration and concrete Source scope composition. Yul/Checks/LocalBoolItemScope: multi-declaration closure, retained partial contexts, dirty-temporary and Source controls.
+- Yul/LocalBoolIf.lean and Yul/Checks/LocalBoolIf.lean: conditional scope execution and clean-input Source agreement with partial-effect controls.
+- Yul/LocalBoolIfElse.lean and Yul/Checks/LocalBoolIfElse.lean: conditional selection of independently indexed item scopes with concrete clean Source agreement.

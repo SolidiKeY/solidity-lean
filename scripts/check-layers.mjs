@@ -12,6 +12,18 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalBoolIfElse|Checks\.LocalBoolIfElse)$/, // Conditional selection of independently indexed scopes.
+  /^Solidity\.Yul\.(LocalBoolIf|Checks\.LocalBoolIf)$/, // Typed Boolean item-list scope closure.
+  /^Solidity\.Yul\.(LocalBoolItemScope|Checks\.LocalBoolItemScope)$/, // Typed Boolean item-list scope closure.
+  /^Solidity\.Yul\.(LocalBoolItems|Checks\.LocalBoolItems)$/, // Intrinsic Boolean item-list composition.
+  /^Solidity\.Yul\.(LocalBoolBinding|Checks\.LocalBoolBinding)$/, // Concrete context-growing declaration/body composition.
+  /^Solidity\.Yul\.(LocalBoolScope|Checks\.LocalBoolScope)$/, // Concrete effectful Boolean initializer scope closure.
+  /^Solidity\.Yul\.(LocalBoolInitialization|Checks\.LocalBoolInitialization)$/, // Concrete Boolean expression initialization.
+  /^Solidity\.Yul\.(RawIntegerScope|Checks\.RawIntegerScope)$/, // Concrete integer initializer scope closure.
+  /^Solidity\.Yul\.(RawIntegerInitialization|Checks\.RawIntegerInitialization)$/, // Concrete integer initialization.
+  /^Solidity\.Yul\.(RawLiteralScope|Checks\.RawLiteralScope)$/, // Concrete literal initializer scope closure.
+  /^Solidity\.Yul\.(RawLiteralInitialization|Checks\.RawLiteralInitialization)$/, // Concrete literal initialization.
+  /^Solidity\.Yul\.(RawDefaultScope|Checks\.RawDefaultScope)$/, // Concrete constant-default scope composition.
   /^Solidity\.Yul\.(RawDefaultDeclaration|Checks\.RawDefaultDeclaration)$/, // Certified constant-default Source declarations.
   /^Solidity\.Yul\.(RawLocalScope|Checks\.RawLocalScope)$/, // Executed Boolean scope closure and Source adapter.
   /^Solidity\.Yul\.(RawLocalDeclaration|Checks\.RawLocalDeclaration)$/, // Context-growing Boolean local declaration.
