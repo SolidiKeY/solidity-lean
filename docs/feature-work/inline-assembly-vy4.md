@@ -491,3 +491,12 @@ Both modules and twenty signature/axiom reports pass serial per-file checks;
 standard axioms only. Independent finder/skeptic report no findings. Failed
 scratch automation/layout attempts are retained. Layering, reachability,
 doc paths and trust pass; mandatory full lane gates remain pending.
+
+## H22/H21 reconciliation
+
+The lane is rebased onto H22's Core call-mode/invocation metadata and H21's
+build rules. Owned World/P7 code constructs no Core `ExtCall`; the inspected
+World leaf closure does not import `Syntax/Scoped`. No static/provenance
+interpretation of the new fields is claimed. Generated roots were regenerated
+and checked after rebasing; existing area-map coverage includes the carried
+modules. Original Source/world/G01/G51/resource and final obligations remain open.
