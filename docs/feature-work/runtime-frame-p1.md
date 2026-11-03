@@ -1249,3 +1249,42 @@ The integration audit checked 212971 Solidity declarations with zero findings.
 The touched build, library build and `run-lean.sh` pass with serial Lean `-j1`
 and the frozen 377-taclet rules file. These are bounded runtime-frame results;
 all previously stated compiler/profile/world correspondence limits remain.
+
+
+## Mutating native returns and represented unwind
+
+`RuntimeFrameV3MutatingSource.success` and `call_success` derive genuine native
+returns at every sufficient quotation index for the mutating countdown family.
+They restore the full caller environment through the actual composed extension,
+allocate exactly one object per positive activation, and preserve all older
+array lengths. Contents may change. Valid accesses at an insufficient index
+produce exhaustion, separately from bare revert. `bodies` and
+`source_coherence` compare successful outputs of the actual syntax at any two
+indices; they do not equate error classes.
+
+The populated client composes an opaque inner return and its actual outer
+native call. Every sufficient quotation returns the same full dependent output.
+The caller scalar is two, its two old aliases remain object zero, and the
+distinct old reference remains object one. The returned old arrays are
+`[1,2]` and `[4]`; both private boolean arrays have length three and six
+observed false elements. Wrong caller locals, wrong references and original
+heap-content preservation are rejected. The source-construction equality
+`root_state` identifies the whole internal body output with the reached
+mutating child after parent-local restoration; it is not inferred from
+equal target words.
+
+`RuntimeFrameV3MutatingReturn.Checks.growing` couples that actual native body
+output to the executed descent plus paired unwind. Saved history comes from
+the previous complete snapshot, and the existing restore producer supplies
+the same output's full parameter-frame representation. Growth eight, cursor
+30, restored counter two, pointer ten, stack and all twenty-five ordered cells
+are checked. A wrong cost-four allocator claim is contradicted by the real
+cursor; this is a proof control, not runtime rejection of a failed premise.
+Successful target execution is distinct from revert and fault. A genuinely
+bad write makes the complete image bare revert, absorbing the unwind.
+
+The target image is assembled from checked components. This populated
+parameter-frame result is separate from the arbitrary-context source export,
+and supplies no public general recursive compiler, approved-domain provenance,
+all-counter native target return theorem or byte/world rollback. Frozen
+interfaces and every earlier observation remain unchanged.
