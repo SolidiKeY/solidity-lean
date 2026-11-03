@@ -2,7 +2,9 @@
 
 These are unproved statements, not axioms or completion certificates. Implement
 in a separate commit using the unchanged toolchain/budgets and H14 automation
-first. No source translation or soundness argument is delegated here.
+first. Only routine logical-constructor assembly over Sol's checked translation facts
+is delegated below; no term lowering, state realization, proof-producing closer
+or soundness argument is delegated.
 
 Planned module: `Solidity.Calculus.DecisionNumericTwoPrefixGlue` (proposed; no file exists yet).
 Import `Solidity.Calculus.DecisionNumericLogic`; namespace `Solidity.Decide`.
@@ -63,7 +65,8 @@ its general two-prefix source/coverage boundary remain incomplete.
 elimination/conditional identities and the source term-size bound from two real
 pushQ operations. It assumes none of T1–T3. The both-atom client and foreign
 atom rejection are checked in `Solidity/Examples/DecisionNumericTwoPrefix.lean`.
-The full source-formula and target/coverage bridges remain Sol work.
+Hard term/equality source cases remain Sol work. Routine logical-constructor
+assembly is T5 below; target/coverage and semantic boundaries remain Sol work.
 
 ## VA1-T4: LFml.UIntQF.twoPrefix_exact_tests
 
@@ -81,3 +84,25 @@ theorem LFml.UIntQF.twoPrefix_exact_tests
 ```
 
 No unproved helper is assumed by a checked theorem.
+
+## VA1-T5: qfUIntLinear_twoPrefix_sourceBound
+
+Planned module: `Solidity.Calculus.DecisionNumericTwoPrefixLogic` (not created).
+Import `Solidity.Calculus.DecisionNumericTwoPrefixFormula`.
+Routine: structural glue over tt/not/and/imp, following the existing one-prefix
+qfUIntLinear_prefix_sourceBound proof. The eq case must reuse Sol's checked
+uintTwoPrefix_eq_sourceBound without replacing its term/polarity/node proof.
+No semantic validity, target, coverage or proof-producing closer is delegated.
+
+```lean
+theorem qfUIntLinear_twoPrefix_sourceBound {C : Contract}
+    {φ : Fml C [.val .uint, .val .uint]} (h : φ.QFUIntLinear) :
+    ∃ ψ : LFml C,
+      φ.toLS true (((SymS.init (C := C)).pushQ .uint).pushQ .uint) = some ψ ∧
+      φ.toLS false (((SymS.init (C := C)).pushQ .uint).pushQ .uint) = some ψ ∧
+      ψ.UIntQF (fun q => q = ⟨.uint, 0⟩ ∨ q = ⟨.uint, 1⟩) (fun _ => False) ∧
+      ψ.elim = ψ ∧ ψ.condSimp = ψ ∧ ψ.nodes ≤ φ.uintQFWeight
+```
+
+This helper is unproved and unused. It does not derive the511 bound or prove
+normalization, source reduction, general target/coverage or soundness.

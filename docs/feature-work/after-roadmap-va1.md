@@ -4573,3 +4573,55 @@ TERRA-TODO lists a fourth routine exact-test adapter; it is unproved and unused.
 Sol retains the actual source-formula, both-polarity, source-size and semantic
 bridge work. All original AU01/AU02/backfill/full-gate obligations remain open
 as above; the inherited failing documentation gate remains failed.
+
+
+## Two-prefix equality source producer (2026-11-03)
+
+Fresh origin/master inspection at8a6d4c5680167f1f22bdedc4dc6751ab432760a3
+found no duplicate Decision implementation. The development tree remains based
+on consumed cd240 source plus this lane; newer unrelated published work is not
+claimed as a validated combined tree.
+
+`Calculus/DecisionNumericTwoPrefixFormula.lean` proves
+uintTwoPrefix_eq_sourceBound for arbitrary UIntLinear operands in the actual
+two-uint context. Both actual toLS polarities yield the same existing LFml,
+with UIntQF atoms0/1, no environment atoms, elim/condSimp identities and
+ψ.nodes≤7*(a.size+b.size)+13. The proof uses actual term translations, the
+existing optional/strict equality polarity fact and prepared-node estimate.
+No coverage/parser/validity/verdict/future-helper or fixed511 premise is supplied;
+no runtime/default/predicate/strategy/proof/fuel/node budget changes.
+
+`Examples/DecisionNumericTwoPrefixFormula.lean` supplies an arbitrary-contract
+client comparing the two-local sum against literal5, not merely reflexivity.
+The actual positive and negative translations both have5nodes. A separate closed
+forallEqualsFive leaf is kernel-certified inTarget/Covered and interpreted as
+refuted; the previous positive source remains proved and the approved unread-hash
+control remains unknown. These are finite source/coverage and guarded Lean
+interpreter checks, not a general source/coverage or external EVM theorem.
+
+Six default automation attempts failed before the hard proof. An initial MCP
+diagnostics-unavailable result is preserved; focused dependency/setup build
+then passes, followed by zero-error per-file MCP. Producer build/MCP
+1.307s/3.171s; client build5.930s, client MCP7.454s; public signature/client/axiom
+probe7.432s. The cumulative focused ledger reaches416entries. Three inspected
+public axiom reports contain only propext/Classical.choice/Quot.sound. Raw size
+and verdict outputs are [some5,some5] and [proved,refuted,unknown].
+
+A transient exec-server disconnect occurred after both client build and probe
+returned0. Provider metadata still said running while actual execution was
+unavailable and retained diagnostics were absent. Access later returned with
+the original committed HEAD, edits and logs intact; both source SHA256 values
+match the passing probe. No VM, thread, goal or Docker-daemon reset/replacement was
+requested. Raw recovery receipt: two-prefix-formula-next/transport-recovery.json.
+
+Independent finder and skeptic first gave explicitly text-only reviews during
+the outage, then reviewed actual saved source and raw axioms after recovery.
+Both found no issue and used no Lean/server/build/writes. H1 hard12GiB/no swap,
+4GiB reserve, serial-j1/threads1,300s and original writer lock remain.
+Evidence: /workspace/va1-evidence/two-prefix-formula-next.
+
+TERRA-TODO T5 contains only routine logical-constructor assembly over this checked
+source producer; it is unproved and unused. General logical-prefix normalization,
+source reduction, target/coverage/soundness, exhaustive Residue/DecisionTheorem-prime
+and all other original unfinished AU01/AU02/backfill/full gates remain open.
+The inherited documentation-path failure remains failed.
