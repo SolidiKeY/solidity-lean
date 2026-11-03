@@ -275,6 +275,19 @@ actual generated PUSH/PUSH/MSTORE to actual Source shrink; executable controls
 cover repaired/final dirty signed words, retained header changes, stack tails,
 MSTORE8 into a byte-object sibling, residual bytes and wrong destinations.
 
+`SelectedPhysicalStore` consumes the published `Compilation.PhysicalStore`
+selector and instruction generator with the existing materializer/checker proofs.
+The selected nonwrapping word program is32MSTORE8 stores (96instructions), not
+one native MSTORE. Its final bytes feed the actual Source snapshot API, retaining
+unsupported canonical preparation separately from target execution. For byte
+writes outside every actual image span, initial complete encoding, pointer
+coverage, distinct IDs and the existing decoder profile derive whole-Source
+identity while the raw complement changes. The kernel controls instantiate a
+selected header shrink and a nonzero residual write. Further controls show the
+exact last valid word boundary, dirty final target bytes, and a reserved FMP
+corruption despite unchanged Source data. Outside-image separation alone is not
+reserved-memory safety, allocation adequacy or language admission.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
