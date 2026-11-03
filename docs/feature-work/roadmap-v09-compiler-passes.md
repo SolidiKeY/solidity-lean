@@ -368,6 +368,30 @@ found no defect. These are intrinsic/symbolic-word internal-call results;
 independent Source/world, public ABI/session and general recursion adequacy
 remain open. H22 external-call construction is untouched.
 
+## Public selection of the scoped call
+
+[CompilerCallScopeRecognition](../../Solidity/Backend/Passes/CompilerCallScopeRecognition.lean)
+uses the actual value returned by public `Compiler.compile` for the scoped-call
+fixture. Its exact acceptance equation and memoryCalls tag are checked. Fragment
+and private-frame projections are checked, as is reached allocation cost 6 at
+the stated intrinsic entry state. The Input equivalence varies level, frame,
+map and machine at that fixed state; it is not an all-state cost theorem.
+A generic output adapter accounts for all eleven constructors and preserves
+the complete memoryCalls fragment, heap, old-map and reached-cost relations.
+
+The consumer is reindexed only by the proved fragment equality. Physical links
+then derive its Input from the actual returned certificate, retaining all three
+selected maps before tails, full outputs and both emitted-code associations.
+[Controls](../../Solidity/Backend/Passes/CompilerCallScopeControls.lean) execute
+the public selector's actual code and check the complete original 18-word
+vector, skipped consumer, corrupted tail and private-frame refusal.
+[Pins](../../Solidity/Backend/Passes/CompilerCallScopePins.lean) guard observed
+standard axiom sets. Independent finder and skeptic source reviews found no
+defect. Equality with the earlier manually packaged complete certificate was
+not proved and is not a premise. This proves recognition of the middle scoped
+stage, not public recognition of the whole three-stage join or independent
+Source/world/ABI adequacy. H22 external-call construction is untouched.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
