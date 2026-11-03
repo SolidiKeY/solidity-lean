@@ -39,7 +39,7 @@ def invokeAt (horizon : Nat) (G : Glob packedTypedEnv) (out : Outcome) : Invoke 
           (c.1.1.2.ex.world.accounts target).code.isNone &&
           decide ((c.1.1.2.ex.world.accounts ⟨64,by decide⟩).code=some 0) &&
           decide ((c.1.1.2.ex.world.accounts ⟨64,by decide⟩).balance.val+7<2^256) then
-        let F : Fr := ⟨frame.source.caller,frame.source.caller,0,false,"EnvironmentCallback",true,0⟩
+        let F : Fr := {this:=frame.source.caller,sender:=frame.source.caller,value:=0,static:=false,contract:="EnvironmentCallback",checked:=true,depth:=0,cd:=[]}
         let run := (Source.callAddr (callbackGlob G out) F horizon target 0 input false).run c.1.1
         some ((run.1,⟨⟨run.2,c.1.2⟩,c.2⟩),(run.2.2.events.drop c.1.1.2.events.length).map Observation.event)
       else none

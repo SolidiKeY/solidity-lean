@@ -294,7 +294,7 @@ theorem physical_log_rule (count : Fin 5) (topics : Vector Word count.val) :
       (fun after => after.observed = emitObserved callEntry ⟨addr 1,count,topics,byteNew⟩ ∧
         after.memory = Solidity.Backend.Environment.writeBytes bytePhysical 160 byteNew)
       ⟨callEntry,Solidity.Backend.Environment.writeBytes bytePhysical 160 byteNew⟩ :=
-  AdapterRules.log_rule _ _ _ _ _ _ _ _ (physical_log count topics)
+  AdapterRules.log_step_eq _ _ _ _ _ _ _ _ (physical_log count topics)
 
 theorem physical_log_full_trace (count : Fin 5) (topics : Vector Word count.val) :
     (emitObserved callEntry ⟨addr 1,count,topics,byteNew⟩).trace =

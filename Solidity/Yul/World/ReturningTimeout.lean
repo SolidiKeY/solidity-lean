@@ -6,33 +6,33 @@ open Solidity.Roadmap (Outcome Bytes)
 open Solidity.Yul.Views
 open Solidity.Yul.World.PhysicalCompletion
 
-theorem internal_timeout (G : Glob env) (s : Source.EMState env []) :
-    (Source.callInternal (glob G) child 3 answerDecl .nil [uint]).run s=(.error .timeout,s) := by
+theorem internal_timeout (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.callInternal (glob G) (child cd) 3 answerDecl .nil [uint]).run s=(.error .timeout,s) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
 
-theorem dispatch_timeout (G : Glob env) (s : Source.EMState env []) :
-    (Source.dispatch (glob G) child 4 (input G)).run s=(.error .timeout,s) := by
-  rw [Source.dispatch,picked,input_nonempty]
+theorem dispatch_timeout (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.dispatch (glob G) (child cd) 4 (input G)).run s=(.error .timeout,s) := by
+  rw [Source.dispatch,picked G cd,input_nonempty]
   simp only [signature,input_length]
   change ((do
-    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob G) child 3 answerDecl .nil [uint])
-    Source.encodeVals child 3 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
-  rw [Source.Hoare.run_bind,Source.run_sub,internal_timeout]
+    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob G) (child cd) 3 answerDecl .nil [uint])
+    Source.encodeVals (child cd) 3 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
+  rw [Source.Hoare.run_bind,Source.run_sub,internal_timeout G _ cd]
 
 theorem enter_timeout (G : Glob env) (s : Source.EMState env [])
     (mark : Nat × Nat × Source.Heap env.layout) :
     (Source.enterInstance (glob G) 5 CallerFrameChecks.receiver CallerFrameChecks.owner 7 (input G) false "Finite" 1 mark).run s=
       (.error .timeout,(s.1,{s.2 with heap:=mark.2.2})) := by
   let cleared : Source.EMState env [] := ⟨s.1,{s.2 with heap:=Source.Heap.empty}⟩
-  have caught : (Source.EM.attempt (Source.dispatch (glob G) child 4 (input G))).run cleared=
+  have caught : (Source.EM.attempt (Source.dispatch (glob G) (child (input G)) 4 (input G))).run cleared=
       (.ok (.error .timeout),cleared) := by
-    change (match (Source.dispatch (glob G) child 4 (input G)).run cleared with
+    change (match (Source.dispatch (glob G) (child (input G)) 4 (input G)).run cleared with
       | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
-    rw [dispatch_timeout]
+    rw [dispatch_timeout G cleared (input G)]
   rw [Source.enterInstance,Source.Hoare.run_bind]
   change ((do
-    let r ← Source.EM.attempt (Source.dispatch (glob G) child 4 (input G))
+    let r ← Source.EM.attempt (Source.dispatch (glob G) (child (input G)) 4 (input G))
     Source.EM.modSt (fun t=>{t with heap:=mark.2.2})
     match r with
     | .ok data => pure (Outcome.success data)

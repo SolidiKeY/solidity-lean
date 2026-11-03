@@ -95,7 +95,7 @@ theorem source_zero_horizon (G : Glob env) :
 
 theorem child_context {Γ} (s : Source.EMState env Γ) r :
     PhysicalSlotPort.sourceFrame (enter s r (parent s) .call CallerFrameChecks.receiver 7 input).source "Finite" true 1=
-      (⟨CallerFrameChecks.receiver,CallerFrameChecks.owner,7,false,"Finite",true,1⟩ : Fr) ∧
+      ({this:=CallerFrameChecks.receiver,sender:=CallerFrameChecks.owner,value:=7,static:=false,contract:="Finite",checked:=true,depth:=1,cd:=input} : Fr) ∧
     (enter s r (parent s) .call CallerFrameChecks.receiver 7 input).source.mark=s.2.ex.journal.length ∧
     (enter s r (parent s) .call CallerFrameChecks.receiver 7 input).mark=r.journal.length := ⟨rfl,rfl,rfl⟩
 

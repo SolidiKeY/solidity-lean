@@ -168,7 +168,7 @@ theorem raw_copy_rule (entry : ObservedEffects D L T) (m : ByteView) (destinatio
     (range : destination.val + bytes.length ≤ 2^256) :
     AdapterRules.Box (AdapterRules.CopyStep port destination source size)
       (fun after => after.observed = entry ∧ after.memory = writeBytes m destination.val bytes) ⟨entry,m⟩ := by
-  apply AdapterRules.copy_rule
+  apply AdapterRules.copy_step_eq
   rw [copyReturndata_exact _ _ _ _ _ _ _ window]
   exact TargetMemory.store_exact _ _ _ range
 

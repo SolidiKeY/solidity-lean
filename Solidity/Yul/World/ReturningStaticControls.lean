@@ -40,9 +40,16 @@ theorem full_frame (G : Glob env) :
     (result G).2.trace=(ReturningCall.observed G).trace ∧ (result G).2.effects.returndata=output :=
   ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
 
+/-- Generic typed frame projection avoids unfolding the concrete caller heap. -/
+theorem child_context_at {Γ} (s : Source.EMState env Γ)
+    (r : ResidualJournal complementCarrierOwnership) (bytes : Roadmap.Bytes) :
+    PhysicalSlotPort.sourceFrame (enter s r (ReturningCall.parent s) .staticcall
+      CallerFrameChecks.receiver 0 bytes).source "Finite" true 1 = child bytes := rfl
+
 theorem child_context (G : Glob env) :
     PhysicalSlotPort.sourceFrame (enter (ReturningCall.caller G) CallerFrameChecks.residual
-      (ReturningCall.parent (ReturningCall.caller G)) .staticcall CallerFrameChecks.receiver 0 (input G)).source "Finite" true 1=child := rfl
+      (ReturningCall.parent (ReturningCall.caller G)) .staticcall CallerFrameChecks.receiver 0 (input G)).source "Finite" true 1=child (input G) :=
+  child_context_at (ReturningCall.caller G) CallerFrameChecks.residual (input G)
 
 def copiedState (G : Glob env) := withSourceHeap (after (ReturningCall.caller G)) (ReturningCall.copiedHeap G)
 

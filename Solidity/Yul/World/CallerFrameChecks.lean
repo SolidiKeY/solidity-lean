@@ -53,7 +53,7 @@ theorem caller_memOK : Source.MemOK packedTypedEnv PhysicalCompletionChecks.heap
 No operation list or supplied source execution equality is an input. -/
 theorem actual_source_run (G : Glob packedTypedEnv) (out : Outcome) :
     (Source.callAddr (CreditEnvironment.creditGlob G out)
-      ⟨owner,owner,0,false,"EnvironmentCredit",true,0⟩ 3 target 0 [17,34,51,68] false).run
+      {this:=owner,sender:=owner,value:=0,static:=false,contract:="EnvironmentCredit",checked:=true,depth:=0,cd:=[]} 3 target 0 [17,34,51,68] false).run
       (Source.L0 packedTypedEnv,caller.2) =
       (.ok out,(Source.L0 packedTypedEnv,(after out).2)) := by
   cases out with
@@ -73,7 +73,7 @@ theorem actual_invoke (G : Glob packedTypedEnv) (out : Outcome) :
       ⟨⟨⟨Source.L0 packedTypedEnv,caller.2⟩,residual⟩,encoding⟩ =
       some ((.ok out,⟨⟨⟨Source.L0 packedTypedEnv,(after out).2⟩,residual⟩,encoding⟩),suffix out) := by
     let sourceRun := (Source.callAddr (CreditEnvironment.creditGlob G out)
-      ⟨owner,owner,0,false,"EnvironmentCredit",true,0⟩ 3 target 0 [17,34,51,68] false).run
+      {this:=owner,sender:=owner,value:=0,static:=false,contract:="EnvironmentCredit",checked:=true,depth:=0,cd:=[]} 3 target 0 [17,34,51,68] false).run
       (Source.L0 packedTypedEnv,caller.2)
     change some ((sourceRun.1,(⟨⟨sourceRun.2,residual⟩,encoding⟩ : Carrier packedTypedEnv [])),
       (sourceRun.2.2.events.drop caller.2.events.length).map Observation.event) = _
@@ -134,7 +134,7 @@ theorem nonempty_function_frame : caller.2.fnLocals.1=[.bytes .memory] ∧ recei
   ⟨rfl,by decide,by decide,by decide⟩
 
 theorem alias_read (out : Outcome) :
-    (Source.bytesOfRV (E:=packedTypedEnv) ⟨owner,sender,0,false,"Finite",true,0⟩ 1
+    (Source.bytesOfRV (E:=packedTypedEnv) {this:=owner,sender:=sender,value:=0,static:=false,contract:="Finite",checked:=true,depth:=0,cd:=[]} 1
       (.val ((result out).1.1.1.1.get .here))).run (result out).1.1.1 =
       (.ok [17,34,51,68],(result out).1.1.1) := by
   cases out <;> rfl
@@ -230,7 +230,7 @@ def partialState : Source.EMState packedTypedEnv [.bytes .memory] :=
 def partialResult : Result packedTypedEnv [.bytes .memory] := pending observed ⟨⟨partialState,residual⟩,encoding⟩ partialSuffix
 
 theorem source_credit_timeout (G : Glob packedTypedEnv) out :
-    (Source.callAddr (CreditEnvironment.creditGlob G out) ⟨owner,owner,0,false,"EnvironmentCredit",true,0⟩
+    (Source.callAddr (CreditEnvironment.creditGlob G out) {this:=owner,sender:=owner,value:=0,static:=false,contract:="EnvironmentCredit",checked:=true,depth:=0,cd:=[]}
       2 target 0 [17,34,51,68] false).run (Source.L0 packedTypedEnv,caller.2) =
       (.error .timeout,(Source.L0 packedTypedEnv,partialState.2)) := rfl
 
@@ -273,9 +273,9 @@ theorem copied_owner_MemOK : Source.MemOK packedTypedEnv PhysicalCompletionCheck
   HeapWindow.copyStateWindow_memOK _ _ _ _ _ _ _ _ _ _ _ _ _ _ exact_state_copy (owner_MemOK (.revert [0xde,0xad,0xbe]))
 
 theorem copied_aliases :
-    (Source.bytesOfRV (E:=packedTypedEnv) ⟨owner,sender,0,false,"Finite",true,0⟩ 1
+    (Source.bytesOfRV (E:=packedTypedEnv) {this:=owner,sender:=sender,value:=0,static:=false,contract:="Finite",checked:=true,depth:=0,cd:=[]} 1
       (.val (copiedState.1.get .here))).run copiedState = (.ok [17,0xde,0xad,68],copiedState) ∧
-    (Source.bytesOfRV (E:=packedTypedEnv) ⟨owner,sender,0,false,"Finite",true,0⟩ 1
+    (Source.bytesOfRV (E:=packedTypedEnv) {this:=owner,sender:=sender,value:=0,static:=false,contract:="Finite",checked:=true,depth:=0,cd:=[]} 1
       (.val (copiedState.2.fnLocals.2.get .here))).run copiedState = (.ok [17,0xde,0xad,68],copiedState) := ⟨rfl,rfl⟩
 
 end Solidity.Yul.World.CallerFrameChecks

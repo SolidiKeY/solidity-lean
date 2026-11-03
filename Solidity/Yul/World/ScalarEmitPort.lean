@@ -16,7 +16,7 @@ def eventDecl (indexed anonymous : Bool) : Decl := ⟨.event,"Notice",some "Fini
 def env (indexed anonymous : Bool) : Env := ⟨eventDecl indexed anonymous::ReturningCall.env.decls⟩
 def statement (indexed anonymous : Bool) : RStmt (env indexed anonymous) [] false ⟨false,false⟩ [] [] :=
   .emit (eventDecl indexed anonymous) rfl (.cons (.const (Q.ofInt ReturningCall.value)) (by cases indexed <;> cases anonymous <;> decide) .nil)
-def frame (static : Bool) : Fr := ⟨CallerFrameChecks.owner,CallerFrameChecks.sender,0,static,"Finite",true,0⟩
+def frame (static : Bool) : Fr := {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.sender,value:=0,static:=static,contract:="Finite",checked:=true,depth:=0,cd:=[]}
 def signature (indexed anonymous : Bool) := sigOf (env indexed anonymous).layout "Notice" [ReturningCall.uint]
 def legacy {indexed anonymous} (G : Glob (env indexed anonymous)) : Bytes := G.selector (signature indexed anonymous)++ReturningCall.output
 

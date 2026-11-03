@@ -16,7 +16,7 @@ def failingGlob (G : Glob env) : Glob env :=
 
 theorem failure_resolved (G : Glob env) : (failingGlob G).dispatchFn "Finite" answerDecl=answerDecl := rfl
 
-theorem failure_picked (G : Glob env) : (failingGlob G).pickFn child (input G)=some answerDecl := by
+theorem failure_picked (G : Glob env) (cd : Bytes := []) : (failingGlob G).pickFn (child cd) (input G)=some answerDecl := by
   rw [Glob.pickFn]
   change ([answerDecl].find? (fun d=>((failingGlob G).prog.body ((failingGlob G).dispatchFn "Finite" d)).isSome &&
     match d.fnSig env with
@@ -28,34 +28,34 @@ theorem failure_picked (G : Glob env) : (failingGlob G).pickFn child (input G)=s
   have selector : (failingGlob G).selector (sigOf env.layout answerDecl.name [])=input G := rfl
   simp only [found,Option.isSome_some,Bool.true_and,selector,BEq.rfl]
 
-theorem failure_internal (G : Glob env) (s : Source.EMState env []) :
-    (Source.callInternal (failingGlob G) child 7 answerDecl .nil [uint]).run s=
+theorem failure_internal (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.callInternal (failingGlob G) (child cd) 7 answerDecl .nil [uint]).run s=
       (.error (.revert (errorData G)),s) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
 
-theorem failure_dispatch (G : Glob env) (s : Source.EMState env []) :
-    (Source.dispatch (failingGlob G) child 8 (input G)).run s=(.error (.revert (errorData G)),s) := by
-  rw [Source.dispatch,failure_picked,input_nonempty]
+theorem failure_dispatch (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.dispatch (failingGlob G) (child cd) 8 (input G)).run s=(.error (.revert (errorData G)),s) := by
+  rw [Source.dispatch,failure_picked G cd,input_nonempty]
   simp only [signature,input_length]
   change ((do
-    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (failingGlob G) child 7 answerDecl .nil [uint])
-    Source.encodeVals child 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
-  rw [Source.Hoare.run_bind,Source.run_sub,failure_internal]
+    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (failingGlob G) (child cd) 7 answerDecl .nil [uint])
+    Source.encodeVals (child cd) 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
+  rw [Source.Hoare.run_bind,Source.run_sub,failure_internal G _ cd]
 
 theorem failure_enter (G : Glob env) (s : Source.EMState env [])
     (mark : Nat × Nat × Source.Heap env.layout) :
     (Source.enterInstance (failingGlob G) 9 CallerFrameChecks.receiver CallerFrameChecks.owner 7 (input G) false "Finite" 1 mark).run s=
       (.ok (.revert (errorData G)),((Source.rollbackTo mark).run (s.1,{s.2 with heap:=mark.2.2})).2) := by
   let cleared : Source.EMState env [] := ⟨s.1,{s.2 with heap:=Source.Heap.empty}⟩
-  have caught : (Source.EM.attempt (Source.dispatch (failingGlob G) child 8 (input G))).run cleared=
+  have caught : (Source.EM.attempt (Source.dispatch (failingGlob G) (child (input G)) 8 (input G))).run cleared=
       (.ok (.error (.revert (errorData G))),cleared) := by
-    change (match (Source.dispatch (failingGlob G) child 8 (input G)).run cleared with
+    change (match (Source.dispatch (failingGlob G) (child (input G)) 8 (input G)).run cleared with
       | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
-    rw [failure_dispatch]
+    rw [failure_dispatch G cleared (input G)]
   rw [Source.enterInstance,Source.Hoare.run_bind]
   change ((do
-    let r ← Source.EM.attempt (Source.dispatch (failingGlob G) child 8 (input G))
+    let r ← Source.EM.attempt (Source.dispatch (failingGlob G) (child (input G)) 8 (input G))
     Source.EM.modSt (fun t=>{t with heap:=mark.2.2})
     match r with
     | .ok data => pure (Outcome.success data)

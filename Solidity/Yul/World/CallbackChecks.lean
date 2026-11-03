@@ -23,14 +23,14 @@ def result (out : Outcome) : Result packedTypedEnv [.bytes .memory] :=
 
 theorem actual_callback_dispatch (G : Glob packedTypedEnv) out :
     (Source.dispatch (Callback.callbackGlob G out)
-      ⟨CallerFrameChecks.receiver,CallerFrameChecks.target,7,false,"Finite",true,2⟩ 1 []).run
+      {this:=CallerFrameChecks.receiver,sender:=CallerFrameChecks.target,value:=7,static:=false,contract:="Finite",checked:=true,depth:=2,cd:=[]} 1 []).run
       (Source.L0 packedTypedEnv,{CallerFrameChecks.caller.2 with ex:=CallerFrameChecks.credited,heap:=Source.Heap.empty}) =
       (.error (.revert []),(Source.L0 packedTypedEnv,
         {CallerFrameChecks.caller.2 with ex:=CallerFrameChecks.credited,heap:=Source.Heap.empty})) := rfl
 
 theorem actual_source_run (G : Glob packedTypedEnv) (out : Outcome) :
     (Source.callAddr (Callback.callbackGlob G out)
-      ⟨CallerFrameChecks.owner,CallerFrameChecks.owner,0,false,"EnvironmentCallback",true,0⟩ 4
+      {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.owner,value:=0,static:=false,contract:="EnvironmentCallback",checked:=true,depth:=0,cd:=[]} 4
       CallerFrameChecks.target 0 [17,34,51,68] false).run (Source.L0 packedTypedEnv,CallerFrameChecks.caller.2) =
       (.ok out,(Source.L0 packedTypedEnv,(after out).2)) := by
   cases out with
@@ -59,7 +59,7 @@ theorem invoke_actual (G : Glob packedTypedEnv) out :
       ⟨⟨⟨Source.L0 packedTypedEnv,CallerFrameChecks.caller.2⟩,CallerFrameChecks.residual⟩,CallerFrameChecks.encoding⟩ =
       some ((.ok out,⟨⟨⟨Source.L0 packedTypedEnv,(after out).2⟩,CallerFrameChecks.residual⟩,CallerFrameChecks.encoding⟩),suffix out) := by
     let src := (Source.callAddr (Callback.callbackGlob G out)
-      ⟨CallerFrameChecks.owner,CallerFrameChecks.owner,0,false,"EnvironmentCallback",true,0⟩ 4 CallerFrameChecks.target 0 [17,34,51,68] false).run
+      {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.owner,value:=0,static:=false,contract:="EnvironmentCallback",checked:=true,depth:=0,cd:=[]} 4 CallerFrameChecks.target 0 [17,34,51,68] false).run
         (Source.L0 packedTypedEnv,CallerFrameChecks.caller.2)
     change some ((src.1,(⟨⟨src.2,CallerFrameChecks.residual⟩,CallerFrameChecks.encoding⟩ : Carrier packedTypedEnv [])),
       (src.2.2.events.drop CallerFrameChecks.caller.2.events.length).map Observation.event) = _

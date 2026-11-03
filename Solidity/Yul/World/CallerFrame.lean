@@ -51,7 +51,7 @@ completed dispatch attempt, including stuck/timeout. Fuel0 is excluded. -/
 theorem enterInstance_heap {E} (G : Glob E) (s : EMState E []) (n : Nat)
     a sender value input static contract depth (mark : Nat × Nat × Source.Heap E.layout) :
     ((Source.enterInstance G (n+1) a sender value input static contract depth mark).run s).2.2.heap=mark.2.2 := by
-  let F : Fr := ⟨a,sender,value,static,contract,true,depth⟩
+  let F : Fr := {this:=a,sender:=sender,value:=value,static:=static,contract:=contract,checked:=true,depth:=depth,cd:=input}
   let resume : Except Halt Solidity.Roadmap.Bytes → EM E [] Outcome := fun result => do
     Source.EM.modSt (fun state=>{state with heap:=mark.2.2})
     match result with

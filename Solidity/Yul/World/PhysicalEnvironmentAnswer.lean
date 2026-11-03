@@ -87,7 +87,7 @@ def staticEnvironmentInvoke {E} (G : Glob E) (out : Outcome) : Invoke E [] :=
           (externalAnswerGlob G out).hasCode c.1.1.2.events target &&
           (frame.source.this == target) && frame.source.static &&
           (c.1.1.2.ex.world.accounts target).code.isNone then
-        let F : Fr := ⟨frame.source.caller,frame.source.caller,0,true,"EnvironmentAnswer",true,0⟩
+        let F : Fr := {this:=frame.source.caller,sender:=frame.source.caller,value:=0,static:=true,contract:="EnvironmentAnswer",checked:=true,depth:=0,cd:=[]}
         let run := (Source.callAddr (externalAnswerGlob G out) F 2 target 0 input true).run c.1.1
         some ((run.1,⟨⟨run.2,c.1.2⟩,c.2⟩),[.event (.call target 0 input true),.event (.answer out none)])
       else none

@@ -22,7 +22,7 @@ def glob (G : Glob env) : Glob env :=
   {G with prog:={G.prog with contracts:=["Finite"],body:=fun d=>if d.name="answer" then some body else none}}
 def input (G : Glob env) : Bytes := (glob G).selector (sigOf env.layout "answer" [])
 def output : Bytes := wordBytes (toWord value)
-def child : Fr := ⟨CallerFrameChecks.receiver,CallerFrameChecks.owner,7,false,"Finite",true,1⟩
+def child (cd : Bytes := []) : Fr := {this:=CallerFrameChecks.receiver,sender:=CallerFrameChecks.owner,value:=7,static:=false,contract:="Finite",checked:=true,depth:=1,cd:=cd}
 
 theorem input_length (G : Glob env) : (input G).length=4 := by
   simp only [input,Glob.selector,List.length_take,wordBytes_length]
@@ -42,7 +42,7 @@ theorem signature : answerDecl.fnSig env=some ([],[uint]) := rfl
 
 theorem found (G : Glob env) : (glob G).prog.body answerDecl=some body := rfl
 
-theorem picked (G : Glob env) : (glob G).pickFn child (input G)=some answerDecl := by
+theorem picked (G : Glob env) (cd : Bytes := []) : (glob G).pickFn (child cd) (input G)=some answerDecl := by
   rw [Glob.pickFn]
   change ([answerDecl].find? (fun d=>((glob G).prog.body ((glob G).dispatchFn "Finite" d)).isSome &&
     match d.fnSig env with
@@ -52,20 +52,20 @@ theorem picked (G : Glob env) : (glob G).pickFn child (input G)=some answerDecl 
   rw [List.take_of_length_le (by rw [input_length]; exact Nat.le_refl _)]
   simp only [input,answerDecl,BEq.rfl]
 
-theorem internal_run (G : Glob env) (s : Source.EMState env []) :
-    (Source.callInternal (glob G) child 7 answerDecl .nil [uint]).run s=
+theorem internal_run (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.callInternal (glob G) (child cd) 7 answerDecl .nil [uint]).run s=
       (.ok (.val (.int (value : Int) (by decide))),s) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
 
-theorem dispatch_run (G : Glob env) (s : Source.EMState env []) :
-    (Source.dispatch (glob G) child 8 (input G)).run s=(.ok output,s) := by
-  rw [Source.dispatch,picked,input_nonempty]
+theorem dispatch_run (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.dispatch (glob G) (child cd) 8 (input G)).run s=(.ok output,s) := by
+  rw [Source.dispatch,picked G cd,input_nonempty]
   simp only [signature,input_length]
   change ((do
-    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob G) child 7 answerDecl .nil [uint])
-    Source.encodeVals child 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
-  rw [Source.Hoare.run_bind,Source.run_sub,internal_run]
+    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob G) (child cd) 7 answerDecl .nil [uint])
+    Source.encodeVals (child cd) 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
+  rw [Source.Hoare.run_bind,Source.run_sub,internal_run G _ cd]
   rfl
 
 theorem enter_run (G : Glob env) (s : Source.EMState env [])
@@ -73,13 +73,13 @@ theorem enter_run (G : Glob env) (s : Source.EMState env [])
     (Source.enterInstance (glob G) 9 CallerFrameChecks.receiver CallerFrameChecks.owner 7 (input G) false "Finite" 1 mark).run s=
       (.ok (.success output),(s.1,{s.2 with heap:=mark.2.2})) := by
   let cleared : Source.EMState env [] := ⟨s.1,{s.2 with heap:=Source.Heap.empty}⟩
-  have caught : (Source.EM.attempt (Source.dispatch (glob G) child 8 (input G))).run cleared=
+  have caught : (Source.EM.attempt (Source.dispatch (glob G) (child (input G)) 8 (input G))).run cleared=
       (.ok (.ok output),cleared) := by
-    change (match (Source.dispatch (glob G) child 8 (input G)).run cleared with | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
-    rw [dispatch_run]
+    change (match (Source.dispatch (glob G) (child (input G)) 8 (input G)).run cleared with | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
+    rw [dispatch_run G cleared (input G)]
   rw [Source.enterInstance,Source.Hoare.run_bind]
   change ((do
-    let r ← Source.EM.attempt (Source.dispatch (glob G) child 8 (input G))
+    let r ← Source.EM.attempt (Source.dispatch (glob G) (child (input G)) 8 (input G))
     Source.EM.modSt (fun t=>{t with heap:=mark.2.2})
     match r with
     | .ok data => pure (Outcome.success data)
@@ -93,7 +93,7 @@ def entryExecution := ((initial.apply (.account CallerFrameChecks.owner (fun a=>
   (.account CallerFrameChecks.receiver (fun a=>{a with balance:=23,nonce:=2,code:=some 0}))).apply (.account CallerFrameChecks.owner id)
 def moved := (entryExecution.apply (.account CallerFrameChecks.owner (fun a=>a.withBalance 4))).apply
   (.account CallerFrameChecks.receiver (fun a=>a.withBalance 30))
-def parentFrame : Fr := ⟨CallerFrameChecks.owner,CallerFrameChecks.sender,0,false,"Finite",true,0⟩
+def parentFrame : Fr := {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.sender,value:=0,static:=false,contract:="Finite",checked:=true,depth:=0,cd:=[]}
 def after {Γ} (s : Source.EMState env Γ) : Source.EMState env Γ := ⟨s.1,{s.2 with ex:=moved}⟩
 
 theorem run_pure {E Γ α} (v : α) (s : Source.EMState E Γ) :

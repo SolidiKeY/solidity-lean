@@ -44,7 +44,7 @@ theorem modifier_resolves (G : Glob env) out :
     (callbackGlob G out).prog.body ((callbackGlob G out).dispatchMod "Finite" modifierDecl)=some modifierBody := rfl
 
 theorem modifier_frame (G : Glob env) out (n : Nat) :
-    ((Source.runMods (callbackGlob G out) ⟨CallerFrameChecks.receiver,CallerFrameChecks.target,7,false,"Finite",true,2⟩
+    ((Source.runMods (callbackGlob G out) {this:=CallerFrameChecks.receiver,sender:=CallerFrameChecks.target,value:=7,static:=false,contract:="Finite",checked:=true,depth:=2,cd:=[]}
       (n+2) fallbackBody [⟨modifierDecl,[],.nil⟩] (Source.L0 env)).run (Source.L0 env,caller.2)).2.2.fnLocals=caller.2.fnLocals :=
   ModifierFrame.zeroArg_fnLocals _ _ _ _ _ _ _ _ (modifier_resolves G out) rfl
 
@@ -57,7 +57,7 @@ def invokeAt (horizon : Nat) (G : Glob env) (out : Outcome) : Invoke env [] :=
           (c.1.1.2.ex.world.accounts target).code.isNone &&
           decide ((c.1.1.2.ex.world.accounts CallerFrameChecks.receiver).code=some 0) &&
           decide ((c.1.1.2.ex.world.accounts CallerFrameChecks.receiver).balance.val+7<2^256) then
-        let F : Fr := ⟨frame.source.caller,frame.source.caller,0,false,"ModifierCallback",true,0⟩
+        let F : Fr := {this:=frame.source.caller,sender:=frame.source.caller,value:=0,static:=false,contract:="ModifierCallback",checked:=true,depth:=0,cd:=[]}
         let run := (Source.callAddr (callbackGlob G out) F horizon target 0 input false).run c.1.1
         some ((run.1,⟨⟨run.2,c.1.2⟩,c.2⟩),(run.2.2.events.drop c.1.1.2.events.length).map Observation.event)
       else none
@@ -81,7 +81,7 @@ def result (out : Outcome) : Result env [.bytes .memory] :=
     ⟨⟨(after out).2.ex,committedLogs (observed.trace++suffix out),returnData out⟩,observed.trace++suffix out,rfl⟩)
 
 theorem source_run (G : Glob env) (out : Outcome) :
-    (Source.callAddr (callbackGlob G out) ⟨CallerFrameChecks.owner,CallerFrameChecks.owner,0,false,"ModifierCallback",true,0⟩
+    (Source.callAddr (callbackGlob G out) {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.owner,value:=0,static:=false,contract:="ModifierCallback",checked:=true,depth:=0,cd:=[]}
       10 CallerFrameChecks.target 0 [17,34,51,68] false).run (Source.L0 env,caller.2) =
       (.ok out,(Source.L0 env,(after out).2)) := by
   cases G with

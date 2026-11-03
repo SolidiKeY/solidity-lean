@@ -23,7 +23,7 @@ theorem signature : answerDecl.fnSig env=some ([],[uint]) := rfl
 
 theorem found (failed : Bool) (G : Glob env) : (glob failed G).prog.body answerDecl=some (body failed) := rfl
 
-theorem picked (failed : Bool) (G : Glob env) : (glob failed G).pickFn child (input G)=some answerDecl := by
+theorem picked (failed : Bool) (G : Glob env) (cd : Bytes := []) : (glob failed G).pickFn (child cd) (input G)=some answerDecl := by
   rw [Glob.pickFn]
   change ([answerDecl].find? (fun d=>((glob failed G).prog.body ((glob failed G).dispatchFn "Finite" d)).isSome &&
     match d.fnSig env with
@@ -33,14 +33,14 @@ theorem picked (failed : Bool) (G : Glob env) : (glob failed G).pickFn child (in
   rw [List.take_of_length_le (by rw [input_length]; exact Nat.le_refl _)]
   simp only [input,glob,Glob.selector,answerDecl,BEq.rfl]
 
-theorem dispatch_success (G : Glob env) (s : Source.EMState env []) :
-    (Source.dispatch (glob false G) child 8 (input G)).run s=(.ok ReturningCall.output,changed s CallerFrameChecks.receiver) := by
-  rw [Source.dispatch,picked false G,input_nonempty]
+theorem dispatch_success (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.dispatch (glob false G) (child cd) 8 (input G)).run s=(.ok ReturningCall.output,changed s CallerFrameChecks.receiver) := by
+  rw [Source.dispatch,picked false G cd,input_nonempty]
   simp only [signature,input_length]
   change ((do
-    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob false G) child 7 answerDecl .nil [uint])
-    Source.encodeVals child 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
-  rw [Source.Hoare.run_bind,Source.run_sub,internal_success]
+    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob false G) (child cd) 7 answerDecl .nil [uint])
+    Source.encodeVals (child cd) 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
+  rw [Source.Hoare.run_bind,Source.run_sub,internal_success G _ cd]
   rfl
 
 theorem enter_success (G : Glob env) (s : Source.EMState env [])
@@ -48,13 +48,13 @@ theorem enter_success (G : Glob env) (s : Source.EMState env [])
     (Source.enterInstance (glob false G) 9 CallerFrameChecks.receiver CallerFrameChecks.owner 7 (input G) false "Finite" 1 mark).run s=
       (.ok (.success ReturningCall.output),((changed s CallerFrameChecks.receiver).1,{(changed s CallerFrameChecks.receiver).2 with heap:=mark.2.2})) := by
   let cleared : Source.EMState env [] := ⟨s.1,{s.2 with heap:=Source.Heap.empty}⟩
-  have caught : (Source.EM.attempt (Source.dispatch (glob false G) child 8 (input G))).run cleared=
+  have caught : (Source.EM.attempt (Source.dispatch (glob false G) (child (input G)) 8 (input G))).run cleared=
       (.ok (.ok ReturningCall.output),changed cleared CallerFrameChecks.receiver) := by
-    change (match (Source.dispatch (glob false G) child 8 (input G)).run cleared with | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
-    rw [dispatch_success]
+    change (match (Source.dispatch (glob false G) (child (input G)) 8 (input G)).run cleared with | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
+    rw [dispatch_success G cleared (input G)]
   rw [Source.enterInstance,Source.Hoare.run_bind]
   change ((do
-    let r ← Source.EM.attempt (Source.dispatch (glob false G) child 8 (input G))
+    let r ← Source.EM.attempt (Source.dispatch (glob false G) (child (input G)) 8 (input G))
     Source.EM.modSt (fun t=>{t with heap:=mark.2.2})
     match r with
     | .ok data => pure (Outcome.success data)
@@ -63,14 +63,14 @@ theorem enter_success (G : Glob env) (s : Source.EMState env [])
   rw [Source.Hoare.run_bind,caught]
   rfl
 
-theorem dispatch_revert (G : Glob env) (s : Source.EMState env []) :
-    (Source.dispatch (glob true G) child 8 (input G)).run s=(.error (.revert (errorData G)),changed s CallerFrameChecks.receiver) := by
-  rw [Source.dispatch,picked true G,input_nonempty]
+theorem dispatch_revert (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.dispatch (glob true G) (child cd) 8 (input G)).run s=(.error (.revert (errorData G)),changed s CallerFrameChecks.receiver) := by
+  rw [Source.dispatch,picked true G cd,input_nonempty]
   simp only [signature,input_length]
   change ((do
-    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob true G) child 7 answerDecl .nil [uint])
-    Source.encodeVals child 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
-  rw [Source.Hoare.run_bind,Source.run_sub,internal_revert]
+    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (glob true G) (child cd) 7 answerDecl .nil [uint])
+    Source.encodeVals (child cd) 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
+  rw [Source.Hoare.run_bind,Source.run_sub,internal_revert G _ cd]
   rfl
 
 theorem enter_revert (G : Glob env) (s : Source.EMState env [])
@@ -78,14 +78,14 @@ theorem enter_revert (G : Glob env) (s : Source.EMState env [])
     (Source.enterInstance (glob true G) 9 CallerFrameChecks.receiver CallerFrameChecks.owner 7 (input G) false "Finite" 1 mark).run s=
       (.ok (.revert (errorData G)),((Source.rollbackTo mark).run ((changed s CallerFrameChecks.receiver).1,{(changed s CallerFrameChecks.receiver).2 with heap:=mark.2.2})).2) := by
   let cleared : Source.EMState env [] := ⟨s.1,{s.2 with heap:=Source.Heap.empty}⟩
-  have caught : (Source.EM.attempt (Source.dispatch (glob true G) child 8 (input G))).run cleared=
+  have caught : (Source.EM.attempt (Source.dispatch (glob true G) (child (input G)) 8 (input G))).run cleared=
       (.ok (.error (.revert (errorData G))),changed cleared CallerFrameChecks.receiver) := by
-    change (match (Source.dispatch (glob true G) child 8 (input G)).run cleared with
+    change (match (Source.dispatch (glob true G) (child (input G)) 8 (input G)).run cleared with
       | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
-    rw [dispatch_revert]
+    rw [dispatch_revert G cleared (input G)]
   rw [Source.enterInstance,Source.Hoare.run_bind]
   change ((do
-    let r ← Source.EM.attempt (Source.dispatch (glob true G) child 8 (input G))
+    let r ← Source.EM.attempt (Source.dispatch (glob true G) (child (input G)) 8 (input G))
     Source.EM.modSt (fun t=>{t with heap:=mark.2.2})
     match r with
     | .ok data => pure (Outcome.success data)

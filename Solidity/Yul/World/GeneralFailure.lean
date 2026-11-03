@@ -96,35 +96,35 @@ theorem call_actual (G : Glob env) {Γ} (s : EMState env Γ)
     (invoke_actual G s next code transfer r b o gas),finish_actual]
 
 open Solidity.Yul.World.ReturningCall
-theorem static_internal (G : Glob env) (s : Source.EMState env []) :
-    (Source.callInternal (failingGlob G) ReturningStatic.child 7 answerDecl .nil [uint]).run s=
+theorem static_internal (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.callInternal (failingGlob G) (ReturningStatic.child cd) 7 answerDecl .nil [uint]).run s=
       (.error (.revert (errorData G)),s) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
 
-theorem static_dispatch (G : Glob env) (s : Source.EMState env []) :
-    (Source.dispatch (failingGlob G) ReturningStatic.child 8 (input G)).run s=(.error (.revert (errorData G)),s) := by
-  have picked : (failingGlob G).pickFn ReturningStatic.child (input G)=some answerDecl := ReturningCall.failure_picked G
+theorem static_dispatch (G : Glob env) (s : Source.EMState env []) (cd : Bytes := []) :
+    (Source.dispatch (failingGlob G) (ReturningStatic.child cd) 8 (input G)).run s=(.error (.revert (errorData G)),s) := by
+  have picked : (failingGlob G).pickFn (ReturningStatic.child cd) (input G)=some answerDecl := ReturningCall.failure_picked G cd
   rw [Source.dispatch,picked,input_nonempty]
   simp only [signature,input_length]
   change ((do
-    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (failingGlob G) ReturningStatic.child 7 answerDecl .nil [uint])
-    Source.encodeVals ReturningStatic.child 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
-  rw [Source.Hoare.run_bind,Source.run_sub,static_internal]
+    let (r,_) ← Source.EM.sub (Source.L0 env) (Source.callInternal (failingGlob G) (ReturningStatic.child cd) 7 answerDecl .nil [uint])
+    Source.encodeVals (ReturningStatic.child cd) 7 false (← Source.EM.lift (Source.unRet [uint] r))).run s)=_
+  rw [Source.Hoare.run_bind,Source.run_sub,static_internal G _ cd]
 
 theorem static_enter (G : Glob env) (s : Source.EMState env [])
     (mark : Nat × Nat × Source.Heap env.layout) :
     (Source.enterInstance (failingGlob G) 9 CallerFrameChecks.receiver CallerFrameChecks.owner 0 (input G) true "Finite" 1 mark).run s=
       (.ok (.revert (errorData G)),((Source.rollbackTo mark).run (s.1,{s.2 with heap:=mark.2.2})).2) := by
   let cleared : Source.EMState env [] := ⟨s.1,{s.2 with heap:=Source.Heap.empty}⟩
-  have caught : (Source.EM.attempt (Source.dispatch (failingGlob G) ReturningStatic.child 8 (input G))).run cleared=
+  have caught : (Source.EM.attempt (Source.dispatch (failingGlob G) (ReturningStatic.child (input G)) 8 (input G))).run cleared=
       (.ok (.error (.revert (errorData G))),cleared) := by
-    change (match (Source.dispatch (failingGlob G) ReturningStatic.child 8 (input G)).run cleared with
+    change (match (Source.dispatch (failingGlob G) (ReturningStatic.child (input G)) 8 (input G)).run cleared with
       | (r,t)=>((Except.ok r : Except Halt (Except Halt Bytes)),t))=_
-    rw [static_dispatch]
+    rw [static_dispatch G cleared (input G)]
   rw [Source.enterInstance,Source.Hoare.run_bind]
   change ((do
-    let r ← Source.EM.attempt (Source.dispatch (failingGlob G) ReturningStatic.child 8 (input G))
+    let r ← Source.EM.attempt (Source.dispatch (failingGlob G) (ReturningStatic.child (input G)) 8 (input G))
     Source.EM.modSt (fun t=>{t with heap:=mark.2.2})
     match r with
     | .ok data => pure (Outcome.success data)

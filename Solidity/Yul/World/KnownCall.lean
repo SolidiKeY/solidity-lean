@@ -12,7 +12,7 @@ open Solidity.Yul.World.CallbackSuccess (env callerExecution)
 def glob (G : Glob env) := CallbackSuccess.callbackGlob G (.success [])
 def entryExecution := callerExecution.apply (.account CallerFrameChecks.owner (fun a=>{a with code:=some 0}))
 def parentFrame : Fr :=
-  ⟨CallerFrameChecks.owner,CallerFrameChecks.sender,0,false,"Finite",true,0⟩
+  {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.sender,value:=0,static:=false,contract:="Finite",checked:=true,depth:=0,cd:=[]}
 def input : Bytes := [17,34,51,68]
 def moved := (entryExecution.apply (.account CallerFrameChecks.owner (fun a=>a.withBalance 4))).apply
   (.account CallerFrameChecks.receiver (fun a=>a.withBalance 30))

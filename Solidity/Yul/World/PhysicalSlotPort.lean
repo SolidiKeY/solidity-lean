@@ -1,5 +1,6 @@
 import Solidity.Yul.World.Adapters
 import Solidity.Yul.Views.OwnedBoolFrame
+import Solidity.Yul.Views.SourceEnvironmentInputs
 
 /-! World-facing actual represented slot action. The complete VY2 result is
 returned alongside observations: source, complement and owned-byte journals
@@ -81,10 +82,10 @@ theorem static_result {E Γ ps ts q before} (F : Fr) (p : RepresentedSlotPlan ps
   rw [representedSourceStep_static F p s r static]
   exact ⟨rfl,same.symm,rfl,rfl⟩
 
-/-- Public CallFrame context is transported only through its actual storage
-owner/static fields; library code selection never changes this account. -/
+/-- Public CallFrame context, including actual calldata, is transported through
+the producer adapter; library code selection never changes its storage account. -/
 def sourceFrame (frame : Source.CallFrame) (contract : String) (checked : Bool) (depth : Nat) : Fr :=
-  ⟨frame.this,frame.caller,frame.value,frame.static,contract,checked,depth⟩
+  sourceFrameOfCall frame contract checked depth
 
 theorem sourceFrame_owner (frame : Source.CallFrame) (contract : String) (checked : Bool) (depth : Nat) :
     (sourceFrame frame contract checked depth).this = frame.this ∧

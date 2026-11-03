@@ -18,7 +18,7 @@ theorem invoke_actual (G : Glob env) (out : Outcome) :
       ⟨⟨⟨Source.L0 env,caller.2⟩,CallerFrameChecks.residual⟩,CallerFrameChecks.encoding⟩ =
       some ((.ok out,⟨⟨⟨Source.L0 env,(after out).2⟩,CallerFrameChecks.residual⟩,CallerFrameChecks.encoding⟩),suffix out) := by
     let src := (Source.callAddr (callbackGlob G out)
-      ⟨CallerFrameChecks.owner,CallerFrameChecks.owner,0,false,"ModifierCallback",true,0⟩ 10 CallerFrameChecks.target 0 [17,34,51,68] false).run
+      {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.owner,value:=0,static:=false,contract:="ModifierCallback",checked:=true,depth:=0,cd:=[]} 10 CallerFrameChecks.target 0 [17,34,51,68] false).run
         (Source.L0 env,caller.2)
     change some ((src.1,(⟨⟨src.2,CallerFrameChecks.residual⟩,CallerFrameChecks.encoding⟩ : Carrier env [])),
       (src.2.2.events.drop caller.2.events.length).map Observation.event) = _
@@ -68,7 +68,7 @@ def partialResult : Result env [.bytes .memory] :=
   pending observed ⟨⟨partialState,CallerFrameChecks.residual⟩,CallerFrameChecks.encoding⟩ partialSuffix
 
 theorem source_timeout (G : Glob env) (out : Outcome) :
-    (Source.callAddr (callbackGlob G out) ⟨CallerFrameChecks.owner,CallerFrameChecks.owner,0,false,"ModifierCallback",true,0⟩
+    (Source.callAddr (callbackGlob G out) {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.owner,value:=0,static:=false,contract:="ModifierCallback",checked:=true,depth:=0,cd:=[]}
       8 CallerFrameChecks.target 0 [17,34,51,68] false).run (Source.L0 env,caller.2) =
       (.error .timeout,(Source.L0 env,partialState.2)) := by
   cases G with
@@ -145,7 +145,7 @@ theorem precompile_refusal (G : Glob env) out : invoke G out observed
 
 theorem missing_modifier (G : Glob env) :
     (Source.runMods {G with prog:={G.prog with body:=fun _=>none}}
-      ⟨CallerFrameChecks.receiver,CallerFrameChecks.target,7,false,"Finite",true,2⟩ 2 fallbackBody
+      {this:=CallerFrameChecks.receiver,sender:=CallerFrameChecks.target,value:=7,static:=false,contract:="Finite",checked:=true,depth:=2,cd:=[]} 2 fallbackBody
       [⟨modifierDecl,[],.nil⟩] (Source.L0 env)).run (Source.L0 env,caller.2)=
       (.error (.stuck "modifier without a body"),(Source.L0 env,caller.2)) := rfl
 
@@ -171,9 +171,9 @@ theorem copied_owner_MemOK : Source.MemOK env PhysicalCompletionChecks.heap.ty c
   HeapWindow.copyStateWindow_memOK _ _ _ _ _ _ _ _ _ _ _ _ _ _ exact_state_copy (owner_MemOK (.revert [0xde,0xad,0xbe]))
 
 theorem copied_aliases :
-    (Source.bytesOfRV (E:=env) ⟨CallerFrameChecks.owner,CallerFrameChecks.sender,0,false,"Finite",true,0⟩ 1
+    (Source.bytesOfRV (E:=env) {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.sender,value:=0,static:=false,contract:="Finite",checked:=true,depth:=0,cd:=[]} 1
       (.val (copiedState.1.get .here))).run copiedState = (.ok [17,0xde,0xad,68],copiedState) ∧
-    (Source.bytesOfRV (E:=env) ⟨CallerFrameChecks.owner,CallerFrameChecks.sender,0,false,"Finite",true,0⟩ 1
+    (Source.bytesOfRV (E:=env) {this:=CallerFrameChecks.owner,sender:=CallerFrameChecks.sender,value:=0,static:=false,contract:="Finite",checked:=true,depth:=0,cd:=[]} 1
       (.val (copiedState.2.fnLocals.2.get .here))).run copiedState = (.ok [17,0xde,0xad,68],copiedState) := ⟨rfl,rfl⟩
 
 end Solidity.Yul.World.CallbackSuccess

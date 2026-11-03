@@ -40,48 +40,48 @@ def glob (failed : Bool) (G : Glob env) : Glob env :=
 def input (G : Glob env) : Bytes := G.selector (sigOf env.layout "answer" [])
 def errorData (G : Glob env) : Bytes := G.selector (sigOf env.layout "Denied" [ReturningCall.uint])++ReturningCall.output
 
-theorem assignment_run (G : Glob env) (s : EMState env [ReturningCall.uint]) :
-    (Source.evalE (glob false G) ReturningCall.child 4 assignment).run s=
+theorem assignment_run (G : Glob env) (s : EMState env [ReturningCall.uint]) (cd : Bytes := []) :
+    (Source.evalE (glob false G) (ReturningCall.child cd) 4 assignment).run s=
       (.ok (.val (.bool true)),changed s CallerFrameChecks.receiver) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
 
-theorem read_after_write (G : Glob env) (s : EMState env [ReturningCall.uint]) :
-    (Source.evalE (glob false G) ReturningCall.child 3 (.state flagDecl rfl)).run (changed s CallerFrameChecks.receiver)=
+theorem read_after_write (G : Glob env) (s : EMState env [ReturningCall.uint]) (cd : Bytes := []) :
+    (Source.evalE (glob false G) (ReturningCall.child cd) 3 (.state flagDecl rfl)).run (changed s CallerFrameChecks.receiver)=
       (.ok (.val (.bool true)),changed s CallerFrameChecks.receiver) := rfl
 
-theorem return_after_write (G : Glob env) (s : EMState env [ReturningCall.uint]) :
-    (Source.evalE (glob false G) ReturningCall.child 4 readReturn).run (changed s CallerFrameChecks.receiver)=
+theorem return_after_write (G : Glob env) (s : EMState env [ReturningCall.uint]) (cd : Bytes := []) :
+    (Source.evalE (glob false G) (ReturningCall.child cd) 4 readReturn).run (changed s CallerFrameChecks.receiver)=
       (.ok (.val (.int (ReturningCall.value : Int) (by decide))),changed s CallerFrameChecks.receiver) := rfl
 
 theorem resolved (failed : Bool) (G : Glob env) : (glob failed G).dispatchFn "Finite" ReturningCall.answerDecl=ReturningCall.answerDecl := rfl
 
-theorem mods_success (G : Glob env) (s : EMState env []) :
-    (Source.runMods (glob false G) ReturningCall.child 6 (body false) [] (.cons (.int 0 (by decide)) .nil)).run s=
+theorem mods_success (G : Glob env) (s : EMState env []) (cd : Bytes := []) :
+    (Source.runMods (glob false G) (ReturningCall.child cd) 6 (body false) [] (.cons (.int 0 (by decide)) .nil)).run s=
       (.ok (.cons (.int (ReturningCall.value : Int) (by decide)) .nil),changed s CallerFrameChecks.receiver) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
 
-theorem internal_success (G : Glob env) (s : EMState env []) :
-    (Source.callInternal (glob false G) ReturningCall.child 7 ReturningCall.answerDecl .nil [ReturningCall.uint]).run s=
+theorem internal_success (G : Glob env) (s : EMState env []) (cd : Bytes := []) :
+    (Source.callInternal (glob false G) (ReturningCall.child cd) 7 ReturningCall.answerDecl .nil [ReturningCall.uint]).run s=
       (.ok (.val (.int (ReturningCall.value : Int) (by decide))),changed s CallerFrameChecks.receiver) := by
   rw [Source.callInternal]
   change ((do
-    let l ← Source.runMods (glob false G) ReturningCall.child 6 (body false) [] (.cons (.int 0 (by decide)) .nil)
+    let l ← Source.runMods (glob false G) (ReturningCall.child cd) 6 (body false) [] (.cons (.int 0 (by decide)) .nil)
     let out ← Source.EM.lift (Source.retVals l 0 [ReturningCall.uint])
     pure (Source.mkRet [ReturningCall.uint] out)).run s)=_
-  rw [Source.Hoare.run_bind,mods_success]
+  rw [Source.Hoare.run_bind,mods_success G _ cd]
   rfl
 
-theorem internal_revert (G : Glob env) (s : EMState env []) :
-    (Source.callInternal (glob true G) ReturningCall.child 7 ReturningCall.answerDecl .nil [ReturningCall.uint]).run s=
+theorem internal_revert (G : Glob env) (s : EMState env []) (cd : Bytes := []) :
+    (Source.callInternal (glob true G) (ReturningCall.child cd) 7 ReturningCall.answerDecl .nil [ReturningCall.uint]).run s=
       (.error (.revert (errorData G)),changed s CallerFrameChecks.receiver) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
 
 /-- A genuine entered-body exhaustion control, not a successful return. -/
-theorem read_body_timeout (G : Glob env) (s : EMState env []) :
-    (Source.runMods (glob false G) ReturningCall.child 6 readBody [] (.cons (.int 0 (by decide)) .nil)).run s=
+theorem read_body_timeout (G : Glob env) (s : EMState env []) (cd : Bytes := []) :
+    (Source.runMods (glob false G) (ReturningCall.child cd) 6 readBody [] (.cons (.int 0 (by decide)) .nil)).run s=
       (.error .timeout,changed s CallerFrameChecks.receiver) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl

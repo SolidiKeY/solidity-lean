@@ -101,7 +101,7 @@ theorem journal_not_unchanged : zeroMoved.journal.length=5 ∧ entryExecution.jo
 
 theorem child_context {Γ} (s : Source.EMState env Γ) r :
     PhysicalSlotPort.sourceFrame (enter s r (parent s) .staticcall CallerFrameChecks.receiver 0 input).source "Finite" true 1=
-      (⟨CallerFrameChecks.receiver,CallerFrameChecks.owner,0,true,"Finite",true,1⟩ : Fr) := rfl
+      ({this:=CallerFrameChecks.receiver,sender:=CallerFrameChecks.owner,value:=0,static:=true,contract:="Finite",checked:=true,depth:=1,cd:=input} : Fr) := rfl
 
 theorem nested_static_source (G : Glob env) :
     (Source.callAddr (glob G) {parentFrame with static:=true} 10 CallerFrameChecks.receiver 0 input true).run

@@ -10,7 +10,7 @@ open Solidity.Yul.World.CallbackSuccess
 
 theorem dispatch_exact (G : Glob env) (out : Outcome) (s : Source.EMState env []) :
     (Source.dispatch (callbackGlob G out)
-      ⟨CallerFrameChecks.receiver,CallerFrameChecks.target,7,false,"Finite",true,2⟩ 10 []).run s =
+      {this:=CallerFrameChecks.receiver,sender:=CallerFrameChecks.target,value:=7,static:=false,contract:="Finite",checked:=true,depth:=2,cd:=[]} 10 []).run s =
       (.ok [],s) := by
   cases G with
   | mk program pipeline fixed balance code strategy timestamp => cases pipeline <;> rfl
