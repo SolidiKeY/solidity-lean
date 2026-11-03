@@ -433,3 +433,11 @@ Rules 0 and 1 also allow `Solidity.Hash.CollisionBound` and
 `Solidity.Roadmap.Evm`, the two modules `Contracts.lean` imports. §1 lists
 six contract gaps, not four. The earlier note that `EvmSpec`'s premise is
 trivial is superseded by round 6.
+
+## Nested Lake cache inventory correction, 2026-11-03
+
+The collector excludes `.lake` directories at every depth. Previously, a local
+Bridge dependency checkout could add Mathlib test pins to the project inventory.
+A regression fixture retains Solidity, Bridge and test sources while rejecting
+both nested dependency and build-cache pins. Existing pin validation and the
+three-axiom allowlist remain unchanged.
