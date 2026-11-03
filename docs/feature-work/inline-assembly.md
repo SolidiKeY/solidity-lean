@@ -178,3 +178,5 @@ checks, remaining obligations).
   [inline-assembly-vy3.md](inline-assembly-vy3.md).
 - VY4 (2026-11-03): world interface; see
   [inline-assembly-vy4.md](inline-assembly-vy4.md).
+- VY5 (2026-11-03): composition pieces; see
+  [vy5-composition.md](vy5-composition.md).

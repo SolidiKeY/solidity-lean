@@ -1792,6 +1792,8 @@ import Solidity.Lowering.P8.SourceResolutionControls
 import Solidity.Lowering.P8.SourceResolutions
 import Solidity.Lowering.P8.FailureContractV2
 import Solidity.Lowering.P8.ResourceContractLaw1
+import Solidity.Lowering.P8.FailureProjection
+import Solidity.Lowering.P8.SourceRealization
 import Solidity.Lowering.V07.DeclarationGraph
 import Solidity.Lowering.V07.Scalar
 import Solidity.Lowering.V07.AcceptedGraphProducer
@@ -2021,3 +2023,9 @@ import Solidity.Yul.World.Raw
 import Solidity.Yul.World.ReturnSize
 import Solidity.Yul.World.ReturnSizeChecks
 import Solidity.Yul.World.WorldChecks
+import Solidity.Yul.Composition.CorrectnessControls
+import Solidity.Yul.Composition.CorrectnessInstances
+import Solidity.Yul.Composition.CorrectnessPublic
+import Solidity.Yul.Composition.CorrectnessPublicControls
+import Solidity.Yul.Composition.P6FrameControls
+import Solidity.Yul.Composition.P6FrameCorrectness

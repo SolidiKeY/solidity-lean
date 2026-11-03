@@ -1883,3 +1883,5 @@ See [P8 admission](feature-work/p8-admission.md).
 | `Yul/Adapters/**` | Source/frame-memory agreement with the P6 interface; writeback and slices. |
 | `Yul/Compilation/**` | Target-side Yul compilation combinators: stack slots, lowering, opcodes, control ([VY3](feature-work/inline-assembly-vy3.md)). |
 | `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](feature-work/inline-assembly-vy4.md)). |
+| `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](feature-work/vy5-composition.md)). |
+| `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
