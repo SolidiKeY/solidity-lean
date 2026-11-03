@@ -2199,6 +2199,7 @@ import Solidity.Lowering.V07.SignedNarrowArithmeticControls
 import Solidity.Lowering.V07.SignedNarrowMultiplication
 import Solidity.Lowering.V07.SignedNarrowSubtraction
 import Solidity.Lowering.V07.SignedNarrowing
+import Solidity.Lowering.V07.SignedNegation
 import Solidity.Lowering.V07.SignedSubtractionControls
 import Solidity.Lowering.V07.SignedWidthCastControls
 import Solidity.Lowering.V07.SignedWidthCasts

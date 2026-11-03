@@ -81,3 +81,4 @@
 | `Lowering/V07/SignedNarrowSubtraction.lean` | Unchecked signed subtraction at every approved width, preserving operand positions |
 | `Lowering/V07/SignedNarrowMultiplication.lean` | Unchecked signed multiplication at every approved width, including wide intermediate overflow |
 | `Lowering/V07/SignedNarrowArithmeticControls.lean` | Inhabited all-width arithmetic clients, captures, checked-classification and wrong-program controls |
+| `Lowering/V07/SignedNegation.lean` | Actual unchecked signed negation at all widths, local/reached-state laws and minimum-value controls |

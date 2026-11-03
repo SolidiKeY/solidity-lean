@@ -512,3 +512,17 @@ general operand/elaborator production, graph admission, aggregate/copy/delete/
 lifetimes and constructor coverage remain open. G16/G17 and both backfills
 stay partial; delegated G18 children/G19 and G18.06 dependencies are unchanged.
 No external compiler or EVM testing is claimed.
+
+## Unchecked signed negation (focused verification)
+
+`SignedNegation` reuses the signed subtraction program for0−x at every approved
+width, including minimum values. Source unary evaluation and typed target value
+evaluation agree; reached-state and local-read clauses use actual Source runs.
+Four inhabited clients and320 wrapped-value cases cover both pipelines and all
+widths. Direct int256 negation gives128 where int8 negation must return−128.
+Checked minimum refusal is classification only. Eight exact guards supplement
+the207 earlier registered guards. Independent finder/skeptic source reviews
+passed; no assignment/family producer or general lowering is asserted.
+Full checkpoint closure/default/TestSuite/fixtures and global gates remain
+pending for this addition. Whole G16/G17/backfill queues remain partial and
+G18 admission/composition prerequisites and delegated children remain open.
