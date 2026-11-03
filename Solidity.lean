@@ -1905,6 +1905,8 @@ import Solidity.Lowering.V08.LibraryIntegerTransport
 import Solidity.Lowering.V08.LibraryPremises
 import Solidity.Lowering.V08.LiteralFailureArithmeticReason
 import Solidity.Lowering.V08.LiteralFailureArithmeticReasonControls
+import Solidity.Lowering.V08.LiteralFailureBoolPrefix
+import Solidity.Lowering.V08.LiteralFailureBoolPrefixControls
 import Solidity.Lowering.V08.LiteralFailureBoolStatement
 import Solidity.Lowering.V08.LiteralFailureBoolStatementControls
 import Solidity.Lowering.V08.LiteralFailureBytesReadback

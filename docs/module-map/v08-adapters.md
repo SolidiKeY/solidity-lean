@@ -454,3 +454,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureStringInterleaving.lean` | Indexed memory-string/byte witness relation; actual encoder computation equality and Source error/expression consumers. |
 | `Solidity/Lowering/V08/LiteralFailureStringInterleavingControls.lean` | Populated multi-string typed controls, aliases, old-object preservation, allocation and late failure observations. |
+
+| `Solidity/Lowering/V08/LiteralFailureBoolPrefix.lean` | Actual bool-kind standard ABI encoding before a supported mixed memory tail; G38/error/expression consumers. |
+| `Solidity/Lowering/V08/LiteralFailureBoolPrefixControls.lean` | Boolean local, shared/distinct strings, allocation/failure controls and exact packed-width distinction. |
