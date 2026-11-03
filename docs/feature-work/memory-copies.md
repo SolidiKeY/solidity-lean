@@ -169,3 +169,32 @@ confirmed full live-content reconstruction and the explicit intrinsic-only
 scope; neither ran Lean or builds. Per-file MCP errors and warnings are zero
 for the three new modules. Checkpoint gates and scoped axiom reports remain
 required before accepting this checkpoint.
+
+## Fresh snapshots across overlapping old writes
+
+`DeepCopyContents.lean` inhabits the already published
+`MemoryDeepCopyHeapCertificate` using existing keeps/fresh laws and the generic
+contents theorem. This uses no legacy word/default certificate or capacity
+antecedent. The existing `Interface` and committed `HeapContentsInterface`
+provide the signatures; no new heap, copier or certificate framework is added.
+
+`deepCopy_schedule_contents` composes V11's published
+`copy_schedule_transport` with `mirror_contents`. An explicit actual successful
+old schedule transports to an actual reached grown heap: old reached objects
+are kept, while the fresh root reads the INITIAL snapshot's live contents.
+It assumes no unfinished G34 theorem. This is an intrinsic schedule law, not
+compiled alias/path/deep-copy emission or Source refinement.
+
+Populated controls start at [7,11,13,17], observe right overlap [7,7,11,13]
+and left overlap [11,13,17,17], invalid-endpoint refusal and an empty schedule.
+The actually reached old alias changes while a distinct fresh root retains the
+original snapshot; an empty live object likewise receives identity1. The
+negative control rejects the cascading literal [7,7,7,7], without executing a
+separate streaming implementation. Finder and skeptic checked this distinction;
+that wording was clarified after review. Both final read-only reviews found no
+semantic/trust defect or hidden premise and used no Lean/build/server/edits.
+MCP errors/warnings are zero; checkpoint gates and scoped axiom audit follow.
+
+The compiled G33 failure path still needs H16/VY5 S03-PANIC41 finalization;
+a host capacity rejection is not substituted for that behavior. Full G33/G35
+compiled defaults/copies/traversal/composition remain open.

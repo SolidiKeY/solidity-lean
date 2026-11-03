@@ -175,3 +175,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/HeapContentsInterface.lean` | Live-content roundtrip obligation over the existing intrinsic heap mirror, without a new copy evaluator. |
 | `Backend/MemoryCopies/HeapContents.lean` | Generic mirror readback and inhabited V2 live-storage contents certificates via existing rank-fuel independence. |
 | `Backend/MemoryCopies/HeapContentsControls.lean` | Populated nested 2/0/64-length children, fresh parent, struct/fixed holders and wrong-live-value/shadow controls. |
+| `Backend/MemoryCopies/DeepCopyContents.lean` | Inhabited fresh snapshot-copy heap certificate and initial live contents after actual old-object overlap schedules, with alias/empty/refusal controls. |
