@@ -171,3 +171,15 @@ proves inequality of the written query's reads, not a separate failed
 representation judgment. Existing complete context/numeric fixtures are reused
 unchanged. Independent finder/skeptic reviews found no issues; general source,
 recursive physical emission and world composition remain open.
+
+`Lowering/StorageOps/SourceWordCommutation.lean` proves full Source-world
+commutation for distinct captured typed cells, actual ordinary/writable
+`writeAt` sequencing, and exact ordered journal snapshots. It does not identify
+whole Source states or evaluate fresh addresses/effectful right-hand sides.
+Mixed uint/bool controls retain nonempty locals, transient state and an existing
+journal prefix: worlds agree, journals/states differ, and overlap changes the
+world. Explicit undo restores the prior execution state; failure does not imply
+implicit rollback. Independent finder/skeptic reviews found no issues. The
+routine combined adapter is pending Terra in [the TODO index](../../TERRA-TODO.md),
+with no compiled stub. Numeric/physical target and general source composition
+remain separate obligations.
