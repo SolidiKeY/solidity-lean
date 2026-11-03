@@ -58,3 +58,5 @@
 | `Bridge/SolidityBridge/Yul/**` | VY3 concrete numeric instruction certificates, typed stack/frame and structured source/model lowering adapters; native/G24/full composition remains scoped ([lane](../feature-work/inline-assembly-vy3.md)). |
 
 | `Bridge/SolidityBridge/Yul/LoopClassification.lean`, `Bridge/SolidityBridge/Yul/LoopSelection.lean`, `Bridge/SolidityBridge/Yul/LoopSelectionControls.lean` | Derived finite macro-prefix classification and concrete nested target-loop whole-iff selection; source/native horizons remain open. |
+
+| `Bridge/SolidityBridge/Yul/JsonCompilation.lean`, `Bridge/SolidityBridge/Yul/JsonCompilationControls.lean` | Closed checked JSON word preparation to scoped instruction/model certificates; synthetic decoder, arithmetic and refusal controls. Source attachment, Body admission and full G24/native adequacy remain open. |

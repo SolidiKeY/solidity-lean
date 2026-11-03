@@ -848,3 +848,34 @@ The skeptic's ambiguous wording about the no-finite-outcome case was fixed
 and confirmed. Focused kernel checks and all three per-file diagnostics pass;
 four guarded reports pin standard axioms. Broad checkpoint and final lane
 validation remain separate obligations.
+
+### Closed JSON compiler slice
+
+`SolidityBridge.Yul.JsonCompilation.checkCompile` composes the actual
+`YulJson.Words.check`, scoped statement compiler, stack-slot emission and
+occurrence selector. Its result retains the producer's dependent checked-JSON
+certificate. `Compiled.source` proves normal closed-word execution at that
+same horizon; `Compiled.model` proves emitted scalar execution and preserves
+the full existing mathematical machine for every represented numeric caller
+suffix. Stack capacity remains separate.
+
+The synthetic three-statement JSON fixture declares 7, adds 9 and multiplies
+by 3. A kernel theorem ties its factored decoder certificate to the original
+checker/compiler call. Intermediate target results 16 and 48 precede local
+retirement. Controls cover dirty caller words, all machine fields, capacity,
+insufficient horizon/depth, unsafe/duplicate flags, unsupported EVM version,
+compiler-dependent builtins, duplicate locals and checked-but-uncompiled `if`.
+Finite string-decoder facts avoid increasing proof budgets.
+
+Independent read-only finder and skeptic reviews found no confirmed defect;
+neither ran Lean or a server. This is synthetic JSON/kernel-model evidence,
+not pinned external solc/EVM evidence, Source attachment/MemOK, open dirty-local
+readback, Body dispatch/admission, source-loop/function compilation or complete
+Source/G24/views/native adequacy. Canonical rethrow and admission are unchanged.
+
+Focused kernel checks, both per-file MCP diagnostics, scoped trust and three
+standard axiom pins pass. The checkpoint's touched build, trust, layer, root,
+doc-path and global axiom-pin gates pass; its library gate is resource-stopped
+in unchanged `Frontend/Checked/UnitExamples.lean`. The broader optional Bridge
+check was interrupted by runtime restart and remains pending. These outcomes
+do not establish final lane validation.

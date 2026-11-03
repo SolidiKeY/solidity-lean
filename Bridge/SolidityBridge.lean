@@ -329,7 +329,6 @@ import SolidityBridge.Yul.ChargedShiftsControls
 import SolidityBridge.Yul.ComparisonSelection
 import SolidityBridge.Yul.ComparisonSelectionControls
 import SolidityBridge.Yul.ControlCompleteness
-import SolidityBridge.Yul.ControlRealization
 import SolidityBridge.Yul.ControlCompletenessControls
 import SolidityBridge.Yul.ControlRealization
 import SolidityBridge.Yul.ControlRealizationControls
@@ -337,6 +336,8 @@ import SolidityBridge.Yul.ExpSelection
 import SolidityBridge.Yul.ExpSelectionControls
 import SolidityBridge.Yul.FrameCertificatesV2
 import SolidityBridge.Yul.FrameCertificatesV2Controls
+import SolidityBridge.Yul.JsonCompilation
+import SolidityBridge.Yul.JsonCompilationControls
 import SolidityBridge.Yul.LiteralSelection
 import SolidityBridge.Yul.LiteralSelectionControls
 import SolidityBridge.Yul.LoopClassification
