@@ -1914,6 +1914,8 @@ import Solidity.Lowering.V08.LiteralFailureDynamicError
 import Solidity.Lowering.V08.LiteralFailureDynamicErrorControls
 import Solidity.Lowering.V08.LiteralFailureDynamicListError
 import Solidity.Lowering.V08.LiteralFailureDynamicListErrorControls
+import Solidity.Lowering.V08.LiteralFailureDynamicReturn
+import Solidity.Lowering.V08.LiteralFailureDynamicReturnControls
 import Solidity.Lowering.V08.LiteralFailureEffectDecode
 import Solidity.Lowering.V08.LiteralFailureEffectDecodeControls
 import Solidity.Lowering.V08.LiteralFailureEncodedRethrow
@@ -1921,6 +1923,8 @@ import Solidity.Lowering.V08.LiteralFailureEncodedRethrowControls
 import Solidity.Lowering.V08.LiteralFailureLowering
 import Solidity.Lowering.V08.LiteralFailurePackedBytes
 import Solidity.Lowering.V08.LiteralFailurePackedBytesControls
+import Solidity.Lowering.V08.LiteralFailureReturnSlots
+import Solidity.Lowering.V08.LiteralFailureReturnSlotsControls
 import Solidity.Lowering.V08.LiteralFailureSelectorBytes
 import Solidity.Lowering.V08.LiteralFailureSelectorBytesControls
 import Solidity.Lowering.V08.LiteralFailureSignatureBytes
@@ -1930,6 +1934,8 @@ import Solidity.Lowering.V08.LiteralFailureSliceDecodeControls
 import Solidity.Lowering.V08.LiteralFailureStorageDecode
 import Solidity.Lowering.V08.LiteralFailureStorageDecodeControls
 import Solidity.Lowering.V08.LiteralFailureStorageSuccessControls
+import Solidity.Lowering.V08.LiteralFailureTupleAbort
+import Solidity.Lowering.V08.LiteralFailureTupleAbortControls
 import Solidity.Lowering.V08.LocalCallableTransport
 import Solidity.Lowering.V08.MetadataControls
 import Solidity.Lowering.V08.NestedControls

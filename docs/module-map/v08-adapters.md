@@ -391,5 +391,11 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/SourceMemoryKeccak.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained premises are in the module. |
 | `Calculus/StaticInvocation.lean` | Bounded readonly-external checkpoint; typed scope and retained premises are in the module. |
 | `Semantics/StaticInvocation.lean` | Bounded readonly-external checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureDynamicReturn.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureDynamicReturnControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureReturnSlots.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureTupleAbort.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
