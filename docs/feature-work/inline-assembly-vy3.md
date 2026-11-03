@@ -794,3 +794,30 @@ This closes the positional structured integration gap for these supported
 constructors, not selector completeness, loops/divergence/functions,
 native byte/PC/ExpansionRoom/capacity/resources, full Source/G24/views/readback
 or frontend/joint adequacy.
+
+### Finite target-loop realization
+
+`SolidityBridge.Yul.LoopRealization` derives actual `loopTurn` outcomes
+from a positional condition slice and the existing body realization. Induction
+on actual `StructuredExec` constructs a finite `loopIterN` witness, then
+`loopRun_of_iterN` gives a whole-loop forward realization. No desired model run
+or source horizon is assumed. The body contract remains the existing explicit
+forward realization; automatic loop selection and reverse classification stay
+open. A two-iteration countdown witnesses the contract with an arbitrary
+full-word caller suffix and unchanged non-stack machine fields.
+
+Controls distinguish continuing prefixes from the final zero-condition turn,
+exercise dirty data and underflow, and keep 1024-word capacity separate from
+gasless Scalar/model execution. An always-true loop has only continuing finite
+prefixes; its mathematical `loopRun` denotation is `.fault` by the existing
+no-finite-outcome definition. This is not executable termination, native fault,
+gas exhaustion, source divergence or horizon correspondence. Seven guarded
+axiom reports pin standard axioms. Source Yul loops, G24/views/readback,
+function/early-control compilation, native byte/PC/resource/world/trace and
+frontend/final joint adequacy remain unfinished.
+
+Independent read-only finder and skeptic reviews found no confirmed defect
+in these proofs and controls; neither reviewer ran Lean or a server. Focused
+module checks and per-file diagnostics pass; the original failed recursion
+and scratch/control checks are retained in the checkpoint evidence. No
+external compiler/client EVM validation is added by this model proof.

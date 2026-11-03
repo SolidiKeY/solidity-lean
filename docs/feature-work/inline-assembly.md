@@ -308,3 +308,9 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   for code/sequence/conditional blocks, whole iff/failure transport and original
   mixed-width BYTE conditional instances at depths0/2. Loop/native/full Source/
   G24/frontend obligations remain open; see [lane](inline-assembly-vy3.md).
+
+VY3 finite target-loop preparation: `SolidityBridge.Yul.LoopRealization` derives
+finite iteration witnesses and whole forward model runs from actual
+`StructuredExec`, with terminating countdown and separate no-finite-outcome
+controls. This does not reopen loop admission or close source/G24/native
+correspondence; see [VY3](inline-assembly-vy3.md#finite-target-loop-realization).
