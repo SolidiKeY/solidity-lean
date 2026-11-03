@@ -168,3 +168,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 
 | `Backend/MemoryOps/SourceCalldataSlice.lean` | Actual resolved uint calldata slice/conversion: computed shifted offset, ordered bounds and decoder/allocation outcomes. |
 | `Backend/MemoryOps/SourceCalldataSliceControls.lean` | Both-pipeline populated slice/copy with checked native allocation, complete old/alias/neighbour frames, exact-end, omitted-end, bounds, timeout and stale-window controls. |
+
+| `Backend/MemoryOps/SourceCalldataBoolSlice.lean` | Actual Boolean calldata slice/conversion with computed shifted decoder and pre-allocation bounds errors. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean` | Real Source RItems retain the actual first sliced-copy allocation on a later malformed Boolean decoder error. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceControls.lean` | Both-pipeline populated valid/malformed-window clients, complete Source/native alias frames, order/timeout/empty and Option-capacity distinctions. |

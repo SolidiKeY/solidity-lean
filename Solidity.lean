@@ -326,6 +326,9 @@ import Solidity.Backend.MemoryOps.SnapshotScheduleGrowth
 import Solidity.Backend.MemoryOps.SourceAlias
 import Solidity.Backend.MemoryOps.SourceAssignment
 import Solidity.Backend.MemoryOps.SourceCalldataBinding
+import Solidity.Backend.MemoryOps.SourceCalldataBoolSlice
+import Solidity.Backend.MemoryOps.SourceCalldataBoolSliceControls
+import Solidity.Backend.MemoryOps.SourceCalldataBoolSliceSequence
 import Solidity.Backend.MemoryOps.SourceCalldataCopy
 import Solidity.Backend.MemoryOps.SourceCalldataMixedCopy
 import Solidity.Backend.MemoryOps.SourceCalldataMutation
