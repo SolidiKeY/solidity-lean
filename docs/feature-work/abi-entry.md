@@ -83,3 +83,9 @@ read-only pinned-writer owner. No capacity/gas exclusion or changed relation is
 introduced. This is a logical-model counterexample, without a source-program
 reachability or external-runtime claim. Independent reviews confirmed the
 obstruction and requested the combined charged-post witness, now included.
+
+`Bridge/SolidityBridge/AccessBridge/MemoryLoadInterface.lean` separately specifies
+MLOAD payload agreement with the existing P6 byte image at every native offset,
+plus unchanged physical bytes. It adds no capacity/offset restriction. Charged
+execution uses the existing memory certificate; post active-extent representation
+and Source-origin adequacy remain separate obligations.
