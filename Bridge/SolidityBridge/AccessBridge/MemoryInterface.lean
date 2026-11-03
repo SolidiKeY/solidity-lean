@@ -5,8 +5,9 @@ import Solidity.Yul.Adapters.P6ByteMemory
 No reserved-capacity restriction, replacement memory or execution semantics is
 introduced. The byte image covers every address, including exterior zeros.
 Charged contracts retain the actual expansion charge and every gate failure.
-P6 MLOAD payload and store/copy image preservation are separate, still-open
-obligations. Only MSIZE has a P6 payload field in this partial interface. -/
+P6 MLOAD payload agreement is supplied separately by MemoryLoad.payload.
+Store/copy image preservation remains open. Only MSIZE has a P6 payload field
+in this partial interface. -/
 namespace SolidityBridge.AccessBridge
 open Solidity Solidity.Backend EvmYul Solidity.Evm.External
 open Solidity.Evm.TryByteImage

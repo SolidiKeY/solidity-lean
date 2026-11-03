@@ -69,7 +69,7 @@ theorem no_raw_offset_keys : ¬∃ p : V11G34_PackedViews input views,
   intro ⟨p,keys⟩
   have same : p.key ⟨0,by decide⟩=p.key ⟨1,by decide⟩ :=
     (keys ⟨0,by decide⟩).trans (keys ⟨1,by decide⟩).symm
-  have impossible := ((p.aliases ⟨0,by decide⟩ ⟨1,by decide⟩).mp same).1
+  have impossible : views[0].type = views[1].type := ((p.aliases ⟨0,by decide⟩ ⟨1,by decide⟩).mp same).1
   cases impossible
 
 /-- Changing one value of a repeated identity violates the required coherence;
@@ -77,8 +77,10 @@ no unconditional packing or favorable decoder payload is assumed. -/
 theorem disagreement_not_coherent :
     ¬ V11G34_ViewCoherence [bv 0 [true,false,true],bv 0 [true,true,true]] := by
   intro h
-  have equality := eq_of_heq (h.coherent ⟨0,by decide⟩ ⟨1,by decide⟩ rfl rfl rfl)
-  have observed := congrArg calldataBoolPayload equality
+  have equality : (bv 0 [true,false,true]).contents =
+      (bv 0 [true,true,true]).contents := eq_of_heq (h.coherent ⟨0,by decide⟩ ⟨1,by decide⟩ rfl rfl rfl)
+  have observed : calldataBoolPayload (bv 0 [true,false,true]).contents =
+      calldataBoolPayload (bv 0 [true,true,true]).contents := congrArg calldataBoolPayload equality
   change (some [true,false,true] : Option (List Bool))=some [true,true,true] at observed
   cases observed
 
@@ -99,8 +101,13 @@ theorem repeated_lookup (v : CalldataView D) (n : Nat) (bytes : List UInt8)
     (i : Fin (List.replicate n v).length) :
     let p := packCalldataViews bytes (List.replicate n v) (repeated_coherent v n)
     p.calldata.objects (p.key i)=some ⟨v.type,v.contents⟩ := by
-  have h := (packCalldataViews bytes (List.replicate n v) (repeated_coherent v n)).lookup i
-  have payload := congrArg (fun w : CalldataView D =>
+  have h : (packCalldataViews bytes (List.replicate n v) (repeated_coherent v n)).calldata.objects
+      ((packCalldataViews bytes (List.replicate n v) (repeated_coherent v n)).key i) =
+      some ⟨(List.replicate n v)[i.val].type, (List.replicate n v)[i.val].contents⟩ :=
+    (packCalldataViews bytes (List.replicate n v) (repeated_coherent v n)).lookup i
+  have payload : (⟨(List.replicate n v)[i.val].type,
+      (List.replicate n v)[i.val].contents⟩ : Sigma (Source.Data D)) = ⟨v.type,v.contents⟩ :=
+    congrArg (fun w : CalldataView D =>
     (⟨w.type,w.contents⟩ : Sigma (Source.Data D))) (List.getElem_replicate i.isLt)
   exact h.trans (congrArg some payload)
 

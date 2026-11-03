@@ -44,8 +44,12 @@ theorem calldataViewKey_aliases {D : Source.Layout} (views : List (CalldataView 
   rw [←calldataViewIdentity_eq]
   constructor
   · intro same
-    have first := calldataViewKey_identity views i
-    have second := calldataViewKey_identity views j
+    have first : calldataViewIdentity (views[calldataViewKey views i]'
+        (calldataViewKey_bound views i)) = calldataViewIdentity views[i.val] :=
+      calldataViewKey_identity views i
+    have second : calldataViewIdentity (views[calldataViewKey views j]'
+        (calldataViewKey_bound views j)) = calldataViewIdentity views[j.val] :=
+      calldataViewKey_identity views j
     have representatives : calldataViewIdentity (views[calldataViewKey views i]'(calldataViewKey_bound views i))=
         calldataViewIdentity (views[calldataViewKey views j]'(calldataViewKey_bound views j)) := by
       simp only [same]
