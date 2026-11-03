@@ -173,3 +173,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceSizeInputs.lean` | Additive evaluation/conversion/oversize inputs; preserves the published panic premise and failure field. |
 | `Backend/MemoryCopies/InterfaceV2Roots.lean` | Optional fresh-root and preserved-gap companion without changing the published V2 certificate. |
 | `Backend/MemoryCopies/HeapContentsInterface.lean` | Live-content roundtrip obligation over the existing intrinsic heap mirror, without a new copy evaluator. |
+| `Backend/MemoryCopies/HeapContents.lean` | Generic mirror readback and inhabited V2 live-storage contents certificates via existing rank-fuel independence. |
+| `Backend/MemoryCopies/HeapContentsControls.lean` | Populated nested 2/0/64-length children, fresh parent, struct/fixed holders and wrong-live-value/shadow controls. |

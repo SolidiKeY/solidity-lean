@@ -268,6 +268,8 @@ import Solidity.Backend.LabelExec.Placement
 import Solidity.Backend.LabelExec.ScalarTransfer
 import Solidity.Backend.LabelExec.Step
 import Solidity.Backend.MemoryCopies.ControlsV2
+import Solidity.Backend.MemoryCopies.HeapContents
+import Solidity.Backend.MemoryCopies.HeapContentsControls
 import Solidity.Backend.MemoryCopies.HeapContentsInterface
 import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.InterfaceV2

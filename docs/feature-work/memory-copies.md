@@ -146,9 +146,26 @@ No Source, admission, exclusion, dependency premise or proof budget is changed.
 ## Intrinsic live-copy contents
 
 `HeapContentsInterface.lean` states the remaining live-content obligation over
-the existing `SVal.Mirrors` relation. The implementation will reuse
+the existing `SVal.Mirrors` relation. The implementation reuses
 `SVal.mirrors_copyStToM`, `MVal.copyBelow_eq` and the existing strip operation.
-The target is generic V2 `StorageHeapCertificate` inhabitants, preserving
-dynamic live lengths and nested contents. It does not establish compiled
+`HeapContents.lean` constructs generic V2 `StorageHeapCertificate` inhabitants,
+reconstructing full live values, including dynamic lengths and nested contents. It does not establish compiled
 storage loading, Source layout agreement or recursive Source graph adequacy.
-The signature precedes proofs; implementation and controls remain pending.
+The signature commit precedes the mutual value/field/element proofs. No new
+copy evaluator, capacity condition or graph selector is added. Existing
+`SVal.keeps_copyStToM`, `SVal.copyStToM_id_ge` and
+`SVal.copyStToM_array_len` provide framing, freshness and live lengths.
+
+`HeapContentsControls.lean` uses live values 7/11/13, nonempty storage shadows,
+a parent with child lengths 2/0/64, root identity 3 and four total objects.
+Struct-held and fixed-array-held dynamic children roundtrip as well. A changed
+live word 7-to-8 is rejected; the empty live child's shadow is removed.
+These are observations of the existing intrinsic operations, not EVM gas or
+allocation-size failure claims.
+
+Independent read-only finder and skeptic reviews found no semantic/trust
+finding, circular contents premise, new exclusion or budget change. Both
+confirmed full live-content reconstruction and the explicit intrinsic-only
+scope; neither ran Lean or builds. Per-file MCP errors and warnings are zero
+for the three new modules. Checkpoint gates and scoped axiom reports remain
+required before accepting this checkpoint.
