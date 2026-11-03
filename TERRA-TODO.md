@@ -120,3 +120,31 @@ unproved and unused. No semantic validity or coverage is involved.
 theorem Fml.qfUIntLinearShape_iff {C : Contract} {Γ : Ctx} (φ : Fml C Γ) :
     φ.qfUIntLinearShape = true ↔ φ.QFUIntLinear
 ```
+
+
+## VA1-T7: uintTwoPrefix_eq_sourceReduction
+
+Planned module: `Solidity.Calculus.DecisionNumericTwoPrefixSource` (not created).
+Import `Solidity.Calculus.DecisionNumericTwoPrefixFormula`.
+Routine: compose the checked two-prefix equality producer with the actual
+`ExactAt.directional?` equation and two `ExactAt.all` constructors in the unchanged
+`sourceReduction?`. Follow `uintPrefix_source_from_polarities`; the only new glue
+is the second actual binder. Do not replace the producer, add an assumed source
+certificate, or change reducer fuel. This is independent of T4/T5 and any VA2
+sharing work. Normalization and the exhaustive coverage bridge remain Sol work.
+
+```lean
+theorem uintTwoPrefix_eq_sourceReduction {C : Contract} (x y : Var)
+    {a b : Tm C [.val .uint, .val .uint] (.val .uint)}
+    (ha : a.UIntLinear) (hb : b.UIntLinear) :
+    ∃ ψ : LFml C,
+      (sourceReduction? (.all x .uint (.all y .uint (.eq a b)))).map (·.leaf) =
+        some (.all 0 .uint (.all 1 .uint ψ)) ∧
+      ψ.UIntQF (fun q => q = ⟨.uint, 0⟩ ∨ q = ⟨.uint, 1⟩) (fun _ => False) ∧
+      ψ.elim = ψ ∧ ψ.condSimp = ψ ∧ ψ.nodes ≤ 7 * (a.size + b.size) + 13
+```
+
+The statement is unproved and unused. The checked producer is
+`uintTwoPrefix_eq_sourceBound`; the inhabited both-local client is
+`Solidity.Examples.DecisionNumericTwoPrefixFormula.forallEqualsFive`.
+It does not prove an arbitrary-prefix theorem, global Residue, or a new verdict.

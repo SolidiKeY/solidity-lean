@@ -4678,3 +4678,41 @@ of this profile or any coverage/verdict test. Actual unknown residual examples,
 substantial nonresidual bridges including the hash route, DecisionTheorem-prime,
 remaining AU02/backfill and full gates are not discharged here. The inherited
 documentation-path gate remains failed as previously compared to frozen base.
+
+
+## Restart recovery and isolated H6 relay — 2026-11-03
+
+The same VM restarted with source/commits intact at8b2c420f, but its `/tmp`
+exports and private runtime views were lost. Earlier `/tmp` artifact paths are
+historical unavailable paths, not current retrievable seals. No goal or VM was
+recreated. Root disk free was265125888bytes; checksum-recorded duplicate-cache
+and superseded-bundle cleanup restored over2GB headroom. All advertised bundle
+heads were checked in Git before deleting those superseded copies. Deduplicated
+build/cache views must remain read-only, or be privately materialized before
+future writes. Cleanup receipts remain in the H1 evidence directory.
+
+At the coordinator's request, H6 was relayed in a separate worktree at
+`/workspace/va1-h6-relay`, exact baseed7c42a7e7964315dc14d0ca76557067b5a24a35,
+headf9196141543da99440452ff90659d0fa69252487. The original assigned branch was
+preserved. This consumes fb58217b without60dd172d: UnitExamples is outside the
+32-module source import closure. All20 focused split files pass, with baseline
+97.9125s and split maximum19.5993s; no300s guard or observation changed. These
+are fresh elaborations with existing exact-source dependency outputs, not a
+cold full build. The bounded runner observed memory.max12884901888 and swap0,
+serial-j1/threads1, maximum sampled RSS5034200KiB and minimum host available
+11622682624bytes. Finder and skeptic reviewed source and focused evidence
+read-only. The finder's stale cherry-picked document link was fixed and both
+reviewers reported no remaining findings.
+
+Sealed H6 dependency package:
+`/workspace/va1-evidence/h6-relay-20261103/package`.
+Its checksum-list digest isa6901b5586c30b549da0a25e072a3e4ef6ce023c46373cfc94a739b4736f7ef1.
+The coordinator integrates this relay; MRS/MIC still need their concrete full
+gates. No push/merge/tag or whole-lane completion occurred.
+
+AU01 resumed with independent exact-source bridge decomposition: T7 records
+the routine two-binder adapter over the checked two-prefix producer. It requires
+neither pending T4/T5 nor VA2 sharing. T7 is only a Markdown statement, unproved
+and unused; there is no new Lean assumption. The hard producer remains checked,
+while normalization, global Residue/DecisionTheorem-prime/exhaustive hash bridge,
+all open AU02/backfill and full-validation obligations remain open.
