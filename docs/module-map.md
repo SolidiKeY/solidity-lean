@@ -2118,3 +2118,18 @@ See [P8 admission](feature-work/p8-admission.md).
 |---|---|
 | `Backend/Selection/Interface.lean` | Selection, frame, structured-control and same-program composition certificate statements; see [executable bytecode selection](feature-work/executable-bytecode-selection.md). |
 | `Backend/Selection/Premises.lean` | Typed G24.03 and G45.05-BR premises and G49.02 runtime-consumer statement; no external result assumed or runtime proof claimed. |
+
+| Module (`Solidity/` omitted) | Role |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean` | Public checked array-probe adapter, exact success identity and bare-failure suffix transport with represented/owned controls. |
+| `Backend/InternalFlow/RuntimeFrameV3GuardedRecursion.lean` | Actual scoped recursive probe, native child-call transport, initialized bare-failure coupling and witnessed same-image success/revert with exhaustion controls. |
+| `Backend/InternalFlow/RuntimeFrameV3GuardedPrefixes.lean` | Arbitrary-counter source horizons, actual guarded/unprobed same-state target prefixes and returning endpoint with witnessed read domain/capacity. |
+| `Backend/InternalFlow/RuntimeFrameV3GuardedCaller.lean` | Native guarded call enter/leave at all horizons and full target caller-tail reconstruction, with populated success/failure and complete observations. |
+| `Backend/InternalFlow/RuntimeFrameV3CallerPrefixes.lean` | Actual saved history and full active-parameter/protected-tail representation at running recursive horizons, with populated snapshots and stopped stability. |
+| `Backend/InternalFlow/RuntimeFrameV3HeapDomain.lean` | Derive exact guarded read success/failure and local recursive read domain from selected typed heap length; witnessed same-program prefix and failure transport. |
+| `Backend/InternalFlow/RuntimeFrameV3DomainTransport.lean` | Exact old read/domain transport through real typed allocation, scoped source/target client and actual mutation counterexample to heap preservation. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean` | Actual allocating callRec family, generic checked child entry and witnessed paired return with grown heap, exact cost and complete frame observations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSource.lean` | Actual allocating recursive success/exhaustion induction, exact object growth and native full-caller export with a populated two-activation source client. |
+| `Backend/InternalFlow/RuntimeFrameResultAgreement.lean` | Successful-output agreement under existing typed result and execution operators, with no failed-state or termination assertion. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean` | Exact allocating-family source-return coherence at all quotation pairs and a populated all-sufficient-index caller control. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean` | Actual allocating fixed-image running prefixes, reached active parameter frames and exact allocator growth, with populated horizon/stop/countercontrols. |

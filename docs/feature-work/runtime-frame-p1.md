@@ -431,3 +431,326 @@ entire child-call trace, nor produce a general `GrowingResult`, recursive
 compiler, approved profile or V3 producer. Native source execution and target
 parent representation are both proved; the complete entry/trace bridge remains
 an obligation.
+
+### Checked bounds-probe leaf
+
+`RuntimeFrameV3ArrayProbe` consumes the published value compiler for an array
+read indexed by the counter decrement. Its selector equation retains the actual
+compiler link. Successful evaluation pushes the represented source word; the
+wrong-read control distinguishes nine from seven before discarding it. The
+checked probe followed by a pop returns the exact original machine. Actual bare
+source failure yields target revert and absorbs the pop and any continuation.
+
+Both populated inputs have genuine representation and allocator ownership: the
+counter-two input reads index one, while counter three reads out of bounds.
+Exhaustion is rejected as a classification of that read failure. This is a
+bounds-probe building block; it does not yet embed the probe into recursive
+execution or supply a recursive V3 producer, failed output state, rollback,
+payload bytes or world correspondence. Published P1 modules are used directly;
+omitted development controls remain local without replacing reviewed producers.
+
+### Scoped probes in the recursive countdown
+
+`RuntimeFrameV3GuardedRecursion` places the checked bounds read in an actual
+scoped scalar declaration before the native recursive call. Successful evaluation
+drops that local; an actual read failure propagates bare revert. Depth zero still
+exhausts. The source child-call equations preserve the exact dependent caller
+context instead of replacing recursion with a separate evaluator.
+
+`failure_pair` couples a positive counter's actual source read failure to the
+initialized target image, given reached representation and valid header bounds.
+The populated client proves success for counter two at every sufficient source
+quotation depth and failure for counter three at every positive depth, using the
+same target code. Success retains both array objects, their ordered contents,
+caller reference, protected stack, saved parent cells and allocator cursor. Its
+complete sixteen-word observation is derived from actual activation and unwind
+execution. A successful read with insufficient unrolling still exhausts; the
+negative control rejects matching that result to the successful target image.
+
+This is a witnessed family, not a `PendingRecursiveReturns` inhabitant. The target
+image is an owned composition of checked value code and existing activation and
+unwind code, not public recursive compiler output. Universal admitted callers,
+profile provenance, recursive compiler admission and termination/divergence
+correspondence remain open. No failed output state, rollback, payload, gas or
+world correspondence follows from the revert result.
+
+### Guarded arbitrary-counter prefixes and returns
+
+`RuntimeFrameV3GuardedPrefixes` generalizes the scoped-probe consumer to an
+arbitrary counter. `ReadDomain` states only the actual source scalar reads at
+each positive lower counter on the unchanged heap. It contains no recursive
+execution, target result or preservation equation. `all_horizons` derives the
+exact successful-return versus exhaustion classification for every intrinsic
+unrolling depth. The populated client discharges both reads of its retained
+`[7,9]` array; a count-three input fails the domain rather than being silently
+admitted. This domain is a local success condition, not an approved profile.
+
+`reached_prefix` derives guarded and unprobed target execution at the same reached
+machine for every horizon up to the counter. It retains the actual next typed
+counter/reference, `StateRepr`, stack, `BaseExtends`, zero allocator growth and
+saved-context cursor, under the existing physical frame and word-fit bounds.
+The cursor counts captured contexts, not heap allocation. `success_endpoint`
+uses the actual terminal guard and shares the existing unwind only after proving
+that both images reached the same machine. Its final representation, low and
+high memory frame, stack, pointer and saved-parent payload follow from execution.
+
+The populated client instantiates zero/one/two running horizons and the returning
+endpoint from its real representation and capacity. Cursor fourteen versus
+twelve and stack seventy-seven versus eighty-eight are distinguished at the
+same two-turn prefix; shallow native unrolling still exhausts. The earlier
+complete sixteen-word observation remains unchanged. General recursive compiler
+admission, approved-domain provenance, a `PendingRecursiveReturns` inhabitant,
+divergence and byte/journal/transient/world composition remain open. The target
+image remains the owned checked-code composition, not public recursive output.
+
+### Guarded calls and complete caller tails
+
+`RuntimeFrameV3GuardedCaller.call_all_horizons` transports the guarded body through
+actual native argument evaluation, entry and return for an arbitrary typed caller
+context. Sufficient source unrolling returns the complete original caller;
+insufficient unrolling remains exhausted. `call_read_failure` separately
+propagates an actual entered-frame read failure as bare revert.
+
+The target `endpoint` handles countdown parameters followed by an arbitrary
+caller tail. It projects the initial parameter representation, consumes the
+guarded endpoint, then reconstructs the full caller representation from actual
+low-memory equality and reached heap/global fields. Every caller cell is below
+the derived frame bound. Tail alias flags and fragile evidence come from the
+original caller representation with unchanged source state; no liveness
+promotion or arbitrary-callee heap preservation is assumed.
+
+The populated client executes its header write before deriving the represented
+input. Its returning image preserves the complete legacy fifteen-word snapshot,
+protected stack and bottom word, including both older aliases, the distinct
+array object, scalar and physical parent cells. Wrong same-typed alias, lost
+distinct object and wrong scalar controls follow from the same endpoint. The
+bad caller has an actual representation and source/target bare-revert proofs;
+fault and shallow-unrolling success are rejected separately. No old fixture or
+expected observation is changed.
+
+This base-zero caller stores a reference in word zero, so it does not witness
+allocator ownership or `AllocationInput`. The target layout remains parameters
+plus a tail, and the image remains owned checked-code composition rather than
+public recursive compiler output. General layouts, mutating recursive callees,
+approved-domain provenance, V3 producer coverage, divergence, failed-state
+rollback and byte/journal/transient/world transport remain open.
+
+### Protected caller tails during descent
+
+`RuntimeFrameV3CallerPrefixes.history` extends saved-parent history to every
+running prefix, including prefixes shorter than the counter. Actual activation
+execution derives both the ordered payload and the exterior memory frame. The
+guarded endpoint supplies the matching unprobed prefix, so no history or
+preservation oracle is added.
+
+`endpoint` reconstructs the represented active-parameter/protected-tail view
+for countdown parameters followed by an arbitrary caller tail. Its counter is
+the active child's counter; this is not a claim that descent mutates the
+suspended native caller. The original tail environment and all lower caller
+cells remain intact. A valid template scalar assignment is used only in the
+proof; the actual counter word and preserved memory are derived from execution.
+Heap/global representation and existing alias flags are retained without
+promotion. Actual read validity and physical capacity remain premises.
+
+The populated client proves complete ordered snapshots at horizons zero, one
+and two, including both aliases, distinct array, old contents, scalar, protected
+stack, header and saved parent cells. It then proves the third false guard
+stops at that same zero-counter machine and every later horizon remains stopped.
+Wrong cursor and alias controls follow from the same reached prefix. A separate
+negative rejects representing the original count-two caller at the count-one
+prefix, making the distinction between active and suspended frames explicit.
+
+These are running descent frames, not completed returns, a new source trace or
+general recursive compiler/V3/profile coverage. The legacy caller still has a
+reference at word zero and supplies no allocator-ownership witness. No general
+mutating-callee, divergence, byte/journal or transient/world result is inferred.
+
+### Deriving the read domain from the selected heap object
+
+`RuntimeFrameV3HeapDomain` consumes the published typed
+`Heap.readAddr_index_isSome` law. Actual alias resolution and counter decrement
+connect the guarded read to that address. `success_iff` and `failure_iff` give
+the exact in-bounds successful read and out-of-bounds bare revert.
+`domain_of_length` derives every required lower-counter read from the selected
+object's length. `domain_iff` proves the converse for a genuine uint counter;
+its word bound is required to avoid impossible-index vacuity.
+
+The populated client obtains the domain from the `[7,9]` object's length two
+rather than supplying individual successful reads. The distinct `[4]` object
+and count-three controls reject the wrong local success bounds. This is not
+compiler refusal or an approved-profile restriction: the out-of-bounds client
+has actual native and checked target bare-revert proofs derived from the same
+heap bound. Exhaustion remains a separate class.
+
+The returning native-call horizon theorem and real represented target prefixes
+consume the derived domain. New prefix machines are identified with the prior
+ones by their actual executions of the same instructions, retaining complete
+zero/one/two-horizon ordered snapshots without replaying full traces.
+
+This local heap condition is not source/resource approved-domain provenance.
+General recursive compiler admission, the V3 recursive producer, mutating
+recursive callees, divergence and byte/journal/transient/world transport remain
+open. Legacy whole-caller fixtures still do not establish allocator ownership.
+
+### Read transport through actual allocation
+
+`RuntimeFrameV3DomainTransport` consumes `Heap.Keeps.readAddr` to transport
+the exact scalar probe value through a dependent heap extension and
+`Heap.Keeps.len` to transport the local read domain. `allocation_domain`
+discharges that heap premise with the published allocation law. This is not
+an assumption that arbitrary mutating callees preserve old objects.
+
+The populated client executes a scoped fresh `bool[3]` allocation and then
+the scoped probe. Actual declaration correctness supplies the reached
+representation and allocator cursor twenty-six from the genuine cursor
+twenty-two input. Scope exit drops the private source binding while retaining
+the grown heap and its physical pointer at cell four. The old reference is
+weakened through the actual extension, still reads nine, and remains distinct
+from the fresh object. Complete source/target execution and ordered observations
+include both older arrays, fresh default values, stack and reserved frame words.
+The target is checked-snippet composition, not a public compiler-selection
+claim for this whole finite program or the recursive family. Its probe reads
+and pops rather than materializing the dead private scalar slot. The actual
+`growing_endpoint` records four reached cells, the extended map and represented
+result for that same code and input.
+
+A separate actual write through the retained old alias changes the probe from
+nine to ninety-nine. Read-on-write correctness supplies the changed source and
+target observations. The read domain remains valid because length is unchanged,
+but `mutation_not_keeps` rejects heap-content preservation for that write. Thus
+read existence is not confused with exact value preservation; `withinM` and
+other mutability guards remain unchanged.
+
+This prepares allocation-aware recursive clients. It does not yet place the
+allocation inside every recursive activation, provide a general V3 producer,
+approved-profile provenance, arbitrary mutation simulation or world transport.
+
+### Allocating recursive activation and witnessed return
+
+`RuntimeFrameV3AllocatingActivation` defines an actual intrinsic recursive
+family: a positive counter selects a scoped `bool[3]` allocation, the scoped
+probe, and `callRec` with the decremented counter and weakened old reference.
+`source_positive` exposes the actual child call with the allocation extension
+composed into its output at every quotation depth. The false guard skips the
+allocation and probe; depth-zero exhaustion remains unchanged.
+
+The generic `activation` theorem derives allocation, exact checked probe,
+capture, evaluated native arguments and `CallRet.enterT` child representation
+from initial representation, genuine ownership, read bounds and physical room.
+It exports stack preservation, the extended address map, exact growth four,
+saved parent words and exterior memory equality. No child run, target run or
+reached midpoint is supplied as a simulation premise.
+
+The populated count-one client executes a real allocating `callRec` and returns
+the grown heap. Its target enters child zero, stops the loop and executes the
+existing paired unwind. The closed `whole` result matches that returned parent
+with the source result and growth four. Complete twenty-one-word snapshots
+retain old arrays, fresh defaults, private physical cells, stack, frame payload
+and allocator cursor. Returned observations are transported from the same
+child snapshot using actual unwind preservation. A negative rejects treating
+the entered child as the returned parent. Too-shallow source quotation still
+exhausts and is explicitly rejected as a matching result.
+
+Generic activation supports arbitrary valid positive counters; the completed
+allocating return is presently a count-one witness. General allocating-prefix
+induction, arbitrary recursive returns, approved-profile provenance and a V3
+recursive producer remain open. The fixed image uses checked snippets, including
+the dead-private-scalar read/pop optimization; public recursive compiler
+selection, external bytecode/gas and world correspondence are not claimed.
+
+
+### Allocating source recursion at arbitrary quotation indices
+
+`RuntimeFrameV3AllocatingSource.success` proves the actual intrinsic allocating
+countdown succeeds whenever the counter is below the quotation index and the
+old array has sufficient elements. It derives exactly one additional heap
+object per positive activation, complete caller-environment weakening through
+the returned extension, and `Heap.Keeps` for this allocation-and-read-only body.
+The proof composes published allocation and native call-export laws; neither a
+successful child result nor the preservation conclusion is a premise.
+
+`exhaustion` preserves the actual insufficient-quotation outcome under the same
+valid-read bound. `call_success` and `call_exhaustion` consume genuinely evaluated
+arguments and transport these results through the complete caller context.
+These are source execution laws, not a new recursion admission cutoff.
+
+The populated client executes two allocating recursive activations after a real
+assignment prefix. Its result is selected from proved execution. Ordered local
+observations retain counter two, two aliases to object zero and a distinct
+object-one reference. Both complete older arrays retain their lengths and
+contents, and the heap contains four objects. Countercontrols reject a changed
+alias, scalar, old element, omitted object growth, and wrong reference bound;
+insufficient quotation is exhaustion rather than success or bare revert.
+The wrong-reference bound is a failed premise control, not runtime rejection.
+
+No new target endpoint is claimed here. General allocating target prefixes and
+per-parent returned representations, fresh-object content snapshots at arbitrary
+counts, public recursive compiler selection, approved-domain provenance and the
+full V3 producer remain open. The earlier allocating target witness and all its
+observations are unchanged.
+
+
+### Allocating recursive return coherence
+
+`RuntimeFrameResultAgreement` composes successful-output agreement through the
+existing `TRes` bind/map and typed `TRun.seq`, `TRun.call` and `TRun.ite`
+operators. It introduces no execution semantics. The call consequence retains
+the actual evaluated arguments, result-entry heap extension, scope drop and
+`CallRet.leaveT` export. Agreement deliberately compares only two successful
+outputs: it neither identifies different halt classes nor proves termination.
+A control demonstrates that agreeing failed results can still be unequal.
+
+`RuntimeFrameV3AllocatingCoherence.bodies` proves agreement for every pair of
+quotation indices of the actual allocating family by induction on its finite
+syntax. No read-validity, successful simulation or caller-result premise is
+needed. `source_coherence` inhabits the exact frozen
+`InterfaceV1.RecursiveReturnCoherence` field for arbitrary typed argument
+expressions and complete caller contexts, with the family's no-result return.
+The V3 signatures themselves remain unchanged.
+
+The populated two-activation client witnesses this successful-return property.
+For every sufficient quotation it returns the same complete dependent `Out`
+already obtained from actual execution, preserving all earlier observations.
+Wrong same-typed scalar and alias outputs are rejected for every such index.
+The witness uses the existing source success theorem and the new coherence
+proof, avoiding a new replay of the complete concrete recursive execution.
+
+This closes the allocating family's source-coherence obligation only. General
+target allocating prefixes, per-parent returned representations, genuine target
+capacity/cost induction, public recursive compiler selection and approved-domain
+provenance remain open. The other V3 producer fields and the full assignment
+are not discharged by successful source-return agreement.
+
+
+### Allocating target descent prefixes
+
+`RuntimeFrameV3AllocatingPrefixes.reached` derives every reached running horizon
+of the fixed allocating descent image. Its inputs are initial representation,
+genuine allocator ownership, counter/reference bindings, an actual old-array
+length bound, and frame/heap room for the reached turns. Each induction step
+consumes the checked allocating activation, evaluated native arguments and
+entry representation; no running endpoint or desired midpoint is an input.
+
+The result includes the active child representation, exact counter and weakened
+old reference, object growth by the horizon, older-object preservation, stack,
+address-map extension, allocator growth of four cells per reached turn, actual
+reached allocator ownership and runtime cursor. A horizon is an observation
+index, not a recursive compiler cutoff. `old_array` derives older primitive
+array observations from the same reached heap and address map.
+
+The genuinely owned populated client covers zero, one and two running turns.
+Ordered observations pin allocator cursors 22/26/30, reference word 16, active
+counters 2/1/0, runtime cursors 10/12/14, stack 77 and both complete older arrays
+`[7,9]` and `[4]`. The next false guard stops without a third allocation;
+published stopped-horizon stability and loop execution laws give the same
+terminal active child. Wrong alias, content, horizon and composed allocation
+cost are rejected against these actual endpoints.
+
+This is active-parameter descent, not a returned caller. A control rejects
+representing the stopped child as the original parent with counter two.
+The theorem does not expose a native partial-call trace, saved-parent payload
+history, arbitrary-count fresh-object snapshots, outer caller-tail word
+preservation or general allocating unwind/source-return coupling. Those are
+remaining runtime-frame obligations. Public recursive compiler selection,
+approved-domain provenance, byte/gas/world behavior and the full V3 producer
+are not implied. Earlier source and target fixtures remain unchanged.
