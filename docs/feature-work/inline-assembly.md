@@ -285,3 +285,9 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   at depths0/2, and height-only capacity laws with separate operand refusal.
   Full source/G24/native/frontend composition remains partial; see
   [lane](inline-assembly-vy3.md).
+
+- VY3 EXP selection: concrete full-word certificate, ordered original-source
+  EXP/ISZERO conditional, general source/model and whole-iff artifacts at
+  depths0/2, and explicit height-capacity versus operand-arity controls. Native
+  gas and full source/G24/frontend closure remain open; see
+  [lane](inline-assembly-vy3.md).

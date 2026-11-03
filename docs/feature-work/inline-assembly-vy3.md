@@ -710,3 +710,23 @@ corrected control checks both independently. Oversized Scalar success is
 separate from the 1024-word bound. Twenty guards enforce observed standard
 axiom reports. Full Source/G24/views/raw-readback, native/world/resource,
 function/loop/divergence/frontend and final joint adequacy remain open.
+
+### Exponentiation selection
+
+`SolidityBridge.Yul.ExpSelection` discharges the EXP instruction certificate
+with the existing `RemainingWordBridges.expBridge` and VY1 word-step theorem.
+The separate table preserves earlier EXP refusal. Original source guarded by
+EXP performs two ordered EXP writes followed by ISZERO of the updated result;
+actual compilation/emission/selection identities close, with source/model and
+whole-iff artifacts at depths0/2 for all represented inputs and arbitrary
+newer/caller frames. No source or target execution premise is assumed.
+
+Controls distinguish base/exponent order, `0^0`, zero, MAX-square wrapping,
+`2^255`/`2^256`, dirty words, updated-local dataflow, protected frames and full
+nonstack fields. The general capacity law checks entry height and height minus
+one; height1 can pass while the actual binary executor refuses underflow.
+Oversized Scalar success does not imply capacity. Thirteen guards pin observed
+standard axiom reports. Universal mathematical word proofs and feasible finite
+evaluations do not establish efficient huge-exponent execution or native gas.
+Full Source/G24/views/raw-readback, native/world/resource, function/loop/
+divergence/frontend and final joint adequacy remain open.
