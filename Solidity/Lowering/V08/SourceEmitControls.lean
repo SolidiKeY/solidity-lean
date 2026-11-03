@@ -97,8 +97,8 @@ theorem arguments_execute (pipeline : Roadmap.Pipeline) (static : Bool) (horizon
       (locals,populated) =
       (.ok (values pipeline),(.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) := by
   simp only [arguments, Source.evalConvArgs, Source.convRV, Source.getV, setFalse,
-    reduceCtorEq, ↓reduceDIte, bind, pure, ExceptT.bind, ExceptT.pure,
-    ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure]
+    ↓reduceDIte, bind, pure, ExceptT.bind, ExceptT.pure,
+    ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind]
   rfl
 
 def digestWord (pipeline : Roadmap.Pipeline) : Roadmap.Word :=

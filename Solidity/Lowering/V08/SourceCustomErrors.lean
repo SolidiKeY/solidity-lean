@@ -21,10 +21,10 @@ theorem execute {E : Source.Env} {Γ : RCtx} {types : List STy}
       (.error (.revert (global.selector (Source.sigOf E.layout error.name types) ++ data)),
         (Source.L0 E,final)) := by
   simp only [ExceptT.run] at arguments encoding
-  simp only [Source.execS,Source.EM.sub,bind,pure,ExceptT.bind,ExceptT.pure,ExceptT.bindCont,ExceptT.run,ExceptT.mk,
-    StateT.bind,StateT.pure,StateT.get,StateT.modifyGet,modify,modifyGet,get,getThe,
-    MonadStateOf.get,MonadStateOf.modifyGet,liftM,monadLift,MonadLift.monadLift,
-    ExceptT.lift,Functor.map,StateT.map,Source.EM.halt,throw,throwThe,MonadExceptOf.throw,arguments,encoding]
+  simp only [Source.execS,Source.EM.sub,bind,pure,ExceptT.bind,ExceptT.bindCont,ExceptT.run,ExceptT.mk,
+    StateT.bind,StateT.pure,
+    
+    Source.EM.halt,throw,throwThe,MonadExceptOf.throw,arguments,encoding]
 
 theorem selector_of_bytes {E : Source.Env} (global : Glob E) (pin : global.fixed.Keccak)
     (characters : List Char) (signature : String)

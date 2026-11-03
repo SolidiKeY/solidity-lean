@@ -3731,3 +3731,33 @@ violation. Confirmed findings and their resolution:
   and pin nothing in the Lean build.
 - Module-map rows were normalized; the stale counts at the top of this file
   are historical.
+
+## World images, catalogue, creation and library frames
+
+Integrated from the v08-world-lowering lane (2026-11-03).
+
+- `WorldImage.lean`, `WorldReset.lean`: an account/session image (typed installed
+  stores, funds, code roles) and its transaction-end reset transport, relative
+  to `ResetInputs` (assumed, not proved) and an arbitrary `StoreRelation`.
+- `WorldCatalogue.lean`, `WorldCatalogueTransport.lean`, `WorldImageAccess.lean`:
+  `assemble` builds an initial `ContractWorld.World` from installed-code
+  witnesses; `assembled_image` and `installed_store` (typed store lookup).
+  The only concrete instance is the one-slot relation of `WorldResetControls`.
+- `LibraryFrameTransport.lean`, `LibraryIntegerTransport.lean`,
+  `WorldContextComposition.lean`: library calls hold for any world but cover a
+  fixed observer entry (empty body, or one integer literal); static refusal; no
+  second payment.
+- `ConstructorScalarTransport.lean`, `ConstructorContinuations.lean`: a
+  hand-written scalar `Cell` constructor fixture and `tryCreate` continuations;
+  `admitted_construct` does not use its admission premises.
+- `CreationPremises.lean`, `LibraryPremises.lean`: producer-premise consumers.
+  Their `admission : P8a.Producer …` field makes them vacuous until
+  P8-SPEC-LAW1 is resolved; `ssNew_body` supplies the constructor run as a
+  producer duty.
+- Callable transports (`IntegerCallable`, `PureArgumentCallable`,
+  `TupleCallable`, `LocalCallableTransport`, `ScalarCallableTransport`,
+  `SignedCallableControls`) and source session/deployment/transaction controls.
+
+Open: proving `ResetInputs`, P8-SPEC-LAW1, the constructor body (`ssNew_body`),
+library dispatch, a P1 V3 runtime-frame consumer (the lane's V2 consumer was not
+merged). No `Producer` instance exists.

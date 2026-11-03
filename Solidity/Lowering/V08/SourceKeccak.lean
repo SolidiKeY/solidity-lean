@@ -23,13 +23,8 @@ theorem eval_literal {E : Source.Env} {Γ : RCtx} (global : Glob E) (frame : Fr)
     (Source.evalE global frame (horizon + 5) (literal bytes)).run (locals, state) =
       (.ok (.val (Source.mkBytes (n := 32) (h := by decide +kernel)
         (Source.wordBytes (global.fixed.hash bytes)))), (locals, afterLiteral state bytes)) := by
-  simp only [literal, Source.evalE, Source.evalBuiltin, Source.evalArgs,
-    Source.convRV, Source.bytesOfRV, Source.ret32, Source.allocRef,
-    Source.alloc, Source.EM.st, Source.EM.setSt, Source.heapBytes,
-    Source.heapObj, reduceCtorEq, decide_false, Bool.false_or, Bool.false_and,
-    Bool.false_eq_true, ↓reduceIte, ↓reduceDIte, STy.bytes32]
-  simp only [pure_bind, map_pure, STy.loc?, reduceCtorEq, ↓reduceDIte,
-    Source.Heap.alloc_get, afterLiteral]
+  simp only [literal, Source.evalE, Source.evalBuiltin, Source.evalArgs, Source.convRV, Source.bytesOfRV, Source.ret32, Source.allocRef, Source.alloc, Source.EM.st, Source.EM.setSt, Source.heapBytes, Source.heapObj, reduceCtorEq, decide_false, Bool.false_or, Bool.false_and, Bool.false_eq_true, ↓reduceIte, STy.bytes32]
+  simp only [pure_bind, STy.loc?, reduceCtorEq, ↓reduceDIte, afterLiteral]
   simp only [bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont,
     ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, StateT.get,
     StateT.modifyGet, modify, modifyGet, get, getThe,

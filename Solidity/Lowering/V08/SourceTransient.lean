@@ -20,8 +20,7 @@ theorem transient_write {E : Source.Env} {Γ : RCtx} (frame : Fr) (path : Source
     (state : Source.St E) :
     (Source.writeAt frame path value : Source.EM E Γ _).run (locals,state) =
       (.ok (),(locals,transientUpdate state frame.this path value)) := by
-  simp only [Source.writeAt,dif_pos rfl,Source.setCell,transient,↓reduceIte,
-    Source.applyOp,ordinary,Bool.false_eq_true,Source.EM.modSt,transientUpdate]
+  simp only [Source.writeAt, Source.setCell, transient, ↓reduceIte, Source.applyOp, ordinary, Bool.false_eq_true, Source.EM.modSt, transientUpdate]
   rfl
 
 theorem transient_static_revert {E : Source.Env} {Γ : RCtx} (frame : Fr) (path : Source.SPath)
@@ -30,8 +29,7 @@ theorem transient_static_revert {E : Source.Env} {Γ : RCtx} (frame : Fr) (path 
     (state : Source.St E) :
     (Source.writeAt frame path value : Source.EM E Γ _).run (locals,state) =
       (.error (.revert []),(locals,state)) := by
-  simp only [Source.writeAt,dif_pos rfl,Source.setCell,transient,↓reduceIte,
-    Source.applyOp,static,Source.EM.halt]
+  simp only [Source.writeAt, Source.setCell, transient, ↓reduceIte, Source.applyOp, static, Source.EM.halt]
   rfl
 
 /-- The actual source read after transaction end sees the declared bool default,
@@ -50,11 +48,7 @@ theorem transient_bool_read_end {E : Source.Env} {Γ : RCtx} (frame : Fr) (path 
       same ▸ (same.symm ▸ (.bool false : Source.Val E.layout .bool)) = (.bool false : Source.Val E.layout .bool) := by
     cases same
     rfl
-  simp only [Source.readAt,Source.readCell,Source.EM.st,endExecution,Source.ExecState.endTx,
-    Source.Transient.empty,Source.Storage.read_empty,Source.Env.lay,typed,transient,
-    ↓reduceIte,declaredDefault,dite_true,cancel,Source.EM.lift,bind,pure,ExceptT.bind,ExceptT.pure,
-    ExceptT.bindCont,ExceptT.run,ExceptT.mk,StateT.bind,StateT.pure,StateT.get,get,getThe,
-    MonadStateOf.get,liftM,monadLift,MonadLift.monadLift,ExceptT.lift,Functor.map,StateT.map]
+  simp only [Source.readAt, Source.readCell, Source.EM.st, endExecution, Source.ExecState.endTx, Source.Transient.empty, Source.Storage.read_empty, Source.Env.lay, typed, transient, ↓reduceIte, declaredDefault, dite_true, cancel, bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, StateT.get, get, getThe, MonadStateOf.get, liftM, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map]
 
 /-- Typed intrinsic reset at a selected installed owner's transient path.
 The exact default lookup and uninstalled failure are preserved, not guessed. -/

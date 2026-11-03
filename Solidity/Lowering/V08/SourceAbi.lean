@@ -55,7 +55,7 @@ theorem literal_execution {E : Source.Env} {Γ : RCtx} (global : Glob E) (frame 
 theorem single_dynamic_bytes (bytes : Roadmap.Bytes) :
     Source.abiLayout [(true,bytes)] =
       Semantics.wordBytes 32 ++ (Semantics.wordBytes bytes.length ++ Semantics.pad32 bytes) := by
-  simp only [Source.abiLayout, Source.abiLayout.go, List.length_cons, List.length_nil, List.append_nil, List.nil_append,
+  simp only [Source.abiLayout, Source.abiLayout.go, List.length_cons, List.length_nil, List.append_nil, 
     natWordBytes_transport, pad32_transport]
 
 /-- This is precisely the ABI data following the existing Error selector.
@@ -223,7 +223,7 @@ theorem prefixed_arguments_failure {E : Source.Env} {Γ : RCtx} {types : List ST
       (.error halt,(reached,final)) := by
   simp only [ExceptT.run] at arguments
   simp only [Source.evalE,bind,ExceptT.bind,ExceptT.bindCont,ExceptT.run,ExceptT.mk,
-    StateT.bind,StateT.pure,arguments]
+    StateT.bind,arguments]
   rfl
 
 #print axioms selector_execute

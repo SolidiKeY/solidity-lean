@@ -1540,6 +1540,12 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](feat
 | `Lowering/V08/LiteralFailureLowering.lean`, `Lowering/V08/LiteralFailureControls.lean` | G21: `literalInput` compiler for closed assert/require/revert/panic literals; source and terminal-byte agreement ([G21](feature-work/g21-failure-lowering.md)). |
 | `Lowering/V08/BoolErrorLowering.lean`, `Lowering/V08/BoolErrorControls.lean` | G21: closed boolean custom errors; ABI payload, source run and constant-payload emitter. |
 | `Lowering/V08/SliceFailureLowering.lean`, `Lowering/V08/SliceFailureControls.lean` | G21: Source calldata-slice equations; the revert paired with an empty terminal (not a lowered bounds check). |
+| `Lowering/V08/WorldImage.lean`, `Lowering/V08/WorldReset.lean`, `Lowering/V08/WorldResetControls.lean` | Account/session image and reset transport relative to `ResetInputs`; one-slot controls ([V08](feature-work/roadmap-v08-world-lowering.md)). |
+| `Lowering/V08/WorldCatalogue.lean`, `Lowering/V08/WorldCatalogueTransport.lean`, `Lowering/V08/WorldImageAccess.lean` (+`Controls`) | Initial world assembly from installed code; `assembled_image`; typed store lookup. |
+| `Lowering/V08/LibraryFrameTransport.lean`, `Lowering/V08/LibraryIntegerTransport.lean`, `Lowering/V08/WorldContextComposition.lean` | Library call frames for fixed observer entries; repeated/failing transactions. |
+| `Lowering/V08/ConstructorScalarTransport.lean`, `Lowering/V08/ConstructorContinuations.lean` | Scalar `Cell` constructor fixture; `tryCreate` continuations. |
+| `Lowering/V08/CreationPremises.lean`, `Lowering/V08/LibraryPremises.lean` | Producer-premise consumers (vacuous until P8-SPEC-LAW1). |
+| `Lowering/V08/{Integer,PureArgument,Tuple}Callable.lean`, `Lowering/V08/{Local,Scalar}CallableTransport.lean`, `Lowering/V08/Source{Session,SessionCredit,Deployment,DeploymentSession,PayableDeployment,FailedDeployment,Transaction,ConstructorArguments}Controls.lean` | Callable transports and source session/deployment controls. |
 | `Lowering/V08/Controls.lean` | Funded, failure-byte, rollback, reset and caught constructor controls. |
 | `Lowering/V08/AbiControls.lean` | Exact catch positives and malformed/wrong-code negatives. |
 | `Lowering/V08/LibraryControls.lean` | Delegated owner isolation and nonempty constructor installation. |

@@ -16,11 +16,7 @@ theorem missing_body {E : Source.Env} {ps rs : List STy} (global : Glob E) (fram
     (missing : global.prog.body (global.dispatchFn frame.contract declaration) = none) :
     (Source.callInternal global frame (horizon+1) declaration values rs).run (Source.L0 E,state) =
       (.error (.stuck "function without a body"),(Source.L0 E,state)) := by
-  simp only [Source.callInternal,missing,bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk,
-    StateT.bind, StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet,
-    get, getThe, MonadStateOf.get, MonadStateOf.modifyGet, liftM, monadLift,
-    MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw]
+  simp only [Source.callInternal, missing, pure, ExceptT.run, ExceptT.mk, StateT.pure, Source.EM.halt, throw, throwThe, MonadExceptOf.throw]
 
 theorem complete {E : Source.Env} {ps rs : List STy} (global : Glob E) (frame : Fr)
     (horizon : Nat) (declaration : Decl) (values : Source.Vals E.layout ps) (body : RBody E)
@@ -38,11 +34,7 @@ theorem complete {E : Source.Env} {ps rs : List STy} (global : Glob E) (frame : 
     (Source.callInternal global frame (horizon+1) declaration values rs).run (Source.L0 E,state) =
       (.ok (Source.mkRet rs outputs),(Source.L0 E,final)) := by
   simp only [ExceptT.run] at initialization execution
-  simp only [Source.callInternal,selected,dif_pos fits,bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk,
-    StateT.bind, StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet,
-    get, getThe, MonadStateOf.get, MonadStateOf.modifyGet, liftM, monadLift,
-    MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw,initialization,execution,extraction]
+  simp only [Source.callInternal, selected, dif_pos fits, bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw, initialization, execution, extraction]
 
 theorem body_failure {E : Source.Env} {ps rs : List STy} (global : Glob E) (frame : Fr)
     (horizon : Nat) (declaration : Decl) (values : Source.Vals E.layout ps) (body : RBody E)
@@ -57,11 +49,7 @@ theorem body_failure {E : Source.Env} {ps rs : List STy} (global : Glob E) (fram
     (Source.callInternal global frame (horizon+1) declaration values rs).run (Source.L0 E,state) =
       (.error halt,(Source.L0 E,final)) := by
   simp only [ExceptT.run] at initialization execution
-  simp only [Source.callInternal,selected,dif_pos fits,bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk,
-    StateT.bind, StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet,
-    get, getThe, MonadStateOf.get, MonadStateOf.modifyGet, liftM, monadLift,
-    MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw,initialization,execution]
+  simp only [Source.callInternal, selected, dif_pos fits, bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw, initialization, execution]
 
 theorem wrong_frame {E : Source.Env} {ps rs : List STy} (global : Glob E) (frame : Fr)
     (horizon : Nat) (declaration : Decl) (values : Source.Vals E.layout ps) (body : RBody E)
@@ -73,11 +61,7 @@ theorem wrong_frame {E : Source.Env} {ps rs : List STy} (global : Glob E) (frame
     (Source.callInternal global frame (horizon+1) declaration values rs).run (Source.L0 E,state) =
       (.error (.stuck "call frame"),(Source.L0 E,initialized)) := by
   simp only [ExceptT.run] at initialization
-  simp only [Source.callInternal,selected,dif_neg wrong,bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk,
-    StateT.bind, StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet,
-    get, getThe, MonadStateOf.get, MonadStateOf.modifyGet, liftM, monadLift,
-    MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw,initialization]
+  simp only [Source.callInternal, selected, dif_neg wrong, bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw, initialization]
 
 theorem expression_complete {E : Source.Env} {Γ : RCtx} {ps rs : List STy}
     (global : Glob E) (frame : Fr) (horizon : Nat) (declaration : Decl)
@@ -91,11 +75,7 @@ theorem expression_complete {E : Source.Env} {Γ : RCtx} {ps rs : List STy}
     (Source.evalE global frame (horizon+1) (.call declaration signature args)).run (locals,state) =
       (.ok result,(afterArgs,final)) := by
   simp only [ExceptT.run] at arguments callee
-  simp only [Source.evalE,Source.EM.sub,bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk,
-    StateT.bind, StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet,
-    get, getThe, MonadStateOf.get, MonadStateOf.modifyGet, liftM, monadLift,
-    MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw,arguments,callee]
+  simp only [Source.evalE, Source.EM.sub, bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, arguments, callee]
 
 theorem expression_failure {E : Source.Env} {Γ : RCtx} {ps rs : List STy}
     (global : Glob E) (frame : Fr) (horizon : Nat) (declaration : Decl)
@@ -109,11 +89,7 @@ theorem expression_failure {E : Source.Env} {Γ : RCtx} {ps rs : List STy}
     (Source.evalE global frame (horizon+1) (.call declaration signature args)).run (locals,state) =
       (.error halt,(afterArgs,final)) := by
   simp only [ExceptT.run] at arguments callee
-  simp only [Source.evalE,Source.EM.sub,bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk,
-    StateT.bind, StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet,
-    get, getThe, MonadStateOf.get, MonadStateOf.modifyGet, liftM, monadLift,
-    MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw,arguments,callee]
+  simp only [Source.evalE, Source.EM.sub, bind, pure, ExceptT.bind, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, arguments, callee]
 
 theorem argument_failure {E : Source.Env} {Γ : RCtx} {ps rs : List STy}
     (global : Glob E) (frame : Fr) (horizon : Nat) (declaration : Decl)
@@ -124,11 +100,7 @@ theorem argument_failure {E : Source.Env} {Γ : RCtx} {ps rs : List STy}
     (Source.evalE global frame (horizon+1) (.call declaration signature args)).run (locals,state) =
       (.error halt,(afterArgs,final)) := by
   simp only [ExceptT.run] at arguments
-  simp only [Source.evalE,bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk,
-    StateT.bind, StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet,
-    get, getThe, MonadStateOf.get, MonadStateOf.modifyGet, liftM, monadLift,
-    MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    Source.EM.halt, Source.EM.lift, throw, throwThe, MonadExceptOf.throw,arguments]
+  simp only [Source.evalE, bind, pure, ExceptT.bind, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, arguments]
 
 #print axioms zero_horizon
 #print axioms missing_body

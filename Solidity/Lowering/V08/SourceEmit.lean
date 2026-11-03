@@ -33,13 +33,7 @@ theorem exec_success {E : Source.Env} {Γ : RCtx} {types : List STy}
       (Source.L0 E,state) =
       (.ok (.normal next),(Source.L0 E,logged global frame event types bytes final)) := by
   simp only [ExceptT.run] at arguments encoding
-  simp only [Source.execS, Source.EM.sub, Source.EM.modSt, Source.EM.halt,
-    bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run,
-    ExceptT.mk, StateT.bind, StateT.pure, StateT.get, StateT.modifyGet,
-    modify, modifyGet, get, getThe, MonadStateOf.get, MonadStateOf.modifyGet,
-    liftM, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    throw, MonadExceptOf.throw, throwThe, arguments, encoding, nonstatic, logged, Bool.false_eq_true,
-    ↓reduceIte]
+  simp only [Source.execS, Source.EM.sub, Source.EM.modSt, bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, StateT.modifyGet, modify, modifyGet, MonadStateOf.modifyGet, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map, arguments, encoding, nonstatic, logged, Bool.false_eq_true, ↓reduceIte]
 
 theorem exec_static {E : Source.Env} {Γ : RCtx} {types : List STy}
     (global : Glob E) (frame : Fr) (horizon : Nat) (event : Decl)
@@ -55,13 +49,7 @@ theorem exec_static {E : Source.Env} {Γ : RCtx} {types : List STy}
       (.emit event typed args : RStmt E [] false .body Γ Γ) locals).run
       (Source.L0 E,state) = (.error (.revert []),(Source.L0 E,final)) := by
   simp only [ExceptT.run] at arguments encoding
-  simp only [Source.execS, Source.EM.sub, Source.EM.modSt, Source.EM.halt,
-    bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run,
-    ExceptT.mk, StateT.bind, StateT.pure, StateT.get, StateT.modifyGet,
-    modify, modifyGet, get, getThe, MonadStateOf.get, MonadStateOf.modifyGet,
-    liftM, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    throw, MonadExceptOf.throw, throwThe, arguments, encoding, static, logged, Bool.false_eq_true,
-    ↓reduceIte]
+  simp only [Source.execS, Source.EM.sub, Source.EM.modSt, Source.EM.halt, bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, modify, modifyGet, MonadStateOf.modifyGet, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, throw, MonadExceptOf.throw, throwThe, arguments, encoding, static, ↓reduceIte]
 
 theorem exec_argument_failure {E : Source.Env} {Γ : RCtx} {types : List STy}
     (global : Glob E) (frame : Fr) (horizon : Nat) (event : Decl)
@@ -73,13 +61,7 @@ theorem exec_argument_failure {E : Source.Env} {Γ : RCtx} {types : List STy}
       (.emit event typed args : RStmt E [] false .body Γ Γ) locals).run
       (Source.L0 E,state) = (.error halt,(Source.L0 E,final)) := by
   simp only [ExceptT.run] at arguments
-  simp only [Source.execS, Source.EM.sub, Source.EM.modSt, Source.EM.halt,
-    bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run,
-    ExceptT.mk, StateT.bind, StateT.pure, StateT.get, StateT.modifyGet,
-    modify, modifyGet, get, getThe, MonadStateOf.get, MonadStateOf.modifyGet,
-    liftM, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    throw, MonadExceptOf.throw, throwThe, arguments, logged, Bool.false_eq_true,
-    ↓reduceIte]
+  simp only [Source.execS, Source.EM.sub, bind, pure, ExceptT.bind, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, arguments]
 
 theorem exec_encoding_failure {E : Source.Env} {Γ : RCtx} {types : List STy}
     (global : Glob E) (frame : Fr) (horizon : Nat) (event : Decl)
@@ -94,19 +76,12 @@ theorem exec_encoding_failure {E : Source.Env} {Γ : RCtx} {types : List STy}
       (.emit event typed args : RStmt E [] false .body Γ Γ) locals).run
       (Source.L0 E,state) = (.error halt,(Source.L0 E,final)) := by
   simp only [ExceptT.run] at arguments encoding
-  simp only [Source.execS, Source.EM.sub, Source.EM.modSt, Source.EM.halt,
-    bind, pure, ExceptT.bind, ExceptT.pure, ExceptT.bindCont, ExceptT.run,
-    ExceptT.mk, StateT.bind, StateT.pure, StateT.get, StateT.modifyGet,
-    modify, modifyGet, get, getThe, MonadStateOf.get, MonadStateOf.modifyGet,
-    liftM, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, StateT.map,
-    throw, MonadExceptOf.throw, throwThe, arguments, encoding, logged, Bool.false_eq_true,
-    ↓reduceIte]
+  simp only [Source.execS, Source.EM.sub, bind, pure, ExceptT.bind, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure, arguments, encoding]
 
 /-- Published static ABI layout retains all three words in order. -/
 theorem three_static (first second third : Roadmap.Bytes) :
     Source.abiLayout [(false,first),(false,second),(false,third)] = first ++ (second ++ third) := by
-  simp only [Source.abiLayout, Source.abiLayout.go, List.length_cons, List.length_nil,
-    List.append_nil]
+  simp only [Source.abiLayout, Source.abiLayout.go, List.append_nil]
 
 /-- The independent source encoding agrees byte-for-byte with the existing
 intrinsic word observer, without claiming a canonical argument/layout relation. -/
