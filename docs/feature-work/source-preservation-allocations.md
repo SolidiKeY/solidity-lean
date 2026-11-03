@@ -86,7 +86,44 @@ The compound expression times out at source horizon 3 and succeeds at horizon 4;
 both observations are retained. Independent finder and skeptic reviews found
 no confirmed defect in this consumer or its controls.
 
-Not covered: reference arguments and returns in the expression fragment,
-allocating expressions inside the fragment, termination,
-compiler/EVM refinement, `SourceSpec` and rollback. All printed axioms are
+## Additive memory-expression and reference-return subset
+
+`AllocatingFragment.lean` defines `AllocatingExpr` over the existing intrinsic
+`RExpr`. It includes the original value fragment with its operations check,
+reference locals, same-type conversions, conditional reference results and
+`newArray` with an admitted length. `eval_allocating_mem` proves `MemOK` and
+result validity at every horizon, including every halt. This is a separate
+syntactic admission; it does not change `ValFragC` or its statement checker.
+
+`ReferenceArguments.lean` admits exact-type converted argument lists. Its
+`eval_exact_args_mem` preserves an earlier argument's reference witness when a
+later argument allocates. Cross-type conversions are outside this admission.
+`AllocatingControls` exercises alias and fresh-reference branches, allocation
+panic, timeout, a retained caller prefix and a later-argument allocation in
+both source pipelines. Raw string literals remain outside `AllocatingExpr`.
+
+`ReferenceReturns.lean` derives body preservation for `returningBody`: a
+modifier-free body containing one `retTuple` of exact-type admitted expressions.
+`call_returning_mem` consumes the actual selected-body equality and handles
+argument packing, default return-slot allocations and actual return-slot writes.
+`sub_returning_mem` restores arbitrary valid caller locals across success and
+all halts. `eval_call_returning_mem` lifts this through the actual `RExpr.call`,
+with its original `fnSig` equation and exact-type argument admission. Calls
+inside these expressions still use the original `CallsOK` value catalogue;
+there is no assumption that arbitrary reference-callee bodies preserve memory.
+
+`ReferenceReturnControls` supplies a hand-built intrinsic runtime program with
+a matching direct-call signature, not an elaborated-program certificate. The
+parameter aliases object 0, default result slots allocate objects 1 and 2, and
+the body returns alias 0 plus fresh object 3. The controls consume the call and
+expression preservation theorems, check restored caller locals and escaping
+reference validity, and retain the exact low-horizon timeout. An oversized
+allocation panics after the two default allocations; `panic_preserved` applies
+the same call theorem to that halt with heap-next 3. Independent
+finder and skeptic reviews found no confirmed defect in this additive subset.
+
+Not covered: arbitrary reference-call bodies, whole-program admission of this
+memory subset, other allocating arms inside this subset, progress or termination,
+compiler/EVM refinement, `SourceSpec` and rollback. The existing standalone
+allocation-arm rules above retain their stated premises. All printed axioms are
 `propext`, `Classical.choice` and `Quot.sound`.

@@ -2107,6 +2107,7 @@ import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
 import Solidity.Source.Preservation.EncodingVariantControls
 import Solidity.Source.Preservation.NewArrayFragmentControls
+import Solidity.Source.Preservation.ReferenceReturnControls
 import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.LiteralBuiltinControls
 import Solidity.Source.FailureResources
