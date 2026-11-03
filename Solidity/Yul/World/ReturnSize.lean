@@ -63,7 +63,7 @@ variable {Memory : Type}
 def Step (count : Word) (before after : Configuration Memory D L T) : Prop :=
   returndataSize before.observed.effects = some count ∧ after = before
 
-theorem size_rule (before : Configuration Memory D L T) (count : Word)
+theorem size_step_eq (before : Configuration Memory D L T) (count : Word)
     (h : returndataSize before.observed.effects = some count) :
     Box (Step count) (fun after => after = before ∧ count.val = after.observed.effects.returndata.length) before := by
   intro after hs

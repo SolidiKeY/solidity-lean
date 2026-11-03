@@ -72,7 +72,7 @@ theorem rule_use (F : Fixed) (salt : Option Word) (failed : Bool) : AdapterRules
       (toWord 100000) (toWord 5) (toWord 7) (toWord 3) (result F salt failed).initialization)
     (fun after => after.observed = (result F salt failed).observed ∧ after.memory = memory ∧
       after.observed.effects.returndata = createReturnData (result F salt failed).initialization)
-    ⟨observed,memory⟩ := AddressedRules.addressed_rule _ _ _ _ _ _ _ _ _ _ _ (actual_addressed F salt failed)
+    ⟨observed,memory⟩ := AddressedRules.addressed_step_eq _ _ _ _ _ _ _ _ _ _ _ (actual_addressed F salt failed)
 
 theorem wrong_outcome (F : Fixed) (salt : Option Word) :
     ¬ AddressedRules.Step F salt TargetMemory.port (producer false) parent

@@ -60,7 +60,7 @@ theorem creation_sizes (F : Solidity.Roadmap.Fixed) (salt : Option Solidity.Road
 
 theorem rule_use : AdapterRules.Box (ReturnSizeRules.Step (toWord 2))
     (fun after => after = ⟨last,memory⟩ ∧ (toWord 2).val = after.observed.effects.returndata.length)
-    ⟨last,memory⟩ := ReturnSizeRules.size_rule _ _ rfl
+    ⟨last,memory⟩ := ReturnSizeRules.size_step_eq _ _ rfl
 
 theorem wrong_size_refused : ¬ ReturnSizeRules.Step (toWord 6)
     (⟨last,memory⟩ : AdapterRules.Configuration _ D₀ LW LW) ⟨last,memory⟩ := by

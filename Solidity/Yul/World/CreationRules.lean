@@ -16,7 +16,7 @@ def InitStep (port : BytePort Memory) (invoke : InitcodePort D L T) (parent : Ca
   ∃ result, initcodeAdapter port invoke before.observed before.memory parent allocated gas value offset size = some result ∧
     result.initialization = initialization ∧ after.observed = result.observed ∧ after.memory = before.memory
 
-theorem initcode_rule (port : BytePort Memory) (invoke : InitcodePort D L T) (parent : CallFrame)
+theorem initcode_step_eq (port : BytePort Memory) (invoke : InitcodePort D L T) (parent : CallFrame)
     (allocated : Address) (gas value offset size : Word) (before : Configuration Memory D L T)
     (result : CompletedCreation D L T)
     (h : initcodeAdapter port invoke before.observed before.memory parent allocated gas value offset size = some result) :

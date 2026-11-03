@@ -48,3 +48,23 @@ represented-slot/encoding-journal dependencies, absent from this published
 Views tree. Routine step projections/continuation are listed in TERRA-TODO.md.
 The integrated preparation-rule determinism and scripted-port limitations
 above remain open; no admission row is reopened.
+
+## Equation-premised port lemmas
+
+The six equation-premised lemmas are named `copy_step_eq`, `call_step_eq`,
+`log_step_eq`, `size_step_eq`, `initcode_step_eq` and `addressed_step_eq`.
+Their propositions and proof bodies are unchanged. They establish determinism
+from an adapter equation, not source reachability or Yul/G51 calculus soundness.
+The independent static-refusal laws retain their names.
+
+Kernel audit commands live in `tests/yul-world/PortEquationAxioms.lean`, rather
+than production imports. All 37 scoped axiom sets match the published baseline
+after renaming; six are empty and the remainder use only standard axioms.
+Fresh isolated per-file compilation checks the ten affected modules. Earlier
+stale-cache successes did not certify the rename; the resulting unknown-name
+audit failure is retained separately from the passing fresh audit.
+
+Original Y07.01/Y07.02/Y09.03 and both backfill queues remain partial. Actual
+callee/initcode execution, physical carrier closure, common source emit/G01,
+compiler returndata noninterference, resources and final calculus/joint gates
+remain open. The scripted WorldPort static-write weakness is unchanged.

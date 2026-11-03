@@ -143,7 +143,4 @@ theorem nested_static_destruction :
     let frame := childContext fundedPrefix { parent with static := true } .delegatecall (addr 2) (toWord 0) [17]
     unscheduledLife.destructAtFrame frame (addr 3) = none := rfl
 
-#print axioms burn_actual
-#print axioms burn_rollback
-#print axioms distinct_control
 end Solidity.Yul.World.LifecycleAdapterChecks

@@ -140,7 +140,7 @@ theorem rule_use : AdapterRules.Box
       (toWord 100000) (toWord 5) (toWord 7) (toWord 3) (.success [96,0]))
     (fun after => after.observed = completed false ∧ after.memory = memory ∧
       after.observed.effects.returndata = []) ⟨prepared,memory⟩ :=
-  CreationRules.initcode_rule _ _ _ _ _ _ _ _ _ initResult init_result_exact
+  CreationRules.initcode_step_eq _ _ _ _ _ _ _ _ _ initResult init_result_exact
 
 theorem wrong_outcome_refused : ¬ CreationRules.InitStep TargetMemory.port producer parent (addr 3)
     (toWord 100000) (toWord 5) (toWord 7) (toWord 3) (.revert [96,0])
@@ -167,7 +167,7 @@ theorem failed_rule_use : AdapterRules.Box
       (toWord 100000) (toWord 5) (toWord 7) (toWord 3) (.revert [253,254]))
     (fun after => after.observed = completed true ∧ after.memory = memory ∧
       after.observed.effects.returndata = [253,254]) ⟨prepared,memory⟩ :=
-  CreationRules.initcode_rule _ _ _ _ _ _ _ _ _ failedResult failed_result_exact
+  CreationRules.initcode_step_eq _ _ _ _ _ _ _ _ _ failedResult failed_result_exact
 
 theorem static_rule_use : AdapterRules.Box
     (CreationRules.InitStep TargetMemory.port producer {parent with static := true} (addr 3)
