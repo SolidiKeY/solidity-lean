@@ -618,3 +618,23 @@ Scoped reports are enforced by generated pins. This closes the earlier table
 integration gap for these slices; native/G24/views/functions/divergence and full
 frontend/joint closure remain open. H22 ExtCall construction remains untouched;
 routine projections remain evidence-only and registrations are generated later.
+
+### Bitwise and full-word shift selection
+
+`SolidityBridge.Yul.BitwiseSelection` concretely discharges AND/OR/XOR/SHL/SHR
+instruction certificates using existing compiler bridges and VY1 word-step
+proofs. No word arithmetic or evaluator is duplicated. The separate extension
+table preserves prior refusal tables and plugs into the typed structured
+selector. Actual original-source compilation of an AND-guarded update sequence
+closes source/model and whole-iff artifacts at depths0/2 for all represented
+three-word inputs, with exact emitted-code/selection identities.
+
+Controls exercise high-bit-only branch truth, shift operand order, counts0/255/
+256/dirty-high-word, wrap and zero results, true/false guards, repeated updates,
+protected caller/newer words and nonstack machine fields, underflow and static
+width/fuel/depth/loop refusals. The mask local is explicitly assigned and follows
+the actual compiled update; equal fixture values do not claim an independent
+mask-framing theorem. Generated pins enforce scoped standard axiom reports.
+No native/charged/G24/views/function/divergence, wider operator or full frontend
+closure is inferred. H22 remains respected; routine named projections stay in
+evidence and new optional registrations are coordinator-generated.

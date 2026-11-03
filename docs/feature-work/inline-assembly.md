@@ -263,3 +263,7 @@ VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithm
   typed leaf certificates, with source/whole-iff witnesses for DIV-controlled
   mixed arithmetic under live prefixes. Legacy verdicts remain unchanged;
   native/G24/full-lane closure stays open. See the [lane document](inline-assembly-vy3.md).
+
+- VY3 bitwise/shift certificates now compose with actual guarded source and
+  whole-iff lowering under live prefixes, including full-word count boundaries.
+  Native/G24/full-lane work remains open; see the [lane document](inline-assembly-vy3.md).
