@@ -30,3 +30,14 @@ facts do not construct `FailureProjection S` or `SourceRealization` for a real S
 
 These statements do not change Source resources or the frozen interface.
 The request-cut and diagonal soundness arguments remain with VY5.
+
+## H16 cursor interface routine facts
+
+- `Source/FailureCursor.lean`: projection lemmas for nextRequest after
+  enterRequest, nextFrame after enterFrame, and unchanged counters after
+  leaveFrame/leaveRequest; constructor/record reductions.
+- FrameBudget.grow preserves ordinal.val and emitted/cut; Fin.castSucc
+  projections. Stop.growFrame/growRequest preserve kind and numeric owner.
+- Prove new frame IDs exceed every existing frame ID using Fin.isLt;
+  prove pop never reuses an ordinal. Resource execution, unwind soundness,
+  actual hooks and horizon consistency remain VY5's producer obligations.

@@ -3352,3 +3352,4 @@ import Solidity.Yul.RawSourceReturnControl
 import Solidity.Yul.RawSourceVoidReturn
 
 
+import Solidity.Source.FailureCursor
