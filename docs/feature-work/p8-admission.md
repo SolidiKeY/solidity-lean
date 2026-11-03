@@ -357,7 +357,7 @@ roster even though its body lookup remains populated. The fixture is
 synthetic; function/modifier parameter agreement is checked, but it is not
 an `Elaborated` or full execution-coherence witness. Removing a contract changes the root count from six to three.
 
-`root_admission_equivalence` proves `RootAdmissionEquivalence` (A01).
+`root_admission_equivalence` proves `RootAdmissionEquivalence`.
 It classifies observations alone, not every source feature or combination.
 
 Open: prove actual source entry and call/modifier/dispatch queries remain in
@@ -396,7 +396,7 @@ a function. The roster is synthetic, not an `Elaborated` or SourceSpec
 witness. These controls do not replace the universal resolver proofs.
 
 `selected_function_membership` proves the singleton-overload proposition
-`SelectedFunctionMembership` (A02). Connecting source-derived selected targets
+`SelectedFunctionMembership`. Connecting source-derived selected targets
 to the complete resolved-tree visitor, modifier/external-call selections,
 actual execution roots and exact profile remains open. Published P9/P8
 dispatch results provide the later dispatch-membership step; they are not
@@ -421,7 +421,7 @@ unchanged deeper-path refusal. These are populated selector controls, not
 full `Elaborated`, execution-root or profile witnesses.
 
 `derived_modifier_membership` and `external_overload_membership` prove
-`DerivedModifierMembership` and `ExternalOverloadMembership` (A03–A04).
+`DerivedModifierMembership` and `ExternalOverloadMembership`.
 Wiring all derived
 callee occurrences and actual execution queries to these initial-target
 facts and published dispatch closure remains open.
@@ -448,8 +448,8 @@ All three axiom reports are guarded to the standard axioms.
 
 The candidate `produce` wrapper uses `CheckedSyntax.produce` and rechecks
 through `accept`. It does not reroute the existing public solc-JSON compiler.
-`produce_input_sound` proves `ProduceInputSound` (A06), and
-`units_program_identity` proves `UnitsProgramIdentity` (A05). The latter uses
+`produce_input_sound` proves `ProduceInputSound`, and
+`units_program_identity` proves `UnitsProgramIdentity`. The latter uses
 `P9.elaborate_program` theorem through the positional `UnitsRealize` relation.
 
 `SourceProgramControls.lean` kernel-checks a separate minimal empty-unit
@@ -482,8 +482,8 @@ These are selector facts, not executed-entry or receiver-reachability
 proofs. Nonempty calldata, payment and argument-decoding checks, getters,
 contract/account coherence, exact feature combinations and full admission
 remain separate. `SelectedEntryRootCoverage` and `SpecialEntryBodyCoverage`
-are proved by `selected_entry_root_coverage` and `special_entry_body_coverage`
-(A07–A08), preserving the actual selector and successful body lookup.
+are proved by `selected_entry_root_coverage` and `special_entry_body_coverage`,
+preserving the actual selector and successful body lookup.
 No Source evaluator, interface or policy is replaced.
 
 `EntryRootControls.lean` kernel-checks eight inhabited selector observations:
@@ -508,7 +508,7 @@ upstream admission equation. No caller chooses a smaller program subset.
 This guard uses the existing local observation policy; it does not establish
 complete feature extraction, feature-combination classification, runtime
 receiver/getter closure, imported-name execution or full approved-profile
-admission. `exact_observation_guard` proves `ExactObservationGuard` (A09)
+admission. `exact_observation_guard` proves `ExactObservationGuard`
 for this guard; it does not replace those broader obligations.
 
 `SourceObservationControls.lean` kernel-checks the minimal original-byte
@@ -533,9 +533,10 @@ rejection branch. This redundancy does not establish full-profile admission.
 `TypedObservationPolicy.lean` proves actual builtin/member typing implies
 local allowance, with no axioms. `TypedExpressionPolicy.lean` proves
 `expression_allowed` using the existing mutual recursor, including argument,
-conversion and lvalue motives. The four container corollaries A10–A13 are
-implemented. `TypedStatementPolicy.lean` supplies unconditional
-`statement_allowed`, `program_allowed` and `closed_policies` (A14) by applying
+conversion and lvalue motives. `arguments_allowed`, `conversions_allowed`,
+`lvalue_allowed` and `optional_allowed` prove the four container policies.
+`TypedStatementPolicy.lean` supplies unconditional
+`statement_allowed`, `program_allowed` and `closed_policies` by applying
 the retained conditional builders to actual checked container proofs.
 Every statement/item position, modifier argument, constant, constructor body,
 initializer and base argument is covered. No finite sample, fuel bound,
@@ -564,7 +565,7 @@ and `units_acceptance` for the actual algorithms: their success bits equal
 the existing elaboration flag and its all-unit conjunction. These laws do
 not replace returned program values, weaken graph/identity judgments or
 assert source/profile completeness. `acceptance_projection` proves
-`AdmitAcceptance`, the exact composition with the existing frontend guard (A15).
+`AdmitAcceptance`, the exact composition with the existing frontend guard.
 
 `SourceProgramAcceptanceControls.lean` reuses the original nonempty contract
 input, parse certificates and component checks. Case analysis on the actual
@@ -574,8 +575,8 @@ contract flag without the failed dependent-payload normalization.
 `single_control` kernel-checks the unchanged `C.sol` output for both pipelines;
 `two_control` preserves both original names and their order, and
 `corrupted_control` kernel-checks the original changed-byte refusal.
-`packed_controls : PackedControls` supplies the full original conjunction
-(A16), using the existing component proofs. The original `ContractControls`
+`packed_controls : PackedControls` supplies the full original conjunction,
+using the existing component proofs. The original `ContractControls`
 proposition is unchanged.
 
 These are checked original-byte/per-unit Source stage observations. Duplicate
@@ -586,7 +587,11 @@ retained separately; the new proofs add no premise or changed expectation.
 
 ## Current admission boundary
 
-The local A01–A16 proof obligations are complete.
+`root_admission_equivalence`, the selector membership and entry-coverage
+theorems, `produce_input_sound`, `units_program_identity`,
+`exact_observation_guard`, the typed-policy closure theorems,
+`acceptance_projection` and `packed_controls` establish the local component
+results described above.
 Lookup/derived-modifier/external-overload membership comes from actual source
 selectors and derivations. Source output identity and candidate-wrapper
 soundness preserve checked byte parsing, resolutions, component metadata and
