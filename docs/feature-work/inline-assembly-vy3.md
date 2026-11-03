@@ -456,3 +456,34 @@ ControlCertificate realization, loops/divergence, general Source/G24/views/
 frontend/Osaka/world/resource/trace/final import composition remain open.
 Focused checks and independent read-only finder/skeptic reviews pass with no
 confirmed findings.
+
+### Arithmetic source branches through actual model execution
+
+BranchModel.source_model proves original intrinsic Yul if evaluation AND complete
+Evm.Machine branch execution using real condition/arm compiler certificates,
+actual instruction-certificate bodies and exact emitted-code identities. The
+condition Scalar run is derived from lowered.correct, transported to the exact
+model stack, and the arm run is derived by the existing source/model consumer.
+Only then is MachineControl.branchCode_run applied. No desired condition, arm
+or whole-branch run is a premise. Full-word zero/nonzero truth is preserved;
+false returns the unchanged machine, true preserves all nonstack fields and
+updates exactly the source locals, with arbitrary numeric caller retention.
+
+The concrete example_model uses actual expression/statement compilers and the
+original normal-control visitor for if x { y := y + 1 }. Both child-code
+identities are closed by rfl; the actual emitted Backend.Block is also checked.
+This extends beyond the earlier stack-only model adapter. Its domain remains
+closed word-level source, numeric irStack and depth0. Relative instruction skips
+are NOT native byte offsets; native decoding/gas, expanded branch capacity,
+physical views and general Solidity/P16/G24 composition remain separate.
+
+Controls cover zero/high-only/dirty conditions, modular wrap, full machine
+metadata/caller, empty/short true-path faults and short false-path success that
+does NOT inhabit the source Vector Word2. Source-horizon/DUP-depth refusal and
+uncapped model success versus arm stackBound are explicit. The initial scratch
+match-normalization and undecidable IR equality guard failures are retained;
+the same equality is checked as a kernel rfl proof, with semantic expectations
+and budgets unchanged. Focused checks and independent read-only finder/skeptic
+reviews pass. TERRA48 leaves routine projections; TERRA1–47/full original lane
+obligations remain pending. No new external solc/client-EVM evidence or full-lane
+gate pass is added. Optional Bridge registration is coordinator-generated.

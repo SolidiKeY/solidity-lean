@@ -231,3 +231,5 @@ VY1 follow-up: intrinsic certificates and concrete all-list/all-fuel Source comp
 VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed suffix restoration, concrete Source block correspondence and retained reached-context failures. General P16 and final composition remain open. See inline-assembly-vy1.md.
 - VY1: LocalBoolIf adds concrete clean-input Source conditional/scope agreement with retained condition effects and partial branch contexts; full lane gates remain open. See [lane handoff](inline-assembly-vy1.md).
 - VY1: LocalBoolIfElse adds clean-input Source agreement for independently indexed conditional branches, retaining partial effects; see [lane handoff](inline-assembly-vy1.md). General P16 and final gates remain open.
+
+VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithmetic-source-branches-through-actual-model-execution). Real child-code certificates derive complete model execution; native/full lane remains partial.
