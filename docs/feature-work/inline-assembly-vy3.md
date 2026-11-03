@@ -487,3 +487,32 @@ and budgets unchanged. Focused checks and independent read-only finder/skeptic
 reviews pass. TERRA48 leaves routine projections; TERRA1–47/full original lane
 obligations remain pending. No new external solc/client-EVM evidence or full-lane
 gate pass is added. Optional Bridge registration is coordinator-generated.
+
+### Checked recursive model control selection
+
+`SolidityBridge.Yul.ControlRealization` checks scalar selection against actual
+instruction certificates and exact re-emitted `Backend.Program` equality.
+This refuses compact PUSH encodings whose erased model representation would
+otherwise re-emit PUSH32, and instructions without proved certificates.
+`Slice.lowering` supplies the actual published iff `Selection.LoweringCertificate`
+for scalar leaves, including reverse reconstruction from full model outcomes.
+
+`selectBlock` recursively builds forward successful model realization for existing
+`Backend.Block` code, sequence and conditionals. Conditionals require only the
+taken arm's execution. Loops refuse. This forward package is explicitly distinct
+from the published iff lowering certificate for whole structured blocks.
+`source_model` combines original `NormalControl` source evaluation and emitted
+`StructuredExec` with the actual constructed realization. Concrete sequence,
+nested branch and newer-prefix examples close all selection/emission identities.
+Full numeric caller tails, dirty words and nonstack machine fields are preserved.
+
+Controls cover updated conditions, nested inactive arms, modular wrap, high-only
+conditions, an inactive ADD which would underflow if taken, empty/short stacks,
+unsupported selectors, PUSH-width mismatch, DUP/SWAP limits and uncapped model
+success versus stackBound. No new frontend admission or external solc/EVM result
+is claimed. Native byte/PC/Osaka/charged/trace correspondence, expanded capacity,
+loops/functions/divergence, full source/G24/view simulation and joint artifacts
+remain open. Independent finder/skeptic reviews are recorded with focused checks
+in the sealed checkpoint handoff. TERRA49 records routine projections; prior
+routine obligations remain pending. Optional Bridge registration is deferred to
+the coordinator's generator, as required by REG1/H14.

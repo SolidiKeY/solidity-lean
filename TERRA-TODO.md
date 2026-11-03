@@ -886,3 +886,23 @@ proves both source evaluation and complete Evm.Machine branch execution for all
 correct numeric inputs. Named source/run projections may use its .1/.2. Keep
 depth0/numeric source context and native byte/PC/gas/expanded-capacity/G24 limits
 visible. TERRA1–47 remain pending; no Lean placeholders are introduced.
+
+## TERRA49 — checked control selection projections (pending)
+
+Module Bridge/SolidityBridge/Yul/ControlRealization.lean. Routine named
+projections of implemented selector/compiler instances and source_model:
+
+```lean
+theorem branch_selected : selectBlock StructuredSource.block = some branchSelected
+theorem sequence_selected : selectBlock StructuredSource.sequenceBlock = some sequenceSelected
+theorem nested_selected : selectBlock StructuredSource.nestedBlock = some nestedSelected
+theorem prefixed_selected : selectBlock StructuredSource.prefixedBlock = some prefixedSelected
+```
+
+Each selection identity already closes by rfl in the actual definitions. Named
+source and model projections may use branch_model/sequence_model/nested_model/
+prefixed_model .1/.2 with their exact numeric representation premises. These
+are routine glue only; substantive Slice.lowering iff and structured forward
+soundness are proved in this checkpoint. General structured reverse lowering,
+native capacity/control/G24 and loops remain original hard proof obligations,
+not Terra placeholders. TERRA1–48 remain pending and no Lean stub is added.

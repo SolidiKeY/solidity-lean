@@ -233,3 +233,9 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolIfElse adds clean-input Source agreement for independently indexed conditional branches, retaining partial effects; see [lane handoff](inline-assembly-vy1.md). General P16 and final gates remain open.
 
 VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithmetic-source-branches-through-actual-model-execution). Real child-code certificates derive complete model execution; native/full lane remains partial.
+
+- VY3 checked control selection: `ControlRealization` constructs scalar iff
+  lowering certificates and forward whole-model sequence/conditional proofs,
+  including actual nested/prefixed source compiler instances. Exact leaf byte
+  origins are checked; loops/native/G24/full-lane closure remain open. See the
+  [lane document](inline-assembly-vy3.md) and sealed checkpoint handoff.
