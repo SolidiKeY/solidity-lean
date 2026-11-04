@@ -95,3 +95,5 @@
 
 | `Source/Funds.lean` | Actual request-boundary funds validation, invalid whole-state identity, exact valid execution, stable completed horizons and both session-driver drop laws. |
 | `Source/FundsControls.lean` | Actual Source payable requests in both pipelines: stress-state drop, following valid request, timeout/revert distinction, prior debit/credit controls. |
+
+| `Source/FailureConstructorControls.lean` | H16 actual initializer/body CALL event cuts, rollback and seeded parent/request owner propagation; default-None horizon proofs retained. Root/session indexing and full adequacy remain open. |

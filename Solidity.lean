@@ -2160,6 +2160,7 @@ import Solidity.Source.Elaborated
 import Solidity.Source.Eval
 import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
+import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
 import Solidity.Source.FailureEventControls
 import Solidity.Source.FailureEventLaws

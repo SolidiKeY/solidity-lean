@@ -27944,6 +27944,111 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.collectArgs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.construct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.deploy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.ancestor_stop_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.body_cut1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.body_uncut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut0_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut0_world_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut1_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut1_root_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut2_events": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut2_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.reader_signature": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.request_stop_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.uncut_events": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.uncut_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.uncut_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.variable_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.giveArgs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.runCtorBody": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.runInits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.caller_nonce_retained": [
   "Classical.choice",
   "Quot.sound",

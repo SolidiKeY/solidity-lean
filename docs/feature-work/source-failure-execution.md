@@ -287,3 +287,39 @@ No ExtCall construction or other-owner source body was changed. The shared
 disk tool initially failed on root-owned extra-worktree build files; authorized
 removal of only that regenerable build recovered about13GB, preserving source,
 Git and sealed evidence.
+
+## Initcode frame and constructor plan execution (2026-11-04)
+
+Source.Semantics now forwards trailing optional plan (default None) through
+runInits/giveArgs/collectArgs/runCtorBody/construct/deploy. Actual initcode
+ABI/payability/constructor execution runs inside the existing frame helper,
+after account preparation. Own frame stops produce completed reverts with
+actual rollback; post-rollback preflight propagates remaining request/ancestor
+stops exceptionally. No detached interpreter or replacement constructor body.
+
+Source API commit45e62205a0c0150fa0096039980b47c94e06a1d1. Before hashes
+match the exact baseline: Semantics0.949638650→0.897647652s; unchanged
+HorizonDeploy8.717757221→8.623069207s. No measured slowdown. The370s
+HorizonDeploy command includes recompiling the unchanged heavy Horizon; its
+pre-existing300s policy overrun remains separate, not RUNTIME_GATE_PASS.
+
+Fifteen constructor-control laws exercise real external-call initializers and
+a separate real constructor body (runMods): decode/store42 without cuts;
+cuts after call/answer; exact event prefix and rollback world/journal fields;
+full cut0 ex equality via undo_apply; and seeded request/ancestor ownership.
+Seeds are actual cursor operations but do not implement H18 session tx0/tx1
+indexing. Some-plan horizon consistency and full P8 realization remain open.
+
+An independently proposed caller-heap preservation probe FAILED: existing
+root deploy clears heap before outcome handling and rollbackTo restores ex
+and logs, not heap. Its original false statement/snapshot remains failed
+evidence. Source heap semantics and frozen fixture expectations were not
+changed to pass it; separate root-state controls describe actual clearing.
+No caller-frame heap preservation, physical layout or EVM refinement claimed.
+
+Resource receipts/timing/source-interface/handoff:
+`/workspace/vy5-composition/initcode-plan-20261103/`. The shared disk tool
+attempted the active extra worktree build and hit permissions; this is a tool
+selection defect, not authority to discard active work. Exited-container
+reclamation subsequently recovered space. No source or newest seal deleted.
+H19/immutable/funds full release and original24/six Y10 closure remain open.
