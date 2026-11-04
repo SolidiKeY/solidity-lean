@@ -98,8 +98,10 @@ and one printer case in `Solidity/Calculus/PrintStmt.lean`.
   observations), a state relation not read by any Source module.
 - VY3 assembly notes (`inline-assembly-vy3.md`): statement-level
   Scalar/machine agreement (success and fault equivalences per block), no
-  session-level relation.  Nothing to unify yet; the route is a `Cert` of the
-  assembly pass (`Cert.ctxRefines_*`).
+  session-level relation.  Not unified here: the block-level equivalences
+  could be restated as `CtxEquivOn` over a block-input adversary, as
+  `StorageObs` restates `ObsEq`; the session-level route is a `Cert` of the
+  assembly pass (`Cert.ctxRefines_*`).  Open.
 - `Bridge/`, `Solidity/Tools/`: no contextual or observational relation.
 - Revert data: `THalt.revertWith`, `Stmt.revertData`, `RevertBytes.lean`
   encodings; no formula reads it (`semantic-gaps.md`).
@@ -109,8 +111,10 @@ and one printer case in `Solidity/Calculus/PrintStmt.lean`.
 `Behav.seq` with its congruence.  `Deployed A E O` (program, adversary
 reading, counted bounds), `CtxRefinesOn`/`CtxEquivOn`, the G50 instance
 `CtxRefines`/`CtxEquiv` over allowed `SessionEnv`s; preorder, equivalence,
-adversary weakening (`noCallback`), `Contract.Faithful`, vacuity made explicit
-(`CtxRefinesOn.of_empty`).  Controls on the toy (`Solidity/Semantics/CtxEquiv/Controls.lean`) and on a
+adversary weakening (`noCallback`), `Contract.Faithful` (env injective and
+allowedness-preserving; a check on the instances, not a hypothesis of the
+relations, and it does not constrain `Counts` or whether `sem` reads the
+environment), vacuity made explicit (`CtxRefinesOn.of_empty`).  Controls on the toy (`Solidity/Semantics/CtxEquiv/Controls.lean`) and on a
 session-reading toy (`Solidity/Semantics/CtxEquiv/AdversaryControls.lean`: a request reads stored
 state, a callback separates a guard so the no-callback reading is strictly
 weaker, sequencing reads the history).
@@ -120,15 +124,20 @@ weaker, sequencing reads the history).
 forward contextual refinement), `preserves_iff`.  Implications:
 `Cert.ctxRefines_back/_forward/ctxEquiv`, `Cert.preserves`,
 `PublicCorrectness.ctxRefines_back/_forward`, `transfer'` (SpecTransfer from
-the two refinements and `envAbs_eq`), `ctx_succeeds` (guarded side not
-vacuous), `Validator.ctxRefines_back/_forward`, `obsEq_iff_ctxEquiv`
+the two refinements and `envAbs_eq`), `ctx_succeeds` (the unguarded bytes
+show a success; non-vacuity of the guarded side, which `ctxRefines_back`
+counts, is open: `RefinesUnder`'s forward half gives no target premise), `Validator.ctxRefines_back/_forward`, `obsEq_iff_ctxEquiv`
 (restatement over path adversaries), `srcContract_ctxEquiv_iff`.
 
 **S6.2.**  `RFml` with the revert-reading modality `dl!{ [ P ] φ ↯ ψ }`
 over `Prog.runFrames`, data predicates (`Error("m")`, `Panic(c)`, bytes,
 selectors, Boolean combinations), conservativity, `revert(bytes)` laws,
-notation and printers, `revert(hex"…")` printed back; the
-`semantic-gaps.md` open row is closed (the calculus has no taclet for it).
+notation and printers, `revert(hex"…")` printed back.  The
+`semantic-gaps.md` row is partly closed: the formula layer reads revert
+data semantically, but the calculus has no taclet for it, the model's data
+outside a self-call frame is less than solc's (recorded in
+`solc-alignment.md`, "Revert data read in formulas"), and logs are not
+modelled (X07).
 
 **Interfaces requested.**
 - X01 (`Roadmap/Contracts.lean`): restate `PublicCorrectness.transfer` as
@@ -136,11 +145,15 @@ notation and printers, `revert(hex"…")` printed back; the
   (the guarded EVM behaviour is otherwise not downward closed in the
   horizon); `DecidableEq` for `CodeUnit`/`Artifact`; a log constructor in
   `Event` (X07) — the relations then observe logs unchanged.
-- O01: implement `Preserves π p h` (D6 per pass under both premises), keep
-  `preserves_iff` and `Cert.preserves`; D1's artifact clause needs X01's
-  artifact parameter.
+- O01: `Preserves π p h` is D6 restricted to forward, premise-meeting runs
+  over G01 observations (no logs, raw call bytes or code hash yet); it is
+  not compositional (the middle language's premises are not carried), so a
+  pipeline still needs `Cert` per pass, from which `Cert.preserves` gives
+  `Preserves`.  D1's artifact clause needs X01's artifact parameter.
 - T07: implement `Validator` (computable `validate`, soundness to
-  `ArtifactRefines`), keep `Validator.ctxRefines_back/_forward`.
+  `ArtifactRefines`), keep `Validator.ctxRefines_back/_forward`.  The toy
+  validator compares the main runtime only, which is sound only because the
+  toy EVM loads nothing else.
 
 **Review (finder and skeptic, read-only).**  Fixed: history-blind and
 overclaimed sequencing (now `List E → O → Behav`, documented as behaviour

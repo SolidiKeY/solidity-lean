@@ -388,8 +388,8 @@ and its code; `revert E(a, b)` with `E`'s selector and `abi.encode(a, b)`.
   custom error's selector or an ABI word of a value, by `revert`'s rules
   (`revertDataBox`, `revertDataDiamond`). The modalities read no data.
   `ExtResult.error`/`.other` carry another callee's reason and data.
-- *Where data is computed.* Since no modality reads a top-level revert's
-  data, literal and custom-error data are emitted only in the callee a
+- *Where data is computed.* Since no `Fml` modality reads a top-level
+  revert's data, literal and custom-error data are emitted only in the callee a
   self-call `try` runs (`selfFrame`) and its calls; elsewhere
   `require(c, "m")` is `require(c)`, so no other proof changes shape.
   A reason written as a byte literal (`hex"6d"`, and every string literal
@@ -397,7 +397,10 @@ and its code; `revert E(a, b)` with `E`'s selector and `abi.encode(a, b)`.
   `Error(string)`'s literal data in every frame, as a computed reason's
   memory bytes are, with nothing allocated (lane FU2-D; `requireReason` is
   `if (c) {} else { revert … }` there). The two readings of one source
-  differ only in data no modality reads outside a self-call's `catch`.
+  differ only in data no `Fml` modality reads outside a self-call's `catch`.
+  The revert-reading `RFml` layer (*Read in formulas*, below) does read it,
+  so there the lowering is a recorded deviation from solc
+  (`docs/solc-alignment.md`, "Revert data read in formulas").
   Computed memory operands keep their bytes everywhere (`RevPart.mem`,
   `Semantics/RevertMemory.lean`); the importer accepts the whole-buffer
   rethrow `assembly { revert(add(d, 32), mload(d)) }` and no other assembly.
