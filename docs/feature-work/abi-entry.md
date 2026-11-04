@@ -371,3 +371,8 @@ Independent read-only finder and skeptic reviews passed with no findings.
 They checked the exact limit boundary, saved suffix and non-vacuous frame,
 raw-byte derivation and guarded lazy/eager failure ordering, and confirmed
 that native allocation/entry correspondence is not claimed.
+
+`AccessBridge/HeadSizeInterface.lean` states the fetched charged CALLDATASIZE
+consumer using published P10 input installation. Its all-input numeric result
+uses the actual modulo word size, with semantic length agreement kept separate.
+It does not claim a fetched native short-head branch or Source adequacy.
