@@ -6,6 +6,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
 import Solidity.Backend.MemoryOps.SourceShortCircuit
+import Solidity.Backend.MemoryOps.SourceMemoryShortCircuit
 import Solidity.Backend.MemoryOps.SourceLocalReferenceOrder
 import Solidity.Backend.MemoryOps.SourceLocalReferenceReject
 import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
@@ -2607,5 +2608,87 @@ theorem local_reference_order_native_vectors :
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_native_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms local_reference_order_native_vectors
+
+
+private def skipDeleteSource : Source.EMState E0 RhsSΓ :=
+  ((rhsSource true).1.set (.there .here) (.memRef rfl 5),
+   {(rhsSource true).2 with heap := ((rhsSource true).2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+private def skipDeleteWord := writeMachine (allocateMachine (rhsWord true) ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+private def firstBadAssign : Source.RExpr E0 RhsSΓ .bool := sourceIndexedAssign (.there .here : Source.Idx RhsSΓ SB) (.there (.there sj)) .here
+
+/-- The exact endpoint3 rejects before the tail can allocate/rebind. The
+separate tail-alone execution is a real counterfactual, not a suffix state. -/
+theorem memory_failure_skips_delete (p : Roadmap.Pipeline) (horizon : Nat) :
+    (Source.evalE (G0 p) F0 (horizon+3) firstBadAssign).run (rhsSource true)=
+      (.error (.revert (Source.panicData .index)),rhsSource true) ∧
+    (Source.execItems (G0 p) F0 (horizon+5) RhsSΓ.length none
+      (.stmt (.expr firstBadAssign) (.stmt rejectLocalDelete .nil) : Source.RItems E0 [] false .body RhsSΓ RhsSΓ)
+      (rhsSource true).1).run (.nil,(rhsSource true).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(rhsSource true).2)) ∧
+    Prog.run (rhsState true) (.cons (rhsNative (.there (.there ti)))
+      (.cons (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl)) .nil))=.error .revert ∧
+    run (rhsCode (.there (.there ti)) ++ rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B))
+      (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord true)=.revert ∧
+    (Source.evalE (G0 p) F0 (horizon+3) (.delete (.local (.there .here : Source.Idx RhsSΓ SB)))).run (rhsSource true)=
+      (.ok Source.RVal.unit,skipDeleteSource) ∧
+    run (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord true)=
+      .ok skipDeleteWord 0 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_write_bounds_short_circuit (G0 p) F0 horizon (rhsSource true) (rhsState true) left 0 (rhsAt true)
+      (.there .here) (.there (.there sj)) .here (.there .here) (.there (.there ti)) .here (uintOfNat 3) true
+      rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (rhsRepr true)
+      (.stmt rejectLocalDelete .nil) (.cons (.rebindMem (.there .here) (.newArr (.lit 0 rfl) rfl)) .nil)
+      (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint))
+    have alone := source_bool_local_delete_rebind_word (G0 p) F0 horizon (rhsSource true) (.there .here) (rhsState true)
+      (.there .here) left 0 (rhsAt true) rfl rfl SH (rhsOK true) (rhsRepr true) (rhsAllocator true) (by decide) (by decide)
+    exact ⟨h.1,h.2.2.1,h.2.2.2.2.2.1,h.2.2.2.2.2.2.2,alone.1,alone.2.2.2.1⟩
+
+/-- Context-changing Source/native declarations and existing declaration code
+are also skipped. No frame-capacity or allocator premise for the tail is used. -/
+theorem memory_failure_skips_declaration (p : Roadmap.Pipeline) (horizon : Nat) :
+    (Source.execItems (G0 p) F0 (horizon+5) RhsSΓ.length none
+      (.stmt (.expr firstBadAssign) (.stmt (.declVar SB) .nil) : Source.RItems E0 [] false .body RhsSΓ (SB::RhsSΓ))
+      (rhsSource true).1).run (.nil,(rhsSource true).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(rhsSource true).2)) ∧
+    Prog.run (rhsState true) (.cons (rhsNative (.there (.there ti)))
+      (.cons (.declMem B (.user "unreached") none rfl rfl) .nil))=.error .revert ∧
+    run (rhsCode (.there (.there ti)) ++ declareNewCode 1 (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord true)=.revert ∧
+    ¬(1+(RhsΓ.length+1)≤8) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_write_bounds_short_circuit (G0 p) F0 horizon (rhsSource true) (rhsState true) left 0 (rhsAt true)
+      (.there .here) (.there (.there sj)) .here (.there .here) (.there (.there ti)) .here (uintOfNat 3) true
+      rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (rhsRepr true)
+      (.stmt (.declVar SB) .nil) (.cons (.declMem B (.user "unreached") none rfl rfl) .nil)
+      (declareNewCode 1 (.lit 0 rfl : Simple C RhsΓ .uint))
+    exact ⟨h.2.2.1,h.2.2.2.2.2.1,h.2.2.2.2.2.2.2,by decide⟩
+
+/-- Complete pre-error and separately executed tail-alone observations. No
+native/word machine returned after the rejecting combined run is asserted. -/
+theorem memory_failure_skip_vectors :
+    rhsViews (rhsSource true)=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,
+      some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SR,pdata [left]⟩,
+      some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    (rhsSource true).2.heap.get 5=none ∧ (rhsSource true).2.heap.next=5 ∧
+    (rhsSource true).1.get (.there .here : Source.Idx RhsSΓ SB)=.memRef rfl 0 ∧
+    rhsViews skipDeleteSource=rhsViews (rhsSource true) ∧ skipDeleteSource.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ ∧
+    skipDeleteSource.2.heap.next=6 ∧ skipDeleteSource.1=(rhsSource true).1.set (.there .here) (.memRef rfl 5) ∧
+    words (rhsWord true)=[w[48],w[32],w[32],w[36],w[1],w[3],w[16],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words skipDeleteWord ++ [skipDeleteWord.mem 48,skipDeleteWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[3],w[48],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    skipDeleteWord.stack=[w[42]] ∧ words skipDeleteWord≠words (rhsWord true) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,by decide⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skips_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms memory_failure_skips_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skips_declaration' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms memory_failure_skips_declaration
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skip_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms memory_failure_skip_vectors
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

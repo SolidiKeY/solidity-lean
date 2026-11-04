@@ -358,6 +358,7 @@ import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
 import Solidity.Backend.MemoryOps.SourceLocalReferenceOrder
 import Solidity.Backend.MemoryOps.SourceLocalReferenceReject
 import Solidity.Backend.MemoryOps.SourceMemory
+import Solidity.Backend.MemoryOps.SourceMemoryShortCircuit
 import Solidity.Backend.MemoryOps.SourceNestedAssignment
 import Solidity.Backend.MemoryOps.SourceNestedDelete
 import Solidity.Backend.MemoryOps.SourceNestedMemory

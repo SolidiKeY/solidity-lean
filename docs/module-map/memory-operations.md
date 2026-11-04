@@ -210,3 +210,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceLocalReferenceReject.lean` | Actual local-reference allocation/rebinding prefix followed by reached empty-root bounds rejection in Source Items, native Prog and full word append; retained-prefix frames. |
 
 | `Backend/MemoryOps/SourceLocalReferenceOrder.lean` | Actual indexed write then allocating local-reference deletion in Source Items/native Prog/full word append; changed retained aliases and world/allocator frames. |
+
+| `Backend/MemoryOps/SourceMemoryShortCircuit.lean` | Actual initial Bool indexed-write bounds error absorbs arbitrary context-changing Source/native and word continuations; no suffix/allocator premises. |
