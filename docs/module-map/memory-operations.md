@@ -182,3 +182,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedDefaults.lean` | Total production selection for fixed dimensions around empty dynamic defaults, exact cost and existing allocator-growth execution. |
 | `Backend/MemoryCopies/NestedDefaultControls.lean` | Populated represented inputs with actual selected-code root/cursor/old-word observations and empty-code/wrong-cursor controls. |
 | `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Production-selected child defaults with complete runtime-parent allocation demand and a real fitting input; no unused-child feasibility condition. |
+| `Backend/MemoryCopies/RuntimeArrays.lean` | Production-selected runtime reference-array loop and scoped declaration correctness, complete parent demand and size-independent code. |
+| `Backend/MemoryCopies/RuntimeArrayControls.lean` | Actual populated runtime lengths0/2/64, empty-any-child and same-code controls, scoped declaration execution and wrong-cursor rejection. |

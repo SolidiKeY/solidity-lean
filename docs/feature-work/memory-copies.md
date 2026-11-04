@@ -265,5 +265,29 @@ and warnings; checkpoint gates and scoped axiom reports remain required.
 complete runtime-parent cost: length+1+length*childCost. Feasibility is attached
 to the entire construction, avoiding an unnecessary fitting-child condition
 when the parent is empty. It extends the existing default/reference-array
-framework; the signature precedes implementation. Source graph admission,
-physical byte refinement and runtime size-failure selection remain separate.
+framework; the signature precedes `RuntimeArrays.lean`. Child code is extracted
+only from production `compileDefault` with proved selection. The same emitted
+code serves every runtime size; equality follows from compiler-result
+uniqueness. Empty-parent cost is1 for any child dimensions, so no fitting-child
+witness is required. Whole-parent successful feasibility stays explicit.
+
+`RuntimeNestedDefault.execute` uses the actual reference-array loop and retains
+the reached heap representation, exact cursor, root address, old bases/cells
+and prior gaps. `declare_correct` connects the actual scoped `TRun.declMem`
+result and emitted `referenceDeclareCode`, reached `StateRepr`, allocator,
+base extension and caller stack. These are intrinsic scoped-state/word-memory
+results, not `Source.EM` graph or byte-addressed physical refinement.
+
+`RuntimeArrayControls.lean` instantiates a real populated allocator and proves
+root40,next41/71/1001 and preserved old word7 for runtime lengths0/2/64 with
+nested child dimensions[2,3]. Same-code, empty-parent-any-dimensions and wrong
+cursor70 controls are included. A separate actual populated declaration
+control derives both source and target execution plus cursor71 and unchanged
+caller stack from input representations, without assuming either outcome.
+
+Independent read-only finder and skeptic found no concrete semantic/trust
+finding, hidden child-capacity condition or new compiler/framework. Neither
+used Lean/build/server/edits. All three new files have zero MCP errors and
+warnings. Source graph admission, physical byte refinement, gas, whole-lane
+adequacy and runtime size-failure selection remain separate. Checkpoint gates
+and scoped axiom reports are required before accepting this increment.
