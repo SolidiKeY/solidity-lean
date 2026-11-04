@@ -1060,3 +1060,22 @@ Controls cover distinct caller/child aliases, a nested child with empty locals,
 returned hash, exact late error and a later revert retaining the source heap
 prefix. This is substitution transport, not general `callInternal`/`callAddr`
 coverage, automatic heap rollback, transaction adequacy or target execution.
+
+
+`MultiRootByteBoundary.above_free` proves that actual multi-root byte plans
+leave every raw byte at or above the actual placement end unchanged, including
+halted prefixes. Successful offsets are derived from the selected heap object's
+layout and live index; invalid operations do not patch raw memory. This result
+needs no initial raw-view or MemOK premise.
+
+`P6MultiRootByte` uses that boundary to derive the final finite-frame `Fits`
+condition from the initial frame and placement room, then constructs the exact
+P6 frame for the coupled source result. Its `sound` theorem retains frame
+metadata, original-H MemOK, complete reencoding, allocation history and unchanged
+whole Source writeback. Initial owner validity, supported inventory, byte reads
+and reserved words stay explicit; final Fits/view agreement is derived. Controls
+cover six objects, both pipelines, repeated byte/string writes, a late source
+failure, nonzero padding and the finite 2047/2048 boundary. A nonzero write beyond
+the represented high-water mark fails Fits. This constructs a physical image;
+it proves neither target opcode execution, memory expansion nor reachable
+allocation refinement.

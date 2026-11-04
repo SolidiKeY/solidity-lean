@@ -143,3 +143,5 @@
 | `Yul/Views/BytePlanHash{,Controls}` | Actual keccak after finite multi-root writes derives final bytes and exact physical preimage from the same reached map, with owner error short-circuiting, restored-caller and noninjective preimage controls. |
 | `Yul/Views/BytePlanHashAlias{,Controls}` | Byte/string-backed bytes aliases derive reached hash contents and exact physical preimages after actual multi-root writes, with same-path aliases, prefix failure and caller restoration controls. |
 | `Yul/Views/BytePlanHashFrames{,Controls}` | Actual child write/hash return through Source local substitution, with arbitrary valid caller aliases, every-H safety and same-map complete Source writeback on success/halt. |
+| `Yul/Views/MultiRootByteBoundary` | Actual multi-root byte writes preserve the raw complement above the placement end, using selected typed object geometry and real source failures. |
+| `Yul/Adapters/P6MultiRootByte{,Controls}` | Derives finite-frame Fits for multi-root source byte plans and constructs exact same-map P6 frames with complete source writeback, original-H safety and metadata preservation. |
