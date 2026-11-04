@@ -207,82 +207,122 @@ end Solidity.Lowering.V07.UnsignedQuotRemEffectsControls
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.range_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_zero_legacy_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_zero_legacy_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_zero_legacy_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_zero_viaIR_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_zero_viaIR_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_zero_viaIR_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.prefix_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.prefix_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.prefix_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_zero_legacy_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_zero_legacy_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_zero_legacy_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_zero_viaIR_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_zero_viaIR_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.code_zero_viaIR_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_zero_legacy_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_zero_legacy_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_zero_legacy_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_zero_viaIR_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_zero_viaIR_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.operand_zero_viaIR_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.transport_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.transport_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.transport_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.zero_legacy_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.zero_legacy_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.zero_legacy_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.zero_viaIR_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.zero_viaIR_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.zero_viaIR_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.repeated_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.repeated_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.repeated_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.self_alias_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.self_alias_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.self_alias_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.equal_content_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.equal_content_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.equal_content_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.extension_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.extension_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.extension_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.binder_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.binder_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.binder_client
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.live_caller' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.live_caller' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.live_caller
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_frame_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_frame_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffectsControls.source_frame_client

@@ -270,7 +270,9 @@ end Solidity.Lowering.V07.UnsignedQuotRemEffects
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffects.code_zero
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffects.operand_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffects.operand_success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffects.operand_success
 
@@ -278,7 +280,9 @@ end Solidity.Lowering.V07.UnsignedQuotRemEffects
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffects.operand_zero
 
-/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffects.transport_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Lowering.V07.UnsignedQuotRemEffects.transport_success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.V07.UnsignedQuotRemEffects.transport_success
 
