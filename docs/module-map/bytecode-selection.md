@@ -140,3 +140,6 @@
 | `Bridge/SolidityBridge/AccessBridge/EmptyCopyInterface.lean` | Arbitrary-offset zero-length CALLDATACOPY charged execution contract retaining inherited failures. |
 | `Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean` | Actual zero-copy identity, zero expansion/three-gas execution, continuation and preserved P6 empty-touch image. |
 | `Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean` | Host-gap/maximal offset, protected dirty memory, either-pipeline image and gas/fuel refusal controls. |
+| `Backend/AbiEntry/SelectorMatchInterface.lean` | Intrinsic four-byte emitted matcher, raw complete-prefix agreement and explicit capacity contract. |
+| `Backend/AbiEntry/SelectorMatch.lean` | Actual SHR/EQ execution, raw first-four-byte/source fixed-hash selector correspondence and short-prefix distinction. |
+| `Backend/AbiEntry/SelectorMatchControls.lean` | Raw match/mismatch, payload invariance, padded partial collision, short-input and capacity/frame controls. |

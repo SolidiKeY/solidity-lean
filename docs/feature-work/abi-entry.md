@@ -504,3 +504,23 @@ family does not imply nonzero physical write or Source/compiler adequacy.
 `SelectorMatchInterface.lean` specifies an intrinsic four-byte selector matcher
 and exact raw prefix agreement after a complete four-byte prefix. Short-input
 classification remains explicit and is not inferred from a padded word match.
+
+`SelectorMatch.lean` emits actual SHR/EQ over the existing numeric execution
+framework. It preserves the entire saved suffix and compares high four bytes
+against an intrinsic four-byte selector, with explicit Selection V2 capacity.
+Raw agreement reuses the published word reader, byte bound and inverse codec;
+concatenation/division isolates the prefix exactly without constraints on the
+remaining payload. The actual `Source.Glob.selector` fixed-hash bytes are
+preserved and the predicate is expressed in Source's comparison direction.
+The full-prefix precondition is local: short inputs are separately proved not
+to match four-byte Source selectors. Controls show why it is needed: a padded
+two-byte input can match numerically while the Source prefix comparison is
+false. They also cover raw match/mismatch, all-low-payload variation, empty
+input, distinct saved words and an inhabited/capacity-refused frame. No fetched
+native load/branch, lookup ordering, collision resolution, receive/fallback,
+Source compiler selection or full dispatch/composition is claimed here.
+Independent read-only finder and skeptic reviews passed with no findings.
+They verified byte order and equal-width injectivity, exact Source selector
+bytes/direction, local full-prefix condition and concrete padded collision,
+and non-vacuous suffix/capacity controls. Full runtime dispatch boundaries were
+confirmed explicit rather than inferred from this numeric predicate.

@@ -34,6 +34,9 @@ import Solidity.Backend.AbiEntry.RawTailGuardInterface
 import Solidity.Backend.AbiEntry.RejectionInterface
 import Solidity.Backend.AbiEntry.TailGuardInterface
 import Solidity.Backend.AbiEntry.ValueGateBodyInterface
+import Solidity.Backend.AbiEntry.SelectorMatch
+import Solidity.Backend.AbiEntry.SelectorMatchControls
+import Solidity.Backend.AbiEntry.SelectorMatchInterface
 import Solidity.Backend.AbiEntry.TailGuard
 import Solidity.Backend.AbiEntry.TailGuardControls
 import Solidity.Backend.AbiEntry.TailGuardInterface
