@@ -167,3 +167,6 @@
 | `Backend/AbiEntry/GetterRoutesInterface.lean` | Source ordinary/getter/special precedence execution certificate. |
 | `Backend/AbiEntry/GetterRoutes.lean` | Actual getter tables and full-length/short Source-linked continuation execution. |
 | `Backend/AbiEntry/GetterRoutesControls.lean` | Public-variable collision, getter value refusal and Source-byte controls. |
+| `Backend/AbiEntry/DispatchRefusalInterface.lean` | Exact routing refusal and Source empty-byte failure certificate. |
+| `Backend/AbiEntry/DispatchRefusal.lean` | Value-aligned actual compiled rejection iff Source routing refusal. |
+| `Backend/AbiEntry/DispatchRefusalControls.lean` | Inhabited refusal combinations and later short-head counterexample. |

@@ -775,3 +775,30 @@ removing its single unused simp argument and has no changed-module warnings.
 `DispatchRefusalInterface.lean` specifies exact routing-refusal classification
 and empty Source revert bytes, with machine/frame value representation explicit.
 It does not classify later decoder or body failures as routing refusals.
+
+`DispatchRefusal.lean` classifies the actual continuation dispatch refusal:
+nonpayable ordinary entries/getters/special entries receiving nonzero value,
+or absence of any entry. With selector/length representation and explicit
+machine-to-Source call-value equality, rejection of the actual publicly selected
+compiled code is equivalent to this Source-derived predicate. A general Source
+theorem proves each such refusal halts with exactly empty revert bytes before
+later argument/storage/body work. Ordinary signature eligibility and nonempty
+input are derived from actual `pickFn`; they are not extra premises. Existing
+Source rejection theorems and actual getter compiler execution are reused.
+The classifier is label-independent and does not assert native byte encoding.
+Controls instantiate ordinary/getter/special/absent combinations on both
+pipelines with a typed bool-parameter function, public uint and nonpayable
+fallback. Nonzero calls reject in actual IR and actual Source; zero-value present
+routes are not rejected by routing. A separate zero-value truncated-head control
+has routing refusal false while actual Source still reverts with empty bytes.
+This pins the exclusion of later decoder/body failures from the classification;
+it is not a claimed completeness theorem for all Source reverts. The fixed hash
+is synthetic, and native execution, aggregate decoding, successful ABI body
+execution/binding and full entry composition remain open.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked explicit machine/frame value alignment, derived ordinary
+eligibility, actual selected compiler code, label independence and one-way
+Source rejection correspondence. Both verified the later-head-failure negative
+control and rejected any reading as completeness for all Source reverts; neither
+used a build or Lean server. Focused compilation has no changed-module warnings.
