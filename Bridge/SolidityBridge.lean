@@ -268,6 +268,8 @@ import SolidityBridge.RoadmapV15.P10.PublishedDivision
 import SolidityBridge.RoadmapV15.P10.PublishedDivisionControls
 import SolidityBridge.RoadmapV15.P10.PublishedRemainder
 import SolidityBridge.RoadmapV15.P10.PublishedRemainderControls
+import SolidityBridge.RoadmapV15.P10.PublishedShifts
+import SolidityBridge.RoadmapV15.P10.PublishedShiftsControls
 import SolidityBridge.RoadmapV15.P10.PublishedSignedOrder
 import SolidityBridge.RoadmapV15.P10.PublishedSignedOrderControls
 import SolidityBridge.RoadmapV15.P10.PublishedUnsignedOrder
