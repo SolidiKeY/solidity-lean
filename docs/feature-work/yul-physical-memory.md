@@ -975,3 +975,14 @@ the original allocation history. Controls compose shrink, allocating reference
 deletion and regrowth without assuming new reads or a final inverse. The
 original-capacity failure remains preparation `None`, not a language refusal;
 no source length-assignment syntax or target execution is added.
+
+`RetainedByteHeader` computes the resized bytes/string payload directly from
+the same raw input, then derives all heap-image reads after the header patch.
+Actual retained writeback and `heapPut`, original-H MemOK, whole-map identity,
+original-history whole Source writeback, coordinates/free and reserved bytes
+follow under the real retained-capacity check. Controls compose zero-length
+bytes/string views, bytes regrowth, then string regrowth33->64; second-step
+reads come from the first complete map. Four aliases recover old bytes and
+nonzero padding made live by growth, with an unrelated third object preserved.
+Preparation `None` beyond original capacity remains distinct from a language
+verdict. No resize syntax, cleaning or target execution policy is introduced.

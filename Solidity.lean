@@ -3330,6 +3330,8 @@ import Solidity.Yul.Views.RetainedArrayImage
 import Solidity.Yul.Views.RetainedArrayLayout
 import Solidity.Yul.Views.RetainedArrayLength
 import Solidity.Yul.Views.RetainedByteControls
+import Solidity.Yul.Views.RetainedByteHeader
+import Solidity.Yul.Views.RetainedByteHeaderControls
 import Solidity.Yul.Views.RetainedCallerCoverage
 import Solidity.Yul.Views.RetainedCallerCoverageControls
 import Solidity.Yul.Views.RetainedCallerHeaders
