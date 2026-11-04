@@ -196,3 +196,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Executable/CreationPatchOrder{,Controls}` | Checked immutable/link table commutation and constructor-copy consumers; no fetched-runtime/world claim. |
 | `Backend/Executable/CreationFreshness{,Controls}` | Actual successful-creation freshness, heterogeneous account preservation and constructor controls; no allocator/source/EVM correspondence. |
 | `Backend/Executable/ConstructorInitialization` | Actual initializer-list composition and exact pipeline-dependent storage/journal observations at argument failure; supplied Source fixtures only. |
+
+| `Backend/Executable/CreationLinkIdentity.lean` | Referenced library bytes derived from actual linking and constructor returns. |
+| `Backend/Executable/CreationLinkIdentityControls.lean` | Same-size swapped-link negatives and the empty/unreferenced boundary. |

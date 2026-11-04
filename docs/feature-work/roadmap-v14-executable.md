@@ -257,3 +257,33 @@ repair or the announced source-keyed master cache transfer, within the existing
 caps. The held Source helper and all previous seals remain preserved.
 
 Published-adoption candidate: `bc61895c17820f9a887042fe3637056428897db0` on `059eb83d4e1d494f42c532513ffbcd3e65adaf75`. Held Source work stays on this helper; no combined-helper or new argument-frame proof pass is claimed.
+
+## Published 6f3eedf0 and referenced library identity
+
+The isolated candidate adopts `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
+That publication imports only the two patch-order modules from the accepted
+V14 snapshot. The bounded P10 linked prefix and new P1 native recovery modules
+do not themselves close constructor/body, account or physical-byte obligations.
+
+`CreationLinkIdentity.sites_frame` and `sites_read` derive exact byte observations
+over the existing library-link fold and typed locations. `runtime_byte` consumes
+the now-published patch-table commutation theorem, retaining actual link-table
+disjointness and cross-table compatibility. `runtime_address` recovers the full
+20-byte interval. `returned_address` derives those bytes from an actual published
+constructor-slice return using determinism; `same_returns` constrains each
+referenced address when two actual returned byte lists agree. Site membership is
+required: unreferenced library mappings are not asserted equal.
+
+Controls reuse the nonempty two-link/two-immutable fixture. They read both actual
+returned addresses, preserve equal runtime lengths while swapping complete
+address bytes, and exclude the old constructor return after that swap. An empty
+link table demonstrates the unreferenced-map boundary. This strengthens the
+same-length observations separately from the previously noted length-only
+prefix control. Independent read-only finder and skeptic found no proof defect.
+
+Initial admission receipts75 launched no Lean. H1-authorized advisory page-cache
+release restored actual headroom without deleting build/evidence files or
+changing guards. Subsequent focused checks use unchanged12GiB/no-swap, serial
+Lean and180s limits. Five scoped standard-axiom guards are separate from pending
+full/import-root/combined-held-Source validation. No address allocator, account
+identity, Source profile, fetched CREATE or whole-lane completion is claimed.
