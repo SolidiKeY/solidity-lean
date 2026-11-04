@@ -137,3 +137,5 @@
 
 | `Yul/Compilation/ArityShapes.lean` | Existing copied-argument/inline/unary/ternary operand transport with explicit child/body metadata and physical rows; not function-frame or capacity correctness. |
 | `Yul/Compilation/PureVisitorShapes{,Controls}.lean` | Actual full pure visitor success/emission derives recursive operand metadata, including ternary and software BYTE/CLZ; original closed-Yul source/target conjunction, separately capacity-checked packet, dirty-index and unbounded modular controls. No logical Source/G24/native closure. |
+
+| `Yul/Compilation/PureAssignmentShapes{,Controls}.lean` | Actual full-pure assignment and two-assignment sequence operand producers, original closed-source/update/run transport and separately capacity-checked packets; dirty read-after-write and physical SWAP16 controls. Reuses the existing statement assignment proof; no general statement/native/G24 closure. |

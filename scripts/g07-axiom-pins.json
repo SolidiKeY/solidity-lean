@@ -32841,5 +32841,132 @@
   "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.unbounded_sum": [
     "Quot.sound",
     "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.assignment_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.packet": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.sequence_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.source_target": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.dirty_payload": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.dirty_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.first_visit": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literal_capacity": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literal_emission": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literal_oversized": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literal_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literal_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literal_trace": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literal_underflow": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.literalPacket": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.packet_instructions": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.payload_zero": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.second_visit": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.shifted_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.shifted_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.source": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.target_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.target_zero": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureAssignmentShapesControls.lean:Solidity.Yul.Compilation.PureAssignmentShapes.Controls.update": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/StatementVisitorShapes.lean:Solidity.Yul.Compilation.StatementVisitorShapes.lowerAssign_shape": [
+    "Quot.sound",
+    "propext"
   ]
 }

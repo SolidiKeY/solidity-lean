@@ -84,7 +84,18 @@ theorem visit_shape (fuel : Nat) : ∀ {c : Solidity.Yul.Control} {n : Nat}
           subst compiled
           exact assign_shape (ProducerStatements.localTarget (targets 0)) rhs.lowered
             (ArithmeticVisitorShapes.visit_shape fuel expr rhs rhsVisit) depth p emitted
+/-- Reusable form of the existing assignment operand proof. RHS metadata is
+explicit here; actual source visitors must discharge it rather than assume it. -/
+theorem lowerAssign_shape {n : Nat} (i : Fin n) {value : Vector Scalar.Word n → Scalar.Word}
+    (rhs : LoweredExpr n value)
+    (rhsShape : ∀ depth p, rhs.code depth = some p → CodeShape p (n+depth) (n+depth+1))
+    (depth : Nat) (p : Program) (emitted : (lowerAssign i rhs).code depth = some p) :
+    CodeShape p (n+depth) (n+depth) := assign_shape i rhs rhsShape depth p emitted
+
 /-- info: 'Solidity.Yul.Compilation.StatementVisitorShapes.visit_shape' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms visit_shape
+/-- info: 'Solidity.Yul.Compilation.StatementVisitorShapes.lowerAssign_shape' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms lowerAssign_shape
+
 end Solidity.Yul.Compilation.StatementVisitorShapes

@@ -2605,6 +2605,8 @@ import Solidity.Yul.Compilation.PhysicalStore
 import Solidity.Yul.Compilation.PhysicalStoreControls
 import Solidity.Yul.Compilation.ProducerExpressions
 import Solidity.Yul.Compilation.ProducerStatements
+import Solidity.Yul.Compilation.PureAssignmentShapes
+import Solidity.Yul.Compilation.PureAssignmentShapesControls
 import Solidity.Yul.Compilation.PureExpressions
 import Solidity.Yul.Compilation.PureLowering
 import Solidity.Yul.Compilation.PureLoweringControls
