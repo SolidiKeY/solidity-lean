@@ -1,0 +1,47 @@
+[
+  {
+    "command": "git merge-base --is-ancestor b419c3cf4f642ae519b66bebc26cdf2f7cf93574 HEAD",
+    "status": "pass",
+    "evidence": "setup.log"
+  },
+  {
+    "command": "node tests/directruntime-20261104/memory-references/fixtures.cjs",
+    "status": "pass",
+    "evidence": "fixtures.log"
+  },
+  {
+    "command": "node --check tests/directruntime-20261104/memory-references/fixtures.cjs",
+    "status": "pass",
+    "evidence": "syntax.log"
+  },
+  {
+    "command": "node scripts/check-layers.mjs",
+    "status": "pass",
+    "evidence": "layers.log"
+  },
+  {
+    "command": "bash scripts/coord-tools/register.sh --check",
+    "status": "pass",
+    "evidence": "roots.log"
+  },
+  {
+    "command": "bash scripts/check-doc-paths.sh",
+    "status": "pass",
+    "evidence": "doc-paths.log"
+  },
+  {
+    "command": "bounded Lean per-file diagnostics and exact theorem axiom audit",
+    "status": "pending",
+    "evidence": "No Lean edits/builds; no MCP available; adapter blocked."
+  },
+  {
+    "command": "./run-lean.sh and KeySort",
+    "status": "pending",
+    "evidence": "Exact bounded scope not yet established; implementation blocked."
+  },
+  {
+    "command": "fresh native/browser Identity and all controls",
+    "status": "pending",
+    "evidence": "A interface unavailable; no adapter or fresh binaries."
+  }
+]
