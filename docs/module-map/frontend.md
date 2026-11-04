@@ -83,3 +83,8 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Backend/PrimitivePackets/SignedSub/Execution.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/OverrideValidation/OverrideFrontier.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/OverrideValidation/Pruning.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/Checked.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/CheckedControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/Inheritance.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/Specification.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/UnitPaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |

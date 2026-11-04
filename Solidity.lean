@@ -1554,9 +1554,14 @@ import Solidity.Frontend.OverrideValidation.Routes
 import Solidity.Frontend.PaymentImport
 import Solidity.Frontend.PaymentPlan
 import Solidity.Frontend.Problems
+import Solidity.Frontend.QualifiedUnits.Checked
+import Solidity.Frontend.QualifiedUnits.CheckedControls
 import Solidity.Frontend.QualifiedUnits.Controls
+import Solidity.Frontend.QualifiedUnits.Inheritance
 import Solidity.Frontend.QualifiedUnits.Lookup
 import Solidity.Frontend.QualifiedUnits.Relation
+import Solidity.Frontend.QualifiedUnits.Specification
+import Solidity.Frontend.QualifiedUnits.UnitPaths
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Frontend.SolcJson.Body
