@@ -1563,6 +1563,8 @@ import Solidity.Frontend.Checked.TypePrintRoundtrip
 import Solidity.Frontend.Checked.TypePrintText
 import Solidity.Frontend.Checked.UnitExamples
 import Solidity.Frontend.Cli
+import Solidity.Frontend.ConstantDepth.Complete
+import Solidity.Frontend.ConstantDepth.Lookup
 import Solidity.Frontend.ConstantDepth.Rank
 import Solidity.Frontend.CreationTryImport
 import Solidity.Frontend.ExpressionUniqueness.Fragments
