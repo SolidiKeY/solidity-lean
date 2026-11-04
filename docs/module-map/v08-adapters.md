@@ -425,6 +425,9 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Roadmap/V16/NativeParentConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/G19/ConditionalStatement.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/G19/ConditionalStatementControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Shifts/Controls.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Shifts/General.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Shifts/Transport.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
