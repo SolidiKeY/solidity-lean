@@ -104,3 +104,7 @@
 | `Source/FailureFrameHorizonControls.lean` | Inhabited event-prefix/heap/caller full-state frames, timeout/outer-cut controls and counterexample to blanket attempt approximation. |
 
 | `Source/FailureRequestAdmission.lean` | Exact post-fee Nat value admission around unchanged requestScope; current effective-fate normalization, other-request/frame preservation, arbitrary-body drop/admitted laws, complete state/byte/cut/timeout/ordinal controls; no balance installation/session/P8 claim. |
+
+| `Source/FailureNoCuts.lean` | Structural CutFree over the actual typed cursor; no-stop, NoFail entry, cleanup/tick preservation and full-state check identity. No full evaluator coherence/NoFail claim. |
+| `Source/FailureNoCutsEffects.lean` | Actual enabled emitter: complete event append, exact live-budget tick, retained remaining locals/state under CutFree. |
+| `Source/FailureNoCutsControls.lean` | Constructed nested request/frame no-cut budgets, full-state events/heap bytes and counterexample to NoFail-plan-alone reasoning on arbitrary cursors. |

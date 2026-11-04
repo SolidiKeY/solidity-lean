@@ -2168,6 +2168,9 @@ import Solidity.Source.FailureFrameHorizon
 import Solidity.Source.FailureFrameHorizonControls
 import Solidity.Source.FailureMachine
 import Solidity.Source.FailureMachineControls
+import Solidity.Source.FailureNoCuts
+import Solidity.Source.FailureNoCutsControls
+import Solidity.Source.FailureNoCutsEffects
 import Solidity.Source.FailurePrimitives
 import Solidity.Source.FailureRequest
 import Solidity.Source.FailureRequestAdmission

@@ -443,3 +443,25 @@ remain in request-admission-20261104. No World balance installation, fee
 calculation, Bound/session/H18 driver, NoFail/Some consistency or P8 realization
 is supplied. H19/immutable/funds release and all24/six remain open. No native
 comparison or changed expected observation is claimed.
+
+### Structural no-cut child
+
+FailureNoCuts proves eight laws of the actual typed Cursor/check operations.
+CutFree means no pending owner and no active request/frame cuts. It holds
+initially, is preserved by real NoFail frame/request entry (with explicit
+input premises), frame/request cleanup and event advancement, and implies
+stop?=none. check then preserves the complete typed locals/Source.St.
+FailureNoCutsEffects proves the actual enabled emitter appends its full event,
+ticks every active budget exactly once and preserves all remaining fields.
+Eleven controls use real cursor constructors, nested budgets, retained heap
+bytes/journals/prefixes and fullNat2^256 metadata. A cursor constructed from
+a cut plan still fails a check supplied a NoFail plan: the input plan alone
+does not supply the missing cursor invariant/coherence proof.
+
+Twenty laws/controls plus the predicate have generated exact standard-axiom
+guards. Existing interpreter/cursor/request module bodies are unchanged.
+Automation, malformed scratch-record/layout attempts and corrected explicit
+monad proof diagnostics are retained in no-cuts-20261104. Full typed-evaluator
+preservation/plan coherence, Bound/session/H18 execution, P8 realization, H19
+and all24/six remain open; this is not a full NoFail source-language theorem
+or fresh native comparison.
