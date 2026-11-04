@@ -1,8 +1,5 @@
-Producer/coordinator proposals only; shared roots/maps intentionally unchanged.
-Solidity.Backend.PrimitivePackets.UnsignedMul.Selection
-Solidity.Backend.PrimitivePackets.UnsignedMul.Execution
+Remaining producer/coordinator proposals after published b419c3cf; shared roots/maps intentionally unchanged.
 Solidity.Backend.PrimitivePackets.UnsignedMul.Controls
-Solidity.Backend.PrimitivePackets.UnsignedMul.WideControls
 Solidity.Backend.PrimitivePackets.UnsignedMul.WidthControls
 
 Area rows: use the owning Backend area file under docs/module-map/.
@@ -14,3 +11,6 @@ WidthControls — Inhabited exact-zero physical execution for every legal unsign
 
 Documentation: docs/feature-work/primitive-packets-1104-UnsignedMul.md
 Fixture: tests/primitive-packets-1104/UnsignedMul/Observations.lean
+
+Already published on b419c3cf: UnsignedMul.Selection, Execution, WideControls.
+The rows above describe the complete family; only Controls and WidthControls remain unregistered.
