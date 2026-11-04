@@ -342,3 +342,44 @@ aggregate RSS. All printed axioms are `propext`, `Classical.choice` and
 `Quot.sound`. Independent read-only finder and skeptic reviews found no
 confirmed defect. The prior full-checkpoint timeout is still failed; this
 increment supplies no changed full-gate condition, and it was not retried.
+
+
+## Runtime logical guards
+
+`FailurePaths.LogicalGuard` connects `require(a && b)` and `require(a || b)`
+over Boolean locals to public checked memory statement selection. It uses the
+existing Source short-circuit evaluator and the compiler's `binaryCode`, with
+its conditional jump around the second load, followed by `assertTop`.
+`agreement` proves actual Source and selected target runs from initial operand
+read correspondence and the full initial `Memory.StateRepr`. True preserves
+the whole target machine and saved stack; false produces bare revert. Source
+retains all state and caller locals and returns normally or reverts with empty
+bytes at horizon `n+7`. No selected certificate or desired run is an input.
+
+`LogicalGuardControls` inhabits all Boolean combinations and both pipelines,
+including saved stack word 77. It retains the older literal-selector refusal
+and zero-horizon timeout. Separate target-only controls deliberately put a
+slot-tagged word in the right Boolean cell, outside `StateRepr`: evaluating it
+as a guard faults and is proved not to revert. True OR skips it and returns the
+whole machine; false AND skips it while evaluating the condition, pushing false.
+The AND control does not claim successful require execution. These malformed
+machine controls establish no additional Source correspondence.
+
+This remains a relation between supplied indexed Source and intrinsic nodes.
+Automatic frontend lowering, arbitrary or effectful operands, message/assert
+payload compilation, reverted target state, internal-frame transport and full
+bytecode/EVM adequacy remain separate. The target instruction machine exposes
+no revert bytes or post-machine. No existing selector, failure outcome or
+allocation-input policy changed.
+
+Focused validation:
+
+```
+LEAN_NUM_THREADS=1 lake -f lakefile.g38.toml build Solidity.Backend.FailurePaths.LogicalGuardControls
+```
+
+The serial guarded check passed in 2.947 seconds with 820,215,808 bytes peak
+aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
+`Quot.sound`. Independent read-only reviews checked the source and the corrected
+fault-versus-revert control. Failed initial proof attempts are retained. The
+previous full checkpoint timeout remains failed and was not retried unchanged.

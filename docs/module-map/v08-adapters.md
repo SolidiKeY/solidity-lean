@@ -515,3 +515,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/RelationalGuard.lean` | Actual Source relational bare require and public checked memory statement selection/run. |
 | `Backend/FailurePaths/RelationalGuardControls.lean` | Inhabited signed/unsigned guards, equality/extrema, both pipelines and refusal/horizon controls. |
+
+| `Backend/FailurePaths/LogicalGuard.lean` | Actual short-circuit Source Boolean-local require and public checked memory selection/run. |
+| `Backend/FailurePaths/LogicalGuardControls.lean` | Inhabited logical guards in both pipelines, saved stack, target-only skipped-invalid-RHS and fault/revert distinctions. |

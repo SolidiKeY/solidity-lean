@@ -120,6 +120,8 @@ import Solidity.Backend.FailurePaths.Controls
 import Solidity.Backend.FailurePaths.FramedEmission
 import Solidity.Backend.FailurePaths.FramedEmissionControls
 import Solidity.Backend.FailurePaths.Interface
+import Solidity.Backend.FailurePaths.LogicalGuard
+import Solidity.Backend.FailurePaths.LogicalGuardControls
 import Solidity.Backend.FailurePaths.Parametric
 import Solidity.Backend.FailurePaths.ParametricControls
 import Solidity.Backend.FailurePaths.Premises
