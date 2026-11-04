@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceUintAlias
 import Solidity.Backend.MemoryOps.SourceUintReadSequence
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
@@ -668,4 +669,156 @@ theorem reached_chain_prefix_timeout (p : Roadmap.Pipeline) (nps : Nat) :
 #guard_msgs (whitespace := lax) in #print axioms endpoint_rejection
 /-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.actual_selector_negative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms actual_selector_negative
+private def aliasSource (self : Bool) : Source.Idx Γ SA :=
+  if self then dr else .there (.there (.there (.there (.there .here))))
+private def aliasTarget (self : Bool) : Idx Δ (.mem A) :=
+  if self then dt else .there (.there (.there (.there (.there .here))))
+private def aliasRef (self : Bool) : HRef H A := if self then left else neighbor
+private def aliasAddress (self : Bool) : Nat := if self then 0 else 2
+private def aliasState (self : Bool) : State C Δ := (state false 2 0).setLocal dt (some (aliasRef self))
+private def aliasSourceState (self : Bool) : Source.EMState E0 Γ :=
+  ((sy false 2 0).1.set dr (.memRef rfl (aliasAddress self)),(sy false 2 0).2)
+private def aliasMachine (self : Bool) : Machine :=
+  writeMachine (machine false 2 0) 3 (.val (base (aliasRef self).id))
+private theorem alias_at (self : Bool) : SourceUintMemoryAt (sy false 2 0) (aliasAddress self) hp (aliasRef self) .dyn := by
+  cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+
+/-- Both pipelines rebind to the actual existing object, retaining strong
+Objects/allocator, complete Source/native heaps, aliases and saved stack. -/
+theorem dynamic_uint_alias_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.evalE (G0 p) F0 (fuel+2) (sourceLocalAlias dr (aliasSource self))).run (sy false 2 0)=
+      (.ok (.val (.memRef rfl (aliasAddress self))),aliasSourceState self) ∧
+    Stmt.run (state false 2 0) (.rebindMem dt (.alias (.var (aliasTarget self) rfl)))=
+      .ok ⟨aliasState self,List.prefix_refl _⟩ ∧
+    run (aliasLocalCode 1 dt (aliasTarget self)) (machine false 2 0)=.ok (aliasMachine self) 0 ∧
+    SourceUintMemoryAt (aliasSourceState self) (aliasAddress self) (aliasState self).heap (aliasRef self) .dyn ∧
+    Source.MemOK E0 SH (aliasSourceState self) ∧
+    Objects.StateRepr 1 1 8 (Frag.init Δ) (aliasState self) base (aliasMachine self) ∧
+    Objects.AllocatorRepr (aliasState self).heap base 8 ⟨40,by decide⟩ (aliasMachine self) ∧
+    Objects.KeepsAllocator 1 8 (state false 2 0) base (machine false 2 0) (aliasState self) (aliasMachine self) ∧
+    (aliasSourceState self).1.get dr=.memRef rfl (aliasAddress self) ∧
+    TEnv.get dt (aliasState self).env=some (aliasRef self) ∧
+    (aliasSourceState self).2=(sy false 2 0).2 ∧ (aliasState self).heap=hp ∧
+    (aliasMachine self).stack=[w[77],w[88]] ∧ (aliasMachine self).mem 0=w[40] := by
+  first
+  | solve | simp only [] | omega
+  | have result := source_uint_alias_word (G0 p) F0 fuel (sy false 2 0) dr (aliasSource self)
+      (aliasAddress self) (by cases self <;> rfl) SH (memOK false 2 0)
+      (state false 2 0) dt (aliasTarget self) (aliasRef self) (by cases self <;> rfl) (alias_at self)
+      (initial_repr false 2 0) (allocator false 2 0) (by decide)
+    obtain ⟨first,stmt,native,word,new,mok,repr,alloc,keeps,selected,targetSelected,globals,heap,stack,free,other,targetOther,objects,source⟩ := result
+    exact ⟨first,native,word,new,mok,repr,alloc,keeps,selected,targetSelected,globals,heap,stack,free⟩
+
+/-- Complete ordered word/object/local/world vectors, including header lengths,
+free pointer, neighbor, maximum word, guard and saved stack. -/
+theorem dynamic_uint_alias_vectors (self : Bool) :
+    words (machine false 2 0)=
+      [w[40],w[32],w[16],w[16],w[24],w[0],w[2],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (aliasMachine self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[0],w[2],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    objects (aliasState self).heap=[old,rhs,next] ∧
+    sourceObjects (sy false 2 0)=[some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    sourceObjects (aliasSourceState self)=[some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    (aliasSourceState self).1=.cons (sourceUint (u 2)) (.cons (sourceUint (u 0)) (.cons (.memRef rfl 1)
+      (.cons (.memRef rfl (aliasAddress self)) (.cons (.memRef rfl 0) (.cons (.memRef rfl 2) .nil))))) ∧
+    (aliasSourceState self).2.ex=(sy false 2 0).2.ex ∧ (aliasSourceState self).2.events=(sy false 2 0).2.events ∧
+    (aliasSourceState self).2.logs=(sy false 2 0).2.logs ∧ (aliasSourceState self).2.fnLocals=(sy false 2 0).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | cases self <;> refine ⟨rfl,rfl,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+    all_goals simp only [objects,aliasState,State.setLocal,state,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn]
+
+/-- Actual alias->read Items and complete word append reject index2 on the
+reached length2 neighbor. The old length3 alias still reads maximum at2. -/
+theorem dynamic_uint_alias_bounds (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+3) (.indexArray (.local dr) (.local di) rfl)).run (aliasSourceState false)=
+      (.error (.revert (Source.panicData .index)),aliasSourceState false) ∧
+    (Source.execItems (G0 p) F0 (fuel+6) Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource false)))
+        (.stmt (.expr (.indexArray (.local dr) (.local di) rfl)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 2 0).1).run (.nil,(sy false 2 0).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(aliasSourceState false).2)) ∧
+    (Val.readMem (.index .dyn (.var dt rfl) (.simple (.local it))) : Val C Δ .uint).evalT (aliasState false)=.error .revert ∧
+    run (readLocalCode 1 dt (.simple (.local it) : Val C Δ .uint)) (aliasMachine false)=.revert ∧
+    run (aliasLocalCode 1 dt (aliasTarget false)++readLocalCode 1 dt (.simple (.local it) : Val C Δ .uint)) (machine false 2 0)=.revert ∧
+    (Source.evalE (G0 p) F0 (fuel+2)
+      (.indexArray (.local (.there (.there (.there (.there .here)))) : Source.RExpr E0 Γ SA) (.local di) rfl)).run (aliasSourceState false)=
+      (.ok (.val (sourceUint maximum)),aliasSourceState false) := by
+  first
+  | solve | simp only [] | omega
+  | have selected := source_uint_alias_read_bounds_word (G0 p) F0 fuel (sy false 2 0) dr (aliasSource false) di 2 (u 2)
+      rfl rfl SH (memOK false 2 0) (state false 2 0) dt (aliasTarget false) it neighbor rfl rfl
+      (alias_at false) (by simp only [Heap.len,Heap.get,Objs.get,hp,neighbor,MObj.elems_dyn];decide)
+      (initial_repr false 2 0) (allocator false 2 0) (by decide) rfl
+    obtain ⟨first,native,word,second,items,invalid,readCode,whole,new,mok,repr,alloc,keeps,globals,heap,stack,free⟩ := selected
+    have oldNative : MObj.elems .dyn (hp.get left)=old := by rw [MObj.elems_dyn];rfl
+    have oldBound : (u 2).1.toNat<hp.len left .dyn := by
+      change (u 2).1.toNat<(MObj.elems .dyn (hp.get left)).length
+      rw [oldNative]
+      decide
+    have oldSource : SourceUintMemoryAt (aliasSourceState false) 0 hp left .dyn := dst_at false 2 0
+    have read := oldSource.eval_index (G0 p) F0 fuel (.there (.there (.there (.there .here)))) di (u 2) rfl rfl oldBound
+    simp only [oldNative] at read
+    exact ⟨second,items,invalid,readCode,whole,read⟩
+
+/-- Self-alias leaves actual locals/environment/memory untouched. Low Source
+alias fuel returns timeout before rebinding; no word post-revert state exists. -/
+theorem dynamic_uint_alias_self_timeout (p : Roadmap.Pipeline) :
+    (aliasSourceState true).1=(sy false 2 0).1 ∧
+    (aliasState true).env=(state false 2 0).env ∧
+    (∀ a,(aliasMachine true).mem a=(machine false 2 0).mem a) ∧
+    (Source.evalE (G0 p) F0 1 (sourceLocalAlias dr (aliasSource false))).run (sy false 2 0)=
+      (.error .timeout,sy false 2 0) ∧
+    words (aliasMachine false)≠words (machine false 2 0) := by
+  first
+  | solve | simp only [] | omega
+  | refine ⟨rfl,rfl,?_,source_local_alias_low_horizon (G0 p) F0 (sy false 2 0) dr (aliasSource false) 1 (by decide),by decide⟩
+    intro a
+    by_cases h : a=3
+    · subst a;rfl
+    · simp only [aliasMachine,writeMachine,upd,if_neg h]
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_client
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_bounds
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_self_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_self_timeout
+
+/-- Actual successful word read through the retained old alias returns max;
+reading the rebound pointer at the same index instead reverts. -/
+theorem dynamic_uint_alias_stale_word :
+    run (readLocalCode (C := C) 1 (.there (.there (.there (.there .here)))) (.simple (.local it)))
+      (aliasMachine false)=.ok ((aliasMachine false).push (.val wMax)) 0 := by
+  first
+  | solve | simp only [] | omega
+  | let oldAlias : Idx Δ (.mem A) := .there (.there (.there (.there .here)))
+    have repr : Objects.StateRepr 1 1 8 (Frag.init Δ) (aliasState false) base (aliasMachine false) :=
+      (dynamic_uint_alias_client .legacy 0 false).2.2.2.2.2.1
+    have root : TEnv.get oldAlias (aliasState false).env=some left := rfl
+    have index : TEnv.get it (aliasState false).env=u 2 := rfl
+    have selected : (aliasState false).heap.readAddr (.index left .dyn (u 2))=some maximum := by
+      change (MObj.elems .dyn (hp.get left))[(u 2).1.toNat]?=some maximum
+      rw [MObj.elems_dyn]
+      rfl
+    have typed : (Val.readMem (.index .dyn (.var oldAlias rfl) (.simple (.local it))) : Val C Δ .uint).evalT (aliasState false)=.ok maximum := by
+      simp only [Val.evalT,MLoc.addrT,MPath.mvalT,Simple.evalT,root,index,selected,
+        TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    have cert := Objects.PtrFrag.readPrimitive repr (Objects.PtrFrag.local oldAlias rfl)
+      (.dyn : ArrTy A (.prim .uint)) (.simple (.local it) : Val C Δ .uint) rfl
+    change ValOutT .uint _ (run (readLocalCode 1 oldAlias (.simple (.local it))) (aliasMachine false)) (aliasMachine false) at cert
+    rw [typed] at cert
+    rcases cert with ⟨v,w,value,representation,code⟩ | ⟨bad,_⟩
+    · cases Except.ok.inj value
+      obtain ⟨n,hn,number,word⟩ := representation.uint_inv
+      have nMax : n=wMax.val := Int.ofNat.inj (number.symm.trans (rfl : maximum.1=(wMax.val : Int)))
+      have wordMax : w=.val wMax := word.trans (congrArg Word.val (Fin.ext nMax))
+      simpa only [wordMax] using code
+    · cases bad
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_stale_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_stale_word
+
 end Solidity.Backend.MemoryOps.UintReadAssignmentControls
