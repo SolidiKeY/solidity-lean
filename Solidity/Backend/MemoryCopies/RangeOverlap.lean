@@ -28,15 +28,15 @@ theorem backward_read_turn (machine : Machine) (index : Nat) (destination source
   have entry : run [.push w[1],.swap 1,.sub] (memoryRangeMachine machine (index + 1) 0 destination source) =
       .ok (memoryRangeMachine machine index 0 destination source) 0 := by
     have current : (wmod (index + 1)).val = index + 1 := Nat.mod_eq_of_lt bounded
-    simp only [memoryRangeMachine,run,exec_cons_zero,Instr.step,Machine.push,Machine.next,Out.ok_bind,exec_nil,
-      List.getElem?_cons_zero,List.getElem?_cons_succ,List.set_cons_zero,List.set_cons_succ,List.cons_append,
-      List.nil_append,Nat.reduceSub,current,decrement]
+    simp only [memoryRangeMachine,run,exec_cons_zero,Instr.step,Machine.next,Out.ok_bind,exec_nil,
+      List.getElem?_cons_zero,List.set_cons_zero,List.cons_append,
+      List.nil_append,current,decrement]
   have lower : index < W := by omega
   have observed : machine.mem ((index + source.val) % W) = word := by
     rw [Nat.add_comm index source.val,Nat.mod_eq_of_lt (show source.val + index < W by omega),selected]
   have payload : run (memoryReadRangeBody.take 8) (memoryRangeMachine machine index 0 destination source) =
       .ok (memoryRangeMachine (writeMachine machine (destination.val + index) word) index 0 destination source) 0 := by
-    simp only [memoryReadRangeBody,List.take,run,exec_cons_zero,Instr.step,Machine.push,Machine.next,Out.ok_bind,exec_nil,
+    simp only [memoryReadRangeBody,List.take,run,exec_cons_zero,Instr.step,Machine.next,Out.ok_bind,exec_nil,
       memoryRangeMachine,List.getElem?_cons_zero,List.getElem?_cons_succ,List.cons_append,List.nil_append,Nat.reduceSub,
       wmod_def,Nat.zero_mod,Nat.mod_eq_of_lt lower,observed,Nat.add_comm,writeMachine]
     rw [Nat.mod_eq_of_lt (show index + destination.val < W by omega)]
