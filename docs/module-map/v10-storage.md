@@ -113,3 +113,6 @@
 
 | `Lowering/StorageOps/SourceCaptureReadback.lean` | Arbitrary capture allocation-prefix typed readbacks and preservation of all older objects |
 | `Lowering/StorageOps/SourceCaptureReadbackControls.lean` | Actual full/shifted capture heap reads, dangling/type failures and complete ordered state/journal observations |
+
+| `Lowering/StorageOps/SourceCapturedByteCommit.lean` | Runtime nested snapshot commit over actual Source operations, captured heap readbacks and reached-prefix headers |
+| `Lowering/StorageOps/SourceCapturedByteCommitControls.lean` | Whole storage-reference copy, dirty tails, ordered journals, retained/live aliases and wrong-reference/fuel controls |

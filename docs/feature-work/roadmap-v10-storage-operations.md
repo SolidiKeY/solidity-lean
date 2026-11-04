@@ -279,6 +279,30 @@ by reads. This strengthens logical Source heap observations only; physical
 allocation, target execution and world rollback remain open. The H26 endpoint
 stays sealed separately; P17's physical bridge choice is coordinator-escalated.
 
+## Captured nested-byte commit traversal
+
+`SourceCapturedByteCommit.commit_all` proves the actual `Source.storeElems`
+commit phase for arbitrary outer counts and independently varying byte-child
+lengths. Captured typed heap readbacks, existing path types, writable context,
+original fuel inequalities and destination headers at the reached prefix states
+are explicit premises. The ordered footprint contains only existing `Source.Op`
+values; it is not another evaluator. OLD header observations alone are not
+claimed sufficient for the intermediate reads.
+
+A populated whole storage-reference copy composes the checked capture and
+commit laws, then commits its outer header. Complete ordered outcomes and
+journals distinguish shifted references, empty traversal, dangling capture and
+partial writes on timeout. Fresh indexing refuses a retained child before the
+outer header commits, then accepts it afterward. A dirty child clears two
+stale bytes while retaining an older shadow byte; a wrong-reference control
+changes the selected payload. All prior fixtures remain unchanged.
+
+The initially combined concrete reduction exceeded the original heartbeat
+limit. Reusing capture/commit laws and keeping named outcome checks fixes that
+without changing budgets or observations. These are logical Source operations,
+not memory-to-storage compiler closure, general recursive physical emission or
+world rollback. The physical P17 bridge remains coordinator-escalated.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI
