@@ -1782,6 +1782,8 @@ import Solidity.Lowering.StorageOps.SourceBoolStorageCopyTarget
 import Solidity.Lowering.StorageOps.SourceBoolStorageCopyTargetControls
 import Solidity.Lowering.StorageOps.SourceByteCaptureSuccess
 import Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls
+import Solidity.Lowering.StorageOps.SourceByteCommitFrames
+import Solidity.Lowering.StorageOps.SourceByteCommitFramesControls
 import Solidity.Lowering.StorageOps.SourceByteStorageBarrier
 import Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls
 import Solidity.Lowering.StorageOps.SourceByteStorageClear

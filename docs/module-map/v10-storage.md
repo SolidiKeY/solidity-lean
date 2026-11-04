@@ -116,3 +116,6 @@
 
 | `Lowering/StorageOps/SourceCapturedByteCommit.lean` | Runtime nested snapshot commit over actual Source operations, captured heap readbacks and reached-prefix headers |
 | `Lowering/StorageOps/SourceCapturedByteCommitControls.lean` | Whole storage-reference copy, dirty tails, ordered journals, retained/live aliases and wrong-reference/fuel controls |
+
+| `Lowering/StorageOps/SourceByteCommitFrames.lean` | Actual byte-operation/prefix read frames and structural OLD next-header transport |
+| `Lowering/StorageOps/SourceByteCommitFramesControls.lean` | OLD-header runtime commit client, complete prefix/journal observations and visited-header/malformed-query controls |

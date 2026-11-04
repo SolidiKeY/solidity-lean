@@ -282,3 +282,32 @@ theorem snapshot_all :
 ```
 
 One added to prior twenty-one: twenty-two adapters remain pending.
+
+## C179: OLD-header commit wrapper
+
+Module: `Solidity.Lowering.StorageOps.SourceByteCommitFrames`.
+Lemma: `commit_from_old_headers`.
+Why routine: apply the already checked `SourceCapturedByteCommit.commit_all`;
+for each header premise apply `prefix_header`, then rewrite its OLD read with
+`headersOld`. Keep all existing captured-object/type/fuel/cleanup premises.
+Place the wrapper in this module to avoid an import cycle. The proposition below
+is type-checked only; it is no compiled theorem, axiom, assumption or instance.
+
+```lean
+theorem commit_from_old_headers : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (_writable : frame.static=false) (dst : Solidity.Source.SPath)
+ (typed : ∀ i j, (.fixedBytes 1 (by decide) : Solidity.Source.STy)=E.cellTy ((dst.go (.index i)).go (.index j)))
+ (headerTyped : ∀ i, (.int Solidity.Source.IntTy.u256 : Solidity.Source.STy)=E.cellTy (dst.go (.index i)))
+ (payload : Nat → List UInt8) (oldLength : Nat → Nat) (start count budget first : Nat)
+ (locals : Solidity.Source.Locals E.layout Γ) (state : Solidity.Source.St E)
+ (_captured : ∀ j<count,state.heap.get (first+j)=some ⟨.bytes .memory,Solidity.Source.Data.bytes (payload (start+j))⟩)
+ (_enough : ∀ j<count,(payload (start+j)).length≤count+budget-j)
+ (_cleanup : ∀ j<count,oldLength (start+j)-(payload (start+j)).length≤count+budget-j)
+ (_headersOld : ∀ j<count,(Solidity.Source.readLen (E:=E) (Γ:=Γ) frame (dst.go (.index (start+j)))).run
+ (locals,state)=(.ok (oldLength (start+j)),(locals,state))),
+ (Solidity.Source.storeElems (E:=E) (Γ:=Γ) frame (count+budget+5) (.bytes .storage) dst start count
+  (fun j : Fin count=>Solidity.Source.Data.val (Solidity.Source.Val.memRef (D:=E.layout) (τ:=.bytes .memory) rfl (first+j.val)))).run (locals,state)=
+ (.ok (),(locals,{state with ex:=state.ex.run (Solidity.Lowering.StorageOps.SourceCapturedByteCommit.plans frame dst typed headerTyped payload oldLength budget start count).flatten}))
+```
+
+One routine adapter added; twenty-three remain pending.

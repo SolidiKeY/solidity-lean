@@ -303,6 +303,24 @@ without changing budgets or observations. These are logical Source operations,
 not memory-to-storage compiler closure, general recursive physical emission or
 world rollback. The physical P17 bridge remains coordinator-escalated.
 
+## OLD-header transport through commit prefixes
+
+`SourceByteCommitFrames` proves persistent and transient read frames through
+byte writes, partial/full cleanup, header commit and arbitrary runtime prefixes.
+`prefix_header` derives the next sibling's actual read outcome from the OLD
+state using structural Source path separation. This supplies the intermediate
+header condition of the captured-byte commit theorem for the checked client;
+it does not assume the desired prefix execution or a physical address relation.
+
+The client exercises populated varying-length captures using only OLD header
+reads. Complete prefix state/journal observations retain unvisited defaults,
+source shadows and captured objects. An unrelated malformed query keeps its
+failure; an already visited header changes from zero to two, showing why the
+outside-path condition matters. Ordinary Source liveness checks, numeric hash
+transport, physical execution and world composition remain separate obligations.
+The routine generic OLD-header wrapper is a type-checked statement for Terra;
+twenty-three adapters remain unproved.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI
