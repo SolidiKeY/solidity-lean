@@ -894,6 +894,8 @@ import Solidity.Backend.StructuredFlow.MappedCondition
 import Solidity.Backend.StructuredFlow.MappedConditionControls
 import Solidity.Backend.StructuredFlow.ScopedMappedSequence
 import Solidity.Backend.StructuredFlow.ScopedMappedSequenceControls
+import Solidity.Backend.StructuredFlow.WhileBreakCompiler
+import Solidity.Backend.StructuredFlow.WhileBreakCompilerControls
 import Solidity.Backend.StructuredFlow.WhileContinueCompiler
 import Solidity.Backend.StructuredFlow.WhileContinueCompilerControls
 import Solidity.Backend.StructuredFlow.WhileReturnCompiler

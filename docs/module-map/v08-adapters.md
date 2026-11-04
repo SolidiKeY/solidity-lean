@@ -453,3 +453,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Backend/StructuredFlow/WhileReturnCompiler.lean` | Mapped G19 while/bare-return classification to the existing captured-selector physical compiler prefix; no EVM RETURN. |
 | `Solidity/Backend/StructuredFlow/WhileReturnCompilerControls.lean` | Inhabited pipeline/value/fuel controls and wrong outcome/capture/base negatives. |
+
+| `Solidity/Backend/StructuredFlow/WhileBreakCompiler.lean` | Mapped assignment-condition/immediate-break Source certificate to the existing scoped physical compiler. |
+| `Solidity/Backend/StructuredFlow/WhileBreakCompilerControls.lean` | Inhabited pipeline/value/fuel controls and visible false-condition/omitted-code/wrong-base negatives. |
