@@ -1569,6 +1569,8 @@ import Solidity.Frontend.ExpressionUniqueness.Fragments
 import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part01
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part02
 import Solidity.Frontend.OverrideValidation.Attributes
 import Solidity.Frontend.OverrideValidation.Compatibility
 import Solidity.Frontend.OverrideValidation.Graph
