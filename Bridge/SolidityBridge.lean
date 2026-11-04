@@ -378,6 +378,8 @@ import SolidityBridge.Yul.RecursiveScopes
 import SolidityBridge.Yul.RecursiveScopesControls
 import SolidityBridge.Yul.ScopedControl
 import SolidityBridge.Yul.ScopedControlControls
+import SolidityBridge.Yul.ScopedFor
+import SolidityBridge.Yul.ScopedForControls
 import SolidityBridge.Yul.ScopedSwitch
 import SolidityBridge.Yul.ScopedSwitchControls
 import SolidityBridge.Yul.SelectionSequence

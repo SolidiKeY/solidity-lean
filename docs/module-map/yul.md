@@ -100,3 +100,5 @@
 | `Yul/Compilation/P20InterfaceV1{,Controls}.lean` | H26 closed-normal success interface: reuses real closed compiler certificates; uninstantiated G24 source/link/represented-success laws with genuine success and represented/payment-free witness fields. Not full P20 adequacy. |
 
 | `Bridge/SolidityBridge/Yul/ForShape{,Controls}.lean` | Actual compiled FOR numeric operand/height and all-prefix capacities; exact existing BlockShape threshold h+2<=1024 for h>=5, separate ExpansionRoom and caller boundaries. No ControlCertificate.realize/native/G24 claim. |
+
+| `Bridge/SolidityBridge/Yul/ScopedFor{,Controls}.lean` | Actual scope/switch component compilation within original FOR; concrete prepare/emission/selection, finite source/whole structured/model proofs, scoped-temp/order-sensitive dirty-word and early-flow refusals. Depth0/caller-only frame; full frontend/G24/native closure open. |

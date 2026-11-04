@@ -31278,5 +31278,101 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.prepare": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.source": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.loop_structured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.structured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.Packet.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedFor.lean:SolidityBridge.Yul.ScopedFor.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.compile_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.reset": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.after_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.after_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.two_running": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.source_ten": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.target_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.model_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.final_order_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.break_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForControls.lean:SolidityBridge.Yul.ScopedFor.Controls.zero_compiler_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

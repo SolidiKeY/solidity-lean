@@ -404,3 +404,5 @@ see [the lane record](inline-assembly-vy3.md).
 - VY3 H26 P20 success-interface V1: original closed compiler alias plus explicit uninstantiated source/G24 success-link fields using actual Input/Rep, with real joint success and represented/payment-free witness requirements. Full P20 and original lane work remain open. See [VY3](inline-assembly-vy3.md#h26-p20-success-interface-v1).
 
 - VY3 emitted FOR shape: exact real instruction layout, operand/height refinements, scalar prefix capacities and separate expansion room now cover the actual branch-bearing FOR with caller bounds. Existing BlockShape iff is h+2<=1024 at h>=5; native realization/G24/full-lane closure remains open. See [VY3](inline-assembly-vy3.md#emitted-for-physical-shape-and-room).
+
+- VY3 scope/switch FOR: actual component compilers now lower lexical temporaries and switch/default within original FOR, with finite whole-source/structured/model proofs and a real order-sensitive dirty-word witness. Exact compile-entry equality and unsupported-flow controls are checked; full frontend/G24/native/lane closure remains open. See [VY3](inline-assembly-vy3.md#for-with-lexical-scope-and-switch-components).

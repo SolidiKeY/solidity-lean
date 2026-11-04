@@ -1554,3 +1554,46 @@ original backfill remainder and final joint/lane gates remain open. The H26 V1
 signatures and existing concrete producer premises are unchanged. No source,
 state, target predicate, calling convention, budget, admission or owner file is
 modified; allocation offsets are not equated with live stack positions.
+
+
+### FOR with lexical scope and switch components
+
+`SolidityBridge.Yul.ScopedFor` consumes the actual `NestedSwitch.Compiled`
+prelude/body/post and `PureExpressions` condition outputs. `prepare`, `emit`,
+`select` and `compile` construct real original-AST-indexed certificates, target
+blocks and selected code; no simulation callback or replacement syntax/state is
+introduced. This adapter uses depth0 locals with an arbitrary numeric caller
+suffix, not an additional newer-prefix convention.
+
+`source` discharges both shared `ForSource` laws using actual component `.source`
+proofs, includes the prelude once and proves original FOR execution at
+`base + count + 2` with common component fuel at most base. `loop_structured`
+and `structured` independently derive body-before-post and whole-block execution
+from the real component emissions. `Packet.model` derives the complete selected
+mathematical machine result, preserving the caller and every nonstack field.
+Finite pre-body nonzero/final-zero guards remain explicit; no general termination,
+source completion inversion, native/capacity or Source/G24 theorem is asserted.
+
+The inhabited control uses a scoped fresh temporary to save/decrement the old
+counter and a postlude switch: zero adds10, default adds1. Prelude resets the
+counter to2, so for EVERY initial raw counter the original source at horizon10
+(component6 + count2 +2) and target/model finish at `[0, dirty+11]`. Reversing
+post/body order would yield `dirty+2`, which is refused. Caller suffixes are
+arbitrary. Break and compiler horizon0 are actual preparation refusals, not
+reclassified source failures. Full dirty-word/nonstack observations are retained.
+
+The first control proof hit the unchanged200000 heartbeat limit by repeatedly
+reducing combined compile/selection data. Factoring actual preparation/emission/
+selection and exact reset/step/finish proofs removed that reduction; `compile_entry`
+proves the factored packet equals the real combined compiler result using existing
+Option bind laws. No theorem statement, initial-word quantifier, expected result,
+source horizon or proof budget was weakened/raised. Raw failures are retained.
+Twenty actual standard-axiom reports are enforced. Independent read-only finder
+and skeptic reviews of final producers, controls, pins, imports and metadata
+found no confirmed findings; neither reviewer used Lean/server/tests.
+
+This adds concrete compilation beyond the previous branch-only FOR adapter.
+Actual root frontend dispatch/JSON attachment, functions/early-flow, physical
+views/capacity, H11 readback, full Source/G24/native/charged/world/observation
+closure, remaining original backfill and joint/lane validation remain open.
+H26 frozen interfaces, H16/H19/H25 Source and H22 ExtCall are unchanged.
