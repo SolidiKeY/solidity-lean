@@ -655,3 +655,38 @@ updates, general operand production and tuples/failures. G18.01 and G18.06 retai
 the accepted-source/concrete-P8/ordered-child dependencies stated above; G18
 children and G19 remain delegated. Constructor coverage remains zero. These
 kernel proofs and bounded Lean observations add no external compiler/EVM tests.
+
+## Signed local increment/decrement
+
+`SignedLocalUpdate` supplies six actual unchecked signed update laws at all
+approved widths. Existing SignedNarrowAddition/Subtraction carry the arithmetic;
+only the pure integer `changed` helper is shared with UnsignedLocalUpdate.
+Source evaluation still uses its independent incDecVal, location read/write and
+local environment. Target old capture, caller write, result capture and drop
+use existing typed Prog/Stmt/Val/Operand. Initial canonical read and alias-family
+alignment derive both executions, returned agreement and the full selected
+postfamily; no desired execution/postrelation or separate target inequality is
+assumed. Exact reached states frame the nonlocal fields on each side.
+
+Twelve closed clients and1536 matrix executions cover all32 signed widths,
+both pipelines, both increment/prefix flags, extrema and ordinary values, with
+repeated aliases, equal-content distinct cells, fresh contexts and live refs.
+At int8 MAX, prefix++ returns-128 whereas postfix++ returns127; both write-128.
+Prefix decrement at MIN returns127 and writes127; postfix would return oldMIN.
+Actual wide programs without narrowing return128 and-129 respectively, which
+are rejected by the controls. Both-pipeline update/read observations and
+cross-order negatives retain semantic operand positions. Checked Source
+MAX-overflow is a separate panic-data/no-write negative; no checked target
+failure, rollback or payload transport claim follows. Eighteen queried inline
+guards pin all six laws and twelve clients to the standard three axioms.
+
+Independent read-only finder/skeptic source reviews found no proof finding.
+The skeptic caught a comment saying postfix MIN-- for a prefix --MIN control;
+only the wording was corrected. Scratch automation failures and the successful
+signed literal-range candidate are retained; expected-message line wrapping
+failures changed no observations. No source-owner/representation/budget edits
+or new external compiler/EVM tests were added. G16/G17/P12 and Backfill A/B
+remain partial: general locations, tuples, effects/failures and production are
+open. G18.01/G18.06 retain concrete producer, ordered child, representation and
+copy/delete/lifetime dependencies; delegated G18/G19 ownership is unchanged.
+Constructor coverage remains zero.

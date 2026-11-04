@@ -86,3 +86,5 @@
 | `Lowering/V07/SignedNegationEffectControls.lean` | Inhabited alias/context/mixed-reference clients, ordered observations and incorrect capture/store/narrowing controls. |
 | `Lowering/V07/SignedComplement.lean` | All-width signed bitwise complement through actual Source unary evaluation and typed subtraction; initial-family local transport. |
 | `Lowering/V07/SignedComplementControls.lean` | Both checkedness modes/pipelines, all signed widths, live-context clients and missing-minus-one/reversed-operand controls. |
+| `Lowering/V07/SignedLocalUpdate.lean` | Actual unchecked local signed prefix/postfix increment/decrement with fresh old/result captures and derived alias-family updates. |
+| `Lowering/V07/SignedLocalUpdateControls.lean` | All signed widths, MAX/MIN wrap and missing-narrowing controls, mixed caller/context clients and actual pipeline observations. |
