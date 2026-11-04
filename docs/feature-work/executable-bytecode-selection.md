@@ -480,3 +480,12 @@ The join-overflow control is static ExpansionRoom rejection; it does not claim
 an independently executed byte-overflow witness. Successful assembly, finite
 StructuredExec and child control certificates remain explicit inputs. The
 reviews used no edits, builds or Lean server.
+
+
+The whole-branch implementationa777de49 passes all eight checkpoint gates
+and all four per-file checks. Exact scoped reports contain only standard
+axioms; KeySort passes under Lean4.24.0/Lake5.0.0-src+797c613. This following
+documentation-only handoff preserves every Lean source from that checked
+implementation. Consumers may construct conditional control certificates from
+certified children and the stated test/join room. General-loop realization,
+G45.06 and the assignment's full final gate remain open.
