@@ -88,3 +88,6 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/QualifiedUnits/Inheritance.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/Specification.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/UnitPaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/CallMetadataPath.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/CallMetadataPathControls.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/CallMetadataSound.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |

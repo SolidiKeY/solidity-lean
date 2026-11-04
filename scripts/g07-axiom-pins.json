@@ -23021,6 +23021,117 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Attached.call_at": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Attached.declaration_at": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Attached.info_unique": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.checked_unique": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Located.descend_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Located.node_unique": [],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.walk_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.absent_call_path_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.absent_declaration_path_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.attached_pure_site": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.attached_pure_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.descendant_callee_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.descendant_original_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.descendant_wrong_field_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.descendant_wrong_kind_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.distinct_fixture_call_paths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.duplicate_selected_path_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.fixture_checked_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.fixture_location_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.issued_pure_site": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.issued_pure_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.mismatched_attached_declaration_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPathControls.lean:Solidity.Frontend.CallMetadata.PathControls.wrong_call_node_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataSound.lean:Solidity.Frontend.CallMetadata.checked_call_exact": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataSound.lean:Solidity.Frontend.CallMetadata.checked_static_declaration": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataSound.lean:Solidity.Frontend.CallMetadata.checked_static_target": [
+  "propext"
+ ],
  "Solidity/Frontend/Static/Certificates.lean:Solidity.Frontend.Static.inheritanceChecker_complete": [
   "Classical.choice",
   "Quot.sound",
