@@ -448,3 +448,8 @@ They checked actual rotation/DUP/AND execution, shared size, non-vacuous capacit
 signed/modular preservation, exact initial-representation-based reference result
 and raw control. They confirmed native load/error ordering and full coverage
 are explicitly left open rather than inferred from pure-check conjunction.
+
+`RawTailGuardInterface.lean` specifies deterministic raw-byte operands and the
+actual semantic tail condition for the existing guard. Size, base and shape
+metadata are unrestricted naturals; no loaded payload/run or representability
+premise is supplied by callers. Native operand-loading execution remains open.
