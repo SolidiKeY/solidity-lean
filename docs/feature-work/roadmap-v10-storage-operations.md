@@ -242,6 +242,28 @@ TERRA-TODO; twenty-two adapters remain unproved. These are logical Source heap
 identities, not physical pointer compilation, allocation-failure or world/
 compiler closure.
 
+## H26 downstream layout and execution interface
+
+`Backend/StorageOps/ProducerInterface` packages three explicit certificates:
+`PathEndpoint` ties the typed path location to the selected target operand;
+`StateEndpoint` retains graph representation, finite-run regions, numeric
+transport, query coverage and target observations; `ReachedEndpoint` certifies
+actual selected-code execution to that same observed machine. Pending producer
+laws are fields, with no unconditional producer instance.
+
+The execution equation matches the already published
+`Backend/MemoryCopies/Premises.LocationStepPremise` at public revision
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. Consumers can construct that premise
+from `endpoint.execution`; the StorageOps interface avoids its Source imports.
+The inhabited bool-word client supplies every field and changes storage from
+zero to one while preserving stack, memory and context. Independent finder and
+skeptic reviews inspect this interface and witness without running Lean.
+
+This endpoint uses intrinsic `Evm.Machine`/`Evm.run`, not physical bytecode or
+packed byte-store execution. General concrete producers, Source authority and
+P17 physical adequacy remain open. The separate readback drafts are preserved
+outside the module tree pending this interface-first checkpoint.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

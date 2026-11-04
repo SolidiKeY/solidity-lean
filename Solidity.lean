@@ -795,6 +795,8 @@ import Solidity.Backend.StorageOps.PrimitiveSnapshotSelf
 import Solidity.Backend.StorageOps.PrimitiveSnapshotSelfControls
 import Solidity.Backend.StorageOps.PrimitiveSnapshotSequence
 import Solidity.Backend.StorageOps.PrimitiveSnapshotSequenceControls
+import Solidity.Backend.StorageOps.ProducerInterface
+import Solidity.Backend.StorageOps.ProducerInterfaceControls
 import Solidity.Backend.StorageOps.PublishedControls
 import Solidity.Backend.StorageOps.PublishedOps
 import Solidity.Backend.StorageOps.PushControls

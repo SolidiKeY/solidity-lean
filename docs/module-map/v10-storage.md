@@ -107,3 +107,6 @@
 
 | `Lowering/StorageOps/SourceByteCaptureSuccess.lean` | Successful varying-length Source capture with exact returned fresh references and heap footprint |
 | `Lowering/StorageOps/SourceByteCaptureSuccessControls.lean` | Full/shifted/static/empty capture identities, complete state/journals, actual heap reads and wrong-offset control |
+
+| `Backend/StorageOps/ProducerInterface.lean` | Explicit typed path, represented reached-state and selected-code execution endpoints for downstream consumers |
+| `Backend/StorageOps/ProducerInterfaceControls.lean` | Inhabited finite-region bool SSTORE client with changed readback and preserved context |
