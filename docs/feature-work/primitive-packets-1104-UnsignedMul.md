@@ -47,5 +47,6 @@ multiplication, declaration/profile admission, automatic Source-to-intrinsic
 lowering, general Source heap/world correspondence and a complete compilation
 pipeline remain outside this result. No Source evaluator, compiler clause,
 intrinsic representation, budget, trust policy or refusal policy is changed.
-Registration and module-map proposals accompany the fixture for the producer
-integrator; shared generated roots and maps are not edited by this packet.
+All five modules are published and registered on master as of `89373e34`.
+The evaluator fixture and this documentation remain worker-owned artifacts;
+shared generated roots and maps are not edited by this packet.
