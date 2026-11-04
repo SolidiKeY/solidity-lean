@@ -348,3 +348,8 @@ Independent read-only finder and skeptic reviews passed with no findings. Both
 checked operand order against actual Scalar semantics, exact signed/modular
 agreement, suffix preservation, concrete capacity and the distinction between
 semantic reference acceptance and full entry/native execution.
+
+`LengthCheckInterface.lean` specifies dynamic-length admission at the semantic
+64-bit limit with suffix/capacity preservation and lazy rejection after the
+actual tail and length-prefixed guards. Loading correspondence and all other
+entry checks remain separate obligations.
