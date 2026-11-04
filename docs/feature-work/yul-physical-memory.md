@@ -953,3 +953,15 @@ Controls keep a sibling alias and old data/padding, and bind allocation before
 a later field-type error to its own complete map and Source writeback. Previously
 shrunk allocation-history extension, other allocating defaults and target
 allocator/compiler correspondence remain open.
+
+`ReferenceDeleteRetained` extends the actual supplied origin through empty
+bytes/string allocation, then the actual struct-field reference deletion.
+Earlier retained writes/capacities survive; the final writeback uses that
+extended origin. It derives allocation preparation, old/new coordinates,
+free pointer, forwarded codecs, complete map and whole Source writeback from
+old typed images and explicit nonoverlapping, bounded new-object placement.
+Controls shrink a dynamic array2->0, delete an unrelated reference, and recover
+the dormant aliases through the existing checked retained-array writeback after
+regrowth. Original capacity96 differs from the current32-byte view. This
+regrowth is canonical preparation/writeback through actual heapPut, not a new
+Solidity expression rule or target execution theorem.
