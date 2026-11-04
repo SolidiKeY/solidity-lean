@@ -218,3 +218,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceReferenceGrowthWrite.lean` | Actual paired allocation then reached parent-slot redirection; derived observers/frames, no emitted allocator. |
 
 | `Solidity/Backend/MemoryOps/SourceReferenceGrowthDelete.lean` | Actual allocation/redirection then nested delete; fresh allocation derives alias separation and old-object frames. |
+| `Backend/MemoryCopies/ControlsV2.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/InterfaceV2Roots.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
