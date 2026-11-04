@@ -242,3 +242,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceUintAliasDelete.lean` | Actual reached dynamic uint alias/delete Source Items/native Prog/whole word success and bounds rejection, strong prefix/final frames. |
 
 | `Solidity/Backend/MemoryOps/SourceUintAliasWriteDelete.lean` | Strong numeric delete bridge and actual reached alias/write/same-index delete Source Items, intrinsic Prog and complete word append with derived frames. |
+| `Backend/MemoryCopies/SourceInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
