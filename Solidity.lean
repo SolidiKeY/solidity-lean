@@ -549,6 +549,8 @@ import Solidity.Backend.Passes.ReframedTripleWrongOrder
 import Solidity.Backend.Passes.ReindexedMemory
 import Solidity.Backend.Passes.RelatedMemoryCapture
 import Solidity.Backend.Passes.RelatedMemoryCaptureControls
+import Solidity.Backend.Passes.RelatedStorageCapture
+import Solidity.Backend.Passes.RelatedStorageCaptureControls
 import Solidity.Backend.Passes.ResolvedMetadata
 import Solidity.Backend.Passes.ResolvedMetadataControls
 import Solidity.Backend.Passes.RevertControls
