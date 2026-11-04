@@ -1,4 +1,4 @@
-import Solidity.Backend.Selection.Interface
+import Solidity.Backend.Selection.InterfaceV2
 import Solidity.Yul.Compilation.ArithmeticMachine
 /-! Concrete Yul compiler clients of the published selection certificate types.
 These are existing compiler-machine/Scalar laws, not native fetched-byte, gas,
