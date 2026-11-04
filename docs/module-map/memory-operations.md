@@ -212,3 +212,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceNestedBytesInterface.lean` | Actual persistent child-cell inputs and nested Source byte traversal with exact fresh identities and retained payloads. |
 | `Backend/MemoryCopies/SourceNestedBytes.lean` | Static cell transport through allocations, actual populated byte-child traversal with sequential fresh IDs and retained payloads, and complete dynamic parent copy. |
 | `Backend/MemoryCopies/SourceNestedBytesControls.lean` | Declared populated/empty bytes arrays, exact final child contents, 64-child growth, wrong-root rejection and horizon refusal. |
+| `Backend/MemoryCopies/SourceStoredFieldsInterface.lean` | Proved heterogeneous Source loadElem/loadFields families stable through sibling memory allocations, with exact Source object counts. |
