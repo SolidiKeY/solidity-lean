@@ -51,3 +51,27 @@ Source combinations, Work2/3 and BackfillA/B remain partial or pending.
 This step supplies no fresh native comparison. Original five optimized-viaIR
 journal mismatches/exit1 and historical docs/G03 failures remain retained;
 zero regression and finite Source controls are not full-lane gates.
+
+## Whole-balance lifecycle consumer (2026-11-04)
+
+The authorized H19 consumer migration updates VY4's existing Lifecycle module
+to transfer the full natural account balance using actual `transferNat`. Burn
+uses natural zero. Existing self-beneficiary, recipient overflow, actual two-entry
+journal and rollback theorem conclusions remain intact, without new range
+premises. Five owned controls prove full100 payment with retained caller
+nonce/journal, complete rollback, distinct-recipient refusal for2^256, exact
+old-self retention and fresh-self burn. Casting2^256 to Word would wrongly
+produce a zero payment, so the refusal control discriminates that bug.
+
+Both changed Lean modules and generated exact signatures pass per-file checks.
+Five axiom guards pin four axiom-free controls and the existing rollback chain's
+standard propext/Quot.sound. Independent read-only finder/skeptic approved this
+narrow migration without findings and without executing checks. Initial runner
+environment, reserved identifier, structure-update and non-Decidable state
+equality diagnostics are retained alongside corrected passes.
+
+The original57-file read inventory now has three migrated entries (two Source
+examples and Lifecycle), leaving54 inventoried read-file migrations plus other
+constructor/whole-balance sites. No full combined checkpoint, native comparison,
+external ledger migration or actual reachable-EVM invariant is supplied. All
+original queue and proof obligations remain open as recorded above.

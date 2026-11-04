@@ -2594,6 +2594,7 @@ import Solidity.Yul.Composition.CorrectnessControls
 import Solidity.Yul.Composition.CorrectnessInstances
 import Solidity.Yul.Composition.CorrectnessPublic
 import Solidity.Yul.Composition.CorrectnessPublicControls
+import Solidity.Yul.Composition.MonetaryLifecycleControls
 import Solidity.Yul.Composition.P6FrameControls
 import Solidity.Yul.Composition.P6FrameCorrectness
 import Solidity.Yul.Composition.SourceCatchBinding
