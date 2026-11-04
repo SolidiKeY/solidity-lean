@@ -149,3 +149,5 @@
 | `Yul/Compilation/WordExecution{,Controls}.lean` | General unchanged WordMachine success transport, six additional word-step laws and real expression/statement source/compiler consumers; combined dirty-word, dependent-write, symbolic-tail and DUP16 controls. Native/resource and Source/G24 adequacy remain separate. |
 
 | `Yul/Compilation/NormalWordTransport{,Controls}.lean` | Whole normally completing branch/sequence execution under the existing WordControl selector and actual compiler derivations; original closed-source result, raw EXP guard/EQ join, dependent writes, symbolic framing and shifted-slot controls. No native/resource/general-loop/G24 closure. |
+
+| `Yul/Compilation/SignedExecution{,Controls}.lean` | General existing SignedMachine success transport consuming concrete signed producers plus WordExecution; original-source/compiler consumers, signed corner cases, dirty words, dependent writes, symbolic framing and shifted DUP16 controls. Native/resource and Source/G24 adequacy remain separate. |

@@ -2642,6 +2642,8 @@ import Solidity.Yul.Compilation.ShiftSubMachine
 import Solidity.Yul.Compilation.ShiftSubMachineControls
 import Solidity.Yul.Compilation.SignedComparisonMachine
 import Solidity.Yul.Compilation.SignedComparisonMachineControls
+import Solidity.Yul.Compilation.SignedExecution
+import Solidity.Yul.Compilation.SignedExecutionControls
 import Solidity.Yul.Compilation.SignedExpressions
 import Solidity.Yul.Compilation.SignedMachine
 import Solidity.Yul.Compilation.SignedQuotientMachine
