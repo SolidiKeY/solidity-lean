@@ -304,3 +304,41 @@ only `propext`, `Classical.choice` and `Quot.sound`. Independent read-only finde
 and skeptic reviews found no confirmed soundness or vacuity defect. The earlier
 300.064-second full checkpoint timeout remains failed; this focused check does
 not discharge it. No unchanged full retry was made for this leaf.
+
+
+## Runtime relational guards
+
+`FailurePaths.RelationalGuard` extends the bare-require result to `<`, `<=`,
+`>` and `>=` of two signed256 or unsigned256 locals. It consumes the published
+primitive comparison packet, including its exact operand order and signed
+instructions. `public_selection` proves that the public checked memory statement
+compiler selects the comparison instructions followed by `assertTop`.
+`agreement` derives both actual executions from initial Source/intrinsic local
+read correspondence and the full initial `Memory.StateRepr`; no selected
+certificate, successful run or poststate is supplied as a premise. At horizon
+`n+7`, Source returns normally or reverts with empty bytes and preserves all
+state and caller locals. The selected target run either preserves the entire
+machine, including the saved stack, or produces bare revert.
+
+`RelationalGuardControls` inhabits the comparison fixture for arbitrary allowed
+operands and both pipelines. Named controls cover equality for all relations,
+signed sign boundary and extrema, maximum unsigned operands, equality failing
+strict less-than, negative signed less-than succeeding, maximum unsigned
+less-than zero reverting, zero-horizon timeout and the older literal selector
+still refusing these runtime conditions. This is a proof about related supplied
+indexed nodes, not an automatic frontend lowering. Arbitrary expressions,
+message-bearing require, assert payload compilation, bytecode/EVM behavior,
+reverted target poststate and internal-frame failure transport remain separate.
+The instruction machine does not expose revert payload bytes or a post-machine.
+
+Focused validation:
+
+```
+LEAN_NUM_THREADS=1 lake -f lakefile.g38.toml build Solidity.Backend.FailurePaths.RelationalGuardControls
+```
+
+The serial guarded check passed in 3.653 seconds with 814,166,016 bytes peak
+aggregate RSS. All printed axioms are `propext`, `Classical.choice` and
+`Quot.sound`. Independent read-only finder and skeptic reviews found no
+confirmed defect. The prior full-checkpoint timeout is still failed; this
+increment supplies no changed full-gate condition, and it was not retried.

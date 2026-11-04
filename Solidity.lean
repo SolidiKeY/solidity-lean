@@ -125,6 +125,8 @@ import Solidity.Backend.FailurePaths.ParametricControls
 import Solidity.Backend.FailurePaths.Premises
 import Solidity.Backend.FailurePaths.ReasonCodec
 import Solidity.Backend.FailurePaths.ReasonCodecControls
+import Solidity.Backend.FailurePaths.RelationalGuard
+import Solidity.Backend.FailurePaths.RelationalGuardControls
 import Solidity.Backend.FailurePaths.Returns
 import Solidity.Backend.FailurePaths.RuntimeGuard
 import Solidity.Backend.FailurePaths.RuntimeGuardControls
