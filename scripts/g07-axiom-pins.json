@@ -28286,6 +28286,46 @@
  "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Digests.identity_list": [
   "propext"
  ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.Controls.complete_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_arguments": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_window": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.not_reverted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.outcome_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.reject_post": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationReturnConsumer.lean:Solidity.Roadmap.V16.CreationReturnConsumer.returned_post": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.bare_revert_spec": [
   "Classical.choice",
   "Quot.sound",
