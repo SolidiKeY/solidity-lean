@@ -32695,5 +32695,151 @@
     "Classical.choice",
     "Quot.sound",
     "propext"
+  ],
+  "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.cons": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.inline": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.no_args": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.ternary": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.unary": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.byte_expansion": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.packet": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.source_target": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.visit_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.actual_visit": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.capacity_not_operands": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_full_result": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_full_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_index_guard": [],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_result": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.operand_missing": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.oversized": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.packet_instructions": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_capacity": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_emission": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_trace": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plainPacket": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.result_zero": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.shifted_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.shifted_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.source": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.target_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.target_zero": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.unbounded_sum": [
+    "Quot.sound",
+    "propext"
   ]
 }

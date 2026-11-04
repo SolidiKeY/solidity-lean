@@ -134,3 +134,6 @@
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Yul/Compilation/ClzShapes{,Controls}.lean` | Operand shapes and exact every-boundary capacity for the existing256-step software CLZ; intrinsic Code packet, exact4867 size, dirty/zero/caller and underflow/1024-boundary controls. Explicit child-shape premise in lowering helper; no native/G24 closure. |
+
+| `Yul/Compilation/ArityShapes.lean` | Existing copied-argument/inline/unary/ternary operand transport with explicit child/body metadata and physical rows; not function-frame or capacity correctness. |
+| `Yul/Compilation/PureVisitorShapes{,Controls}.lean` | Actual full pure visitor success/emission derives recursive operand metadata, including ternary and software BYTE/CLZ; original closed-Yul source/target conjunction, separately capacity-checked packet, dirty-index and unbounded modular controls. No logical Source/G24/native closure. |

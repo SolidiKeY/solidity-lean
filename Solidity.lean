@@ -2555,6 +2555,7 @@ import Solidity.Yul.Compilation.ArithmeticMachine
 import Solidity.Yul.Compilation.ArithmeticMachineControls
 import Solidity.Yul.Compilation.ArithmeticVisitorShapes
 import Solidity.Yul.Compilation.ArithmeticVisitorShapesControls
+import Solidity.Yul.Compilation.ArityShapes
 import Solidity.Yul.Compilation.BitExpressions
 import Solidity.Yul.Compilation.BitMachineExecution
 import Solidity.Yul.Compilation.BitMachineExecutionControls
@@ -2608,6 +2609,8 @@ import Solidity.Yul.Compilation.PureExpressions
 import Solidity.Yul.Compilation.PureLowering
 import Solidity.Yul.Compilation.PureLoweringControls
 import Solidity.Yul.Compilation.PureStatements
+import Solidity.Yul.Compilation.PureVisitorShapes
+import Solidity.Yul.Compilation.PureVisitorShapesControls
 import Solidity.Yul.Compilation.QuotientExpressions
 import Solidity.Yul.Compilation.QuotientMachine
 import Solidity.Yul.Compilation.QuotientMachineControls
