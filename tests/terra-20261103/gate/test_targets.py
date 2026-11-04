@@ -22,12 +22,12 @@ class Targets(unittest.TestCase):
         self.calls = self.root / "calls.jsonl"
         self.elan = self.root / "elan-used"
         self.env = os.environ.copy()
-        self.env.update(GIT_AUTHOR_NAME="Gate Fixture", GIT_AUTHOR_EMAIL="fixture@example.invalid",
-                        GIT_COMMITTER_NAME="Gate Fixture", GIT_COMMITTER_EMAIL="fixture@example.invalid")
         for key in list(self.env):
-            if key.startswith("GIT_CONFIG_") or key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"):
+            if key.startswith("GIT_"):
                 self.env.pop(key)
-        self.env.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+        self.env.update(GIT_AUTHOR_NAME="Gate Fixture", GIT_AUTHOR_EMAIL="fixture@example.invalid",
+                        GIT_COMMITTER_NAME="Gate Fixture", GIT_COMMITTER_EMAIL="fixture@example.invalid",
+                        GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
         self.env.pop("GATE_EXAMPLES", None)
         self.git("init", "-q")
         self.put("Solidity/Leaf.lean", "def leaf : Nat := 1\n")
