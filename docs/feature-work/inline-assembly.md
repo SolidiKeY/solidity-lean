@@ -356,3 +356,10 @@ exact source horizons and constructive initialized-prefix entry/retirement
 proofs preserving outer mutations and arbitrary caller tails. Reviewed nested
 scope/dirty-word/model controls pass. Case-body nesting and full source/native
 adequacy remain open; see [the lane record](inline-assembly-vy3.md).
+
+
+VY3 recursive cases/defaults: `SolidityBridge.Yul.NestedSwitch` constructs
+original-AST source/structured-target certificates through mutually recursive
+statement/case compilation, including lexical scopes inside nested arms.
+Reviewed dirty-word, no-fallthrough, source/model and refusal controls pass.
+General source/native adequacy remains open; see [the lane record](inline-assembly-vy3.md).

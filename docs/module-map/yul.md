@@ -72,3 +72,5 @@
 | `Bridge/SolidityBridge/Yul/SwitchControl.lean`, `Bridge/SolidityBridge/Yul/SwitchControlControls.lean` | Original-statement sequence/conditional visitor over concrete switch and normal-body compilers; same-horizon source and whole-block structured execution with exact caller tails. |
 
 | `Bridge/SolidityBridge/Yul/ScopedSwitch.lean`, `Bridge/SolidityBridge/Yul/ScopedSwitchControls.lean` | Original-statement lexical-scope adapter over concrete switch/control lowering; exact source horizons, initialized prefix entry/retirement and arbitrary caller-tail preservation. |
+
+| `Bridge/SolidityBridge/Yul/NestedSwitch.lean`, `Bridge/SolidityBridge/Yul/NestedSwitchControls.lean` | Concrete mutual original-statement/case compiler constructing source and structured-target certificates; nested normal-word cases/defaults/scopes, exact horizons and caller-tail transport. |

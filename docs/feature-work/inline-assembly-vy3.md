@@ -1062,3 +1062,44 @@ build supplies the local import check. Earlier broad build failures remain
 open without unchanged retries. General switch case bodies, functions/loops/
 early control, multi-result declarations, Source/G24/views/raw readback,
 frontend admission and native/final joint adequacy are still unfinished.
+
+
+### Recursive cases and defaults
+
+`SolidityBridge.Yul.NestedSwitch` supplies a concrete mutually recursive
+visitor on the original statement and case families. Its `Compiled` and
+`CompiledCases` records contain the exact original source evaluation and
+structured-target proofs. The visitor constructs every returned certificate
+from concrete operation leaves and proved sequence, conditional, scope and
+case producers; no source/target law is an assumed producer obligation.
+Explicit original-family recursors and structural source-horizon recursion
+retain G0. Operation leaves keep their existing supported/refusal domain;
+this is normal closed word-control compilation, not general Yul admission.
+
+Case suffixes and arm bodies consume their actual decreasing horizons while
+the default retains the original switch child horizon. The selector is
+computed once, compared as a full word, and retired before exactly one
+chosen arm/default. Scope entry/exit preserves outer mutations and arbitrary
+caller tails. Nine guarded standard-axiom reports include the actual mutual
+compiler definitions and all new proof-producing combinators, rather than
+only record projections.
+
+Reviewed controls inhabit nested case/if/let/zero/switch combinations and a
+nested default. A dirty accumulator selects a later inner switch after the
+scope update; changing the outer selector to3 does not execute its later
+outer case. Actual source evaluation and selected-model observations retain
+caller words and machine metadata. False guards, earlier API refusals,
+new nested-case success, exact case-fuel refusals, shifted positions15/16,
+underflow and height-capacity versus oversized-model success are separate
+controls. Existing expected verdicts and admission remain unchanged.
+
+Independent read-only finder and skeptic reviews found no confirmed findings.
+Focused/per-file kernel checks, both MCP diagnostics, exact signatures,
+trust/layer/root/docs/module-map and axiom pins pass. Two redundant closing
+tactics and an unnecessary unreduced-match change were corrected without
+changing statements or budgets; raw diagnostics and automation failures are
+retained. The core-only touched selector finds no Bridge targets, so the
+explicit focused build supplies local import validation. No new external
+compiler/EVM evidence is claimed. Functions/loops/early flow, multi-result
+bindings, Source/G24/views/raw readback, frontend admission, native/resource/
+world/trace correspondence and full joint gates remain unfinished.
