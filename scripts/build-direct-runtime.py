@@ -38,7 +38,7 @@ clang=pathlib.Path(os.environ.get('EMCC_CLANG',str(compiler.parent.parent/'bin/c
 config_path=pathlib.Path(os.environ['EM_CONFIG']).resolve()
 os.environ['EM_CONFIG']=str(config_path)
 config_initial=hashlib.sha256(config_path.read_bytes()).hexdigest()
-configured=json.loads(subprocess.check_output([sys.executable,'-c',
+configured=json.loads(subprocess.check_output([sys.executable,'-E','-c',
     "import sys,json; sys.path.insert(0,sys.argv[1]); from tools import config,shared; "
     "print(json.dumps(dict(clang=shared.CLANG_CC,ar=shared.LLVM_AR,nm=shared.LLVM_NM,ld=shared.WASM_LD,"
     "binaryen=config.BINARYEN_ROOT,node=config.NODE_JS,wrapper=config.COMPILER_WRAPPER)))",

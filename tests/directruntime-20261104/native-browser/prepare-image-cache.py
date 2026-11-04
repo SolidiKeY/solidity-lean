@@ -7,7 +7,7 @@ assert os.getuid()==1000
 out=pathlib.Path(__import__("sys").argv[1])
 if out.exists():raise SystemExit("refusing cleanup receipt overwrite")
 start=time.monotonic();before=int((outer/"memory.current").read_text());count=0;total=0;errors=0
-for base in [pathlib.Path("/workspace/solidity-lean/.lake/native-browser-lean4"),pathlib.Path("/workspace/solidity-lean/.lake/native-browser-wasm/lean4"),pathlib.Path("/emsdk"),pathlib.Path("/usr"),pathlib.Path("/lib"),pathlib.Path("/workspace/.setup/tools/lean-4.24.0-linux/lib"),pathlib.Path("/work/toolchain-cache"),pathlib.Path("/work/gmp-build64"),pathlib.Path("/work/build64"),pathlib.Path("/work/direct-native-cache"),pathlib.Path("/workspace/solidity-lean/.lake/build"),pathlib.Path("/workspace/.setup/cache/lake/artifacts")]:
+for base in [pathlib.Path("/workspace/solidity-lean/.lake/native-browser-hardening"),pathlib.Path("/workspace/solidity-lean/.lake/direct-native"),pathlib.Path("/workspace/solidity-lean/.lake/native-browser-wasm/direct"),pathlib.Path("/workspace/solidity-lean/.lake/native-browser-sdk-usr"),pathlib.Path("/workspace/solidity-lean/.lake/native-browser-lean4"),pathlib.Path("/workspace/solidity-lean/.lake/native-browser-wasm/lean4"),pathlib.Path("/emsdk"),pathlib.Path("/usr"),pathlib.Path("/lib"),pathlib.Path("/workspace/.setup/tools/lean-4.24.0-linux/lib"),pathlib.Path("/work/toolchain-cache"),pathlib.Path("/work/gmp-build64"),pathlib.Path("/work/build64"),pathlib.Path("/work/direct-native-cache"),pathlib.Path("/workspace/solidity-lean/.lake/build"),pathlib.Path("/workspace/.setup/cache/lake/artifacts")]:
  for directory,dirs,files in os.walk(base,followlinks=False):
   for name in files:
    p=pathlib.Path(directory)/name
