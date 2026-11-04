@@ -403,6 +403,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/G19/WhileReturn.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/G19/WhileReturnControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/ConditionalCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/ReasonCodec.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/ReasonCodecControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

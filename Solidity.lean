@@ -114,6 +114,8 @@ import Solidity.Backend.FailurePaths.Interface
 import Solidity.Backend.FailurePaths.Parametric
 import Solidity.Backend.FailurePaths.ParametricControls
 import Solidity.Backend.FailurePaths.Premises
+import Solidity.Backend.FailurePaths.ReasonCodec
+import Solidity.Backend.FailurePaths.ReasonCodecControls
 import Solidity.Backend.FailurePaths.Returns
 import Solidity.Backend.FailurePaths.Statements
 import Solidity.Backend.FailurePaths.TransientCallback
