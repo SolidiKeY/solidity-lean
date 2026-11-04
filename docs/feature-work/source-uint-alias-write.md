@@ -25,9 +25,20 @@ identity. It rebinds an old length-three object to an existing length-two
 neighbour and writes index one with 42; retained LEFT stays unchanged in the
 distinct case. Self alias mutates LEFT while the unrelated right object stays
 unchanged. Earlier complete ordered vectors and guards remain byte-preserved.
-The new client retains an existential final target and payload/frame facts;
-new complete ordered Source/native/final 20-word vectors, discriminator and
-short-horizon extensions remain pending, rather than claimed by this client.
+The original existential client remains intact. The additive
+`dynamic_uint_alias_write_concrete` identifies its actual Source/native/word
+outputs by determinism, using Source memSet and the published array-address
+execution law. No full word-machine reduction or larger budget is needed.
+`dynamic_uint_alias_write_vectors` now records initial/prefix/final twenty-word
+vectors, all three Source/native object tables, complete reached locals,
+world fields, stack, free pointer and all non-memory target fields.
+`dynamic_uint_alias_write_negatives` executes selected reads returning 42 after
+the write and 9 before it, and the skipped-rebinding Source write to LEFT;
+the complete word vectors distinguish skipped rebinding and skipped write.
+`dynamic_uint_alias_write_timeout` proves an actual alias statement followed
+by a suffix timeout in Source Items at horizon four. The failed Items outcome
+exposes globals only; the changed local prefix is proved separately, without
+invented error locals, rollback or a failed target machine.
 
 Focused kernel checks and exact standard-axiom guards validate these laws.
 This is an incremental partial interface, not end-of-lane validation, a raw

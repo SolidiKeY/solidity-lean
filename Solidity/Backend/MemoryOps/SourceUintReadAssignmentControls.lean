@@ -873,4 +873,212 @@ theorem dynamic_uint_alias_write_client (p : Roadmap.Pipeline) (fuel : Nat) (sel
 /-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_client
 
+private def mutationMid (self : Bool) : Source.EMState E0 Γ :=
+  ((sy false 1 42).1.set dr (.memRef rfl (aliasAddress self)),(sy false 1 42).2)
+private def mutationNative (self : Bool) : Heap H :=
+  hp.set (aliasRef self) (MObj.setElem .dyn (hp.get (aliasRef self)) 1 (u 42))
+private def mutationFinal (self : Bool) : Source.EMState E0 Γ :=
+  ((mutationMid self).1,{(mutationMid self).2 with heap := (mutationMid self).2.heap.write (aliasAddress self) (sourceUintMemory ((if self then old else next).set 1 (u 42))) (by cases self <;> rfl)})
+private def mutationPointer (self : Bool) : Machine :=
+  writeMachine (machine false 1 42) 3 (.val (base (aliasRef self).id))
+private def mutationTarget (self : Bool) : Machine :=
+  writeMachine (mutationPointer self) ((base (aliasRef self).id).val+2) w[42]
+
+private theorem mutation_source (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintIndexedAssign dr di si)).run (mutationMid self)=
+      (.ok (.val (sourceUint (u 42))),mutationFinal self) := by
+  first
+  | solve | simp only [] | omega
+  | have initial : SourceUintMemoryAt (mutationMid self) (aliasAddress self) hp (aliasRef self) .dyn := by
+      cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+    have contents : (mutationMid self).2.heap.get (aliasAddress self)=
+        some ⟨SA,sourceUintMemory (if self then old else next)⟩ := by cases self <;> rfl
+    obtain ⟨ht,write⟩ := source_uint_write (mutationMid self) (aliasAddress self) (if self then old else next)
+      contents 1 (by cases self <;> decide) (u 42)
+    have actual : (Source.writeLoc F0 (fuel+2) (.mem (aliasAddress self) (u 1).1.toNat) (sourceUint (u 42))).run
+        (mutationMid self)=(.ok (),mutationFinal self) := write
+    exact initial.eval_assign_of_run (G0 p) F0 fuel dr di si (u 1) (u 42)
+      (by cases self <;> rfl) rfl rfl
+      (by cases self <;> simp only [aliasRef,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide) actual
+
+private theorem write_one_run (m : Machine) (a : Fin W) (n : Nat) (hn : n<W) (hi : 1<n)
+    (space : a.val+2<W) (hv : m.mem 5=w[42]) (hp : m.mem 3=.val a)
+    (hx : m.mem 6=w[1]) (hh : m.mem a.val=.val (wmod n)) :
+    run (uintAliasWriteCode (C := C) 1 dt it jt) m=.ok (writeMachine m (a.val+2) w[42]) 0 := by
+  first
+  | solve | simp only [] | omega
+  | change run ([.mload 5]++([.mload 3]++([.mload 6]++Objects.writeCode (.dyn : ArrTy A (.prim .uint))))) m=_
+    rw [run_append_ok (show run [.mload 5] m=.ok (m.push w[42]) 0 from by change Out.ok (m.push (m.mem 5)) 0=_;rw [hv])]
+    rw [run_append_ok (show run [.mload 3] (m.push w[42])=.ok ((m.push w[42]).push (.val a)) 0 from by
+      change Out.ok ((m.push w[42]).push (m.mem 3)) 0=_;rw [hp])]
+    rw [run_append_ok (show run [.mload 6] ((m.push w[42]).push (.val a))=
+        .ok (((m.push w[42]).push (.val a)).push w[1]) 0 from by
+      change Out.ok (((m.push w[42]).push (.val a)).push (m.mem 6)) 0=_;rw [hx])]
+    have addr := arrayAddrStack_run (m.push w[42]) a ⟨1,by decide⟩ n hn hh
+    rw [if_pos hi] at addr
+    change run (arrayAddrStackCode++[.mstoreAt]) (((m.push w[42]).push (.val a)).push w[1])=_
+    rw [run_append_ok addr]
+    simp only [run,Machine.push,exec_cons_zero,Instr.step,wmod_of_lt space,Out.ok_bind,exec_nil,writeMachine]
+
+private theorem mutation_word (self : Bool) :
+    run (uintAliasWriteCode (C := C) 1 dt it jt) (mutationPointer self)=.ok (mutationTarget self) 0 := by
+  first
+  | solve | simp only [] | omega
+  | exact write_one_run (mutationPointer self) (base (aliasRef self).id) (if self then 3 else 2)
+      (by cases self <;> decide) (by cases self <;> decide) (by cases self <;> decide)
+      (by cases self <;> rfl) (by cases self <;> rfl) (by cases self <;> rfl) (by cases self <;> rfl)
+
+/-- Concrete final identities come from determinism of the SAME Source,
+native and word executions returned by the generic producer. -/
+theorem dynamic_uint_alias_write_concrete (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.execItems (G0 p) F0 (fuel+6) Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (mutationFinal self).1),(.nil,(mutationFinal self).2)) ∧
+    Prog.run (state false 1 42) (.cons (.rebindMem dt (.alias (.var (aliasTarget self) rfl)))
+      (.cons (.assignMem (.index .dyn (.var dt rfl) (.simple (.local it))) (.val (.simple (.local jt)))) .nil))=
+      .ok ⟨((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (mutationNative self),List.prefix_refl _⟩ ∧
+    run (aliasLocalCode 1 dt (aliasTarget self)++uintAliasWriteCode (C := C) 1 dt it jt)
+      (machine false 1 42)=.ok (mutationTarget self) 0 ∧
+    SourceUintMemoryAt (mutationFinal self) (aliasAddress self) (mutationNative self) (aliasRef self) .dyn ∧
+    Objects.StateRepr 1 1 8 (Frag.init Δ)
+      (((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (mutationNative self)) base (mutationTarget self) ∧
+    Objects.AllocatorRepr (mutationNative self) base 8 ⟨40,by decide⟩ (mutationTarget self) := by
+  first
+  | solve | simp only [] | omega
+  | have initial : SourceUintMemoryAt (sy false 1 42) (aliasAddress self) hp (aliasRef self) .dyn := by
+      cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+    have sourceRoot : (sy false 1 42).1.get (aliasSource self)=.memRef rfl (aliasAddress self) := by cases self <;> rfl
+    have targetRoot : TEnv.get (aliasTarget self) (state false 1 42).env=some (aliasRef self) := by cases self <;> rfl
+    have bound : (u 1).1.toNat<hp.len (aliasRef self) .dyn := by
+      cases self <;> simp only [aliasRef,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide
+    obtain ⟨out,z,target,first,second,items,aliasNative,native,prog,write,selected,new,mok,aliasCode,code,whole,repr,alloc,rest⟩ :=
+      source_uint_alias_assign_word (G0 p) F0 fuel (sy false 1 42) dr (aliasSource self) di si
+        (aliasAddress self) (u 1) (u 42) sourceRoot rfl rfl SH (memOK false 1 42)
+        (state false 1 42) dt (aliasTarget self) it jt (aliasRef self) targetRoot rfl rfl initial bound
+        (initial_repr false 1 42) (allocator false 1 42) (by decide) rfl rfl
+    have knownWrite : hp.writeAddr (.index (aliasRef self) .dyn (u 1)) (u 42)=some (mutationNative self) := by
+      have hb : 1<(MObj.elems .dyn (hp.get (aliasRef self))).length := bound
+      simp only [Heap.writeAddr,Heap.setIndex,show (u 1).1.toNat=1 from by decide,if_pos hb,mutationNative]
+    have he : out=mutationNative self := Option.some.inj (write.symm.trans knownWrite)
+    subst out
+    have hz : z=mutationFinal self := congrArg Prod.snd (second.symm.trans (mutation_source p fuel self))
+    subst z
+    have ht : target=mutationTarget self := (Out.ok.inj (code.symm.trans (mutation_word self))).1
+    subst target
+    exact ⟨items,prog,whole,new,repr,alloc⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_concrete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_concrete
+
+/-- Complete ordered observations of the executions identified above, at
+initial, alias-prefix and final stages. All twenty words and all three objects
+are retained; the pipeline parameter is in the actual execution theorem. -/
+theorem dynamic_uint_alias_write_vectors (self : Bool) :
+    words (machine false 1 42)=
+      [w[40],w[32],w[16],w[16],w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (mutationPointer self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (mutationTarget self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[42],w[1],w[0],w[99],w[3],w[7],(if self then w[42] else w[0]),.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],(if self then w[9] else w[42])] ∧
+    objects hp=[old,rhs,next] ∧
+    objects (mutationNative self)=(if self then [old.set 1 (u 42),rhs,next] else [old,rhs,next.set 1 (u 42)]) ∧
+    sourceObjects (sy false 1 42)=
+      [some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    sourceObjects (mutationMid self)=sourceObjects (sy false 1 42) ∧
+    sourceObjects (mutationFinal self)=(if self then
+      [some ⟨SA,sourceUintMemory (old.set 1 (u 42))⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] else
+      [some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory (next.set 1 (u 42))⟩]) ∧
+    (mutationMid self).1=.cons (sourceUint (u 1)) (.cons (sourceUint (u 42)) (.cons (.memRef rfl 1)
+      (.cons (.memRef rfl (aliasAddress self)) (.cons (.memRef rfl 0) (.cons (.memRef rfl 2) .nil))))) ∧
+    (mutationFinal self).1=(mutationMid self).1 ∧
+    (((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (mutationNative self)).env=
+      (u 1,u 42,some right,some (aliasRef self),some left,some neighbor,()) ∧
+    (mutationFinal self).2.ex=(sy false 1 42).2.ex ∧
+    (mutationFinal self).2.events=(sy false 1 42).2.events ∧
+    (mutationFinal self).2.logs=(sy false 1 42).2.logs ∧
+    (mutationFinal self).2.fnLocals=(sy false 1 42).2.fnLocals ∧
+    ({mutationTarget self with mem := (machine false 1 42).mem} : Machine)=machine false 1 42 ∧
+    (mutationTarget self).stack=[w[77],w[88]] ∧ (mutationTarget self).mem 0=w[40] := by
+  first
+  | solve | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,?_,?_,rfl,rfl,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+      · simp only [objects,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn]
+      · simp only [objects,mutationNative,aliasRef,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn,MObj.setElem_dyn]
+      · simp only [sourceObjects,mutationFinal,mutationMid,aliasAddress,Bool.false_eq_true,if_false,if_true,
+          Source.Heap.write_get,Source.Heap.write_other _ (show 0≠2 by decide),
+          Source.Heap.write_other _ (show 1≠2 by decide),Source.Heap.write_other _ (show 1≠0 by decide),
+          Source.Heap.write_other _ (show 2≠0 by decide)]
+        rfl
+
+/-- Skipping rebinding writes LEFT, not the chosen shorter neighbour. Skipping
+the write retains 9; the actual selected value is 42. Both are executable
+observations, not an expected-output oracle or a rollback claim. -/
+theorem dynamic_uint_alias_write_negatives (p : Roadmap.Pipeline) (fuel : Nat) :
+    words (mutationTarget false)≠words (mutationTarget true) ∧
+    words (mutationTarget false)≠words (mutationPointer false) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (mutationFinal false)=
+      (.ok (.val (sourceUint (u 42))),mutationFinal false) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (mutationMid false)=
+      (.ok (.val (sourceUint (u 9))),mutationMid false) ∧
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintIndexedAssign dr di si)).run (sy false 1 42)=
+      (.ok (.val (sourceUint (u 42))),mutationFinal true) := by
+  first
+  | solve | simp only [] | omega
+  | refine ⟨by decide,by decide,?_,?_,mutation_source p fuel true⟩
+    · have represented := (dynamic_uint_alias_write_concrete p fuel false).2.2.2.1
+      have contents : MObj.elems .dyn ((mutationNative false).get neighbor)=next.set 1 (u 42) := by
+        change MObj.elems .dyn ((hp.set neighbor (MObj.setElem .dyn (hp.get neighbor) 1 (u 42))).get neighbor)=_
+        rw [Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn]
+        rfl
+      have read := represented.eval_index (G0 p) F0 fuel dr di (u 1) rfl rfl
+        (by change (u 1).1.toNat<(MObj.elems .dyn ((mutationNative false).get neighbor)).length
+            rw [contents,List.length_set]
+            decide)
+      simpa only [show aliasRef false=neighbor from rfl,contents] using read
+    · have represented : SourceUintMemoryAt (mutationMid false) 2 hp neighbor .dyn := by
+        unfold SourceUintMemoryAt;rw [MObj.elems_dyn];rfl
+      have read := represented.eval_index (G0 p) F0 fuel dr di (u 1) rfl rfl
+        (by simp only [Heap.len,Heap.get,Objs.get,hp,neighbor,MObj.elems_dyn];decide)
+      simpa only [Heap.get,Objs.get,hp,neighbor,MObj.elems_dyn] using read
+
+/-- The short Items run retains the real alias prefix then times out before
+writing. It exposes globals only; no inaccessible failed local output is added. -/
+theorem dynamic_uint_alias_write_timeout (p : Roadmap.Pipeline) :
+    (Source.execS (G0 p) F0 3 Γ.length none
+      (.expr (sourceLocalAlias dr (aliasSource false)) : Source.RStmt E0 [] false .body Γ Γ)
+      (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (mutationMid false).1),(.nil,(mutationMid false).2)) ∧
+    (Source.evalE (G0 p) F0 1 (sourceUintIndexedAssign dr di si)).run (mutationMid false)=
+      (.error .timeout,mutationMid false) ∧
+    (Source.execItems (G0 p) F0 4 Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource false)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.error .timeout,(.nil,(mutationMid false).2)) := by
+  first
+  | solve | simp only [] | omega | rfl
+  | have alias := source_local_alias_run (G0 p) F0 0 (sy false 1 42) dr (aliasSource false)
+      (.memRef rfl 2) rfl
+    have first := source_expr_statement_run (G0 p) F0 2 Γ.length _ _ _ _ alias
+    have late : (Source.evalE (G0 p) F0 1 (sourceUintIndexedAssign dr di si)).run (mutationMid false)=
+        (.error .timeout,mutationMid false) := by cases p <;> rfl
+    have second := source_expr_statement_error (G0 p) F0 1 Γ.length _ _ _ _ late
+    refine ⟨first,late,?_⟩
+    rw [Source.execItems,Source.Hoare.run_bind,first]
+    change ((Source.execItems (G0 p) F0 3 Γ.length none
+      (.stmt (.expr (sourceUintIndexedAssign dr di si)) .nil : Source.RItems E0 [] false .body Γ Γ)
+      (mutationMid false).1) >>= fun o => Source.EM.lift (o.up Γ)).run (.nil,(mutationMid false).2)=_
+    rw [Source.Hoare.run_bind,Source.execItems,Source.Hoare.run_bind,second]
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_negatives' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_negatives
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_timeout
+
 end Solidity.Backend.MemoryOps.UintReadAssignmentControls
