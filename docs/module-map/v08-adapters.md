@@ -466,3 +466,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureCalldataPrefix.lean` | Frame-indexed calldata bytes/string prefix over represented tail; actual no-copy encoding, layout and expression/G38 consumers. |
 | `Solidity/Lowering/V08/LiteralFailureCalldataPrefixControls.lean` | Populated no-copy calldata encoding, shared/short/past-end references, exact result allocation and order/frame corruption controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureSliceEncoding.lean` | Actual checked calldata slice argument composed with standard ABI encoding; invalid-head short-circuiting before arbitrary tails. |
+| `Solidity/Lowering/V08/LiteralFailureSliceEncodingControls.lean` | Populated slice/encode byte outputs, logical versus physical bounds, effectful-tail ordering and timeout controls. |

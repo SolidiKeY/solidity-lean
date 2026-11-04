@@ -1963,6 +1963,8 @@ import Solidity.Lowering.V08.LiteralFailureSignatureBytes
 import Solidity.Lowering.V08.LiteralFailureSignatureBytesControls
 import Solidity.Lowering.V08.LiteralFailureSliceDecode
 import Solidity.Lowering.V08.LiteralFailureSliceDecodeControls
+import Solidity.Lowering.V08.LiteralFailureSliceEncoding
+import Solidity.Lowering.V08.LiteralFailureSliceEncodingControls
 import Solidity.Lowering.V08.LiteralFailureStatementReason
 import Solidity.Lowering.V08.LiteralFailureStatementReasonControls
 import Solidity.Lowering.V08.LiteralFailureStorageDecode
