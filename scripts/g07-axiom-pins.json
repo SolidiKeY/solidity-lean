@@ -1595,6 +1595,7 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.repeat_shift": [],
  "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.slices": [
   "Quot.sound",
   "propext"
@@ -1655,6 +1656,43 @@
   "propext"
  ],
  "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.prepare": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.source": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.source_loop": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.structured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalForControls.lean:SolidityBridge.Yul.NormalFor.Controls.model_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalForControls.lean:SolidityBridge.Yul.NormalFor.Controls.source_seven": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalForControls.lean:SolidityBridge.Yul.NormalFor.Controls.target_two": [
   "Classical.choice",
   "Quot.sound",
   "propext"

@@ -349,6 +349,8 @@ import SolidityBridge.Yul.LoweredWhile
 import SolidityBridge.Yul.LoweredWhileControls
 import SolidityBridge.Yul.NestedSwitch
 import SolidityBridge.Yul.NestedSwitchControls
+import SolidityBridge.Yul.NormalFor
+import SolidityBridge.Yul.NormalForControls
 import SolidityBridge.Yul.OccurrenceControl
 import SolidityBridge.Yul.OccurrenceControlControls
 import SolidityBridge.Yul.OccurrenceSelection

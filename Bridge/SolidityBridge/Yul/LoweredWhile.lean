@@ -9,7 +9,8 @@ namespace SolidityBridge.Yul.LoweredWhile
 open Solidity Backend Scalar Selection
 open Solidity.Yul.Compilation
 
-private theorem repeat_shift {α : Type} (f : α → α) (count : Nat) (a : α) :
+/-- Reindex the existing iteration function after one real update. -/
+theorem repeat_shift {α : Type} (f : α → α) (count : Nat) (a : α) :
     Nat.repeat f count (f a) = Nat.repeat f (count+1) a := by
   induction count with
   | zero => rfl
@@ -93,6 +94,9 @@ theorem model {n : Nat} {condition : Vector Word n → Word}
   selected.realization.execute _ _ m represented
     (structured c b depth block emitted count locals newer tail running stopped)
 
+/-- info: 'SolidityBridge.Yul.LoweredWhile.repeat_shift' does not depend on any axioms -/
+#guard_msgs in
+#print axioms repeat_shift
 /-- info: 'SolidityBridge.Yul.LoweredWhile.parts' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms parts

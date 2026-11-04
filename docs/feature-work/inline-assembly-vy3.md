@@ -1237,3 +1237,42 @@ This is Original Backfill A/B target preparation. Whole original FOR/source
 horizons, termination/divergence, source/G24/views, native/charged/capacity/world
 correspondence, frontend admission and final joint gates remain open. NJ1's
 previous exact fixed-fixture attachment remains complete.
+
+
+### Normal original FOR compilation slice
+
+`SolidityBridge.Yul.NormalFor` prepares the original four intrinsic FOR
+components using the actual pure expression/statement compilers. `Prepared`
+holds their indexed compiler outputs; it is not another AST or source state.
+`emit` lowers the prelude once followed by the existing condition/body/post
+loop, with body before post. `LoweredWhile.repeat_shift` is exposed unchanged
+for reuse; the prior execution contracts are unchanged.
+
+`source_loop` proves original closed-word `evalLoop` execution at horizon
+`base + count + 1`; `source` includes the actual prelude and original `for_`
+at `base + count + 2`. The four proved component horizons must be at most
+`base`. Existing producer horizon stability supplies every actual child run.
+Each pre-body guard at iterate `j < count` must be nonzero and the final guard
+at `count` zero, over `post.update (body.update locals)` after the prelude.
+These sufficient finite-exit premises do not infer termination or a least fuel.
+`structured` and `model` give the same final word locals with arbitrary newer
+prefix/caller tail; model retains actual selection and represented-stack
+premises. Capacity, native gas and logical Solidity Source/G24 are separate.
+
+The inhabited witness compiles original local/assignment/subtraction/addition
+AST components. Its prelude sets counter2, the body decrements it, and post
+adds the updated counter to a dirty accumulator: two turns give dirty+1,
+whereas reversing body/post would give dirty+3. Kernel theorems cover the
+actual original FOR at sufficient horizon7, complete structured execution and
+selected mathematical-machine execution for arbitrary caller tails. Source
+horizon2 exhaustion, compiler horizon2 refusal, break/continue refusal,
+shifted temporary accessibility, target underflow and oversized numeric success
+with failed prelude capacity remain distinct controls. No external solc/EVM
+claim or old fixture budget/verdict changes follow.
+
+Independent read-only finder/skeptic reviews found no confirmed findings.
+Nine enforced axiom reports use standard axioms only (repeat_shift uses none).
+Full Y08.01 logical Source/G24/views/functions/early-flow/divergence, general FOR
+dispatch, Y08.02 native opcode/world/resource composition, frontend attachment,
+remaining backfill and final joint gates remain unfinished. NJ1 stays complete
+for its earlier fixed synthetic fixture.

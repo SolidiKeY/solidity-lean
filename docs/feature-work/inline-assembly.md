@@ -388,3 +388,5 @@ observations are unchanged. Full lane/source/native obligations remain open;
 see [the lane record](inline-assembly-vy3.md).
 
 - VY3 finite emitted while: `SolidityBridge.Yul.LoweredWhile` derives exact finite structured/model runs from real emitted slice certificates with explicit pre-body/final guard premises and arbitrary prefix/caller preservation. Original AST leaf compiler controls are inhabited; Source FOR/native/resource/full-lane adequacy remains open. See [VY3](inline-assembly-vy3.md#finite-emitted-while-execution).
+
+- VY3 normal FOR slice: `SolidityBridge.Yul.NormalFor` prepares original intrinsic components and proves finite original closed-word FOR/horizon execution plus matching structured/model emission. Prelude/body/post ordering is witnessed with dirty words; guards and component bounds remain explicit. Logical Solidity Source/G24/native/full-lane adequacy stays open. See [VY3](inline-assembly-vy3.md#normal-original-for-compilation-slice).
