@@ -31,6 +31,9 @@ const cases = [
  ['fixedDefault','int[1] memory m; assert(m[0] == 0);','success'],
  ['fixedAlias','int[1] memory m; int[1] memory a = m; a[0] = 1; assert(m[0] == 1);','success'],
  ['referenceAlias','int[][] memory m = new int[][](1); m[0] = new int[](1); int[] memory a = m[0]; a[0] = 1; assert(m[0][0] == 1);','success'],
+ ['mappingRoot','int[] memory m = new int[](1); m[0] = 1; assert(m[0] == 1);','success','mapping(uint => int) unused;'],
+ ['storageAlias','int[] storage a = stored; a[0] = 1; assert(stored[0] == 1);','conditionalSuccessOrRevert','int[] stored;',''],
+ ['copyAfterPush','stored.push(0); uint i = stored.length - 1; int[] memory m = stored; m[i] = 1; assert(stored[i] == 0);','successOrExhausted','int[] stored;',''],
  ['storageCopy','int[] memory m = stored; m[0] = 1; assert(stored[0] == 0);','conditionalSuccessOrRevert','int[] stored;','view','require(stored.length == 1); require(stored[0] == 0); '],
 ];
 const walk = function*(x) { if (x && typeof x === 'object') { yield x; for (const v of Object.values(x)) yield* walk(v); } };
@@ -47,7 +50,7 @@ for (const [id,body,outcome,state='',mutability='pure',prefix=''] of cases) {
    assert.equal((output.errors||[]).filter(x=>x.severity==='error').length,0,JSON.stringify(output.errors));
    const ast=output.sources['Identity.sol'].ast;
    const nodes=[...walk(ast)];
-   assert(nodes.some(n=>n.nodeType==='VariableDeclaration'&&n.storageLocation==='memory'));
+   assert(nodes.some(n=>n.nodeType==='VariableDeclaration'&&['memory','storage'].includes(n.storageLocation)));
    if(id==='identity') {
     assert(nodes.some(n=>n.nodeType==='NewExpression'&&n.typeName.nodeType==='ArrayTypeName'));
     assert(nodes.some(n=>n.nodeType==='IndexAccess'));
@@ -57,7 +60,7 @@ for (const [id,body,outcome,state='',mutability='pure',prefix=''] of cases) {
    const name=stem+(viaIR?'.ir':'.legacy');
    write(path.join(root,'compiler',name+'.input.json'),JSON.stringify(input,null,2)+'\n');
    write(path.join(root,'compiler',name+'.output.json'),JSON.stringify(output,null,2)+'\n');
-   rows.push({id,modality,viaIR,source:'sources/'+stem+'.sol',input:'compiler/'+name+'.input.json',output:'compiler/'+name+'.output.json',sourceSha256:sha(source),modelHalt:outcome,requiredProven:outcome==='success'||(['revert','conditionalSuccessOrRevert'].includes(outcome)&&modality==='box'),admission:'pending',proofClosure:'pending',native:'pending',browser:'pending'});
+   rows.push({id,modality,viaIR,source:'sources/'+stem+'.sol',input:'compiler/'+name+'.input.json',output:'compiler/'+name+'.output.json',sourceSha256:sha(source),modelHalt:outcome,initialModelHalt:outcome==='conditionalSuccessOrRevert'?'revert':outcome==='successOrExhausted'?'success':outcome,requiredProven:['success','successOrExhausted'].includes(outcome)||(['revert','conditionalSuccessOrRevert'].includes(outcome)&&modality==='box'),admission:'pending',proofClosure:'pending',native:'pending',browser:'pending'});
   }
  }
 }
@@ -90,6 +93,23 @@ write(path.join(root,'invalid.json'),JSON.stringify(invalidRows,null,2)+'\n');
 const original=JSON.parse(fs.readFileSync(path.join(root,'compiler/identity.box.legacy.output.json')));
 const mutations=[
  ['missingLocation',(d)=>{delete d.storageLocation;}],
+ ['coherentStorageFromNew',(d)=>{d.storageLocation='storage';d.typeDescriptions.typeIdentifier=d.typeDescriptions.typeIdentifier.replaceAll('memory','storage');}],
+ ['allocationResultLocation',(_,o)=>{const n=[...walk(o)].find(n=>n.nodeType==='FunctionCall'&&n.expression.nodeType==='NewExpression');n.typeDescriptions.typeIdentifier=n.typeDescriptions.typeIdentifier.replaceAll('memory','storage');}],
+ ['constructorIdentifier',(_,o)=>{[...walk(o)].find(n=>n.nodeType==='NewExpression').typeDescriptions.typeIdentifier='t_bool';}],
+ ['missingConstructorIdentifier',(_,o)=>{delete [...walk(o)].find(n=>n.nodeType==='NewExpression').typeDescriptions.typeIdentifier;}],
+ ['tryAllocation',(_,o)=>{[...walk(o)].find(n=>n.nodeType==='FunctionCall'&&n.expression.nodeType==='NewExpression').tryCall=true;}],
+ ['allocationArity',(_,o)=>{[...walk(o)].find(n=>n.nodeType==='FunctionCall'&&n.expression.nodeType==='NewExpression').arguments=[];}],
+ ['wrongDeclarationNode',(d)=>{d.nodeType='Literal';}],
+ ['missingDeclarationNode',(d)=>{delete d.nodeType;}],
+ ['stateLocal',(d)=>{d.stateVariable=true;}],
+ ['constantLocal',(d)=>{d.constant=true;}],
+ ['calldataIdentifier',(d)=>{d.typeDescriptions.typeIdentifier=d.typeDescriptions.typeIdentifier.replaceAll('memory','calldata');}],
+ ['missingIdentifier',(d)=>{delete d.typeDescriptions.typeIdentifier;}],
+ ...[0n,2n**256n].map(n=>['fixedLength'+n,(d)=>{
+   d.typeName.length={nodeType:'Literal',kind:'number',value:String(n),typeDescriptions:{typeString:'int_const '+n}};
+   d.typeName.typeDescriptions={typeString:`int256[${n}]`,typeIdentifier:`t_array$_t_int256_$${n}_storage_ptr`};
+   d.typeDescriptions={typeString:`int256[${n}]`,typeIdentifier:`t_array$_t_int256_$${n}_memory_ptr`};
+ }]),
  ['calldataLocation',(d)=>{d.storageLocation='calldata';}],
  ['storageLocation',(d)=>{d.storageLocation='storage';}],
  ['unknownLocation',(d)=>{d.storageLocation='invented';}],
@@ -99,9 +119,20 @@ const mutations=[
 for(const [id,mutate] of mutations) {
  const output=structuredClone(original);
  const d=[...walk(output)].find(n=>n.nodeType==='VariableDeclaration'&&n.name==='m');
- assert(d); mutate(d);
+ assert(d); mutate(d,output);
  write(path.join(root,'malformed',id+'.output.json'),JSON.stringify(output,null,2)+'\n');
 }
+// Coherent type metadata that still requires intrinsic rejection.
+const mismatch=structuredClone(original);
+const md=[...walk(mismatch)].find(n=>n.nodeType==='VariableDeclaration'&&n.name==='m');
+md.typeName.baseType.name='bool';md.typeName.baseType.typeDescriptions={typeString:'bool',typeIdentifier:'t_bool'};
+md.typeName.typeDescriptions={typeString:'bool[]',typeIdentifier:'t_array$_t_bool_$dyn_storage_ptr'};
+md.typeDescriptions={typeString:'bool[]',typeIdentifier:'t_array$_t_bool_$dyn_memory_ptr'};
+write(path.join(root,'type-errors/elementMismatch.output.json'),JSON.stringify(mismatch,null,2)+'\n');
+const wrongAlias=JSON.parse(fs.readFileSync(path.join(root,'compiler/alias.box.legacy.output.json')));
+const ad=[...walk(wrongAlias)].find(n=>n.nodeType==='VariableDeclaration'&&n.name==='a');
+ad.storageLocation='storage';ad.typeDescriptions.typeIdentifier=ad.typeDescriptions.typeIdentifier.replaceAll('memory','storage');
+write(path.join(root,'type-errors/storageFromMemory.output.json'),JSON.stringify(wrongAlias,null,2)+'\n');
 write(path.join(root,'malformed/README.txt'),'Corrupted AST fixtures; NOT compiler-produced; must reject/unknown, never success. Admission remains pending.\n');
 console.log(`PASS ${invalidRows.length} compiler-invalid controls and ${mutations.length} corrupted admission controls (not executed)`);
 console.log(`PASS ${rows.length} full compiler AST fixtures; ${cases.length} scenarios x 2 modalities x 2 pipelines; compiler ${version}; no verifier invoked`);

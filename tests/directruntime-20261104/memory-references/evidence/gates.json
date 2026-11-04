@@ -1,47 +1,121 @@
 [
   {
-    "command": "git merge-base --is-ancestor b419c3cf4f642ae519b66bebc26cdf2f7cf93574 HEAD",
+    "name": "fixtures-bounded",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/directruntime-20261104/memory-references/fixtures.cjs"
+    ],
     "status": "pass",
-    "evidence": "setup.log"
+    "exit": 0,
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/fixtures-bounded.log",
+    "metrics": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/fixtures-bounded.json"
   },
   {
-    "command": "node tests/directruntime-20261104/memory-references/fixtures.cjs",
+    "name": "source-transport",
+    "command": [
+      "node",
+      "tests/directruntime-20261104/memory-references/source-transport.mjs"
+    ],
     "status": "pass",
-    "evidence": "fixtures.log"
+    "exit": 0,
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/source-transport.log",
+    "metrics": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/source-transport.json"
   },
   {
-    "command": "node --check tests/directruntime-20261104/memory-references/fixtures.cjs",
+    "name": "typed-model-final",
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/directruntime-20261104/memory-references/Admission.lean"
+    ],
     "status": "pass",
-    "evidence": "syntax.log"
+    "exit": 0,
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/typed-model-final.log",
+    "metrics": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/typed-model-final.json"
   },
   {
+    "name": "kernel-controls-v2",
+    "command": [
+      "lake",
+      "build",
+      "KernelControls"
+    ],
+    "status": "pass",
+    "exit": 0,
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/kernel-controls-v2.log",
+    "metrics": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/kernel-controls-v2.json"
+  },
+  {
+    "name": "kernel-matrix-final",
+    "command": [
+      "lake",
+      "build",
+      "KernelMatrix"
+    ],
+    "status": "pass",
+    "exit": 0,
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/kernel-matrix-final.log",
+    "metrics": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/kernel-matrix-final.json"
+  },
+  {
+    "name": "keysort",
+    "command": [
+      "bash",
+      "scripts/check-solkey.sh",
+      "--key",
+      "/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+    ],
+    "status": "pass",
+    "exit": 0,
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/keysort.log",
+    "metrics": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/keysort.json"
+  },
+  {
+    "name": "final-run-lean",
+    "command": [
+      "bash",
+      "run-lean.sh"
+    ],
+    "status": "fail",
+    "exit": 1,
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/final-run-lean.log",
+    "metrics": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/final-run-lean.json"
+  },
+  {
+    "name": "kernel-axioms",
+    "command": "audit accepted #print axioms reports",
+    "status": "pass",
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/owned-axioms.json"
+  },
+  {
+    "name": "ordinary-native-browser",
+    "command": "A/D source-to-result integration and fresh binaries",
+    "status": "pending",
+    "evidence": "Both ordinary runtime columns pending; no verdicts manufactured."
+  },
+  {
+    "name": "trust",
+    "command": "bash scripts/check-trust.sh",
+    "status": "pass",
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/trust-v2.log"
+  },
+  {
+    "name": "layers",
     "command": "node scripts/check-layers.mjs",
     "status": "pass",
-    "evidence": "layers.log"
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/layers-v2.log"
   },
   {
-    "command": "bash scripts/coord-tools/register.sh --check",
-    "status": "pass",
-    "evidence": "roots.log"
-  },
-  {
+    "name": "doc-paths",
     "command": "bash scripts/check-doc-paths.sh",
     "status": "pass",
-    "evidence": "doc-paths.log"
+    "evidence": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/doc-paths-v2.log"
   },
   {
-    "command": "bounded Lean per-file diagnostics and exact theorem axiom audit",
-    "status": "pending",
-    "evidence": "No Lean edits/builds; no MCP available; adapter blocked."
-  },
-  {
-    "command": "./run-lean.sh and KeySort",
-    "status": "pending",
-    "evidence": "Exact bounded scope not yet established; implementation blocked."
-  },
-  {
-    "command": "fresh native/browser Identity and all controls",
-    "status": "pending",
-    "evidence": "A interface unavailable; no adapter or fresh binaries."
+    "name": "source-whitespace",
+    "command": "git diff --cached --check",
+    "status": "pass",
+    "evidence": "Captured raw log/tsv whitespace is excluded via owned .gitattributes; source whitespace is checked."
   }
 ]
