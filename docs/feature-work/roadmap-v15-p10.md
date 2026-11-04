@@ -1685,3 +1685,9 @@ Per-file checks use the exact Lake-generated import setup after a successful
 focused target build; metadata identity and artifact availability alone are not
 semantic validation. No Source implementation, physical memory/storage adapter,
 Core ExtCall, package pin or proof budget was changed.
+
+### Published signed division consumer
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivision.lean` connects the published Source-local signed-division packet to the existing charged fetched SDIV consumer. The ordinary result retains nonzero and minimum/-1 exclusions; separate laws show Source division-by-zero panic versus raw zero, and checked overflow panic versus unchecked minimum wrap. Source and native inputs are separately constructed; physical operand loading, reached compiler guards and frame origin remain obligations.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivisionControls.lean` supplies both pipeline clients, negative truncation toward zero, minimum/maximum boundaries, and populated full native-state observations with wrong-rounding and reordered-tail negatives. These are kernel reference-model consequences, not fresh external execution or full Osaka/compiler correspondence. Independent finder/skeptic review covers the statements, premises and controls.

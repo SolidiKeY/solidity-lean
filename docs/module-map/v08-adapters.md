@@ -266,6 +266,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/BinaryGuardControls.lean` | Populated result/cost rows, complete ordered States and distinct legal/raw-overlimit resource controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainder.lean` | Published pure Source-local signed remainder through typed Scalar encoding to the actual native SMOD body; explicit zero mismatch. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean` | Both-pipeline/mode clients, signed and min/max controls, zero panic/raw success, and complete ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivision.lean` | Source-local signed division and exceptional branches against constructed fetched SDIV bodies. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivisionControls.lean` | Signed division clients, zero/overflow controls and ordered state observations. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 

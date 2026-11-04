@@ -262,6 +262,8 @@ import SolidityBridge.RoadmapV15.P10.NonbranchTables
 import SolidityBridge.RoadmapV15.P10.PopConsumer
 import SolidityBridge.RoadmapV15.P10.PopControls
 import SolidityBridge.RoadmapV15.P10.PowerControls
+import SolidityBridge.RoadmapV15.P10.PublishedDivision
+import SolidityBridge.RoadmapV15.P10.PublishedDivisionControls
 import SolidityBridge.RoadmapV15.P10.PublishedRemainder
 import SolidityBridge.RoadmapV15.P10.PublishedRemainderControls
 import SolidityBridge.RoadmapV15.P10.PushDecoderAgreement
