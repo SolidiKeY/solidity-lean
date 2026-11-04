@@ -371,3 +371,10 @@ contracts. Synthetic JSON and emitted-prefix controls distinguish21/999/42/17
 and preserve ingress refusals. A specific raw-JSON kernel certificate remains
 pending as H14 NJ1; no Body admission or source/native adequacy is claimed.
 See [the lane record](inline-assembly-vy3.md).
+
+
+VY3 NJ1 kernel components: the explicit typed syntax/preparation and concrete
+lowering are inhabited. Exact checked-packet reconstruction is proved only
+under the visible premise `blockAux 20 ast = .ok tree`; that raw decoder
+equality remains the H14 routine task, so NJ1 is still partial. See
+[the lane record](inline-assembly-vy3.md).

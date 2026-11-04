@@ -1143,3 +1143,36 @@ Body dispatch, feature status or canonical rethrow changed. These are synthetic
 controls, not external solc/EVM evidence. Source attachment/MemOK/readback,
 frontend admission, full Source/G24/native correspondence and final joint gates
 remain open alongside NJ1 and the original unfinished queue.
+
+
+### NJ1 kernel components (raw attachment still partial)
+
+`StructuredSwitchJsonKernelControls` now constructs the explicit existing
+`Syn` tree, an inhabited `WordSyntax.Prepared` program, and its concrete nested
+lowering/emission/selection in the kernel. These inhabitants do not depend on
+any raw parser hypothesis. Source and structured-target certificates are
+available for that actual prepared program; its model prefix control produces21.
+No new AST, state, parser implementation or calling convention is introduced.
+
+`checkedFromParse`, `compiledFromParse` and `packetFromParse` construct all
+remaining packet fields, reusing the actual earlier span equation.
+`compilesFromParse` proves exact reconstruction of `checkCompile`, with the
+single explicit premise `blockAux 20 ast = .ok tree`. That equality has NOT
+been proved. Conditional packet/source/model conclusions do not inhabit the
+premise or close NJ1. The updated H14 routine handoff now asks for that exact
+remaining equality, then instantiation of the existing builders. No bare
+`raw_nested_packet` or unconditional raw compilation theorem is exported.
+
+Six enforced axiom reports contain only standard axioms. Independent read-only
+finder and skeptic reviews found no confirmed findings and checked the partial
+boundary. Focused/per-file kernel checks, MCP diagnostics, exact signatures and
+static gates pass under unchanged budgets. Direct and recursive simplification
+attempts retain their failed exits, including default recursion-bound failures;
+no limit was raised. Polymorphic-list import, closed shape-decision type and
+selected-index scoping diagnostics were fixed without changing postconditions.
+
+New prefix/oversized controls use the independently inhabited tree compiler,
+not an assumed decoder proof; they remain finite model observations. New raw
+JSON guards from the previous milestone remain evaluations. Body admission,
+Source/G24/views/readback, native/resource/world/trace adequacy, final joint
+gates and the original unfinished queue remain open along with the NJ1 equality.
