@@ -1135,3 +1135,23 @@ body certificates, admission and general P16 remain outside this theorem.
 Independent read-only finder/skeptic reviews found no issues. Both modules
 have zero diagnostic errors; ten scoped axiom reports use only Lean standard
 axioms. Final lane gates and external compiler/EVM validation remain open.
+
+
+### Post-iteration exact-word congruence
+
+`LocalBoolPostRepresentation.postIter` proves all-fuel congruence for the
+existing guarded Boolean post-iteration runner with its original guard, post
+and scoped-item certificates. Guard, body and post partial effects retain their
+actual order and predecessor horizons. Halted body contexts are preserved;
+post failures retain post-updated locals. Successful post values are discarded,
+while related updated full states feed recursion.
+Eight controls exercise post writes stopping the next guard, ignored false/true
+post values, skipped posts, body failure before post, post failure after a write,
+zero fuel and dirty projection refusal. The side-effecting failing post
+certificate is inhabited.
+These proof-only results change no evaluator, Source type, readback policy or
+admission. Broader body/post certificates and general P16 remain open.
+
+Independent read-only finder/skeptic reviews found no issues. Both per-file
+diagnostics report zero errors; nine scoped axiom reports contain only Lean
+standard axioms. Final lane and external compiler/EVM validation remain open.

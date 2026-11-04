@@ -95,3 +95,5 @@
 | `Yul/LocalBoolWhileRepresentation.lean`, `Yul/Checks/LocalBoolWhileRepresentation.lean` | All-fuel while/do-while exact-word congruence with scoped declarations and precise halted contexts. |
 
 | `Yul/LocalBoolForRepresentation.lean`, `Yul/Checks/LocalBoolForRepresentation.lean` | All-fuel Boolean-initialized no-post for congruence, preserving initializer/body halt contexts and outer writes. |
+
+| `Yul/LocalBoolPostRepresentation.lean`, `Yul/Checks/LocalBoolPostRepresentation.lean` | All-fuel guarded post-iteration congruence preserving body/post halt states and discarded post values. |

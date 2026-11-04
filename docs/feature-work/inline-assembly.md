@@ -283,3 +283,5 @@ VY1: concrete post/do-while classifications and omitted-guard post-loop Source h
 VY1: exact constant-loop reductions and constant-true do/while Source horizons proved, with effectful-post and breaking-body counterexamples; see [lane handoff](inline-assembly-vy1.md#constant-loop-reductions). General P16 remains open.
 
 VY1: exact-word congruence now composes through certified Boolean expressions, context-growing items, scopes, conditionals and loops, including Boolean-initialized no-post for execution; see [lane handoff](inline-assembly-vy1.md#boolean-initialized-for-congruence). General P16 remains open.
+
+VY1: all-fuel exact-word congruence now covers certified guarded Boolean post iterations, retaining body/post partial states while discarding post values; see [lane handoff](inline-assembly-vy1.md#post-iteration-exact-word-congruence). General P16 remains open.
