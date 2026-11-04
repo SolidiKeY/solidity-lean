@@ -309,6 +309,7 @@ import SolidityBridge.RoadmapV15.P10.SignedLeLayout
 import SolidityBridge.RoadmapV15.P10.SignedLePrimitive
 import SolidityBridge.RoadmapV15.P10.SignedLeWord
 import SolidityBridge.RoadmapV15.P10.SourceWordBytes
+import SolidityBridge.RoadmapV15.P10.SourceWordBytesControls
 import SolidityBridge.RoadmapV15.P10.StackFamilyConsumer
 import SolidityBridge.RoadmapV15.P10.StackFamilyControls
 import SolidityBridge.RoadmapV15.P10.StorageChaseControls
