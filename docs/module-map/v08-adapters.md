@@ -469,3 +469,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureSliceEncoding.lean` | Actual checked calldata slice argument composed with standard ABI encoding; invalid-head short-circuiting before arbitrary tails. |
 | `Solidity/Lowering/V08/LiteralFailureSliceEncodingControls.lean` | Populated slice/encode byte outputs, logical versus physical bounds, effectful-tail ordering and timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureNestedSlice.lean` | Actual nested calldata slicing, relative offset/full-word bounds, ordered failures and standard encoding consumer. |
+| `Solidity/Lowering/V08/LiteralFailureNestedSliceControls.lean` | Populated nested-slice packet outputs, old-alias preservation, nonzero/incorrect bases, two-stage bounds and timeout controls. |

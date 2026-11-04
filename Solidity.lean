@@ -1945,6 +1945,8 @@ import Solidity.Lowering.V08.LiteralFailureMixedSelector
 import Solidity.Lowering.V08.LiteralFailureMixedSelectorControls
 import Solidity.Lowering.V08.LiteralFailureMixedSignature
 import Solidity.Lowering.V08.LiteralFailureMixedSignatureControls
+import Solidity.Lowering.V08.LiteralFailureNestedSlice
+import Solidity.Lowering.V08.LiteralFailureNestedSliceControls
 import Solidity.Lowering.V08.LiteralFailureOverflowReason
 import Solidity.Lowering.V08.LiteralFailureOverflowReasonControls
 import Solidity.Lowering.V08.LiteralFailurePackedBytes
