@@ -445,6 +445,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Frontend/C3Exactness/Trace.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/LiteralFailureMemoryRevert.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/LiteralFailureMemoryRevertControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/UnsignedUpdateCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/UnsignedUpdateCallableControls.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
