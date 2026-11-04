@@ -190,3 +190,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceReferenceAliasDelete.lean` | Computed reference replacement, reached local alias and actual indexed deletion in one Source Items/intrinsic Prog/word append, with derived frames. |
 
 | `Backend/MemoryOps/SourceReferenceAliasReject.lean` | Actual computed replacement and reached local rebinding followed by late indexed-delete rejection; retained prefix observers, Source error globals, intrinsic Prog and full word append. |
+
+| `Backend/MemoryOps/PhysicalByteStore.lean` | Actual MSTORE8 in both byte APIs, disjoint complete numeric-word frames and reached-memory REVERT observations; no abstract-word instruction refinement. |
+| `Backend/MemoryOps/PhysicalByteStoreControls.lean` | Inhabited boundary-byte stores, high-word/full-byte observations, truncation/short-stack and overlapping-write frame counterexamples. |

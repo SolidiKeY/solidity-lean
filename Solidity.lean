@@ -286,6 +286,8 @@ import Solidity.Backend.MemoryOps.OverwriteAgreementExact
 import Solidity.Backend.MemoryOps.OverwriteRestoration
 import Solidity.Backend.MemoryOps.PhysicalArrayReframe
 import Solidity.Backend.MemoryOps.PhysicalByteJournal
+import Solidity.Backend.MemoryOps.PhysicalByteStore
+import Solidity.Backend.MemoryOps.PhysicalByteStoreControls
 import Solidity.Backend.MemoryOps.PhysicalFrameImage
 import Solidity.Backend.MemoryOps.PhysicalFrameImageControls
 import Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal
