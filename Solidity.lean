@@ -298,6 +298,8 @@ import Solidity.Backend.MemoryCopies.FixedPathCopyInterface
 import Solidity.Backend.MemoryCopies.FixedStorageCopy
 import Solidity.Backend.MemoryCopies.FixedStorageCopyControls
 import Solidity.Backend.MemoryCopies.FixedStorageCopyInterface
+import Solidity.Backend.MemoryCopies.FixedStoragePath
+import Solidity.Backend.MemoryCopies.FixedStoragePathControls
 import Solidity.Backend.MemoryCopies.FixedStoragePathInterface
 import Solidity.Backend.MemoryCopies.HeapContents
 import Solidity.Backend.MemoryCopies.HeapContentsControls
