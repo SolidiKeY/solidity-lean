@@ -309,3 +309,62 @@ Selection library reports match their source declarations. Independent
 read-only adoption reviews pass. The guard is attached before container
 startup; no resource stop occurred. These are checkpoint results, not a full
 lane pass, and they do not renew the failed H30 prerequisite allowance.
+
+
+## H33 serial prerequisite repair
+
+H33 authorizes a distinct retry with explicit single-thread compiler settings
+and separate bounded prerequisite groups. The actual input key remains
+8990275316855339899; the shipped input map has no matching record. The
+coordinator's different key15157267888537533899 is not reused or rekeyed.
+The target source SHA256 remains
+f7f3af9f667806ce59e1cf198608d1a7e601efaf662c5392669de03bcedf9bf4.
+
+Explicit LEAN_NUM_THREADS=1 and the existing serial TOML/compiler-j1 wrapper
+were used for separate Decision, HashingNames and DecisionHashes builds.
+All three groups passed under TERM178s/KILL2s bounds. A first cache-only
+lookup exited3; shell error handling ended that initial launcher before any
+prerequisite compilation. Its scripts and receipts are preserved separately;
+the subsequent launcher continued with the authorized serial groups.
+
+After own inactive build-page advice, both admission checks passed. The
+launcher requested readiness before workload startup, retaining Docker12GiB/no-swap,
+one CPU, the4GiB reserve and unchanged512MiB safety margin. The target
+retry stopped after approximately57.2s: the guard observed12361523200 bytes
+of parent memory use and4818345984 bytes of headroom. This was a runtime
+safety-margin stop, not admission failure, timeout or a Lean diagnostic.
+Consequently the H33 admission-failure600s retry condition did not occur.
+The container exited137 and produced no target olean; no output is
+reconstructed and no further unchanged heavy retry is taken.
+
+The H30 red receipt remains intact. H33's exact commands, admission and
+runtime trace, explicit compiler argv, cache miss and group results are saved
+under /workspace/parallel-20261103/executable-bytecode/h33-ops1/evidence.
+Full validation remains pending until the exact artifact can be kernel-built
+within the authorized limits or supplied as an exact verified mapping.
+This repair does not change proofs, premises, theorem budgets or exclusions,
+and does not establish RUNTIME_GATE_PASS or whole-lane completion.
+
+Finder identified a startup-readiness race in the reused launcher: copying
+old guard.log did not synchronously clear its previous READY marker before
+the second background redirection. Runtime monitoring, admission and stop
+are observed, but strict pre-start guard readiness for that invocation is
+not established by these logs. The executed script remains unchanged as
+evidence; launch-next.sh adds synchronous log truncation and guard-liveness
+checks for a future authorized run. No heavy rerun is inferred from this
+control repair. Finder and skeptic reviews are read-only; no Lean server or
+build was used by reviewers.
+
+Coordinator clarification preserves only the single existing extra180s
+prerequisite allowance per checkpoint, with300s proof/group and14400s
+aggregate bounds; serial import groups do not multiply that allowance.
+The observed serial build window, including the failed target, was below
+180s. No further unchanged target retry is authorized. The remaining named
+dependency is the existing VA1 owner
+solidity-automation-20261031/va1-decision: a published reviewed split of
+DecisionHashesChecks retaining every theorem, namespace, control and original
+aggregator, or an exact source-keyed artifact. Shared Examples modules remain
+read-only here. There is no independently ready owned proof work remaining
+within the documented fragment; required full validation remains blocked.
+Independent finder and skeptic accept the final limitation and prospective
+launcher correction. Neither used builds, a Lean server or edits.
