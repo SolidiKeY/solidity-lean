@@ -1,5 +1,6 @@
 import Solidity.Examples.DecisionHashCore
 import Solidity.Examples.DecisionHashFamilyCheck
+import Solidity.Examples.DecisionHashFiveChain
 
 /-!
 # Five-string family and exact coverage controls.
@@ -27,23 +28,6 @@ coverage check asks for the same (`famCovered`). -/
 /-- info: [true, true] -/
 #guard_msgs in #eval [fiveStrings, fiveChain].map (fun φ => φ.hashCovered && φ.inTarget {})
 
-/-- Five strings, by the kernel: the family of five checked (`famOKAll 5`,
-fifteen hashes) and the 52 instances covered. -/
-theorem fiveChain_covered : fiveChain.hashCovered = true := by
-  have hf : famCovered fiveChain.allocCount = true := by
-    change famCovered 5 = true
-    exact famCovered_five
-  have hk : fiveChain.coveredK .keccak = true := by
-    simp only [Fml.coveredK, hf]
-    decide +kernel
-  unfold Fml.hashCovered
-  simp only [Bool.and_eq_true]
-  refine ⟨by decide +kernel, List.any_eq_true.mpr ?_⟩
-  refine ⟨tryK .keccak (by decide), ?_, hk⟩
-  simp only [hashTries, List.mem_cons, true_or]
-
-
-#print axioms fiveChain_covered
 
 end Hashes
 end Solidity.Examples.DecisionHashes
