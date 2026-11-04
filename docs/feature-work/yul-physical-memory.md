@@ -644,3 +644,11 @@ is invented. The empty-locals halted-callee control computes both dormant packs,
 actual source inventory, whole-store unchanged writeback and full raw reencoding.
 The theorem establishes child-pack selection, not arbitrary descendant-path or
 initial/escape reachability adequacy; successful checked preparation remains real.
+
+`RetainedCallerHeaders` carries saved-caller-selected child packs into their
+actual declaration-traced dynamic header registrations, then into the computed
+source inventory. Header membership derives from the checked child packing;
+no final membership law is supplied. The dormant child1 control uses the real
+post-stamp cursor `102*32+2`, derives aligned slot103/offset0/width32, reads actual
+Source length1 and rejects sibling slot101. This covers traced headers of selected
+packs, not arbitrary descendant paths, reachability or full source adequacy.
