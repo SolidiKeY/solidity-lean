@@ -189,3 +189,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TraversalFresh.lean` | Generic fresh strictly ordered sibling identities and nonaliasing from the existing typed storage-copy fold. |
 | `Backend/MemoryCopies/TraversalControls.lean` | Repeated populated nested trees after old ownership, empty/64 vectors and shared-identity negative control. |
 | `Backend/MemoryCopies/AliasBindingInterface.lean` | Actual pointer-compiler selection and emitted alias rebinding success/refusal with allocator framing. |
+| `Backend/MemoryCopies/AliasBinding.lean` | Actual selected pointer compiler followed by alias-local store, deriving exact source/target success or bounds refusal. |
+| `Backend/MemoryCopies/AliasBindingControls.lean` | Populated indexed-alias source/target observations, bounds refusal and fresh-pointer/empty-code negative controls. |
