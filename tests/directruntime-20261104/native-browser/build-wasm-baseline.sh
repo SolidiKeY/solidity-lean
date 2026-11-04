@@ -27,6 +27,7 @@ Path("tests/directruntime-20261104/native-browser/gmp-serial.sh").write_text(s.r
 GMP
 common=(--rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000
  -e LEAN_NUM_THREADS=1 -e EMCC_CORES=1 -e BINARYEN_CORES=1
+ -e EM_FROZEN_CACHE=0 -e EM_CACHE=/work/toolchain-cache
  -e GIT_CONFIG_GLOBAL=/work/native-browser.gitconfig
  -v "$repository:$repository" -v "$work:/work"
  -v "$native:/native:ro" -v /workspace/.setup:/workspace/.setup:ro
