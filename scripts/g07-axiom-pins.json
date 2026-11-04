@@ -28820,6 +28820,36 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.action_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.actual_fixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.erase_prefix_not_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.fixture_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.growth_does_not_fix_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.growAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.caller_nonce_retained": [
   "Classical.choice",
   "Quot.sound",
@@ -29530,6 +29560,11 @@
   "propext"
  ],
  "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.runTxWithPlan": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionGrowth.lean:Solidity.Source.FailureExecution.runTxWithPlan_grow": [
   "Classical.choice",
   "Quot.sound",
   "propext"

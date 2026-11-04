@@ -2225,6 +2225,8 @@ import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
 import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
+import Solidity.Source.FailureEvaluatorGrow
+import Solidity.Source.FailureEvaluatorGrowControls
 import Solidity.Source.FailureEventControls
 import Solidity.Source.FailureEventLaws
 import Solidity.Source.FailureFrameHorizon
@@ -2242,6 +2244,7 @@ import Solidity.Source.FailureRequestHorizonControls
 import Solidity.Source.FailureResources
 import Solidity.Source.FailureRuntimeControls
 import Solidity.Source.FailureTransactionControls
+import Solidity.Source.FailureTransactionGrowth
 import Solidity.Source.Funds
 import Solidity.Source.FundsControls
 import Solidity.Source.Hoare

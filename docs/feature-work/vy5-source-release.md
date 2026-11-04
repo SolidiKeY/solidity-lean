@@ -105,3 +105,45 @@ are retained; the regenerated axiom inventory equals the semantic three-way
 merge, with fourteen new request-horizon pins. The known H19 transfers shrink
 to an axiom-free proof is preserved, not overwritten by master's old Word pin.
 No Source implementation was altered by that correction.
+
+
+## Closed enabled-plan evaluator growth
+
+FailureEvaluatorGrow proves GrowAt for every horizon, arbitrary intrinsic
+program/global/state and any fixed enabled FailurePoints. All17 functions
+of the actual mutual evaluator are included. The final growAt theorem has
+no NoFail, body-growth, fragment or desired-execution premise. The generated
+record/induction is proof-only, based on the existing Source.Horizon case
+partition, with actual functions explicitly supplied some points. No AST,
+state or evaluator is copied or replaced. The generator records a raw-byte
+SHA256 basis and --check rejects stale/missing output, including CRLF changes.
+Existing uniform unused induction-hypothesis warnings are retained rather
+than suppressed. No proof/fuel/heartbeat/node budget changes.
+
+Initial checking91.700s failed only at an explicit envLoop equation that
+selected none. Selecting the actual some-points equation passes80.074s,
+below the unchanged300-second module bound. The hot existing Horizon file
+is unchanged; its pre-existing timing-policy failure remains a failure.
+The VM then disconnected before control-file creation. On recovery, the
+passing proof/source hash was confirmed; only controls/import materialization
+resumed. A context-name collision and premature fixture reduction failed
+that check; context qualification and existing fixture equalities fixed it
+without increasing the heartbeat budget. No downstream generated sorryAx
+is accepted as a proof. Raw failures remain under planned-grow-20261104.
+
+Five controls consume actual mark/sub/enterInstance under both Source
+pipeline settings: all-horizon/all-cut caller-prefix preservation, exact
+existing fixture identity, changed-plan outcomes and event-erasure refusal.
+FailureTransactionGrowth further proves Grow of actual runTxWithPlan with
+the request timestamp-adjusted global, root credit/dispatch/rollback,
+finalization and receipt operations. No body-growth/outcome oracle is supplied.
+Headline induction, root and controls have only propext/Classical.choice/
+Quot.sound, pinned by guard messages. Finder and skeptic reviewed read-only
+without Lean/build/tests; generator byte-check precision was fixed and
+re-reviewed, with no remaining findings.
+
+This closes event growth only. Enabled-plan Approx/Below induction, cursor
+coherence, full deployment/request ordinal/session consistency, exact-money
+installation/authority wiring, H19 full reachability, P8 realization and
+immutable/funds release remain open. It supplies no fresh native observation,
+assembly embedding, original24-obligation/six-combination or full-lane closure.

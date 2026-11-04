@@ -125,3 +125,7 @@
 
 | `Source/FailureRequestHorizon.lean` | Actual requestScope event growth and fixed-plan horizon approximation with per-balance body premises; timeout cleanup rethrows without events. |
 | `Source/FailureRequestHorizonControls.lean` | Inhabited request horizon/full-state/wide-input/byte controls, cut/drop distinctions, caught-cut refusal and changed-plan counterexample. |
+
+| `Source/FailureEvaluatorGrow.lean` | Closed event-growth induction over all17 existing Source evaluator functions with an arbitrary enabled fixed plan; generated proof basis, no body-growth/NoFail/outcome premise. |
+| `Source/FailureEvaluatorGrowControls.lean` | Actual entered-frame induction use, all-horizon prefix transport and changed-plan/event-erasure counterexamples; transitive standard axiom pins. |
+| `Source/FailureTransactionGrowth.lean` | Actual runTxWithPlan event growth from the closed induction and real root operations; no session/Approx/P8 claim. |
