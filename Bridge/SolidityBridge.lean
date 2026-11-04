@@ -291,6 +291,8 @@ import SolidityBridge.WeakestPreLaws
 import SolidityBridge.Yul.ArithmeticSelection
 import SolidityBridge.Yul.ArithmeticSelectionControls
 import SolidityBridge.Yul.BinaryPlacement
+import SolidityBridge.Yul.BranchModel
+import SolidityBridge.Yul.BranchModelControls
 import SolidityBridge.Yul.ChargedArithmeticShift
 import SolidityBridge.Yul.ChargedArithmeticShiftControls
 import SolidityBridge.Yul.ChargedBitwise
