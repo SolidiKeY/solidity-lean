@@ -421,3 +421,8 @@ Independent read-only finder and skeptic reviews passed with no findings.
 They confirmed initial-image-derived execution, exact post-image/accounting,
 standard word-fit handling, inhabited either-pipeline/unbounded-reserve controls
 and preservation of inherited failures and remaining compiler/Source boundaries.
+
+`TailGuardInterface.lean` specifies a single composed numeric length-prefixed
+reference guard with exact signed offset, length-limit and modular region
+predicates. The runtime size operand is shared explicitly; loading and native
+conditional branching remain separate.
