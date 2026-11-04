@@ -1600,4 +1600,13 @@ Concrete clients obtain the target witness through ReturnClaim and retain the co
 
 The frozen V2 recursive-return producer is inhabited using universal claims and source coherence. `with_domain` assembles V3 only from explicit external family agreement, universal Entry coverage and both witness memberships. Agreement alone does not authenticate approved-profile provenance. General recursive body selection, approved-domain coverage and full runtime/physical/world correspondence remain open.
 
-A checked coverage counterexample remains: the same caller and code succeed at index five, but the inherited quotation-based arena reserve rejects its Entry. This conservative metadata is not an approved-profile characterization; coverage cannot be assumed and requires further owned resource work.
+The quotation-based plan retains a checked counterexample: the same caller and code succeed at index five, but its arena reserve rejects Entry. The actual-count constructor below repairs this case without changing that plan. Neither constructor establishes approved-profile coverage by itself.
+
+
+### Actual-count arena demand
+
+`RuntimeFrameV3ScalarDemand` provides a new plan constructor without altering the quotation-based plan. Its reserve is the mandatory control-space floor together with twice the actual checked argument count; a failed argument retains the floor. It uses the existing source value evaluator as natural resource metadata, not an admission predicate or another evaluator. Code, source semantics, fixed interfaces and proof/test/resource limits are unchanged.
+
+The checked metadata bridge reuses the earlier capacity proof at the actual count. This is proof-only: the new universal `ReturnClaim` and `BareRevertClaim` keep their original source quotation index and the same machine/code. `RuntimeFrameV3ScalarDemandDual` instantiates the same successful and reverting callers, now with valid initial entries at every index. The old-plan rejection and new-plan admission at index five are both retained, while insufficient actual demand and insufficient control space still fail. Complete 22-word observations are unchanged.
+
+This repairs the demonstrated reserve obstruction and supplies a V2 producer for the new metadata. V3 assembly still requires external admission agreement, universal initial-entry coverage and admitted witness memberships; none authenticates approved-source provenance by itself. General recursive source selection, full-domain coverage and world/physical correspondence remain open.
