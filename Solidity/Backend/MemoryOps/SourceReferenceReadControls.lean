@@ -1,6 +1,7 @@
 import Solidity.Backend.MemoryOps.SourceReferenceRead
 import Solidity.Backend.MemoryOps.SourceReferenceReadSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAliasSequence
+import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1051,5 +1052,170 @@ theorem complete_reference_alias_vectors (self : Bool) :
 #guard_msgs (whitespace := lax) in #print axioms computed_reference_alias_client
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_alias_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms complete_reference_alias_vectors
+
+private def aliasDeletedState (self : Bool) := (aliasFinalState self).withHeap (deletedHeap self)
+private def aliasDeletedWord (self : Bool) := writeMachine (aliasFinalWord self) 26 w[0]
+
+/-- THREE actual Source/native statements and whole target append. The computed
+RIGHT pointer passes through a local before deletion; RIGHT[1] changes true to
+false while old LEFT and shared parent references remain. Both pipeline orders
+and both distinct/same parent cases are inhabited. Reads following the program
+are separate expressions, not a fourth compiled statement. -/
+theorem computed_alias_delete_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ (ym z : Source.EMState E0 AliasSΓ),
+    let ya : Source.EMState E0 AliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2);
+      (Source.execS (G0 p) F0 (fuel+6) AliasSΓ.length none
+        (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si)) :
+          Source.RStmt E0 [] false .body AliasSΓ AliasSΓ) aliasSource.1).run (.nil,aliasSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+5) AliasSΓ.length none
+        (.expr (sourceSelectedAlias .here (.there (ds self)) (.there sj)) :
+          Source.RStmt E0 [] false .body AliasSΓ AliasSΓ) ym.1).run (.nil,ym.2)=(.ok (.normal ya.1),(.nil,ya.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+4) AliasSΓ.length none
+        (.expr (sourceIndexedDelete .here (.there si)) : Source.RStmt E0 [] false .body AliasSΓ AliasSΓ)
+        ya.1).run (.nil,ya.2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) AliasSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si)))
+          (.stmt (.expr (sourceSelectedAlias .here (.there (ds self)) (.there sj)))
+            (.stmt (.expr (sourceIndexedDelete .here (.there si))) .nil)) :
+              Source.RItems E0 [] false .body AliasSΓ AliasSΓ) aliasSource.1).run (.nil,aliasSource.2)=
+                (.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run aliasState (.cons (referenceReadStmt (.there (dt self)) (.there tsrc) (.there ti) (.there tj))
+        (.cons (.rebindMem .here (.alias (.loc (.index .dyn (.var (.there (dt self)) rfl) (.simple (.local (.there ti)))))))
+          (.cons (.deleteMem (.loc (.index .dyn (.var .here rfl) (.simple (.local (.there tj))))) rfl) .nil)))=
+            .ok ⟨aliasDeletedState self,List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) (Δ := AliasΓ) 1 (.there (dt self)) (.there tsrc) (.there ti) (.there tj)) aliasWord=
+        .ok (aliasMidWord self) 0 ∧
+      run (selectedAliasCode (C := C) (Γ := AliasΓ) 1 .here (.there (dt self)) (.there ti)) (aliasMidWord self)=.ok (aliasFinalWord self) 0 ∧
+      run (deleteLocalCode 1 (.here : Idx AliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there tj)) : Val C AliasΓ .uint)))
+        (aliasFinalWord self)=.ok (aliasDeletedWord self) 0 ∧
+      run ((referenceReadWriteCode (C := C) (Δ := AliasΓ) 1 (.there (dt self)) (.there tsrc) (.there ti) (.there tj) ++
+        selectedAliasCode (C := C) (Γ := AliasΓ) 1 .here (.there (dt self)) (.there ti)) ++
+          deleteLocalCode 1 (.here : Idx AliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there tj)) : Val C AliasΓ .uint)))
+        aliasWord=.ok (aliasDeletedWord self) 0 ∧
+      aliasViews ym=expectedSource self ∧ aliasViews ya=expectedSource self ∧ aliasViews z=deletedSource self ∧
+      SourceBoolRefsAt z (daddr self) (deletedHeap self) (dref self) addresses ∧
+      SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn ∧ SourceBoolMemoryAt z 1 (deletedHeap self) right .dyn ∧
+      Source.MemOK E0 SH z ∧ RefArrayStateRepr 1 1 8 aliasFrag (aliasDeletedState self) base (aliasDeletedWord self) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx AliasSΓ SB)) (.local (.there si)) rfl)).run ya=
+        (.ok (.val (.bool true)),ya) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx AliasSΓ SB)) (.local (.there si)) rfl)).run z=
+        (.ok (.val (.bool false)),z) ∧
+      (Source.readLoc (E := E0) (Γ := AliasSΓ) F0 (τ := .bool) (.mem 0 0)).run z=(.ok (.bool true),z) ∧
+      z.1=aliasSource.1.set .here (.memRef rfl 1) ∧ z.2.heap.next=5 ∧ z.2.heap.get 5=none ∧
+      (z.2.ex=aliasSource.2.ex ∧ z.2.events=aliasSource.2.events ∧ z.2.logs=aliasSource.2.logs ∧ z.2.fnLocals=aliasSource.2.fnLocals) ∧
+      StructAllocatorRepr (deletedHeap self) base 8 ⟨48,by decide⟩ (aliasDeletedWord self) ∧
+      (aliasDeletedWord self).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := (aliasAt self).computed_alias_delete_program (G0 p) F0 fuel aliasSource aliasState (dref self) fresh
+      (daddr self) 3 addresses aliasFresh (.there (ds self)) (.there ssrc) (.there sj) (.there si) (.there si) .here
+      (.there (dt self)) (.there tsrc) (.there ti) (.there tj) (.there tj) .here
+      ⟨0,by decide⟩ ⟨1,by decide⟩ ⟨1,by decide⟩
+      (by cases self <;> rfl) rfl rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl rfl
+      (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      (by simp only [Heap.len,MObj.elems_dyn];decide) (by intro t ht hn;exact hn)
+      SH aliasSourceOK aliasRepr
+    obtain ⟨mid,out,ym,z,hw₁,selected,hw₃,stmt₁,stmt₂,stmt₃,items,native,word₁,word₂,word₃,word,hr₂,hr₃,child₂,
+      mok₂,mok₃,repr₂,repr₃,locals₁,locals₃,nativeAlias,parentElems,childElems,others,addrs,next,effects,stack,alloc,
+      repr₁,children,midAddrs,write₃⟩ := result
+    simp only [MObj.elems_dyn] at hw₁ hw₃ nativeAlias
+    have known₁ : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap self := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₃ : (postHeap self).writeAddr (.index right .dyn (indexValue ⟨1,by decide⟩)) false=some (deletedHeap self) := by
+      cases self <;> simp only [Heap.writeAddr,Heap.setIndex,postHeap,dref,Bool.false_eq_true,if_false,if_true,indexValue,
+        Int.toNat_natCast,Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,deletedHeap] <;> rfl
+    have outEq : out=deletedHeap self := Option.some.inj (hw₃.symm.trans known₃)
+    subst out
+    simp only [MObj.elems_dyn] at stmt₂ stmt₃ items native word₁ word₂ word₃ word hr₂ hr₃ repr₂ repr₃ child₂ locals₃ nativeAlias parentElems childElems others addrs midAddrs write₃ alloc
+    let ya : Source.EMState E0 AliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2)
+    change SourceBoolRefsAt ya (daddr self) (postHeap self) (dref self) addresses at hr₂
+    change SourceBoolRefsAt z (daddr self) (deletedHeap self) (dref self) addresses at hr₃
+    change SourceBoolMemoryAt ya 1 (postHeap self) right .dyn at child₂
+    change ∀ q : HRef H B,(postHeap self).get q=hp.get q at children
+    change ∀ q : HRef H B,q.id≠right.id → (deletedHeap self).get q=hp.get q at others
+    change z.1=aliasSource.1.set .here (.memRef rfl 1) at locals₃
+    have tables : aliasViews ym=expectedSource self := by
+      have parent := hr₂.parent
+      rw [post_elems] at parent
+      cases self
+      · change ym.2.heap.get 2=some ⟨SR,pdata [right]⟩ at parent
+        unfold aliasViews expectedSource
+        rw [parent,midAddrs 0 (by decide),midAddrs 1 (by decide),midAddrs 3 (by decide),midAddrs 4 (by decide)];rfl
+      · change ym.2.heap.get 3=some ⟨SR,pdata [right,right,left]⟩ at parent
+        unfold aliasViews expectedSource
+        rw [parent,midAddrs 0 (by decide),midAddrs 1 (by decide),midAddrs 2 (by decide),midAddrs 4 (by decide)];rfl
+    change ((deletedHeap self).get (dref self)).val=(hp.get (dref self)).val.set 0 right at parentElems
+    change ((deletedHeap self).get right).val=(hp.get right).val.set 1 false at childElems
+    have member : right∈MObj.elems .dyn ((deletedHeap self).get (dref self)) := by
+      rw [MObj.elems_dyn,parentElems]
+      simpa only [MObj.elems_dyn] using List.mem_set (dhi self) right
+    have child₃ := hr₃.children right member
+    have leftAt : SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn := by
+      unfold SourceBoolMemoryAt
+      rw [addrs 0 (by cases self <;> decide) (by decide),others left (by decide)]
+      exact left_at
+    have finalTables : aliasViews z=deletedSource self := by
+      have parent := hr₃.parent
+      have leaf := child₃
+      unfold SourceBoolMemoryAt at leaf
+      cases self
+      all_goals
+        simp only [deletedHeap,postHeap,dref,daddr,addresses,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,
+          Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,List.set_cons_zero,List.set_cons_succ] at parent leaf
+        unfold aliasViews deletedSource
+        simp only [Bool.false_eq_true,if_false,if_true]
+        rw [parent,leaf,addrs 0 (by decide) (by decide),addrs 4 (by decide) (by decide)]
+      · rw [addrs 3 (by decide) (by decide)];rfl
+      · rw [addrs 2 (by decide) (by decide)];rfl
+    have before : (postHeap self).index right .dyn (uintOfNat 1)=some true := by
+      simp only [Heap.index,children right,MObj.elems_dyn];rfl
+    have after : (deletedHeap self).index right .dyn (uintOfNat 1)=some false := by
+      change (MObj.elems .dyn ((deletedHeap self).get right))[1]?=some false
+      rw [MObj.elems_dyn,childElems];rfl
+    have beforeRead := child₂.eval_local_read (G0 p) F0 fuel .here (.there si) (uintOfNat 1) true
+      (source_locals_get_set _ _ _) (by rw [source_bool_alias_uint_frame,locals₁];rfl) before
+    have afterRead := child₃.eval_local_read (G0 p) F0 fuel .here (.there si) (uintOfNat 1) false
+      (by rw [locals₃];rfl) (by rw [locals₃];rfl) after
+    have leftRead := (leftAt.read_iff F0 (uintOfNat 0) true).mpr
+      (by simp only [Heap.index,others left (by decide),MObj.elems_dyn];rfl)
+    refine ⟨ym,z,stmt₁,stmt₂,stmt₃,items,native,word₁,word₂,word₃,word,tables,tables,finalTables,hr₃,leftAt,child₃,
+      mok₃,repr₃,beforeRead,afterRead,leftRead,locals₃,next,?_,effects,?_,rfl⟩
+    · rw [addrs 5 (by cases self <;> decide) (by decide)];rfl
+    · apply alloc ⟨48,by decide⟩ (by decide) aliasAllocator
+      cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,MObj.elems_dyn,base] <;> decide
+
+/-- ALL ordered machine/native observations across replacement, rebinding and
+clear. Prior vectors are reused verbatim; the final clear changes only RIGHT's
+payload cell26. Skipping clear or selecting the stale LEFT object differs. -/
+theorem complete_alias_delete_vectors (self : Bool) :
+    words aliasWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (aliasMidWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (aliasFinalWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[24],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (aliasDeletedWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[24],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[0],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap self)=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    views (aliasFinalState self).heap=views (postHeap self) ∧
+    views (deletedHeap self)=([true,false,false],[false,false,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    TEnv.get (.here : Idx AliasΓ (.mem B)) (aliasDeletedState self).env=some right ∧
+    (aliasDeletedWord self).mem 0=w[48] ∧ (aliasDeletedWord self).stack=[w[42]] ∧
+    words (aliasDeletedWord self)≠words (aliasFinalWord self) ∧
+    words (aliasDeletedWord self)≠words (writeMachine (aliasFinalWord self) 18 w[0]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,rfl,?_,?_,rfl,?_,rfl,rfl,rfl,by decide,by decide⟩
+      · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+      · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+      · simp only [views,deletedHeap,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_alias_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_alias_delete_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_alias_delete_vectors
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

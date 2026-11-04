@@ -188,3 +188,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceReferenceReadSequence.lean` | Computed reference RHS followed by reached nested delete or ordered parent/child bounds rejection; actual Source Items, intrinsic Prog, whole word append and prefix observer/allocator frames. |
 
 | `Backend/MemoryOps/SourceReferenceAliasSequence.lean` | Actual computed reference replacement followed by reached local alias selection; Source Items, intrinsic Prog, full word append and derived observer/local/allocator frames. |
+
+| `Backend/MemoryOps/SourceReferenceAliasDelete.lean` | Computed reference replacement, reached local alias and actual indexed deletion in one Source Items/intrinsic Prog/word append, with derived frames. |
