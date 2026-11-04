@@ -2484,6 +2484,8 @@ import Solidity.Yul.Adapters.RawPhysicalInteriorControls
 import Solidity.Yul.Adapters.RawPhysicalInventory
 import Solidity.Yul.Adapters.RawPhysicalInventoryControls
 import Solidity.Yul.Adapters.RawPhysicalProducer
+import Solidity.Yul.Adapters.RawPhysicalReturndata
+import Solidity.Yul.Adapters.RawPhysicalReturndataControls
 import Solidity.Yul.Adapters.RawPhysicalUpdate
 import Solidity.Yul.Adapters.RawPhysicalUpdateControls
 import Solidity.Yul.Adapters.RawPhysicalWriteback

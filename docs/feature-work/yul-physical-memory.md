@@ -1211,3 +1211,13 @@ accounting stays at six. Preimage negatives assume no hash injectivity.
 These are gas-free instruction-slice/physical-frame laws; Word-end nonwrapping,
 resource adequacy, ordinary dirty Source readback and whole compiler/world
 composition are not supplied.
+
+`RawPhysicalReturndata.world_copy` connects the actual World target-memory
+port to P6 `writeSpan`, using the actual strict returndata window to determine
+both bytes and length. `transport` derives reached inventory room and complete
+frame identity after refreshing all raw locals from that same reached map.
+Physical capacity and Word-end nonwrapping remain separate from source-window
+validity. Controls retain a dirty bool's interior byte, its sibling and nonzero
+padding, and distinguish a valid empty window at the end from an invalid one
+past the end. This covers raw local images; typed-heap adequacy, CALL execution,
+resource accounting and source-level failure interpretation remain separate.

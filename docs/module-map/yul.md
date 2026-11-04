@@ -156,3 +156,4 @@
 | `Yul/Adapters/RawPhysicalCalldata{,Controls}` | Actual Fr.cd copy into arbitrary raw-local images, with derived complete frame writeback and exact raw-word versus typed Source decoder success/error boundaries. |
 | `Yul/Adapters/SourceEnvironmentSlice{,Controls}` | Actual Source magic/balance reads paired with executed environment instruction slices, preserving ordered values/state/memory/tails and post-operand balance snapshots without claiming independent ledger or compiler adequacy. |
 | `Yul/Adapters/RawPhysicalHash{,Controls}` | Actual KECCAK/PUSH/MSTORE digest writeback into a complete raw-local image, retaining the old overlapping input snapshot and explicit P6 read/store access accounting. |
+| `Yul/Adapters/RawPhysicalReturndata{,Controls}` | Strict world returndata copying into the complete raw-local physical image, with separate window/capacity/nonwrap guards, derived reached room, whole-frame writeback and dirty-byte/empty-window controls. |
