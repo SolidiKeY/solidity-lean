@@ -1641,3 +1641,13 @@ These results establish frame re-entry and an inhabited scalar-family compositio
 The client selects the real post-allocation heap-reading call at every index, including the unchanged native default, with the same runtime image. Its reached Entry and return remain the complete earlier 26-word endpoint. A selected invalid argument has a real source and target bare revert. Negative controls include a program whose outer layer matches but whose deeper child changes canonical exhaustion into revert: complete verification rejects it. Wrong guard, return destination, increment, base and index are rejected too.
 
 This is specialized intrinsic scalar-family selection, not general recursive compilation, elaborator/catalogue provenance or approved-profile coverage. The old `Mutation.compileRecursive` refusal is unchanged. A checked exhausted quotation can still select an image that succeeds; the explicit control records why the two frozen conditional claims are not a full failure/termination simulation. Physical/world correspondence and the original full validation obligations remain open.
+
+### Scoped default locals around selected recursive bodies
+
+`RuntimeFrameScopedSource` proves a full-outcome equation for an actual block that runs a body, introduces one unused default primitive local and drops it. Successful state, heap extension and every halt are preserved; this is a law of the existing evaluator, without heap-content preservation assumptions. The call law retains the same arguments and return binder.
+
+`RuntimeFrameV3ScopedScalarCompiler` recognizes precisely that wrapper around a checked scalar body. It checks the inner final context, complete body receipt and public argument-emitter receipt. Its constructor equation links the actual public selector to the selected emission. It does not treat initialized locals, observable writes or extra inner locals as unused defaults.
+
+The registered client accepts every primitive local type, name and quotation index, with the same target image. At the real post-mutation/allocation caller it discharges the reached Entry and source success, preserving the previous complete 26-word endpoint, aliases, private/new objects, result and stack. A selected invalid argument has a real source and target bare revert. Controls retain initialization/write/context/body refusals and distinguish source panic, payload and exhaustion; refused payload bodies have no target payload theorem.
+
+This is specialized scoped source selection, not arbitrary recursive compilation, frontend/profile provenance or full failure/termination correspondence. The earlier exhausted-source/target-success boundary remains. Original mandatory validation and general profile/world obligations remain open.
