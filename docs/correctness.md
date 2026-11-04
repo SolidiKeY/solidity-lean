@@ -71,3 +71,16 @@ Regressions: `Examples/Tactics/AuditRepairs.lean`,
 `Examples/Tactics/Net.lean`, `Examples/Tactics/RunnerAudit.lean`.
 Correctness is relative to the model: full solc/EVM equivalence, gas and
 static-call restrictions are outside the proved fragment.
+
+## Caller models (O11)
+
+`ValidM M ts φ` (`⊨ᶠₘ[M; ts] φ`, `Calculus/CallerModel.lean`) reads `φ`
+with callees that call back as the caller model `M` allows: `none` (no
+callback: `Fml.Valid`), `staticOnly` (read, change nothing),
+`nonReentrant R` (call back only into entries `R`'s lock does not guard) or
+`any` (`ValidT ts`, `validM_any`). It is an internal formula validity like
+`ValidT`; no `Spec` statement reads it yet. A box proved under a stronger
+model holds under a weaker one (`ValidM.weaken`, positive modalities only),
+so a `ValidT` proof is one under every model (`ValidM.of_validT`); the
+converse fails at each level (`Theory/CallerModel/Separation.lean`). See
+[options.md](options.md#o11-caller-models-lean-only).

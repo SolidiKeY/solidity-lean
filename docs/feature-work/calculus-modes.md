@@ -41,4 +41,56 @@ lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
 
 ## Handoffs
 
-None yet.
+### VC2 — O11 caller-model lattice (2026-11-05)
+
+**Inventory (step 0).** `Bridge/` has no callback or attacker notion.
+`Solidity/Tools/` has none either (its counterexample `Tri` reads runs, not
+callers). Reused: `StateInv`, `ExecS`/`ExecP`/`ExecF`, `Prog.exec_run`,
+`ExecS.eq_run` (`Semantics/Callback.lean`); `holdsC`, `ValidT`,
+`TransferSem`, `validT_noCallback_iff` (`Calculus/CallbackHolds.lean`);
+`Upd.afterT_imp`, `Modality.forallB`. `CallMode.static` and `Mode.readOnly`
+name the `STATICCALL` restriction but no callback run reads them (O1 "not
+done", H22), so `staticOnly` is a model of the callee, documented against
+them, not a reading of `ExtCall.mode`. `Semantics/Lifetime.lean`'s
+`System` (entries as `Prog C [] []`) shaped `Reentry`; it reads the
+deterministic run, so it is not reused for re-entry. The reentrancy-lock
+examples in the repository are prose only (`Examples/Tactics/Callback.lean`
+has no lock); no lock judgment existed. `docs/options.md` O1/O3/O4 fixed
+the orthogonality: the transfer semantics says whether a payment calls back,
+the caller model what a callee that does may do.
+
+**Interface for VC3 (stable): `Solidity.Calculus.CallerModel`** —
+`CallerModel C` (`none | staticOnly | nonReentrant (R : Reentry C) | any`),
+`CallerModel.Allows`, `CallerModel.Le`, `Reentry` (`Entry`, `body`,
+`guarded`, `held`; `Call`, `Reach`, `Guards`, `KeepsHeld`), the runs
+`ExecSM M J`/`ExecPM`/`ExecFM`, `holdsR M I pay`, `ValidM M ts φ`
+(`⊨ᶠₘ[M; ts] φ`). Theorems: `Calculus/CallerModelRun.lean`
+(`ExecPM.mono`, `ExecPM.toExecP`, `ExecP.ofExecPM`, `Prog.execM_run`),
+`Calculus/CallerModelValid.lean` (`validM_any`, `validM_none`,
+`validM_none_iff_noCallback`, `ValidM.weaken`, `ValidM.of_validT`,
+`Reentry.reachAny_iff`). For O12, a reachable-states mode under model `M`
+should read callbacks inside its transaction sequence by `ExecPM M`.
+
+**Done.** Lattice and lock judgment; `any`/`none` coincide with today's
+readings (`validM_any` exact; `validM_none` is `Fml.Valid`, equal to
+`ValidT .noCallback` without `try`/value call); weakening theorem; one
+separating example per adjacent pair (`Theory/CallerModel/Separation.lean`),
+each with its `#print axioms` pinned. Docs: options.md O11, correctness.md
+"Caller models (O11)", module-map rows.
+
+**Design note.** `ExecSM` is a model-indexed copy of `ExecS` (41
+constructors, three with an `Allows` premise more), not an edit of `ExecS`:
+an extra premise on `ExecS` would change the arity of `transferResume`,
+`sendResume` and `tryOk` in about twenty modules outside this lane
+(`CallbackWk`, `CallbackUnwk`, `CallbackFrame`, `CapturePayments`, …). The
+copy's agreement with `ExecS` is proved both ways (`toExecS`, `ofExecSM`).
+
+**Limitations.** No `ProvesC`-style calculus for `staticOnly` or
+`nonReentrant`: a proof there is a `ValidT` proof weakened, a `Fml.Valid`
+proof where callees change nothing (`Theory/CallerModel/Static.lean`), or by
+the runs. A re-entrant call carries no value, and its own callees read as
+`any`. The weakening theorem needs positive modalities. The `none <
+staticOnly` example separates by the invariant owed on exit; the sharper
+separation (two equal calls answered alike only under `none`) is true but
+not provable by `sol_close`, which forgets the oracle's correlation.
+Other lanes' needs: none.
