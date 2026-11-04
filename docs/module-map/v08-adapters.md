@@ -447,3 +447,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Backend/StructuredFlow/DoWhileBreakCompiler.lean` | Mapped G19 immediate-break do-while Source certificate to existing scoped physical compiler. |
 | `Solidity/Backend/StructuredFlow/DoWhileBreakCompilerControls.lean` | Inhabited pipeline/value/fuel controls and skipped-condition/omitted-body negatives. |
+
+| `Solidity/Backend/StructuredFlow/DoWhileContinueCompiler.lean` | Mapped G19 do-while continue with skipped body suffix and literal-false exit to existing physical assignment compiler. |
+| `Solidity/Backend/StructuredFlow/DoWhileContinueCompilerControls.lean` | Inhabited pipeline/value/fuel controls and skipped-suffix/omitted-body negatives. |
