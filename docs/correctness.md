@@ -40,6 +40,13 @@ in the [lifetime layer](lifetime.md). Its `AG`, `EF` and `AGEF` describe
 transaction-boundary safety and possible reachability; commits require actual
 successful outcomes, so an exhausted diamond does not witness reachability.
 
+A function statement can also be read only at a contract's reachable
+starting states: `ValidStart (.reachable M) φ`
+([options.md, O12](options.md#o12-reachable-starting-states-lean-only),
+`Theory/Reachable/Mode.lean`), discharged by a contract invariant proved once
+over the entry points; `ValidTail .clean` statements carry over
+(`ValidTail.validStart_reachable`).
+
 ## Model choices behind the statements
 
 - **Payments.** Transfers and sends check both available funds and the

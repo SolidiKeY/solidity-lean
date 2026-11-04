@@ -26,6 +26,7 @@ can never be read as one under another.
 | O7 | the solc test runner states a calling-back obligation under `ValidT .noCallback` | done |
 | O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
 | O9 | configurable expression order: legacy and Solidity via IR | done |
+| O12 | reachable starting states: deployment plus a finite sequence of entry calls (`ValidStart (.reachable M)`); Lean-only | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -712,3 +713,58 @@ evaluation, a calculus proof and an imported contract.
 
 A failing read is saved before later explicit guards (`captureBefore`),
 for binary operands and argument lists in either schedule.
+
+## O12. Reachable starting states (Lean-only)
+
+**Decision.** solkey has no such option: its validity reads a formula at
+every state. Lean adds a start mode as an argument of the validity proved
+(`ValidStart m φ`, `Theory/Reachable/Mode.lean`): `.any` is `Fml.Valid`, solkey's
+reading and the default, so no TestSuite statement changes; `.reachable M`
+reads `φ` only at the entry frames of the worlds a deployed contract reaches
+through its interface `M` (`Lifetime.System`): a successful deployment, then
+a finite sequence of admitted entry calls, a revert or a panic rolled back
+(`Lifetime.Reachable`, [lifetime.md](lifetime.md)). The interface is part of
+the mode: a claim proved for one interface says nothing of another.
+
+| Option | `ValidStart` | The starting state | Discharged by |
+|---|---|---|---|
+| `any` | `Fml.Valid φ` | any typed state | nothing (solkey) |
+| `reachable M` | `∀ σ, EntryState M σ → holds σ φ` | an entry frame of a world `M` reaches | a contract invariant, once |
+
+**The invariant, once.** `ValidStart.of_invariant` takes the contract's
+invariant (`Lifetime.Invariant M I`, proved by induction over the entry
+points; a rollback and waiting need nothing, `Invariant.ofRuns`) and its
+reading `J` at an entry frame, and leaves `Fml.Valid (J → φ)`. For an
+invariant formula that reads only persistent storage (`PersistentFml`) the
+induction is one constructor box and one box per entry
+(`PersistentFml.invariant`, `ValidStart.of_persistent`).
+
+**O6 follows.** For an interface whose constructor and entries expose
+nothing (`ExposesNone M`, `Prog.exposesNone`), clean tails are the contract's
+invariant (`cleanTail_invariant`; the transaction boundary's transient reset
+keeps them, `Storage.resetTransient_cleanTail`), so
+`ValidTail .clean φ → ValidStart (.reachable M) φ`
+(`ValidTail.validStart_reachable`, `Theory/Reachable/CleanTail.lean`).
+Witness and controls: `Theory/Reachable/Witness.lean` (the claim holds under
+`.reachable safeM`, fails under `.any` at a dirty-tail state that is no entry
+state, and fails under an interface with an entry that writes through a
+dangling alias, `dirty_refutes`).
+
+**Callbacks inside the sequence (O11).** `Theory/Reachable/CallerModel.lean`
+runs each entry under an execution relation `Exec C` chosen by a caller model
+(`ReachableE`, `ValidStartE`). Until O11's lattice lands it is a stub,
+`CallerStub` (`noCallback`: the deterministic run, `withCallback J`:
+`ExecP J`). `noCallback` is exactly the `Lifetime` reading
+(`reachableE_noCallback_iff`, `validStartE_noCallback_iff`); reachability is
+monotone in the relation, so an invariant against a stronger attacker holds
+against a weaker one (`InvariantE.weaken`, `ValidStartE.weaken`); clean tails
+stay an invariant under `withCallback` for entries that keep them across the
+callback boundary (`cleanTail_invariantE`, `ValidTail.validStartE_withCallback`).
+A run that violates the callback invariant admits any world (control:
+`violating_refutes`).
+
+**Not done.** No `dl{…}` syntax: the mode is a validity statement, not a
+formula. Deployment runs deterministically under every caller model. The
+interface `M` is a model obligation (`Contract` keeps no visibility). The
+stub's adaptation to O11's lattice is listed in
+[calculus-modes.md](feature-work/calculus-modes.md#handoffs).

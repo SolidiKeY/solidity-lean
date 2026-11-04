@@ -2390,6 +2390,10 @@ import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
+import Solidity.Theory.Reachable.CallerModel
+import Solidity.Theory.Reachable.CleanTail
+import Solidity.Theory.Reachable.Mode
+import Solidity.Theory.Reachable.Witness
 import Solidity.Theory.Segs
 import Solidity.Theory.Typed.Leaves
 import Solidity.Theory.Typed.Mem

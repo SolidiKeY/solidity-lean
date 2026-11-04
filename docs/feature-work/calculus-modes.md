@@ -41,4 +41,52 @@ lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
 
 ## Handoffs
 
-None yet.
+### VC3 — O12 reachable starting states (branch `cloud/modes-20261105/reachable`)
+
+**Inventory (step 0).** Reused, not rebuilt:
+- `Semantics/Lifetime.lean`: `System` (deploy, entry calls, payable,
+  environment predicates), `Init` (successful `Contract.deployT`), `Step`
+  (commit, rollback of revert/revertWith/panic, wait), `Reachable`,
+  `Invariant` with `Invariant.ofRuns` (rollback needs no proof). This is the
+  O12 starting-state relation; nothing new was needed below it.
+- `Calculus/Lifetime.lean`: `post_of_deploy_box`, `System.preserves_of_fml`.
+- `Typing/CleanTailRun.lean`: `Prog.exposesNone`, `Prog.run_cleanTail`,
+  `ReachableBy` (storage-only, no rollback, no transaction frame: kept
+  distinct, as `.claude/rules/typing.md` asks).
+- `Calculus/TailMode.lean` (`ValidTail`, `holds_cleanTail_of`),
+  `Calculus/CleanTailBoundary.lean` (`StateInv.cleanTail`,
+  `Prog.CleanTailCallbackBoundary`, `_exit`, `_noViolation`),
+  `Semantics/Callback.lean` (`StateInv`, `ExecP`, `COut`).
+- Not reused: `Typing/Reachability.lean`'s `Reachable` (any single program
+  from `State.init`: storage constructibility, not a transaction sequence);
+  `ContractWorld.Reachable` (multi-contract, rooted at an empty world);
+  `Bridge/SolidityBridge/AdversaryPolicy.lean` and `CallbackTrace.lean`
+  (traces inside one callback). Nothing in `Solidity/Tools/` applies.
+- Deployment/dispatch facts: `Contract` keeps no visibility, so the
+  interface `M` is a model obligation (as in `docs/lifetime.md`); no
+  selector dispatch exists in the typed core.
+
+**Delivered** (`Solidity/Theory/Reachable/`): `Mode.lean` (`StartMode`,
+`ValidStart`, `EntryState`, `ValidStart.of_invariant`, `PersistentFml`,
+`PersistentFml.invariant`, `ValidStart.of_persistent`), `CleanTail.lean`
+(`Storage.resetTransient_cleanTail`, `cleanTail_invariant`,
+`ValidTail.validStart_reachable`), `CallerModel.lean` (`Exec`, `RunE`,
+`StepE`, `ReachableE`, `InvariantE`, `ValidStartE`, the stub `CallerStub`,
+monotonicity, `reachableE_noCallback_iff`, `cleanTail_invariantE`,
+`ValidTail.validStartE_withCallback`), `Witness.lean` (contract `Bag`,
+witnesses and negative controls). Docs: options.md O12 (row and section,
+Lean-only), correctness.md paragraph, module-map rows in
+`docs/module-map/theories.md`. No edit to `Calculus/TailMode.lean` or
+`Calculus/CleanTailBoundary.lean` was needed.
+
+**O11 adaptation (for after VC2 lands).** `CallerStub` stands for VC2's
+lattice. To adapt: (1) give each caller model of the lattice its `Exec C`
+(`none` ↦ `CallerStub.noCallback.exec`, `any` ↦ `ExecP J`; `staticOnly`
+and `nonReentrant` from VC2's relations); (2) prove VC2's order gives
+`Exec.Le` between their relations, so `ReachableE.mono`,
+`InvariantE.weaken` and `ValidStartE.weaken` instantiate to the lattice's
+weakening; (3) replace `CallerStub` in `ValidTail.validStartE_withCallback`
+by the lattice's top. Nothing else in the lane reads the stub.
+
+**Requests to other owners.** VC1 (`Calculus/Assumptions.lean`): a start-mode
+field (`any` | `reachable`) in the mode record, `any` the default.
