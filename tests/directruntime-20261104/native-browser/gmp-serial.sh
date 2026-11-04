@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source /emsdk/emsdk_env.sh >/dev/null 2>&1
+export EM_FROZEN_CACHE=0 EM_CACHE=/work/toolchain-cache
 mkdir -p /work/gmp-build64
 cd /work/gmp-build64
 emconfigure ../gmp/configure --host=none --build=x86_64-pc-linux-gnu --disable-assembly --disable-shared --enable-static --prefix=/work/gmp-wasm64 CC='emcc -sMEMORY64=1' CFLAGS='-O2 -sMEMORY64=1 -flto -fwasm-exceptions' CC_FOR_BUILD=gcc

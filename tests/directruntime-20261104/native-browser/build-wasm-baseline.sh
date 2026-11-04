@@ -27,7 +27,13 @@ from pathlib import Path
 p=Path("web/tools/lean-wasm/build-gmp.sh")
 s=p.read_text()
 assert s.count("make -j2 MAKEINFO=true")==1
-Path("tests/directruntime-20261104/native-browser/gmp-serial.sh").write_text(s.replace("make -j2 MAKEINFO=true", "make -j1 MAKEINFO=true"))
+activation="source /emsdk/emsdk_env.sh >/dev/null 2>&1"
+assert s.count(activation)==1
+s=s.replace("make -j2 MAKEINFO=true", "make -j1 MAKEINFO=true").replace(activation,activation+"\nexport EM_FROZEN_CACHE=0 EM_CACHE=/work/toolchain-cache")
+Path("tests/directruntime-20261104/native-browser/gmp-serial.sh").write_text(s)
+p=Path("web/tools/lean-wasm/build-compact-runtime.sh");s=p.read_text()
+assert s.count(activation)==1
+Path("tests/directruntime-20261104/native-browser/compact-runtime-cache.sh").write_text(s.replace(activation,activation+"\nexport EM_FROZEN_CACHE=0 EM_CACHE=/work/toolchain-cache"))
 GMP
 common=(--rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000
  -e LEAN_NUM_THREADS=1 -e EMCC_CORES=1 -e BINARYEN_CORES=1
