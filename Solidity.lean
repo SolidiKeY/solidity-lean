@@ -330,6 +330,7 @@ import Solidity.Backend.MemoryCopies.RuntimeGrowthInterface
 import Solidity.Backend.MemoryCopies.RuntimeLiveArray
 import Solidity.Backend.MemoryCopies.RuntimeLiveArrayControls
 import Solidity.Backend.MemoryCopies.RuntimeLiveArrayInterface
+import Solidity.Backend.MemoryCopies.RuntimeMemoryArrayInterface
 import Solidity.Backend.MemoryCopies.RuntimePathArray
 import Solidity.Backend.MemoryCopies.RuntimePathArrayControls
 import Solidity.Backend.MemoryCopies.RuntimePathArrayInterface
