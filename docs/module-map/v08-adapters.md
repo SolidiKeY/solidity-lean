@@ -480,3 +480,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/StructuredFlow/DoWhileReturnCompiler.lean` | Actual compiler composition for mapped do-while assignment/bare-return; explicit entry, fragment and capacity. |
 | `Backend/StructuredFlow/DoWhileReturnCompilerControls.lean` | Both-pipeline/checked-mode native snapshots, independent true capture, wrong flag and leaked trailing-write native mutations. |
+
+| `Lowering/G19/ConditionalReturn.lean` | V07-related conditional assignments then unconditional bare return, scoped branch temps and independent true return flag. |
+| `Lowering/G19/ConditionalReturnControls.lean` | Both-pipeline/checked-mode branch writes, reached-state donor, wrong donor/flag and Source return classification controls. |

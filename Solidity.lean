@@ -1658,6 +1658,8 @@ import Solidity.Lowering.G19.AssignmentWhileContinue
 import Solidity.Lowering.G19.AssignmentWhileContinueControls
 import Solidity.Lowering.G19.AssignmentWhileReset
 import Solidity.Lowering.G19.AssignmentWhileResetControls
+import Solidity.Lowering.G19.ConditionalReturn
+import Solidity.Lowering.G19.ConditionalReturnControls
 import Solidity.Lowering.G19.ConditionalSequence
 import Solidity.Lowering.G19.ConditionalSequenceControls
 import Solidity.Lowering.G19.ConditionalStatement
