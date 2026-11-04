@@ -711,3 +711,14 @@ repeated path; reversing the trace changes the result. A request omitted from th
 physical registry still executes in Source, so registry evidence is not admission.
 These fixed-registry laws do not prove full live-layout or changing-ownership,
 dirty-representation or arbitrary Source/Yul program adequacy.
+
+`DeclarationDefaults` proves zero encoding for available actual Source defaults
+of declaration-selected codecs, then carries that law through offset relocation,
+typed path registration and `packDeclarationPaths`. For computed registrations,
+the existing zero-default check therefore tests only actual default availability.
+No law is imposed on arbitrary user-supplied codecs. Mixed declaration controls
+use the real packed metadata; the actual ordinary transient uint16 root resets
+all raw slots using derived zero witnesses. Function codecs remain selected while
+`Source.Val.default` at function type returns `none`; that owner boundary is not
+converted to zero, a source refusal or a new language exclusion. This is not full
+transient aggregate, dirty representation or source/compiler adequacy.

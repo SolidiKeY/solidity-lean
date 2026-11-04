@@ -2869,6 +2869,8 @@ import Solidity.Yul.Views.Controls
 import Solidity.Yul.Views.DeclarationBoundary
 import Solidity.Yul.Views.DeclarationBoundaryControls
 import Solidity.Yul.Views.DeclarationControls
+import Solidity.Yul.Views.DeclarationDefaults
+import Solidity.Yul.Views.DeclarationDefaultsControls
 import Solidity.Yul.Views.DeclarationJournalControls
 import Solidity.Yul.Views.DeclarationPacking
 import Solidity.Yul.Views.DeclarationPathExtent
