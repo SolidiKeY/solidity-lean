@@ -782,3 +782,14 @@ restores a saved heap, which this adapter does not implement. The restored map
 is reconstructed using computed residual cells. A late timeout bypasses the
 subsequent rollback operation and preserves its completed write prefix, so the
 adapter is not unconditional undo or automatic transaction failure handling.
+
+`CellHashMemory` connects the actual combined write/hash allocation to the
+computed incremental object encoder. Header, clipped payload and FMP form one
+physical image; its raw-map reconstruction and unchanged whole Source writeback
+are derived constructively. The actual observed hash reads that image's payload
+with the same Fixed hash. Unowned bytes, including nonzero tail padding, remain
+exact outside the header/payload and FMP. Controls distinguish this full image
+from a payload-only copy. Initial image reads, supported old types, owner MemOK,
+reserved memory and exact computed Word extent remain genuine premises. The
+computed placement is not proved to be the target allocator's selection, nor
+does this discharge general allocation refinement or retained-history extension.

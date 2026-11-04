@@ -2854,6 +2854,8 @@ import Solidity.Yul.Views.CellHashFinalization
 import Solidity.Yul.Views.CellHashFinalizationControls
 import Solidity.Yul.Views.CellHashFrames
 import Solidity.Yul.Views.CellHashFramesControls
+import Solidity.Yul.Views.CellHashMemory
+import Solidity.Yul.Views.CellHashMemoryControls
 import Solidity.Yul.Views.CellHashRollback
 import Solidity.Yul.Views.CellHashRollbackControls
 import Solidity.Yul.Views.CellWritesCalldataHash
