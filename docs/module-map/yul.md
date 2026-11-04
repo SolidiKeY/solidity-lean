@@ -91,3 +91,5 @@
 | `Bridge/SolidityBridge/Yul/StructuredFor{,Controls}.lean` | Branch/sequence-aware original FOR component compilation, finite closed-source/structured/model proofs; actual high-only-word branch and zero-exit witnesses. Full G24/native/admission/early-flow/divergence remains open. |
 
 | `Bridge/SolidityBridge/Yul/ForPrefixes{,Controls}.lean` | Actual compiled FOR all-horizon source noncompletion and exact finite model macro-turn transport; real branch-bearing invariant, caller/frame preservation and whole selected noncompletion denotation. Not native prefixes/exception correspondence or general Source-G24. |
+
+| `Bridge/SolidityBridge/Yul/ForCompletion{,Controls}.lean` | Extract first-zero count/normal output from any actual successful original FOR horizon; exact source-output to real emission/selected model transport without caller-supplied stopping count. Branch/zero/horizon/noncompletion controls; no native/G24/capacity adequacy. |

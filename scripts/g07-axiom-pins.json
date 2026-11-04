@@ -31106,5 +31106,43 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.loop_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.source_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.transport_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletionControls.lean:SolidityBridge.Yul.ForCompletion.Controls.from_source_eight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletionControls.lean:SolidityBridge.Yul.ForCompletion.Controls.from_zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletionControls.lean:SolidityBridge.Yul.ForCompletion.Controls.short_horizon_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletionControls.lean:SolidityBridge.Yul.ForCompletion.Controls.infinite_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

@@ -1403,3 +1403,42 @@ Solidity Source/G24/view/function/early-flow/divergence refinement, native
 prefix/charged/capacity/world correspondence, frontend admission or final
 joint validation. The native host-writer counterexample remains open. No new
 external solc/native-EVM tests are claimed.
+
+
+### Source-completion-driven FOR transport
+
+`SolidityBridge.Yul.ForCompletion.loop_complete` inverts an actual successful
+original closed-word `evalLoop` at any horizon. It derives a count strictly
+below that horizon, all pre-body nonzero guards, the first zero guard, and the
+exact iterated normal output. Real condition/body/post compiler source facts
+and completed-run uniqueness discharge component identities and exclude early
+flow; no desired exchange/run or source count is assumed. `source_complete`
+includes the actual prelude once and derives `count + 1 < fuel` for the whole
+original FOR. There is no minimum component-horizon premise.
+
+`transport` uses this recovered certificate with actual emitted blocks and
+selection to obtain `StructuredExec` and the selected mathematical `Evm.run`.
+`transport_output` matches the actual successful source output vector exactly,
+using pointwise raw-word injectivity; it preserves arbitrary newer/caller
+prefixes and all nonstack machine fields. Its remaining premises are actual
+normal compiler certificates, source completion, successful emission, selected
+realization and numeric whole-stack representation. No target run/count/guard
+sequence is supplied by the caller.
+
+Controls derive results from the previous branch-bearing source run at horizon8
+and zero-guard run at horizon6, without providing iteration counts. The three
+source-result locals are matched exactly; the two newer words, arbitrary numeric
+caller tail and unchanged high-only flag are preserved. Short horizons (at most1) and the actual infinite source witness
+refuse the success premise; these are source horizon controls, not EVM underflow
+or native failure. Only terminating code is executed by the runtime regression.
+Eight standard-axiom reports are enforced. Independent read-only finder and
+skeptic reviews found no proof defects in the final producer/controls; the
+skeptic requested the preservation wording above to distinguish updated locals
+from preserved frame/flag words, which is corrected here.
+
+This is closed-word source to selected mathematical-model transport for the
+actual normal FOR component compiler, not general logical Solidity Source/G24,
+root frontend dispatch, early-flow/function/native instruction-prefix/resource
+or view adequacy. Full Y08.01/Y08.02, frontend/joint artifacts, remaining original
+backfill and full lane validation remain open. No admission, manifest, canonical
+rethrow, observation, proof budget or producer-owner implementation changed.

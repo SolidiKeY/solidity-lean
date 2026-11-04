@@ -336,6 +336,8 @@ import SolidityBridge.Yul.DirectMemory
 import SolidityBridge.Yul.DirectMemoryControls
 import SolidityBridge.Yul.ExpSelection
 import SolidityBridge.Yul.ExpSelectionControls
+import SolidityBridge.Yul.ForCompletion
+import SolidityBridge.Yul.ForCompletionControls
 import SolidityBridge.Yul.ForPrefixes
 import SolidityBridge.Yul.ForPrefixesControls
 import SolidityBridge.Yul.ForSource
