@@ -2198,6 +2198,8 @@ import Solidity.Source.Progress.ForwardingChainControls
 import Solidity.Source.Progress.ForwardingControls
 import Solidity.Source.Progress.ForwardingReturns
 import Solidity.Source.Progress.InitializedCalls
+import Solidity.Source.Progress.InitializedChain
+import Solidity.Source.Progress.InitializedChainControls
 import Solidity.Source.Progress.InitializedControls
 import Solidity.Source.Progress.InitializedLocals
 import Solidity.Source.Progress.InitializedPrefixes

@@ -446,3 +446,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/InitializedPrefixes` | Finite initialized-local prefixes ending in one return. |
 | `Source/Progress/InitializedCalls` | Actual internal-call frames for initialized-return bodies. |
 | `Source/Progress/InitializedControls` | Elaborated initialized-local relay and success/panic/refusal consumers. |
+
+| `Source/Progress/InitializedChain` | Finite initialized-return extensions and whole-unit call/composition proofs. |
+| `Source/Progress/InitializedChainControls` | Whole-unit initialized relay, caller/panic consumers and coverage refusals. |

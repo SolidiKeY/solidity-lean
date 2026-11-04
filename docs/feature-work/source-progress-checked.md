@@ -493,3 +493,35 @@ Uninitialized locals, nonidentity conversions, mutation, loops and modifiers
 remain outside this certificate. General memory-call graphs, source recognizer
 completeness, compiler/physical-frame refinement and EVM agreement are not
 established by this source-only result.
+
+
+## Whole-unit initialized-return chains
+
+`Progress/InitializedChain` embeds an existing `ForwardingChain` unchanged, then
+adds fresh source declarations whose selected bodies have `InitializedReturns`
+certificates. Each extension keeps source membership, signature, supported
+defaults and exact dispatched-body equality. `initialized_chain_sound` derives
+call progress and conditional memory preservation from previously certified
+callees; no semantic correctness oracle for the added body is stored.
+
+With the separate union-coverage check, `initialized_chain_program_calls` yields
+`ReadyProgramCalls` for every function in the source unit, and
+`initialized_chain_composition` admits those source functions in composed
+expressions and arguments. `InitializedChain.declared` derives environment
+membership using the checked environment/unit correspondence.
+
+`InitializedChainControls` consumes these whole-unit results for the actual
+legacy-elaborated allocating leaf and initialized-local relay. Both evaluator
+pipelines have inhabited returned-reference consumers; the caller success and
+allocation-panic runs retain their exact heap and caller prefix. Omitting either
+source function, adding a duplicate, or overlapping the value list has a negative
+certificate/coverage control. These are not frontend refusals. Independent finder
+and skeptic reviews found no confirmed defect. Validation targets are
+`Solidity.Source.Progress.InitializedChain` and `InitializedChainControls`;
+printed axioms are standard only.
+
+Freshness applies to added entries, not the embedded base. Existing base
+duplicates/overlap and recursive value callees remain possible. The result is
+finite proof construction, not automatic graph recognition, global runtime
+acyclicity, termination or compiler/EVM refinement. General memory-body shapes
+remain outside the initialized-return certificate.
