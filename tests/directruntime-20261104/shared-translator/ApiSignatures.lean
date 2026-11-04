@@ -1,3 +1,4 @@
+import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 import Solidity.Frontend.ExecutableAst.Shared.Translate
 open Solidity.Frontend.ExecutableAst.Shared
 #check Reader
@@ -12,3 +13,8 @@ open Solidity.Frontend.ExecutableAst.Shared
 #check reader
 #check function
 #check contract
+
+#check BodyLoopLowerer
+#check PlainEntryPre
+#check assertionObligation
+#check obligation

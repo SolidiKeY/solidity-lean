@@ -1,0 +1,13 @@
+{
+  "note": "MCP focused114-job build and zero per-file errors; source/C/olean binding, not runtime closure or AST semantic proof",
+  "modules": [
+    {
+      "source": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+      "sourceSha256": "fbe70d07e9c4a8a12f8ef331108e4b2792c67938eeafac5f39ed5c4239ec4c35",
+      "generatedC": ".lake/build/ir/Solidity/Frontend/ExecutableAst/Shared/Intrinsic.c",
+      "generatedCSha256": "22de5d6d3878099d2876c695df4e7d84ab6b2a7d209a7db0cfc015beeb83dc0c",
+      "olean": ".lake/build/lib/lean/Solidity/Frontend/ExecutableAst/Shared/Intrinsic.olean",
+      "oleanSha256": "5447c04d296cd9a5945ed5db0708fb71f98c44fa163f92177cb7b0e57ce1b298"
+    }
+  ]
+}

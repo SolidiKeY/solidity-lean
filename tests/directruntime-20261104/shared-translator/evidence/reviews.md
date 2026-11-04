@@ -27,3 +27,19 @@ Final preparatory skeptic review: no confirmed blocker to committing a partial p
 Finder inventory correction: initial per-node feature mapping missed helper-produced pragma/builtin/magic-member alternatives. inventory.py now unions those helper branches conservatively and labels the mapping conditional. Raw mappings now include byte-literal call encoding and function-tag RawTy.named. Full per-form semantic/backend validation remains pending.
 
 Finder final raw mapping correction: RevertStatement names custom-error RawStmt.revertErr; bare RawStmt.revert belongs to builtin FunctionCall lowering. The table marks subtype mappings as examples pending full per-form controls.
+
+## Intrinsic extraction review
+
+Separate finder and skeptic, read-only and no Lean/server, found no implementation
+regression. Both producer callbacks are pinned exactly; the assertion body differs
+only by callback substitution and a new intrinsic reference guard. This guard
+preserves the already-refused default AST fragment and prevents premature reference
+input adoption with incorrect diamond binders. Return refusal retains priority.
+Specified dispatch still calls existing specObligation. Intrinsic local closure is
+104 modules with no other Frontend module. Proof-search and exported wrapper are
+unchanged. Arbitrary callbacks are not source-soundness certificates.
+
+Finder's audit issue was fixed with a conservative token scan covering inline
+sorry/private axiom forms; this remains source inspection, not a transitive axiom
+audit. Skeptic's documentation correction was applied. Full DirectRuntime checking,
+producer migration/parity, CR/B/C exact commits and native/WASM gates remain pending.

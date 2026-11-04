@@ -83,7 +83,11 @@ for kind in sorted(emitted):
       'backendGap':'Fresh native/WASM closure and construct-specific backend evidence pending; source admission is not backend correctness.',
       'owners':{'implementation':'C' if kind in control else 'B' if kind in reference else 'CR' if kind in producer else 'A',
         'sharedAndDirectRuntime':'A','existingImportMigration':'CR',
-        'backend':'exact backend lane reservation not supplied in A dispatch; retain existing producer ownership'},
+        'nativeBrowserScripts':'DR-D (registered native/browser script scopes)',
+        'admissionP8Migration':'CR', 'sourceH16':'VY5 (frozen; integration owner only)',
+        'backendPasses':'V09 Passes', 'sourceLowering':'V08 Lowering/V08',
+        'memoryOperations':'V11 MemoryOps (reference-dependent forms)',
+        'aggregates':'V16 Aggregates/Roadmap (aggregate-dependent forms)'},
       'positiveNegativeRegressions':{'status':'full per-construct controls pending',
         'existingSourceCandidates':[p for p in evidence if p.startswith(('tests/','Solidity/Examples/'))]}})
 yulPath='Solidity/Frontend/SolcJson/Yul.lean'
@@ -101,6 +105,12 @@ def visit(module):
     seen[module]={'path':path,'sha256':sha(path)}
     for dep in re.findall(r'^import ([\w.]+)',read(path),re.M): visit(dep)
 visit('Solidity.Frontend.ExecutableAst.Shared.Translate')
+rawClosure=dict(seen)
+seen={}
+visit('Solidity.Frontend.ExecutableAst.Shared.Intrinsic')
+intrinsicClosure=dict(seen)
+assert all(n=='Solidity.Frontend.ExecutableAst.Shared.Intrinsic' or not n.startswith('Solidity.Frontend.') for n in seen)
+seen=rawClosure
 assert 'Solidity.Frontend.Import' not in seen and 'Solidity.Frontend.Testing' not in seen
 result={'schemaVersion':1,'status':'initial census; full coverage gates pending','base':base,
  'headAtGeneration':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
@@ -110,8 +120,8 @@ result={'schemaVersion':1,'status':'initial census; full coverage gates pending'
  'direct':'refused','raw':'canonical memory-byte rethrow is separate; no general Yul-to-Raw admission',
  'proofClosure':'decoder/static/shape derivations are not whole-Solidity semantic equivalence',
  'backend':'whole-assembly execution/compiled closure not established'} for k in yul],
- 'rawConstructors':raw,'localSharedImportClosure':seen,
+ 'rawConstructors':raw,'localSharedImportClosure':seen,'localIntrinsicImportClosure':intrinsicClosure,
  'sourceProvenance':{p:sha(p) for p in [admissionPath,'Solidity/Frontend/SolcJson/Body.lean','Solidity/Frontend/SolcJson/Contract.lean',rawPath,'docs/solidity-features.json']},
  'featureCatalog':catalog['features']}
 (owned/'coverage-inventory.json').write_text(json.dumps(result,indent=2)+'\n')
-print(json.dumps({'counts':result['counts'],'rawConstructorCounts':{k:len(v) for k,v in raw.items()},'localSharedImportModules':len(seen),'status':result['status']},sort_keys=True))
+print(json.dumps({'counts':result['counts'],'rawConstructorCounts':{k:len(v) for k,v in raw.items()},'localSharedImportModules':len(seen),'localIntrinsicImportModules':len(intrinsicClosure),'status':result['status']},sort_keys=True))

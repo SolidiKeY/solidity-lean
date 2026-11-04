@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "initial census; full coverage gates pending",
   "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "headAtGeneration": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "headAtGeneration": "b2c27cb7be09b246887f403c67b378a8e8becf94",
   "upstream": {
     "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
     "exporterGitBlob": "b855c19efcb9061c7b19b696cf7045f25e78dc74",
@@ -87,7 +87,13 @@
         "implementation": "B",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -165,7 +171,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -271,7 +283,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -340,7 +358,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -403,7 +427,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -474,7 +504,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -535,7 +571,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -628,7 +670,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -691,7 +739,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -809,7 +863,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -874,7 +934,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -933,7 +999,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -998,7 +1070,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1046,7 +1124,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1119,7 +1203,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1183,7 +1273,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1246,7 +1342,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1311,7 +1413,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1436,7 +1544,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1520,7 +1634,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1660,7 +1780,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1735,7 +1861,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -1979,7 +2111,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2065,7 +2203,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2131,7 +2275,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2199,7 +2349,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2271,7 +2427,13 @@
         "implementation": "B",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2336,7 +2498,13 @@
         "implementation": "B",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2396,7 +2564,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2453,7 +2627,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2584,7 +2764,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -2653,7 +2839,13 @@
         "implementation": "B",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3027,7 +3219,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3103,7 +3301,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3160,7 +3364,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3231,7 +3441,13 @@
         "implementation": "B",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3295,7 +3511,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3345,7 +3567,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3405,7 +3633,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3482,7 +3716,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3550,7 +3790,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3609,7 +3855,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3699,7 +3951,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3764,7 +4022,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3833,7 +4097,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3896,7 +4166,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -3955,7 +4231,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4020,7 +4302,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4090,7 +4378,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4181,7 +4475,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4275,7 +4575,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4345,7 +4651,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4438,7 +4750,13 @@
         "implementation": "B",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4501,7 +4819,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4563,7 +4887,13 @@
         "implementation": "CR",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4725,7 +5055,13 @@
         "implementation": "A",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4799,7 +5135,13 @@
         "implementation": "B",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -4864,7 +5206,13 @@
         "implementation": "C",
         "sharedAndDirectRuntime": "A",
         "existingImportMigration": "CR",
-        "backend": "exact backend lane reservation not supplied in A dispatch; retain existing producer ownership"
+        "nativeBrowserScripts": "DR-D (registered native/browser script scopes)",
+        "admissionP8Migration": "CR",
+        "sourceH16": "VY5 (frozen; integration owner only)",
+        "backendPasses": "V09 Passes",
+        "sourceLowering": "V08 Lowering/V08",
+        "memoryOperations": "V11 MemoryOps (reference-dependent forms)",
+        "aggregates": "V16 Aggregates/Roadmap (aggregate-dependent forms)"
       },
       "positiveNegativeRegressions": {
         "status": "full per-construct controls pending",
@@ -5200,6 +5548,424 @@
     "Solidity.Keccak": {
       "path": "Solidity/Keccak.lean",
       "sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    }
+  },
+  "localIntrinsicImportClosure": {
+    "Solidity.Frontend.ExecutableAst.Shared.Intrinsic": {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+      "sha256": "fbe70d07e9c4a8a12f8ef331108e4b2792c67938eeafac5f39ed5c4239ec4c35"
+    },
+    "Solidity.Calculus.Spec": {
+      "path": "Solidity/Calculus/Spec.lean",
+      "sha256": "fe862ca098bec3150836b0959bed518369c17d7be58828c897c18d005bebf852"
+    },
+    "Solidity.Calculus.Problem": {
+      "path": "Solidity/Calculus/Problem.lean",
+      "sha256": "0d6c00b28cd8fce8f5b58ac47839d12e7b42d12e849a62787f6b0e799773b516"
+    },
+    "Solidity.Typing.CanonTest": {
+      "path": "Solidity/Typing/CanonTest.lean",
+      "sha256": "e14e8c0b8658e78c74d5d28034e77cf2176ed391a5faafe0ae5c9976216fee94"
+    },
+    "Solidity.Typing.Constructibility": {
+      "path": "Solidity/Typing/Constructibility.lean",
+      "sha256": "ef7f71c95f25f70e395d6da5f14f36fbc48714cf2e3e4fc130a4fa1de03bb9fa"
+    },
+    "Solidity.Typing.Fits": {
+      "path": "Solidity/Typing/Fits.lean",
+      "sha256": "077bb72e812053667f559a0b271c052f0f7f00f2fb1db1a2776929c8c89fba71"
+    },
+    "Solidity.Typing.Tight": {
+      "path": "Solidity/Typing/Tight.lean",
+      "sha256": "6b5648af0064ec36f47a13324316c487c61608a2f1d4be7660b0f545e403b4e6"
+    },
+    "Solidity.Typing.Reachability": {
+      "path": "Solidity/Typing/Reachability.lean",
+      "sha256": "2004789b49a1b9e054fccd84bfb4bf44e941c9fb279db53597341bc58c224fc2"
+    },
+    "Solidity.Typing.HeredRun": {
+      "path": "Solidity/Typing/HeredRun.lean",
+      "sha256": "8bf6f4713b0939a60cf713591f3ac928dfb3a47ce2743ec20838d7a2f120d659"
+    },
+    "Solidity.Typing.Values": {
+      "path": "Solidity/Typing/Values.lean",
+      "sha256": "8b6c32a3816e4613470608c860b727180d0dde2c0c22038b44b220bb0406099c"
+    },
+    "Solidity.Theory.Typed.Obs": {
+      "path": "Solidity/Theory/Typed/Obs.lean",
+      "sha256": "adf3215f70b63900d25c801084a2fbe6a74d5ce545e8791ae792c7eb05425a27"
+    },
+    "Solidity.Theory.Typed.Obs.Paths": {
+      "path": "Solidity/Theory/Typed/Obs/Paths.lean",
+      "sha256": "207bc401bf223ddcc90322522890f064c9aba2786204895e69da81898ac5c5cc"
+    },
+    "Solidity.Semantics.Heap": {
+      "path": "Solidity/Semantics/Heap.lean",
+      "sha256": "82bbdc0c5bb712e3cbfaedb258d0fb3cb439d784fb4d79c23c7f9ec1399be24a"
+    },
+    "Solidity.Semantics.Storage": {
+      "path": "Solidity/Semantics/Storage.lean",
+      "sha256": "31e4b8f86b806252e7440a12ddc6e06c1cf1cac21942df248e875b25079d0bc1"
+    },
+    "Solidity.Semantics.Storage.Values": {
+      "path": "Solidity/Semantics/Storage/Values.lean",
+      "sha256": "df568d043be5c7ffbe97ca6d790c7a7118efbe9039513c8379978fd764495259"
+    },
+    "Solidity.Semantics.Value": {
+      "path": "Solidity/Semantics/Value.lean",
+      "sha256": "afa9b289f7720b04ce4db7d28b12c52649d2f12569d9f4d67bc703c1a9a7166e"
+    },
+    "Solidity.Semantics": {
+      "path": "Solidity/Semantics.lean",
+      "sha256": "588c96429a3d91ef043d5ae731a1f98f3a12a8a394a601e287550828db32497d"
+    },
+    "Solidity.Syntax.Checked": {
+      "path": "Solidity/Syntax/Checked.lean",
+      "sha256": "27c2e199e4275370d18314eb80f610d4d97f95bf27df26aac042b8875f4ce964"
+    },
+    "Solidity.Syntax.Scoped": {
+      "path": "Solidity/Syntax/Scoped.lean",
+      "sha256": "85d626e454f350c6043046352101ce2bd53c7cebdebb93698f4a34e9deed7532"
+    },
+    "Solidity.Syntax": {
+      "path": "Solidity/Syntax.lean",
+      "sha256": "81e376192590dacc20ae1b3c1cb27e4cf144289d89be28beb40452d4fe7340e8"
+    },
+    "Solidity.Syntax.Raw": {
+      "path": "Solidity/Syntax/Raw.lean",
+      "sha256": "7c137f7e8e4c70f4868dc41a437687ab42e2d63e887cdde3ba3ccd1ea764b76f"
+    },
+    "Solidity.AST": {
+      "path": "Solidity/AST.lean",
+      "sha256": "d5463f24e3b12577a04099593cf2640b68a1ccb14cb3db513254d633c849c54b"
+    },
+    "Solidity.KeySort": {
+      "path": "Solidity/KeySort.lean",
+      "sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    "Solidity.SpecSyntax": {
+      "path": "Solidity/SpecSyntax.lean",
+      "sha256": "0d93503bea09cc6e1174fa5bcf6150705f5db360dfffa0fc33885bad23b3e236"
+    },
+    "Solidity.Syntax.Grammar": {
+      "path": "Solidity/Syntax/Grammar.lean",
+      "sha256": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8"
+    },
+    "Solidity.Syntax.Contract": {
+      "path": "Solidity/Syntax/Contract.lean",
+      "sha256": "25f04a46318dd766e6ac468972c2bf11bf75add95a069dde17a7171e85d5c70a"
+    },
+    "Solidity.Scope": {
+      "path": "Solidity/Scope.lean",
+      "sha256": "d37a9e4393e9b9da12bcd85beb428965becc2d3947838b1d11f510b07170c4ff"
+    },
+    "Solidity.RevertBytes": {
+      "path": "Solidity/RevertBytes.lean",
+      "sha256": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee"
+    },
+    "Solidity.Keccak": {
+      "path": "Solidity/Keccak.lean",
+      "sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    "Solidity.Eqns": {
+      "path": "Solidity/Eqns.lean",
+      "sha256": "d54a2319480cd95cc158517c938b654eadd3ed9065d99e47eb2c3f2cdf39d096"
+    },
+    "Solidity.Semantics.Storage.Ops": {
+      "path": "Solidity/Semantics/Storage/Ops.lean",
+      "sha256": "85009df8f6d04dc43ca6ee088416e6f557e33a8c0b6a8b7306edc86321d53706"
+    },
+    "Solidity.Semantics.Storage.Anon": {
+      "path": "Solidity/Semantics/Storage/Anon.lean",
+      "sha256": "43d65f0f8f1c00f8802252ed6e031c121e6255f64e0c73bfd748008f74f45e92"
+    },
+    "Solidity.Hashes": {
+      "path": "Solidity/Hashes.lean",
+      "sha256": "1c2c71f30137bb0c0f5767b6f6596e6f54f14ef65f1921c5e7b2cff930bc0919"
+    },
+    "Solidity.Secp256k1": {
+      "path": "Solidity/Secp256k1.lean",
+      "sha256": "44a750d75d6a27fbec52095f26e228b6d31927508854671d71119e78f76433e5"
+    },
+    "Solidity.Theory.Typed.Obs.Values": {
+      "path": "Solidity/Theory/Typed/Obs/Values.lean",
+      "sha256": "47995dc3569459157761825dde462c102424cc44d779ac548d9e6cd4cef6c1c5"
+    },
+    "Solidity.Theory.Typed.Obs.Ops": {
+      "path": "Solidity/Theory/Typed/Obs/Ops.lean",
+      "sha256": "73daf760a49da614a224a6e744dec38dd81060cbffbfd7e24f6418474424bdc9"
+    },
+    "Solidity.Semantics.StorageWt": {
+      "path": "Solidity/Semantics/StorageWt.lean",
+      "sha256": "d045184c6c27687ae0feff9590128fb644ae0cf319fa48f9fef26c0a211a1093"
+    },
+    "Solidity.Typing.TypedRunInv": {
+      "path": "Solidity/Typing/TypedRunInv.lean",
+      "sha256": "ff3afec81bcf237ec4fa9f93ef45d3c3ce5604a15df27c59196e046b40cea236"
+    },
+    "Solidity.Typing.Soundness": {
+      "path": "Solidity/Typing/Soundness.lean",
+      "sha256": "a4aafcddf6e0aedb60a371a8ef0c926268f7aa1fcb4e3ee2f4d3d0aae847434d"
+    },
+    "Solidity.Semantics.State": {
+      "path": "Solidity/Semantics/State.lean",
+      "sha256": "9023e4196a09e4430a7db8141ab664c746ab812252d35c438d34dac0dd3bb4d4"
+    },
+    "Solidity.Semantics.RunFrame": {
+      "path": "Solidity/Semantics/RunFrame.lean",
+      "sha256": "cd150706360346b72eb985ebaa6170532bfcea378d0630a68d35412b103c51bd"
+    },
+    "Solidity.Semantics.RunWk": {
+      "path": "Solidity/Semantics/RunWk.lean",
+      "sha256": "598f5ac1081015beaa20e1805fd59bd27eb362a9e4330462a7bee014af8a0ebb"
+    },
+    "Solidity.Semantics.Run": {
+      "path": "Solidity/Semantics/Run.lean",
+      "sha256": "5211d56062874939f6a059abdb604e8b0c0fec6b7fdf1fc80036d39d474837d5"
+    },
+    "Solidity.Semantics.Ops": {
+      "path": "Solidity/Semantics/Ops.lean",
+      "sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a"
+    },
+    "Solidity.Semantics.RevertData": {
+      "path": "Solidity/Semantics/RevertData.lean",
+      "sha256": "73f37ee7b44cb603d6768e652965fb7066275c8b078d3fa8519fee135e0a00f7"
+    },
+    "Solidity.Calculus.WkOver": {
+      "path": "Solidity/Calculus/WkOver.lean",
+      "sha256": "b17b1d294b95ad1a058ef61c76e6d96789eeb3099ae4012046dd165323d7f408"
+    },
+    "Solidity.Calculus.Blocks": {
+      "path": "Solidity/Calculus/Blocks.lean",
+      "sha256": "8d679c16c1f10cc04ddbdfe0c1f19ec46410c18a7cc8d6aaf9363f48582a6719"
+    },
+    "Solidity.Calculus.Arms": {
+      "path": "Solidity/Calculus/Arms.lean",
+      "sha256": "6a07403c61d7c44ede0da0fc3902f041023112a0287dba981b2edfc67d86f6ec"
+    },
+    "Solidity.Calculus.Shift": {
+      "path": "Solidity/Calculus/Shift.lean",
+      "sha256": "907888bf49ae2347938ae251b0a3ba38dfe12d0502e54159cf9f52d26ee1991f"
+    },
+    "Solidity.Calculus.Lower": {
+      "path": "Solidity/Calculus/Lower.lean",
+      "sha256": "7984f90e4d065aa67a3150390bc2dd22301e1c2cedda89f7bf69f2c1d75ed3ef"
+    },
+    "Solidity.Calculus.TermEval": {
+      "path": "Solidity/Calculus/TermEval.lean",
+      "sha256": "c254b7420b1157544fbc8d1581673887b90cde8206ee2ea9035f3c6f6e2ea201"
+    },
+    "Solidity.Calculus.Fml": {
+      "path": "Solidity/Calculus/Fml.lean",
+      "sha256": "1327bb1fe336e9eca4b761b1ebdf8c59c1b00dabbfc4cb5b9b0dfe78f94385f1"
+    },
+    "Solidity.Signature": {
+      "path": "Solidity/Signature.lean",
+      "sha256": "f87769d741153c151bd2d27aa43be9ba0a380f846f614ee5b00ef0e2581b5d1d"
+    },
+    "Solidity.Update": {
+      "path": "Solidity/Update.lean",
+      "sha256": "b6770b0a55a024edbf17e0abe396984bac6ca3797e0a3d238a9b62af5adfb830"
+    },
+    "Solidity.Theory.Segs": {
+      "path": "Solidity/Theory/Segs.lean",
+      "sha256": "57e4a32ca89346c6e840f90866f0cdfd8fc2765cb268e09f693e267a5cb0b673"
+    },
+    "Solidity.Calculus.JoinSequence": {
+      "path": "Solidity/Calculus/JoinSequence.lean",
+      "sha256": "cc80898729c66130d66f79d85a83b2a0347eb751c13a42ec87ccdb504bcc66ac"
+    },
+    "Solidity.Syntax.PushSource": {
+      "path": "Solidity/Syntax/PushSource.lean",
+      "sha256": "80e4c3b947bc6ab63eda96005f7f982971204423bf7c0f059e57b07f38f6bdcf"
+    },
+    "Solidity.Calculus.LexDiamond": {
+      "path": "Solidity/Calculus/LexDiamond.lean",
+      "sha256": "b43e502c0feda4c79a70b847ad6d366547be2614947797bfb88e528ce36b79bc"
+    },
+    "Solidity.Calculus.LexVariant": {
+      "path": "Solidity/Calculus/LexVariant.lean",
+      "sha256": "f853ebeba1f5e360812e86e9cc607d1a22c4f74c25afd236d152fe1f1d2cb40e"
+    },
+    "Solidity.Calculus.CallSummary": {
+      "path": "Solidity/Calculus/CallSummary.lean",
+      "sha256": "90d665e058d1a0679d87a6a462d786da588e27a7a94269a46926351eeb1f626b"
+    },
+    "Solidity.Calculus.SyntaxSize": {
+      "path": "Solidity/Calculus/SyntaxSize.lean",
+      "sha256": "012ca70547d657dce56baaa86599c032f7f888d4c86336cbcb62bf760b8d999a"
+    },
+    "Solidity.Semantics.NoPanic": {
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "sha256": "a08845384cb4ee03338d7cee214bc2514acec30e16d08bb9225bcaa8e670e5cf"
+    },
+    "Solidity.Semantics.Ends": {
+      "path": "Solidity/Semantics/Ends.lean",
+      "sha256": "5e820367d4ae198af9df2ccd0054dec6c57f9c4a2f3415541c2cbf23c513b840"
+    },
+    "Solidity.Syntax.Join": {
+      "path": "Solidity/Syntax/Join.lean",
+      "sha256": "b0aa29059d179bc364e3bc87c7b0cb833c5dc76beda3585221dd8e54921899a8"
+    },
+    "Solidity.Calculus.SurfaceSpec": {
+      "path": "Solidity/Calculus/SurfaceSpec.lean",
+      "sha256": "c293fafbabdaec3208cc677a271f33dcc2591b9f202756b54679cdcbf6a91fc9"
+    },
+    "Solidity.Calculus.Close": {
+      "path": "Solidity/Calculus/Close.lean",
+      "sha256": "a4a33ab654a5196f6be2f9c64039b287a018dc42f3fdf56856faf7ed3818465d"
+    },
+    "Solidity.Calculus.SurfaceNotation": {
+      "path": "Solidity/Calculus/SurfaceNotation.lean",
+      "sha256": "1eb45e5d7655a78125ea52a93499dbfa949fc0156ceb0531a4fab907a22d505b"
+    },
+    "Solidity.Calculus.Hyp": {
+      "path": "Solidity/Calculus/Hyp.lean",
+      "sha256": "9f9cbfe8045669576874d5ba2ce546b7f5ae01b6bedf1c696a8c8b7a1462f55b"
+    },
+    "Solidity.Calculus.RuleSyntax": {
+      "path": "Solidity/Calculus/RuleSyntax.lean",
+      "sha256": "18e91abcdf9af69b9d1630c8bcde81b5201f632e5698c306a20cf5e524f09695"
+    },
+    "Solidity.Calculus.RuleSyntax.Grammar": {
+      "path": "Solidity/Calculus/RuleSyntax/Grammar.lean",
+      "sha256": "c664960e0939567b227ab68988d0888f87d0bf90e44f23ef92d2112c3ef7112e"
+    },
+    "Solidity.Calculus.RuleSyntax.Schemas": {
+      "path": "Solidity/Calculus/RuleSyntax/Schemas.lean",
+      "sha256": "8a0a45b5395daee294d89566fd07478f12cde60e1d7368afb6d46e07060eea41"
+    },
+    "Solidity.Calculus.RuleSyntax.Print": {
+      "path": "Solidity/Calculus/RuleSyntax/Print.lean",
+      "sha256": "1656c905099219e20e7b8a96d31bd12c423160322dfca122458bf08262376cca"
+    },
+    "Solidity.Syntax.Quote": {
+      "path": "Solidity/Syntax/Quote.lean",
+      "sha256": "1f6c9b771878d5fc94fcecd995dffb86fe5fc70f5a322afa4f6e1c6aa35a8f7d"
+    },
+    "Solidity.Calculus.NamedTerm": {
+      "path": "Solidity/Calculus/NamedTerm.lean",
+      "sha256": "8069cd0ac8dc2add53e3363226f946046974451b6837a60990c8e7678e49dc84"
+    },
+    "Solidity.Syntax.Elab.Context": {
+      "path": "Solidity/Syntax/Elab/Context.lean",
+      "sha256": "29648f77f4398feb59e713d808c5ad68a7a4aa4787f9f84d5d0d1120c24de657"
+    },
+    "Solidity.Syntax.Elab.Values": {
+      "path": "Solidity/Syntax/Elab/Values.lean",
+      "sha256": "1f11c77e3d374d273755f7146714c170b8b370834cfe92eb9d0c267da8128e66"
+    },
+    "Solidity.Syntax.Numeric": {
+      "path": "Solidity/Syntax/Numeric.lean",
+      "sha256": "4ae017159179d6ac5f4aa13c432ccf97635cae8f50c087ed18f452841386bf4a"
+    },
+    "Solidity.Calculus.TacticSyntax": {
+      "path": "Solidity/Calculus/TacticSyntax.lean",
+      "sha256": "db47b2de230d187301da0fe65b7400531c73b36516918d123fe9dfe96f5c82e0"
+    },
+    "Solidity.Calculus.CloseLemmas": {
+      "path": "Solidity/Calculus/CloseLemmas.lean",
+      "sha256": "ffe4b59874fbaaadecefec09b464406f61da658ad6bc8a9974604d6242157407"
+    },
+    "Solidity.Calculus.ReadWrite": {
+      "path": "Solidity/Calculus/ReadWrite.lean",
+      "sha256": "fadc45d5d8799f08018f77541390df7350c1e870569b5bad254e7bbb060d2969"
+    },
+    "Solidity.Theory.Bridge.Denote": {
+      "path": "Solidity/Theory/Bridge/Denote.lean",
+      "sha256": "dfb71b1ad5c191193e1e7fa687aad5e99b5b59e879b410e2516a647e6163ec76"
+    },
+    "Solidity.Typing.CleanTail": {
+      "path": "Solidity/Typing/CleanTail.lean",
+      "sha256": "31fddba4c6e1b500a1e2aafc1ac205050ca184f9f80c52dc27dfbf049655650f"
+    },
+    "Solidity.Calculus.CloseNonlin": {
+      "path": "Solidity/Calculus/CloseNonlin.lean",
+      "sha256": "ced1d68ce75aa98cc9e89332e4a6d2765515c437a23e510e25cc6ed6b80776ab"
+    },
+    "Solidity.Calculus.Budget": {
+      "path": "Solidity/Calculus/Budget.lean",
+      "sha256": "fbc4569f8e359086c160139d912c34d835c54d306baabad6658b54bbb3e406b4"
+    },
+    "Solidity.Calculus.CloseAll": {
+      "path": "Solidity/Calculus/CloseAll.lean",
+      "sha256": "85b57fa9c68357f7d3f3291a2d6219f0c19c9308d4d7a612e4eb9155a3c5580b"
+    },
+    "Solidity.Calculus.FilteredMembership": {
+      "path": "Solidity/Calculus/FilteredMembership.lean",
+      "sha256": "ce1a3a266d48d5e2016104ca961e5e12485cd093d6353de90d251a6b7b79095b"
+    },
+    "Solidity.Calculus.FiniteMembership": {
+      "path": "Solidity/Calculus/FiniteMembership.lean",
+      "sha256": "e472ca888946d33909bdf74a0aac10332bf2e710896187b4071b11159c566604"
+    },
+    "Solidity.Calculus.Logic": {
+      "path": "Solidity/Calculus/Logic.lean",
+      "sha256": "2ea371b5a0825522f4387a36ed10ae2d651b8de0b12bab6c34e2318ce5dd4b8b"
+    },
+    "Solidity.Calculus.Lands": {
+      "path": "Solidity/Calculus/Lands.lean",
+      "sha256": "b623cc6b3d79911c47302977a822ebe64017c06127a209a4e4b3ee1ca75f1c62"
+    },
+    "Solidity.Calculus.Step": {
+      "path": "Solidity/Calculus/Step.lean",
+      "sha256": "13894e747d90e0d5c1fe21bf6bf66f4a616f8a2b36bf5ccacacb6eb59483c37d"
+    },
+    "Solidity.Calculus.TermWk": {
+      "path": "Solidity/Calculus/TermWk.lean",
+      "sha256": "74f89643d25bcc23f809ceb088decbfc42d161f91642e9eb9bb01e6e29c1f0a9"
+    },
+    "Solidity.Calculus.NotationResolve": {
+      "path": "Solidity/Calculus/NotationResolve.lean",
+      "sha256": "237d675e34c60b55771c985fc999e13ee9f9a5b455b68955ef9c99da1e08ffc3"
+    },
+    "Solidity.Calculus.RefInputs": {
+      "path": "Solidity/Calculus/RefInputs.lean",
+      "sha256": "b5efc0c790c85a2d7246216a7fc7400785cfa38cb42a0497c108f72af2ab8fcb"
+    },
+    "Solidity.Syntax.Elab": {
+      "path": "Solidity/Syntax/Elab.lean",
+      "sha256": "249d1dc7ca5ddb596c4a4ccf196d9448c20fe70880bb3edf1f632fa6115d341c"
+    },
+    "Solidity.Syntax.Elab.Lower": {
+      "path": "Solidity/Syntax/Elab/Lower.lean",
+      "sha256": "45c15f74514675e02f8f4eb2c0aa20ae8c86c2cb0bf2fc8f8720e9a572dc0c41"
+    },
+    "Solidity.ERC7201": {
+      "path": "Solidity/ERC7201.lean",
+      "sha256": "5600d38de5f2e8cc3277d3b8a3186d82ecb42631b52f2da5699017a6202d6dff"
+    },
+    "Solidity.Syntax.Elab.Arms": {
+      "path": "Solidity/Syntax/Elab/Arms.lean",
+      "sha256": "518335dc8c62d9f7bb493b32f372c5f96cb38dc142ce4d0061406d136699d194"
+    },
+    "Solidity.Syntax.Elab.SliceCopy": {
+      "path": "Solidity/Syntax/Elab/SliceCopy.lean",
+      "sha256": "abf1079fe98967c0c56302d478928178d639f695b8604a785e07cf9cb1106676"
+    },
+    "Solidity.Syntax.Elab.Stmt": {
+      "path": "Solidity/Syntax/Elab/Stmt.lean",
+      "sha256": "37af387a108b618627ed2b309711d7f6b624a45eb06fa7d05c1acf32bb596591"
+    },
+    "Solidity.Syntax.DispatchChain": {
+      "path": "Solidity/Syntax/DispatchChain.lean",
+      "sha256": "1a8fc2d211b89114265d04daab49865ebf1603ff55a9d0a5db10076b3f96088b"
+    },
+    "Solidity.Calculus.Quote": {
+      "path": "Solidity/Calculus/Quote.lean",
+      "sha256": "bd3e8f491d4258d0eb93859ed1a57eb10c4b045bc56b7345bb3173a204faeeb5"
+    },
+    "Solidity.Syntax.Splice": {
+      "path": "Solidity/Syntax/Splice.lean",
+      "sha256": "0cddafd96209ee6e63110878491d0bcfca8047ce51daf986ea31d5740c191c1f"
+    },
+    "Solidity.Syntax.Inlined": {
+      "path": "Solidity/Syntax/Inlined.lean",
+      "sha256": "34e9c25712b0f22df16c813dd534040787733a221f70f6a1d8b9e77f9e349391"
+    },
+    "Solidity.Syntax.LoopWarnings": {
+      "path": "Solidity/Syntax/LoopWarnings.lean",
+      "sha256": "8b399406ddefd840a1e95114965a0376b5f98366cca73fed29e933c51d27fabc"
     }
   },
   "sourceProvenance": {
