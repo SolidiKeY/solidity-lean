@@ -177,3 +177,27 @@ can be reviewed without the held Source core migration. Actual journal and
 request-scope adapters are in `MonetaryAuthoritySource.lean`, which explicitly
 requires the owner-held H16 cursor/H19 account changes. No interface is a
 claim that fee settlement or session authority wiring already exists.
+
+## Remaining read/constructor consumers (2026-11-04)
+
+39 more modules are migrated: the final16 inventory reads plus23 related
+Source-account constructor/dependency fixtures. All57 original read sites are
+now migrated. Values and complete expected state/trace/failure distinctions
+remain unchanged; no Source core module is edited in this increment. Initial
+failures and corrected passes are retained separately.
+
+Readonly StaticJournal required an isolated representation amendment: balance
+certificate steps and their storage-preservation lemma now accept the actual
+Nat monetary field. All start/write/static/child/rollback rules and conclusions
+are unchanged. Word-step and Word-storage compatibility are explicit. Actual
+credit/transfer histories are proved without an added range premise; transfer
+unfolds the real transferNat wrapper. This generalizes storage-preservation
+coverage, not payment admission or settlement. The readonly owner is requested
+to review the isolated patch before integration. Read-only finder and skeptic
+approved this scope without findings or running Lean/tests.
+
+The global .balance.val search is clear, but this does not itself prove full
+consumer/Source closure. Combined checkpoint, Source release/timing acceptance,
+G01 H25 authority settlement/session wiring, full balance reachability, H16/P8
+realization and original24 obligations/six combinations remain pending. No
+fresh native observation or whole-lane completion is claimed.

@@ -44,12 +44,12 @@ def source : Source.EMState env [.bool] :=
 def before : Source.EMState env [.bool] :=
   ⟨source.1,{source.2 with ex := source.2.ex.run [
     .account Controls.owner (fun a => { a with
-      balance := ⟨93,by decide⟩
+      balance := 93
       nonce := 4
       code := some 0
       storage := a.storage.write Controls.saved (.bool true) }),
     .transient Controls.other (fun cells => cells.write Controls.path (.bool true))]}⟩
-def credited := before.2.ex.apply (.account Controls.owner (fun a => a.withBalance ⟨93,by decide⟩))
+def credited := before.2.ex.apply (.account Controls.owner (fun a => a.withBalance 93))
 def changed := credited.apply (.transient Controls.owner (fun cells => cells.write Controls.path (.bool true)))
 def run (pipeline : Roadmap.Pipeline) (out : Roadmap.Outcome) (static : Bool) (horizon : Nat) :
     Source.EM env [.bool] Roadmap.Outcome := do

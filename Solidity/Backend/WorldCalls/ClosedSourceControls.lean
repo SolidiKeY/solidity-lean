@@ -14,7 +14,7 @@ def run (amount : Solidity.Roadmap.Word) (out : Solidity.Roadmap.Outcome) :=
 def successRun := run (word 3) (.success [5,6])
 def revertRun := run (word 3) (.revert [7,9])
 def insufficient := run (word 11) (.success [5,6])
-def balance (s : St EB) := (s.ex.world.accounts thisC).balance.val
+def balance (s : St EB) := (s.ex.world.accounts thisC).balance
 def reentrant (out : Solidity.Roadmap.Outcome) :=
   (callAddr (GB (SourceCallHistoryControls.callee out)) FC 30 ext (word 3) [4,5] false).run (L0 EB,entry)
 theorem successful_bytes : successRun.1 = .ok (.success [5,6]) := by rfl

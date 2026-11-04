@@ -36,7 +36,7 @@ def storage : Source.Storage env.layout env.cellTy :=
 def state : Source.St env :=
  { ex :=
     { world := ⟨fun a=>if a=address then
-        {balance:=⟨19,by decide⟩,nonce:=3,code:=some 0,storage:=storage}
+        {balance := 19,nonce:=3,code:=some 0,storage:=storage}
         else Source.Account.empty _⟩
       transient:=Source.Transient.empty
       journal:=[] }
@@ -77,7 +77,7 @@ def sourceView (s : Source.St env) :=
  ([SourceArrayDeleteTarget.wordAt frame s.ex path,SourceArrayDeleteTarget.wordAt frame s.ex (child 0),
  SourceArrayDeleteTarget.wordAt frame s.ex (child 1),SourceArrayDeleteTarget.wordAt frame s.ex (child 2),
  SourceArrayDeleteTarget.wordAt frame s.ex other],s.ex.journal.length,
- (s.ex.world.accounts address).balance.val,(s.ex.world.accounts address).nonce,
+ (s.ex.world.accounts address).balance,(s.ex.world.accounts address).nonce,
  (s.ex.world.accounts address).code,s.events.length,s.logs.length)
 def targetView (m : Evm.Machine) :=
  ([m.store (.root 0),m.store (.data (.root 0) 0),m.store (.data (.root 0) 1),m.store (.data (.root 0) 2),m.store (.root 9)],

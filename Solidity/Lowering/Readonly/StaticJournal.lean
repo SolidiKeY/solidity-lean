@@ -20,7 +20,7 @@ ancestry. It does not classify outcomes, observations or caller continuations. -
 inductive History : ExecState D L T → Bool → ExecState D L T → Prop where
   | start (entry : ExecState D L T) (mode : Bool) : History entry mode entry
   | balance {entry s : ExecState D L T} {mode : Bool}
-      (prior : History entry mode s) (a : Address) (b : Word) :
+      (prior : History entry mode s) (a : Address) (b : Monetary.Balance) :
       History entry mode (s.apply (.account a fun old => old.withBalance b))
   | write {entry s : ExecState D L T} {mode : Bool}
       (prior : History entry mode s) (ordinary : mode = false) (op : Op D L T) :
@@ -35,13 +35,24 @@ inductive History : ExecState D L T → Bool → ExecState D L T → Prop where
       History entry mode ((s.enter a sender v input (requested || mode)).rollback (s.run ops))
 
 /-- Crediting/debiting may change an account's balance, never its typed storage. -/
-theorem balance_storage (s : ExecState D L T) (a : Address) (b : Word) :
+theorem balance_storage (s : ExecState D L T) (a : Address) (b : Monetary.Balance) :
     SameStorage (s.apply (.account a fun old => old.withBalance b)) s := by
   intro target
   by_cases same : target = a
   · subst target
     simp only [ExecState.apply, World.set_get, Account.withBalance]
   · simp only [ExecState.apply, World.set_other _ same]
+
+/-- The former Word-valued history step embeds unchanged into exact money. -/
+theorem History.balance_word {entry state : ExecState D L T} {mode : Bool}
+    (prior : History entry mode state) (address : Address) (amount : Word) :
+    History entry mode (state.apply (.account address fun old => old.withBalance amount.val)) :=
+  .balance prior address amount.val
+
+/-- Compatibility with the original bounded balance-storage statement. -/
+theorem balance_storage_word (state : ExecState D L T) (address : Address) (amount : Word) :
+    SameStorage (state.apply (.account address fun old => old.withBalance amount.val)) state :=
+  balance_storage state address amount.val
 
 /-- Every certified history preserves storage, including nested rollback. -/
 theorem History.storage {entry final : ExecState D L T} {mode : Bool}
@@ -65,7 +76,7 @@ success and on overflow refusal. No mode or whole-world equality is assumed. -/
 theorem credit_history {E : Env} {Γ : RCtx} (a : Address) (v : Word)
     (locals : Locals E.layout Γ) (state : St E) (mode : Bool) :
     History state.ex mode ((credit a v : EM E Γ Unit).run (locals, state)).2.2.ex := by
-  by_cases fits : (state.ex.world.accounts a).balance.val + v.val < 2 ^ 256
+  by_cases fits : (state.ex.world.accounts a).balance + v.val < 2 ^ 256
   · simp only [credit, EM.st, EM.modSt, EM.halt, bind, pure, ExceptT.bind,
       ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind,
       StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet, get,
@@ -86,12 +97,12 @@ theorem transfer_history (state final : ExecState D L T) (src dst : Address)
     (v : Word) (mode : Bool) (execution : state.transfer src dst v = some final) :
     History state mode final := by
   by_cases self : src = dst
-  · simp only [ExecState.transfer, self, ↓reduceIte] at execution
+  · simp only [ExecState.transfer, ExecState.transferNat, self, ↓reduceIte] at execution
     split at execution
     · cases execution
       exact .start _ _
     · cases execution
-  · simp only [ExecState.transfer, self, ↓reduceIte] at execution
+  · simp only [ExecState.transfer, ExecState.transferNat, self, ↓reduceIte] at execution
     split at execution
     · cases execution
       exact .balance (.balance (.start _ _) src _) dst _
