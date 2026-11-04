@@ -426,3 +426,19 @@ execution succeeds. This is a strengthened control, not a semantics change.
 Both independent reviewers confirmed the embedded0x5b repair. Packet proofs
 received no semantic finding; the remaining branch draft is not registered
 and is not part of the passing code.
+
+
+## Control checkpoint handoff
+
+Placed code/sequence realization is committed at7583709c (documentation
+handoffb60e023c), and bounded control packets at2b1d3227. Each passes all eight
+checkpoint gates and its two scoped per-file checks, with only standard
+axioms in the exact scoped report sets. KeySort passes under the recorded
+Lean4.24.0/Lake5.0.0-src+797c613 serial toolchain. This documentation-only
+handoff retains identical Lean sources to the gated packet implementation.
+Consumers may use codeCertificate, seqCertificate, bounded jump/jumpi/test
+and placed tag execution; they may not infer a branch or loop certificate.
+The unproved branch draft needs smaller static layout and execution lemmas
+within the existing proof budget. General loops and G45.06 remain open, with
+no current producer blocker to those proof steps. These checkpoint passes do
+not constitute the assignment's final full gate or Source/Bridge agreement.
