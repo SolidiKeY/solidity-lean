@@ -102,3 +102,36 @@ end Solidity.Lowering.StorageOps.SourceStorageCopyPhases
 
 The prior subtotal was fourteen pending adapters; this statement makes fifteen.
 No `all_fuel` theorem is registered or claimed proved.
+
+## C169: byte capture-to-prepared-copy adapter
+
+Module: `Solidity.Lowering.StorageOps.SourceByteStorageCapture` (not created).
+Lemma: `prepared_copy`.
+Why routine: unfold actual storRef capture once, use checked `load_bytes`
+with OLD header/read premises, then `store_prepared`; rewrite list length.
+The operation producers and their soundness proofs are already checked. No
+new assumption about emitted target code or desired preservation is permitted.
+This statement is type-validated only; no theorem/stub is registered.
+
+```lean
+theorem prepared_copy :
+∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (_writable : frame.static=false)
+ (src dst : Solidity.Source.SPath) (_different : src≠dst)
+ (count oldLength padding : Nat) (payload : Nat → UInt8)
+ (typed : ∀ j, (.fixedBytes 1 (by decide) : Solidity.Source.STy)=E.cellTy (dst.go (.index j)))
+ (headerTyped : (.int Solidity.Source.IntTy.u256 : Solidity.Source.STy)=E.cellTy dst)
+ (locals : Solidity.Source.Locals E.layout Γ) (state : Solidity.Source.St E)
+ (_sourceHeader : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame src).run (locals,state)=(.ok count,(locals,state)))
+ (_reads : ∀ j<count,(Solidity.Source.readAt (E:=E) (Γ:=Γ) frame (src.go (.index j)) (.fixedBytes 1 (by decide))).run (locals,state)=
+   (.ok (Solidity.Source.Val.fixedBytes (n:=1) (h:=by decide) [payload j] rfl),(locals,state)))
+ (_targetHeader : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame dst).run (locals,state)=(.ok oldLength,(locals,state))),
+ let bs := (List.range' 0 count).map payload
+ (Solidity.Source.storeVal (E:=E) (Γ:=Γ) frame (count+padding+3) (.bytes .storage) dst
+   (Solidity.Source.Val.storRef (τ:=.bytes .storage) rfl src)).run (locals,state)=
+ (if oldLength-count≤count+padding then .ok () else .error .timeout,
+  (locals,{state with ex:=state.ex.run (Solidity.Lowering.StorageOps.SourceByteStoragePrepared.phaseLog frame dst typed headerTyped bs oldLength padding)}))
+```
+
+This adds one routine adapter to the prior fifteen: sixteen remain pending.
+The statement does not discharge generic storRef composition.

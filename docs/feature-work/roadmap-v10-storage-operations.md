@@ -131,8 +131,28 @@ context. They distinguish partial writes, final-write timeout, successful writes
 empty fuel boundaries, nonzero-start capture, static refusal and malformed paths.
 Independent read-only finder/skeptic reviews found no producer soundness issue;
 full storage-reference byte/string capture-to-cleanup/header composition and
-packed physical layout remain open. These are Source operation helpers, not a
+packed physical layout remain open at that helper boundary. These are Source operation helpers, not a
 memory-to-storage or whole compiler certificate.
+
+## Source byte cleanup and prepared phases
+
+`SourceByteStorageClear.range_eq_int` transports actual primitive byte-clear
+operations to the checked scalar runtime range, including zero-fuel failure;
+it does not equate byte and integer values. `SourceByteStoragePrepared` composes
+byte payload writes, exactly the demanded clear prefix and header-last commit.
+At phase fuel `length+padding+2`, cleanup gets budget `length+padding`; failure
+retains its generated writes and old header. No implicit rollback follows.
+
+The populated controls execute actual storage-reference byte copies and retain
+all ordered outcomes, raw observations, success/timeout journal order and
+nonempty local/account context. Shrink, growth, empty, self and static cases
+separate raw cleared absence from default-byte reads and fresh bounds checks;
+older shadows and unvisited tails remain observable. Independent read-only
+finder/skeptic reviews found no producer issue; their requested timeout-journal
+and default/live alias controls are included. String-copy coverage is not claimed.
+The generic capture-to-prepared adapter is type-validated but unproved in
+TERRA-TODO; sixteen routine adapters now remain pending. Packed representation,
+Source address compilation and emitted/world composition remain open.
 
 ## Remaining obligations
 
