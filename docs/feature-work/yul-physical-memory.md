@@ -742,3 +742,14 @@ failure stops before hashing. Controls combine mixed writes, two calldata aliase
 and an oversized reference, distinguishing clipped3-byte and padded5-byte inputs.
 This does not establish ABI-entry provenance, allocator header/FMP realization,
 whole Source-statement fuel transport or Source/Yul/compiler adequacy.
+
+`CellHashFinalization` transports the successful combined write/hash run's
+persistent encoding through actual transaction finalization. Its general reset
+law preserves persistent residual slots, resets transient residual slots, reads
+actual source defaults and clears both journals. Controls also finalize a late
+hash timeout: completed persistent writes survive while transient cells reset.
+This is explicit carrier finalization, including the timeout example, not
+automatic transaction error handling. The encoding law uses the original map
+complement independently of the supplied residual journal; their initial
+coupling is not derived here. Finalization is not frame rollback or a claim that arbitrary default codecs
+encode zero; heap placement and general call/source adequacy remain open.

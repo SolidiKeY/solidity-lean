@@ -2850,6 +2850,8 @@ import Solidity.Yul.Views.CanonicalAliasControls
 import Solidity.Yul.Views.CanonicalCompatibility
 import Solidity.Yul.Views.CanonicalMemory
 import Solidity.Yul.Views.CanonicalRetained
+import Solidity.Yul.Views.CellHashFinalization
+import Solidity.Yul.Views.CellHashFinalizationControls
 import Solidity.Yul.Views.CellWritesCalldataHash
 import Solidity.Yul.Views.CellWritesCalldataHashControls
 import Solidity.Yul.Views.ComponentComposition
