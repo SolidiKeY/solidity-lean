@@ -577,10 +577,43 @@ references and fresh context,768 constructed wrapped-value cases over both
 pipelines/modes and all32 signed widths, and concrete controls distinguishing
 correct complement from plain negation and reversed subtraction.13 exact
 standard-axiom guards cover all five core laws and eight clients. The wrapped
-fixture inputs do not prove constant admission. Unsigned complement, general
+fixture inputs do not prove constant admission. General
 operand production, checked arithmetic panic/payload/rollback, graph admission,
 recursive aggregates/lifetimes and whole production remain open; no constructor
 or external compiler/EVM coverage is added. G16/G17 and both backfills remain
 partial, with delegated children and G18 composition dependencies unchanged.
 
 Independent finder and skeptic source/control reviews passed with no substantive finding for the signed-complement increment.
+
+## Unsigned bitwise complement
+
+`UnsignedComplement` uses the actual typed word `bnot` and existing width cast,
+relating it to independent Source `~x` at every approved unsigned width. Six
+laws establish word canonicalization, word execution, Source value/reached-state
+execution, target narrowing and initial-family local transport. Only canonical
+input ranges, actual operand runs in the composition helper and initial local
+alignment are premises; local transport derives both runs from initial reads.
+Both checked settings are supported without changing arithmetic failure rules.
+
+`UnsignedComplementControls` contains nine closed clients, repeated aliases,
+fresh context transport and a caller with live memory/storage references. Its
+768 sample executions cover all32 widths, both pipelines and checked settings;
+wrapped payloads include duplicate canonical values. For uint8 input5, actual
+program controls distinguish250 from the unnarrowed word complement2^256-6
+and unsigned negation251. Fifteen exact inline guards pin every headline and
+closed client; word canonicalization and its client need no Classical.choice.
+
+Independent read-only finder and skeptic source reviews found no substantive
+issue. The actual check initially found a missing explicit fixture import and
+a dependent subtype rewrite; these were fixed. Guard-query failures retained
+actual smaller axiom sets and pretty-printer wrapping before corrected pins.
+These are kernel operational transport and bounded Lean execution evidence,
+not compiler/EVM tests or frontend selection/admission completeness.
+
+Queue: G16, G17/P12, G18.01 and Backfill A/B remain partial; checked panic/payload,
+general operands/updates/tuples, accepted-Source graph completeness and whole
+production remain open. G18.02/.03 belong to V16, G18.04/.05 to V14 and G19 to
+V17. G18.06 awaits their ordered admitted-source applications, recursive copy,
+delete/lifetime and representation certificates. The published H24 companion
+is a typed premise without a concrete P8 inhabitant; H16/P8-SPEC remains VY5.
+Constructor coverage is zero. Private rank proposals remain unproved.
