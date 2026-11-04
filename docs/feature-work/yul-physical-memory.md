@@ -1033,5 +1033,17 @@ The additive `sourceBytesOfMemory_alias_run` and
 an actual memory string object. `sourceStringBytes_pointer` proves the owner's
 pointer-preserving conversion with the complete source state unchanged. These
 laws retain invalid UTF-8 bytes and the actual lookup error; they do not prove
-historical reference formation, surface admission, or general string-backed
-whole-map transport after a write plan. Existing bytes-only APIs are unchanged.
+historical reference formation or surface admission. Existing bytes-only APIs
+are unchanged.
+
+`BytePlanHashAlias.transport` extends the write-plan result to string-backed
+bytes aliases. It derives the reached object contents from actual type
+preservation and heap shape, then obtains the physical preimage from the
+complete map constructed by `MultiRootByteWrites.sound`. Its initial placement,
+MemOK, supported inventory, old reads and reserved-region premises remain
+explicit. The same source operation sequence and raw companion retain their
+whole-map/writeback laws; no final contents or view are supplied by the caller.
+Controls use two valid aliases to a string object, mutations across byte/string
+roots, nonzero padding, a late non-byte write failure and restored caller locals.
+They establish kernel source/view behavior, not target opcode execution,
+external compiler observations or general expression/escape adequacy.

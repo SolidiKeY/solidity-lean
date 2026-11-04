@@ -2860,6 +2860,8 @@ import Solidity.Yul.Views.ByteHeapRealization
 import Solidity.Yul.Views.ByteHeapRealizationControls
 import Solidity.Yul.Views.ByteObjects
 import Solidity.Yul.Views.BytePlanHash
+import Solidity.Yul.Views.BytePlanHashAlias
+import Solidity.Yul.Views.BytePlanHashAliasControls
 import Solidity.Yul.Views.BytePlanHashControls
 import Solidity.Yul.Views.ByteWriteSequence
 import Solidity.Yul.Views.ByteWriteSequenceControls
