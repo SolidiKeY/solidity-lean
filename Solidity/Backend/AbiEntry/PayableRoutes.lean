@@ -106,6 +106,25 @@ def certificate : Interface.PayableRoutesCertificate route where
   selected := fun C base table fallback => ⟨compiled C base table fallback,selected C base table fallback⟩
   executed := executed
 
+/-- Public adapters for composition reuse the checked branch implementation. -/
+def branchBody (base : Nat) (label : Fin W) (payable : Bool) : List Evm.Instr := bodyCode base label payable
+
+theorem branchBody_code (C : Contract) (base : Nat) (label : Fin W) (payable : Bool) :
+    compileProg base (ValueGateBody.guard payable (SelectorRoutes.writeLabel C label))=branchBody base label payable :=
+  body_code C base label payable
+
+theorem test_run (base : Nat) (tag selector : Fin W) (yes no : List Evm.Instr) (machine : Machine)
+    (initial : machine.mem base=.val selector) :
+    run ([.mload base,.push (.val tag),.eq,.iszero,.jumpi (yes.length+1)]++yes++[.jump no.length]++no) machine=
+      if tag.val=selector.val then run (yes++[.jump no.length]++no) machine else run no machine :=
+  front base tag selector yes no machine initial
+
+theorem branchBody_run (base : Nat) (label : Fin W) (payable : Bool) (rest : List Evm.Instr) (machine : Machine) :
+    run (branchBody base label payable++[.jump rest.length]++rest) machine=
+      if payable || decide (machine.callvalue.val=0) then
+        .ok {machine with mem := upd machine.mem (base+1) (.val label)} 0 else .revert :=
+  body_run base label payable rest machine
+
 /-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.admitted' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -116,4 +135,10 @@ def certificate : Interface.PayableRoutesCertificate route where
 #guard_msgs (whitespace := lax) in #print axioms executed
 /-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.certificate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms certificate
+/-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.branchBody_code' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms branchBody_code
+/-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.test_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms test_run
+/-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.branchBody_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms branchBody_run
 end Solidity.Backend.AbiEntry.PayableRoutes

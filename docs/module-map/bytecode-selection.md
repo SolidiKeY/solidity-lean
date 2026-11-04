@@ -161,3 +161,6 @@
 | `Backend/AbiEntry/SpecialRoutesInterface.lean` | Receive/fallback continuation selection and rejection certificates. |
 | `Backend/AbiEntry/SpecialRoutes.lean` | Typed special choice, declaration payability and exact Source rejection bytes. |
 | `Backend/AbiEntry/SpecialRoutesControls.lean` | Receive preference, fallback value, absence and protected-state controls. |
+| `Backend/AbiEntry/EntryRoutesInterface.lean` | Combined ordinary/special continuation execution certificate. |
+| `Backend/AbiEntry/EntryRoutes.lean` | One typed length/ordinary/special tree with exact public compiler execution. |
+| `Backend/AbiEntry/EntryRoutesControls.lean` | Precedence, terminal rejection, equal-label and saved-state controls. |

@@ -710,3 +710,32 @@ consumer was rechecked.
 `EntryRoutesInterface.lean` specifies one compiled continuation path: short
 inputs use special selection, full inputs prefer the first ordinary match,
 and ordinary misses use special selection. Getter/body integration is open.
+
+`EntryRoutes.lean` composes one typed continuation tree: short inputs enter
+special selection; full inputs try ordinary rows in order, then enter special
+selection on a miss. Selected ordinary value refusal is terminal, even when a
+payable fallback or later collision exists. Length/result cell reuse leaves
+original state intact for special selection on a miss. General admission,
+public compiler selection and actual IR execution prove exact success state
+and zero pending skip, with no supplied body run or poststate. Additive branch
+adapters reuse the existing PayableRoutes proofs; no old implementation or
+framework is replaced. Option-valued Source ordinary lookup is recovered from
+the existing general default-valued theorem at two distinct defaults, so
+absence stays distinct without relying on unique labels or redoing selector
+proofs. Existing declaration-derived special rows are reused.
+Controls cover arbitrary-value empty receive, short nonempty fallback including
+a padded collision, full ordinary zero-value acceptance, terminal nonzero
+refusal despite payable fallback/later collision, full misses, total absence,
+equal ordinary/fallback labels, malformed length and protected saved state.
+This remains continuation dispatch. Getter precedence must be compiled before
+special selection on an ordinary miss; this module does not claim the whole
+Source dispatch when getters exist. Native selector/size loading, native byte
+failure correspondence, decoding/argument binding, parameterized fallback
+input/output and successful ABI body execution/composition remain open.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked one actual selected tree, original length/state on misses,
+terminal collision/value refusal, exact joins and noninjective-label option
+recovery. Both confirmed the getter/native/body/binding boundaries; neither
+used a build or Lean server. Focused importing-consumer compilation passed
+without warnings in the changed modules.

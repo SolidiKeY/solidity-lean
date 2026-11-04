@@ -12,6 +12,9 @@ import Solidity.Backend.AbiEntry.CalldataWordInterface
 import Solidity.Backend.AbiEntry.CompositionInterface
 import Solidity.Backend.AbiEntry.Consumers
 import Solidity.Backend.AbiEntry.EntryComposition
+import Solidity.Backend.AbiEntry.EntryRoutes
+import Solidity.Backend.AbiEntry.EntryRoutesControls
+import Solidity.Backend.AbiEntry.EntryRoutesInterface
 import Solidity.Backend.AbiEntry.EntryTransport
 import Solidity.Backend.AbiEntry.EnumEntry
 import Solidity.Backend.AbiEntry.HeadCheck
