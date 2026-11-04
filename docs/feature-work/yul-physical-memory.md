@@ -587,3 +587,14 @@ child1's99 and high padding bits. Paired rollback restores exactly the checked
 post-alias external-state/residual boundary, not arbitrary caller locals or a
 whole call. Canonical preparation failure and general capture/frame adequacy
 remain separate obligations.
+
+`RetainedAliasSequence` indexes the next checked plan by the exact first Source
+state, residual journal and capture prefix. Its source projection is the actual
+owner monadic bind. First refusal skips the second program; late static refusal
+retains the first reached map and journal plus any second alias effect. Two
+successes use the second completed map. Owner safety composes over both branches.
+A ready-but-skipped control and a journal-reset negative distinguish these cases;
+first/second requested headers are3/0. The checked preparation reproduction law
+factors actual guard fields without omitting them or raising recursion/heartbeat
+limits. The concrete factored control takes about45seconds; generic laws about2.
+This explicit sequence does not establish general call/frame capture or rollback.

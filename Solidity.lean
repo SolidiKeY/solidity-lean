@@ -3257,6 +3257,8 @@ import Solidity.Yul.Views.ResidualWindowControls
 import Solidity.Yul.Views.RetainedAliasOwnership
 import Solidity.Yul.Views.RetainedAliasOwnershipControls
 import Solidity.Yul.Views.RetainedAliasReadControls
+import Solidity.Yul.Views.RetainedAliasSequence
+import Solidity.Yul.Views.RetainedAliasSequenceControls
 import Solidity.Yul.Views.RetainedAllocation
 import Solidity.Yul.Views.RetainedAllocationFurtherControls
 import Solidity.Yul.Views.RetainedAllocationLiftControls

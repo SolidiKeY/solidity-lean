@@ -98,3 +98,4 @@
 | `Yul/Views/RetainedLocalAlias{,Controls}` | Actual typed local-assignment capture preserves overwritten entry aliases and returned references, with whole-store identity and dormant-path loss controls. |
 | `Yul/Views/RetainedLocalAliasImage{,Controls}` | Actual alias capture drives checked enlarged retained images, source traversal, whole-storage unchanged writeback and exact complementary raw-map reconstruction. |
 | `Yul/Views/RetainedAliasOwnership{,Controls}` | One actual alias-plus-Source storage run with success-only complementary journaling, full reencoding, static prefix retention and paired-boundary rollback controls. |
+| `Yul/Views/RetainedAliasSequence{,Controls}` | Actual Source-bind ownership sequencing keeps reached journals and capture prefixes through first/late refusals and two successes; checked fields reproduce public preparation. |
