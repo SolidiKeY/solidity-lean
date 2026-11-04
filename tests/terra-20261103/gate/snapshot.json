@@ -1,15 +1,17 @@
 {
   "version": 2,
-  "source_commit": "4c5d27bd9081f396bce99c257a52d201ef993654",
+  "source_commit": "fc695ef1d2228947eac2fb1c6279fc4ccf0bd56d",
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "source_sha256": "8a4059f77224ea758da3cec2fb82ce041c943233db42f4d6204e9c7cb835a227",
   "source_changed_paths": [
     "scripts/coord-tools/gate.sh",
     "tests/terra-20261103/gate/README.md",
     "tests/terra-20261103/gate/accept.py",
+    "tests/terra-20261103/gate/accept_repaired.py",
     "tests/terra-20261103/gate/freeze_acceptance.py",
     "tests/terra-20261103/gate/history/tf-gate-9cc85b14.tar.gz",
     "tests/terra-20261103/gate/old_to_new.json",
+    "tests/terra-20261103/gate/snapshot.json",
     "tests/terra-20261103/gate/test_cases.py",
     "tests/terra-20261103/gate/test_contract.py",
     "tests/terra-20261103/gate/test_targets.py"
@@ -27,15 +29,15 @@
     "tests/terra-20261103/gate/test_targets.py"
   ],
   "files": {
-    "tests/terra-20261103/gate/README.md": "254c8387ba190bbac1955b210e6e4f07e5158fe6a805b8193050d137fbefa8f5",
+    "tests/terra-20261103/gate/README.md": "764eaf6ee4035ab43da398cae4f8425ab9a610420894547329846d26aa88cfd8",
     "tests/terra-20261103/gate/accept.py": "ddc8936bd0dac39a6fcd02ed0685c5b2dac7ae5caa76a385f58fd7f7770019f5",
-    "tests/terra-20261103/gate/accept_repaired.py": "888975f9b0cea6e42ad59938506cf298cb44cdcf80b6982e287e1ade5dea4b61",
-    "tests/terra-20261103/gate/freeze_acceptance.py": "2f8a5ec0d262d830134d6bd4f146cf708e3b52d906effa39e318ce9c886e98ae",
+    "tests/terra-20261103/gate/accept_repaired.py": "b7c6ba137d335a8915f92e4a7331d63b14183419333f74e372d2d0fc312a610a",
+    "tests/terra-20261103/gate/freeze_acceptance.py": "4663cf58cb1721e340aafb2f2e4eb274285f8be818519d10211f44fde334f922",
     "tests/terra-20261103/gate/history/tf-gate-9cc85b14.tar.gz": "d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba",
-    "tests/terra-20261103/gate/old_to_new.json": "6bcb52fd841da96231b4e29e774760b409f92f6e26fa94d3e9c6f00290a2d0ec",
+    "tests/terra-20261103/gate/old_to_new.json": "787ae2062832d0fc542a83e94b4868ec71acb6d1fcd96ddd3063fc08d67ef78d",
     "tests/terra-20261103/gate/test_cases.py": "768c8ef171149905dd942ab2a5965b8cf7d4aac55efe33f442a9c8352459d8a1",
-    "tests/terra-20261103/gate/test_contract.py": "c13f2c8501efc80a6ccd6bdadd9449b8d4fbe5caeeb93548f152332ac5794e97",
-    "tests/terra-20261103/gate/test_targets.py": "833431798aec13a4759be903c5c8bf76adeeecb7022daf0fd7c5e0548735bfcb"
+    "tests/terra-20261103/gate/test_contract.py": "edbbaa78415c0537bb1b69917619e8a88f8590fda41bc50fb9acb9bf77389b1c",
+    "tests/terra-20261103/gate/test_targets.py": "de3831e7802d64f758c6c927a9b8e9474c0570501672cc08c19bc575478eb8aa"
   },
   "dependencies": {
     "run-lean.sh": "712c5d44cf0fe3360f88cc77b69d6244c4f328b2f9d93f1ba22e9fcb8539dfaf",
@@ -94,6 +96,7 @@
       "FrozenContract.test_missing_artifact",
       "FrozenContract.test_missing_head_argument",
       "FrozenContract.test_source_drift",
+      "FrozenContract.test_tool_substitution",
       "FrozenContract.test_unexpected_commit",
       "FrozenContract.test_wrong_head"
     ]

@@ -5,7 +5,7 @@ sys.dont_write_bytecode = True
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 HERE=pathlib.Path(__file__).resolve().parent
 REL=HERE.relative_to(ROOT).as_posix()
-SOURCE_COMMIT='4c5d27bd9081f396bce99c257a52d201ef993654'
+SOURCE_COMMIT='fc695ef1d2228947eac2fb1c6279fc4ccf0bd56d'
 BASE='6f3eedf0788ee1f8a3bcf230558c712ecdca04d5'
 ARCHIVE_SHA='d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba'
 GENERATED={REL+"/accept_repaired.py",REL+"/snapshot.json"}
@@ -82,6 +82,8 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--head",required=True,help="exact independently reviewed acceptance commit")
     args=parser.parse_args()
+    override=os.environ.get("GATE_TOOL")
+    require(override is None or pathlib.Path(override).resolve()==(ROOT/"scripts/coord-tools/gate.sh").resolve(),"gate tool override mismatch")
     snap=verify_snapshot(args.head)
     tests=[]; ids=[]
     for file,expected in snap["case_inventory"].items():
