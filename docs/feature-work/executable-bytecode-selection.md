@@ -301,3 +301,11 @@ All local Selection Lean sources remain unchanged by this adoption. The H30
 failed prerequisite receipt and separate repair question remain open. The
 latest cache transport is separately pending; no unchanged heavy retry or
 resource-policy change is authorized by the publication alone.
+
+Fresh adoption validation on2fbb123f8c9dc49262090fc3ba138708c8bf4cb3 passes
+all eight checkpoint gates (library3499 jobs) and eight per-file checks. The
+eight files have53 scoped standard-only reports and no warnings; all483
+Selection library reports match their source declarations. Independent
+read-only adoption reviews pass. The guard is attached before container
+startup; no resource stop occurred. These are checkpoint results, not a full
+lane pass, and they do not renew the failed H30 prerequisite allowance.
