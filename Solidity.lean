@@ -1570,9 +1570,11 @@ import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
 import Solidity.Frontend.OverrideValidation.Attributes
+import Solidity.Frontend.OverrideValidation.Compatibility
 import Solidity.Frontend.OverrideValidation.Graph
 import Solidity.Frontend.OverrideValidation.Identity
 import Solidity.Frontend.OverrideValidation.OverrideFrontier
+import Solidity.Frontend.OverrideValidation.OverrideLists
 import Solidity.Frontend.OverrideValidation.Pruning
 import Solidity.Frontend.OverrideValidation.Routes
 import Solidity.Frontend.PaymentImport

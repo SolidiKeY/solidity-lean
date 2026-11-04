@@ -93,3 +93,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/SolcJson/CallMetadataSound.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/ReferenceControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/References.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Compatibility.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/OverrideLists.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
