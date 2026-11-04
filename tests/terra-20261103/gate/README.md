@@ -8,4 +8,37 @@ Checkpoint/full controls populate real trust inventory, roots/Lake libraries, a 
 
 Copied tool scripts are untracked fixture harness inputs; tracked populated Lean/catalogue/documentation inputs are deliberate audit subjects. No checker source, default, allowlist or expectation is patched in the disposable repositories. Optional TF_GATE_EVIDENCE writes full per-case audit/gate/receipt JSONL outside the checkout for review.
 
-Frozen accept.py is byte-identical to the transferred historical packet, whose archive SHA256 is d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba. Its historical source pin is incompatible with the corrected tool, so its exit 1 is retained; direct suite success is separate from committed-item acceptance pending a coordinator-reviewed regenerated contract (TF-CONTRACT-02). No source-pin assertion was removed or changed, and original RED/reviews remain outside this tree. The additional source test_targets.py is also explicitly part of the pending artifact-path review. Historical failureCount remains 2.
+## Reconciled frozen acceptance
+
+Historical `accept.py`, the exact original three files, RED and reviews remain
+immutable in `history/tf-gate-9cc85b14.tar.gz` (SHA256
+`d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba`).
+The old acceptor remains byte-identical and intentionally rejects source drift.
+Coordinator authorization 2026-11-04 12:49 resolves TF-CONTRACT-02 by creating
+`accept_repaired.py`, never by changing the old pin or dropping assertions.
+
+`freeze_acceptance.py inventory` generates `old_to_new.json`: every historical
+case, assertion, artifact, rejection guard and backend check maps to its retained
+or stronger replacement. It also inventories positive/negative audit controls
+and all additional controls. After committing repaired inputs, run
+`freeze_acceptance.py freeze` and commit only the two generated freeze files.
+The snapshot pins that exact repaired source commit, all artifact and copied-tool
+hashes, complete case sets and allowed changes. Its own bytes and generated runner
+are bound by the exact final acceptance commit; the external seal hashes every
+file, including the snapshot, avoiding a circular self-hash claim.
+
+Two independent read-only finder/skeptic reviews must compare the full old/new
+inventory on the exact acceptance commit before execution. Run:
+`python3 tests/terra-20261103/gate/accept_repaired.py --head <reviewed-full-SHA>`.
+No check-only or skip mode exists. Wrong HEAD, changed source/dependency/artifact,
+missing/extra files, modified metadata, unexpected commits and missing head args
+are exercised against the actual executable in sparse local clones. All old 15,
+supplemental 8 and contract-tamper 9 cases must run without skip/xfail. Sparse
+clones share read-only Git objects, perform no network and never execute Lean.
+
+H21's published checkpoint-library policy is retained. Historical empty-target,
+backend refusal and failed-log checks remain explicit; stdout and invocation
+membership checks are strengthened to exact vectors. The unsafe host-elan
+absence prerequisite is replaced by private HOME/path identity and complete
+backend invocation checks. No production budgets, checker semantics, named case,
+profile or refusal was weakened. Historical failureCount stays 2.

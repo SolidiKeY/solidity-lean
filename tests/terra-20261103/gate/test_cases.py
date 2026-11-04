@@ -221,6 +221,8 @@ class GateCases(unittest.TestCase):
         shutil.copy2(source / "run-lean.sh", self.repo / "run-lean.sh")
         real_node = shutil.which("node")
         self.assertIsNotNone(real_node, "real Node is a fixture prerequisite")
+        self.assertEqual(self.env["HOME"], str(self.home))
+        self.assertEqual((self.home / ".elan/bin/lake").resolve(), (self.bin / "lake").resolve())
         for name, executable in (("bash", "/bin/bash"), ("node", real_node)):
             wrapper = self.bin / name
             wrapper.write_text("#!/bin/sh\nprintf '%s\\n' \"" + name + " $*\" >> \"$CALLS\"\nexec \"" + executable + "\" \"$@\"\n")
@@ -303,11 +305,12 @@ class GateCases(unittest.TestCase):
             statuses += ["FAIL", "FAIL", "FAIL"]
         result = self.run_gate(mode, FAIL_TOOL="lake")
         rows = self.inspect(result, names, statuses)
+        self.assertEqual((self.logs / "1.log").read_text(), "targets: none\n")
         wanted = ["build_touched", "lake build Solidity" if mode == "checkpoint" else "bash run-lean.sh", "bash scripts/check-trust.sh", "node scripts/check-orphans.mjs", "node scripts/check-layers.mjs", "bash scripts/coord-tools/register.sh --check", "bash scripts/check-doc-paths.sh", "node scripts/check-axiom-pins.mjs"]
         if mode == "full":
             wanted += ["bash scripts/check-testsuite.sh", "bash scripts/check-corpus.sh", "node scripts/check-automatic.mjs --strict"]
         self.assertEqual([r[4].strip() for r in rows], wanted)
-        diagnostics = {"trust": "forbidden sorry", "orphans": "ORPHAN   Solidity.Loose", "layers": "0 reach the elaborator", "roots": "missing import Solidity.Loose", "doc-paths": "MissingFixture.lean", "axiom-pins": "pin Fixture.pin shrank", "testsuite": "Report.lean pins `unsound fixtureMarker`", "corpus": "fixture backend refused: lake", "automatic-strict": "1 manual"}
+        diagnostics = {"library": "fixture backend refused: lake", "run-lean": "register: stale roots", "trust": "forbidden sorry", "orphans": "ORPHAN   Solidity.Loose", "layers": "0 reach the elaborator", "roots": "missing import Solidity.Loose", "doc-paths": "MissingFixture.lean", "axiom-pins": "pin Fixture.pin shrank", "testsuite": "Report.lean pins `unsound fixtureMarker`", "corpus": "fixture backend refused: lake", "automatic-strict": "1 manual"}
         for i, name in enumerate(names, 1):
             text = (self.logs / (str(i) + ".log")).read_text()
             if name in diagnostics:
