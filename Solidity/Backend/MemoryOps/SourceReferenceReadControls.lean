@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceReferenceGrowthDelete
 import Solidity.Backend.MemoryOps.SourceReferenceGrowthWrite
 import Solidity.Backend.MemoryOps.SourceReferenceRead
 import Solidity.Backend.MemoryOps.SourceReferenceReadSequence
@@ -2913,5 +2914,93 @@ theorem reference_growth_redirect_client (p : Roadmap.Pipeline) (horizon : Nat) 
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_redirect_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms reference_growth_redirect_client
+
+private def graphSourceViews (y : Source.EMState E0 SΓ) :=
+  [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4,y.2.heap.get 5]
+private def graphRedirectTable (xs : List Bool) : List (Option (Σ τ,Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+   some ⟨SR,pdata [left]⟩,some ⟨SR,sourceBoolRefMemory graphNewMap
+    [(graphPair false).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])]⟩,
+   some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory xs⟩]
+
+/-- Allocate [false,true], redirect entry0, then actually delete fresh index1.
+The prior client is linked to the SAME prefix by execution determinism.
+The old LEFT alias and the other repeated entry remain untouched. -/
+theorem reference_growth_delete_client (p : Roadmap.Pipeline) (horizon : Nat) :
+    ∃ (mid out : Heap (H++[B])) (z w : Source.EMState E0 SΓ),
+      (Source.allocRef (E := E0) (Γ := SΓ) (sourceBoolMemory (MObj.elems .dyn (graphObject false)))).run sy=
+        (.ok (.memRef rfl 5),graphSource false) ∧
+      (graphPair false).1.writeAddr (.index (fresh.wk (List.prefix_append H [B])) .dyn (indexValue ⟨0,by decide⟩))
+        (graphPair false).2=some mid ∧
+      (Source.writeLoc (E := E0) (Γ := SΓ) F0 (horizon+4) (.mem (τ := SB) 3 0) (.memRef rfl 5)).run (graphSource false)=(.ok (),z) ∧
+      mid.writeAddr (.index (graphPair false).2 .dyn (uintOfNat 1)) false=some out ∧
+      (Source.evalE (G0 p) F0 (horizon+4) (sourceNestedDelete ssrc sj si)).run z=(.ok Source.RVal.unit,w) ∧
+      SourceBoolRefsAt w 3 out (fresh.wk (List.prefix_append H [B])) graphNewMap ∧
+      Source.MemOK E0 SH w ∧ z.1=sy.1 ∧ w.1=sy.1 ∧ w.2.heap.next=6 ∧
+      (Source.evalE (G0 p) F0 1 (sourceNestedDelete ssrc sj si)).run z=(.error .timeout,z) ∧
+      graphSourceViews z=graphRedirectTable [false,true] ∧ graphSourceViews w=graphRedirectTable [false,false] ∧
+      (MObj.elems .dyn (out.get (left.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (right.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (graphPair false).2))=([true,false,false],[false,true,false],[false,false]) ∧
+      (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B])))).map HRef.id=[5,1,0] ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run z=
+        (.ok (.val (.bool true)),z) ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run w=
+        (.ok (.val (.bool false)),w) ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run (graphSource false)=
+        (.ok (.val (.bool false)),graphSource false) ∧
+      (w.2.ex=sy.2.ex ∧ w.2.events=sy.2.events ∧ w.2.logs=sy.2.logs ∧ w.2.fnLocals=sy.2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,out,z,w,ha,hw,hs,selected,hwrite,sw,run,parent,post,mz,mw,lz,lw,keepParent,elems,sep,old,new,cells,next,world⟩ :=
+      graphInitial.alloc_redirect_delete (graphObject false) SH source_memOK (G0 p) F0 horizon ssrc sj si
+        ⟨0,by decide⟩ (uintOfNat 1) rfl rfl rfl
+        (by simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide)
+        (by simp only [graphObject,MObj.elems_dyn];decide)
+    obtain ⟨pm,pz,pha,phw,phs,pparent,pmem,plocal,pnext,ptable,ppayload,pvectors,prest⟩ :=
+      reference_growth_redirect_client p (horizon+4) false
+    have midEq : pm=mid := Option.some.inj (phw.symm.trans hw)
+    have zEq : pz=z := congrArg Prod.snd (phs.symm.trans hs)
+    subst pm
+    subst pz
+    have midVectors : graphSourceViews z=graphRedirectTable [false,true] := pvectors
+    have freshPayload : MObj.elems .dyn (out.get (graphPair false).2)=[false,false] := by
+      change MObj.elems .dyn (out.get (hp.alloc (graphObject false)).2)=[false,false]
+      rw [new]
+      simp only [graphObject,MObj.elems_dyn];rfl
+    have selectedFinal : out.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 0)=some (graphPair false).2 := by
+      change (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B]))))[0]?=_
+      rw [keepParent,ptable];rfl
+    have freshSource := post.children (graphPair false).2 (List.mem_of_getElem? selectedFinal)
+    change w.2.heap.get 5=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (out.get (graphPair false).2))⟩ at freshSource
+    rw [freshPayload] at freshSource
+    refine ⟨mid,out,z,w,ha,hw,hs,hwrite,run,post,mw,lz,lw,next.trans pnext,rfl,midVectors,?_,?_,?_,?_,?_,
+      (reference_growth_reads p horizon false).1,world⟩
+    · simp only [graphSourceViews]
+      rw [cells 0 (by decide),cells 1 (by decide),cells 2 (by decide),cells 3 (by decide),cells 4 (by decide),freshSource]
+      have firstFive := congrArg (fun xs => xs.take 5) midVectors
+      change [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4]=_ at firstFive
+      change [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4]++[some ⟨SB,sourceBoolMemory [false,false]⟩]=_
+      rw [firstFive];rfl
+    · rw [old left,old right,freshPayload]
+      simp only [MObj.elems_wk,Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keepParent,ptable];rfl
+    · apply parent.eval_nested_read (G0 p) F0 horizon ssrc sj si (uintOfNat 0) (uintOfNat 1) (graphPair false).2 true
+      · rw [lz];rfl
+      · rw [lz];rfl
+      · rw [lz];rfl
+      · exact selected
+      · change (MObj.elems .dyn (mid.get (hp.alloc (graphObject false)).2))[1]?=some true
+        rw [elems];simp only [graphObject,MObj.elems_dyn];rfl
+    · apply post.eval_nested_read (G0 p) F0 horizon ssrc sj si (uintOfNat 0) (uintOfNat 1) (graphPair false).2 false
+      · rw [lw];rfl
+      · rw [lw];rfl
+      · rw [lw];rfl
+      · exact selectedFinal
+      · change (MObj.elems .dyn (out.get (graphPair false).2))[1]?=some false
+        rw [freshPayload];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_delete_client
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

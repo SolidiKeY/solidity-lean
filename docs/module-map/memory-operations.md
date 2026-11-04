@@ -216,3 +216,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceReferenceGrowth.lean` | Actual paired Source/intrinsic allocation preserves finite reference-parent/Boolean-child observations; no emitted allocator claim. |
 
 | `Solidity/Backend/MemoryOps/SourceReferenceGrowthWrite.lean` | Actual paired allocation then reached parent-slot redirection; derived observers/frames, no emitted allocator. |
+
+| `Solidity/Backend/MemoryOps/SourceReferenceGrowthDelete.lean` | Actual allocation/redirection then nested delete; fresh allocation derives alias separation and old-object frames. |
