@@ -981,3 +981,18 @@ or compiler adequacy is claimed; broader P16 and final lane gates remain open.
 
 Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
 All eleven reported axiom sets contain only standard Lean axioms.
+
+### Constant-loop reductions
+
+LocalLoopReductions proves full raw-result equality between false do/while at
+fuel+2 and one scoped body at fuel+1, and between false/true literal posts at
+every fuel. The post equality is limited to those literals: an assigning post
+can change the result. Constant-true do/while has an actual retained timeout
+state at every finite horizon; exact Source timeout/world output follows from
+clean Source locals with the real body certificate. A breaking Source body
+completes normally, so the certificate cannot be dropped. These are concrete
+runner laws, not general divergence, dirty readback or compiler adequacy.
+Source, state and evaluators are unchanged; broader P16/final gates remain open.
+
+Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
+All eleven reported axiom sets contain only standard Lean axioms.

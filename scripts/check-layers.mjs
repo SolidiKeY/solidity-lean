@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalLoopReductions|Checks\.LocalLoopReductions)$/, // Exact constant-loop reductions and horizon results.
   /^Solidity\.Yul\.(LocalPostHorizon|Checks\.LocalPostHorizon)$/, // Concrete post/do-while finite-horizon laws.
   /^Solidity\.Yul\.(LocalLoopFailure|Checks\.LocalLoopFailure)$/, // Concrete scope/loop timeout and Source horizon laws.
   /^Solidity\.Yul\.(LocalItemFailure|Checks\.LocalItemFailure)$/, // Indexed statement and context-growing item failure classification.

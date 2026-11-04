@@ -279,3 +279,5 @@ VY1: actual statement/initialization and context-growing item failures are prove
 VY1: concrete scoped-loop timeout classification and all-horizon omitted-guard Source output proved, with retained raw results and a break counterexample; see [lane handoff](inline-assembly-vy1.md#concrete-finite-horizon-loop-timeouts). General P16 remains open.
 
 VY1: concrete post/do-while classifications and omitted-guard post-loop Source horizons proved; see [lane handoff](inline-assembly-vy1.md#post-and-body-first-horizons). General P16 remains open.
+
+VY1: exact constant-loop reductions and constant-true do/while Source horizons proved, with effectful-post and breaking-body counterexamples; see [lane handoff](inline-assembly-vy1.md#constant-loop-reductions). General P16 remains open.

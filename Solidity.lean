@@ -2438,6 +2438,7 @@ import Solidity.Yul.Checks.LocalExprStatement
 import Solidity.Yul.Checks.LocalItemFailure
 import Solidity.Yul.Checks.LocalItemWorld
 import Solidity.Yul.Checks.LocalLoopFailure
+import Solidity.Yul.Checks.LocalLoopReductions
 import Solidity.Yul.Checks.LocalOperations
 import Solidity.Yul.Checks.LocalPostHorizon
 import Solidity.Yul.Checks.LocalProjection
@@ -2652,6 +2653,7 @@ import Solidity.Yul.LocalExprStatement
 import Solidity.Yul.LocalItemFailure
 import Solidity.Yul.LocalItemWorld
 import Solidity.Yul.LocalLoopFailure
+import Solidity.Yul.LocalLoopReductions
 import Solidity.Yul.LocalOperations
 import Solidity.Yul.LocalPostHorizon
 import Solidity.Yul.LocalProjection
