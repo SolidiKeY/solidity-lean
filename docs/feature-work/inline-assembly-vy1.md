@@ -1175,3 +1175,26 @@ certificates, general P16 and full-lane validation remain open.
 Independent read-only finder/skeptic reviews found no issues. Both modules
 have zero diagnostic errors; ten scoped axiom reports use only Lean standard
 axioms. Final lane and external compiler/EVM validation remain open.
+
+
+### Heterogeneous default and unchecked congruence
+
+`LocalDefaultRepresentation` proves six universal laws: `items`,
+`restore`, `close`, `block`, `unchecked`, and `uncheckedBlock`.
+Real default-lookup certificates add identical typed values beside related
+surviving locals; no allocation premise is substituted. Existing fuel guards,
+dependent certified suffixes and checked/unchecked continuation contexts remain
+unchanged. Only normal results close their scopes; exact halt reasons, reached
+contexts, related full locals and equal worlds are preserved.
+Nine controls use heterogeneous uint8/uint256 prefixes and distinct clean/raw
+Boolean constructors with equal complete words. Both input and output frames
+are related, but their normal Source projections differ. Prefix-growth
+timeouts, scope closure and unchecked continuation/block behavior are concrete.
+The default-list certificate is inhabited.
+These proof-only laws change no runtime/Source representation and establish
+neither cleanup nor admission/readback equivalence. Broader certificates,
+allocation support, general P16 and full-lane validation remain open.
+
+Independent read-only finder/skeptic reviews found no issues. Both modules
+have zero diagnostic errors; fifteen scoped axiom reports use only Lean
+standard axioms. Final lane and external compiler/EVM validation remain open.

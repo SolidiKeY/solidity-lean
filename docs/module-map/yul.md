@@ -99,3 +99,5 @@
 | `Yul/LocalBoolPostRepresentation.lean`, `Yul/Checks/LocalBoolPostRepresentation.lean` | All-fuel guarded post-iteration congruence preserving body/post halt states and discarded post values. |
 
 | `Yul/LocalBoolForPostRepresentation.lean`, `Yul/Checks/LocalBoolForPostRepresentation.lean` | All-fuel Boolean initializer/guard/post for congruence with precise scope and outer-write controls. |
+
+| `Yul/LocalDefaultRepresentation.lean`, `Yul/Checks/LocalDefaultRepresentation.lean` | All-fuel heterogeneous default/scope/unchecked congruence with related clean/raw frames and unequal projection controls. |

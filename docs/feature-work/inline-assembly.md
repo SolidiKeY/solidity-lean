@@ -287,3 +287,5 @@ VY1: exact-word congruence now composes through certified Boolean expressions, c
 VY1: all-fuel exact-word congruence now covers certified guarded Boolean post iterations, retaining body/post partial states while discarding post values; see [lane handoff](inline-assembly-vy1.md#post-iteration-exact-word-congruence). General P16 remains open.
 
 VY1: exact-word congruence now composes Boolean initialization with guarded post iteration and normal-only scope closure; see [lane handoff](inline-assembly-vy1.md#initializer-and-post-loop-congruence). General P16 remains open.
+
+VY1: exact-word congruence now covers certified heterogeneous defaults and unchecked scope/continuation composition, with related clean/raw frames whose Source projections differ; see [lane handoff](inline-assembly-vy1.md#heterogeneous-default-and-unchecked-congruence). General P16 remains open.
