@@ -119,3 +119,5 @@
 | `Yul/Compilation/ArithmeticVisitorShapes{,Controls}.lean` | Actual successful ProducerExpressions arithmetic visitor/emission derives recursive operand metadata without public child/primitive-row assumptions; nested original MUL/ADD/SUB source/target, shifted access and peak-three controls. Wider visitors/native/G24 remain separate. |
 
 | `Yul/Compilation/StatementVisitorShapes{,Controls}.lean` | Actual normal statement visitor/emission derives balanced CodeShape, closing RHS metadata/slot range/recursive children; dependent two-assignment source/target witness, shifted prefix/caller and peak-three controls. Wider control/native/G24 remain separate. |
+
+| `Yul/Compilation/WordVisitorShapes{,Controls}.lean` | Actual word visitor/emission derives operand metadata for arithmetic, unsigned quotients, comparisons and unary word operations; mixed DIV/MOD/EQ/NOT source/target, universal zero-divisor/full-complement and access/capacity controls. Wider pure/native/G24 remain separate. |

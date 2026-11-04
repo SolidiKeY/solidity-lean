@@ -2580,6 +2580,8 @@ import Solidity.Yul.Compilation.UnaryMachineControls
 import Solidity.Yul.Compilation.WordControl
 import Solidity.Yul.Compilation.WordExpressions
 import Solidity.Yul.Compilation.WordMachine
+import Solidity.Yul.Compilation.WordVisitorShapes
+import Solidity.Yul.Compilation.WordVisitorShapesControls
 import Solidity.Yul.Composition.CorrectnessControls
 import Solidity.Yul.Composition.CorrectnessInstances
 import Solidity.Yul.Composition.CorrectnessPublic

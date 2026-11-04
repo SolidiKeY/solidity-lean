@@ -31778,5 +31778,69 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapes.lean:Solidity.Yul.Compilation.WordVisitorShapes.visit_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.actual_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.capacity_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.overflow_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.result_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.shifted_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.target_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordVisitorShapesControls.lean:Solidity.Yul.Compilation.WordVisitorShapes.Controls.trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }
