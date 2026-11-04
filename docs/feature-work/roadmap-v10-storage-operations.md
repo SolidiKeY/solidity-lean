@@ -116,6 +116,24 @@ the journal even when ordinary header reads stay zero; it is not a no-op.
 The generic all-fuel composition statement is well-typed but unproved in
 TERRA-TODO; with it, fifteen routine adapters remain pending.
 
+## Source byte capture and writes
+
+`Lowering/StorageOps/SourceByteStorageCopy` proves OLD-state runtime byte
+capture and exact write progress at every original fuel using the existing
+Source fixed-byte cells and operation journal. Success requires fuel strictly
+greater than the payload length; equal fuel writes all bytes and then times
+out on the empty tail. This timeout preserves those writes and is not rollback.
+The typed-cell and OLD-read hypotheses remain explicit.
+
+The companion controls instantiate both general producers and retain complete
+ordered outcomes, raw byte cells, journal snapshots and unchanged account/frame
+context. They distinguish partial writes, final-write timeout, successful writes,
+empty fuel boundaries, nonzero-start capture, static refusal and malformed paths.
+Independent read-only finder/skeptic reviews found no producer soundness issue;
+full storage-reference byte/string capture-to-cleanup/header composition and
+packed physical layout remain open. These are Source operation helpers, not a
+memory-to-storage or whole compiler certificate.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

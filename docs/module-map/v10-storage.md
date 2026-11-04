@@ -85,3 +85,6 @@
 
 | `Lowering/StorageOps/SourceStorageCopyEmpty.lean` | Actual primitive empty-source fuel3 boundary with header-only success or pre-clear timeout |
 | `Lowering/StorageOps/SourceStorageCopyEmptyControls.lean` | Complete empty-copy outcomes/journals, raw-zero materialization and actual fresh/retained alias controls |
+
+| `Lowering/StorageOps/SourceByteStorageCopy.lean` | Actual Source OLD byte capture and all-fuel journaled byte-write prefix, including final-write timeout |
+| `Lowering/StorageOps/SourceByteStorageCopyControls.lean` | Inhabited byte capture/write clients, complete ordered outcomes/raw cells/journals and static/malformed controls |
