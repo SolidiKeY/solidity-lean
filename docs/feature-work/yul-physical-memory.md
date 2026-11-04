@@ -873,3 +873,15 @@ tail byte 99. Initial MemOK, supported types, complete old reads and actual
 codecs remain premises. Final `retainInitial` begins at the resulting heap;
 arbitrary earlier retained-lineage extension, shared-zero/interior/dirty-owned
 representations and target opcode execution remain open.
+
+`ArrayWordRetained` consumes the existing `retainSameShapeWrite` theorem to
+extend an actual earlier allocation lineage through an array-member write.
+Whole-map reconstruction and unchanged Source writeback retain the original
+allocation argument and derived history, rather than resetting `retainInitial`.
+Controls allocate two words, execute a typed shrink to one, then write the live
+member: original capacity 96, current size 64, free pointer 224, dormant word 9
+and unknown byte 170 remain exact. Live Source reads see 42, while the dormant
+index still panics under the current length. Current-shape recomputation would
+choose free pointer 192 and is distinguished explicitly. These helper executions
+do not establish high-level program reachability, shared-zero/interior/dirty-owned
+representations or target allocator refinement.
