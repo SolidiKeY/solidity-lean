@@ -230,3 +230,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceDefaultHorizon.lean` | Generic default traversal fuel extension and exact canonical results for existing reference/value/field construction certificates. |
 | `Backend/MemoryCopies/SourceDefaultHorizonControls.lean` | Guarded recursive defaults, fixed bytes/string children, scalar/empty/64-child stability, refusal and partial-timeout controls. |
 | `Backend/MemoryCopies/SourceStoredFreshInterface.lean` | Fresh parent-last reference certificates and exact distinct repeated Source storage-copy obligations. |
+| `Backend/MemoryCopies/SourceStoredFresh.lean` | Actual load success inversion, positive parent-last reference copies, distinct repeated copies, retained first state and canonical traversal laws. |
+| `Backend/MemoryCopies/SourceStoredFreshControls.lean` | Populated/empty/64-child repeated struct copies, retained payloads/lengths, exact horizons, partial second timeout and shared-root rejection. |
