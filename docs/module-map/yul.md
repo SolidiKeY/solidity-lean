@@ -158,3 +158,5 @@
 | `Yul/RawControlSequenceHorizon.lean`, `Yul/Checks/RawControlSequenceHorizon.lean` | Concrete raw control-sequence/block stability; break/continue short-circuit, normal-tail partial effects and clean Source controls. |
 
 | `Yul/RawControlledWhileHorizon.lean`, `Yul/RawReadOnlyViews.lean`, `Yul/Checks/RawControlledWhileHorizon.lean` | Concrete while completed-frame stability, read-only word views and break/continue/mutation/clean Source controls. |
+
+| `Yul/RawSequenceWhileHorizon.lean`, `Yul/Checks/RawSequenceWhileHorizon.lean` | Concrete sequence-bodied while stability; deep-tail break/continue, mutation, timeout and clean Source controls. |

@@ -1858,3 +1858,28 @@ three modules. Per-file diagnostics report zero errors; focused Lean, the helper
 module build, generated-root and layer checks pass. Sixteen scoped axiom reports
 use only Lean standard axioms. Raw failed attempts remain separate from passes.
 No theorem premise, expected outcome or proof/checking limit was weakened.
+
+### Completed raw sequence-bodied while horizons
+
+`RawSequenceWhileHorizon.successor` and `extension` preserve the exact
+whole loop result and raw frame after non-timeout execution. Concrete condition
+and control-block producers fix captures before the actual normal/continue
+post-body state recurses. Break exits; false/error paths and the intrinsic
+leave exclusion remain unchanged. No coherence, projection or supplied child
+simulation/termination law is assumed.
+Nine controls reuse inhabited control sequences followed by deep tails:
+break exits at 5 with raw 2/257; a false-writing continue bypasses its tail
+and exits at 7; normal mutation exits at 12 with false and untouched 257.
+All three completed frames remain identical at every larger horizon.
+A false guard skips the body at 2; the continue path at 6 still times out.
+Concrete all-fuel Source agreement remains separately clean-start bounded.
+These existing same-context certificates add no arbitrary statements/returns,
+dirty Source readback, admission or compiler adequacy. Source/ExtCall/evaluators/
+layouts, observations, expected outcomes and proof budgets are unchanged.
+Full VY1/general P16 and final lane gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Per-file diagnostics report zero errors; focused Lean, affected core build,
+generated-root and layer checks pass. Eleven scoped axiom reports use only
+Lean standard axioms. Raw failed standard automation remains separate from
+passing concrete proofs; no statements, outcomes or checking limits changed.

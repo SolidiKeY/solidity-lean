@@ -2557,6 +2557,7 @@ import Solidity.Yul.Checks.RawLocalDeclaration
 import Solidity.Yul.Checks.RawLocalScope
 import Solidity.Yul.Checks.RawLoopBodyHorizon
 import Solidity.Yul.Checks.RawSequenceHorizon
+import Solidity.Yul.Checks.RawSequenceWhileHorizon
 import Solidity.Yul.Checks.RawSourceReturnControl
 import Solidity.Yul.Checks.RawSourceVoidReturn
 import Solidity.Yul.Checks.RawStatementHorizon
@@ -2832,6 +2833,7 @@ import Solidity.Yul.RawReadOnlyViews
 import Solidity.Yul.RawSequence
 import Solidity.Yul.RawSequenceHorizon
 import Solidity.Yul.RawSequenceWhile
+import Solidity.Yul.RawSequenceWhileHorizon
 import Solidity.Yul.RawSource
 import Solidity.Yul.RawSourceAdapter
 import Solidity.Yul.RawSourceAdapterDoWhile
