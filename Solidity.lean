@@ -1911,6 +1911,8 @@ import Solidity.Lowering.V08.LiteralFailureBoolStatement
 import Solidity.Lowering.V08.LiteralFailureBoolStatementControls
 import Solidity.Lowering.V08.LiteralFailureBytesReadback
 import Solidity.Lowering.V08.LiteralFailureBytesReadbackControls
+import Solidity.Lowering.V08.LiteralFailureCalldataCopy
+import Solidity.Lowering.V08.LiteralFailureCalldataCopyControls
 import Solidity.Lowering.V08.LiteralFailureCalldataDecode
 import Solidity.Lowering.V08.LiteralFailureCalldataDecodeControls
 import Solidity.Lowering.V08.LiteralFailureChoiceDecode

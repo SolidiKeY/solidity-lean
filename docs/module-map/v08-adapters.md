@@ -460,3 +460,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureTypedFields.lean` | Synchronized Source/ABI field evidence, constructive normalization, generic standard encoding and allocation preservation. |
 | `Solidity/Lowering/V08/LiteralFailureTypedFieldsControls.lean` | Seven-field, three-bool actual execution controls, typed kind corruption, aliases, allocation and late failures. |
+
+| `Solidity/Lowering/V08/LiteralFailureCalldataCopy.lean` | Actual calldata-to-memory argument conversion before typed custom-error encoding, with reached heap state. |
+| `Solidity/Lowering/V08/LiteralFailureCalldataCopyControls.lean` | Copied-object and full-packet observations, extraction boundaries, before/after-copy failures and retained-state controls. |
