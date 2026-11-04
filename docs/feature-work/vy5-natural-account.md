@@ -41,8 +41,8 @@ Independent read-only finder and skeptic approved this narrow interface step,
 with no findings; neither executed Lean or tests. They explicitly require the
 remaining consumer migrations, whole-balance operations, external monetary
 ledger decision, real reachability and full combined checks before release.
-A hash-bound inventory records 57 unmigrated downstream Source-account read
-files. Whole-balance/selfdestruct consumers must use exact Nat operations,
+A hash-bound inventory records 57 downstream Source-account read files: the
+two owned Source examples are migrated; 55 other read-file migrations remain. Whole-balance/selfdestruct consumers must use exact Nat operations,
 not cast the amount to Word. No downstream compiler/EVM correspondence is claimed.
 
 Queue: H16/P8a full execution/realization, immutable/funds release, remaining H19
