@@ -1,0 +1,11 @@
+{
+  "memory.max": "17179869184",
+  "memory.swap.max": "max",
+  "cgroup.controllers": "cpuset cpu io memory hugetlb pids",
+  "cgroup.subtree_control": "cpuset cpu io memory hugetlb pids",
+  "cgroup_writable": false,
+  "pid1": "tail",
+  "reserve_bytes": 4294967296,
+  "required_job_max_bytes": 12884901888,
+  "proc_swaps": "Filename\t\t\t\tType\t\tSize\t\tUsed\t\tPriority\n"
+}

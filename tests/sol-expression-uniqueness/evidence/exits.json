@@ -1,0 +1,11 @@
+{
+  "scope-system": 1,
+  "scope-user": 1,
+  "lean-version": 0,
+  "lake-version": 0,
+  "inventory": 0,
+  "acceptance": 1,
+  "checker-controls": 0,
+  "base-ancestry": 0,
+  "diff-whitespace": 0
+}

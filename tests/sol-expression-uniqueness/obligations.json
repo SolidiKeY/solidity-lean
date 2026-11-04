@@ -1,0 +1,72 @@
+[
+  {
+    "id": "EU-01",
+    "obligation": "exhaustive constructor and boundary inventory",
+    "status": "inventory-only"
+  },
+  {
+    "id": "EU-02",
+    "obligation": "layout erasure and fragments reconstruction",
+    "status": "open"
+  },
+  {
+    "id": "EU-03",
+    "obligation": "balanced delimiter and token splitting lemmas",
+    "status": "open"
+  },
+  {
+    "id": "EU-04",
+    "obligation": "root reconstruction for all precedence levels",
+    "status": "open"
+  },
+  {
+    "id": "EU-05",
+    "obligation": "all operator associativity and precedence boundaries",
+    "status": "open"
+  },
+  {
+    "id": "EU-06",
+    "obligation": "primary/type/tuple/list/option/call argument uniqueness",
+    "status": "open"
+  },
+  {
+    "id": "EU-07",
+    "obligation": "certified expression yield uniqueness",
+    "status": "open"
+  },
+  {
+    "id": "EU-08",
+    "obligation": "parseCat accepted-tree corollary",
+    "status": "open"
+  },
+  {
+    "id": "EU-09",
+    "obligation": "documented prefix/postfix/conditional assignment refusals reproduced",
+    "status": "pending"
+  },
+  {
+    "id": "EU-10",
+    "obligation": "arbitrary-family inhabited and negative controls",
+    "status": "open"
+  },
+  {
+    "id": "EU-11",
+    "obligation": "all module/declaration inventory and standard-only axiom pins",
+    "status": "pending"
+  },
+  {
+    "id": "EU-12",
+    "obligation": "runtime, KeySort, import closure, trust and fixture gates",
+    "status": "pending"
+  },
+  {
+    "id": "EU-13",
+    "obligation": "independent finder and skeptic reviews",
+    "status": "pending"
+  },
+  {
+    "id": "EU-14",
+    "obligation": "sealed full proof handoff",
+    "status": "pending"
+  }
+]

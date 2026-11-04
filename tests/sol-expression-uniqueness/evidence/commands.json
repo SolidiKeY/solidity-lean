@@ -1,0 +1,108 @@
+[
+  {
+    "name": "scope-system",
+    "command": [
+      "systemd-run",
+      "--scope",
+      "-p",
+      "MemoryMax=12G",
+      "-p",
+      "MemorySwapMax=0",
+      "true"
+    ],
+    "exit": 1,
+    "wall_seconds": 0.00481464199998527,
+    "peak_rss_kib": 9472
+  },
+  {
+    "name": "scope-user",
+    "command": [
+      "systemd-run",
+      "--user",
+      "--scope",
+      "-p",
+      "MemoryMax=12G",
+      "-p",
+      "MemorySwapMax=0",
+      "true"
+    ],
+    "exit": 1,
+    "wall_seconds": 0.0030671629999687866,
+    "peak_rss_kib": 9472
+  },
+  {
+    "name": "lean-version",
+    "command": [
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "--version"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.03587666900000386,
+    "peak_rss_kib": 34776
+  },
+  {
+    "name": "lake-version",
+    "command": [
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake",
+      "--version"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.0355203149999852,
+    "peak_rss_kib": 39280
+  },
+  {
+    "name": "inventory",
+    "command": [
+      "python3",
+      "scripts/check-sol-expression-uniqueness.py",
+      "--inventory"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.05076095900000155,
+    "peak_rss_kib": 11392
+  },
+  {
+    "name": "acceptance",
+    "command": [
+      "python3",
+      "scripts/check-sol-expression-uniqueness.py"
+    ],
+    "exit": 1,
+    "wall_seconds": 0.0491249319999838,
+    "peak_rss_kib": 11392
+  },
+  {
+    "name": "checker-controls",
+    "command": [
+      "python3",
+      "tests/sol-expression-uniqueness/checker-controls.py"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.18745490800000653,
+    "peak_rss_kib": 19508
+  },
+  {
+    "name": "base-ancestry",
+    "command": [
+      "git",
+      "merge-base",
+      "--is-ancestor",
+      "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+      "origin/master"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.001990246999980627,
+    "peak_rss_kib": 9472
+  },
+  {
+    "name": "diff-whitespace",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.005371148000051562,
+    "peak_rss_kib": 9472
+  }
+]

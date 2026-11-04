@@ -1,0 +1,16 @@
+INVENTORY_PASS: 29 intrinsic expression constructors; 8 exact base/working source pins; 14 obligations
+EU-01: inventory-only: exhaustive constructor and boundary inventory
+EU-02: open: layout erasure and fragments reconstruction
+EU-03: open: balanced delimiter and token splitting lemmas
+EU-04: open: root reconstruction for all precedence levels
+EU-05: open: all operator associativity and precedence boundaries
+EU-06: open: primary/type/tuple/list/option/call argument uniqueness
+EU-07: open: certified expression yield uniqueness
+EU-08: open: parseCat accepted-tree corollary
+EU-09: pending: documented prefix/postfix/conditional assignment refusals reproduced
+EU-10: open: arbitrary-family inhabited and negative controls
+EU-11: pending: all module/declaration inventory and standard-only axiom pins
+EU-12: pending: runtime, KeySort, import closure, trust and fixture gates
+EU-13: pending: independent finder and skeptic reviews
+EU-14: pending: sealed full proof handoff
+Inventory only; no RUNTIME_GATE_PASS or proof acceptance claimed.
