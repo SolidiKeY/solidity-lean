@@ -253,5 +253,17 @@ supplies no Source/world or stack correspondence. General runtime encoding,
 internal-frame payload/panic/exhaustion transport, P7 nonempty rollback, gas,
 allocation and full bytecode/EVM adequacy remain separate. The existing emitter,
 compiler selections, refusals and overlapping-store counterexamples are
-unchanged. Focused validation target:
-`Solidity.Backend.FailurePaths.FramedEmissionControls`.
+unchanged. Focused validation:
+
+```
+LEAN_NUM_THREADS=1 lake -f lakefile.g38.toml build Solidity.Backend.FailurePaths.FramedEmissionControls
+```
+
+The temporary config supplies Lean `-j1` and `Elab.async=false`; the inherited
+resource guard remains required. The focused consumer passed in 3.039 seconds
+with 902,086,656 bytes peak aggregate RSS. Its printed axioms are only
+`propext`, `Classical.choice` and `Quot.sound`. The bounded full checkpoint
+remained incomplete: timeout at 300.064 seconds, 1,830,236,160 bytes peak,
+with `Yul.DirectUpdates` last logged complete. This is not a full-gate pass or
+an attribution of the timeout to that module. All failed elaboration and build
+receipts are retained in the handoff.
