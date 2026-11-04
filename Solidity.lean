@@ -2657,6 +2657,8 @@ import Solidity.Yul.Compilation.UnaryBranch
 import Solidity.Yul.Compilation.UnaryBranchControls
 import Solidity.Yul.Compilation.UnaryMachine
 import Solidity.Yul.Compilation.UnaryMachineControls
+import Solidity.Yul.Compilation.WhileWordExecution
+import Solidity.Yul.Compilation.WhileWordExecutionControls
 import Solidity.Yul.Compilation.WordControl
 import Solidity.Yul.Compilation.WordExecution
 import Solidity.Yul.Compilation.WordExecutionControls

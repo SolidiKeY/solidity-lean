@@ -151,3 +151,5 @@
 | `Yul/Compilation/NormalWordTransport{,Controls}.lean` | Whole normally completing branch/sequence execution under the existing WordControl selector and actual compiler derivations; original closed-source result, raw EXP guard/EQ join, dependent writes, symbolic framing and shifted-slot controls. No native/resource/general-loop/G24 closure. |
 
 | `Yul/Compilation/SignedExecution{,Controls}.lean` | General existing SignedMachine success transport consuming concrete signed producers plus WordExecution; original-source/compiler consumers, signed corner cases, dirty words, dependent writes, symbolic framing and shifted DUP16 controls. Native/resource and Source/G24 adequacy remain separate. |
+
+| `Yul/Compilation/WhileWordExecution{,Controls}.lean` | Concrete unchanged word-selected lowerWhile turns, finite running prefixes/exits, whole model execution and all-prefix model fault; actual emitter consumer without abstract realization, raw-word counter/NOT/zero/boundary controls. No source-divergence/native/resource/G24 adequacy. |
