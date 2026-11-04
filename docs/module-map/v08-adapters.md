@@ -533,3 +533,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/CheckedGuards.lean` | Unified indexed Source guard dispatch, every-success actual runs and exact public checked compiler/code provenance. |
 | `Backend/FailurePaths/CheckedGuardsControls.lean` | One inhabited mixed Boolean/integer frame for all dispatch branches, provenance clients and outcome/refusal/relation controls. |
+
+| `Backend/FailurePaths/GuardLowering.lean` | Computable intrinsic guard targets, guaranteed public compilation and exact dispatcher/code/refusal equivalence. |
+| `Backend/FailurePaths/GuardLoweringControls.lean` | Computed mixed-context targets and public compile/run clients for all three guard families, with refusal controls. |

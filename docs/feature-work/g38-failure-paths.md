@@ -552,3 +552,37 @@ public-code provenance and inhabited branch clients without confirmed findings.
 The initial equality-substitution name error and scratch automation are retained.
 The earlier full-checkpoint timeout remains failed; focused checks do not
 establish a full build on the expanded published base.
+
+
+## Computable intrinsic guard lowering
+
+`FailurePaths.GuardLowering.lower` produces an existing intrinsic `Stmt` directly
+from the three admitted indexed Source guard views. It does not extract data
+from an existential proof or introduce another AST. Its compiler stage calls
+public `Memory.compileStmt` once on the computed target. `compile_eq_checked`
+proves exact equality with the prior checked dispatcher for every Source input,
+including unsupported forms, so code and refusal boundaries are unchanged.
+
+`lowered_require` characterizes every successful target as a Boolean require;
+`lowered_compiles` derives actual public checked compilation success for every
+lowered target. `selected_correct` derives actual Source and compiled runs from
+successful executable selection, initial typed read correspondence and full
+`Memory.StateRepr`. `lowered_correct` is the typed consumer: its lowering and
+public compiler equations must hold, and it then derives the same runs. Neither
+consumer assumes a desired execution or poststate.
+
+`GuardLoweringControls` computes all three targets in the inhabited mixed
+Boolean/integer context, proves their public compiler choices and exact code,
+and consumes the typed lowering theorem in both Source pipelines. Literal,
+assert and message refusals remain explicit; general refusal equivalence is
+also proved. The old context-map, range, frame, source horizon and target failure
+observation limits are retained. This is productive statement lowering for the
+existing guard leaves, not body/program/whole-unit lowering, a context-map
+producer, payload or internal-frame transport, or bytecode/EVM adequacy.
+
+Validation target is `Solidity.Backend.FailurePaths.GuardLoweringControls`.
+The serial guarded check passed in 5.418 seconds with 830,263,296 bytes peak
+aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
+`Quot.sound`. Independent read-only finder and skeptic reviews found no
+confirmed defect. The historical full-checkpoint timeout remains failed;
+focused checks do not establish a full build on the expanded published base.
