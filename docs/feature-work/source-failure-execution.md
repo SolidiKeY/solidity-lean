@@ -371,8 +371,11 @@ ExecState.undo_apply, with unchanged conclusions. All failure logs remain.
 
 This root operation does not consume a request fate, install an arbitrary Nat
 post-fee balance, establish general cursor coherence/fixed-plan consistency,
-or create a P8 realization. callAddr's environment branch still lacks a
-scheduled frame entry; this is an explicit remaining H16 child. H18 session
+or create a P8 realization. FailurePoints counts compiled-system activations only: callAddr's
+environment branch intentionally has no such entry (callbacks into compiled
+code use enterInstance). Earlier handoffs misclassified that branch as a
+missing frame; the actual Roadmap.Evm.FailurePoints contract and Cursor
+module distinguish it from depth, which counts all external frames. H18 session
 indexing, H19/immutable/funds release and all24 original/six full Y10
 combinations remain open. No new native comparison is claimed.
 
@@ -418,3 +421,25 @@ retainedDEAD bytes, timeout and outer-frame cutoff. Eleven generated exact
 standard-axiom guards pass. Source.Horizon and all evaluator bodies remain
 unchanged. This closes a primitive transport child only: planned evaluator
 mutual consistency/session/P8 realization and all24/six remain open.
+
+### Request-value admission child
+
+`Source/FailureRequestAdmission.lean` reuses the unchanged actual requestScope.
+The existing TxFate contract runs a request only when its value fits the
+full natural post-fee balance. The adapter normalizes only that currently
+unaffordable effective fate to dropped, before cut/body execution; it does
+not replace the resource, frame schedule, other request choices or the
+body's original plan closure. Four general/preservation laws and eleven
+full-state controls cover arbitrary-body suppression from an explicit empty
+cursor, exact admitted-scope equality for constant fates, zero cuts, retained
+full revert bytes/mutated locals/journals, timeout/stuck, active-owner refusal,
+sequential ordinals and balance2^256 without wrapping.
+
+Eighteen generated exact axiom guards use standard axioms only. Original
+FailureRequest is byte-identical: checking2.295s before/2.324s repeat; the
+new module checks0.459s. The factored-core candidate measured2.436s and
+is held, not landed; raw failures and Legacy.lean original-body equality
+remain in request-admission-20261104. No World balance installation, fee
+calculation, Bound/session/H18 driver, NoFail/Some consistency or P8 realization
+is supplied. H19/immutable/funds release and all24/six remain open. No native
+comparison or changed expected observation is claimed.

@@ -102,3 +102,5 @@
 
 | `Source/FailureFrameHorizon.lean` | H16 actual frame/check/event Grow and frame Approx transport; explicit real body relations and rethrow-timeout continuation, not full planned evaluator consistency. |
 | `Source/FailureFrameHorizonControls.lean` | Inhabited event-prefix/heap/caller full-state frames, timeout/outer-cut controls and counterexample to blanket attempt approximation. |
+
+| `Source/FailureRequestAdmission.lean` | Exact post-fee Nat value admission around unchanged requestScope; current effective-fate normalization, other-request/frame preservation, arbitrary-body drop/admitted laws, complete state/byte/cut/timeout/ordinal controls; no balance installation/session/P8 claim. |

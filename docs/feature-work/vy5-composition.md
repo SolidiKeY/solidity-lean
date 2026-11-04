@@ -177,3 +177,8 @@ Legacy runTx remains unchanged after rejecting a slower optional-signature
 draft. This is kernel Source component evidence, not native comparison,
 H18/H19 session integration, P8 realization or completion of the24 original
 obligations/six general combinations.
+
+Request admission increment: actual Source.FailureExecution.requestValueScope
+reuses unchanged requestScope with exact-Nat sender-value admission. See
+[source failure execution](source-failure-execution.md#request-value-admission-child)
+and vy5-request-admission-timings.json. This is not Session/P8/Y10 closure.
