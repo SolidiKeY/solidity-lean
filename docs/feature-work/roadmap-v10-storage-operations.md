@@ -107,6 +107,15 @@ follows repository-default elaboration, preserving explicit single-thread and
 resource limits; both readback and the original EVM heartbeat checks pass in
 that mode. Diagnostics from the incompatible task-local override are retained.
 
+`SourceStorageCopyEmpty.copy_empty` proves the remaining primitive fuel3
+boundary: an empty destination commits a zero header, while a nonempty old live
+tail times out before its first clear. Ten complete controls distinguish static,
+type, missing-source and same-path ordering, the next-fuel first clear, actual
+fresh/retained reads and raw-absent header materialization. Empty success grows
+the journal even when ordinary header reads stay zero; it is not a no-op.
+The generic all-fuel composition statement is well-typed but unproved in
+TERRA-TODO; with it, fifteen routine adapters remain pending.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

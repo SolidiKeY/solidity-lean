@@ -82,3 +82,6 @@
 
 | `Lowering/StorageOps/SourceStorageCopyPayload.lean` | Actual nonempty Source copy payload-boundary timeout with exact runtime write prefix |
 | `Lowering/StorageOps/SourceStorageCopyPayloadControls.lean` | Complete payload-failure outcomes/journals and actual fresh-versus-retained alias readbacks |
+
+| `Lowering/StorageOps/SourceStorageCopyEmpty.lean` | Actual primitive empty-source fuel3 boundary with header-only success or pre-clear timeout |
+| `Lowering/StorageOps/SourceStorageCopyEmptyControls.lean` | Complete empty-copy outcomes/journals, raw-zero materialization and actual fresh/retained alias controls |
