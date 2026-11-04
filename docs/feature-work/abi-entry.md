@@ -353,3 +353,21 @@ semantic reference acceptance and full entry/native execution.
 64-bit limit with suffix/capacity preservation and lazy rejection after the
 actual tail and length-prefixed guards. Loading correspondence and all other
 entry checks remain separate obligations.
+
+`LengthCheck.lean` reuses the existing bound compiler at `lim+1` and proves
+admission iff the runtime length is at most `2^64-1`, preserving the whole
+numeric suffix. Its Selection V2 certificate has explicit capacity and input
+room. General semantic theorems preserve lazy reference `.revert` after a
+passed tail check, and eager bytes/array `.panic` after a present length head.
+The latter are semantic model equations, not certificates of native allocation
+failure production. Raw-byte controls derive the oversized length from bytes,
+including zero-padded offset loading, without a decoded payload premise.
+Controls retain maximum accepted length, first rejected length, all-high word,
+zero length, short-head-before-panic and fuel-before-panic behavior. Capacity
+refusal and an inhabited frame are checked. Factored raw-load lemmas keep these
+computations within unchanged recursion/heartbeat limits. Native loading,
+branching, actual allocation failures and full entry composition remain open.
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked the exact limit boundary, saved suffix and non-vacuous frame,
+raw-byte derivation and guarded lazy/eager failure ordering, and confirmed
+that native allocation/entry correspondence is not claimed.

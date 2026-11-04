@@ -133,3 +133,6 @@
 | `Backend/AbiEntry/OffsetChecksInterface.lean` | Signed modular tail and region emitted predicate contracts over four runtime words. |
 | `Backend/AbiEntry/OffsetChecks.lean` | Exact signed/modular arithmetic emission with preserved numeric suffix and non-vacuous V2 capacity frames. |
 | `Backend/AbiEntry/OffsetChecksControls.lean` | Boundary, wrapping, signed-offset, actual semantic-reference acceptance and stack-height controls. |
+| `Backend/AbiEntry/LengthCheckInterface.lean` | Loaded dynamic length admission and ordered lazy rejection signatures. |
+| `Backend/AbiEntry/LengthCheck.lean` | Existing numeric emitter at the exact semantic length limit, saved suffix/capacity and semantic failure classification. |
+| `Backend/AbiEntry/LengthCheckControls.lean` | Raw oversized length, exact boundary flags, lazy/eager distinction and short-head/fuel priority controls. |
