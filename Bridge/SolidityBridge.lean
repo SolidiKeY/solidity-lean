@@ -138,9 +138,14 @@ import SolidityBridge.HashBridge.QueryUnique
 import SolidityBridge.HashBridge.StaticQueries
 import SolidityBridge.HashBridge.StaticQueryControls
 import SolidityBridge.HashBridge.Step
+import SolidityBridge.HashBridge.StopQueries
 import SolidityBridge.HashBridge.ThetaControls
 import SolidityBridge.HashBridge.ThetaQueries
 import SolidityBridge.HashBridge.TwoHashCuts
+import SolidityBridge.HashBridge.XiContextControls
+import SolidityBridge.HashBridge.XiContextMessage
+import SolidityBridge.HashBridge.XiContextRun
+import SolidityBridge.HashBridge.XiContextSetup
 import SolidityBridge.HashBridge.XiControls
 import SolidityBridge.HashBridge.XiQueries
 import SolidityBridge.Loom
