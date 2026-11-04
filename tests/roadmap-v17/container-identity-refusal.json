@@ -1,0 +1,16 @@
+{
+  "outcome": "NONPASS",
+  "errorType": "FileNotFoundError",
+  "error": "[Errno 2] No such file or directory: '/proc/1656597/ns/time'",
+  "errno": 2,
+  "path": "/proc/1656597/ns/time",
+  "actorUid": 1000,
+  "elapsedSeconds": 5.538099503610283e-05,
+  "transportSourceSha256": "35f05da8dec02ba1425da59fb6fb15b961b704813e3fdb0dfe82dd47cfba083f",
+  "observerSourceSha256": "22334e2663fc0657068edd437cde60fcd8a2f440cca5fb2a918025c9328967d9",
+  "containerLaunched": false,
+  "liveTransportAuthenticated": false,
+  "kernelValidated": false,
+  "semanticPremisesDischarged": false,
+  "releaseClosed": false
+}

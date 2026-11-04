@@ -5,6 +5,7 @@ No capabilities, user switches, host-proc mounts or relaxed v1 cgroup rules.
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -135,6 +136,35 @@ def unique_object(pairs):
     result={}
     for key,value in pairs:
         require(key not in result,'duplicate JSON field');result[key]=value
+    return result
+
+def decode_pinned(raw, expected_sha256, maximum):
+    """Bound caller-retained bytes. A matching pin authenticates bytes, not capture."""
+    require(type(maximum) is int and 0<maximum<=MAX_MESSAGE,'invalid wire byte ceiling')
+    require(type(raw) is bytes and 0<len(raw)<=maximum,'empty/oversized wire input')
+    require(isinstance(expected_sha256,str) and re.fullmatch('[0-9a-f]{64}',expected_sha256)
+            and digest(raw)==expected_sha256,'wire SHA256 mismatch')
+    def forbidden(value):
+        raise ValueError('nonfinite JSON number')
+    def finite_float(value):
+        result=float(value);require(math.isfinite(result),'nonfinite JSON exponent');return result
+    return json.loads(raw.decode('utf-8'),object_pairs_hook=unique_object,parse_constant=forbidden,parse_float=finite_float)
+
+def consume_reply(m,request_raw,request_sha256,reply_raw,reply_sha256,inspection,
+                  public_init_before,public_init_after,public_workers_before,public_workers_after):
+    """Retained wire consistency only. This API never repairs a failed live gate."""
+    request=decode_pinned(request_raw,request_sha256,65536)
+    request_valid(request)
+    reply=decode_pinned(reply_raw,reply_sha256,MAX_MESSAGE)
+    require(isinstance(reply,dict),'missing reply object')
+    for key in ['liveTransportAuthenticated','selectorsAuthenticated','replayVerified',
+                'runtimeAuthenticated','toolExecutionAuthenticated']:
+        require(key not in reply or reply[key] is False,'contradictory wire promotion')
+    result=validate_reply(m,request,reply,inspection,public_init_before,public_init_after,
+                          public_workers_before,public_workers_after)
+    result.update(wireBindings=dict(requestSha256=request_sha256,replySha256=reply_sha256),
+                  bytePinsConsistent=True,selectorsAuthenticated=False,replayVerified=False,
+                  toolExecutionAuthenticated=False)
     return result
 
 def main():
