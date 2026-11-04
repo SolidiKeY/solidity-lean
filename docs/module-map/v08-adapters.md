@@ -397,6 +397,20 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V08/LiteralFailureTupleAbort.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Roadmap/V16/H24Input.lean` | Explicit V16 input boundary for the published H24 companion; no admission inhabitant. |
+| `Backend/Executable/CreationPatchOrder.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationPatchOrderControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/WhileReturn.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/WhileReturnControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/ConditionalCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/ReasonCodec.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/ReasonCodecControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3MutatingActivation.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeUnwind.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
