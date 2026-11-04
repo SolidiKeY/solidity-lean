@@ -152,3 +152,6 @@
 | `Backend/AbiEntry/PayableRoutesInterface.lean` | Checked first-match routing with per-entry payability and terminal value rejection. |
 | `Backend/AbiEntry/PayableRoutes.lean` | Public compiler selection and actual IR execution, reusing the existing value gate inside matched branches. |
 | `Backend/AbiEntry/PayableRoutesControls.lean` | Zero/nonzero value, payable collision/nonmatch priority, protected state and malformed-selector controls. |
+| `Backend/AbiEntry/SourcePayableInterface.lean` | Source declaration payability lookup and execution certificate. |
+| `Backend/AbiEntry/SourcePayable.lean` | Source-derived payable routes, actual compiler execution and Source rejection bytes. |
+| `Backend/AbiEntry/SourcePayableControls.lean` | Source mutability, collision, arbitrary-value and exact rejection controls. |

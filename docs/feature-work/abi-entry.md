@@ -613,3 +613,30 @@ Source/native/body boundaries; neither used a Lean server or build.
 first ordinary selector-match agreement, with explicit selector-cell and
 call-value representation. Source body and special-function execution remain
 separate obligations.
+
+`SourcePayable.lean` constructs compile-time route rows from the actual exposed
+Source declarations, retaining existing body/signature eligibility, selector
+order and `Decl.fnMut` payability. General lookup agrees with `pickFn`; actual
+public compiler selection and IR execution derive the first matched label or
+terminal rejection. Initial selector-cell and call-value representation remain
+explicit. The ordinary Source rejection theorem proves the existing dispatch
+halts with empty revert bytes before decoding for a matched nonpayable entry
+with nonzero value. Numeric IR `.revert` has no byte-output representation, so
+these endpoints do not claim a native failure-byte correspondence.
+Controls use a typed synthetic colliding hash and both pipelines: bodyless
+exclusion, actual declaration flags, zero-value acceptance and nonzero rejection,
+payable success at
+all values, collision cannot bypass rejection, no-match label at all values,
+protected state and actual Source empty-revert-byte execution. No-match labels
+remain observations, not getter/receive/fallback bodies; labels need not be
+injective. Full entry/body association, native realization, aggregate decoding,
+short-input dispatch and admission remain open. A costly direct declaration
+witness check timed out in MCP; closed signature/payability metadata plus a
+case split on the actual lookup avoids declaration equality without a budget
+increase or stronger premise.
+
+Independent read-only finder and skeptic reviews passed. Both checked actual
+Source flag authenticity, selector order, public selection/execution and the
+separate exact Source rejection endpoint. The skeptic's wording correction
+clarifies zero-value acceptance versus nonzero rejection; no code findings.
+Neither reviewer used a Lean server or build.
