@@ -298,3 +298,33 @@ actual successful Scalar.run proof, rather than proving compiler correctness
 on its own. Independent read-only finder and skeptic reviews found no semantic
 defect. The finder requested an explicit proposition type for one local bound
 in the overflow rejection; that proof-style annotation has been added.
+
+## Mixed numeric/native-stack sequences
+
+The existing sequence compiler and runner proof are factored over their
+instruction-certificate selector. compileNumeric and its named contracts
+remain numeric specializations with unchanged types and controls; no second
+compiler or evaluator is introduced. MixedSelection adds numeric-priority
+native-stack fallback, retaining every previous numeric selection. A theorem
+proves exact emitted-code equality for every previously compiled numeric
+program. All Fin16 native cases have explicit selection theorems.
+
+Mixed lowering and fault reflection specialize the same actual-runner theorem.
+Controls compile six IR instructions combining PUSH, DUP, SWAP, DIV and POP
+to 70 bytes and preserve arbitrary complete IR caller machines and suffixes.
+An existing V2 ofRun consumer supplies conservative peak6 (not the least peak),
+capacity on its declared room domain and all-prefix bounds. Late native
+shortage is reflected into an actual IR fault. Index17 still returns None
+while its raw IR execution can succeed; no larger-index lowering or source
+refusal claim follows. Structured control and executable-byte composition
+remain open.
+
+Both independent read-only reviews found the original final-result negative
+did not discriminate order errors because POP discarded DIV's result. It was
+renamed as a wrong-result control. Explicit IR/code prefix equalities now
+identify the boundary before POP; its actual run retains results3 and5.
+Executed wrong-DUP1 and omitted-SWAP mutants produce1 and0 instead of3, and
+inequalities distinguish both on the same populated tail. Both reviewers
+confirmed this control repair. The compiler and runner proofs had no semantic
+finding. The announced factoring checked file history and undid no earlier
+checking-speed optimization.

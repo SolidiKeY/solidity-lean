@@ -53,35 +53,41 @@ theorem instruction_equation (instruction : Evm.Instr)
   | some output => exact (certificate.success input output m stack).mpr actual
 
 /-- Flatten actual selected expansions in IR order. None means outside this
-numeric component, independently of whether the IR itself faults or reverts. -/
-def compileNumeric : List Evm.Instr → Option Program
+supplied selector component, independently of whether the IR faults or reverts. -/
+def compileWith (selector : (instruction : Evm.Instr) → Option (InstructionCertificate instruction)) :
+    List Evm.Instr → Option Program
   | [] => some []
-  | instruction :: rest => (selectNumeric instruction).bind (fun certificate =>
-      (compileNumeric rest).map (fun code => certificate.code ++ code))
+  | instruction :: rest => (selector instruction).bind (fun certificate =>
+      (compileWith selector rest).map (fun code => certificate.code ++ code))
+
+/-- Numeric specialization of the common certified sequence compiler. -/
+def compileNumeric : List Evm.Instr → Option Program := compileWith selectNumeric
 
 /-- Whole actual IR execution, including early and late operand faults. -/
-theorem compileNumeric_equation (ir : List Evm.Instr) (code : Program)
-    (selected : compileNumeric ir = some code) (input : Scalar.Stack)
+theorem compileWith_equation
+    (selector : (instruction : Evm.Instr) → Option (InstructionCertificate instruction))
+    (ir : List Evm.Instr) (code : Program)
+    (selected : compileWith selector ir = some code) (input : Scalar.Stack)
     (m : Evm.Machine) (stack : m.stack = irStack input) :
     Evm.run ir m = match Scalar.run code input with
       | none => .fault
       | some output => .ok { m with stack := irStack output } 0 := by
   induction ir generalizing code input m with
   | nil =>
-    simp only [compileNumeric, Option.some.injEq] at selected
+    simp only [compileWith, Option.some.injEq] at selected
     subst code
     simp only [Evm.run, Evm.exec_nil, Scalar.run, ← stack]
   | cons instruction rest ih =>
-    cases first : selectNumeric instruction with
-    | none => simp only [compileNumeric, first, Option.bind_none, reduceCtorEq] at selected
+    cases first : selector instruction with
+    | none => simp only [compileWith, first, Option.bind_none, reduceCtorEq] at selected
     | some certificate =>
-      cases next : compileNumeric rest with
+      cases next : compileWith selector rest with
       | none =>
-        simp only [compileNumeric, first, next, Option.bind_some,
+        simp only [compileWith, first, next, Option.bind_some,
           Option.map_none, reduceCtorEq] at selected
       | some tailCode =>
         have codes : certificate.code ++ tailCode = code := by
-          simpa only [compileNumeric, first, next, Option.bind_some,
+          simpa only [compileWith, first, next, Option.bind_some,
             Option.map_some, Option.some.injEq] using selected
         subst code
         rw [Scalar.run_append]
@@ -93,6 +99,14 @@ theorem compileNumeric_equation (ir : List Evm.Instr) (code : Program)
           simpa only [Evm.run, Evm.Out.bind, Option.bind_some] using
             ih tailCode next middle { m with stack := irStack middle } rfl
 
+theorem compileNumeric_equation (ir : List Evm.Instr) (code : Program)
+    (selected : compileNumeric ir = some code) (input : Scalar.Stack)
+    (m : Evm.Machine) (stack : m.stack = irStack input) :
+    Evm.run ir m = match Scalar.run code input with
+      | none => .fault
+      | some output => .ok { m with stack := irStack output } 0 := by
+  exact compileWith_equation selectNumeric ir code selected input m stack
+
 /-- The existing code-case execution specification is exactly Scalar.run. -/
 theorem structured_code_iff (code : Program) (input output : Scalar.Stack) :
     StructuredExec (.code code) input output ↔ Scalar.run code input = some output := by
@@ -102,26 +116,39 @@ theorem structured_code_iff (code : Program) (input output : Scalar.Stack) :
     | code actual => exact actual
   · exact StructuredExec.code
 
-/-- Selected numeric sequences inhabit the existing lowering contract. -/
-def numericLowering (ir : List Evm.Instr) (code : Program)
-    (selected : compileNumeric ir = some code) : LoweringCertificate ir (.code code) where
+/-- Selected sequences inhabit the existing lowering contract. -/
+def loweringWith
+    (selector : (instruction : Evm.Instr) → Option (InstructionCertificate instruction))
+    (ir : List Evm.Instr) (code : Program)
+    (selected : compileWith selector ir = some code) : LoweringCertificate ir (.code code) where
   success := by
     intro input output m stack
-    rw [structured_code_iff, compileNumeric_equation ir code selected input m stack]
+    rw [structured_code_iff, compileWith_equation selector ir code selected input m stack]
     cases actual : Scalar.run code input with
     | none => simp only [reduceCtorEq]
     | some reached =>
       simpa only [Evm.Out.ok.injEq, and_true, Option.some.injEq] using
         stack_update_eq m reached output
 
+def numericLowering (ir : List Evm.Instr) (code : Program)
+    (selected : compileNumeric ir = some code) : LoweringCertificate ir (.code code) := loweringWith selectNumeric ir code selected
+
+theorem compileWith_fault_iff
+    (selector : (instruction : Evm.Instr) → Option (InstructionCertificate instruction))
+    (ir : List Evm.Instr) (code : Program)
+    (selected : compileWith selector ir = some code) (input : Scalar.Stack)
+    (m : Evm.Machine) (stack : m.stack = irStack input) :
+    Evm.run ir m = .fault ↔ Scalar.run code input = none := by
+  rw [compileWith_equation selector ir code selected input m stack]
+  cases actual : Scalar.run code input with
+  | none => simp only
+  | some output => simp only [reduceCtorEq]
+
 theorem selected_fault_iff (ir : List Evm.Instr) (code : Program)
     (selected : compileNumeric ir = some code) (input : Scalar.Stack)
     (m : Evm.Machine) (stack : m.stack = irStack input) :
     Evm.run ir m = .fault ↔ Scalar.run code input = none := by
-  rw [compileNumeric_equation ir code selected input m stack]
-  cases actual : Scalar.run code input with
-  | none => simp only
-  | some output => simp only [reduceCtorEq]
+  exact compileWith_fault_iff selectNumeric ir code selected input m stack
 
 namespace NumericSequenceControls
 
@@ -190,6 +217,9 @@ end NumericSequenceControls
 #print axioms NumericSequenceControls.early_fault
 #print axioms NumericSequenceControls.late_fault
 #print axioms NumericSequenceControls.unsupported_revert
+#print axioms compileWith_equation
+#print axioms loweringWith
+#print axioms compileWith_fault_iff
 #print axioms selectNumeric_complete
 #print axioms instruction_equation
 #print axioms compileNumeric_equation
