@@ -771,3 +771,7 @@ precedence for short/full inputs, public compiler execution, Source rejection
 bytes, synthetic controls and machine-versus-frame value/body boundaries.
 Neither used a build or Lean server. The focused consumer was rechecked after
 removing its single unused simp argument and has no changed-module warnings.
+
+`DispatchRefusalInterface.lean` specifies exact routing-refusal classification
+and empty Source revert bytes, with machine/frame value representation explicit.
+It does not classify later decoder or body failures as routing refusals.
