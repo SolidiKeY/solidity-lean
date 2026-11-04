@@ -303,6 +303,7 @@ import Solidity.Backend.MemoryCopies.RuntimeRebindInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultControls
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaults
+import Solidity.Backend.MemoryCopies.SnapshotPathInterface
 import Solidity.Backend.MemoryCopies.SourceBytes
 import Solidity.Backend.MemoryCopies.SourceBytesControls
 import Solidity.Backend.MemoryCopies.SourceBytesInterface

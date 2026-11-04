@@ -235,3 +235,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CopyPathInterface.lean` | Existing typed Path observations below copied heaps: full live contents and fresh allocation-range reference bounds. |
 | `Backend/MemoryCopies/CopyPaths.lean` | Live typed-path contents and absence, fresh descendant bounds, preserving-growth transport and cross-copy reference separation. |
 | `Backend/MemoryCopies/CopyPathControls.lean` | Nested/fixed/struct and empty/64-child path observations, shadow/overrun rejection and distinct descendant controls. |
+| `Backend/MemoryCopies/SnapshotPathInterface.lean` | Exact typed snapshot-path contents and reference bounds across successful schedules and reached failure prefixes. |
