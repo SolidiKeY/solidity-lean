@@ -876,6 +876,8 @@ import Solidity.Backend.StructuredFlow.CoreScopeControls
 import Solidity.Backend.StructuredFlow.CoreScopes
 import Solidity.Backend.StructuredFlow.CoreSequence
 import Solidity.Backend.StructuredFlow.CoreSequenceControls
+import Solidity.Backend.StructuredFlow.DoWhileBreakCompiler
+import Solidity.Backend.StructuredFlow.DoWhileBreakCompilerControls
 import Solidity.Backend.StructuredFlow.ExitControls
 import Solidity.Backend.StructuredFlow.ExitSelector
 import Solidity.Backend.StructuredFlow.ForBreakCompiler

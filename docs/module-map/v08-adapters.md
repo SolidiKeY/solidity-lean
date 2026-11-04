@@ -444,3 +444,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
 | `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
 | `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
+
+| `Solidity/Backend/StructuredFlow/DoWhileBreakCompiler.lean` | Mapped G19 immediate-break do-while Source certificate to existing scoped physical compiler. |
+| `Solidity/Backend/StructuredFlow/DoWhileBreakCompilerControls.lean` | Inhabited pipeline/value/fuel controls and skipped-condition/omitted-body negatives. |
