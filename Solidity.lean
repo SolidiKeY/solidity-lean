@@ -1534,6 +1534,8 @@ import Solidity.Frontend.LibraryTryImport
 import Solidity.Frontend.OverrideValidation.Attributes
 import Solidity.Frontend.OverrideValidation.Graph
 import Solidity.Frontend.OverrideValidation.Identity
+import Solidity.Frontend.OverrideValidation.OverrideFrontier
+import Solidity.Frontend.OverrideValidation.Pruning
 import Solidity.Frontend.OverrideValidation.Routes
 import Solidity.Frontend.PaymentImport
 import Solidity.Frontend.PaymentPlan
