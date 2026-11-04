@@ -31455,5 +31455,45 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacy.lean:SolidityBridge.Yul.ScopedForAdequacy.no_source_iff_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacy.lean:SolidityBridge.Yul.ScopedForAdequacy.output_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacyControls.lean:SolidityBridge.Yul.ScopedForAdequacy.Controls.actual_preparation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacyControls.lean:SolidityBridge.Yul.ScopedForAdequacy.Controls.exact_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacyControls.lean:SolidityBridge.Yul.ScopedForAdequacy.Controls.model_no_finite_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacyControls.lean:SolidityBridge.Yul.ScopedForAdequacy.Controls.source_never": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacyControls.lean:SolidityBridge.Yul.ScopedForAdequacy.Controls.successful_output_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacyControls.lean:SolidityBridge.Yul.ScopedForAdequacy.Controls.terminating_not_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

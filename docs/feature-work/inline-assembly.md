@@ -410,3 +410,5 @@ see [the lane record](inline-assembly-vy3.md).
 - VY3 scoped FOR completion: actual source success at any horizon now supplies count/guards internally for exact whole structured/model transport. Shared source induction retains real premises discharged by both concrete compilers; old completion contracts/controls are unchanged. Full Source/G24/native/frontend/lane adequacy remains open. See [VY3](inline-assembly-vy3.md#source-success-transport-for-scoped-for).
 
 - VY3 scoped FOR reflection: actual finite scope/switch target/selected-model success derives original source completion and exact caller/raw-word/frame/pending result; `compilerFuel ≤ base` remains explicit. See [lane handoff](inline-assembly-vy3.md#target-success-reflection-for-scoped-for). Full native/G24/frontend adequacy remains open.
+
+- VY3 closed scoped FOR: exact raw-output iff and all-horizon noncompletion correspondence for actual packets; genuine unending literal-true scoped/switch witness, never runtime-executed. See [lane handoff](inline-assembly-vy3.md#closed-scoped-for-result-and-noncompletion-equivalence). This remains mathematical-model preparation, not full G24/native adequacy.

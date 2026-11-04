@@ -380,6 +380,8 @@ import SolidityBridge.Yul.RecursiveScopesControls
 import SolidityBridge.Yul.ScopedControl
 import SolidityBridge.Yul.ScopedControlControls
 import SolidityBridge.Yul.ScopedFor
+import SolidityBridge.Yul.ScopedForAdequacy
+import SolidityBridge.Yul.ScopedForAdequacyControls
 import SolidityBridge.Yul.ScopedForCompletion
 import SolidityBridge.Yul.ScopedForCompletionControls
 import SolidityBridge.Yul.ScopedForControls
