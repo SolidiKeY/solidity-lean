@@ -307,6 +307,7 @@ import Solidity.Backend.MemoryCopies.SourceConstruction
 import Solidity.Backend.MemoryCopies.SourceConstructionControls
 import Solidity.Backend.MemoryCopies.SourceConstructionInterface
 import Solidity.Backend.MemoryCopies.SourceControls
+import Solidity.Backend.MemoryCopies.SourceCopyHorizonInterface
 import Solidity.Backend.MemoryCopies.SourceDefaultFrames
 import Solidity.Backend.MemoryCopies.SourceFields
 import Solidity.Backend.MemoryCopies.SourceFieldsControls
