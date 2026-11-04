@@ -132,4 +132,109 @@ theorem SourceBoolRefsAt.computed_reference_delete_sequence
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_reference_delete_sequence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms SourceBoolRefsAt.computed_reference_delete_sequence
+/-- A successful computed replacement precedes the ACTUAL reached bounds
+rejection: either the nested parent index is invalid, or it is the replaced
+slot and its newly selected child's inner index is invalid. There is no child
+write, so no selected-footprint separation premise is needed. The Source error
+retains the real changed prefix globals; native/word errors return no heap or
+machine and assert no transaction rollback or panic-payload equivalence. -/
+theorem SourceBoolRefsAt.computed_reference_delete_reject
+    {E : Source.Env} {Γ : Source.RCtx} {C : Contract} {Δ : Ctx}
+    (G : Source.Glob E) (Fs : Source.Fr) (fuel : Nat) (y : Source.EMState E Γ)
+    (σ : State C Δ) (dst src : HRef σ.H BoolRefsRef) (da sa : Nat) (address : Nat → Nat)
+    (hd : SourceBoolRefsAt y da σ.heap dst address) (hs : SourceBoolRefsAt y sa σ.heap src address)
+    (droot sroot : Source.Idx Γ SourceBoolRefsTy) (sdi ssi spi ski : Source.Idx Γ (.int .u256))
+    (dl sl : Idx Δ (.mem BoolRefsRef)) (di si pi ki : Idx Δ (.val .uint)) (i j p k : Fin Evm.W)
+    (hdr : y.1.get droot=.memRef rfl da) (hsr : y.1.get sroot=.memRef rfl sa)
+    (hdi : y.1.get sdi=sourceUint (Evm.Memory.indexValue i))
+    (hsi : y.1.get ssi=sourceUint (Evm.Memory.indexValue j))
+    (hpi : y.1.get spi=sourceUint (Evm.Memory.indexValue p))
+    (hki : y.1.get ski=sourceUint (Evm.Memory.indexValue k))
+    (htd : TEnv.get dl σ.env=some dst) (hts : TEnv.get sl σ.env=some src)
+    (hti : TEnv.get di σ.env=Evm.Memory.indexValue i) (htj : TEnv.get si σ.env=Evm.Memory.indexValue j)
+    (htp : TEnv.get pi σ.env=Evm.Memory.indexValue p) (htk : TEnv.get ki σ.env=Evm.Memory.indexValue k)
+    (hi : i.val<σ.heap.len dst .dyn) (hj : j.val<σ.heap.len src .dyn)
+    (reject : σ.heap.len dst .dyn≤p.val ∨
+      (p=i ∧ σ.heap.len ((MObj.elems .dyn (σ.heap.get src))[j.val]'hj) .dyn≤k.val))
+    (SH : Source.HeapTy) (memOK : Source.MemOK E SH y)
+    {L b frame : Nat} {F : Evm.Frag Δ} {base : Nat → Fin Evm.W} {m : Evm.Machine}
+    (hm : Evm.Memory.RefArrayStateRepr L b frame F σ base m) :
+    let child := (MObj.elems .dyn (σ.heap.get src))[j.val]'hj
+    ∃ (mid : Heap σ.H) (ym : Source.EMState E Γ) (mm : Evm.Machine),
+      σ.heap.writeAddr (.index dst .dyn (Evm.Memory.indexValue i)) child=some mid ∧
+      mid.index dst .dyn (Evm.Memory.indexValue i)=some child ∧
+      (Source.execS G Fs (fuel+6) Γ.length none
+        (.expr (sourceReferenceReadAssign droot sroot sdi ssi) : Source.RStmt E [] false .body Γ Γ)
+        y.1).run (.nil,y.2)=(.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.evalE G Fs (fuel+4) (sourceNestedDelete droot spi ski)).run ym=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.execS G Fs (fuel+5) Γ.length none
+        (.expr (sourceNestedDelete droot spi ski) : Source.RStmt E [] false .body Γ Γ)
+        ym.1).run (.nil,ym.2)=(.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      (Source.execItems G Fs (fuel+7) Γ.length none
+        (.stmt (.expr (sourceReferenceReadAssign droot sroot sdi ssi))
+          (.stmt (.expr (sourceNestedDelete droot spi ski)) .nil) : Source.RItems E [] false .body Γ Γ)
+        y.1).run (.nil,y.2)=(.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      Stmt.run σ (referenceReadStmt dl sl di si)=.ok ⟨σ.withHeap mid,List.prefix_refl _⟩ ∧
+      Stmt.run (σ.withHeap mid) (nestedDeleteStmt dl pi ki)=.error .revert ∧
+      Prog.run σ (.cons (referenceReadStmt dl sl di si) (.cons (nestedDeleteStmt dl pi ki) .nil))=.error .revert ∧
+      Evm.run (referenceReadWriteCode (C := C) b dl sl di si) m=.ok mm 0 ∧
+      Evm.run (nestedDeleteCode (C := C) b dl pi ki) mm=.revert ∧
+      Evm.run (referenceReadWriteCode (C := C) b dl sl di si ++ nestedDeleteCode (C := C) b dl pi ki) m=.revert ∧
+      SourceBoolRefsAt ym da mid dst address ∧ SourceBoolMemoryAt ym (address child.id) mid child .dyn ∧
+      Source.MemOK E SH ym ∧ Evm.Memory.RefArrayStateRepr L b frame F (σ.withHeap mid) base mm ∧
+      ym.1=y.1 ∧ MObj.elems .dyn (mid.get dst)=(MObj.elems .dyn (σ.heap.get dst)).set i.val child ∧
+      (∀ q : HRef σ.H (.array (.prim .bool)),mid.get q=σ.heap.get q) ∧
+      (∀ a,a≠da → ym.2.heap.get a=y.2.heap.get a) ∧ ym.2.heap.next=y.2.heap.next ∧
+      (ym.2.ex=y.2.ex ∧ ym.2.events=y.2.events ∧ ym.2.logs=y.2.logs ∧ ym.2.fnLocals=y.2.fnLocals) ∧
+      mm.stack=m.stack ∧
+      (∀ cursor,Evm.Memory.StructAllocatorRepr σ.heap base frame cursor m →
+        (base dst.id).val+1+σ.heap.len dst .dyn≤cursor.val →
+        Evm.Memory.StructAllocatorRepr mid base frame cursor mm) ∧
+      mm=Evm.Memory.writeMachine m ((base dst.id).val+1+i.val) (.val (base child.id)) := by
+  first
+  | solve | rfl | simp only [referenceReadStmt] | omega
+  | let child := (MObj.elems .dyn (σ.heap.get src))[j.val]'hj
+    obtain ⟨mid,ym,hit,hchild,hw,read,expr,stmt,native,word,hr,mok,represented,locals,elems,children,sourceChildren,other,addrs,next,effects,alloc⟩ :=
+      hd.computed_reference_assign_word G Fs (fuel+1) Γ.length y σ dst src da sa address hs
+        droot sroot sdi ssi dl sl di si i j hdr hsr hdi hsi htd hts hti htj hi hj SH memOK hm
+    let mm := Evm.Memory.writeMachine m ((base dst.id).val+1+i.val) (.val (base child.id))
+    have selected : mid.index dst .dyn (Evm.Memory.indexValue i)=some child := by
+      change (MObj.elems .dyn (mid.get dst))[(Evm.Memory.indexValue i).1.toNat]?=some child
+      rw [elems]
+      simpa only [Evm.Memory.indexValue,Int.toNat_natCast] using List.getElem?_set_self hi (a := child)
+    have suffix :
+        (Source.evalE G Fs (fuel+4) (sourceNestedDelete droot spi ski)).run ym=
+          (.error (.revert (Source.panicData .index)),ym) ∧
+        Stmt.run (σ.withHeap mid) (nestedDeleteStmt dl pi ki)=.error .revert ∧
+        Evm.run (nestedDeleteCode (C := C) b dl pi ki) mm=.revert := by
+      rcases reject with parentBad | ⟨same,childBad⟩
+      · have bound : mid.len dst .dyn≤p.val := by
+          change (MObj.elems .dyn (mid.get dst)).length≤p.val
+          rw [elems,List.length_set]
+          exact parentBad
+        exact SourceBoolRefsAt.nested_delete_parent_bounds G Fs fuel droot spi ski (σ.withHeap mid) dl pi ki dst p address hr
+          (by rw [locals];exact hdr) (by rw [locals];exact hpi) htd htp bound represented
+      · have selectedP : mid.index dst .dyn (Evm.Memory.indexValue p)=some child := by
+          rw [same];exact selected
+        have bound : mid.len child .dyn≤k.val := by
+          change (MObj.elems .dyn (mid.get child)).length≤k.val
+          rw [children child]
+          exact childBad
+        exact SourceBoolRefsAt.nested_delete_child_bounds G Fs fuel droot spi ski (σ.withHeap mid) dl pi ki dst child p k address hr
+          (by rw [locals];exact hdr) (by rw [locals];exact hpi) (by rw [locals];exact hki)
+          htd htp htk selectedP bound represented
+    have firstStmt : (Source.execS G Fs (fuel+6) Γ.length none
+        (.expr (sourceReferenceReadAssign droot sroot sdi ssi) : Source.RStmt E [] false .body Γ Γ)
+        y.1).run (.nil,y.2)=(.ok (.normal ym.1),(.nil,ym.2)) := by rw [locals];exact stmt
+    have failedStmt := source_expr_statement_error G Fs (fuel+4) Γ.length _ ym ym _ suffix.1
+    refine ⟨mid,ym,mm,hw,selected,firstStmt,suffix.1,failedStmt,?_,native,suffix.2.1,?_,word,suffix.2.2,?_,
+      hr,sourceChildren child hchild,mok,represented,locals,elems,children,addrs,next,effects,rfl,alloc,rfl⟩
+    · exact source_items_pair_error G Fs (fuel+1) Γ.length _ _ y ym ym _ firstStmt failedStmt
+    · exact intrinsic_heap_pair_error σ _ _ mid .revert native suffix.2.1
+    · rw [Evm.run_append_ok word];exact suffix.2.2
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_reference_delete_reject' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms SourceBoolRefsAt.computed_reference_delete_reject
+
 end Solidity.Backend.MemoryOps

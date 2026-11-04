@@ -706,4 +706,144 @@ theorem complete_reference_delete_vectors (self : Bool) :
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_delete_vectors' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms complete_reference_delete_vectors
 
+private abbrev BoundΓ : Ctx := .val .uint :: Γ
+private abbrev BoundSΓ : Source.RCtx := .int .u256 :: SΓ
+private def boundState : State C BoundΓ := σ.push (t := .val .uint) (uintOfNat 3)
+private def boundSource : Source.EMState E0 BoundSΓ := (.cons (sourceUint (uintOfNat 3)) sy.1,sy.2)
+private def boundWord := writeMachine machine 6 w[3]
+private def boundFrag := frag.push (.val .uint) .ok
+private def boundPostWord := writeMachine boundWord 33 w[24]
+private def boundSourceViews (y : Source.EMState E0 BoundSΓ) :=
+  [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private def boundarySource (inner : Bool) : Source.Idx BoundSΓ (.int .u256) :=
+  if inner then .there sj else .there si
+private def boundaryNative (inner : Bool) : Idx BoundΓ (.val .uint) :=
+  if inner then .there ti else .there tj
+private theorem boundSourceOK : Source.MemOK E0 SH boundSource :=
+  ⟨⟨source_memOK.1.1,⟨trivial,source_memOK.1.2⟩⟩,source_memOK.2⟩
+private theorem boundOld : SourceBoolRefsAt boundSource 2 hp old addresses :=
+  ⟨old_at.parent,old_at.children⟩
+private theorem boundFresh : SourceBoolRefsAt boundSource 3 hp fresh addresses :=
+  ⟨fresh_at.parent,fresh_at.children⟩
+private theorem boundRepr : RefArrayStateRepr 1 1 8 boundFrag boundState base boundWord :=
+  ⟨initial_repr.state.consVal (uintOfNat 3) w[3] (ReprV.uint_of rfl) (by decide),
+    initial_repr.arrays.localWrite 6 (by decide) w[3]⟩
+private theorem boundAllocator : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ boundWord :=
+  allocator.localWrite 6 (by decide) (by decide) w[3]
+
+/-- Both declared pipelines execute a materially changed replacement, THEN
+reject either parent endpoint1 or reached RIGHT-child endpoint3. The new scalar
+local is independently represented, not a declaration-execution claim. No target
+post-revert machine/heap or transaction rollback is asserted. -/
+theorem computed_reference_reject_client (p : Roadmap.Pipeline) (fuel : Nat) (inner : Bool) :
+    ∃ ym : Source.EMState E0 BoundSΓ,
+      (Source.execS (G0 p) F0 (fuel+6) BoundSΓ.length none
+        (.expr (sourceReferenceReadAssign (.there sdst) (.there ssrc) (.there sj) (.there si)) :
+          Source.RStmt E0 [] false .body BoundSΓ BoundSΓ) boundSource.1).run (.nil,boundSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.evalE (G0 p) F0 (fuel+4)
+        (sourceNestedDelete (.there sdst) (boundarySource inner) .here)).run ym=
+          (.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) BoundSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there sdst) (.there ssrc) (.there sj) (.there si)))
+          (.stmt (.expr (sourceNestedDelete (.there sdst) (boundarySource inner) .here)) .nil) :
+            Source.RItems E0 [] false .body BoundSΓ BoundSΓ) boundSource.1).run (.nil,boundSource.2)=
+              (.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      Stmt.run boundState (referenceReadStmt (.there tdst) (.there tsrc) (.there ti) (.there tj))=
+        .ok ⟨boundState.withHeap (postHeap false),List.prefix_refl _⟩ ∧
+      Stmt.run (boundState.withHeap (postHeap false))
+        (nestedDeleteStmt (.there tdst) (boundaryNative inner) .here)=.error .revert ∧
+      Prog.run boundState (.cons (referenceReadStmt (.there tdst) (.there tsrc) (.there ti) (.there tj))
+        (.cons (nestedDeleteStmt (.there tdst) (boundaryNative inner) .here) .nil))=.error .revert ∧
+      run (referenceReadWriteCode (C := C) (Δ := BoundΓ) 1 (.there tdst) (.there tsrc) (.there ti) (.there tj)) boundWord=
+        .ok boundPostWord 0 ∧
+      run (nestedDeleteCode (C := C) (Γ := BoundΓ) 1 (.there tdst) (boundaryNative inner) .here) boundPostWord=.revert ∧
+      run (referenceReadWriteCode (C := C) (Δ := BoundΓ) 1 (.there tdst) (.there tsrc) (.there ti) (.there tj) ++
+        nestedDeleteCode (C := C) (Γ := BoundΓ) 1 (.there tdst) (boundaryNative inner) .here) boundWord=.revert ∧
+      boundSourceViews ym=expectedSource false ∧
+      SourceBoolRefsAt ym 2 (postHeap false) old addresses ∧
+      SourceBoolMemoryAt ym 0 (postHeap false) left .dyn ∧
+      SourceBoolMemoryAt ym 1 (postHeap false) right .dyn ∧ Source.MemOK E0 SH ym ∧
+      RefArrayStateRepr 1 1 8 boundFrag (boundState.withHeap (postHeap false)) base boundPostWord ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.there sdst)) (.local (.there sj)) rfl)).run boundSource=
+        (.ok (.val (.memRef rfl 0)),boundSource) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.there sdst)) (.local (.there sj)) rfl)).run ym=
+        (.ok (.val (.memRef rfl 1)),ym) ∧
+      (Source.readLoc (E := E0) (Γ := BoundSΓ) F0 (τ := .bool) (.mem 0 0)).run ym=(.ok (.bool true),ym) ∧
+      ym.1=boundSource.1 ∧ ym.2.heap.next=5 ∧ ym.2.heap.get 5=none ∧
+      (ym.2.ex=boundSource.2.ex ∧ ym.2.events=boundSource.2.events ∧
+        ym.2.logs=boundSource.2.logs ∧ ym.2.fnLocals=boundSource.2.fnLocals) ∧
+      StructAllocatorRepr (postHeap false) base 8 ⟨48,by decide⟩ boundPostWord ∧
+      boundPostWord.stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := boundOld.computed_reference_delete_reject (G0 p) F0 fuel boundSource boundState old fresh 2 3 addresses boundFresh
+      (.there sdst) (.there ssrc) (.there sj) (.there si) (boundarySource inner) .here
+      (.there tdst) (.there tsrc) (.there ti) (.there tj) (boundaryNative inner) .here
+      ⟨0,by decide⟩ ⟨1,by decide⟩ (if inner then ⟨0,by decide⟩ else ⟨1,by decide⟩) ⟨3,by decide⟩
+      rfl rfl rfl rfl (by cases inner <;> rfl) rfl rfl rfl rfl rfl (by cases inner <;> rfl) rfl
+      (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      (by cases inner
+          · exact Or.inl (by simp only [Heap.len,MObj.elems_dyn];decide)
+          · exact Or.inr ⟨rfl,by simp only [Heap.len,MObj.elems_dyn];decide⟩)
+      SH boundSourceOK boundRepr
+    have srcElems : MObj.elems .dyn (boundState.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+    simp only [srcElems,List.getElem_cons_succ,List.getElem_cons_zero] at result
+    obtain ⟨mid,ym,mm,hw,selected,stmt,failed,failedStmt,items,native,badNative,badProg,word,badWord,badAppend,
+      hr,child,mok,represented,locals,elems,children,addrs,next,effects,stack,alloc,mmEq⟩ := result
+    have known : hp.writeAddr (.index old .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap false) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get old)).length from dhi false,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap false := Option.some.inj (hw.symm.trans known)
+    subst mid
+    subst mm
+    have tables : boundSourceViews ym=expectedSource false := by
+      have parent := hr.parent
+      have pe := post_elems false
+      change MObj.elems .dyn ((postHeap false).get old)=[right] at pe
+      rw [pe] at parent
+      change ym.2.heap.get 2=some ⟨SR,pdata [right]⟩ at parent
+      unfold boundSourceViews expectedSource
+      simp only [Bool.false_eq_true,if_false]
+      rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 3 (by decide),addrs 4 (by decide)]
+      rfl
+    have leftAt : SourceBoolMemoryAt ym 0 (postHeap false) left .dyn := by
+      unfold SourceBoolMemoryAt
+      rw [addrs 0 (by decide),children left]
+      exact left_at
+    have initialRead := boundOld.eval_parent_read (G0 p) F0 fuel (.there sdst) (.there sj) (uintOfNat 0) left rfl rfl
+      (by simp only [Heap.index,MObj.elems_dyn];rfl)
+    have reachedRead := hr.eval_parent_read (G0 p) F0 fuel (.there sdst) (.there sj) (uintOfNat 0) right
+      (by rw [locals];rfl) (by rw [locals];rfl) selected
+    have leftRead := source_bool_read ym 0 _ leftAt 0 (by rw [children left];simp only [MObj.elems_dyn];decide)
+    refine ⟨ym,stmt,failed,items,native,badNative,badProg,word,badWord,badAppend,tables,hr,leftAt,child,mok,represented,
+      initialRead,reachedRead,?_,locals,next,?_,effects,?_,rfl⟩
+    · simpa only [children left,MObj.elems_dyn] using leftRead
+    · rw [addrs 5 (by decide)];rfl
+    · exact alloc ⟨48,by decide⟩ boundAllocator (by simp only [Heap.len,MObj.elems_dyn];decide)
+
+/-- ALL INITIAL and retained-prefix objects/words, including new scalar cell6,
+all root aliases, headers/children, empty object, free pointer and saved stack.
+These are prefix observations, never a returned post-revert machine. -/
+theorem complete_reference_rejection_vectors :
+    boundSourceViews boundSource=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,
+      some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SR,pdata [left]⟩,
+      some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    words boundWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words boundPostWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[24],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap false)=([true,false,false],[false,true,false],[1],[0,1,0],[]) ∧
+    boundPostWord.mem 0=w[48] ∧ boundPostWord.stack=[w[42]] ∧
+    words boundPostWord≠words boundWord := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,?_,?_,rfl,rfl,by decide⟩
+    · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+    · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_rejection_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_reference_rejection_vectors
+
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

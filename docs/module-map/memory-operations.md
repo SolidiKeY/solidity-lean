@@ -185,4 +185,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceReferenceRead.lean` | Computed parent-element reference RHS: actual Source/native/published whole pointer write, selected-child derivation, frames and allocator transport. |
 | `Backend/MemoryOps/SourceReferenceReadControls.lean` | Inhabited distinct/same-parent/no-op clients, complete five-object/twenty-four-word observations, nested reads and exact bounds/timeout distinctions. |
 
-| `Backend/MemoryOps/SourceReferenceReadSequence` | Computed parent-element reference RHS followed by actual reached nested delete; Source Items, intrinsic Prog, full word append and derived finite observer/allocator frames. |
+| `Backend/MemoryOps/SourceReferenceReadSequence.lean` | Computed reference RHS followed by reached nested delete or ordered parent/child bounds rejection; actual Source Items, intrinsic Prog, whole word append and prefix observer/allocator frames. |
