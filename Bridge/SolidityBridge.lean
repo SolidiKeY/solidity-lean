@@ -264,6 +264,8 @@ import SolidityBridge.RoadmapV15.P10.PopControls
 import SolidityBridge.RoadmapV15.P10.PowerControls
 import SolidityBridge.RoadmapV15.P10.PublishedBitwise
 import SolidityBridge.RoadmapV15.P10.PublishedBitwiseControls
+import SolidityBridge.RoadmapV15.P10.PublishedCheckedAdd
+import SolidityBridge.RoadmapV15.P10.PublishedCheckedAddControls
 import SolidityBridge.RoadmapV15.P10.PublishedDivision
 import SolidityBridge.RoadmapV15.P10.PublishedDivisionControls
 import SolidityBridge.RoadmapV15.P10.PublishedRemainder

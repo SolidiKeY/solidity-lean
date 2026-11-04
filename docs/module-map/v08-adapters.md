@@ -276,6 +276,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedUnsignedOrderControls.lean` | Direct combined-law clients, uint256 boundaries, short horizons and complete ordered native observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean` | All-count published unchecked Source shifts through Fin-word/BitVec transport to fetched SWAP1/SHL and SWAP1/SHR. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` | Direct Source/Scalar/native/X clients, zero/boundary/saturated counts and complete ordered observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAdd.lean` | Published checked Source addition success and overflow boundary against the raw fetched ADD body. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAddControls.lean` | Direct combined-law clients, maximum-fit/overflow controls, exact panic bytes and ordered native observations. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 
