@@ -36,7 +36,7 @@ def git(*args): return subprocess.check_output(["git",*args],text=True).splitlin
 merge=git("merge-base",base,"HEAD")[0]
 files=set(git("diff","--name-only","--no-renames",merge,"--")) | set(git("ls-files","--others","--exclude-standard"))
 def eligible(p):
-    return p.startswith("Solidity/") and p.endswith(".lean") and not p.startswith("Solidity/Scratch/")
+    return p == "Solidity.lean" or (p.startswith("Solidity/") and p.endswith(".lean") and not p.startswith("Solidity/Scratch/"))
 mods={}
 for p in pathlib.Path("Solidity").rglob("*.lean"):
     if not eligible(str(p)): continue
@@ -52,9 +52,9 @@ while stack:
 # The examples, the TestSuite and the corpus are their own libraries: a lane
 # builds the dependents it touched among them only when it touches the core
 # (Syntax, Semantics, Calculus) or sets GATE_EXAMPLES=1 (docs/contributing.md).
-core=any(m.split(".")[1] in ("Syntax","Semantics","Calculus") for m in touched) or "SolidityExamples.lean" in files
+core=any("." in m and m.split(".")[1] in ("Syntax","Semantics","Calculus") for m in touched) or "SolidityExamples.lean" in files
 wide=core or os.environ.get("GATE_EXAMPLES")=="1"
-leaf=lambda m: m.split(".")[1] in ("Examples","TestSuite","Corpus")
+leaf=lambda m: "." in m and m.split(".")[1] in ("Examples","TestSuite","Corpus")
 # what a touched example, TestSuite or corpus module reaches among those leaves
 leafs={m for m in touched if leaf(m)}; stack=list(leafs)
 while stack:
