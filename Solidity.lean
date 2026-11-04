@@ -2216,6 +2216,9 @@ import Solidity.Lowering.V07.ShortCircuitControls
 import Solidity.Lowering.V07.SignedArithmeticControls
 import Solidity.Lowering.V07.SignedComplement
 import Solidity.Lowering.V07.SignedComplementControls
+import Solidity.Lowering.V07.SignedEnumControls
+import Solidity.Lowering.V07.SignedEnumGuard
+import Solidity.Lowering.V07.SignedEnumTransport
 import Solidity.Lowering.V07.SignedLocalUpdate
 import Solidity.Lowering.V07.SignedLocalUpdateControls
 import Solidity.Lowering.V07.SignedNarrowAddition
