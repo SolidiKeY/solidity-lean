@@ -88,3 +88,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MemoryTripleAdmission.lean` | Both dependent memory links derived from one original public three-stage joined admission. |
 | `Backend/Passes/MemoryTripleAdmissionControls.lean` | Two allocations and fresh-length capture; three shared maps, both associations and reached failure controls. |
 | `Backend/Passes/MemoryTripleAdmissionPins.lean` | Exact standard-only axioms for three-stage admission and inhabited clients. |
+
+| `Solidity/Backend/Passes/MemoryJoinedOutput.lean` | Full public legacy-memory joined output with the actual selected suffix map and reached cost. |
+| `Solidity/Backend/Passes/MemoryJoinedOutputControls.lean` | Actual allocation/allocation/capture whole output over saved tails and publicly recognized reached failure. |
+| `Solidity/Backend/Passes/MemoryJoinedOutputPins.lean` | Exact standard-only joined-output headline axiom guards. |

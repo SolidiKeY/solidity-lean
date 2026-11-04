@@ -689,6 +689,25 @@ rejected; frame7 is used. A typed third-stage bounds failure is proved for
 all saved tails via the admitted whole Input, without raw fault-tail transport.
 Legacy memory scope and pending Source/world/public-resource boundaries remain.
 
+## Public joined output retains the actual suffix map
+
+`MemoryJoinedOutput.compose` composes two full legacy-memory mapped outputs
+into the joined certificate's full output, retaining the suffix's actual
+selected map. The actual successful first intrinsic result supplies the
+heap extension and the reached cost evaluation point. The public wrapper
+selects the join through `Memory.compileProg`; no preservation equality or
+new map is assumed.
+
+`MemoryJoinedOutputControls.public_shared` applies this law twice to the
+real five-cell allocation, four-cell allocation and fresh-length capture.
+The actual publicly selected whole program retains full mapped output with
+one final map before all saved tails. Existing complete 17-cell observations,
+wrong-alias, frame and failure controls remain unchanged. `public_failure`
+also retains whole public recognition for the reached typed bounds failure.
+Four exact standard-only axiom guards accompany the application. These
+remain intrinsic/abstract-Instr results; Source/world/public ABI, resource
+and external EVM adequacy and mandatory combined validation remain open.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

@@ -538,6 +538,9 @@ import Solidity.Backend.Passes.MemoryJoinFramePins
 import Solidity.Backend.Passes.MemoryJoinedAllocation
 import Solidity.Backend.Passes.MemoryJoinedAllocationControls
 import Solidity.Backend.Passes.MemoryJoinedAllocationPins
+import Solidity.Backend.Passes.MemoryJoinedOutput
+import Solidity.Backend.Passes.MemoryJoinedOutputControls
+import Solidity.Backend.Passes.MemoryJoinedOutputPins
 import Solidity.Backend.Passes.MemoryScopeAllocation
 import Solidity.Backend.Passes.MemoryScopeBoundary
 import Solidity.Backend.Passes.MemoryScopeControls
