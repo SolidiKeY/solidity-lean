@@ -224,3 +224,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SelectedArrayDefaults.lean` | Lifts existing production selection through fixed wrappers and reuses runtime reference-array/scoped declaration correctness for supported roots. |
 | `Backend/MemoryCopies/SelectedArrayDefaultControls.lean` | Emitted arrays of structs/fixed structs at0/2/64, whole-parent feasibility, nested default identities and actual scoped declaration controls. |
 | `Backend/MemoryCopies/SourceCopyHorizonInterface.lean` | Exact non-timeout result/reached-state preservation obligations under additional Source storage-copy traversal fuel. |
+| `Backend/MemoryCopies/SourceCopyHorizon.lean` | Generic exact non-timeout result/state extension for all existing Source copy traversals via bind and mutual fuel descent. |
+| `Backend/MemoryCopies/SourceCopyHorizonControls.lean` | Nested and64-byte stability, mapping refusal retention, partially allocated timeout/recovery and old-state controls. |
