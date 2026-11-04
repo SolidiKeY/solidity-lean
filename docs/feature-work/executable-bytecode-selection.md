@@ -384,3 +384,45 @@ Lean4.24.0/Lake5.0.0-src+797c613. The scoped reports contain only standard
 axioms. These are checkpoint checks, not the unfinished assignment's full
 runtime gate. The following documentation-only handoff records this result;
 its Lean sources are identical to the gated implementation commit.
+
+
+## Bounded assembled control packets
+
+ControlPackets adds capacity to the existing assembled JUMP, JUMPI and
+ISZERO/PUSH/JUMPI packets. Actual assembly supplies target resolution and the
+scanner's validity proof. Actual fetched PUSH determines the intermediate
+operand stack. The two-step packet splitter derives its second step from the
+complete packet and the independently fetched first step; no favorable next
+state is assumed. JUMP needs one temporary word; conditional tests need two
+above their actual tail. ISZERO replaces its input word and does not add one.
+The final JUMPDEST is itself executed. Item indices are converted through the
+actual assembled byte sizes.
+
+Controls construct an actual assembler output with the published assembler
+existence theorem, then derive both bounded conditional arms, a bounded jump
+and the destination's own step. Independent literal byte vectors pin the
+PUSH32-prefix entry33, zero destination39 and nonzero fallthrough37. They do
+not claim equality with the assembler's exact minimal-width output. The
+literal test admits a real1024-word peak and rejects its hidden1025-word peak
+for every alleged finish state. Wrong PCs, results and tails are rejected.
+A corrupted taken target lies in PUSH data and is refused by the scanner;
+the same corrupted target remains unused on the untaken arm.
+
+The first monolithic whole-branch draft exceeded the unchanged200000
+heartbeat budget during layout normalization. It is preserved outside the
+registered source for decomposition into smaller lemmas. No heartbeat budget
+was increased, and no branch or general-loop control certificate is claimed
+by these packet results. Whole body reachability, general-loop realization
+and assembly composition remain open.
+
+
+Both read-only packet reviews confirmed the proof scope but found that the
+initial corrupt-target control's non-JUMPDEST payload did not isolate the
+scanner's instruction-boundary check. It now targets a payload byte0x5b:
+the byte equals JUMPDEST, an explicit InPushData witness proves it is inside
+PUSH data, and the scanner rejects it. Taken execution fails and untaken
+execution succeeds. This is a strengthened control, not a semantics change.
+
+Both independent reviewers confirmed the embedded0x5b repair. Packet proofs
+received no semantic finding; the remaining branch draft is not registered
+and is not part of the passing code.
