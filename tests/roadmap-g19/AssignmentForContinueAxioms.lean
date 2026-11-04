@@ -16,6 +16,22 @@ import Solidity.Lowering.G19.AssignmentForContinueControls
 #guard_msgs in
 #print axioms Solidity.Lowering.G19.AssignmentForContinue.bind_known
 
+/-- info: 'Solidity.Lowering.G19.AssignmentForContinue.bind_result' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.G19.AssignmentForContinue.bind_result
+
+/-- info: 'Solidity.Lowering.G19.AssignmentForContinue.bind_ext' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.G19.AssignmentForContinue.bind_ext
+
+/-- info: 'Solidity.Lowering.G19.AssignmentForContinue.bind_bool_ext' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.G19.AssignmentForContinue.bind_bool_ext
+
+/-- info: 'Solidity.Lowering.G19.AssignmentForContinue.bind_out_ext' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.G19.AssignmentForContinue.bind_out_ext
+
 /-- info: 'Solidity.Lowering.G19.AssignmentForContinue.body_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Lowering.G19.AssignmentForContinue.body_run
