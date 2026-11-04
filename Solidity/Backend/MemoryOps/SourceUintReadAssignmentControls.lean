@@ -1,3 +1,5 @@
+import Solidity.Backend.MemoryOps.SourceUintAliasWriteDelete
+import Solidity.Backend.MemoryOps.SourceUintSliceCompoundRead
 import Solidity.Backend.MemoryOps.SourceUintAliasDelete
 import Solidity.Backend.MemoryOps.SourceUintAliasWrite
 import Solidity.Backend.MemoryOps.SourceUintAlias
@@ -1308,5 +1310,230 @@ theorem dynamic_uint_alias_delete_endpoint (p : Roadmap.Pipeline) (fuel : Nat) :
 
 /-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_delete_endpoint
+
+private theorem triple_contents (self : Bool) :
+    (mutationFinal self).2.heap.get (aliasAddress self)=
+      some ⟨SA,sourceUintMemory ((if self then old else next).set 1 (u 42))⟩ := by
+  cases self <;> simp only [mutationFinal,mutationMid,aliasAddress,Bool.false_eq_true,if_false,if_true,Source.Heap.write_get]
+
+private def tripleNative (self : Bool) : Heap H :=
+  (mutationNative self).set (aliasRef self) (MObj.setElem .dyn ((mutationNative self).get (aliasRef self)) 1 (u 0))
+private def tripleFinal (self : Bool) : Source.EMState E0 Γ :=
+  ((mutationFinal self).1,{(mutationFinal self).2 with heap := (mutationFinal self).2.heap.write (aliasAddress self) (sourceUintMemory (((if self then old else next).set 1 (u 42)).set 1 (u 0))) (by
+    change ((mutationFinal self).2.heap.get (aliasAddress self)).map Sigma.fst=some SA
+    rw [triple_contents]
+    rfl)})
+private def tripleTarget (self : Bool) : Machine :=
+  writeMachine (mutationTarget self) ((base (aliasRef self).id).val+2) w[0]
+
+private theorem triple_source (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintIndexedDelete dr di)).run (mutationFinal self)=
+      (.ok Source.RVal.unit,tripleFinal self) := by
+  first
+  | solve | simp only [] | omega
+  | have initial := (dynamic_uint_alias_write_concrete p fuel self).2.2.2.1
+    obtain ⟨ht,write⟩ := source_uint_write (mutationFinal self) (aliasAddress self)
+      ((if self then old else next).set 1 (u 42)) (triple_contents self) 1
+      (by rw [List.length_set];cases self <;> decide) (u 0)
+    have actual : (Source.deleteLoc F0 (fuel+2) (τ := .int .u256) (.mem (aliasAddress self) (u 1).1.toNat)).run
+        (mutationFinal self)=(.ok (),tripleFinal self) := write
+    have bound : (u 1).1.toNat<(mutationNative self).len (aliasRef self) .dyn := by
+      change (u 1).1.toNat<(MObj.elems .dyn ((mutationNative self).get (aliasRef self))).length
+      rw [show MObj.elems .dyn ((mutationNative self).get (aliasRef self))=
+        (MObj.elems .dyn (hp.get (aliasRef self))).set 1 (u 42) from by
+          change MObj.elems .dyn ((hp.set (aliasRef self) _).get (aliasRef self))=_
+          rw [Heap.get_set_same,MObj.elems_setElem]]
+      rw [List.length_set]
+      cases self <;> rw [MObj.elems_dyn] <;> decide
+    exact initial.eval_delete_of_run (G0 p) F0 fuel dr di (u 1) (by cases self <;> rfl) rfl bound actual
+
+private theorem triple_word (self : Bool) :
+    run (uintAliasDeleteCode (C := C) 1 dt it) (mutationTarget self)=.ok (tripleTarget self) 0 := by
+  first
+  | solve | simp only [] | omega
+  | exact delete_one_run (mutationTarget self) (base (aliasRef self).id) (if self then 3 else 2)
+      (by cases self <;> decide) (by cases self <;> decide) (by cases self <;> decide)
+      (by cases self <;> rfl) (by cases self <;> rfl) (by cases self <;> rfl)
+
+/-- The three real executions consume the SAME materially changed prefix.
+Both pipeline parameters and same/distinct reference identities are inhabited. -/
+theorem dynamic_uint_alias_write_delete_concrete (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.execItems (G0 p) F0 (fuel+7) Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) (.stmt (.expr (sourceUintIndexedDelete dr di)) .nil)) :
+          Source.RItems E0 [] false .body Γ Γ) (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (tripleFinal self).1),(.nil,(tripleFinal self).2)) ∧
+    Prog.run (state false 1 42) (.cons (.rebindMem dt (.alias (.var (aliasTarget self) rfl)))
+      (.cons (.assignMem (.index .dyn (.var dt rfl) (.simple (.local it))) (.val (.simple (.local jt))))
+        (.cons (.deleteMem (.loc (.index .dyn (.var dt rfl) (.simple (.local it)))) rfl) .nil)))=
+      .ok ⟨((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (tripleNative self),List.prefix_refl _⟩ ∧
+    run ((aliasLocalCode 1 dt (aliasTarget self)++uintAliasWriteCode (C := C) 1 dt it jt)++uintAliasDeleteCode (C := C) 1 dt it)
+      (machine false 1 42)=.ok (tripleTarget self) 0 ∧
+    (Source.evalE (G0 p) F0 (fuel+4) (sourceUintIndexedAssign dr di si)).run (mutationMid self)=
+      (.ok (.val (sourceUint (u 42))),mutationFinal self) ∧
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintIndexedDelete dr di)).run (mutationFinal self)=
+      (.ok Source.RVal.unit,tripleFinal self) ∧
+    SourceUintMemoryAt (tripleFinal self) (aliasAddress self) (tripleNative self) (aliasRef self) .dyn ∧
+    Source.MemOK E0 SH (tripleFinal self) ∧
+    Objects.StateRepr 1 1 8 (Frag.init Δ)
+      (((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (tripleNative self)) base (tripleTarget self) ∧
+    Objects.AllocatorRepr (tripleNative self) base 8 ⟨40,by decide⟩ (tripleTarget self) := by
+  first
+  | solve | simp only [] | omega
+  | have initial : SourceUintMemoryAt (sy false 1 42) (aliasAddress self) hp (aliasRef self) .dyn := by
+      cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+    have sourceRoot : (sy false 1 42).1.get (aliasSource self)=.memRef rfl (aliasAddress self) := by cases self <;> rfl
+    have targetRoot : TEnv.get (aliasTarget self) (state false 1 42).env=some (aliasRef self) := by cases self <;> rfl
+    have bound : (u 1).1.toNat<hp.len (aliasRef self) .dyn := by
+      cases self <;> simp only [aliasRef,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide
+    obtain ⟨mid,out,changed,z,mm,target,first,second,third,items,prog,prefixCode,code,whole,write,delwrite,read,new,final,
+      mok,finalOK,repr,finalRepr,alloc,finalAlloc,rest⟩ :=
+      source_uint_alias_write_delete_word (G0 p) F0 fuel (sy false 1 42) dr (aliasSource self) di si
+        (aliasAddress self) (u 1) (u 42) sourceRoot rfl rfl SH (memOK false 1 42)
+        (state false 1 42) dt (aliasTarget self) it jt (aliasRef self) targetRoot rfl rfl initial bound
+        (initial_repr false 1 42) (allocator false 1 42) (by decide) rfl rfl
+    have knownWrite : hp.writeAddr (.index (aliasRef self) .dyn (u 1)) (u 42)=some (mutationNative self) := by
+      have hb : 1<(MObj.elems .dyn (hp.get (aliasRef self))).length := bound
+      simp only [Heap.writeAddr,Heap.setIndex,show (u 1).1.toNat=1 from by decide,if_pos hb,mutationNative]
+    have hm : mid=mutationNative self := Option.some.inj (write.symm.trans knownWrite)
+    subst mid
+    have hc : changed=mutationFinal self := congrArg Prod.snd (second.symm.trans (mutation_source p (fuel+1) self))
+    subst changed
+    have hmiddle : mm=mutationTarget self := (Out.ok.inj (prefixCode.symm.trans (dynamic_uint_alias_write_concrete p fuel self).2.2.1)).1
+    subst mm
+    have knownDelete : (mutationNative self).writeAddr (.index (aliasRef self) .dyn (u 1)) (PrimTy.dflt .uint)=some (tripleNative self) := by
+      have hb : 1<(MObj.elems .dyn ((mutationNative self).get (aliasRef self))).length := by
+        rw [show MObj.elems .dyn ((mutationNative self).get (aliasRef self))=
+          (MObj.elems .dyn (hp.get (aliasRef self))).set 1 (u 42) from by
+            change MObj.elems .dyn ((hp.set (aliasRef self) _).get (aliasRef self))=_
+            rw [Heap.get_set_same,MObj.elems_setElem],List.length_set]
+        exact bound
+      simp only [Heap.writeAddr,Heap.setIndex,show (u 1).1.toNat=1 from by decide,if_pos hb,tripleNative]
+      rfl
+    have ho : out=tripleNative self := Option.some.inj (delwrite.symm.trans knownDelete)
+    subst out
+    have hz : z=tripleFinal self := congrArg Prod.snd (third.symm.trans (triple_source p fuel self))
+    subst z
+    have ht : target=tripleTarget self := (Out.ok.inj (code.symm.trans (triple_word self))).1
+    subst target
+    exact ⟨items,prog,whole,second,third,final,finalOK,finalRepr,finalAlloc⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_concrete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_delete_concrete
+
+/-- All four stages retain complete ordered observations. The written42
+stage is kept even though deleting afterward has the same final words as a
+standalone deletion. The execution theorem supplies both pipeline instances. -/
+theorem dynamic_uint_alias_write_delete_vectors (self : Bool) :
+    words (machine false 1 42)=
+      [w[40],w[32],w[16],w[16],w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (mutationPointer self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (mutationTarget self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[42],w[1],w[0],w[99],w[3],w[7],(if self then w[42] else w[0]),.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],(if self then w[9] else w[42])] ∧
+    words (tripleTarget self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],(if self then w[9] else w[0])] ∧
+    objects hp=[old,rhs,next] ∧
+    objects (mutationNative self)=(if self then [old.set 1 (u 42),rhs,next] else [old,rhs,next.set 1 (u 42)]) ∧
+    objects (tripleNative self)=(if self then [(old.set 1 (u 42)).set 1 (u 0),rhs,next] else [old,rhs,(next.set 1 (u 42)).set 1 (u 0)]) ∧
+    sourceObjects (sy false 1 42)=
+      [some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    sourceObjects (mutationMid self)=sourceObjects (sy false 1 42) ∧
+    sourceObjects (mutationFinal self)=(if self then
+      [some ⟨SA,sourceUintMemory (old.set 1 (u 42))⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] else
+      [some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory (next.set 1 (u 42))⟩]) ∧
+    sourceObjects (tripleFinal self)=(if self then
+      [some ⟨SA,sourceUintMemory ((old.set 1 (u 42)).set 1 (u 0))⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] else
+      [some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory ((next.set 1 (u 42)).set 1 (u 0))⟩]) ∧
+    (tripleFinal self).1=(mutationMid self).1 ∧
+    (((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (tripleNative self)).env=
+      (u 1,u 42,some right,some (aliasRef self),some left,some neighbor,()) ∧
+    (tripleFinal self).2.ex=(sy false 1 42).2.ex ∧
+    (tripleFinal self).2.events=(sy false 1 42).2.events ∧
+    (tripleFinal self).2.logs=(sy false 1 42).2.logs ∧
+    (tripleFinal self).2.fnLocals=(sy false 1 42).2.fnLocals ∧
+    ({tripleTarget self with mem := (machine false 1 42).mem} : Machine)=machine false 1 42 ∧
+    (tripleTarget self).stack=[w[77],w[88]] ∧ (tripleTarget self).mem 0=w[40] := by
+  first
+  | solve | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,rfl,?_,?_,?_,rfl,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+      · simp only [objects,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn]
+      · simp only [objects,mutationNative,aliasRef,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn,MObj.setElem_dyn]
+      · simp only [objects,tripleNative,mutationNative,aliasRef,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn,MObj.setElem_dyn]
+      · simp only [sourceObjects,mutationFinal,mutationMid,aliasAddress,Bool.false_eq_true,if_false,if_true,
+          Source.Heap.write_get,Source.Heap.write_other _ (show 0≠2 by decide),Source.Heap.write_other _ (show 1≠2 by decide),
+          Source.Heap.write_other _ (show 1≠0 by decide),Source.Heap.write_other _ (show 2≠0 by decide)]
+        rfl
+      · simp only [sourceObjects,tripleFinal,mutationFinal,mutationMid,aliasAddress,Bool.false_eq_true,if_false,if_true,
+          Source.Heap.write_get,Source.Heap.write_other _ (show 0≠2 by decide),Source.Heap.write_other _ (show 1≠2 by decide),
+          Source.Heap.write_other _ (show 1≠0 by decide),Source.Heap.write_other _ (show 2≠0 by decide)]
+        rfl
+
+/-- The ordered history distinguishes a skipped write: the actual reached
+read is42 before deletion and0 after. Final words alone cannot discriminate
+it, and that equality is recorded rather than hidden. -/
+theorem dynamic_uint_alias_write_delete_negatives (p : Roadmap.Pipeline) (fuel : Nat) :
+    words (tripleTarget false)=words (deletionTarget false) ∧
+    words (mutationTarget false)≠words (mutationPointer false) ∧
+    words (tripleTarget false)≠words (mutationTarget false) ∧
+    words (tripleTarget false)≠words (tripleTarget true) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (mutationFinal false)=
+      (.ok (.val (sourceUint (u 42))),mutationFinal false) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (tripleFinal false)=
+      (.ok (.val (sourceUint (u 0))),tripleFinal false) := by
+  first
+  | solve | simp only [] | omega
+  | refine ⟨rfl,by decide,by decide,by decide,(dynamic_uint_alias_write_negatives p fuel).2.2.1,?_⟩
+    have represented := (dynamic_uint_alias_write_delete_concrete p fuel false).2.2.2.2.2.1
+    have contents : MObj.elems .dyn ((tripleNative false).get neighbor)=(next.set 1 (u 42)).set 1 (u 0) := by
+      change MObj.elems .dyn (((mutationNative false).set neighbor _).get neighbor)=_
+      rw [Heap.get_set_same,MObj.elems_setElem]
+      have written : MObj.elems .dyn ((mutationNative false).get neighbor)=next.set 1 (u 42) := by
+        change MObj.elems .dyn ((hp.set neighbor _).get neighbor)=_
+        rw [Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn]
+        rfl
+      rw [show aliasRef false=neighbor from rfl,written]
+    have read := represented.eval_index (G0 p) F0 fuel dr di (u 1) rfl rfl
+      (by change (u 1).1.toNat<(MObj.elems .dyn ((tripleNative false).get neighbor)).length
+          rw [contents,List.length_set,List.length_set]
+          decide)
+    simpa only [show aliasRef false=neighbor from rfl,contents] using read
+
+/-- Low Items fuel keeps the actual42 write before the delete times out.
+The error outcome returns globals only; prefix locals are proved separately. -/
+theorem dynamic_uint_alias_write_delete_timeout (p : Roadmap.Pipeline) :
+    (Source.execItems (G0 p) F0 6 Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource false)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+      (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (mutationFinal false).1),(.nil,(mutationFinal false).2)) ∧
+    (Source.evalE (G0 p) F0 2 (sourceUintIndexedDelete dr di)).run (mutationFinal false)=
+      (.error .timeout,mutationFinal false) ∧
+    (Source.execItems (G0 p) F0 6 Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource false)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) (.stmt (.expr (sourceUintIndexedDelete dr di)) .nil)) :
+          Source.RItems E0 [] false .body Γ Γ) (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.error .timeout,(.nil,(mutationFinal false).2)) := by
+  first
+  | solve | simp only [] | omega
+  | have first := source_local_alias_run (G0 p) F0 2 (sy false 1 42) dr (aliasSource false) (.memRef rfl 2) rfl
+    have second := mutation_source p 0 false
+    have late : (Source.evalE (G0 p) F0 2 (sourceUintIndexedDelete dr di)).run (mutationFinal false)=
+        (.error .timeout,mutationFinal false) := by cases p <;> rfl
+    refine ⟨(dynamic_uint_alias_write_concrete p 0 false).1,late,?_⟩
+    exact source_items_triple_error (G0 p) F0 2 Γ.length _ _ _ (sy false 1 42) (mutationMid false)
+      (mutationFinal false) (mutationFinal false) .timeout
+      (source_expr_statement_run (G0 p) F0 4 Γ.length _ _ _ _ first)
+      (source_expr_statement_run (G0 p) F0 3 Γ.length _ _ _ _ second)
+      (source_expr_statement_error (G0 p) F0 2 Γ.length _ _ _ _ late)
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_delete_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_negatives' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_delete_negatives
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_delete_timeout
 
 end Solidity.Backend.MemoryOps.UintReadAssignmentControls
