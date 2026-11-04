@@ -70,3 +70,5 @@
 | `Yul/Views/RetainedCallerCoverageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/ShapeCapacity.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/ShapeCapacityControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/CreationReturnWindow.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/CreationReturnWindowControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |

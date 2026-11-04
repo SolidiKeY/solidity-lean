@@ -3398,6 +3398,8 @@ import Solidity.Yul.World.CreationAddressing
 import Solidity.Yul.World.CreationAddressingChecks
 import Solidity.Yul.World.CreationFrames
 import Solidity.Yul.World.CreationFramesChecks
+import Solidity.Yul.World.CreationReturnWindow
+import Solidity.Yul.World.CreationReturnWindowControls
 import Solidity.Yul.World.CreationRules
 import Solidity.Yul.World.Frames
 import Solidity.Yul.World.Lifecycle
