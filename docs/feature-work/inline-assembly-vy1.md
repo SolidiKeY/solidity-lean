@@ -996,3 +996,22 @@ Source, state and evaluators are unchanged; broader P16/final gates remain open.
 
 Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
 All eleven reported axiom sets contain only standard Lean axioms.
+
+
+### Syntax and bounded Source interface freeze
+
+`Solidity.Yul.Interfaces.P16` imports existing context/arity-indexed syntax,
+`RawFrame.State`, and `RawSourceAdapter.Adapter` / `ItemAdapter` without
+duplicate declarations. These APIs were published at
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
+Adapter fields `run` and `correct` retain the same-context syntax indices,
+coherent-input premise and exact represented Source result/world.
+Consumers must supply both fields for each supported statement.
+Existing `Checks.RawLiteralScope.adapterTrue`, `mixedSource`, and `timeouts`
+provide inhabited, combination and horizon controls.
+This freeze supplies no universal adapter, general dirty readback or full
+Source embedding. Those original obligations remain open.
+
+Independent read-only finder and skeptic reviews found no scope or contract
+findings. Per-file interface/signature checks and generated registration pass;
+this is an interface checkpoint, not full-lane validation.

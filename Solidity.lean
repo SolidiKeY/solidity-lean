@@ -2614,6 +2614,7 @@ import Solidity.Yul.ExternalScope
 import Solidity.Yul.FunctionScope
 import Solidity.Yul.GlobalExternal
 import Solidity.Yul.HorizonAdapter
+import Solidity.Yul.Interfaces.P16
 import Solidity.Yul.LocalBlock
 import Solidity.Yul.LocalBlockLogic
 import Solidity.Yul.LocalBoolAgreement
