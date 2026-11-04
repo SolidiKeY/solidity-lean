@@ -213,3 +213,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceNestedBytes.lean` | Static cell transport through allocations, actual populated byte-child traversal with sequential fresh IDs and retained payloads, and complete dynamic parent copy. |
 | `Backend/MemoryCopies/SourceNestedBytesControls.lean` | Declared populated/empty bytes arrays, exact final child contents, 64-child growth, wrong-root rejection and horizon refusal. |
 | `Backend/MemoryCopies/SourceStoredFieldsInterface.lean` | Proved heterogeneous Source loadElem/loadFields families stable through sibling memory allocations, with exact Source object counts. |
+| `Backend/MemoryCopies/SourceStoredFields.lean` | Actual primitive/bytes/string load families, heterogeneous storage field traversal and layout-indexed fresh Source struct copying with exact counts. |
+| `Backend/MemoryCopies/SourceStoredFieldsControls.lean` | Declared mixed struct storage copy with scalar42, distinct bytes/string contents, fresh child/parent identities, old/nonheap state and refusal controls. |
