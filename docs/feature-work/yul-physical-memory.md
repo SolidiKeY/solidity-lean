@@ -522,3 +522,14 @@ frame and history into the second and exports both source runs and full maps.
 Missing-entry and stale-image controls distinguish coverage loss and accidentally
 overwriting the changed byte. This does not discharge arbitrary producer/frame
 adequacy, allocation provenance or the remaining original queues.
+
+`P6ByteWriteSub` transports these writes through actual `Source.EM.sub` for
+arbitrary typed child locals. One realized heap supplies child success, a later
+explicit Source halt, restored caller locals and whole mixed-map reconstruction.
+A late halt passes the updated store; this is not transaction/frame rollback.
+Immediate out-of-bounds Source failure instead preserves the whole prior Source
+state, without claiming a separately executed physical store was undone. The
+empty-child control retains two suspended caller aliases, and both actual owner
+reads observe the changed string. Caller MemOK is transported from its own
+invariant; arbitrary child-local safety and general call instrumentation remain
+separate obligations.

@@ -2426,6 +2426,8 @@ import Solidity.Yul.Adapters.P6ByteWriteInventory
 import Solidity.Yul.Adapters.P6ByteWriteInventoryControls
 import Solidity.Yul.Adapters.P6ByteWriteOrder
 import Solidity.Yul.Adapters.P6ByteWriteOrderControls
+import Solidity.Yul.Adapters.P6ByteWriteSub
+import Solidity.Yul.Adapters.P6ByteWriteSubControls
 import Solidity.Yul.Adapters.P6CalldataHash
 import Solidity.Yul.Adapters.P6CalldataHashControls
 import Solidity.Yul.Adapters.P6ChangedPayloadHashControls
