@@ -85,4 +85,23 @@ theorem captureCompoundRun_rhs {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) 
   apply captureLocationRun_prefix
   exact List.mem_append_right _ List.mem_cons_self
 
+/-- Earlier observations survive every compound-assignment outcome, including
+RHS failure, failed target resolution, arithmetic refusal and failed write. -/
+theorem captureCompoundRun_prefix {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) (n : Nat)
+    (op : Source.AssignOp) (loc : Source.RLVal E Γ τ) (rhs : Source.RExpr E Γ σ)
+    (fits : op.fits E.isBase σ τ = true) (prior) (s : Source.EMState E Γ) (scope)
+    (member : scope∈prior) : scope∈(captureCompoundRun G F n op loc rhs fits prior s).2 := by
+  first | (simp only;done) | decide | omega | rfl | skip
+  cases n with
+  | zero => exact captureRuntimeRun_prefix F prior _ s scope member
+  | succ n =>
+    have first : scope∈(captureRuntimeRun F prior (Source.evalE G F n rhs) s).2 :=
+      captureRuntimeRun_prefix F prior _ s scope member
+    unfold captureCompoundRun
+    dsimp only
+    split
+    · exact first
+    · apply captureLocationBindRun_keeps
+      apply captureLocationRun_prefix
+      exact first
 end Solidity.Yul.Views
