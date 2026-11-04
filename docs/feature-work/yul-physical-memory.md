@@ -635,3 +635,12 @@ without a callee-local validity or empty-caller assumption. Controls derive the
 restored dormant child's actual `RefOK`/`pathTy`, cover both static positions and
 a differently sized caller context. This does not prove historical formation,
 reachability, complete suspended-alias capture or arbitrary call adequacy.
+
+`RetainedCallerCoverage` connects actual saved-caller capture to the finite visit
+union and checked child packs. Every observed caller path accepted by the layout's
+root/index selector has a corresponding prepared element; genuine caller `LocalsOK`
+separately yields static path typing. No ancestor length or historical index event
+is invented. The empty-locals halted-callee control computes both dormant packs,
+actual source inventory, whole-store unchanged writeback and full raw reencoding.
+The theorem establishes child-pack selection, not arbitrary descendant-path or
+initial/escape reachability adequacy; successful checked preparation remains real.

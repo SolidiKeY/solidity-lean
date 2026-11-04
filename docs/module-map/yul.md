@@ -103,3 +103,4 @@
 | `Yul/Views/RetainedAliasTransaction{,Controls}` | Actual success-only Source endTx sequence, complete persistent reconstruction, transient/journal reset, reached-error prefix and every-H memory safety. |
 | `Yul/Views/RetainedAliasSub{,Controls}` | Actual caller-local substitution of the checked ownership sequence with reached pair, full reencoding, late-static prefix and rollback transport. |
 | `Yul/Views/RetainedAliasSubSafety{,Controls}` | Universal unchanged heap and every-H caller MemOK through actual ownership substitution on all branches, with restored dormant RefOK and distinct-context controls. |
+| `Yul/Views/RetainedCallerCoverage{,Controls}` | Actual saved-caller capture selects duplicate-safe visits and checked child packs, with typed aliases, halted empty-callee source traversal and complete unchanged reconstruction. |
