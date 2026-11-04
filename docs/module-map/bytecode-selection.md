@@ -155,3 +155,6 @@
 | `Backend/AbiEntry/SourcePayableInterface.lean` | Source declaration payability lookup and execution certificate. |
 | `Backend/AbiEntry/SourcePayable.lean` | Source-derived payable routes, actual compiler execution and Source rejection bytes. |
 | `Backend/AbiEntry/SourcePayableControls.lean` | Source mutability, collision, arbitrary-value and exact rejection controls. |
+| `Backend/AbiEntry/ShortRoutesInterface.lean` | Short-input guard compiler and exact execution certificate. |
+| `Backend/AbiEntry/ShortRoutes.lean` | Typed length guard and Source-linked payable routing with general short exclusion. |
+| `Backend/AbiEntry/ShortRoutesControls.lean` | Short lengths, padded collision, value boundary and protected-state controls. |

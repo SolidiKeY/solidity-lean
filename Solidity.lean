@@ -43,6 +43,9 @@ import Solidity.Backend.AbiEntry.SelectorMatchInterface
 import Solidity.Backend.AbiEntry.SelectorRoutes
 import Solidity.Backend.AbiEntry.SelectorRoutesControls
 import Solidity.Backend.AbiEntry.SelectorRoutesInterface
+import Solidity.Backend.AbiEntry.ShortRoutes
+import Solidity.Backend.AbiEntry.ShortRoutesControls
+import Solidity.Backend.AbiEntry.ShortRoutesInterface
 import Solidity.Backend.AbiEntry.SourcePayable
 import Solidity.Backend.AbiEntry.SourcePayableControls
 import Solidity.Backend.AbiEntry.SourcePayableInterface

@@ -644,3 +644,31 @@ Neither reviewer used a Lean server or build.
 `ShortRoutesInterface.lean` specifies a compiled length-local branch before
 ordinary selector routing, with explicit length and selector representation.
 The short continuation label does not execute receive/fallback bodies.
+
+`ShortRoutes.lean` compiles the missing outer length check through the existing
+intrinsic/public compiler. The result local initially contains length, then is
+reused for the selected label. Inputs shorter than four bytes reach the short
+continuation without selector or value checks; full inputs run the existing
+per-entry payable routes. General actual execution preserves every other
+machine field and saved stack, with zero pending skip. The Source-linked
+execution theorem covers both branches using explicit selector, length and
+call-value representation. Separately, `source_short` reuses the existing
+four-byte selector theorem to prove actual ordinary `pickFn` is absent for all
+short inputs. Length is an unsigned represented word; native size loading and
+fetched execution are still open.
+Controls cover all represented sizes below four, concrete sizes zero through
+three, exactly four with zero/nonzero value, a three-byte padded-selector
+collision fixed by the guard, the unguarded counterexample, actual Source
+ordinary exclusion, malformed length-cell fault and protected state. The
+short label deliberately leaves empty-input receive versus nonempty fallback,
+getters, special payability/body execution and full ABI composition open;
+no-match/short labels are not executed special bodies. Native failure-byte
+correspondence and aggregate decoding remain open. No Source/Core changes or
+new untyped framework are introduced.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked length-cell reuse, actual branch offsets and compiler selection,
+Source short exclusion and both-branch linkage, padded collision controls,
+protected state and the explicit native/special/body boundaries. Neither used
+a build or Lean server. Unused simp arguments found by the focused build were
+removed and the importing consumer rechecked without own warnings.
