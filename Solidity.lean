@@ -124,6 +124,8 @@ import Solidity.Backend.FailurePaths.LocalGuardSelection
 import Solidity.Backend.FailurePaths.LocalGuardSelectionControls
 import Solidity.Backend.FailurePaths.LogicalGuard
 import Solidity.Backend.FailurePaths.LogicalGuardControls
+import Solidity.Backend.FailurePaths.LogicalGuardSelection
+import Solidity.Backend.FailurePaths.LogicalGuardSelectionControls
 import Solidity.Backend.FailurePaths.Parametric
 import Solidity.Backend.FailurePaths.ParametricControls
 import Solidity.Backend.FailurePaths.Premises

@@ -524,3 +524,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/LocalGuardSelection.lean` | Executable indexed Source Boolean-local require selection through the public memory compiler, with every-success correctness. |
 | `Backend/FailurePaths/LocalGuardSelectionControls.lean` | Inhabited actual selector consumers in both pipelines and selector/refuted-relation/horizon controls. |
+
+| `Backend/FailurePaths/LogicalGuardSelection.lean` | Executable indexed Source logical-local require selection and every-success actual run correctness. |
+| `Backend/FailurePaths/LogicalGuardSelectionControls.lean` | Inhabited logical-selector clients, exact Boolean observations, complementary refusals and relation/horizon controls. |

@@ -422,3 +422,45 @@ aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
 confirmed defect. Failed initial dependent-pattern/type-check attempts remain
 in the handoff. The earlier full-checkpoint timeout remains failed and was not
 retried unchanged.
+
+
+## Executable selection of logical guards
+
+`FailurePaths.LogicalGuardSelection.compile` recognizes bare indexed Source
+`require(a && b)` and `require(a || b)` when both operands are Boolean locals.
+It reuses the existing Boolean-local recognizer and retains actual operand,
+type, operator and statement equalities. The selected Source indices pass
+through an explicit context map, and compilation invokes public checked
+`Memory.compileStmt`; callers supply neither an intrinsic target node nor a
+successful target run.
+
+`selected_correct` proves actual Source execution, public compiler selection
+and selected target execution for every successful decision. Initial local
+correspondence and full `Memory.StateRepr` are explicit. At horizon `n+7`,
+Source preserves its state and caller locals and either returns normally or
+reverts with empty bytes. Target code preserves the entire machine on true or
+produces bare revert on false. The target instruction machine exposes no revert
+payload or post-machine.
+
+`LogicalGuardSelectionControls.success_client` consumes this theorem on an
+inhabited layout with saved stack word 77 for both operators, all Boolean values
+and both pipelines. Separate exact observations check the expected logical
+result. The selector refuses local-only guards (handled by the separate local
+selector), literal operands, assert and message forms. These are selector
+boundaries, not Source-language errors. A negative control refutes incorrect
+initial correspondence; compilation performs no runtime-value check. Zero
+Source horizon still times out.
+
+Context-map construction, whole-unit/frontend lowering, general or effectful
+operands, message/assert payload compilation, internal-frame failure transport
+and bytecode/EVM adequacy remain outside this result. No existing selector,
+syntax representation or halt/allocation policy changed.
+
+Validation target is `Solidity.Backend.FailurePaths.LogicalGuardSelectionControls`.
+The serial guarded check passed in 3.043 seconds with 833,429,504 bytes peak
+aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
+`Quot.sound`. Independent read-only finder and skeptic reviews found no
+confirmed defect. The failed initial dependent-rewrite attempt is preserved;
+explicit evaluator congruence resolves it without changing the theorem. The
+earlier full-checkpoint timeout remains failed; focused checks do not establish
+a full build on the expanded published base.
