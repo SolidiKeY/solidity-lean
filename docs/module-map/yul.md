@@ -105,3 +105,4 @@
 | `Yul/Views/RetainedAliasSubSafety{,Controls}` | Universal unchanged heap and every-H caller MemOK through actual ownership substitution on all branches, with restored dormant RefOK and distinct-context controls. |
 | `Yul/Views/RetainedCallerCoverage{,Controls}` | Actual saved-caller capture selects duplicate-safe visits and checked child packs, with typed aliases, halted empty-callee source traversal and complete unchanged reconstruction. |
 | `Yul/Views/RetainedCallerHeaders{,Controls}` | Declaration-traced saved-child dynamic header registrations in actual prepared source inventories, with pre-alignment cursor, physical slot and typed-length controls. |
+| `Yul/Views/RetainedLiveCoverage{,Controls}` | Successful source traversal derives actual header lengths and all generated live fields across child/image inventories; dormant payload and roots-only loss controls. |

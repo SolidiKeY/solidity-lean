@@ -652,3 +652,12 @@ no final membership law is supplied. The dormant child1 control uses the real
 post-stamp cursor `102*32+2`, derives aligned slot103/offset0/width32, reads actual
 Source length1 and rejects sibling slot101. This covers traced headers of selected
 packs, not arbitrary descendant paths, reachability or full source adequacy.
+
+`RetainedLiveCoverage` derives actual successful header-length reads and complete
+membership of their generated live primitive registrations from source traversal.
+The proof composes the existing header, child and image computations; callers do
+not supply the final coverage law or length. Controls recover saved child1's
+length1, packed payload slot2000 and actual value99, and reject static-roots-only
+coverage. Actual element-index and declaration-entry facts factor dependent
+unification under unchanged budgets. Arbitrary dormant descendants, noncanonical
+representations and global alias/source adequacy remain outside this result.

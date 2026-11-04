@@ -3297,6 +3297,8 @@ import Solidity.Yul.Views.RetainedEntryRun
 import Solidity.Yul.Views.RetainedExpressionCapture
 import Solidity.Yul.Views.RetainedHeapAllocation
 import Solidity.Yul.Views.RetainedIndices
+import Solidity.Yul.Views.RetainedLiveCoverage
+import Solidity.Yul.Views.RetainedLiveCoverageControls
 import Solidity.Yul.Views.RetainedLocalAlias
 import Solidity.Yul.Views.RetainedLocalAliasControls
 import Solidity.Yul.Views.RetainedLocalAliasImage
