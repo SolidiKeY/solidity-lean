@@ -134,3 +134,7 @@
 | `Source/FailureEvaluatorStability.lean` | Closed enabled-plan BelowAt induction for all17 existing Source evaluator functions; exact-byte generated proof basis, no external execution premise. |
 | `Source/FailureTransactionStability.lean` | Actual planned root Below and complete result/state stability after non-timeout completion at all larger fixed-plan horizons. |
 | `Source/FailureStabilityControls.lean` | Full frozen Source revert/panic/stuck/request-stop transport and timeout/attempt counterexamples; standard transitive axiom pins. |
+
+| `Source/FailureEvaluatorApprox.lean` | Closed fixed-plan event-prefix Approx induction for all17 actual Source evaluator functions; exact-byte generated proof basis, no NoFail/execution premise. |
+| `Source/FailureTransactionApprox.lean` | Actual planned root approximation and event-prefix inclusion at every larger horizon, including timeouts; no session/deployment/P8 assertion. |
+| `Source/FailureApproxControls.lean` | Actual timeout-prefix/completed-cut controls and changed-plan/captured-timeout counterexamples; exact standard axiom pins. |

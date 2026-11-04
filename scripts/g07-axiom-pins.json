@@ -28675,6 +28675,46 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.approxAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.captured_timeout_not_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.changed_plan_not_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.completed_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.root_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.collectArgs": [
   "Classical.choice",
   "Quot.sound",

@@ -2223,8 +2223,10 @@ import Solidity.Source.Elaborated
 import Solidity.Source.Eval
 import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
+import Solidity.Source.FailureApproxControls
 import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
+import Solidity.Source.FailureEvaluatorApprox
 import Solidity.Source.FailureEvaluatorGrow
 import Solidity.Source.FailureEvaluatorGrowControls
 import Solidity.Source.FailureEvaluatorStability
@@ -2246,6 +2248,7 @@ import Solidity.Source.FailureResources
 import Solidity.Source.FailureRuntimeControls
 import Solidity.Source.FailureScopeStability
 import Solidity.Source.FailureStabilityControls
+import Solidity.Source.FailureTransactionApprox
 import Solidity.Source.FailureTransactionControls
 import Solidity.Source.FailureTransactionGrowth
 import Solidity.Source.FailureTransactionStability

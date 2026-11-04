@@ -184,3 +184,31 @@ a pass from6009c420. Timeout event-prefix Approx, cursor coherence, fixed-plan
 deployment/request/session consistency, H25 monetary wiring, P8 realization,
 H19 full reachability, immutable/funds release and original24 obligations/six
 combinations plus Work2/BackfillA/B remain open. Goal status unchanged.
+
+## Fixed-plan event-prefix induction
+
+The pending combined checkpoint for157ba513 passed in the next recovery:
+affected imports, library, trust, orphans, layers, registration, documentation
+paths and axiom pins all exit0. No resource stop occurred. That receipt is
+attributed to157ba513 rather than retrospectively claimed for its earlier turn.
+
+FailureEvaluatorApprox closes the actual evaluator's event-prefix ApproxAt
+induction for all17 functions with the same explicit failure plan at both
+horizons. The proof consumes the closed PlannedGrow induction and actual
+frame_approx transport; no NoFail, fragment, execution agreement or desired
+outcome is supplied. The proof-only generator binds raw Horizon/output bytes
+and rejects missing output, a disabled-plan substitution, stale basis and
+changed line endings. Five Python provenance tests pass. The new induction
+checks in174.185s below the unchanged300-second module bound. No existing hot
+Source implementation, representation, semantics or budget changed.
+
+FailureTransactionApprox derives actual runTxWithPlan approximation and event
+prefix inclusion for arbitrary ordered horizons, typed locals and complete
+input state under one fixed plan. Timeout runs need not agree on full state
+with completed runs. Five Source controls retain the frozen initial prefix,
+actual timeout and completed full revert state; reject changing the plan and
+reject blanket transport through captured timeout. These are kernel-checked
+Source laws and controls, not fresh native observations, session consistency,
+deployment coverage, P8 realization or whole Source-to-EVM correspondence.
+All24 original obligations/six general combinations and the remaining H16/H19,
+H25, immutable/funds, Work2 and Backfill obligations remain explicitly open.
