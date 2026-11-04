@@ -561,3 +561,26 @@ added. The controls are Lean execution checks, not external compiler/EVM tests.
 Independent finder and skeptic source/control reviews passed. The finder found
 that the two new module-map rows were outside the headered table; their
 placement was corrected without changing the module descriptions.
+
+## Signed bitwise complement
+
+`SignedComplement` proves signed `~x` for every approved width by reusing the
+existing typed subtraction value program for `-1 - x`. The source operation
+is the independent `Source.unaryVal` definition `-x - 1`; both checkedness
+modes are covered. Reached-state expression transport and initial-family
+local transport use actual Source evaluation and target value execution.
+Only initial reads, canonical Source ranges and existing alignment are inputs;
+no returned agreement or post-run premise is added to the local theorem.
+
+`SignedComplementControls` supplies eight closed clients with mixed live
+references and fresh context,768 constructed wrapped-value cases over both
+pipelines/modes and all32 signed widths, and concrete controls distinguishing
+correct complement from plain negation and reversed subtraction.13 exact
+standard-axiom guards cover all five core laws and eight clients. The wrapped
+fixture inputs do not prove constant admission. Unsigned complement, general
+operand production, checked arithmetic panic/payload/rollback, graph admission,
+recursive aggregates/lifetimes and whole production remain open; no constructor
+or external compiler/EVM coverage is added. G16/G17 and both backfills remain
+partial, with delegated children and G18 composition dependencies unchanged.
+
+Independent finder and skeptic source/control reviews passed with no substantive finding for the signed-complement increment.

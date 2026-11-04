@@ -2192,6 +2192,8 @@ import Solidity.Lowering.V07.Scalar
 import Solidity.Lowering.V07.ShortCircuit
 import Solidity.Lowering.V07.ShortCircuitControls
 import Solidity.Lowering.V07.SignedArithmeticControls
+import Solidity.Lowering.V07.SignedComplement
+import Solidity.Lowering.V07.SignedComplementControls
 import Solidity.Lowering.V07.SignedNarrowAddition
 import Solidity.Lowering.V07.SignedNarrowArithmeticControls
 import Solidity.Lowering.V07.SignedNarrowMultiplication

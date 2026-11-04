@@ -84,3 +84,5 @@
 | `Lowering/V07/SignedNegation.lean` | Actual unchecked signed negation at all widths, local/reached-state laws and minimum-value controls |
 | `Lowering/V07/SignedNegationEffects.lean` | Actual unchecked negation of local assignment, fresh result capture and initial alias-family transport. |
 | `Lowering/V07/SignedNegationEffectControls.lean` | Inhabited alias/context/mixed-reference clients, ordered observations and incorrect capture/store/narrowing controls. |
+| `Lowering/V07/SignedComplement.lean` | All-width signed bitwise complement through actual Source unary evaluation and typed subtraction; initial-family local transport. |
+| `Lowering/V07/SignedComplementControls.lean` | Both checkedness modes/pipelines, all signed widths, live-context clients and missing-minus-one/reversed-operand controls. |
