@@ -594,3 +594,11 @@ owned module rows into the existing contiguous Markdown table. Programs with
 escaping skips or nonstack effects cannot satisfy this normal-return/frame
 contract merely by discarding those observations; eventual producers must
 prove their domain. Signature-only status remains explicit.
+
+
+The signature checkpointfb1fddbe passes all eight checkpoint gates and its
+per-file check, with axiom-free signature/projection reports and zero warnings.
+KeySort passes under Lean4.24.0/Lake5.0.0-src+797c613. This documentation-only
+handoff preserves the checked Lean source. The interface is now committed
+before any framed lowering proof; the original recursive lowering obligation
+and final assignment gates remain open.
