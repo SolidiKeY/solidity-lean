@@ -176,3 +176,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceCalldataSliceRead.lean` | Actual one-word calldata indexing through a computed slice, with ordered slice/index/selected-decoder outcomes and unchanged Source state. |
 | `Backend/MemoryOps/SourceCalldataSliceReadCopy.lean` | Selected Source reads agree with the read from a separately executed actual checked fresh Boolean copy after computed window-decoder success. |
 | `Backend/MemoryOps/SourceCalldataSliceReadControls.lean` | Both-pipeline Bool/uint/max/lazy-versus-eager clients, complete old alias/neighbour data, selected-word failure, empty/index panic and timeout. |
+
+| `Backend/MemoryOps/SourceUintReadAssignment.lean` | Actual RHS-first indexed uint memory read assignment; Source/native/strong Objects frames and allocator transport. |
+| `Backend/MemoryOps/SourceUintReadAssignmentControls.lean` | Inhabited computed-RHS distinct/aliased clients, complete twenty-word/Source/native vectors and endpoint/timeout negatives. |

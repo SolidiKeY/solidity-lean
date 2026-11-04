@@ -390,6 +390,8 @@ import Solidity.Backend.MemoryOps.SourceUintFixedFuel
 import Solidity.Backend.MemoryOps.SourceUintFixedIncrement
 import Solidity.Backend.MemoryOps.SourceUintFixedWrite
 import Solidity.Backend.MemoryOps.SourceUintMemory
+import Solidity.Backend.MemoryOps.SourceUintReadAssignment
+import Solidity.Backend.MemoryOps.SourceUintReadAssignmentControls
 import Solidity.Backend.MemoryOps.SourceUintSequence
 import Solidity.Backend.MemoryOps.SourceUintWrite
 import Solidity.Backend.MemoryOps.SourceWrite
