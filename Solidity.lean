@@ -686,6 +686,7 @@ import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.Widths
 import Solidity.Backend.Scalar.Wrapping
 import Solidity.Backend.Selection.FrameCapacityV2
+import Solidity.Backend.Selection.FramedLoweringInterface
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.InterfaceV2
 import Solidity.Backend.Selection.InterfaceV2Controls
