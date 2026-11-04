@@ -1928,6 +1928,8 @@ import Solidity.Lowering.V08.LiteralFailureCopySelector
 import Solidity.Lowering.V08.LiteralFailureCopySelectorControls
 import Solidity.Lowering.V08.LiteralFailureCopySequence
 import Solidity.Lowering.V08.LiteralFailureCopySequenceControls
+import Solidity.Lowering.V08.LiteralFailureCopySignature
+import Solidity.Lowering.V08.LiteralFailureCopySignatureControls
 import Solidity.Lowering.V08.LiteralFailureDynamicError
 import Solidity.Lowering.V08.LiteralFailureDynamicErrorControls
 import Solidity.Lowering.V08.LiteralFailureDynamicListError

@@ -496,3 +496,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/V08/LiteralFailureCopySelector.lean` | Actual selector-prefixed encoding after converted local arguments, with typed value injection and reached allocation. |
 | `Lowering/V08/LiteralFailureCopySelectorControls.lean` | Populated arbitrary-selector/copy/old-string/full-word controls and complete packets. |
+
+| `Lowering/V08/LiteralFailureCopySignature.lean` | Signature alias transport through actual copies and signature-prefixed encoder execution. |
+| `Lowering/V08/LiteralFailureCopySignatureControls.lean` | Actual aliased signature/read/copy packets, dangling-read and timeout-priority controls. |
