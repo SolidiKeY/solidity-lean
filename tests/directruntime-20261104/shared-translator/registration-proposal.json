@@ -1,0 +1,15 @@
+{
+  "status": "proposal only; shared registries not edited",
+  "modules": [
+    {
+      "module": "Solidity.Frontend.ExecutableAst.Shared.Boundary",
+      "area": "docs/module-map/frontend.md",
+      "row": "Executable reader callback signatures returning the existing surface syntax; no Lean environment argument."
+    },
+    {
+      "module": "Solidity.Frontend.ExecutableAst.Shared.Translate",
+      "area": "docs/module-map/frontend.md",
+      "row": "Extracted executable AST reader and recursive extension steps; default fragment/refusals preserved."
+    }
+  ]
+}

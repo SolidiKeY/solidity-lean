@@ -1,0 +1,1 @@
+PASS	lean:tests/directruntime-20261104/shared-translator/ApiSignatures.lean	2	/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/api-signatures/1.log	lake env lean --tstack=131072 tests/directruntime-20261104/shared-translator/ApiSignatures.lean 

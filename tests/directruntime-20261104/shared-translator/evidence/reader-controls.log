@@ -1,0 +1,3 @@
+PASS lean:tests/directruntime-20261104/shared-translator/ReaderControls.lean 3s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/reader-controls/1.log
+{"childMaxRssKiB": 550488, "command": ["env", "GATE_LOGS=tests/directruntime-20261104/shared-translator/evidence/reader-controls", "bash", "scripts/coord-tools/gate.sh", "per-file", "tests/directruntime-20261104/shared-translator/ReaderControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "140759040", "wallSeconds": 2.925977041999886}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 16285118464, "outerWallSeconds": 6.840218114999971}

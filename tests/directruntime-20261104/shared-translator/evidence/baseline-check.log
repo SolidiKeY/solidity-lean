@@ -1,0 +1,2 @@
+FAIL lean:Solidity/Tools/DirectRuntime.lean 1s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/baseline-per-file/1.log
+{"childMaxRssKiB": 75668, "command": ["env", "GATE_LOGS=tests/directruntime-20261104/shared-translator/evidence/baseline-per-file", "bash", "scripts/coord-tools/gate.sh", "per-file", "Solidity/Tools/DirectRuntime.lean"], "exit": 1, "scopeMemoryPeakBytes": "70451200", "wallSeconds": 0.4134009229999833}

@@ -1,0 +1,24 @@
+{
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "note": "Focused Shared build in pre-commit extraction worktree; source/C/olean hashes bind these exact files. Not a runtime closure or final exact-head gate.",
+  "modules": [
+    {
+      "module": "Solidity.Frontend.ExecutableAst.Shared.Boundary",
+      "source": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+      "sourceSha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64",
+      "generatedC": ".lake/build/ir/Solidity/Frontend/ExecutableAst/Shared/Boundary.c",
+      "generatedCSha256": "0293a922f4eecfe9319d87cf30fba6bdff8dc99f27d576e189e2203f208fec21",
+      "olean": ".lake/build/lib/lean/Solidity/Frontend/ExecutableAst/Shared/Boundary.olean",
+      "oleanSha256": "a5e46a1b002c22c87de45de78d8dfe336c3451bb8c2ea74cdda1eec8e3805185"
+    },
+    {
+      "module": "Solidity.Frontend.ExecutableAst.Shared.Translate",
+      "source": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sourceSha256": "c39cb830d5002721ee1705452e260134000dbf7547dee4befcd29f5c3c937a92",
+      "generatedC": ".lake/build/ir/Solidity/Frontend/ExecutableAst/Shared/Translate.c",
+      "generatedCSha256": "06cf24c0b8e7f426c143b22296d77e99dc8b75c22424b5fd64e9f67ac8bac3d1",
+      "olean": ".lake/build/lib/lean/Solidity/Frontend/ExecutableAst/Shared/Translate.olean",
+      "oleanSha256": "f2c78fb5e0d488d20554941057fe1b5c8a04f711ae1cd7e9e46442e0cc4600e5"
+    }
+  ]
+}
