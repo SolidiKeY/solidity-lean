@@ -26,7 +26,7 @@ levels is what the callee may do, not what it must keep.
   not (`lock_any`).  `setX_guards` proves the lock judgment of `setX`.
 -/
 
-namespace Solidity.Theory.CallerModel.Separation
+namespace Solidity.Examples.Tactics.CallerModel
 
 open Semantics
 
@@ -199,19 +199,19 @@ theorem setX_reachAny (J : StateInv Locked) {g g' : State Locked []}
 
 end Lock
 
-end Solidity.Theory.CallerModel.Separation
+end Solidity.Examples.Tactics.CallerModel
 
-/-- info: 'Solidity.Theory.CallerModel.Separation.lock_bump' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Theory.CallerModel.Separation.lock_bump
-/-- info: 'Solidity.Theory.CallerModel.Separation.lock_any' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Theory.CallerModel.Separation.lock_any
-/-- info: 'Solidity.Theory.CallerModel.Separation.lock_setX' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Theory.CallerModel.Separation.lock_setX
-/-- info: 'Solidity.Theory.CallerModel.Separation.exit_staticOnly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Theory.CallerModel.Separation.exit_staticOnly
-/-- info: 'Solidity.Theory.CallerModel.Separation.exit_none' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Theory.CallerModel.Separation.exit_none
-/-- info: 'Solidity.Theory.CallerModel.Separation.setX_guards' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Theory.CallerModel.Separation.setX_guards
-/-- info: 'Solidity.Theory.CallerModel.Separation.setX_reachAny' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Theory.CallerModel.Separation.setX_reachAny
+/-- info: 'Solidity.Examples.Tactics.CallerModel.lock_bump' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.lock_bump
+/-- info: 'Solidity.Examples.Tactics.CallerModel.lock_any' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.lock_any
+/-- info: 'Solidity.Examples.Tactics.CallerModel.lock_setX' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.lock_setX
+/-- info: 'Solidity.Examples.Tactics.CallerModel.exit_staticOnly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.exit_staticOnly
+/-- info: 'Solidity.Examples.Tactics.CallerModel.exit_none' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.exit_none
+/-- info: 'Solidity.Examples.Tactics.CallerModel.setX_guards' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.setX_guards
+/-- info: 'Solidity.Examples.Tactics.CallerModel.setX_reachAny' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.setX_reachAny

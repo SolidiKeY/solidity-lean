@@ -82,5 +82,5 @@ callback: `Fml.Valid`), `staticOnly` (read, change nothing),
 `ValidT`; no `Spec` statement reads it yet. A box proved under a stronger
 model holds under a weaker one (`ValidM.weaken`, positive modalities only),
 so a `ValidT` proof is one under every model (`ValidM.of_validT`); the
-converse fails at each level (`Theory/CallerModel/Separation.lean`). See
+converse fails at each level (`Examples/Tactics/CallerModel.lean`). See
 [options.md](options.md#o11-caller-models-lean-only).

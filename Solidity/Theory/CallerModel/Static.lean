@@ -12,7 +12,7 @@ deterministic one (`ExecSM.transfer_inert`), so a program whose only
 callbacks are transfers (`Prog.inertSafe`) has one run, its typed run
 (`ExecPM.eq_run_inert`): `Fml.Valid` decides a modality over it
 (`holdsR_modal_inert`).  The separating examples
-(`Theory/CallerModel/Separation.lean`) read their valid sides so.
+(`Examples/Tactics/CallerModel.lean`) read their valid sides so.
 -/
 
 namespace Solidity

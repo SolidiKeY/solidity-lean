@@ -753,7 +753,7 @@ which every `pre → [ P ] post` with a first-order `pre` has) give
 proof (`sol_prove`'s, O3) under every model. A modality in a negative
 position turns the inclusion of runs around, so such formulas are excluded.
 
-**Strictness** (`Theory/CallerModel/Separation.lean`): one formula per
+**Strictness** (`Examples/Tactics/CallerModel.lean`): one formula per
 adjacent pair, valid under the weaker model and refuted by a typed run
 under the stronger.
 

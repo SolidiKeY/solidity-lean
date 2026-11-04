@@ -74,7 +74,7 @@ should read callbacks inside its transaction sequence by `ExecPM M`.
 **Done.** Lattice and lock judgment; `any`/`none` coincide with today's
 readings (`validM_any` exact; `validM_none` is `Fml.Valid`, equal to
 `ValidT .noCallback` without `try`/value call); weakening theorem; one
-separating example per adjacent pair (`Theory/CallerModel/Separation.lean`),
+separating example per adjacent pair (`Examples/Tactics/CallerModel.lean`),
 each with its `#print axioms` pinned. Docs: options.md O11, correctness.md
 "Caller models (O11)", module-map rows.
 
@@ -93,4 +93,7 @@ the runs. A re-entrant call carries no value, and its own callees read as
 staticOnly` example separates by the invariant owed on exit; the sharper
 separation (two equal calls answered alike only under `none`) is true but
 not provable by `sol_close`, which forgets the oracle's correlation.
-Other lanes' needs: none.
+The separating examples live in `Examples/Tactics/CallerModel.lean`, not
+under `Theory/CallerModel/`: they use `dl!{ … }` and `sol_symex`, which
+the core library may not reach (`scripts/check-layers.mjs`); the file is
+new and no other lane's. Other lanes' needs: none.

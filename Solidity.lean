@@ -2393,7 +2393,6 @@ import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
-import Solidity.Theory.CallerModel.Separation
 import Solidity.Theory.CallerModel.Static
 import Solidity.Theory.Segs
 import Solidity.Theory.Typed.Leaves
