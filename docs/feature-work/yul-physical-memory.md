@@ -358,6 +358,19 @@ layout/canonical-codec and initial whole-image premises remain explicit. This
 closes this bounded preparation's capacity obligation, not runtime allocation,
 resource feasibility or general Source/compiler correspondence.
 
+`P6SnapshotCopy` connects the actual bounded P6 copy to `snapshotStep`, allowing
+owned destinations as well as residual regions. Both preparation outcomes retain
+the complete reached frame. Successful preparation derives actual Source writes,
+complete-map reencoding, administrative preservation, inventory coverage/IDs and
+every initial owner `MemOK`. Arbitrary copy spans do not imply reserved-word or
+memory-safe permissions. Controls copy an owned nominal signed field and observe
+both aliases while preserving a sibling byte object and nonzero tail; a copied
+noncanonical word retains its physical output with preparation `None`. A separate
+kernel self-copy witness derives preparation using existing codecs. Changed-field
+preparation existence is an executable control here, not an independent kernel
+existence theorem. No intermediate observations or whole-program correspondence
+are inferred from this final-boundary adapter.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
