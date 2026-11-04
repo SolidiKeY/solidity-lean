@@ -2169,6 +2169,8 @@ import Solidity.Lowering.V07.LocationGraphProducer
 import Solidity.Lowering.V07.LocationProducerControls
 import Solidity.Lowering.V07.MixedAssignmentControls
 import Solidity.Lowering.V07.NodeRank
+import Solidity.Lowering.V07.NumericComparisonControls
+import Solidity.Lowering.V07.NumericComparisons
 import Solidity.Lowering.V07.Operands
 import Solidity.Lowering.V07.P12AssignedCondition
 import Solidity.Lowering.V07.P12AssignedConditionControls

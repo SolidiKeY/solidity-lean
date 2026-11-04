@@ -98,3 +98,5 @@
 | `Lowering/V07/UnsignedQuotRemPassControls.lean` | Inhabited pass clients, alias/context controls and ordered payload negatives. |
 | `Lowering/V07/LessThan.lean` | Signed/unsigned less-than and actual assignment/read Source transport with fresh captures. |
 | `Lowering/V07/LessThanControls.lean` | Inhabited boundaries, alias/context/frame and operand-order controls. |
+| `Lowering/V07/NumericComparisons.lean` | All six numeric comparison clauses with actual Source transport, ordered captures and panic-pass identity. |
+| `Lowering/V07/NumericComparisonControls.lean` | Inhabited operators, signed/width boundaries, alias/context and ordered observation controls. |
