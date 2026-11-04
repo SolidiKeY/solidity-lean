@@ -129,3 +129,8 @@
 | `Source/FailureEvaluatorGrow.lean` | Closed event-growth induction over all17 existing Source evaluator functions with an arbitrary enabled fixed plan; generated proof basis, no body-growth/NoFail/outcome premise. |
 | `Source/FailureEvaluatorGrowControls.lean` | Actual entered-frame induction use, all-horizon prefix transport and changed-plan/event-erasure counterexamples; transitive standard axiom pins. |
 | `Source/FailureTransactionGrowth.lean` | Actual runTxWithPlan event growth from the closed induction and real root operations; no session/Approx/P8 claim. |
+
+| `Source/FailureScopeStability.lean` | Actual frame/request Below transport with genuine timeout rethrow; no blanket attempt transport. |
+| `Source/FailureEvaluatorStability.lean` | Closed enabled-plan BelowAt induction for all17 existing Source evaluator functions; exact-byte generated proof basis, no external execution premise. |
+| `Source/FailureTransactionStability.lean` | Actual planned root Below and complete result/state stability after non-timeout completion at all larger fixed-plan horizons. |
+| `Source/FailureStabilityControls.lean` | Full frozen Source revert/panic/stuck/request-stop transport and timeout/attempt counterexamples; standard transitive axiom pins. |

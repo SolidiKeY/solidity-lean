@@ -147,3 +147,40 @@ coherence, full deployment/request ordinal/session consistency, exact-money
 installation/authority wiring, H19 full reachability, P8 realization and
 immutable/funds release remain open. It supplies no fresh native observation,
 assembly embedding, original24-obligation/six-combination or full-lane closure.
+
+
+## Closed enabled-plan completed-horizon stability
+
+FailureScopeStability proves actual frame/request Below transport, rethrowing
+timeout after cleanup. Raw attempt alone has no such blanket transport law.
+FailureEvaluatorStability closes BelowAt by induction across all17 actual
+mutual evaluator functions with some fixed points and arbitrary typed inputs.
+No NoFail, body/execution oracle, fragment or desired-outcome premise appears
+in final belowAt. Proof-only generation reuses the existing Horizon partition,
+adds actual frame stability to the entered dispatch step, and checks raw basis/
+output bytes including negative text and CRLF mutations. No evaluator, AST,
+state representation, observation or proof/fuel/heartbeat budget changed.
+The checked new induction takes29.019s, below the unchanged300-second bound.
+Existing hot Source files and their historical timing-policy failures remain
+unchanged. Initial automation/frame-IH, reserved-binder and fixture-rewrite
+failures are retained under planned-below-20261104.
+
+FailureTransactionStability derives actual runTxWithPlan Below and full-result
+equality at every larger horizon after actual non-timeout completion, under
+the same immutable plan. The complete locals/state/cursor/bytes are retained;
+the completion hypothesis is not an assumed desired result. Six controls
+transport independently frozen actual Source revert, full panic, stuck and
+exceptional request-stop states for all later horizons, under both pipelines.
+Counterexamples reject dropping completion and blanket captured-timeout Below.
+These are Source controls, not fresh compiler/EVM comparisons.
+
+Finder and skeptic independently approved read-only, without Lean/build/tests.
+The scoped transitive audit pins11 headline/control laws to the standard three
+axioms. The executor briefly became unavailable after focused checks; saved
+files, unchanged committed head and completed check receipts were confirmed.
+Following the recovery rule, no full gate is restarted in this turn. Combined
+checkpoint/import validation is pending on this new commit, not inherited as
+a pass from6009c420. Timeout event-prefix Approx, cursor coherence, fixed-plan
+deployment/request/session consistency, H25 monetary wiring, P8 realization,
+H19 full reachability, immutable/funds release and original24 obligations/six
+combinations plus Work2/BackfillA/B remain open. Goal status unchanged.
