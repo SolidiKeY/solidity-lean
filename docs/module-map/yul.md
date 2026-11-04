@@ -143,3 +143,5 @@
 | `Yul/Compilation/ScopedVisitorShapes{,Controls}.lean` | Actual scoped visitor success derives operand metadata for skip/sequence/full-pure assignment/singleton let/arbitrary zero prefixes; original closed-source/update/run, independently capacity-checked packets and nested/17-local access controls. Scope emission keeps its depthzero restriction; no native/G24/general-control closure. |
 
 | `Yul/Compilation/NumericExecution{,Controls}.lean` | General success transport for unchanged ten-operator NumericMachine selection plus stack operations; real lowerer/original closed-Yul compiler consumers discharge scalar-run premises, preserve symbolic caller/nonstack fields. Actual21-instruction/all-ten-operator and scoped-update controls; no native/byte/PC/gas/capacity/G24 closure. |
+
+| `Yul/Compilation/NormalNumericTransport{,Controls}.lean` | Whole numeric normal branch/sequence execution using existing compiler derivations and selector; same-horizon closed-Yul result, symbolic caller/newer-prefix preservation, high-bit/shifted-slot/refusal controls. Capacity, native execution and Source/G24 adequacy remain separate. |

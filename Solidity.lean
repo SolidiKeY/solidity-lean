@@ -2588,6 +2588,8 @@ import Solidity.Yul.Compilation.NestedWrites
 import Solidity.Yul.Compilation.NestedWritesControls
 import Solidity.Yul.Compilation.NormalControl
 import Solidity.Yul.Compilation.NormalControlControls
+import Solidity.Yul.Compilation.NormalNumericTransport
+import Solidity.Yul.Compilation.NormalNumericTransportControls
 import Solidity.Yul.Compilation.NormalStackControls
 import Solidity.Yul.Compilation.NormalStackTransport
 import Solidity.Yul.Compilation.NumericExecution
