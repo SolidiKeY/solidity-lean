@@ -1,6 +1,6 @@
 import SolidityBridge.Yul.JsonCompilation
-import SolidityBridge.Yul.RecursiveScopes
-/-! Actual checked JSON to the recursive normal scope/control compiler and
+import SolidityBridge.Yul.NestedSwitch
+/-! Actual checked JSON to the recursive normal scope/switch compiler and
 existing exact mathematical model selection. No Body dispatch/admission,
 Source attachment/MemOK, open raw-local readback or native/G24 adequacy claim. -/
 namespace SolidityBridge.Yul.StructuredJson
@@ -10,14 +10,14 @@ open Solidity.Frontend.YulJson
 abbrev Error := JsonCompilation.Error
 
 structure Compiled {outside bound node} (checked : Words.Checked outside bound node) (fuel : Nat) where
-  statement : RecursiveScopes.Derivation ClosedSyntax.rootControl 0 fuel checked.program.code
+  statement : NestedSwitch.Compiled fuel checked.program.code
   block : Backend.Block
   emitted : statement.emit = some block
   selected : OccurrenceControl.Selected block
 
 def compile {outside bound node} (checked : Words.Checked outside bound node) (fuel : Nat) :
     Except Error (Compiled checked fuel) :=
-  match RecursiveScopes.compile fuel checked.program.code with
+  match NestedSwitch.compile fuel checked.program.code with
   | none => .error .statement
   | some statement =>
     match emitted : statement.emit with
@@ -71,4 +71,12 @@ theorem Compiled.model {outside bound fuel node}
 /-- info: 'SolidityBridge.Yul.StructuredJson.Compiled.model' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms Compiled.model
+
+/-- info: 'SolidityBridge.Yul.StructuredJson.compile' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms compile
+
+/-- info: 'SolidityBridge.Yul.StructuredJson.checkCompile' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms checkCompile
 end SolidityBridge.Yul.StructuredJson

@@ -2141,6 +2141,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/StructuredJson.lean:SolidityBridge.Yul.StructuredJson.checkCompile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredJson.lean:SolidityBridge.Yul.StructuredJson.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/StructuredJsonControls.lean:SolidityBridge.Yul.StructuredJson.Controls.conditional_compiles": [
   "Classical.choice",
   "Quot.sound",

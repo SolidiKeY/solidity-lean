@@ -1103,3 +1103,43 @@ explicit focused build supplies local import validation. No new external
 compiler/EVM evidence is claimed. Functions/loops/early flow, multi-result
 bindings, Source/G24/views/raw readback, frontend admission, native/resource/
 world/trace correspondence and full joint gates remain unfinished.
+
+
+### Checked JSON consumer migration (partial)
+
+`SolidityBridge.Yul.StructuredJson` now consumes the actual
+`NestedSwitch.Compiled` certificate and mutual compiler. Its existing
+`Compiled.source` and `Compiled.model` conclusions and proofs are unchanged:
+actual checked closed-word execution terminates normally, and selected-model
+execution preserves the arbitrary represented caller and complete machine.
+The concrete compiler/checkCompile definitions now have guarded standard-axiom
+reports as well. The old conditional/arithmetic kernel packet regressions
+still check with the migrated certificate type.
+
+`StructuredSwitchJsonControls` exercises real synthetic JSON checking,
+preparation, nested compilation, emission and model selection. Nested dirty
+case matching changes x1 to3 without outer-case fallthrough; a following if
+multiplies it to21. Late/default paths produce999/42/17. An analysis-only
+extractor inspects the actual emitted block before its final local POP,
+so these finite observations check arithmetic and dirty matching rather than
+only the empty final scope. It is not a general compiler transformation or
+source-preserving extraction theorem. Full fixture runs preserve caller words
+and observed machine fields; input, safety, duplicate/default-order, opcode,
+horizon and oversized-model controls remain separate.
+
+New raw-JSON success is checked by evaluations, not a named kernel parse
+certificate. Direct standard-tactic attempts at that exact success proposition
+did not reduce; no budget was raised. The exact packet/equality statement is
+handed off as new H14 task NJ1 in [TERRA-TODO](../../TERRA-TODO.md), with no Lean
+stub or axiom. This milestone therefore remains partial. The general kernel
+consumer proofs do not by themselves certify this particular JSON fixture.
+
+Independent read-only finder and skeptic reviews found no confirmed findings.
+Affected focused/per-file checks, MCP diagnostics, trust/layer/root/docs,
+module-map and axiom inventory pass. Initial reserved-name/default-forwarding
+syntax diagnostics and failed kernel attempts remain saved. Missing-memory-safe
+control uses the otherwise-successful payload. No old verdict, fixture budget,
+Body dispatch, feature status or canonical rethrow changed. These are synthetic
+controls, not external solc/EVM evidence. Source attachment/MemOK/readback,
+frontend admission, full Source/G24/native correspondence and final joint gates
+remain open alongside NJ1 and the original unfinished queue.

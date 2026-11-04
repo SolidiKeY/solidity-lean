@@ -65,7 +65,7 @@
 
 | `Bridge/SolidityBridge/Yul/RecursiveScopes.lean`, `Bridge/SolidityBridge/Yul/RecursiveScopesControls.lean` | Original context/horizon-indexed recursive scope/branch/sequence compiler; same-horizon source and structured execution proofs with caller-tail preservation. |
 
-| `Bridge/SolidityBridge/Yul/StructuredJson.lean`, `Bridge/SolidityBridge/Yul/StructuredJsonControls.lean` | Actual checked JSON to recursive normal structured compilation; same-horizon source/model certificates and synthetic conditional/arithmetic controls, separate admission/native/G24 obligations. |
+| `Bridge/SolidityBridge/Yul/StructuredJson.lean`, `Bridge/SolidityBridge/Yul/StructuredJsonControls.lean` | Actual checked JSON to nested normal scope/switch compilation; unchanged same-horizon source/model certificates, separate admission/native/G24 obligations. |
 
 | `Bridge/SolidityBridge/Yul/SwitchCompilation.lean`, `Bridge/SolidityBridge/Yul/SwitchCompilationControls.lean` | Original-case switch compiler component: single selector evaluation, ordered full-word matching, source/structured proofs and exact selector retirement before scoped body/default. |
 
@@ -74,3 +74,5 @@
 | `Bridge/SolidityBridge/Yul/ScopedSwitch.lean`, `Bridge/SolidityBridge/Yul/ScopedSwitchControls.lean` | Original-statement lexical-scope adapter over concrete switch/control lowering; exact source horizons, initialized prefix entry/retirement and arbitrary caller-tail preservation. |
 
 | `Bridge/SolidityBridge/Yul/NestedSwitch.lean`, `Bridge/SolidityBridge/Yul/NestedSwitchControls.lean` | Concrete mutual original-statement/case compiler constructing source and structured-target certificates; nested normal-word cases/defaults/scopes, exact horizons and caller-tail transport. |
+
+| `Bridge/SolidityBridge/Yul/StructuredSwitchJsonControls.lean` | Synthetic actual JSON-to-nested-lowering/model controls, emitted-fixture prefix values and unchanged ingress refusals; exact new raw-JSON kernel certificate pending NJ1. |

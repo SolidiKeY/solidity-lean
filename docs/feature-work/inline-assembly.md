@@ -363,3 +363,11 @@ original-AST source/structured-target certificates through mutually recursive
 statement/case compilation, including lexical scopes inside nested arms.
 Reviewed dirty-word, no-fallthrough, source/model and refusal controls pass.
 General source/native adequacy remains open; see [the lane record](inline-assembly-vy3.md).
+
+
+VY3 checked JSON consumer migration (partial): `StructuredJson` now uses the
+concrete nested-switch compiler without changing its kernel source/model
+contracts. Synthetic JSON and emitted-prefix controls distinguish21/999/42/17
+and preserve ingress refusals. A specific raw-JSON kernel certificate remains
+pending as H14 NJ1; no Body admission or source/native adequacy is claimed.
+See [the lane record](inline-assembly-vy3.md).
