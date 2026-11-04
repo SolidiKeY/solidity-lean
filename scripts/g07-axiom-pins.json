@@ -29498,6 +29498,21 @@
  ],
  "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.resolve_complete": [],
  "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.resolve_sound": [],
+ "Solidity/Yul/Compilation/P20InterfaceV1.lean:Solidity.Yul.Compilation.P20.InterfaceV1.PendingG24": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1.lean:Solidity.Yul.Compilation.P20.InterfaceV1.PendingRepresentedSuccess": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/upstream/ByteLiterals.lean:literal_ignores_ambient_append": [],
  "tests/upstream/ByteLiterals.lean:long_literal_exact": [],
  "tests/upstream/ByteLiterals.lean:long_literal_not_truncated": [],

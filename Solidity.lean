@@ -2529,6 +2529,8 @@ import Solidity.Yul.Compilation.OpcodeLoweringControls
 import Solidity.Yul.Compilation.OpenExpressionControls
 import Solidity.Yul.Compilation.OpenExpressions
 import Solidity.Yul.Compilation.OpenStatements
+import Solidity.Yul.Compilation.P20InterfaceV1
+import Solidity.Yul.Compilation.P20InterfaceV1Controls
 import Solidity.Yul.Compilation.PhysicalCombination
 import Solidity.Yul.Compilation.PhysicalHash
 import Solidity.Yul.Compilation.PhysicalHashControls
