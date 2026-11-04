@@ -1232,3 +1232,15 @@ concrete World port. `call_copied` composes the actual World call adapter under
 its explicit preflight, input-load, output-acceptance and invocation equations;
 it does not provide a concrete call producer or invocation adequacy. Controls
 separate short-return padding, retained dirty cells and requested-access extent.
+
+`RawPhysicalCallFrame.execute_eq` retains the entire existing
+`World.CompletedCall` carrier, rather than only its copied-memory projection.
+Input loading is derived from the pre-call physical snapshot. Preflight,
+Word-end nonwrapping, output acceptance and the actual invocation equation
+remain explicit. Success retains the supplied operations and ordered trace;
+callee revert restores the full caller journal entry and committed logs while
+copying the revert-data prefix into caller memory. This does not imply an
+enclosing-frame commit. Controls execute the adapter with a labelled synthetic
+answer containing real typed Source journal operations: success changes storage,
+revert preserves the prior caller value/log and physical output tail, and a
+static value-bearing call is rejected. Concrete invocation adequacy is open.
