@@ -622,6 +622,8 @@ import Solidity.Backend.PrimitivePackets.SignedDiv.Controls
 import Solidity.Backend.PrimitivePackets.SignedDiv.Execution
 import Solidity.Backend.PrimitivePackets.SignedDiv.Origin
 import Solidity.Backend.PrimitivePackets.SignedDiv.Selected
+import Solidity.Backend.PrimitivePackets.SignedSub.Controls
+import Solidity.Backend.PrimitivePackets.SignedSub.Execution
 import Solidity.Backend.Scalar.ArithmeticWidths
 import Solidity.Backend.Scalar.Axioms
 import Solidity.Backend.Scalar.Bitwise
