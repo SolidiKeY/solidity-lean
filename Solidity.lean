@@ -315,6 +315,7 @@ import Solidity.Backend.MemoryCopies.TraversalInterface
 import Solidity.Backend.MemoryCopies.PrimitiveArray
 import Solidity.Backend.MemoryCopies.PrimitiveArrayControls
 import Solidity.Backend.MemoryCopies.PrimitiveArrayInterface
+import Solidity.Backend.MemoryCopies.PublishedStorageInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrayControls
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrays
