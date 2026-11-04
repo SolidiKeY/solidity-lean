@@ -543,3 +543,14 @@ independently executed physical store. Concrete typed contexts and globals
 inhabit controls for both Source pipeline selections. This local-operand result
 does not cover arbitrary effectful assignment operands or recursive producer
 capture. The returned bytes1 word keeps its genuine left alignment.
+
+`P6ChainedByteAssignment` covers an actual effectful RHS: one resolved byte
+assignment nested inside another. At horizon n+4 the inner write completes
+before outer location formation. The universal laws impose no distinct-index
+premise. Physical composition constructs two actual refreshed inventories and
+exports the nested Source result, both complete maps, coverage/IDs, sibling
+preservation and every-original-H MemOK. Original allocation history feeds the
+second update. Controls cross indices31/32 of the same string and distinguish
+an inner panic (no outer write) from an outer panic (successful inner prefix
+retained). This concrete operand composition is not a general arbitrary-expression
+producer theorem, and no independent physical write is erased on Source failure.

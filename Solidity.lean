@@ -2432,6 +2432,8 @@ import Solidity.Yul.Adapters.P6ByteWriteSub
 import Solidity.Yul.Adapters.P6ByteWriteSubControls
 import Solidity.Yul.Adapters.P6CalldataHash
 import Solidity.Yul.Adapters.P6CalldataHashControls
+import Solidity.Yul.Adapters.P6ChainedByteAssignment
+import Solidity.Yul.Adapters.P6ChainedByteAssignmentControls
 import Solidity.Yul.Adapters.P6ChangedPayloadHashControls
 import Solidity.Yul.Adapters.P6CopyHistory
 import Solidity.Yul.Adapters.P6CopyHistoryControls

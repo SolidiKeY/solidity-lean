@@ -94,3 +94,4 @@
 | `Yul/Adapters/P6ByteWriteInventory{,Controls}` | Constructed complete mixed-inventory refresh after actual Source/MSTORE8 byte writes; same-state writeback, whole-map reencoding, retained history and sequential controls. |
 | `Yul/Adapters/P6ByteWriteSub{,Controls}` | Actual Source substitution around represented byte writes, with linked success/late halt, exact caller restoration and whole mixed-map reconstruction. |
 | `Yul/Adapters/P6ByteAssignment{,Controls}` | Actual resolved Source indexed-byte assignment, exact local-operand horizon/errors and constructive shared Source/physical mixed-inventory result. |
+| `Yul/Adapters/P6ChainedByteAssignment{,Controls}` | Actual effectful byte-assignment RHS with two chronological Source/physical inventories and exact inner/outer failure prefixes. |
