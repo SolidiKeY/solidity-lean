@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 1,
+  "status": "source census and fixture expectations only; no admission/compiler certificate",
+  "upstream": {
+    "repository": "argotorg/solidity",
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "sources": [
+      {
+        "path": "libsolidity/ast/Types.cpp",
+        "sha256": "12dc5df7741a2b9b97d5e2eb1dcafa2e83025b6f0faf92d08fc00b5235cd1277",
+        "gitBlobSha": "50fa0508baf49d78ae9d1a36cbffac8eca0c13b0",
+        "existingManifestPin": true
+      },
+      {
+        "path": "libsolidity/analysis/GlobalContext.cpp",
+        "sha256": "ce2889f813e0bb58fdb76f10598853301f005126d992ce7102ba2ebccb2b68ed",
+        "gitBlobSha": "8bc50a88da65cbd123084fd58b6a23ed7484ab7f",
+        "existingManifestPin": true
+      },
+      {
+        "path": "libsolidity/analysis/TypeChecker.cpp",
+        "sha256": "20d4db6a5c37df65d4c6e23af2f541e79a0c35552ce73a5838f5a7de5ab3eb63",
+        "gitBlobSha": "5a5fe50d07f0bf2acdaf8bb6c59c4e943e1cd6b8",
+        "existingManifestPin": true
+      },
+      {
+        "path": "liblangutil/EVMVersion.h",
+        "sha256": "91637591c0fc834cc08db39b6556bc95a33714004372f7ea12160f6407b0e1e4",
+        "gitBlobSha": "66895f23f8c425eeb15ae209b34e6ae57bb20f6d",
+        "existingManifestPin": false
+      },
+      {
+        "path": "docs/units-and-global-variables.rst",
+        "sha256": "fee48da08e14a3893fb84ea73b2764e85cece91939e030f61d3196b2d3ed1526",
+        "gitBlobSha": "dd0a9a98058f88dc96790a03d942b3b527dac976",
+        "existingManifestPin": true
+      },
+      {
+        "path": "libsolidity/codegen/ExpressionCompiler.cpp",
+        "sha256": "94017752fc3fda286f15cabc7b5d7ba13e9794bdf0325e203f4730c58f4d55a3",
+        "gitBlobSha": "32bd09c8b21e4edf6a100e7abed8ee55189e744f",
+        "existingManifestPin": false
+      },
+      {
+        "path": "libevmasm/Instruction.h",
+        "sha256": "83f22b65ae6ee985249bfa841123136c895986459f962dcb30ab025c4b9d87d2",
+        "gitBlobSha": "755fce5c9c03d9c0eaf0e4aa5d2f1b2d9ce25baa",
+        "existingManifestPin": false
+      }
+    ]
+  },
+  "fields": [
+    {
+      "spelling": "block.coinbase",
+      "feature": "blockCoinbase",
+      "resultType": "address payable",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "COINBASE",
+      "capability": null,
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4185
+      },
+      "upstreamOpcode": "COINBASE"
+    },
+    {
+      "spelling": "block.timestamp",
+      "feature": "blockTimestamp",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "TIMESTAMP",
+      "capability": null,
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4186
+      },
+      "upstreamOpcode": "TIMESTAMP"
+    },
+    {
+      "spelling": "block.difficulty",
+      "feature": "blockDifficulty",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "PREVRANDAO",
+      "capability": null,
+      "interpretation": "difficultyBeforeParis;prevrandaoFromParis",
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4188
+      },
+      "upstreamOpcode": "PREVRANDAO"
+    },
+    {
+      "spelling": "block.prevrandao",
+      "feature": "blockPrevrandao",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "PREVRANDAO",
+      "capability": null,
+      "interpretation": "difficultyBeforeParis;prevrandaoFromParis",
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4189
+      },
+      "upstreamOpcode": "PREVRANDAO"
+    },
+    {
+      "spelling": "block.number",
+      "feature": "blockNumber",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "NUMBER",
+      "capability": null,
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4190
+      },
+      "upstreamOpcode": "NUMBER"
+    },
+    {
+      "spelling": "block.gaslimit",
+      "feature": "blockGaslimit",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "GASLIMIT",
+      "capability": null,
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4191
+      },
+      "upstreamOpcode": "GASLIMIT"
+    },
+    {
+      "spelling": "block.chainid",
+      "feature": "blockChainid",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "CHAINID",
+      "capability": "hasChainID",
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4192
+      },
+      "upstreamOpcode": "CHAINID"
+    },
+    {
+      "spelling": "block.basefee",
+      "feature": "blockBasefee",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "BASEFEE",
+      "capability": "hasBaseFee",
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4193
+      },
+      "upstreamOpcode": "BASEFEE"
+    },
+    {
+      "spelling": "block.blobbasefee",
+      "feature": "blockBlobbasefee",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "BLOBBASEFEE",
+      "capability": "hasBlobBaseFee",
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4194
+      },
+      "upstreamOpcode": "BLOBBASEFEE"
+    },
+    {
+      "spelling": "block.slotnum",
+      "feature": "blockSlotnum",
+      "resultType": "uint64",
+      "argumentTypes": [],
+      "backendOsakaOpcode": null,
+      "capability": "hasSlotNum",
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4195
+      },
+      "upstreamOpcode": "SLOTNUM"
+    },
+    {
+      "spelling": "tx.origin",
+      "feature": "txOrigin",
+      "resultType": "address",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "ORIGIN",
+      "capability": null,
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4207
+      },
+      "upstreamOpcode": "ORIGIN"
+    },
+    {
+      "spelling": "tx.gasprice",
+      "feature": "txGasprice",
+      "resultType": "uint256",
+      "argumentTypes": [],
+      "backendOsakaOpcode": "GASPRICE",
+      "capability": null,
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/ast/Types.cpp",
+        "line": 4208
+      },
+      "upstreamOpcode": "GASPRICE"
+    },
+    {
+      "spelling": "blockhash",
+      "feature": "blockhashBuiltin",
+      "resultType": "bytes32",
+      "argumentTypes": [
+        "uint256"
+      ],
+      "backendOsakaOpcode": "BLOCKHASH",
+      "capability": null,
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/analysis/GlobalContext.cpp",
+        "line": 87
+      },
+      "upstreamOpcode": "BLOCKHASH"
+    },
+    {
+      "spelling": "blobhash",
+      "feature": "blobhashBuiltin",
+      "resultType": "bytes32",
+      "argumentTypes": [
+        "uint256"
+      ],
+      "backendOsakaOpcode": "BLOBHASH",
+      "capability": "hasBlobHash",
+      "interpretation": null,
+      "source": {
+        "path": "libsolidity/analysis/GlobalContext.cpp",
+        "line": 119
+      },
+      "upstreamOpcode": "BLOBHASH"
+    }
+  ],
+  "forkBoundaries": {
+    "hasChainID": "istanbul",
+    "hasBaseFee": "london",
+    "hasBlobBaseFee": "cancun",
+    "hasBlobHash": "cancun",
+    "hasSlotNum": "amsterdam",
+    "hasPrevRandao": "paris"
+  },
+  "aliases": [
+    {
+      "spelling": "block.blockhash",
+      "status": "removed in Solidity 0.5.0; retained in native-member metadata; metadata presence is not admission"
+    },
+    {
+      "spelling": "now",
+      "status": "removed in Solidity 0.7.0"
+    },
+    {
+      "spelling": "block.prevrandao",
+      "beforeParis": "accepted with warning 9432 and difficulty semantics"
+    },
+    {
+      "spelling": "block.difficulty",
+      "fromParis": "accepted with warning 8417 and prevrandao semantics"
+    }
+  ],
+  "chainPremises": [
+    "All environment values are universally quantified, with intrinsic integer/address widths.",
+    "Real-chain consistency is explicit; off-chain EVM environments need not identify a canonical block.",
+    "blockhash is zero unless query < currentBlock and currentBlock - query <= 256.",
+    "blobhash is zero when index is outside the current transaction versioned-hash list; actual list provenance is a chain premise.",
+    "tx.origin is the top-level transaction sender, including during nested calls; it need not equal msg.sender.",
+    "tx.gasprice is the transaction effective gas price; dynamic-fee provenance is a chain premise, not an invented constant.",
+    "No uniform randomness, timestamp accuracy, inter-frame monotonicity or unique-hash premise is introduced."
+  ],
+  "expectedBoundaryControls": [
+    {
+      "kind": "blockhash",
+      "current": 0,
+      "query": 0,
+      "available": false
+    },
+    {
+      "kind": "blockhash",
+      "current": 256,
+      "query": 0,
+      "available": true
+    },
+    {
+      "kind": "blockhash",
+      "current": 257,
+      "query": 0,
+      "available": false
+    },
+    {
+      "kind": "blockhash",
+      "current": 257,
+      "query": 1,
+      "available": true
+    },
+    {
+      "kind": "blockhash",
+      "current": 257,
+      "query": 256,
+      "available": true
+    },
+    {
+      "kind": "blockhash",
+      "current": 257,
+      "query": 257,
+      "available": false
+    },
+    {
+      "kind": "blockhash",
+      "current": 257,
+      "query": 258,
+      "available": false
+    },
+    {
+      "kind": "blobhash",
+      "length": 0,
+      "index": 0,
+      "available": false
+    },
+    {
+      "kind": "blobhash",
+      "length": 2,
+      "index": 0,
+      "available": true
+    },
+    {
+      "kind": "blobhash",
+      "length": 2,
+      "index": 1,
+      "available": true
+    },
+    {
+      "kind": "blobhash",
+      "length": 2,
+      "index": 2,
+      "available": false
+    }
+  ],
+  "combinationFixtures": [
+    {
+      "name": "origin-vs-callback-sender",
+      "inputs": {
+        "origin": 1,
+        "msgSender": 2
+      },
+      "expected": "origin=1 independently of sender=2"
+    },
+    {
+      "name": "fee-fields-distinct",
+      "inputs": {
+        "gasprice": 30,
+        "basefee": 10,
+        "blobbasefee": 7
+      },
+      "expected": "three independent input fields; no equality premise"
+    },
+    {
+      "name": "difficulty-alias",
+      "forks": [
+        "london",
+        "paris",
+        "osaka"
+      ],
+      "expected": "0x44 difficulty before Paris, prevrandao from Paris"
+    },
+    {
+      "name": "slotnum-osaka-amsterdam",
+      "forks": [
+        "osaka",
+        "amsterdam"
+      ],
+      "expected": "unavailable in Osaka; uint64 from Amsterdam; Backend.Op adapter needed"
+    },
+    {
+      "name": "blockhash-and-blobhash",
+      "expected": "separate chain history and transaction blob domains; no shared lookup table"
+    }
+  ]
+}

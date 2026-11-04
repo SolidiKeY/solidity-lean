@@ -1281,4 +1281,72 @@ def ArtifactSound (source : Source) (target : Target)
       (eraseGas (target.lang.sem (target.load art) env rt)).Le
         (eraseGas (source.lang.sem program (environment env) rs))
 
+/-- Normalizing gas values a second time cannot hide another observation. -/
+theorem Observation.withoutGas_idempotent (observation : Observation) :
+    observation.withoutGas.withoutGas = observation.withoutGas := by
+  cases observation with
+  | scalar kind value => cases kind <;> rfl
+  | _ => rfl
+
+/-- Normalizing one prefix retains its exact observation count. -/
+theorem eraseGas_length (p : Prefix Observation Outcome) :
+    (eraseGas p).events.length = p.events.length :=
+  List.length_map Observation.withoutGas
+
+/-- Return/revert bytes remain exact even under the optimizer quotient. -/
+theorem eraseGas_final (p : Prefix Observation Outcome) :
+    (eraseGas p).final = p.final := rfl
+
+/-- The quotient is a projection, not repeated information loss. -/
+theorem eraseGas_idempotent (p : Prefix Observation Outcome) :
+    eraseGas (eraseGas p) = eraseGas p := by
+  cases p with
+  | mk events final =>
+    change Prefix.mk ((events.map Observation.withoutGas).map Observation.withoutGas) final = _
+    rw [List.map_map]
+    have hmap : events.map (Observation.withoutGas ∘ Observation.withoutGas) =
+        events.map Observation.withoutGas :=
+      List.map_congr_left fun observation _ => observation.withoutGas_idempotent
+    rw [hmap]
+    rfl
+
+/-- Normalization preserves finite-prefix order, including completed prefixes. -/
+theorem eraseGas_le {a b : Prefix Observation Outcome} (h : a.Le b) :
+    (eraseGas a).Le (eraseGas b) := by
+  refine ⟨h.1.map Observation.withoutGas, ?_⟩
+  rcases h.2 with unfinished | completed
+  · exact .inl unfinished
+  · exact .inr (congrArg eraseGas completed)
+
+/-- Any exact two-sided refinement also satisfies the optimizer relation.
+The converse is deliberately not asserted: gas values alone may differ. -/
+theorem optimizes_of_refines {RS RT : Type} {AS : RS → Prop} {AT : RT → Prop}
+    {FS GS : RS → Prop} {GT : RT → Prop}
+    {source : Prefixes RS Observation Outcome} {target : Prefixes RT Observation Outcome}
+    (h : RefinesUnder AS AT FS GS GT source target) :
+    Optimizes AS AT FS GS GT source target := by
+  constructor
+  · intro rs admissible forward guard
+    obtain ⟨rt, hadmissible, hprefix⟩ := h.1 rs admissible forward guard
+    exact ⟨rt, hadmissible, eraseGas_le hprefix⟩
+  · intro rt admissible guard
+    obtain ⟨rs, hadmissible, hprefix⟩ := h.2 rt admissible guard
+    exact ⟨rs, hadmissible, eraseGas_le hprefix⟩
+
+/-- Empty physical memory is inhabited and all byte reads are zero. This
+witness precedes the solc prologue; it does not assert an initialized FMP. -/
+def ByteMemory.empty : ByteMemory where
+  data := fun _ => 0
+  size := 0
+  size_le := Nat.zero_le _
+  aligned := rfl
+  unallocated_zero := fun _ _ => rfl
+
+/-- D2's necessary observable creation-size failure obligation, parameterized
+by actual producer execution. It does not assert success or exact failure gas;
+those remain separate obligations. No producer proof is supplied. -/
+def CreationSizeFailures (attempt : Bytes → Bytes → Evm.Halt) : Prop :=
+  ∀ initcode runtime, ¬ creationFits initcode runtime →
+    (attempt initcode runtime).observe = (false, [])
+
 end Solidity.Roadmap.FullScope
