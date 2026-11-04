@@ -102,3 +102,6 @@
 | `Bridge/SolidityBridge/Yul/ForShape{,Controls}.lean` | Actual compiled FOR numeric operand/height and all-prefix capacities; exact existing BlockShape threshold h+2<=1024 for h>=5, separate ExpansionRoom and caller boundaries. No ControlCertificate.realize/native/G24 claim. |
 
 | `Bridge/SolidityBridge/Yul/ScopedFor{,Controls}.lean` | Actual scope/switch component compilation within original FOR; concrete prepare/emission/selection, finite source/whole structured/model proofs, scoped-temp/order-sensitive dirty-word and early-flow refusals. Depth0/caller-only frame; full frontend/G24/native closure open. |
+
+| `Bridge/SolidityBridge/Yul/ForCompletionSource.lean` | Shared original-loop completion induction with explicit normal source laws; actual old/new compiler clients discharge both premises, not a final simulation interface. |
+| `Bridge/SolidityBridge/Yul/ScopedForCompletion{,Controls}.lean` | Actual scope/switch FOR source success at arbitrary horizon derives count/guards/normal exact output and selected-model transport; no supplied stopping count or minimum horizon. Source10/all-input witness and horizon/order refusals. |

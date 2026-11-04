@@ -1597,3 +1597,37 @@ Actual root frontend dispatch/JSON attachment, functions/early-flow, physical
 views/capacity, H11 readback, full Source/G24/native/charged/world/observation
 closure, remaining original backfill and joint/lane validation remain open.
 H26 frozen interfaces, H16/H19/H25 Source and H22 ExtCall are unchanged.
+
+
+### Source-success transport for scoped FOR
+
+`ForCompletionSource.loop_complete` factors the existing original-source
+completion induction with its two real universal normal-source premises.
+`ForCompletion.loop_complete` keeps its exact old proposition and concretely
+passes actual `NormalControl` source facts. All declarations after that proof,
+old controls, premises and axiom guards remain byte-identical. This proof-only
+refactor was announced before editing and checked before/after; no source/target
+AST, state, evaluator, calling convention or runtime definition changed.
+
+`ScopedForCompletion` passes actual `NestedSwitch` component source facts through
+the same induction and includes the actual prelude. From ANY successful original
+source horizon it derives count, finite guards, exact normal output and
+`count + 1 < horizon`. There is no minimum source horizon assumption or supplied
+count/guard oracle. The actual `ScopedFor` packet then supplies real emission and
+selected code; concrete whole structured/model transport and raw-word output
+injectivity preserve exact source-result locals, arbitrary numeric caller and
+all nonstack machine fields. The shared helper by itself is not adequacy.
+
+Controls quantify over every source horizon and complete output, with the actual
+unchanged source10/dirty+11/all-initial-counter witness inhabiting the premise.
+Short horizons are refused and the wrong-order dirty+2 result cannot be obtained
+at another horizon, using actual completed-run uniqueness. Compiler fuel6,
+source witness10, original budgets, observations and expected verdicts are
+unchanged. Ten new standard-axiom reports are guarded. Independent read-only finder and
+skeptic reviews of the final helper, concrete consumers, controls, pins, imports
+and metadata found no confirmed findings; neither used Lean/server/tests.
+
+This remains depth0 normal closed-word scope/switch FOR to the mathematical
+model. Generic root frontend attachment, Source/G24/views/functions/early-flow,
+readback, native/charged/capacity/world/observation closure, remaining backfill and
+full lane/joint gates remain open. H26 interfaces and all owner holds are intact.

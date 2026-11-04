@@ -1,3 +1,4 @@
+import SolidityBridge.Yul.ForCompletionSource
 import SolidityBridge.Yul.StructuredFor
 import SolidityBridge.Yul.StructuredSource
 
@@ -23,57 +24,9 @@ theorem loop_complete (fuel : Nat) (locals : Vector Scalar.Word n) (out : Outcom
     ∃ count, count < fuel ∧
       (∀ j, j < count → test.value (Nat.repeat (fun l => after.update (inside.update l)) j locals) ≠ 0) ∧
       test.value (Nat.repeat (fun l => after.update (inside.update l)) count locals) = 0 ∧
-      out = ⟨sourceLocals (Nat.repeat (fun l => after.update (inside.update l)) count locals),.normal⟩ := by
-  induction fuel generalizing locals with
-  | zero => cases completed
-  | succ fuel ih =>
-    rw [evalLoop] at completed
-    cases tested : evalExpr fuel .nil True.intro condition test.profile (sourceLocals locals) with
-    | none => simp only [tested] at completed; cases completed
-    | some values =>
-      rw [tested] at completed
-      have same := evalExpr_completed_unique .nil True.intro condition test.profile
-        (sourceLocals locals) tested (test.source locals)
-      subst values
-      change (if (test.value locals).toNat = 0 then some ⟨sourceLocals locals,.normal⟩ else _) = some out at completed
-      by_cases zero : test.value locals = 0
-      · rw [zero] at completed
-        change some ⟨sourceLocals locals,.normal⟩ = some out at completed
-        exact ⟨0,by omega,(by intro j bound; omega),zero,(Option.some.inj completed).symm⟩
-      · have nz : (test.value locals).toNat ≠ 0 := fun h => zero (BitVec.eq_of_toNat_eq h)
-        rw [if_neg nz] at completed
-        change (evalStmt fuel .nil True.intro body inside.profile (sourceLocals locals)).bind _ = some out at completed
-        cases bodyRun : evalStmt fuel .nil True.intro body inside.profile (sourceLocals locals) with
-        | none => simp only [bodyRun] at completed; cases completed
-        | some result =>
-          rw [bodyRun] at completed
-          have same := evalStmt_completed_unique .nil True.intro body inside.profile
-            (sourceLocals locals) bodyRun (inside.source locals)
-          subst result
-          change (evalStmt fuel .nil True.intro post after.profile
-            (sourceLocals (inside.update locals))).bind _ = some out at completed
-          cases postRun : evalStmt fuel .nil True.intro post after.profile
-              (sourceLocals (inside.update locals)) with
-          | none => simp only [postRun] at completed; cases completed
-          | some result =>
-            rw [postRun] at completed
-            have same := evalStmt_completed_unique .nil True.intro post after.profile
-              (sourceLocals (inside.update locals)) postRun (after.source (inside.update locals))
-            subst result
-            change evalLoop fuel .nil True.intro condition test.profile post after.profile
-              body inside.profile (sourceLocals (after.update (inside.update locals))) = some out at completed
-            obtain ⟨count,bound,running,stopped,result⟩ := ih (after.update (inside.update locals)) completed
-            refine ⟨count+1,by omega,?_,?_,?_⟩
-            · intro j prior
-              cases j with
-              | zero => exact zero
-              | succ j =>
-                rw [←LoweredWhile.repeat_shift]
-                exact running j (by omega)
-            · rw [←LoweredWhile.repeat_shift]
-              exact stopped
-            · rw [←LoweredWhile.repeat_shift]
-              exact result
+      out = ⟨sourceLocals (Nat.repeat (fun l => after.update (inside.update l)) count locals),.normal⟩ :=
+  ForCompletionSource.loop_complete test after.profile after.update after.source
+    inside.profile inside.update inside.source fuel locals out completed
 
 variable {af : Nat} {pre : Solidity.Yul.Stmt [] [] ⟨c.function,false⟩ n}
   (before : NormalControl.Derivation af pre)

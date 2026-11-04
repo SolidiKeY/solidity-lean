@@ -31374,5 +31374,52 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletionSource.lean:SolidityBridge.Yul.ForCompletionSource.loop_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletion.lean:SolidityBridge.Yul.ScopedForCompletion.loop_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletion.lean:SolidityBridge.Yul.ScopedForCompletion.source_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletion.lean:SolidityBridge.Yul.ScopedForCompletion.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletion.lean:SolidityBridge.Yul.ScopedForCompletion.transport_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.from_any_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.from_ten": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.every_completed_normal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.short_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.wrong_order_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

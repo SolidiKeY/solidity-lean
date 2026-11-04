@@ -338,6 +338,7 @@ import SolidityBridge.Yul.ExpSelection
 import SolidityBridge.Yul.ExpSelectionControls
 import SolidityBridge.Yul.ForCompletion
 import SolidityBridge.Yul.ForCompletionControls
+import SolidityBridge.Yul.ForCompletionSource
 import SolidityBridge.Yul.ForPrefixes
 import SolidityBridge.Yul.ForPrefixesControls
 import SolidityBridge.Yul.ForReflection
@@ -379,6 +380,8 @@ import SolidityBridge.Yul.RecursiveScopesControls
 import SolidityBridge.Yul.ScopedControl
 import SolidityBridge.Yul.ScopedControlControls
 import SolidityBridge.Yul.ScopedFor
+import SolidityBridge.Yul.ScopedForCompletion
+import SolidityBridge.Yul.ScopedForCompletionControls
 import SolidityBridge.Yul.ScopedForControls
 import SolidityBridge.Yul.ScopedSwitch
 import SolidityBridge.Yul.ScopedSwitchControls
