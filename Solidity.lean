@@ -2545,6 +2545,7 @@ import Solidity.Yul.Checks.Parsing
 import Solidity.Yul.Checks.Placement
 import Solidity.Yul.Checks.Powers
 import Solidity.Yul.Checks.RawControlSequenceHorizon
+import Solidity.Yul.Checks.RawControlledWhileHorizon
 import Solidity.Yul.Checks.RawDefaultDeclaration
 import Solidity.Yul.Checks.RawDefaultScope
 import Solidity.Yul.Checks.RawDivergence
@@ -2813,6 +2814,7 @@ import Solidity.Yul.RawCondition
 import Solidity.Yul.RawControlSequence
 import Solidity.Yul.RawControlSequenceHorizon
 import Solidity.Yul.RawControlledWhile
+import Solidity.Yul.RawControlledWhileHorizon
 import Solidity.Yul.RawDefaultDeclaration
 import Solidity.Yul.RawDefaultScope
 import Solidity.Yul.RawFrame
@@ -2826,6 +2828,7 @@ import Solidity.Yul.RawLocalDeclaration
 import Solidity.Yul.RawLocalScope
 import Solidity.Yul.RawLoopBody
 import Solidity.Yul.RawLoopBodyHorizon
+import Solidity.Yul.RawReadOnlyViews
 import Solidity.Yul.RawSequence
 import Solidity.Yul.RawSequenceHorizon
 import Solidity.Yul.RawSequenceWhile

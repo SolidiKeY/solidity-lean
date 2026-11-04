@@ -1824,3 +1824,37 @@ Both modules have zero per-file diagnostic errors; focused Lean, generated-root
 and layer checks pass. Fifteen scoped axiom reports use only Lean standard
 axioms. Raw failed standard automation remains separate from passing concrete
 proofs and gates; no statements, outcomes or proof/checking limits changed.
+
+### Completed raw controlled-while horizons
+
+`RawControlledWhileHorizon.successor` and `extension` preserve the exact
+whole loop result and raw frame after non-timeout execution. Actual condition
+and body producers fix their captured frames before fuel induction: normal
+and continue recurse at the same post-body state, break exits, and false/error
+paths keep their original result. All child terminality is derived from the
+actual parent run; no coherence, projection or supplied simulation law is assumed.
+`RawReadOnlyViews.condition`, `continueBody` and `loop` additionally prove
+actual word-view preservation for indexed read/read-continue execution at every
+fuel. These laws allow capture metadata to change and assert neither whole-frame
+identity nor divergence.
+Eleven controls cover break exit at 3 retaining raw 2/257; a false-writing
+continue body that actually continues then exits at 5; normal-body mutation
+and exit at 10; and exact larger-horizon equality of completed frames.
+A false guard skips the deep body at 2. The unchanged true continue loop is
+tested only through finite timeout 5; normal-body timeout 9 retains its partial
+true write before completion writes false. Concrete all-fuel clean Source
+agreement uses an explicitly indexed Source loop matching the certificate.
+Brute-force narrow-word checking reached the existing heartbeat limit.
+The concrete read-view laws prove the same expected word observation without
+raising limits. Initial branch, ambiguous Source-index, missing helper-object
+and failed brute-force attempts remain raw evidence; no expected verdict changed.
+These existing certified loops add no arbitrary statement/return support, dirty
+Source readback, admission or compiler adequacy. Source/ExtCall/evaluators/layouts,
+observations and proof budgets remain unchanged. Full VY1/general P16 and final
+lane gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings across all
+three modules. Per-file diagnostics report zero errors; focused Lean, the helper
+module build, generated-root and layer checks pass. Sixteen scoped axiom reports
+use only Lean standard axioms. Raw failed attempts remain separate from passes.
+No theorem premise, expected outcome or proof/checking limit was weakened.

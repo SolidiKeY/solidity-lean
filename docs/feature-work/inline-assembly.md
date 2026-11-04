@@ -337,3 +337,5 @@ VY1: completed raw sequence/block horizons; [scope and controls](inline-assembly
 VY1: completed raw condition/control-body horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-condition-and-loop-body-horizons). Full lane remains open.
 
 VY1: completed raw control-sequence/block horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-control-sequence-horizons). Full lane remains open.
+
+VY1: completed raw controlled-while horizons and read views; [scope and controls](inline-assembly-vy1.md#completed-raw-controlled-while-horizons). Full lane remains open.
