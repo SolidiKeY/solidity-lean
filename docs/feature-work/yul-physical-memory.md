@@ -371,6 +371,18 @@ preparation existence is an executable control here, not an independent kernel
 existence theorem. No intermediate observations or whole-program correspondence
 are inferred from this final-boundary adapter.
 
+`P6CopyPreparation` supplies the next constructive step: a full copied word
+is proved equal to the old source word, and canonical nominal word facts derive
+an actual inventory update with its exact dependent data. The real shape bound
+remains explicit. A two-root explicit codec image constructs both the changed
+nominal update and the untouched byte-object update, then proves complete
+snapshot preparation exists in the kernel. The second owned word changes from
+32767 to-1. `changed_source_view` derives an actual complete Source result,
+whole-map reencoding, administrative preservation and every initial owner typing
+without assuming successful preparation. This uses the explicit codec image;
+it does not identify that image with all generated-image or arbitrary-copy
+preparations, nor supply allocator or compiler correspondence.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary

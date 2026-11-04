@@ -2417,6 +2417,8 @@ import Solidity.Yul.Adapters.P6ByteWriteOrder
 import Solidity.Yul.Adapters.P6ByteWriteOrderControls
 import Solidity.Yul.Adapters.P6CalldataHash
 import Solidity.Yul.Adapters.P6CalldataHashControls
+import Solidity.Yul.Adapters.P6CopyPreparation
+import Solidity.Yul.Adapters.P6CopyPreparationControls
 import Solidity.Yul.Adapters.P6InputControls
 import Solidity.Yul.Adapters.P6Inputs
 import Solidity.Yul.Adapters.P6Memory
