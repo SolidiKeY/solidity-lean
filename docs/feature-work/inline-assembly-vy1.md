@@ -951,3 +951,18 @@ embedding, loop adequacy and final lane validation remain open.
 
 Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
 All eleven reported axiom sets contain only standard Lean axioms.
+
+### Concrete finite-horizon loop timeouts
+
+LocalLoopFailure classifies actual scope/while halts on raw inputs, retains an
+actual reached context/state for omitted-guard no-post timeouts at every fuel,
+and proves the exact Source.forIter timeout/world result from clean Source
+locals. All body certificates remain explicit; no supplied execution law is
+assumed. Raw results remain separate from the old Source projection. A direct
+Source break loop completes normally and cannot inhabit this body certificate,
+showing why the premise is necessary. These finite-horizon laws do not assert
+coinductive divergence, general embedding or compiler adequacy. Source and
+runners are unchanged; broader P16 and final lane gates remain open.
+
+Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
+All eleven reported axiom sets contain only standard Lean axioms.
