@@ -618,3 +618,11 @@ typing remains safe on success and halt. A late-static control retains a genuine
 nonempty source undo prefix and the first complete map, so premature finalization
 is rejected. This explicit success-finalization fragment is not `runTx`, transaction
 admission, failure rollback or general source/call instrumentation.
+
+`RetainedAliasSub` runs the checked two-program sequence inside actual `EM.sub`.
+Its derived projection retains exactly the reached external state and residual
+journal; caller locals return on success and halt. Full raw reencoding and paired
+child rollback use this same result. Controls preserve the saved child1 caller
+alias against a callee overwrite to child0 and preserve the first completed map
+on late static refusal. Arbitrary caller-local safety, complete suspended-alias
+capture and external-call admission do not follow from this local-context law.

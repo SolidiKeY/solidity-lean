@@ -101,3 +101,4 @@
 | `Yul/Views/RetainedAliasSequence{,Controls}` | Actual Source-bind ownership sequencing keeps reached journals and capture prefixes through first/late refusals and two successes; checked fields reproduce public preparation. |
 | `Yul/Views/RetainedAliasFrames{,Controls}` | Derived actual sequence boundary, paired child/outer rollback and complete prefix/initial raw reconstruction with distinct retained-tail controls. |
 | `Yul/Views/RetainedAliasTransaction{,Controls}` | Actual success-only Source endTx sequence, complete persistent reconstruction, transient/journal reset, reached-error prefix and every-H memory safety. |
+| `Yul/Views/RetainedAliasSub{,Controls}` | Actual caller-local substitution of the checked ownership sequence with reached pair, full reencoding, late-static prefix and rollback transport. |
