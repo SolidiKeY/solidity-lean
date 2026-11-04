@@ -75,3 +75,31 @@ examples and Lifecycle), leaving54 inventoried read-file migrations plus other
 constructor/whole-balance sites. No full combined checkpoint, native comparison,
 external ledger migration or actual reachable-EVM invariant is supplied. All
 original queue and proof obligations remain open as recorded above.
+
+## Balance observation and world-control consumers (2026-11-04)
+
+Six further H19 consumers are migrated: VY4 WorldChecks/SelfDestructControls
+and VY2 Views SourceBalanceInputs/SourceBalanceReads/StorageBalanceInputs/
+SourceBalanceControls. Existing numeric values, storage/log/returndata traces,
+rollback and overflow expectations are retained; two balance tuples now carry
+Nat instead of Word. No Source core or evaluator body changes in this increment.
+
+Known-code balance observations explicitly use `Monetary.wordView`, exactly
+matching actual Source.evalE.balance. Existing observation/storage-preservation
+laws gain no range premise. A separate new `sourceObservedBalance_system_exact`
+law requires visible `Fits` for equality to the exact natural balance. External
+ledger observations are unchanged. A synthetic2^256 Source account retains
+its exact money, observes Word zero and evaluates that result through the actual
+evaluator for arbitrary pipeline. This is a deliberate negative control against
+claiming lossless projection without range, not a reachable-EVM witness.
+
+All six changed modules and generated signatures pass focused checks; six exact
+axiom guards retain only propext/Classical.choice/Quot.sound. Simp-only automation
+proves the new bounded equality. Original tuple-type, structure-update and
+Pipeline-name failures are retained separately. Read-only finder and skeptic
+approved the scoped migration without findings; neither ran tests or Lean.
+The57-file read inventory now has four migrated entries, leaving53 inventoried
+read-file migrations plus other constructors and representation bridges. Full
+H19 ledger/reachability, H16/P8 realization, immutable/funds release and all
+original24 obligations/six Source combinations remain open. No fresh native
+comparison, combined release gate or whole-lane completion is claimed.
