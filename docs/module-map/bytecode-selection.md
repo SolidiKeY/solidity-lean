@@ -158,3 +158,6 @@
 | `Backend/AbiEntry/ShortRoutesInterface.lean` | Short-input guard compiler and exact execution certificate. |
 | `Backend/AbiEntry/ShortRoutes.lean` | Typed length guard and Source-linked payable routing with general short exclusion. |
 | `Backend/AbiEntry/ShortRoutesControls.lean` | Short lengths, padded collision, value boundary and protected-state controls. |
+| `Backend/AbiEntry/SpecialRoutesInterface.lean` | Receive/fallback continuation selection and rejection certificates. |
+| `Backend/AbiEntry/SpecialRoutes.lean` | Typed special choice, declaration payability and exact Source rejection bytes. |
+| `Backend/AbiEntry/SpecialRoutesControls.lean` | Receive preference, fallback value, absence and protected-state controls. |

@@ -52,6 +52,9 @@ import Solidity.Backend.AbiEntry.SourcePayableInterface
 import Solidity.Backend.AbiEntry.SourceRoutes
 import Solidity.Backend.AbiEntry.SourceRoutesControls
 import Solidity.Backend.AbiEntry.SourceRoutesInterface
+import Solidity.Backend.AbiEntry.SpecialRoutes
+import Solidity.Backend.AbiEntry.SpecialRoutesControls
+import Solidity.Backend.AbiEntry.SpecialRoutesInterface
 import Solidity.Backend.AbiEntry.TailGuard
 import Solidity.Backend.AbiEntry.TailGuardControls
 import Solidity.Backend.AbiEntry.TailGuardInterface

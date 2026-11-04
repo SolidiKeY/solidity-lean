@@ -676,3 +676,33 @@ removed and the importing consumer rechecked without own warnings.
 `SpecialRoutesInterface.lean` specifies empty-input receive preference, fallback
 choice, absence rejection and selected special payability. It certifies
 continuation routing, not special-body execution or fallback parameter binding.
+
+`SpecialRoutes.lean` emits the empty-input branch, preferring receive when
+present, otherwise fallback, and selecting fallback for nonempty input. Missing
+special entries emit rejection; selected entries run the existing value gate
+before writing a continuation label. General public compiler admission and
+selection and actual emitted IR execution preserve the whole saved machine
+apart from the result/length cell, with zero pending skip. Compile-time rows
+map actual `Env.special` declarations and `Decl.specialPayable`; general Source
+lookup and execution transport retain explicit length representation. These
+are special-path continuations: integration after ordinary/getter misses is
+not yet compiled here. Independent actual Source theorems prove absence and
+nonpayable refusal produce empty revert bytes before body lookup, with ordinary
+and getter misses explicit. IR rejection does not encode bytes, so native
+byte correspondence is not inferred.
+Controls cover arbitrary-value receive preference, absent receive fallback,
+nonempty nonpayable refusal, empty nonpayable refusal without receive, total
+absence, all-value payable fallback, actual declaration-derived flags, actual
+Source absence/refusal bytes, malformed length and protected saved state. No
+special body execution or parameterized fallback input/output transport is
+claimed; getters, native realization, aggregate decoding and full ABI body
+composition remain open. A bounded MCP scratch attempt timed out; its workers
+were stopped before clean per-file diagnostics, without a budget increase.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+Both checked actual branch selection/execution, declaration-derived special
+flags, Source rejection premises and exact saved state; neither used a build
+or Lean server. They confirmed Source-selected rows still use machine call
+value in the IR outcome and do not certify successful Source body execution.
+Unused simp arguments were removed after focused compilation and the importing
+consumer was rechecked.
