@@ -1,0 +1,1453 @@
+{
+  "base": "b6ba0696102a7a038afe2ed333c09dff397cc5b2",
+  "boundary": "static review only; no kernel verification",
+  "files": [
+    {
+      "path": "Solidity/Backend/Selection/FrameCapacityV2.lean",
+      "sha256": "da93c8332c310dfa451fa646c24216ec8b2d87df8145215197e0c8e2c4d5d330",
+      "entries": [
+        {
+          "line": 8,
+          "text": "theorem FrameCertificate.capacity_empty {input output : Scalar.Stack}",
+          "assessment": "witness-present",
+          "explanation": "Empty-tail capacity follows from inputRoom, so the capacity implication has at least one admitted tail.",
+          "evidence": [
+            8,
+            11,
+            13
+          ]
+        },
+        {
+          "line": 16,
+          "text": "theorem FrameCertificate.prefixes {input output : Scalar.Stack}",
+          "assessment": "unresolved",
+          "explanation": "Prefix bound assumes a successful prefix run and a tail satisfying room; it does not produce either execution.",
+          "evidence": [
+            16,
+            18,
+            21,
+            25
+          ]
+        },
+        {
+          "line": 28,
+          "text": "theorem FrameCertificate.output_capacity {input output : Scalar.Stack}",
+          "assessment": "unresolved",
+          "explanation": "Output capacity uses both the frame run and the room-conditioned capacity field; it is not a producer.",
+          "evidence": [
+            28,
+            30,
+            32
+          ]
+        },
+        {
+          "line": 34,
+          "text": "theorem FrameCertificate.output_bound {input output : Scalar.Stack}",
+          "assessment": "witness-present",
+          "explanation": "The empty-tail frame equation and capacity_empty bound the actual output of any supplied certificate.",
+          "evidence": [
+            34,
+            36,
+            38
+          ]
+        },
+        {
+          "line": 41,
+          "text": "theorem no_overfull_output (input output : Scalar.Stack)",
+          "assessment": "witness-present",
+          "explanation": "An output above 1024 rules out every V2 certificate, independent of a chosen peak.",
+          "evidence": [
+            41,
+            42,
+            44
+          ]
+        },
+        {
+          "line": 47,
+          "text": "def identityFrame (input : Scalar.Stack) (room : input.length \u2264 1024) :",
+          "assessment": "risk",
+          "explanation": "This certificate witnesses inhabitedness with empty code and zero peak, so alone it does not demonstrate work.",
+          "evidence": [
+            47,
+            49,
+            50,
+            52
+          ]
+        },
+        {
+          "line": 49,
+          "text": "  code := []",
+          "assessment": "risk",
+          "explanation": "The identity certificate chooses an empty program; success here cannot witness a nonempty instruction trace.",
+          "evidence": [
+            47,
+            49,
+            52
+          ]
+        },
+        {
+          "line": 50,
+          "text": "  peak := 0",
+          "assessment": "risk",
+          "explanation": "Zero peak is suitable for this identity but cannot establish a positive capacity allowance for real operations.",
+          "evidence": [
+            47,
+            50,
+            51
+          ]
+        },
+        {
+          "line": 51,
+          "text": "  inputRoom := by simpa only [Nat.add_zero] using room",
+          "assessment": "witness-present",
+          "explanation": "The caller-provided room bound discharges the empty program input room after adding zero.",
+          "evidence": [
+            47,
+            50,
+            51
+          ]
+        },
+        {
+          "line": 52,
+          "text": "  frame := fun _ => rfl",
+          "assessment": "risk",
+          "explanation": "Reflexivity proves the identity frame; this is an inhabited but behaviorally trivial case.",
+          "evidence": [
+            47,
+            49,
+            52
+          ]
+        },
+        {
+          "line": 53,
+          "text": "  capacity := by",
+          "assessment": "witness-present",
+          "explanation": "The proof derives capacity from admitted height for the empty program, rather than an assumed stackBound.",
+          "evidence": [
+            53,
+            55,
+            56,
+            58
+          ]
+        },
+        {
+          "line": 61,
+          "text": "def duplicateHead (word : Scalar.Word) : FrameCertificate [word] [word,word] where",
+          "assessment": "witness-present",
+          "explanation": "DUP1 supplies a concrete nonempty frame transformation with one additional stack word.",
+          "evidence": [
+            61,
+            62,
+            63,
+            67
+          ]
+        },
+        {
+          "line": 62,
+          "text": "  code := [.op (.DUP 0)]",
+          "assessment": "witness-present",
+          "explanation": "The selected code contains an actual DUP instruction rather than the empty identity program.",
+          "evidence": [
+            61,
+            62,
+            67
+          ]
+        },
+        {
+          "line": 63,
+          "text": "  peak := 1",
+          "assessment": "witness-present",
+          "explanation": "Peak one accounts for the extra word needed by the duplicate operation.",
+          "evidence": [
+            61,
+            62,
+            63
+          ]
+        },
+        {
+          "line": 64,
+          "text": "  inputRoom := by",
+          "assessment": "witness-present",
+          "explanation": "The one-word input plus peak has concrete room and is discharged by decision.",
+          "evidence": [
+            61,
+            63,
+            64,
+            66
+          ]
+        },
+        {
+          "line": 67,
+          "text": "  frame := fun _ => rfl",
+          "assessment": "witness-present",
+          "explanation": "The frame equation is definitional for this concrete DUP instruction and preserves arbitrary tails.",
+          "evidence": [
+            61,
+            62,
+            67
+          ]
+        },
+        {
+          "line": 68,
+          "text": "  capacity := by",
+          "assessment": "witness-present",
+          "explanation": "Capacity is shown for every admitted tail using the DUP height trace and the room inequality.",
+          "evidence": [
+            68,
+            70,
+            72,
+            73
+          ]
+        }
+      ],
+      "dimensions": {
+        "inhabited_domain": {
+          "status": "witness-present",
+          "explanation": "Input room admits the empty tail; identity and duplicate certificates are explicitly constructed.",
+          "lines": [
+            8,
+            11,
+            13,
+            47,
+            61
+          ]
+        },
+        "nonempty_execution": {
+          "status": "witness-present",
+          "explanation": "The DUP certificate uses a concrete nonempty instruction while identity uses empty code.",
+          "lines": [
+            47,
+            49,
+            61,
+            62
+          ]
+        },
+        "nontrivial_observation": {
+          "status": "risk",
+          "explanation": "Identity output equals input and is reflexive; DUP exhibits a changed numeric stack but not source observation.",
+          "lines": [
+            47,
+            48,
+            52,
+            61,
+            67
+          ]
+        },
+        "capacity_or_identity": {
+          "status": "witness-present",
+          "explanation": "Empty-tail and output bounds derive from mandatory capacity; DUP reserves one additional word.",
+          "lines": [
+            8,
+            13,
+            34,
+            38,
+            61,
+            63
+          ]
+        },
+        "premise_provenance": {
+          "status": "unresolved",
+          "explanation": "These numeric consequences assume a supplied frame certificate and do not produce source or compiler evidence.",
+          "lines": [
+            8,
+            9,
+            16,
+            17,
+            61
+          ]
+        },
+        "positive_and_negative_controls": {
+          "status": "witness-present",
+          "explanation": "Identity and DUP are positive constructions and no_overfull_output is a negative capacity control.",
+          "lines": [
+            41,
+            42,
+            47,
+            61
+          ]
+        }
+      }
+    },
+    {
+      "path": "Solidity/Backend/Selection/Interface.lean",
+      "sha256": "07faf4434d6ef93a5cbcdc2c317a58b8773f32d0c89231e6479d387655b36250",
+      "entries": [
+        {
+          "line": 16,
+          "text": "abbrev irStack (s : Scalar.Stack) : List Evm.Word :=",
+          "assessment": "unresolved",
+          "explanation": "The mapping turns scalar words into numeric IR words; its definition does not establish source provenance.",
+          "evidence": [
+            15,
+            16,
+            17
+          ]
+        },
+        {
+          "line": 21,
+          "text": "structure InstructionCertificate (i : Evm.Instr) where",
+          "assessment": "unresolved",
+          "explanation": "InstructionCertificate declares obligations for a supplied instruction and code; no inhabitant is constructed here.",
+          "evidence": [
+            19,
+            21,
+            23,
+            27
+          ]
+        },
+        {
+          "line": 22,
+          "text": "  code : Program",
+          "assessment": "unresolved",
+          "explanation": "The emitted program is an unconstrained field until the success and refusal equations are supplied.",
+          "evidence": [
+            21,
+            22,
+            23,
+            27
+          ]
+        },
+        {
+          "line": 23,
+          "text": "  success : \u2200 (input output : Scalar.Stack) (m : Evm.Machine),",
+          "assessment": "unresolved",
+          "explanation": "Success is an equivalence under a matching stack and exact zero-cost outcome, not a nonempty success witness.",
+          "evidence": [
+            23,
+            24,
+            25,
+            26
+          ]
+        },
+        {
+          "line": 27,
+          "text": "  refusal : \u2200 (input : Scalar.Stack) (m : Evm.Machine),",
+          "assessment": "unresolved",
+          "explanation": "Refusal equates faults to numeric failure under a matching stack; no example establishes a failing input here.",
+          "evidence": [
+            27,
+            28,
+            29
+          ]
+        },
+        {
+          "line": 34,
+          "text": "structure FrameCertificate (input output : Scalar.Stack) where",
+          "assessment": "risk",
+          "explanation": "The V1 frame law has a conditional capacity premise, allowing gasless frames that exceed physical capacity.",
+          "evidence": [
+            31,
+            32,
+            34,
+            38,
+            39
+          ]
+        },
+        {
+          "line": 35,
+          "text": "  code : Program",
+          "assessment": "unresolved",
+          "explanation": "The program is supplied as certificate data; this field alone does not require a nonempty program.",
+          "evidence": [
+            34,
+            35,
+            36
+          ]
+        },
+        {
+          "line": 36,
+          "text": "  frame : \u2200 tail : Scalar.Stack,",
+          "assessment": "witness-present",
+          "explanation": "The frame equation quantifies over every tail and demands successful numeric execution for each one.",
+          "evidence": [
+            36,
+            37
+          ]
+        },
+        {
+          "line": 38,
+          "text": "  prefixes : \u2200 (tail : Scalar.Stack),",
+          "assessment": "risk",
+          "explanation": "The prefix conclusion assumes stackBound, so it does not establish that the bound itself holds.",
+          "evidence": [
+            38,
+            39,
+            40,
+            41,
+            42
+          ]
+        },
+        {
+          "line": 48,
+          "text": "inductive StructuredExec : Block \u2192 Scalar.Stack \u2192 Scalar.Stack \u2192 Prop where",
+          "assessment": "unresolved",
+          "explanation": "StructuredExec permits a code execution and structured branches, but no nonempty instruction witness is required.",
+          "evidence": [
+            48,
+            49,
+            50,
+            51,
+            60
+          ]
+        },
+        {
+          "line": 71,
+          "text": "def ExpansionRoom : Block \u2192 Nat \u2192 Nat \u2192 Prop",
+          "assessment": "unresolved",
+          "explanation": "ExpansionRoom is True for code and adds join room for branches; it does not itself demonstrate execution.",
+          "evidence": [
+            71,
+            72,
+            76,
+            77,
+            78
+          ]
+        },
+        {
+          "line": 83,
+          "text": "structure ControlCertificate (b : Block) (input output : Nat) where",
+          "assessment": "unresolved",
+          "explanation": "ControlCertificate requires shape, room and realization, but the file supplies no certificate inhabitant.",
+          "evidence": [
+            83,
+            84,
+            85,
+            86
+          ]
+        },
+        {
+          "line": 84,
+          "text": "  shape : LabelExec.BlockShape b input output",
+          "assessment": "unresolved",
+          "explanation": "Shape is imported evidence for the selected block and heights, not a source execution witness.",
+          "evidence": [
+            83,
+            84
+          ]
+        },
+        {
+          "line": 85,
+          "text": "  room : ExpansionRoom b input output",
+          "assessment": "unresolved",
+          "explanation": "Room refers to the recursive expansion constraint; it is not itself an assembly or run witness.",
+          "evidence": [
+            71,
+            77,
+            83,
+            85
+          ]
+        },
+        {
+          "line": 86,
+          "text": "  realize : \u2200 (before after : List (Item Nat Empty)) (label : Nat)",
+          "assessment": "risk",
+          "explanation": "Realization is conditional on assembly and StructuredExec and permits steps zero; neither premise is inhabited here.",
+          "evidence": [
+            86,
+            88,
+            89,
+            90,
+            95
+          ]
+        },
+        {
+          "line": 103,
+          "text": "structure LoweringCertificate (ir : List Evm.Instr) (b : Block) where",
+          "assessment": "unresolved",
+          "explanation": "LoweringCertificate states an IR/block equivalence but does not construct a matching successful run.",
+          "evidence": [
+            103,
+            104,
+            106
+          ]
+        },
+        {
+          "line": 104,
+          "text": "  success : \u2200 (s t : Scalar.Stack) (m : Evm.Machine),",
+          "assessment": "risk",
+          "explanation": "The equivalence ranges over exact zero-cost successful outcomes and may hold without a nontrivial success.",
+          "evidence": [
+            104,
+            105,
+            106
+          ]
+        },
+        {
+          "line": 110,
+          "text": "structure CompositionCertificate (ir : List Evm.Instr) (b : Block) (input output : Nat) where",
+          "assessment": "unresolved",
+          "explanation": "Composition ties lowering and control to one assembled program but supplies no instance or source producer.",
+          "evidence": [
+            110,
+            111,
+            112,
+            113,
+            114,
+            115
+          ]
+        },
+        {
+          "line": 111,
+          "text": "  lowering : LoweringCertificate ir b",
+          "assessment": "unresolved",
+          "explanation": "Lowering is a required field from the earlier interface; it is not proved by the assembly field.",
+          "evidence": [
+            103,
+            106,
+            110,
+            111
+          ]
+        },
+        {
+          "line": 112,
+          "text": "  control : ControlCertificate b input output",
+          "assessment": "unresolved",
+          "explanation": "Control is an additional certificate requirement and has its own conditional realization obligations.",
+          "evidence": [
+            83,
+            86,
+            110,
+            112
+          ]
+        },
+        {
+          "line": 113,
+          "text": "  assembled : Assembled Empty",
+          "assessment": "unresolved",
+          "explanation": "The assembled object is supplied data whose actual relation to the block is enforced by assembly.",
+          "evidence": [
+            110,
+            113,
+            114
+          ]
+        },
+        {
+          "line": 114,
+          "text": "  assembly : assemble 0 LabelExec.emptyLink (b.expand 0).1 = some assembled",
+          "assessment": "witness-present",
+          "explanation": "This equation requires successful assembly of the selected expansion into the same supplied object.",
+          "evidence": [
+            113,
+            114,
+            115
+          ]
+        },
+        {
+          "line": 115,
+          "text": "  roundtrip : decode (encode assembled.code) = some assembled.code",
+          "assessment": "unresolved",
+          "explanation": "Roundtrip connects encoding and decoding of assembled code but does not itself establish executable behavior.",
+          "evidence": [
+            108,
+            109,
+            113,
+            115
+          ]
+        }
+      ],
+      "dimensions": {
+        "inhabited_domain": {
+          "status": "risk",
+          "explanation": "Several universal implications have no inhabitance field; especially conditional prefix and realization can be vacuous.",
+          "lines": [
+            34,
+            38,
+            39,
+            83,
+            86,
+            88,
+            89
+          ]
+        },
+        "nonempty_execution": {
+          "status": "unresolved",
+          "explanation": "StructuredExec specifies runs but the certificate interfaces do not require a nonempty successful execution witness.",
+          "lines": [
+            48,
+            49,
+            50,
+            86,
+            89,
+            90
+          ]
+        },
+        "nontrivial_observation": {
+          "status": "unresolved",
+          "explanation": "IR stack mapping preserves numeric conversion but no source observation relation appears in these interfaces.",
+          "lines": [
+            15,
+            16,
+            17,
+            103,
+            106
+          ]
+        },
+        "capacity_or_identity": {
+          "status": "risk",
+          "explanation": "V1 prefixes assume stackBound; ExpansionRoom separately reserves branch join space.",
+          "lines": [
+            31,
+            32,
+            38,
+            39,
+            71,
+            77
+          ]
+        },
+        "premise_provenance": {
+          "status": "unresolved",
+          "explanation": "Lowering, control and roundtrip are caller-supplied fields, not a source/compiler production theorem.",
+          "lines": [
+            100,
+            101,
+            103,
+            110,
+            111,
+            112,
+            115
+          ]
+        },
+        "positive_and_negative_controls": {
+          "status": "unresolved",
+          "explanation": "This interface declares obligations but contains no concrete positive or negative execution controls.",
+          "lines": [
+            21,
+            34,
+            83,
+            103,
+            110
+          ]
+        }
+      }
+    },
+    {
+      "path": "Solidity/Backend/Selection/InterfaceV2.lean",
+      "sha256": "0c4d31640864ac6e9a4f16765d03e03298ed3699f6e70ca67713bfbb02b360e4",
+      "entries": [
+        {
+          "line": 18,
+          "text": "structure FrameCertificate (input output : Scalar.Stack) where",
+          "assessment": "witness-present",
+          "explanation": "Input room forces an admitted empty tail, while frame and capacity impose separate successful and physical laws.",
+          "evidence": [
+            18,
+            21,
+            22,
+            24,
+            25
+          ]
+        },
+        {
+          "line": 19,
+          "text": "  code : Program",
+          "assessment": "unresolved",
+          "explanation": "Code is supplied by the certificate; the structure does not require that it contain an instruction.",
+          "evidence": [
+            18,
+            19,
+            22
+          ]
+        },
+        {
+          "line": 20,
+          "text": "  peak : Nat",
+          "assessment": "unresolved",
+          "explanation": "Peak is an arbitrary sufficient allowance, not a minimal peak or a positive-operation requirement.",
+          "evidence": [
+            14,
+            15,
+            16,
+            20
+          ]
+        },
+        {
+          "line": 21,
+          "text": "  inputRoom : input.length + peak \u2264 1024",
+          "assessment": "witness-present",
+          "explanation": "The input plus peak must fit, ensuring the empty-tail capacity premise is satisfiable.",
+          "evidence": [
+            21,
+            24,
+            25
+          ]
+        },
+        {
+          "line": 22,
+          "text": "  frame : \u2200 tail : Scalar.Stack,",
+          "assessment": "witness-present",
+          "explanation": "The frame equation requires a successful scalar run for every tail, including the empty tail.",
+          "evidence": [
+            22,
+            23
+          ]
+        },
+        {
+          "line": 24,
+          "text": "  capacity : \u2200 tail : Scalar.Stack,",
+          "assessment": "witness-present",
+          "explanation": "The capacity field demands the actual stackBound for each admitted tail, rather than assuming it.",
+          "evidence": [
+            21,
+            24,
+            25,
+            26
+          ]
+        }
+      ],
+      "dimensions": {
+        "inhabited_domain": {
+          "status": "witness-present",
+          "explanation": "inputRoom makes empty-tail admission possible for any supplied certificate.",
+          "lines": [
+            18,
+            21,
+            24,
+            25
+          ]
+        },
+        "nonempty_execution": {
+          "status": "unresolved",
+          "explanation": "frame requires successful runs but code can be empty; the structure alone requires no nonempty execution.",
+          "lines": [
+            19,
+            22,
+            23
+          ]
+        },
+        "nontrivial_observation": {
+          "status": "unresolved",
+          "explanation": "The frame law compares numeric stacks and does not name a source observation relation.",
+          "lines": [
+            18,
+            22,
+            23
+          ]
+        },
+        "capacity_or_identity": {
+          "status": "witness-present",
+          "explanation": "Capacity demands stackBound for all admitted tails, including empty; tails beyond peak room are excluded.",
+          "lines": [
+            14,
+            16,
+            21,
+            24,
+            25,
+            26
+          ]
+        },
+        "premise_provenance": {
+          "status": "unresolved",
+          "explanation": "This is a contract on supplied numeric code and does not construct compiler provenance.",
+          "lines": [
+            14,
+            18,
+            19,
+            22
+          ]
+        },
+        "positive_and_negative_controls": {
+          "status": "unresolved",
+          "explanation": "No examples or rejection controls occur in this file; they must be assessed separately.",
+          "lines": [
+            18,
+            21,
+            22,
+            24
+          ]
+        }
+      }
+    },
+    {
+      "path": "Solidity/Backend/Selection/InterfaceV2Controls.lean",
+      "sha256": "c1eed9cda5b87d21539c9423526def3698e00112884cb34b54a70d2a761355a5",
+      "entries": [
+        {
+          "line": 10,
+          "text": "def zeroPush : Instr := .push 0 #v[]",
+          "assessment": "witness-present",
+          "explanation": "zeroPush is a concrete PUSH0 instruction used to form the overflow counterexample.",
+          "evidence": [
+            9,
+            10,
+            25,
+            27
+          ]
+        },
+        {
+          "line": 13,
+          "text": "theorem run_zero_pushes (n : Nat) (tail : Scalar.Stack) :",
+          "assessment": "witness-present",
+          "explanation": "The induction demonstrates gasless execution of any number of zero pushes, including the 1025 case.",
+          "evidence": [
+            13,
+            14,
+            15,
+            16,
+            21
+          ]
+        },
+        {
+          "line": 15,
+          "text": "      some (List.replicate n (0 : Scalar.Word) ++ tail) := by",
+          "assessment": "not-a-contract",
+          "explanation": "This scanner hit is a continuation of the theorem result, not a separate declaration or field.",
+          "evidence": [
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "line": 25,
+          "text": "def legacyOverflow : Solidity.Backend.Selection.FrameCertificate []",
+          "assessment": "risk",
+          "explanation": "legacyOverflow constructs a V1 frame that produces 1025 words, exposing the conditional-prefix defect.",
+          "evidence": [
+            25,
+            26,
+            27,
+            28,
+            29,
+            33
+          ]
+        },
+        {
+          "line": 27,
+          "text": "  code := List.replicate 1025 zeroPush",
+          "assessment": "witness-present",
+          "explanation": "The V1 counterexample code is 1025 concrete PUSH0 instructions, not an empty code witness.",
+          "evidence": [
+            25,
+            26,
+            27
+          ]
+        },
+        {
+          "line": 28,
+          "text": "  frame := run_zero_pushes 1025",
+          "assessment": "witness-present",
+          "explanation": "The counterexample frame uses run_zero_pushes for all tails, exhibiting the gasless success.",
+          "evidence": [
+            13,
+            14,
+            25,
+            28
+          ]
+        },
+        {
+          "line": 29,
+          "text": "  prefixes := by",
+          "assessment": "risk",
+          "explanation": "The prefix proof uses the assumed bound directly, demonstrating why this field adds no capacity guarantee.",
+          "evidence": [
+            29,
+            30,
+            31,
+            32,
+            33
+          ]
+        },
+        {
+          "line": 36,
+          "text": "theorem reject_overflow : \u00ac Nonempty",
+          "assessment": "witness-present",
+          "explanation": "The negative control excludes a V2 certificate for the same 1025-word output.",
+          "evidence": [
+            36,
+            37,
+            38,
+            39
+          ]
+        },
+        {
+          "line": 43,
+          "text": "theorem reject_push_program {input output : Scalar.Stack}",
+          "assessment": "witness-present",
+          "explanation": "This negative control rejects the 1025-PUSH code for any declared V2 input and output.",
+          "evidence": [
+            43,
+            44,
+            45,
+            50,
+            51,
+            53
+          ]
+        },
+        {
+          "line": 47,
+          "text": "      some (List.replicate 1025 (0 : Scalar.Word) ++ input) := by",
+          "assessment": "not-a-contract",
+          "explanation": "This scanner hit continues the local run equation inside reject_push_program, not a separate declaration.",
+          "evidence": [
+            43,
+            46,
+            47,
+            49
+          ]
+        },
+        {
+          "line": 56,
+          "text": "example : Scalar.run (duplicateHead 7).code ([7] ++ [11,99]) =",
+          "assessment": "witness-present",
+          "explanation": "The positive example runs DUP over a nonempty protected tail, exercising real frame behavior.",
+          "evidence": [
+            55,
+            56,
+            57
+          ]
+        },
+        {
+          "line": 57,
+          "text": "    some ([7,7] ++ [11,99]) := (duplicateHead 7).frame [11,99]",
+          "assessment": "not-a-contract",
+          "explanation": "This scanner hit is the result side of the preceding example, not a separate contract.",
+          "evidence": [
+            56,
+            57
+          ]
+        },
+        {
+          "line": 59,
+          "text": "example : Scalar.stackBound (duplicateHead 7).code 1023 = true := by decide",
+          "assessment": "witness-present",
+          "explanation": "At height 1023 the DUP code meets the stack bound, a positive boundary control.",
+          "evidence": [
+            59,
+            60
+          ]
+        },
+        {
+          "line": 60,
+          "text": "example : Scalar.stackBound (duplicateHead 7).code 1024 = false := by decide",
+          "assessment": "witness-present",
+          "explanation": "At height 1024 the same DUP code fails the bound, a negative maximum-height control.",
+          "evidence": [
+            59,
+            60
+          ]
+        },
+        {
+          "line": 61,
+          "text": "example : (identityFrame ([] : Scalar.Stack) (by decide)).peak = 0 := rfl",
+          "assessment": "risk",
+          "explanation": "This example checks the empty identity peak is zero; it does not show nonempty execution.",
+          "evidence": [
+            61
+          ]
+        },
+        {
+          "line": 65,
+          "text": "def identityCompiler : CompilerPremise Unit (fun _ => ()) []",
+          "assessment": "risk",
+          "explanation": "The producer control is inhabited but uses Unit observation, identity relation and empty IR, not source correspondence.",
+          "evidence": [
+            63,
+            64,
+            65,
+            66,
+            67
+          ]
+        },
+        {
+          "line": 67,
+          "text": "  inhabited := \u27e80,Evm.Machine.init,Evm.Machine.init,rfl\u27e9",
+          "assessment": "risk",
+          "explanation": "The chosen budget and initial/final machines are identical; this witnesses only a trivial relation case.",
+          "evidence": [
+            65,
+            66,
+            67
+          ]
+        },
+        {
+          "line": 68,
+          "text": "  preserves := by",
+          "assessment": "risk",
+          "explanation": "Preservation follows by substituting machine equality for the empty IR control, not a compiler implementation.",
+          "evidence": [
+            65,
+            66,
+            68,
+            69,
+            70,
+            71
+          ]
+        },
+        {
+          "line": 75,
+          "text": "theorem runtime_witness_inhabited : \u2203 (budget : Nat) (m : Evm.Machine)",
+          "assessment": "risk",
+          "explanation": "The runtime domain witness uses empty IR, empty stacks and zero budget; it does not construct a consumer.",
+          "evidence": [
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79
+          ]
+        },
+        {
+          "line": 82,
+          "text": "theorem reject_wrong_ir_result : Evm.run [] Evm.Machine.init \u2260",
+          "assessment": "witness-present",
+          "explanation": "This negative control rejects a false final stack for the empty IR execution.",
+          "evidence": [
+            81,
+            82,
+            83,
+            85,
+            88
+          ]
+        },
+        {
+          "line": 92,
+          "text": "theorem reject_false_compiler (Observation : Type) (source : Nat \u2192 Observation)",
+          "assessment": "witness-present",
+          "explanation": "The inhabited producer field rules out a constantly false relation as a negative control.",
+          "evidence": [
+            91,
+            92,
+            94,
+            96,
+            97
+          ]
+        },
+        {
+          "line": 101,
+          "text": "theorem reject_false_runtime (Observation : Type) (source : Nat \u2192 Observation)",
+          "assessment": "witness-present",
+          "explanation": "The consumer independently rules out a constantly false relation by extracting its own witness.",
+          "evidence": [
+            99,
+            101,
+            107,
+            109,
+            110,
+            111
+          ]
+        }
+      ],
+      "dimensions": {
+        "inhabited_domain": {
+          "status": "witness-present",
+          "explanation": "The compiler control and numeric witness are inhabited, while false relations are explicitly rejected.",
+          "lines": [
+            65,
+            67,
+            75,
+            79,
+            92,
+            101
+          ]
+        },
+        "nonempty_execution": {
+          "status": "witness-present",
+          "explanation": "1025 PUSH and DUP controls contain nonempty numeric work; the runtime domain witness is empty IR.",
+          "lines": [
+            25,
+            27,
+            56,
+            57,
+            75,
+            78
+          ]
+        },
+        "nontrivial_observation": {
+          "status": "risk",
+          "explanation": "The compiler control uses Unit observation and equality, so it does not establish nontrivial source observation.",
+          "lines": [
+            63,
+            64,
+            65,
+            66,
+            67
+          ]
+        },
+        "capacity_or_identity": {
+          "status": "witness-present",
+          "explanation": "Overflow is admitted by V1 and rejected by V2; DUP is tested at heights 1023 and 1024.",
+          "lines": [
+            25,
+            27,
+            36,
+            37,
+            59,
+            60
+          ]
+        },
+        "premise_provenance": {
+          "status": "risk",
+          "explanation": "The identity compiler and no-op runtime witness do not construct a source/compiler or bridge theorem.",
+          "lines": [
+            63,
+            64,
+            65,
+            73,
+            74,
+            75
+          ]
+        },
+        "positive_and_negative_controls": {
+          "status": "witness-present",
+          "explanation": "Positive DUP and identity controls accompany false relation, wrong result and overflow rejection controls.",
+          "lines": [
+            36,
+            56,
+            61,
+            65,
+            82,
+            92,
+            101
+          ]
+        }
+      }
+    },
+    {
+      "path": "Solidity/Backend/Selection/Premises.lean",
+      "sha256": "95e3ac7e486a8749fab1383b2ad503bef93d4d18153740789ce33c6137f6921f",
+      "entries": [
+        {
+          "line": 10,
+          "text": "structure CompilerPremise (SourceObservation : Type)",
+          "assessment": "risk",
+          "explanation": "V1 compiler preservation has no inhabited relation field, so an always-false relation makes its implication vacuous.",
+          "evidence": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ]
+        },
+        {
+          "line": 13,
+          "text": "  preserves : \u2200 (budget : Nat) (initial final : Evm.Machine),",
+          "assessment": "risk",
+          "explanation": "Preservation is only demanded when the supplied relation holds; no source observation case is required.",
+          "evidence": [
+            13,
+            14
+          ]
+        },
+        {
+          "line": 19,
+          "text": "structure DecoderPremise (bytes : List UInt8) (input : Nat)",
+          "assessment": "unresolved",
+          "explanation": "DecoderPremise requires entry, closure, agreement and iteration for supplied adapters; no adapter is produced.",
+          "evidence": [
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            26,
+            27,
+            28
+          ]
+        },
+        {
+          "line": 23,
+          "text": "  entry : \u2200 s : Scalar.Stack, s.length = input \u2192 reachable \u27e80,s\u27e9",
+          "assessment": "witness-present",
+          "explanation": "Every stack of the declared input length must be reachable at entry, excluding an empty reachable set.",
+          "evidence": [
+            23
+          ]
+        },
+        {
+          "line": 24,
+          "text": "  closed : \u2200 s t : LabelExec.State, reachable s \u2192",
+          "assessment": "unresolved",
+          "explanation": "Reachability is closed under successful label steps but this implication does not itself produce a step.",
+          "evidence": [
+            24,
+            25
+          ]
+        },
+        {
+          "line": 26,
+          "text": "  agrees : \u2200 s : LabelExec.State, reachable s \u2192 bridgeStep s = LabelExec.step bytes s",
+          "assessment": "unresolved",
+          "explanation": "Agreement is required on reachable states; it is an external bridge obligation, not established here.",
+          "evidence": [
+            19,
+            22,
+            26
+          ]
+        },
+        {
+          "line": 27,
+          "text": "  zero : \u2200 s : LabelExec.State, bridgeRun 0 s = some s",
+          "assessment": "risk",
+          "explanation": "This field requires the supplied bridgeRun to implement the identity equation at zero steps. It is a producer obligation, not a reflexive proof for an arbitrary adapter, and does not establish any nonempty execution.",
+          "evidence": [
+            27
+          ]
+        },
+        {
+          "line": 28,
+          "text": "  succ : \u2200 (n : Nat) (s : LabelExec.State),",
+          "assessment": "unresolved",
+          "explanation": "The successor equation ties repeated bridge execution to its supplied step function without a step witness.",
+          "evidence": [
+            28,
+            29
+          ]
+        },
+        {
+          "line": 35,
+          "text": "structure RuntimeConsumer (SourceObservation : Type)",
+          "assessment": "risk",
+          "explanation": "V1 RuntimeConsumer has only an implication field, allowing vacuity when external premises or relation are empty.",
+          "evidence": [
+            35,
+            42,
+            43,
+            44,
+            47
+          ]
+        },
+        {
+          "line": 43,
+          "text": "  consume : CompilerPremise SourceObservation source ir relation \u2192",
+          "assessment": "risk",
+          "explanation": "Consumption depends on compiler and decoder premises and a relation case; no witness is required in this structure.",
+          "evidence": [
+            43,
+            44,
+            45,
+            46,
+            47,
+            48
+          ]
+        }
+      ],
+      "dimensions": {
+        "inhabited_domain": {
+          "status": "risk",
+          "explanation": "Compiler relation has no witness requirement; consumer is conditional on premises and relation.",
+          "lines": [
+            10,
+            12,
+            13,
+            14,
+            35,
+            43,
+            47
+          ]
+        },
+        "nonempty_execution": {
+          "status": "risk",
+          "explanation": "Neither premise requires a successful nonempty execution; bridgeRun zero is a reflexive identity.",
+          "lines": [
+            13,
+            14,
+            27,
+            43,
+            48,
+            49
+          ]
+        },
+        "nontrivial_observation": {
+          "status": "risk",
+          "explanation": "The externally supplied source relation may be False or identity; no coverage guarantee is stated.",
+          "lines": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ]
+        },
+        "capacity_or_identity": {
+          "status": "unresolved",
+          "explanation": "Runtime capacity is asserted only in the consumer conclusion under all its antecedents.",
+          "lines": [
+            43,
+            44,
+            45,
+            47,
+            50,
+            51
+          ]
+        },
+        "premise_provenance": {
+          "status": "risk",
+          "explanation": "Compiler and decoder are external obligations, not producers, and the consumer assumes both.",
+          "lines": [
+            3,
+            4,
+            5,
+            43,
+            44
+          ]
+        },
+        "positive_and_negative_controls": {
+          "status": "unresolved",
+          "explanation": "No positive or negative control is defined in this legacy premises file.",
+          "lines": [
+            10,
+            19,
+            35
+          ]
+        }
+      }
+    },
+    {
+      "path": "Solidity/Backend/Selection/PremisesV2.lean",
+      "sha256": "fe5eacf6561b9c9e5b899338083281eafa8106b8b546fbccdd166b740734fc76",
+      "entries": [
+        {
+          "line": 18,
+          "text": "structure CompilerPremise (SourceObservation : Type)",
+          "assessment": "witness-present",
+          "explanation": "The compiler premise adds an inhabited relation but does not ensure coverage of actual source evaluations.",
+          "evidence": [
+            7,
+            11,
+            12,
+            18,
+            21,
+            22
+          ]
+        },
+        {
+          "line": 21,
+          "text": "  inhabited : \u2203 (budget : Nat) (initial final : Evm.Machine),",
+          "assessment": "witness-present",
+          "explanation": "An explicit budget and machine pair must satisfy the relation, excluding the constantly false relation.",
+          "evidence": [
+            21,
+            22
+          ]
+        },
+        {
+          "line": 23,
+          "text": "  preserves : \u2200 (budget : Nat) (initial final : Evm.Machine),",
+          "assessment": "unresolved",
+          "explanation": "Preservation remains conditional on the supplied relation and requires exact zero-cost IR success.",
+          "evidence": [
+            23,
+            24
+          ]
+        },
+        {
+          "line": 30,
+          "text": "structure RuntimeConsumer (SourceObservation : Type)",
+          "assessment": "witness-present",
+          "explanation": "The consumer requires its own successful IR relation witness, independent of the implication premises.",
+          "evidence": [
+            26,
+            27,
+            30,
+            38,
+            40,
+            41,
+            42
+          ]
+        },
+        {
+          "line": 38,
+          "text": "  inhabited : \u2203 (budget : Nat) (m : Evm.Machine) (s t : Scalar.Stack),",
+          "assessment": "risk",
+          "explanation": "The witness enforces an input-height and successful run but allows zero budget, empty code and identity behavior.",
+          "evidence": [
+            38,
+            39,
+            40,
+            41
+          ]
+        },
+        {
+          "line": 42,
+          "text": "  consume : CompilerPremise SourceObservation source ir relation \u2192",
+          "assessment": "unresolved",
+          "explanation": "The consumer conclusion still assumes compiler and decoder producers and does not establish those obligations.",
+          "evidence": [
+            42,
+            43,
+            44,
+            46,
+            47,
+            48
+          ]
+        }
+      ],
+      "dimensions": {
+        "inhabited_domain": {
+          "status": "witness-present",
+          "explanation": "Both structures require a relation witness; runtime adds input-height and actual IR success.",
+          "lines": [
+            18,
+            21,
+            22,
+            30,
+            38,
+            39,
+            40,
+            41
+          ]
+        },
+        "nonempty_execution": {
+          "status": "risk",
+          "explanation": "A successful IR witness is mandatory but nothing requires nonempty code or a positive execution cost.",
+          "lines": [
+            38,
+            40,
+            41
+          ]
+        },
+        "nontrivial_observation": {
+          "status": "risk",
+          "explanation": "Nonemptiness alone allows an identity observation and explicitly does not establish source coverage.",
+          "lines": [
+            7,
+            8,
+            11,
+            12,
+            21,
+            22
+          ]
+        },
+        "capacity_or_identity": {
+          "status": "unresolved",
+          "explanation": "Consumer claims bounds for each bridge prefix only after both external premises and relation hold.",
+          "lines": [
+            42,
+            43,
+            46,
+            47,
+            49,
+            50
+          ]
+        },
+        "premise_provenance": {
+          "status": "risk",
+          "explanation": "The source function and relation remain parameters and compiler/decoder evidence is assumed by consume.",
+          "lines": [
+            7,
+            12,
+            18,
+            19,
+            20,
+            42,
+            43
+          ]
+        },
+        "positive_and_negative_controls": {
+          "status": "unresolved",
+          "explanation": "This file has no concrete positive or negative examples; it only defines the strengthened contracts.",
+          "lines": [
+            18,
+            21,
+            30,
+            38
+          ]
+        }
+      }
+    }
+  ]
+}
