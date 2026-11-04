@@ -48,3 +48,5 @@
 | `Lowering/V07/SignedWordSubtraction.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V07/UnsignedCasts.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V07/UnsignedWidthCasts.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V07/UnsignedComplement.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/UnsignedComplementControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |

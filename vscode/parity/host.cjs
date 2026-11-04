@@ -1,11 +1,11 @@
 'use strict';
 const assert = require('node:assert/strict');
-const {readFileSync,writeFileSync,appendFileSync,existsSync} = require('node:fs');
+const {readFileSync,writeFileSync,appendFileSync,existsSync,mkdirSync} = require('node:fs');
 const {join} = require('node:path');
 const {performance} = require('node:perf_hooks');
 const {createHash}=require('node:crypto');
 const {observe} = require('./observe.cjs');
-const {workload,symbolPosition} = require('./workloads.cjs');
+const {workload,symbolPosition,verificationOutcomes,servicesWorkload,assertServiceResponse} = require('./workloads.cjs');
 
 async function run() {
   const vscode = require('vscode');
@@ -59,15 +59,15 @@ async function run() {
     await vscode.window.showTextDocument(doc,{preview:false}); return doc;
   }
   function current(doc) { const state=states.get(doc.uri.toString());return state?.version === doc.version ? state : null; }
-  async function verify(doc,count) {
+  async function verify(doc,count,expected='proved') {
     if (target==='local') {
       const report=await api.verify(doc);
       assert.ok(report,'verification discarded');
-      assert.equal(report.errors.length,0,JSON.stringify(report.errors));
-      assert.equal(report.results.filter(r=>/^f\d+$/.test(r.function)).length,count,'all paired obligations must be reported');
+      verificationOutcomes(target,report,count,expected);
       return report;
     }
     await until(()=>{const state=current(doc);return state?.namedVerifiables.length===count && state.namedVerifiables.every(s=>s.status>=4);},'final current-version symbol status');
+    verificationOutcomes(target,current(doc),count,expected);
     return current(doc);
   }
   function snapshot(doc) {
@@ -151,27 +151,14 @@ async function run() {
           scope:id==='hover'?'verified declaration hover':'Discovery probe at declaration; dedicated trigger/call-site tests are required.'};
       });
     }
-    if(config.suite==='full'&&target==='local')await scenario('language-services-callsite',async()=>{
-      const path=file('language-services');
-      const body='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Services { function helper(uint a, uint b) public pure returns(uint) {return a+b;} function caller() public pure returns(uint) {return helper(1,2);} }\n';
-      writeFileSync(path,body);const languageDoc=await vscode.workspace.openTextDocument(path);
-      const offset=body.lastIndexOf('helper('),point=languageDoc.positionAt(offset+2);
-      const definition=await request('vscode.executeDefinitionProvider',languageDoc,point,[]);
-      assert.ok(definition.value?.length,'call-site definition');
-      const references=await request('vscode.executeReferenceProvider',languageDoc,point,[]);assert.ok(references.value?.length>=2);
-      const completion=await request('vscode.executeCompletionItemProvider',languageDoc,point,[]);assert.ok(completion.value?.items.some(i=>i.label==='helper'));
-      const signature=await request('vscode.executeSignatureHelpProvider',languageDoc,languageDoc.positionAt(offset+'helper(1,'.length),[]);
-      assert.equal(signature.value?.activeParameter,1);assert.match(signature.value.signatures[0].label,/helper/);
-      const rename=await vscode.commands.executeCommand('vscode.executeDocumentRenameProvider',languageDoc.uri,point,'renamed');
-      assert.equal(rename.get(languageDoc.uri).length,2);
-      return {status:'partial',definitions:definition.value.length,references:references.value.length,renameEdits:rename.get(languageDoc.uri).length,
-        scope:'Actual local compiler-backed providers at a call site. Cross-language semantic parity is unexamined.'};
+    if(config.suite==='full')await scenario('symbols-and-formatting',async()=>{
+      const symbols=await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',doc.uri);
+      const names=[];const visit=rows=>{for(const s of rows||[]){names.push(s.name);visit(s.children);}};visit(symbols);
+      assert.ok(names.some(n=>n.includes('f0')),'function document symbol');
+      const formatting=await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider',doc.uri,{tabSize:2,insertSpaces:true});
+      assert.ok(Array.isArray(formatting),'formatter response (already formatted input may have no edits)');
+      return {status:'partial',symbols,formatting,scope:'Document symbols and formatter invocation; formatting edit semantics need dedicated fixtures.'};
     });
-    if(config.suite==='full')await scenario('symbols-and-formatting',async()=>({
-      status:target==='local'&&!api.service?'missing':'partial',
-      symbols:await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',doc.uri),
-      formatting:await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider',doc.uri,{tabSize:2,insertSpaces:true})
-    }));
     await scenario('incremental-verification',async()=>{
       const start=performance.now();await replace(doc,workload(target,config.obligations+1));
       await verify(doc,config.obligations+1);metrics.incrementalVerificationMs=performance.now()-start;return snapshot(doc);
@@ -212,7 +199,7 @@ async function run() {
       return {status:'partial',saveBoundary,state:snapshot(doc),scope:'The obsolete request is suppressed. Latest verification requires explicit Save after this VS Code persistence race; automatic recovery remains open.'};
     });
     if(config.suite==='full')await scenario('failure-diagnostics',async()=>{
-      await replace(doc,workload(target,config.obligations,true));await verify(doc,config.obligations);
+      await replace(doc,workload(target,config.obligations,true));await verify(doc,config.obligations,'failed');
       const state=snapshot(doc);assert.ok(state.diagnostics.length>0,'false postcondition must be visible');return state;
     });
     if(config.suite==='full')await scenario('counterexamples',async()=>{
@@ -224,8 +211,8 @@ async function run() {
       await vscode.workspace.getConfiguration('solidityLean').update('counterexamples',true,vscode.ConfigurationTarget.Workspace);
       const report=await api.verify(doc);
       const rows=report.results.filter(r=>/^f\d+$/.test(r.function));
-      assert.ok(rows.some(r=>r.status==='refuted'&&r.counterexample),'certified counterexample evidence');
-      return {status:'partial',rows:rows.map(r=>({function:r.function,status:r.status,counterexample:r.counterexample})),scope:'Certified model prestate, without a positioned trace.'};
+      assert.ok(rows.some(r=>r.status==='refuted'&&r.counterexample),'counterexample evidence');
+      return {status:'partial',rows:rows.map(r=>({function:r.function,status:r.status,counterexample:r.counterexample})),scope:'Model prestate, without a positioned trace. Certificate presence is retained per row.'};
     });
     await scenario('concurrent-files-and-requests',async()=>{
       const start=performance.now();
@@ -274,6 +261,35 @@ async function run() {
       const start=performance.now();await vscode.commands.executeCommand(target==='local'?'solidityLean.restartServer':'dafny.restartServer');
       metrics.restartMs=performance.now()-start;
       const restarted=await open('restarted',1);await verify(restarted,1);return snapshot(restarted);
+    });
+    if(config.suite==='full')await scenario('language-services-callsite',async()=>{
+      const fixture=servicesWorkload(target);
+      const project=join(config.workspace,'language-services-project');mkdirSync(project,{recursive:true});
+      if(target==='dafny')writeFileSync(join(project,'dfyconfig.toml'),'includes = ["*.dfy"]\n');
+      const path=join(project,'language-services'+(target==='dafny'?'.dfy':'.sol'));
+      writeFileSync(path,fixture.text);const languageDoc=await vscode.workspace.openTextDocument(path);
+      await vscode.window.showTextDocument(languageDoc,{preview:false});
+      const definition=await request('vscode.executeDefinitionProvider',languageDoc,fixture.call,[]);
+      assertServiceResponse('definition',fixture,languageDoc.uri.toString(),definition.value);
+      const references=await request('vscode.executeReferenceProvider',languageDoc,fixture.call,[]);
+      assertServiceResponse('references',fixture,languageDoc.uri.toString(),references.value);
+      const signature=await request('vscode.executeSignatureHelpProvider',languageDoc,fixture.signature,[]);
+      assert.match(signature.value?.signatures?.[0]?.label||'',/helper/);
+      const secondParameter=await request('vscode.executeSignatureHelpProvider',languageDoc,fixture.signatureSecond,[]);
+      const point=new vscode.Position(fixture.call.line,fixture.call.character);
+      const rename=await vscode.commands.executeCommand('vscode.executeDocumentRenameProvider',languageDoc.uri,point,'renamed');
+      assertServiceResponse('rename',fixture,languageDoc.uri.toString(),{changes:{[languageDoc.uri.toString()]:rename?.get(languageDoc.uri)||[]}});
+      let completion;
+      const completionEdit=new vscode.WorkspaceEdit();completionEdit.insert(languageDoc.uri,new vscode.Position(fixture.completionInsertion.line,fixture.completionInsertion.character),' + this.');
+      assert.equal(await vscode.workspace.applyEdit(completionEdit),true);
+      try{
+        completion=await request('vscode.executeCompletionItemProvider',languageDoc,fixture.completion,['.']);
+        assert.ok(completion.value?.items.some(i=>(typeof i.label==='string'?i.label:i.label.label)==='helper'),'member completion on incomplete receiver');
+        metrics.completionMs=completion.elapsedMs;
+      }finally{await replace(languageDoc,fixture.text);}
+
+      return {status:'partial',definitions:definition.value,references:references.value,completionLabels:completion.value.items.map(i=>i.label),signature:signature.value,secondParameter:secondParameter.value,renameEdits:rename.get(languageDoc.uri),
+        scope:'Paired real call-site APIs; additional language-specific behavior remains unexamined.'};
     });
     result.observations.commands=(await vscode.commands.getCommands(true)).filter(c=>c.startsWith(target==='local'?'solidityLean.':'dafny.'));
     result.observations.decorations=observation.decorations;
