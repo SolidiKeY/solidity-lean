@@ -64,7 +64,7 @@ theorem step_reverse (t : Tok) (s next : List Bracket)
   | none =>
     simp only [step, hb, Option.some.injEq] at h
     subst next
-    simp only [mirrorTok, hb, step, hb]
+    simp only [mirrorTok, step, hb]
   | some tag =>
     rcases tag with ⟨opening, k⟩
     cases opening with

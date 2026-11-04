@@ -64,13 +64,12 @@ def pins():
     runs = read("audit-runs.json")
     report = DATA/"evidence"/runs["signature_gate_dir"]/"1.log"
     axioms = {}
-    for line in report.read_text().splitlines():
-        match = re.fullmatch(r"'([^']+)' does not depend on any axioms", line)
-        if match:
-            axioms[match[1]] = []
-        match = re.fullmatch(r"'([^']+)' depends on axioms: \[(.*)\]", line)
-        if match:
-            axioms[match[1]] = [x.strip() for x in match[2].split(",") if x.strip()]
+    messages = {}
+    pattern = r"^'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])$"
+    for match in re.finditer(pattern, report.read_text(), re.M):
+        assert match[1] not in axioms, "duplicate actual kernel axiom report"
+        messages[match[1]] = match[0]
+        axioms[match[1]] = [x.strip() for x in match[2].split(",") if x.strip()] if match[2] else []
     assert set(axioms) == {r["name"] for r in rows}, "incomplete actual kernel report"
     assert all(set(a) <= STANDARD for a in axioms.values()), "non-standard axiom"
     write("axioms.json", axioms)
@@ -78,8 +77,7 @@ def pins():
     source = "\n".join("import "+m for m in imports)+"\n\n/-! Exact kernel-reported axiom pins for every source declaration in this lane. -/\n\n"
     for row in rows:
         name = row["name"]
-        ax = axioms[name]
-        message = f"'{name}' depends on axioms: [{', '.join(ax)}]" if ax else f"'{name}' does not depend on any axioms"
+        message = messages[name]
         source += f"/-- info: {message} -/\n#guard_msgs in #print axioms {name}\n\n"
     (AREA/"AxiomPins.lean").write_text(source.rstrip()+"\n")
     print(f"AUDIT_PINS: {len(axioms)} exact standard-only kernel axiom sets")

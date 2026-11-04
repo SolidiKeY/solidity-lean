@@ -360,6 +360,48 @@
     "source_signature": "theorem certified_expr_spans_commaSep_unique\n    (a b : Syn .expr) (aspan bspan : List Tok)\n    (args args' : List (Syn .expr \u00d7 List Tok))\n    (ha : a.Derives aspan) (hb : b.Derives bspan)\n    (has : \u2200 pair, pair \u2208 args \u2192 pair.1.Derives pair.2)\n    (hbs : \u2200 pair, pair \u2208 args' \u2192 pair.1.Derives pair.2)\n    (he : commaSep (aspan :: args.map Prod.snd) = commaSep (bspan :: args'.map Prod.snd)) :\n    aspan :: args.map Prod.snd = bspan :: args'.map Prod.snd"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.all_prec_root",
+    "source_signature": "theorem all_prec_root {c : Cat} (e : Syn c) (h : e.all Syn.precNode = true) :\n    e.precNode = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.all_prec_implies_prec",
+    "source_signature": "theorem all_prec_implies_prec {c : Cat} (e : Syn c) (h : e.all Syn.precNode = true) :\n    e.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LowYieldProperty",
+    "source_signature": "def LowYieldProperty {c : Cat} (e : Syn c) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_low_property",
+    "source_signature": "theorem expression_low_property {c : Cat} (e : Syn c) : LowYieldProperty e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_yield_lowFree",
+    "source_signature": "theorem high_expr_yield_lowFree (e : Syn .expr) (hp : e.prec = true) (hl : 2 \u2264 e.level) :\n    Produces e.yield LowFreeItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_lowFree",
+    "source_signature": "theorem type_yield_lowFree (ty : Syn .typeName) : Produces ty.yield LowFreeItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_derives_lowFree",
+    "source_signature": "theorem high_expr_derives_lowFree (e : Syn .expr) (ts : List Tok)\n    (hp : e.prec = true) (hl : 2 \u2264 e.level) (hd : e.Derives ts) : LowFree ts"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.Families",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.negFamily",
@@ -802,6 +844,390 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily_certified_depth_injective",
     "source_signature": "theorem groupFamily_certified_depth_injective (e : Syn .expr) (ts : List Tok)\n    (hd : e.Derives ts) {n m : Nat} (h : groupFamily n e = groupFamily m e) : n = m"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_yield_join",
+    "source_signature": "theorem assignment_yield_join (op : AssignOp) (a b : Syn .expr)\n    (initial middle rest : List Choice) (xs ys : List (List Tok))\n    (ha : a.yield initial = some (xs, middle)) (hb : b.yield middle = some (ys, rest)) :\n    (Syn.assign op a b).yield initial = some ([xs.flatten ++ pu op.punct ++ ys.flatten], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_yield_join",
+    "source_signature": "theorem conditional_yield_join (c a b : Syn .expr)\n    (initial middle next rest : List Choice) (xs ys zs : List (List Tok))\n    (hc : c.yield initial = some (xs, middle)) (ha : a.yield middle = some (ys, next))\n    (hb : b.yield next = some (zs, rest)) :\n    (Syn.cond c a b).yield initial = some ([xs.flatten ++ pu .question ++ ys.flatten ++\n      pu .colon ++ zs.flatten], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_prec_join",
+    "source_signature": "theorem assignment_prec_join (op : AssignOp) (a b : Syn .expr)\n    (ha : a.prec = true) (hb : b.prec = true) (hl : 2 \u2264 a.level) :\n    (Syn.assign op a b).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_prec_join",
+    "source_signature": "theorem conditional_prec_join (c a b : Syn .expr)\n    (hc : c.prec = true) (ha : a.prec = true) (hb : b.prec = true)\n    (hcl : 2 \u2264 c.level) (hbl : 1 \u2264 b.level) : (Syn.cond c a b).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleAssignment",
+    "source_signature": "def middleAssignment (op : AssignOp) (n : Nat) : Syn .expr"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleAssignmentTokens",
+    "source_signature": "def middleAssignmentTokens (op : AssignOp) (n : Nat) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleAssignment_prec",
+    "source_signature": "theorem middleAssignment_prec (op : AssignOp) (n : Nat) :\n    (middleAssignment op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleAssignment_yield",
+    "source_signature": "theorem middleAssignment_yield (op : AssignOp) (n : Nat) (rest : List Choice) :\n    (middleAssignment op n).yield rest = some ([middleAssignmentTokens op n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleAssignment_certified",
+    "source_signature": "theorem middleAssignment_certified (op : AssignOp) (n : Nat) :\n    (middleAssignment op n).Derives (middleAssignmentTokens op n) \u2227\n      (middleAssignment op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleAssignment_first_question",
+    "source_signature": "theorem middleAssignment_first_question (op : AssignOp) (n : Nat) :\n    firstTop lowMarker [] (middleAssignmentTokens op n) = some (1, .punct .question)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleAssignment_marker_not_assignment",
+    "source_signature": "theorem middleAssignment_marker_not_assignment (op : AssignOp) (n : Nat) (position : Nat) :\n    firstTop lowMarker [] (middleAssignmentTokens op n) \u2260 some (position, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowMarker",
+    "source_signature": "def lowMarker : Tok \u2192 Bool\n  | .punct .question | .punct .assign | .punct .assignBitOr | .punct .assignBitXor\n  | .punct .assignBitAnd | .punct .assignShl | .punct .assignSar | .punct .assignShr\n  | .punct .assignAdd | .punct .assignSub | .punct .assignMul | .punct .assignDiv\n  | .punct .assignMod => true\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LowFree",
+    "source_signature": "def LowFree (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LowFreeItems",
+    "source_signature": "def LowFreeItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowMarker_atomic",
+    "source_signature": "theorem lowMarker_atomic : AtomicSelector lowMarker"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_nil",
+    "source_signature": "theorem lowFree_nil : LowFree []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_lowMarker",
+    "source_signature": "theorem assignment_lowMarker (op : AssignOp) : lowMarker (.punct op.punct) = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_balanced",
+    "source_signature": "theorem lowFree_balanced {ts : List Tok} (h : LowFree ts) : Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFreeItems_balanced",
+    "source_signature": "theorem lowFreeItems_balanced {items : List (List Tok)} (h : LowFreeItems items) :\n    BalancedItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_append",
+    "source_signature": "theorem lowFree_append {xs ys : List Tok} (hx : LowFree xs) (hy : LowFree ys) :\n    LowFree (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_atom",
+    "source_signature": "theorem lowFree_atom {t : Tok} (hb : bracket t = none) (hc : lowMarker t = false) :\n    LowFree [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFreeItems_nil",
+    "source_signature": "theorem lowFreeItems_nil : LowFreeItems []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFreeItems_cons",
+    "source_signature": "theorem lowFreeItems_cons {ts : List Tok} {items : List (List Tok)}\n    (h : LowFree ts) (hs : LowFreeItems items) : LowFreeItems (ts :: items)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFreeItems_single",
+    "source_signature": "theorem lowFreeItems_single {ts : List Tok} (h : LowFree ts) : LowFreeItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFreeItems_dropHead",
+    "source_signature": "theorem lowFreeItems_dropHead {ts : List Tok} {items : List (List Tok)}\n    (h : LowFreeItems (ts :: items)) : LowFreeItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFreeItems_flatten",
+    "source_signature": "theorem lowFreeItems_flatten {items : List (List Tok)} (h : LowFreeItems items) :\n    LowFree items.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_flatMap",
+    "source_signature": "theorem lowFree_flatMap {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 LowFree (f x)) : LowFree (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_of_atoms",
+    "source_signature": "theorem lowFree_of_atoms (ts : List Tok) (h : \u2200 t, t \u2208 ts \u2192 bracket t = none \u2227 lowMarker t = false) :\n    LowFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_parens",
+    "source_signature": "theorem lowFree_parens {ts : List Tok} (h : Balanced ts) : LowFree (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_braces",
+    "source_signature": "theorem lowFree_braces {ts : List Tok} (h : Balanced ts) : LowFree (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_square",
+    "source_signature": "theorem lowFree_square {ts : List Tok} (h : Balanced ts) :\n    LowFree (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_tk",
+    "source_signature": "theorem lowFree_tk (k : Kw) : LowFree (tk k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_idt",
+    "source_signature": "theorem lowFree_idt (name : String) : LowFree (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_path",
+    "source_signature": "theorem lowFree_path (p : IdPath) : LowFree p.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_elem",
+    "source_signature": "theorem lowFree_elem (e : Elem) : LowFree e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_visibility",
+    "source_signature": "theorem lowFree_visibility (v : Visibility) : LowFree v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_mutability",
+    "source_signature": "theorem lowFree_mutability (m : Mutability) : LowFree m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_dataLoc",
+    "source_signature": "theorem lowFree_dataLoc (l : DataLoc) : LowFree l.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_optToks",
+    "source_signature": "theorem lowFree_optToks {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 a, LowFree (f a))\n    (value : Option \u03b1) : LowFree (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_prefix",
+    "source_signature": "theorem lowFree_prefix (op : PrefixOp) : LowFree op.punct"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_suffix",
+    "source_signature": "theorem lowFree_suffix (op : SuffixOp) : LowFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_mul",
+    "source_signature": "theorem lowFree_mul (op : MulOp) : LowFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_add",
+    "source_signature": "theorem lowFree_add (op : AddOp) : LowFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_shift",
+    "source_signature": "theorem lowFree_shift (op : ShiftOp) : LowFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_order",
+    "source_signature": "theorem lowFree_order (op : OrderOp) : LowFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_equality",
+    "source_signature": "theorem lowFree_equality (op : EqOp) : LowFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_lowFree",
+    "source_signature": "theorem fragsP_lowFree (mk : Bytes \u2192 Tok) (hm : \u2200 bs, bracket (mk bs) = none \u2227 lowMarker (mk bs) = false)\n    (bs : Bytes) : Produces (fragsP mk bs) LowFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_lowFree",
+    "source_signature": "theorem litP_lowFree (l : Lit) : Produces (litP l) LowFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LowFreeAttrs",
+    "source_signature": "def LowFreeAttrs (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFreeAttrs_append",
+    "source_signature": "theorem lowFreeAttrs_append {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : LowFreeAttrs xs) (hy : LowFreeAttrs ys) : LowFreeAttrs (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lowFree_single",
+    "source_signature": "theorem lowFree_single (slot : Slot) (ts : List Tok) (h : LowFree ts) :\n    LowFreeAttrs (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_lowFree",
+    "source_signature": "theorem arrange_lowFree (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : LowFreeAttrs singles)\n    (hm : LowFreeItems mods) (h : arrange order singles mods = some ts) : LowFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_lowFree",
+    "source_signature": "theorem attrsP_lowFree (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : LowFreeAttrs singles) (hm : LowFreeItems mods) :\n    Produces (attrsP singles mods order) LowFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.FirstLowIs",
+    "source_signature": "def FirstLowIs (marker : Tok) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_yield_firstLow",
+    "source_signature": "theorem assignment_yield_firstLow (op : AssignOp) (a b : Syn .expr)\n    (hp : (Syn.assign op a b).prec = true) :\n    Produces (Syn.assign op a b).yield (FirstLowIs (.punct op.punct))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_yield_firstLow",
+    "source_signature": "theorem conditional_yield_firstLow (c a b : Syn .expr)\n    (hp : (Syn.cond c a b).prec = true) :\n    Produces (Syn.cond c a b).yield (FirstLowIs (.punct .question))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_firstLow",
+    "source_signature": "theorem derives_firstLow (e : Syn .expr) (ts : List Tok) (marker : Tok)\n    (hy : Produces e.yield (FirstLowIs marker)) (hd : e.Derives ts) :\n    \u2203 n, firstTop lowMarker [] ts = some (n, marker)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_derives_firstLow",
+    "source_signature": "theorem assignment_derives_firstLow (op : AssignOp) (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.assign op a b).prec = true) (hd : (Syn.assign op a b).Derives ts) :\n    \u2203 n, firstTop lowMarker [] ts = some (n, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_derives_firstLow",
+    "source_signature": "theorem conditional_derives_firstLow (c a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.cond c a b).prec = true) (hd : (Syn.cond c a b).Derives ts) :\n    \u2203 n, firstTop lowMarker [] ts = some (n, .punct .question)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_conditional_disjoint",
+    "source_signature": "theorem assignment_conditional_disjoint (op : AssignOp) (a b c d e : Syn .expr)\n    (ts : List Tok) (ha : (Syn.assign op a b).prec = true)\n    (hc : (Syn.cond c d e).prec = true) (da : (Syn.assign op a b).Derives ts)\n    (dc : (Syn.cond c d e).Derives ts) : False"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_punct_injective",
+    "source_signature": "theorem assignment_punct_injective (op op' : AssignOp) (h : op.punct = op'.punct) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_operator_reconstructed",
+    "source_signature": "theorem assignment_operator_reconstructed (op op' : AssignOp) (a b c d : Syn .expr)\n    (ts : List Tok) (ha : (Syn.assign op a b).prec = true)\n    (hc : (Syn.assign op' c d).prec = true) (da : (Syn.assign op a b).Derives ts)\n    (dc : (Syn.assign op' c d).Derives ts) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_level_below_two_cases",
+    "source_signature": "theorem expr_level_below_two_cases (e : Syn .expr) (h : e.level < 2) :\n    (\u2203 op a b, e = Syn.assign op a b) \u2228 (\u2203 c a b, e = Syn.cond c a b)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LowRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certified_firstLow_none_iff",
+    "source_signature": "theorem certified_firstLow_none_iff (e : Syn .expr) (ts : List Tok)\n    (hp : e.prec = true) (hd : e.Derives ts) :\n    firstTop lowMarker [] ts = none \u2194 2 \u2264 e.level"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.Primary",

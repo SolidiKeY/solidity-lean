@@ -43,10 +43,28 @@ def declarations():
     return rows
 
 
-def audit_checkpoint(modules, decls, axioms):
+def audit_runs():
     runs = read("audit-runs.json")
     require(set(runs) == {"proof_stem", "proof_gate_dir", "signature_stem", "signature_gate_dir"} and
             all(re.fullmatch(r"[a-z][a-z0-9-]*", value) for value in runs.values()), "invalid audit run references")
+    return runs
+
+
+def actual_axiom_report():
+    runs = audit_runs()
+    path = DATA/"evidence"/runs["signature_gate_dir"]/"1.log"
+    require(path.is_file(), "actual axiom report missing")
+    pattern = r"^'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])$"
+    reported, messages = {}, {}
+    for match in re.finditer(pattern, path.read_text(), re.M):
+        require(match[1] not in reported, "duplicate actual axiom report")
+        messages[match[1]] = match[0]
+        reported[match[1]] = [x.strip() for x in match[2].split(",") if x.strip()] if match[2] else []
+    return reported, messages
+
+
+def audit_checkpoint(modules, decls, axioms):
+    runs = audit_runs()
     proof = read("evidence/"+runs["proof_stem"]+".inside.json")
     outer = read("evidence/"+runs["proof_stem"]+".outer.json")
     current = {name: digest(ROOT/name) for name in modules}
@@ -75,14 +93,7 @@ def audit_checkpoint(modules, decls, axioms):
     pin_path = "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean"
     require({k:v for k,v in signature["source_hashes"].items() if k != pin_path} ==
             {k:v for k,v in current.items() if k != pin_path}, "signature evidence is stale")
-    reported = {}
-    for line in (DATA/"evidence"/runs["signature_gate_dir"]/"1.log").read_text().splitlines():
-        match = re.fullmatch(r"'([^']+)' does not depend on any axioms", line)
-        if match:
-            reported[match[1]] = []
-        match = re.fullmatch(r"'([^']+)' depends on axioms: \[(.*)\]", line)
-        if match:
-            reported[match[1]] = [s.strip() for s in match[2].split(",") if s.strip()]
+    reported, _ = actual_axiom_report()
     require(reported == axioms, "actual axiom report differs from pins")
     compiler = read("evidence/compiler-0.8.38.json")
     require(compiler["pin"]["sha256"] == "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390" and
@@ -161,9 +172,10 @@ def main():
     require(set(axioms) == set(names) and all(set(a) <= STANDARD for a in axioms.values()), "axiom inventory differs")
     imports = sorted({d["module"] for d in decls})
     expected = "\n".join("import "+m for m in imports)+"\n\n/-! Exact kernel-reported axiom pins for every source declaration in this lane. -/\n\n"
+    reported, messages = actual_axiom_report()
+    require(reported == axioms, "actual axiom report differs from pins")
     for name in names:
-        ax = axioms[name]
-        msg = f"'{name}' depends on axioms: [{', '.join(ax)}]" if ax else f"'{name}' does not depend on any axioms"
+        msg = messages[name]
         expected += f"/-- info: {msg} -/\n#guard_msgs in #print axioms {name}\n\n"
     require((AREA/"AxiomPins.lean").read_text() == expected.rstrip()+"\n", "axiom guards differ from full declaration inventory")
     signature_source = "\n".join("import "+m for m in imports)+"\n\n"+"".join(

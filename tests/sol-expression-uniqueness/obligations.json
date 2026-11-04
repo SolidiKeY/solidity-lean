@@ -21,13 +21,13 @@
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "Enclosing/grouping/comma spans reconstruct; last-marker token helper proved. Expression-derived precedence selectors and arbitrary operator-root reconstruction remain open."
+    "evidence": "Joint marker freedom is derived from existing recursive precedence. Certified roots classify as assignment/conditional/higher, and assignment operator reconstructs. Full operand/colon spans and remaining operator roots remain open."
   },
   {
     "id": "EU-05",
     "obligation": "all operator associativity and precedence boundaries",
     "status": "partial",
-    "evidence": "All left/right associativity refusal classes proved for arbitrary subtrees and operator values; full precedence uniqueness remains open. External fixtures use representative binary operators."
+    "evidence": "All associativity refusal families proved; loose root/operator class reconstructs. Full arithmetic/bitwise/logical/relational/exponent precedence unambiguity and remaining boundaries stay open."
   },
   {
     "id": "EU-06",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Arbitrary inhabited grouping and hidden-add mixed nesting families, tuple hole count reconstruction, and malformed reverse-scan/empty-vector collision controls proved. Full precedence boundary acceptance remains open."
+    "evidence": "Every assignment operator and arbitrary prefix depth has an inhabited middle-assignment conditional with exact yield/prec and first-question/not-assignment controls. Other arbitrary families remain. Full boundary acceptance stays open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "18 modules and 303 source declarations inventoried with exact standard-only kernel axiom pins."
+    "evidence": "22 modules and 374 source declarations inventoried with exact kernel standard-only pins, including Classical.choice where reported. Raw wrapped messages preserved."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel gates pass. Global roots/orphans stop at 18 frozen registrations; source trust/layers pass; central axiom inventory zero errors but 303 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at22 frozen registrations; source trust3694/layers pass; central axiom inventory zero errors but374 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted separator checkpoint with no remaining defects; malformed-word suffix semantics clarified with a kernel negative control. See evidence/reviews-separators.json. Future checkpoints require reviews."
+    "evidence": "Separate finder/skeptic accepted loose-root proofs, arbitrary middle-assignment controls and exact multiline axiom auditing with no remaining findings; no Lean server/edits. See evidence/reviews-lowroots.json."
   },
   {
     "id": "EU-14",

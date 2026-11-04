@@ -128,3 +128,25 @@ bad["source_hashes"]["Solidity/Elsewhere/AxiomPins.lean"] = "0" * 64
 reject_data(signature_inside, bad, "--checkpoint")
 require_positive_baseline()
 print("SIGNATURE_SNAPSHOT_CONTROLS_PASS: only the separately checked generated pin path is excluded; other extra paths rejected")
+
+report_path = audit.DATA/"evidence"/runs["signature_gate_dir"]/"1.log"
+report = report_path.read_text()
+read_text = Path.read_text
+
+def reject_report(value):
+    def changed(path, *args, **kwargs):
+        return value if path == report_path else read_text(path, *args, **kwargs)
+    with patch.object(Path, "read_text", changed), patch.object(sys, "argv", ["audit", "--checkpoint"]):
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            try:
+                audit.main()
+            except ValueError:
+                return
+    raise AssertionError("invalid actual axiom report accepted")
+
+first_name = next(iter(read("axioms.json")))
+reject_report(report+"\n'"+first_name+"' does not depend on any axioms\n")
+reject_report(report.replace("Classical.choice", "sorryAx", 1))
+reject_report(report.replace("Classical.choice,\n Quot.sound]", "Classical.choice,\n Quot.sound", 1))
+require_positive_baseline()
+print("AXIOM_REPORT_CONTROLS_PASS: actual wrapped standard lists accepted; duplicate, forbidden and unterminated reports rejected")

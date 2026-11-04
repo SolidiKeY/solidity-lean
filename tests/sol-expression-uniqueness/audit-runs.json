@@ -1,6 +1,6 @@
 {
-  "proof_stem": "checkpoint-proof-separators",
-  "proof_gate_dir": "checkpoint-gates-separators",
-  "signature_stem": "signature-audit-separators",
-  "signature_gate_dir": "signature-gates-separators"
+  "proof_stem": "checkpoint-proof-lowroots-final",
+  "proof_gate_dir": "checkpoint-gates-lowroots-final",
+  "signature_stem": "signature-audit-lowroots",
+  "signature_gate_dir": "signature-gates-lowroots"
 }

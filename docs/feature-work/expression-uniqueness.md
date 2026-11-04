@@ -40,9 +40,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 303 source declarations with source signatures;
+`declarations.json` enumerates all 374 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The eighteen modules are proposed for coordinator registration, with module-map rows,
+The twenty-two modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -96,7 +96,11 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `SeparatorSplit` | Actual commaSep injectivity on nonempty component vectors, allowing empty words; arbitrary hole-count reconstruction; explicit zero-vector versus single-empty collision. |
 | `CommaFreeAlgebra` | Comma-free token/item/attribute algebra; enclosures need only balanced interiors, allowing internal commas. |
 | `ExpressionCommaFree` | Exhaustive expression closure yields have no top-level commas; original expression certificates supply every scanner condition in certified component-span reconstruction. This concludes word-vector equality, not child-tree equality. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 303 source declarations; actual sets use only `propext` and `Quot.sound`, or no axioms. |
+| `LowFreeAlgebra` | Joint question/assignment selector includes all 13 assignment operators; loose-root-free token, type-spelling and attribute algebra. |
+| `ExpressionLowFree` | Existing recursive precedence plus level ≥ 2 derives loose-marker freedom for all expression roots; type and call-argument outer words are unconditionally free, including arbitrary enclosed descendants. |
+| `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Full operand spans and the conditional colon cut are still open. |
+| `LowControls` | Every assignment operator and arbitrary prefix depth inhabit a conditional middle branch with exact yield and whole precedence; the first marker is the outer question, never that middle assignment. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 374 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -137,13 +141,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-separators.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-lowroots-final.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-separators.inside.json`. It took 17.496485 seconds, child peak RSS
-239404 KiB, exact container peak 782573568 bytes, minimum parent headroom
-15714938880 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-lowroots-final.inside.json`. It took 18.247962 seconds, child peak RSS
+243668 KiB, exact container peak 782254080 bytes, minimum parent headroom
+15693119488 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -155,10 +159,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these eighteen modules lack central root imports. The orphan gate
-reported the same eighteen. Source trust passed (3690 sources, zero findings), and
+check: exactly these twenty-two modules lack central root imports. The orphan gate
+reported the same twenty-two. Source trust passed (3694 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 303 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 374 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -224,7 +228,7 @@ full acceptance remains exit 1 with the original proof obligations open.
 
 ## Separator checkpoint
 
-Four further modules add 85 declarations, bringing the current inventory to 18
+Four further modules add 85 declarations, bringing that checkpoint inventory to 18
 modules and 303 declarations. `expr_derives_commaFree` derives top-level comma
 freedom directly from the existing fully consumed certificate, across all 29
 constructors and recursive type/argument syntax. Component token spans therefore
@@ -246,3 +250,38 @@ tested core congruence proof and diagnostics passed. Current verdicts are in
 Node PATH (exit 127); its corrected invocation reached the same frozen-registration
 check (exit 1), now for 18 modules. All failed checks remain in evidence. The full
 public theorem, accepted-tree corollary and full final acceptance remain open.
+
+## Loose-root checkpoint
+
+Four modules add 71 declarations, bringing the current total to 22 modules and
+374 declarations. The original `Syn.prec` certificate and root level, rather than
+new producer conditions, yield the loose-marker invariant. Taking the first
+joint question/assignment marker handles arbitrary assignments in conditional
+middle branches. `certified_firstLow_none_iff` characterizes the higher-root class
+without a root-class premise. Assignment/conditional disjointness and assignment
+operator reconstruction are proved at arbitrary tree sizes. Full operand spans,
+conditional colon reconstruction, remaining operator levels and global tree
+uniqueness are still open. The all-operator middle-assignment family proves
+actual inhabited certificates at every prefix depth; documented false-branch
+refusals remain unchanged.
+
+Failed constructor-simplification attempts hit the unchanged 200000-heartbeat
+limit. Closed per-constructor arithmetic contradictions and compositional
+precedence joins discharge the exact same statements; no budget or statement
+changed. The high-expression invariant took about 130 seconds in MCP and its
+serial kernel build passed. A duplicate unused simp argument in `ReverseSplit`
+was removed. No owned-module linter warning remains in the successful signature
+build; frozen upstream `Source/Ctor` warnings remain untouched.
+
+Actual kernel axiom sets now include `Classical.choice` as well as `propext` and
+`Quot.sound`, all within the standard whitelist. Lean wrapped ten three-axiom
+messages across lines, exposing a single-line report-reader assumption. The
+parser now reads complete lists and rejects duplicate names. Guard comments
+preserve exact raw kernel messages; no printing/whitespace setting was relaxed.
+The first parser failure and the first guard-format failure are retained under
+separate evidence names. Both static inventory and checkpoint acceptance compare
+the entire reported axiom dictionary to the pins; the checkpoint additionally
+binds every current proof source hash and successful kernel guard run. Wrapped
+positive reports and duplicate/forbidden/unterminated negative controls pass.
+Separate finder/skeptic reviews accepted the source and audit changes without
+Lean-server use. Verdicts are in `evidence/reviews-lowroots.json`.

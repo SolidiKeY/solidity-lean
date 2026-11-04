@@ -205,7 +205,7 @@
     "level": 1,
     "precNode": "c.level >= 2 and f.level >= 1; t unrestricted at root",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "partial: first question marker and conditional class reconstructed; condition/branch spans and colon matching remain open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_cond (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -215,7 +215,7 @@
     "level": 0,
     "precNode": "a.level >= 2; b unrestricted at root",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "partial: marker class and assignment operator reconstructed from original certificates; complete operand spans remain open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_assign (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
