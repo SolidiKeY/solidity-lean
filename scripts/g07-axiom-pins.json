@@ -18059,6 +18059,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/StorageOps/ProducerInterfaceControls.lean:Solidity.Backend.StorageOps.ProducerInterfaceControls.changed_and_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ProducerInterfaceControls.lean:Solidity.Backend.StorageOps.ProducerInterfaceControls.compatible_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ProducerInterfaceControls.lean:Solidity.Backend.StorageOps.ProducerInterfaceControls.reached_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.copy_sound": [
   "Classical.choice",
   "Quot.sound",
@@ -24161,6 +24176,516 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccess.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccess.capture_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls.full_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls.heap_readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls.journals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls.shifted_not_absolute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccessControls.slice_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.byteWrites_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.phase_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.plans_prefix_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.prefix_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.changed_visited_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.header_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.old_header_commit_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.oldHeaders": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.outside_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.outside_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean:Solidity.Lowering.StorageOps.SourceByteCommitFramesControls.outside_read_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrier.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrier.load_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.capture_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.shifted_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageClear.lean:Solidity.Lowering.StorageOps.SourceByteStorageClear.range_eq_int": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopy.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopy.load_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopy.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopy.store_bytes_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.boundary_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.refusal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.write_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePrepared.lean:Solidity.Lowering.StorageOps.SourceByteStoragePrepared.store_prepared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.context_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.phase_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.timeout_journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommit.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommit.commit_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.capture_for_whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.dangling_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.dirty_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.dirty_journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.dirty_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.dirty_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.empty_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.phase_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.shifted_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.snapshot_for_whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.timeout_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.whole_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls.wrong_reference_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedBytePhase.lean:Solidity.Lowering.StorageOps.SourceCapturedBytePhase.run_phase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeout.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeout.cleanup_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.capture_for_whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.heap_not_rolled_back": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.naive_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.phase_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.rollback_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.snapshot_for_whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.success_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.timeout_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls.whole_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeout.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeout.payload_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeout.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeout.write_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.capture_for_whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.exact_payload_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.heap_not_rolled_back": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.naive_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.phase_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.rollback_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.snapshot_for_whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.success_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.timeout_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls.whole_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadback.lean:Solidity.Lowering.StorageOps.SourceCaptureReadback.allocation_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.full_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.slice_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceCopyCommutation.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.commute": [
   "Classical.choice",
   "Quot.sound",
@@ -24692,6 +25217,91 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCapture.lean:Solidity.Lowering.StorageOps.SourceNestedByteCapture.empty_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCapture.lean:Solidity.Lowering.StorageOps.SourceNestedByteCapture.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.prefix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.timeout_heap_changed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.timeout_storage_unchanged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValues.lean:Solidity.Lowering.StorageOps.SourceNestedByteValues.capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValues.lean:Solidity.Lowering.StorageOps.SourceNestedByteValues.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.execution_unchanged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.prefix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.Controls.actual_prefix_readback": [
   "Classical.choice",
   "Quot.sound",
@@ -25032,6 +25642,41 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.array_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.copy_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.load_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.uniform_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.certificate": [
   "Classical.choice",
   "Quot.sound",
@@ -25068,6 +25713,101 @@
   "propext"
  ],
  "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.wrong_tail_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmpty.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmpty.copy_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.absent_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.empty_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.materialization_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.tail_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayload.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayload.copy_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayload.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayload.store_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.empty_destination_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.short_destination_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.three_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.two_certificate": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -25360,6 +26100,46 @@
   "propext"
  ],
  "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_second_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCapture.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCapture.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.execution_unchanged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.fuel_guard_needed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.prefix_client": [
   "Classical.choice",
   "Quot.sound",
   "propext"
