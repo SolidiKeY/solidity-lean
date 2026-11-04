@@ -1,0 +1,3 @@
+# drift-reports bounded tooling checkpoint
+
+Producer `10553724951069ff6b2f9986a2fe8c297ea866be`. Exact frozen acceptance SHA256 `01a6a0a842966fa758441e3e70af53799a8d657a181540341a7bcbe759071e64` passed for items 1–3 on its original producer tree, including the complete pinned BASE corpus. Independent read-only finder and skeptic passed. Combined focused controls also passed. These are advisory mechanical tools and frozen historical inventories; they do not establish Lean proofs, current-source feature status, or whole-lane completion. Existing source policies, protected files, and trust boundaries are unchanged. Final combined repository gates remain required before publication.
