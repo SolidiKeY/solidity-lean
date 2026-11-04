@@ -43,3 +43,8 @@
 
 | `Backend/Selection/ControlPackets.lean` | Bounded actual assembled JUMP/JUMPI/ISZERO tests, placed fetch and exact tag/byte-offset/JUMPDEST clients of existing LabelExec packets. |
 | `Backend/Selection/ControlPacketControls.lean` | Inhabited assembled packet arms plus independent literal-byte controls for exact1024/hidden1025 peaks, target corruption, PC/result/tail and untaken-target behavior. |
+
+| `Backend/Selection/BranchLayout.lean` | Static prefix views equal to existing conditional expansion and fixed-whole-items adapters for proved scalar/control packets and byte coordinates. |
+| `Backend/Selection/BranchPackets.lean` | Bounded selected-body, condition, test, join and tag traces at exact whole-branch placements. |
+| `Backend/Selection/BranchExecution.lean` | Frozen ControlCertificate constructor for whole conditional execution, actual selected body reachability and every prefix bound. |
+| `Backend/Selection/BranchControls.lean` | Inhabited assembled true/false arms, wrong-arm/tail negatives, overwritten-condition operand execution and join-capacity refusal. |

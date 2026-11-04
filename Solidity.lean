@@ -630,6 +630,10 @@ import Solidity.Backend.Scalar.Widths
 import Solidity.Backend.Scalar.Wrapping
 import Solidity.Backend.Selection.ArithmeticSelection
 import Solidity.Backend.Selection.BitwiseSelection
+import Solidity.Backend.Selection.BranchControls
+import Solidity.Backend.Selection.BranchExecution
+import Solidity.Backend.Selection.BranchLayout
+import Solidity.Backend.Selection.BranchPackets
 import Solidity.Backend.Selection.ControlPacketControls
 import Solidity.Backend.Selection.ControlPackets
 import Solidity.Backend.Selection.ExecutionTrace

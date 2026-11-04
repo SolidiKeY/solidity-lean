@@ -442,3 +442,41 @@ The unproved branch draft needs smaller static layout and execution lemmas
 within the existing proof budget. General loops and G45.06 remain open, with
 no current producer blocker to those proof steps. These checkpoint passes do
 not constitute the assignment's final full gate or Source/Bridge agreement.
+
+
+## Whole conditional execution
+
+BranchExecution.iteCertificate implements every field of the original frozen
+ControlCertificate for an existing Block.ite. It derives the selected body's
+entry from actual condition execution and the generated test, executes that
+body through its proved certificate, and executes the required join jump and
+final JUMPDEST. The true and false paths retain their actual instruction
+counts and stack bounds at every boundary, including temporary label pushes.
+Condition code may overwrite lower words. Output room explicitly reserves
+the true arm's join operand; no condition-only capacity assumption replaces it.
+
+BranchLayout.Placement records prefix views of the same existing expansion;
+items_eq and block_prefix prove their equality to Block.expand. It is neither
+a compiler nor an execution language. Generic adapters hold the whole item
+list abstract while transporting existing scalar/packet/control proofs through
+explicit list equalities. Separating these lemmas avoids elaborating symbolic
+assembler expressions inside the whole proof. The unchanged200000 heartbeat
+budget suffices; the earlier monolithic draft is superseded for branches.
+
+Controls construct real assembler outputs after PUSH32, exercise distinct
+nonempty true/false bodies over a populated tail, and reject the wrong-arm
+result and corrupted tail for the same actual run. A condition replaces42
+with99 and chooses the false body; whole byte execution then observes106,
+rather than assuming preservation of the original operand. A separate static
+negative retains the required room above a1024-word branch output. These are
+kernel proof controls, not external EVM tests or exact minimal-width claims.
+General loops and G45.06 composition remain open.
+
+
+Independent finder and skeptic reviews passed all four branch modules without
+material findings. Both confirmed actual body reachability, byte coordinates,
+changed condition-stack handling, join and tag execution and prefix capacity.
+The join-overflow control is static ExpansionRoom rejection; it does not claim
+an independently executed byte-overflow witness. Successful assembly, finite
+StructuredExec and child control certificates remain explicit inputs. The
+reviews used no edits, builds or Lean server.
