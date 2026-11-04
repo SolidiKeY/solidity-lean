@@ -290,3 +290,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/FixedMemoryCopyInterface.lean` | Headerless fixed primitive memory-copy code and complete allocator/freshness contract. |
 | `Backend/MemoryCopies/FixedMemoryCopy.lean` | Actual headerless fixed primitive memory-copy execution and complete allocator adoption. |
 | `Backend/MemoryCopies/FixedMemoryCopyControls.lean` | Fixed empty/pair/64 payload copies, old pointer preservation and header/shallow/empty-reservation negatives. |
+| `Backend/MemoryCopies/FixedPathCopyInterface.lean` | Selected-pointer fixed-array fresh copy/binding contracts with headerless layout and refusal. |
