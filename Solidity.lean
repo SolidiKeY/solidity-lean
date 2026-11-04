@@ -2223,6 +2223,8 @@ import Solidity.Lowering.V07.UnsignedNarrowing
 import Solidity.Lowering.V07.UnsignedNarrowingControls
 import Solidity.Lowering.V07.UnsignedQuotRem
 import Solidity.Lowering.V07.UnsignedQuotRemControls
+import Solidity.Lowering.V07.UnsignedQuotRemGuard
+import Solidity.Lowering.V07.UnsignedQuotRemGuardControls
 import Solidity.Lowering.V07.UnsignedWidthCastControls
 import Solidity.Lowering.V07.UnsignedWidthCasts
 import Solidity.Lowering.V07.WordCastControls

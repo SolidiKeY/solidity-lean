@@ -90,3 +90,5 @@
 | `Lowering/V07/SignedLocalUpdateControls.lean` | All signed widths, MAX/MIN wrap and missing-narrowing controls, mixed caller/context clients and actual pipeline observations. |
 | `Lowering/V07/UnsignedQuotRem.lean` | Actual unsigned division/remainder, derived result bounds and initial-family local transport; distinct Source/native zero observations. |
 | `Lowering/V07/UnsignedQuotRemControls.lean` | All widths/modes/pipelines, zero and reversed-operand controls, inhabited alias/context/live-reference clients and payload mismatch witness. |
+| `Lowering/V07/UnsignedQuotRemGuard.lean` | Published division panic guards, exact Source panic payloads, fresh result capture and initial-family success/failure local transport. |
+| `Lowering/V07/UnsignedQuotRemGuardControls.lean` | Guard metadata, all-width/mode/pipeline cases, live caller/context clients and exact wrong-code/plain-revert/drop controls. |

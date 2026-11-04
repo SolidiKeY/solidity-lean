@@ -722,3 +722,41 @@ Grammar.lean; propose these two owned modules as additional component evidence,
 without changing the global manifest/ledger. G16/G17/P12, G18.01 and Backfill A/B
 remain partial. G18.06 awaits ordered V16/V14 applications and concrete P8
 producers; G19 remains V17. No constructors or external compiler/EVM tests added.
+
+## Guarded unsigned quotient/remainder
+
+`UnsignedQuotRemGuard` reuses the published Checked.divPG condition and
+panicStmt0x12, then captures a successful result in a fresh typed local before
+Operand.run drops it. Ten laws prove guard metadata/execution, exact code and
+operand outcomes, and Source/local transport from initial scalar alignment.
+Both Source checked modes and pipelines are supported. Nonzero succeeds with
+the derived range; zero now emits the complete Source panic bytes, observed
+with the existing Backend.Failure.HaltObserves predicate. No new failure
+relation, encoder, Source semantics or Backend opcode emitter is introduced.
+
+The ABI equality is the published V08.AbiObservations.panicData_transport leaf
+from059eb83d, independently validated by that integration's combined gates and
+rechecked through this import closure. It imports only Source.Observe and
+Semantics.RevertData, so no V07 cycle or unpublished lane dependency is added.
+Backend.Failure.revert_bytes_intrinsic/ofData_observes are reused read-only.
+The guarded target clause is explicit; this does not prove that every reserved
+frontend path selects it. In particular payload-retention mode/front-end
+integration remains an obligation, not a new source-profile restriction.
+
+Seventeen inhabited clients and2304 matrix executions cover all uint widths,
+pipelines, checked modes, zeros/extrema, aliases and live-reference contexts.
+Full payload comparisons reject both wrong panic0x11 and plain empty revert.
+Complete prefix/result/caller observations pin capture-before-drop; the wrong
+drop read is exactly17, not quotient3. Twenty-seven queried guards cover every
+headline/client; the metadata law/client use propext only, others standardthree.
+Independent read-only finder/skeptic source reviews passed; the skeptic's
+stronger exact negative-control observation was adopted without changing the
+expected result. Failed placeholder/inference checks remain in lane evidence.
+
+Feature arithmetic and G16/G17/P12 remain partial: general effectful operands,
+locations, signed division, other operators and actual frontend production are
+open. Exact local panic bytes do not provide transaction rollback, session
+failure projection or whole SourceSpec adequacy. G18.01/G18.06 retain the
+concrete producer/ordered-child/representation/copy/delete/lifetime boundaries;
+G18 children/G19 remain delegated. Backfill A/B remain partial; constructors0
+and no external compiler/EVM tests were added.
