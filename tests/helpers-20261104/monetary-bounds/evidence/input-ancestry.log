@@ -1,0 +1,2 @@
+COMMAND: ['git', 'merge-base', '--is-ancestor', '6f3eedf0788ee1f8a3bcf230558c712ecdca04d5', '046292ee61fc6967311bbb1ddec44505ed698481']
+EXIT: 0

@@ -1,0 +1,2 @@
+COMMAND: bash scripts/check-trust.sh
+scripts/check-trust.sh: line 4: node: command not found

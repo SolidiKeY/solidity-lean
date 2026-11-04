@@ -1,0 +1,35 @@
+COMMAND: rm -f .lake/build/lib/lean/SolkeyCheck.trace .lake/build/lib/lean/SolkeyCheck.olean; lake --no-cache -v -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml build solkeycheck; lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml exe solkeycheck
+✔ [0/12] Ran job computation
+✔ [1/12] Ran «solidity-lean»:extraDep
+✔ [2/12] Fetched Solidity.KeySort
+⚠ [3/12] Replayed Solidity.AST
+trace: .> LEAN_PATH=/workspace/monetary-producer-input/.lake/build/lib/lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --tstack=131072 -j1 /workspace/monetary-producer-input/Solidity/AST.lean -o /workspace/monetary-producer-input/.lake/build/lib/lean/Solidity/AST.olean -i /workspace/monetary-producer-input/.lake/build/lib/lean/Solidity/AST.ilean -c /workspace/monetary-producer-input/.lake/build/ir/Solidity/AST.c --setup /workspace/monetary-producer-input/.lake/build/ir/Solidity/AST.setup.json --json
+warning: Solidity/AST.lean:355:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+ℹ [4/12] Replayed Solidity.SortCheck.Annotations
+trace: .> LEAN_PATH=/workspace/monetary-producer-input/.lake/build/lib/lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --tstack=131072 -j1 /workspace/monetary-producer-input/Solidity/SortCheck/Annotations.lean -o /workspace/monetary-producer-input/.lake/build/lib/lean/Solidity/SortCheck/Annotations.olean -i /workspace/monetary-producer-input/.lake/build/lib/lean/Solidity/SortCheck/Annotations.ilean -c /workspace/monetary-producer-input/.lake/build/ir/Solidity/SortCheck/Annotations.c --setup /workspace/monetary-producer-input/.lake/build/ir/Solidity/SortCheck/Annotations.setup.json --json
+ℹ [5/12] Replayed Solidity.SortCheck.Parser
+trace: .> LEAN_PATH=/workspace/monetary-producer-input/.lake/build/lib/lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --tstack=131072 -j1 /workspace/monetary-producer-input/Solidity/SortCheck/Parser.lean -o /workspace/monetary-producer-input/.lake/build/lib/lean/Solidity/SortCheck/Parser.olean -i /workspace/monetary-producer-input/.lake/build/lib/lean/Solidity/SortCheck/Parser.ilean -c /workspace/monetary-producer-input/.lake/build/ir/Solidity/SortCheck/Parser.c --setup /workspace/monetary-producer-input/.lake/build/ir/Solidity/SortCheck/Parser.setup.json --json
+✔ [6/12] Fetched SolkeyCheck
+ℹ [7/12] Replayed SolkeyCheck:c.o (with exports)
+trace: .> /workspace/.setup/tools/lean-4.24.0-linux/bin/clang -c -o /workspace/monetary-producer-input/.lake/build/ir/SolkeyCheck.c.o.export /workspace/.setup/cache/lake/artifacts/17255787572073184053.c -I /workspace/.setup/tools/lean-4.24.0-linux/include -fstack-clash-protection -fwrapv -fPIC -fvisibility=hidden -Wno-unused-command-line-argument --sysroot /workspace/.setup/tools/lean-4.24.0-linux -nostdinc -isystem /workspace/.setup/tools/lean-4.24.0-linux/include/clang -O3 -DNDEBUG -DLEAN_EXPORTING
+✔ [8/12] Fetched Solidity.KeySort:c.o (with exports)
+ℹ [9/12] Replayed Solidity.AST:c.o (with exports)
+trace: .> /workspace/.setup/tools/lean-4.24.0-linux/bin/clang -c -o /workspace/monetary-producer-input/.lake/build/ir/Solidity/AST.c.o.export /workspace/.setup/cache/lake/artifacts/15715442723061233627.c -I /workspace/.setup/tools/lean-4.24.0-linux/include -fstack-clash-protection -fwrapv -fPIC -fvisibility=hidden -Wno-unused-command-line-argument --sysroot /workspace/.setup/tools/lean-4.24.0-linux -nostdinc -isystem /workspace/.setup/tools/lean-4.24.0-linux/include/clang -O3 -DNDEBUG -DLEAN_EXPORTING
+✔ [10/12] Fetched Solidity.SortCheck.Annotations:c.o (with exports)
+ℹ [11/12] Replayed Solidity.SortCheck.Parser:c.o (with exports)
+trace: .> /workspace/.setup/tools/lean-4.24.0-linux/bin/clang -c -o /workspace/monetary-producer-input/.lake/build/ir/Solidity/SortCheck/Parser.c.o.export /workspace/.setup/cache/lake/artifacts/9430386893954448805.c -I /workspace/.setup/tools/lean-4.24.0-linux/include -fstack-clash-protection -fwrapv -fPIC -fvisibility=hidden -Wno-unused-command-line-argument --sysroot /workspace/.setup/tools/lean-4.24.0-linux -nostdinc -isystem /workspace/.setup/tools/lean-4.24.0-linux/include/clang -O3 -DNDEBUG -DLEAN_EXPORTING
+ℹ [12/12] Replayed solkeycheck:exe
+trace: .> /workspace/.setup/tools/lean-4.24.0-linux/bin/clang -o /workspace/monetary-producer-input/.lake/build/bin/solkeycheck /workspace/.setup/cache/lake/artifacts/7736450633310865475.o /workspace/.setup/cache/lake/artifacts/3538141911066521104.o /workspace/.setup/cache/lake/artifacts/5989539196305794689.o /workspace/.setup/cache/lake/artifacts/7499308678861788667.o /workspace/.setup/cache/lake/artifacts/5952272433234931142.o -L /workspace/.setup/tools/lean-4.24.0-linux/lib/lean --sysroot /workspace/.setup/tools/lean-4.24.0-linux -L /workspace/.setup/tools/lean-4.24.0-linux/lib -L /workspace/.setup/tools/lean-4.24.0-linux/lib/glibc -lc -lc_nonshared -Wl,--as-needed -l:ld.so -Wl,--no-as-needed -lpthread_nonshared -Wl,--as-needed -Wl,-Bstatic -lgmp -lunwind -luv -Wl,-Bdynamic -Wl,--no-as-needed -fuse-ld=lld -Wl,--start-group -lleancpp -lLean -Wl,--end-group -lStd -Wl,--start-group -lInit -lleanrt -Wl,--end-group -Wl,-Bstatic -lc++ -lc++abi -Wl,-Bdynamic -lLake -Wl,--as-needed -lgmp -luv -lpthread -ldl -lrt -Wl,--no-as-needed -lm -ldl -pthread
+Build completed successfully (12 jobs).
+✔ [2/12] Fetched Solidity.KeySort
+⚠ [3/12] Replayed Solidity.AST
+warning: Solidity/AST.lean:355:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [6/12] Fetched SolkeyCheck
+✔ [8/12] Fetched Solidity.KeySort:c.o
+✔ [10/12] Fetched Solidity.SortCheck.Annotations:c.o
+solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131
+solkeycheck: OK — annotations match /workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key

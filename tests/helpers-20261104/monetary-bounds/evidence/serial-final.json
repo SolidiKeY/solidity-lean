@@ -1,0 +1,20 @@
+[
+  {
+    "name": "keysort-serial-rebuild",
+    "command": "rm -f .lake/build/lib/lean/SolkeyCheck.trace .lake/build/lib/lean/SolkeyCheck.olean; lake --no-cache -v -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml build solkeycheck; lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml exe solkeycheck",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 16084303872,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/keysort-serial-rebuild.log"
+  },
+  {
+    "name": "resource-proof",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml build Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 16084627456,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/resource-proof.log"
+  }
+]

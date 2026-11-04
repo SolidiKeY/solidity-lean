@@ -1,0 +1,101 @@
+[
+  {
+    "name": "runtime",
+    "command": "lean --version; lake --version; cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17983377408,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/runtime.log"
+  },
+  {
+    "name": "packet",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml build Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 16084627456,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/resource-proof.log"
+  },
+  {
+    "name": "keysort-final",
+    "command": "lake env lean --tstack=131072 -j1 --setup .lake/build/ir/SolkeyCheck.setup.json SolkeyCheck.lean; lake exe solkeycheck",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 15980793856,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/keysort-explicit-root.log"
+  },
+  {
+    "name": "run-lean",
+    "command": "./run-lean.sh",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17886748672,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/run-lean.log"
+  },
+  {
+    "name": "trust",
+    "command": "bash scripts/check-trust.sh",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17623486464,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/trust.log"
+  },
+  {
+    "name": "layers",
+    "command": "node scripts/check-layers.mjs",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17814810624,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/layers.log"
+  },
+  {
+    "name": "roots",
+    "command": "bash scripts/coord-tools/register.sh --check",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17947115520,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/roots.log"
+  },
+  {
+    "name": "orphans",
+    "command": "node scripts/check-orphans.mjs",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17811738624,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/orphans.log"
+  },
+  {
+    "name": "doc-paths",
+    "command": "bash scripts/check-doc-paths.sh",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17841106944,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/doc-paths.log"
+  },
+  {
+    "name": "axiom-inventory",
+    "command": "node scripts/check-axiom-pins.mjs",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17700261888,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/axiom-inventory.log"
+  },
+  {
+    "name": "mcp-diagnostics",
+    "command": "export LEAN_MCP_SERVER_CMD='/workspace/solidity-lean/.venv/bin/python -m lean_lsp_mcp --lean-project-path /workspace/monetary-producer-input'; export LEAN_MCP_START_WAIT=45 LEAN_MCP_TIMEOUT=90 LEAN_LSP_MAX_OPEN_FILES=1; trap 'scripts/coord-tools/lean-mcp stop' EXIT; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17543831552,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/mcp-diagnostics.log"
+  }
+]

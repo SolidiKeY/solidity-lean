@@ -1,0 +1,11 @@
+[
+  {
+    "name": "keysort-explicit-root",
+    "command": "lake env lean --tstack=131072 -j1 --setup .lake/build/ir/SolkeyCheck.setup.json SolkeyCheck.lean; lake exe solkeycheck",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 15980793856,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/keysort-explicit-root.log"
+  }
+]

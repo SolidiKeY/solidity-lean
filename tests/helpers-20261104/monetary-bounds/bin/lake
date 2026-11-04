@@ -1,0 +1,10 @@
+#!/bin/bash
+set -eu
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+case "${1:-}" in --version|--help) exec "$real" "$@";; esac
+for arg in "$@"; do
+ if [ "$arg" = serve ]; then
+  exec "$real" -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml "$@" --tstack=131072 -j1
+ fi
+done
+exec "$real" -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml "$@"

@@ -1,0 +1,2 @@
+COMMAND: node scripts/check-axiom-pins.mjs
+bash: line 1: node: command not found

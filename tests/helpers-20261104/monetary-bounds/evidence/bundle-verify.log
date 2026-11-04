@@ -1,0 +1,8 @@
+COMMAND: ['git', 'bundle', 'verify', '/workspace/peer-inputs/h26/monetary-046292ee.bundle']
+EXIT: 0
+/workspace/peer-inputs/h26/monetary-046292ee.bundle is okay
+The bundle contains this ref:
+046292ee61fc6967311bbb1ddec44505ed698481 refs/heads/h26-monetary-input-046292ee
+The bundle requires this ref:
+6f3eedf0788ee1f8a3bcf230558c712ecdca04d5 
+The bundle uses this hash algorithm: sha1

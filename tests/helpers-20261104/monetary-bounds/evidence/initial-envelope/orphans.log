@@ -1,0 +1,2 @@
+COMMAND: node scripts/check-orphans.mjs
+bash: line 1: node: command not found

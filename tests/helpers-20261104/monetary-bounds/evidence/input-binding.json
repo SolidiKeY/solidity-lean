@@ -1,0 +1,16 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "input": "046292ee61fc6967311bbb1ddec44505ed698481",
+  "bundle_sha256": "3e80a54e099845314bfd0b494132947eb312e1e683046eabf7dca0431099b64b",
+  "repository": "/workspace/solidity-lean",
+  "producer_worktree": "/workspace/monetary-producer-input",
+  "source_sha256": {
+    "/workspace/monetary-producer-input/Solidity/Source/Monetary.lean": "90e92e71ca8a43c9b34f3054a0fd9263cacfda849f032cde9c52fa4b03e9a1ca",
+    "/workspace/monetary-producer-input/Solidity/Source/MonetaryLaws.lean": "6ebc6da755bbeb062187f37798578b89c490b220ad968940f93954264b985eda"
+  },
+  "helper_sha256": {
+    "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean": "82583b19074fbcb61f1d9e2071a67bd31bc6706b6f298d9be3bcb4de79d60dc0",
+    "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean": "ddad4a694800ac8c34b8219cb8ad2e28b8b0c74ffde07dd0f0923f58ccc23f7e",
+    "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean": "3dbff0633d2a7906fcb8a79884fad5bdc06fcb23abd9556d21f095dad1bc4434"
+  }
+}

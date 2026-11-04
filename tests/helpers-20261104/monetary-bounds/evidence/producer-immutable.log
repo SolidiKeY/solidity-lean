@@ -1,0 +1,2 @@
+COMMAND: ['git', '-C', '/workspace/monetary-producer-input', 'diff', '--exit-code', '046292ee61fc6967311bbb1ddec44505ed698481', '--', '.']
+EXIT: 0

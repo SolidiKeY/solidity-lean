@@ -1,0 +1,92 @@
+[
+  {
+    "name": "runtime",
+    "command": "lean --version; lake --version; cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 18004107264,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/runtime-wrapper-failure.log"
+  },
+  {
+    "name": "packet",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml build Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17964535808,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/packet.log"
+  },
+  {
+    "name": "keysort-final",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml exe solkeycheck",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17982996480,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/keysort-final.log"
+  },
+  {
+    "name": "run-lean",
+    "command": "./run-lean.sh",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17886748672,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/run-lean.log"
+  },
+  {
+    "name": "trust",
+    "command": "bash scripts/check-trust.sh",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17623486464,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/trust.log"
+  },
+  {
+    "name": "layers",
+    "command": "node scripts/check-layers.mjs",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17814810624,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/layers.log"
+  },
+  {
+    "name": "roots",
+    "command": "bash scripts/coord-tools/register.sh --check",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17947115520,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/roots.log"
+  },
+  {
+    "name": "orphans",
+    "command": "node scripts/check-orphans.mjs",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17811738624,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/orphans.log"
+  },
+  {
+    "name": "doc-paths",
+    "command": "bash scripts/check-doc-paths.sh",
+    "exit": 0,
+    "status": "pass",
+    "minimum_available_bytes": 17841106944,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/doc-paths.log"
+  },
+  {
+    "name": "axiom-inventory",
+    "command": "node scripts/check-axiom-pins.mjs",
+    "exit": 1,
+    "status": "fail",
+    "minimum_available_bytes": 17700261888,
+    "reserve_stop": false,
+    "log": "/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/evidence/axiom-inventory.log"
+  }
+]

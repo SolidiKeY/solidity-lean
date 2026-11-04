@@ -1,0 +1,16 @@
+✔ [2/12] Fetched Solidity.KeySort
+✔ [3/12] Fetched Solidity.KeySort:c.o
+⚠ [4/12] Built Solidity.AST (9.1s)
+warning: Solidity/AST.lean:355:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [5/12] Built Solidity.AST:c.o (4.3s)
+✔ [6/12] Built Solidity.SortCheck.Annotations (1.1s)
+✔ [7/12] Fetched Solidity.SortCheck.Annotations:c.o
+✔ [8/12] Built Solidity.SortCheck.Parser (1.5s)
+✔ [9/12] Built Solidity.SortCheck.Parser:c.o (839ms)
+✔ [10/12] Built SolkeyCheck (818ms)
+✔ [11/12] Built SolkeyCheck:c.o (264ms)
+✔ [12/12] Built solkeycheck:exe (1.5s)
+solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131
+solkeycheck: OK — annotations match /workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
