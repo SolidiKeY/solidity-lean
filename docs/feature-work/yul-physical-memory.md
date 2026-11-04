@@ -575,3 +575,15 @@ full raw-map reencoding. Newly observed child1 owns its low value99 while high
 padding bits remain residual; the stale-complement and no-cleaning controls
 make that distinction explicit. These are checked snapshot ownership facts,
 not a logical write, journal transition or global retained-reference adequacy.
+
+`RetainedAliasOwnership` composes actual local alias production and the checked
+ownership plan's `Source.applyOp` in one Source computation. The plan is indexed
+by the actual post-assignment state and capture scopes. Only source success
+advances the complementary journal; static storage refusal retains the completed
+alias prefix and old residual journal. Whole-map reconstruction, every-original-H
+MemOK and other-account/bank journal isolation derive from that same result.
+The two-child control grows child0 from2 to3, recovering tail77 while preserving
+child1's99 and high padding bits. Paired rollback restores exactly the checked
+post-alias external-state/residual boundary, not arbitrary caller locals or a
+whole call. Canonical preparation failure and general capture/frame adequacy
+remain separate obligations.
