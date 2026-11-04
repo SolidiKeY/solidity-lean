@@ -21,6 +21,6 @@ def SourceByteRange {E : Source.Env} {Γ : Source.RCtx} (frame : Source.Fr)
     (path : Source.SPath) (before : Source.EMState E Γ) (start : Nat) (bytes : List UInt8) : Prop :=
   ∀ index : Fin bytes.length,
     PersistentSourceCell frame (path.go (.index (start + index.val))) before
-      (Source.Val.fixedBytes (h := by decide) [bytes[index]] rfl)
+      (Source.Val.fixedBytes (n := 1) (h := by decide) [bytes[index]] rfl)
 
 end Solidity.Backend.MemoryCopies
