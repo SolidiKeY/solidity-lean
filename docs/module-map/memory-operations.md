@@ -326,3 +326,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedStorageArrayInterface.lean` | Actual storage-header capacity guard and total primitive storage-to-memory copy contract. |
 | `Backend/MemoryCopies/CheckedStorageArray.lean` | Actual storage-length/free-cursor capacity checks and total fresh primitive-array copy execution. |
 | `Backend/MemoryCopies/CheckedStorageArrayControls.lean` | Inhabited empty/pair/long storage copies, capacity boundaries and actual header-dependent selection. |
+| `Backend/MemoryCopies/CheckedStoragePathInterface.lean` | Checked compiled storage paths, declarations/rebinding and explicit capacity refusal contracts. |
