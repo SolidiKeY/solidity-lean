@@ -138,3 +138,5 @@
 | `Lowering/V07/FixedBytesComparisonControls.lean` | All-width/operator ordered observations, live-reference framing and executed uncaptured/reversed-capture negative programs. |
 | `Lowering/V07/IntegerConstants.lean` | Source integer literal conversion from existing range typing, actual native fresh capture/drop and exact caller framing. |
 | `Lowering/V07/IntegerConstantControls.lean` | All64 integer types, literal boundaries, mixed references and executed truncation/fraction/signedness controls with exact pins. |
+| `Lowering/V07/IntegerConstantAssignment.lean` | Actual integer literal assignment, typed fresh capture/drop and arbitrary selected-family alias preservation. |
+| `Lowering/V07/IntegerConstantAssignmentControls.lean` | All64 integer types, ordered assignment observations, repeated/equal aliases and executed missing-write/stale/wrong-destination controls. |
