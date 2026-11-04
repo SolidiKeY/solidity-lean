@@ -70,3 +70,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/CheckedAdditionReachedOverflow.lean` | Selected two-stage checked-add execution with actual mapped prefix and derived reached-overflow Input. |
 | `Backend/Passes/CheckedAdditionReachedOverflowControls.lean` | MAX capture then doubling overflow; complete physical prefix and order/frame controls. |
 | `Backend/Passes/CheckedAdditionReachedOverflowPins.lean` | Exact standard-only axiom guards for reached checked-add overflow. |
+| `Backend/Passes/CheckedAdditionSequenceSuccess.lean` | Two successful public checked-add captures with both actual mapped outputs and exact second-guard terminal iff. |
+| `Backend/Passes/CheckedAdditionSequenceSuccessControls.lean` | Dependent16→23 capture, complete cells/readback, both guards and negative controls. |
+| `Backend/Passes/CheckedAdditionSequenceSuccessPins.lean` | Exact standard-only axiom guards for successful checked-add sequencing. |

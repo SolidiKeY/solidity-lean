@@ -584,6 +584,23 @@ wrong ordering and missing room. Source declaration lowering and public ABI or
 session observations remain outside these internal terminal results. Independent
 read-only finder and skeptic source reviews found no soundness defect.
 
+## Successful dependent checked-add captures
+
+`CheckedAdditionSequenceSuccess` supplies the successful counterpart for the
+same public two-capture program. Both actual machines and selected maps precede
+all saved tails, and the second Input is derived from the first full mapped
+output. Original local reads, arithmetic bounds and two-slot capacity remain
+explicit. `guard_exact` combines success with reached overflow: after the first
+sum fits, intrinsic and selected-code reverts are equivalent to second-sum
+out-of-range, without an execution premise.
+
+The inhabited 7+9 then16+7 control executes both captures, observes all 14 cells
+and the saved tail, and reads the original capture16 after the new capture23.
+Skipped suffix, wrong recapture and corrupted-tail controls distinguish those
+observations. Both guard cases are instantiated. Independent read-only source
+reviews found no defect; these remain intrinsic/memory-compiler results rather
+than Source declaration, public ABI or resource/session adequacy.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
