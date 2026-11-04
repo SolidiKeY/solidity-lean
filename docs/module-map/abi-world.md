@@ -24,3 +24,6 @@ These modules provide component observations; presence does not establish full A
 | `Backend/AbiWorld/CheckedAddArtifactControls.lean` | Kernel bounded-assembly witnesses and wrong-label controls; complete byte-layout observations, not branch execution. |
 
 See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof boundaries.
+
+| `Backend/AbiWorld/NativeParentWord.lean` | Actual recovered native-parent counter connected to existing full-word ABI encoding and explicit-count byte readback. |
+| `Backend/AbiWorld/NativeParentWordControls.lean` | Populated native-entry application and separately labeled caller-counter/word-boundary codec controls. |

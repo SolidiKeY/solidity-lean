@@ -28,6 +28,8 @@ import Solidity.Backend.AbiWorld.ErrorReadWindow
 import Solidity.Backend.AbiWorld.ErrorReadWindowControls
 import Solidity.Backend.AbiWorld.ErrorRoundtrip
 import Solidity.Backend.AbiWorld.LibraryResultPacket
+import Solidity.Backend.AbiWorld.NativeParentWord
+import Solidity.Backend.AbiWorld.NativeParentWordControls
 import Solidity.Backend.AbiWorld.PacketPrefix
 import Solidity.Backend.AbiWorld.PacketPrefixControls
 import Solidity.Backend.AbiWorld.PanicCallFrame
