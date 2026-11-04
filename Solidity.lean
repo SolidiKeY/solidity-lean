@@ -126,8 +126,10 @@ import Solidity.Backend.FailurePaths.ReasonCodecControls
 import Solidity.Backend.FailurePaths.Returns
 import Solidity.Backend.FailurePaths.Statements
 import Solidity.Backend.FailurePaths.TransientCallback
+import Solidity.Backend.FailurePaths.TransientComposition
 import Solidity.Backend.FailurePaths.TransientControls
 import Solidity.Backend.FailurePaths.TransientSharing
+import Solidity.Backend.FailurePaths.TransientSharingControls
 import Solidity.Backend.FailurePaths.TransientUnwind
 import Solidity.Backend.FailurePaths.WorldUnwind
 import Solidity.Backend.FunctionValues.Controls
