@@ -1631,3 +1631,14 @@ This remains depth0 normal closed-word scope/switch FOR to the mathematical
 model. Generic root frontend attachment, Source/G24/views/functions/early-flow,
 readback, native/charged/capacity/world/observation closure, remaining backfill and
 full lane/joint gates remain open. H26 interfaces and all owner holds are intact.
+
+
+### Target-success reflection for scoped FOR
+
+`ScopedForReflection` inverts the actual compiled scope/switch FOR target. The condition compiler's exact word/stack law and the real `NestedSwitch` body/post execution laws identify each iteration; target determinism supplies the exact next locals. From actual finite target evidence it derives the stopping count, every earlier nonzero guard and the final zero. From an actual packet and `compilerFuel ≤ base` it proves original source completion at `base + count + 2`. Selected-model success yields that source execution, identical arbitrary caller tail, exact raw locals/nonstack machine frame and pending zero. No source run, iteration count or desired exchange/run is assumed.
+
+The controls use the existing original scoped-temporary/switch FOR with dirty `2^200+257`, all raw initial counters and arbitrary caller tails. They reject nonzero pending and the wrong body/post-order accumulator, and exhibit mathematical-model success at initial stack length1025 while explicitly recording that capacity is exceeded. Source/compiler fuels, original observations and expected results are unchanged. These are kernel/model results; no new solc/native EVM experiment was performed.
+
+Validation: focused import build and two changed-file diagnostics; seven enforced standard-axiom reports; scoped trust, layers, generated roots, doc paths, module-map and inventory checks. Separate read-only finder and skeptic found no confirmed findings. Initial binder/parser/control-representation failures and a reduction-depth failure are retained; list-length lemmas fix the last without a budget change. Prior failed broad gates remain failed evidence, not passes.
+
+This closes a target-only reflection slice, not Y08.01/Y08.02. General logical Source/G24/H11/view/function/early-flow/admission-origin producers, native fetched-byte/charged/scanner/world/ordered-observation/host-writer closure, frontend dispatch and complete final validation remain open. H26 P20 interfaces and all earlier contracts stay unchanged.

@@ -105,3 +105,5 @@
 
 | `Bridge/SolidityBridge/Yul/ForCompletionSource.lean` | Shared original-loop completion induction with explicit normal source laws; actual old/new compiler clients discharge both premises, not a final simulation interface. |
 | `Bridge/SolidityBridge/Yul/ScopedForCompletion{,Controls}.lean` | Actual scope/switch FOR source success at arbitrary horizon derives count/guards/normal exact output and selected-model transport; no supplied stopping count or minimum horizon. Source10/all-input witness and horizon/order refusals. |
+
+| `Bridge/SolidityBridge/Yul/ScopedForReflection{,Controls}.lean` | Actual scope/switch FOR finite target-to-original-source reflection; source horizon recovered from target, exact raw locals/caller/full model frame and pending0. Model/native capacity separation and order refusals; no G24/native adequacy. |

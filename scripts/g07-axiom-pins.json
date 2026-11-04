@@ -31421,5 +31421,39 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForReflection.lean:SolidityBridge.Yul.ScopedForReflection.loop_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForReflection.lean:SolidityBridge.Yul.ScopedForReflection.source_of_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForReflection.lean:SolidityBridge.Yul.ScopedForReflection.source_of_structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForReflectionControls.lean:SolidityBridge.Yul.ScopedForReflection.Controls.oversized_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForReflectionControls.lean:SolidityBridge.Yul.ScopedForReflection.Controls.pending_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForReflectionControls.lean:SolidityBridge.Yul.ScopedForReflection.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForReflectionControls.lean:SolidityBridge.Yul.ScopedForReflection.Controls.wrong_order_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

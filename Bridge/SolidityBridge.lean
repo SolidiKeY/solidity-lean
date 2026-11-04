@@ -383,6 +383,8 @@ import SolidityBridge.Yul.ScopedFor
 import SolidityBridge.Yul.ScopedForCompletion
 import SolidityBridge.Yul.ScopedForCompletionControls
 import SolidityBridge.Yul.ScopedForControls
+import SolidityBridge.Yul.ScopedForReflection
+import SolidityBridge.Yul.ScopedForReflectionControls
 import SolidityBridge.Yul.ScopedSwitch
 import SolidityBridge.Yul.ScopedSwitchControls
 import SolidityBridge.Yul.SelectionSequence
