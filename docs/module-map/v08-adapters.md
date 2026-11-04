@@ -502,3 +502,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/V08/LiteralFailureCopyReturn.lean` | Derived converted tuple-return execution, slot extraction and actual return-data encoding. |
 | `Lowering/V08/LiteralFailureCopyReturnControls.lean` | Populated hidden return slots/caller parameters, exact extracted packets and copy-only allocation controls. |
+
+| `Lowering/V08/LiteralFailureCopiedReason.lean` | Actual eager calldata-string require conversion, exact success/failure state and Error readback. |
+| `Lowering/V08/LiteralFailureCopiedReasonControls.lean` | Populated copied-reason, static/local, full-word old-field and tight-fuel controls with complete packets. |
