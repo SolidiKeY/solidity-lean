@@ -355,6 +355,7 @@ import Solidity.Backend.MemoryOps.SourceDelete
 import Solidity.Backend.MemoryOps.SourceDeleteTarget
 import Solidity.Backend.MemoryOps.SourceIndexedDelete
 import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
+import Solidity.Backend.MemoryOps.SourceLocalReferenceReject
 import Solidity.Backend.MemoryOps.SourceMemory
 import Solidity.Backend.MemoryOps.SourceNestedAssignment
 import Solidity.Backend.MemoryOps.SourceNestedDelete

@@ -206,3 +206,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceCalldataBoolSliceNative.lean` | Actual computed Bool slice/decoder classification composed with paired Source and intrinsic allocation; retained old named struct/children/aliases and fresh map/MemOK frames. |
 
 | `Backend/MemoryOps/SourceLocalReferenceDelete.lean` | Actual Source local Bool-array reference deletion paired with native allocating rebind and complete published word code; fresh observer and retained old aliases. |
+
+| `Backend/MemoryOps/SourceLocalReferenceReject.lean` | Actual local-reference allocation/rebinding prefix followed by reached empty-root bounds rejection in Source Items, native Prog and full word append; retained-prefix frames. |

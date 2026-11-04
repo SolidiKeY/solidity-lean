@@ -6,6 +6,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
 import Solidity.Backend.MemoryOps.SourceShortCircuit
+import Solidity.Backend.MemoryOps.SourceLocalReferenceReject
 import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
 import Solidity.Backend.MemoryOps.SourceConditional
 import Solidity.Evm.Correct
@@ -2333,5 +2334,115 @@ theorem local_reference_delete_boundaries (p : Roadmap.Pipeline) :
 #guard_msgs (whitespace := lax) in #print axioms local_reference_delete_client
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms local_reference_delete_vectors
+
+
+private def rejectLocalSource : Source.EMState E0 RhsSΓ :=
+  ((rhsSource false).1.set (.there .here) (.memRef rfl 5),
+   {(rhsSource false).2 with heap := ((rhsSource false).2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+private def rejectLocalWord := writeMachine (allocateMachine (rhsWord false) ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+private def rejectLocalDelete : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ :=
+  .expr (.delete (.local (.there .here : Source.Idx RhsSΓ SB)))
+private def rejectLocalAssign : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ :=
+  .expr (sourceIndexedAssign (.there .here) (.there (.there si)) .here)
+private def rejectLocalItems : Source.RItems E0 [] false .body RhsSΓ RhsSΓ :=
+  .stmt rejectLocalDelete (.stmt rejectLocalAssign .nil)
+
+/-- Same INITIAL populated state under both pipelines: the first program step
+really changes identity, and the second rejects through that reached identity. -/
+theorem local_reference_late_reject_client (p : Roadmap.Pipeline) (horizon : Nat) :
+    let pair := (rhsState false).alloc (defaultArray .bool ⟨0,W_pos⟩)
+    let state := pair.1.setLocal (.there .here : Idx RhsΓ (.mem B)) (some pair.2)
+    (Source.execS (G0 p) F0 (horizon+5) RhsSΓ.length none rejectLocalDelete (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.ok (.normal rejectLocalSource.1),(.nil,rejectLocalSource.2)) ∧
+    Stmt.run (rhsState false) (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl))=
+      .ok ⟨state,List.prefix_append H [B]⟩ ∧
+    Evm.run (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord false)=
+      .ok rejectLocalWord 0 ∧
+    (Source.evalE (G0 p) F0 (horizon+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run rejectLocalSource=
+      (.error (.revert (Source.panicData .index)),rejectLocalSource) ∧
+    (Source.execItems (G0 p) F0 (horizon+6) RhsSΓ.length none rejectLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,rejectLocalSource.2)) ∧
+    Prog.run (rhsState false) (.cons (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl))
+      (.cons (rhsNative (.there (.there tj))) .nil))=.error .revert ∧
+    Evm.run (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint) ++
+      rhsCode (.there (.there tj))) (rhsWord false)=.revert ∧
+    Source.MemOK E0 SH rejectLocalSource ∧
+    SourceBoolMemoryAt rejectLocalSource 0 state.heap (left.wk (List.prefix_append H [B])) .dyn ∧
+    StateRepr 1 1 8 rhsFrag state (upd base 5 ⟨48,by decide⟩) rejectLocalWord ∧
+    StructAllocatorRepr state.heap (upd base 5 ⟨48,by decide⟩) 8 ⟨49,by decide⟩ rejectLocalWord ∧
+    Heap.Keeps (List.prefix_append H [B]) hp state.heap ∧
+    state.heap=(hp.alloc (defaultArray .bool ⟨0,W_pos⟩)).1 ∧ state.heap.len pair.2 .dyn=0 ∧ pair.2.id=5 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_local_delete_reject_program (G0 p) F0 horizon (rhsSource false)
+      (.there .here) (.there (.there si)) .here (rhsState false) (.there .here) (.there (.there tj)) .here left 0
+      (uintOfNat 1) true (rhsAt false) rfl rfl rfl rfl rfl rfl SH (rhsOK false)
+      (rhsRepr false) (rhsAllocator false) (by decide) (by decide)
+    rcases h with ⟨stmt,native,word,expr,items,_,program,_,append,keep,mok,_,oldAt,repr,alloc,length,id,_⟩
+    exact ⟨stmt,native,word,expr,items,program,append,mok,oldAt,repr,alloc,keep,rfl,length,id⟩
+
+/-- Skipping the deletion is a real successful write to old LEFT[1], not the
+same outcome as the combined program. Retained old reads stay on LEFT. -/
+theorem local_reference_reject_skipped_delete (p : Roadmap.Pipeline) (horizon : Nat) :
+    ∃ z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (horizon+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource false)=
+        (.ok (.val (.bool true)),z) ∧
+      SourceBoolMemoryAt z 0 rhsHeap left .dyn ∧
+      run (rhsCode (.there (.there tj))) (rhsWord false)=.ok (rhsMidWord false) 0 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨out,z,target,write,expr,_,_,_,observer,_⟩ := resolved_assign_word (G0 p) F0 horizon (rhsState false) left
+      (rhsAt false) (.there .here) (.there (.there si)) .here (.there .here) (.there (.there tj)) .here
+      (uintOfNat 1) true rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (rhsRepr false) SH (rhsOK false)
+    have known : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have same : out=rhsHeap := Option.some.inj (write.symm.trans known)
+    subst out
+    exact ⟨z,expr,observer,rhs_first_word false⟩
+
+theorem local_reference_late_reject_vectors :
+    rhsViews rejectLocalSource=rhsViews (rhsSource false) ∧
+    rejectLocalSource.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ ∧
+    (rhsSource false).2.heap.get 5=none ∧ rejectLocalSource.2.heap.next=6 ∧
+    rejectLocalSource.1=.cons (.bool true) (.cons (.memRef rfl 5) sy.1) ∧
+    words (rhsWord false)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words rejectLocalWord ++ [rejectLocalWord.mem 48,rejectLocalWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[0],w[48],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    rejectLocalWord.stack=[w[42]] ∧ words rejectLocalWord≠words (rhsWord false) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,by decide⟩
+
+/-- Horizon five reaches the real allocation/rebinding prefix before the
+assignment's timeout. The failed Items outcome exposes globals, not locals. -/
+theorem local_reference_reject_late_timeout (p : Roadmap.Pipeline) :
+    (Source.execItems (G0 p) F0 5 RhsSΓ.length none rejectLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.error .timeout,(.nil,rejectLocalSource.2)) ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 0 1 .bool).run rejectLocalSource=
+      (.ok (.bool false),rejectLocalSource) ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 5 1 .bool).run rejectLocalSource=
+      (.error (.revert (Source.panicData .index)),rejectLocalSource) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have reached := (source_bool_local_delete_rebind_word (G0 p) F0 0 (rhsSource false) (.there .here)
+      (rhsState false) (.there .here) left 0 (rhsAt false) rfl rfl SH (rhsOK false)
+      (rhsRepr false) (rhsAllocator false) (by decide) (by decide)).2.1
+    refine ⟨?_,rfl,rfl⟩
+    change (Source.execItems (G0 p) F0 5 RhsSΓ.length none (.stmt rejectLocalDelete (.stmt rejectLocalAssign .nil))
+      (rhsSource false).1).run (.nil,(rhsSource false).2)=_
+    unfold rejectLocalDelete
+    rw [Source.execItems,Source.Hoare.run_bind,reached]
+    rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_late_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_late_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_reject_skipped_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_reject_skipped_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_late_reject_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_late_reject_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_reject_late_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_reject_late_timeout
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls
