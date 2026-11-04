@@ -472,3 +472,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureNestedSlice.lean` | Actual nested calldata slicing, relative offset/full-word bounds, ordered failures and standard encoding consumer. |
 | `Solidity/Lowering/V08/LiteralFailureNestedSliceControls.lean` | Populated nested-slice packet outputs, old-alias preservation, nonzero/incorrect bases, two-stage bounds and timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureSliceChain.lean` | Arbitrary finite actual typed slice-chain evaluation, explicit fuel, standard encoding and invalid-extension consumers. |
+| `Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean` | Populated mixed explicit/omitted-end chain, complete packets, failure extensions, skipped allocating tails and timeout controls. |
