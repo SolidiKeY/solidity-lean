@@ -1314,3 +1314,28 @@ Both modules have zero per-file diagnostic errors; scoped Lean, layer and
 generated-root checks pass. Eleven scoped axiom reports use only Lean standard
 axioms. Failed automation/import/configuration/proof attempts remain raw evidence;
 the final proofs keep the original statements and budgets.
+
+### Boolean terminal horizons
+
+`LocalBoolHorizon.baseSuccessor` proves exact full-run equality at one extra
+fuel level for all four existing Boolean base certificates, after a non-timeout
+result. `successor` covers all six existing control constructors, including
+short-circuit and conditional execution, and `extension` handles arbitrary
+additional fuel. The concrete base theorem supplies the base case; every
+evaluated child premise follows actual parent execution. Skipped children need
+no termination premise. Complete raw values, local writes and worlds remain
+in the equality; no cleanup is introduced.
+Nine controls cover stable short-circuit results, preserved dirty words and
+failed clean projection, conditional writes, an inhabited selected-true
+conditional with an unselected timeout branch, retained partial writes,
+observable timeout changes and comparison-certificate refusal. Timeout
+prefixes remain excluded. These are local horizon laws, not general divergence,
+readback, arbitrary Source embedding, admission or compiler adequacy.
+No Source/ExtCall/evaluator edits or changed observations, expectations or
+budgets. General P16/full Y01/Y02/Y03/Y09.01 and final gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Twelve scoped axiom reports use only Lean standard
+axioms. Failed automation/branch reductions and the initial incomplete refusal
+proof are retained as raw evidence; no statements or budgets were changed.

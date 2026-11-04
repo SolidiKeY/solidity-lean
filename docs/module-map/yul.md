@@ -111,3 +111,5 @@
 | `Yul/LocalU8Horizon.lean`, `Yul/Checks/LocalU8Horizon.lean` | Exact full-run stability after non-timeout checked-u8 results, arbitrary added fuel and timeout counterexamples. |
 
 | `Yul/LocalU8CompareHorizon.lean`, `Yul/Checks/LocalU8CompareHorizon.lean` | Exact comparison result/state stability after non-timeout, preserving operand order and invalid-operation halts. |
+
+| `Yul/LocalBoolHorizon.lean`, `Yul/Checks/LocalBoolHorizon.lean` | Full raw-frame terminal fuel stability for base and short-circuit Boolean expressions, with selected-branch and timeout controls. |

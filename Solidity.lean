@@ -2420,6 +2420,7 @@ import Solidity.Yul.Checks.LocalBoolForNoGuard
 import Solidity.Yul.Checks.LocalBoolForPost
 import Solidity.Yul.Checks.LocalBoolForPostRepresentation
 import Solidity.Yul.Checks.LocalBoolForRepresentation
+import Solidity.Yul.Checks.LocalBoolHorizon
 import Solidity.Yul.Checks.LocalBoolIf
 import Solidity.Yul.Checks.LocalBoolIfElse
 import Solidity.Yul.Checks.LocalBoolInitialization
@@ -2648,6 +2649,7 @@ import Solidity.Yul.LocalBoolForNoGuard
 import Solidity.Yul.LocalBoolForPost
 import Solidity.Yul.LocalBoolForPostRepresentation
 import Solidity.Yul.LocalBoolForRepresentation
+import Solidity.Yul.LocalBoolHorizon
 import Solidity.Yul.LocalBoolIf
 import Solidity.Yul.LocalBoolIfElse
 import Solidity.Yul.LocalBoolInitialization
