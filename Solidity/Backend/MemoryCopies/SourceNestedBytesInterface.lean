@@ -29,8 +29,8 @@ def SourceByteChildrenResult {E : Source.Env} {Γ : Source.RCtx} (frame : Source
     (Source.loadElems (E := E) (Γ := Γ) frame (byteChildrenHorizon children + slack)
       (.bytes .memory) path start children.length).run before = (.ok values,after) ∧
     after.2.heap.next = before.2.heap.next + children.length ∧ AllocationExtension before after ∧
-    (∀ index, values index = .val (.memRef rfl (before.2.heap.next + index.val))) ∧
-    (∀ index, after.2.heap.get (before.2.heap.next + index.val) =
+    (∀ index : Fin children.length, values index = .val (.memRef rfl (before.2.heap.next + index.val))) ∧
+    (∀ index : Fin children.length, after.2.heap.get (before.2.heap.next + index.val) =
       some ⟨.bytes .memory,Source.Data.bytes children[index]⟩)
 
 end Solidity.Backend.MemoryCopies
