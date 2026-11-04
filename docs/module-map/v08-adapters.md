@@ -471,3 +471,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/G19/ReturnPair.lean` | V07-related captured return across two suffix assignments, rereading the second donor from reached state. |
 | `Lowering/G19/ReturnPairControls.lean` | Inhabited return/fallthrough, visible second write, stale donor and omitted-second controls. |
+
+| `Backend/StructuredFlow/ReturnPairCompiler.lean` | Actual compiler composition for mapped captured return and two reached-state suffix assignments; explicit fragment/capacity and entry premises. |
+| `Backend/StructuredFlow/ReturnPairCompilerControls.lean` | Inhabited both-pipeline runs, full native snapshot and typed/native suffix mutation negatives. |
