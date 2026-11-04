@@ -245,3 +245,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/DefaultSelection.lean` | Actual statement-compiler support for selected default roots and wrappers, exact allocation cost and checked emitted success with growth. |
 | `Backend/MemoryCopies/DefaultSelectionControls.lean` | Actual empty/nested/fixed64/primitive-struct default compiler choices and executions, with unsupported shape and wrong/skipped-code controls. |
 | `Backend/MemoryCopies/SingletonCopyInterface.lean` | Nonvacuous populated resolved singleton-array word-copy contract using existing allocation and typed-store emitters. |
+| `Backend/MemoryCopies/SingletonCopy.lean` | Populated resolved singleton array emission, actual source heap identity, complete allocator preservation and V2/root-gap certificate construction. |
+| `Backend/MemoryCopies/SingletonCopyControls.lean` | Nonzero uint/Boolean payloads, dynamic length, fresh repeated copies, reserved gaps, old-data framing and capacity/code negative controls. |
