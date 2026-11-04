@@ -207,3 +207,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Executable/CreationReturnProducer.lean` | Concrete H26 kernel-return producer and exact returned-byte equivalence over all referenced library addresses. |
 | `Backend/Executable/CreationReturnProducerControls.lean` | Nonempty one-site unused-library equivalence and referenced two-site swap rejection. |
 | `Backend/Executable/CreationReturnProducerAudit.lean` | Exact producer/equivalence types and scoped standard-axiom guards. |
+| `Backend/Executable/CreationReturnPartition.lean` | Actual constructor-return byte classification with immutable/link/outside certificates and cross-region exclusion. |
+| `Backend/Executable/CreationReturnPartitionControls.lean` | Direct classification at an adjacent library boundary, populated patch boundaries and argument-leak negatives. |
+| `Backend/Executable/CreationReturnPartitionAudit.lean` | Complete classification signatures and scoped axiom guards. |

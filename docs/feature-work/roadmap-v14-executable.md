@@ -377,3 +377,33 @@ probe is retained separately. G44 full source/account/world correspondence,
 G43/H19/H25, G36.03/V12 G37 and helper G18/VY5 remain open; G45 ownership remains
 reassigned/master-owned. General constructor Source lowering is not inferred
 from this bounded artifact-return result.
+
+### Complete constructor-return byte explanation (2026-11-04)
+
+`CreationReturnPartition` derives immutable bytes and unchanged bytes from actual
+constructor `Exec` and the existing deterministic runtime return. `partition`
+explains every index using a certified immutable byte, a certified library byte,
+or explicit certificates that the index is outside both tables plus equality to
+the original runtime lookup. Absent bytes are covered as Option lookups; input
+arguments are not appended to the result. `cross_exclusive` derives geometric
+immutable/library separation from the actual compatible tables. It is not a
+claim that keys or byte values uniquely identify frontend source declarations.
+No new AST, source-map fidelity or execution semantics is introduced.
+
+The actual105-byte constructor client has nonempty arguments, two immutable
+patches, two library sites and an unchanged byte. `classified_boundary` consumes
+the generic theorem at33 and excludes the wrong geometric classes. Further
+controls check both ends of each adjacent region, the first absent byte105,
+a wrong immutable value and argument leakage. Scoped guards retain standard
+axioms only; the finite boundary/argument controls are axiom-free. Initial
+normalization, variable-inclusion/index and membership failures remain raw.
+The initial admission refusal launched no heavy process; advisory cache-page
+release allowed the unchanged12GiB/no-swap/-j1/180s guard to admit the check.
+
+Independent read-only finder/skeptic reviews accepted the proofs and requested
+guarded outputs and direct classification control. These were added. Their
+observation that unchanged values alone do not establish provenance was also
+addressed by retaining both outside-region certificates in the conclusion.
+General Source constructor lowering, source/account/world and fetched-CREATE
+correspondence remain open, as do G43/H19/H25, G36.03/V12 G37 and G18/VY5.
+G45 implementation ownership stays reassigned/master-owned.
