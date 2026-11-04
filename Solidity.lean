@@ -293,6 +293,7 @@ import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.InterfaceV2
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
 import Solidity.Backend.MemoryCopies.InterfaceV2Roots
+import Solidity.Backend.MemoryCopies.LoadedArrayInterface
 import Solidity.Backend.MemoryCopies.LoadedSingleton
 import Solidity.Backend.MemoryCopies.LoadedSingletonControls
 import Solidity.Backend.MemoryCopies.LoadedSingletonInterface

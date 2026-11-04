@@ -259,3 +259,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/PrimitiveArrayInterface.lean` | Arbitrary finite populated primitive-array resolved-value copy using existing allocator/stores, typed word relation and nonvacuous V2/root-gap certificates. |
 | `Backend/MemoryCopies/PrimitiveArray.lean` | Arbitrary finite primitive payload initialization through existing stores/reservation/adoption, exact source allocation, full allocator and V2/root-gap certificates. |
 | `Backend/MemoryCopies/PrimitiveArrayControls.lean` | Inhabited fitting uint-list copies, empty/pair/64-element observations, exact lengths/live contents, old payload preservation and negative controls. |
+| `Backend/MemoryCopies/LoadedArrayInterface.lean` | Existing expression loads followed by finite populated array initialization, with explicit source evaluation inputs and full reached allocator contract. |
