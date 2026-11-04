@@ -287,3 +287,37 @@ changing guards. Subsequent focused checks use unchanged12GiB/no-swap, serial
 Lean and180s limits. Five scoped standard-axiom guards are separate from pending
 full/import-root/combined-held-Source validation. No address allocator, account
 identity, Source profile, fetched CREATE or whole-lane completion is claimed.
+
+## H26 V1 constructor-return signature packet
+
+`CreationReturnInterfaceV1` is generated from the committed lane schema and
+self-contained generator. `Producer.returned_address` and `same_returns` retain
+exactly the existing byte-return law premises/conclusions; neither is an axiom
+or a discharged producer instance. The separate Bool `Witness` requires real
+nonempty runtime/arguments/immutable patches, certified referenced-site membership
+and actual `Exec` RETURN. It does not restrict the universal Lib/Key law domain.
+Controls construct that genuine witness, reject empty links and distinguish a
+revert outcome. No `Producer` instance is supplied. The interface covers encoded
+library-return observations only, without payment, Source/profile/account or
+fetched-CREATE adequacy. Original concrete laws and their scope remain unchanged.
+
+Already on master `6f3eedf0`, `InternalFlow.RuntimeFrame.ArgumentEntry.endpoint`
+supplies native argument-declaration entry with its checked program, evaluation,
+representation, room and capacity premises. It is reused rather than restated.
+Its exact cache key is `13773213865773461960`, resolving to artifact
+`6053978188459522509.olean` (SHA256
+`82e43b05edcf8cd5b5a908b300b761f52b18bf004b77f0504164103d68b2aa22`).
+The announced cache repair allows the canonical frame-definition build to pass;
+no frame consumer proof is claimed from definitions. That validated definition
+draft remains outside the registered tree while this small signature packet is
+prepared first. General P1 approved-domain and Source constructor obligations
+remain explicit; H16/H19/H25 and frozen Core ExtCall are untouched.
+
+The first post-cache artifact check wrongly assumed local olean storage; Lake's
+facet query resolved the content-addressed path. A cache-aware `lake lean` driver
+then crashed; normal module builds pass. Per-file diagnostics now use their
+canonical generated import setup, without changing sources, Lean pin, axioms or
+resource/proof flags. Original timeout, instrumentation and driver failures remain
+raw evidence. All jobs remain serial under the original12GiB/no-swap180s limits.
+
+H26 checkpoint: touched/library/trust/orphan/layer/root/docs gates pass on the published-base candidate. Axiom inventory reports 0 errors and 41 unrecorded standard-only records (3 from this stub,38 from older private audits). Exact published-base comparison has0 errors/notes. The reserved global inventory is unchanged; the stub-only three-record delta is supplied for coordinator registration. This gate remains failed until that reconciliation.

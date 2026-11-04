@@ -199,3 +199,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 
 | `Backend/Executable/CreationLinkIdentity.lean` | Referenced library bytes derived from actual linking and constructor returns. |
 | `Backend/Executable/CreationLinkIdentityControls.lean` | Same-size swapped-link negatives and the empty/unreferenced boundary. |
+| `Backend/Executable/CreationReturnInterfaceV1.lean` | H26 generated kernel-return fields and nonempty execution-witness shape; no producer instance. |
+| `Backend/Executable/CreationReturnInterfaceV1Controls.lean` | Genuine nonempty input witness and empty-domain/reverted-outcome controls, not a pending-law implementation. |
+| `Backend/Executable/CreationReturnInterfaceV1Audit.lean` | Complete interface types and standard-axiom guards. |
