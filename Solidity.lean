@@ -2555,6 +2555,7 @@ import Solidity.Yul.Checks.RawLocalDeclaration
 import Solidity.Yul.Checks.RawLocalScope
 import Solidity.Yul.Checks.RawSourceReturnControl
 import Solidity.Yul.Checks.RawSourceVoidReturn
+import Solidity.Yul.Checks.RawStatementHorizon
 import Solidity.Yul.Checks.RawWordLogic
 import Solidity.Yul.Checks.ScalarLocals
 import Solidity.Yul.Checks.Scope
@@ -2833,6 +2834,7 @@ import Solidity.Yul.RawSourceForIter
 import Solidity.Yul.RawSourceForPost
 import Solidity.Yul.RawSourceReturnControl
 import Solidity.Yul.RawSourceVoidReturn
+import Solidity.Yul.RawStatementHorizon
 import Solidity.Yul.RawWhile
 import Solidity.Yul.ReservedNames
 import Solidity.Yul.ScalarLocals

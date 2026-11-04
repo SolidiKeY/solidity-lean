@@ -329,3 +329,5 @@ VY1: concrete initialized omitted-guard noncompletion and clean Source consequen
 VY1: concrete full Boolean for timeout classification and clean Source outcomes; [scope and controls](inline-assembly-vy1.md#full-boolean-for-timeout-classification). Full lane remains open.
 
 VY1: concrete Source firstDone horizon selection; [scope and controls](inline-assembly-vy1.md#concrete-source-horizon-selection). Full lane remains open.
+
+VY1: concrete completed raw-frame statement horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-frame-statement-horizons). Full lane remains open.

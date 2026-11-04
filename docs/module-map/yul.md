@@ -148,3 +148,5 @@
 | `Yul/LocalForTimeout.lean`, `Yul/Checks/LocalForTimeout.lean` | Concrete full Boolean for halt classification, reached omitted-guard timeouts and clean Source consequences. |
 
 | `Yul/LocalForFirstDone.lean`, `Yul/Checks/LocalForFirstDone.lean` | Actual Source firstDone outcomes for initialized omitted guards; least-horizon, break, continue and completed-failure controls. |
+
+| `Yul/RawStatementHorizon.lean`, `Yul/Checks/RawStatementHorizon.lean` | Concrete raw/coherence-aware statement horizon stability with exact dirty-frame retention and projection/timeout controls. |

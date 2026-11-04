@@ -1697,3 +1697,36 @@ and layer checks pass. Eleven scoped axiom reports use only Lean standard
 axioms. The initial missing Source.Semantics import and invalid-import tactic
 attempts remain raw failures, distinct from the corrected valid-import attempts
 and passing concrete proofs. No checking/proof limits were increased.
+
+### Completed raw-frame statement horizons
+
+`RawStatementHorizon.discardSuccessor` lifts concrete Boolean control
+execution stability through the existing expression-statement discard.
+`rawSuccessor`/`rawExtension` and
+`coherentSuccessor`/`coherentExtension` then prove exact whole-result and
+whole-frame equality for the existing `RawSource.execS` and
+`RawCoherent.execS` at larger horizons. The original non-timeout premise is
+explicit. No coherent-input, clean projection, child simulation or abstract
+adapter stability law is assumed; unchanged capture functions preserve the
+same clean backup, raw cells and world.
+Ten controls use an inhabited conditional-write certificate over the existing
+mixed Boolean/narrow-word/function-field frame. The condition first writes
+Boolean true; a selected triple-not assignment later writes false. Fuel 4
+retains the first write on timeout; fuel 7 completes with the second write,
+and each complete result/frame is identical at every larger bound. The
+untouched narrow word remains 257, dirty input/output coherence fails, and
+both normal dirty projections refuse. Clean input has a separate successful
+coherent observation. Distinct timeout/completion tags show why the premise
+cannot be dropped.
+These concrete same-context expression-statement laws add no Source/readback
+or compiler adequacy, general admission, arbitrary statement/control support,
+or physical state semantics. Source/ExtCall/evaluators/layouts, observations,
+expected outcomes and proof budgets are unchanged. Full VY1/general P16 and
+final lane gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; focused Lean, generated-root
+and layer checks pass. Fifteen scoped axiom reports use only Lean standard
+axioms. Raw failed standard automation, initial fixture-parenthesis correction
+and scratch constructor-tactic correction remain separate from passing checks;
+no control statement, expected outcome or proof/checking limit changed.
