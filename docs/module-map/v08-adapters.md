@@ -262,6 +262,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentSelectionControls.lean` | Inhabited all-key source/native clients, wrapped timestamp and ordered negative observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentGuards.lean` | Exact all-key gas/stack checks, counted-prefix result and actual X fuel/refusal order. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentGuardControls.lean` | Both-permission legal stack boundaries, populated full States and ordered fuel/resource negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BinaryGuards.lean` | Twenty-op numeric charged-gate correspondence, legal capacity, fetched refusals and exact short-fuel order. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BinaryGuardControls.lean` | Populated result/cost rows, complete ordered States and distinct legal/raw-overlimit resource controls. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 

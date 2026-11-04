@@ -170,6 +170,8 @@ import SolidityBridge.RoadmapV15.P10.BalanceEnvironmentConsumer
 import SolidityBridge.RoadmapV15.P10.BalanceEnvironmentControls
 import SolidityBridge.RoadmapV15.P10.BalanceWarmControls
 import SolidityBridge.RoadmapV15.P10.BalanceWarmTransport
+import SolidityBridge.RoadmapV15.P10.BinaryGuardControls
+import SolidityBridge.RoadmapV15.P10.BinaryGuards
 import SolidityBridge.RoadmapV15.P10.BitwiseConsumer
 import SolidityBridge.RoadmapV15.P10.BitwiseControls
 import SolidityBridge.RoadmapV15.P10.BitwiseFixtures

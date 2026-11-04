@@ -1628,3 +1628,30 @@ tail is rejected. These reference-model errors return no State; no account or
 transaction rollback theorem follows. Source/frame, Osaka approval and all full
 opcode-row obligations remain open. Separate read-only finder and skeptic
 reviews confirmed the fuel distinction and populated boundary coverage.
+
+## Binary numeric gate correspondence
+
+`BinaryGuards` classifies the actual charged gate for twenty existing binary
+numeric instructions: ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, SIGNEXTEND, LT, GT,
+SLT, SGT, EQ, AND, OR, XOR, BYTE, SHL, SHR and SAR. This finite consumer set does
+not change source admission. The cost is the actual pinned `C'`; zero memory
+expansion and two-input/one-output arities discharge the remaining local checks.
+Gas refusal precedes underflow, which precedes output-capacity refusal. Legal
+input stacks with at least two and at most 1024 words cannot overflow these
+instructions. Actual fetched-prefix and `X` error transport retain the checks,
+and the counted-versus-`X` one-fuel distinction remains explicit.
+
+`BinaryGuardControls` supplies an exact ordered twenty-row result/cost inventory
+for operands 11 and 2 and spill [258, 513], with direct full native-State clients
+under both permission flags. The results include zero comparisons, BYTE and
+right shifts and a nonzero SHL. Exact code, memory, calldata, accounts and return
+bytes are observed; an identical-length swapped spill is rejected. These are
+bounded kernel-checked reference examples, not a general scalar/source proof.
+
+Both independent reviewers requested missing overflow and short-fuel branch
+clients. The added controls derive raw 1026-word overflow and actual `X 1`
+underflow/overflow from the classifiers, plus legal gas/stack fuel exhaustion.
+The 1026-word fixture is outside the admitted input profile: consuming two and
+pushing one produces 1025 words. It is separate from the legal 1024-word gate
+client, and is not evidence for reachable source execution. No rollback State,
+compiler origin, Osaka approval or full opcode-row closure follows.
