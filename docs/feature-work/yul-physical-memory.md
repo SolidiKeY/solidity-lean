@@ -1307,3 +1307,13 @@ byte `256`, read it through the array alias and retain unknown byte `383`.
 The physical initial frame already represents the post-allocation heap: this
 closes the sink-store component, not physical allocation execution, arbitrary
 retained-history transport, or compiler/resource adequacy.
+
+`P6RetainedHeapWordStore.transport` carries the original `allocated` placement
+and `prior` history through the actual same-shape Source member write and P6
+store. Whole administrative writeback uses the derived `nextHistory`, rather
+than a new current-origin snapshot. Canonical input reads, owner support,
+coordinates and physical span bounds stay explicit. Controls execute the Source
+allocate–shrink–write sequence, preserve dormant word `9` and unknown byte `319`,
+and show that repacking the current short object would lose the original end.
+Physical execution starts from the post-shrink frame; target allocation/shrink
+execution and arbitrary retained-history adequacy remain separate obligations.

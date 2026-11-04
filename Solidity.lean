@@ -2469,6 +2469,8 @@ import Solidity.Yul.Adapters.P6ResidualResume
 import Solidity.Yul.Adapters.P6ResidualResumeControls
 import Solidity.Yul.Adapters.P6ResidualSequence
 import Solidity.Yul.Adapters.P6ResidualSequenceControls
+import Solidity.Yul.Adapters.P6RetainedHeapWordStore
+import Solidity.Yul.Adapters.P6RetainedHeapWordStoreControls
 import Solidity.Yul.Adapters.P6RetainedRegionCopy
 import Solidity.Yul.Adapters.P6RetainedRegionCopyControls
 import Solidity.Yul.Adapters.P6SnapshotCopy
