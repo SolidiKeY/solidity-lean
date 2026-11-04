@@ -1655,3 +1655,33 @@ The 1026-word fixture is outside the admitted input profile: consuming two and
 pushing one produces 1025 words. It is separate from the legal 1024-word gate
 client, and is not evidence for reachable source execution. No rollback State,
 compiler origin, Osaka approval or full opcode-row closure follows.
+
+## Published Source signed remainder
+
+`PublishedRemainder` consumes the published primitive packet's actual pure
+Source-local evaluation and existing signed word encoding. For in-range int256
+operands and a nonzero divisor it derives the Source remainder and the charged,
+fetched native SMOD body from the same typed values. Initial Source local reads,
+the original gas/stack bounds and separate Source/native fuel remain explicit;
+no desired evaluation or simulation is a premise. The native input is constructed
+from the values, so physical operand loading, entry/frame identity, selected
+whole-code execution and bytecode guard execution remain open.
+
+Zero division is handled separately: the Source expression returns the original
+division panic bytes while the raw SMOD body succeeds with zero. This is an
+explicit missing guard boundary, not correspondence for a failing compiler path
+or an exclusion from the source profile. Minimum modulo minus one succeeds with
+zero in both checked modes; no signed-division overflow exclusion is introduced.
+
+`PublishedRemainderControls` reuses the published Source fixture read-only and
+instantiates the new body API for both pipelines, checked modes and native
+permission flags. Negative dividend/divisor, maximum and minimum values, exact
+ordered spills, complete native states and zero panic/raw-success controls are
+checked. Source and native contexts are separately populated; these tests do not
+establish invocation or world provenance. All full G46/G47 obligations stay open.
+
+Independent finder and skeptic reviews cleared the source and cache-setup route.
+Per-file checks use the exact Lake-generated import setup after a successful
+focused target build; metadata identity and artifact availability alone are not
+semantic validation. No Source implementation, physical memory/storage adapter,
+Core ExtCall, package pin or proof budget was changed.
