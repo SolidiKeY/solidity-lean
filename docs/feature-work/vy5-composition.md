@@ -167,3 +167,13 @@ release, P8 realization, all24 original obligations and six full Source
 combinations remain open. Source/Lowering/Readonly producer bodies were read
 only; this checkpoint adds no Source core change. Independent finder and
 skeptic approved the concrete proof scope with no findings.
+
+## H16 root execution leaf (2026-11-04)
+
+The actual `Source.runTxWithPlan` root and fourteen both-pipeline controls
+retain full selected source states, ownership and panic bytes; see
+[source execution and timings](source-failure-execution.md#scheduled-root-transaction-execution-2026-11-04).
+Legacy runTx remains unchanged after rejecting a slower optional-signature
+draft. This is kernel Source component evidence, not native comparison,
+H18/H19 session integration, P8 realization or completion of the24 original
+obligations/six general combinations.

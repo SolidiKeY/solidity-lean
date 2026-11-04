@@ -2170,6 +2170,7 @@ import Solidity.Source.FailurePrimitives
 import Solidity.Source.FailureRequest
 import Solidity.Source.FailureResources
 import Solidity.Source.FailureRuntimeControls
+import Solidity.Source.FailureTransactionControls
 import Solidity.Source.Funds
 import Solidity.Source.FundsControls
 import Solidity.Source.Hoare

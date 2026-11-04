@@ -97,3 +97,5 @@
 | `Source/FundsControls.lean` | Actual Source payable requests in both pipelines: stress-state drop, following valid request, timeout/revert distinction, prior debit/credit controls. |
 
 | `Source/FailureConstructorControls.lean` | H16 actual initializer/body CALL event cuts, rollback and seeded parent/request owner propagation; default-None horizon proofs retained. Root/session indexing and full adequacy remain open. |
+
+| `Source/FailureTransactionControls.lean` | H16 actual root dispatch plan, own-frame reverts versus outer-stop/timeout propagation, transient/journal finalization and complete state controls; request fate/funding/P8 adequacy remain open. |

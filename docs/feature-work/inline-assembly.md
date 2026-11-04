@@ -237,3 +237,7 @@ and canonical rethrow are composed with complete-state/all-byte/horizon≥3
 kernel laws in `Yul/Composition/SourceCatchBinding.lean`. See
 [the lane record](vy5-composition.md). This is not general Yul/compiler
 adequacy or native execution; the24 full obligations/six combinations stay open.
+
+VY5/H16 producer checkpoint: actual scheduled Source root dispatch, rollback,
+full-state/error-byte controls and measured legacy-path preservation; see
+[the lane record](vy5-composition.md). General assembly and P8 closure remain open.
