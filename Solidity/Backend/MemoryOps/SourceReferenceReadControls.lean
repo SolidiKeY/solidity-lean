@@ -2,6 +2,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceRead
 import Solidity.Backend.MemoryOps.SourceReferenceReadSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAliasSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
+import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1217,5 +1218,163 @@ theorem complete_alias_delete_vectors (self : Bool) :
 #guard_msgs (whitespace := lax) in #print axioms computed_alias_delete_client
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms complete_alias_delete_vectors
+
+
+private abbrev RejectAliasΓ : Ctx := .mem B :: BoundΓ
+private abbrev RejectAliasSΓ : Source.RCtx := SB :: BoundSΓ
+private def rejectAliasState : State C RejectAliasΓ := boundState.push (t := .mem B) (some left)
+private def rejectAliasSource : Source.EMState E0 RejectAliasSΓ := (.cons (.memRef rfl 0) boundSource.1,boundSource.2)
+private def rejectAliasWord := writeMachine boundWord 7 w[16]
+private def rejectAliasFrag := boundFrag.push (.mem B) .ok
+private def rejectAliasMidWord (self : Bool) := writeMachine rejectAliasWord ((base (dref self).id).val+1) w[24]
+private def rejectAliasFinalWord (self : Bool) := writeMachine (rejectAliasMidWord self) 7 w[24]
+private def rejectAliasFinalState (self : Bool) := (rejectAliasState.withHeap (postHeap self)).setLocal (.here : Idx RejectAliasΓ (.mem B)) (some right)
+private def rejectAliasViews (y : Source.EMState E0 RejectAliasSΓ) :=
+  [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private theorem rejectAliasOK : Source.MemOK E0 SH rejectAliasSource :=
+  ⟨⟨boundSourceOK.1.1,⟨⟨SB,rfl,rfl⟩,boundSourceOK.1.2⟩⟩,boundSourceOK.2⟩
+private theorem rejectAliasAt (self : Bool) : SourceBoolRefsAt rejectAliasSource (daddr self) hp (dref self) addresses :=
+  ⟨(dat self).parent,(dat self).children⟩
+private theorem rejectAliasFresh : SourceBoolRefsAt rejectAliasSource 3 hp fresh addresses :=
+  ⟨fresh_at.parent,fresh_at.children⟩
+private theorem rejectAliasRepr : RefArrayStateRepr 1 1 8 rejectAliasFrag rejectAliasState base rejectAliasWord :=
+  ⟨boundRepr.state.consMem left (by decide),boundRepr.arrays.localWrite 7 (by decide) w[16]⟩
+private theorem rejectAliasAllocator : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ rejectAliasWord :=
+  boundAllocator.localWrite 7 (by decide) (by decide) w[16]
+
+/-- Both pipelines, same/distinct parent: actual two changed prefixes, then
+RIGHT endpoint3 rejects. Source exposes retained reached globals; intrinsic and
+word failure outcomes expose no final machine. The seven locals are independently
+represented (the added scalar/reference are not declaration executions). -/
+theorem computed_alias_reject_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ ym : Source.EMState E0 RejectAliasSΓ,
+    let ya : Source.EMState E0 RejectAliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2);
+      (Source.execS (G0 p) F0 (fuel+6) RejectAliasSΓ.length none
+        (.expr (sourceReferenceReadAssign (.there (.there (ds self))) (.there (.there ssrc)) (.there (.there sj)) (.there (.there si))) :
+          Source.RStmt E0 [] false .body RejectAliasSΓ RejectAliasSΓ) rejectAliasSource.1).run (.nil,rejectAliasSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+5) RejectAliasSΓ.length none
+        (.expr (sourceSelectedAlias .here (.there (.there (ds self))) (.there (.there sj))) :
+          Source.RStmt E0 [] false .body RejectAliasSΓ RejectAliasSΓ) ym.1).run (.nil,ym.2)=
+            (.ok (.normal ya.1),(.nil,ya.2)) ∧
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedDelete (.here : Source.Idx RejectAliasSΓ SB) (.there .here))).run ya=
+        (.error (.revert (Source.panicData .index)),ya) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) RejectAliasSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there (.there (ds self))) (.there (.there ssrc)) (.there (.there sj)) (.there (.there si))))
+          (.stmt (.expr (sourceSelectedAlias .here (.there (.there (ds self))) (.there (.there sj))))
+            (.stmt (.expr (sourceIndexedDelete (.here : Source.Idx RejectAliasSΓ SB) (.there .here))) .nil)) :
+              Source.RItems E0 [] false .body RejectAliasSΓ RejectAliasSΓ) rejectAliasSource.1).run (.nil,rejectAliasSource.2)=
+                (.error (.revert (Source.panicData .index)),(.nil,ya.2)) ∧
+      Prog.run rejectAliasState
+        (.cons (referenceReadStmt (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)))
+          (.cons (.rebindMem .here (.alias (.loc (.index .dyn (.var (.there (.there (dt self))) rfl) (.simple (.local (.there (.there ti)))))))) .nil))=
+            .ok ⟨rejectAliasFinalState self,List.prefix_refl _⟩ ∧
+      Stmt.run (rejectAliasFinalState self) (.deleteMem (.loc (.index .dyn (.var (.here : Idx RejectAliasΓ (.mem B)) rfl)
+        (.simple (.local (.there .here))))) rfl)=.error .revert ∧
+      Prog.run rejectAliasState
+        (.cons (referenceReadStmt (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)))
+          (.cons (.rebindMem .here (.alias (.loc (.index .dyn (.var (.there (.there (dt self))) rfl) (.simple (.local (.there (.there ti))))))))
+            (.cons (.deleteMem (.loc (.index .dyn (.var (.here : Idx RejectAliasΓ (.mem B)) rfl) (.simple (.local (.there .here))))) rfl) .nil)))=.error .revert ∧
+      run (referenceReadWriteCode (C := C) (Δ := RejectAliasΓ) 1 (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj))) rejectAliasWord=
+        .ok (rejectAliasMidWord self) 0 ∧
+      run (selectedAliasCode (C := C) (Γ := RejectAliasΓ) 1 .here (.there (.there (dt self))) (.there (.there ti))) (rejectAliasMidWord self)=
+        .ok (rejectAliasFinalWord self) 0 ∧
+      run (deleteLocalCode 1 (.here : Idx RejectAliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there .here)) : Val C RejectAliasΓ .uint))) (rejectAliasFinalWord self)=.revert ∧
+      run ((referenceReadWriteCode (C := C) (Δ := RejectAliasΓ) 1 (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)) ++
+        selectedAliasCode (C := C) (Γ := RejectAliasΓ) 1 .here (.there (.there (dt self))) (.there (.there ti))) ++
+        deleteLocalCode 1 (.here : Idx RejectAliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there .here)) : Val C RejectAliasΓ .uint))) rejectAliasWord=.revert ∧
+      rejectAliasViews ym=expectedSource self ∧ rejectAliasViews ya=expectedSource self ∧
+      SourceBoolRefsAt ya (daddr self) (postHeap self) (dref self) addresses ∧
+      SourceBoolMemoryAt ya 0 (postHeap self) left .dyn ∧ SourceBoolMemoryAt ya 1 (postHeap self) right .dyn ∧
+      Source.MemOK E0 SH ya ∧ RefArrayStateRepr 1 1 8 rejectAliasFrag (rejectAliasFinalState self) base (rejectAliasFinalWord self) ∧
+      (Source.readLoc (E := E0) (Γ := RejectAliasSΓ) F0 (τ := .bool) (.mem 0 0)).run ya=(.ok (.bool true),ya) ∧
+      (Source.readLoc (E := E0) (Γ := RejectAliasSΓ) F0 (τ := .bool) (.mem 1 1)).run ya=(.ok (.bool true),ya) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx RejectAliasSΓ SB)) (.local (.there (.there sj))) rfl)).run rejectAliasSource=
+        (.ok (.val (.bool true)),rejectAliasSource) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx RejectAliasSΓ SB)) (.local (.there (.there sj))) rfl)).run ya=
+        (.ok (.val (.bool false)),ya) ∧
+      (Source.evalE (G0 p) F0 2 (sourceIndexedDelete (.here : Source.Idx RejectAliasSΓ SB) (.there .here))).run ya=(.error .timeout,ya) ∧
+      ym.1=rejectAliasSource.1 ∧ ya.1=rejectAliasSource.1.set .here (.memRef rfl 1) ∧
+      ya.2.heap.next=5 ∧ ya.2.heap.get 5=none ∧
+      (ya.2.ex=rejectAliasSource.2.ex ∧ ya.2.events=rejectAliasSource.2.events ∧ ya.2.logs=rejectAliasSource.2.logs ∧ ya.2.fnLocals=rejectAliasSource.2.fnLocals) ∧
+      StructAllocatorRepr (postHeap self) base 8 ⟨48,by decide⟩ (rejectAliasFinalWord self) ∧
+      (rejectAliasFinalWord self).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := (rejectAliasAt self).computed_alias_delete_reject (G0 p) F0 fuel rejectAliasSource rejectAliasState (dref self) fresh
+      (daddr self) 3 addresses rejectAliasFresh (.there (.there (ds self))) (.there (.there ssrc))
+      (.there (.there sj)) (.there (.there si)) (.there .here) .here
+      (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)) (.there .here) .here
+      ⟨0,by decide⟩ ⟨1,by decide⟩ ⟨3,by decide⟩
+      (by cases self <;> rfl) rfl rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl rfl
+      (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      SH rejectAliasOK rejectAliasRepr
+    obtain ⟨mid,ym,hw,selected,stmt₁,stmt₂,expr₃,stmt₃,items,nativePrefix,native₃,native,word₁,word₂,word₃,word,hr,child,
+      mok,repr,locals₁,locals₂,sourceAlias,nativeAlias,parent,children,addrs,next,effects,stack,alloc⟩ := result
+    simp only [MObj.elems_dyn] at hw
+    have known : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap self := Option.some.inj (hw.symm.trans known)
+    subst mid
+    simp only [MObj.elems_dyn] at stmt₂ expr₃ stmt₃ items nativePrefix native₃ native word₁ word₂ word₃ word hr child mok repr locals₂ sourceAlias nativeAlias parent children addrs next effects stack alloc
+    let ya : Source.EMState E0 RejectAliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2)
+    change SourceBoolRefsAt ya (daddr self) (postHeap self) (dref self) addresses at hr
+    change SourceBoolMemoryAt ya 1 (postHeap self) right .dyn at child
+    change ∀ q : HRef H B,(postHeap self).get q=hp.get q at children
+    have tables : rejectAliasViews ya=expectedSource self := by
+      have parent := hr.parent
+      rw [post_elems] at parent
+      cases self
+      · change ya.2.heap.get 2=some ⟨SR,pdata [right]⟩ at parent
+        unfold rejectAliasViews expectedSource
+        rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+      · change ya.2.heap.get 3=some ⟨SR,pdata [right,right,left]⟩ at parent
+        unfold rejectAliasViews expectedSource
+        rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 2 (by decide),addrs 4 (by decide)];rfl
+    have leftAt : SourceBoolMemoryAt ya 0 (postHeap self) left .dyn := by
+      unfold SourceBoolMemoryAt
+      rw [addrs 0 (by cases self <;> decide),children left]
+      exact left_at
+    have leftRead := (leftAt.read_iff F0 (uintOfNat 0) true).mpr (by simp only [Heap.index,children left,MObj.elems_dyn];rfl)
+    have rightRead := (child.read_iff F0 (uintOfNat 1) true).mpr (by simp only [Heap.index,children right,MObj.elems_dyn];rfl)
+    have initialLeft : SourceBoolMemoryAt rejectAliasSource 0 hp left .dyn := left_at
+    have oldRead := initialLeft.eval_local_read (G0 p) F0 fuel .here (.there (.there sj)) (uintOfNat 0) true rfl rfl
+      (by simp only [Heap.index,MObj.elems_dyn];rfl)
+    have newRead := child.eval_local_read (G0 p) F0 fuel .here (.there (.there sj)) (uintOfNat 0) false sourceAlias
+      (by change (ym.1.set (.here : Source.Idx RejectAliasSΓ SB) (.memRef rfl 1)).get (.there (.there sj))=_;rw [source_bool_alias_uint_frame,locals₁];rfl) (by simp only [Heap.index,children right,MObj.elems_dyn];rfl)
+    have timeout := source_indexed_delete_horizon_two (G0 p) F0 ya (.here : Source.Idx RejectAliasSΓ SB) (.there .here)
+    refine ⟨ym,stmt₁,stmt₂,expr₃,items,nativePrefix,native₃,native,word₁,word₂,word₃,word,tables,tables,hr,leftAt,child,mok,repr,
+      leftRead,rightRead,oldRead,newRead,timeout,locals₁,locals₂,next,?_,effects,?_,rfl⟩
+    · rw [addrs 5 (by cases self <;> decide)];rfl
+    · apply alloc ⟨48,by decide⟩ (by decide) rejectAliasAllocator
+      cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,MObj.elems_dyn,base] <;> decide
+
+/-- Full INITIAL/replacement/rebound target vectors; failure supplies no new
+machine, and both referenced child contents remain the original contents. -/
+theorem complete_alias_reject_vectors (self : Bool) :
+    rejectAliasViews rejectAliasSource=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    words rejectAliasWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[16],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (rejectAliasMidWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[16],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (rejectAliasFinalWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[24],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views rejectAliasState.heap=views hp ∧
+    views (rejectAliasFinalState self).heap=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    TEnv.get (.here : Idx RejectAliasΓ (.mem B)) rejectAliasState.env=some left ∧
+    TEnv.get (.here : Idx RejectAliasΓ (.mem B)) (rejectAliasFinalState self).env=some right ∧
+    (rejectAliasFinalWord self).mem 0=w[48] ∧ (rejectAliasFinalWord self).stack=[w[42]] ∧
+    words (rejectAliasFinalWord self)≠words (rejectAliasMidWord self) ∧
+    words (rejectAliasFinalWord self)≠words (writeMachine (rejectAliasFinalWord self) 26 w[0]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,rfl,rfl,?_,rfl,rfl,rfl,rfl,by decide,by decide⟩
+      simp only [rejectAliasFinalState,State.setLocal,State.withHeap,views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_alias_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_alias_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_reject_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_alias_reject_vectors
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

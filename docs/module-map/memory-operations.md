@@ -190,3 +190,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceReferenceAliasSequence.lean` | Actual computed reference replacement followed by reached local alias selection; Source Items, intrinsic Prog, full word append and derived observer/local/allocator frames. |
 
 | `Backend/MemoryOps/SourceReferenceAliasDelete.lean` | Computed reference replacement, reached local alias and actual indexed deletion in one Source Items/intrinsic Prog/word append, with derived frames. |
+
+| `Backend/MemoryOps/SourceReferenceAliasReject.lean` | Actual computed replacement and reached local rebinding followed by late indexed-delete rejection; retained prefix observers, Source error globals, intrinsic Prog and full word append. |
