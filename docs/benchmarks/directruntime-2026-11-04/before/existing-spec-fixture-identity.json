@@ -1,0 +1,42 @@
+{
+  "source": "tests/automation/ClosedSpecs.sol",
+  "sourceSha256": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+  "fixture": "tests/automation/ClosedSpecs.ast.json",
+  "fixtureSha256": "0ee494a445a18406c30e7f69cd7d049b75f1e68bf878ea60b457e6759b2a54ee",
+  "header": {
+    "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "sourceSha256": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+    "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+    "source": "tests/automation/ClosedSpecs.sol",
+    "provenanceVersion": 1,
+    "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+    "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "validationStage": "analysis",
+    "settings": {
+      "viaIR": false,
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "libraries": {},
+      "remappings": [],
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ]
+        }
+      }
+    },
+    "acceptedPragmas": [
+      [
+        "solidity",
+        "^",
+        "0.8",
+        ".34"
+      ]
+    ]
+  },
+  "boundary": "Original eight controls used this committed input, not a cached verdict. Fresh-source replacements are separately saved."
+}

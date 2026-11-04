@@ -1,0 +1,20 @@
+{
+  "command": [
+    "bash",
+    "tests/directruntime-20261104/native-browser/native-baseline-checks.sh"
+  ],
+  "exitCode": 0,
+  "wallSeconds": 6.719507259999773,
+  "scope": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0
+  },
+  "requiredOuterHeadroomBytes": 4294967296,
+  "minimumOuterHeadroomBytes": 12935405568,
+  "resourceStop": false,
+  "sampledContainerProcessRssPeakBytes": 264953856,
+  "rssSamplingSeconds": 0.1,
+  "childRusageMaxRssKiB": 169716,
+  "cgroupPeakBytes": 223297536,
+  "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+}

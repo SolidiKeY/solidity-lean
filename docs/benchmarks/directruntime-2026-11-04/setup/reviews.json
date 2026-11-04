@@ -1,0 +1,40 @@
+{
+  "scope": "Partial native-baseline checkpoint only; no Lean server used by either reviewer.",
+  "finder": {
+    "findings": [
+      "Missing separate headroom guard",
+      "Missing cold-build wall/RSS capture",
+      "Completed baseline overwrite risk",
+      "Native manifest/cache provenance gaps",
+      "Missing generated archive callback roots filtered silently",
+      "Full runtime accepted by ordinary loaders",
+      "Preflight refusal had no structured receipt",
+      "Six fresh ordinary controls versus eight initially fixture-based specs"
+    ],
+    "resolvedInCheckpoint": [
+      "Measured headroom guard with atomic refusal receipts; old v1 archived",
+      "Completed input/audit/timing/resource evidence refuses overwrite",
+      "Eight specs freshly compiled and passed",
+      "Three frontend-origin flags structurally classified using exact C/object/binary bodies; coarse failure preserved"
+    ],
+    "pending": [
+      "Successful cold-C-build timing",
+      "Owned production audit fixes",
+      "Coordinated unowned loader handoff",
+      "Browser and producer/final gates"
+    ],
+    "finalNarrowReview": "No new finding in narrow fixes; supports partial checkpoint only."
+  },
+  "skeptic": {
+    "reviewedBinarySha256": "4ade5e55eae99ba7c45e39ab148de066858ea5897fecca9a8debcd371c03cfd5",
+    "structuralConclusion": "Three exact IO-success initializer stubs and primitive helpers do not execute frontend operations. Callee allowset is not a general purity proof; exact bodies were independently inspected.",
+    "verified": [
+      "All three original/extracted C and object hashes/keys",
+      "All six C body hashes and disassemblies",
+      "Coarse failed receipt remains immutable and its hash matches",
+      "Current source hash matches fresh eight-control AST header and runtime result identity",
+      "v1/v2 runner hashes and no-overwrite publication"
+    ],
+    "finalNarrowReview": "No new blocking issue for partial native checkpoint; preserve all six ordinary control artifacts. Full assignment remains pending."
+  }
+}

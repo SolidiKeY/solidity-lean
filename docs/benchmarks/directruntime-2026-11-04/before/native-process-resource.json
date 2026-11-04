@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "backend": "generated-c-native",
+  "binarySha256": "4ade5e55eae99ba7c45e39ab148de066858ea5897fecca9a8debcd371c03cfd5",
+  "wireSha256": "285dfc798c4f95b781cb5043f1190309883e62f5fff6f1f316385a8818dc3a22",
+  "expectedRequests": 249,
+  "actualReplies": 249,
+  "exitCode": 0,
+  "wallSeconds": 0.6228647160000946,
+  "nativeMaxRssKiB": 36068,
+  "userSeconds": 0.606997,
+  "systemSeconds": 0.003992,
+  "failures": [],
+  "stderr": "",
+  "boundary": "Fresh untimed-throughput run for native process rusage only. Per-request latency remains the independent unchanged benchmark's three-round report; no compiler or trace process is in this rusage."
+}

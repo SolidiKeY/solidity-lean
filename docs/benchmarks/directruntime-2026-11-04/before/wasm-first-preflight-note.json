@@ -1,0 +1,9 @@
+{
+  "sourceLog": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build.log",
+  "sourceLogSha256": "e68a68c3df2ffae3c036bdebc6b441e53da79f5250e238b222c2c5ffa7d4355e",
+  "observedMessage": "insufficient initial outer cgroup headroom",
+  "exactInitialHeadroomBytes": null,
+  "childStarted": false,
+  "childStartedBasis": "Runner v1 source exits before Popen in this branch; not an additional runtime observation",
+  "limitation": "Retrospective error inventory only; exact initial headroom was not saved and is unknown."
+}

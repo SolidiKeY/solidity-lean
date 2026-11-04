@@ -1,0 +1,21 @@
+{
+  "phase": "before integration",
+  "functions": 83,
+  "rounds": 3,
+  "expectedRequests": 249,
+  "actualRequests": 249,
+  "provedRequests": 249,
+  "failures": [],
+  "medianFunctionMs": 0.8389050000000111,
+  "p95FunctionMs": 4.069481999999994,
+  "p95Method": "nearest rank of 83 per-function medians",
+  "nativeReadyMs": 7.561709000000008,
+  "latencyBoundary": "Precompiled-AST request, excludes Solidity compilation",
+  "nativeBinaryBytes": 20738808,
+  "nativeProcessMaxRssKiB": 36068,
+  "successfulColdBuildMeasurement": null,
+  "buildMeasurementLimitation": "First cold attempt failed at cc; guarded cached-object link retry is separate",
+  "browser": null,
+  "after": null,
+  "fullAssignmentComplete": false
+}

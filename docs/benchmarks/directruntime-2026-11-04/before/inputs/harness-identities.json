@@ -1,0 +1,10 @@
+{
+  "scripts/testsuite-performance.mjs": "704ea0504eacff6672908c1ef4903b602ab6f9f9528167f5655bd24f5a751129",
+  "scripts/check-direct-testsuite.mjs": "c87bd99713bb958a7a28449dc1ae9855f10f0132b01b2d1c761978507d195462",
+  "web/test/testsuite-performance.cjs": "1412b9257cdec7ddb244de8a8e05aa3ad6fcfc459204c17249b06e14a724bc78",
+  "scripts/build-direct-native.py": "7b72740325b11c6e427e1d351a3d3f3d715b5cded5c0800ce007183d5ca81888",
+  "scripts/build-direct-runtime.py": "3558817660ed241a0920e6d2c95313a256a0eef7ee0acb6abe3c52ce9298d4f4",
+  "scripts/direct-runtime-closure.py": "bfb277b2be3496fae001d62b29bf3ea59c6bb3ffe297b8d38526a966ed9cbad2",
+  "web/browser/direct-bridge.c": "6f38dac8eb57d2c78309ddd40fe086ad1a19f4de36faae9e1d197914b2d1a46b",
+  "lean-toolchain": "42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434"
+}

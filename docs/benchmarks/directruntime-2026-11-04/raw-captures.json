@@ -1,0 +1,80 @@
+[
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/fresh-specs.log",
+    "rawSha256": "698c88856fa76d6b85f0f6a08bcb2c574ee9506e81d52e175536f6b6b35c74ae",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/fresh-specs.log.gz",
+    "archiveSha256": "0d0cb9900f72c6994793fe0fa59d6f18b024a0de6b8498b68b18153b52eae83b"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-audit.log",
+    "rawSha256": "ac5e44843511e6b24010ead47cc412b4932213b28858a853fdbd1480cd2c82b4",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-audit.log.gz",
+    "archiveSha256": "506fe9d95015dc820a60c0f2af76c95beb837be3c30cb0efc2c73eb0a286f645"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-build.log",
+    "rawSha256": "dcc7c7d818b4d87592cfe7686ae190da83e1cf7d849090f51f0acabc360cf872",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-build.log.gz",
+    "archiveSha256": "2ed5b64db1e0f12d7c9ea5dca00451f31388841cc8ffbca4da2a0cdbb00d42fc"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-checks.log",
+    "rawSha256": "931bace3b50217c8471b74dc14817e771de9cc990d482fb76340c702243da98d",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-checks.log.gz",
+    "archiveSha256": "5636f85ff8c72c657ae59b55cea3deeda0ffdc8f83f9af8beec0d84fccaa5bdc"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-dynamic.txt",
+    "rawSha256": "dbac7020545f7942b55be08ec56040d9de97778f7e52d8841103a4770a345488",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-dynamic.txt.gz",
+    "archiveSha256": "5eb63b1d1914ac1b552598c795867172583598d9f04b585d6d7d124f06665347"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-link-retry.log",
+    "rawSha256": "8cee6c4fef317d76e1d2c743b80a19233e42062f2a31bb836db3e6d71bbdb134",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-link-retry.log.gz",
+    "archiveSha256": "a8545dd86b70813b84a171e286dc571445f2c45dc588027a571eae5f12558c8d"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-resource.log",
+    "rawSha256": "a5cf94dab7974618249ba9bb4cb8bb9dcc8b83b5aba55c024de5084c906e4a4f",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-resource.log.gz",
+    "archiveSha256": "5a07d40ae598beedd3b8c222db5c6d15ec3d3c9d2eae275e89a3369c028e06d9"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-runtime.strace",
+    "rawSha256": "99220321417a3aec242337030154ef1fb34f705a70b7b9084ef7c5205d7a4719",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-runtime.strace.gz",
+    "archiveSha256": "ca5af1bd215f08c4862c382b23b23217f6907ae88d3a06909cc4225d83e65082"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-symbols.txt",
+    "rawSha256": "29aaa88d4511c3979d2cecebf55157be529f01d86ac416c29f36aa27b8fe2653",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-symbols.txt.gz",
+    "archiveSha256": "5b13c70ff497981e2a0a87f36dade016c13cf7b8d06d2dd7c568cb62c37868ab"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-trace-stderr.txt",
+    "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-trace-stderr.txt.gz",
+    "archiveSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build.log",
+    "rawSha256": "e68a68c3df2ffae3c036bdebc6b441e53da79f5250e238b222c2c5ffa7d4355e",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build.log.gz",
+    "archiveSha256": "8db10c3a13322deb72db59abf31d3692acf7c6b63a4e191ada39f3fd909e70df"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/setup/keys/1.log",
+    "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/setup/keys/1.log.gz",
+    "archiveSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/setup/keys/gates.tsv",
+    "rawSha256": "b4a75126be462ba2b1928b6780e1d6d7b5de21ad7c564cfe22b7124ba0aa72a4",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/setup/keys/gates.tsv.gz",
+    "archiveSha256": "1f14263ed818a8948bd0dc84052ac473bdb219e44ba00976f844384c7526a099"
+  }
+]

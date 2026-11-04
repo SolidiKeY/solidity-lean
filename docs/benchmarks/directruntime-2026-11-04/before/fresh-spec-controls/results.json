@@ -1,0 +1,289 @@
+{
+  "backend": "generated-c-native",
+  "executableSha256": "4ade5e55eae99ba7c45e39ab148de066858ea5897fecca9a8debcd371c03cfd5",
+  "manifestSha256": "6e273d5c8ca02b0866be03f3af749c923417aec01d56a7b4d2bd4c33c2d6ecf4",
+  "leanCommit": "797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+  "trials": [
+    {
+      "name": "maximum",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 154.26246000000003,
+      "result": {
+        "results": [
+          {
+            "function": "maximum",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 22,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "falseMaximum",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 5.842967999999928,
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [
+                {
+                  "modelName": "x",
+                  "paramIndex": 0,
+                  "type": "uint",
+                  "value": "0"
+                },
+                {
+                  "modelName": "y",
+                  "paramIndex": 1,
+                  "type": "uint",
+                  "value": "0"
+                }
+              ],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "value = 0",
+              "kind": "model-state",
+              "lines": [
+                "x = 0, y = 0, msg.sender = 1, msg.value = 0",
+                "before: value = 0",
+                "after: value = 0"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "value = 0"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "falseMaximum",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 41,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storeMaximum",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 320.996358,
+      "result": {
+        "results": [
+          {
+            "function": "storeMaximum",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "twoChoices",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 3.536711999999852,
+      "result": {
+        "results": [
+          {
+            "function": "twoChoices",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 102,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "constantOne",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 1.2825749999999516,
+      "result": {
+        "results": [
+          {
+            "function": "constantOne",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 111,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "falseConstant",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 1.6881169999999202,
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "value = 0",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: value = 0",
+                "after: value = 0"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "value = 0"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "falseConstant",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 120,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "store",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 1.1494970000001103,
+      "result": {
+        "results": [
+          {
+            "function": "store",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 131,
+            "status": "proved",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "falseStore",
+      "round": 0,
+      "sourceHash": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+      "wallMs": 1.9908470000000307,
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "value = 0",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: value = 0",
+                "after: value = 2"
+              ],
+              "outcome": {
+                "kind": "postStorage",
+                "storage": "value = 2"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "falseStore",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 140,
+            "status": "refuted",
+            "tag": "specified",
+            "verification": "direct"
+          }
+        ]
+      }
+    }
+  ],
+  "startupMs": 7.404145999999969,
+  "sourceSha256": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+  "compilerHeader": {
+    "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "sourceSha256": "2d7aa2231395bc084588c541087fbd1d80bdd104ccb7ef07adbafc0812b4ffef",
+    "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+    "source": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/before/fresh-spec-controls/ClosedSpecs.sol",
+    "provenanceVersion": 1,
+    "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+    "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "validationStage": "analysis",
+    "settings": {
+      "viaIR": false,
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "libraries": {},
+      "remappings": [],
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ]
+        }
+      }
+    },
+    "acceptedPragmas": [
+      [
+        "solidity",
+        "^",
+        "0.8",
+        ".34"
+      ]
+    ]
+  },
+  "originalFixtureSha256": "0ee494a445a18406c30e7f69cd7d049b75f1e68bf878ea60b457e6759b2a54ee",
+  "freshFixtureSha256": "ed8b05e94f496acaadbe8ca9c36fdbe23aa39a2f460fa7dc313878e83c0cdb95",
+  "failures": [],
+  "passed": true
+}
