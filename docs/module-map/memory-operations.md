@@ -261,3 +261,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Initial raw-word facts derive both decoder phases of the existing linked Bool slice Items program, retaining its actual first allocation. |
 
 | `Solidity/Backend/MemoryOps/PhysicalByteStackExact.lean` | Exact nonempty materializer transient/suffix guard and checked-run equations on reached byte memory, with universal caller-stack REVERT classification. |
+
+| `Solidity/Backend/MemoryOps/PhysicalPointerMaterialize.lean` | Actual byte materialization preserves independent scaled-pointer, typed-parent and numeric-word footprints under local interval separation. |

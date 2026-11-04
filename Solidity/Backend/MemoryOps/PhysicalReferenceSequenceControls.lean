@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.PhysicalReferenceSequence
+import Solidity.Backend.MemoryOps.PhysicalPointerMaterialize
 
 /-! Inhabited parent redirection/dynamic child-write controls. These word/byte
 programs do not assert a Source path compiler or external EVM execution. -/
@@ -417,4 +418,105 @@ theorem stale_base_negative :
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.stale_base_negative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms stale_base_negative
+private def payloadBytes : List UInt8 := [7,0,255]
+private def byteAfter := Environment.writeBytes bytes 384 payloadBytes
+private theorem byte_vectors_framed : byteVector byteAfter=byteVector bytes := by
+  first
+  | solve | simp only [] | omega
+  | apply List.map_congr_left
+    intro c hc
+    apply readMemory_congr
+    intro j hj
+    apply Environment.writeBytes_frame
+    simp only [payloadBytes,List.length_cons,List.length_nil]
+    simp only [cells,List.mem_cons,List.not_mem_nil,or_false] at hc
+    rcases hc with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl <;> omega
+
+/-- Actual checked byte emission retains the typed repeated parent, numeric
+child, complete old byte vector (including free pointer/neighbour), and caller
+stack whenever the published guard returns a machine. No graph closure claim. -/
+theorem materialize_mixed_frames (caller : List Roadmap.Word) (suffix : Backend.Program) :
+    Failure.Slice.checkedRun (Environment.materialize 384 payloadBytes++(.op .REVERT::suffix))
+      ⟨⟨384,by decide⟩::⟨3,by decide⟩::caller,bytes⟩=
+      (if caller.length+4≤1024 then some (⟨caller,byteAfter⟩,some (.revert payloadBytes)) else none) ∧
+    (∀ out,Failure.Slice.checkedRun (Environment.materialize 384 payloadBytes++(.op .REVERT::suffix))
+      ⟨⟨384,by decide⟩::⟨3,by decide⟩::caller,bytes⟩=some out →
+      ReferenceArrayAt hp root base machine out.1.memory ∧
+      WordFrame machine out.1.memory (fun c => (base right.id).val≤c ∧ c<(base right.id).val+1+hp.len right .dyn) ∧
+      out.1.stack=caller ∧ out.2=some (.revert payloadBytes) ∧
+      byteVector out.1.memory=[1024,2,1,0,1,0,2,32,32,2,8,9].map Semantics.wordBytes ∧
+      Environment.readMemory out.1.memory 384 3=payloadBytes ∧
+      Environment.readMemory out.1.memory 544 32=Environment.readMemory out.1.memory 576 32) := by
+  first
+  | solve | simp only [] | omega
+  | have header : 384+payloadBytes.length≤32*(base root.id).val ∨ 32*(base root.id).val+32≤384 := by decide
+    have ptrs : ∀ c,ReferenceSlots hp root base c → 384+payloadBytes.length≤32*c ∨ 32*c+32≤384 := by
+      intro c hc
+      obtain ⟨i,hi,eq⟩ := hc
+      rw [parentLength] at hi
+      change c=16+1+i at eq
+      subst c
+      change 387≤32*(16+1+i) ∨ 32*(16+1+i)+32≤384
+      omega
+    have nums : ∀ c,(base right.id).val≤c ∧ c<(base right.id).val+1+hp.len right .dyn →
+        384+payloadBytes.length≤32*c ∨ 32*c+32≤384 := by
+      intro c hc
+      rw [rightLength] at hc
+      change 8≤c ∧ c<10 at hc
+      change 387≤32*c ∨ 32*c+32≤384
+      omega
+    have linked := parentAt.materialize_checked_revert _ rightBytes 7 [0,255] ⟨384,by decide⟩ ⟨3,by decide⟩ caller suffix
+        rfl (by decide) header ptrs nums
+    refine ⟨linked.1,?_⟩
+    intro out returned
+    obtain ⟨parent,numeric,stack,halt⟩ := linked.2 out returned
+    have run := linked.1
+    change Failure.Slice.checkedRun (Environment.materialize 384 payloadBytes++(.op .REVERT::suffix))
+      ⟨⟨384,by decide⟩::⟨3,by decide⟩::caller,bytes⟩=
+      (if caller.length+4≤1024 then some (⟨caller,byteAfter⟩,some (.revert payloadBytes)) else none) at run
+    rw [run] at returned
+    by_cases room : caller.length+4≤1024
+    · rw [if_pos room] at returned
+      have resultEq := (Option.some.inj returned).symm
+      refine ⟨parent,numeric,stack,halt,?_,?_,?_⟩
+      · rw [resultEq]
+        exact byte_vectors_framed.trans initial_byte_vector
+      · rw [resultEq]
+        exact Environment.read_written payloadBytes 384 bytes
+      · have left0 : (MObj.elems .dyn (hp.get root))[0]?=some left := by rw [parentElements];rfl
+        have left1 : (MObj.elems .dyn (hp.get root))[1]?=some left := by rw [parentElements];rfl
+        exact (parent.child_bytes 0 left left0).2.trans (parent.child_bytes 1 left left1).2.symm
+    · rw [if_neg room] at returned
+      cases returned
+
+/-- A real overlapping one-byte emission changes the low pointer byte32 to7.
+The exposed byte-slice halt machine exists, but its initial typed parent
+representation is false. This does not assert every overlap is invalid. -/
+theorem materialize_pointer_overlap :
+    Failure.Slice.checkedRun (Environment.materialize 575 [7]++[.op .REVERT])
+      ⟨[⟨575,by decide⟩,⟨1,by decide⟩],bytes⟩=
+      some (⟨[],Environment.writeBytes bytes 575 [7]⟩,some (.revert [7])) ∧
+    ¬ReferenceArrayAt hp root base machine (Environment.writeBytes bytes 575 [7]) := by
+  first
+  | solve | simp only [] | omega
+  | refine ⟨(materialize_checked_revert [7] ⟨575,by decide⟩ ⟨1,by decide⟩ [] bytes [] rfl (by decide) (by decide)).2,?_⟩
+    intro wrong
+    have selected : (MObj.elems .dyn (hp.get root))[0]?=some left := by rw [parentElements];rfl
+    have read := (wrong.child_bytes 0 left selected).2
+    change Environment.readMemory (Environment.writeBytes bytes 575 [7]) 544 32=Semantics.wordBytes 32 at read
+    have asBytes : Failure.Slice.getBytes (Environment.writeBytes bytes 575 [7]) 544 32=Semantics.wordBytes 32 :=
+      (readMemory_eq_getBytes _ 544 32).symm.trans read
+    have found : (Failure.Slice.getBytes (Environment.writeBytes bytes 575 [7]) 544 32)[31]?=some (7 : UInt8) := by
+      rw [List.getElem?_eq_getElem (by rw [getBytes_length];decide),
+        getBytes_at (Environment.writeBytes bytes 575 [7]) 544 32 31 (by decide)]
+      rfl
+    have low := congrArg (fun xs : List UInt8 => xs[31]?) asBytes
+    change (Failure.Slice.getBytes (Environment.writeBytes bytes 575 [7]) 544 32)[31]?=(Semantics.wordBytes 32)[31]? at low
+    rw [found,show (Semantics.wordBytes 32)[31]?=some (32 : UInt8) by decide] at low
+    exact (by decide : (some (7 : UInt8))≠some 32) low
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.materialize_mixed_frames' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms materialize_mixed_frames
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.materialize_pointer_overlap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms materialize_pointer_overlap
 end Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls
