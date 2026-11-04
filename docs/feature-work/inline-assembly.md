@@ -241,3 +241,13 @@ adequacy or native execution; the24 full obligations/six combinations stay open.
 VY5/H16 producer checkpoint: actual scheduled Source root dispatch, rollback,
 full-state/error-byte controls and measured legacy-path preservation; see
 [the lane record](vy5-composition.md). General assembly and P8 closure remain open.
+
+VY5 H16 request-admission child: rebased on published6f3eedf0; actual
+requestValueScope reuses unchanged requestScope with exact-Nat sender-value
+admission, four general/preservation laws and eleven full-state controls.
+Checkpoint at674cc1797b911fbf5bf3d626cc4a44e2af949ec1 passes library3359,
+trust/layers/roots/doc-paths/axiom-pins and strict classification. V17 WhileReturn
+needs only one proof-side legacy None disambiguation. Evidence/interface:
+`/workspace/vy5-composition/request-admission-20261104/final`. The held
+factored-core timing candidate is not landed. H16 session/P8, H19 and all24/six
+remain open; no new native evidence or full-lane/runtime-gate pass.
