@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceReferenceGrowthWrite
 import Solidity.Backend.MemoryOps.SourceReferenceRead
 import Solidity.Backend.MemoryOps.SourceReferenceReadSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAliasSequence
@@ -2830,5 +2831,87 @@ theorem reference_growth_fresh_reads :
 #guard_msgs (whitespace := lax) in #print axioms reference_growth_reads
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms reference_growth_vectors
+
+/-- The actual newly allocated child, rather than LEFT, is installed in entry0;
+entry2 retains LEFT. Both pipelines execute the reached nested read. -/
+theorem reference_growth_redirect_client (p : Roadmap.Pipeline) (horizon : Nat) (blank : Bool) :
+    ∃ (out : Heap (H++[B])) (z : Source.EMState E0 SΓ),
+      (Source.allocRef (E := E0) (Γ := SΓ) (sourceBoolMemory (MObj.elems .dyn (graphObject blank)))).run sy=
+        (.ok (.memRef rfl 5),graphSource blank) ∧
+      (graphPair blank).1.writeAddr (.index (fresh.wk (List.prefix_append H [B])) .dyn (indexValue ⟨0,by decide⟩))
+        (graphPair blank).2=some out ∧
+      (Source.writeLoc (E := E0) (Γ := SΓ) F0 horizon (.mem (τ := SB) 3 0) (.memRef rfl 5)).run (graphSource blank)=(.ok (),z) ∧
+      SourceBoolRefsAt z 3 out (fresh.wk (List.prefix_append H [B])) graphNewMap ∧
+      Source.MemOK E0 SH z ∧ z.1=sy.1 ∧ z.2.heap.next=6 ∧
+      MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B])))=
+        [(graphPair blank).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])] ∧
+      (MObj.elems .dyn (out.get (left.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (right.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (graphPair blank).2))=([true,false,false],[false,true,false],if blank then [] else [false,true]) ∧
+      [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4,z.2.heap.get 5]=
+        [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+         some ⟨SR,pdata [left]⟩,some ⟨SR,sourceBoolRefMemory graphNewMap
+          [(graphPair blank).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])]⟩,
+         some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory (if blank then [] else [false,true])⟩] ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 3 0)).run z=(.ok (.memRef rfl 5),z) ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 3 2)).run z=(.ok (.memRef rfl 0),z) ∧
+      (Source.memElem (E := E0) (Γ := SΓ) 0 0 .bool).run z=(.ok (.bool true),z) ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local sj) rfl)).run z=
+        ((if blank then .error (.revert (Source.panicData .index)) else .ok (.val (.bool false))),z) ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨out,z,ha,hw,hs,mid,parent,fr,mm,mz,lz,rs,new,old,aliases,hid,haddr,distinct,world,cells,next⟩ :=
+      graphInitial.alloc_redirect (graphObject blank) SH source_memOK F0 horizon ⟨0,by decide⟩
+        (by simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide)
+    have table : MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B])))=
+        [(graphPair blank).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])] := by
+      rw [rs]
+      simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.map_cons,List.map_nil,List.set_cons_zero]
+      rfl
+    have freshElems : MObj.elems .dyn (out.get (graphPair blank).2)=(if blank then [] else [false,true]) := by
+      change MObj.elems .dyn (out.get (hp.alloc (graphObject blank)).2)=_
+      rw [new]
+      exact (reference_growth_vectors blank).2.2.2.2.2.2
+    have sourceParent := parent.parent
+    rw [table] at sourceParent
+    have get0 := cells 0 (by decide)
+    have get1 := cells 1 (by decide)
+    have get2 := cells 2 (by decide)
+    have get4 := cells 4 (by decide)
+    have get5 := cells 5 (by decide)
+    have hq : out.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 0)=some (graphPair blank).2 := by
+      change (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B]))))[0]?=_
+      rw [table];rfl
+    refine ⟨out,z,ha,hw,hs,parent,mz,lz,next,table,?_,?_,?_,?_,?_,?_,world⟩
+    · rw [old left,old right,freshElems]
+      simp only [MObj.elems_wk,Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil]
+      rfl
+    · rw [get0,get1,get2,sourceParent,get4,get5]
+      cases blank <;> simp only [graphObject,MObj.elems_dyn] <;> rfl
+    · exact parent.parent_read F0 0 _ hq
+    · apply parent.parent_read F0 2 (left.wk (List.prefix_append H [B]))
+      change (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B]))))[2]?=_
+      rw [table];rfl
+    · apply source_bool_read z 0 [true,false,false] _ 0 (by decide)
+      rw [get0];cases blank <;> simp only [graphObject,MObj.elems_dyn] <;> rfl
+    · cases blank
+      · apply parent.eval_nested_read (G0 p) F0 horizon ssrc sj sj (uintOfNat 0) (uintOfNat 0) _ false
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · exact hq
+        · change (MObj.elems .dyn (out.get (graphPair false).2))[0]?=some false
+          rw [freshElems];rfl
+      · apply parent.eval_nested_child_bounds (G0 p) F0 horizon ssrc sj sj (uintOfNat 0) (uintOfNat 0) (graphPair true).2
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · exact hq
+        · change (MObj.elems .dyn (out.get (graphPair true).2)).length≤0
+          rw [freshElems];decide
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_redirect_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_redirect_client
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

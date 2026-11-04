@@ -214,3 +214,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceMemoryShortCircuit.lean` | Actual initial Bool indexed-write bounds error absorbs arbitrary context-changing Source/native and word continuations; no suffix/allocator premises. |
 
 | `Solidity/Backend/MemoryOps/SourceReferenceGrowth.lean` | Actual paired Source/intrinsic allocation preserves finite reference-parent/Boolean-child observations; no emitted allocator claim. |
+
+| `Solidity/Backend/MemoryOps/SourceReferenceGrowthWrite.lean` | Actual paired allocation then reached parent-slot redirection; derived observers/frames, no emitted allocator. |
