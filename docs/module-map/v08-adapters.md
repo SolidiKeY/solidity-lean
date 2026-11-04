@@ -517,3 +517,4 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSubControls.lean` | Signed wrap boundaries, populated full observations and gas/stack/fuel negative controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PushFamily.lean` | Exact arbitrary payload and Scalar-tail transport through existing all-width charged metadata PUSH. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PushFamilyControls.lean` | Leading-zero/width/PC/cost distinctions, populated complete observations and resource negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean` | Concrete ADD/MUL instruction certificates, exact Scalar code and charged fetched numeric transport with separate frames. |
