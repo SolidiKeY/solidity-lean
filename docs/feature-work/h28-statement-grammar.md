@@ -51,12 +51,12 @@ validity and existing layout and precedence contracts are not weakened.
 2. Splitting/root/association: recursive block/control balance, mixed boundary
    splitting, intrinsic nearest position and non-simple token roots proved.
    Arbitrary statement/atom brace balance and arbitrary block-prefix splitting
-   are proved under H31. Raw root-collision classification is proved; contextual simple/revert
-   discrimination under precedence and token-level association remain in progress.
+   are proved under H31. All statement roots, including contextual simple/revert, are distinguished
+   under the original precedence contract. Token-level association remains in progress.
    The former Q-ATOM hold is resolved.
 3. Parse/yield: recursive block/control completeness and actual yield uniqueness
    proved; fixed-Boolean/empty-for compound coverage proved. Broad uniqueness/
-   profile completeness are refuted by SG-CEX-01 and retained OPEN/REFUTED.
+   profile completeness are refuted by SG-CEX-01/SG-CEX-02 and retained OPEN/REFUTED.
    General remaining statement composition is in progress under H31; no successful parse
    is assumed to discharge completeness.
 4. All 45 kernel and pinned solc fixture controls pass with 40 constructor
@@ -1250,3 +1250,137 @@ uniqueness/association, general compound expression/header/body fuel, full
 repository gates and whole-scope reviews/acceptance. The original objective
 is not complete. H31 remains the only atom-proof authorization, and SOL-EU
 remains excluded.
+
+
+## Checkpoint P: all statement roots under the original contract
+
+PairPr.lean and SyntaxPair.lean derive the required two-token facts locally
+under H31. An expression/type yield cannot begin with an identifier followed
+by another identifier or colon; it is nonempty whenever that nonemptiness is
+needed for concatenation. Call-argument yields start with a left parenthesis.
+The framing lemma explicitly requires a real separator and obtains atom
+nonemptiness from the previously proved SafeParts invariant. All 36 constructors
+of these three substantive categories are covered; other categories receive
+only the explicit trivial PairInvariant fallback, not an atom claim.
+
+ContextPr.lean and RootContract.lean then distinguish all three simple forms
+from path-qualified revert. Declaration heads can create two leading identifiers
+only where an initializer assignment or semicolon follows. Expressions and
+tuple declarations cannot acquire the conflicting prefix. Valid revert path
+yields start with an identifier and then either a member period or argument
+parenthesis, so their first three tokens disagree with simple statements.
+All these facts are framed over arbitrary suffixes and actual input/output
+layouts. Existing isPathExpr supplies the path premise directly from revert's
+existing precNode contract; no new semantic premise is assumed.
+
+statement_root_unique_node_contract proves root equality for equal successful
+token prefixes under the existing node conditions. statement_root_unique derives
+the original full prec=true/layout version using Syn.prec_root. This completes
+root discrimination across all 13 statement roots for arbitrary intrinsic
+syntax, contexts, atoms, layouts and suffixes. There is no root exclusion,
+expression-uniqueness or successful-parser premise. The conclusion is Root
+equality only, not full syntax-tree equality or whole-language uniqueness.
+No producer API or original theorem statement is changed.
+
+RootContractControls has inhabited positional, qualified and named revert
+forms with successful actual yields and precedence. It distinguishes a simple
+declaration's semicolon from revert's parenthesis/member period, proves a
+universal simple/revert prefix refusal, and recovers the revert root of every
+contract-valid matching candidate. A valid named argument begins identifier/
+colon and is explicitly retained outside the expression/type atom-pair claim.
+PairConstructorControls reuses the same typed fixture data as O to check the
+stronger properties for all 36 relevant constructors, all five literal variants,
+nonempty actual yields and empty residual layouts. Exact Ctor inventories and
+counts are kernel checked; no predicate-only/vacuous fixture inventory is used.
+
+### SG-CEX-02: ASCII intrinsic-guard completeness is false
+
+ContextualDeclCounterexample.lean contains the inhabited statement
+simpleStmt(declVar(varDecl(userType("revert"), none, "E"), none)). Its exact
+successful yield is the tokens of revert E;. The actual checked lexer accepts
+the ASCII bytes and produces those tokens. The tree has prec=true and
+InProfile. Nevertheless, for every positive fuel n+2, the existing stmt parser
+returns expected '(' at the semicolon; fuel0/fuel1 also fail. The all-fuel
+proof covers arbitrary token locations, suffix states, output states and target
+trees. No larger structural fuel can recover this intrinsic declaration.
+
+This is an additional OPEN/REFUTED roundtrip-completeness target under the
+stated intrinsic guards. It does not refute RootContract: no valid revert tree
+shares the declaration's semicolon prefix. It is not rejection of solc-accepted
+source or a solc divergence. The pinned compiler also rejects the unqualified
+contextual declaration, consistent with the checked parser's frozen dispatch.
+The missing intrinsic-image restriction is not added as a new premise,
+exclusion or producer change. SG-CEX-01 remains separately OPEN/REFUTED.
+
+The new six-case contextual-revert-fixtures manifest records three exact
+ParserError2314 refusals (contract-type declaration, value-type declaration,
+initialized declaration) and three accepted AST controls (qualified declaration,
+ordinary declaration and error revert). The lexical identifier rule explicitly
+admits revert. The positive qualified/ordinary declarations and actual error
+revert prevent an empty all-refusal test relation. The external compiler is
+still 0.8.38+commit.1835d247.Emscripten.clang with the original SHA256 pin.
+The exploratory observations are retained separately from the subsequent
+pinned-expectation gate. All source/input/output hashes are sealed.
+
+contextual-revert-solc.mjs verifies all six source hashes, compiler identity,
+exact errors and accepted statement/declaration-path AST fields. It seals setup
+and case failures and copies its own source/manifest. runtime.py changes only
+its exact solc runner allowlist to admit this second fixed path; all memory,
+no-swap, CPU, headroom, serial Lean, wall and failure-cleanup guards stay unchanged.
+The original45 fixtures and runner are unchanged and were rerun successfully.
+These are external compiler tests, not premises or evidence replacing the
+kernel proofs. No semantic solc acceptance is claimed for raw kernel-only trees.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/PairPr.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793821238782375771 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/SyntaxPair.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793821381822991130 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/ContextPr.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793821637197432185 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/RootContract.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793821866656976278 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.RootContract | pass; 1.75s timed wall, RSS 446320 KiB | /workspace/h28-statement-grammar-evidence/run-1793822012190190520 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/ContextualDeclCounterexample.lean | pass, exact lexer/all-fuel equations | /workspace/h28-statement-grammar-evidence/run-1793822566829758878 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.ContextualDeclCounterexample | pass; 0.75s timed wall, RSS 449480 KiB | /workspace/h28-statement-grammar-evidence/run-1793822650089152080 |
+| runtime.py diag tests/h28-sol/statement-grammar/RootContractControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793822774544714542 |
+| runtime.py diag tests/h28-sol/statement-grammar/PairConstructorControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793822824148070802 |
+| runtime.py diag tests/h28-sol/statement-grammar/ContractPublicAxioms.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823312657256898 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/PairPr.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823547601599660 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/SyntaxPair.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823553666548053 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/ContextPr.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823560939358464 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/RootContract.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823566564296226 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/ContextualDeclCounterexample.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823573263007215 |
+| runtime.py gate tests/h28-sol/statement-grammar/RootContractControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823579194180195 |
+| runtime.py gate tests/h28-sol/statement-grammar/PairConstructorControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793823585209052888 |
+| runtime.py gate tests/h28-sol/statement-grammar/ContractPublicAxioms.lean | pass, all43 public theorem signatures/axioms | /workspace/h28-statement-grammar-evidence/run-1793823591478678202 |
+| runtime.py solc tests/h28-sol/statement-grammar/solc-fixtures.mjs | pass, original45 expectations unchanged | /workspace/h28-statement-grammar-evidence/run-1793823597759694237 |
+| runtime.py solc tests/h28-sol/statement-grammar/contextual-revert-solc.mjs | pass, all6 new exact expectations | /workspace/h28-statement-grammar-evidence/run-1793823603941886168 |
+
+All43 public source theorem signatures/axiom sets are enumerated by
+ContractPublicAxioms and axioms-p.json. 26 have no axioms, 14 use propext and
+Quot.sound, and three use propext. All36 atomic constructor/source identities,
+all13 root scope and six fixture records are in inventory-p.json. The five
+new source modules are locally registered only. No custom axiom, sorry/admit,
+unsafe/native_decide, heartbeat raise, expression uniqueness or producer change
+is introduced. Exact commands/exits/timing/RSS and recursive input hashes are
+in every run receipt, alongside process samples and immutable checksums.
+
+Two failed counterexample diagnostics remain retained: run-1793822395213499066
+needed the actual Lexer import; run-1793822465683997957 could not synthesize
+generic Except equality for decide. The unchanged exact lexer-success equation
+is instead proved by kernel rfl. Its statement and guards were not weakened.
+The independent bounded compiler exploration is at
+contextual-solc-probe-1793822236046042570 and is labeled observations, not a
+pinned expectation PASS. Later fixture gates enforce the recorded expectations.
+
+Separate read-only finder and skeptic pass all five proof modules, both control
+modules, the exact counterexample applicability, six source fixtures and test
+runner/resource change. Neither used Lean/server/solc/builds. Both confirmed
+that the counterexample does not claim solc-accepted-source rejection or a
+failure of the root theorem. reviews-p.json records the scoped verdicts.
+
+Remaining original work: general mixed statement token splitting, token-level
+conditional association/uniqueness where meaningful independently of SOL-EU,
+additional true structural-fuel fragments versus explicitly refuted intrinsic
+completeness targets, full repository gates and whole-scope reviews/acceptance.
+Root discrimination under the existing contract is now proved, including the
+previous contextual pair. The original assignment is not marked complete;
+SG-CEX-01 and SG-CEX-02 stay OPEN/REFUTED with no new exclusion or premise.

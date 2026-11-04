@@ -72,7 +72,7 @@ def main():
                     assert (ROOT/'.lake/build/lib/lean'/(dep.replace('.','/')+'.olean')).is_file(), 'prebuild import serially: '+dep
         inputs=list((ROOT/'Solidity/Frontend/StatementGrammarH28').rglob('*'))+list((ROOT/'tests/h28-sol/statement-grammar').rglob('*'))+[ROOT/'Solidity/Source/Syntax.lean',ROOT/'docs/feature-work/h28-statement-grammar.md']+list(ROOT.glob('Solidity/Frontend/Checked/*.lean'))+list(ROOT.glob('tests/upstream/grammar-0.8.38/*.g4'))
         (out/'inputs.json').write_text(json.dumps({str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs if p.is_file()},indent=2))
-        if mode=='solc':assert target=='tests/h28-sol/statement-grammar/solc-fixtures.mjs'
+        if mode=='solc':assert target in ('tests/h28-sol/statement-grammar/solc-fixtures.mjs','tests/h28-sol/statement-grammar/contextual-revert-solc.mjs')
         if mode=='diag':cmd=['scripts/coord-tools/lean-mcp','diag',target]
         else:
             inner=['lake','-f',str(TOOLS/'lakefile.toml'),'build',target] if mode=='build' else ['bash','scripts/coord-tools/gate.sh','per-file',target]

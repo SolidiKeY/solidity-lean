@@ -65,3 +65,8 @@ Solidity.Frontend.StatementGrammarH28.SyntaxBalance	H31 local proof-only arbitra
 Solidity.Frontend.StatementGrammarH28.HeadPr	H31 universal expression/type/simple leading-token and root collision proofs
 Solidity.Frontend.StatementGrammarH28.SyntaxHead	H31 universal expression/type/simple leading-token and root collision proofs
 Solidity.Frontend.StatementGrammarH28.RootHead	H31 universal expression/type/simple leading-token and root collision proofs
+Solidity.Frontend.StatementGrammarH28.PairPr	H31 full contract-level statement roots and checked contextual declaration counterexample
+Solidity.Frontend.StatementGrammarH28.SyntaxPair	H31 full contract-level statement roots and checked contextual declaration counterexample
+Solidity.Frontend.StatementGrammarH28.ContextPr	H31 full contract-level statement roots and checked contextual declaration counterexample
+Solidity.Frontend.StatementGrammarH28.RootContract	H31 full contract-level statement roots and checked contextual declaration counterexample
+Solidity.Frontend.StatementGrammarH28.ContextualDeclCounterexample	H31 full contract-level statement roots and checked contextual declaration counterexample
