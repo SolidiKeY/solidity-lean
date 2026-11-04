@@ -1036,6 +1036,7 @@ import Solidity.Calculus.DecisionMappingFieldReason
 import Solidity.Calculus.DecisionMemoryCoverage
 import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.DecisionNegativeInstantiation
+import Solidity.Calculus.DecisionNormalizationResidue
 import Solidity.Calculus.DecisionNumericBounds
 import Solidity.Calculus.DecisionNumericCompiler
 import Solidity.Calculus.DecisionNumericCoverage

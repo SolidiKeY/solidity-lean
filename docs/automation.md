@@ -1368,6 +1368,17 @@ depth. Runtime2048 and the later511-node cut remain unchanged; the broader runti
 fuel/cut obligation and global Residue theorem are still open.
 
 
+VA1 source-budget reason (2026-11-04): DecisionNormalizationResidue defines
+an independently decidable class of two uint prefixes with QFUIntLinear bodies
+whose computed work exceeds the unchanged2048 normalizer budget. A typed
+recognizer and the exact-work theorem certify actual normalization failure.
+The2049/1025-visit clients use both uint locals; the smaller source normalizes
+but remains unknown, demonstrating that this class is not an unknown test.
+Small target controls have kernel-certified proved/refuted results under the
+existing hash premise. Global Residue/DecisionTheorem-prime, the exhaustive
+coverage bridge and whole-formula511-node derivation remain open.
+
+
 VA1 typed-prefix storage bridge (2026-11-02): DecisionFixedArrayStorage lifts
 existing optional fixedFloorAtPath reconstruction into actual Storage.set.
 Generic word/presence transport includes undefined/out-of-range paths, with

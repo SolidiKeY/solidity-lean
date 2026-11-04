@@ -87,6 +87,7 @@ import Solidity.Examples.DecisionMemory
 import Solidity.Examples.DecisionMemoryFixtureData
 import Solidity.Examples.DecisionMemoryParameterData
 import Solidity.Examples.DecisionNegativeInstantiation
+import Solidity.Examples.DecisionNormalizationResidue
 import Solidity.Examples.DecisionNumericBounds
 import Solidity.Examples.DecisionNumericCompiler
 import Solidity.Examples.DecisionNumericCoverage

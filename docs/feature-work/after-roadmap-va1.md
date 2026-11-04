@@ -4884,3 +4884,87 @@ not replaced. Full affected reverse closure, full run-lean/TestSuite, strict,
 trust/axiom and frozen-base cumulative final gates remain pending. No EVM test
 or final integration pass is claimed. A separately reviewed two-uint-prefix
 normalization-over-budget reason is design-only, not a new exclusion or theorem.
+
+
+## Decidable source-budget reason and H1 recovery — 2026-11-04
+
+Published scheduled master059eb83d4e1d494f42c532513ffbcd3e65adaf75 is merged
+on this task branch at4cbebde068c694ad7361687e39b5dfcb5342ca12. Checkpoint
+3019534c and its latest seal remain intact. Frozen base stays8bd8742a; no
+H16 Source or ExtCall implementation was edited by this checkpoint.
+
+`Calculus/DecisionNormalizationResidue.lean` implements a new independently
+decidable source-reason class, `Fml.NormalizationBudgetResidue`. Recognition
+matches two outer uint forall binders, checks the existing QFUIntLinear body
+grammar and requires body.normalizationWork+2>2048. It returns a witness indexed
+by that complete intrinsic source. The one-line reason names those actual
+formula visits. It never consults Covered, inTarget, normalization success or
+any decision verdict. This is one source-budget reason; global Fml.Residue,
+DecisionTheorem-prime and the exhaustive coverage/hash bridge remain open.
+
+The public certificate theorem has explicit contract/context/source quantifiers:
+`normalizationBudgetResidue_normalizer_none {C : Contract} {Γ : Ctx}
+{φ : Fml C Γ} (h : φ.NormalizationBudgetResidue) :
+ProgramNormalization.ofFormula? 2048 φ = none`.
+Its indexed-witness theorem uses the existing exact two-prefix work theorem;
+the class theorem extracts the actual Option witness. No successful
+normalization, coverage, translation, validity or future-helper premise is
+supplied. No normalizer/511-node/proof budget was increased.
+
+`Examples/DecisionNormalizationResidue.lean` supplies a real member over Gaps:
+a1024-leaf conjunction of an arithmetic equation using both actual uint locals.
+Its source work is2049 visits. The512-leaf sibling needs1025 visits. Kernel
+proofs certify membership, target admission, hash absence, rejection of wrong
+sort/additional binder/havoc shapes, the large source's normalization failure
+and the sibling's normalization success. Small non-residual inTarget sources
+have a certified proved verdict and an actual returned refutation state.
+`reflexive_validH` and `small_countermodel` use the unchanged exact goal hash
+premise through decideGoal_sound/refutes. All printed axiom reports contain
+only propext, Classical.choice and Quot.sound.
+
+Fresh public observations are preserved as interpreted guard pins:
+[unknown,unknown,refuted,proved,unknown] for the large source, sibling, small
+source, reflexive source and existing gapHashNegForall. The sibling remains
+unknown despite normalizing successfully and lies outside this class. These
+large unknown observations are not kernel equality theorems or a global
+completeness result. No existing expected verdict was edited. Original frozen-
+base baseline replay and broader reason census remain incomplete.
+
+Actual focused gates: both files have zero per-file MCP errors; repository
+per-file kernel gates pass in2s/15s; the concrete consumer module builds.
+Fresh bounded KeySort parses377 taclets,131 read-bearing, covers131 and matches
+the pinned rules. Lean4.24.0, Lake5.0.0-src+797c613. Trust0findings; orphans0;
+layers0; axiom-pins0errors/unrecorded changes. Strict classification records
+491automatic,61with a step budget,11refuted,0manual,0pending, explicitly without
+cumulative timing. Registration is script-generated and module-map rows are
+limited to the owned area files. Full reverse closure/run-lean/TestSuite/timing
+and cumulative final gates remain pending.
+
+Raw failures remain under `/workspace/va1-evidence/normalization-residue-next`:
+initial MCP cache-incomplete failure and raw fatal diagnostic; missing rg PATH
+entry (fixed using installed /usr/local/bin/rg); and the direct-reduction
+normalizer client attempt stopped by the effective4GiB reserve guard, exit1.
+The successful client uses the existing structural certificate. The stopped
+attempt is not a pass. Every Lean/LSP job uses the original writer lock,
+LEAN_NUM_THREADS=1, explicit-j1, hard memory.max12884901888, swap.max0 and the
+unchanged300s bound, with no LSP/build overlap. memory.reclaim is not writable.
+
+H1 cleanup receipt: `/workspace/va1-evidence/disk-recovery-20261104`.
+Independent finder/skeptic approved removing362 unreferenced private cache
+blobs (942586290bytes) after SHA inventory and two completed clean auxiliary
+worktrees. The sole H6 config was preserved and verified; both commits/refs,
+all source work, protected `/workspace/.setup/cache/lake`, current thin-build,
+and latest seals remain. Free bytes rose from937959424 to2255536128. Cache
+reconstruction was temporarily needed for MCP; it stays task-private and the
+protected cache remains read-only. Final free bytes are recorded in the final
+cleanup receipt; shipment fit still requires the coordinator's actual missing
+artifact/pack sizes plus its2GiB reserve.
+
+AU01 global theorem/bridge, remaining AU02 array/memory/halting-OR/approved
+program-free boundary/whole-formula511-node derivation, baseline/backfill and
+T1–T7 remain partial or unproved. AU05 is assigned next but not started.
+No EVM test or whole-lane completion is claimed.
+
+Independent read-only finder and skeptic reviews found no proof/scope issues
+and approved this incremental checkpoint. Neither used Lean or a server. Exact
+review receipts are in normalization-residue-next/independent-reviews.json.

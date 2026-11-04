@@ -215,3 +215,4 @@ At the root, the notation's own tests:
 | `Examples/DecisionVerdictData.lean` | Existing general decision verdict renderer without regression imports. |
 | `Examples/FixedArrayFloor.lean` | Inhabited changed/retained, zero/past-length and nested fixed storage reads, with a missing-length countercontrol. |
 | `Examples/FixedArrayRoot.lean` | Inhabited selected-root, retained/halted, non-default other-root and unretained-formula countercontrols for fixed storage reconstruction. |
+| `Examples/DecisionNormalizationResidue.lean` | Inhabited 2049/1025-visit controls, rejected source shapes, certified proved/refuted targets and interpreted unknown pins. |
