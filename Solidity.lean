@@ -303,6 +303,7 @@ import Solidity.Backend.MemoryCopies.SourceFramesControls
 import Solidity.Backend.MemoryCopies.SourceFramesCore
 import Solidity.Backend.MemoryCopies.SourceFramesInterface
 import Solidity.Backend.MemoryCopies.SourceInterface
+import Solidity.Backend.MemoryCopies.SourceLeafInterface
 import Solidity.Backend.MemoryCopies.SourceRootCopies
 import Solidity.Backend.MemoryCopies.SourceSize
 import Solidity.Backend.MemoryCopies.SourceSizeInputs
