@@ -245,7 +245,7 @@ No false target or semantic exclusion has been silently discharged.
 | Nearest-else association | existing local no-capture contract proved; unique attachment/token decomposition pending |
 | Simple/block/loop/control token-root discrimination | syntactic root discrimination proved; token-root discrimination pending |
 | Parse/yield uniqueness under precedence/layout | unrestricted intrinsic target refuted, even with InProfile; SG-CEX-01 retained open; other positive uniqueness obligations pending |
-| Concrete parser completeness with syntax-derived fuel | three control leaves proved; unrestricted intrinsic-profile completeness refuted by SG-CEX-01; other constructors/dependencies pending |
+| Concrete parser completeness with syntax-derived fuel | control leaves plus arbitrary-length leaf-list blocks/blockStmt/unchecked families proved; unrestricted intrinsic-profile completeness refuted by SG-CEX-01; other constructors/dependencies pending |
 | Constructor-complete kernel controls | narrow root, dangling-else and three leaf controls pass; full variants pending |
 | Positive/negative return-expression/unchecked/try variants | pending |
 | solc 0.8.38 grammar fixtures | pending; no external solc result claimed |
@@ -406,3 +406,77 @@ remaining constructor fuel/coverage and controls, solc fixtures, full gates,
 full-scope reviews/acceptance and final handoff. SG-CEX-01 remains OPEN/REFUTED;
 no premise or producer is changed to make it disappear. The existing goal
 continues with these obligations, not a replacement goal or VM.
+
+## Checkpoint F: syntax-derived control-block and list-loop fuel
+
+BlockLeafCoverage.lean defines LeafItems as a relation on existing indexed
+Syn item lists and their tokens. It admits arbitrary list lengths of empty
+return, break and continue, retaining the intrinsic loop/unchecked contexts.
+It introduces no replacement AST. It is explicitly not the whole statement
+grammar. Generated internal locations are zero; arbitrary source-position
+or lexer correctness is not claimed. Arbitrary suffix tokens, layout and EOF
+are preserved by the successful coverage equations.
+
+The proof derives token length = itemCount + itemCount from syntax. The actual
+many loop's token-derived fuel is sufficient for itemCount parsing steps and
+the necessary stopping step. With exactly itemCount iterations, the existing
+manyAux parser fails at the closing brace with no progress, universally over
+all represented lists. Every operational success premise in the helper
+composition lemmas is discharged by concrete existing-parser leaf equations.
+Final completeness theorems assume only LeafItems, never successful parsing.
+
+Uniform sufficient nesting fuel is n+4 for a block and n+5 for its blockStmt
+or unchecked-item wrapper. These are sufficient bounds, not asserted minimal
+nesting bounds. Arbitrary list length is handled by the independently proved
+many iteration bound. Nested unchecked input is refused for every positive
+item fuel. The relation also derives actual Syn list yields, block yields
+and successful block toks [], connecting parser inputs to the existing yield
+specification instead of mocking a successful parse.
+
+Controls contain arbitrary-count and 80-item return lists, mixed return,
+break and continue lists in both unchecked states, blockStmt and unchecked
+wrappers, nonempty else suffix/layout/EOF, universal stopping-step underfuel,
+actual yields and nested-unchecked refusal. Separate read-only finder and
+skeptic reviews pass the complete narrow source/control increment. Neither
+used Lean/server/builds. The skeptic requested the actual-yield connection;
+it was added and both reviewers accepted it. The restriction to this leaf
+relation and zero-offset inputs remains explicit.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/BlockLeafCoverage.lean | pass, final yield/underfuel additions | /workspace/h28-statement-grammar-evidence/run-1793800827348532515 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage | pass; 4.08s timed wall; peak RSS 510844 KiB | /workspace/h28-statement-grammar-evidence/run-1793801075967086471 |
+| runtime.py diag tests/h28-sol/statement-grammar/BlockLeafCoverageControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793801537126732798 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/BlockLeafCoverage.lean | pass, no local warnings | /workspace/h28-statement-grammar-evidence/run-1793801699935772492 |
+| runtime.py gate tests/h28-sol/statement-grammar/BlockLeafCoverageControls.lean | pass, no local warnings | /workspace/h28-statement-grammar-evidence/run-1793801704641692241 |
+
+Exact public signatures and all 24 printed theorem axiom sets are in the
+source and gate output. many_aux_none, many_aux_cons, many_aux_cons_error,
+uncheckedInput_eq and leaf_step_stop have no axioms. blockInput_eq uses
+[propext]. stmt_block_prefix, item_unchecked_prefix,
+unchecked_nested_refused and the three concrete leaf_step success theorems
+use [Quot.sound]. The remaining printed theorems use [propext, Quot.sound].
+Only existing Lean foundations occur; no custom axiom, unsafe, native_decide
+or raised maxHeartbeats was introduced.
+
+Retained failures: run-1793799901568202090 attempted induction on a fixed
+indexed Syn category; the checked inverse theorem uses indexed recursion.
+run-1793800030559517318 exposed generated-equation and stateful-option-match
+issues; the checked proof rewrites the generated equations and retains the
+stateful matcher until its result is known. run-1793800253330800174 lacked
+an explicit Except type in a change expression. run-1793800505573602267 had
+uninstantiated constructor/projection patterns and a flattened-list equality;
+explicit witnesses, typed projected equalities and append_nil fixed those.
+run-1793801452731473003 required explicit itemCount equations in the concrete
+three-item underfuel control. All failed runs remain visible.
+
+External fixture setup only: the official soljson-v0.8.38+commit.1835d247.js
+was retrieved and SHA-256 verified as
+6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390,
+matching the existing repository pin. In the same bounded runtime it reports
+0.8.38+commit.1835d247.Emscripten.clang; Node is v24.19.0. No solc grammar
+fixture PASS is claimed yet. The next work is constructor-complete kernel
+controls and these pinned external fixtures, then remaining boundary/root/
+attachment results and full gates/reviews. General compound completeness,
+mixed-list splitting, all-Syn balance and scope acceptance remain open.
+SG-CEX-01 is still OPEN/REFUTED and all original constraints remain binding.

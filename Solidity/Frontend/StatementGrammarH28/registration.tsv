@@ -5,3 +5,4 @@ Solidity.Frontend.StatementGrammarH28.LeafCoverage	Concrete control-leaf parser 
 Solidity.Frontend.StatementGrammarH28.FlagCounterexample	Checked statement-yield and existential-fuel completeness counterexamples
 Solidity.Frontend.StatementGrammarH28.Balance	Balanced brace prefix/list splitting and intrinsic block boundaries
 Solidity.Frontend.StatementGrammarH28.YieldSplit	Exact existing block/list yield and intermediate-layout decomposition
+Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage	Syntax-derived arbitrary-length control-block parser fuel and actual yield coverage
