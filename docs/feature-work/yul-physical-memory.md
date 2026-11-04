@@ -1182,3 +1182,17 @@ static-frame Source carriers, right padding, maximum-offset zeros and exterior
 bytes. Source offsets remain mathematical Nat after the initial Word; no wrap
 or invented source-end bound is introduced. General dirty-local readback and
 compiler CALLDATACOPY correspondence remain open.
+
+
+`SourceEnvironmentSlice` connects the existing Source magic sequence to actual
+`Backend.Environment.runSlice` execution of TIMESTAMP, CALLER and CALLVALUE in
+that order, retaining the full Source state, target memory and stack suffix.
+Actual Source values map to the resulting reversed stack order. BALANCE reads
+use the existing code-presence/history Source balance projection and exact
+bounded account conversion. Effectful operands select their actual post-state
+and returned account; the adapter does not compile the operand or run a balance
+read after operand failure. Controls retain distinct sender/self identities,
+full-width value, history/code-selected balances, late timeout prefixes and
+mismatched-ledger/order negatives. These are the existing gas-free local slices;
+stack/gas/fuel resource correspondence, independent runtime-ledger agreement,
+whole-world execution and compiler adequacy remain open.

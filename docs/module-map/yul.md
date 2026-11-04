@@ -154,3 +154,4 @@
 | `Yul/Adapters/RawPhysicalInterior{,Controls}` | Complete raw-local inventory transport after an interior-byte P6/MSTORE8 update, using exact full-word codecs and retaining other bytes/cells under explicit coordinate/fit guards. |
 | `Yul/Adapters/RawPhysicalAnyImage{,Controls}` | Universal arbitrary raw-byte image decode/reencode and finite-frame identity, applied to actual bounded overlapping/cross-cell P6 snapshot copies with derived reached room. |
 | `Yul/Adapters/RawPhysicalCalldata{,Controls}` | Actual Fr.cd copy into arbitrary raw-local images, with derived complete frame writeback and exact raw-word versus typed Source decoder success/error boundaries. |
+| `Yul/Adapters/SourceEnvironmentSlice{,Controls}` | Actual Source magic/balance reads paired with executed environment instruction slices, preserving ordered values/state/memory/tails and post-operand balance snapshots without claiming independent ledger or compiler adequacy. |

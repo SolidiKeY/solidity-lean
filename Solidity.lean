@@ -2488,6 +2488,8 @@ import Solidity.Yul.Adapters.RawPhysicalWriteback
 import Solidity.Yul.Adapters.RawPhysicalWritebackControls
 import Solidity.Yul.Adapters.SelectedPhysicalStore
 import Solidity.Yul.Adapters.SelectedPhysicalStoreControls
+import Solidity.Yul.Adapters.SourceEnvironmentSlice
+import Solidity.Yul.Adapters.SourceEnvironmentSliceControls
 import Solidity.Yul.Adapters.SourceSliceFrame
 import Solidity.Yul.Adapters.SourceSliceFrameControls
 import Solidity.Yul.AssignmentCheck
