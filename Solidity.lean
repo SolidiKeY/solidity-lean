@@ -2124,6 +2124,8 @@ import Solidity.Lowering.V07.AddressComparisonControls
 import Solidity.Lowering.V07.AddressComparisons
 import Solidity.Lowering.V07.AddressConversionControls
 import Solidity.Lowering.V07.AddressConversions
+import Solidity.Lowering.V07.AddressQualifierControls
+import Solidity.Lowering.V07.AddressQualifiers
 import Solidity.Lowering.V07.AliasRhsSubtraction
 import Solidity.Lowering.V07.AllAliasControls
 import Solidity.Lowering.V07.AllAliasPair

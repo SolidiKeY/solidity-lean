@@ -106,3 +106,5 @@
 | `Lowering/V07/AddressConversionControls.lean` | Inhabited mixed-reference conversion, admission-refusal, alias and capture-lifetime controls. |
 | `Lowering/V07/AddressComparisons.lean` | Six address comparison clauses over independent Source execution and existing native captures; initial canonical context alignment. |
 | `Lowering/V07/AddressComparisonControls.lean` | Inhabited address comparison, context-extension and ordered negative controls with exact axiom guards. |
+| `Lowering/V07/AddressQualifiers.lean` | Actual payable/explicit-erasure assignment transport from canonical initial context alignment. |
+| `Lowering/V07/AddressQualifierControls.lean` | Inhabited both-qualifier, mixed-reference, composition and capture controls. |
