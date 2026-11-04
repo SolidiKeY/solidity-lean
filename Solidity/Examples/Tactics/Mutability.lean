@@ -120,6 +120,41 @@ theorem transact_reverts :
 example : isOkB (Transient.Program.transact (L := []) (Transient.Program.pure (C := C) ())
     (Lifetime.World.ofState (State.init C)) paid true {}) = true := by decide +kernel
 
+/-! ## Pure on the transient layer: witness and control -/
+
+/-- `uint transient count;` -/
+abbrev tl : Transient.Layout := [("count", .uint)]
+/-- The transient cell `count`. -/
+def countSlot : Transient.Slot tl .uint := .here
+/-- A transient store with `count == 4`. -/
+def four : Transient.Store tl := (⟨4, rfl⟩, ())
+/-- The entry state: initial storage, `count` at its default. -/
+def entry0 : Transient.FrameState C tl := ⟨State.init C, Transient.Store.empty tl⟩
+/-- `assert(1 == 1);`, an ordinary `pure` fragment. -/
+def trivialPure : Prog C [] [] := sol[C]{ assert(1 == 1); }
+
+/-- **Witness**: a pure effect tree runs alike from every outside and
+transient store (`Transient.Program.pure_independent`); it returns. -/
+theorem pure_tree_same :
+    (Transient.Program.run (Transient.Program.ordinary .pure trivialPure (by decide +kernel))
+      { mutability := .pure } (Transient.withOutsideCells entry0 outside5 four)).map Prod.fst =
+    (Transient.Program.run (Transient.Program.ordinary .pure trivialPure (by decide +kernel))
+      { mutability := .pure } entry0).map Prod.fst :=
+  Transient.Program.pure_independent _ rfl entry0 outside5 (outside entry0.base) four _
+
+example : isOkB (Transient.Program.run
+    (Transient.Program.ordinary .pure trivialPure (by decide +kernel)) { mutability := .pure }
+    entry0) = true := by decide +kernel
+
+/-- **Negative control**: in a `view` context a read of `count` depends on
+the transient store: `0` at entry, `4` after replacing the cells. -/
+theorem view_read_depends :
+    (Transient.Program.run (Transient.Program.read countSlot) { mutability := .view }
+      entry0).map (fun r => r.1.1) = .ok 0 ∧
+    (Transient.Program.run (Transient.Program.read countSlot) { mutability := .view }
+      (Transient.withOutsideCells entry0 (outside entry0.base) four)).map (fun r => r.1.1) =
+      .ok 4 := ⟨rfl, rfl⟩
+
 /-! ## Assignable (S3.2): witness and control -/
 
 /-- `uint a; uint b;` -/
@@ -221,3 +256,15 @@ info: 'Solidity.Theory.Mutability.Transient.Program.ordinary_static' depends on 
 #guard_msgs in #print axioms Solidity.Theory.Mutability.Transient.Program.ordinary_static
 /-- info: 'Solidity.Theory.Mutability.ContractWorld.World.enter_static' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Theory.Mutability.ContractWorld.World.enter_static
+/--
+info: 'Solidity.Theory.Mutability.Transient.Program.run_withOutsideCells' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms Solidity.Theory.Mutability.Transient.Program.run_withOutsideCells
+/--
+info: 'Solidity.Theory.Mutability.Transient.Program.pure_independent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms Solidity.Theory.Mutability.Transient.Program.pure_independent

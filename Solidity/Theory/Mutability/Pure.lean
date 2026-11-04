@@ -461,4 +461,126 @@ theorem Prog.pure_outside {Γ Γ' : Ctx} {P : Prog C Γ Γ'} (hw : Prog.within .
   have hk := hg.keeps pure_ne_nonpayable
   simp only [outside, hk.1, hk.2, hg.selfBalance pure_ne_nonpayable, hg.tx]
 
+/-! ## The explicit transient layer -/
+
+namespace Transient
+
+open Solidity.Transient
+
+/-- A transient-layer state with its base's outside replaced by `w` and its
+transient cells by `c`. -/
+def withOutsideCells {L : Layout} (s : FrameState C L) (w : Outside C) (c : Store L) :
+    FrameState C L :=
+  ⟨withOutside s.base w, c⟩
+
+/-- The outside a zero-value self-call enters with: the caller's globals,
+sender the contract itself, no value. -/
+def enterOutside (w : Outside C) : Outside C :=
+  ⟨w.storage, w.net, w.selfBalance,
+    { w.tx with msgSender := w.tx.selfAddress, msgValue := PrimTy.dflt .uint }⟩
+
+/-- `pure` permits only `pure` callees. -/
+theorem permits_pure {μ : Mutability} (h : Program.permits .pure μ = true) : μ = .pure := by
+  cases μ <;> first | rfl | exact absurd h (by decide)
+
+/-- **A pure effect tree does not read the state** (S3.1, pure, on the
+transient layer): in a `pure` context, replacing the outside and the
+transient cells commutes with the run, so neither `uint transient count`
+nor the storage, balance or transaction can change a pure result. -/
+theorem Program.run_withOutsideCells {L : Layout} {α : Type} (body : Program C L α)
+    {ctx : Context} (hμ : ctx.mutability = .pure) (s : FrameState C L) (w : Outside C)
+    (c : Store L) :
+    Program.run body ctx (withOutsideCells s w c) =
+      (Program.run body ctx s).map fun r => (r.1, withOutsideCells r.2 w c) := by
+  induction body generalizing ctx s w c with
+  | pure x => rfl
+  | bind body next ih ihNext =>
+    change (Program.run body ctx (withOutsideCells s w c) >>= fun r =>
+        Program.run (next r.1) ctx r.2) =
+      (Program.run body ctx s >>= fun r => Program.run (next r.1) ctx r.2).map _
+    rw [ih hμ s w c]
+    cases Program.run body ctx s with
+    | error e => rfl
+    | ok r =>
+      obtain ⟨x, u⟩ := r
+      exact ihNext x hμ u w c
+  | halt e => rfl
+  | read i =>
+    change (if ctx.mutability == .pure then Except.error THalt.revert else _) =
+      (if ctx.mutability == .pure then Except.error THalt.revert else _).map _
+    simp only [hμ, BEq.rfl, if_true]
+    rfl
+  | write i value =>
+    change (if ctx.mutability != .nonpayable || ctx.static then Except.error THalt.revert
+      else _) = (if ctx.mutability != .nonpayable || ctx.static then Except.error THalt.revert
+      else _).map _
+    have hne : (ctx.mutability != .nonpayable || ctx.static) = true := by
+      rw [hμ]
+      rfl
+    simp only [hne, if_true]
+    rfl
+  | ordinary μ P within =>
+    change (if Program.ordinaryAllowed ctx μ P then
+      (P.run (withOutside s.base w) >>= fun o =>
+          Except.ok ((), { withOutsideCells s w c with base := o.st }))
+      else Except.error THalt.revert) =
+      (if Program.ordinaryAllowed ctx μ P then
+        (P.run s.base >>= fun o => Except.ok ((), { s with base := o.st }))
+        else Except.error THalt.revert).map _
+    split
+    · rename_i allowed
+      simp only [Program.ordinaryAllowed, Bool.and_eq_true, hμ] at allowed
+      have hp := permits_pure allowed.1
+      subst hp
+      rw [Prog.run_withOutside P within s.base w]
+      cases P.run s.base <;> rfl
+    · rfl
+  | selfCall μ forced body ih =>
+    change (if Program.permits ctx.mutability μ then
+      (Program.run body (Program.calleeContext ctx μ forced) (withOutsideCells s w c).enterSelf
+          >>= fun r => Except.ok (r.1, (withOutsideCells s w c).resume r.2))
+        else Except.error THalt.revert) =
+      (if Program.permits ctx.mutability μ then
+      (Program.run body (Program.calleeContext ctx μ forced) s.enterSelf >>= fun r =>
+          Except.ok (r.1, s.resume r.2)) else Except.error THalt.revert).map _
+    split
+    · rename_i hp
+      rw [hμ] at hp
+      have hp' := permits_pure hp
+      have hc : (Program.calleeContext ctx μ forced).mutability = .pure := hp'
+      have he : (withOutsideCells s w c).enterSelf =
+          withOutsideCells s.enterSelf (enterOutside w) c := rfl
+      rw [he, ih hc s.enterSelf (enterOutside w) c]
+      cases Program.run body (Program.calleeContext ctx μ forced) s.enterSelf with
+      | error e => rfl
+      | ok r => rfl
+    · rfl
+  | attempt body ih =>
+    change (match Program.run body ctx (withOutsideCells s w c) with
+      | .ok (x, u) => Except.ok (Except.ok x, u)
+      | .error e => if Program.catchable e then Except.ok (Except.error e, withOutsideCells s w c)
+        else Except.error e) = (match Program.run body ctx s with
+      | .ok (x, u) => Except.ok (Except.ok x, u)
+      | .error e => if Program.catchable e then Except.ok (Except.error e, s)
+        else Except.error e).map _
+    rw [ih hμ s w c]
+    cases Program.run body ctx s with
+    | error e =>
+      dsimp only [Except.map]
+      split <;> rfl
+    | ok r => rfl
+
+/-- A pure effect tree's results are the same from every outside and every
+transient store. -/
+theorem Program.pure_independent {L : Layout} {α : Type} (body : Program C L α)
+    {ctx : Context} (hμ : ctx.mutability = .pure) (s : FrameState C L) (w w' : Outside C)
+    (c c' : Store L) :
+    (Program.run body ctx (withOutsideCells s w c)).map Prod.fst =
+      (Program.run body ctx (withOutsideCells s w' c')).map Prod.fst := by
+  rw [Program.run_withOutsideCells body hμ s w c, Program.run_withOutsideCells body hμ s w' c',
+    TRes.map_map, TRes.map_map]
+  rfl
+
+end Transient
+
 end Solidity.Theory.Mutability

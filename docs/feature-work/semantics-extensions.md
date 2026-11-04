@@ -121,7 +121,8 @@ witnesses, negative controls and axiom pins in
   ledger, balance, transaction) commutes with a pure run, by structural
   recursion over `Stmt`/`Prog` (loops through `TLoop.run_map`); corollaries
   `Prog.pure_independent`, `pure_halt_independent`, `pure_local_independent`,
-  `pure_outside`.
+  `pure_outside`; on the transient layer `Transient.Program.run_withOutsideCells`
+  and `Transient.Program.pure_independent` (outside and transient cells).
 - Payable: `System.run_nonpayable`, `deployT_nonpayable`,
   `transact_nonpayable`, `ContractWorld.World.enter_nonpayable`,
   `World.enter_static`, `World.callFrame_nonpayable`.
@@ -166,8 +167,8 @@ as limitations:
   memory locals or writes, no external `view` call (`callReceiver`), no
   `catchData`/`new`; `pure` also rejects memory reads, memory `.length` and
   hashing, which solc allows.  Independence is over storage, ledger, balance
-  and transaction; heap and locals are inputs.  Pure independence is not
-  stated on the explicit transient layer (only `read_pure`).
+  and transaction (and, on the transient layer, the transient cells); heap
+  and locals are inputs.
 - Payable: the theorems state each entry point's guard.  Not covered:
   `World.create` (its frame is private; it enters through `World.enter`),
   `World.deployLibrary`, and ABI dispatch (`Semantics/Dispatch.lean`,
