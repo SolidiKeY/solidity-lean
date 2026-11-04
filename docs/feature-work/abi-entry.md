@@ -117,3 +117,12 @@ V09's `Backend/Passes/RelatedMemoryCapture.lean` supplies aligned local memory
 capture and selected-map pointer readback; it does not supply the general
 statement interface. General P1 selection, P10 decoding/call correspondence,
 physical origin, concrete P8 admission and whole-program adequacy remain open.
+
+H26 exposes `Backend/MemoryOps/PhysicalByteWorldInterface.lean` on master. The
+AccessBridge `ByteWorldInterface.lean` states a paired-load consumer contract
+against its exact explicit `ByteWorld.Producer.load` field. Initial P6/native
+images, selected numeric word cells, address scaling and stack capacity remain
+explicit. Concrete byte-program realization and Source provenance are not
+supplied by this interface. The published RawUint Source proof modules are
+reused rather than reimplemented; their helper branch and omitted consumer/doc
+remain preserved.
