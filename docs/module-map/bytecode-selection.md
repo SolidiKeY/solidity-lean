@@ -116,32 +116,24 @@
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentControls.lean` | Inhabited either-pipeline images, crossed-word expansion and aligned word-fit endpoint refusal. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadExecutionInterface.lean` | Additive fetched charged-load/P6 payload and post-image linkage, retaining all existing access failures and budgets. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadExecution.lean` | Derives the actual charged load, saved tail, exact raw-byte value and P6 touch post-image iff from initial images and the real gate. |
-| `Backend/AbiEntry/ValueGateInterface.lean` | Intrinsic payable/non-payable gate contracts indexed by actual public compiler selection. |
 | `Backend/AbiEntry/ValueGate.lean` | Typed require/value-check family, checked compiler selection and exact whole-machine intrinsic execution. |
 | `Backend/AbiEntry/ValueGateControls.lean` | Inhabited context, saved-tail/protected-memory and all-word payable/nonzero rejection controls. |
-| `Backend/AbiEntry/ValueGateBodyInterface.lean` | Actual checked compiler selection and exact body-result composition signatures for core-classified typed bodies. |
 | `Backend/AbiEntry/ValueGateBody.lean` | Public compiler selection of typed guarded bodies and preservation of their entire intrinsic outcome. |
 | `Backend/AbiEntry/ValueGateBodyControls.lean` | Context-growing mutation, protected memory/tail, blocked body and raw fault/skip controls. |
-| `Backend/AbiEntry/CalldataWordInterface.lean` | Exact all-offset zero-padded semantic/source word access contracts, separate from entry span checks. |
 | `Backend/AbiEntry/CalldataWord.lean` | Reuses published window padding and bounds to prove semantic/source word reader equality. |
 | `Bridge/SolidityBridge/AccessBridge/AbiWordInterface.lean` | Native semantic-word and all-kind numeric validation/rejection contracts, retaining charged-load failures and budgets. |
 | `Bridge/SolidityBridge/AccessBridge/AbiWord.lean` | Actual native load to indexed decoder and existing validator agreement without an assumed decoded word. |
 | `Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean` | Prefixed/unaligned fetched word, validation/refusal, padding/large-offset and distinct zero-fuel controls. |
-| `Backend/AbiEntry/HeadCheckInterface.lean` | Emitted ordinary short-head predicate contracts with explicit initial size-word representation and no success-admission claim. |
-| `Backend/AbiEntry/HeadCheck.lean` | Exact unbounded head-threshold emission, initial semantic rejection and non-vacuous Selection V2 capacity certificate. |
 | `Backend/AbiEntry/HeadCheckControls.lean` | Selector/head boundaries, static/dynamic and huge metadata, semantic fuel ordering, passed-head rejection and stack-height controls. |
-| `Backend/AbiEntry/OffsetChecksInterface.lean` | Signed modular tail and region emitted predicate contracts over four runtime words. |
 | `Backend/AbiEntry/OffsetChecks.lean` | Exact signed/modular arithmetic emission with preserved numeric suffix and non-vacuous V2 capacity frames. |
 | `Backend/AbiEntry/OffsetChecksControls.lean` | Boundary, wrapping, signed-offset, actual semantic-reference acceptance and stack-height controls. |
-| `Backend/AbiEntry/LengthCheckInterface.lean` | Loaded dynamic length admission and ordered lazy rejection signatures. |
-| `Backend/AbiEntry/LengthCheck.lean` | Existing numeric emitter at the exact semantic length limit, saved suffix/capacity and semantic failure classification. |
-| `Backend/AbiEntry/LengthCheckControls.lean` | Raw oversized length, exact boundary flags, lazy/eager distinction and short-head/fuel priority controls. |
 | `Bridge/SolidityBridge/AccessBridge/HeadSizeInterface.lean` | Fetched charged native calldata extent to numeric short-head consumer signature. |
 | `Bridge/SolidityBridge/AccessBridge/HeadSize.lean` | Published P10 fetched extent and whole-State/X transport consumed by the existing numeric head-check compiler. |
 | `Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean` | Inhabited charged native execution, protected state, short input and word-size wraparound limitation controls. |
 | `Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionInterface.lean` | Fetched charged MSIZE/P6 image-preserving execution and continuation contract. |
 | `Bridge/SolidityBridge/AccessBridge/MemorySizeExecution.lean` | Initial-image-derived MSIZE value, complete saved stack and preserved post-image, reusing P10 execution. |
 | `Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionControls.lean` | Either-pipeline inhabited execution, arbitrary reserved capacity, wrong-active and short-fuel controls. |
-| `Backend/AbiEntry/TailGuardInterface.lean` | Composed signed-offset, dynamic-length and modular-region numeric guard contract. |
 | `Backend/AbiEntry/TailGuard.lean` | Single actual numeric program for the three guards, exact semantic reference classification and explicit V2 capacity. |
 | `Backend/AbiEntry/TailGuardControls.lean` | Individual refusals, accepted signed offset, raw empty-array reference and inhabited/capacity controls. |
+| `Backend/AbiEntry/RawTailGuard.lean` | All-input raw-byte numeric agreement and exact length-prefixed semantic reference result without supplied load facts. |
+| `Backend/AbiEntry/RawTailGuardControls.lean` | Raw malformed/empty-array, actual signed-offset acceptance and beyond-word stride controls. |

@@ -453,3 +453,25 @@ are explicitly left open rather than inferred from pure-check conjunction.
 actual semantic tail condition for the existing guard. Size, base and shape
 metadata are unrestricted naturals; no loaded payload/run or representability
 premise is supplied by callers. Native operand-loading execution remains open.
+
+`RawTailGuard.lean` derives both words from the actual byte input and proves the
+existing numeric guard agrees for every input, pointer, base and shape, without
+caller-supplied decoded payload, successful run or load equalities. Subtraction
+and product periodicity bridge arbitrary natural byte size and shape metadata
+to word operands; no representability bounds or new input exclusion are needed
+for these particular modular guards. Length-prefixed references retain the
+exact semantic success pair or empty revert. Initial eight-word construction
+is an operand specification; actual fetched native load construction and its
+failure/gas ordering remain open. Controls use real bytes for a wrapped negative
+offset accepted by the reference and cover empty/malformed inputs and a stride
+beyond the word range. This does not close aggregate payload decoding, native
+branching, Source coverage or entry dispatch/composition.
+Published master was adopted with both append-only module-map row sets retained
+and generated roots regenerated. Its physical byte-store increment concerns
+compiler slices and leaves the pinned native HostWriteControls mismatch intact.
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked raw load/address derivation, modular identities for unrestricted
+metadata, exact length-prefixed reference outcome and real signed-negative
+controls. The finder also verified that the master merge retained every row
+from both module-map parents. Native execution and full coverage limits remain
+explicit and were not inferred from the operand specification.

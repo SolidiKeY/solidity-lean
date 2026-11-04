@@ -28,6 +28,8 @@ import Solidity.Backend.AbiEntry.Premises
 import Solidity.Backend.AbiEntry.Premises.CalldataViewExtensions
 import Solidity.Backend.AbiEntry.Premises.CalldataViews
 import Solidity.Backend.AbiEntry.RawFreeTransport
+import Solidity.Backend.AbiEntry.RawTailGuard
+import Solidity.Backend.AbiEntry.RawTailGuardControls
 import Solidity.Backend.AbiEntry.RawTailGuardInterface
 import Solidity.Backend.AbiEntry.RejectionInterface
 import Solidity.Backend.AbiEntry.TailGuardInterface
