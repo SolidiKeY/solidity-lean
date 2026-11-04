@@ -1317,3 +1317,15 @@ allocate–shrink–write sequence, preserve dormant word `9` and unknown byte `
 and show that repacking the current short object would lose the original end.
 Physical execution starts from the post-shrink frame; target allocation/shrink
 execution and arbitrary retained-history adequacy remain separate obligations.
+
+`P6RetainedArrayHeader.transport` connects executed P6/MSTORE header updates to
+checked canonical retained-array preparation and actual Source `heapPut`.
+Newly live values come from the same raw payload, including dormant words;
+original allocation capacity and history remain explicit. Complete reencoding,
+whole Source writeback, owner safety and reserved-word preservation follow.
+Controls regrow a shortened array to expose dormant word `9`. A physical store
+of length `3` still reaches a frame, while Source-image preparation returns
+`None` because the original allocation holds only two elements. This is neither
+Source/Yul refusal nor a new high-level length-assignment syntax; target
+allocation execution, general dirty-owned adequacy and compiler closure remain
+separate.
