@@ -1578,3 +1578,30 @@ reused; this does not establish full Osaka, source or account-world adequacy.
 
 Review strengthened the wrong-balance control to keep the identical tail and
 length, isolating 29 versus 41 rather than a stack-size difference.
+
+## Five-key environment selection
+
+`EnvironmentSelection` derives a complete G31 observation view from the native
+caller source, payment word, timestamp modulo 256 bits, code-owner balance and
+code-owner address. Its bounded-address observation lemma preserves low160
+identity. The finite selection composes the existing charged fetched producers
+for all five admitted `EnvKey` constructors: SELFBALANCE costs 5; the others cost
+2. Gas, stack and fuel bounds remain explicit. Complete native state, memory and
+return buffers are retained apart from the actual machine updates.
+
+The intrinsic-expression consequence takes the existing `Environment.Represents`
+relation as a typed premise. It neither proves the original source-frame origin
+nor constructs a compiler/world correspondence. `EnvironmentSelectionControls`
+inhabits this premise using the published represented-state fixture and directly
+consumes the combined law for every key and both permissions. Independent
+expected records use owner 7, caller 11, origin 19, value 37, balance 29 and an
+oversized native timestamp whose word is 260. Exact ordered stacks, code, buffers
+and accounts are observed; wrong origin/address, reordered spill and stale frame
+balance are negative controls. The oversized header is a reference-model test,
+not a consensus-admission witness. Full G46/G47 obligations remain open.
+
+Independent finder and skeptic source reviews found no semantic or premise
+weakening; the explicit representation and source-origin boundary is retained.
+
+Review corrected the two new index rows into the existing P10 table with actual
+module paths; theorem statements and premises were unchanged.

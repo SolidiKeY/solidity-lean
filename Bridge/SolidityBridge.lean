@@ -192,6 +192,8 @@ import SolidityBridge.RoadmapV15.P10.DecoderAgreement
 import SolidityBridge.RoadmapV15.P10.DecoderAgreementControls
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationProducer
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationWitness
+import SolidityBridge.RoadmapV15.P10.EnvironmentSelection
+import SolidityBridge.RoadmapV15.P10.EnvironmentSelectionControls
 import SolidityBridge.RoadmapV15.P10.EnvironmentTasksV1
 import SolidityBridge.RoadmapV15.P10.EqualityConsumer
 import SolidityBridge.RoadmapV15.P10.EqualityControls
