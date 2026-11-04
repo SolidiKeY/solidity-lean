@@ -542,6 +542,9 @@ import Solidity.Backend.Passes.MemoryScopeAllocation
 import Solidity.Backend.Passes.MemoryScopeBoundary
 import Solidity.Backend.Passes.MemoryScopeControls
 import Solidity.Backend.Passes.MemoryScopePins
+import Solidity.Backend.Passes.MemoryTripleAdmission
+import Solidity.Backend.Passes.MemoryTripleAdmissionControls
+import Solidity.Backend.Passes.MemoryTripleAdmissionPins
 import Solidity.Backend.Passes.PositiveAllocationFailure
 import Solidity.Backend.Passes.PositiveAllocationFailureControls
 import Solidity.Backend.Passes.PositiveAllocationFailurePins

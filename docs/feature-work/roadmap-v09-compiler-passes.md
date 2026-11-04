@@ -671,6 +671,24 @@ small static frame bound is the sole missing Input field. These laws concern the
 legacy memory branch; call/loop certificate-specific need/Room and public
 resource/session adequacy are not normalized or discharged.
 
+## Three-stage admission without assumed physical links
+
+`MemoryTripleAdmission.links` derives the prefix Input and both dependent
+mapped links from one original joined Input for P.join(Q.joinR). The actual
+Q+R Input is first transported through P's reached state/map; its prefix Input
+and binary link then supply Q and R. `public_admission` selects the actual
+inner and whole public compiler outputs, retaining fragments/code, three
+static frame bounds and one reached total allocation budget. It assumes no
+physical link or future-run budget family.
+
+An inhabited five-cell then four-cell allocation followed by fresh-array
+length capture retains three actual maps/machines before all saved tails,
+both intrinsic/code associations and all three mapped outputs. The complete
+17-cell vector captures3 while retaining old objects and cursor25. Frame6 is
+rejected; frame7 is used. A typed third-stage bounds failure is proved for
+all saved tails via the admitted whole Input, without raw fault-tail transport.
+Legacy memory scope and pending Source/world/public-resource boundaries remain.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

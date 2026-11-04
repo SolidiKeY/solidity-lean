@@ -85,3 +85,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MemoryJoinFrame.lean` | Exact legacy-memory joined static frame/Input equivalence and derived reached mapped boundary link. |
 | `Backend/Passes/MemoryJoinFrameControls.lean` | Actual allocating public admission, scoped slot reuse and static-frame refusal after failure. |
 | `Backend/Passes/MemoryJoinFramePins.lean` | Exact standard-only axioms for joined memory admission and controls. |
+| `Backend/Passes/MemoryTripleAdmission.lean` | Both dependent memory links derived from one original public three-stage joined admission. |
+| `Backend/Passes/MemoryTripleAdmissionControls.lean` | Two allocations and fresh-length capture; three shared maps, both associations and reached failure controls. |
+| `Backend/Passes/MemoryTripleAdmissionPins.lean` | Exact standard-only axioms for three-stage admission and inhabited clients. |
