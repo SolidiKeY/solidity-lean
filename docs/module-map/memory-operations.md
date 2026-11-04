@@ -253,3 +253,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CanonicalSingletonInterface.lean` | Canonical existing index-zero load from the copied storage path, with path-derived evaluation/support and declaration obligations. |
 | `Backend/MemoryCopies/CanonicalSingleton.lean` | Path-derived compiler support/evaluation, canonical storage-copy declaration and exact source/target failed-path propagation. |
 | `Backend/MemoryCopies/CanonicalSingletonControls.lean` | Represented nested dynamic storage matrix, canonical singleton-leaf copying for arbitrary payloads and invalid outer-index source/target refusal. |
+| `Backend/MemoryCopies/CanonicalRebindInterface.lean` | Canonical singleton storage-copy rebinding with complete allocator, old-object preservation and strict fresh identity. |
