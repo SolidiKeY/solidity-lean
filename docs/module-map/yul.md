@@ -121,3 +121,16 @@
 | `Yul/Compilation/StatementVisitorShapes{,Controls}.lean` | Actual normal statement visitor/emission derives balanced CodeShape, closing RHS metadata/slot range/recursive children; dependent two-assignment source/target witness, shifted prefix/caller and peak-three controls. Wider control/native/G24 remain separate. |
 
 | `Yul/Compilation/WordVisitorShapes{,Controls}.lean` | Actual word visitor/emission derives operand metadata for arithmetic, unsigned quotients, comparisons and unary word operations; mixed DIV/MOD/EQ/NOT source/target, universal zero-divisor/full-complement and access/capacity controls. Wider pure/native/G24 remain separate. |
+
+| `Yul/Compilation/P20InterfaceV1.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/P20InterfaceV1Controls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedAdd/Agreement.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedAdd/Controls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedAdd/Selected.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedAdd/Source.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedAdd/Target.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Interfaces/P16.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedLocalAliasImage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Yul/Compilation/ClzShapes{,Controls}.lean` | Operand shapes and exact every-boundary capacity for the existing256-step software CLZ; intrinsic Code packet, exact4867 size, dirty/zero/caller and underflow/1024-boundary controls. Explicit child-shape premise in lowering helper; no native/G24 closure. |
