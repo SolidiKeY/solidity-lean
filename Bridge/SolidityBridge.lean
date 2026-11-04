@@ -276,6 +276,8 @@ import SolidityBridge.RoadmapV15.P10.PublishedShifts
 import SolidityBridge.RoadmapV15.P10.PublishedShiftsControls
 import SolidityBridge.RoadmapV15.P10.PublishedSignedOrder
 import SolidityBridge.RoadmapV15.P10.PublishedSignedOrderControls
+import SolidityBridge.RoadmapV15.P10.PublishedSignedSub
+import SolidityBridge.RoadmapV15.P10.PublishedSignedSubControls
 import SolidityBridge.RoadmapV15.P10.PublishedUnsignedOrder
 import SolidityBridge.RoadmapV15.P10.PublishedUnsignedOrderControls
 import SolidityBridge.RoadmapV15.P10.PushDecoderAgreement

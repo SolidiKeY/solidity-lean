@@ -502,3 +502,6 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 
 See [P8 admission](../feature-work/p8-admission.md).
 
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSub.lean` | Published unchecked signed Source-local subtraction, canonical word and charged fetched SUB transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSubControls.lean` | Signed wrap boundaries, populated full observations and gas/stack/fuel negative controls. |
