@@ -21,13 +21,21 @@ class Targets(unittest.TestCase):
         self.bin.mkdir()
         self.calls = self.root / "calls.jsonl"
         self.elan = self.root / "elan-used"
+        self.home = self.root / "private home"
+        self.home.mkdir()
         self.env = os.environ.copy()
         for key in list(self.env):
             if key.startswith("GIT_"):
                 self.env.pop(key)
         self.env.update(GIT_AUTHOR_NAME="Gate Fixture", GIT_AUTHOR_EMAIL="fixture@example.invalid",
                         GIT_COMMITTER_NAME="Gate Fixture", GIT_COMMITTER_EMAIL="fixture@example.invalid",
-                        GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+                        GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1",
+                        HOME=str(self.home), ELAN_HOME=str(self.home / ".elan"),
+                        XDG_CACHE_HOME=str(self.home / ".cache"),
+                        XDG_CONFIG_HOME=str(self.home / ".config"),
+                        LAKE_CACHE_DIR="", LAKE_ARTIFACT_CACHE="false")
+        self.env.pop("BASH_ENV", None)
+        self.env.pop("ENV", None)
         self.env.pop("GATE_EXAMPLES", None)
         self.git("init", "-q")
         self.put("Solidity/Leaf.lean", "def leaf : Nat := 1\n")
@@ -73,6 +81,7 @@ class Targets(unittest.TestCase):
         wanted = [{"args": ["build", *sorted(expected)], "threads": "1"}] if expected else []
         self.assertEqual(calls, wanted)
         self.assertFalse(self.elan.exists(), "fixture touched host/toolchain elan")
+        self.assertEqual(list(self.home.iterdir()), [], "unexpected toolchain/cache/config write")
         log = Path(self.env["GATE_LOGS"])
         self.assertEqual((log / "HEAD").read_text().strip(), self.base)
         rows = (log / "gates.tsv").read_text().splitlines()
