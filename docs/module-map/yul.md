@@ -35,34 +35,35 @@
 | `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](../feature-work/vy5-composition.md)). |
 | `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
 
-- Yul/LocalBoolWhile.lean and Yul/Checks/LocalBoolWhile.lean: fuelled Boolean scope iteration and all-fuel clean Source agreement.
+| `Yul/LocalBoolWhile.lean`, `Yul/Checks/LocalBoolWhile.lean` | fuelled Boolean scope iteration and all-fuel clean Source agreement. |
 
-- Yul/LocalBoolDivergence.lean and Yul/Checks/LocalBoolDivergence.lean: universal no-normal-completion laws for literal-true certified scoped loops.
+| `Yul/LocalBoolDivergence.lean`, `Yul/Checks/LocalBoolDivergence.lean` | universal no-normal-completion laws for literal-true certified scoped loops. |
 
-- Yul/LocalBoolDoWhile.lean and Yul/Checks/LocalBoolDoWhile.lean: body-first scoped iteration and concrete all-fuel clean Source agreement.
+| `Yul/LocalBoolDoWhile.lean`, `Yul/Checks/LocalBoolDoWhile.lean` | body-first scoped iteration and concrete all-fuel clean Source agreement. |
 
-- Yul/LocalBoolDoDivergence.lean and Yul/Checks/LocalBoolDoDivergence.lean: constant-true do/while noncompletion laws and guard controls.
+| `Yul/LocalBoolDoDivergence.lean`, `Yul/Checks/LocalBoolDoDivergence.lean` | constant-true do/while noncompletion laws and guard controls. |
 
-- Yul/LocalBoolFor.lean and Yul/Checks/LocalBoolFor.lean: Boolean initializer and context-growing for-body scope composition, without post.
+| `Yul/LocalBoolFor.lean`, `Yul/Checks/LocalBoolFor.lean` | Boolean initializer and context-growing for-body scope composition, without post. |
 
-- Yul/LocalBoolPostIter.lean, Yul/LocalBoolForPost.lean and Yul/Checks/LocalBoolForPost.lean: scoped for posts and initializer composition.
+| `Yul/LocalBoolPostIter.lean`, `Yul/LocalBoolForPost.lean`, `Yul/Checks/LocalBoolForPost.lean` | scoped for posts and initializer composition. |
 
-- Yul/LocalBoolForNoGuard.lean and Yul/Checks/LocalBoolForNoGuard.lean: exact omitted-guard Source transport and concrete scoped adapters.
+| `Yul/LocalBoolForNoGuard.lean`, `Yul/Checks/LocalBoolForNoGuard.lean` | exact omitted-guard Source transport and concrete scoped adapters. |
 
-- Yul/LocalBoolUnchecked.lean and Yul/Checks/LocalBoolUnchecked.lean: unchecked/ordinary Boolean item scope composition and concrete Source laws.
+| `Yul/LocalBoolUnchecked.lean`, `Yul/Checks/LocalBoolUnchecked.lean` | unchecked/ordinary Boolean item scope composition and concrete Source laws. |
 
-- Yul/LocalDefaultBinding.lean and Yul/Checks/LocalDefaultBinding.lean: constant-default declarations followed by certified local item bodies.
+| `Yul/LocalDefaultBinding.lean`, `Yul/Checks/LocalDefaultBinding.lean` | constant-default declarations followed by certified local item bodies. |
 
-- Yul/LocalDefaultItems.lean and Yul/Checks/LocalDefaultItems.lean: certified heterogeneous constant-default declaration sequences and concrete Source item composition.
+| `Yul/LocalDefaultItems.lean`, `Yul/Checks/LocalDefaultItems.lean` | certified heterogeneous constant-default declaration sequences and concrete Source item composition. |
 
-- Yul/LocalDefaultUnchecked.lean and Yul/Checks/LocalDefaultUnchecked.lean: unchecked heterogeneous default scopes, ordinary continuations and concrete Source composition.
+| `Yul/LocalDefaultUnchecked.lean`, `Yul/Checks/LocalDefaultUnchecked.lean` | unchecked heterogeneous default scopes, ordinary continuations and concrete Source composition. |
 
-- Yul/LocalItemWorld.lean and Yul/Checks/LocalItemWorld.lean: universal raw-input world preservation for pure local item/default/unchecked execution.
+| `Yul/LocalItemWorld.lean`, `Yul/Checks/LocalItemWorld.lean` | universal raw-input world preservation for pure local item/default/unchecked execution. |
 
-- Yul/LocalDefaultIfElse.lean and Yul/Checks/LocalDefaultIfElse.lean: conditional default scopes, concrete Source agreement and raw world preservation.
+| `Yul/LocalDefaultIfElse.lean`, `Yul/Checks/LocalDefaultIfElse.lean` | conditional default scopes, concrete Source agreement and raw world preservation. |
 
-- Yul/LocalDefaultWhile.lean and Yul/Checks/LocalDefaultWhile.lean: scoped default-loop Source agreement, raw purity and finite-normal exclusion.
+| `Yul/LocalDefaultWhile.lean`, `Yul/Checks/LocalDefaultWhile.lean` | scoped default-loop Source agreement, raw purity and finite-normal exclusion. |
 
-- Yul/LocalDefaultDoWhile.lean and Yul/Checks/LocalDefaultDoWhile.lean: body-first default scopes, Source agreement, raw purity and finite-normal exclusion.
+| `Yul/LocalDefaultDoWhile.lean`, `Yul/Checks/LocalDefaultDoWhile.lean` | body-first default scopes, Source agreement, raw purity and finite-normal exclusion. |
 
-- Yul/LocalDefaultPostIter.lean and Yul/Checks/LocalDefaultPostIter.lean: scoped default for-iterations with Boolean post evaluation, Source agreement and raw purity.
+| `Yul/LocalDefaultPostIter.lean`, `Yul/Checks/LocalDefaultPostIter.lean` | scoped default for-iterations with Boolean post evaluation, Source agreement and raw purity. |
+| `Yul/LocalDefaultNoGuard.lean` | Concrete default-scoped omitted-guard iterations using existing Source transport. |

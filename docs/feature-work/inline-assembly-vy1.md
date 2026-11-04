@@ -896,3 +896,22 @@ and final lane gates remain open.
 
 Scoped kernel checks and independent finder/skeptic reviews pass; final lane
 validation remains pending.
+
+### Omitted guards and H22/H21 integration
+
+LocalDefaultNoGuard reuses the committed universal Source omitted-guard equality
+and the actual default-scoped literal-true runners, with present-post and no-post
+forms. Concrete clean Source agreements, raw world preservation and finite-normal
+exclusions retain actual supported-body/post premises. No optional-guard semantics
+is duplicated. Controls contrast omitted and present guards, retain partial post
+writes and demonstrate continuing iteration after the body clears a local.
+The branch is rebased onto H22. Existing lane source bodies match the saved
+pre-rebase checkpoint; incoming ExtCall fields are preserved. H21 roots are
+regenerated and module-map rows live in the Yul area file. General P16, admission,
+dirty compiler adequacy and final lane validation remain open.
+
+The checkpoint library build passed (3,270 jobs), along with trust, layers,
+roots and documentation checks. The axiom-pin gate failed on an unrecorded
+Mathlib cache test pin outside the lane; its raw failure is retained, not
+reported as a pass. Eight adapter laws and six controls have only standard
+Lean axioms. Independent finder/skeptic reviews reported no findings.
