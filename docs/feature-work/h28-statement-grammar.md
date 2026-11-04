@@ -240,8 +240,8 @@ No false target or semantic exclusion has been silently discharged.
 | Original obligation | Current evidence / remaining work |
 | --- | --- |
 | Every statement/block constructor and grammar alternative inventory | recorded, including embedded Yul and non-expression parser dependencies |
-| Intrinsic shape/token-boundary relations | intrinsic root and open-spine relations proved; token-boundary relations pending |
-| Balanced block/list splitting | pending, including backfill strengthening |
+| Intrinsic shape/token-boundary relations | root/open-spine plus actual-yield BlockBoundary proved; coverage of arbitrary syntax by balanced witnesses pending |
+| Balanced block/list splitting | balanced-brace prefixes and lists of braced segments proved; exact Syn block/list yield/layout decomposition proved; arbitrary mixed statement-list token splitting pending |
 | Nearest-else association | existing local no-capture contract proved; unique attachment/token decomposition pending |
 | Simple/block/loop/control token-root discrimination | syntactic root discrimination proved; token-root discrimination pending |
 | Parse/yield uniqueness under precedence/layout | unrestricted intrinsic target refuted, even with InProfile; SG-CEX-01 retained open; other positive uniqueness obligations pending |
@@ -327,3 +327,82 @@ proofs, so no duplicate producer or new dependency was introduced.
 The authorized balanced block/list and fuel backfill continues. Full queue
 acceptance, remaining constructor coverage/controls, fixtures and final gates
 are unfinished. The frozen persistent goal is not marked complete.
+
+## Checkpoint E: balanced block/list decomposition backfill
+
+Balance.lean proves a brace-scanner frame theorem for arbitrary depth and
+suffix, unique content/suffix splitting of balanced braced prefixes, and
+unique decomposition of arbitrary-length lists of balanced braced segments.
+BraceBalanced is a token predicate, not an AST. BlockBoundary is intrinsically
+indexed by the existing Syn block and its actual yield and input/output
+layouts. The syntax-indexed splitting theorem concludes token-body and suffix
+equality, not equality of trees deriving those tokens.
+
+YieldSplit.lean proves exact decomposition and recomposition of existing
+Syn block and list yields, for arbitrary syntax/categories and layouts. List
+splitting exposes head token segments, tail segments and the exact intermediate
+layout N between input L and final M. A successful block yield contains one
+braced flattened item segment with the same final layout as its item list.
+Balanced actual item yields produce an intrinsic BlockBoundary witness.
+No parser success is assumed in these grammar-yield equations.
+
+This is a narrow backfill increment: balancing of every arbitrary expression
+atom, coverage of all Syn blocks by BlockBoundary, and token splitting of
+mixed statement lists are STILL OPEN. Per-part balance remains an explicit
+premise; it is not silently supplied by a successful parser or confused with
+SOL-EU. The original arbitrary-syntax obligation is not marked complete.
+
+Controls include nonempty return blocks, nested blocks and unchecked blocks
+in existing indexed contexts, arbitrary scanner suffixes, and rejection of
+an early closing brace despite equal total brace counts. Actual string atoms
+exercise L→N→M with two fragment choices and a nonempty residual layout.
+String bytes 123/125 remain string tokens, not punctuation braces. Invalid
+fragment lengths and empty fragment choices fail. No successful yield is
+mocked. All witnesses are existing Syn values.
+
+Separate read-only finder and skeptic reviews pass the narrow proofs and
+controls, without Lean/server/build use. Finder requested nonempty/nested
+intrinsic controls beyond the empty witness; those were added. Both reviewers
+confirmed the precise limits on universal syntax coverage and mixed lists.
+The final local unused-simp warning in the layout control was removed.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/Balance.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793798392749704798 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.Balance | pass; 0.65s timed wall; peak RSS 409936 KiB | /workspace/h28-statement-grammar-evidence/run-1793798440871849495 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/YieldSplit.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793798772789829921 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.YieldSplit | pass; 11.65s timed wall; peak RSS 529952 KiB | /workspace/h28-statement-grammar-evidence/run-1793798972971418619 |
+| runtime.py diag tests/h28-sol/statement-grammar/BalanceControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793798935841289274 |
+| runtime.py diag tests/h28-sol/statement-grammar/YieldSplitControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799351873943685 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/Balance.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799394523501932 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/YieldSplit.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799395302199855 |
+| runtime.py gate tests/h28-sol/statement-grammar/BalanceControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799406518489970 |
+| runtime.py gate tests/h28-sol/statement-grammar/YieldSplitControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799407296252208 |
+
+Exact axiom outputs for Balance: balanced_scan_frame, close_after_balanced and
+unmatched_close_not_balanced use [propext]; balanced_braced_split,
+balanced_braced_list_unique and block_boundary_split use [propext, Quot.sound];
+balanced_flatten and empty_block_boundary have no axioms. For YieldSplit,
+block_yield_decompose and list_yield_cons_decompose use [propext, Quot.sound];
+block_yield_map, list_cons_yield_bind, block_yield_of_items, list_yield_cons_of
+and block_boundary_of_items have no axioms. These are existing Lean foundations;
+there are no new custom axioms or trust shortcuts. Exact signatures, commands,
+exits, timings, RSS, source hashes and control axiom outputs are in the sealed
+source/evidence. No speed-motivated upstream refactor was made.
+
+Retained failures: run-1793798115614860910 used the unavailable List.Forall
+name; the equivalent explicit member-wise proposition is now used.
+run-1793798515617629097, run-1793798600656417495 and
+run-1793798711211803233 failed attempts at definitional monad equality. The
+checked proof first rewrites the existing yield equation, exposes Option
+binds and splits at the exact intermediate layout. The layout control's
+run-1793799056008112752 failed because an empty-tail membership branch had
+not simplified; that was fixed and checked. No failed run is hidden or PASS.
+
+Remaining original work includes arbitrary syntax/atom boundary coverage,
+mixed statement-list decomposition, nearest-else attachment-position and
+remaining root/conditional uniqueness results where independent of SOL-EU,
+remaining constructor fuel/coverage and controls, solc fixtures, full gates,
+full-scope reviews/acceptance and final handoff. SG-CEX-01 remains OPEN/REFUTED;
+no premise or producer is changed to make it disappear. The existing goal
+continues with these obligations, not a replacement goal or VM.

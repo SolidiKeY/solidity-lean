@@ -3,3 +3,5 @@ Solidity.Frontend.StatementGrammarH28.Shape	Intrinsic statement root classificat
 Solidity.Frontend.StatementGrammarH28.NearestElse	Intrinsic open-if spine and existing nearest-else contract
 Solidity.Frontend.StatementGrammarH28.LeafCoverage	Concrete control-leaf parser coverage, yields and structural fuel bounds
 Solidity.Frontend.StatementGrammarH28.FlagCounterexample	Checked statement-yield and existential-fuel completeness counterexamples
+Solidity.Frontend.StatementGrammarH28.Balance	Balanced brace prefix/list splitting and intrinsic block boundaries
+Solidity.Frontend.StatementGrammarH28.YieldSplit	Exact existing block/list yield and intermediate-layout decomposition
