@@ -1555,3 +1555,12 @@ manually assembled from checked components, not selected by a general public
 recursive compiler. General argument/return shapes, original approved-domain
 provenance, native partial-return traces and the complete V3 producer remain
 open. It supplies no failed state, byte/world rollback or physical EVM test.
+
+
+### Disjoint scalar caller restoration
+
+`RuntimeFrameSameGlobals.reframe` transports the complete caller representation from a reached frame when source globals and heap are identical and protected local words are preserved. Fragile slots retain their original reached liveness evidence under that equality; this is not preservation under arbitrary heap mutation.
+
+`RuntimeFrameV3DisjointScalarEntry` executes the checked scalar argument and memory-reference entry into separate callee cells. `RuntimeFrameV3DisjointScalarReturn.endpoint` connects that entry, the countdown image and actual private-result export to the original native recursive source call. The caller destination is unrestricted initially. The populated control changes destination cell four from 77 to 3 by copying private cell seven, retaining both aliases, protected scalar two, old heap, allocator and stack in a complete 22-word observation. The actual public scalar-value selector is checked; general recursive compiler selection and approved-profile provenance remain open.
+
+The out-of-bounds argument control proves actual bare-revert prefix absorption, including source failure before depth-zero exhaustion. It supplies no failed state, rollback, payload or world-effect conclusion. These are scalar-family components, not a general recursive producer instance.
