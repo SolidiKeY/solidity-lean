@@ -608,3 +608,8 @@ Independent read-only finder and skeptic reviews passed with no findings.
 Both checked public compiler selection, branch skip lengths, terminal collision
 rejection, per-row value checks, protected state and the explicit remaining
 Source/native/body boundaries; neither used a Lean server or build.
+
+`SourcePayableInterface.lean` specifies declaration-derived payability and
+first ordinary selector-match agreement, with explicit selector-cell and
+call-value representation. Source body and special-function execution remain
+separate obligations.
