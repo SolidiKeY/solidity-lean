@@ -91,6 +91,8 @@ import Solidity.Backend.Environment.ObservationsChecks
 import Solidity.Backend.EvmVectors
 import Solidity.Backend.Executable.ConstructorArgumentObservations
 import Solidity.Backend.Executable.ConstructorLocalArguments
+import Solidity.Backend.Executable.CreationPatchOrder
+import Solidity.Backend.Executable.CreationPatchOrderControls
 import Solidity.Backend.Failure.Checkpoint
 import Solidity.Backend.Failure.Composition
 import Solidity.Backend.Failure.CompositionChecks
