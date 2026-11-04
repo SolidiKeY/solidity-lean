@@ -75,7 +75,7 @@
     "level": 13,
     "precNode": "operand.level >= 13 and operand.level != 14",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "partial: original certificates and actual yields reconstruct operator and child token word/execution; prefix position0 and suffix positive-position markers separate higher roots. Root levels agree through14; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_unaryPrefix (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -85,7 +85,7 @@
     "level": 14,
     "precNode": "operand.level >= 15",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "partial: original certificates and actual yields reconstruct operator and child token word/execution; prefix position0 and suffix positive-position markers separate higher roots. Root levels agree through14; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_unarySuffix (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },

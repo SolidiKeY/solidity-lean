@@ -9,7 +9,7 @@
     "id": "EU-02",
     "obligation": "layout erasure and fragments reconstruction",
     "status": "partial",
-    "evidence": "Arbitrary string fragment payload reconstruction and all-family literal uniqueness proved; type attribute reconstruction remains open."
+    "evidence": "Arbitrary fragments/literal reconstruction plus expression-category layout extension/trimming proved: every successful partial expression yield has a genuine fully consumed Derives witness for its flattened word. Type attribute/tree identity remains open."
   },
   {
     "id": "EU-03",
@@ -21,13 +21,13 @@
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "All ordinary binary roots, assignment and conditional recover actual child token words/layout executions internally from original certificates; conditional colon and index/slice payloads are reconstructed. High-root/tree identity remains open."
+    "evidence": "All binary/assignment/conditional/unary child token spans and operators reconstruct. Original certified root levels agree whenever either root is<=14, including arbitrary partial executions via fresh fully consumed witnesses. Postfix15 versus primary16 and recursive identity remain open."
   },
   {
     "id": "EU-05",
     "obligation": "all operator associativity and precedence boundaries",
     "status": "partial",
-    "evidence": "All original refusals retained. All ordinary binary ranks separate, with correct associativity-oriented cuts deriving child spans for arbitrary subtree sizes. Complete tree association and remaining boundaries remain open."
+    "evidence": "All original refusals retained. All root levels0through14 separate from higher certified roots, with actual child spans and correct associativity cuts. Arbitrary prefix/grouped-suffix chains cover all operator values. Complete recursive tree association remains open."
   },
   {
     "id": "EU-06",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Arbitrary nested conditional true branches have inhabited exact-yield certificates, correct outer-colon positions and raw-selector countercontrols. All prior arbitrary families retained; full boundary acceptance remains open."
+    "evidence": "All6prefix operators and both grouped-suffix operators have arbitrary-depth inhabited exact-yield/prec/marker controls; ungrouped suffix nesting remains refused. Prior conditional/additive/delimiter controls retained. Full boundary acceptance remains open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "43 modules/725 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
+    "evidence": "49 modules/814 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at43 frozen registrations; trust3715zero/layers559zero pass; central axiom inventory zero errors but725 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at49 frozen registrations; trust3721zero/layers559zero pass; central axiom inventory zero errors but814 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted conditional counter/algebra/all29expression closure, actual3childspan and index/slice payload proofs, arbitrary nested controls. No defects or Lean-server use. See evidence/reviews-conditional.json."
+    "evidence": "Separate finder/skeptic accepted unary freedom/root/span/controls, layout extension/trimming and combined root-level reconstruction, without defects or Lean-server use. See evidence/reviews-unary.json."
   },
   {
     "id": "EU-14",

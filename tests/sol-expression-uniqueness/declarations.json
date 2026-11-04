@@ -2100,6 +2100,36 @@
     "source_signature": "theorem expr_derives_modeDone (e : Syn .expr) (ts : List Tok) (hd : e.Derives ts) : ModeDone ts"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionUnaryFree",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.UnaryYieldProperty",
+    "source_signature": "def UnaryYieldProperty {c : Cat} (e : Syn c) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionUnaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_unary_property",
+    "source_signature": "theorem expression_unary_property {c : Cat} (e : Syn c) : UnaryYieldProperty e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionUnaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_yield_unaryFree",
+    "source_signature": "theorem high_expr_yield_unaryFree (e : Syn .expr) (hp : e.prec = true) (hl : 15 \u2264 e.level) :\n    Produces e.yield UnaryFreeItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionUnaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_unaryFree",
+    "source_signature": "theorem type_yield_unaryFree (ty : Syn .typeName) : Produces ty.yield UnaryFreeItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionUnaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_derives_unaryFree",
+    "source_signature": "theorem high_expr_derives_unaryFree (e : Syn .expr) (ts : List Tok)\n    (hp : e.prec = true) (hl : 15 \u2264 e.level) (hd : e.Derives ts) : UnaryFree ts"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.Families",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.negFamily",
@@ -2542,6 +2572,90 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily_certified_depth_injective",
     "source_signature": "theorem groupFamily_certified_depth_injective (e : Syn .expr) (ts : List Tok)\n    (hd : e.Derives ts) {n m : Nat} (h : groupFamily n e = groupFamily m e) : n = m"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LayoutExtend",
+    "source_signature": "def LayoutExtend {\u03b1 : Type} (p : Pr \u03b1) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LayoutTrim",
+    "source_signature": "def LayoutTrim {\u03b1 : Type} (p : Pr \u03b1) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LayoutPrinter",
+    "source_signature": "def LayoutPrinter {\u03b1 : Type} (p : Pr \u03b1) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_pure",
+    "source_signature": "theorem layout_pure {\u03b1 : Type} (value : \u03b1) : LayoutPrinter (pure value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_lift",
+    "source_signature": "theorem layout_lift {\u03b1 : Type} (o : Option \u03b1) : LayoutPrinter (Pr.lift o)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_pop",
+    "source_signature": "theorem layout_pop : LayoutPrinter Pr.pop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_bind",
+    "source_signature": "theorem layout_bind {\u03b1 \u03b2 : Type} (p : Pr \u03b1) (k : \u03b1 \u2192 Pr \u03b2)\n    (hp : LayoutPrinter p) (hk : \u2200 value, LayoutPrinter (k value)) : LayoutPrinter (p >>= k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_popAttrs",
+    "source_signature": "theorem layout_popAttrs : LayoutPrinter popAttrs"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_fragsP",
+    "source_signature": "theorem layout_fragsP (mk : Bytes \u2192 Tok) (bs : Bytes) : LayoutPrinter (fragsP mk bs)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_litP",
+    "source_signature": "theorem layout_litP (l : Lit) : LayoutPrinter (litP l)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.layout_attrsP",
+    "source_signature": "theorem layout_attrsP (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok)) (order : List Slot) :\n    LayoutPrinter (attrsP singles mods order)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_layout",
+    "source_signature": "theorem expressionCategory_yield_layout {c : Cat} (e : Syn c) :\n    ExpressionCategory c = true \u2192 LayoutPrinter e.yield"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_yield_trim",
+    "source_signature": "theorem expression_yield_trim (e : Syn .expr) (initial rest : List Choice) (items : List (List Tok))\n    (hy : e.yield initial = some (items, rest)) : \u2203 used, e.yield used = some (items, [])"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.LayoutBoundary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_partial_derives",
+    "source_signature": "theorem expression_partial_derives (e : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (hy : e.yield initial = some (items, rest)) : e.Derives items.flatten"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.LowControls",
@@ -3648,6 +3762,36 @@
     "source_signature": "theorem malformed_reverse_scan_control :\n    lastTop isAddMarker [.punct .lparen, .punct .add] = some (1, .punct .add) \u2227\n    firstTop isAddMarker [] [.punct .lparen, .punct .add] = none"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.RootLevels",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_level_thirteen_cases",
+    "source_signature": "theorem expr_level_thirteen_cases (e : Syn .expr) (hl : e.level = 13) :\n    \u2203 op a, e = Syn.unaryPrefix op a"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.RootLevels",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.loose_higher_root_disjoint",
+    "source_signature": "theorem loose_higher_root_disjoint (a b : Syn .expr) (ts : List Tok)\n    (low : a.level < 2) (higher : a.level < b.level)\n    (ha : a.prec = true) (hb : b.prec = true) (da : a.Derives ts) (db : b.Derives ts) : False"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.RootLevels",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.through_unary_higher_root_disjoint",
+    "source_signature": "theorem through_unary_higher_root_disjoint (a b : Syn .expr) (ts : List Tok)\n    (bounded : a.level \u2264 14) (higher : a.level < b.level)\n    (ha : a.prec = true) (hb : b.prec = true) (da : a.Derives ts) (db : b.Derives ts) : False"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.RootLevels",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal_through_unary",
+    "source_signature": "theorem certified_root_levels_equal_through_unary (a b : Syn .expr) (ts : List Tok)\n    (bounded : a.level \u2264 14 \u2228 b.level \u2264 14)\n    (ha : a.prec = true) (hb : b.prec = true) (da : a.Derives ts) (db : b.Derives ts) :\n    a.level = b.level"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.RootLevels",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.partial_root_levels_equal_through_unary",
+    "source_signature": "theorem partial_root_levels_equal_through_unary (a b : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (bounded : a.level \u2264 14 \u2228 b.level \u2264 14) (ha : a.prec = true) (hb : b.prec = true)\n    (hy : a.yield initial = some (items, rest)) (hy' : b.yield initial' = some (items', rest'))\n    (words : items.flatten = items'.flatten) : a.level = b.level"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.isComma",
@@ -3928,6 +4072,396 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique",
     "source_signature": "theorem firstTop_cut_unique (p : Tok \u2192 Bool) (xs ys xs' ys' : List Tok) (t t' : Tok)\n    (hx : skip p [] xs = some []) (hx' : skip p [] xs' = some [])\n    (ht : p t = true) (ht' : p t' = true)\n    (heq : xs ++ t :: ys = xs' ++ t' :: ys') :\n    xs = xs' \u2227 t = t' \u2227 ys = ys'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixChain",
+    "source_signature": "def prefixChain (op : PrefixOp) : Nat \u2192 Syn .expr\n  | 0 => .ident \"a\"\n  | n + 1 => .unaryPrefix op (prefixChain op n)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixChainTokens",
+    "source_signature": "def prefixChainTokens (op : PrefixOp) : Nat \u2192 List Tok\n  | 0 => [.ident \"a\"]\n  | n + 1 => prefixToken op :: prefixChainTokens op n"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixChain_prec",
+    "source_signature": "theorem prefixChain_prec (op : PrefixOp) (n : Nat) : (prefixChain op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixChain_yield",
+    "source_signature": "theorem prefixChain_yield (op : PrefixOp) (n : Nat) (rest : List Choice) :\n    (prefixChain op n).yield rest = some ([prefixChainTokens op n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixChain_certified",
+    "source_signature": "theorem prefixChain_certified (op : PrefixOp) (n : Nat) :\n    (prefixChain op n).Derives (prefixChainTokens op n) \u2227 (prefixChain op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixChain_marker",
+    "source_signature": "theorem prefixChain_marker (op : PrefixOp) (n : Nat) :\n    firstTop unaryMarker [] (prefixChainTokens op (n + 1)) = some (0, prefixToken op)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffixChain",
+    "source_signature": "def suffixChain (op : SuffixOp) : Nat \u2192 Syn .expr\n  | 0 => .ident \"a\"\n  | n + 1 => .unarySuffix op (group (suffixChain op n))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffixChainTokens",
+    "source_signature": "def suffixChainTokens (op : SuffixOp) : Nat \u2192 List Tok\n  | 0 => [.ident \"a\"]\n  | n + 1 => parens (suffixChainTokens op n) ++ pu op.punct"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffixChain_prec",
+    "source_signature": "theorem suffixChain_prec (op : SuffixOp) (n : Nat) : (suffixChain op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffixChain_yield",
+    "source_signature": "theorem suffixChain_yield (op : SuffixOp) (n : Nat) (rest : List Choice) :\n    (suffixChain op n).yield rest = some ([suffixChainTokens op n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffixChain_certified",
+    "source_signature": "theorem suffixChain_certified (op : SuffixOp) (n : Nat) :\n    (suffixChain op n).Derives (suffixChainTokens op n) \u2227 (suffixChain op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffixChainTokens_length",
+    "source_signature": "theorem suffixChainTokens_length (op : SuffixOp) (n : Nat) :\n    (suffixChainTokens op n).length = 3 * n + 1"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffixChain_marker",
+    "source_signature": "theorem suffixChain_marker (op : SuffixOp) (n : Nat) :\n    \u2203 position, 0 < position \u2227 firstTop unaryMarker [] (suffixChainTokens op (n + 1)) =\n      some (position, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ungrouped_suffix_chain_refused",
+    "source_signature": "theorem ungrouped_suffix_chain_refused (op op' : SuffixOp) (a : Syn .expr) :\n    (Syn.unarySuffix op (Syn.unarySuffix op' a)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryMarker",
+    "source_signature": "def unaryMarker : Tok \u2192 Bool\n  | .punct .inc | .punct .dec | .punct .not | .punct .bitNot | .punct .sub | .kw .delete => true\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.UnaryFree",
+    "source_signature": "def UnaryFree (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeItems",
+    "source_signature": "def UnaryFreeItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryMarker_atomic",
+    "source_signature": "theorem unaryMarker_atomic : AtomicSelector unaryMarker"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_nil",
+    "source_signature": "theorem unaryFree_nil : UnaryFree []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_balanced",
+    "source_signature": "theorem unaryFree_balanced {ts : List Tok} (h : UnaryFree ts) : Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFreeItems_balanced",
+    "source_signature": "theorem unaryFreeItems_balanced {items : List (List Tok)} (h : UnaryFreeItems items) :\n    BalancedItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_append",
+    "source_signature": "theorem unaryFree_append {xs ys : List Tok} (hx : UnaryFree xs) (hy : UnaryFree ys) :\n    UnaryFree (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_atom",
+    "source_signature": "theorem unaryFree_atom {t : Tok} (hb : bracket t = none) (hc : unaryMarker t = false) :\n    UnaryFree [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFreeItems_nil",
+    "source_signature": "theorem unaryFreeItems_nil : UnaryFreeItems []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFreeItems_cons",
+    "source_signature": "theorem unaryFreeItems_cons {ts : List Tok} {items : List (List Tok)}\n    (h : UnaryFree ts) (hs : UnaryFreeItems items) : UnaryFreeItems (ts :: items)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFreeItems_single",
+    "source_signature": "theorem unaryFreeItems_single {ts : List Tok} (h : UnaryFree ts) : UnaryFreeItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFreeItems_dropHead",
+    "source_signature": "theorem unaryFreeItems_dropHead {ts : List Tok} {items : List (List Tok)}\n    (h : UnaryFreeItems (ts :: items)) : UnaryFreeItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFreeItems_flatten",
+    "source_signature": "theorem unaryFreeItems_flatten {items : List (List Tok)} (h : UnaryFreeItems items) :\n    UnaryFree items.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_flatMap",
+    "source_signature": "theorem unaryFree_flatMap {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 UnaryFree (f x)) : UnaryFree (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_of_atoms",
+    "source_signature": "theorem unaryFree_of_atoms (ts : List Tok) (h : \u2200 t, t \u2208 ts \u2192 bracket t = none \u2227 unaryMarker t = false) :\n    UnaryFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_parens",
+    "source_signature": "theorem unaryFree_parens {ts : List Tok} (h : Balanced ts) : UnaryFree (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_braces",
+    "source_signature": "theorem unaryFree_braces {ts : List Tok} (h : Balanced ts) : UnaryFree (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_square",
+    "source_signature": "theorem unaryFree_square {ts : List Tok} (h : Balanced ts) :\n    UnaryFree (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_tk",
+    "source_signature": "theorem unaryFree_tk (k : Kw) (h : unaryMarker (.kw k) = false) : UnaryFree (tk k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_idt",
+    "source_signature": "theorem unaryFree_idt (name : String) : UnaryFree (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_path",
+    "source_signature": "theorem unaryFree_path (p : IdPath) : UnaryFree p.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_elem",
+    "source_signature": "theorem unaryFree_elem (e : Elem) : UnaryFree e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_visibility",
+    "source_signature": "theorem unaryFree_visibility (v : Visibility) : UnaryFree v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_mutability",
+    "source_signature": "theorem unaryFree_mutability (m : Mutability) : UnaryFree m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_dataLoc",
+    "source_signature": "theorem unaryFree_dataLoc (l : DataLoc) : UnaryFree l.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_optToks",
+    "source_signature": "theorem unaryFree_optToks {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 a, UnaryFree (f a))\n    (value : Option \u03b1) : UnaryFree (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_mul",
+    "source_signature": "theorem unaryFree_mul (op : MulOp) : UnaryFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_shift",
+    "source_signature": "theorem unaryFree_shift (op : ShiftOp) : UnaryFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_order",
+    "source_signature": "theorem unaryFree_order (op : OrderOp) : UnaryFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_equality",
+    "source_signature": "theorem unaryFree_equality (op : EqOp) : UnaryFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_unaryFree",
+    "source_signature": "theorem fragsP_unaryFree (mk : Bytes \u2192 Tok) (hm : \u2200 bs, bracket (mk bs) = none \u2227 unaryMarker (mk bs) = false)\n    (bs : Bytes) : Produces (fragsP mk bs) UnaryFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_unaryFree",
+    "source_signature": "theorem litP_unaryFree (l : Lit) : Produces (litP l) UnaryFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAttrs",
+    "source_signature": "def UnaryFreeAttrs (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFreeAttrs_append",
+    "source_signature": "theorem unaryFreeAttrs_append {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : UnaryFreeAttrs xs) (hy : UnaryFreeAttrs ys) : UnaryFreeAttrs (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryFree_single",
+    "source_signature": "theorem unaryFree_single (slot : Slot) (ts : List Tok) (h : UnaryFree ts) :\n    UnaryFreeAttrs (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_unaryFree",
+    "source_signature": "theorem arrange_unaryFree (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : UnaryFreeAttrs singles)\n    (hm : UnaryFreeItems mods) (h : arrange order singles mods = some ts) : UnaryFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_unaryFree",
+    "source_signature": "theorem attrsP_unaryFree (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : UnaryFreeAttrs singles) (hm : UnaryFreeItems mods) :\n    Produces (attrsP singles mods order) UnaryFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixToken",
+    "source_signature": "def prefixToken : PrefixOp \u2192 Tok\n  | .inc => .punct .inc | .dec => .punct .dec | .not => .punct .not\n  | .bitNot => .punct .bitNot | .delete => .kw .delete | .neg => .punct .sub"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_word_single",
+    "source_signature": "theorem prefix_word_single (op : PrefixOp) : op.punct = [prefixToken op]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefixToken_injective",
+    "source_signature": "theorem prefixToken_injective (op op' : PrefixOp) (h : prefixToken op = prefixToken op') : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffix_punct_injective",
+    "source_signature": "theorem suffix_punct_injective (op op' : SuffixOp) (h : op.punct = op'.punct) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.UnaryChildSpans",
+    "source_signature": "def UnaryChildSpans (a b : Syn .expr) (initial rest initial' rest' : List Choice) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_child_spans",
+    "source_signature": "theorem prefix_child_spans (op op' : PrefixOp) (a b : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hy : (Syn.unaryPrefix op a).yield initial = some (items, rest))\n    (hy' : (Syn.unaryPrefix op' b).yield initial' = some (items', rest'))\n    (he : items.flatten = items'.flatten) :\n    op = op' \u2227 UnaryChildSpans a b initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffix_child_spans",
+    "source_signature": "theorem suffix_child_spans (op op' : SuffixOp) (a b : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hy : (Syn.unarySuffix op a).yield initial = some (items, rest))\n    (hy' : (Syn.unarySuffix op' b).yield initial' = some (items', rest'))\n    (he : items.flatten = items'.flatten) :\n    op = op' \u2227 UnaryChildSpans a b initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_yield_firstUnary",
+    "source_signature": "theorem prefix_yield_firstUnary (op : PrefixOp) (a : Syn .expr)\n    (initial rest : List Choice) (items : List (List Tok))\n    (hy : (Syn.unaryPrefix op a).yield initial = some (items, rest)) :\n    firstTop unaryMarker [] items.flatten = some (0, prefixToken op)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffix_yield_firstUnary",
+    "source_signature": "theorem suffix_yield_firstUnary (op : SuffixOp) (a : Syn .expr)\n    (initial rest : List Choice) (items : List (List Tok))\n    (hp : (Syn.unarySuffix op a).prec = true)\n    (hy : (Syn.unarySuffix op a).yield initial = some (items, rest)) :\n    \u2203 n, 0 < n \u2227 firstTop unaryMarker [] items.flatten = some (n, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_yield_firstUnary_none",
+    "source_signature": "theorem high_yield_firstUnary_none (e : Syn .expr) (initial rest : List Choice) (items : List (List Tok))\n    (hp : e.prec = true) (hl : 15 \u2264 e.level) (hy : e.yield initial = some (items, rest)) :\n    firstTop unaryMarker [] items.flatten = none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffix_higher_root_disjoint",
+    "source_signature": "theorem suffix_higher_root_disjoint (op : SuffixOp) (a e : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.unarySuffix op a).prec = true) (hp' : e.prec = true) (hl : 15 \u2264 e.level)\n    (hy : (Syn.unarySuffix op a).yield initial = some (items, rest))\n    (hy' : e.yield initial' = some (items', rest')) : items.flatten \u2260 items'.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_level_fourteen_cases",
+    "source_signature": "theorem expr_level_fourteen_cases (e : Syn .expr) (hl : e.level = 14) :\n    \u2203 op a, e = Syn.unarySuffix op a"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.UnaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_higher_root_disjoint",
+    "source_signature": "theorem prefix_higher_root_disjoint (op : PrefixOp) (a e : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp' : e.prec = true) (hl : 14 \u2264 e.level)\n    (hy : (Syn.unaryPrefix op a).yield initial = some (items, rest))\n    (hy' : e.yield initial' = some (items', rest')) : items.flatten \u2260 items'.flatten"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",

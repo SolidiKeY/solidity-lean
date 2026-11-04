@@ -26,7 +26,9 @@ It is a definition of an OPEN obligation, not a theorem inhabiting it. Layouts
 are independently existential through the existing `Syn.Derives`. Equivalently
 quantify `La Lb` and require `a.toks La = some ts` and `b.toks Lb = some ts`.
 Layout equality is neither a premise nor a conclusion. Successful `Syn.toks`
-consumes the entire layout; an unconsumed `Syn.yield` suffix is insufficient.
+consumes the entire layout. `LayoutBoundary` now constructs a genuine fully
+consumed witness for the flattened word of any successful partial expression
+yield. This does not equate that fresh witness with the original layout.
 No second AST, parser edit, new producer assumption or theorem exclusion exists.
 
 The accepted-tree corollary must combine `parseCat_sound` with the public
@@ -40,9 +42,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 725 source declarations with source signatures;
+`declarations.json` enumerates all 814 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The forty-three modules are proposed for coordinator registration, with module-map rows,
+The forty-nine modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -121,7 +123,13 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ExpressionConditional` | Every original expression/type/param/callargs yield pairs top-level question/colon punctuation; bare namedArg colons remain shielded in actual enclosures. |
 | `ConditionalSpans` | Original certificates derive all three conditional child spans and layout states; optional index/slice payloads separate and slice colon cuts reconstruct. |
 | `ConditionalControls` | Arbitrary nested true branches have inhabited certificates and correct outer-colon cuts; raw selectors choose an inner colon, and all bracket kinds shield arbitrary internal colons. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 725 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `UnaryFreeAlgebra` | Token/attribute algebra for all six prefix and both suffix markers; keyword delete is covered. |
+| `ExpressionUnaryFree` | Original certified roots of level>=15, types and callargs exclude outer unary markers; enclosed unary descendants remain unrestricted. |
+| `UnaryRoot` | Actual prefix/suffix child words and operators reconstruct; prefix marker0, suffix markerpositive and higher absence distinguish roots. |
+| `UnaryControls` | All prefix/grouped-suffix operators have arbitrary-depth inhabited exact yields and markers, retaining ungrouped nesting refusals. |
+| `LayoutBoundary` | Existing printer extension/trimming composition and complete expression-category closure; actual partial expression yields obtain fully consumed Derives witnesses. |
+| `RootLevels` | Original certified root levels agree whenever either is<=14, also for independent partial layouts. Postfix15 versus primary16 remains open. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 814 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -162,13 +170,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-conditional.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-unary-final.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-conditional.inside.json`. It took 26.686933 seconds, child peak RSS
-251716 KiB, exact container peak 830967808 bytes, minimum parent headroom
-15597060096 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-unary-final.inside.json`. It took 33.475511 seconds, child peak RSS
+259028 KiB, exact container peak 841744384 bytes, minimum parent headroom
+15565615104 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -180,10 +188,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these forty-three modules lack central root imports. The orphan gate
-reported the same forty-three. Source trust passed (3715 sources, zero findings), and
+check: exactly these forty-nine modules lack central root imports. The orphan gate
+reported the same forty-nine. Source trust passed (3721 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 725 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 814 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -437,3 +445,44 @@ All six assignment read-only master inputs are unchanged there; the integrated
 `Fragments.lean` matches this branch. No merge/rebase/reset was performed and
 the assigned branch still descends from its exact pinned base. Remaining work
 is not claimed integrated. Fetch evidence is `evidence/published-master-fetch.log`.
+
+
+## Unary roots and layout-boundary checkpoint
+
+Six modules add 89 declarations, giving 49 modules and 814 declarations. Every
+outer prefix/suffix token, including keyword delete, is absent from certified
+roots of level at least15. The proof covers all29 expression constructors and
+type/call-argument closure using actual layouts and enclosures. Prefix markers
+select position zero; suffix markers select a positive position because the
+original certificate supplies a nonempty higher-root operand. Actual unary
+printer inversion reconstructs operator and child word/execution, independently
+of the two layouts. Every prefix operator has arbitrary direct nesting; every
+suffix operator has arbitrary grouped nesting and exact inhabited certificates.
+The existing ungrouped suffix refusal remains unchanged.
+
+Generic printer extension/trimming laws cover pure/lift/pop/bind and all three
+existing Choice constructors. The complete expression-category yield closure
+satisfies them. Thus every partial expression success has a fresh fully consumed
+Derives witness for its flattened word, with no assumed child printability or
+layout equality. This supplies the missing bridge from recovered child-state
+executions to the original existential certificate interface. Statement, function
+and unit uniqueness are not claimed or added to this closure.
+
+Combining the original loose/binary results with unary separation proves equal
+certified root levels whenever either level is at most14; the same result holds
+for independently chosen partial executions. Postfix15 versus primary16, their
+complete decompositions and recursive type/list/argument/child-tree identities
+remain open. The public theorem and parseCat accepted-tree corollary stay open.
+No original target, premise, exclusion, refusal, producer interface or budget
+changed. One broad control simplification exhausted the fixed200000 heartbeats;
+using a closed root fact fixed it at the same budget. Failed attempts are kept.
+A deprecated length lemma in the first successful signature build was replaced
+by its identical current API; final diagnostics/kernel logs have no owned warning.
+
+Independent read-only finder/skeptic source reviews accepted this partial work
+without defects or Lean-server use. Records are in `evidence/reviews-unary.json`.
+Exact standard-only kernel signatures/axiom pins cover all814 declarations.
+The local49 registration count describes the original pinned checkout and
+includes Fragments already integrated on published master; the manifest records
+that integration separately so the coordinator can deduplicate registration.
+No remaining work is claimed integrated and no rebase/reset/merge occurred.
