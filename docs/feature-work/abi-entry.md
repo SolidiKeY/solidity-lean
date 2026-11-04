@@ -475,3 +475,8 @@ metadata, exact length-prefixed reference outcome and real signed-negative
 controls. The finder also verified that the master merge retained every row
 from both module-map parents. Native execution and full coverage limits remain
 explicit and were not inferred from the operand specification.
+
+`AccessBridge/EmptyCopyInterface.lean` states the actual zero-length calldata
+copy family with arbitrary source and destination words, explicit initial
+stack/gas/capacity and exact reached state/continuation. Nonzero copies and
+Source/compiler adequacy remain open.
