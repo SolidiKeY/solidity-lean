@@ -2451,6 +2451,8 @@ import Solidity.Yul.Adapters.P6Memory
 import Solidity.Yul.Adapters.P6MemoryControls
 import Solidity.Yul.Adapters.P6MultiRootByte
 import Solidity.Yul.Adapters.P6MultiRootByteControls
+import Solidity.Yul.Adapters.P6MultiRootByteRefresh
+import Solidity.Yul.Adapters.P6MultiRootByteRefreshControls
 import Solidity.Yul.Adapters.P6ResidualCapacity
 import Solidity.Yul.Adapters.P6ResidualCapacityControls
 import Solidity.Yul.Adapters.P6ResidualCopy
@@ -3115,6 +3117,7 @@ import Solidity.Yul.Views.MixedHeapOrder
 import Solidity.Yul.Views.MixedHeapOrderControls
 import Solidity.Yul.Views.MixedHeapView
 import Solidity.Yul.Views.MixedMemoryMemOK
+import Solidity.Yul.Views.MultiRootByteAppend
 import Solidity.Yul.Views.MultiRootByteBoundary
 import Solidity.Yul.Views.MultiRootByteFrames
 import Solidity.Yul.Views.MultiRootByteFramesControls

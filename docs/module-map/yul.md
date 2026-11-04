@@ -145,3 +145,5 @@
 | `Yul/Views/BytePlanHashFrames{,Controls}` | Actual child write/hash return through Source local substitution, with arbitrary valid caller aliases, every-H safety and same-map complete Source writeback on success/halt. |
 | `Yul/Views/MultiRootByteBoundary` | Actual multi-root byte writes preserve the raw complement above the placement end, using selected typed object geometry and real source failures. |
 | `Yul/Adapters/P6MultiRootByte{,Controls}` | Derives finite-frame Fits for multi-root source byte plans and constructs exact same-map P6 frames with complete source writeback, original-H safety and metadata preservation. |
+| `Yul/Views/MultiRootByteAppend` | Exact chronological concatenation of actual multi-root coupled plans, retaining stopped prefixes and skipped suffixes. |
+| `Yul/Adapters/P6MultiRootByteRefresh{,Controls}` | Derives next-plan source/frame preparation from actual first output and connects successful sequential physical plans to one concatenated execution, with stale-state and failure controls. |

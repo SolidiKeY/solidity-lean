@@ -1079,3 +1079,17 @@ failure, nonzero padding and the finite 2047/2048 boundary. A nonzero write beyo
 the represented high-water mark fails Fits. This constructs a physical image;
 it proves neither target opcode execution, memory expansion nor reachable
 allocation refinement.
+
+
+`MultiRootByteAppend.coupled_append` proves exact chronological plan
+concatenation: a source error stops both source and raw updates, while success
+feeds the reached pair into the suffix. `P6MultiRootByteRefresh.refresh` derives
+the next plan's retained placement, owner safety, supported inventory, reads,
+reserved words and finite-frame room from the actual first frame. No second-view
+or second-bound premise is required for this construction. `append_success`
+uses the derived placement addresses and actual first success to identify two
+physical runs with the concatenated coupled execution. Readiness after an error
+is not permission to execute its suffix. Controls prove this composition for
+both pipelines and arbitrary original H, and distinguish stale Source reuse
+from the reached state. General call rollback, opcode execution and allocation
+refinement remain separate obligations.
