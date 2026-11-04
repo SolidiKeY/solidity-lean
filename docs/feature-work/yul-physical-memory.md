@@ -921,3 +921,13 @@ cleaning, padding, a source/payload byte-32 crossing, exact Panic0x32 state
 preservation, and static memory-write success. No string surface syntax,
 shape-changing update, target opcode execution or general dirty representation
 adequacy is inferred.
+
+`ByteElementFrames` connects byte transport to actual `EM.sub` success/halt:
+caller locals restore, and the resulting heap passes through. Whole Source
+writeback and physical reconstruction refer to that same reached state and
+original allocation history. The separate actual `mark`/`rollbackTo` theorem
+retains heap writes, as the owner restores only external journal/log fields.
+Controls retain a caller prefix and child byte mutation through a late halt,
+nested empty child contexts and explicit rollback, with suspended caller aliases
+and exact bounds failure. These facts do not specify general callInternal,
+external-world effects or an automatic memory rollback policy.
