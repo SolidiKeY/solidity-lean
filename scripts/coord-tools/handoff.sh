@@ -12,7 +12,13 @@ def main():
     gates=[]; stale=[]
     for d in filter(None,env.get("HANDOFF_GATES","").split(":")):
         h=pathlib.Path(d)/"HEAD"
-        if h.is_file() and h.read_text().strip()!=head: stale.append(d)
+        if status=="done":
+            if not h.is_file(): raise ValueError("done refused: missing or invalid gate HEAD: "+str(h))
+            try: gate_head=h.read_text().strip()
+            except (OSError,UnicodeError) as e:
+                raise ValueError("done refused: unreadable gate HEAD: "+str(h)) from e
+            if gate_head!=head: stale.append(d)
+        elif h.is_file() and h.read_text().strip()!=head: stale.append(d)
         for row in (pathlib.Path(d)/"gates.tsv").read_text().splitlines():
             st,name,seconds,evidence,command=row.split("\t",4)
             if st not in ("PASS","FAIL"): raise ValueError("invalid gate status")
