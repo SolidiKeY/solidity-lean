@@ -27959,6 +27959,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.deployRun": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.deployRun_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.ancestor_no_receipt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.ancestor_stop_propagates": [
   "Classical.choice",
   "Quot.sound",
@@ -28005,6 +28020,31 @@
   "propext"
  ],
  "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.reader_signature": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_cut0": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_cut1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_uncut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.request_no_receipt": [
   "Classical.choice",
   "Quot.sound",
   "propext"

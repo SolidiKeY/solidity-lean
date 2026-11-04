@@ -1,5 +1,6 @@
 import Solidity.Source.SemanticsExamples
 import Solidity.Source.FailureEventLaws
+import Solidity.Source.Session
 
 /-! H16 actual initcode-frame controls. The intrinsic constructor's state
 initializer calls an explicit environment receiver, receives an ABI word and
@@ -168,6 +169,67 @@ theorem request_stop_propagates (pipeline : Roadmap.Pipeline) :
       result.2.2.ex.journal.length = 1 ∧ (result.2.2.ex.world.accounts thisC).nonce = 0 := by
   cases pipeline <;> decide +kernel
 
+/-- Same registered constructor and host strategy, now through the actual
+session deployment-receipt operation. No request-fate scope is fabricated. -/
+def sessionProgram (pipeline : Roadmap.Pipeline) : SrcProg E :=
+  ⟨program,pipeline,toyFixed,"C"⟩
+def sessionEnv : Roadmap.SessionEnv where
+  deployer := user
+  deployNonce := ⟨0,by decide⟩
+  deployValue := word 0
+  deployArgs := []
+  balance _ := word 0
+  hasCode _ _ := true
+  requests _ _ := none
+  callee _ := .answer (.success (wordBytes (word 42)))
+def receiptRun (pipeline : Roadmap.Pipeline) (cut : Option Nat) (fuel : Nat := 20) :=
+  (deployRun (plan := some (points cut)) (sessionProgram pipeline) sessionEnv thisC fuel).run
+    (L0 E,input)
+def receipt (o : Roadmap.Outcome) : Roadmap.Event :=
+  .deploy user (word 0) [] o (match o with | .success _ => some thisC | .revert _ => none)
+
+theorem receipt_uncut (pipeline : Roadmap.Pipeline) :
+    let r := receiptRun pipeline none
+    r.1 = .ok (.success []) ∧ value r.2.2 = some 42 ∧
+    r.2.2.events = [prior,callEvent,answerEvent,receipt (.success [])] ∧
+    r.2.2.resource.nextFrame = 1 := by cases pipeline <;> decide +kernel
+
+theorem receipt_cut1 (pipeline : Roadmap.Pipeline) :
+    let r := receiptRun pipeline (some 1)
+    r.1 = .ok (.revert []) ∧ value r.2.2 = some 0 ∧
+    r.2.2.events = [prior,callEvent,receipt (.revert [])] ∧
+    r.2.2.ex.journal.length = 1 ∧ r.2.2.resource.pending.isNone = true := by
+  cases pipeline <;> decide +kernel
+
+theorem receipt_cut0 (pipeline : Roadmap.Pipeline) :
+    let r := receiptRun pipeline (some 0)
+    r.1 = .ok (.revert []) ∧ r.2.2.events = [prior,receipt (.revert [])] ∧
+    r.2.2.resource.nextFrame = 1 := by cases pipeline <;> decide +kernel
+
+theorem receipt_timeout (pipeline : Roadmap.Pipeline) :
+    let r := receiptRun pipeline none 0
+    r.1 = .error .timeout ∧ r.2.2.events = [prior] := by
+  cases pipeline <;> decide +kernel
+
+def ancestorReceipt (pipeline : Roadmap.Pipeline) :=
+  (deployRun (plan := some ancestorPlan) (sessionProgram pipeline) sessionEnv thisC 20).run
+    (L0 E,ancestorInput)
+def requestReceipt (pipeline : Roadmap.Pipeline) :=
+  (deployRun (plan := some requestPlan) (sessionProgram pipeline) sessionEnv thisC 20).run
+    (L0 E,requestInput)
+
+theorem ancestor_no_receipt (pipeline : Roadmap.Pipeline) :
+    let r := ancestorReceipt pipeline
+    r.1 = .error (.revert []) ∧ r.2.2.events = [prior,callEvent] ∧
+    r.2.2.resource.pending.map (fun stop => (stop.isFrame 0,stop.isRequest 0)) = some (true,false) ∧
+    r.2.2.ex.journal.length = 1 := by cases pipeline <;> decide +kernel
+
+theorem request_no_receipt (pipeline : Roadmap.Pipeline) :
+    let r := requestReceipt pipeline
+    r.1 = .error (.revert []) ∧ r.2.2.events = [prior,callEvent] ∧
+    r.2.2.resource.pending.map (fun stop => (stop.isRequest 0,stop.isFrame 0)) = some (true,false) ∧
+    r.2.2.ex.journal.length = 1 := by cases pipeline <;> decide +kernel
+
 end Solidity.Source.FailureExecution.ConstructorControls
 
 /-- info: 'Solidity.Source.runInits' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -232,3 +294,22 @@ end Solidity.Source.FailureExecution.ConstructorControls
 
 /-- info: 'Solidity.Source.FailureExecution.ConstructorControls.request_stop_propagates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.request_stop_propagates
+
+/- BEGIN GENERATED RECEIPT PINS -/
+/-- info: 'Solidity.Source.deployRun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.deployRun
+/-- info: 'Solidity.Source.deployRun_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.deployRun_run
+/-- info: 'Solidity.Source.FailureExecution.ConstructorControls.receipt_uncut' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.receipt_uncut
+/-- info: 'Solidity.Source.FailureExecution.ConstructorControls.receipt_cut1' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.receipt_cut1
+/-- info: 'Solidity.Source.FailureExecution.ConstructorControls.receipt_cut0' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.receipt_cut0
+/-- info: 'Solidity.Source.FailureExecution.ConstructorControls.receipt_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.receipt_timeout
+/-- info: 'Solidity.Source.FailureExecution.ConstructorControls.ancestor_no_receipt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.ancestor_no_receipt
+/-- info: 'Solidity.Source.FailureExecution.ConstructorControls.request_no_receipt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.request_no_receipt
+/- END GENERATED RECEIPT PINS -/

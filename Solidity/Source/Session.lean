@@ -142,12 +142,40 @@ theorem sessionGoEvents_mono (P : SrcProg E) (env : SessionEnv) :
           · exact runTx_events_mono (P.glob env) q s hn hdn
       · exact sessionGoEvents_mono P env k k' n n' (i + 1) s last (by omega) hn
 
-/-- The deployment as a session runs it: its outcome recorded as an event. -/
-def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) : EM E [] Outcome := do
-  let o ← deploy (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs
-  emitEvent (.deploy env.deployer env.deployValue env.deployArgs o
+/-- The deployment as a session runs it: its completed outcome recorded as an
+event. An explicit failure plan reaches actual initcode execution; an exceptional
+request/ancestor stop propagates without a deployment receipt. The default path
+and its horizon laws below remain unchanged. This does not install a post-fee
+balance or consume the deployment transaction-fate ordinal. The terminal
+receipt is deliberately outside the body-event budget, as in FailureCursor. -/
+def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat)
+    (plan : FailureExecution.RuntimePlan := none) : EM E [] Outcome := do
+  let o ← deploy (plan := plan) (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs
+  emitEvent (plan := none) (.deploy env.deployer env.deployValue env.deployArgs o
     (match o with | .success _ => some addr | .revert _ => none))
   pure o
+
+/-- Exact full-state receipt boundary: completion appends only the terminal
+event; every exceptional halt retains the entire resulting state without a
+receipt. In particular receipt emission does not tick body-event budgets. -/
+theorem deployRun_run {E : Env} (P : SrcProg E) (env : Roadmap.SessionEnv)
+    (addr : Roadmap.Address) (f : Nat) (plan : FailureExecution.RuntimePlan)
+    (l : Locals E.layout []) (s : St E) :
+    (deployRun P env addr f plan).run (l,s) =
+      match (deploy (plan := plan) (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs).run (l,s) with
+      | (.ok o,(l',s')) =>
+        (.ok o,(l',{ s' with events := s'.events ++
+          [.deploy env.deployer env.deployValue env.deployArgs o
+            (match o with | .success _ => some addr | .revert _ => none)] }))
+      | (.error why,post) => (.error why,post) := by
+  unfold deployRun
+  rw [ExceptT.run_bind]
+  show StateT.bind (ExceptT.run (deploy (plan := plan) (P.glob env) f P.main addr
+    env.deployer env.deployValue env.deployArgs)) _ (l,s) = _
+  simp only [StateT.bind]
+  cases h : (deploy (plan := plan) (P.glob env) f P.main addr env.deployer
+    env.deployValue env.deployArgs).run (l,s) with
+  | mk result post => cases result <;> cases post <;> rfl
 
 theorem deployRun_grow (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) :
     Grow (deployRun P env addr f) := by

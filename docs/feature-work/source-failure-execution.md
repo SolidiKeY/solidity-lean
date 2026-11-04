@@ -323,3 +323,22 @@ attempted the active extra worktree build and hit permissions; this is a tool
 selection defect, not authority to discard active work. Exited-container
 reclamation subsequently recovered space. No source or newest seal deleted.
 H19/immutable/funds full release and original24/six Y10 closure remain open.
+
+## Actual deployment receipt boundary (2026-11-04)
+
+Source.Session.deployRun now forwards an optional RuntimePlan to actual deploy.
+Default None and its existing horizon proofs remain unchanged. deployRun_run
+proves the exact full-state equation for arbitrary inputs: a completed result
+appends only its terminal deployment receipt, while a halt preserves the entire
+post-state and emits none. The terminal receipt explicitly uses plan None,
+consistent with FailureCursor's existing body-event exclusion. This wrapper
+is not arbitrary ancestor-call composition or deployment request-fate scope.
+
+Six both-pipeline actual-interpreter controls distinguish successful
+initializer read/store42, own-frame cuts0/1, timeout, ancestor and request
+stops, complete event ordering and retained rollback journal/pending owner.
+No fresh native tests, H18 tx0 scope, natural post-fee installation, arbitrary
+Some-plan consistency or P8 realization is claimed. Full original24/six
+obligations remain open. Simple automation failures and the successful exact
+monad case proof are retained under
+`/workspace/vy5-composition/deploy-receipt-20261104/`.
