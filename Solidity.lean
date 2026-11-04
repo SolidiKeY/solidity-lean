@@ -1798,6 +1798,8 @@ import Solidity.Lowering.StorageOps.SourceCapturedByteCommitControls
 import Solidity.Lowering.StorageOps.SourceCapturedBytePhase
 import Solidity.Lowering.StorageOps.SourceCapturedByteTimeout
 import Solidity.Lowering.StorageOps.SourceCapturedByteTimeoutControls
+import Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeout
+import Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeoutControls
 import Solidity.Lowering.StorageOps.SourceCopyCommutation
 import Solidity.Lowering.StorageOps.SourceCopyCommutationControls
 import Solidity.Lowering.StorageOps.SourceCopyFrames

@@ -340,6 +340,26 @@ heap component is not a heap-restoration guarantee. No Source semantics changed.
 The routine generic rollback wrapper is type-only for Terra; twenty-four
 adapters remain unproved. Physical target/caller rollback remains open.
 
+## Payload timeout after a runtime child prefix
+
+`SourceCapturedByteWriteTimeout.payload_timeout` proves the actual captured
+child writes exactly the available payload prefix before timeout, including
+zero write fuel. `write_timeout` lifts this through an arbitrary successful
+child prefix with OLD headers transported through the checked frames. Earlier
+payload/cleanup conditions and the final shortage condition remain explicit.
+The exact trace contains no cleanup or header for the failing child.
+
+A whole storage-reference copy captures varying-length children, commits the
+first two, writes both bytes of the third and then times out at its empty-tail
+fuel boundary. Its last child header stays zero despite populated raw cells;
+a successful phase control commits that header. Complete ordered states and
+journals distinguish failure, success, skipped rollback and separately invoked
+rollback retaining captured heap objects. The original heartbeat limit is
+preserved by reusing the checked commit theorem for the success contrast.
+These Source fuel observations do not establish EVM gas behavior, physical
+execution or whole-caller rollback. The prior twenty-four Terra adapters remain
+unproved; no generic pending adapter is used as a producer.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

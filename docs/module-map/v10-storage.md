@@ -123,3 +123,6 @@
 | `Lowering/StorageOps/SourceCapturedBytePhase.lean` | Actual captured-byte child phase execution, including partial cleanup failure |
 | `Lowering/StorageOps/SourceCapturedByteTimeout.lean` | Runtime successful-child prefix followed by exact cleanup timeout from OLD header observations |
 | `Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean` | Whole storage-reference failure, complete ordered journals, stale/older shadows and explicit rollback boundaries |
+
+| `Lowering/StorageOps/SourceCapturedByteWriteTimeout.lean` | Actual captured payload timeout and arbitrary successful-child failure-prefix transport |
+| `Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean` | Whole-copy empty-tail fuel boundary, unchanged headers, complete journals and explicit rollback contrasts |
