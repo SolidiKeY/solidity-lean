@@ -500,3 +500,7 @@ They checked the actual all-offset identity, derived gate/charge, complete
 execution/continuation, connection of the P6 post-image to the same reached
 state, and extreme/dirty-byte/refusal controls. Both confirmed the zero-length
 family does not imply nonzero physical write or Source/compiler adequacy.
+
+`SelectorMatchInterface.lean` specifies an intrinsic four-byte selector matcher
+and exact raw prefix agreement after a complete four-byte prefix. Short-input
+classification remains explicit and is not inferred from a padded word match.
