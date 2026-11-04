@@ -229,3 +229,19 @@ a2928672d59b179e55fddfee12c6228a29c8ad6b. The existing decoder consumer proofs
 use entry, closure, agreement and zero/successor fields explicitly. Concrete
 compiler/Bridge producers remain open; no copied producer definition,
 replacement axiom, Source/ExtCall edit or G49 proof is introduced.
+
+## P20 interface consumer
+
+Published master b419c3cf4f642ae519b66bebc26cdf2f7cf93574 adds the exact
+`Yul/Compilation/P20InterfaceV1.lean` signature at commit
+09e0c75fc98ac82992550c95c0a9103378f45293. PendingG24.lowering has the existing
+LoweringCertificate type. P20ConsumerInterface states an assembly-consumer
+endpoint over that record and the actual checked compilation, retaining shape,
+room and successful assembly explicitly. Its signature is committed before
+implementation. This supplies no PendingG24 or PendingRepresentedSuccess
+instance and proves no Source/physical adequacy or G49 result.
+
+This adoption imports only ScalarSequenceFrameControls from the reviewed
+4fe21828 snapshot; the remaining local work is preserved. No broader completion
+is inferred from the master's integration receipt. Cache delivery for this
+published base is separately pending; full lane validation remains open.
