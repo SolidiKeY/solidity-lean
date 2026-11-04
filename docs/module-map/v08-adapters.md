@@ -432,6 +432,9 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/PrimitivePackets/Comparisons/Controls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Comparisons/LocalReads.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Comparisons/Selected.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedMul/Execution.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedMul/Selection.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedMul/WideControls.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
