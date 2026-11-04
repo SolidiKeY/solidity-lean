@@ -892,5 +892,13 @@ to the complete actual struct `writeLoc` result through existing canonical
 codecs. Selected-struct encoding with unchanged complementary bytes reconstructs
 the patched map. Heterogeneous controls update a pointer, boolean and uint256,
 preserve sibling aliases and padding, and distinguish a wrong-type Source write
-from dirty-bool canonical preparation None. Whole-heap changed-image refresh,
-target opcode execution and general dirty assembly transport remain open.
+from dirty-bool canonical preparation None.
+
+`StructWordHeap` extends the field write to every post-write heap image using
+the actual old inventory, codecs and separated placement. It derives complete
+map reconstruction, unchanged whole administrative Source writeback, owner
+MemOK for every original heap typing, and reserved-byte preservation. Six
+heterogeneous objects witness the changed pointer, unchanged sibling alias,
+other objects and nonzero padding. The result uses `retainInitial`; extension
+through arbitrary prior allocation history, target opcode execution and general
+dirty assembly transport remain open.

@@ -3456,6 +3456,8 @@ import Solidity.Yul.Views.StructArray
 import Solidity.Yul.Views.StructConstructorControls
 import Solidity.Yul.Views.StructConstructorFields
 import Solidity.Yul.Views.StructConstructorRun
+import Solidity.Yul.Views.StructWordHeap
+import Solidity.Yul.Views.StructWordHeapControls
 import Solidity.Yul.Views.StructWordStore
 import Solidity.Yul.Views.StructWordStoreControls
 import Solidity.Yul.Views.TransientCellUpdate
