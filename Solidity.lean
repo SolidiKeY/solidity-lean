@@ -3254,6 +3254,8 @@ import Solidity.Yul.Views.ResidualMcopy
 import Solidity.Yul.Views.ResidualMcopyControls
 import Solidity.Yul.Views.ResidualMemoryWriteback
 import Solidity.Yul.Views.ResidualWindowControls
+import Solidity.Yul.Views.RetainedAliasFrames
+import Solidity.Yul.Views.RetainedAliasFramesControls
 import Solidity.Yul.Views.RetainedAliasOwnership
 import Solidity.Yul.Views.RetainedAliasOwnershipControls
 import Solidity.Yul.Views.RetainedAliasReadControls

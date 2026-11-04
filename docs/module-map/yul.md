@@ -99,3 +99,4 @@
 | `Yul/Views/RetainedLocalAliasImage{,Controls}` | Actual alias capture drives checked enlarged retained images, source traversal, whole-storage unchanged writeback and exact complementary raw-map reconstruction. |
 | `Yul/Views/RetainedAliasOwnership{,Controls}` | One actual alias-plus-Source storage run with success-only complementary journaling, full reencoding, static prefix retention and paired-boundary rollback controls. |
 | `Yul/Views/RetainedAliasSequence{,Controls}` | Actual Source-bind ownership sequencing keeps reached journals and capture prefixes through first/late refusals and two successes; checked fields reproduce public preparation. |
+| `Yul/Views/RetainedAliasFrames{,Controls}` | Derived actual sequence boundary, paired child/outer rollback and complete prefix/initial raw reconstruction with distinct retained-tail controls. |

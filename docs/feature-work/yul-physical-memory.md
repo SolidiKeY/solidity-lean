@@ -598,3 +598,13 @@ first/second requested headers are3/0. The checked preparation reproduction law
 factors actual guard fields without omitting them or raising recursion/heartbeat
 limits. The concrete factored control takes about45seconds; generic laws about2.
 This explicit sequence does not establish general call/frame capture or rollback.
+
+`RetainedAliasFrames` derives the child boundary from the actual first compound
+execution, then connects the actual two-program result to paired external-state
+and complementary-journal rollback. Child rollback preserves the completed parent
+prefix; child commit followed by outer rollback restores the initial pair. Both
+restore the corresponding complete raw map through the checked inventory. Controls
+distinguish the prefix padding word from the initial residual packed tail. These
+laws do not restore arbitrary caller locals, heap or logs and do not instrument
+general call execution. Canonical preparation, capture completeness and general
+source/frame adequacy remain explicit unfinished obligations.
