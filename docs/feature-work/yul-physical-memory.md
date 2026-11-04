@@ -554,3 +554,14 @@ second update. Controls cross indices31/32 of the same string and distinguish
 an inner panic (no outer write) from an outer panic (successful inner prefix
 retained). This concrete operand composition is not a general arbitrary-expression
 producer theorem, and no independent physical write is erased on Source failure.
+
+`RetainedLocalAlias` reuses the published actual Source local-assignment law to
+prove capture for every intrinsic type and local index. Entry, final and returned
+reference scopes are derived from that computation. Overwriting a local does
+not erase its entry paths, and a later explicit halt retains both assignment
+effects and captured references. The store stays exactly unchanged; every
+original owner heap typing is preserved. Static path typing is derived separately
+from actual MemOK. Controls overwrite dormant child1 with child0 while outer
+length is zero: final-only collection loses child1, whereas captured duplicate-safe
+visits retain both. This establishes the local-alias producer case, not global
+producer completeness or realization of the newly enlarged captured inventory.
