@@ -2422,6 +2422,8 @@ import Solidity.Yul.Adapters.P6ByteReferenceReads
 import Solidity.Yul.Adapters.P6ByteReferenceReadsControls
 import Solidity.Yul.Adapters.P6ByteReferenceWrite
 import Solidity.Yul.Adapters.P6ByteReferenceWriteControls
+import Solidity.Yul.Adapters.P6ByteWriteInventory
+import Solidity.Yul.Adapters.P6ByteWriteInventoryControls
 import Solidity.Yul.Adapters.P6ByteWriteOrder
 import Solidity.Yul.Adapters.P6ByteWriteOrderControls
 import Solidity.Yul.Adapters.P6CalldataHash

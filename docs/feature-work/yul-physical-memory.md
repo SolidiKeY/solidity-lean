@@ -510,3 +510,15 @@ The three-object string control changes the final byte of a partially occupied
 word, preserves nonzero padding, and distinguishes the numeric MSTORE8 operand
 from a left-aligned Source bytes1 word. No general compiler, static-call,
 allocator-provenance or dirty-local adequacy is claimed.
+
+`P6ByteWriteInventory.write` closes the complete mixed-inventory refresh step for
+these valid byte writes. Canonical preparation constructs the updated entry;
+actual placement separation preserves the other images. One resulting inventory
+supplies the actual Source write result, selected writeback, whole mixed-map
+reencoding, complete coverage, IDs, resulting cell, unchanged coordinates and
+every-original-H MemOK. Original retained-allocation history remains available
+for the next operation. The two-write control feeds the first actual heap,
+frame and history into the second and exports both source runs and full maps.
+Missing-entry and stale-image controls distinguish coverage loss and accidentally
+overwriting the changed byte. This does not discharge arbitrary producer/frame
+adequacy, allocation provenance or the remaining original queues.

@@ -91,3 +91,4 @@
 | `Yul/Adapters/P6RetainedRegionCopy{,Controls}` | Checked header-changing copies in original retained byte/string regions; exact capacity failure, constructed Source/full-map closure and kernel shrink/regrowth. |
 | `Yul/Adapters/P6ByteReferenceReads{,Controls}` | Exact Source byte/string-backed memory location formation, length/read/write access and panic laws, with retained shrink/regrowth access controls. |
 | `Yul/Adapters/P6ByteReferenceWrite{,Controls}` | Actual Source byte writes and computed bounded MSTORE8 share exact typed writeback, selected full-map encoding, unchanged-state identity and exterior-byte preservation. |
+| `Yul/Adapters/P6ByteWriteInventory{,Controls}` | Constructed complete mixed-inventory refresh after actual Source/MSTORE8 byte writes; same-state writeback, whole-map reencoding, retained history and sequential controls. |
