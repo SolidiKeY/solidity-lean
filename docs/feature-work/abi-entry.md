@@ -163,3 +163,11 @@ pins, one removed duplicate wrapper and 45 unrecorded changes. Its refresh is
 proposed separately, outside lane ownership; no gate pass is claimed. Independent
 read-only finder and skeptic reviews passed with no findings. The full original
 queue and its producer, physical-store/copy and provenance obligations remain open.
+
+`MemoryLoadExtentInterface.lean` adds exact native MLOAD active-word accounting
+and an iff for the post-image of the published `P6ByteMemory.touch`. This is
+separate from raw payload and charged execution. Intrinsic/native offset
+correspondence and the actual 32-byte span are explicit; the iff exposes the
+existing post-active word-fit boundary without narrowing calldata admission.
+The earlier absence of a local FrameMem read method is not a blocker: the
+published P6 adapter already supplies `touch` and its byte/carrier laws.
