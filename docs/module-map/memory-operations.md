@@ -282,3 +282,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimeLiveArray.lean` | Actual-value source and runtime path declaration/rebinding proofs, preserving ownership and old aliases. |
 | `Backend/MemoryCopies/RuntimeLiveArrayControls.lean` | Shadow-bearing empty/pair/64 path bindings, retained storage, aliases, invalid paths and extra-tail controls. |
 | `Backend/MemoryCopies/RuntimeMemoryArrayInterface.lean` | Runtime primitive memory-array deep-copy code and full allocator/identity certificate. |
+| `Backend/MemoryCopies/RuntimeMemoryArray.lean` | Actual runtime header/payload loop deep copying primitive memory arrays with ownership-derived separation. |
+| `Backend/MemoryCopies/RuntimeMemoryArrayControls.lean` | Populated/empty/64-element runtime deep-copy controls preserving old aliases and rejecting shallow results. |
