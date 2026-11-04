@@ -173,3 +173,21 @@ runtime gate or B16 proof. Mathlib delivery remains separately pending, and
 `Mathlib/Data/Nat/Log.olean` is still absent. No original obligation is discharged
 by this adoption. Current handoff and evidence: `evidence/dependency-adoption-20261104.md`
 and `evidence/dependency-adoption-20261104-gates.log`. No new question is raised.
+
+## Published selected-module delivery, 2026-11-04T122441Z
+
+Adopted `b419c3cf4f642ae519b66bebc26cdf2f7cf93574` on the original branch via
+`e98653edc48f5e9c3b81f4cbc09102bf64d79b8b`, preserving the original lane head.
+Its three SignedMod modules exactly match helper `584d34226053a12ae8e7cf82f58da44c177b54c5`.
+The helper branch/worktree, tests, axiom consumer, raw failures and bundle remain
+preserved separately and are not all claimed imported. Read the published
+`integration-20261104T122441Z-precompile-agreement.md` for the bounded delivery.
+
+Both independent read-only adoption reviews pass without findings or Lean/server
+use. Precompile inventory/12 controls, generated roots and central axiom inventory
+pass locally; coordinator-reported full publication gates are not a local full
+B16 acceptance. Original precompile inputs are unchanged and Mathlib Log.olean
+is still absent. No original proof obligation is completed by these unrelated
+partial producer/interface deliveries. All original queue/holds remain binding.
+Current adoption handoff: `evidence/dependency-adoption-122441.md`; exact gate
+commands/results: `evidence/dependency-adoption-122441-gates.log`.
