@@ -805,3 +805,17 @@ an unknown tail, actual old/new source bytes, and the existing max-one stride
 for a zero-footprint mathematical object. Initial canonical support, owner
 validity, old reads and exact Word extents remain premises. Target allocator
 selection and general retained-history/refinement remain open.
+
+`AllocationSequence.Certified` is a proof-only relation over actual source data,
+reached states and checked placements. Each step records only actual shape,
+exact Word extent, Inner/DataOK and supported element types; later read/view
+laws are derived by allocation refresh. `realize` constructs the full physical
+continuation for any certified finite list, one actual `Source.allocRef` sequence,
+whole-map reconstruction, unchanged whole-state writeback, owner safety and
+reserved-memory transport. All returned values retain their intrinsic types and
+have valid references in the final heap. There is no added length or fuel cap.
+The relation is not a new Source admission predicate: controls include a real
+dangling-child allocation that Source executes successfully despite absent owner
+validity. A three-object control contains a pointer to the first allocated object;
+empty input leaves the original state and residual bytes intact. General Source
+producer coverage, allocator selection and retained-history refinement remain open.

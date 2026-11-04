@@ -2840,6 +2840,8 @@ import Solidity.Yul.Views.AllocationPhysicalControls
 import Solidity.Yul.Views.AllocationPhysicalView
 import Solidity.Yul.Views.AllocationRefresh
 import Solidity.Yul.Views.AllocationRefreshControls
+import Solidity.Yul.Views.AllocationSequence
+import Solidity.Yul.Views.AllocationSequenceControls
 import Solidity.Yul.Views.AllocationViewImages
 import Solidity.Yul.Views.ArrayStruct
 import Solidity.Yul.Views.ByteHeapRealization
