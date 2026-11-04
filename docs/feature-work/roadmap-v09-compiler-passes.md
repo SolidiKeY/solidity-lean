@@ -568,6 +568,22 @@ Independent read-only finder and skeptic source reviews found no soundness
 defect and confirmed those boundaries. Focused failures and resource records
 are retained separately from successful theorem checks.
 
+## Reached checked-add overflow
+
+`CheckedAdditionReachedOverflow` selects the actual public memory compiler for
+two dependent checked-add captures. Under original representation, scalar reads
+and exact two-slot capacity, it derives the successful prefix and its full mapped
+output, then derives the suffix Input at that actual state and selected map.
+The canonical prefix machine and map precede all saved tails. Intrinsic joined
+execution and emitted joined code both revert only after the prefix succeeds.
+
+The inhabited MAX+0 then MAX+MAX case retains all 13 ordered local/heap cells and
+the saved tail. The observed physical capture is the machine consumed by the
+failing suffix. Typed early-doubling and insufficient-frame controls distinguish
+wrong ordering and missing room. Source declaration lowering and public ABI or
+session observations remain outside these internal terminal results. Independent
+read-only finder and skeptic source reviews found no soundness defect.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

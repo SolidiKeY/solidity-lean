@@ -424,6 +424,9 @@ import Solidity.Backend.Passes.CapturedValueStability
 import Solidity.Backend.Passes.CheckedAdditionCapture
 import Solidity.Backend.Passes.CheckedAdditionCaptureControls
 import Solidity.Backend.Passes.CheckedAdditionCapturePins
+import Solidity.Backend.Passes.CheckedAdditionReachedOverflow
+import Solidity.Backend.Passes.CheckedAdditionReachedOverflowControls
+import Solidity.Backend.Passes.CheckedAdditionReachedOverflowPins
 import Solidity.Backend.Passes.ClosedHashPins
 import Solidity.Backend.Passes.ClosedValueControls
 import Solidity.Backend.Passes.ClosedValues

@@ -67,3 +67,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/CheckedAdditionCapture.lean` | Public checked-add compilation with fresh capture, full mapped output and shared tails. |
 | `Backend/Passes/CheckedAdditionCaptureControls.lean` | Populated heap/caller capture and overflow controls with complete ordered observations. |
 | `Backend/Passes/CheckedAdditionCapturePins.lean` | Standard-only axiom guards for checked-add capture headlines. |
+| `Backend/Passes/CheckedAdditionReachedOverflow.lean` | Selected two-stage checked-add execution with actual mapped prefix and derived reached-overflow Input. |
+| `Backend/Passes/CheckedAdditionReachedOverflowControls.lean` | MAX capture then doubling overflow; complete physical prefix and order/frame controls. |
+| `Backend/Passes/CheckedAdditionReachedOverflowPins.lean` | Exact standard-only axiom guards for reached checked-add overflow. |
