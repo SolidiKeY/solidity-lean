@@ -218,3 +218,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceStoredReferencesInterface.lean` | Reference closure obligations for existing Source stored-value certificates: nested structs, empty dynamic arrays and byte arrays with exact counts/horizons. |
 | `Backend/MemoryCopies/SourceStoredReferences.lean` | Proved closure of existing Source stored-value certificates for nested structs, empty dynamic arrays and byte arrays. |
 | `Backend/MemoryCopies/SourceStoredReferencesControls.lean` | Declared nested struct identities/payloads, empty recursive child arrays, old-state framing and negative Source controls. |
+| `Backend/MemoryCopies/SourceStoredElementsInterface.lean` | Existing Source homogeneous element traversal and fixed/dynamic array closure obligations with exact object counts. |
