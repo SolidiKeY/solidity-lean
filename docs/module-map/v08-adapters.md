@@ -477,3 +477,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/G19/AssignmentDoWhileReturn.lean` | Mapped do-while body assignment then bare return; arbitrary trailing condition skipped, true fresh flag independent of assigned value. |
 | `Lowering/G19/AssignmentDoWhileReturnControls.lean` | Both-pipeline/checked-mode true and false body runs, same-slot, wrong flag, skipped-effect and return classification controls. |
+
+| `Backend/StructuredFlow/DoWhileReturnCompiler.lean` | Actual compiler composition for mapped do-while assignment/bare-return; explicit entry, fragment and capacity. |
+| `Backend/StructuredFlow/DoWhileReturnCompilerControls.lean` | Both-pipeline/checked-mode native snapshots, independent true capture, wrong flag and leaked trailing-write native mutations. |
