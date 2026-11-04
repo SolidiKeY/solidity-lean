@@ -110,3 +110,5 @@
 | `Lowering/V07/AddressQualifierControls.lean` | Inhabited both-qualifier, mixed-reference, composition and capture controls. |
 | `Lowering/V07/EnumConversions.lean` | Existing enum/uint256 successful assignment transport and exact Source-only invalid-cast observations, with explicit representation obligations. |
 | `Lowering/V07/EnumConversionControls.lean` | Real enum-declaration, mixed-reference, alias, full-panic and oversized-layout countercontrols. |
+| `Lowering/V07/EnumGuard.lean` | Native enum range guard and actual assignment/capture success/panic transport, including zero/full word capacities. |
+| `Lowering/V07/EnumGuardControls.lean` | Inhabited guarded enum, reached-state order, prefix and zero/full-capacity controls with exact pins. |
