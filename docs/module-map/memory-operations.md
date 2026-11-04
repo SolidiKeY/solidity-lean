@@ -224,3 +224,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceRawUintDelete.lean` | Published byte-decoder specialization of actual Source Items uint copy/bind/delete, reached bounds failure and old-object frames. |
 
 | `Solidity/Backend/MemoryOps/SourceGuardedUintDelete.lean` | Actual cdTail guard then Source Items uint copy/delete; byte-derived success, early refusal and late bounds failure with explicit initial view alignment. |
+
+| `Solidity/Backend/MemoryOps/SourceUintSliceNative.lean` | Actual byte-derived uint slice expression and guarded paired Source/native allocation with old-object/map frames. |

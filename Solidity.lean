@@ -425,6 +425,7 @@ import Solidity.Backend.MemoryOps.SourceUintReadAssignment
 import Solidity.Backend.MemoryOps.SourceUintReadAssignmentControls
 import Solidity.Backend.MemoryOps.SourceUintReadSequence
 import Solidity.Backend.MemoryOps.SourceUintSequence
+import Solidity.Backend.MemoryOps.SourceUintSliceNative
 import Solidity.Backend.MemoryOps.SourceUintWrite
 import Solidity.Backend.MemoryOps.SourceWrite
 import Solidity.Backend.MemoryOps.StructDefaults.Controls
