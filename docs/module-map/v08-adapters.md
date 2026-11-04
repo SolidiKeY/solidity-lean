@@ -478,3 +478,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureLocatedFields.lean` | Arbitrary supported memory/scalar/calldata interleavings; actual encoder-part derivation, ABI layout and allocation-preserved evidence. |
 | `Solidity/Lowering/V08/LiteralFailureLocatedFieldsControls.lean` | Eight-field mixed-location execution, aliases, complete packets, typed-kind/wire distinction and failure/fuel controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureConvertedFields.lean` | Input-only converted-argument evidence; actual copied values, reached field evidence, exact allocation count and custom-error execution. |
+| `Solidity/Lowering/V08/LiteralFailureConvertedFieldsControls.lean` | Two interleaved calldata copies into an existing error signature, complete copied objects/packets, old aliases and zero/one/two-copy timeout controls. |
