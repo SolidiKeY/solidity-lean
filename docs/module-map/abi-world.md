@@ -27,3 +27,6 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 
 | `Backend/AbiWorld/NativeParentWord.lean` | Actual recovered native-parent counter connected to existing full-word ABI encoding and explicit-count byte readback. |
 | `Backend/AbiWorld/NativeParentWordControls.lean` | Populated native-entry application and separately labeled caller-counter/word-boundary codec controls. |
+
+| `Solidity.Backend.AbiWorld.MutatingEntryWords` | Ordered full-word codec observation of actual mutation and allocating child frame entry. |
+| `Solidity.Backend.AbiWorld.MutatingEntryWordsControls` | Inhabited entry application, stale/order/heap-preservation negatives and complete codec vectors. |
