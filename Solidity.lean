@@ -512,6 +512,9 @@ import Solidity.Backend.Passes.LoopScopeTrace
 import Solidity.Backend.Passes.LoopSequence
 import Solidity.Backend.Passes.MappedSequence
 import Solidity.Backend.Passes.MappedTail
+import Solidity.Backend.Passes.MemoryAssociation
+import Solidity.Backend.Passes.MemoryAssociationControls
+import Solidity.Backend.Passes.MemoryAssociationPins
 import Solidity.Backend.Passes.MemoryCallApplication
 import Solidity.Backend.Passes.MemoryCallBoundary
 import Solidity.Backend.Passes.MemoryCallControls

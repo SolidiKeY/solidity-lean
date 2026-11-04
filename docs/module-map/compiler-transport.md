@@ -92,3 +92,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Solidity/Backend/Passes/MemoryJoinedOutput.lean` | Full public legacy-memory joined output with the actual selected suffix map and reached cost. |
 | `Solidity/Backend/Passes/MemoryJoinedOutputControls.lean` | Actual allocation/allocation/capture whole output over saved tails and publicly recognized reached failure. |
 | `Solidity/Backend/Passes/MemoryJoinedOutputPins.lean` | Exact standard-only joined-output headline axiom guards. |
+
+| `Solidity/Backend/Passes/MemoryAssociation.lean` | Exact public legacy-memory association transport of Input, actual code and selected-map output. |
+| `Solidity/Backend/Passes/MemoryAssociationControls.lean` | Both public allocating/capture associations, shared maps/tails, reached failure and insufficient-frame rejection. |
+| `Solidity/Backend/Passes/MemoryAssociationPins.lean` | Exact standard-only memory-association axiom guards. |

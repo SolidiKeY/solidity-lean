@@ -708,6 +708,24 @@ Four exact standard-only axiom guards accompany the application. These
 remain intrinsic/abstract-Instr results; Source/world/public ABI, resource
 and external EVM adequacy and mandatory combined validation remain open.
 
+## Exact public memory association transport
+
+`MemoryAssociation` transports the original full Input and full mapped
+output between both intrinsic associations. Public compiler selections fix
+both fragments and emitted code. Output transport retains the same actual
+selected map and reached cost, including failure-prefix costs; it neither
+infers machine equality from representation nor applies raw fault-tail
+transport. Terminal equality is equality of the actual selected code on
+one unchanged entry machine.
+
+Controls retain both actual public whole selections for allocation,
+allocation and fresh-array capture, one final map before all saved tails,
+full mapped outputs on both sides and the original frame6 rejection.
+Both public selections also retain the reached typed bounds failure. All
+previous complete ordered observations are unchanged. Seven exact
+standard-only guards accompany these legacy-memory results; public
+Source/world/session/ABI and external EVM adequacy remain open.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
