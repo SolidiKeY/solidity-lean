@@ -533,3 +533,13 @@ empty-child control retains two suspended caller aliases, and both actual owner
 reads observe the changed string. Caller MemOK is transported from its own
 invariant; arbitrary child-local safety and general call instrumentation remain
 separate obligations.
+
+`P6ByteAssignment` connects the existing resolved Source assignment expression
+with local reference, index and bytes1 operands to the physical byte-write
+inventory. It proves the actual RHS-first evaluation, location formation,
+RVal conversion, write and returned value at horizon n+3. Bounds panic and a
+horizon-1 timeout are distinct Source results; neither claims to undo an
+independently executed physical store. Concrete typed contexts and globals
+inhabit controls for both Source pipeline selections. This local-operand result
+does not cover arbitrary effectful assignment operands or recursive producer
+capture. The returned bytes1 word keeps its genuine left alignment.
