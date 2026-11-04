@@ -487,3 +487,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureCopySequence.lean` | Arbitrary supported local conversion sequences; actual identity/byte/string steps, reached values/fields, preservation and exact object counts. |
 | `Solidity/Lowering/V08/LiteralFailureCopySequenceControls.lean` | FieldMix7 with three interleaved copies, full error/copy outputs, old aliases and zero/one/two/three-copy timeout states. |
+
+| `Lowering/V08/LiteralFailureCopyEncoding.lean` | Actual standard ABI expression after typed local conversions; derived copy effects and packet allocation. |
+| `Lowering/V08/LiteralFailureCopyEncodingControls.lean` | Populated copy/packet/old-alias and partial-fuel controls with complete packets. |
