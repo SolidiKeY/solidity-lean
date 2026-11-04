@@ -527,3 +527,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/LogicalGuardSelection.lean` | Executable indexed Source logical-local require selection and every-success actual run correctness. |
 | `Backend/FailurePaths/LogicalGuardSelectionControls.lean` | Inhabited logical-selector clients, exact Boolean observations, complementary refusals and relation/horizon controls. |
+
+| `Backend/FailurePaths/RelationalGuardSelection.lean` | Actual full-width integer-local Source guard selection, preserving width/sign/operator evidence and proving every-success runs. |
+| `Backend/FailurePaths/RelationalGuardSelectionControls.lean` | Inhabited signed/unsigned selector clients, integer-index map, exact boundaries and successful-but-refused uint8 Source control. |

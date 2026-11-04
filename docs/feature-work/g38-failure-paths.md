@@ -464,3 +464,45 @@ confirmed defect. The failed initial dependent-rewrite attempt is preserved;
 explicit evaluator congruence resolves it without changing the theorem. The
 earlier full-checkpoint timeout remains failed; focused checks do not establish
 a full build on the expanded published base.
+
+
+## Executable selection of relational guards
+
+`FailurePaths.RelationalGuardSelection.compile` recognizes bare indexed Source
+require over `<`, `<=`, `>` or `>=` of two integer locals. Recognition checks
+actual width 256 and retains signedness, local indices, operator and Source
+syntax equality. It constructs the intrinsic guard through an explicit typed
+integer context map and invokes public checked `Memory.compileStmt`.
+
+`selected_correct` covers every successful decision. It obtains the integer
+operands and their ranges from the recognized Source locals, uses explicit
+initial read correspondence and full `Memory.StateRepr`, and derives actual
+Source execution, public compiler selection and selected target execution.
+No supplied target node, compiled certificate, desired run or poststate is a
+premise. Source returns normally or reverts with empty bytes at horizon `n+7`,
+retaining state and caller locals. Target preserves the whole machine on true
+or produces bare revert on false, with no exposed revert bytes or post-machine.
+
+`RelationalGuardSelectionControls.success_client` consumes this theorem on
+inhabited full-width inputs for all four relations, either signedness, arbitrary
+in-range operands and both pipelines. Exact controls also cover equality, the
+signed sign boundary and maximum unsigned value, with saved stack word 77.
+The fixture's structural integer-index map preserves indexed types; its semantic
+read relation is proved separately for the full-width fixture. It is not a
+whole-program lowering producer.
+
+Narrow integers, nonlocal operands, assert and message forms are refused by
+this selector. An actual uint8 Source guard succeeds in both pipelines while
+remaining refused, so the width boundary is not Source-language rejection.
+Zero source horizon still times out. Existing selectors and policies remain
+unchanged. General operands, whole-unit/frontend lowering, context-map
+construction, payload compilation, internal-frame transport and bytecode/EVM
+adequacy remain outside this result.
+
+Validation target is `Solidity.Backend.FailurePaths.RelationalGuardSelectionControls`.
+The serial guarded check passed in 4.069 seconds with 827,912,192 bytes peak
+aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
+`Quot.sound`. Independent read-only finder and skeptic reviews found no
+confirmed defect. The uint8 control required explicit pipeline cases; its failed
+initial proof and scratch automation are retained. The earlier full-checkpoint
+timeout remains failed; these focused checks do not establish a full build.
