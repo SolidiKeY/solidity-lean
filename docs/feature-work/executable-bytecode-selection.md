@@ -199,7 +199,8 @@ All local Selection source files are unchanged by this adoption. Generated
 roots are regenerated and the area map retains each module exactly once.
 The imported nonvacuity audit is historical at its frozen input, not an audit
 of these later producers. The source/Bridge premises and full lane validation
-obligations above remain open; announced cache delivery is still pending.
+obligations above remain open. Cache delivery was pending at this adoption
+checkpoint; the subsequent source-key check is recorded below.
 
 Fresh validation on adoption commit63deee119a84320f18a99c4d9917c130116019da
 passes all eight checkpoint gates and nine per-file checks, including the two
@@ -208,3 +209,23 @@ standard-only reports; the library replays all465 exact Selection reports.
 Independent finder/skeptic adoption reviews pass. This is fresh dependency
 validation, not reuse of old-head gates. The full gate is still outstanding,
 and shared-cache reclamation remains unauthorized.
+
+## Confirmed transport and exact cache-key check
+
+The coordinator confirms successful H21 transport/mapping delivery for6f3eedf0.
+The cache-only query of `Solidity.Examples.DecisionHashesChecks:olean` nevertheless
+returns3 (rebuild required), before any full-gate or module compilation. Its
+current source key8990275316855339899 has no local input-map entry. The source
+is unchanged from6f. This is a local lookup miss, not a claim that transport
+failed or that the artifact does not exist elsewhere. A private diagnostic
+using installed Lake trace APIs agrees with an existing saved reference key;
+independent finder/skeptic reviews confirm the narrow result. The full gate
+remains outstanding; no success validator or full-gate pass is claimed.
+
+H26 lookup finds master still at6f, with no new producer stub for these
+obligations. The already imported `Selection/Premises.lean` signature is on
+master at3b6380b8f8243f3618b1a42456bba4e19aeefac3, and PremisesV2 at
+a2928672d59b179e55fddfee12c6228a29c8ad6b. The existing decoder consumer proofs
+use entry, closure, agreement and zero/successor fields explicitly. Concrete
+compiler/Bridge producers remain open; no copied producer definition,
+replacement axiom, Source/ExtCall edit or G49 proof is introduced.
