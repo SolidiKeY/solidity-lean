@@ -173,4 +173,3 @@ theorem transport_failure {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} 
 #print axioms Solidity.Lowering.V07.SignedEnumTransport.transport_failure
 
 end Solidity.Lowering.V07.SignedEnumTransport
-
