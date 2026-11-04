@@ -459,3 +459,37 @@ defect. Validation targets are `Solidity.Source.Progress.ForwardingChain` and
 `ForwardingChainControls`; printed axioms are standard only. General body shapes,
 recursive-memory compiler support, source recognizer completeness, physical
 base-map and compiler/EVM agreement remain outside this source-only result.
+
+
+## Initialized-local return prefixes
+
+`Progress/InitializedLocals`, `InitializedPrefixes` and `InitializedCalls` derive
+progress and conditional memory preservation for finitely many initialized
+locals followed by one composed return. Each initializer has an identity
+conversion and plain extraction type, and uses the existing composed-expression
+certificate. A local stores the returned reference without an additional copy
+or default allocation. The actual `sub`, `Out.up`, body frame and return
+extraction operations preserve reached allocations and remove prefix locals
+when returning to the caller. Every halt retains `MemOK`; progress excludes
+`stuck` at each fuel horizon and does not imply termination.
+
+`initialized_from_elaborate` derives earlier callee admission from actual
+elaboration and the checked catalogue. The supplied entry still needs source
+membership/signature, supported defaults and exact selected-body equality.
+`extend_initialized_calls` adds it to the certified list without asserting
+freshness, whole-unit coverage or a global acyclicity property.
+
+`InitializedControls` elaborates an allocating leaf and a relay that initializes
+`uint[] memory temporary = fresh(n)` and then returns `temporary`. Both evaluator
+pipelines return the same fresh reference, preserve the caller prefix and reached
+heap, and retain the allocation panic and stopped heap on oversized input.
+Inhabited consumers instantiate the joint proofs. Empty and uninitialized-prefix
+certificates and an incorrect signature have negative controls; these are proof
+fragment refusals, not frontend rejection. Finder and skeptic reviews found no
+confirmed defect. Focused targets are the four `Initialized*` modules; printed
+axioms are `propext`, `Classical.choice` and `Quot.sound` only.
+
+Uninitialized locals, nonidentity conversions, mutation, loops and modifiers
+remain outside this certificate. General memory-call graphs, source recognizer
+completeness, compiler/physical-frame refinement and EVM agreement are not
+established by this source-only result.

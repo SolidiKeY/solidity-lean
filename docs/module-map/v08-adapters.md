@@ -441,3 +441,8 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ForwardingControls.lean` | Elaborated primitive-argument memory-return relay with escaped references and callee-panic restoration. |
 | `Source/Progress/ForwardingChain.lean` | Finite source forwarding certificates derive per-entry and whole-unit call guarantees. |
 | `Source/Progress/ForwardingChainControls.lean` | Inhabited base/relay, caller restoration and freshness/coverage controls. |
+
+| `Source/Progress/InitializedLocals` | Composed initialized-local progress and reference preservation. |
+| `Source/Progress/InitializedPrefixes` | Finite initialized-local prefixes ending in one return. |
+| `Source/Progress/InitializedCalls` | Actual internal-call frames for initialized-return bodies. |
+| `Source/Progress/InitializedControls` | Elaborated initialized-local relay and success/panic/refusal consumers. |

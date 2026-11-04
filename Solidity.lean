@@ -2197,6 +2197,10 @@ import Solidity.Source.Progress.ForwardingChain
 import Solidity.Source.Progress.ForwardingChainControls
 import Solidity.Source.Progress.ForwardingControls
 import Solidity.Source.Progress.ForwardingReturns
+import Solidity.Source.Progress.InitializedCalls
+import Solidity.Source.Progress.InitializedControls
+import Solidity.Source.Progress.InitializedLocals
+import Solidity.Source.Progress.InitializedPrefixes
 import Solidity.Source.Progress.LiteralBuiltinControls
 import Solidity.Source.Progress.LiteralBuiltins
 import Solidity.Source.Progress.NewArray
