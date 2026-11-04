@@ -146,3 +146,6 @@
 | `Backend/AbiEntry/SelectorRoutesInterface.lean` | Public checked compiler selector-local table routing and exact reached-machine contract. |
 | `Backend/AbiEntry/SelectorRoutes.lean` | Typed arbitrary table family, proved compiler admission/selection and actual first-match IR execution. |
 | `Backend/AbiEntry/SelectorRoutesControls.lean` | Duplicate priority, later match/fallback, protected state, malformed fault and empty-table controls. |
+| `Backend/AbiEntry/SourceRoutesInterface.lean` | Ordinary Source lookup from raw selector to checked route-result contract. |
+| `Backend/AbiEntry/SourceRoutes.lean` | Input-independent tables from actual exposed declarations/body/signatures and exact Source pickFn/runtime agreement. |
+| `Backend/AbiEntry/SourceRoutesControls.lean` | Both-pipeline Source body-less/collision filtering, actual compiled route/miss and short-input mismatch controls. |

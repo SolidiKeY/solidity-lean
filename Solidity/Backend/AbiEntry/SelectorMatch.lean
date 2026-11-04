@@ -114,6 +114,16 @@ def sourceSelector {E : Source.Env} (global : Source.Glob E) (signature : List C
 theorem source_bytes {E : Source.Env} (global : Source.Glob E) (signature : List Char) :
     (sourceSelector global signature).toList=global.selector signature := List.toList_toArray
 
+/-- Numeric value of the actual fixed-hash prefix, using the proved byte split. -/
+theorem source_value {E : Source.Env} (global : Source.Glob E) (signature : List Char) :
+    Source.beValue (sourceSelector global signature).toList=
+      (global.fixed.hash (Source.asciiBytes signature)).val/2^224 := by
+  rw [source_bytes]
+  have exactPrefix := high_prefix (Source.wordBytes (global.fixed.hash (Source.asciiBytes signature)))
+    (Source.wordBytes_length _)
+  rw [Source.wordBytes_value] at exactPrefix
+  exact exactPrefix.symm
+
 theorem source_raw {E : Source.Env} (global : Source.Glob E) (signature : List Char)
     (frame : Source.Fr) (full : 4≤frame.cd.length) (suffix : Stack) :
     run (code (sourceSelector global signature))
@@ -163,6 +173,8 @@ def certificate : Interface.SelectorMatchCertificate code where
 #guard_msgs (whitespace := lax) in #print axioms capacity
 /-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.source_bytes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_bytes
+/-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.source_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_value
 /-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.source_raw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_raw
 /-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.short_no_match' depends on axioms: [propext, Quot.sound] -/

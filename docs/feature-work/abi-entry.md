@@ -555,3 +555,30 @@ or ABI dispatch success, and the remaining correspondence boundary is explicit.
 `SourceRoutesInterface.lean` specifies ordinary Source lookup to checked route
 execution using raw selector bytes, retaining complete-prefix and initial-cell
 representation facts. Compile-time labels do not certify declaration bodies.
+
+`SourceRoutes.lean` builds ordinary route tables from actual exposed declarations,
+virtual-dispatch body presence and function signatures. It retains Source order
+and actual fixed-hash selectors. The table depends only on compile-time global,
+contract and label mapping, never calldata or a preselected declaration. Raw
+selector comparison reuses `SelectorMatch`; its exported hash-prefix value
+lemma avoids repeatedly normalizing serialized hashes and keeps original proof
+budgets. Exact lookup matches `Source.Glob.pickFn`, and actual public-compiler
+route execution writes that declaration's label while preserving the rest of
+the machine and saved stack. Only initial selector-cell representation and a
+complete prefix are required, not a successful lookup/run/poststate.
+Controls use a typed abstract Source unit with a body-less declaration and two
+colliding model selectors in both pipelines. They verify exclusion/order,
+match/miss, protected state and actual compiled execution. The model hash is
+explicitly synthetic, not a Keccak or deployment/admission test. A short input
+selects no ordinary Source function while unguarded numeric routing matches a
+padded selector; this pins the required outer length branch. Compile-time labels
+need not be injective and are not compiled bodies. Their body association,
+getters, receive/fallback/payability, native loading/realization and full Source
+entry execution/admission remain open. No Source module or ExtCall constructor
+was changed.
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked input-independent table construction against actual `pickFn`,
+virtual-body/signature eligibility and collision order, reused hash-prefix value
+proof, and actual public-compiler execution. Both confirmed the synthetic
+fixture and short-input mismatch do not certify Keccak, deployment admission,
+body execution or full ABI entry behavior.

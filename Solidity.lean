@@ -40,6 +40,9 @@ import Solidity.Backend.AbiEntry.SelectorMatchInterface
 import Solidity.Backend.AbiEntry.SelectorRoutes
 import Solidity.Backend.AbiEntry.SelectorRoutesControls
 import Solidity.Backend.AbiEntry.SelectorRoutesInterface
+import Solidity.Backend.AbiEntry.SourceRoutes
+import Solidity.Backend.AbiEntry.SourceRoutesControls
+import Solidity.Backend.AbiEntry.SourceRoutesInterface
 import Solidity.Backend.AbiEntry.TailGuard
 import Solidity.Backend.AbiEntry.TailGuardControls
 import Solidity.Backend.AbiEntry.TailGuardInterface
