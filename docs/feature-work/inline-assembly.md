@@ -325,3 +325,5 @@ VY1: concrete full initialized-for completed horizon composition and exact scope
 VY1: concrete initialized no-post for completed horizon composition and nested-scope caller-write controls; see [lane handoff](inline-assembly-vy1.md#initialized-no-post-for-completed-horizons). Full lane remains open.
 
 VY1: concrete initialized omitted-guard noncompletion and clean Source consequences; [scope and controls](inline-assembly-vy1.md#initialized-omitted-guard-noncompletion). Full lane remains open.
+
+VY1: concrete full Boolean for timeout classification and clean Source outcomes; [scope and controls](inline-assembly-vy1.md#full-boolean-for-timeout-classification). Full lane remains open.

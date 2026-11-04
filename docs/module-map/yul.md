@@ -144,3 +144,5 @@
 | `Yul/LocalForNoPostHorizon.lean`, `Yul/Checks/LocalForNoPostHorizon.lean` | Exact Boolean/default while agreement and concrete initialized no-post for completed horizons, with nested-scope caller-write controls. |
 
 | `Yul/LocalForNoGuardFailure.lean`, `Yul/Checks/LocalForNoGuardFailure.lean` | Concrete initialized omitted-guard finite noncompletion, clean Source consequences and scoped mutation/refusal controls. |
+
+| `Yul/LocalForTimeout.lean`, `Yul/Checks/LocalForTimeout.lean` | Concrete full Boolean for halt classification, reached omitted-guard timeouts and clean Source consequences. |

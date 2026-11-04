@@ -1639,3 +1639,32 @@ and layer checks pass. Thirteen scoped axiom reports use only Lean standard
 axioms. Raw failed standard automation is separate from passing gates.
 A wrapper-only version-query failure is retained; direct toolchain binaries
 report Lean 4.24.0 and Lake 5.0.0-src+797c613. No checking/proof limits changed.
+
+### Full Boolean for timeout classification
+
+`LocalForTimeout.halt_kind` and `no_post_halt_kind` classify actual
+halted full-for executions as timeout, for present Boolean guards with or
+without post expressions. They compose existing initializer failure and
+loop-failure proofs through concrete all-fuel Boolean/default iteration
+agreement, retaining the exact reached context and state.
+`omitted` and `omitted_no_post` combine this classification with concrete
+omitted-guard noncompletion to produce a reached raw timeout state at every
+fuel. `source_omitted` and `source_omitted_no_post` use the existing
+clean-input full-for agreement to return the actual execution's final world
+with the Source timeout. They assume no final-world identity or dirty readback.
+Ten controls reuse an inhabited context-growing counter/caller-writing body:
+both arbitrary-fuel timeout witnesses, original caller timeout, retained counter
+and post effects, present/false guards that complete normally, refusal of
+non-timeout halts, and both concrete clean Source timeout witnesses.
+These are existing restricted Boolean certificates with no break/return or
+world effects. No arbitrary-loop divergence, expanded admission or general
+Source/compiler adequacy is claimed. Source/ExtCall/evaluators/layouts, expected
+outcomes, observations and proof budgets are unchanged. Full VY1/general P16
+and final lane gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; focused Lean, generated-root
+and layer checks pass. Sixteen scoped axiom reports use only Lean standard
+axioms. Failed standard automation and the initial reflexivity-branch correction
+remain raw evidence separate from passing checks. No checking/proof limits
+were increased.
