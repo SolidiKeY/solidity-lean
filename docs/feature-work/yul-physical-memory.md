@@ -348,6 +348,16 @@ newly written tail; access raises high-water to17. Replaying the accepted
 overlapping prefix changes byte232 from8 to7, unlike correct resumption. This is
 bounded representation preparation, not allocator reachability or EVM expansion.
 
+`P6ResidualReserve` computes the maximum source/destination end of nonempty
+pending copies and the least sufficient number of extra32byte words. Empty
+maximum-offset requests contribute zero. The resulting reservation derives all
+capacity premises, proves actual checked completion and reconstructs the full
+chronological residual map with unchanged whole Source writeback. No output
+coverage or completion witness is supplied by a caller. The existing Word-range,
+layout/canonical-codec and initial whole-image premises remain explicit. This
+closes this bounded preparation's capacity obligation, not runtime allocation,
+resource feasibility or general Source/compiler correspondence.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary

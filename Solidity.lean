@@ -2425,6 +2425,8 @@ import Solidity.Yul.Adapters.P6ResidualCapacity
 import Solidity.Yul.Adapters.P6ResidualCapacityControls
 import Solidity.Yul.Adapters.P6ResidualCopy
 import Solidity.Yul.Adapters.P6ResidualCopyControls
+import Solidity.Yul.Adapters.P6ResidualReserve
+import Solidity.Yul.Adapters.P6ResidualReserveControls
 import Solidity.Yul.Adapters.P6ResidualResume
 import Solidity.Yul.Adapters.P6ResidualResumeControls
 import Solidity.Yul.Adapters.P6ResidualSequence

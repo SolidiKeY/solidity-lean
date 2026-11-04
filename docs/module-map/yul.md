@@ -77,3 +77,4 @@
 | `Yul/Views/InventorySnapshotHistory{,Controls}` | Changing supplied snapshots with refreshed retained ownership, exact successful prefixes, pending suffix/resumption and final-map reconstruction. |
 | `Yul/Views/NominalInventorySequential{,Controls}` | Exact nominal snapshot/sequential Source-result agreement with refreshed candidates, duplicates and capacity controls. |
 | `Yul/Adapters/P6ResidualResume{,Controls}` | Existing zero-capacity extension and pending-only checked resumption with chronological full-map/Source closure and replay-sensitive controls. |
+| `Yul/Adapters/P6ResidualReserve{,Controls}` | Least sufficient pending-copy word reservation, constructive checked completion and chronological whole-map/Source closure. |
