@@ -98,3 +98,5 @@
 | `Bridge/SolidityBridge/Yul/ForReflection{,Controls}.lean` | Recover guard/count/exact locals from actual finite FOR target evidence, then original source completion from structured/selected model success; full frame/pending-zero and noncompletion/capacity controls. Not native/G24 adequacy. |
 
 | `Yul/Compilation/P20InterfaceV1{,Controls}.lean` | H26 closed-normal success interface: reuses real closed compiler certificates; uninstantiated G24 source/link/represented-success laws with genuine success and represented/payment-free witness fields. Not full P20 adequacy. |
+
+| `Bridge/SolidityBridge/Yul/ForShape{,Controls}.lean` | Actual compiled FOR numeric operand/height and all-prefix capacities; exact existing BlockShape threshold h+2<=1024 for h>=5, separate ExpansionRoom and caller boundaries. No ControlCertificate.realize/native/G24 claim. |

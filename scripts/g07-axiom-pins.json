@@ -31201,5 +31201,82 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.actual_layout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.pre_trace": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.body_trace": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.post_trace": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.pre_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.body_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.post_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.requires_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.shape_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShape.lean:SolidityBridge.Yul.ForShape.expansion_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.last_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.next_caller_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.condition_only_insufficient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.model_without_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.caller_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

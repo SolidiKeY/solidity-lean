@@ -342,6 +342,8 @@ import SolidityBridge.Yul.ForPrefixes
 import SolidityBridge.Yul.ForPrefixesControls
 import SolidityBridge.Yul.ForReflection
 import SolidityBridge.Yul.ForReflectionControls
+import SolidityBridge.Yul.ForShape
+import SolidityBridge.Yul.ForShapeControls
 import SolidityBridge.Yul.ForSource
 import SolidityBridge.Yul.FrameCertificatesV2
 import SolidityBridge.Yul.FrameCertificatesV2Controls

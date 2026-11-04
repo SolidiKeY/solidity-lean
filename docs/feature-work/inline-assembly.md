@@ -402,3 +402,5 @@ see [the lane record](inline-assembly-vy3.md).
 - VY3 finite FOR reflection: target determinism and actual compiler emissions now recover source counts/guards/output from finite structured/model success, including exact machine framing and pending zero. Real component horizon bounds remain explicit; native/G24/admission and final-lane adequacy stay open. See [VY3](inline-assembly-vy3.md#finite-for-target-to-source-reflection).
 
 - VY3 H26 P20 success-interface V1: original closed compiler alias plus explicit uninstantiated source/G24 success-link fields using actual Input/Rep, with real joint success and represented/payment-free witness requirements. Full P20 and original lane work remain open. See [VY3](inline-assembly-vy3.md#h26-p20-success-interface-v1).
+
+- VY3 emitted FOR shape: exact real instruction layout, operand/height refinements, scalar prefix capacities and separate expansion room now cover the actual branch-bearing FOR with caller bounds. Existing BlockShape iff is h+2<=1024 at h>=5; native realization/G24/full-lane closure remains open. See [VY3](inline-assembly-vy3.md#emitted-for-physical-shape-and-room).

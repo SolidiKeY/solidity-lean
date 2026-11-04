@@ -1516,3 +1516,41 @@ failure/divergence/prefix, native resource/observation and final joint laws rema
 original implementation obligations. H16/H19/H25 Source and H22 ExtCall are
 untouched. The separately recorded H1 cache-admission deficit remains blocked;
 no protected cache/output/evidence was removed and no shipment is claimed.
+
+
+### Emitted FOR physical shape and room
+
+`SolidityBridge.Yul.ForShape.actual_layout` ties the named readable instruction
+vectors to the actual previous `StructuredFor` target by kernel equality,
+including PUSH32 widths and zero-based DUP/SWAP indices. Independently computed
+height traces show prelude-arm peak `h+1` and body/post-arm peaks `h+2`, with
+final height `h`. Actual `InstrShape`/`CodeShape` proofs derive operand existence
+from `h ≥ 5` (three locals, two newer words), separately from every scalar
+prefix's `stackBound` capacity. No successful run/exchange/shape is assumed.
+
+`shape_iff` proves precisely that the EXISTING `LabelExec.BlockShape` for this
+emitted block, with input/output height `h ≥ 5`, holds iff `h+2 ≤ 1024`.
+Necessity comes from the prelude branch's actual test-capacity field via a
+generalized existing-shape recursor; it is not a lower-bound theorem for every
+possible EVM execution. `expansion_room` separately constructs the existing
+join-jump `ExpansionRoom` obligation. Neither result supplies the remaining
+`ControlCertificate.realize` field or a whole native execution certificate.
+
+Controls prove the actual five-word frame plus arbitrary caller is shaped when
+caller length is at most1017, including the last accepted height1022. Height1023
+is refused despite the scalar loop condition fitting by itself. Body/post
+arithmetic also peaks at two extra words; no claim blames only the jump. A real
+finite selected-model run at that refused height remains successful, explicitly
+separating mathematical success from physical shape/native adequacy. Actual
+flag/counter underflow and high-only/dirty-word controls retain their original
+semantics and expected outputs. Sixteen standard-axiom reports are enforced.
+Independent read-only finder and skeptic reviews of the final producers,
+controls, pins, imports and documentation found no confirmed findings; neither
+reviewer used Lean/server/tests.
+
+These are target preparation for Y08.01/Y08.02/original Backfill A; full byte/PC,
+charged/native/scanner/resource/G24/views/frontend/function/early-flow/readback,
+original backfill remainder and final joint/lane gates remain open. The H26 V1
+signatures and existing concrete producer premises are unchanged. No source,
+state, target predicate, calling convention, budget, admission or owner file is
+modified; allocation offsets are not equated with live stack positions.
