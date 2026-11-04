@@ -95,3 +95,6 @@
 
 | `Lowering/StorageOps/SourceByteStorageBarrier.lean` | Arbitrary-fuel byte capture timeout with OLD-read premises and exact full-state preservation |
 | `Lowering/StorageOps/SourceByteStorageBarrierControls.lean` | Static/shifted witnesses, complete capture/destination/malformed/self ordering and unchanged journals |
+
+| `Lowering/StorageOps/SourceNestedByteCapture.lean` | Actual empty-reference allocation and arbitrary runtime nested-capture timeout allocation prefixes |
+| `Lowering/StorageOps/SourceNestedByteCaptureControls.lean` | Actual storRef nested captures separating storage/journal preservation from changed heap, old objects and static failure |

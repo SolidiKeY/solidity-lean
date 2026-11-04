@@ -169,6 +169,25 @@ The two routine memory/copy wrappers are type-checked statements only in
 TERRA-TODO; eighteen adapters remain pending. This is a capture barrier, not
 implicit rollback or a Source-to-target compiler theorem.
 
+## Nested allocating capture
+
+`SourceNestedByteCapture.empty_capture` executes the existing Source allocation
+of an empty reference object. `timeout_prefix` proves arbitrary runtime prefixes:
+capturing `count+1` empty byte-reference elements at original fuel `count+3`
+times out after exactly `count` existing heap allocations. OLD child-header reads
+are transported through heap-only changes using the published read-frame law.
+The footprint uses existing Source states/heaps and `Nat.repeatTR`, not another
+evaluator or an admitted-source depth cap.
+
+Populated actual storage-reference array copies distinguish storage/journal
+preservation from changed heap on timeout and static refusal. Ordered outcomes,
+heap contents, source shadows, old objects, success journals and self-copy are
+pinned. This is a concrete limit on generalizing primitive byte full-state
+preservation; no automatic heap/world rollback follows. The routine outer-copy
+wrapper is a type-checked proposition only in TERRA-TODO; nineteen adapters
+remain pending. General nested shapes, physical allocation/failure and compiler
+composition remain open.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI
