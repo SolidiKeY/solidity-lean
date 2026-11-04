@@ -116,6 +116,8 @@ import Solidity.Backend.Failure.Unwind
 import Solidity.Backend.Failure.UnwindChecks
 import Solidity.Backend.FailurePaths.BooleanReturn
 import Solidity.Backend.FailurePaths.BooleanReturnControls
+import Solidity.Backend.FailurePaths.CheckedGuards
+import Solidity.Backend.FailurePaths.CheckedGuardsControls
 import Solidity.Backend.FailurePaths.Controls
 import Solidity.Backend.FailurePaths.FramedEmission
 import Solidity.Backend.FailurePaths.FramedEmissionControls

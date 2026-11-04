@@ -506,3 +506,49 @@ aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
 confirmed defect. The uint8 control required explicit pipeline cases; its failed
 initial proof and scratch automation are retained. The earlier full-checkpoint
 timeout remains failed; these focused checks do not establish a full build.
+
+
+## Unified checked guard entry point
+
+`FailurePaths.CheckedGuards.compile` dispatches actual indexed Source statements
+to the local-Boolean, logical-local and full-width relational-local selectors.
+It invokes those existing public-memory-compiler paths without introducing an
+AST or interpreter. `Maps` and `Related` group their existing typed index
+functions and initial read premises. They do not construct or replace a
+whole-program context/position/origin/alias relation.
+
+`selected_correct` proves actual Source and target execution for every successful
+dispatch from the grouped initial read relation and full `Memory.StateRepr`.
+It returns a Boolean observation: at horizon `n+7`, Source preserves state and
+caller locals and either returns normally or reverts with empty bytes; target
+code preserves the whole machine on true or produces bare revert on false.
+`selected_public_compiler` separately derives an actual intrinsic target and
+checked certificate, public `Memory.compileStmt` selection, and exact equality
+of the returned code. No target, certificate or desired run is supplied as an
+input to either theorem.
+
+`CheckedGuardsControls` uses one inhabited mixed context with two Boolean and
+two unsigned256 locals, exactly reserved frame 4 and saved stack word 77.
+The same maps, initial read relation and full representation support all three
+unconditional source selections. Each branch consumes unified correctness and
+exact public compiler provenance. Further controls distinguish OR success, AND
+revert and relational outcomes, preserve zero-horizon timeout, refuse literals,
+assert and message forms, and refute incorrect initial correspondence. Selector
+refusal is not Source-language rejection; the existing literal-failure compiler
+remains separate and unchanged.
+
+This is the union of the three narrow pure guard fragments. General or effectful
+conditions, argument/body/whole-unit lowering, context-map construction, payload
+compilation, target failure poststate, internal-frame transport and bytecode/EVM
+adequacy remain outside it. The target machine exposes no revert bytes or
+post-machine. No existing source, compiler, syntax or halt/allocation policy
+changed.
+
+Validation target is `Solidity.Backend.FailurePaths.CheckedGuardsControls`.
+The serial guarded check passed in 5.273 seconds with 856,449,024 bytes peak
+aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
+`Quot.sound`. Independent read-only finder and skeptic reviews checked execution,
+public-code provenance and inhabited branch clients without confirmed findings.
+The initial equality-substitution name error and scratch automation are retained.
+The earlier full-checkpoint timeout remains failed; focused checks do not
+establish a full build on the expanded published base.

@@ -530,3 +530,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/RelationalGuardSelection.lean` | Actual full-width integer-local Source guard selection, preserving width/sign/operator evidence and proving every-success runs. |
 | `Backend/FailurePaths/RelationalGuardSelectionControls.lean` | Inhabited signed/unsigned selector clients, integer-index map, exact boundaries and successful-but-refused uint8 Source control. |
+
+| `Backend/FailurePaths/CheckedGuards.lean` | Unified indexed Source guard dispatch, every-success actual runs and exact public checked compiler/code provenance. |
+| `Backend/FailurePaths/CheckedGuardsControls.lean` | One inhabited mixed Boolean/integer frame for all dispatch branches, provenance clients and outcome/refusal/relation controls. |
