@@ -428,6 +428,7 @@ import Solidity.Backend.MemoryOps.SourceUintSequence
 import Solidity.Backend.MemoryOps.SourceUintSliceBinding
 import Solidity.Backend.MemoryOps.SourceUintSliceCompound
 import Solidity.Backend.MemoryOps.SourceUintSliceCompoundBounds
+import Solidity.Backend.MemoryOps.SourceUintSliceCompoundRead
 import Solidity.Backend.MemoryOps.SourceUintSliceNative
 import Solidity.Backend.MemoryOps.SourceUintWrite
 import Solidity.Backend.MemoryOps.SourceWrite

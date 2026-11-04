@@ -232,3 +232,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceUintSliceCompound.lean` | Byte-derived slice binding followed by actual reached compound addition or checked overflow, with Items execution and heap/world frames. |
 
 | `Solidity/Backend/MemoryOps/SourceUintSliceCompoundBounds.lean` | Dynamic Source compound index rejection after actual slice binding, retained Items prefix, native read/write bounds and low-horizon laws. |
+
+| `Solidity/Backend/MemoryOps/SourceUintSliceCompoundRead.lean` | Actual slice binding, compound update and changed-cell scalar read in one Source Items program, with alias-safe locals, frames and triple-error composition. |

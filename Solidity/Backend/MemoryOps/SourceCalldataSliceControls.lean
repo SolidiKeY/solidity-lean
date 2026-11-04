@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceUintSliceCompoundRead
 import Solidity.Backend.MemoryOps.SourceUintSliceCompoundBounds
 import Solidity.Backend.MemoryOps.SourceUintSliceCompound
 import Solidity.Backend.MemoryOps.SourceUintSliceBinding
@@ -860,5 +861,135 @@ theorem slice_add_bounds_timing (p : Roadmap.Pipeline) :
 #guard_msgs (whitespace := lax) in #print axioms slice_add_empty
 /-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_add_bounds_timing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms slice_add_bounds_timing
+
+/-- All three actual statements execute in either pipeline. The read sees5,
+not the initial2, and stores it into the index local only after reading0. -/
+theorem slice_add_read_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ (finalHeap : Heap (H++[A])) (changed : Source.EMState E0 Γ),
+      let final : Source.EMState E0 Γ := (changed.1.set (.there .here) (sourceUint (u 5)),changed.2)
+      (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+5)
+        (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) false)).run (sliceInput 0 3)=
+        (.ok (.val (.memRef rfl 2)),wholeBound) ∧
+      (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+4)
+        (sourceUintIndexedAdd bindDst (.there .here) (.there (.there .here)))).run wholeBound=
+        (.ok (.val (sourceUint (u 5))),changed) ∧
+      (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+2)
+        (.indexArray (.local bindDst) (.local (.there .here)) rfl)).run changed=
+        (.ok (.val (sourceUint (u 5))),changed) ∧
+      (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+3)
+        (sourceUintReadInto bindDst (.there .here) (.there .here))).run changed=(.ok (.val (sourceUint (u 5))),final) ∧
+      (Source.execItems (G0 p) (sliceFrame sliceData) (fuel+7) Γ.length none
+        (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) false))
+          (.stmt (.expr (sourceUintIndexedAdd bindDst (.there .here) (.there (.there .here))))
+            (.stmt (.expr (sourceUintReadInto bindDst (.there .here) (.there .here))) .nil)) :
+          Source.RItems E0 [] false .body Γ Γ) (sliceInput 0 3).1).run (.nil,(sliceInput 0 3).2)=
+        (.ok (.normal final.1),(.nil,final.2)) ∧
+      wholeHeap.writeAddr (.index wholeFresh .dyn (u 0)) (u 5)=some finalHeap ∧
+      SourceUintMemoryAt final 2 finalHeap wholeFresh .dyn ∧ Source.MemOK E0 SH final ∧
+      Heap.Keeps (List.prefix_append H [A]) hp finalHeap ∧
+      [MObj.elems .dyn (finalHeap.get (left.wk (List.prefix_append H [A]))),
+        MObj.elems .dyn (finalHeap.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (finalHeap.get wholeFresh)]=
+        [old,neighbor,[u 5,u 0,maximum]] ∧
+      [final.2.heap.get 0,final.2.heap.get 1,final.2.heap.get 2,final.2.heap.get 3]=
+        [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,
+          some ⟨SU,sourceUintMemory [u 5,u 0,maximum]⟩,none] ∧
+      final.1=.cons (.cdRef rfl 68 3) (.cons (sourceUint (u 5)) (.cons (sourceUint (u 3))
+        (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil))))) ∧
+      (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+2)
+        (.indexArray (.local bindDst) (.local (.there .here)) rfl)).run final=
+        (.error (.revert (Source.panicData .index)),final) ∧
+      u 5≠u 2 ∧ changed.1=wholeBound.1 ∧
+      final.2.ex=(sliceInput 0 3).2.ex ∧ final.2.events=(sliceInput 0 3).2.events ∧
+      final.2.logs=(sliceInput 0 3).2.logs ∧ final.2.fnLocals=(sliceInput 0 3).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | have arithmetic : PrimTy.uint.inRange (((CalldataPackets.RawUint.payload (sliceFrame sliceData)
+        (68+32*(u 0).1.toNat) ((u 3).1.toNat-(u 0).1.toNat))[(u 0).1.toNat]?.getD (PrimTy.dflt .uint)).1+(u 3).1)=true := by
+      rw [rawWhole]
+      decide
+    have result := source_uint_slice_bind_add_read (sliceInput 0 3) hp (G0 p) (sliceFrame sliceData) fuel Γ.length
+      bindDst .here (.there .here) (.there (.there .here)) (.there .here) (.there (.there .here)) (.there .here) 68 3
+      (u 0) (u 3) (u 0) (u 3) false rfl rfl rfl rfl rfl (by decide) (by decide) (by decide) (by decide)
+      arithmetic SH (sliceMemOK 0 3)
+    simp only [Bool.false_eq_true,if_false,rawWhole] at result
+    obtain ⟨valid,finalHeap,changed,first,second,read,third,items,write,nativeRead,new,mok,keep,values,selected,stored,other,occupied,sourceFrames,locals,ex,events,logs,fn⟩ := result
+    let final : Source.EMState E0 Γ := (changed.1.set (.there .here) (sourceUint (u 5)),changed.2)
+    have representation : SourceUintMemoryAt final 2 finalHeap wholeFresh .dyn := new
+    have newValues : MObj.elems .dyn (finalHeap.get wholeFresh)=[u 5,u 0,maximum] := values
+    have oldValues : MObj.elems .dyn (finalHeap.get (left.wk (List.prefix_append H [A])))=old := by
+      rw [keep left,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    have neighborValues : MObj.elems .dyn (finalHeap.get (right.wk (List.prefix_append H [A])))=neighbor := by
+      rw [keep right,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    have objectNew : final.2.heap.get 2=some ⟨SU,sourceUintMemory [u 5,u 0,maximum]⟩ := by
+      change final.2.heap.get 2=some ⟨SU,sourceUintMemory (MObj.elems .dyn (finalHeap.get wholeFresh))⟩ at representation
+      rw [newValues] at representation
+      exact representation
+    have absent : final.2.heap.get 3=none := (sourceFrames 3 (by decide)).trans rfl
+    have beyond : finalHeap.len wholeFresh .dyn≤(u 5).1.toNat := by
+      change (MObj.elems .dyn (finalHeap.get wholeFresh)).length≤(u 5).1.toNat
+      rw [newValues]
+      decide
+    have nextRead := new.eval_read_bounds (G0 p) (sliceFrame sliceData) fuel bindDst (.there .here) (u 5) selected stored beyond
+    refine ⟨finalHeap,changed,first,second,read,third,items,write,new,mok,keep,?_,?_,?_,nextRead,by decide,locals,ex,events,logs,fn⟩
+    · rw [oldValues,neighborValues,newValues]
+    · rw [occupied 0 _ rfl,occupied 1 _ rfl,objectNew,absent]
+    · change (changed.1.set (.there .here) (sourceUint (u 5)))=_
+      rw [locals]
+      rfl
+
+/-- Horizon6 really completes binding and the2->5 update, then times out
+while evaluating the final read assignment. Only globals are returned on
+Items error; prefix locals are separate derived execution observations. -/
+theorem slice_add_read_late_timeout (p : Roadmap.Pipeline) :
+    ∃ (finalHeap : Heap (H++[A])) (changed : Source.EMState E0 Γ),
+      (Source.evalE (G0 p) (sliceFrame sliceData) 4
+        (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) false)).run (sliceInput 0 3)=
+        (.ok (.val (.memRef rfl 2)),wholeBound) ∧
+      (Source.evalE (G0 p) (sliceFrame sliceData) 3
+        (sourceUintIndexedAdd bindDst (.there .here) (.there (.there .here)))).run wholeBound=
+        (.ok (.val (sourceUint (u 5))),changed) ∧
+      (Source.execItems (G0 p) (sliceFrame sliceData) 6 Γ.length none
+        (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) false))
+          (.stmt (.expr (sourceUintIndexedAdd bindDst (.there .here) (.there (.there .here))))
+            (.stmt (.expr (sourceUintReadInto bindDst (.there .here) (.there .here))) .nil)) :
+          Source.RItems E0 [] false .body Γ Γ) (sliceInput 0 3).1).run (.nil,(sliceInput 0 3).2)=
+        (.error .timeout,(.nil,changed.2)) ∧
+      SourceUintMemoryAt changed 2 finalHeap wholeFresh .dyn ∧ Source.MemOK E0 SH changed ∧
+      Heap.Keeps (List.prefix_append H [A]) hp finalHeap ∧
+      [MObj.elems .dyn (finalHeap.get (left.wk (List.prefix_append H [A]))),
+        MObj.elems .dyn (finalHeap.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (finalHeap.get wholeFresh)]=
+        [old,neighbor,[u 5,u 0,maximum]] ∧
+      [changed.2.heap.get 0,changed.2.heap.get 1,changed.2.heap.get 2,changed.2.heap.get 3]=
+        [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,
+          some ⟨SU,sourceUintMemory [u 5,u 0,maximum]⟩,none] ∧
+      (Source.memElem (E := E0) (Γ := Γ) 2 0 (.int .u256)).run changed=(.ok (sourceUint (u 5)),changed) ∧
+      changed.1=wholeBound.1 ∧
+      changed.2.ex=(sliceInput 0 3).2.ex ∧ changed.2.events=(sliceInput 0 3).2.events ∧
+      changed.2.logs=(sliceInput 0 3).2.logs ∧ changed.2.fnLocals=(sliceInput 0 3).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨finalHeap,changed,first,second,pairRun,write,new,mok,keep,nativeVectors,sourceVectors,locals,ex,events,logs,fn⟩ := slice_bind_add_client p 0
+    have failed : (Source.evalE (G0 p) (sliceFrame sliceData) 2
+        (sourceUintReadInto bindDst (.there .here) (.there .here))).run changed=(.error .timeout,changed) := rfl
+    have items := source_items_triple_error (G0 p) (sliceFrame sliceData) 2 Γ.length _ _ _
+      (sliceInput 0 3) wholeBound changed changed .timeout
+      (source_expr_statement_run (G0 p) (sliceFrame sliceData) 4 Γ.length _ _ _ _ first)
+      (source_expr_statement_run (G0 p) (sliceFrame sliceData) 3 Γ.length _ _ _ _ second)
+      (source_expr_statement_error (G0 p) (sliceFrame sliceData) 2 Γ.length _ _ _ _ failed)
+    have values : MObj.elems .dyn (finalHeap.get wholeFresh)=[u 5,u 0,maximum] :=
+      (List.cons.inj (List.cons.inj (List.cons.inj nativeVectors).2).2).1
+    have objectNew : changed.2.heap.get 2=some ⟨SU,sourceUintMemory [u 5,u 0,maximum]⟩ := by
+      change changed.2.heap.get 2=some ⟨SU,sourceUintMemory (MObj.elems .dyn (finalHeap.get wholeFresh))⟩ at new
+      rw [values] at new
+      exact new
+    exact ⟨finalHeap,changed,first,second,items,new,mok,keep,nativeVectors,sourceVectors,
+      source_uint_read changed 2 [u 5,u 0,maximum] objectNew 0 (by decide),locals,ex,events,logs,fn⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_add_read_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_add_read_client
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_add_read_late_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_add_read_late_timeout
 
 end Solidity.Backend.MemoryOps.UintSliceControls
