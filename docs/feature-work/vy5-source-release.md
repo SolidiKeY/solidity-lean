@@ -212,3 +212,32 @@ Source laws and controls, not fresh native observations, session consistency,
 deployment coverage, P8 realization or whole Source-to-EVM correspondence.
 All24 original obligations/six general combinations and the remaining H16/H19,
 H25, immutable/funds, Work2 and Backfill obligations remain explicitly open.
+
+## Fixed-plan constructor and deployment transport
+
+After the d84ff61f combined checkpoint and immutable seal, a second ready leaf
+consumes the actual constructor APIs already accepting a failure plan. No runtime
+Source module was edited. FailureDeploymentHorizon proves Grow and Approx for
+initializers, base-argument evaluation/collection, modifier-wrapped constructor
+bodies and construction under both actual pipeline orders. Actual deploy Grow,
+Approx, arbitrary-horizon event prefix and complete-result stability follow.
+The completed-result premise is the actual non-timeout result, not a supplied
+execution outcome. Full state equality includes locals, heap, journals and cursor;
+it does not equate a timeout state to a completed state.
+
+Broad deploy automation initially exhausted the unchanged200000 heartbeats.
+The retained failed attempt was replaced by the existing explicit deployment
+proof partition with real frame_approx and cleanup transport. Checking then
+took8.049s, below the unchanged300-second module bound. No budget increased.
+FailureDeploymentReceipt consumes actual deployRun: its terminal receipt stays
+outside the body-event budget and exceptional halts emit no invented receipt.
+Five Source controls transport the original registered initializer, nonempty
+constructor body and ancestor stop without desired outcomes, and reject a
+silently changed plan. Twenty-two component theorem axiom pins pass with only
+the standard three axioms. Ten Python controls validate both generators against
+exact raw bases/output, including stale/missing/disabled-plan/CRLF mutations.
+These are not fresh native comparisons, nor the original24 full obligations.
+
+Deployment transaction-fate ordinal0 and ordinary ordinal1+, full fixed-plan
+request/session consistency, H25 post-fee settlement authority, P8 realization,
+H19 reachability and the original24/six full Y10 obligations remain open.

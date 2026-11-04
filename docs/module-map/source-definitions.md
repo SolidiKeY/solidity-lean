@@ -138,3 +138,7 @@
 | `Source/FailureEvaluatorApprox.lean` | Closed fixed-plan event-prefix Approx induction for all17 actual Source evaluator functions; exact-byte generated proof basis, no NoFail/execution premise. |
 | `Source/FailureTransactionApprox.lean` | Actual planned root approximation and event-prefix inclusion at every larger horizon, including timeouts; no session/deployment/P8 assertion. |
 | `Source/FailureApproxControls.lean` | Actual timeout-prefix/completed-cut controls and changed-plan/captured-timeout counterexamples; exact standard axiom pins. |
+
+| `Source/FailureDeploymentHorizon.lean` | Fixed-plan actual initializer/base-argument/modifier-body growth/approximation, deployment event-prefix monotonicity and exact full-result stability after non-timeout completion; no session fate or P8 claim. |
+| `Source/FailureDeploymentReceipt.lean` | Actual enabled-plan deployRun receipt growth, approximation and arbitrary-horizon prefix; terminal receipt remains outside body-event budget. |
+| `Source/FailureDeploymentControls.lean` | Inhabited registered initializer/nonempty-constructor-body/ancestor-stop transport, changed-plan counterexample and22 exact standard axiom pins. |

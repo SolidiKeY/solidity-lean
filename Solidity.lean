@@ -2226,6 +2226,9 @@ import Solidity.Source.ExprProgress
 import Solidity.Source.FailureApproxControls
 import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
+import Solidity.Source.FailureDeploymentControls
+import Solidity.Source.FailureDeploymentHorizon
+import Solidity.Source.FailureDeploymentReceipt
 import Solidity.Source.FailureEvaluatorApprox
 import Solidity.Source.FailureEvaluatorGrow
 import Solidity.Source.FailureEvaluatorGrowControls
