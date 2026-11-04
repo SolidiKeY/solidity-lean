@@ -143,3 +143,6 @@
 | `Backend/AbiEntry/SelectorMatchInterface.lean` | Intrinsic four-byte emitted matcher, raw complete-prefix agreement and explicit capacity contract. |
 | `Backend/AbiEntry/SelectorMatch.lean` | Actual SHR/EQ execution, raw first-four-byte/source fixed-hash selector correspondence and short-prefix distinction. |
 | `Backend/AbiEntry/SelectorMatchControls.lean` | Raw match/mismatch, payload invariance, padded partial collision, short-input and capacity/frame controls. |
+| `Backend/AbiEntry/SelectorRoutesInterface.lean` | Public checked compiler selector-local table routing and exact reached-machine contract. |
+| `Backend/AbiEntry/SelectorRoutes.lean` | Typed arbitrary table family, proved compiler admission/selection and actual first-match IR execution. |
+| `Backend/AbiEntry/SelectorRoutesControls.lean` | Duplicate priority, later match/fallback, protected state, malformed fault and empty-table controls. |

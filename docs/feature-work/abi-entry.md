@@ -529,3 +529,25 @@ confirmed explicit rather than inferred from this numeric predicate.
 through the existing public compiler, with exact result-cell mutation and
 complete machine preservation. Route labels are not ABI bodies or authenticated
 Source declarations; raw loading and entry/body composition remain open.
+
+`SelectorRoutes.lean` constructs typed programs over two existing uint locals
+and proves the public `Compiler.compile` selects the core family for every
+finite selector/label table. It then proves actual emitted IR execution selects
+the first matching entry or fallback label, writing only the result local and
+preserving the entire remaining machine and saved stack with zero pending
+skip. Initial selector-cell representation is the only value input fact; no
+desired route, compiled value, successful run or poststate is assumed. Duplicate
+selectors retain first-entry priority. Controls use actual public selection,
+unequal saved words and protected memory, later-match/fallback, non-noop result
+mutation, and a raw malformed selector cell that faults. An empty table does
+not read that cell. Route labels and fallback labels are numeric results, not
+Source declarations, compiled ABI bodies or Solidity fallback execution.
+Calldata-to-selector-local transport, Source table authenticity/precedence,
+receive/fallback/payability, native fetched realization and full entry/body
+composition remain open. This extends the existing intrinsic compiler and IR;
+no replacement dispatcher interpreter or untyped syntax is introduced.
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked actual public compiler selection, emitted jump/skip behavior and
+first-match induction, exact result-cell-only mutation and malformed/empty-table
+controls. Both confirmed route/fallback labels are not represented as Source
+or ABI dispatch success, and the remaining correspondence boundary is explicit.
