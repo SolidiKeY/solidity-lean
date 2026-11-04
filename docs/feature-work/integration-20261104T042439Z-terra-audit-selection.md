@@ -14,3 +14,7 @@ obligation on the supplied adapter, not reflexivity for an arbitrary function.
 That explanation and the reproduction instructions were corrected, then frozen-
 source acceptance and separate finder/skeptic follow-ups passed. Assessment
 classes, evidence lines, input hashes and frozen acceptance code are unchanged.
+
+The final integration reviewers found the same misleading wording duplicated in
+the nonempty-execution dimension explanation. That sentence was also corrected
+to require the supplied identity law, with classifications and evidence unchanged.

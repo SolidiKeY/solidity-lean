@@ -1241,7 +1241,7 @@
         },
         "nonempty_execution": {
           "status": "risk",
-          "explanation": "Neither premise requires a successful nonempty execution; bridgeRun zero is a reflexive identity.",
+          "explanation": "Neither premise requires a successful nonempty execution; bridgeRun at zero steps must satisfy a supplied identity law.",
           "lines": [
             13,
             14,
