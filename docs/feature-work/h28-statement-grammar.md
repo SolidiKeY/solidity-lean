@@ -1505,3 +1505,12 @@ run-1793831523045102863 refused a stopped runtime. The same container was
 restarted. run-1793831561186026424 and run-1793831644405690338 required
 recursive fixture equations instead of an unavailable Decidable reduction.
 No theorem signature, premise, exclusion, budget or producer was changed.
+
+
+H35 control-axiom audit completion: in addition to all49 public source lemmas,
+NoSemiControls and FramedListControls now print axioms for all21 of their
+new kernel-control theorems. No control theorem statement or proof changes.
+inventory-q-v3.json retains v2 witness-name corrections and adds these exact
+control-theorem identities (70 source/control theorem audits total). The
+earlier source inventory revisions remain saved. This audit-only follow-up
+is revalidated at its own committed head before another delivery attempt.

@@ -79,4 +79,11 @@ theorem do_while_not_first_semicolon :
       .punct .lparen, .bool true, .punct .rparen, .punct .semi] ≠ some [] := by
   decide +kernel
 
+#print axioms all_semicolon_variants_checked
+#print axioms six_roots_exhaustive
+#print axioms mixed_framed_inhabited
+#print axioms mixed_framed_actual_yield
+#print axioms any_matching_list_segments
+#print axioms mixed_seven_roots
+#print axioms do_while_not_first_semicolon
 end Solidity.Frontend.StatementGrammarH28

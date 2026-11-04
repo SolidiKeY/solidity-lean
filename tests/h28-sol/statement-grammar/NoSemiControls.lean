@@ -143,4 +143,9 @@ theorem semi_constructor_count :
 #print axioms paramSemiWitnesses_inventory
 #print axioms varSemiWitnesses_inventory
 #print axioms simpleSemiWitnesses_inventory
+#print axioms semicolon_payload_is_atomic
+#print axioms no_semicolon_token
+#print axioms empty_fragment_choice_refused
+#print axioms wrong_layout_choice_refused
+#print axioms list_option_yield_controls
 end Solidity.Frontend.StatementGrammarH28
