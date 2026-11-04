@@ -646,3 +646,55 @@ remaining universal compound fuel coverage, full repository gates,
 whole-scope reviews/acceptance and final handoff. The intrinsic attachment
 position obligation is now proved; its token-level counterpart is not.
 SG-CEX-01 remains OPEN/REFUTED, and the original persistent goal stays active.
+
+
+## Checkpoint I: fixed token-root discrimination
+
+TokenRoot.lean proves statement_fixed_head for every non-simple intrinsic
+statement root and arbitrary successful actual Syn.yield, layout and residual
+layout. Expression subtrees remain opaque computations; the proof derives
+heads from the existing stateful printer clauses via PrEnsures pure/bind
+lemmas. The fixed-head map has 12 distinct tokens: left brace, if, for,
+while, do, continue, break, try, return, emit, identifier "revert", assembly.
+Its thirteenth/simple entry is none. Contextual revert is deliberately an
+identifier, matching the frozen producer rather than inventing a keyword.
+
+nonSimple_root_of_equal_prefix proves root equality for arbitrary intrinsic
+contexts, layout choices/residuals and suffix tokens whenever the successful
+yielded token prefixes plus suffixes agree. Its two non-simple hypotheses
+are explicit restrictions of this proved fragment; they do not replace or
+weaken the still-open original simple-root obligation. It proves root equality,
+not subtree equality, expression uniqueness or whole-language uniqueness.
+No expression-uniqueness or successful-parser premise is introduced.
+
+All 12 fixed roots have inhabited actual successful yield controls, with an
+exact constructor inventory checked against the control list. An arbitrary
+suffix/layout break-versus-continue theorem rejects equal prefixes. A concrete
+nonempty residual fragment layout and else suffix retain the fixed return
+head. A simple expression named "revert" and an actual revert statement
+both yield the identifier head; their complete displayed streams differ.
+This negative control rejects first-token-only simple/revert discrimination,
+not full-stream uniqueness. General simple-root comparison remains open.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/TokenRoot.lean | pass, final prefix theorem | /workspace/h28-statement-grammar-evidence/run-1793806842008128609 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.TokenRoot | pass; 12.50s timed wall, RSS 538796 KiB | /workspace/h28-statement-grammar-evidence/run-1793806895558983375 |
+| runtime.py diag tests/h28-sol/statement-grammar/TokenRootControls.lean | pass, final layout control | /workspace/h28-statement-grammar-evidence/run-1793807013740202989 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/TokenRoot.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793807027868193999 |
+| runtime.py gate tests/h28-sol/statement-grammar/TokenRootControls.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793807052368259455 |
+
+All seven public source theorem axiom sets are empty, as printed by the
+actual build/gate. Control signatures/axiom sets are recorded in their gate
+log. No new axiom, unsafe/native_decide, expression premise or heartbeat
+raise was introduced. The layout control initially failed dotted-token
+elaboration (run-1793806968171195222); explicitly naming Tok.kw fixed it.
+The failed receipt is retained. Separate read-only finder and skeptic pass
+source and controls, including the shared-head limitation, without
+Lean/server/builds. The module is locally registered only.
+
+Remaining original work includes arbitrary syntax/atom balance, mixed-list
+token splitting, simple-root discrimination, token-level conditional
+uniqueness/association, remaining universal compound fuel coverage, full
+repository gates and whole-scope acceptance/reviews/handoff. SG-CEX-01
+remains OPEN/REFUTED. The persistent goal remains active and incomplete.
