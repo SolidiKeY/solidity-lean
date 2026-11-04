@@ -641,7 +641,12 @@ import Solidity.Backend.Selection.ControlPackets
 import Solidity.Backend.Selection.ExecutionTrace
 import Solidity.Backend.Selection.ExecutionTraceControls
 import Solidity.Backend.Selection.FrameCapacityV2
+import Solidity.Backend.Selection.FramedLowering
 import Solidity.Backend.Selection.FramedLoweringInterface
+import Solidity.Backend.Selection.IRBranchLowering
+import Solidity.Backend.Selection.IRBranchPackets
+import Solidity.Backend.Selection.IRLoopLowering
+import Solidity.Backend.Selection.IRLoopPackets
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.InterfaceV2
 import Solidity.Backend.Selection.InterfaceV2Controls
@@ -663,6 +668,8 @@ import Solidity.Backend.Selection.ScalarSequenceResources
 import Solidity.Backend.Selection.SignedSelection
 import Solidity.Backend.Selection.StackSelection
 import Solidity.Backend.Selection.StructuredExecution
+import Solidity.Backend.Selection.StructuredIRComposition
+import Solidity.Backend.Selection.StructuredIRControls
 import Solidity.Backend.Selection.UnsignedSelection
 import Solidity.Backend.StorageOps.AbsentRootQueries
 import Solidity.Backend.StorageOps.AggregatePop

@@ -37,7 +37,7 @@
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoad.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
-| `Backend/Selection/ExecutionTrace.lean` | Actual bounded byte-PC traces, scalar placement and frozen code/sequence control certificates; branch and loop realization remain open. |
+| `Backend/Selection/ExecutionTrace.lean` | Actual bounded byte-PC traces, scalar placement and frozen code/sequence control certificates reused by whole branch/loop realization. |
 | `Backend/Selection/ExecutionTraceControls.lean` | Inhabited placed sequence after PUSH32, all-prefix capacity and wrong-PC/result/tail/underflow controls. |
 | `Backend/Selection/ControlPackets.lean` | Bounded actual assembled JUMP/JUMPI/ISZERO tests, placed fetch and exact tag/byte-offset/JUMPDEST clients of existing LabelExec packets. |
 | `Backend/Selection/ControlPacketControls.lean` | Inhabited assembled packet arms plus independent literal-byte controls for exact1024/hidden1025 peaks, target corruption, PC/result/tail and untaken-target behavior. |
@@ -53,3 +53,10 @@
 | `Backend/Selection/Composition.lean` | Same-artifact assembly/encoding/byte execution and named decoder-premise transport; concrete compositions from proved mixed scalar selection. |
 | `Backend/Selection/CompositionControls.lean` | Inhabited70-byte selector-to-runtime composition, full caller frame, independent six-step bytes, wrong artifact/tail and nonvacuous decoder-premise controls. |
 | `Backend/Selection/FramedLoweringInterface.lean` | Signature-only strengthening of existing lowering: reflect arbitrary successful IR outcomes into numeric stacks, complete caller frames and zero pending skips; local proof obligation. |
+| `Backend/Selection/FramedLowering.lean` | Proved scalar and sequence constructors for successful IR reflection, numeric outputs, complete caller frames and zero pending skips. |
+| `Backend/Selection/IRBranchPackets.lean` | Existing G36 relative-branch emitter laws extended to arbitrary numeric conditions, retaining actual pending-skip continuation. |
+| `Backend/Selection/IRBranchLowering.lean` | Constructed two-sided lowering and arbitrary-success reflection for actual relative IR branches. |
+| `Backend/Selection/IRLoopPackets.lean` | Actual IR loop singleton/turn laws, finite-success extraction and abstract finite-iterator composition. |
+| `Backend/Selection/IRLoopLowering.lean` | Recursive actual IR loop lowering in both directions using finite witnesses derived from loopRun and complete intermediate frames. |
+| `Backend/Selection/StructuredIRComposition.lean` | Checked assembly factory consuming recursively constructed framed lowering and existing shape/room, preserving assembly refusal. |
+| `Backend/Selection/StructuredIRControls.lean` | Closed nested IR-loop/branch byte compositions, independent named IR-turn witnesses, false-arm/wrong-distance and frame/escaping-skip/underflow controls. |
