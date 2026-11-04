@@ -3,8 +3,9 @@
 `Solidity/Backend/Selection/**` implements G45.01, G45.02, the remaining
 whole-control part of G45.03 and G45.06 for the numeric/native-stack and
 structured IR fragment described below. The recursive IR branch/loop producer
-gap identified during composition review is now implemented. Final lane
-validation is pending; declaring a certificate structure never proves it.
+gap identified during composition review is now implemented and passes its
+checkpoint gates. The required full lane gate remains incomplete; declaring a
+certificate structure never proves it.
 
 ## Contracts and proof boundary
 
@@ -171,3 +172,20 @@ stack spilling beyond16, memory/storage/account/terminal behavior, Source
 adequacy, gas equivalence, divergence classification or termination. It adds no
 authorization to exclude an original obligation. Final completion requires the
 required reviews, full lane gate, standard-axiom audit and sealed handoff.
+
+## Structured IR checkpoint validation and handoff
+
+The signature-first interface is committed at fb1fddbe; recursive producer,
+composition and control proofs at c5c0ba36, with unused-simp cleanup at effc78df.
+Independent finder/skeptic source reviews pass, including the explicit scalar
+condition restriction. All eight checkpoint gates and seven per-file checks
+pass on effc78df; the seven files have no warnings. All 465 scoped Selection
+axiom reports match their source declarations and use only standard axioms.
+Earlier modules retain their existing unused-argument warnings.
+
+The full lane gate was interrupted by its RAM-reserve guard while checking an
+existing decision-hash example. It has not passed and was not retried unchanged.
+The local structured IR implementation is ready for review, but final validation
+remains open. The sealed handoff records actual commands, source bindings,
+resource evidence and the ownership approval needed to resolve that blocker.
+No RUNTIME_GATE_PASS or whole-assignment completion is claimed.
