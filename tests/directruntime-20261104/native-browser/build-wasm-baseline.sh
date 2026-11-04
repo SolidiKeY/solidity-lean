@@ -6,6 +6,10 @@ image=solidity-lean-native-browser-wasm:4.24
 attempt=${NATIVE_BROWSER_WASM_ATTEMPT:-before-1}
 [[ $attempt =~ ^[A-Za-z0-9_-]+$ ]]
 native="$repository/.lake/native-browser-prefix"
+sdk="$repository/.lake/native-browser-sdk"
+userspace="$repository/.lake/native-browser-sdk-usr"
+alternatives="$repository/.lake/native-browser-sdk-alternatives"
+[[ -f "$sdk/upstream/emscripten/emcc" && -f "$userspace/bin/cmake" ]]
 mkdir -p "$work"
 if [[ ! -d "$work/lean4/.git" ]]; then git clone --shared "$repository/.lake/native-browser-lean4" "$work/lean4"; fi
 [[ $(git -C "$work/lean4" rev-parse HEAD) == 797c613eb9b6d4ec95db23e3e00af9ac6657f24b ]]
@@ -31,5 +35,6 @@ common=(--rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000
  -e GIT_CONFIG_GLOBAL=/work/native-browser.gitconfig
  -v "$repository:$repository" -v "$work:/work"
  -v "$native:/native:ro" -v /workspace/.setup:/workspace/.setup:ro
+ -v "$sdk:/emsdk:ro" -v "$userspace:/usr:ro" -v "$alternatives:/etc/alternatives:ro" -v /opt:/opt:ro
  -v /sys/fs/cgroup:/task-outer-cgroup:ro -v /etc/ssl/certs/ca-certificates.crt:/run/system-ca.pem:ro -w "$repository")
-docker run "${common[@]}" --name "native-browser-wasm-$attempt" -e "NATIVE_BROWSER_WASM_ATTEMPT=$attempt" -e "NATIVE_LEAN_PREFIX=$native" -e "LEAN_BROWSER_WORK=$work" -e LEAN_WASM_SOURCE=/work/lean4 "$image" bash tests/directruntime-20261104/native-browser/wasm-inside.sh
+docker run "${common[@]}" --name "native-browser-wasm-$attempt" -e "NATIVE_BROWSER_WASM_ATTEMPT=$attempt" -e "NATIVE_LEAN_PREFIX=$native" -e "LEAN_BROWSER_WORK=$work" -e LEAN_WASM_SOURCE=/work/lean4 ubuntu:24.04 bash tests/directruntime-20261104/native-browser/wasm-inside.sh
