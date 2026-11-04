@@ -40,9 +40,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 218 source declarations with source signatures;
+`declarations.json` enumerates all 303 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The fourteen modules are proposed for coordinator registration, with module-map rows,
+The eighteen modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -92,7 +92,11 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ExpressionBalance` | The expression/type/parameter/argument/list/option closure yields balanced items; `expr_derives_balanced` derives balance from the original token certificate. Arbitrary closing-token prefixes cannot be expression yields. |
 | `DelimiterReconstruction` | Enclosing payload and suffix spans are reconstructed from actual certificates; closing-selector skip facts are derived, not supplied as premises. |
 | `Grouping` | Actual group certificates invert to child certificates; group-prefix spans are unique. Arbitrary grouping depth has exact tokens, inhabited certification, token-depth injectivity and tree-depth injectivity for a fixed printable base. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 218 source declarations; actual sets use only `propext` and `Quot.sound`, or no axioms. |
+| `ReverseSplit` | Mirrored step/run/skip reversal at arbitrary stacks, suffix-scanned last-marker cuts, inhabited arbitrary mixed nesting with hidden add markers, and an explicit malformed-word negative control. Operator-selector freedom from precedence remains open. |
+| `SeparatorSplit` | Actual commaSep injectivity on nonempty component vectors, allowing empty words; arbitrary hole-count reconstruction; explicit zero-vector versus single-empty collision. |
+| `CommaFreeAlgebra` | Comma-free token/item/attribute algebra; enclosures need only balanced interiors, allowing internal commas. |
+| `ExpressionCommaFree` | Exhaustive expression closure yields have no top-level commas; original expression certificates supply every scanner condition in certified component-span reconstruction. This concludes word-vector equality, not child-tree equality. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 303 source declarations; actual sets use only `propext` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -133,13 +137,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-balance.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-separators.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-balance.inside.json`. It took 14.263511 seconds, child peak RSS
-238152 KiB, exact container peak 762212352 bytes, minimum parent headroom
-15749713920 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-separators.inside.json`. It took 17.496485 seconds, child peak RSS
+239404 KiB, exact container peak 782573568 bytes, minimum parent headroom
+15714938880 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -151,10 +155,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these fourteen modules lack central root imports. The orphan gate
-reported the same fourteen. Source trust passed (3686 sources, zero findings), and
+check: exactly these eighteen modules lack central root imports. The orphan gate
+reported the same eighteen. Source trust passed (3690 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 218 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 303 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -176,8 +180,9 @@ results are saved under the evidence directory; future proof checkpoints still
 require their own reviews.
 
 The expression-closure delimiter invariant and grouped/enclosed span reconstruction
-are now proved. Next derive separator and precedence-selector invariants from
-certificates, then reconstruct arbitrary precedence roots. A raw
+are now proved. The comma separator invariant is now derived from
+certificates. Next derive precedence-selector invariants and reconstruct
+arbitrary precedence roots. A raw
 punctuation split is insufficient: `-` is both a prefix and binary token, and
 conditional middle expressions mask nested assignments/colons. Prove those facts;
 do not add a desired split, parse completeness or uniqueness as a premise.
@@ -190,7 +195,7 @@ partial proof checkpoint. No push, merge, PR, producer edit or scope expansion.
 ## Balance and grouping checkpoint
 
 The continuation adds six proof modules and 80 source declarations, bringing the
-current totals to 14 modules and 218 declarations. Both independent read-only
+that checkpoint totals to 14 modules and 218 declarations. Both independent read-only
 reviews accepted the new components, without Lean-server use. Their precision
 limits are retained: optional results reconstruct absence/presence, not complete
 lists; grouping tree-depth injectivity has a fixed base with an actual yield;
@@ -216,3 +221,28 @@ Final finder and skeptic verdicts for this checkpoint are recorded in
 accepted the corrected audit; neither used Lean or edited sources. The corrected
 positive baseline, corruption controls and checkpoint acceptance pass. Default
 full acceptance remains exit 1 with the original proof obligations open.
+
+## Separator checkpoint
+
+Four further modules add 85 declarations, bringing the current inventory to 18
+modules and 303 declarations. `expr_derives_commaFree` derives top-level comma
+freedom directly from the existing fully consumed certificate, across all 29
+constructors and recursive type/argument syntax. Component token spans therefore
+reconstruct without caller-supplied split or scanner assumptions. Tree equality,
+list-to-layout inversion and operator-root selectors remain separate open work.
+
+`lastTop` means depth zero in the mirrored suffix scan. On malformed words it
+need not agree with forward top-level status; the unmatched-parenthesis negative
+control records this exactly. No general forward/reverse consistency theorem is
+claimed. The inhabited hidden-add family quantifies arbitrary nesting, payload
+marker count and prefix length. Nonempty comma vectors permit arbitrary empty
+holes; the empty vector and one empty word collision prevents an invalid stronger
+statement. These helpers do not weaken the original uniqueness target.
+
+Separate finder/skeptic reviews accepted this partial proof work without Lean
+server or edits. The known `congrArg₂` name error was replaced with an independently
+tested core congruence proof and diagnostics passed. Current verdicts are in
+`evidence/reviews-separators.json`. The first full-gate command failed at missing
+Node PATH (exit 127); its corrected invocation reached the same frozen-registration
+check (exit 1), now for 18 modules. All failed checks remain in evidence. The full
+public theorem, accepted-tree corollary and full final acceptance remain open.

@@ -1,6 +1,6 @@
 {
-  "proof_stem": "checkpoint-proof-balance",
-  "proof_gate_dir": "checkpoint-gates-balance",
-  "signature_stem": "signature-audit-balance",
-  "signature_gate_dir": "signature-gates-balance"
+  "proof_stem": "checkpoint-proof-separators",
+  "proof_gate_dir": "checkpoint-gates-separators",
+  "signature_stem": "signature-audit-separators",
+  "signature_gate_dir": "signature-gates-separators"
 }

@@ -36,6 +36,234 @@
     "source_signature": "theorem attrsP_balanced (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : BalancedAttrs singles) (hm : BalancedItems mods) :\n    Produces (attrsP singles mods order) Balanced"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.run_of_skip",
+    "source_signature": "theorem run_of_skip (p : Tok \u2192 Bool) (ts : List Tok) (s next : List Bracket)\n    (h : skip p s ts = some next) : run s ts = some next"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_balanced",
+    "source_signature": "theorem commaFree_balanced {ts : List Tok} (h : CommaFree ts) : Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_balanced",
+    "source_signature": "theorem commaFreeItems_balanced {items : List (List Tok)} (h : CommaFreeItems items) :\n    BalancedItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_append",
+    "source_signature": "theorem commaFree_append {xs ys : List Tok} (hx : CommaFree xs) (hy : CommaFree ys) :\n    CommaFree (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_atom",
+    "source_signature": "theorem commaFree_atom {t : Tok} (hb : bracket t = none) (hc : isComma t = false) :\n    CommaFree [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_nil",
+    "source_signature": "theorem commaFreeItems_nil : CommaFreeItems []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_cons",
+    "source_signature": "theorem commaFreeItems_cons {ts : List Tok} {items : List (List Tok)}\n    (h : CommaFree ts) (hs : CommaFreeItems items) : CommaFreeItems (ts :: items)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_single",
+    "source_signature": "theorem commaFreeItems_single {ts : List Tok} (h : CommaFree ts) : CommaFreeItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_dropHead",
+    "source_signature": "theorem commaFreeItems_dropHead {ts : List Tok} {items : List (List Tok)}\n    (h : CommaFreeItems (ts :: items)) : CommaFreeItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_flatten",
+    "source_signature": "theorem commaFreeItems_flatten {items : List (List Tok)} (h : CommaFreeItems items) :\n    CommaFree items.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_flatMap",
+    "source_signature": "theorem commaFree_flatMap {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 CommaFree (f x)) : CommaFree (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_of_atoms",
+    "source_signature": "theorem commaFree_of_atoms (ts : List Tok) (h : \u2200 t, t \u2208 ts \u2192 bracket t = none \u2227 isComma t = false) :\n    CommaFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_parens",
+    "source_signature": "theorem commaFree_parens {ts : List Tok} (h : Balanced ts) : CommaFree (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_braces",
+    "source_signature": "theorem commaFree_braces {ts : List Tok} (h : Balanced ts) : CommaFree (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_square",
+    "source_signature": "theorem commaFree_square {ts : List Tok} (h : Balanced ts) :\n    CommaFree (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_tk",
+    "source_signature": "theorem commaFree_tk (k : Kw) : CommaFree (tk k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_idt",
+    "source_signature": "theorem commaFree_idt (name : String) : CommaFree (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_path",
+    "source_signature": "theorem commaFree_path (p : IdPath) : CommaFree p.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_elem",
+    "source_signature": "theorem commaFree_elem (e : Elem) : CommaFree e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_visibility",
+    "source_signature": "theorem commaFree_visibility (v : Visibility) : CommaFree v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_mutability",
+    "source_signature": "theorem commaFree_mutability (m : Mutability) : CommaFree m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_dataLoc",
+    "source_signature": "theorem commaFree_dataLoc (l : DataLoc) : CommaFree l.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_optToks",
+    "source_signature": "theorem commaFree_optToks {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 a, CommaFree (f a))\n    (value : Option \u03b1) : CommaFree (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_prefix",
+    "source_signature": "theorem commaFree_prefix (op : PrefixOp) : CommaFree op.punct"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_suffix",
+    "source_signature": "theorem commaFree_suffix (op : SuffixOp) : CommaFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_mul",
+    "source_signature": "theorem commaFree_mul (op : MulOp) : CommaFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_add",
+    "source_signature": "theorem commaFree_add (op : AddOp) : CommaFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_shift",
+    "source_signature": "theorem commaFree_shift (op : ShiftOp) : CommaFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_order",
+    "source_signature": "theorem commaFree_order (op : OrderOp) : CommaFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_equality",
+    "source_signature": "theorem commaFree_equality (op : EqOp) : CommaFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_assign",
+    "source_signature": "theorem commaFree_assign (op : AssignOp) : CommaFree (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_commaFree",
+    "source_signature": "theorem fragsP_commaFree (mk : Bytes \u2192 Tok) (hm : \u2200 bs, bracket (mk bs) = none \u2227 isComma (mk bs) = false)\n    (bs : Bytes) : Produces (fragsP mk bs) CommaFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_commaFree",
+    "source_signature": "theorem litP_commaFree (l : Lit) : Produces (litP l) CommaFree"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAttrs",
+    "source_signature": "def CommaFreeAttrs (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeAttrs_append",
+    "source_signature": "theorem commaFreeAttrs_append {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : CommaFreeAttrs xs) (hy : CommaFreeAttrs ys) : CommaFreeAttrs (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_single",
+    "source_signature": "theorem commaFree_single (slot : Slot) (ts : List Tok) (h : CommaFree ts) :\n    CommaFreeAttrs (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_commaFree",
+    "source_signature": "theorem arrange_commaFree (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : CommaFreeAttrs singles)\n    (hm : CommaFreeItems mods) (h : arrange order singles mods = some ts) : CommaFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_commaFree",
+    "source_signature": "theorem attrsP_commaFree (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : CommaFreeAttrs singles) (hm : CommaFreeItems mods) :\n    Produces (attrsP singles mods order) CommaFree"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction",
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.skip_of_run_forbidden_at_empty",
@@ -106,6 +334,30 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close",
     "source_signature": "theorem expr_cannot_start_close (k : Bracket) (rest : List Tok) (e : Syn .expr) :\n    \u00ac e.Derives (closeTok k :: rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_commaFree",
+    "source_signature": "theorem expressionCategory_yield_commaFree {c : Cat} (e : Syn c) :\n    ExpressionCategory c = true \u2192 Produces e.yield CommaFreeItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_yield_commaFree",
+    "source_signature": "theorem expr_yield_commaFree (e : Syn .expr) : Produces e.yield CommaFreeItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_derives_commaFree",
+    "source_signature": "theorem expr_derives_commaFree (e : Syn .expr) (ts : List Tok) (h : e.Derives ts) :\n    CommaFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certified_expr_spans_commaSep_unique",
+    "source_signature": "theorem certified_expr_spans_commaSep_unique\n    (a b : Syn .expr) (aspan bspan : List Tok)\n    (args args' : List (Syn .expr \u00d7 List Tok))\n    (ha : a.Derives aspan) (hb : b.Derives bspan)\n    (has : \u2200 pair, pair \u2208 args \u2192 pair.1.Derives pair.2)\n    (hbs : \u2200 pair, pair \u2208 args' \u2192 pair.1.Derives pair.2)\n    (he : commaSep (aspan :: args.map Prod.snd) = commaSep (bspan :: args'.map Prod.snd)) :\n    aspan :: args.map Prod.snd = bspan :: args'.map Prod.snd"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.Families",
@@ -808,6 +1060,264 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.assignment_left_nested_refused",
     "source_signature": "theorem assignment_left_nested_refused (o q : AssignOp) (a b c : Syn .expr) :\n    (Syn.assign o (.assign q a b) c).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorTok",
+    "source_signature": "def mirrorTok (t : Tok) : Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorWord",
+    "source_signature": "def mirrorWord (ts : List Tok) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bracket_open",
+    "source_signature": "theorem bracket_open (k : Bracket) : bracket (openTok k) = some (true, k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bracket_close",
+    "source_signature": "theorem bracket_close (k : Bracket) : bracket (closeTok k) = some (false, k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorTok_open",
+    "source_signature": "theorem mirrorTok_open (k : Bracket) : mirrorTok (openTok k) = closeTok k"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorTok_close",
+    "source_signature": "theorem mirrorTok_close (k : Bracket) : mirrorTok (closeTok k) = openTok k"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorTok_involutive",
+    "source_signature": "theorem mirrorTok_involutive (t : Tok) : mirrorTok (mirrorTok t) = t"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorWord_nil",
+    "source_signature": "theorem mirrorWord_nil : mirrorWord [] = []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorWord_append",
+    "source_signature": "theorem mirrorWord_append (xs ys : List Tok) :\n    mirrorWord (xs ++ ys) = mirrorWord ys ++ mirrorWord xs"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorWord_singleton",
+    "source_signature": "theorem mirrorWord_singleton (t : Tok) : mirrorWord [t] = [mirrorTok t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorWord_cons",
+    "source_signature": "theorem mirrorWord_cons (t : Tok) (ts : List Tok) :\n    mirrorWord (t :: ts) = mirrorWord ts ++ [mirrorTok t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorWord_involutive",
+    "source_signature": "theorem mirrorWord_involutive (ts : List Tok) : mirrorWord (mirrorWord ts) = ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.step_reverse",
+    "source_signature": "theorem step_reverse (t : Tok) (s next : List Bracket)\n    (h : step s t = some next) : step next (mirrorTok t) = some s"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.run_reverse",
+    "source_signature": "theorem run_reverse (ts : List Tok) (s next : List Bracket)\n    (h : run s ts = some next) : run next (mirrorWord ts) = some s"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_mirror",
+    "source_signature": "theorem balanced_mirror (ts : List Tok) (h : Balanced ts) :\n    Balanced (mirrorWord ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AtomicSelector",
+    "source_signature": "def AtomicSelector (p : Tok \u2192 Bool) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.atomicSelector_mirror",
+    "source_signature": "theorem atomicSelector_mirror (p : Tok \u2192 Bool) (hp : AtomicSelector p) (t : Tok) :\n    p (mirrorTok t) = p t"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.reverse_step_not_hit",
+    "source_signature": "theorem reverse_step_not_hit (p : Tok \u2192 Bool) (hp : AtomicSelector p)\n    (t : Tok) (s next : List Bracket) (hs : step s t = some next)\n    (hit : (s.isEmpty && p t) = false) : (next.isEmpty && p (mirrorTok t)) = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip_reverse",
+    "source_signature": "theorem skip_reverse (p : Tok \u2192 Bool) (hp : AtomicSelector p)\n    (ts : List Tok) (s next : List Bracket) (h : skip p s ts = some next) :\n    skip p next (mirrorWord ts) = some s"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mirrorWord_injective",
+    "source_signature": "theorem mirrorWord_injective (xs ys : List Tok) (h : mirrorWord xs = mirrorWord ys) :\n    xs = ys"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastTop_cut_unique",
+    "source_signature": "theorem lastTop_cut_unique (p : Tok \u2192 Bool) (hp : AtomicSelector p)\n    (xs ys xs' ys' : List Tok) (t t' : Tok)\n    (hy : skip p [] ys = some []) (hy' : skip p [] ys' = some [])\n    (ht : p t = true) (ht' : p t' = true)\n    (heq : xs ++ t :: ys = xs' ++ t' :: ys') :\n    xs = xs' \u2227 t = t' \u2227 ys = ys'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastTop",
+    "source_signature": "def lastTop (p : Tok \u2192 Bool) (ts : List Tok) : Option (Nat \u00d7 Tok)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastTop_marker",
+    "source_signature": "theorem lastTop_marker (p : Tok \u2192 Bool) (hp : AtomicSelector p)\n    (xs ys : List Tok) (t : Tok) (hy : skip p [] ys = some []) (ht : p t = true) :\n    lastTop p (xs ++ t :: ys) = some (xs.length, t)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip_nested",
+    "source_signature": "theorem skip_nested (p : Tok \u2192 Bool) (hp : AtomicSelector p)\n    (ks : List Bracket) (hne : ks \u2260 []) (ts : List Tok) (h : Balanced ts) :\n    skip p [] (nest ks ts) = some []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.nested_last_marker_control",
+    "source_signature": "theorem nested_last_marker_control (p : Tok \u2192 Bool) (hp : AtomicSelector p)\n    (ks : List Bracket) (hne : ks \u2260 []) (inside before : List Tok)\n    (hinside : Balanced inside) (t : Tok) (ht : p t = true) :\n    lastTop p (before ++ t :: nest ks inside) = some (before.length, t)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.isAddMarker",
+    "source_signature": "def isAddMarker (t : Tok) : Bool"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addMarker_atomic",
+    "source_signature": "theorem addMarker_atomic : AtomicSelector isAddMarker"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.repeated_add_balanced",
+    "source_signature": "theorem repeated_add_balanced (n : Nat) : Balanced (List.replicate n (.punct .add))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.nested_add_markers_control",
+    "source_signature": "theorem nested_add_markers_control (ks : List Bracket) (hne : ks \u2260 [])\n    (before : List Tok) (n : Nat) :\n    lastTop isAddMarker (before ++ .punct .add :: nest ks (List.replicate n (.punct .add))) =\n      some (before.length, .punct .add)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ReverseSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.malformed_reverse_scan_control",
+    "source_signature": "theorem malformed_reverse_scan_control :\n    lastTop isAddMarker [.punct .lparen, .punct .add] = some (1, .punct .add) \u2227\n    firstTop isAddMarker [] [.punct .lparen, .punct .add] = none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.isComma",
+    "source_signature": "def isComma (t : Tok) : Bool"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.CommaFree",
+    "source_signature": "def CommaFree (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.CommaFreeItems",
+    "source_signature": "def CommaFreeItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.firstTop_none_of_skip",
+    "source_signature": "theorem firstTop_none_of_skip (p : Tok \u2192 Bool) (ts : List Tok)\n    (h : skip p [] ts = some []) : firstTop p [] ts = none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_nil",
+    "source_signature": "theorem commaFree_nil : CommaFree []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_tail",
+    "source_signature": "theorem commaFreeItems_tail (xs : List Tok) (xss : List (List Tok))\n    (h : CommaFreeItems (xs :: xss)) : CommaFreeItems xss"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaSep_single",
+    "source_signature": "theorem commaSep_single (xs : List Tok) : commaSep [xs] = xs"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaSep_cons_cons",
+    "source_signature": "theorem commaSep_cons_cons (xs ys : List Tok) (rest : List (List Tok)) :\n    commaSep (xs :: ys :: rest) = xs ++ .punct .comma :: commaSep (ys :: rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaFree_not_marker_word",
+    "source_signature": "theorem commaFree_not_marker_word (xs ys tail : List Tok) (hx : CommaFree xs)\n    (hy : CommaFree ys) : xs \u2260 ys ++ .punct .comma :: tail"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaSep_nonempty_unique",
+    "source_signature": "theorem commaSep_nonempty_unique (xs ys : List Tok) (xss yss : List (List Tok))\n    (hx : CommaFreeItems (xs :: xss)) (hy : CommaFreeItems (ys :: yss))\n    (he : commaSep (xs :: xss) = commaSep (ys :: yss)) : xs :: xss = ys :: yss"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaSep_empty_single_empty",
+    "source_signature": "theorem commaSep_empty_single_empty : commaSep [] = commaSep [[]]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.empty_holes_comma_free",
+    "source_signature": "theorem empty_holes_comma_free (n : Nat) : CommaFreeItems (List.replicate n [])"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SeparatorSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arbitrary_holes_reconstructed",
+    "source_signature": "theorem arbitrary_holes_reconstructed (n m : Nat)\n    (h : commaSep ([] :: List.replicate n []) = commaSep ([] :: List.replicate m [])) : n = m"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.Statement",

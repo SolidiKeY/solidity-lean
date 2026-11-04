@@ -1,0 +1,18 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted partial separator checkpoint; no confirmed defects.",
+    "method": "Independent read-only review; no Lean server or edits.",
+    "results": "All29 roots and recursive expression category closure derive CommaFree from original yield certificates. Span equality is word-vector equality only. Arbitrary empty holes and nonempty-vector collision boundary preserved.",
+    "precision": "lastTop is a suffix-based mirrored scan on malformed words; explicit documentation and kernel negative control added. Tested core congruence replacement applied and per-file diagnostics pass.",
+    "open": "Expression-derived operator selectors, full root reconstruction, child-tree uniqueness, parseCat corollary and full acceptance remain open."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Accepted partial separator checkpoint; no confirmed defects.",
+    "method": "Independent read-only review; no Lean server or edits.",
+    "results": "All29 roots and recursive expression category closure derive CommaFree from original yield certificates. Span equality is word-vector equality only. Arbitrary empty holes and nonempty-vector collision boundary preserved.",
+    "precision": "lastTop is a suffix-based mirrored scan on malformed words; explicit documentation and kernel negative control added. Tested core congruence replacement applied and per-file diagnostics pass.",
+    "open": "Expression-derived operator selectors, full root reconstruction, child-tree uniqueness, parseCat corollary and full acceptance remain open."
+  }
+]
