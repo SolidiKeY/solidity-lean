@@ -1571,3 +1571,10 @@ The out-of-bounds argument control proves actual bare-revert prefix absorption, 
 `RuntimeFrameV3ScalarEmitter.compile` selects the published value compiler and checks disjoint static caller/callee/control geometry. Its result contains only that checked value certificate and geometry, with no target-run premise. `selected_value` links every successful root selection to the exact public value-compiler result. Runtime cursor, actual source evaluation and payload capacity remain explicit in `RuntimeFrameV3ScalarEmitterSound.endpoint`, which derives the complete disjoint caller representation and actual execution. The original populated 22-word result and argument-failure prefix are witnessed through the selected code; overlapping layouts are refused.
 
 This is an executable emitter for the fixed scalar countdown family. It does not inspect arbitrary recursive source syntax, replace the general recursive compiler, establish approved-domain provenance or inhabit the complete frozen V3 contract.
+
+
+### Recursive image authentication
+
+`RuntimeFrameCodeAuthentication` compares the existing instruction lists structurally, including both condition and body lists of nested loops. Its total recursion follows the finite code data, with no runtime horizon cutoff. Soundness gives exact instruction/list equality and therefore the complete existing execution outcome and common-suffix equality. Reflexivity and common-prefix equations share kernel-checked boundaries instead of repeatedly reducing well-founded proof data. The previous flat recognizer is unchanged.
+
+The concrete candidate retains the selected scalar-family image, full populated caller representation and 22-word observation. Its full-image positive proof uses construction equality and generic reflexivity, rather than an independent full-image computational reduction. Nested condition/body/order, destination, cursor and trailing-instruction controls distinguish altered images. This authenticates code data; it does not select arbitrary source recursion, prove physical EVM execution, close approved-profile provenance or supply a general V3 producer.
