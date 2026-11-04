@@ -268,6 +268,8 @@ import SolidityBridge.RoadmapV15.P10.PublishedCheckedAdd
 import SolidityBridge.RoadmapV15.P10.PublishedCheckedAddControls
 import SolidityBridge.RoadmapV15.P10.PublishedDivision
 import SolidityBridge.RoadmapV15.P10.PublishedDivisionControls
+import SolidityBridge.RoadmapV15.P10.PublishedMultiply
+import SolidityBridge.RoadmapV15.P10.PublishedMultiplyControls
 import SolidityBridge.RoadmapV15.P10.PublishedRemainder
 import SolidityBridge.RoadmapV15.P10.PublishedRemainderControls
 import SolidityBridge.RoadmapV15.P10.PublishedShifts

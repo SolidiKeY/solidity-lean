@@ -278,6 +278,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` | Direct Source/Scalar/native/X clients, zero/boundary/saturated counts and complete ordered observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAdd.lean` | Published checked Source addition success and overflow boundary against the raw fetched ADD body. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAddControls.lean` | Direct combined-law clients, maximum-fit/overflow controls, exact panic bytes and ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiply.lean` | Actual Source word/BitVec encoding and unchecked uint256 multiplication observation against fetched MUL. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiplyControls.lean` | Direct Source/word/driver/X clients, modular overflow and negative encoding controls, complete ordered native states. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 
