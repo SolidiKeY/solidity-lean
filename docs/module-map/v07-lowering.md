@@ -102,3 +102,5 @@
 | `Lowering/V07/NumericComparisonControls.lean` | Inhabited operators, signed/width boundaries, alias/context and ordered observation controls. |
 | `Lowering/V07/BooleanComparisons.lean` | Boolean equality/inequality transport with heterogeneous caller and capture-context frames. |
 | `Lowering/V07/BooleanComparisonControls.lean` | Inhabited mixed-reference, alias/context, effect-order and wrong-binding controls. |
+| `Lowering/V07/AddressConversions.lean` | Existing-carrier address/uint160 value and actual expression/local/assignment conversion certificates. |
+| `Lowering/V07/AddressConversionControls.lean` | Inhabited mixed-reference conversion, admission-refusal, alias and capture-lifetime controls. |
