@@ -1443,3 +1443,29 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Fifteen scoped axiom reports use only Lean standard
 axioms. Failed standard automation attempts are retained separately from
 passing gates; no checking/proof limits were increased.
+
+### Independently typed conditional scope horizons
+
+`LocalIfHorizon.successor` and `extension` preserve the exact final caller
+raw frame after actual normal completion of the existing default-item
+conditional. Branch output contexts remain independently quantified.
+Concrete `LocalBoolHorizon.successor` fixes the actual successful guard value
+and intermediate state before the same truth choice; concrete
+`LocalDefaultHorizon.blockSuccessor` stabilizes only the selected restored
+branch. Its completion premise follows actual parent execution, with no
+assumed child simulation or unselected-branch termination requirement.
+Ten controls exercise uint8 versus uint256 branch prefixes, arbitrary added
+fuel, guard writes retained after restoration, distinct prefix timeout contexts,
+timeout-to-completion change and persistent dirty projection refusal. An
+inhabited empty-branch certificate combines with a nontrivial opposite branch:
+selected execution completes while the unselected block times out at that horizon.
+These are completed-run laws for existing certificates, not arbitrary control,
+timeout stability, readback, admission or general Source/compiler adequacy.
+No Source/ExtCall/evaluator/layout, observation or proof-budget changes.
+General P16/full VY1 and final gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Twelve scoped axiom reports use only Lean standard
+axioms. Failed standard automation attempts remain raw evidence, distinct from
+passing gates; no checking/proof limits were increased.

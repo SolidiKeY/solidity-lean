@@ -309,3 +309,5 @@ VY1: context-growing completed item horizon stability and multi-declaration cont
 VY1: heterogeneous default-item and restored-block completed horizon stability; see [lane handoff](inline-assembly-vy1.md#heterogeneous-default-item-and-block-horizons). Full lane remains open.
 
 VY1: completed unchecked-scope/ordinary-continuation horizon stability; see [lane handoff](inline-assembly-vy1.md#unchecked-scope-and-ordinary-continuation-horizons). Full lane remains open.
+
+VY1: independently typed conditional-scope completed horizon stability; see [lane handoff](inline-assembly-vy1.md#independently-typed-conditional-scope-horizons). Full lane remains open.

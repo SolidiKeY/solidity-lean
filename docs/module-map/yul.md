@@ -121,3 +121,5 @@
 | `Yul/LocalDefaultHorizon.lean`, `Yul/Checks/LocalDefaultHorizon.lean` | Exact completed heterogeneous default-item and restored-block frame stability, with numeric-prefix/dirty-local controls. |
 
 | `Yul/LocalUncheckedHorizon.lean`, `Yul/Checks/LocalUncheckedHorizon.lean` | Completed-run stability for the existing unchecked default scope, ordinary continuation and enclosing block; distinct inner/continuation timeout frames. |
+
+| `Yul/LocalIfHorizon.lean`, `Yul/Checks/LocalIfHorizon.lean` | Completed heterogeneous conditional-scope fuel stability using concrete guard and selected restored-block producers. |
