@@ -397,5 +397,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V08/LiteralFailureTupleAbort.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Roadmap/V16/H24Input.lean` | Explicit V16 input boundary for the published H24 companion; no admission inhabitant. |
 
 See [P8 admission](../feature-work/p8-admission.md).
+
