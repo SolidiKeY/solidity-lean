@@ -84,3 +84,5 @@
 | `Yul/Adapters/P6CopyHistory{,Controls}` | Finite actual P6 copies with per-success Source/cursor refresh, exact stopped synchronization suffix and retained failed physical output. |
 | `Yul/Adapters/P6HistoryHash{,Controls}` | Completed-history Source/KECCAK same-payload agreement and raw live-frame hashing across unsupported canonical preparation. |
 | `Yul/Adapters/P6HistoryHashRef{,Controls}` | Actual Source subcontext byte hashing after completed copies, exact caller restoration and a nonempty changed-history Source/KECCAK witness. |
+| `Yul/Adapters/P6ByteCopyPreparation` | Actual overlapping copy-byte readback and canonical byte-object update existence from header/payload and retained-capacity facts. |
+| `Yul/Adapters/P6ChangedPayloadHashControls` | Kernel exact changed-byte Source state, nonempty history and changed-payload Source/KECCAK witness with sibling/alias preservation. |

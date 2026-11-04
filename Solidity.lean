@@ -2411,12 +2411,14 @@ import Solidity.Yul.Adapters.MemoryBytes
 import Solidity.Yul.Adapters.MemoryBytesControls
 import Solidity.Yul.Adapters.ObjectWriteback
 import Solidity.Yul.Adapters.ObjectWritebackControls
+import Solidity.Yul.Adapters.P6ByteCopyPreparation
 import Solidity.Yul.Adapters.P6ByteMemory
 import Solidity.Yul.Adapters.P6ByteMemoryControls
 import Solidity.Yul.Adapters.P6ByteWriteOrder
 import Solidity.Yul.Adapters.P6ByteWriteOrderControls
 import Solidity.Yul.Adapters.P6CalldataHash
 import Solidity.Yul.Adapters.P6CalldataHashControls
+import Solidity.Yul.Adapters.P6ChangedPayloadHashControls
 import Solidity.Yul.Adapters.P6CopyHistory
 import Solidity.Yul.Adapters.P6CopyHistoryControls
 import Solidity.Yul.Adapters.P6CopyPreparation

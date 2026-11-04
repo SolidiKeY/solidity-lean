@@ -429,6 +429,16 @@ query view, Source evaluation and target KECCAK step; no successful preparation
 or final-state law is an input. This does not claim that the hashed payload
 changed, nor prove reference formation, escape capture or callInternal adequacy.
 
+`P6ByteCopyPreparation` constructs canonical byte-object updates from actual
+copy readback, header, payload and retained-capacity facts. The changed-payload
+control copies two overlapping bytes from224 to225, deriving `[7,7,0]` from
+`[7,0,255]` while retaining length3. Actual whole-inventory Source writes yield
+an exact byte-root heap update; the nominal sibling, both caller aliases and
+every original owner typing survive. The nonempty history constructs its
+refreshed view and the real Source subcontext hash and KECCAK step consume the
+changed payload. Nonzero padding remains unchanged. The concrete old/new digest
+comparison is finite evidence, with no injectivity or compiler/gas claim.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
