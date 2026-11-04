@@ -1915,6 +1915,8 @@ import Solidity.Lowering.V08.LiteralFailureCalldataCopy
 import Solidity.Lowering.V08.LiteralFailureCalldataCopyControls
 import Solidity.Lowering.V08.LiteralFailureCalldataDecode
 import Solidity.Lowering.V08.LiteralFailureCalldataDecodeControls
+import Solidity.Lowering.V08.LiteralFailureCalldataPrefix
+import Solidity.Lowering.V08.LiteralFailureCalldataPrefixControls
 import Solidity.Lowering.V08.LiteralFailureChoiceDecode
 import Solidity.Lowering.V08.LiteralFailureChoiceDecodeControls
 import Solidity.Lowering.V08.LiteralFailureControls

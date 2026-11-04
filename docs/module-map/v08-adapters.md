@@ -463,3 +463,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureCalldataCopy.lean` | Actual calldata-to-memory argument conversion before typed custom-error encoding, with reached heap state. |
 | `Solidity/Lowering/V08/LiteralFailureCalldataCopyControls.lean` | Copied-object and full-packet observations, extraction boundaries, before/after-copy failures and retained-state controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureCalldataPrefix.lean` | Frame-indexed calldata bytes/string prefix over represented tail; actual no-copy encoding, layout and expression/G38 consumers. |
+| `Solidity/Lowering/V08/LiteralFailureCalldataPrefixControls.lean` | Populated no-copy calldata encoding, shared/short/past-end references, exact result allocation and order/frame corruption controls. |
