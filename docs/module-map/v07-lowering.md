@@ -126,3 +126,5 @@
 | `Lowering/V07/SignedEnumControls.lean` | Inhabited mixed-reference, all-width panic/order/sign/capacity controls and exact axiom guards. |
 | `Lowering/V07/UdvtAssignment.lean` | Integer-underlying UDVT local assignment and same-tag identity conversion, nominal-refusal boundaries and initial-derived context transport. |
 | `Lowering/V07/UdvtAssignmentControls.lean` | Real two-tag UDVT metadata, mixed-reference and all64 integer-type controls with nominal-erasure/stale-read negatives and exact guards. |
+| `Lowering/V07/UdvtBoolAssignment.lean` | Boolean-underlying UDVT same-tag assignment and initial-derived full mapped caller transport. |
+| `Lowering/V07/UdvtBoolAssignmentControls.lean` | Inhabited mixed-reference Boolean matrix, self/capture extension, stale-read and nominal-refusal controls with exact guards. |

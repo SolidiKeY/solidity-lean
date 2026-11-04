@@ -2238,6 +2238,8 @@ import Solidity.Lowering.V07.SignedWordSubtraction
 import Solidity.Lowering.V07.SourceReads
 import Solidity.Lowering.V07.UdvtAssignment
 import Solidity.Lowering.V07.UdvtAssignmentControls
+import Solidity.Lowering.V07.UdvtBoolAssignment
+import Solidity.Lowering.V07.UdvtBoolAssignmentControls
 import Solidity.Lowering.V07.UnsignedAddition
 import Solidity.Lowering.V07.UnsignedCastControls
 import Solidity.Lowering.V07.UnsignedCasts
