@@ -112,3 +112,4 @@
 | `Yul/Views/RepeatedCellWrites{,Controls}` | Arbitrary finite actual same-field typed Source writes in the computed bank, full raw reconstruction with original complement, every-H safety, rollback and duplicate/static controls. |
 | `Yul/Views/FiniteCellWrites{,Controls}` | Arbitrary finite different-path intrinsic requests through one Source run, actual bank dispatch, both complete raw views/original complements, safety/static/rollback and domain-boundary controls. |
 | `Yul/Views/DeclarationDefaults{,Controls}` | Zero payloads derived from declaration-selected codecs through relocation/registration/packing; reset-check availability equivalence and actual transient-root full reset controls. |
+| `Yul/Views/FixedDeclarationDefaults{,Controls}` | Actual recursive fixed-array/struct and ordered-root packing derives optional default payloads, reset-check availability and empty-store full encode/writeback; None/default distinction controls. |

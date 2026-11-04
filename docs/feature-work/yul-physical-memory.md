@@ -722,3 +722,12 @@ all raw slots using derived zero witnesses. Function codecs remain selected whil
 `Source.Val.default` at function type returns `none`; that owner boundary is not
 converted to zero, a source refusal or a new language exclusion. This is not full
 transient aggregate, dirty representation or source/compiler adequacy.
+
+`FixedDeclarationDefaults` transports the selected-codec default law through the
+existing aligned rows, fixed arrays, structs and ordered root packer. The checked
+root interface uses the certificate's actual packing result. Available defaults
+derive empty Source views, whole-store unchanged writeback and full zero-map
+encoding. Controls cover Inner[2][2] followed by uint128[3] and mixed ordered roots;
+absent cells and explicitly written defaults retain their distinct complete stores.
+This proof recursion adds no planner or depth cap and does not admit transient
+aggregates or synthesize unavailable function defaults. Broader adequacy is open.

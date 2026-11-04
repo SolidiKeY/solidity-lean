@@ -2912,6 +2912,8 @@ import Solidity.Yul.Views.FixedDeclaration
 import Solidity.Yul.Views.FixedDeclarationChecked
 import Solidity.Yul.Views.FixedDeclarationComposition
 import Solidity.Yul.Views.FixedDeclarationControls
+import Solidity.Yul.Views.FixedDeclarationDefaults
+import Solidity.Yul.Views.FixedDeclarationDefaultsControls
 import Solidity.Yul.Views.FixedDeclarationExtent
 import Solidity.Yul.Views.FixedDeclarationFinal
 import Solidity.Yul.Views.FixedDeclarationJournal
