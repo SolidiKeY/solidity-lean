@@ -356,6 +356,8 @@ import Solidity.Backend.MemoryOps.SourceNestedMemory
 import Solidity.Backend.MemoryOps.SourceNestedMutation
 import Solidity.Backend.MemoryOps.SourceNestedSelect
 import Solidity.Backend.MemoryOps.SourceReferenceAssignment
+import Solidity.Backend.MemoryOps.SourceReferenceRead
+import Solidity.Backend.MemoryOps.SourceReferenceReadControls
 import Solidity.Backend.MemoryOps.SourceReferenceSequence
 import Solidity.Backend.MemoryOps.SourceReferenceWrite
 import Solidity.Backend.MemoryOps.SourceSequence

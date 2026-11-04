@@ -1,0 +1,590 @@
+import Solidity.Backend.MemoryOps.SourceReferenceRead
+import Solidity.Evm.Correct
+import Solidity.Source.SemanticsExamples
+
+/-! Reuses the original owned populated nested fixture, checked against current
+published interfaces. No constructor/heap/copy semantics is reimplemented. -/
+namespace Solidity.Backend.MemoryOps.SourceReferenceReadControls
+open Evm Evm.Memory
+open Source.SemanticsExamples (E0 F0 G0 s0)
+private def C : Contract := {vars := []}
+private abbrev B : RefTy := .array (.prim .bool)
+private abbrev R : RefTy := BoolRefsRef
+private abbrev H : HTy := [B,B,R,R,R]
+private def left : HRef H B := ⟨0,rfl⟩
+private def right : HRef H B := ⟨1,rfl⟩
+private def old : HRef H R := ⟨2,rfl⟩
+private def fresh : HRef H R := ⟨3,rfl⟩
+private def empty : HRef H R := ⟨4,rfl⟩
+private def hp : Heap H := (⟨[true,false,false],by decide⟩,(⟨[false,true,false],by decide⟩,
+  (⟨[left],by decide⟩,(⟨[left,right,left],by decide⟩,(⟨[],by decide⟩,())))))
+private abbrev Γ0 : Ctx := [.mem R,.mem R,.mem R]
+private def σ0 : State C Γ0 := {storage := Storage.init C,H := H,heap := hp,env := (some fresh,(some old,(some old,())))}
+private def base (i : Nat) : Fin W := if i=0 then ⟨16,by decide⟩ else if i=1 then ⟨24,by decide⟩ else if i=2 then ⟨32,by decide⟩ else if i=3 then ⟨36,by decide⟩ else ⟨44,by decide⟩
+private def machine0 : Machine := {Machine.init with stack := [w[42]],mem := fun a =>
+  if a=0 then w[48] else if a=1 then w[32] else if a=2 then w[32] else if a=3 then w[36] else if a=7 then w[99]
+  else if a=16 then w[3] else if a=17 then w[1] else if a=24 then w[3] else if a=26 then w[1]
+  else if a=32 then w[1] else if a=33 then w[16] else if a=36 then w[3] else if a=37 then w[16]
+  else if a=38 then w[24] else if a=39 then w[16] else w[0]}
+private theorem prim_refs {p : PrimTy} (q : HRef H (.array (.prim p))) : p=.bool ∧ (HEq q left ∨ HEq q right) := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi;exact ⟨rfl,.inl HEq.rfl⟩
+  | succ i => cases i with
+    | zero => cases hi;exact ⟨rfl,.inr HEq.rfl⟩
+    | succ i => cases i with
+      | zero => cases hi
+      | succ i => cases i with
+        | zero => cases hi
+        | succ i => cases i with
+          | zero => cases hi
+          | succ i => cases hi
+private theorem ref_refs {Q : RefTy} (q : HRef H (.array (.ref Q))) : Q=B ∧ (HEq q old ∨ HEq q fresh ∨ HEq q empty) := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi
+  | succ i => cases i with
+    | zero => cases hi
+    | succ i => cases i with
+      | zero => cases hi;exact ⟨rfl,.inl HEq.rfl⟩
+      | succ i => cases i with
+        | zero => cases hi;exact ⟨rfl,.inr (.inl HEq.rfl)⟩
+        | succ i => cases i with
+          | zero => cases hi;exact ⟨rfl,.inr (.inr HEq.rfl)⟩
+          | succ i => cases hi
+private theorem no_struct {s : Name} (q : HRef H (.struct s)) : False := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi
+  | succ i => cases i with
+    | zero => cases hi
+    | succ i => cases i with
+      | zero => cases hi
+      | succ i => cases i with
+        | zero => cases hi
+        | succ i => cases i with
+          | zero => cases hi
+          | succ i => cases hi
+private theorem left_repr : ArrayRepr hp left (base left.id) machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using (show 16+1+3≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using (show machine0.mem 16=.val (wmod 3) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases i with
+      | zero => cases Option.some.inj hi;rfl
+      | succ i => cases i with
+        | zero => cases Option.some.inj hi;rfl
+        | succ i => cases hi
+private theorem right_repr : ArrayRepr hp right (base right.id) machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn] using (show 24+1+3≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn] using (show machine0.mem 24=.val (wmod 3) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases i with
+      | zero => cases Option.some.inj hi;rfl
+      | succ i => cases i with
+        | zero => cases Option.some.inj hi;rfl
+        | succ i => cases hi
+private theorem old_repr : RefArrayRepr hp old base machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,old,MObj.elems_dyn] using (show 32+1+1≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,old,MObj.elems_dyn] using (show machine0.mem 32=.val (wmod 1) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,old,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases hi
+private theorem fresh_repr : RefArrayRepr hp fresh base machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] using (show 36+1+3≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] using (show machine0.mem 36=.val (wmod 3) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases i with
+      | zero => cases Option.some.inj hi;rfl
+      | succ i => cases i with
+        | zero => cases Option.some.inj hi;rfl
+        | succ i => cases hi
+private theorem empty_repr : RefArrayRepr hp empty base machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,empty,MObj.elems_dyn] using (show 44+1+0≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,empty,MObj.elems_dyn] using (show machine0.mem 44=.val (wmod 0) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn] at hi
+    cases hi
+private theorem initial_state0 : StateRepr 1 1 8 (Frag.init Γ0) σ0 base machine0 := by
+  have hc := Sim.init C 0 W_pos (fun _ => 0) ⟨0,W_pos⟩ rfl
+  refine ⟨?_,?_,?_,by decide,?_,?_,RefFieldsRepr.withoutStructs _ _ _ (fun q => no_struct q)⟩
+  · refine ⟨hc.store,?_,?_,hc.net,hc.netSelf,hc.bound,?_,hc.env,hc.funds,hc.oracle⟩
+    all_goals intro p i;cases i with | there i => cases i with | there i => cases i with | there i => nomatch i
+  · refine ⟨?_,?_,?_⟩
+    · intro p q;obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+      · exact left_repr
+      · exact right_repr
+    · intro p q;obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq <;> decide
+    · intro p t q z hne
+      obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+      all_goals obtain ⟨rfl,hz|hz⟩ := prim_refs z <;> cases hz
+      all_goals first | exact (hne rfl).elim | (simp only [Heap.len,Heap.get,left,right,MObj.elems_dyn] <;> decide)
+  · intro Q i
+    cases i with
+    | here => exact ⟨fresh,rfl,rfl⟩
+    | there i => cases i with
+      | here => exact ⟨old,rfl,rfl⟩
+      | there i => cases i with
+        | here => exact ⟨old,rfl,rfl⟩
+        | there i => nomatch i
+  · exact ⟨fun q => (no_struct q).elim,fun q => (no_struct q).elim,fun q _ _ => (no_struct q).elim⟩
+  · intro p s arr q;exact (no_struct q).elim
+private theorem initial_refs0 : RefArrayHeapRepr hp base 8 machine0 := by
+  constructor
+  · intro Q q;obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq
+    · exact old_repr
+    · exact fresh_repr
+    · exact empty_repr
+  · intro Q q;obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq <;> decide
+  · intro Q T q t hne
+    obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq
+    all_goals obtain ⟨rfl,ht|ht|ht⟩ := ref_refs t <;> cases ht
+    all_goals first | exact (hne rfl).elim | (simp only [Heap.len,Heap.get,Objs.get,hp,old,fresh,empty,MObj.elems_dyn] <;> decide)
+  · intro Q p q t
+    obtain ⟨rfl,ht|ht⟩ := prim_refs t <;> cases ht
+    all_goals obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq
+    all_goals right;simp only [Heap.len,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn] <;> decide
+  · intro Q s q t;exact (no_struct t).elim
+private abbrev Γ : Ctx := [.val .uint,.val .uint,.mem R,.mem R,.mem R]
+private def σ1 := σ0.push (t := .val .uint) (uintOfNat 1)
+private def σ := σ1.push (t := .val .uint) (uintOfNat 0)
+private def machine1 := writeMachine machine0 4 w[1]
+private def machine := writeMachine machine1 5 w[0]
+private def frag := (((Frag.init Γ0).push (.val .uint) .ok).push (.val .uint) .ok)
+private theorem initial_repr : RefArrayStateRepr 1 1 8 frag σ base machine := by
+  have h1 := initial_state0.consVal (uintOfNat 1) w[1] (ReprV.uint_of rfl) (by decide)
+  have h2 := h1.consVal (uintOfNat 0) w[0] (ReprV.uint_of rfl) (by decide)
+  exact ⟨h2,(initial_refs0.localWrite 4 (by decide) w[1]).localWrite 5 (by decide) w[0]⟩
+
+private abbrev SB : Source.STy := .array .memory .bool none
+private abbrev SR : Source.STy := SourceBoolRefsTy
+private abbrev SΓ : Source.RCtx := [.int .u256,.int .u256,SR,SR,SR]
+private def addresses (i : Nat) := i
+private def pdata (rs : List (HRef H B)) : Source.Data E0.layout SR := sourceBoolRefMemory addresses rs
+private def y0 : Source.EMState E0 [] := (.nil,s0)
+private def yl : Source.EMState E0 [] := ((Source.allocRef (sourceBoolMemory [true,false,false])).run y0).2
+private def yr : Source.EMState E0 [] := ((Source.allocRef (sourceBoolMemory [false,true,false])).run yl).2
+private def yo : Source.EMState E0 [] := ((Source.allocRef (pdata [left])).run yr).2
+private def yn : Source.EMState E0 [] := ((Source.allocRef (pdata [left,right,left])).run yo).2
+private def ye : Source.EMState E0 [] := ((Source.allocRef (pdata [])).run yn).2
+private def sy : Source.EMState E0 SΓ :=
+  (.cons (sourceUint (uintOfNat 0)) (.cons (sourceUint (uintOfNat 1))
+    (.cons (.memRef rfl 3) (.cons (.memRef rfl 2) (.cons (.memRef rfl 2) .nil)))),ye.2)
+private abbrev SH : Source.HeapTy := (Source.Heap.empty (D := E0.layout)).ty
+private theorem left_memOK : Source.MemOK E0 SH yl := by
+  have hm : Source.MemOK E0 SH y0 :=
+    ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩
+  have h := source_bool_alloc_memOK (E := E0) (Γ := []) SH [true,false,false] y0 hm
+  have he : (Source.allocRef (E := E0) (Γ := []) (sourceBoolMemory [true,false,false])).run y0=(.ok (.memRef rfl 0),yl) := rfl
+  rw [he] at h;exact h.1
+private theorem right_memOK : Source.MemOK E0 SH yr := by
+  have h := source_bool_alloc_memOK (E := E0) (Γ := []) SH [false,true,false] yl left_memOK
+  have he : (Source.allocRef (E := E0) (Γ := []) (sourceBoolMemory [false,true,false])).run yl=(.ok (.memRef rfl 1),yr) := rfl
+  rw [he] at h;exact h.1
+private theorem alloc_parent_keep (y : Source.EMState E0 []) (rs : List (HRef H B))
+    (hm : Source.MemOK E0 SH y) (h0 : y.2.heap.ty 0=some SB) (h1 : y.2.heap.ty 1=some SB) :
+    Source.MemOK E0 SH ((Source.allocRef (pdata rs)).run y).2 := by
+  have hd : Source.DataOK E0 y.2.heap.ty (pdata rs) := by
+    apply Source.DataOK.array
+    intro j
+    apply Source.DataOK.val
+    obtain ⟨_,hq|hq⟩ := prim_refs rs[j]
+    · have he : rs[j]=left := eq_of_heq hq
+      rw [he]
+      exact ⟨SB,h0,rfl⟩
+    · have he : rs[j]=right := eq_of_heq hq
+      rw [he]
+      exact ⟨SB,h1,rfl⟩
+  have h := Source.allocRef_mem' (E := E0) (Γ := []) (H := SH) (pdata rs) (by trivial)
+    (by intro j;exact ⟨.memRef rfl (addresses rs[j].id),rfl⟩) y ⟨hm,hd⟩
+  have he : (Source.allocRef (E := E0) (Γ := []) (pdata rs)).run y=
+      (.ok (.memRef rfl y.2.heap.next),(y.1,{y.2 with heap := (y.2.heap.alloc ⟨SR,pdata rs⟩).1})) := rfl
+  rw [he] at h
+  exact h.1
+private theorem old_memOK : Source.MemOK E0 SH yo := alloc_parent_keep yr [left] right_memOK rfl rfl
+private theorem new_memOK : Source.MemOK E0 SH yn := alloc_parent_keep yo [left,right,left] old_memOK rfl rfl
+private theorem empty_memOK : Source.MemOK E0 SH ye := alloc_parent_keep yn [] new_memOK rfl rfl
+private theorem source_memOK : Source.MemOK E0 SH sy := by
+  refine ⟨⟨empty_memOK.1.1,?_⟩,empty_memOK.2⟩
+  exact ⟨trivial,⟨trivial,⟨⟨SR,rfl,rfl⟩,⟨⟨SR,rfl,rfl⟩,⟨⟨SR,rfl,rfl⟩,trivial⟩⟩⟩⟩⟩
+private theorem left_at : SourceBoolMemoryAt sy 0 hp left .dyn := by
+  unfold SourceBoolMemoryAt
+  simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn]
+  rfl
+private theorem right_at : SourceBoolMemoryAt sy 1 hp right .dyn := by
+  unfold SourceBoolMemoryAt
+  simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn]
+  rfl
+private theorem old_at : SourceBoolRefsAt sy 2 hp old addresses := by
+  refine ⟨?_,?_⟩
+  · simp only [Heap.get,Objs.get,hp,old,MObj.elems_dyn];rfl
+  · intro q hq
+    simp only [Heap.get,Objs.get,hp,old,MObj.elems_dyn,List.mem_cons,List.not_mem_nil,or_false] at hq
+    subst q;exact left_at
+private theorem fresh_at : SourceBoolRefsAt sy 3 hp fresh addresses := by
+  refine ⟨?_,?_⟩
+  · simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+  · intro q hq
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.mem_cons,List.not_mem_nil,or_false] at hq
+    rcases hq with hq|hq|hq <;> subst q
+    · exact left_at
+    · exact right_at
+    · exact left_at
+private theorem empty_at : SourceBoolRefsAt sy 4 hp empty addresses := by
+  refine ⟨?_,?_⟩
+  · simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn];rfl
+  · intro q hq
+    simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn,List.not_mem_nil] at hq
+
+
+private def ssrc : Source.Idx SΓ SR := .there (.there .here)
+private def sdst : Source.Idx SΓ SR := .there (.there (.there .here))
+private def backup : Source.Idx SΓ SR := .there (.there (.there (.there .here)))
+private def si : Source.Idx SΓ (.int .u256) := .there .here
+private def sj : Source.Idx SΓ (.int .u256) := .here
+private def tsrc : Idx Γ (.mem R) := .there (.there .here)
+private def tdst : Idx Γ (.mem R) := .there (.there (.there .here))
+
+private theorem nallocator0 : StructAllocatorRepr σ0.heap base 8 ⟨48,by decide⟩ machine0 := by
+  apply AllocatorRepr.withoutStructs _ (fun q => no_struct q)
+  refine ⟨initial_state0.heap,?_,?_⟩
+  · refine ⟨by decide,by decide,rfl,?_⟩
+    intro addr ha
+    change 48≤addr at ha
+    change (if addr=0 then w[48] else if addr=1 then w[32] else if addr=2 then w[32] else if addr=3 then w[36] else if addr=7 then w[99]
+      else if addr=16 then w[3] else if addr=17 then w[1] else if addr=24 then w[3] else if addr=26 then w[1]
+      else if addr=32 then w[1] else if addr=33 then w[16] else if addr=36 then w[3] else if addr=37 then w[16]
+      else if addr=38 then w[24] else if addr=39 then w[16] else w[0])=w[0]
+    rw [if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),
+      if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),
+      if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega)]
+  · intro p q
+    obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+    all_goals simp only [σ0,Heap.len,Heap.get,Objs.get,hp,left,right,base,MObj.elems_dyn] <;> decide
+private theorem allocator : StructAllocatorRepr σ.heap base 8 ⟨48,by decide⟩ machine :=
+  (nallocator0.localWrite 4 (by decide) (by decide) w[1]).localWrite 5 (by decide) (by decide) w[0]
+
+private def dref (self : Bool) := if self then fresh else old
+private def daddr (self : Bool) := if self then 3 else 2
+private def ds (self : Bool) : Source.Idx SΓ SR := if self then ssrc else sdst
+private def dt (self : Bool) : Idx Γ (.mem R) := if self then tsrc else tdst
+private def ti : Idx Γ (.val .uint) := .here
+private def tj : Idx Γ (.val .uint) := .there .here
+private def postHeap (self : Bool) := hp.set (dref self) (MObj.setElem .dyn (hp.get (dref self)) 0 right)
+private def postWord (self : Bool) := writeMachine machine ((base (dref self).id).val+1) (.val (base right.id))
+private theorem dat (self : Bool) : SourceBoolRefsAt sy (daddr self) hp (dref self) addresses := by
+  cases self
+  · exact old_at
+  · exact fresh_at
+private theorem dhi (self : Bool) : 0<hp.len (dref self) .dyn := by
+  cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,Heap.get,Objs.get,hp,old,fresh,MObj.elems_dyn] <;> decide
+
+/-- The RHS has no child-reference local. Actual INITIAL fresh-parent[1]
+selects RIGHT, changes the old-parent slot (or the same parent), and retains
+both old child contents, locals, allocation cursor and all external frames. -/
+theorem computed_reference_client (p : Roadmap.Pipeline) (fuel nps : Nat) (self : Bool) :
+    ∃ z : Source.EMState E0 SΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign (ds self) ssrc sj si)).run sy=
+        (.ok (.val (.memRef rfl 1)),z) ∧
+      (Source.execS (G0 p) F0 (fuel+5) nps none (.expr (sourceReferenceReadAssign (ds self) ssrc sj si) :
+        Source.RStmt E0 [] false .body SΓ SΓ) sy.1).run (.nil,sy.2)=(.ok (.normal sy.1),(.nil,z.2)) ∧
+      Stmt.run σ (.assignMem (.index .dyn (.var (dt self) rfl) (.simple (.local ti)))
+        (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))))=
+          .ok ⟨σ.withHeap (postHeap self),List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) 1 (dt self) tsrc ti tj) machine=.ok (postWord self) 0 ∧
+      SourceBoolRefsAt z (daddr self) (postHeap self) (dref self) addresses ∧ Source.MemOK E0 SH z ∧
+      RefArrayStateRepr 1 1 8 frag (σ.withHeap (postHeap self)) base (postWord self) ∧
+      SourceBoolMemoryAt z 0 (postHeap self) left .dyn ∧ SourceBoolMemoryAt z 1 (postHeap self) right .dyn ∧
+      z.1=sy.1 ∧ z.2.heap.next=5 ∧
+      (∀ q : HRef H B,(postHeap self).get q=hp.get q) ∧
+      (∀ {Q : RefTy} (q : HRef H Q),(dref self).id≠q.id → (postHeap self).get q=hp.get q) ∧
+      (∀ a,a≠daddr self → z.2.heap.get a=sy.2.heap.get a) ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) ∧
+      StructAllocatorRepr (postHeap self) base 8 ⟨48,by decide⟩ (postWord self) ∧
+      (postWord self).stack=[w[42]] := by
+  have result := (dat self).computed_reference_assign_word (G0 p) F0 fuel nps sy σ (dref self) fresh
+    (daddr self) 3 addresses fresh_at (ds self) ssrc sj si (dt self) tsrc ti tj ⟨0,by decide⟩ ⟨1,by decide⟩
+    (by cases self <;> rfl) rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl
+    (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide) SH source_memOK initial_repr
+  obtain ⟨out,z,hit,child,hw,read,expr,stmt,native,word,hr,mok,represented,locals,elems,children,sourceChildren,other,addrs,next,effects,alloc⟩ := result
+  have srcElems : MObj.elems .dyn (σ.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+  simp only [srcElems,List.getElem_cons_succ,List.getElem_cons_zero] at hw expr word represented alloc
+  have known : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+    rfl
+  have outEq : out=postHeap self := Option.some.inj (hw.symm.trans known)
+  subst out
+  refine ⟨z,expr,stmt,native,word,hr,mok,represented,sourceChildren left left_at,sourceChildren right right_at,locals,next,children,other,addrs,effects,?_,rfl⟩
+  apply alloc ⟨48,by decide⟩ allocator
+  cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,Heap.get,Objs.get,hp,old,fresh,MObj.elems_dyn,base] <;> decide
+
+private def cells : List Nat := [0,1,2,3,4,5,6,7,16,17,18,19,24,25,26,27,32,33,36,37,38,39,44,45]
+private def words (m : Machine) := cells.map m.mem
+private def views (h : Heap H) := (MObj.elems .dyn (h.get left),MObj.elems .dyn (h.get right),
+  (MObj.elems .dyn (h.get old)).map HRef.id,(MObj.elems .dyn (h.get fresh)).map HRef.id,(MObj.elems .dyn (h.get empty)).map HRef.id)
+private def sourceViews (y : Source.EMState E0 SΓ) := [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private def expectedSource (self : Bool) : List (Option (Σ τ : Source.STy, Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+   some ⟨SR,pdata (if self then [left] else [right])⟩,
+   some ⟨SR,pdata (if self then [right,right,left] else [left,right,left])⟩,some ⟨SR,pdata []⟩]
+private theorem post_elems (self : Bool) :
+    MObj.elems .dyn ((postHeap self).get (dref self))=(if self then [left,right,left] else [left]).set 0 right := by
+  unfold postHeap
+  rw [Heap.get_set_same,MObj.elems_setElem]
+  cases self <;> rw [MObj.elems_dyn] <;> rfl
+
+/-- All five native objects and every represented word are ordered observations,
+including source sharing, empty parent, untouched children, guard/free-pointer,
+and retained root-alias cells. -/
+theorem complete_reference_vectors (self : Bool) :
+    words machine=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (postWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap self)=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    sourceViews sy=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    (postWord self).mem 0=w[48] ∧ (postWord self).stack=[w[42]] := by
+  cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+  all_goals
+    refine ⟨rfl,rfl,?_,?_,rfl,rfl,rfl⟩
+    · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+    · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil]
+      rfl
+
+private theorem source_tables (self : Bool) (z : Source.EMState E0 SΓ)
+    (hr : SourceBoolRefsAt z (daddr self) (postHeap self) (dref self) addresses)
+    (other : ∀ a,a≠daddr self → z.2.heap.get a=sy.2.heap.get a) : sourceViews z=expectedSource self := by
+  have hp := hr.parent
+  rw [post_elems] at hp
+  cases self
+  · change z.2.heap.get 2=some ⟨SR,pdata [right]⟩ at hp
+    unfold sourceViews expectedSource
+    rw [hp,other 0 (by decide),other 1 (by decide),other 3 (by decide),other 4 (by decide)]
+    rfl
+  · change z.2.heap.get 3=some ⟨SR,pdata [right,right,left]⟩ at hp
+    unfold sourceViews expectedSource
+    rw [hp,other 0 (by decide),other 1 (by decide),other 2 (by decide),other 4 (by decide)]
+    rfl
+
+/-- The SAME executed assignment reaches RIGHT's false inner value; the retained
+LEFT object still reads true. Complete Source tables and no fresh address5
+show existing identity replacement rather than payload copy/allocation. -/
+theorem computed_reference_observations (p : Roadmap.Pipeline) (fuel nps : Nat) (self : Bool) :
+    ∃ z : Source.EMState E0 SΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign (ds self) ssrc sj si)).run sy=
+        (.ok (.val (.memRef rfl 1)),z) ∧ sourceViews z=expectedSource self ∧
+      (Source.evalE (G0 p) F0 (fuel+3) (.indexArray (.indexArray (.local (ds self)) (.local sj) rfl) (.local sj) rfl)).run z=
+        (.ok (.val (.bool false)),z) ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run z=(.ok (.bool true),z) ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 1 0)).run z=(.ok (.bool false),z) ∧
+      (postHeap self).index (dref self) .dyn (uintOfNat 0)=some right ∧
+      (postHeap self).index right .dyn (uintOfNat 0)=some false ∧
+      z.1=sy.1 ∧ z.2.heap.next=5 ∧ z.2.heap.get 5=none ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) := by
+  obtain ⟨z,expr,stmt,native,word,hr,mok,represented,hl,hright,locals,next,children,other,addrs,effects,alloc,stack⟩ :=
+    computed_reference_client p fuel nps self
+  have leftRead : (postHeap self).index left .dyn (uintOfNat 0)=some true := by
+    simp only [Heap.index,children left,MObj.elems_dyn]
+    rfl
+  have rightRead : (postHeap self).index right .dyn (uintOfNat 0)=some false := by
+    simp only [Heap.index,children right,MObj.elems_dyn]
+    rfl
+  have selected : (postHeap self).index (dref self) .dyn (uintOfNat 0)=some right := by
+    change (MObj.elems .dyn ((postHeap self).get (dref self)))[(uintOfNat 0).val.toNat]?=some right
+    rw [post_elems]
+    cases self <;> rfl
+  have nested := hr.eval_nested_read (G0 p) F0 fuel (ds self) sj sj (uintOfNat 0) (uintOfNat 0) right false
+    (by rw [locals];cases self <;> rfl) (by rw [locals];rfl) (by rw [locals];rfl) selected rightRead
+  have lr := (hl.read_iff F0 (uintOfNat 0) true).mpr leftRead
+  have rr := (hright.read_iff F0 (uintOfNat 0) false).mpr rightRead
+  refine ⟨z,expr,source_tables self z hr addrs,nested,lr,rr,selected,rightRead,locals,next,?_,effects⟩
+  rw [addrs 5 (by cases self <;> decide)]
+  rfl
+
+/-- Actual initial RHS reads distinguish the supported selected index/parent
+from stale-parent or wrong-index selection. Whole output word vectors differ
+from an omitted redirect, although both child payloads are unchanged. -/
+theorem wrong_reference_negative (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local ssrc) (.local si) rfl)).run sy=
+      (.ok (.val (.memRef rfl 1)),sy) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local ssrc) (.local sj) rfl)).run sy=
+      (.ok (.val (.memRef rfl 0)),sy) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local sdst) (.local sj) rfl)).run sy=
+      (.ok (.val (.memRef rfl 0)),sy) ∧
+    words (postWord false)≠words machine ∧ words (postWord true)≠words machine := by
+  have f1 : hp.index fresh .dyn (uintOfNat 1)=some right := by rw [Heap.index,MObj.elems_dyn];rfl
+  have f0 : hp.index fresh .dyn (uintOfNat 0)=some left := by rw [Heap.index,MObj.elems_dyn];rfl
+  have o0 : hp.index old .dyn (uintOfNat 0)=some left := by rw [Heap.index,MObj.elems_dyn];rfl
+  refine ⟨fresh_at.eval_parent_read (G0 p) F0 fuel ssrc si (uintOfNat 1) right rfl rfl f1,
+    fresh_at.eval_parent_read (G0 p) F0 fuel ssrc sj (uintOfNat 0) left rfl rfl f0,
+    old_at.eval_parent_read (G0 p) F0 fuel sdst sj (uintOfNat 0) left rfl rfl o0,?_,?_⟩
+  · intro h
+    have x := congrArg (fun v => v[17]?) h
+    change some w[24]=some w[16] at x
+    cases x
+  · intro h
+    have x := congrArg (fun v => v[19]?) h
+    change some w[24]=some w[16] at x
+    cases x
+
+private def emptySource : Source.EMState E0 SΓ := (sy.1.set ssrc (.memRef rfl 4),sy.2)
+private def emptyState := σ.setLocal tsrc (some empty)
+private def emptyWord := writeMachine machine (cellOf 1 tsrc) (.val (base empty.id))
+private theorem emptySourceOK : Source.MemOK E0 SH emptySource := by
+  have h := Source.writeLoc_memOK (E := E0) (Γ := SΓ) (H := SH) F0 0 (.local ssrc)
+    (.memRef rfl 4) sy ⟨source_memOK,⟨SR,rfl,rfl⟩⟩
+  exact h
+
+/-- A genuinely represented literal empty parent rejects index0 before LHS
+execution. Source panic/state and erased native/word failure outcomes stay
+separate; no successful suffix, post-revert machine or rollback is invented. -/
+theorem empty_reference_rejection (p : Roadmap.Pipeline) (fuel : Nat) :
+    Source.MemOK E0 SH emptySource ∧
+    RefArrayStateRepr 1 1 8 frag emptyState base emptyWord ∧
+    (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc sj sj)).run emptySource=
+      (.error (.revert (Source.panicData .index)),emptySource) ∧
+    Stmt.run emptyState (.assignMem (.index .dyn (.var tdst rfl) (.simple (.local ti)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))))=.error .revert ∧
+    run (referenceReadWriteCode (C := C) 1 tdst tsrc ti ti) emptyWord=.revert := by
+  have hr : SourceBoolRefsAt emptySource 4 hp empty addresses := ⟨empty_at.parent,empty_at.children⟩
+  have source := hr.computed_reference_rhs_bounds (G0 p) F0 (fuel+1) sdst ssrc sj sj (uintOfNat 0) rfl rfl
+    (by simp only [Heap.len,MObj.elems_dyn];decide)
+  have represented : RefArrayStateRepr 1 1 8 frag emptyState base emptyWord := initial_repr.setMem tsrc empty
+  have badPath : (MPath.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))) : MPath C Γ (.ref B)).mvalT emptyState=.error .revert := by
+    simp only [MPath.mvalT,MLoc.addrT,Val.evalT,Simple.evalT,
+      show TEnv.get tsrc emptyState.env=some empty from rfl,
+      show TEnv.get ti emptyState.env=uintOfNat 0 from rfl,Heap.readAddr,Heap.index,MObj.elems_dyn,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    rfl
+  have native : TRun.assignMem (.index .dyn (.var tdst rfl) (.simple (.local ti)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))) emptyState=.error .revert := by
+    simp only [TRun.assignMem,MSrc.mvalT]
+    rw [badPath]
+    rfl
+  have rhs : RefPtrFrag (C := C) 1 frag (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))
+      ([.mload (cellOf 1 tsrc)] ++ compileVal 1 (.simple (.local ti) : Val C Γ .uint) ++ readArrayStackCode) :=
+    .index (.var tsrc rfl) _ (.local tsrc rfl) _ rfl
+  have whole := RefPtrFrag.writeReference represented (RefPtrFrag.local tdst rfl) rhs (.simple (.local ti)) rfl
+  rw [native] at whole
+  refine ⟨emptySourceOK,represented,source,native,?_⟩
+  rcases whole with ⟨o,t,impossible,_⟩ | ⟨_,run⟩
+  · cases impossible
+  · exact run
+
+/-- True destination endpoint1 is independently invalid while RHS fresh[1]
+successfully reads the existing right child. The source state is unchanged. -/
+theorem destination_reference_rejection (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc si si)).run sy=
+      (.error (.revert (Source.panicData .index)),sy) ∧
+    Stmt.run σ (.assignMem (.index .dyn (.var tdst rfl) (.simple (.local tj)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))))=.error .revert ∧
+    run (referenceReadWriteCode (C := C) 1 tdst tsrc tj tj) machine=.revert := by
+  have hq : hp.index fresh .dyn (uintOfNat 1)=some right := by rw [Heap.index,MObj.elems_dyn];rfl
+  have loc : (Source.evalLoc (G0 p) F0 (fuel+3) (.indexArray (.local sdst) (by decide) (.local si) rfl)).run sy=
+      (.error (.revert (Source.panicData .index)),sy) := by
+    rw [Source.evalLoc,Source.Hoare.run_bind,source_local_value_run (G0 p) F0 (fuel+1) sy sdst (.memRef rfl 2) rfl]
+    change ((Source.evalE (G0 p) F0 (fuel+2) (.local si)) >>= fun v => Source.indexNat v >>= fun k =>
+      Source.indexLoc F0 (.memRef rfl 2 : Source.Val E0.layout SR) k).run sy=_
+    rw [Source.Hoare.run_bind,source_local_value_run (G0 p) F0 (fuel+1) sy si _ rfl]
+    change (Source.indexLoc F0 (.memRef rfl 2 : Source.Val E0.layout SR) (uintOfNat 1).val.toNat).run sy=_
+    exact old_at.indexLoc_bounds F0 _ (by simp only [Heap.len,MObj.elems_dyn];decide)
+  have source : (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc si si)).run sy=
+      (.error (.revert (Source.panicData .index)),sy) := by
+    rw [sourceReferenceReadAssign,Source.evalE,Source.Hoare.run_bind,
+      fresh_at.eval_parent_read (G0 p) F0 (fuel+1) ssrc si (uintOfNat 1) right rfl rfl hq]
+    change ((Source.evalLoc (G0 p) F0 (fuel+3) (.indexArray (.local sdst) (by decide) (.local si) rfl)) >>=
+      fun l => Source.writeLoc F0 (fuel+3) l (.memRef rfl 1) >>= fun _ => pure (Source.RVal.val (.memRef rfl 1))).run sy=_
+    rw [Source.Hoare.run_bind,loc]
+  have hqState : σ.heap.index fresh .dyn (uintOfNat 1)=some right := hq
+  have path : (MPath.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))) : MPath C Γ (.ref B)).mvalT σ=.ok right := by
+    simp only [MPath.mvalT,MLoc.addrT,Val.evalT,Simple.evalT,
+      show TEnv.get tsrc σ.env=some fresh from rfl,show TEnv.get tj σ.env=uintOfNat 1 from rfl,
+      Heap.readAddr,hqState,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+  have fail : σ.heap.writeAddr (.index old .dyn (uintOfNat 1)) right=none := by
+    change hp.setIndex old .dyn (uintOfNat 1) right=none
+    unfold Heap.setIndex
+    rw [MObj.elems_dyn]
+    exact if_neg (by decide)
+  have native : TRun.assignMem (.index .dyn (.var tdst rfl) (.simple (.local tj)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))) σ=.error .revert := by
+    simp only [TRun.assignMem,MSrc.mvalT]
+    rw [path]
+    simp only [MLoc.addrT,MPath.mvalT,Val.evalT,Simple.evalT,
+      show TEnv.get tdst σ.env=some old from rfl,show TEnv.get tj σ.env=uintOfNat 1 from rfl,
+      fail,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+  have rhs : RefPtrFrag (C := C) 1 frag (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))
+      ([.mload (cellOf 1 tsrc)] ++ compileVal 1 (.simple (.local tj) : Val C Γ .uint) ++ readArrayStackCode) :=
+    .index (.var tsrc rfl) _ (.local tsrc rfl) _ rfl
+  have whole := RefPtrFrag.writeReference initial_repr (RefPtrFrag.local tdst rfl) rhs (.simple (.local tj)) rfl
+  rw [native] at whole
+  refine ⟨source,native,?_⟩
+  rcases whole with ⟨o,t,impossible,_⟩ | ⟨_,run⟩
+  · cases impossible
+  · exact run
+
+/-- Insufficient expression horizon times out before the pointer read/write.
+This is an evaluator observation, not a target halt or rollback theorem. -/
+theorem reference_read_timeout (p : Roadmap.Pipeline) :
+    (Source.evalE (G0 p) F0 2 (sourceReferenceReadAssign sdst ssrc sj si)).run sy=(.error .timeout,sy) := by
+  cases p <;> rfl
+
+/-- Selecting the already stored LEFT from fresh[0] is an executed same-pointer
+no-op on every object table and represented word, not a deep-copy operation. -/
+theorem same_pointer_noop (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    ∃ z : Source.EMState E0 SΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc sj sj)).run sy=(.ok (.val (.memRef rfl 0)),z) ∧
+      Stmt.run σ (.assignMem (.index .dyn (.var tdst rfl) (.simple (.local ti)))
+        (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))))=.ok ⟨σ.withHeap hp,List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) 1 tdst tsrc ti ti) machine=.ok (writeMachine machine 33 w[16]) 0 ∧
+      sourceViews z=sourceViews sy ∧ words (writeMachine machine 33 w[16])=words machine ∧
+      z.1=sy.1 ∧ z.2.heap.next=5 ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) := by
+  have result := old_at.computed_reference_assign_word (G0 p) F0 fuel nps sy σ old fresh 2 3 addresses fresh_at
+    sdst ssrc sj sj tdst tsrc ti ti ⟨0,by decide⟩ ⟨0,by decide⟩
+    rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide)
+    (by simp only [Heap.len,MObj.elems_dyn];decide) SH source_memOK initial_repr
+  obtain ⟨out,z,hit,child,hw,read,expr,stmt,native,word,hr,mok,represented,locals,elems,children,sourceChildren,other,addrs,next,effects,alloc⟩ := result
+  have srcElems : MObj.elems .dyn (σ.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+  simp only [srcElems,List.getElem_cons_zero] at hw expr word
+  have known : hp.writeAddr (.index old .dyn (indexValue ⟨0,by decide⟩)) left=some hp := by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,Heap.get,Objs.get,hp,old,MObj.elems_dyn,MObj.setElem_dyn,Heap.set,Objs.set]
+    simp only [show 0<[left].length from by decide,↓reduceIte,List.set]
+  have equal : out=hp := Option.some.inj (hw.symm.trans known)
+  subst out
+  refine ⟨z,expr,native,word,?_,rfl,locals,next,effects⟩
+  have parent : z.2.heap.get 2=sy.2.heap.get 2 := hr.parent.trans old_at.parent.symm
+  unfold sourceViews
+  rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 3 (by decide),addrs 4 (by decide)]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.same_pointer_noop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms same_pointer_noop
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.empty_reference_rejection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_reference_rejection
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.destination_reference_rejection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms destination_reference_rejection
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_read_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_read_timeout
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_reference_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_observations
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.wrong_reference_negative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms wrong_reference_negative
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_client
+
+end Solidity.Backend.MemoryOps.SourceReferenceReadControls

@@ -181,3 +181,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceUintReadAssignmentControls.lean` | Inhabited computed-RHS distinct/aliased clients, complete twenty-word/Source/native vectors and endpoint/timeout negatives. |
 
 | `Backend/MemoryOps/SourceUintReadSequence.lean` | Reached computed-RHS propagation: actual Source Items/native Prog/full Objects word append, initial bounds and composed allocator/world frames. |
+
+| `Backend/MemoryOps/SourceReferenceRead.lean` | Computed parent-element reference RHS: actual Source/native/published whole pointer write, selected-child derivation, frames and allocator transport. |
+| `Backend/MemoryOps/SourceReferenceReadControls.lean` | Inhabited distinct/same-parent/no-op clients, complete five-object/twenty-four-word observations, nested reads and exact bounds/timeout distinctions. |
