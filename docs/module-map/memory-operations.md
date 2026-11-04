@@ -318,3 +318,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedDefault.lean` | Actual production default selection with total guarded allocation/refusal and complete result transport. |
 | `Backend/MemoryCopies/CheckedDefaultControls.lean` | Inhabited nested defaults, impossible-capacity refusal and unused huge child controls. |
 | `Backend/MemoryCopies/CheckedReferenceInterface.lean` | Complete-demand runtime reference-array default guard and allocation/refusal contract. |
+| `Backend/MemoryCopies/CheckedReference.lean` | Actual division-based full-demand guard and total reference-array default execution. |
+| `Backend/MemoryCopies/CheckedReferenceControls.lean` | Nested runtime defaults, unused oversized children and inhabited quotient-boundary controls. |
