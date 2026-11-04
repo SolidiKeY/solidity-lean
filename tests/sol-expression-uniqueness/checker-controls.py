@@ -54,8 +54,8 @@ for name in pins:
     reject_pins(corrupt)
 with patch.object(sys, "argv", ["audit"]):
     with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-        assert audit.main() == 1, "inventory must not substitute for proof acceptance"
-print(f"CHECKER_CONTROLS_PASS: empty, {len(pins)} missing, extra, {len(pins)} corrupt pins; default acceptance stays blocked")
+        assert audit.main() == 1, "proof-scope acceptance must not substitute for required global gates"
+print(f"CHECKER_CONTROLS_PASS: empty, {len(pins)} missing, extra, {len(pins)} corrupt pins; full global acceptance stays blocked")
 
 
 def reject_data(name, value, mode="--inventory"):
@@ -150,3 +150,83 @@ reject_report(report.replace("Classical.choice", "sorryAx", 1))
 reject_report(report.replace("Classical.choice,\n Quot.sound]", "Classical.choice,\n Quot.sound", 1))
 require_positive_baseline()
 print("AXIOM_REPORT_CONTROLS_PASS: actual wrapped standard lists accepted; duplicate, forbidden and unterminated reports rejected")
+
+
+reject_data("constructor-identity.json", read("constructor-identity.json")[:-1])
+bad = read("constructor-identity.json")
+bad[0]["theorem"] = bad[1]["theorem"]
+reject_data("constructor-identity.json", bad)
+bad = read("operators.json")
+bad[-1]["constructors"] = bad[-1]["constructors"][:-1]
+reject_data("operators.json", bad)
+reject_data("boundaries.json", read("boundaries.json")[:-1])
+with patch.object(audit, "original_target_text", lambda: "∀ a, a = a"), patch.object(sys, "argv", ["audit", "--inventory"]):
+    with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+        try:
+            audit.main()
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("changed original theorem target accepted")
+by_name = {r["name"]: r for r in read("declarations.json")}
+bad = {name: dict(row) for name, row in by_name.items()}
+name = "Solidity.Frontend.ExpressionUniqueness.certifiedYieldUnique"
+bad[name]["source_signature"] = "theorem certifiedYieldUnique (h : CertifiedYieldUnique) : CertifiedYieldUnique"
+with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+    try:
+        audit.audit_complete_proof(bad, [r["constructor"] for r in read("constructors.json")], read("constructors.json"))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("circular public uniqueness premise accepted")
+require_positive_baseline()
+print("COMPLETE_PROOF_CONTROLS_PASS: omitted/remapped constructor step, missing intrinsic operator/boundary, changed original target and added circular public premise rejected")
+
+reject_data("recursive-cases.json", read("recursive-cases.json")[:-1])
+bad = read("recursive-cases.json")
+bad[0]["categories"] = ["list.expr"]
+reject_data("recursive-cases.json", bad)
+require_positive_baseline()
+print("RECURSIVE_CASE_CONTROLS_PASS: missing recursive constructor or optional/parameter category rejected")
+
+reject_data("kernel-module-declarations.json", read("kernel-module-declarations.json")[:-1], "--checkpoint")
+reject_data("kernel-declarations.json", read("kernel-declarations.json")[:-1], "--checkpoint")
+bad = read("kernel-declarations.json")
+bad.append(bad[0])
+reject_data("kernel-declarations.json", bad, "--checkpoint")
+bad = read("environment-summary.json")
+bad["audit"]["source_sha256"] = "0"*64
+reject_data("environment-summary.json", bad, "--checkpoint")
+bad = read("environment-summary.json")
+bad["extra_names_also_kernel"] = 0
+reject_data("environment-summary.json", bad, "--checkpoint")
+for role in ("names", "audit"):
+    run = read("environment-summary.json")[role]
+    path = "evidence/"+run["stem"]+".inside.json"
+    bad = read(path)
+    bad["verification_hashes"][run["source"]] = "0"*64
+    reject_data(path, bad, "--checkpoint")
+    bad = read(path)
+    bad["exit"] = 1
+    reject_data(path, bad, "--checkpoint")
+require_positive_baseline()
+print("KERNEL_ENVIRONMENT_CONTROLS_PASS: omitted/duplicate kernel rows, module omission, stale actual verifier hash, failed command and hidden compiler/logical overlap rejected")
+
+reject_data("kernel-emissions.json", read("kernel-emissions.json")[:-1], "--checkpoint")
+bad = read("kernel-emissions.json")
+bad.append(bad[0])
+reject_data("kernel-emissions.json", bad, "--checkpoint")
+bad = read("kernel-module-declarations.json")
+next(row for row in bad if row["ownership"])["ownership"][0]["owner"] = "Solidity.Source.Syntax"
+reject_data("kernel-module-declarations.json", bad, "--checkpoint")
+require_positive_baseline()
+print("KERNEL_OWNER_CONTROLS_PASS: missing/duplicated emissions and changed actual kernel ownership rejected; repeated metadata copies require identical types/axioms")
+
+bad = read("environment-compression.json")
+next(row for row in bad if row["original"].endswith("environment-audit-gates-sealed/1.log"))["compressed_sha256"] = "0"*64
+reject_data("environment-compression.json", bad, "--checkpoint")
+bad = read("kernel-declarations.json")
+bad[0]["type_expr_sha256"] = "0"*64
+reject_data("kernel-declarations.json", bad, "--checkpoint")
+require_positive_baseline()
+print("STREAMED_TYPE_TRACE_CONTROLS_PASS: corrupted lossless archive provenance and changed compact type hashes rejected; full trace preserved and full repeated types compared")

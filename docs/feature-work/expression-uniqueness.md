@@ -1,9 +1,10 @@
 # SOL-EU: certified expression yield uniqueness
 
-Status: substantive partial proof checkpoint. H26 resolved runtime setup on this
-same VM; EU-R1 is closed without changing limits. The full assignment is NOT
-complete. Recursive expression tree reconstruction, public uniqueness and the accepted-tree
-corollary remain open. No ambiguity has been established.
+Status: the original certified uniqueness theorem and accepted-tree corollaries
+are kernel-checked by exhaustive intrinsic induction. All1241declaration axiom pins and
+all2323unique logical declaration type/axiom audits pass. H26 runtime setup remains resolved without changing
+limits. The full assignment is NOT complete: frozen integration and required
+global gates remain open. No certified ambiguity has been found.
 
 Base: `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
 Branch: `codex/solidity-sol2-20261104/expression-uniqueness`.
@@ -11,7 +12,7 @@ Repository: `/workspace/solidity-lean`. The previous inventory-only commit
 `7642fc89d68bc9ee12acceafcd829902d532f960` and its failed setup probes remain honest
 history. The current immutable packet records its own exact committed head.
 
-## Original theorem target (open)
+## Original theorem target (kernel-proved)
 
 `CertifiedYieldUnique` in `Statement.lean` records this proposition in the existing
 namespace `Solidity.Frontend.ExpressionUniqueness`:
@@ -22,7 +23,8 @@ namespace `Solidity.Frontend.ExpressionUniqueness`:
   b.Derives ts → b.prec = true → a = b
 ```
 
-It is a definition of an OPEN obligation, not a theorem inhabiting it. Layouts
+The original definition is preserved exactly. certifiedYieldUnique in the Certified module
+inhabits it; certified_expression_yield_unique exposes the original premises. Layouts
 are independently existential through the existing `Syn.Derives`. Equivalently
 quantify `La Lb` and require `a.toks La = some ts` and `b.toks Lb = some ts`.
 Layout equality is neither a premise nor a conclusion. Successful `Syn.toks`
@@ -34,17 +36,18 @@ No second AST, parser edit, new producer assumption or theorem exclusion exists.
 The accepted-tree corollary must combine `parseCat_sound` with the public
 uniqueness theorem: an accepted `parseCat expr src` tree equals any certified
 expression deriving that same successful lexical result's tokens. Parser
-determinism alone does not establish this. The corollary is still open.
+determinism alone does not establish this. parseCat_expression_accepted_unique in the Accepted module proves this using the original
+parseCat_sound certificate, with a same-source cross-producer corollary as well.
 
 ## Exhaustive inventory and scope
 
 `tests/sol-expression-uniqueness/constructors.json` enumerates all 29 expression
 constructors in intrinsic declaration order, boundaries, root levels, root
-conditions, layouts and open reconstruction obligations. `constructor-controls.json`
+conditions, layouts and proved reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 1142 source declarations with source signatures;
+`declarations.json` enumerates all 1241 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The ninety-two modules are proposed for coordinator registration, with module-map rows,
+The one hundred modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -85,8 +88,8 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `Refusals` | Whole-`Syn.prec` refusal for both prefix/postfix readings, both conditional-assignment readings, all postfix-base classes, direct-new alternatives and all left/right association classes, for arbitrary subtrees and parameterized operator values. These constrain trees; they do not reconstruct roots from tokens. |
 | `Families` | Unbounded certified negative-prefix family with exact yields and injectivity in depth; arbitrary-depth grouping precedence preservation. Its grouping-yield obligation is now discharged by `Grouping`. |
 | `Fragments` | Arbitrary-byte/length-list reconstruction, exact fragment count, independent-layout byte uniqueness, inhabited single and zero-length-leading fragment controls and distinct layouts. |
-| `Primary` | Deterministic identifier/boolean/number/unit/elementary yields; identifier, boolean and numeric injectivity; all five literal families, including string tags, arbitrary payload lengths and independent layouts, have same-yield uniqueness. Other expression roots and recursive types remain open. |
-| `Statement` | The original open uniqueness proposition; no proof value. |
+| `Primary` | Deterministic identifier/boolean/number/unit/elementary yields; identifier, boolean and numeric injectivity; all five literal families, including string tags, arbitrary payload lengths and independent layouts, have same-yield uniqueness. Certified closes other expression roots and recursive types. |
+| `Statement` | The unchanged original uniqueness proposition, inhabited in Certified. |
 | `Fixtures` | All 29 accepted-root controls, four documented refusals, four additional postfix bases and grouped accepted alternatives, proved with `decide +kernel`. |
 | `YieldShape` | All 29 expression roots have exactly one nonempty item on every successful partial-layout execution; optional empty tokens identify absence, and `some e` preserves the expression printer. |
 | `YieldBalance` | Compositional balance for items, flattening, separators, type spellings, operators and literal fragments. |
@@ -98,9 +101,9 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `SeparatorSplit` | Actual commaSep injectivity on nonempty component vectors, allowing empty words; arbitrary hole-count reconstruction; explicit zero-vector versus single-empty collision. |
 | `CommaFreeAlgebra` | Comma-free token/item/attribute algebra; enclosures need only balanced interiors, allowing internal commas. |
 | `ExpressionCommaFree` | Exhaustive expression closure yields have no top-level commas; original expression certificates supply every scanner condition in certified component-span reconstruction. This concludes word-vector equality, not child-tree equality. |
-| `LowFreeAlgebra` | Joint question/assignment selector includes all 13 assignment operators; loose-root-free token, type-spelling and attribute algebra. |
+| `LowFreeAlgebra` | Joint question/assignment selector includes all 12 assignment operators; loose-root-free token, type-spelling and attribute algebra. |
 | `ExpressionLowFree` | Existing recursive precedence plus level ≥ 2 derives loose-marker freedom for all expression roots; type and call-argument outer words are unconditionally free, including arbitrary enclosed descendants. |
-| `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Assignment and conditional child spans are now proved in BinarySpans and ConditionalSpans; recursive tree identity remains open. |
+| `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Assignment and conditional child spans are now proved in BinarySpans and ConditionalSpans; recursive tree identity is closed by Certified. |
 | `LowControls` | Every assignment operator and arbitrary prefix depth inhabit a conditional middle branch with exact yield and whole precedence; the first marker is the outer question, never that middle assignment. |
 | `BinaryFreeAlgebra` | Parameterized exact binary-rank markers and token/attribute algebra; prefix helper records its necessary rank-10 limitation. |
 | `ExpressionBinaryFree` | Original certificates imply marker freedom above each rank 2–9, 11 and 12, across all constructors and reachable type/call syntax. Its raw-rank-10 limitation is handled by the later operand-sensitive `AddRoot` proof. |
@@ -155,7 +158,7 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `LiteralPrefix` | Arbitrary same-kind literal token runs reconstruct maximal prefixes; unit denomination separates ordinary numeric literals under derived postfix followers. |
 | `PrimaryPrefixParts` | Scalar, keyword and balanced-enclosure primary prefix cuts; new types use the internally derived follower boundary. |
 | `PrimaryStart` | Existing unindexed Ctor and actual first-token classes distinguish primary families; literal/unit share a header class until the proved follower-sensitive cut. |
-| `PrimaryPrefix` | Exhaustive9primary families reconstruct actual word prefixes, including literal/unit crosscase disjointness; recursive tree identity remains open. |
+| `PrimaryPrefix` | Exhaustive9primary families reconstruct actual word prefixes, including literal/unit crosscase disjointness; recursive tree identity is closed by Certified. |
 | `AllRootLevels` | All certified root levels0through16 reconstruct at independent actual layouts; primary spine and prefix cut derive15versus16 separation. |
 | `RootLevelControls` | Arbitrary postfix towers and new-array depths reconstruct levels against any certified competitor; direct-new square/period first followers refuted, call/options heads permitted without arbitrary-tail validity. |
 | `RecursiveProperty` | Word/vector structural induction predicates on existing Syn; list vectors preserve holes. No public instance asserted. |
@@ -172,12 +175,20 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `MappingKeyIdentity` | Existing unindexed MapKey word prefix, key/name/arrow reconstruction and arbitrary elementary/path key identity. |
 | `MappingIdentity` | Actual key/value/name fields recover mapping identity using only structural valuechild IH, against all type competitors. |
 | `TypeIdentityControls` | Arbitrary array family WordUnique against ANY certified competitor, plus empty function type child-premise closure. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 1142 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `BinaryIdentity` | All12ordinarybinary/assignment expression identity steps, arbitrary operators/trees, actual original root and child cuts. |
+| `BoundaryIdentity` | All6prefix/all2suffix operator and conditional identity steps from actual root levels/children. |
+| `PostfixIdentity` | All5postfix identity steps; optional/list child types and full options-tail vectors preserved. |
+| `PrimaryLeafIdentity` | Identifier, elementary, all5literal families and units compare against every certified root; independent fragments and original follower separation. |
+| `PrimaryChildIdentity` | New/meta/payable/tuple/inline identity steps, arbitrary component lengths and empty tuple holes retained. |
+| `Certified` | Exhaustive intrinsic mutual induction and exact original public CertifiedYieldUnique theorem, no added premise or parser assumption. |
+| `Accepted` | Original parseCat_sound supplies actual lexical/yield/precedence facts; accepted trees equal any certified competitor, including cross-producer same-source equality. |
+| `CertifiedControls` | Arbitrary arraydepth/paramcount/optionalreturns/attributeorder wrapped function expressions and tupleholes are inhabited; original directfunctionmeta refusal retained. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 1241 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
-skip facts from certificates, while recursive tree
-reconstruction remains open. Likewise
+skip facts from certificates, while Certified closes recursive tree
+reconstruction. Likewise
 `mkPayload` in a fragment helper is a token-constructor left-inverse condition;
 all three concrete string instantiations discharge it by `rfl`.
 
@@ -197,7 +208,9 @@ association, and the documented disagreements/grouping. Every source and its has
 expected shape, actual shape and parser errors are saved. `stopAfter: parsing`
 means these are external parser observations, not type checking, semantic compiler
 correctness, every operator spelling, every conditional/assignment cross-boundary,
-or kernel uniqueness proofs. Those broader obligations remain open.
+or kernel uniqueness proofs. Kernel uniqueness and all intrinsic operator/association classes are proved
+separately. Semantic compiler correctness and type-checking are not claimed by
+these external parsing observations.
 
 ## Runtime and measured validation
 
@@ -213,13 +226,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-recursive.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-complete-final.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-recursive.inside.json`. It took 38.326629 seconds, child peak RSS
-270236 KiB, exact container peak 861724672 bytes, minimum parent headroom
-9615880192 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-complete-final.inside.json`. This command took 49.745508seconds, childRSS274040KiB,
+exactcgrouppeak844828672bytes, minimumparentheadroom9594183680bytes,
+with zeroOOM/resource stop. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -228,13 +241,13 @@ is labeled separately from exact memory.peak and per-child RSS.
 constructors, modules, declarations, proposed rows, fixture references and axiom
 guard inventory. `--checkpoint` additionally requires current-source kernel
 signature/axiom evidence, runtime bounds, KeySort and compiler observations.
-Default full acceptance remains exit 1 while the original target is open. Changing
+Default full acceptance remains exit1 while frozen integration/global gates are open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these ninety-two modules lack central root imports. The orphan gate
-reported the same ninety-two. Source trust passed (3764 sources, zero findings), and
+check: exactly these one hundred modules lack central root imports. The orphan gate
+reported the same one hundred. Source trust passed (3772 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 1142 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 1241 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -257,15 +270,43 @@ results are saved under the evidence directory; future proof checkpoints still
 require their own reviews.
 
 All expression/category delimiter, comma, precedence-marker and operand-state
-invariants are derived from actual certificates. Conditional, unary, binary,
-postfix and argument word spans reconstruct, and all root levels0through16 agree.
-Primary prefix cuts now derive the new-type boundary in its original certified
-context. Next prove recursive identities for intrinsic types/parameters,
-optional/list components, arguments and expression children, then assemble the
-public theorem and parseCat accepted-tree corollary. Do not add a desired split,
-parse completeness or uniqueness as a premise. Full boundary acceptance and
-registration-dependent gates remain open. Current artifacts are explicitly a
-partial proof checkpoint. No push, merge, PR, producer edit or scope expansion.
+invariants, actual root/child cuts and recursive identities are proved.
+recursive_yield_property in the Certified module exhaustively discharges all child hypotheses;
+certifiedYieldUnique inhabits the exact original target, and Accepted derives
+accepted-tree equality. Final source/signature/axiom and complete logical-declaration evidence passes.
+Bounded streamed proof acceptance/corruption controls PASS; global registration
+failures are confirmed. Independent finder/skeptic final metadata reviews PASS with no remaining findings. Frozen registration-dependent global gates and the full task
+handoff remain open. No push, merge, PR, producer edit or scope expansion.
+
+
+The complete kernel environment inventory has2323unique owned logical declarations
+(1241explicit source declarations plus1082generated logical declarations).
+All2447module metadata emissions were actually audited;124re-emissions have
+identical types/axioms and are canonicalized by Lean's actual declaration-owner
+map. Every defining-owner emission and explicit source name/owner is checked.
+The387extra compiler metadata names overlap34audited logical names; the353
+remaining compiler-only names have no separate kernel declaration/type claim.
+Both verifier tools are confined to owned tests and import Lean there only;
+actual command-start tool hashes, current library snapshots, full type Exprs,
+actual standard axiom sets, gates and resources bind the inventory. Corruption
+controls reject missing/duplicate emissions, poisoned ownership, changed target,
+circular public premise, stale tools, omitted boundaries/operators and hidden
+overlap. This tooling is evidence collection, not an extra mathematical premise.
+
+Two eager metadata validation attempts breached H1reserve and were stopped by
+the monitor (outerexit137/resource_stoptrue; wrapperexit125); they are failures,
+not passing proof gates. Full type trace size497393242bytes caused eager copying
+pressure. Lossless compression preserves all bytes in9983027bytes, with raw and
+compressed SHA256s; compact indexes retain type hashes/lengths and actual axioms.
+The reader streams the full trace, compares repeated FULL type strings and hashes
+every raw byte. Each acceptance rehashes compressed bytes; only verified compact
+rows may be memoized under raw/compressed hashes and exact expected multiplicities.
+Current library and actually executed verifier snapshots are checked before cache
+use. This may change validation speed; history had no speed-motivated implementation
+to undo. Formal proofs/budgets are unchanged. Recovery proof acceptance passes
+at39628KiB RSS/reserve10347106304bytes; allcorruptioncontrols at50040KiB RSS/
+reserve10334318592bytes. Complete failure/resource/preservation evidence is in
+`tests/sol-expression-uniqueness/evidence/memory-recovery.json`.
 
 ## Balance and grouping checkpoint
 
@@ -740,3 +781,85 @@ Continue the same goal/branch: all expression constructor identity steps and the
 exhaustive mutual induction, public CertifiedYieldUnique, parseCat corollary,
 scope-complete final acceptance and registration-dependent full gates remainOPEN.
 No target/premise/exclusion/refusal/observation/budget change or goal completion.
+
+
+## Complete original proof checkpoint
+
+Eight added modules bring the lane to100modules/1241source declarations.
+All29expression constructors have actual structural identity steps. Certified's
+exhaustive Syn induction closes every required expression/type/parameter/list/
+optional/argument cycle; no child uniqueness premise remains in the public
+theorem. CertifiedYieldUnique's original definition and premises are unchanged.
+Accepted-tree corollaries use original parseCat_sound and the proved uniqueness,
+not parser determinism. Per-file MCP reports zeroerrors for assembled proofs;
+actual final kernel/signature/axiom gates PASS without owned warnings.
+
+The checker now binds the unchanged original target text, exact public theorem
+signatures,29constructor identity steps and induction cases,17root levels and
+all34intrinsic operator constructors, plus actual kernel types/axiom guards and
+current source/runtime/fixture pins. It rejects an extra circular public premise,
+a changed target, missing/remapped step, missing operator or boundary. The pinned
+AssignOp has12constructors; a previous prose count13was corrected without any
+syntax, observation, refusal or theorem change. Full/default task acceptance
+remains closed until frozen registration-dependent global gates pass.
+
+New inhabited arbitrary-family controls vary type array depth, parameter count,
+optional returns and both successful visibility/mutability orders inside a
+meta-type ARRAY wrapper. The original DIRECTfunction-type meta refusal remains
+proved, with no broadened exclusion. Arbitrary tuplehole counts preserve all
+commas and compare against any certified competitor. Earlier string/layout,
+unary/postfix/group/mixedbinary/conditional/array controls and all130exactexternal
+parsing-only observations remain unchanged. Initial comma-vector normalization,
+missing-import/optional-category and flatten normalization failures, including
+assembled diagnostics_unavailable, are retained and never counted as passes.
+
+
+### Complete proof checkpoint handoff (integration pending)
+
+The unchanged CertifiedYieldUnique target is inhabited by certifiedYieldUnique;
+certified_expression_yield_unique exposes exactly independent Derives+prec
+premises. parseCat_expression_accepted_unique and parseCat_expression_same_source
+follow from original parseCat_sound. Actual axiom sets for these public theorems
+are exactly propext, Classical.choice and Quot.sound. No sorry/admit/unsafe or new axiom declarations were introduced; no premise,
+exclusion, refusal, observation or proof budget was weakened or raised.
+
+All100modules/1241explicit source declarations have actual kernel signatures and
+exact standard-only axiom guards. All2323unique owned logical declarations have
+full actual type/axiom evidence, through2447audited emissions/124consistent repeats.
+The full type trace is losslessly archived;387extra metadata names distinguish
+34already-audited logical overlaps from353compiler-only names. The Lean-importing
+auditors are verification tests only, never dependencies of the library. Source
+proof versus external130parsing-only observations versus compiler-codegen metadata
+remain distinct. All29expression/all13recursive cases,17levels,34operators,
+8frozen source pins, fixtures and arbitrary inhabited/negative controls are bound
+by acceptance, including adversarial provenance/owner/archive/target checks.
+
+Clean signature-audit-complete-final and checkpoint-proof-complete-final PASS;
+actual Lean4.24.0/Lake5.0.0-src+797c613 and KeySort377/131 PASS before
+RUNTIME_GATE_PASS. Streamed bounded proof acceptance and corruption checks PASS
+with zero resource stop; two eager reserve-stopped attempts are preserved as
+failures and explicitly recovered. Environment enumeration/audit tools and all
+library hashes are bound to successful resource-limited execution evidence.
+
+Actual globalrun-lean/orphans exit1at100frozen local registrations BEFORE full
+library/TestSuite confirmation. Trust3772sources/285sites/zero findings and
+layers559core/zero violations PASS. Central axiom-source inventory has zeroerrors
+but1241unrecorded standard pins and exits1. No integration gate is waived. The
+owned manifest proposes registration/map/pins and records already-published
+Fragments for coordinator deduplication. Full/global task acceptance and final
+integration gates remainOPEN; the original persistent goal is not completed.
+
+The checkpoint commit and immutable packet record exact base/head/branch/repository,
+full original patch/bundle, actual signatures/axioms/commands/exits/timings/RSS/
+cgroup peaks, independent reviews, complete source pins and SHA256 manifest.
+Continue on the same branch after coordinator integration; do not create/reset a
+goal, push, merge, change frozen roots/registries or expand scope.
+
+
+Final independent finder and skeptic source/streaming/metadata verdicts PASS,
+each with an independent current streamed proof-audit rerun and no remaining
+findings. Their actual verdicts and boundaries are in evidence/reviews-complete.json.
+This is a complete original SOURCE PROOF checkpoint with an integration-blocked
+assignment status, not full RUNTIME/task acceptance. Required global registrations,
+central pins and library/TestSuite/corpus/strict integration validation remainOPEN.
+The goal is retained and not marked complete. No scope question is pending.

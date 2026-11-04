@@ -1,0 +1,1 @@
+FAIL	lean:tests/sol-expression-uniqueness/environment-names.lean	2	/workspace/solidity-lean/tests/sol-expression-uniqueness/evidence/environment-names-gates-final/1.log	lake env lean --tstack=131072 tests/sol-expression-uniqueness/environment-names.lean

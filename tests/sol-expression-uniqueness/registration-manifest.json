@@ -1,6 +1,7 @@
 {
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "modules": [
+    "Solidity/Frontend/ExpressionUniqueness/Accepted.lean",
     "Solidity/Frontend/ExpressionUniqueness/AddControls.lean",
     "Solidity/Frontend/ExpressionUniqueness/AddFreeAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/AddRoot.lean",
@@ -16,9 +17,13 @@
     "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
     "Solidity/Frontend/ExpressionUniqueness/BinaryControls.lean",
     "Solidity/Frontend/ExpressionUniqueness/BinaryFreeAlgebra.lean",
+    "Solidity/Frontend/ExpressionUniqueness/BinaryIdentity.lean",
     "Solidity/Frontend/ExpressionUniqueness/BinaryRank.lean",
     "Solidity/Frontend/ExpressionUniqueness/BinaryRoot.lean",
     "Solidity/Frontend/ExpressionUniqueness/BinarySpans.lean",
+    "Solidity/Frontend/ExpressionUniqueness/BoundaryIdentity.lean",
+    "Solidity/Frontend/ExpressionUniqueness/Certified.lean",
+    "Solidity/Frontend/ExpressionUniqueness/CertifiedControls.lean",
     "Solidity/Frontend/ExpressionUniqueness/CommaFreeAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/ConditionalAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/ConditionalBalance.lean",
@@ -58,10 +63,13 @@
     "Solidity/Frontend/ExpressionUniqueness/ParameterWords.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixControls.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixFollowers.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PostfixIdentity.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixRootKind.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixSpans.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixYieldSplit.lean",
     "Solidity/Frontend/ExpressionUniqueness/Primary.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PrimaryChildIdentity.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PrimaryLeafIdentity.lean",
     "Solidity/Frontend/ExpressionUniqueness/PrimaryPrefix.lean",
     "Solidity/Frontend/ExpressionUniqueness/PrimaryPrefixParts.lean",
     "Solidity/Frontend/ExpressionUniqueness/PrimarySpine.lean",
@@ -95,6 +103,8 @@
     "Solidity/Frontend/ExpressionUniqueness/YieldSplit.lean"
   ],
   "declarations": [
+    "Solidity.Frontend.ExpressionUniqueness.parseCat_expression_accepted_unique",
+    "Solidity.Frontend.ExpressionUniqueness.parseCat_expression_same_source",
     "Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_addFree",
     "Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_lastAdd_none",
     "Solidity.Frontend.ExpressionUniqueness.finished_prefix_is_selected",
@@ -283,6 +293,30 @@
     "Solidity.Frontend.ExpressionUniqueness.binaryFree_single",
     "Solidity.Frontend.ExpressionUniqueness.arrange_binaryFree",
     "Solidity.Frontend.ExpressionUniqueness.attrsP_binaryFree",
+    "Solidity.Frontend.ExpressionUniqueness.exp_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.exp_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.mulDivMod_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.mulDivMod_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.addSub_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.addSub_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.shift_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.shift_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.bitAnd_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.bitAnd_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.bitXor_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.bitXor_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.bitOr_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.bitOr_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.order_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.order_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.equality_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.equality_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.and_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.and_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.or_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.or_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.assign_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.assign_word_unique",
     "Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker",
     "Solidity.Frontend.ExpressionUniqueness.expr_level_twelve_cases",
     "Solidity.Frontend.ExpressionUniqueness.certified_exp_marker",
@@ -334,6 +368,52 @@
     "Solidity.Frontend.ExpressionUniqueness.add_child_spans",
     "Solidity.Frontend.ExpressionUniqueness.exp_child_spans",
     "Solidity.Frontend.ExpressionUniqueness.assignment_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.unaryPrefix_prec_child",
+    "Solidity.Frontend.ExpressionUniqueness.unaryPrefix_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.unarySuffix_prec_child",
+    "Solidity.Frontend.ExpressionUniqueness.unarySuffix_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.cond_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.cond_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property",
+    "Solidity.Frontend.ExpressionUniqueness.expression_yield_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.type_yield_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.parameter_yield_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.argument_yield_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.namedArg_yield_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.optional_expression_yield_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.certified_expression_yield_unique",
+    "Solidity.Frontend.ExpressionUniqueness.certifiedYieldUnique",
+    "Solidity.Frontend.ExpressionUniqueness.typedParameter",
+    "Solidity.Frontend.ExpressionUniqueness.typedParameterWord",
+    "Solidity.Frontend.ExpressionUniqueness.typedParameter_prec",
+    "Solidity.Frontend.ExpressionUniqueness.typedParameter_yield",
+    "Solidity.Frontend.ExpressionUniqueness.typedParameters",
+    "Solidity.Frontend.ExpressionUniqueness.typedParameters_prec",
+    "Solidity.Frontend.ExpressionUniqueness.typedParameters_yield",
+    "Solidity.Frontend.ExpressionUniqueness.functionReturns",
+    "Solidity.Frontend.ExpressionUniqueness.functionReturnWords",
+    "Solidity.Frontend.ExpressionUniqueness.functionReturns_prec",
+    "Solidity.Frontend.ExpressionUniqueness.functionReturns_yield",
+    "Solidity.Frontend.ExpressionUniqueness.functionOrder",
+    "Solidity.Frontend.ExpressionUniqueness.functionAttrs",
+    "Solidity.Frontend.ExpressionUniqueness.functionTypeFamily",
+    "Solidity.Frontend.ExpressionUniqueness.functionTypeWord",
+    "Solidity.Frontend.ExpressionUniqueness.functionTypeFamily_prec",
+    "Solidity.Frontend.ExpressionUniqueness.functionTypeFamily_yield",
+    "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr",
+    "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionWord",
+    "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_prec",
+    "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_yield",
+    "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_certified",
+    "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_any_competitor",
+    "Solidity.Frontend.ExpressionUniqueness.direct_function_meta_refused",
+    "Solidity.Frontend.ExpressionUniqueness.attribute_orders_distinct",
+    "Solidity.Frontend.ExpressionUniqueness.holeTuple",
+    "Solidity.Frontend.ExpressionUniqueness.holeTupleWord",
+    "Solidity.Frontend.ExpressionUniqueness.holeTuple_prec",
+    "Solidity.Frontend.ExpressionUniqueness.holeTuple_yield",
+    "Solidity.Frontend.ExpressionUniqueness.holeTuple_certified",
+    "Solidity.Frontend.ExpressionUniqueness.holeTuple_any_competitor",
     "Solidity.Frontend.ExpressionUniqueness.run_of_skip",
     "Solidity.Frontend.ExpressionUniqueness.commaFree_balanced",
     "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_balanced",
@@ -798,6 +878,16 @@
     "Solidity.Frontend.ExpressionUniqueness.word_append_nonempty_right",
     "Solidity.Frontend.ExpressionUniqueness.new_postfixFollower_typeBoundary",
     "Solidity.Frontend.ExpressionUniqueness.postfixFollower_tokenBoundary",
+    "Solidity.Frontend.ExpressionUniqueness.index_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.index_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.slice_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.slice_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.member_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.member_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.callOptions_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.callOptions_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.call_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.call_word_unique",
     "Solidity.Frontend.ExpressionUniqueness.postfixRootKind",
     "Solidity.Frontend.ExpressionUniqueness.postfixEndCode",
     "Solidity.Frontend.ExpressionUniqueness.tokenEndClass",
@@ -850,6 +940,23 @@
     "Solidity.Frontend.ExpressionUniqueness.literal_head_kind",
     "Solidity.Frontend.ExpressionUniqueness.literal_kind_determined",
     "Solidity.Frontend.ExpressionUniqueness.literal_same_yield",
+    "Solidity.Frontend.ExpressionUniqueness.commaSep_head_tail",
+    "Solidity.Frontend.ExpressionUniqueness.surround_word_injective",
+    "Solidity.Frontend.ExpressionUniqueness.new_prec_child",
+    "Solidity.Frontend.ExpressionUniqueness.new_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.metaType_prec_child",
+    "Solidity.Frontend.ExpressionUniqueness.metaType_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.payableConv_prec_child",
+    "Solidity.Frontend.ExpressionUniqueness.payableConv_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.tuple_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.tuple_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.inlineArray_prec_children",
+    "Solidity.Frontend.ExpressionUniqueness.inlineArray_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.primary_competitor_kind",
+    "Solidity.Frontend.ExpressionUniqueness.ident_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.elementary_expr_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.literal_word_unique",
+    "Solidity.Frontend.ExpressionUniqueness.unit_word_unique",
     "Solidity.Frontend.ExpressionUniqueness.expr_level_sixteen_cases",
     "Solidity.Frontend.ExpressionUniqueness.primary_yield_prefix_unique",
     "Solidity.Frontend.ExpressionUniqueness.ident_yield_prefix_unique",
@@ -1241,6 +1348,11 @@
   "module_map_rows": [
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/Accepted.lean",
+      "description": "Accepted expression trees equal every certified tree of their actual tokens"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/AddControls.lean",
       "description": "Inhabited arbitrary prefix and additive-root controls"
     },
@@ -1316,6 +1428,11 @@
     },
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/BinaryIdentity.lean",
+      "description": "Binary expression identity structural steps"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/BinaryRank.lean",
       "description": "Certified binary marker classes distinguish lower roots from higher roots"
     },
@@ -1328,6 +1445,21 @@
       "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/BinarySpans.lean",
       "description": "Recover binary child words from actual certified printer executions"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/BoundaryIdentity.lean",
+      "description": "Unary and conditional expression identity steps"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/Certified.lean",
+      "description": "Certified expression yield uniqueness over the original intrinsic syntax"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/CertifiedControls.lean",
+      "description": "Inhabited arbitrary-family controls for the complete theorem"
     },
     {
       "file": "docs/module-map/source-definitions.md",
@@ -1526,6 +1658,11 @@
     },
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PostfixIdentity.lean",
+      "description": "Postfix expression identity structural steps"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/PostfixRootKind.lean",
       "description": "The five postfix constructor families reconstruct from actual words"
     },
@@ -1543,6 +1680,16 @@
       "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/Primary.lean",
       "description": "Reconstruction of deterministic primary token yields"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PrimaryChildIdentity.lean",
+      "description": "Recursive primary expression identity steps"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PrimaryLeafIdentity.lean",
+      "description": "Primary expression leaf identity against every certified competitor"
     },
     {
       "file": "docs/module-map/source-definitions.md",
@@ -1709,7 +1856,7 @@
   "central_axiom_registration": {
     "file": "scripts/g07-axiom-pins.json",
     "source": "tests/sol-expression-uniqueness/axioms.json",
-    "count": 1142,
+    "count": 1241,
     "status": "pending coordinator integration; shared trust inventory frozen"
   },
   "published_integration": {
@@ -1719,5 +1866,18 @@
     ],
     "snapshot": "fe9575de638a188058bd93d0a4ea55750283e6cc",
     "note": "Coordinator reports only Fragments integrated. Current pinned-checkout proposals retain exhaustive local inventory; coordinator deduplicates already integrated registration at merge. Remaining work is not claimed integrated."
+  },
+  "generated_kernel_inventory": {
+    "source": "tests/sol-expression-uniqueness/kernel-declarations.json",
+    "module_source": "tests/sol-expression-uniqueness/kernel-module-declarations.json",
+    "summary": "tests/sol-expression-uniqueness/environment-summary.json",
+    "logical_declarations": 2323,
+    "explicit_source_declarations": 1241,
+    "compiler_metadata_names": 387,
+    "compiler_metadata_names_also_logical": 34,
+    "compiler_only_names": 353,
+    "tooling": "Lean imports are isolated to owned verification tests; compiler-only names have no additional kernel declaration/type/axiom claim.",
+    "audited_emissions": 2447,
+    "repeated_emissions": 124
   }
 }

@@ -1,0 +1,11 @@
+{
+  "command": "python3 scripts/check-sol-expression-uniqueness.py --proof",
+  "exit": 1,
+  "decisive_output": "AUDIT_FAIL: explicit source declarations missing from owning kernel modules",
+  "wall_seconds": null,
+  "peak_rss": null,
+  "metrics_note": "This initial host metadata check did not capture timing/RSS; bounded recovery gates do.",
+  "cause": "2447module metadata emissions contain2323unique logicalnames;124consistent re-emissions invalidated a global-unique-emission assumption.",
+  "resolution": "Lean getModuleIdxFor? actual owners captured; all emissions retained and checked, then canonicalized. All1241explicit names/owners and axioms match.",
+  "resolved_by": "complete-proof-acceptance-streaming / complete-checker-controls-streaming"
+}

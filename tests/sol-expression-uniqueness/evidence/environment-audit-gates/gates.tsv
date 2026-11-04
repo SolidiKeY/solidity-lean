@@ -1,0 +1,1 @@
+PASS	lean:tests/sol-expression-uniqueness/environment-audit.lean	55	/workspace/solidity-lean/tests/sol-expression-uniqueness/evidence/environment-audit-gates/1.log	lake env lean --tstack=131072 tests/sol-expression-uniqueness/environment-audit.lean

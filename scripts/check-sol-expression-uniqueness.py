@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """SOL-EU audit. --inventory is static; --checkpoint validates partial proof evidence.
-Default full acceptance stays closed while the original uniqueness target is open.
+Proof-scope acceptance checks the unchanged target and complete kernel evidence.
+Default full acceptance stays closed while registration-dependent global gates remain open.
 """
 import argparse
 import hashlib
+import gzip
+from collections import Counter
 import json
 from pathlib import Path
 import re
@@ -32,7 +35,7 @@ def digest(path):
 
 def declarations():
     rows = []
-    for path in sorted(AREA.glob("*.lean")):
+    for path in sorted(AREA.rglob("*.lean")):
         source = path.read_text()
         matches = list(re.finditer(r"^(def|theorem|inductive)\s+(\w+)", source, re.M))
         for i, match in enumerate(matches):
@@ -63,7 +66,152 @@ def actual_axiom_report():
     return reported, messages
 
 
+
+
+# Cache only compact, verified rows. Every call re-hashes the compressed bytes;
+# a changed archive/catalog or enumeration cannot reuse a prior verification.
+_ENVIRONMENT_AUDIT_CACHE = {}
+
+
+def stream_environment_emissions(archive, compression, declared):
+    compressed = digest(archive)
+    require(compressed == compression["compressed_sha256"] and
+            archive.stat().st_size == compression["compressed_bytes"], "compressed actual Lean output differs")
+    counts = Counter(name for module in declared for name in module["constants"])
+    key = (str(archive), compressed, compression["uncompressed_sha256"], compression["uncompressed_bytes"],
+           tuple(sorted(counts.items())))
+    if key in _ENVIRONMENT_AUDIT_CACHE:
+        return _ENVIRONMENT_AUDIT_CACHE[key]
+    raw_hash, raw_size = hashlib.sha256(), 0
+    remaining = counts.copy()
+    duplicate_types, rows = {}, []
+    prefix = b"OWNED_KERNEL_DECL "
+    with gzip.open(archive, "rb") as source:
+        for line in source:
+            raw_hash.update(line)
+            raw_size += len(line)
+            if not line.startswith(prefix):
+                continue
+            row = json.loads(line[len(prefix):])
+            typ = row.pop("type_expr")
+            require(isinstance(typ, str) and typ, "missing actual full kernel type")
+            name = row["name"]
+            require(name in counts and remaining[name] > 0, "unexpected/duplicate kernel emission name")
+            if counts[name] > 1:
+                if name in duplicate_types:
+                    require(duplicate_types[name] == typ, "re-emitted full kernel types differ")
+                else:
+                    duplicate_types[name] = typ
+            remaining[name] -= 1
+            if remaining[name] == 0:
+                duplicate_types.pop(name, None)
+            encoded = typ.encode()
+            row["type_expr_sha256"] = hashlib.sha256(encoded).hexdigest()
+            row["type_expr_bytes"] = len(encoded)
+            rows.append(row)
+    require(raw_size == compression["uncompressed_bytes"] and
+            raw_hash.hexdigest() == compression["uncompressed_sha256"], "lossless actual Lean output digest differs")
+    require(all(count == 0 for count in remaining.values()) and not duplicate_types,
+            "actual kernel emission stream is incomplete")
+    _ENVIRONMENT_AUDIT_CACHE[key] = rows
+    return rows
+
+
+def audit_kernel_environment(modules, decls, axioms):
+    summary = read("environment-summary.json")
+    current = {name: digest(ROOT/name) for name in modules}
+    role_sources = {"names": "tests/sol-expression-uniqueness/environment-names.lean",
+                    "audit": "tests/sol-expression-uniqueness/environment-audit.lean"}
+    outputs = {}
+    for role, source in role_sources.items():
+        run = summary[role]
+        require(run["source"] == source and run["source_sha256"] == digest(ROOT/source),
+                "environment verifier source hash differs: "+role)
+        require(re.fullmatch(r"[a-z][a-z0-9-]*", run["stem"]) and
+                re.fullmatch(r"[a-z][a-z0-9-]*", run["gate_dir"]), "invalid environment run reference")
+        inside = read("evidence/"+run["stem"]+".inside.json")
+        outer = read("evidence/"+run["stem"]+".outer.json")
+        require(inside["exit"] == outer["exit"] == 0 and not outer["resource_stop"],
+                "environment audit command failed: "+role)
+        require(inside["memory_max"] == 12884901888 and inside["memory_swap_max"] == 0 and
+                inside["lean_num_threads"] == 1 and outer["minimum_parent_headroom_bytes"] >= 4294967296,
+                "environment runtime/reserve differs: "+role)
+        require(inside["source_hashes"] == current and
+                inside["verification_hashes"][source] == run["source_sha256"],
+                "environment audit library or executed-tool snapshot is stale: "+role)
+        gate = (DATA/"evidence"/run["gate_dir"]/"gates.tsv").read_text().splitlines()
+        require(len(gate) == 1 and gate[0].startswith("PASS\tlean:"+source+"\t"),
+                "environment kernel/tool gate missing: "+role)
+        if role == "names":
+            outputs[role] = (DATA/"evidence"/run["gate_dir"]/"1.log").read_text()
+    def records(role, prefix):
+        return [json.loads(line[len(prefix):]) for line in outputs[role].splitlines() if line.startswith(prefix)]
+    declared = records("names", "OWNED_KERNEL_MODULE ")
+    require(summary["compression_catalog_sha256"] == digest(DATA/"environment-compression.json"),
+            "lossless output archive catalog differs")
+    original = "tests/sol-expression-uniqueness/evidence/"+summary["audit"]["gate_dir"]+"/1.log"
+    archives = [row for row in read("environment-compression.json") if row["original"] == original]
+    require(len(archives) == 1 and archives[0]["archive"] == original+".gz" and
+            summary["audit"]["log_archive"] == archives[0]["archive"], "actual full type trace archive missing")
+    emissions = stream_environment_emissions(ROOT/archives[0]["archive"], archives[0], declared)
+    require(declared == read("kernel-module-declarations.json") and emissions == read("kernel-emissions.json"),
+            "kernel declaration inventories differ from actual Lean output")
+    for key, path in (("module_inventory_sha256", "kernel-module-declarations.json"),
+                      ("emission_inventory_sha256", "kernel-emissions.json"),
+                      ("kernel_inventory_sha256", "kernel-declarations.json")):
+        require(summary[key] == digest(DATA/path), "kernel inventory digest differs: "+path)
+    expected_modules = {name[:-5].replace("/", ".") for name in modules}
+    require(len(declared) == len(expected_modules) and {row["module"] for row in declared} == expected_modules,
+            "environment module coverage differs")
+    expected = [(row["module"], name) for row in declared for name in row["constants"]]
+    actual = [(row["module"], row["name"]) for row in emissions]
+    require(len(expected) == len(set(expected)) == len(actual) == len(set(actual)) and set(expected) == set(actual),
+            "kernel emission audit missing/duplicate rows")
+    owners = {}
+    for module in declared:
+        require([row["name"] for row in module["ownership"]] == module["constants"],
+                "kernel ownership coverage differs")
+        for row in module["ownership"]:
+            require(row["owner"] in expected_modules and
+                    (row["name"] not in owners or owners[row["name"]] == row["owner"]),
+                    "actual kernel ownership differs across metadata emissions")
+            owners[row["name"]] = row["owner"]
+    groups = {}
+    for row in emissions:
+        groups.setdefault(row["name"], []).append(row)
+    canonical = []
+    for name, copies in sorted(groups.items()):
+        require(len({(row["kind"], row["type_expr_sha256"], row["type_expr_bytes"], tuple(row["axioms"])) for row in copies}) == 1,
+                "repeated kernel metadata has inconsistent type/axioms: "+name)
+        require((owners[name], name) in set(actual), "kernel defining-module entry missing")
+        row = copies[0]
+        canonical.append(dict(module=owners[name], name=name, kind=row["kind"], type_expr_sha256=row["type_expr_sha256"], type_expr_bytes=row["type_expr_bytes"],
+                              axioms=row["axioms"], emitting_modules=sorted(copy["module"] for copy in copies)))
+    require(canonical == read("kernel-declarations.json"), "unique owned kernel declarations differ")
+    by_name = {row["name"]: row for row in canonical}
+    require(all(row["name"] in by_name and by_name[row["name"]]["module"] == row["module"] for row in decls),
+            "explicit source declaration is missing or assigned to the wrong kernel owner")
+    for row in canonical:
+        require(row["kind"] in {"definition", "theorem", "opaque", "quotient", "constructor", "recursor", "inductive"} and
+                re.fullmatch(r"[0-9a-f]{64}", row["type_expr_sha256"]) and row["type_expr_bytes"] > 0 and
+                len(row["axioms"]) == len(set(row["axioms"])) and set(row["axioms"]) <= STANDARD,
+                "kernel type/kind/actual standard axiom set invalid: "+row["name"])
+    require(all(set(by_name[name]["axioms"]) == set(value) for name, value in axioms.items()),
+            "explicit source axiom pins differ from complete kernel audit")
+    extra = [name for row in declared for name in row["codegen_extra"]]
+    require(len(extra) == len(set(extra)), "duplicate compiler metadata name")
+    overlap = set(extra) & set(by_name)
+    counts = dict(modules=len(declared), kernel_declarations=len(canonical), kernel_emissions=len(emissions),
+                  repeated_emissions=len(emissions)-len(canonical), explicit_source_declarations=len(decls),
+                  extra_names=len(extra), extra_names_also_kernel=len(overlap), compiler_only_names=len(set(extra)-set(by_name)))
+    require(all(summary[key] == value for key, value in counts.items()), "kernel/compiler metadata counts differ")
+    print(f"KERNEL_ENVIRONMENT_PASS: {len(declared)} modules; {len(canonical)} unique owned logical declarations; "
+          f"{len(emissions)} audited emissions; {len(extra)} compiler metadata names "
+          f"({len(overlap)} also logical, {len(set(extra)-set(by_name))} compiler-only)")
+
+
 def audit_checkpoint(modules, decls, axioms):
+    audit_kernel_environment(modules, decls, axioms)
     runs = audit_runs()
     proof = read("evidence/"+runs["proof_stem"]+".inside.json")
     outer = read("evidence/"+runs["proof_stem"]+".outer.json")
@@ -76,6 +224,9 @@ def audit_checkpoint(modules, decls, axioms):
     log = (DATA/"evidence"/(runs["proof_stem"]+".log")).read_text()
     require("RUNTIME_GATE_PASS" in log and "377 taclets, 131 read-bearing" in log and
             "diag: 0 errors" in log, "runtime/KeySort/MCP evidence missing")
+    require("Lean (version 4.24.0" in log and "Lake version 5.0.0-src+797c613" in log and
+            log.index("377 taclets, 131 read-bearing") < log.index("RUNTIME_GATE_PASS"),
+            "actual versions or KeySort-before-marker ordering differs")
     gate = (DATA/"evidence"/runs["proof_gate_dir"]/"gates.tsv").read_text().splitlines()
     require(len(gate) == 1 and gate[0].startswith("PASS\tlean:Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean\t"),
             "axiom pin kernel gate missing")
@@ -115,7 +266,73 @@ def audit_checkpoint(modules, decls, axioms):
                 any(e["type"] == "ParserError" for e in row["errors"]), "compiler refusal stage differs")
     require(read("evidence/compiler-pinned.inside.json")["exit"] == 0, "external compiler command failed")
     print("CHECKPOINT_PASS: exact current proof sources, standard axiom pins, runtime and 130 external parsing controls")
-    print("Partial checkpoint only: recursive expression tree reconstruction and global uniqueness remain OPEN.")
+    print("Kernel proof scope is complete; registration-dependent full task gates remain OPEN.")
+
+
+
+# Fixed reviewed proof contracts, independent of mutable acceptance metadata.
+EXPRESSION_IDENTITY_STEPS = {'index': 'index_word_unique', 'slice': 'slice_word_unique', 'member': 'member_word_unique', 'callOptions': 'callOptions_word_unique', 'call': 'call_word_unique', 'payableConv': 'payableConv_word_unique', 'metaType': 'metaType_word_unique', 'unaryPrefix': 'unaryPrefix_word_unique', 'unarySuffix': 'unarySuffix_word_unique', 'exp': 'exp_word_unique', 'mulDivMod': 'mulDivMod_word_unique', 'addSub': 'addSub_word_unique', 'shift': 'shift_word_unique', 'bitAnd': 'bitAnd_word_unique', 'bitXor': 'bitXor_word_unique', 'bitOr': 'bitOr_word_unique', 'order': 'order_word_unique', 'equality': 'equality_word_unique', 'and': 'and_word_unique', 'or': 'or_word_unique', 'cond': 'cond_word_unique', 'assign': 'assign_word_unique', 'new': 'new_word_unique', 'tuple': 'tuple_word_unique', 'inlineArray': 'inlineArray_word_unique', 'ident': 'ident_word_unique', 'lit': 'literal_word_unique', 'litUnit': 'unit_word_unique', 'elemType': 'elementary_expr_word_unique'}
+OPERATOR_CONTRACTS = {'PrefixOp': ('unaryPrefix_word_unique', 'prefix_suffix_refused'), 'SuffixOp': ('unarySuffix_word_unique', 'suffix_prefix_refused'), 'MulOp': ('mulDivMod_word_unique', 'mulDivMod_right_nested_refused'), 'AddOp': ('addSub_word_unique', 'addSub_right_nested_refused'), 'ShiftOp': ('shift_word_unique', 'shift_right_nested_refused'), 'OrderOp': ('order_word_unique', 'order_right_nested_refused'), 'EqOp': ('equality_word_unique', 'equality_right_nested_refused'), 'AssignOp': ('assign_word_unique', 'assignment_left_nested_refused')}
+BOUNDARY_NEGATIVES = ['assignment_left_nested_refused', 'conditional_left_nested_refused', 'or_right_nested_refused', 'and_right_nested_refused', 'equality_right_nested_refused', 'order_right_nested_refused', 'bitOr_right_nested_refused', 'bitXor_right_nested_refused', 'bitAnd_right_nested_refused', 'shift_right_nested_refused', 'addSub_right_nested_refused', 'mulDivMod_right_nested_refused', 'exp_left_nested_refused', 'prefix_suffix_refused', 'suffix_prefix_refused', 'postfix_bases_refused', 'new_bases_refused']
+PUBLIC_PROOF_SIGNATURES = {'Solidity.Frontend.ExpressionUniqueness.parseCat_expression_accepted_unique': 'theorem parseCat_expression_accepted_unique {p : Nat → P (Syn .expr)} {src : Bytes} {tree : Syn .expr} {layout : List Choice} (accepted : parseCat p src = .ok (tree, layout)) : ∃ ps, lex src = .ok ps ∧ tree.toks layout = some (tokensOf ps) ∧ tree.prec = true ∧ ∀ other : Syn .expr, other.Derives (tokensOf ps) → other.prec = true → tree = other', 'Solidity.Frontend.ExpressionUniqueness.parseCat_expression_same_source': "theorem parseCat_expression_same_source {p q : Nat → P (Syn .expr)} {src : Bytes} {a b : Syn .expr} {la lb : List Choice} (accepted : parseCat p src = .ok (a, la)) (accepted' : parseCat q src = .ok (b, lb)) : a = b", 'Solidity.Frontend.ExpressionUniqueness.recursive_yield_property': 'theorem recursive_yield_property {c : Cat} (e : Syn c) : RecursiveYieldProperty e', 'Solidity.Frontend.ExpressionUniqueness.expression_yield_word_unique': 'theorem expression_yield_word_unique (e : Syn .expr) : WordUnique e', 'Solidity.Frontend.ExpressionUniqueness.certified_expression_yield_unique': 'theorem certified_expression_yield_unique (a b : Syn .expr) (ts : List Tok) (da : a.Derives ts) (ha : a.prec = true) (db : b.Derives ts) (hb : b.prec = true) : a = b', 'Solidity.Frontend.ExpressionUniqueness.certifiedYieldUnique': 'theorem certifiedYieldUnique : CertifiedYieldUnique'}
+RECURSIVE_CASE_CONTRACTS = [{'constructor': 'nil', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.nil_vector_unique', 'categories': ['list.expr', 'list.param', 'list.namedArg', 'list(opt.expr)']}, {'constructor': 'cons', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.cons_vector_unique', 'categories': ['list.expr', 'list.param', 'list.namedArg', 'list(opt.expr)']}, {'constructor': 'none', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.none_expr_word_unique', 'categories': ['opt.expr']}, {'constructor': 'some', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.some_expr_word_unique', 'categories': ['opt.expr']}, {'constructor': 'positional', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.positional_word_unique', 'categories': ['callArgs']}, {'constructor': 'named', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.named_word_unique', 'categories': ['callArgs']}, {'constructor': 'namedArg', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.namedArg_word_unique', 'categories': ['namedArg']}, {'constructor': 'param', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.parameter_word_unique', 'categories': ['param']}, {'constructor': 'elem', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.elementary_type_word_unique', 'categories': ['typeName']}, {'constructor': 'userType', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.user_type_word_unique', 'categories': ['typeName']}, {'constructor': 'mapping', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.mapping_type_word_unique', 'categories': ['typeName']}, {'constructor': 'fnType', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.fn_type_word_unique', 'categories': ['typeName']}, {'constructor': 'array', 'theorem': 'Solidity.Frontend.ExpressionUniqueness.array_type_word_unique', 'categories': ['typeName']}]
+ORIGINAL_TARGET = "∀ (a b : Syn .expr) (ts : List Tok), a.Derives ts → a.prec = true → b.Derives ts → b.prec = true → a = b"
+
+
+def original_target_text():
+    source = (AREA / "Statement.lean").read_text()
+    return " ".join(source.split("def CertifiedYieldUnique : Prop :=", 1)[1].split("end Solidity.Frontend.ExpressionUniqueness", 1)[0].split())
+
+
+def audit_complete_proof(by_name, constructors, ledger):
+    require(original_target_text() == ORIGINAL_TARGET, "original certified uniqueness target changed")
+    for name, signature in PUBLIC_PROOF_SIGNATURES.items():
+        require(name in by_name and by_name[name]["kind"] == "theorem" and
+                " ".join(by_name[name]["source_signature"].split()) == signature,
+                "public proof signature changed or missing: " + name)
+    identity = read("constructor-identity.json")
+    expected = [dict(constructor=c, theorem="Solidity.Frontend.ExpressionUniqueness."+EXPRESSION_IDENTITY_STEPS[c],
+                     assembly="Solidity.Frontend.ExpressionUniqueness.recursive_yield_property") for c in constructors]
+    require(identity == expected, "constructor identity/assembly ledger differs")
+    for row in identity:
+        name = row["theorem"]
+        require(name in by_name and by_name[name]["kind"] == "theorem" and
+                "WordUnique (Syn."+row["constructor"]+" " in by_name[name]["source_signature"],
+                "constructor identity theorem does not bind its intrinsic root: "+row["constructor"])
+    source = (AREA / "Certified.lean").read_text()
+    cases = re.findall(r"^  \| @?(\w+)\b", source, re.M)
+    require(all(cases.count(c) == 1 for c in constructors), "exhaustive expression induction case coverage differs")
+    require(read("recursive-cases.json") == RECURSIVE_CASE_CONTRACTS,
+            "recursive category/case-family inventory differs")
+    for row in RECURSIVE_CASE_CONTRACTS:
+        require(cases.count(row["constructor"]) == 1 and row["theorem"] in by_name and
+                by_name[row["theorem"]]["kind"] == "theorem", "recursive induction case/identity step missing")
+    syntax = (ROOT / "Solidity/Source/Syntax.lean").read_text()
+    expected_ops = []
+    for enum, (step, negative) in OPERATOR_CONTRACTS.items():
+        block = syntax.split("inductive "+enum+" where", 1)[1].split("  deriving", 1)[0]
+        expected_ops.append(dict(enum=enum, constructors=re.findall(r"\|\s*(\w+)", block),
+            identity="Solidity.Frontend.ExpressionUniqueness."+step,
+            negative="Solidity.Frontend.ExpressionUniqueness."+negative))
+    require(read("operators.json") == expected_ops, "intrinsic operator constructor coverage differs")
+    expected_boundaries = [dict(level=i, constructors=[r["constructor"] for r in ledger if r["level"] == i],
+        classification="Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+        negative="Solidity.Frontend.ExpressionUniqueness."+BOUNDARY_NEGATIVES[i]) for i in range(17)]
+    require(read("boundaries.json") == expected_boundaries, "precedence/association boundary coverage differs")
+    for row in expected_ops:
+        for key in ("identity", "negative"):
+            require(row[key] in by_name and by_name[row[key]]["kind"] == "theorem", "operator proof missing")
+    for row in expected_boundaries:
+        for key in ("classification", "negative"):
+            require(row[key] in by_name and by_name[row[key]]["kind"] == "theorem", "boundary proof missing")
+    controls = ["wrappedFunctionExpr_certified", "wrappedFunctionExpr_any_competitor", "direct_function_meta_refused",
+        "attribute_orders_distinct", "holeTuple_certified", "holeTuple_any_competitor", "arrayTypeFamily_word_unique",
+        "optionalHoles_actual_vector_identity", "postfixTower_certified", "prefixChain_certified", "suffixChain_certified",
+        "middleAssignment_certified", "groupFamily_certified", "mixedAddPrefix_certified"]
+    for name in controls:
+        full = "Solidity.Frontend.ExpressionUniqueness."+name
+        require(full in by_name and by_name[full]["kind"] == "theorem", "arbitrary inhabited/negative control missing: "+name)
+    print("PROOF_SCOPE_PASS: unchanged certified target, exhaustive29expression cases, all17levels, all intrinsic operators, accepted-tree corollaries and arbitrary-family controls")
 
 
 def main():
@@ -123,6 +340,7 @@ def main():
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--inventory", action="store_true")
     modes.add_argument("--checkpoint", action="store_true")
+    modes.add_argument("--proof", action="store_true")
     args = parser.parse_args()
     pins = read("source-pins.json")
     required = {"Solidity/Frontend/Checked/"+n+".lean" for n in
@@ -143,9 +361,11 @@ def main():
         require(0 <= row["level"] <= 16, "invalid precedence level")
     obligations = read("obligations.json")
     require([r["id"] for r in obligations] == [f"EU-{i:02}" for i in range(1, 15)], "obligation inventory differs")
-    require(all(r["status"] == "open" for r in obligations if r["id"] in {"EU-04", "EU-07", "EU-08", "EU-14"}),
-            "open target changed: extend actual proof acceptance before closing obligations")
-    modules = sorted(p.relative_to(ROOT).as_posix() for p in AREA.glob("*.lean"))
+    require(all(r["status"] == "proved" for r in obligations if r["id"] in
+                {"EU-02", "EU-03", "EU-04", "EU-05", "EU-06", "EU-07", "EU-08", "EU-10"}) and
+            all(r["status"] in {"partial", "open"} for r in obligations if r["id"] in {"EU-12", "EU-14"}),
+            "proof versus required-global-gate obligation status differs")
+    modules = sorted(p.relative_to(ROOT).as_posix() for p in AREA.rglob("*.lean"))
     manifest = read("registration-manifest.json")
     decls = declarations()
     require(manifest["base"] == BASE and manifest["modules"] == modules, "module registration inventory differs")
@@ -161,6 +381,7 @@ def main():
     require([r["constructor"] for r in controls] == constructors and
             all(r["theorem"] in names and r["input"] for r in controls), "constructor fixtures incomplete")
     by_name = {d["name"]: d for d in decls}
+    audit_complete_proof(by_name, constructors, ledger)
     for row in controls:
         ctor = row["constructor"]
         name = "Solidity.Frontend.ExpressionUniqueness.constructor_"+ctor
@@ -184,13 +405,13 @@ def main():
     print(f"INVENTORY_PASS: {len(constructors)} constructors; {len(modules)} modules; {len(decls)} source declarations; {len(pins)} source pins")
     for row in obligations:
         print(f'{row["id"]}: {row["status"]}: {row["obligation"]}')
-    if args.checkpoint:
+    if args.checkpoint or args.proof:
         audit_checkpoint(modules, decls, axioms)
         return 0
     if args.inventory:
         print("Static inventory only; no full task acceptance claimed.")
         return 0
-    print("ACCEPTANCE_OPEN: original certified expression uniqueness, root reconstruction, accepted-tree corollary and full final gates remain open.", file=sys.stderr)
+    print("ACCEPTANCE_OPEN: original kernel uniqueness and accepted-tree proof scope is complete; frozen registration and required full global gates remain open.", file=sys.stderr)
     return 1
 
 

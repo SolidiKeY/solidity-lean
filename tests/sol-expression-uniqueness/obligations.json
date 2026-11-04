@@ -8,44 +8,44 @@
   {
     "id": "EU-02",
     "obligation": "layout erasure and fragments reconstruction",
-    "status": "partial",
-    "evidence": "Actual attribute layouts independently reconstruct optional visibility/mutability fields from exhaustive successful0/1/2field runs, no canonical order premise. Full closure induction remains open."
+    "status": "proved",
+    "evidence": "Exhaustive intrinsic equality accounts for arbitrary independent fragment and attribute layouts; no layout equality premise. Actual attribute fields and arbitrary literal payloads reconstruct."
   },
   {
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
-    "status": "partial",
-    "evidence": "Actual certified primary spines derive first-postfix followers internally, including original not-new restrictions. All9primary word-prefix cuts recover actual boundaries; all previous arbitrary delimiter helpers retained."
+    "status": "proved",
+    "evidence": "Reusable arbitrary balanced/token/operand/conditional/comma cuts and all original source-derived scanner conditions completed; public proof introduces no desired split premise."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
-    "status": "open",
-    "evidence": "All certified root LEVELS0through16 reconstruct, including15vs16 from original primary spines. All5postfix kinds reconstruct at15 and9primary prefix families are exhaustive. Complete recursive root/tree identity remains open."
+    "status": "proved",
+    "evidence": "All17rootlevels/all29constructor families and actual operators/children reconstruct; exhaustive recursive_yield_property supplies full tree identity."
   },
   {
     "id": "EU-05",
     "obligation": "all operator associativity and precedence boundaries",
-    "status": "partial",
-    "evidence": "All original refusals retained. All root levels0through14 separate from higher certified roots, with actual child spans and correct associativity cuts. Arbitrary prefix/grouped-suffix chains cover all operator values. Complete recursive tree association remains open."
+    "status": "proved",
+    "evidence": "All34intrinsic operator constructors bound to universal identity and original refusal theorems; all17precedence/association classes, arbitrary trees and lengths covered. Frozen expected refusals unchanged."
   },
   {
     "id": "EU-06",
     "obligation": "primary/type/tuple/list/option/call argument uniqueness",
-    "status": "partial",
-    "evidence": "All5typeconstructors, parameter/namedArg/callArgs, list and opt.expr have structural identity steps using only actualchild IHs. Arbitrary array type families and optionalholevectors discharge their IHs against ANY certified competitor. Full mutual induction/expression assembly remains open."
+    "status": "proved",
+    "evidence": "Full mutual Syn induction closes every expression/type/param/namedArg/callArgs/list/optional cycle; list item vectors preserve tuple holes. All5typeconstructors and9primary families included."
   },
   {
     "id": "EU-07",
     "obligation": "certified expression yield uniqueness",
-    "status": "open",
-    "evidence": "Original proposition is defined, not inhabited."
+    "status": "proved",
+    "evidence": "certifiedYieldUnique inhabits the exact original target with only independent Derives+prec premises; actual kernel/MCP/signature/axiom guards PASS. Axioms exactly propext, Classical.choice, Quot.sound."
   },
   {
     "id": "EU-08",
     "obligation": "parseCat accepted-tree corollary",
-    "status": "open",
-    "evidence": "Accepted-tree corollary awaits public uniqueness."
+    "status": "proved",
+    "evidence": "Accepted.parseCat_expression_accepted_unique combines original parseCat_sound with certified uniqueness; same-source cross-producer corollary also proved. No parser determinism substitution."
   },
   {
     "id": "EU-09",
@@ -56,31 +56,31 @@
   {
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
-    "status": "partial",
-    "evidence": "Arbitraryarraydepth WordUnique againstANYcertifiedtypecompetitor, exactinhabitedfamilywitnesses, arbitraryoptionalholevectoridentity and rawflattenedlistcollision control. Earlier expression/boundary families retained."
+    "status": "proved",
+    "evidence": "Arbitrary depths/counts/optionalreturns/bothattributeorders inhabit wrapped function meta expressions; original DIRECTfnmeta refused. Arbitrarytupleholes, arrays, postfix/group/unary/mixedbinary families retained; controls compare ANYcertifiedcompetitor."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "92modules/1142declarations inventoried with exact actual kernel signatures and standard-only axiom guards; clean kernel/signature/MCP pass."
+    "evidence": "100modules/1241explicitsource declarations;2323uniqueownedlogical declarations across2447audited emissions;124re-emissions agree. Allactualkerneltypes/stdaxioms+exactSourcepins covered.387extra metadata names=34logical overlaps+353compiler-only; exactowners/toolhashes/resources/coverage checked."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/versions/KeySort/kernel/sourcehash gates pass. Global roots/orphans stop at92 pinned-local frozen registrations; trust3764zero/layers559zero pass; central axiom-source zero errors but1142unrecorded pins. Full global build remains open."
+    "evidence": "Complete-final kernel/MCP/versions/KeySort/axiom/environment gates PASS. Streamed proof acceptance and corruption controls PASS within H1. Two earlier eager metadata validations reserve-stopped and recovered, retained. Globalroot/orphan100missing/central1241unrecorded remainblocked; trust3772zero/layers559zeroPASS. Full library/TestSuite/corpus/strict integration gates have not passed."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
-    "status": "partial",
-    "evidence": "Independent finder/skeptic source and finalmetadata reviews accept14newrecursive/type modules, rerun checkpoint/corruption controls92/1142, no remaining findings and no Lean server/edits. See evidence/reviews-recursive.json."
+    "status": "pass",
+    "evidence": "Separate finder/skeptic source, streaming integrity and final metadata verdicts PASS; each independently reran current streamed --proof. No remaining findings, no Lean server/edits. See evidence/reviews-complete.json."
   },
   {
     "id": "EU-14",
     "obligation": "sealed full proof handoff",
     "status": "open",
-    "evidence": "Partial proof checkpoint packet only; full proof handoff remains open."
+    "evidence": "Complete original proof packet being prepared; full task handoff remains open until required global gates pass after frozen coordinator integration."
   }
 ]

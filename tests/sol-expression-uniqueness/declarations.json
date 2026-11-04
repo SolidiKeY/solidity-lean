@@ -1,5 +1,17 @@
 [
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Accepted",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.parseCat_expression_accepted_unique",
+    "source_signature": "theorem parseCat_expression_accepted_unique {p : Nat \u2192 P (Syn .expr)} {src : Bytes}\n    {tree : Syn .expr} {layout : List Choice} (accepted : parseCat p src = .ok (tree, layout)) :\n    \u2203 ps, lex src = .ok ps \u2227 tree.toks layout = some (tokensOf ps) \u2227 tree.prec = true \u2227\n      \u2200 other : Syn .expr, other.Derives (tokensOf ps) \u2192 other.prec = true \u2192 tree = other"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Accepted",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.parseCat_expression_same_source",
+    "source_signature": "theorem parseCat_expression_same_source {p q : Nat \u2192 P (Syn .expr)} {src : Bytes}\n    {a b : Syn .expr} {la lb : List Choice}\n    (accepted : parseCat p src = .ok (a, la)) (accepted' : parseCat q src = .ok (b, lb)) : a = b"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_addFree",
@@ -1128,6 +1140,150 @@
     "source_signature": "theorem attrsP_binaryFree {rank : Nat} (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : (BinaryFreeAttrs rank) singles) (hm : (BinaryFreeItems rank) mods) :\n    Produces (attrsP singles mods order) (BinaryFree rank)"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_prec_children",
+    "source_signature": "theorem exp_prec_children (left right : Syn .expr)\n    (hp : (Syn.exp left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_word_unique",
+    "source_signature": "theorem exp_word_unique (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.exp left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mulDivMod_prec_children",
+    "source_signature": "theorem mulDivMod_prec_children (op : MulOp) (left right : Syn .expr)\n    (hp : (Syn.mulDivMod op left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mulDivMod_word_unique",
+    "source_signature": "theorem mulDivMod_word_unique (op : MulOp) (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.mulDivMod op left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSub_prec_children",
+    "source_signature": "theorem addSub_prec_children (op : AddOp) (left right : Syn .expr)\n    (hp : (Syn.addSub op left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSub_word_unique",
+    "source_signature": "theorem addSub_word_unique (op : AddOp) (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.addSub op left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_prec_children",
+    "source_signature": "theorem shift_prec_children (op : ShiftOp) (left right : Syn .expr)\n    (hp : (Syn.shift op left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_word_unique",
+    "source_signature": "theorem shift_word_unique (op : ShiftOp) (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.shift op left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitAnd_prec_children",
+    "source_signature": "theorem bitAnd_prec_children (left right : Syn .expr)\n    (hp : (Syn.bitAnd left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitAnd_word_unique",
+    "source_signature": "theorem bitAnd_word_unique (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.bitAnd left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitXor_prec_children",
+    "source_signature": "theorem bitXor_prec_children (left right : Syn .expr)\n    (hp : (Syn.bitXor left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitXor_word_unique",
+    "source_signature": "theorem bitXor_word_unique (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.bitXor left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitOr_prec_children",
+    "source_signature": "theorem bitOr_prec_children (left right : Syn .expr)\n    (hp : (Syn.bitOr left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitOr_word_unique",
+    "source_signature": "theorem bitOr_word_unique (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.bitOr left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_prec_children",
+    "source_signature": "theorem order_prec_children (op : OrderOp) (left right : Syn .expr)\n    (hp : (Syn.order op left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_word_unique",
+    "source_signature": "theorem order_word_unique (op : OrderOp) (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.order op left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_prec_children",
+    "source_signature": "theorem equality_prec_children (op : EqOp) (left right : Syn .expr)\n    (hp : (Syn.equality op left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_word_unique",
+    "source_signature": "theorem equality_word_unique (op : EqOp) (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.equality op left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.and_prec_children",
+    "source_signature": "theorem and_prec_children (left right : Syn .expr)\n    (hp : (Syn.and left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.and_word_unique",
+    "source_signature": "theorem and_word_unique (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.and left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.or_prec_children",
+    "source_signature": "theorem or_prec_children (left right : Syn .expr)\n    (hp : (Syn.or left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.or_word_unique",
+    "source_signature": "theorem or_word_unique (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.or left right)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assign_prec_children",
+    "source_signature": "theorem assign_prec_children (op : AssignOp) (left right : Syn .expr)\n    (hp : (Syn.assign op left right).prec = true) : left.prec = true \u2227 right.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assign_word_unique",
+    "source_signature": "theorem assign_word_unique (op : AssignOp) (left right : Syn .expr)\n    (ihLeft : WordUnique left) (ihRight : WordUnique right) : WordUnique (Syn.assign op left right)"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker",
@@ -1432,6 +1588,282 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.assignment_child_spans",
     "source_signature": "theorem assignment_child_spans (op op' : AssignOp) (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.assign op a b).prec = true) (hp' : (Syn.assign op' c d).prec = true)\n    (hy : (Syn.assign op a b).yield initial = some (items, rest))\n    (hy' : (Syn.assign op' c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    op = op' \u2227 BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BoundaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryPrefix_prec_child",
+    "source_signature": "theorem unaryPrefix_prec_child (op : PrefixOp) (child : Syn .expr)\n    (hp : (Syn.unaryPrefix op child).prec = true) : child.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BoundaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unaryPrefix_word_unique",
+    "source_signature": "theorem unaryPrefix_word_unique (op : PrefixOp) (child : Syn .expr) (ih : WordUnique child) :\n    WordUnique (Syn.unaryPrefix op child)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BoundaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unarySuffix_prec_child",
+    "source_signature": "theorem unarySuffix_prec_child (op : SuffixOp) (child : Syn .expr)\n    (hp : (Syn.unarySuffix op child).prec = true) : child.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BoundaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unarySuffix_word_unique",
+    "source_signature": "theorem unarySuffix_word_unique (op : SuffixOp) (child : Syn .expr) (ih : WordUnique child) :\n    WordUnique (Syn.unarySuffix op child)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BoundaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.cond_prec_children",
+    "source_signature": "theorem cond_prec_children (condition yes no : Syn .expr)\n    (hp : (Syn.cond condition yes no).prec = true) :\n    condition.prec = true \u2227 yes.prec = true \u2227 no.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BoundaryIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.cond_word_unique",
+    "source_signature": "theorem cond_word_unique (condition yes no : Syn .expr)\n    (ihCondition : WordUnique condition) (ihYes : WordUnique yes) (ihNo : WordUnique no) :\n    WordUnique (Syn.cond condition yes no)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property",
+    "source_signature": "theorem recursive_yield_property {c : Cat} (e : Syn c) : RecursiveYieldProperty e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_yield_word_unique",
+    "source_signature": "theorem expression_yield_word_unique (e : Syn .expr) : WordUnique e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_word_unique",
+    "source_signature": "theorem type_yield_word_unique (e : Syn .typeName) : WordUnique e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.parameter_yield_word_unique",
+    "source_signature": "theorem parameter_yield_word_unique (e : Syn .param) : WordUnique e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.argument_yield_word_unique",
+    "source_signature": "theorem argument_yield_word_unique (e : Syn .callArgs) : WordUnique e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.namedArg_yield_word_unique",
+    "source_signature": "theorem namedArg_yield_word_unique (e : Syn .namedArg) : WordUnique e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.optional_expression_yield_word_unique",
+    "source_signature": "theorem optional_expression_yield_word_unique (e : Syn (.opt .expr)) : WordUnique e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certified_expression_yield_unique",
+    "source_signature": "theorem certified_expression_yield_unique (a b : Syn .expr) (ts : List Tok)\n    (da : a.Derives ts) (ha : a.prec = true) (db : b.Derives ts) (hb : b.prec = true) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Certified",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certifiedYieldUnique",
+    "source_signature": "theorem certifiedYieldUnique : CertifiedYieldUnique"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typedParameter",
+    "source_signature": "def typedParameter (n : Nat) : Syn .param"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typedParameterWord",
+    "source_signature": "def typedParameterWord (n : Nat) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typedParameter_prec",
+    "source_signature": "theorem typedParameter_prec (n : Nat) : (typedParameter n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typedParameter_yield",
+    "source_signature": "theorem typedParameter_yield (n : Nat) (rest : List Choice) :\n    (typedParameter n).yield rest = some ([typedParameterWord n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typedParameters",
+    "source_signature": "def typedParameters (n : Nat) : Nat \u2192 Syn (.list .param)\n  | 0 => .nil\n  | m + 1 => .cons (typedParameter n) (typedParameters n m)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typedParameters_prec",
+    "source_signature": "theorem typedParameters_prec (n m : Nat) : (typedParameters n m).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typedParameters_yield",
+    "source_signature": "theorem typedParameters_yield (n m : Nat) (rest : List Choice) :\n    (typedParameters n m).yield rest = some (List.replicate m (typedParameterWord n), rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionReturns",
+    "source_signature": "def functionReturns (n m : Nat) (enabled : Bool) : Syn (.list .param)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionReturnWords",
+    "source_signature": "def functionReturnWords (n m : Nat) (enabled : Bool) : List (List Tok)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionReturns_prec",
+    "source_signature": "theorem functionReturns_prec (n m : Nat) (enabled : Bool) : (functionReturns n m enabled).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionReturns_yield",
+    "source_signature": "theorem functionReturns_yield (n m : Nat) (enabled : Bool) (rest : List Choice) :\n    (functionReturns n m enabled).yield rest = some (functionReturnWords n m enabled, rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionOrder",
+    "source_signature": "def functionOrder (swap : Bool) : List Slot"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionAttrs",
+    "source_signature": "def functionAttrs (swap : Bool) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionTypeFamily",
+    "source_signature": "def functionTypeFamily (n m : Nat) (returns : Bool) : Syn .typeName"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionTypeWord",
+    "source_signature": "def functionTypeWord (n m : Nat) (returns swap : Bool) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionTypeFamily_prec",
+    "source_signature": "theorem functionTypeFamily_prec (n m : Nat) (returns : Bool) : (functionTypeFamily n m returns).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.functionTypeFamily_yield",
+    "source_signature": "theorem functionTypeFamily_yield (n m : Nat) (returns swap : Bool) (rest : List Choice) :\n    (functionTypeFamily n m returns).yield (.attrs (functionOrder swap) :: rest) =\n      some ([functionTypeWord n m returns swap], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr",
+    "source_signature": "def wrappedFunctionExpr (n m : Nat) (returns : Bool) : Syn .expr"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionWord",
+    "source_signature": "def wrappedFunctionWord (n m : Nat) (returns swap : Bool) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_prec",
+    "source_signature": "theorem wrappedFunctionExpr_prec (n m : Nat) (returns : Bool) : (wrappedFunctionExpr n m returns).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_yield",
+    "source_signature": "theorem wrappedFunctionExpr_yield (n m : Nat) (returns swap : Bool) (rest : List Choice) :\n    (wrappedFunctionExpr n m returns).yield (.attrs (functionOrder swap) :: rest) =\n      some ([wrappedFunctionWord n m returns swap], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_certified",
+    "source_signature": "theorem wrappedFunctionExpr_certified (n m : Nat) (returns swap : Bool) :\n    (wrappedFunctionExpr n m returns).Derives (wrappedFunctionWord n m returns swap) \u2227\n      (wrappedFunctionExpr n m returns).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.wrappedFunctionExpr_any_competitor",
+    "source_signature": "theorem wrappedFunctionExpr_any_competitor (n m : Nat) (returns swap : Bool) (other : Syn .expr)\n    (derived : other.Derives (wrappedFunctionWord n m returns swap)) (prec : other.prec = true) :\n    wrappedFunctionExpr n m returns = other"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.direct_function_meta_refused",
+    "source_signature": "theorem direct_function_meta_refused (params returns : Syn (.list .param))\n    (vis : Option Visibility) (mu : Option Mutability) : (Syn.metaType (.fnType params vis mu returns)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attribute_orders_distinct",
+    "source_signature": "theorem attribute_orders_distinct : functionOrder true \u2260 functionOrder false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.holeTuple",
+    "source_signature": "def holeTuple (n : Nat) : Syn .expr"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.holeTupleWord",
+    "source_signature": "def holeTupleWord (n : Nat) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.holeTuple_prec",
+    "source_signature": "theorem holeTuple_prec (n : Nat) : (holeTuple n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.holeTuple_yield",
+    "source_signature": "theorem holeTuple_yield (n : Nat) (rest : List Choice) : (holeTuple n).yield rest = some ([holeTupleWord n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.holeTuple_certified",
+    "source_signature": "theorem holeTuple_certified (n : Nat) : (holeTuple n).Derives (holeTupleWord n) \u2227 (holeTuple n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.CertifiedControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.holeTuple_any_competitor",
+    "source_signature": "theorem holeTuple_any_competitor (n : Nat) (other : Syn .expr)\n    (derived : other.Derives (holeTupleWord n)) (prec : other.prec = true) : holeTuple n = other"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
@@ -4218,6 +4650,66 @@
     "source_signature": "theorem postfixFollower_tokenBoundary (p : Tok \u2192 Bool) (flag : Bool) (tail : List Tok)\n    (hp : p (.punct .lparen) = false) (hb : p (.punct .lbrace) = false)\n    (hs : p (.punct .lbrack) = false) (hd : p (.punct .period) = false)\n    (h : PostfixFollower flag tail) : TokenBoundary p tail"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.index_prec_children",
+    "source_signature": "theorem index_prec_children (base : Syn .expr) (index : Syn (.opt .expr))\n    (hp : (Syn.index base index).prec = true) : base.prec = true \u2227 index.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.index_word_unique",
+    "source_signature": "theorem index_word_unique (base : Syn .expr) (index : Syn (.opt .expr))\n    (ihBase : WordUnique base) (ihIndex : WordUnique index) : WordUnique (Syn.index base index)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.slice_prec_children",
+    "source_signature": "theorem slice_prec_children (base : Syn .expr) (start : Syn (.opt .expr)) (stop : Syn (.opt .expr))\n    (hp : (Syn.slice base start stop).prec = true) : base.prec = true \u2227 start.prec = true \u2227 stop.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.slice_word_unique",
+    "source_signature": "theorem slice_word_unique (base : Syn .expr) (start : Syn (.opt .expr)) (stop : Syn (.opt .expr))\n    (ihBase : WordUnique base) (ihStart : WordUnique start) (ihStop : WordUnique stop) : WordUnique (Syn.slice base start stop)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.member_prec_children",
+    "source_signature": "theorem member_prec_children (base : Syn .expr) (name : String)\n    (hp : (Syn.member base name).prec = true) : base.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.member_word_unique",
+    "source_signature": "theorem member_word_unique (base : Syn .expr) (name : String)\n    (ihBase : WordUnique base) : WordUnique (Syn.member base name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.callOptions_prec_children",
+    "source_signature": "theorem callOptions_prec_children (base : Syn .expr) (first : Syn .namedArg) (args : Syn (.list .namedArg))\n    (hp : (Syn.callOptions base first args).prec = true) : base.prec = true \u2227 first.prec = true \u2227 args.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.callOptions_word_unique",
+    "source_signature": "theorem callOptions_word_unique (base : Syn .expr) (first : Syn .namedArg) (args : Syn (.list .namedArg))\n    (ihBase : WordUnique base) (ihFirst : WordUnique first) (ihArgs : VectorUnique args) : WordUnique (Syn.callOptions base first args)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.call_prec_children",
+    "source_signature": "theorem call_prec_children (base : Syn .expr) (args : Syn .callArgs)\n    (hp : (Syn.call base args).prec = true) : base.prec = true \u2227 args.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.call_word_unique",
+    "source_signature": "theorem call_word_unique (base : Syn .expr) (args : Syn .callArgs)\n    (ihBase : WordUnique base) (ihArgs : WordUnique args) : WordUnique (Syn.call base args)"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.postfixRootKind",
@@ -4528,6 +5020,108 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.literal_same_yield",
     "source_signature": "theorem literal_same_yield (a b : Lit) (ts : List Tok)\n    (ha : (Syn.lit a).Derives ts) (hb : (Syn.lit b).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.commaSep_head_tail",
+    "source_signature": "theorem commaSep_head_tail (first : List Tok) (rest : List (List Tok)) :\n    commaSep (first :: rest) = first ++ rest.flatMap (pu .comma ++ \u00b7)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.surround_word_injective",
+    "source_signature": "theorem surround_word_injective (left right : Tok) (xs ys : List Tok)\n    (words : left :: (xs ++ [right]) = left :: (ys ++ [right])) : xs = ys"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.new_prec_child",
+    "source_signature": "theorem new_prec_child (ty : Syn .typeName) (hp : (Syn.new ty).prec = true) : ty.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.new_word_unique",
+    "source_signature": "theorem new_word_unique (ty : Syn .typeName) (ih : WordUnique ty) : WordUnique (Syn.new ty)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.metaType_prec_child",
+    "source_signature": "theorem metaType_prec_child (ty : Syn .typeName) (hp : (Syn.metaType ty).prec = true) : ty.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.metaType_word_unique",
+    "source_signature": "theorem metaType_word_unique (ty : Syn .typeName) (ih : WordUnique ty) : WordUnique (Syn.metaType ty)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.payableConv_prec_child",
+    "source_signature": "theorem payableConv_prec_child (args : Syn .callArgs) (hp : (Syn.payableConv args).prec = true) : args.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.payableConv_word_unique",
+    "source_signature": "theorem payableConv_word_unique (args : Syn .callArgs) (ih : WordUnique args) : WordUnique (Syn.payableConv args)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tuple_prec_children",
+    "source_signature": "theorem tuple_prec_children (first : Syn (.opt .expr)) (rest : Syn (.list (.opt .expr)))\n    (hp : (Syn.tuple first rest).prec = true) : first.prec = true \u2227 rest.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tuple_word_unique",
+    "source_signature": "theorem tuple_word_unique (first : Syn (.opt .expr)) (rest : Syn (.list (.opt .expr)))\n    (ihFirst : WordUnique first) (ihRest : VectorUnique rest) : WordUnique (Syn.tuple first rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.inlineArray_prec_children",
+    "source_signature": "theorem inlineArray_prec_children (first : Syn .expr) (rest : Syn (.list .expr))\n    (hp : (Syn.inlineArray first rest).prec = true) : first.prec = true \u2227 rest.prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryChildIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.inlineArray_word_unique",
+    "source_signature": "theorem inlineArray_word_unique (first : Syn .expr) (rest : Syn (.list .expr))\n    (ihFirst : WordUnique first) (ihRest : VectorUnique rest) : WordUnique (Syn.inlineArray first rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryLeafIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.primary_competitor_kind",
+    "source_signature": "theorem primary_competitor_kind (a b : Syn .expr)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok))\n    (level : a.level = 16) (hp : a.prec = true) (hp' : b.prec = true)\n    (hy : a.yield initial = some (items, final)) (hy' : b.yield initial' = some (items', final'))\n    (words : items.flatten = items'.flatten) : b.level = 16 \u2227 primaryRootKind a = primaryRootKind b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryLeafIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ident_word_unique",
+    "source_signature": "theorem ident_word_unique (name : String) : WordUnique (Syn.ident name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryLeafIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.elementary_expr_word_unique",
+    "source_signature": "theorem elementary_expr_word_unique (value : Elem) (allowed : value \u2260 .addressPayable) : WordUnique (Syn.elemType value allowed)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryLeafIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.literal_word_unique",
+    "source_signature": "theorem literal_word_unique (literal : Lit) : WordUnique (Syn.lit literal)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryLeafIdentity",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unit_word_unique",
+    "source_signature": "theorem unit_word_unique (number : NumLit) (unit : Denom) : WordUnique (Syn.litUnit number unit)"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.PrimaryPrefix",

@@ -1,0 +1,26 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted complete original mathematical proof, controls and final verification metadata; full assignment blocked on frozen integration. No remaining findings.",
+    "method": "Separate independent read-only source review; no Lean server or edits.",
+    "proof": "All29expressionconstructors plus13recursivecasefamilies close actualchildIHs. PublicCertifiedYieldUnique exactoriginaltarget; parseCat_sound corollaries do not replace it by parserdeterminism. No new AST/premise/exclusion/refusal/budget changes.",
+    "controls": "Arbitrarytypearraydepth/paramcount/returns/attributeorders andtupleholes inhabited. DIRECTfnmeta original refusal retained. All34intrinsic operator constructors/all17boundaries checked.",
+    "environment": "ActualLeanowner map,2323unique logicaldecls/2447auditedemissions/124identicalre-emissions; all1241explicit names/owners/pins.387metadata names=34logical+353compiler-only. Exactcoverage/execution-role toolhashes/currentall100sourcehashes/resources/gates verified by checker.",
+    "findings": "Final accounting check caught repeated module metadata names; corrected using actual owner map without omitting any emission. Earlier comma normalizations and control type/import errors fixed and retained. No remaining source findings.",
+    "limitations": "Fullglobalintegration/registration-dependentgates remainopen; Sourceproofandstandardaxiomaudits are separate from130externalparsing-only observations.",
+    "final_metadata": "Independent current streamed --proof exit0; exact100modules/1241explicit/2323unique logical/2447emissions/124consistent repeats and387metadata=34logical+353compiler-only. Current sources/8pins/29fixtures/13recursivecases/17levels/34operators, standardaxioms, actualtools/resources/losslessarchives and recoveredH1failures agree. Finalboundedproof+controls pass. Global100registrations/1241centralpins and full library/TestSuite/integration remainopen. No Lean server/edits.",
+    "streaming_review": "Accepted literal full repeated-type comparison, raw/compressed hashes, exact multiplicities and fresh source/tool snapshots before compact cache use. Full trace preserved losslessly; no weakened acceptance."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Accepted complete original mathematical proof, controls and final verification metadata; full assignment blocked on frozen integration. No remaining findings.",
+    "method": "Separate independent read-only source review; no Lean server or edits.",
+    "proof": "All29expressionconstructors plus13recursivecasefamilies close actualchildIHs. PublicCertifiedYieldUnique exactoriginaltarget; parseCat_sound corollaries do not replace it by parserdeterminism. No new AST/premise/exclusion/refusal/budget changes.",
+    "controls": "Arbitrarytypearraydepth/paramcount/returns/attributeorders andtupleholes inhabited. DIRECTfnmeta original refusal retained. All34intrinsic operator constructors/all17boundaries checked.",
+    "environment": "ActualLeanowner map,2323unique logicaldecls/2447auditedemissions/124identicalre-emissions; all1241explicit names/owners/pins.387metadata names=34logical+353compiler-only. Exactcoverage/execution-role toolhashes/currentall100sourcehashes/resources/gates verified by checker.",
+    "findings": "Final accounting check caught repeated module metadata names; corrected using actual owner map without omitting any emission. Earlier comma normalizations and control type/import errors fixed and retained. No remaining source findings.",
+    "limitations": "Fullglobalintegration/registration-dependentgates remainopen; Sourceproofandstandardaxiomaudits are separate from130externalparsing-only observations.",
+    "final_metadata": "Independent current streamed --proof exit0; exact100modules/1241explicit/2323unique logical/2447emissions/124consistent repeats and387metadata=34logical+353compiler-only. Current sources/8pins/29fixtures/13recursivecases/17levels/34operators, standardaxioms, actualtools/resources/losslessarchives and recoveredH1failures agree. Finalboundedproof+controls pass. Global100registrations/1241centralpins and full library/TestSuite/integration remainopen. No Lean server/edits.",
+    "streaming_review": "Accepted literal full repeated-type comparison, raw/compressed hashes, exact multiplicities and fresh source/tool snapshots before compact cache use. Full trace preserved losslessly; no weakened acceptance."
+  }
+]

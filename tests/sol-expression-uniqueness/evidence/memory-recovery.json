@@ -1,0 +1,30 @@
+{
+  "cause": "Eager full-type JSON/trace copies with concurrent reviews exceeded H1reserve; own containers intentionally stopped, never counted as passes.",
+  "failed_attempts": [
+    {
+      "stem": "complete-proof-acceptance",
+      "outer_exit": 137,
+      "wrapper_exit": 125,
+      "resource_stop": true,
+      "minimum_parent_headroom_bytes": 3644559360,
+      "inner_result": null
+    },
+    {
+      "stem": "complete-checker-controls",
+      "outer_exit": 137,
+      "wrapper_exit": 125,
+      "resource_stop": true,
+      "minimum_parent_headroom_bytes": 4274016256,
+      "inner_result": null
+    }
+  ],
+  "unchanged_limits": "12GiB aggregate/zero swap/one heavy/4GiB reserve, no proof or timeout increase",
+  "preservation": "Full original traces and derived full-type JSON losslessly compressed and byte-hash verified before removing raw duplicates; environment-compression.json maps original paths to archives.",
+  "fix": "Stream actual full types; exact full-string comparison on re-emissions; cache compact rows only after raw/compressed hash and complete-count verification. Rehash archive bytes and refresh tool/library snapshots on every acceptance.",
+  "recovery_runs": [
+    "complete-proof-acceptance-streaming",
+    "complete-checker-controls-streaming"
+  ],
+  "history": "202d1e6a Reconstruct certified primary prefixes and all expression root levels\n51491fe6 Reconstruct certified assignment and conditional root classes\n28313260 Prove expression delimiter balance and grouping reconstruction\n098b02e0 Prove expression token and literal helpers\n",
+  "scope": "Verification tooling only, no library proof/target/premise/exclusion/budget change."
+}

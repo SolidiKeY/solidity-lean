@@ -24,7 +24,7 @@ def write(name, value):
 
 def collect():
     rows = []
-    for path in sorted(AREA.glob("*.lean")):
+    for path in sorted(AREA.rglob("*.lean")):
         source = path.read_text()
         matches = list(re.finditer(r"^(def|theorem|inductive)\s+(\w+)", source, re.M))
         for i, match in enumerate(matches):
@@ -43,7 +43,7 @@ def inventory(tag):
     (DATA/"signatures.lean").write_text("\n".join("import "+m for m in imports)+"\n\n"+
         "".join("#check "+r["name"]+"\n#print axioms "+r["name"]+"\n" for r in rows))
     manifest = read("registration-manifest.json")
-    paths = sorted(AREA.glob("*.lean"))
+    paths = sorted(AREA.rglob("*.lean"))
     manifest["modules"] = [p.relative_to(ROOT).as_posix() for p in paths]
     manifest["declarations"] = [r["name"] for r in rows]
     manifest["module_map_rows"] = []

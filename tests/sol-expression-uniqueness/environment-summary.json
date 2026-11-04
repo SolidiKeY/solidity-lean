@@ -1,0 +1,27 @@
+{
+  "names": {
+    "stem": "environment-ownership-final",
+    "gate_dir": "environment-ownership-gates-final",
+    "source": "tests/sol-expression-uniqueness/environment-names.lean",
+    "source_sha256": "07db4621f931a9e35cb8a002ed54a2a0f8d886a3b9d0592d4de7db0fcde459b2"
+  },
+  "audit": {
+    "stem": "environment-audit-sealed",
+    "gate_dir": "environment-audit-gates-sealed",
+    "source": "tests/sol-expression-uniqueness/environment-audit.lean",
+    "source_sha256": "abc70a60f41e2a0f526ddc4cf70b996a2e3f7dbc2a616922e26a167423adc398",
+    "log_archive": "tests/sol-expression-uniqueness/evidence/environment-audit-gates-sealed/1.log.gz"
+  },
+  "modules": 100,
+  "kernel_declarations": 2323,
+  "explicit_source_declarations": 1241,
+  "extra_names": 387,
+  "extra_names_also_kernel": 34,
+  "compiler_only_names": 353,
+  "module_inventory_sha256": "9a41600dd820741ba11cc7083b80bb41824c9aa97085a857de7a2eb543df1e62",
+  "kernel_inventory_sha256": "cf9212df7c693abdec58b3cea493073cfde6851ed234ec94eb272646f2d5b6c3",
+  "kernel_emissions": 2447,
+  "repeated_emissions": 124,
+  "emission_inventory_sha256": "4f669725eafc5a314e4f05628c6372e9a0551ebc5fbcbfd35d53669a49349759",
+  "compression_catalog_sha256": "f87486881e35b58669e9adb35a275a45962900f4130202ff4671d379d009910e"
+}
