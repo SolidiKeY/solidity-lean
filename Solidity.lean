@@ -2899,6 +2899,8 @@ import Solidity.Yul.Views.DynamicStoreControls
 import Solidity.Yul.Views.DynamicUintControls
 import Solidity.Yul.Views.DynamicUintMemory
 import Solidity.Yul.Views.EnumeratedMemory
+import Solidity.Yul.Views.FiniteCellWrites
+import Solidity.Yul.Views.FiniteCellWritesControls
 import Solidity.Yul.Views.FiniteControls
 import Solidity.Yul.Views.FinitePaths
 import Solidity.Yul.Views.FiniteResidual

@@ -700,3 +700,14 @@ and halt. Duplicate writes retain real undo entries, equal-value static writes
 refuse, and empty traces remain pure. Controls cover both banks and nonzero
 padding. This proves same represented-path composition, not changing ownership,
 arbitrary path/program coverage or dirty-owned adequacy, and imposes no trace cap.
+
+`FiniteCellWrites` generalizes same-path repetition to finite lists of existing
+path-indexed registrations and intrinsic values. One fixed-frame Source program
+selects each bank from real declaration metadata. Registered physical-domain
+membership and initial separated views derive both final raw-bank reconstructions
+with original complements. Owner safety, static refusal and paired rollback use
+the actual operation list. Controls interleave packed neighbors, banks and a
+repeated path; reversing the trace changes the result. A request omitted from the
+physical registry still executes in Source, so registry evidence is not admission.
+These fixed-registry laws do not prove full live-layout or changing-ownership,
+dirty-representation or arbitrary Source/Yul program adequacy.
