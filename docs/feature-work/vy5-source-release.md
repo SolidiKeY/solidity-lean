@@ -64,3 +64,25 @@ all confirmed findings were fixed, tested and re-reviewed without further
 findings. The original native five optimized-viaIR journal failures and
 historical docs/G03 failures retain their actual exits. No verdict, observation,
 proof budget or semantic hold is changed.
+
+
+## Actual request-scope horizon increment
+
+Two laws now prove Grow and Approx for the existing requestScope under genuine
+per-balance body Grow/Approx premises and the same immutable plan. They use
+actual Source operations; no execution result is assumed. Approx.attempt_bind
+handles request cleanup followed by timeout rethrow without events; a blanket
+Approx.attempt rule is not used. Twelve inhabited controls retain full caller
+state, heap/log/function-local/journal prefixes and DEAD bytes. They cover
+all completed horizons of a real body family, zero-horizon timeout, exact2^256
+body input, drop versus request cut, cut0/cut1 and caught cuts that still halt.
+Different successful plans returning257/258 are a concrete non-Approx control.
+Input balance is not installed into an authority/account and is not a receipt.
+
+The first automated approximation attempt failed at captured timeout; that
+failure is retained. The corrected existing timeout-continuation rule passes.
+Finder and skeptic independently reviewed read-only without Lean/build/tests
+and found no issues. Actual plan-parametric evaluator induction (legacy
+GrowAt/ApproxAt use default disabled plans), fixed-plan Session consistency,
+H25 authority wiring and P8 realization remain open. This does not discharge
+the original24 obligations/six combinations or create fresh native evidence.

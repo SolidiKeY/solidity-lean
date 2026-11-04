@@ -122,3 +122,6 @@
 
 | `Source/MonetaryStorage.lean` | Actual persistent/transient mutable storage and typed-write preservation of explicit current-and-saved balance bounds, with static refusal unchanged. |
 | `Source/MonetaryStorageControls.lean` | Inhabited typed direct-storage controls: full caller state/prefixes, balance17, changed cells, static/type refusals and actual journal undo; not dispatched execution. |
+
+| `Source/FailureRequestHorizon.lean` | Actual requestScope event growth and fixed-plan horizon approximation with per-balance body premises; timeout cleanup rethrows without events. |
+| `Source/FailureRequestHorizonControls.lean` | Inhabited request horizon/full-state/wide-input/byte controls, cut/drop distinctions, caught-cut refusal and changed-plan counterexample. |

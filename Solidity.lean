@@ -2174,6 +2174,8 @@ import Solidity.Source.FailureNoCutsEffects
 import Solidity.Source.FailurePrimitives
 import Solidity.Source.FailureRequest
 import Solidity.Source.FailureRequestAdmission
+import Solidity.Source.FailureRequestHorizon
+import Solidity.Source.FailureRequestHorizonControls
 import Solidity.Source.FailureResources
 import Solidity.Source.FailureRuntimeControls
 import Solidity.Source.FailureTransactionControls
