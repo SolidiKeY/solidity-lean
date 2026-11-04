@@ -880,6 +880,8 @@ import Solidity.Backend.StructuredFlow.ExitControls
 import Solidity.Backend.StructuredFlow.ExitSelector
 import Solidity.Backend.StructuredFlow.ForContinueCompiler
 import Solidity.Backend.StructuredFlow.ForContinueCompilerControls
+import Solidity.Backend.StructuredFlow.ForReturnCompiler
+import Solidity.Backend.StructuredFlow.ForReturnCompilerControls
 import Solidity.Backend.StructuredFlow.MappedBranch
 import Solidity.Backend.StructuredFlow.MappedBranchControls
 import Solidity.Backend.StructuredFlow.MappedCondition
