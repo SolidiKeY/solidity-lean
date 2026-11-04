@@ -266,3 +266,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CanonicalArray.lean` | Derive all finite index reads from actual copied storage lookup, construct load inputs, guard empty paths and prove full declarations/refusals. |
 | `Backend/MemoryCopies/CanonicalArrayControls.lean` | Nested storage paths copying arbitrary finite uint payloads, distinct64-element observations, empty success and invalid empty-path refusal. |
 | `Backend/MemoryCopies/PublishedStorageInterface.lean` | Exact published StorageOps.ReachedEndpoint consumed at the unchanged local execution/composition boundary. |
+| `Backend/MemoryCopies/PublishedStorage.lean` | Published reached-storage execution converted to existing local composition certificates; same-store endpoint transport preserves every producer field. |
+| `Backend/MemoryCopies/PublishedStorageControls.lean` | Actual represented memory-array copy followed by published scalar SSTORE, reached allocator preservation and skipped-store rejection. |
