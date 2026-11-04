@@ -138,3 +138,5 @@
 | `Yul/LocalDoWhileHorizon.lean`, `Yul/Checks/LocalDoWhileHorizon.lean` | Exact completed body-first do/while horizon stability with concrete restored-body/guard producers and two-iteration controls. |
 
 | `Yul/LocalForPostHorizon.lean`, `Yul/Checks/LocalForPostHorizon.lean` | Exact guarded for/post completed horizon stability with concrete guard/body/post producers and retained post-effect controls. |
+
+| `Yul/LocalForInitHorizon.lean`, `Yul/Checks/LocalForInitHorizon.lean` | Exact Boolean/default scope and iteration agreement, concrete initializer stability and full present-guard/post for-statement completed horizons. |

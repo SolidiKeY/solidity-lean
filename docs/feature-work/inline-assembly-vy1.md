@@ -1560,3 +1560,29 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Thirteen scoped axiom reports use only Lean standard
 axioms. Raw failed standard automation remains separate from passing gates;
 no checking/proof limits were increased.
+
+### Full for initializer completed horizons
+
+`LocalForInitHorizon.scope_agrees` and `iteration_agrees` prove exact equality
+between existing Boolean scopes/iterations and their default-item body
+embeddings at every fuel, including halts and reached contexts. No agreement
+law is assumed. `initializerSuccessor` preserves the real added Boolean frame;
+`iterationSuccessor` transports the concrete guarded-post horizon through the
+proved equality. `successor` and `extension` compose actual initializer and
+iteration completion with unchanged final initializer removal, preserving the
+literal same caller raw frame for present Boolean guard/post certificates.
+Eleven controls reuse inhabited initialized-loop/body/post witnesses: scoped
+counter writes, retained initializer effects, skipped post, exact added frames,
+all-fuel scope/iteration agreement, different body/post timeout frames, dirty
+projection refusal and timeout-to-completion change.
+Normal completion is an explicit premise. Arbitrary for admission/control,
+timeout stability, general Source/readback/compiler adequacy and full P16
+remain open. No duplicate evaluator, assumed simulation, Source/ExtCall/layout,
+observation or proof-budget change is introduced. Full VY1/final gates remain
+open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Seventeen scoped axiom reports use only Lean standard
+axioms. Failed direct-reflexivity/standard-automation and redundant-rewrite
+attempts are retained as raw evidence; no statements or proof limits changed.

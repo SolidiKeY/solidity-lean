@@ -2513,6 +2513,7 @@ import Solidity.Yul.Checks.LocalDefaultUnchecked
 import Solidity.Yul.Checks.LocalDefaultWhile
 import Solidity.Yul.Checks.LocalDoWhileHorizon
 import Solidity.Yul.Checks.LocalExprStatement
+import Solidity.Yul.Checks.LocalForInitHorizon
 import Solidity.Yul.Checks.LocalForPostHorizon
 import Solidity.Yul.Checks.LocalIfHorizon
 import Solidity.Yul.Checks.LocalItemFailure
@@ -2754,6 +2755,7 @@ import Solidity.Yul.LocalDefaultUnchecked
 import Solidity.Yul.LocalDefaultWhile
 import Solidity.Yul.LocalDoWhileHorizon
 import Solidity.Yul.LocalExprStatement
+import Solidity.Yul.LocalForInitHorizon
 import Solidity.Yul.LocalForPostHorizon
 import Solidity.Yul.LocalIfHorizon
 import Solidity.Yul.LocalItemFailure

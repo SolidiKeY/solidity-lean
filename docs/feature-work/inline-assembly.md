@@ -319,3 +319,5 @@ VY1: recursive default-scoped while completed horizon stability and mutating-ite
 VY1: body-first recursive do/while completed horizon stability and two-iteration controls; see [lane handoff](inline-assembly-vy1.md#body-first-dowhile-completed-horizons). Full lane remains open.
 
 VY1: guarded for/post completed horizon stability and retained-post-effect controls; see [lane handoff](inline-assembly-vy1.md#guarded-forpost-completed-horizons). Full lane remains open.
+
+VY1: concrete full initialized-for completed horizon composition and exact scope/iteration agreement; see [lane handoff](inline-assembly-vy1.md#full-for-initializer-completed-horizons). Full lane remains open.
