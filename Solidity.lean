@@ -2391,6 +2391,7 @@ import Solidity.Syntax.Splice
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
 import Solidity.Theory.Mutability.Assignable
+import Solidity.Theory.Mutability.Closer
 import Solidity.Theory.Mutability.Payable
 import Solidity.Theory.Mutability.Pure
 import Solidity.Theory.Mutability.View
