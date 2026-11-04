@@ -40,9 +40,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 138 source declarations with source signatures;
+`declarations.json` enumerates all 218 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The eight modules are proposed for coordinator registration, with module-map rows,
+The fourteen modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -65,7 +65,7 @@ Member name `address` emits `Tok.elem .address`; other names emit `Tok.ident`.
 Tuple parentheses are syntax: `(e)` retains its one-component tuple node.
 Empty tuple components and empty positional/named arguments retain their
 commas, parentheses and braces. Inline arrays and call options have an intrinsic
-first element and are nonempty. No expression-empty-yield theorem is claimed yet.
+first element and are nonempty. `expr_derives_nonempty` now rules out empty expression yields at arbitrary size.
 
 Layout choices are consumed in preorder. String fragment lists are nonempty,
 allow zero-length fragments and must consume the literal bytes exactly. The three
@@ -81,15 +81,23 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 |---|---|
 | `TokenSplit` | Arbitrary-list delimiter execution, append and untouched-stack-suffix laws, equivalence of empty-stack balance and contextual balance, enclosure, mixed nesting, skipping enclosed markers and whole token-cut uniqueness. Deriving scanner hypotheses from every expression certificate remains open. |
 | `Refusals` | Whole-`Syn.prec` refusal for both prefix/postfix readings, both conditional-assignment readings, all postfix-base classes, direct-new alternatives and all left/right association classes, for arbitrary subtrees and parameterized operator values. These constrain trees; they do not reconstruct roots from tokens. |
-| `Families` | Unbounded certified negative-prefix family with exact yields and injectivity in depth; arbitrary-depth grouping precedence preservation. Grouping-family yields are not yet proved. |
+| `Families` | Unbounded certified negative-prefix family with exact yields and injectivity in depth; arbitrary-depth grouping precedence preservation. Its grouping-yield obligation is now discharged by `Grouping`. |
 | `Fragments` | Arbitrary-byte/length-list reconstruction, exact fragment count, independent-layout byte uniqueness, inhabited single and zero-length-leading fragment controls and distinct layouts. |
 | `Primary` | Deterministic identifier/boolean/number/unit/elementary yields; identifier, boolean and numeric injectivity; all five literal families, including string tags, arbitrary payload lengths and independent layouts, have same-yield uniqueness. Other expression roots and recursive types remain open. |
 | `Statement` | The original open uniqueness proposition; no proof value. |
 | `Fixtures` | All 29 accepted-root controls, four documented refusals, four additional postfix bases and grouped accepted alternatives, proved with `decide +kernel`. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 138 source declarations; actual sets use only `propext` and `Quot.sound`, or no axioms. |
+| `YieldShape` | All 29 expression roots have exactly one nonempty item on every successful partial-layout execution; optional empty tokens identify absence, and `some e` preserves the expression printer. |
+| `YieldBalance` | Compositional balance for items, flattening, separators, type spellings, operators and literal fragments. |
+| `AttributeBalance` | Actual successful function-type attribute layouts preserve balance, including arbitrary order lengths. |
+| `ExpressionBalance` | The expression/type/parameter/argument/list/option closure yields balanced items; `expr_derives_balanced` derives balance from the original token certificate. Arbitrary closing-token prefixes cannot be expression yields. |
+| `DelimiterReconstruction` | Enclosing payload and suffix spans are reconstructed from actual certificates; closing-selector skip facts are derived, not supplied as premises. |
+| `Grouping` | Actual group certificates invert to child certificates; group-prefix spans are unique. Arbitrary grouping depth has exact tokens, inhabited certification, token-depth injectivity and tree-depth injectivity for a fixed printable base. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 218 source declarations; actual sets use only `propext` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
-the original expression target and do NOT close root reconstruction. Likewise
+the original expression target. Delimiter/grouping corollaries now derive their
+skip facts from certificates, while arbitrary precedence-operator root
+reconstruction remains open. Likewise
 `mkPayload` in a fragment helper is a token-constructor left-inverse condition;
 all three concrete string instantiations discharge it by `rfl`.
 
@@ -125,13 +133,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-final.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-balance.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-final.inside.json`. It took 13.235280 seconds, child peak RSS
-233444 KiB, exact container peak 699457536 bytes, minimum parent headroom
-15813529600 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-balance.inside.json`. It took 14.263511 seconds, child peak RSS
+238152 KiB, exact container peak 762212352 bytes, minimum parent headroom
+15749713920 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -143,10 +151,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these eight modules lack central root imports. The orphan gate
-reported the same eight. Source trust passed (3680 sources, zero findings), and
+check: exactly these fourteen modules lack central root imports. The orphan gate
+reported the same fourteen. Source trust passed (3686 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 138 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 218 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -167,13 +175,44 @@ and has explicit corruption controls for these findings. The earlier missing pin
 results are saved under the evidence directory; future proof checkpoints still
 require their own reviews.
 
-Next, derive delimiter and scanner invariants from arbitrary certified expression,
-type, argument, list and option yields, then reconstruct precedence roots. A raw
+The expression-closure delimiter invariant and grouped/enclosed span reconstruction
+are now proved. Next derive separator and precedence-selector invariants from
+certificates, then reconstruct arbitrary precedence roots. A raw
 punctuation split is insufficient: `-` is both a prefix and binary token, and
 conditional middle expressions mask nested assignments/colons. Prove those facts;
 do not add a desired split, parse completeness or uniqueness as a premise.
-Then finish grouping/tuple holes, primary cross-root disjointness, member/index/
+Then finish multi-component tuple/list reconstruction, primary cross-root disjointness, member/index/
 slice/call/options reconstruction and recursive type uniqueness, derive the public
 theorem and accepted-tree corollary, and complete full boundary controls and gates.
 The full sealed proof handoff remains open. Current artifacts are explicitly a
 partial proof checkpoint. No push, merge, PR, producer edit or scope expansion.
+
+## Balance and grouping checkpoint
+
+The continuation adds six proof modules and 80 source declarations, bringing the
+current totals to 14 modules and 218 declarations. Both independent read-only
+reviews accepted the new components, without Lean-server use. Their precision
+limits are retained: optional results reconstruct absence/presence, not complete
+lists; grouping tree-depth injectivity has a fixed base with an actual yield;
+there is no theorem equating arbitrary grouped child trees from equal yields.
+The global `CertifiedYieldUnique` obligation and parseCat corollary are unchanged
+and open. `refresh-audit.py` regenerates only owned metadata and pins from the
+actual successful kernel signature report. `audit-runs.json` selects the current
+bounded evidence; the checker requires matching current module hashes and passing
+signature/axiom gates, and rejects stale run references. Central registry files
+remain untouched.
+
+The balance-checkpoint metadata review caught a signature-snapshot mismatch:
+pre-refresh snapshots include the previous generated `AxiomPins.lean`. The checker
+now excludes that exact path from both sides of the signature-source comparison;
+the current axiom-pin gate still checks its refreshed hash exactly. Every other
+extra/missing signature path is rejected. Controls now assert a successful
+positive inventory/checkpoint baseline before and after corruption tests, so a
+broken baseline cannot make the negative tests pass vacuously. The failed first
+balance acceptance command is retained as evidence.
+
+Final finder and skeptic verdicts for this checkpoint are recorded in
+`tests/sol-expression-uniqueness/evidence/reviews-balance.json`. Both independently
+accepted the corrected audit; neither used Lean or edited sources. The corrected
+positive baseline, corruption controls and checkpoint acceptance pass. Default
+full acceptance remains exit 1 with the original proof obligations open.

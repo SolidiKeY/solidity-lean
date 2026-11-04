@@ -15,6 +15,11 @@ audit = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(audit)
 read = audit.read
 pins = read("source-pins.json")
+runs = read("audit-runs.json")
+proof_inside = "evidence/"+runs["proof_stem"]+".inside.json"
+proof_outer = "evidence/"+runs["proof_stem"]+".outer.json"
+signature_inside = "evidence/"+runs["signature_stem"]+".inside.json"
+signature_outer = "evidence/"+runs["signature_stem"]+".outer.json"
 
 
 def reject_pins(value):
@@ -28,6 +33,16 @@ def reject_pins(value):
                 return
     raise AssertionError("invalid source pins accepted")
 
+
+def require_positive_baseline():
+    for mode in ("--inventory", "--checkpoint"):
+        with patch.object(sys, "argv", ["audit", mode]):
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                assert audit.main() == 0, "positive baseline failed: "+mode
+
+
+require_positive_baseline()
+print("POSITIVE_BASELINE_PASS: inventory and checkpoint acceptance")
 
 reject_pins({})
 for name in pins:
@@ -68,15 +83,15 @@ reject_data("axioms.json", bad)
 bad = read("obligations.json")
 next(r for r in bad if r["id"] == "EU-07")["status"] = "pass"
 reject_data("obligations.json", bad)
-bad = read("evidence/checkpoint-proof-final.inside.json")
+bad = read(proof_inside)
 bad["source_hashes"] = {}
-reject_data("evidence/checkpoint-proof-final.inside.json", bad, "--checkpoint")
-bad = read("evidence/checkpoint-proof-final.inside.json")
+reject_data(proof_inside, bad, "--checkpoint")
+bad = read(proof_inside)
 bad["memory_swap_max"] = 1
-reject_data("evidence/checkpoint-proof-final.inside.json", bad, "--checkpoint")
-bad = read("evidence/checkpoint-proof-final.outer.json")
+reject_data(proof_inside, bad, "--checkpoint")
+bad = read(proof_outer)
 bad["minimum_parent_headroom_bytes"] = 0
-reject_data("evidence/checkpoint-proof-final.outer.json", bad, "--checkpoint")
+reject_data(proof_outer, bad, "--checkpoint")
 bad = read("evidence/compiler-0.8.38.json")
 bad["observations"][0]["id"] = "missing-class"
 reject_data("evidence/compiler-0.8.38.json", bad, "--checkpoint")
@@ -92,10 +107,24 @@ reject_data("constructor-controls.json", bad)
 bad = read("constructor-controls.json")
 bad[0]["input"] = "wrong-input"
 reject_data("constructor-controls.json", bad)
-bad = read("evidence/signature-audit-second.inside.json")
+bad = read(signature_inside)
 bad["exit"] = 1
-reject_data("evidence/signature-audit-second.inside.json", bad, "--checkpoint")
-bad = read("evidence/signature-audit-second.outer.json")
+reject_data(signature_inside, bad, "--checkpoint")
+bad = read(signature_outer)
 bad["resource_stop"] = True
-reject_data("evidence/signature-audit-second.outer.json", bad, "--checkpoint")
+reject_data(signature_outer, bad, "--checkpoint")
 print("REVIEW_REGRESSION_CONTROLS_PASS: remapped/duplicated fixture theorem, changed input, failed signature command and resource stop rejected")
+
+bad = read("audit-runs.json")
+bad["proof_stem"] = "../outside"
+reject_data("audit-runs.json", bad, "--checkpoint")
+bad = read("audit-runs.json")
+bad["signature_stem"] = "signature-audit-second"
+reject_data("audit-runs.json", bad, "--checkpoint")
+print("AUDIT_REFERENCE_CONTROLS_PASS: invalid and stale run references rejected")
+
+bad = read(signature_inside)
+bad["source_hashes"]["Solidity/Elsewhere/AxiomPins.lean"] = "0" * 64
+reject_data(signature_inside, bad, "--checkpoint")
+require_positive_baseline()
+print("SIGNATURE_SNAPSHOT_CONTROLS_PASS: only the separately checked generated pin path is excluded; other extra paths rejected")

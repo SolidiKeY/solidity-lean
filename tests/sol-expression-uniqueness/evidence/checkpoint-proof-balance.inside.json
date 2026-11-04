@@ -1,0 +1,32 @@
+{
+  "command": [
+    "bash",
+    "-c",
+    "set -eu; cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max; lean --version; lake --version; ./.lake/build/bin/solkeycheck --key \"$SOLKEY_RULES\"; echo RUNTIME_GATE_PASS; scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean; scripts/coord-tools/lean-mcp stop; GATE_LOGS=tests/sol-expression-uniqueness/evidence/checkpoint-gates-balance bash scripts/coord-tools/gate.sh per-file Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean"
+  ],
+  "exit": 0,
+  "wall_seconds": 14.263511361000383,
+  "child_peak_rss_kib": 238152,
+  "sampled_cgroup_peak_bytes": 759701504,
+  "memory_max": 12884901888,
+  "memory_swap_max": 0,
+  "lean_num_threads": 1,
+  "source_hashes": {
+    "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean": "f7a35587fb7501c562ac3bf2a99e9f3e347c6ee14d6a3e36bd8b6bd510a07e79",
+    "Solidity/Frontend/ExpressionUniqueness/AttributeBalance.lean": "0dfccbb76d5b24d1a5a853c8b37d681be6201fcd18f502521bc7beeb932d9a64",
+    "Solidity/Frontend/ExpressionUniqueness/Fixtures.lean": "8050132aff110cd0b22a9e7a4127b3805a236825424d690434858d7fb2f80dcc",
+    "Solidity/Frontend/ExpressionUniqueness/DelimiterReconstruction.lean": "8100da4672b557f921e0a9361a49d7e0a7e20c4ed48c38a82b2e666cf4c62f9d",
+    "Solidity/Frontend/ExpressionUniqueness/Statement.lean": "ec8fd72f6ee74de4a2499657e9a840fce700e751237492e87bfd04ca81b79685",
+    "Solidity/Frontend/ExpressionUniqueness/Fragments.lean": "60fdbeb739a7132fde18560b3bb32508c5820f202b32f2c3771e4442f201b0c2",
+    "Solidity/Frontend/ExpressionUniqueness/TokenSplit.lean": "7192f0a4c4bea786840d7f30f4ac568c89d5b696de8d2c5e977f5a3515e2470b",
+    "Solidity/Frontend/ExpressionUniqueness/YieldBalance.lean": "85161872e76552c431a8e533b64baf9cf811181e22c3add2a2b26f102ba01837",
+    "Solidity/Frontend/ExpressionUniqueness/Primary.lean": "feb5152dc130373e94d51e4626d2efd5ede8a05a05095236c6daea04459cc3ad",
+    "Solidity/Frontend/ExpressionUniqueness/YieldShape.lean": "53ac9c704437b97a3c6f04c016ebf70d49afab27f477aabc2663adcb7848edf5",
+    "Solidity/Frontend/ExpressionUniqueness/ExpressionBalance.lean": "472e48948f10d53041bcd199021a0365a43a9466024b8cdb14a80df10f4ef360",
+    "Solidity/Frontend/ExpressionUniqueness/Families.lean": "068e9531bac32c5de73ed3b3af915c194727dea504a9e568058994efce6db25e",
+    "Solidity/Frontend/ExpressionUniqueness/Grouping.lean": "04c6cbcddc57f00522413c7f7da02a671a425740202b649d4b02c77fcc00442d",
+    "Solidity/Frontend/ExpressionUniqueness/Refusals.lean": "342655f48ca24a403f6173abd61081df06ea00aaf9565f3ff507513a4d8708d1"
+  },
+  "cgroup_memory_peak_bytes": 762212352,
+  "memory_events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n"
+}

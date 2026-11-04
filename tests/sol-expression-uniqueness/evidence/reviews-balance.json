@@ -1,0 +1,16 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted partial balance checkpoint; no remaining findings.",
+    "method": "Read-only independent review; no Lean server or edits.",
+    "resolution": "Exact generated-pin-path signature comparison corrected on both sides; current pin separately hashed. Positive baseline and corruption controls independently passed.",
+    "boundary": "14 modules, 218 declarations. Full precedence root reconstruction, expression tree uniqueness and accepted-tree corollary remain open."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Accepted partial balance checkpoint; no remaining findings.",
+    "method": "Read-only independent review; no Lean server or edits.",
+    "resolution": "Exact generated-pin-path signature comparison corrected on both sides; current pin separately hashed. Positive baseline and corruption controls independently passed.",
+    "boundary": "14 modules, 218 declarations. Full precedence root reconstruction, expression tree uniqueness and accepted-tree corollary remain open."
+  }
+]

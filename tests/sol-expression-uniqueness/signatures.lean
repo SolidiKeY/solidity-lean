@@ -1,11 +1,53 @@
+import Solidity.Frontend.ExpressionUniqueness.AttributeBalance
+import Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction
+import Solidity.Frontend.ExpressionUniqueness.ExpressionBalance
 import Solidity.Frontend.ExpressionUniqueness.Families
 import Solidity.Frontend.ExpressionUniqueness.Fixtures
 import Solidity.Frontend.ExpressionUniqueness.Fragments
+import Solidity.Frontend.ExpressionUniqueness.Grouping
 import Solidity.Frontend.ExpressionUniqueness.Primary
 import Solidity.Frontend.ExpressionUniqueness.Refusals
 import Solidity.Frontend.ExpressionUniqueness.Statement
 import Solidity.Frontend.ExpressionUniqueness.TokenSplit
+import Solidity.Frontend.ExpressionUniqueness.YieldBalance
+import Solidity.Frontend.ExpressionUniqueness.YieldShape
 
+#check Solidity.Frontend.ExpressionUniqueness.BalancedAttrs
+#print axioms Solidity.Frontend.ExpressionUniqueness.BalancedAttrs
+#check Solidity.Frontend.ExpressionUniqueness.balancedAttrs_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.balancedAttrs_append
+#check Solidity.Frontend.ExpressionUniqueness.balanced_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_single
+#check Solidity.Frontend.ExpressionUniqueness.arrange_nonModifier
+#print axioms Solidity.Frontend.ExpressionUniqueness.arrange_nonModifier
+#check Solidity.Frontend.ExpressionUniqueness.arrange_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.arrange_balanced
+#check Solidity.Frontend.ExpressionUniqueness.attrsP_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.attrsP_balanced
+#check Solidity.Frontend.ExpressionUniqueness.skip_of_run_forbidden_at_empty
+#print axioms Solidity.Frontend.ExpressionUniqueness.skip_of_run_forbidden_at_empty
+#check Solidity.Frontend.ExpressionUniqueness.skip_close_of_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.skip_close_of_balanced
+#check Solidity.Frontend.ExpressionUniqueness.enclosed_payload_unique
+#print axioms Solidity.Frontend.ExpressionUniqueness.enclosed_payload_unique
+#check Solidity.Frontend.ExpressionUniqueness.parens_prefix_unique
+#print axioms Solidity.Frontend.ExpressionUniqueness.parens_prefix_unique
+#check Solidity.Frontend.ExpressionUniqueness.expression_parens_prefix_unique
+#print axioms Solidity.Frontend.ExpressionUniqueness.expression_parens_prefix_unique
+#check Solidity.Frontend.ExpressionUniqueness.ExpressionCategory
+#print axioms Solidity.Frontend.ExpressionUniqueness.ExpressionCategory
+#check Solidity.Frontend.ExpressionUniqueness.balanced_mapping_key
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_mapping_key
+#check Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_balanced
+#check Solidity.Frontend.ExpressionUniqueness.expr_yield_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_yield_balanced
+#check Solidity.Frontend.ExpressionUniqueness.type_yield_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.type_yield_balanced
+#check Solidity.Frontend.ExpressionUniqueness.expr_derives_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_derives_balanced
+#check Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close
 #check Solidity.Frontend.ExpressionUniqueness.negFamily
 #print axioms Solidity.Frontend.ExpressionUniqueness.negFamily
 #check Solidity.Frontend.ExpressionUniqueness.negTokens
@@ -132,6 +174,28 @@ import Solidity.Frontend.ExpressionUniqueness.TokenSplit
 #print axioms Solidity.Frontend.ExpressionUniqueness.fragsP_leading_empty
 #check Solidity.Frontend.ExpressionUniqueness.fragment_layouts_distinct
 #print axioms Solidity.Frontend.ExpressionUniqueness.fragment_layouts_distinct
+#check Solidity.Frontend.ExpressionUniqueness.group_yield_map
+#print axioms Solidity.Frontend.ExpressionUniqueness.group_yield_map
+#check Solidity.Frontend.ExpressionUniqueness.group_toks_iff
+#print axioms Solidity.Frontend.ExpressionUniqueness.group_toks_iff
+#check Solidity.Frontend.ExpressionUniqueness.group_derives_iff
+#print axioms Solidity.Frontend.ExpressionUniqueness.group_derives_iff
+#check Solidity.Frontend.ExpressionUniqueness.group_prefix_unique
+#print axioms Solidity.Frontend.ExpressionUniqueness.group_prefix_unique
+#check Solidity.Frontend.ExpressionUniqueness.parenTokens
+#print axioms Solidity.Frontend.ExpressionUniqueness.parenTokens
+#check Solidity.Frontend.ExpressionUniqueness.groupFamily_toks
+#print axioms Solidity.Frontend.ExpressionUniqueness.groupFamily_toks
+#check Solidity.Frontend.ExpressionUniqueness.groupFamily_certified
+#print axioms Solidity.Frontend.ExpressionUniqueness.groupFamily_certified
+#check Solidity.Frontend.ExpressionUniqueness.parenTokens_length
+#print axioms Solidity.Frontend.ExpressionUniqueness.parenTokens_length
+#check Solidity.Frontend.ExpressionUniqueness.parenTokens_depth_injective
+#print axioms Solidity.Frontend.ExpressionUniqueness.parenTokens_depth_injective
+#check Solidity.Frontend.ExpressionUniqueness.groupFamily_inhabited
+#print axioms Solidity.Frontend.ExpressionUniqueness.groupFamily_inhabited
+#check Solidity.Frontend.ExpressionUniqueness.groupFamily_certified_depth_injective
+#print axioms Solidity.Frontend.ExpressionUniqueness.groupFamily_certified_depth_injective
 #check Solidity.Frontend.ExpressionUniqueness.derives_pure_yield
 #print axioms Solidity.Frontend.ExpressionUniqueness.derives_pure_yield
 #check Solidity.Frontend.ExpressionUniqueness.derives_ident
@@ -282,3 +346,105 @@ import Solidity.Frontend.ExpressionUniqueness.TokenSplit
 #print axioms Solidity.Frontend.ExpressionUniqueness.firstTop_marker
 #check Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique
 #print axioms Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique
+#check Solidity.Frontend.ExpressionUniqueness.BalancedItems
+#print axioms Solidity.Frontend.ExpressionUniqueness.BalancedItems
+#check Solidity.Frontend.ExpressionUniqueness.balancedItems_nil
+#print axioms Solidity.Frontend.ExpressionUniqueness.balancedItems_nil
+#check Solidity.Frontend.ExpressionUniqueness.balancedItems_cons
+#print axioms Solidity.Frontend.ExpressionUniqueness.balancedItems_cons
+#check Solidity.Frontend.ExpressionUniqueness.balancedItems_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.balancedItems_single
+#check Solidity.Frontend.ExpressionUniqueness.balancedItems_tail
+#print axioms Solidity.Frontend.ExpressionUniqueness.balancedItems_tail
+#check Solidity.Frontend.ExpressionUniqueness.balancedItems_flatten
+#print axioms Solidity.Frontend.ExpressionUniqueness.balancedItems_flatten
+#check Solidity.Frontend.ExpressionUniqueness.balanced_flatMap
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_flatMap
+#check Solidity.Frontend.ExpressionUniqueness.balanced_of_atoms
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_of_atoms
+#check Solidity.Frontend.ExpressionUniqueness.balanced_commaSep
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_commaSep
+#check Solidity.Frontend.ExpressionUniqueness.balanced_parens
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_parens
+#check Solidity.Frontend.ExpressionUniqueness.balanced_braces
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_braces
+#check Solidity.Frontend.ExpressionUniqueness.balanced_square
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_square
+#check Solidity.Frontend.ExpressionUniqueness.balanced_tk
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_tk
+#check Solidity.Frontend.ExpressionUniqueness.balanced_idt
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_idt
+#check Solidity.Frontend.ExpressionUniqueness.balanced_path
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_path
+#check Solidity.Frontend.ExpressionUniqueness.balanced_elem
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_elem
+#check Solidity.Frontend.ExpressionUniqueness.balanced_visibility
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_visibility
+#check Solidity.Frontend.ExpressionUniqueness.balanced_mutability
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_mutability
+#check Solidity.Frontend.ExpressionUniqueness.balanced_dataLoc
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_dataLoc
+#check Solidity.Frontend.ExpressionUniqueness.balanced_optToks
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_optToks
+#check Solidity.Frontend.ExpressionUniqueness.balanced_prefix
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_prefix
+#check Solidity.Frontend.ExpressionUniqueness.balanced_suffix
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_suffix
+#check Solidity.Frontend.ExpressionUniqueness.balanced_mul
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_mul
+#check Solidity.Frontend.ExpressionUniqueness.balanced_add
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_add
+#check Solidity.Frontend.ExpressionUniqueness.balanced_shift
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_shift
+#check Solidity.Frontend.ExpressionUniqueness.balanced_order
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_order
+#check Solidity.Frontend.ExpressionUniqueness.balanced_equality
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_equality
+#check Solidity.Frontend.ExpressionUniqueness.balanced_assign
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_assign
+#check Solidity.Frontend.ExpressionUniqueness.fragsP_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.fragsP_balanced
+#check Solidity.Frontend.ExpressionUniqueness.litP_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.litP_balanced
+#check Solidity.Frontend.ExpressionUniqueness.Produces
+#print axioms Solidity.Frontend.ExpressionUniqueness.Produces
+#check Solidity.Frontend.ExpressionUniqueness.produces_pure
+#print axioms Solidity.Frontend.ExpressionUniqueness.produces_pure
+#check Solidity.Frontend.ExpressionUniqueness.produces_bind_all
+#print axioms Solidity.Frontend.ExpressionUniqueness.produces_bind_all
+#check Solidity.Frontend.ExpressionUniqueness.produces_bind
+#print axioms Solidity.Frontend.ExpressionUniqueness.produces_bind
+#check Solidity.Frontend.ExpressionUniqueness.SingleItem
+#print axioms Solidity.Frontend.ExpressionUniqueness.SingleItem
+#check Solidity.Frontend.ExpressionUniqueness.NonemptyItem
+#print axioms Solidity.Frontend.ExpressionUniqueness.NonemptyItem
+#check Solidity.Frontend.ExpressionUniqueness.expr_yield_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_yield_single
+#check Solidity.Frontend.ExpressionUniqueness.litP_nonempty
+#print axioms Solidity.Frontend.ExpressionUniqueness.litP_nonempty
+#check Solidity.Frontend.ExpressionUniqueness.callArgs_yield_nonempty
+#print axioms Solidity.Frontend.ExpressionUniqueness.callArgs_yield_nonempty
+#check Solidity.Frontend.ExpressionUniqueness.nonemptyItem_flatten
+#print axioms Solidity.Frontend.ExpressionUniqueness.nonemptyItem_flatten
+#check Solidity.Frontend.ExpressionUniqueness.append_nonempty_left
+#print axioms Solidity.Frontend.ExpressionUniqueness.append_nonempty_left
+#check Solidity.Frontend.ExpressionUniqueness.append_nonempty_right
+#print axioms Solidity.Frontend.ExpressionUniqueness.append_nonempty_right
+#check Solidity.Frontend.ExpressionUniqueness.expr_yield_nonempty
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_yield_nonempty
+#check Solidity.Frontend.ExpressionUniqueness.expr_toks_iff
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_toks_iff
+#check Solidity.Frontend.ExpressionUniqueness.derives_nonempty_of_produces
+#print axioms Solidity.Frontend.ExpressionUniqueness.derives_nonempty_of_produces
+#check Solidity.Frontend.ExpressionUniqueness.expr_derives_nonempty
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_derives_nonempty
+#check Solidity.Frontend.ExpressionUniqueness.some_expr_yield_nonempty
+#print axioms Solidity.Frontend.ExpressionUniqueness.some_expr_yield_nonempty
+#check Solidity.Frontend.ExpressionUniqueness.optional_expr_empty_iff
+#print axioms Solidity.Frontend.ExpressionUniqueness.optional_expr_empty_iff
+#check Solidity.Frontend.ExpressionUniqueness.some_expr_yield_eq
+#print axioms Solidity.Frontend.ExpressionUniqueness.some_expr_yield_eq
+#check Solidity.Frontend.ExpressionUniqueness.optional_expr_yield_empty_iff
+#print axioms Solidity.Frontend.ExpressionUniqueness.optional_expr_yield_empty_iff
+#check Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed
+#print axioms Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed

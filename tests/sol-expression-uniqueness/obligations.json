@@ -15,13 +15,13 @@
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
     "status": "partial",
-    "evidence": "Arbitrary token delimiter/context/splitting lemmas proved; not yet connected to every expression yield."
+    "evidence": "Arbitrary expression/type/argument closure yields are balanced; enclosing and grouping span cuts are derived from actual certificates."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "Token-machine skip hypotheses are not derived from certified expressions. No root reconstruction theorem yet."
+    "evidence": "Enclosing/grouping spans reconstructed. Arbitrary precedence-operator roots and selectors remain open; no desired split or uniqueness premise added."
   },
   {
     "id": "EU-05",
@@ -33,7 +33,7 @@
     "id": "EU-06",
     "obligation": "primary/type/tuple/list/option/call argument uniqueness",
     "status": "partial",
-    "evidence": "Fixed primary yields and full literal-family uniqueness proved; recursive types, lists, options, grouping holes, calls and postfix reconstruction remain open."
+    "evidence": "All literal families, optional absence/presence and grouping certificate inversion proved; recursive type/list/call/postfix/tree uniqueness remains open."
   },
   {
     "id": "EU-07",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Unbounded negative-prefix, grouping precedence, mixed nesting and arbitrary-byte fragment controls; complete boundary families remain open."
+    "evidence": "Exact inhabited arbitrary-depth grouping yields and certified-base tree-depth injectivity added; arbitrary closing-token negative family follows from certificates. Full operator boundaries remain open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "Eight modules and 138 source declarations inventoried with exact kernel-reported standard-only axiom pins."
+    "evidence": "14 modules and 218 source declarations inventoried with exact standard-only kernel axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "H26/runtime/KeySort/current proof/fixture gates pass. Global run-lean/orphans fail at eight frozen root registrations; central axiom inventory reports zero errors and 138 unrecorded pins. Full global confirmation remains open."
+    "evidence": "H26/runtime/KeySort/current proof gates pass. Current global roots/orphans fail at 14 frozen registrations; central axiom source inventory has zero errors and 218 unrecorded pins. Full global confirmation remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Final separate finder/skeptic accepted corrected partial proof checkpoint; F2/F3/F4 and S2/S3 resolved. Future proof checkpoints still require reviews."
+    "evidence": "Separate finder/skeptic accepted balance checkpoint after correcting the signature snapshot comparison and adding positive baseline controls; no remaining checkpoint findings. See evidence/reviews-balance.json. Future proof checkpoints require reviews."
   },
   {
     "id": "EU-14",

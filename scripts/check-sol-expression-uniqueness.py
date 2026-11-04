@@ -44,36 +44,39 @@ def declarations():
 
 
 def audit_checkpoint(modules, decls, axioms):
-    proof = read("evidence/checkpoint-proof-final.inside.json")
-    outer = read("evidence/checkpoint-proof-final.outer.json")
+    runs = read("audit-runs.json")
+    require(set(runs) == {"proof_stem", "proof_gate_dir", "signature_stem", "signature_gate_dir"} and
+            all(re.fullmatch(r"[a-z][a-z0-9-]*", value) for value in runs.values()), "invalid audit run references")
+    proof = read("evidence/"+runs["proof_stem"]+".inside.json")
+    outer = read("evidence/"+runs["proof_stem"]+".outer.json")
     current = {name: digest(ROOT/name) for name in modules}
     require(proof["exit"] == outer["exit"] == 0 and not outer["resource_stop"], "proof gate failed")
     require(proof["source_hashes"] == current, "proof evidence is stale for current modules")
     require(proof["memory_max"] == 12884901888 and proof["memory_swap_max"] == 0 and
             proof["lean_num_threads"] == 1, "runtime bounds mismatch")
     require(outer["minimum_parent_headroom_bytes"] >= 4294967296, "H1 reserve failed")
-    log = (DATA/"evidence/checkpoint-proof-final.log").read_text()
+    log = (DATA/"evidence"/(runs["proof_stem"]+".log")).read_text()
     require("RUNTIME_GATE_PASS" in log and "377 taclets, 131 read-bearing" in log and
             "diag: 0 errors" in log, "runtime/KeySort/MCP evidence missing")
-    gate = (DATA/"evidence/checkpoint-gates/gates.tsv").read_text().splitlines()
+    gate = (DATA/"evidence"/runs["proof_gate_dir"]/"gates.tsv").read_text().splitlines()
     require(len(gate) == 1 and gate[0].startswith("PASS\tlean:Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean\t"),
             "axiom pin kernel gate missing")
-    signature = read("evidence/signature-audit-second.inside.json")
-    signature_outer = read("evidence/signature-audit-second.outer.json")
+    signature = read("evidence/"+runs["signature_stem"]+".inside.json")
+    signature_outer = read("evidence/"+runs["signature_stem"]+".outer.json")
     require(signature["exit"] == signature_outer["exit"] == 0 and not signature_outer["resource_stop"],
             "signature build/audit command failed")
     require(signature["memory_max"] == 12884901888 and signature["memory_swap_max"] == 0 and
             signature["lean_num_threads"] == 1 and
             signature_outer["minimum_parent_headroom_bytes"] >= 4294967296,
             "signature runtime/reserve mismatch")
-    signature_gate = (DATA/"evidence/signature-gates/gates.tsv").read_text().splitlines()
+    signature_gate = (DATA/"evidence"/runs["signature_gate_dir"]/"gates.tsv").read_text().splitlines()
     require(len(signature_gate) == 1 and signature_gate[0].startswith(
         "PASS\tlean:tests/sol-expression-uniqueness/signatures.lean\t"), "signature kernel gate missing")
-    require(signature["source_hashes"] ==
-            {k:v for k,v in current.items() if not k.endswith("/AxiomPins.lean")},
-            "signature evidence is stale")
+    pin_path = "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean"
+    require({k:v for k,v in signature["source_hashes"].items() if k != pin_path} ==
+            {k:v for k,v in current.items() if k != pin_path}, "signature evidence is stale")
     reported = {}
-    for line in (DATA/"evidence/signature-gates/1.log").read_text().splitlines():
+    for line in (DATA/"evidence"/runs["signature_gate_dir"]/"1.log").read_text().splitlines():
         match = re.fullmatch(r"'([^']+)' does not depend on any axioms", line)
         if match:
             reported[match[1]] = []
@@ -138,6 +141,10 @@ def main():
     require(read("declarations.json") == decls and manifest["declarations"] == [d["name"] for d in decls],
             "declaration/signature inventory differs")
     require([r["module"] for r in manifest["module_map_rows"]] == [m[9:] for m in modules], "module-map proposals differ")
+    central = manifest["central_axiom_registration"]
+    require(central["file"] == "scripts/g07-axiom-pins.json" and
+            central["source"] == "tests/sol-expression-uniqueness/axioms.json" and
+            central["count"] == len(decls), "central axiom registration proposal differs")
     names = [d["name"] for d in decls]
     controls = read("constructor-controls.json")
     require([r["constructor"] for r in controls] == constructors and

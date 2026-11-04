@@ -1,5 +1,113 @@
 [
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.BalancedAttrs",
+    "source_signature": "def BalancedAttrs (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balancedAttrs_append",
+    "source_signature": "theorem balancedAttrs_append {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : BalancedAttrs xs) (hy : BalancedAttrs ys) : BalancedAttrs (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_single",
+    "source_signature": "theorem balanced_single (slot : Slot) (ts : List Tok) (h : Balanced ts) :\n    BalancedAttrs (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_nonModifier",
+    "source_signature": "theorem arrange_nonModifier (slot : Slot) (h : slot \u2260 .modInv)\n    (order : List Slot) (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok)) :\n    arrange (slot :: order) singles mods =\n      (singles.find? (\u00b7.1 == slot)).bind (fun entry =>\n        (arrange order (singles.filter (\u00b7.1 != slot)) mods).map (entry.2 ++ \u00b7))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_balanced",
+    "source_signature": "theorem arrange_balanced (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : BalancedAttrs singles)\n    (hm : BalancedItems mods) (h : arrange order singles mods = some ts) : Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_balanced",
+    "source_signature": "theorem attrsP_balanced (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : BalancedAttrs singles) (hm : BalancedItems mods) :\n    Produces (attrsP singles mods order) Balanced"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip_of_run_forbidden_at_empty",
+    "source_signature": "theorem skip_of_run_forbidden_at_empty (p : Tok \u2192 Bool)\n    (blocked : \u2200 t, p t = true \u2192 step [] t = none)\n    (ts : List Tok) (stack next : List Bracket) (h : run stack ts = some next) :\n    skip p stack ts = some next"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip_close_of_balanced",
+    "source_signature": "theorem skip_close_of_balanced (k : Bracket) (ts : List Tok) (h : Balanced ts) :\n    skip (fun t => decide (t = closeTok k)) [] ts = some []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.enclosed_payload_unique",
+    "source_signature": "theorem enclosed_payload_unique (k : Bracket) (xs ys tail tail' : List Tok)\n    (hx : Balanced xs) (hy : Balanced ys)\n    (heq : openTok k :: (xs ++ closeTok k :: tail) =\n      openTok k :: (ys ++ closeTok k :: tail')) : xs = ys \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.parens_prefix_unique",
+    "source_signature": "theorem parens_prefix_unique (xs ys tail tail' : List Tok) (hx : Balanced xs) (hy : Balanced ys)\n    (heq : parens xs ++ tail = parens ys ++ tail') : xs = ys \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_parens_prefix_unique",
+    "source_signature": "theorem expression_parens_prefix_unique (a b : Syn .expr) (xs ys tail tail' : List Tok)\n    (ha : a.Derives xs) (hb : b.Derives ys)\n    (heq : parens xs ++ tail = parens ys ++ tail') : xs = ys \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ExpressionCategory",
+    "source_signature": "def ExpressionCategory : Cat \u2192 Bool\n  | .expr | .typeName | .param | .callArgs | .namedArg => true\n  | .list c | .opt c => ExpressionCategory c\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_mapping_key",
+    "source_signature": "theorem balanced_mapping_key (key : MapKey) :\n    Balanced (match key with | .elem e _ => e.toks | .path p => p.toks)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_balanced",
+    "source_signature": "theorem expressionCategory_yield_balanced {c : Cat} (e : Syn c) :\n    ExpressionCategory c = true \u2192 Produces e.yield BalancedItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_yield_balanced",
+    "source_signature": "theorem expr_yield_balanced (e : Syn .expr) : Produces e.yield BalancedItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_balanced",
+    "source_signature": "theorem type_yield_balanced (ty : Syn .typeName) : Produces ty.yield BalancedItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_derives_balanced",
+    "source_signature": "theorem expr_derives_balanced (e : Syn .expr) (ts : List Tok) (h : e.Derives ts) : Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close",
+    "source_signature": "theorem expr_cannot_start_close (k : Bracket) (rest : List Tok) (e : Syn .expr) :\n    \u00ac e.Derives (closeTok k :: rest)"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.Families",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.negFamily",
@@ -376,6 +484,72 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.fragment_layouts_distinct",
     "source_signature": "theorem fragment_layouts_distinct (bs : Bytes) :\n    ([Choice.frags [bs.length]] : List Choice) \u2260 [.frags [0, bs.length]]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.group_yield_map",
+    "source_signature": "theorem group_yield_map (e : Syn .expr) (L : List Choice) :\n    (group e).yield L = (e.yield L).map (fun r => ([parens r.1.flatten], r.2))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.group_toks_iff",
+    "source_signature": "theorem group_toks_iff (e : Syn .expr) (L : List Choice) (ts : List Tok) :\n    (group e).toks L = some ts \u2194 \u2203 inner, e.toks L = some inner \u2227 ts = parens inner"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.group_derives_iff",
+    "source_signature": "theorem group_derives_iff (e : Syn .expr) (ts : List Tok) :\n    (group e).Derives ts \u2194 \u2203 inner, e.Derives inner \u2227 ts = parens inner"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.group_prefix_unique",
+    "source_signature": "theorem group_prefix_unique (a b : Syn .expr) (xs ys tail tail' : List Tok)\n    (ha : (group a).Derives xs) (hb : (group b).Derives ys)\n    (heq : xs ++ tail = ys ++ tail') : xs = ys \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.parenTokens",
+    "source_signature": "def parenTokens : Nat \u2192 List Tok \u2192 List Tok\n  | 0, ts => ts\n  | n + 1, ts => parens (parenTokens n ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily_toks",
+    "source_signature": "theorem groupFamily_toks (n : Nat) (e : Syn .expr) (L : List Choice) (ts : List Tok)\n    (h : e.toks L = some ts) : (groupFamily n e).toks L = some (parenTokens n ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily_certified",
+    "source_signature": "theorem groupFamily_certified (n : Nat) (e : Syn .expr) (ts : List Tok)\n    (hd : e.Derives ts) (hp : e.prec = true) :\n    (groupFamily n e).Derives (parenTokens n ts) \u2227 (groupFamily n e).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.parenTokens_length",
+    "source_signature": "theorem parenTokens_length (n : Nat) (ts : List Tok) :\n    (parenTokens n ts).length = ts.length + 2 * n"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.parenTokens_depth_injective",
+    "source_signature": "theorem parenTokens_depth_injective (ts : List Tok) {n m : Nat}\n    (h : parenTokens n ts = parenTokens m ts) : n = m"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily_inhabited",
+    "source_signature": "theorem groupFamily_inhabited (n : Nat) (name : String) :\n    (groupFamily n (.ident name)).Derives (parenTokens n [.ident name]) \u2227\n      (groupFamily n (.ident name)).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Grouping",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily_certified_depth_injective",
+    "source_signature": "theorem groupFamily_certified_depth_injective (e : Syn .expr) (ts : List Tok)\n    (hd : e.Derives ts) {n m : Nat} (h : groupFamily n e = groupFamily m e) : n = m"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
@@ -826,5 +1000,311 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique",
     "source_signature": "theorem firstTop_cut_unique (p : Tok \u2192 Bool) (xs ys xs' ys' : List Tok) (t t' : Tok)\n    (hx : skip p [] xs = some []) (hx' : skip p [] xs' = some [])\n    (ht : p t = true) (ht' : p t' = true)\n    (heq : xs ++ t :: ys = xs' ++ t' :: ys') :\n    xs = xs' \u2227 t = t' \u2227 ys = ys'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.BalancedItems",
+    "source_signature": "def BalancedItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balancedItems_nil",
+    "source_signature": "theorem balancedItems_nil : BalancedItems []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balancedItems_cons",
+    "source_signature": "theorem balancedItems_cons {ts : List Tok} {items : List (List Tok)}\n    (h : Balanced ts) (hs : BalancedItems items) : BalancedItems (ts :: items)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balancedItems_single",
+    "source_signature": "theorem balancedItems_single {ts : List Tok} (h : Balanced ts) : BalancedItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balancedItems_tail",
+    "source_signature": "theorem balancedItems_tail {ts : List Tok} {items : List (List Tok)}\n    (h : BalancedItems (ts :: items)) : BalancedItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balancedItems_flatten",
+    "source_signature": "theorem balancedItems_flatten {items : List (List Tok)} (h : BalancedItems items) :\n    Balanced items.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_flatMap",
+    "source_signature": "theorem balanced_flatMap {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 Balanced (f x)) : Balanced (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_of_atoms",
+    "source_signature": "theorem balanced_of_atoms (ts : List Tok) (h : \u2200 t, t \u2208 ts \u2192 bracket t = none) :\n    Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_commaSep",
+    "source_signature": "theorem balanced_commaSep {items : List (List Tok)} (h : BalancedItems items) :\n    Balanced (commaSep items)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_parens",
+    "source_signature": "theorem balanced_parens {ts : List Tok} (h : Balanced ts) : Balanced (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_braces",
+    "source_signature": "theorem balanced_braces {ts : List Tok} (h : Balanced ts) : Balanced (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_square",
+    "source_signature": "theorem balanced_square {ts : List Tok} (h : Balanced ts) :\n    Balanced (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_tk",
+    "source_signature": "theorem balanced_tk (k : Kw) : Balanced (tk k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_idt",
+    "source_signature": "theorem balanced_idt (name : String) : Balanced (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_path",
+    "source_signature": "theorem balanced_path (p : IdPath) : Balanced p.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_elem",
+    "source_signature": "theorem balanced_elem (e : Elem) : Balanced e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_visibility",
+    "source_signature": "theorem balanced_visibility (v : Visibility) : Balanced v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_mutability",
+    "source_signature": "theorem balanced_mutability (m : Mutability) : Balanced m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_dataLoc",
+    "source_signature": "theorem balanced_dataLoc (l : DataLoc) : Balanced l.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_optToks",
+    "source_signature": "theorem balanced_optToks {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 a, Balanced (f a))\n    (value : Option \u03b1) : Balanced (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_prefix",
+    "source_signature": "theorem balanced_prefix (op : PrefixOp) : Balanced op.punct"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_suffix",
+    "source_signature": "theorem balanced_suffix (op : SuffixOp) : Balanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_mul",
+    "source_signature": "theorem balanced_mul (op : MulOp) : Balanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_add",
+    "source_signature": "theorem balanced_add (op : AddOp) : Balanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_shift",
+    "source_signature": "theorem balanced_shift (op : ShiftOp) : Balanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_order",
+    "source_signature": "theorem balanced_order (op : OrderOp) : Balanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_equality",
+    "source_signature": "theorem balanced_equality (op : EqOp) : Balanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_assign",
+    "source_signature": "theorem balanced_assign (op : AssignOp) : Balanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_balanced",
+    "source_signature": "theorem fragsP_balanced (mk : Bytes \u2192 Tok) (hm : \u2200 bs, bracket (mk bs) = none)\n    (bs : Bytes) : Produces (fragsP mk bs) Balanced"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_balanced",
+    "source_signature": "theorem litP_balanced (l : Lit) : Produces (litP l) Balanced"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.Produces",
+    "source_signature": "def Produces {\u03b1 : Type} (p : Pr \u03b1) (P : \u03b1 \u2192 Prop) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.produces_pure",
+    "source_signature": "theorem produces_pure {\u03b1 : Type} (value : \u03b1) (P : \u03b1 \u2192 Prop) (h : P value) :\n    Produces (pure value) P"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.produces_bind_all",
+    "source_signature": "theorem produces_bind_all {\u03b1 \u03b2 : Type} (p : Pr \u03b1) (k : \u03b1 \u2192 Pr \u03b2) (Q : \u03b2 \u2192 Prop)\n    (h : \u2200 value, Produces (k value) Q) : Produces (p >>= k) Q"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.produces_bind",
+    "source_signature": "theorem produces_bind {\u03b1 \u03b2 : Type} (p : Pr \u03b1) (k : \u03b1 \u2192 Pr \u03b2)\n    (P : \u03b1 \u2192 Prop) (Q : \u03b2 \u2192 Prop) (hp : Produces p P)\n    (hk : \u2200 value, P value \u2192 Produces (k value) Q) : Produces (p >>= k) Q"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.SingleItem",
+    "source_signature": "def SingleItem (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.NonemptyItem",
+    "source_signature": "def NonemptyItem (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_yield_single",
+    "source_signature": "theorem expr_yield_single (e : Syn .expr) : Produces e.yield SingleItem"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_nonempty",
+    "source_signature": "theorem litP_nonempty (l : Lit) : Produces (litP l) (fun ts => ts \u2260 [])"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.callArgs_yield_nonempty",
+    "source_signature": "theorem callArgs_yield_nonempty (args : Syn .callArgs) : Produces args.yield NonemptyItem"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.nonemptyItem_flatten",
+    "source_signature": "theorem nonemptyItem_flatten {items : List (List Tok)} (h : NonemptyItem items) :\n    items.flatten \u2260 []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.append_nonempty_left",
+    "source_signature": "theorem append_nonempty_left {\u03b1 : Type} (xs ys : List \u03b1) (h : xs \u2260 []) : xs ++ ys \u2260 []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.append_nonempty_right",
+    "source_signature": "theorem append_nonempty_right {\u03b1 : Type} (xs ys : List \u03b1) (h : ys \u2260 []) : xs ++ ys \u2260 []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_yield_nonempty",
+    "source_signature": "theorem expr_yield_nonempty (e : Syn .expr) : Produces e.yield NonemptyItem"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_toks_iff",
+    "source_signature": "theorem expr_toks_iff (e : Syn .expr) (L : List Choice) (ts : List Tok) :\n    e.toks L = some ts \u2194 e.yield L = some ([ts], [])"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_nonempty_of_produces",
+    "source_signature": "theorem derives_nonempty_of_produces {c : Cat} (e : Syn c)\n    (hp : Produces e.yield NonemptyItem) (ts : List Tok) (h : e.Derives ts) : ts \u2260 []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_derives_nonempty",
+    "source_signature": "theorem expr_derives_nonempty (e : Syn .expr) (ts : List Tok) (h : e.Derives ts) : ts \u2260 []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.some_expr_yield_nonempty",
+    "source_signature": "theorem some_expr_yield_nonempty (e : Syn .expr) : Produces (Syn.some e).yield NonemptyItem"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.optional_expr_empty_iff",
+    "source_signature": "theorem optional_expr_empty_iff (e : Syn (.opt .expr)) : e.Derives [] \u2194 e = .none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.some_expr_yield_eq",
+    "source_signature": "theorem some_expr_yield_eq (e : Syn .expr) : (Syn.some e).yield = e.yield"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.optional_expr_yield_empty_iff",
+    "source_signature": "theorem optional_expr_yield_empty_iff (e : Syn (.opt .expr)) (L rest : List Choice)\n    (items : List (List Tok)) (h : e.yield L = some (items, rest)) :\n    items.flatten = [] \u2194 e = .none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldShape",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed",
+    "source_signature": "theorem optional_presence_reconstructed (a b : Syn (.opt .expr))\n    (La Lb ra rb : List Choice) (xs ys : List (List Tok))\n    (ha : a.yield La = some (xs, ra)) (hb : b.yield Lb = some (ys, rb))\n    (heq : xs.flatten = ys.flatten) : a = .none \u2194 b = .none"
   }
 ]
