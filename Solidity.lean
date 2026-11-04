@@ -3028,6 +3028,8 @@ import Solidity.Yul.Views.LayoutOriginNegativeControls
 import Solidity.Yul.Views.LayoutOriginReads
 import Solidity.Yul.Views.LayoutOriginState
 import Solidity.Yul.Views.LayoutOriginStore
+import Solidity.Yul.Views.LinkedCellHash
+import Solidity.Yul.Views.LinkedCellHashControls
 import Solidity.Yul.Views.LocalConstructorArguments
 import Solidity.Yul.Views.LocatedControls
 import Solidity.Yul.Views.LocatedHash

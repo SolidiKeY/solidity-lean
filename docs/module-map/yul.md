@@ -115,3 +115,4 @@
 | `Yul/Views/FixedDeclarationDefaults{,Controls}` | Actual recursive fixed-array/struct and ordered-root packing derives optional default payloads, reset-check availability and empty-store full encode/writeback; None/default distinction controls. |
 | `Yul/Views/CellWritesCalldataHash{,Controls}` | One actual typed storage-write/calldata-hash computation with same-state raw banks, clipped same-Fixed payload binding, allocation safety and exact timeout/static prefixes. |
 | `Yul/Views/CellHashFinalization{,Controls}` | Transaction finalization of one actual mixed typed-write/calldata-hash run: persistent reconstruction with original complement, transient/default and journal reset, late-timeout prefix controls. |
+| `Yul/Views/LinkedCellHash{,Controls}` | Computed account-tagged initial journal complements and whole persistent reencoding from the actual finalized journal, with nonzero unknown-slot and account/bank controls. |

@@ -753,3 +753,12 @@ automatic transaction error handling. The encoding law uses the original map
 complement independently of the supplied residual journal; their initial
 coupling is not derived here. Finalization is not frame rollback or a claim that arbitrary default codecs
 encode zero; heap placement and general call/source adequacy remain open.
+
+`LinkedCellHash.prepare` computes both selected-account complements from the
+supplied complete maps and packed registries, preserving other accounts' cells.
+After the actual combined typed-write/hash run, `reencode` reconstructs the whole
+persistent map using the finalized journal's actual cells. Unknown nonzero slots
+survive while transient residuals reset. Preparation is an explicit constructed
+initialization boundary: retaining an existing undo list does not prove its
+historical compatibility, automatic initialization, or rollback transport.
+Original canonical views, separation and request-registration premises remain.
