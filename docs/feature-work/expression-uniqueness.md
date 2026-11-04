@@ -40,9 +40,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 607 source declarations with source signatures;
+`declarations.json` enumerates all 641 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The thirty-five modules are proposed for coordinator registration, with module-map rows,
+The thirty-eight modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -98,7 +98,7 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ExpressionCommaFree` | Exhaustive expression closure yields have no top-level commas; original expression certificates supply every scanner condition in certified component-span reconstruction. This concludes word-vector equality, not child-tree equality. |
 | `LowFreeAlgebra` | Joint question/assignment selector includes all 13 assignment operators; loose-root-free token, type-spelling and attribute algebra. |
 | `ExpressionLowFree` | Existing recursive precedence plus level ≥ 2 derives loose-marker freedom for all expression roots; type and call-argument outer words are unconditionally free, including arbitrary enclosed descendants. |
-| `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Full operand spans and the conditional colon cut are still open. |
+| `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Assignment child spans are now proved in BinarySpans; the conditional colon cut remains open. |
 | `LowControls` | Every assignment operator and arbitrary prefix depth inhabit a conditional middle branch with exact yield and whole precedence; the first marker is the outer question, never that middle assignment. |
 | `BinaryFreeAlgebra` | Parameterized exact binary-rank markers and token/attribute algebra; prefix helper records its necessary rank-10 limitation. |
 | `ExpressionBinaryFree` | Original certificates imply marker freedom above each rank 2–9, 11 and 12, across all constructors and reachable type/call syntax. Its raw-rank-10 limitation is handled by the later operand-sensitive `AddRoot` proof. |
@@ -113,7 +113,10 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ExpressionAddFree` | Original high-expression certificates derive additive freedom starting unfinished; all constructors and arbitrary type/argument/layout descendants are covered. |
 | `AddRoot` | Additive root/operator reconstruction and higher-root disjointness close the rank-10 marker gap. Certified ordinary binary roots at all ranks 2–12 have equal levels when their yields agree. |
 | `AddControls` | Every additive operator and arbitrary right-prefix depth have an inhabited exact-yield certificate and correct outer marker. The same unary prefix deliberately fails a skip begun finished. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 607 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `YieldSplit` | Actual successful StateT/Option executions invert into child successes, with arbitrary independent layout states. |
+| `BinarySpans` | All eleven ordinary binary families plus assignment derive equal child token spans and actual state executions from parent certificates/yields; enum operators reconstruct. |
+| `SpanControls` | Arbitrary mixed additive/prefix depths have partial-state operator/depth uniqueness and certified family-tree uniqueness. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 641 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -154,13 +157,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-additive.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-spans.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-additive.inside.json`. It took 24.893980 seconds, child peak RSS
-249944 KiB, exact container peak 848158720 bytes, minimum parent headroom
-15605366784 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-spans.inside.json`. It took 25.049671 seconds, child peak RSS
+250512 KiB, exact container peak 827023360 bytes, minimum parent headroom
+15617515520 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -172,10 +175,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these thirty-five modules lack central root imports. The orphan gate
-reported the same thirty-five. Source trust passed (3707 sources, zero findings), and
+check: exactly these thirty-eight modules lack central root imports. The orphan gate
+reported the same thirty-eight. Source trust passed (3710 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 607 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 641 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -198,7 +201,7 @@ require their own reviews.
 
 The expression-closure delimiter invariant and grouped/enclosed span reconstruction
 are now proved. The comma separator and joint loose/non-minus binary marker invariants are now
-derived from certificates. The rank-ten operand-state invariant is now proved. Next complete child-span
+derived from certificates. The rank-ten operand-state invariant is now proved. Next complete conditional-colon/high-root span
 decomposition for arbitrary precedence roots and reconstruct conditional colons. A raw
 punctuation split is insufficient: `-` is both a prefix and binary token, and
 conditional middle expressions mask nested assignments/colons. Prove those facts;
@@ -331,7 +334,7 @@ remain open, as do full registration-dependent global gates.
 
 ## Operand-sensitive additive checkpoint
 
-Eight modules add 146 declarations, bringing the current inventory to 35 modules
+Eight modules add 146 declarations, bringing that checkpoint inventory to 35 modules
 and 607 declarations. The stack/bit machine stores no syntax tree. Successful
 intrinsic expression, type and call-argument words finish an operand from either
 initial bit; fragment vectors must be nonempty according to their actual layout,
@@ -362,3 +365,30 @@ reviews accepted the state invariants, all-constructor coverage and root/control
 proofs, using no Lean server. Verdicts are in `evidence/reviews-additive.json`.
 Failed first enclosure normalizations and one file-assembly/missing-file attempt
 remain separate evidence. No incomplete Lean proof is counted as passing.
+
+
+## Actual binary child-span checkpoint
+
+Three modules add 34 declarations, giving 38 modules and 641 declarations.
+`YieldSplit` inverts successful existing printer binds and pure results. It
+recovers each child execution and its intermediate layout state from the actual
+parent success, even with an unconsumed layout suffix. `BinarySpans` uses those
+executions and the original recursive precedence certificate to derive the
+necessary marker freedom internally. Nine left-associative families use the
+last same-rank cut, additive roots use operand-sensitive last cuts, and
+exponentiation/assignment use first cuts. All twelve families conclude equal
+left/right child words; enum families also recover the operator. Independent
+layouts are not equated. No desired root split or uniqueness premise is assumed.
+
+The arbitrary mixed-add/prefix family reconstructs both operator and depth from
+shared partial successes, and hence proves equality within that inhabited family.
+This does not prove general child-tree identity. Conditional colon matching,
+higher-root/postfix/primary reconstruction, recursive type/list/argument/tree
+uniqueness, the public theorem and accepted-tree corollary remain open. The
+original target, source interfaces, exclusions, refusals and budgets are unchanged.
+
+All three modules pass per-file diagnostics and serial kernel signature/axiom
+gates. Exact actual standard-only axiom sets cover all 641 declarations. Separate
+finder and skeptic source reviews accepted the partial checkpoint without
+defects or Lean-server use; records are in `evidence/reviews-spans.json`. Failed
+first bind inversion and missing direct import diagnostics remain retained.

@@ -21,13 +21,13 @@
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "All ordinary binary ranks2\u201312, including operand-sensitive rank10, have certificate-derived root markers, lower/higher disjointness and binary root-level equality. Complete operand/colon/high-root spans remain open."
+    "evidence": "All ordinary binary roots and assignment now reconstruct both child token words and actual layout-state executions from original certificates. Conditional colon/high-root spans and recursive child identities remain open."
   },
   {
     "id": "EU-05",
     "obligation": "all operator associativity and precedence boundaries",
     "status": "partial",
-    "evidence": "All original refusals retained. Arbitrary all-binary root-level precedence separation and marker associativity orientation proved, including unary/binary minus handling. Complete same-yield child/tree association and remaining boundary acceptance stay open."
+    "evidence": "All original refusals retained. All ordinary binary ranks separate, with correct associativity-oriented cuts deriving child spans for arbitrary subtree sizes. Complete tree association and remaining boundaries remain open."
   },
   {
     "id": "EU-06",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Both AddOps and arbitrary right-prefix depth have exact inhabited certificates/outer-marker controls; unary prefixes pass unfinished additive scan and deliberately fail finished-entry scan. Earlier arbitrary families retained. Full boundary acceptance stays open."
+    "evidence": "Arbitrary right-prefix depth now has same-yield family-tree uniqueness through recovered spans, including independent partial layouts. Inhabited and negative state-entry controls retained; full boundary acceptance remains open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "35 modules/607 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
+    "evidence": "38 modules/641 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at35 frozen registrations; trust3707zero/layers559zero pass; central axiom inventory zero errors but607 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at38 frozen registrations; trust3710zero/layers559zero pass; central axiom inventory zero errors but641 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted completion/additive state, all-constructor certificate proofs, all-binary root-rank result and arbitrary controls without defects or Lean-server use. See evidence/reviews-additive.json."
+    "evidence": "Separate finder/skeptic accepted partial printer inversion, all12 binary/assignment span proofs and arbitrary family controls without defects or Lean-server use. See evidence/reviews-spans.json."
   },
   {
     "id": "EU-14",

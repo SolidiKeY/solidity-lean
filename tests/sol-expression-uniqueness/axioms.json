@@ -499,6 +499,56 @@
     "propext",
     "Quot.sound"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.BinaryChildSpans": [],
+  "Solidity.Frontend.ExpressionUniqueness.mul_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.shift_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.order_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.equality_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitAnd_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitXor_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitOr_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.and_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.or_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.add_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.exp_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.assignment_child_spans": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.run_of_skip": [
     "propext"
   ],
@@ -1551,6 +1601,14 @@
   "Solidity.Frontend.ExpressionUniqueness.arbitrary_holes_reconstructed": [
     "propext"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_partial_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_same_yield_unique": [
+    "propext",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique": [],
   "Solidity.Frontend.ExpressionUniqueness.Bracket": [],
   "Solidity.Frontend.ExpressionUniqueness.openTok": [],
@@ -1765,5 +1823,24 @@
   "Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed": [
     "propext",
     "Quot.sound"
-  ]
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bind_success_split": [],
+  "Solidity.Frontend.ExpressionUniqueness.pure_success_split": [],
+  "Solidity.Frontend.ExpressionUniqueness.pair_pure_success_split": [],
+  "Solidity.Frontend.ExpressionUniqueness.one_pure_success_split": [],
+  "Solidity.Frontend.ExpressionUniqueness.exp_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.mul_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.add_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.shift_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.order_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.equality_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.bitXor_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.bitOr_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.and_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.or_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.assignment_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.conditional_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.prefix_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.suffix_yield_parts": []
 }

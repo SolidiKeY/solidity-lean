@@ -7,6 +7,7 @@ import Solidity.Frontend.ExpressionUniqueness.BinaryControls
 import Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra
 import Solidity.Frontend.ExpressionUniqueness.BinaryRank
 import Solidity.Frontend.ExpressionUniqueness.BinaryRoot
+import Solidity.Frontend.ExpressionUniqueness.BinarySpans
 import Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra
 import Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction
 import Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree
@@ -28,10 +29,12 @@ import Solidity.Frontend.ExpressionUniqueness.Primary
 import Solidity.Frontend.ExpressionUniqueness.Refusals
 import Solidity.Frontend.ExpressionUniqueness.ReverseSplit
 import Solidity.Frontend.ExpressionUniqueness.SeparatorSplit
+import Solidity.Frontend.ExpressionUniqueness.SpanControls
 import Solidity.Frontend.ExpressionUniqueness.Statement
 import Solidity.Frontend.ExpressionUniqueness.TokenSplit
 import Solidity.Frontend.ExpressionUniqueness.YieldBalance
 import Solidity.Frontend.ExpressionUniqueness.YieldShape
+import Solidity.Frontend.ExpressionUniqueness.YieldSplit
 
 /-! Exact kernel-reported axiom pins for every source declaration in this lane. -/
 
@@ -541,6 +544,47 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.BinaryChildSpans' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.BinaryChildSpans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mul_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mul_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.shift_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.shift_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.order_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.order_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.equality_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.equality_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitAnd_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitAnd_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitXor_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitXor_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitOr_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitOr_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.and_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.and_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.or_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.or_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.add_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.add_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.exp_child_spans' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.exp_child_spans
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.assignment_child_spans' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.assignment_child_spans
 
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.run_of_skip' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.run_of_skip
@@ -1627,6 +1671,12 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.arbitrary_holes_reconstructed' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.arbitrary_holes_reconstructed
 
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_partial_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_partial_unique
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_same_yield_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_same_yield_unique
+
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique
 
@@ -1875,3 +1925,60 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bind_success_split' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bind_success_split
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.pure_success_split' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.pure_success_split
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.pair_pure_success_split' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.pair_pure_success_split
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.one_pure_success_split' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.one_pure_success_split
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.exp_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.exp_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mul_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mul_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.add_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.add_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.shift_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.shift_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.order_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.order_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.equality_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.equality_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitXor_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitXor_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitOr_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitOr_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.and_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.and_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.or_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.or_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.assignment_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.assignment_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.conditional_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.conditional_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.prefix_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.prefix_yield_parts
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.suffix_yield_parts' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.suffix_yield_parts

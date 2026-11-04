@@ -1014,6 +1014,84 @@
     "source_signature": "theorem lastTop_none_of_binaryFree (rank : Nat) (ts : List Tok) (hf : BinaryFree rank ts) :\n    lastTop (binaryMarker rank) ts = none"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.BinaryChildSpans",
+    "source_signature": "def BinaryChildSpans (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mul_child_spans",
+    "source_signature": "theorem mul_child_spans (op op' : MulOp) (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.mulDivMod op a b).prec = true) (hp' : (Syn.mulDivMod op' c d).prec = true)\n    (hy : (Syn.mulDivMod op a b).yield initial = some (items, rest))\n    (hy' : (Syn.mulDivMod op' c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    op = op' \u2227 BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_child_spans",
+    "source_signature": "theorem shift_child_spans (op op' : ShiftOp) (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.shift op a b).prec = true) (hp' : (Syn.shift op' c d).prec = true)\n    (hy : (Syn.shift op a b).yield initial = some (items, rest))\n    (hy' : (Syn.shift op' c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    op = op' \u2227 BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_child_spans",
+    "source_signature": "theorem order_child_spans (op op' : OrderOp) (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.order op a b).prec = true) (hp' : (Syn.order op' c d).prec = true)\n    (hy : (Syn.order op a b).yield initial = some (items, rest))\n    (hy' : (Syn.order op' c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    op = op' \u2227 BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_child_spans",
+    "source_signature": "theorem equality_child_spans (op op' : EqOp) (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.equality op a b).prec = true) (hp' : (Syn.equality op' c d).prec = true)\n    (hy : (Syn.equality op a b).yield initial = some (items, rest))\n    (hy' : (Syn.equality op' c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    op = op' \u2227 BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitAnd_child_spans",
+    "source_signature": "theorem bitAnd_child_spans (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.bitAnd a b).prec = true) (hp' : (Syn.bitAnd c d).prec = true)\n    (hy : (Syn.bitAnd a b).yield initial = some (items, rest))\n    (hy' : (Syn.bitAnd c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitXor_child_spans",
+    "source_signature": "theorem bitXor_child_spans (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.bitXor a b).prec = true) (hp' : (Syn.bitXor c d).prec = true)\n    (hy : (Syn.bitXor a b).yield initial = some (items, rest))\n    (hy' : (Syn.bitXor c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitOr_child_spans",
+    "source_signature": "theorem bitOr_child_spans (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.bitOr a b).prec = true) (hp' : (Syn.bitOr c d).prec = true)\n    (hy : (Syn.bitOr a b).yield initial = some (items, rest))\n    (hy' : (Syn.bitOr c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.and_child_spans",
+    "source_signature": "theorem and_child_spans (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.and a b).prec = true) (hp' : (Syn.and c d).prec = true)\n    (hy : (Syn.and a b).yield initial = some (items, rest))\n    (hy' : (Syn.and c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.or_child_spans",
+    "source_signature": "theorem or_child_spans (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.or a b).prec = true) (hp' : (Syn.or c d).prec = true)\n    (hy : (Syn.or a b).yield initial = some (items, rest))\n    (hy' : (Syn.or c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_child_spans",
+    "source_signature": "theorem add_child_spans (op op' : AddOp) (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.addSub op a b).prec = true) (hp' : (Syn.addSub op' c d).prec = true)\n    (hy : (Syn.addSub op a b).yield initial = some (items, rest))\n    (hy' : (Syn.addSub op' c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    op = op' \u2227 BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_child_spans",
+    "source_signature": "theorem exp_child_spans (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.exp a b).prec = true) (hp' : (Syn.exp c d).prec = true)\n    (hy : (Syn.exp a b).yield initial = some (items, rest))\n    (hy' : (Syn.exp c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinarySpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_child_spans",
+    "source_signature": "theorem assignment_child_spans (op op' : AssignOp) (a b c d : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.assign op a b).prec = true) (hp' : (Syn.assign op' c d).prec = true)\n    (hy : (Syn.assign op a b).yield initial = some (items, rest))\n    (hy' : (Syn.assign op' c d).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    op = op' \u2227 BinaryChildSpans a b c d initial rest initial' rest'"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.run_of_skip",
@@ -3144,6 +3222,18 @@
     "source_signature": "theorem arbitrary_holes_reconstructed (n m : Nat)\n    (h : commaSep ([] :: List.replicate n []) = commaSep ([] :: List.replicate m [])) : n = m"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SpanControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_partial_unique",
+    "source_signature": "theorem mixedAddPrefix_partial_unique (op op' : AddOp) (n m : Nat)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hy : (mixedAddPrefix op n).yield initial = some (items, rest))\n    (hy' : (mixedAddPrefix op' m).yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) : op = op' \u2227 n = m"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.SpanControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_same_yield_unique",
+    "source_signature": "theorem mixedAddPrefix_same_yield_unique (op op' : AddOp) (n m : Nat) (ts : List Tok)\n    (hy : (mixedAddPrefix op n).Derives ts) (hy' : (mixedAddPrefix op' m).Derives ts) :\n    mixedAddPrefix op n = mixedAddPrefix op' m"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.Statement",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique",
@@ -3640,5 +3730,119 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed",
     "source_signature": "theorem optional_presence_reconstructed (a b : Syn (.opt .expr))\n    (La Lb ra rb : List Choice) (xs ys : List (List Tok))\n    (ha : a.yield La = some (xs, ra)) (hb : b.yield Lb = some (ys, rb))\n    (heq : xs.flatten = ys.flatten) : a = .none \u2194 b = .none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bind_success_split",
+    "source_signature": "theorem bind_success_split {\u03b1 \u03b2 : Type} (p : Pr \u03b1) (k : \u03b1 \u2192 Pr \u03b2)\n    (initial rest : List Choice) (result : \u03b2) (h : (p >>= k) initial = some (result, rest)) :\n    \u2203 value middle, p initial = some (value, middle) \u2227 k value middle = some (result, rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.pure_success_split",
+    "source_signature": "theorem pure_success_split {\u03b1 : Type} (value result : \u03b1) (initial rest : List Choice)\n    (h : (pure value : Pr \u03b1) initial = some (result, rest)) : result = value \u2227 rest = initial"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.pair_pure_success_split",
+    "source_signature": "theorem pair_pure_success_split {\u03b1 \u03b2 \u03b3 : Type} (p : Pr \u03b1) (q : Pr \u03b2) (render : \u03b1 \u2192 \u03b2 \u2192 \u03b3)\n    (initial rest : List Choice) (result : \u03b3)\n    (h : (do let x \u2190 p; let y \u2190 q; pure (render x y)) initial = some (result, rest)) :\n    \u2203 x y middle, p initial = some (x, middle) \u2227 q middle = some (y, rest) \u2227 result = render x y"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.one_pure_success_split",
+    "source_signature": "theorem one_pure_success_split {\u03b1 \u03b2 : Type} (p : Pr \u03b1) (render : \u03b1 \u2192 \u03b2)\n    (initial rest : List Choice) (result : \u03b2)\n    (h : (do let x \u2190 p; pure (render x)) initial = some (result, rest)) :\n    \u2203 x, p initial = some (x, rest) \u2227 result = render x"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_yield_parts",
+    "source_signature": "theorem exp_yield_parts (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.exp a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu .exp ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mul_yield_parts",
+    "source_signature": "theorem mul_yield_parts (op : MulOp) (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.mulDivMod op a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu op.punct ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_yield_parts",
+    "source_signature": "theorem add_yield_parts (op : AddOp) (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.addSub op a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu op.punct ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_yield_parts",
+    "source_signature": "theorem shift_yield_parts (op : ShiftOp) (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.shift op a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu op.punct ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_yield_parts",
+    "source_signature": "theorem order_yield_parts (op : OrderOp) (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.order op a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu op.punct ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_yield_parts",
+    "source_signature": "theorem equality_yield_parts (op : EqOp) (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.equality op a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu op.punct ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_parts",
+    "source_signature": "theorem bitAnd_yield_parts (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.bitAnd a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu .bitAnd ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitXor_yield_parts",
+    "source_signature": "theorem bitXor_yield_parts (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.bitXor a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu .bitXor ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitOr_yield_parts",
+    "source_signature": "theorem bitOr_yield_parts (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.bitOr a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu .bitOr ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.and_yield_parts",
+    "source_signature": "theorem and_yield_parts (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.and a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu .and ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.or_yield_parts",
+    "source_signature": "theorem or_yield_parts (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.or a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu .or ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_yield_parts",
+    "source_signature": "theorem assignment_yield_parts (op : AssignOp) (a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.assign op a b).yield initial = some (items, rest)) :\n    \u2203 xs ys middle, a.yield initial = some (xs, middle) \u2227 b.yield middle = some (ys, rest) \u2227\n      items = [xs.flatten ++ pu op.punct ++ ys.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_yield_parts",
+    "source_signature": "theorem conditional_yield_parts (c a b : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.cond c a b).yield initial = some (items, rest)) :\n    \u2203 xs ys zs middle next, c.yield initial = some (xs, middle) \u2227\n      a.yield middle = some (ys, next) \u2227 b.yield next = some (zs, rest) \u2227\n      items = [xs.flatten ++ pu .question ++ ys.flatten ++ pu .colon ++ zs.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_yield_parts",
+    "source_signature": "theorem prefix_yield_parts (op : PrefixOp) (e : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.unaryPrefix op e).yield initial = some (items, rest)) :\n    \u2203 xs, e.yield initial = some (xs, rest) \u2227 items = [op.punct ++ xs.flatten]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.YieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffix_yield_parts",
+    "source_signature": "theorem suffix_yield_parts (op : SuffixOp) (e : Syn .expr) (initial rest : List Choice)\n    (items : List (List Tok)) (h : (Syn.unarySuffix op e).yield initial = some (items, rest)) :\n    \u2203 xs, e.yield initial = some (xs, rest) \u2227 items = [xs.flatten ++ pu op.punct]"
   }
 ]

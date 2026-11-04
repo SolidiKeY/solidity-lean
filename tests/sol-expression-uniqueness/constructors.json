@@ -95,7 +95,7 @@
     "level": 12,
     "precNode": "a.level >= 13 and b.level >= 12",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: first exponent marker and higher-root disjointness proved; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_exp (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -105,7 +105,7 @@
     "level": 11,
     "precNode": "a.level >= 11 and b.level >= 12",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_mulDivMod (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -115,7 +115,7 @@
     "level": 10,
     "precNode": "a.level >= 10 and b.level >= 11",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: operand-sensitive last marker, additive operator reconstruction and all-binary higher-root disjointness proved; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_addSub (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -125,7 +125,7 @@
     "level": 9,
     "precNode": "a.level >= 9 and b.level >= 10",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_shift (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -135,7 +135,7 @@
     "level": 8,
     "precNode": "a.level >= 8 and b.level >= 9",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitAnd (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -145,7 +145,7 @@
     "level": 7,
     "precNode": "a.level >= 7 and b.level >= 8",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitXor (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -155,7 +155,7 @@
     "level": 6,
     "precNode": "a.level >= 6 and b.level >= 7",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitOr (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -165,7 +165,7 @@
     "level": 5,
     "precNode": "a.level >= 5 and b.level >= 6",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_order (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -175,7 +175,7 @@
     "level": 4,
     "precNode": "a.level >= 4 and b.level >= 5",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_equality (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -185,7 +185,7 @@
     "level": 3,
     "precNode": "a.level >= 3 and b.level >= 4",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_and (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -195,7 +195,7 @@
     "level": 2,
     "precNode": "a.level >= 2 and b.level >= 3",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: last same-rank marker and lower/higher root disjointness proved; enum operator reconstructs where applicable; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_or (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -215,7 +215,7 @@
     "level": 0,
     "precNode": "a.level >= 2; b unrestricted at root",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: marker class and assignment operator reconstructed from original certificates; complete operand spans remain open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_assign (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },

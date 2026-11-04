@@ -11,6 +11,7 @@
     "Solidity/Frontend/ExpressionUniqueness/BinaryFreeAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/BinaryRank.lean",
     "Solidity/Frontend/ExpressionUniqueness/BinaryRoot.lean",
+    "Solidity/Frontend/ExpressionUniqueness/BinarySpans.lean",
     "Solidity/Frontend/ExpressionUniqueness/CommaFreeAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/DelimiterReconstruction.lean",
     "Solidity/Frontend/ExpressionUniqueness/ExpressionAddFree.lean",
@@ -32,10 +33,12 @@
     "Solidity/Frontend/ExpressionUniqueness/Refusals.lean",
     "Solidity/Frontend/ExpressionUniqueness/ReverseSplit.lean",
     "Solidity/Frontend/ExpressionUniqueness/SeparatorSplit.lean",
+    "Solidity/Frontend/ExpressionUniqueness/SpanControls.lean",
     "Solidity/Frontend/ExpressionUniqueness/Statement.lean",
     "Solidity/Frontend/ExpressionUniqueness/TokenSplit.lean",
     "Solidity/Frontend/ExpressionUniqueness/YieldBalance.lean",
-    "Solidity/Frontend/ExpressionUniqueness/YieldShape.lean"
+    "Solidity/Frontend/ExpressionUniqueness/YieldShape.lean",
+    "Solidity/Frontend/ExpressionUniqueness/YieldSplit.lean"
   ],
   "declarations": [
     "Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_addFree",
@@ -207,6 +210,19 @@
     "Solidity.Frontend.ExpressionUniqueness.exp_yield_firstBinary",
     "Solidity.Frontend.ExpressionUniqueness.exp_derives_firstBinary",
     "Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree",
+    "Solidity.Frontend.ExpressionUniqueness.BinaryChildSpans",
+    "Solidity.Frontend.ExpressionUniqueness.mul_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.shift_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.order_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.equality_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.bitAnd_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.bitXor_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.bitOr_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.and_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.or_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.add_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.exp_child_spans",
+    "Solidity.Frontend.ExpressionUniqueness.assignment_child_spans",
     "Solidity.Frontend.ExpressionUniqueness.run_of_skip",
     "Solidity.Frontend.ExpressionUniqueness.commaFree_balanced",
     "Solidity.Frontend.ExpressionUniqueness.commaFreeItems_balanced",
@@ -562,6 +578,8 @@
     "Solidity.Frontend.ExpressionUniqueness.commaSep_empty_single_empty",
     "Solidity.Frontend.ExpressionUniqueness.empty_holes_comma_free",
     "Solidity.Frontend.ExpressionUniqueness.arbitrary_holes_reconstructed",
+    "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_partial_unique",
+    "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_same_yield_unique",
     "Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique",
     "Solidity.Frontend.ExpressionUniqueness.Bracket",
     "Solidity.Frontend.ExpressionUniqueness.openTok",
@@ -644,7 +662,26 @@
     "Solidity.Frontend.ExpressionUniqueness.optional_expr_empty_iff",
     "Solidity.Frontend.ExpressionUniqueness.some_expr_yield_eq",
     "Solidity.Frontend.ExpressionUniqueness.optional_expr_yield_empty_iff",
-    "Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed"
+    "Solidity.Frontend.ExpressionUniqueness.optional_presence_reconstructed",
+    "Solidity.Frontend.ExpressionUniqueness.bind_success_split",
+    "Solidity.Frontend.ExpressionUniqueness.pure_success_split",
+    "Solidity.Frontend.ExpressionUniqueness.pair_pure_success_split",
+    "Solidity.Frontend.ExpressionUniqueness.one_pure_success_split",
+    "Solidity.Frontend.ExpressionUniqueness.exp_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.mul_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.add_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.shift_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.order_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.equality_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.bitXor_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.bitOr_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.and_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.or_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.assignment_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.conditional_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.prefix_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.suffix_yield_parts"
   ],
   "module_map_rows": [
     {
@@ -696,6 +733,11 @@
       "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/BinaryRoot.lean",
       "description": "Certified binary root markers follow their associativity"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/BinarySpans.lean",
+      "description": "Recover binary child words from actual certified printer executions"
     },
     {
       "file": "docs/module-map/source-definitions.md",
@@ -804,6 +846,11 @@
     },
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/SpanControls.lean",
+      "description": "Arbitrary-family controls for recovered operand spans"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/Statement.lean",
       "description": "The original certified expression uniqueness target"
     },
@@ -821,6 +868,11 @@
       "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/YieldShape.lean",
       "description": "Structural facts about successful intrinsic expression yields"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/YieldSplit.lean",
+      "description": "Invert actual printer executions into successful child executions"
     }
   ],
   "note": "Coordinator registration requested through this manifest only. Shared roots and module map remain frozen. Source declarations are enumerated; Bracket also has kernel-generated recursors, deriving instances and its three constructors.",
@@ -832,7 +884,7 @@
   "central_axiom_registration": {
     "file": "scripts/g07-axiom-pins.json",
     "source": "tests/sol-expression-uniqueness/axioms.json",
-    "count": 607,
+    "count": 641,
     "status": "pending coordinator integration; shared trust inventory frozen"
   }
 }
