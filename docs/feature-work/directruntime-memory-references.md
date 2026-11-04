@@ -238,3 +238,28 @@ The final generated-source whitespace check passes. Captured raw log/tsv
 whitespace is preserved through the owned .gitattributes; source checks remain
 enabled. Documentation paths pass with 48 ambiguous but resolving baseline
 references. Regenerating KernelMatrix is byte-identical to the checked file.
+
+
+## H35 VM gate and cache shipment follow-up
+
+At code head `e9d5ac2c8825966141f13ee9bb5a93b7fceeb179`, the owned-module
+build passed again (0.609 s, 57656 KiB aggregate RSS), the 54 named
+`#print axioms` reports contained only propext/Classical.choice/Quot.sound, and
+the Admission controls passed again (5.434 s, 684096 KiB). These are development
+model/proof gates, not native/browser results. Checks used the existing 12 GiB,
+zero-swap container, one Lean thread, explicit -j1 wrapper and host writer lock.
+An initial lock invocation inside the container failed before starting Lean;
+the retained passing invocation uses the host lock.
+
+The actual `scripts/coord-tools/ship-cache.sh` invocation exited 1 after
+creating a cache archive and manifest: coordinator-side
+`/home/ubuntu/.local/state/cloudvm-coord/poll-state.json` is absent. This VM
+also lacks the coordinator catalogs/transport installation. No destination
+was invented and no receipt claims delivery. `evidence/h35/receipt.json` gives
+the absolute archive path and SHA256; the archive remains on this VM for
+coordinator retrieval, outside Git. The script collected 1638 artifacts and
+550 mappings; its counter reported `0 traces without cached outputs skipped`.
+That counter excludes traces with absent mapping/outputs. Separate owned-cache
+coverage checks confirm Reader and both proof modules are included. Cache delivery is blocked, so under
+H35 no checkpoint is merge-ready solely on these passing VM gates. The
+central registration and ordinary native/browser obligations above remain open.
