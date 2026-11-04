@@ -114,3 +114,4 @@
 | `Lowering/V07/EnumGuardControls.lean` | Inhabited guarded enum, reached-state order, prefix and zero/full-capacity controls with exact pins. |
 | `Lowering/V07/UnsignedEnumGuard.lean` | Approved unsigned-width Source enum conversions reuse the existing native guard, with initial-derived success/failure transport. |
 | `Lowering/V07/UnsignedEnumGuardControls.lean` | Inhabited narrow-width alias, context and maximum-bound controls across all 32 widths. |
+| `Lowering/V07/P12NextInterface.lean` | H26 generated request-indexed P12 condition/reference dependency contracts; all producer fields pending, no instances. |
