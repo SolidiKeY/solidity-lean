@@ -152,3 +152,48 @@ balanced splitting, open-spine/nearest-else proofs, token root discrimination,
 parse/yield uniqueness, syntax-derived parser fuel/completeness, full kernel
 variants, solc fixtures, full gates, scope acceptance and sealed final handoff.
 Checkpoint A is not queue-wide or whole-goal completion.
+
+## Checkpoint B: open-spine and nearest-else contract
+
+NearestElse.lean defines OpenSpine intrinsically over existing indexed Syn.
+The missing-else root, else-branch propagation, for-body propagation and
+while-body propagation exactly characterize Syn.openIf for arbitrary syntax.
+Block and do-while boundaries are closed for arbitrary bodies. nearestElse_node
+uses exactly the existing precNode premise; nearestElse uses existing prec.
+This is the local no-capture contract, not attachment-position uniqueness,
+token-yield uniqueness, or parser completeness. Expressions are not traversed.
+
+An inhabited kernel control gives distinct outer/inner association trees,
+a successful common yield to the explicit tokens
+`if (p) if (q) return; else return;`, outer precedence refusal and inner
+precedence acceptance. The example is a counterexample to unconditional raw
+yield uniqueness; the requested precedence-qualified uniqueness remains open.
+All four OpenSpine constructors have inhabited controls; arbitrary blocks and
+do-while bodies are tested as closed boundaries.
+
+Finder and skeptic read-only reviews found the Option-equality control needed
+a successful-yield witness (equal failures would be insufficient); finder
+also requested an elseBranch control. Both fixes were implemented and both
+reviewers returned narrow PASS without Lean/server/build use.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/NearestElse.lean | pass, zero errors | /workspace/h28-statement-grammar-evidence/run-1793796519850435959 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.NearestElse | pass; 1.34s timed wall; peak RSS 416344 KiB | /workspace/h28-statement-grammar-evidence/run-1793796615688240659 |
+| runtime.py diag tests/h28-sol/statement-grammar/NearestElseControls.lean | pass, strengthened controls | /workspace/h28-statement-grammar-evidence/run-1793796735545103488 |
+| runtime.py gate tests/h28-sol/statement-grammar/NearestElseControls.lean | pass, repository per-file gate | /workspace/h28-statement-grammar-evidence/run-1793796851761080156 |
+
+Exact axiom output: openSpine_iff depends on [propext, Quot.sound]; nearestElse
+on [propext]; nearestElse_node, block_closed and doWhile_closed have no axioms.
+All five named dangling controls have no axioms. These are the standard Lean
+foundations; no custom axiom, sorry, unsafe or native_decide was introduced.
+Exact signatures are in the immutable module/test sources captured by the
+input manifests. Retained failed run-1793796482613356211 reports an invalid
+attempt to use Bool.and_eq_true as an iff constant; this was fixed by reusing
+the existing Syn.prec_root theorem. The failure guard stopped the owned
+runtime, which was restarted with the same ID and limits before the retry.
+
+Checkpoint B is accepted only as this local contract increment. Balanced
+block/list token splitting, token-root discrimination, attachment-position and
+parse/yield uniqueness, compound syntax-derived parser completeness, solc
+fixtures and final acceptance remain pending. The full goal remains active.
