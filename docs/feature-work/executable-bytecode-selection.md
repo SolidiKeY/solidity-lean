@@ -182,9 +182,8 @@ underflow and wrong-result controls. Additional controls distinguish unsigned
 high-bit comparisons, full-width complement and both Boolean outcomes, reject
 corrupted suffixes and check all eight opcode bytes. A local ADD absence is
 paired with its existing arithmetic selection, so component absence is not
-presented as a whole-selector or source refusal. Division, shifts, signed
-operations, instruction sequences and the remaining stack/control/composition
-queue remain open.
+presented as a whole-selector or source refusal. The components below cover division, shifts and signed operations. Instruction
+sequences and the remaining stack/control/composition queue remain open.
 
 Independent read-only finder and skeptic reviews passed this component and
 its controls without confirmed findings, including unsigned ordering, flag
@@ -210,5 +209,27 @@ full-width unsigned values, counts 0/255/256/maximum, SHL overflow, logical SHR,
 corrupted suffixes and all four opcode bytes. Component absence is paired with
 another component's supported selection. Independent read-only finder and
 skeptic reviews passed without confirmed findings; no hidden divisor, count,
-capacity or source-coverage premise was introduced. Signed operations,
-instruction sequences and the stack/control/composition queue remain open.
+capacity or source-coverage premise was introduced. Signed selection is described below; instruction sequences and the
+stack/control/composition queue remain open.
+
+## Signed numeric component
+
+SignedSelection.lean selects SLT/SGT/SDIV/SMOD against the actual numeric IR
+step. It reuses Scalar.sgn_word and Scalar.toWord_ofInt together with the
+published Evm signed-range theorems. The division-result range is the wider
+word interval, so minimum divided by negative one is included and wraps as
+raw EVM SDIV does. The SMOD nonzero-divisor case discharges its range proof
+inside the certificate; divisor zero is separately proved to return zero.
+No nonzero-divisor or minimum-integer exclusion is a caller premise.
+
+Controls distinguish signed from unsigned ordering, truncation from floor
+division, dividend-signed remainder from Euclidean remainder, and raw overflow
+from checked source refusal. They execute zero divisors, negative divisors,
+minimum words, arbitrary suffixes and complete IR caller frames, reject both
+operand shortages, wrong results and corrupted tails, and check all four
+opcode bytes. Physical capacity, checked source guard/panic execution, source
+adequacy and byte-runtime correspondence remain separate obligations.
+
+Independent read-only finder and skeptic reviews passed this component and
+controls without confirmed findings, including local discharge of every range
+obligation and inclusion of zero divisors and raw minimum-word overflow.
