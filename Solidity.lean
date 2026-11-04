@@ -305,6 +305,7 @@ import Solidity.Backend.MemoryOps.PhysicalByteJournal
 import Solidity.Backend.MemoryOps.PhysicalByteMaterialize
 import Solidity.Backend.MemoryOps.PhysicalByteMaterializeControls
 import Solidity.Backend.MemoryOps.PhysicalByteStack
+import Solidity.Backend.MemoryOps.PhysicalByteStackExact
 import Solidity.Backend.MemoryOps.PhysicalByteStore
 import Solidity.Backend.MemoryOps.PhysicalByteStoreControls
 import Solidity.Backend.MemoryOps.PhysicalByteWorldInterface

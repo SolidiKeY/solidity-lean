@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.PhysicalByteStack
+import Solidity.Backend.MemoryOps.PhysicalByteStackExact
 
 /-! Inhabited complete-byte observations for the real materializer. These two
 backend byte APIs have no Source pipeline parameter. No Source execution,
@@ -167,4 +167,50 @@ theorem empty_stack_boundary :
 #guard_msgs (whitespace := lax) in #print axioms stack_capacity
 /-- info: 'Solidity.Backend.MemoryOps.Physical.MaterializeControls.empty_stack_boundary' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms empty_stack_boundary
+/-- Classify EVERY runtime caller stack. A returned machine has the complete
+populated frame and byte observations; rejection returns no machine at all.
+Earlier finite boundary/empty/overlap observations are unchanged. -/
+theorem all_stack_classified (caller : List Roadmap.Word) (suffix : Backend.Program) :
+    Failure.Slice.checkedRun (Environment.materialize 31 payload++(.op .REVERT::suffix)) ⟨a::n::caller,bytes⟩=
+      (if caller.length+4≤1024 then some (⟨caller,reached⟩,some (.revert payload)) else none) ∧
+    (Failure.Slice.checkedRun (Environment.materialize 31 payload++(.op .REVERT::suffix)) ⟨a::n::caller,bytes⟩=none ↔
+      1024<caller.length+4) ∧
+    (∀ result,Failure.Slice.checkedRun (Environment.materialize 31 payload++(.op .REVERT::suffix)) ⟨a::n::caller,bytes⟩=some result →
+      result=(⟨caller,reached⟩,some (.revert payload)) ∧
+      WordFrame machine result.1.memory (fun c => c=2) ∧ result.1.stack=caller ∧
+      Environment.readMemory result.1.memory 30 6=[5,7,0,255,5,5] ∧
+      Environment.readMemory result.1.memory 64 32=Semantics.wordBytes high.val) := by
+  first
+  | solve | simp only [] | omega
+  | have run := materialize_checked_revert_exact 7 [0,255] a n caller bytes suffix rfl (by decide)
+    change Failure.Slice.checkedRun (Environment.materialize 31 payload++(.op .REVERT::suffix)) ⟨a::n::caller,bytes⟩=
+      (if caller.length+4≤1024 then some (⟨caller,reached⟩,some (.revert payload)) else none) at run
+    have frame := initial.materialize_outside 31 payload (by intro c hc;subst c;decide)
+    have complete : Environment.readMemory reached 64 32=Semantics.wordBytes high.val := by
+      obtain ⟨w,hw,hb⟩ := frame.cells 2 rfl
+      change Word.val high=Word.val w at hw
+      rw [←Word.val.inj hw] at hb
+      exact hb
+    refine ⟨run,?_,?_⟩
+    · rw [run]
+      by_cases room : caller.length+4≤1024
+      · rw [if_pos room]
+        constructor
+        · intro impossible;cases impossible
+        · intro impossible;omega
+      · rw [if_neg room]
+        exact ⟨fun _ => by omega,fun _ => rfl⟩
+    · intro result returned
+      rw [run] at returned
+      by_cases room : caller.length+4≤1024
+      · rw [if_pos room] at returned
+        have resultEq := (Option.some.inj returned).symm
+        refine ⟨resultEq,?_⟩
+        rw [resultEq]
+        exact ⟨frame,rfl,by change Environment.readMemory reached 30 6=[5,7,0,255,5,5];decide,complete⟩
+      · rw [if_neg room] at returned
+        cases returned
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.MaterializeControls.all_stack_classified' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms all_stack_classified
 end Solidity.Backend.MemoryOps.Physical.MaterializeControls
