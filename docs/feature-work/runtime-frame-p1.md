@@ -1322,3 +1322,45 @@ family. Generic saved history and paired target return, general recursive
 compiler selection, approved-domain provenance and byte/world correspondence
 remain separate obligations. Earlier interfaces, observations and refusals
 are unchanged.
+
+
+## Generic mutating saved history and paired completion
+
+`RuntimeFrameV3MutatingHistory.history` derives every saved parent reference
+and counter, the active reference word and the qualified reserved-frame
+exterior from actual mutating descent. It consumes the activation's already
+proved pre-turn payload/exterior facts directly. Only allocation after the
+write uses `Heap.Keeps`; the write transports lengths instead of old contents.
+
+`RuntimeFrameV3MutatingCompletion.endpoint` combines that history with the
+actual native continuation and the existing paired restore. For every counter
+with valid accesses and the stated real representation, allocator, frame,
+capacity and pointer premises, it derives native success, actual image
+execution and full representation of the returned output. Stack and old
+addresses persist, growth is exactly `4 * count`, the parent pointer returns
+to its start, and all saved pairs and qualified exterior words are proved.
+`growing_at` uses an actual successful source run and whole-output coherence
+to establish the same image at every sufficient quotation index.
+
+The populated two-turn client discharges the generic premises from the same
+real prefix and retains the complete twenty-five-cell return snapshot, old
+mutation `[1,2]`, unrelated `[4]`, both aliases, private arrays, saved parents,
+cursor 30 and restored pointer ten. Source-output identities come from source
+execution; target determinism identifies machines only. Cost four, an
+unfinished pointer and omitted mutation are rejected with successful baselines.
+
+The zero client executes an actual source and target local assignment after
+that populated prefix. The setup's code is linked to the public statement
+compiler. Its representation and allocator are derived from that execution,
+then the generic endpoint is inhabited at count zero. A separate execution
+proof shows the entire same image returns the exact input machine: no
+allocation or parent capture occurs, cursor 22 and old data remain. Charging
+four cells is refuted using the genuine allocator; this is a proof control,
+not runtime rejection of a false capacity premise.
+
+The image is assembled from checked components, not emitted by a public
+general recursive compiler. The theorem is for this no-result countdown
+family and its parameter frame. Full caller-target export, other recursive
+results/control, all-outcome behavior, approved-domain provenance and
+byte/world correspondence remain open. Frozen interfaces and previous
+observations are unchanged.
