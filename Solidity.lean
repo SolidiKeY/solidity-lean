@@ -3087,6 +3087,8 @@ import Solidity.Yul.Views.MemberStorageExtent
 import Solidity.Yul.Views.MemberStoragePaths
 import Solidity.Yul.Views.MemoryContract
 import Solidity.Yul.Views.MemoryControls
+import Solidity.Yul.Views.MemoryDelete
+import Solidity.Yul.Views.MemoryDeleteControls
 import Solidity.Yul.Views.MemoryImageExtension
 import Solidity.Yul.Views.MemoryImageOrder
 import Solidity.Yul.Views.MemoryImageOrderControls

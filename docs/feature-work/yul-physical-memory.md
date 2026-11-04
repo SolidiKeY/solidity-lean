@@ -931,3 +931,13 @@ Controls retain a caller prefix and child byte mutation through a late halt,
 nested empty child contexts and explicit rollback, with suspended caller aliases
 and exact bounds failure. These facts do not specify general callInternal,
 external-world effects or an automatic memory rollback policy.
+
+`MemoryDelete` runs the actual owner `zeroVal` before transporting a deletion.
+For array elements and struct fields it keeps the computed `Val.default` result
+and canonical word encoding explicit; bytes/string elements use the concrete
+zero byte. The resulting physical patch reconstructs the complete map and
+writes back the whole Source state against the supplied original allocation
+history. Controls cover scalar/byte deletion, universal integer defaults,
+unchanged siblings/padding, timeout, type error and Panic0x32. A reference-field
+deletion is separately observed to allocate and redirect the pointer; the scalar
+adapter supplies no physical theorem for that allocating branch.
