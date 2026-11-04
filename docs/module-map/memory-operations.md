@@ -221,3 +221,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceStoredElementsInterface.lean` | Existing Source homogeneous element traversal and fixed/dynamic array closure obligations with exact object counts. |
 | `Backend/MemoryCopies/SourceStoredElements.lean` | Generic existing Source element traversal and fixed/dynamic stored-value closure with exact allocation frames and counts. |
 | `Backend/MemoryCopies/SourceStoredElementsControls.lean` | Populated recursive Node children, fixed scalar payload order, empty traversal, frame and negative Source controls. |
+| `Backend/MemoryCopies/TraversalFootprintInterface.lean` | Exact intrinsic copy allocation-count, parent-last identity and sequential subtree separation obligations. |

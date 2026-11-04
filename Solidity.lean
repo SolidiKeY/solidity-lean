@@ -335,6 +335,7 @@ import Solidity.Backend.MemoryCopies.SourceStrings
 import Solidity.Backend.MemoryCopies.SourceStringsControls
 import Solidity.Backend.MemoryCopies.SourceStringsInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
+import Solidity.Backend.MemoryCopies.TraversalFootprintInterface
 import Solidity.Backend.MemoryCopies.TraversalFresh
 import Solidity.Backend.MemoryCopies.TraversalInterface
 import Solidity.Backend.MemoryOps.CalldataAgreementChildren
