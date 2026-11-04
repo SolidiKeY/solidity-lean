@@ -739,3 +739,7 @@ terminal collision/value refusal, exact joins and noninjective-label option
 recovery. Both confirmed the getter/native/body/binding boundaries; neither
 used a build or Lean server. Focused importing-consumer compilation passed
 without warnings in the changed modules.
+
+`GetterRoutesInterface.lean` specifies actual Source ordinary/getter/special
+continuation precedence through the existing EntryRoutes compiler. Getter
+argument decoding, storage reads and output/body execution remain separate.
