@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-TOOL = Path(os.environ.get("GATE_TOOL", Path(__file__).resolve().parents[3] / "scripts/coord-tools/gate.sh")).resolve()
+TOOL = (Path(__file__).resolve().parents[3] / "scripts/coord-tools/gate.sh").resolve()
 
 class Targets(unittest.TestCase):
     def setUp(self):

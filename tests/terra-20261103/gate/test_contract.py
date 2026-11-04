@@ -79,3 +79,12 @@ class FrozenContract(unittest.TestCase):
         self.command(["git", "-C", str(self.clone), "commit", "--allow-empty", "-qm", "unexpected"])
         head = self.command(["git", "-C", str(self.clone), "rev-parse", "HEAD"])
         self.reject("contract parent mismatch", head)
+
+    def test_tool_substitution(self):
+        marker = Path(self.temp.name) / "substitute-was-run"
+        substitute = Path(self.temp.name) / "unreviewed-gate"
+        substitute.write_text("#!/bin/sh\nprintf called > '" + str(marker) + "'\nexit 0\n")
+        substitute.chmod(0o700)
+        self.env["GATE_TOOL"] = str(substitute)
+        self.reject("gate tool override mismatch")
+        self.assertFalse(marker.exists(), "unpinned gate executed")

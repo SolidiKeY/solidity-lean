@@ -1970,6 +1970,7 @@
       "FrozenContract.test_missing_artifact",
       "FrozenContract.test_missing_head_argument",
       "FrozenContract.test_source_drift",
+      "FrozenContract.test_tool_substitution",
       "FrozenContract.test_unexpected_commit",
       "FrozenContract.test_wrong_head"
     ]
@@ -1984,7 +1985,7 @@
     "testsuite": "one-parameter source/hash/AST/catalogue/derived report/parity positive; unsound Report negative",
     "corpus": "actual generator/parity/scoreboard positive with mock Lake; explicit backend failure negative",
     "automatic": "non-vacuous one automatic positive; exactly one manual proof negative",
-    "backend": "exact private Lake argv/counts and per-file failure propagation; no real Lean",
+    "backend": "repository-bound TOOL only; mismatching inherited GATE_TOOL rejected before module import; exact private Lake argv/counts and per-file failure propagation; no real Lean",
     "receipt": "exact five-field TSV, stdout, HEAD and complete file/call inventory"
   },
   "policy_boundaries": {

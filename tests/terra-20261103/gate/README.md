@@ -33,7 +33,7 @@ inventory on the exact acceptance commit before execution. Run:
 No check-only or skip mode exists. Wrong HEAD, changed source/dependency/artifact,
 missing/extra files, modified metadata, unexpected commits and missing head args
 are exercised against the actual executable in sparse local clones. All old 15,
-supplemental 8 and contract-tamper 9 cases must run without skip/xfail. Sparse
+supplemental 8 and contract-tamper 10 cases must run without skip/xfail. Sparse
 clones share read-only Git objects, perform no network and never execute Lean.
 
 H21's published checkpoint-library policy is retained. Historical empty-target,
@@ -42,3 +42,10 @@ membership checks are strengthened to exact vectors. The unsafe host-elan
 absence prerequisite is replaced by private HOME/path identity and complete
 backend invocation checks. No production budgets, checker semantics, named case,
 profile or refusal was weakened. Historical failureCount stays 2.
+
+The supplemental TOOL is bound directly to this repository's gate.sh. The frozen
+runner rejects any mismatching inherited GATE_TOOL before importing a test
+module. A negative substitution control supplies an unpinned executable and
+requires rejection plus proof that its execution marker was never created.
+Historical override-based RED logs remain immutable predecessor evidence; the
+corrected fixture provides no executable-substitution interface.

@@ -106,7 +106,7 @@ def inventory():
                   "testsuite":"one-parameter source/hash/AST/catalogue/derived report/parity positive; unsound Report negative",
                   "corpus":"actual generator/parity/scoreboard positive with mock Lake; explicit backend failure negative",
                   "automatic":"non-vacuous one automatic positive; exactly one manual proof negative",
-                  "backend":"exact private Lake argv/counts and per-file failure propagation; no real Lean",
+                  "backend":"repository-bound TOOL only; mismatching inherited GATE_TOOL rejected before module import; exact private Lake argv/counts and per-file failure propagation; no real Lean",
                   "receipt":"exact five-field TSV, stdout, HEAD and complete file/call inventory"},
               policy_boundaries={"H21":"2c79634c checkpoint library mode and bounded non-root closure preserved; direct changed root restored", "spaces":"dedicated per-file/log positives retained; real JS integration uses non-space paths, scoped-out production defect recorded", "budgets":"No production proof/time/resource/skip policy changed", "trust":"Mocks establish audit behavior, not Lean/kernel/corpus/EVM validity"})
     (HERE/"old_to_new.json").write_text(json.dumps(data,indent=2)+"\n")
@@ -195,6 +195,8 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--head",required=True,help="exact independently reviewed acceptance commit")
     args=parser.parse_args()
+    override=os.environ.get("GATE_TOOL")
+    require(override is None or pathlib.Path(override).resolve()==(ROOT/"scripts/coord-tools/gate.sh").resolve(),"gate tool override mismatch")
     snap=verify_snapshot(args.head)
     tests=[]; ids=[]
     for file,expected in snap["case_inventory"].items():
