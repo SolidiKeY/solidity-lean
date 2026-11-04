@@ -140,3 +140,5 @@
 | `Lowering/V07/IntegerConstantControls.lean` | All64 integer types, literal boundaries, mixed references and executed truncation/fraction/signedness controls with exact pins. |
 | `Lowering/V07/IntegerConstantAssignment.lean` | Actual integer literal assignment, typed fresh capture/drop and arbitrary selected-family alias preservation. |
 | `Lowering/V07/IntegerConstantAssignmentControls.lean` | All64 integer types, ordered assignment observations, repeated/equal aliases and executed missing-write/stale/wrong-destination controls. |
+| `Lowering/V07/IntegralRationalConstants.lean` | Arbitrary integral rational meaning, Source conversion/assignment and native capture transport with existing range typing. |
+| `Lowering/V07/IntegralRationalControls.lean` | All64 integer types, four denominator representations, ordered observations and executed numerator/floor/cast negatives. |
