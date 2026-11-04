@@ -3371,6 +3371,51 @@
   "propext"
  ],
  "Solidity/Backend/MemoryOps/PhysicalByteJournal.lean:Solidity.Backend.MemoryOps.Physical.writeBytes_eq_putBytes": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_revert_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_revert_live": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_short_stack": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_slices": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.readMemory_writeByte_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.mstore8_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.writeByte_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.writeByte_eq_putByte": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.boundary_byte_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.byte_truncation": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.checked_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.initial_stack_overflow": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.overlap_breaks_frame": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/PhysicalByteWorldInterface.lean:Solidity.Backend.MemoryOps.Physical.ByteWorld.current_mload_boundary": [
   "Classical.choice",
   "Quot.sound",
