@@ -222,3 +222,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/InterfaceV2Roots.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Solidity/Backend/MemoryOps/SourceRawUintDelete.lean` | Published byte-decoder specialization of actual Source Items uint copy/bind/delete, reached bounds failure and old-object frames. |
+
+| `Solidity/Backend/MemoryOps/SourceGuardedUintDelete.lean` | Actual cdTail guard then Source Items uint copy/delete; byte-derived success, early refusal and late bounds failure with explicit initial view alignment. |

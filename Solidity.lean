@@ -361,6 +361,7 @@ import Solidity.Backend.MemoryOps.SourceDeclaration
 import Solidity.Backend.MemoryOps.SourceDefault
 import Solidity.Backend.MemoryOps.SourceDelete
 import Solidity.Backend.MemoryOps.SourceDeleteTarget
+import Solidity.Backend.MemoryOps.SourceGuardedUintDelete
 import Solidity.Backend.MemoryOps.SourceIndexedDelete
 import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
 import Solidity.Backend.MemoryOps.SourceLocalReferenceOrder

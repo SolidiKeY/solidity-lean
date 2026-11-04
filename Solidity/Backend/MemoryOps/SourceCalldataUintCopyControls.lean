@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceGuardedUintDelete
 import Solidity.Backend.MemoryOps.SourceRawUintDelete
 import Solidity.Backend.MemoryOps.SourceCalldataMixedCopy
 import Solidity.Backend.MemoryOps.SourceCalldataUintDelete
@@ -1414,5 +1415,202 @@ theorem raw_delete_late_timeout (p : Roadmap.Pipeline) (nps : Nat) :
 #guard_msgs (whitespace := lax) in #print axioms raw_delete_reads
 /-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_late_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_delete_late_timeout
+
+private def entrySelector : List UInt8 := [222,173,190,239]
+private def entryData : List UInt8 := Source.natBytes 32 32++Source.natBytes 32 2++Source.natBytes 32 7++Source.natBytes 32 42
+private def entryTruncated : List UInt8 := Source.natBytes 32 32++Source.natBytes 32 2++Source.natBytes 32 7
+private def entryZero : List UInt8 := Source.natBytes 32 32++Source.natBytes 32 0
+private def entryLarge : List UInt8 := Source.natBytes 32 32++Source.natBytes 32 (2^64)
+private def entryFrame (data : List UInt8) : Source.Fr := {F0 with cd := entrySelector++data}
+private theorem entryOff : Source.wordAt entryData 0=32 := by decide
+private theorem entryLen : Source.wordAt (entryData.drop 32) 0=2 := by decide
+private theorem entryBytes : entryData.length=128 := by
+  simp only [entryData,Source.natBytes,List.length_append,Source.beBytes_length]
+private theorem entryValues : CalldataPackets.RawUint.dataPayload entryData 64 2=rawPayload := by decide
+private def entryMid (k : PrimTy.uint.Denote) : Source.EMState E0 BΓ :=
+  ((bInput 68 2 k).1.set bDst (.memRef rfl 2),(rawMid k).2)
+private def entryDone : Source.EMState E0 BΓ := ((entryMid (u 1)).1,rawDone.2)
+
+/-- Full actual entry guard -> Items program, linked to the same byte-derived
+fresh root, with old Source/native objects framed. Both pipelines quantified. -/
+theorem guarded_entry_delete_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    Source.cdTail entryData 0 32=.ok (68,2) ∧
+    (Source.evalE (G0 p) (entryFrame entryData) (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 68 2 (u 1))=
+      (.ok (.val (.memRef rfl 2)),entryMid (u 1)) ∧
+    (Source.evalE (G0 p) (entryFrame entryData) (fuel+3) (sourceUintIndexedDelete bDst bIndex)).run (entryMid (u 1))=
+      (.ok Source.RVal.unit,entryDone) ∧
+    (sourceGuardedUintDelete (G0 p) (entryFrame entryData) fuel nps bDst bSrc bIndex entryData 0 (bInput 68 2 (u 1)).1).run (.nil,(bInput 68 2 (u 1)).2)=
+      (.ok (.normal entryDone.1),(.nil,entryDone.2)) ∧
+    rawPair.1.writeAddr (.index rawPair.2 .dyn (u 1)) (PrimTy.dflt .uint)=some rawHeap ∧
+    SourceUintMemoryAt entryDone 2 rawHeap rawPair.2 .dyn ∧ Source.MemOK E0 SH entryDone ∧
+    Heap.Keeps (List.prefix_append H [A]) hp rawHeap ∧
+    SourceUintMemoryAt entryDone 0 rawHeap (left.wk (List.prefix_append H [A])) .dyn ∧
+    SourceUintMemoryAt entryDone 1 rawHeap (right.wk (List.prefix_append H [A])) .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := source_guarded_uint_bind_delete (bInput 68 2 (u 1)) hp (G0 p) (entryFrame entryData) fuel nps
+      bDst bSrc bIndex entrySelector entryData rfl rfl 0 (u 1)
+      (by rw [entryOff,entryLen];rfl) rfl
+      (by rw [entryOff,entryLen];decide) (by rw [entryOff,entryLen,entryBytes];decide)
+      (by rw [entryOff,entryLen];decide) SH (bMemOK 68 2 (u 1))
+    simp only [entryOff,entryLen,entryValues] at result
+    obtain ⟨guard,valid,native,zs,first,second,program,adapter,hw,new,mok,keep,values,occupied,locals,ex,events,logs,fn,guarded⟩ := result
+    have nativeRun := (raw_delete_program p 0 0).2.2.2.1
+    have sameNative : native=rawHeap := Option.some.inj (hw.symm.trans nativeRun)
+    subst native
+    have before : SourceUintMemoryAt (entryMid (u 1)) 2 rawPair.1 rawPair.2 .dyn := rawAt
+    have size : (u 1).1.toNat<rawPair.1.len rawPair.2 .dyn := by
+      unfold rawPair Heap.len
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.length_map];decide
+    obtain ⟨ht,write⟩ := source_uint_write (entryMid (u 1)) 2 rawPayload (by rfl) 1 (by decide) (PrimTy.dflt .uint)
+    have actualWrite : (Source.deleteLoc (E := E0) (Γ := BΓ) (entryFrame entryData) (fuel+2) (τ := .int .u256) (.mem 2 1)).run (entryMid (u 1))=(.ok (),entryDone) := write
+    have actual := before.eval_delete_of_run (G0 p) (entryFrame entryData) fuel bDst bIndex (u 1) rfl rfl size actualWrite
+    have sameSource : zs=entryDone := congrArg Prod.snd (second.symm.trans actual)
+    subst zs
+    have oldInitial : SourceUintMemoryAt (bInput 68 2 (u 1)) 0 hp left .dyn := old_at 68 2
+    have neighborInitial : SourceUintMemoryAt (bInput 68 2 (u 1)) 1 hp right .dyn := neighbor_at 68 2
+    exact ⟨guard,first,second,guarded,nativeRun,new,mok,keep,oldInitial.transport keep occupied,neighborInitial.transport keep occupied⟩
+
+/-- Complete initial/prefix/final object tables, locals and frame values are
+retained; the shifted Source view really points after selector and length. -/
+theorem guarded_entry_vectors :
+    [(bInput 68 2 (u 1)).2.heap.get 0,(bInput 68 2 (u 1)).2.heap.get 1,(bInput 68 2 (u 1)).2.heap.get 2,(bInput 68 2 (u 1)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none] ∧
+    [(entryMid (u 1)).2.heap.get 0,(entryMid (u 1)).2.heap.get 1,(entryMid (u 1)).2.heap.get 2,(entryMid (u 1)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory [u 7,u 42]⟩,none] ∧
+    [entryDone.2.heap.get 0,entryDone.2.heap.get 1,entryDone.2.heap.get 2,entryDone.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory [u 7,u 0]⟩,none] ∧
+    (bInput 68 2 (u 1)).1=.cons (sourceUint (u 1)) (.cons (.cdRef rfl 68 2)
+      (.cons (.memRef rfl 0) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    entryDone.1=.cons (sourceUint (u 1)) (.cons (.cdRef rfl 68 2)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    (entryMid (u 1)).1=entryDone.1 ∧
+    ((entryMid (u 1)).2.heap.next,entryDone.2.heap.next,rawPair.2.id)=(3,3,2) ∧
+    (MObj.elems .dyn (rawHeap.get (left.wk (List.prefix_append H [A]))),
+     MObj.elems .dyn (rawHeap.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (rawHeap.get rawPair.2))=
+      (old,neighbor,[u 7,u 0]) ∧
+    (entryDone.2.ex,entryDone.2.events,entryDone.2.logs,entryDone.2.fnLocals)=
+      ((bInput 68 2 (u 1)).2.ex,(bInput 68 2 (u 1)).2.events,(bInput 68 2 (u 1)).2.logs,(bInput 68 2 (u 1)).2.fnLocals) ∧
+    (entryFrame entryData).cd=entrySelector++entryData ∧
+    ((entryFrame entryData).this,(entryFrame entryData).sender,(entryFrame entryData).value,(entryFrame entryData).static,
+      (entryFrame entryData).contract,(entryFrame entryData).checked,(entryFrame entryData).depth)=
+      (F0.this,F0.sender,F0.value,F0.static,F0.contract,F0.checked,F0.depth) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,?_,rfl,rfl,rfl⟩
+    exact raw_delete_vectors.2.2.2.2.2.2.1
+
+/-- The three real entry refusals preserve the original globals BEFORE copy.
+The same short data still admits standalone cdToMem padding, separately below. -/
+theorem guarded_entry_refusals (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (sourceGuardedUintDelete (G0 p) (entryFrame entryTruncated) fuel nps bDst bSrc bIndex entryTruncated 0 (bInput 68 2 (u 1)).1).run (.nil,(bInput 68 2 (u 1)).2)=
+      (.error (.revert []),(.nil,(bInput 68 2 (u 1)).2)) ∧
+    (sourceGuardedUintDelete (G0 p) (entryFrame entryLarge) fuel nps bDst bSrc bIndex entryLarge 0 (bInput 68 2 (u 1)).1).run (.nil,(bInput 68 2 (u 1)).2)=
+      (.error (.revert []),(.nil,(bInput 68 2 (u 1)).2)) ∧
+    (sourceGuardedUintDelete (G0 p) (entryFrame []) fuel nps bDst bSrc bIndex [] 0 (bInput 68 2 (u 1)).1).run (.nil,(bInput 68 2 (u 1)).2)=
+      (.error (.revert []),(.nil,(bInput 68 2 (u 1)).2)) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨?_,?_,?_⟩
+    · exact source_guarded_uint_delete_refusal (G0 p) (entryFrame entryTruncated) fuel nps bDst bSrc bIndex entryTruncated 0 (bInput 68 2 (u 1)) (by decide)
+    · exact source_guarded_uint_delete_refusal (G0 p) (entryFrame entryLarge) fuel nps bDst bSrc bIndex entryLarge 0 (bInput 68 2 (u 1)) (by decide)
+    · exact source_guarded_uint_delete_refusal (G0 p) (entryFrame []) fuel nps bDst bSrc bIndex [] 0 (bInput 68 2 (u 1)) (by decide)
+
+/-- A valid ZERO-length dynamic entry passes its guard and then rejects deletion
+on the actual fresh empty array, preserving its allocated prefix globals. -/
+theorem guarded_entry_empty (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    Source.cdTail entryZero 0 32=.ok (68,0) ∧
+    ∃ (mid : Source.EMState E0 BΓ),
+      (Source.evalE (G0 p) (entryFrame entryZero) (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 68 0 (u 0))=
+        (.ok (.val (.memRef rfl 2)),mid) ∧
+      (sourceGuardedUintDelete (G0 p) (entryFrame entryZero) fuel nps bDst bSrc bIndex entryZero 0 (bInput 68 0 (u 0)).1).run (.nil,(bInput 68 0 (u 0)).2)=
+        (.error (.revert (Source.panicData .index)),(.nil,mid.2)) ∧
+      mid.2.heap.get 2=some ⟨SU,sourceUintMemory []⟩ ∧ mid.2.heap.next=3 ∧
+      mid.2.heap.get 0=some ⟨SU,sourceUintMemory old⟩ ∧ mid.2.heap.get 1=some ⟨SU,sourceUintMemory neighbor⟩ := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have off : Source.wordAt entryZero 0=32 := by decide
+    have size : Source.wordAt (entryZero.drop 32) 0=0 := by decide
+    have values : CalldataPackets.RawUint.dataPayload entryZero 64 0=[] := rfl
+    have result := source_guarded_uint_bind_delete_bounds (bInput 68 0 (u 0)) hp (G0 p) (entryFrame entryZero) fuel nps
+      bDst bSrc bIndex entrySelector entryZero rfl rfl 0 (u 0)
+      (by rw [off,size];rfl) rfl (by rw [off,size];decide)
+      (by rw [off,size];decide) (by rw [off,size];decide) SH (bMemOK 68 0 (u 0))
+    simp only [off,size,values] at result
+    obtain ⟨guard,valid,first,second,program,adapter,write,fresh,mok,keep,occupied,guarded⟩ := result
+    refine ⟨guard,_,first,guarded,?_,rfl,?_,?_⟩
+    · rfl
+    · rfl
+    · rfl
+
+/-- Actual standalone copy of that SAME truncated entry pads the absent second
+word instead of running the entry-span check or inventing a guard failure. -/
+theorem guarded_entry_standalone_padding :
+    (Source.cdToMem (E := E0) (Γ := BΓ) (entryFrame entryTruncated) SU 68 2).run (bInput 68 2 (u 1))=
+      (.ok (.val (.memRef rfl 2)),((bInput 68 2 (u 1)).1,
+        {(bInput 68 2 (u 1)).2 with heap := ((bInput 68 2 (u 1)).2.heap.alloc ⟨SU,sourceUintMemory [u 7,u 0]⟩).1})) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have values : CalldataPackets.RawUint.payload (entryFrame entryTruncated) 68 2=[u 7,u 0] := by decide
+    rw [CalldataPackets.RawUint.copy_run,values]
+    rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_delete_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guarded_entry_delete_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guarded_entry_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_refusals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guarded_entry_refusals
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guarded_entry_empty
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_standalone_padding' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guarded_entry_standalone_padding
+
+/-- A FULL valid entry can fail later at endpoint2: the copy happened and its
+prefix globals remain, with index panic bytes distinct from early empty revert. -/
+theorem guarded_entry_endpoint (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    Source.cdTail entryData 0 32=.ok (68,2) ∧
+    (sourceGuardedUintDelete (G0 p) (entryFrame entryData) fuel nps bDst bSrc bIndex entryData 0 (bInput 68 2 (u 2)).1).run (.nil,(bInput 68 2 (u 2)).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(entryMid (u 2)).2)) ∧
+    rawPair.1.writeAddr (.index rawPair.2 .dyn (u 2)) (PrimTy.dflt .uint)=none ∧
+    (entryMid (u 2)).2.heap.get 2=some ⟨SU,sourceUintMemory rawPayload⟩ ∧
+    Source.panicData .index≠[] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := source_guarded_uint_bind_delete_bounds (bInput 68 2 (u 2)) hp (G0 p) (entryFrame entryData) fuel nps
+      bDst bSrc bIndex entrySelector entryData rfl rfl 0 (u 2)
+      (by rw [entryOff,entryLen];rfl) rfl
+      (by rw [entryOff,entryLen];decide) (by rw [entryOff,entryLen,entryBytes];decide)
+      (by rw [entryOff,entryLen];decide) SH (bMemOK 68 2 (u 2))
+    simp only [entryOff,entryLen,entryValues] at result
+    obtain ⟨guard,valid,first,second,program,adapter,write,fresh,mok,keep,occupied,guarded⟩ := result
+    exact ⟨guard,guarded,write,rfl,by decide⟩
+
+/-- The actual guard succeeds, then horizon5 times out AFTER the real binding
+prefix. No wrapper changes the Items fuel and no rollback state is invented. -/
+theorem guarded_entry_late_timeout (p : Roadmap.Pipeline) (nps : Nat) :
+    ((Source.EM.lift (Source.cdTail entryData 0 32)) >>= fun _ =>
+      Source.execItems (G0 p) (entryFrame entryData) 5 nps none dProgram (bInput 68 2 (u 1)).1).run (.nil,(bInput 68 2 (u 1)).2)=
+      (.error .timeout,(.nil,(entryMid (u 1)).2)) := by
+  first
+  | solve | simp only [] | omega
+  | have bytes : CalldataPackets.RawUint.payload (entryFrame entryData) 68 2=rawPayload :=
+      (CalldataPackets.RawUint.payload_frame (entryFrame entryData) entrySelector entryData rfl rfl 64 2).trans entryValues
+    have first : (Source.evalE (G0 p) (entryFrame entryData) 3 (sourceUintCalldataBind bDst bSrc)).run (bInput 68 2 (u 1))=
+        (.ok (.val (.memRef rfl 2)),entryMid (u 1)) := by
+      rw [source_cd_uint_bind_run (G0 p) (entryFrame entryData) 0 (bInput 68 2 (u 1)) bDst bSrc 68 2 rfl,source_cd_uint_values_raw]
+      dsimp only
+      rw [source_uint_payload_sourceUint,bytes]
+      rfl
+    have statement := source_expr_statement_run (G0 p) (entryFrame entryData) 3 nps _ _ _ _ first
+    rw [(guarded_entry_delete_program p 0 nps).1]
+    change (Source.execItems (G0 p) (entryFrame entryData) 5 nps none dProgram (bInput 68 2 (u 1)).1).run (.nil,(bInput 68 2 (u 1)).2)=_
+    rw [dProgram,Source.execItems,Source.Hoare.run_bind,statement]
+    rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guarded_entry_endpoint
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_late_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guarded_entry_late_timeout
 
 end Solidity.Backend.MemoryOps.UintCopyControls
