@@ -3,6 +3,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceReadSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAliasSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
 import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
+import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1376,5 +1377,232 @@ theorem complete_alias_reject_vectors (self : Bool) :
 #guard_msgs (whitespace := lax) in #print axioms computed_alias_reject_client
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_reject_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms complete_alias_reject_vectors
+
+
+private abbrev RhsΓ : Ctx := .val .bool :: AliasΓ
+private abbrev RhsSΓ : Source.RCtx := .bool :: AliasSΓ
+private def rhsNumber (bad : Bool) := if bad then 3 else 0
+private def rhsBase := aliasState.push (t := .val .bool) true
+private def rhsState (bad : Bool) := rhsBase.setLocal (.there (.there ti)) (uintOfNat (rhsNumber bad))
+private def rhsSourceBase : Source.EMState E0 RhsSΓ := (.cons (.bool true) aliasSource.1,aliasSource.2)
+private def rhsSource (bad : Bool) : Source.EMState E0 RhsSΓ :=
+  (rhsSourceBase.1.set (.there (.there sj)) (sourceUint (uintOfNat (rhsNumber bad))),rhsSourceBase.2)
+private def rhsWord (bad : Bool) := writeMachine (writeMachine aliasWord 7 w[1]) 5 (.val (wmod (rhsNumber bad)))
+private def rhsFrag := aliasFrag.push (.val .bool) .ok
+private def rhsHeap := hp.set left (MObj.setElem .dyn (hp.get left) 1 true)
+private def rhsMidWord (bad : Bool) := writeMachine (rhsWord bad) 18 w[1]
+private def rhsViews (y : Source.EMState E0 RhsSΓ) := [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private def rhsTables : List (Option (Σ τ : Source.STy,Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+    some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩]
+private theorem rhsAt (bad : Bool) : SourceBoolMemoryAt (rhsSource bad) 0 hp left .dyn := left_at
+private theorem rhsOK (bad : Bool) : Source.MemOK E0 SH (rhsSource bad) := by
+  have hb : Source.MemOK E0 SH rhsSourceBase :=
+    ⟨⟨aliasSourceOK.1.1,⟨trivial,aliasSourceOK.1.2⟩⟩,aliasSourceOK.2⟩
+  exact ⟨⟨hb.1.1,Source.LocalsOK.set rhsSourceBase.1 (.there (.there sj)) hb.1.2 trivial⟩,hb.2⟩
+private theorem rhsRepr (bad : Bool) : StateRepr 1 1 8 rhsFrag (rhsState bad) base (rhsWord bad) := by
+  have hb := aliasRepr.state.consVal (p := .bool) true w[1] rfl (by decide)
+  exact hb.setVal (.there (.there ti)) (uintOfNat (rhsNumber bad)) (.val (wmod (rhsNumber bad)))
+    (by cases bad <;> exact ReprV.uint_of rfl)
+private theorem rhsAllocator (bad : Bool) : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ (rhsWord bad) :=
+  (aliasAllocator.localWrite 7 (by decide) (by decide) w[1]).localWrite 5 (by decide) (by decide) _
+private def rhsNative (i : Idx RhsΓ (.val .uint)) : Stmt C RhsΓ RhsΓ :=
+  .assignMem (.index .dyn (.var (.there .here : Idx RhsΓ (.mem B)) rfl) (.simple (.local i))) (.val (.simple (.local .here)))
+private def rhsCode (i : Idx RhsΓ (.val .uint)) :=
+  writeLocalCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.simple (.local i)) (.simple (.local .here))
+private theorem rhs_first_word (bad : Bool) :
+    run (rhsCode (.there (.there tj))) (rhsWord bad)=.ok (rhsMidWord bad) 0 := by
+  have codes : rhsCode (.there (.there tj))=[.mload 7,.mload 6,.mload 4] ++ writeArrayStackCode := by rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 4] (rhsWord bad)=
+      .ok ((((rhsWord bad).push w[1]).push w[16]).push w[1]) 0 := by cases bad <;> rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((rhsWord bad).push w[1])
+    (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) (by cases bad <;> rfl) [.mstoreAt]]
+  have addr := arrayAddr_run ((rhsWord bad).push w[1]) (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3
+    (by decide) (by cases bad <;> rfl)
+  simp only [show (1 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+
+/-- BOTH actual pipelines: RHS LEFT[1]=true materially changes the cell BEFORE
+outer endpoint3 is resolved. The nested expression/statement fail with that real
+RHS state; a separately executed initial LHS lookup fails without it. No target
+post-revert machine or outer transaction rollback is inferred. -/
+theorem rhs_late_effect_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.execS (G0 p) F0 (fuel+5) RhsSΓ.length none
+        (.expr (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here) : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ)
+        (rhsSource true).1).run (.nil,(rhsSource true).2)=(.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      (Source.evalLoc (G0 p) F0 (fuel+3) (.indexArray (.local (.there .here : Source.Idx RhsSΓ SB)) (by decide) (.local (.there (.there sj))) rfl)).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),rhsSource true) ∧
+      Prog.run (rhsState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))=.error .revert ∧
+      run (rhsCode (.there (.there tj))) (rhsWord true)=.ok (rhsMidWord true) 0 ∧
+      run (rhsCode (.there (.there ti))) (rhsMidWord true)=.revert ∧
+      run (rhsCode (.there (.there tj)) ++ rhsCode (.there (.there ti))) (rhsWord true)=.revert ∧
+      rhsViews ym=rhsTables ∧ SourceBoolMemoryAt ym 0 rhsHeap left .dyn ∧ Source.MemOK E0 SH ym ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState true).withHeap rhsHeap) base (rhsMidWord true) ∧
+      ym.1=(rhsSource true).1 ∧ ym.2.heap.get 0≠(rhsSource true).2.heap.get 0 ∧
+      (∀ a,a≠0 → ym.2.heap.get a=(rhsSource true).2.heap.get a) ∧ ym.2.heap.next=5 ∧
+      (ym.2.ex=(rhsSource true).2.ex ∧ ym.2.events=(rhsSource true).2.events ∧ ym.2.logs=(rhsSource true).2.logs ∧ ym.2.fnLocals=(rhsSource true).2.fnLocals) ∧
+      StructAllocatorRepr rhsHeap base 8 ⟨48,by decide⟩ (rhsMidWord true) ∧ (rhsMidWord true).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,ym,mm,hw,inner,expr,stmt,native₁,native₂,native,word₁,word₂,word,hr,mok,repr,locals,elems,other,addrs,next,effects,stack,alloc⟩ :=
+      rhs_assign_late_bounds_word (G0 p) F0 fuel (rhsState true) left (rhsAt true) (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 3) (uintOfNat 1) true
+        rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+        (rhsRepr true) SH (rhsOK true)
+    have known : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he : mid=rhsHeap := Option.some.inj (hw.symm.trans known)
+    subst mid
+    have hm : mm=rhsMidWord true := (Evm.Out.ok.inj (word₁.symm.trans (rhs_first_word true))).1
+    subst mm
+    have initialLeft := (rhsAt true).eval_index_bounds (G0 p) F0 (fuel+1) (.there .here) (.there (.there sj)) (uintOfNat 3) rfl rfl
+      (by simp only [Heap.len,MObj.elems_dyn];decide)
+    have leaf := hr
+    unfold SourceBoolMemoryAt at leaf
+    rw [elems] at leaf
+    simp only [MObj.elems_dyn] at leaf
+    change ym.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,false]⟩ at leaf
+    have tables : rhsViews ym=rhsTables := by
+      unfold rhsViews rhsTables
+      rw [leaf,addrs 1 (by decide),addrs 2 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+    refine ⟨ym,inner,expr,stmt,initialLeft,native,word₁,word₂,word,tables,hr,mok,repr,locals,?_,addrs,next,effects,alloc _ (by decide) (rhsAllocator true),rfl⟩
+    intro he
+    have oldAt : SourceBoolMemoryAt ym 0 hp left .dyn := by
+      change ym.2.heap.get 0=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (hp.get left))⟩
+      rw [he];exact rhsAt true
+    have nowIndex : rhsHeap.index left .dyn (uintOfNat 1)=some true := by
+      change (MObj.elems .dyn (rhsHeap.get left))[(uintOfNat 1).val.toNat]?=some true
+      rw [elems];simp only [MObj.elems_dyn];rfl
+    have oldIndex : hp.index left .dyn (uintOfNat 1)=some false := by simp only [Heap.index,MObj.elems_dyn];rfl
+    have nowRead := (hr.read_iff F0 (uintOfNat 1) true).mpr nowIndex
+    have oldRead := (oldAt.read_iff F0 (uintOfNat 1) false).mpr oldIndex
+    cases congrArg Prod.fst (nowRead.symm.trans oldRead)
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_late_effect_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_late_effect_client
+
+private def rhsFinalHeap := rhsHeap.set left (MObj.setElem .dyn (rhsHeap.get left) 0 true)
+private def rhsFinalWord := writeMachine (rhsMidWord false) 17 w[1]
+private theorem rhs_second_word : run (rhsCode (.there (.there ti))) (rhsMidWord false)=.ok rhsFinalWord 0 := by
+  have codes : rhsCode (.there (.there ti))=[.mload 7,.mload 6,.mload 5] ++ writeArrayStackCode := by rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 5] (rhsMidWord false)=
+      .ok ((((rhsMidWord false).push w[1]).push w[16]).push w[0]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((rhsMidWord false).push w[1])
+    (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run ((rhsMidWord false).push w[1]) (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (0 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+
+/-- Successful ONE nested expression/statement, matched by reached nativeProg2
+and complete word append. The second same-value write is actually executed,
+not claimed materially different or needed to distinguish final-only ordering. -/
+theorem rhs_success_effect_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource false)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (rhsSource false)=
+        (.ok (.val (.bool true)),z) ∧
+      (Source.execS (G0 p) F0 (fuel+5) RhsSΓ.length none
+        (.expr (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here) : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ)
+        (rhsSource false).1).run (.nil,(rhsSource false).2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run (rhsState false) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))=
+        .ok ⟨(rhsState false).withHeap rhsFinalHeap,List.prefix_refl _⟩ ∧
+      run (rhsCode (.there (.there tj))) (rhsWord false)=.ok (rhsMidWord false) 0 ∧
+      run (rhsCode (.there (.there ti))) (rhsMidWord false)=.ok rhsFinalWord 0 ∧
+      run (rhsCode (.there (.there tj)) ++ rhsCode (.there (.there ti))) (rhsWord false)=.ok rhsFinalWord 0 ∧
+      rhsViews ym=rhsTables ∧ rhsViews z=rhsTables ∧
+      SourceBoolMemoryAt z 0 rhsFinalHeap left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState false).withHeap rhsFinalHeap) base rhsFinalWord ∧
+      z.1=(rhsSource false).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(rhsSource false).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(rhsSource false).2.ex ∧ z.2.events=(rhsSource false).2.events ∧ z.2.logs=(rhsSource false).2.logs ∧ z.2.fnLocals=(rhsSource false).2.fnLocals) ∧
+      StructAllocatorRepr rhsFinalHeap base 8 ⟨48,by decide⟩ rhsFinalWord ∧ rhsFinalWord.stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,mm,target,hw₁,hw₂,inner,expr,stmt,native,word₁,word₂,word,hr₁,hr₂,mok₁,mok₂,hm₁,hm₂,
+      locals₁,locals₂,elems,other,addrs,next,effects,stack,alloc⟩ :=
+      rhs_assign_success_word (G0 p) F0 fuel (rhsState false) left (rhsAt false) (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 0) (uintOfNat 1) true
+        rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+        (rhsRepr false) SH (rhsOK false)
+    have known₁ : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he₁ : mid=rhsHeap := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₂ : rhsHeap.writeAddr (.index left .dyn (uintOfNat 0)) true=some rhsFinalHeap := by
+      have pos : 0<(rhsHeap.get left).val.length := by
+        simp only [rhsHeap,Heap.get_set_same,MObj.setElem_dyn,Heap.get,Objs.get,hp,left];decide
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 0<2^256),Int.toNat_natCast,MObj.elems_dyn,if_pos pos]
+      rfl
+    have he₂ : out=rhsFinalHeap := Option.some.inj (hw₂.symm.trans known₂)
+    subst out
+    have hm : mm=rhsMidWord false := (Evm.Out.ok.inj (word₁.symm.trans (rhs_first_word false))).1
+    subst mm
+    have ht : target=rhsFinalWord := (Evm.Out.ok.inj (word₂.symm.trans rhs_second_word)).1
+    subst target
+    have middleOther : ∀ a,a≠0 → ym.2.heap.get a=(rhsSource false).2.heap.get a := by
+      obtain ⟨h,he⟩ := (rhsAt false).assign_state (G0 p) F0 fuel (.there .here) (.there (.there si)) .here (uintOfNat 1) true rfl rfl rfl
+        (by simp only [Heap.len,MObj.elems_dyn];decide) inner
+      intro a hn;rw [he];exact Source.Heap.write_other _ hn _ h
+    have tables₁ : rhsViews ym=rhsTables := by
+      have leaf := hr₁
+      unfold SourceBoolMemoryAt at leaf
+      simp only [rhsHeap,Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn] at leaf
+      unfold rhsViews rhsTables
+      rw [leaf,middleOther 1 (by decide),middleOther 2 (by decide),middleOther 3 (by decide),middleOther 4 (by decide)];rfl
+    have tables₂ : rhsViews z=rhsTables := by
+      have leaf := hr₂
+      unfold SourceBoolMemoryAt at leaf
+      rw [elems] at leaf
+      simp only [MObj.elems_dyn] at leaf
+      unfold rhsViews rhsTables
+      rw [leaf,addrs 1 (by decide),addrs 2 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+    exact ⟨ym,z,inner,expr,stmt,native,word₁,word₂,word,tables₁,tables₂,hr₂,mok₂,hm₂,locals₂,addrs,next,effects,
+      alloc _ (by decide) (rhsAllocator false),rfl⟩
+
+/-- Every ordered Source/native object and all24 INITIAL/reached/final words.
+Failure has only the real reached PREFIX vector, not a returned target machine.
+Native and Source aliases/parents retain LEFT identity while its contents change. -/
+theorem complete_rhs_effect_vectors (bad : Bool) :
+    rhsViews (rhsSource bad)=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    views (rhsState bad).heap=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views rhsHeap=([true,true,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views rhsFinalHeap=([true,true,false],[false,true,false],[0],[0,1,0],[]) ∧
+    words (rhsWord bad)=[w[48],w[32],w[32],w[36],w[1],(if bad then w[3] else w[0]),w[16],w[1],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (rhsMidWord bad)=[w[48],w[32],w[32],w[36],w[1],(if bad then w[3] else w[0]),w[16],w[1],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words rhsFinalWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (rhsMidWord bad)≠words (rhsWord bad) ∧
+    (rhsWord bad).mem 0=w[48] ∧ (rhsMidWord bad).mem 0=w[48] ∧ rhsFinalWord.mem 0=w[48] ∧
+    TEnv.get (.there .here : Idx RhsΓ (.mem B)) (rhsState bad).env=some left := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases bad
+    all_goals
+      refine ⟨rfl,?_,?_,?_,rfl,rfl,rfl,by decide,rfl,rfl,rfl,rfl⟩
+      all_goals first | change views hp = _ | skip
+      all_goals simp only [views,rhsHeap,rhsFinalHeap,Heap.get_set_same,Heap.get_set_ne,Heap.get,Objs.get,
+        Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil] <;> rfl
+
+/-- Low horizon prevents the inner write itself; this is not the late bounds
+case and is not an admission cap or minimal-fuel claim. -/
+theorem rhs_effect_low_horizon (p : Roadmap.Pipeline) (bad : Bool) :
+    (Source.evalE (G0 p) F0 2 (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (rhsSource bad)=
+      (.error .timeout,rhsSource bad) := by rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_success_effect_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_success_effect_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_rhs_effect_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_rhs_effect_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_effect_low_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_effect_low_horizon
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

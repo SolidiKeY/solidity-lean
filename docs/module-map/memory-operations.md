@@ -193,3 +193,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 
 | `Backend/MemoryOps/PhysicalByteStore.lean` | Actual MSTORE8 in both byte APIs, disjoint complete numeric-word frames and reached-memory REVERT observations; no abstract-word instruction refinement. |
 | `Backend/MemoryOps/PhysicalByteStoreControls.lean` | Inhabited boundary-byte stores, high-word/full-byte observations, truncation/short-stack and overlapping-write frame counterexamples. |
+
+| `Backend/MemoryOps/SourceRhsAssignment.lean` | Actual memory-writing assignment RHS before reached outer location; success/late bounds, one Source expression/statement, native Prog2 and discarded-result word append. |
