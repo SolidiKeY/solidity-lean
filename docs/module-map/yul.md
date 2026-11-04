@@ -149,3 +149,4 @@
 | `Yul/Adapters/P6MultiRootByteRefresh{,Controls}` | Derives next-plan source/frame preparation from actual first output and connects successful sequential physical plans to one concatenated execution, with stale-state and failure controls. |
 | `Yul/Adapters/RawPhysicalInventory{,Controls}` | Complete published raw-local cell enumeration in a constructed separated finite frame, preserving all raw bits, clean/world fields and residual bytes while distinguishing absent overlays. |
 | `Yul/Adapters/RawPhysicalProducer` | Consumer of the actual bounded P16 Adapter.correct field, transporting its exact reached Source representation through complete raw-local physical capture under the unchanged coherent-input premise. |
+| `Yul/Adapters/RawPhysicalWriteback{,Controls}` | Whole raw-map and complete P6-frame identity after unchanged all-cell decode/reencode, retaining residual bytes and distinguishing view equality from overlay administration. |

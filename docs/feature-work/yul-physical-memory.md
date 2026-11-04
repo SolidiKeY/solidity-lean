@@ -1116,3 +1116,15 @@ external-function fields, nonaligned coordinates, padding, empty inventory and
 absent overlays. Explicit existing return boundaries perform the bool/u8
 readback. A real skip producer witnesses success/timeout transport; dirty
 physical states remain incoherent, rather than being silently cleaned.
+
+
+`RawPhysicalWriteback.unchanged` strengthens the raw-local view result to
+identity of the whole encoded byte map after decode/reencode. Read facts are
+derived from the actual complete encoder; no final coverage/inverse/view law is
+supplied. `frame_unchanged` retains the entire finite P6 frame, including metadata
+and all padding, using only the original room bound. This still does not equate
+RawFrame administrative overlays: capture may install `Some` where none existed.
+Controls demonstrate equal decoded raw views with different residual bytes,
+reject reencoding from a zero residual, and retain dirty bool/u8 words. The
+identity is physical unchanged writeback, not arbitrary dirty Source readback,
+compiler layout provenance or target execution adequacy.
