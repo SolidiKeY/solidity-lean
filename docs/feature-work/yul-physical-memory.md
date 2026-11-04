@@ -1295,3 +1295,15 @@ as preparation `None`. A forged-root control deliberately passes physical
 checks, demonstrating that they validate neither reference provenance nor
 emptiness. This is unchanged local writeback, not fresh pointer decoding,
 shared object writes, allocation refinement or complete shared-zero adequacy.
+
+`P6HeapWordStore.transport` connects actual P6 `store32` and executed `MSTORE`
+to canonical Source array-member `writeLoc`, including pointer values. The
+same reached byte map supports complete changed-heap reencoding, whole Source
+writeback, owner `MemOK`, reserved-word preservation and retained target tail,
+state and invocation key. Old inventory reads, canonical element encoding,
+real member coordinates and physical span bounds remain explicit. Controls
+consume a new Source child reference at physical pointer `288`, store it at
+byte `256`, read it through the array alias and retain unknown byte `383`.
+The physical initial frame already represents the post-allocation heap: this
+closes the sink-store component, not physical allocation execution, arbitrary
+retained-history transport, or compiler/resource adequacy.
