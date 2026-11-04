@@ -339,6 +339,7 @@ import Solidity.Backend.MemoryCopies.PrimitiveArrayLiveInterface
 import Solidity.Backend.MemoryCopies.PublishedStorage
 import Solidity.Backend.MemoryCopies.PublishedStorageControls
 import Solidity.Backend.MemoryCopies.PublishedStorageInterface
+import Solidity.Backend.MemoryCopies.RangeOverlapInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrayControls
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrays
