@@ -116,6 +116,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadConsumer.lean` | Actual charged/fetched SLOAD/TLOAD, exact warm/cold resource bounds and existing finite typed source-observation transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadControls.lean` | Populated root/transient/source witnesses, exact two-insertion warming states and gas/fuel/permission/coverage negatives. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentConsumer.lean` | Charged fetched BALANCE; the frame `funds` field is defined from the EVM account map (G31 ledger observation). |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceWarmTransport.lean` | Actual BALANCE warmth, low160 probe aliases, ledger preservation and charged fetched transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceWarmControls.lean` | Populated complete post-read state, distinct account probes and gas/fuel/order refusals. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentControls.lean` | Populated complete-state balance, alias, warm/cold, ordered failure and ledger-origin controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean` | All 117 non-immediate Backend/reference decoder targets and fetched dispatch, exposing CLZ→INVALID. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean` | Populated family, ordered byte/state and real fallback/PC/opcode decoder controls. |

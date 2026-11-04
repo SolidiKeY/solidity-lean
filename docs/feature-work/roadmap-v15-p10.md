@@ -1537,3 +1537,24 @@ endian/length/order observations are retained. Memory, return buffers, calldata
 and accounts are observed. Independent finder and skeptic reviews found no
 substantive defect and requested the explicit prior-coverage distinction above.
 Compiler/frame origin and full G46/G47 correspondence remain open.
+
+## Balance warmth and ledger preservation
+
+`BalanceWarmTransport` derives account warmth, account-map and repeated-read
+preservation from the actual pinned BALANCE evaluator. The charged fetched
+consumer requires the actual cost to fit the supplied gas, stack capacity and
+positive fuel. It preserves the typed funds observation, memory and return bytes.
+The probe stack is explicit; keys with the same actual low160 address share its
+warm cost. Later instruction supply and compiler/world provenance remain open.
+
+`BalanceWarmControls` compares the complete resulting state after reading account
+13 with balance 73, including nonempty memory, calldata, return buffers, logs and
+both storage maps. Gas drops from 2700 to 100. Probes at 13 and its high-bit alias
+cost 100; account 14 and the returned balance word 73 cost 2600. Low gas, exhausted
+fuel and reordered spill values have negative controls. These reference-model
+laws leave full Osaka, source/frame, account execution and transaction adequacy
+obligations open.
+
+Review identified evaluator-only coverage of the new API. Direct populated
+clients now instantiate both the charged fetched/frame law and the low160 alias
+law, alongside the independent complete-state and returned-word-cold controls.
