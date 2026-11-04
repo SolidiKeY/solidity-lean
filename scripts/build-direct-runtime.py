@@ -34,7 +34,8 @@ if not compiler.is_file():
     import shutil
     compiler=pathlib.Path(shutil.which(emcc) or emcc).resolve()
 clang=pathlib.Path(os.environ.get('EMCC_CLANG',str(compiler.parent.parent/'bin/clang')))
-config_initial=hashlib.sha256(pathlib.Path(os.environ['EM_CONFIG']).read_bytes()).hexdigest()
+config_path=pathlib.Path(os.environ['EM_CONFIG']).resolve()
+config_initial=hashlib.sha256(config_path.read_bytes()).hexdigest()
 configured=json.loads(subprocess.check_output([sys.executable,'-c',
     "import sys,json; sys.path.insert(0,sys.argv[1]); from tools import config,shared; "
     "print(json.dumps(dict(clang=shared.CLANG_CC,ar=shared.LLVM_AR,nm=shared.LLVM_NM,ld=shared.WASM_LD,"
@@ -58,12 +59,12 @@ def provenance_paths():
     return [pathlib.Path(__file__).resolve(),closure_path,bridge_path,root/'lean-toolchain',root/'lakefile.toml',
             *map(pathlib.Path,compiler_identity),*configured_tools,prefix/'bin/lean',prefix/'bin/lake',
             *sorted(compiler.parent.rglob('*.py')),
-            *([pathlib.Path(os.environ['EM_CONFIG'])] if os.environ.get('EM_CONFIG') else []),
+            config_path,
             *sorted((prefix/'include').rglob('*.h')),
             *sorted((stage/'lib/lean').glob('*.a')),
             stage/'libuv/src/libuv/libuv.a',stage.parent.parent/'gmp-wasm64/lib/libgmp.a']
 provenance=helper.snapshot_files(provenance_paths())
-if provenance[os.environ['EM_CONFIG']]!=config_initial:raise ValueError('Emscripten config changed during discovery')
+if provenance[str(config_path)]!=config_initial:raise ValueError('Emscripten config changed during discovery')
 if any(provenance[p]!=digest for p,digest in compiler_identity.items()):raise ValueError('Compiler changed before snapshot')
 headers_check=hashlib.sha256()
 for header in sorted((prefix/'include/lean').rglob('*.h')):
