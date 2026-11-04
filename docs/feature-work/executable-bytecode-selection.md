@@ -328,3 +328,17 @@ inequalities distinguish both on the same populated tail. Both reviewers
 confirmed this control repair. The compiler and runner proofs had no semantic
 finding. The announced factoring checked file history and undid no earlier
 checking-speed optimization.
+
+## Stack checkpoint handoff
+
+Native frames/capacity are committed at d21aae49; shared compiler and mixed
+lowering at de20c672. Both checkpoints pass the library, touched-module, trust,
+roots, orphans, layers, documentation-path and axiom-pin gates; scoped per-file
+checks and KeySort pass, with only standard axioms in the scoped reports.
+Consumers can use selectScalar, compileScalar, scalarLowering, the exact
+numeric-code compatibility theorem, and V2 native/compose/ofRun frame
+constructors. Conservative peaks retain their explicit room conditions.
+Native indices above16 need another lowering; source compiler adequacy and
+Bridge agreement remain typed producer boundaries. Whole structured control
+and executable-byte composition remain open; these passes are not a runtime
+gate or whole-assignment completion.
