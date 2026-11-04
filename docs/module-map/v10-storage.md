@@ -110,3 +110,6 @@
 
 | `Backend/StorageOps/ProducerInterface.lean` | Explicit typed path, represented reached-state and selected-code execution endpoints for downstream consumers |
 | `Backend/StorageOps/ProducerInterfaceControls.lean` | Inhabited finite-region bool SSTORE client with changed readback and preserved context |
+
+| `Lowering/StorageOps/SourceCaptureReadback.lean` | Arbitrary capture allocation-prefix typed readbacks and preservation of all older objects |
+| `Lowering/StorageOps/SourceCaptureReadbackControls.lean` | Actual full/shifted capture heap reads, dangling/type failures and complete ordered state/journal observations |

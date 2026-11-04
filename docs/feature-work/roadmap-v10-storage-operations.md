@@ -261,8 +261,23 @@ skeptic reviews inspect this interface and witness without running Lean.
 
 This endpoint uses intrinsic `Evm.Machine`/`Evm.run`, not physical bytecode or
 packed byte-store execution. General concrete producers, Source authority and
-P17 physical adequacy remain open. The separate readback drafts are preserved
-outside the module tree pending this interface-first checkpoint.
+P17 physical adequacy remain open. The interface-first checkpoint was sealed before the separate readback
+modules described below were restored.
+
+## Capture allocation readbacks
+
+`SourceCaptureReadback.allocation_observations` proves exact fresh addresses
+and typed payloads for every arbitrary finite runtime capture prefix, with
+independently varying child lengths. It also preserves every older heap object.
+The proof uses the existing allocation operations and their typed readback laws;
+no replacement heap or representation relation is introduced.
+
+Full and shifted clients exercise actual Source capture and `heapAt`: existing
+objects survive, fresh objects contain changed captured bytes, dangling and
+wrong-type reads fail, and complete ordered states and journals are unchanged
+by reads. This strengthens logical Source heap observations only; physical
+allocation, target execution and world rollback remain open. The H26 endpoint
+stays sealed separately; P17's physical bridge choice is coordinator-escalated.
 
 ## Remaining obligations
 
