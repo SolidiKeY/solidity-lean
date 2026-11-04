@@ -3107,6 +3107,8 @@ import Solidity.Yul.Views.MixedHeapOrder
 import Solidity.Yul.Views.MixedHeapOrderControls
 import Solidity.Yul.Views.MixedHeapView
 import Solidity.Yul.Views.MixedMemoryMemOK
+import Solidity.Yul.Views.MultiRootByteFrames
+import Solidity.Yul.Views.MultiRootByteFramesControls
 import Solidity.Yul.Views.MultiRootByteWrites
 import Solidity.Yul.Views.MultiRootByteWritesControls
 import Solidity.Yul.Views.NestedControls

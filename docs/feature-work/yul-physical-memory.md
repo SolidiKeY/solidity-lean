@@ -1007,3 +1007,13 @@ profile. Controls alternate roots, overwrite a byte again, then stop on a
 non-byte root; separate dangling/bounds cases preserve their prefixes. The
 fixture's bytes/string locals retain their shared root0 alias. The physical
 support profile remains an input representation condition, not Source admission.
+
+`MultiRootByteFrames` derives whole nonheap Source administration and heap-type
+preservation for finite multi-root byte plans. The actual callee run feeds
+`EM.sub` and its physical companion; preserved heap typing restores validity of
+arbitrary original caller locals. Whole caller Source writeback and complete
+raw reconstruction hold on success and halt. Child locals need their real
+incoming `LocalsOK`, without an empty/no-alias condition. Controls distinguish
+caller aliases to root0 from nonempty child references to roots5/1. They retain
+the same successful heap prefix on a late error; general call/rollback policies
+and evaluator coverage remain separate obligations.
