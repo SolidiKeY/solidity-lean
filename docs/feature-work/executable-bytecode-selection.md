@@ -342,3 +342,37 @@ Native indices above16 need another lowering; source compiler adequacy and
 Bridge agreement remain typed producer boundaries. Whole structured control
 and executable-byte composition remain open; these passes are not a runtime
 gate or whole-assignment completion.
+
+
+## Placed code and sequential control
+
+ExecutionTrace proves finite execution in the existing LabelExec.advance
+machine, with a 1024-word bound at every reached instruction boundary. Safe
+is a predicate over that machine, not another evaluator. Scalar success and
+actual stackBound evidence execute encoded instructions at byte PCs through
+arbitrary surrounding bytes. Assembly equality transports this result to
+arbitrary item-prefix/suffix placement. Existing CodeShape determines the
+height of the actual result; StructuredExec conditions may overwrite lower
+words, and no protected-value assumption is inferred from height.
+
+The frozen ControlCertificate now has codeCertificate and seqCertificate
+constructors. Sequence execution uses its actual intermediate stack and the
+first certificate's derived result height; it joins actual instruction counts
+and every prefix bound. No reached-body or favorable-PC premise is supplied.
+Controls instantiate both constructors in a nonempty sequence after PUSH32:
+entry33, exit38, actual result12 with protected word23. Wrong item-index PC,
+wrong result, corrupted tail and actual ADD shortage are rejected. A condition
+control explicitly preserves the existing lower-word-overwrite behavior.
+
+This checkpoint covers code and sequence. Conditional branches, general loop
+body reachability/backedges and whole assembly/encoding composition remain
+open. Counts are instruction boundaries, not gas or Source budgets; LabelExec
+has no memory/storage/account or terminal semantics. Source compiler adequacy
+and decoder Bridge agreement remain the existing typed producer premises.
+
+
+Independent finder and skeptic reviews passed the code/sequence proofs and
+placement controls without semantic findings. The shortage control supplies a
+one-word state directly at ADD; it is not a fault reached from the sample's
+normal entry. Both reviews explicitly retain the open branch/loop and full
+composition obligations and used neither builds nor the Lean server.
