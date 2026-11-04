@@ -661,3 +661,13 @@ length1, packed payload slot2000 and actual value99, and reject static-roots-onl
 coverage. Actual element-index and declaration-entry facts factor dependent
 unification under unchanged budgets. Arbitrary dormant descendants, noncanonical
 representations and global alias/source adequacy remain outside this result.
+
+`PackedCellUpdate` derives a complete canonical finite view after an actual typed
+cell write and the existing bounded field patch. Pairwise logical/physical
+separation preserves all other fields; owned-byte reasoning proves the entire
+complement map unchanged. Complete reencoding therefore uses the original
+complement. The actual persistent `Source.setCell` projection keeps bank and
+nonstatic premises explicit. Controls write retained uint16 payload99 to42,
+preserve high padding and neighboring88, and retain exact static refusal.
+Unchanged writeback is identity on the already-written store, not the original
+setter's administration. Changing ownership and dirty-owned adequacy remain open.

@@ -106,3 +106,4 @@
 | `Yul/Views/RetainedCallerCoverage{,Controls}` | Actual saved-caller capture selects duplicate-safe visits and checked child packs, with typed aliases, halted empty-callee source traversal and complete unchanged reconstruction. |
 | `Yul/Views/RetainedCallerHeaders{,Controls}` | Declaration-traced saved-child dynamic header registrations in actual prepared source inventories, with pre-alignment cursor, physical slot and typed-length controls. |
 | `Yul/Views/RetainedLiveCoverage{,Controls}` | Successful source traversal derives actual header lengths and all generated live fields across child/image inventories; dormant payload and roots-only loss controls. |
+| `Yul/Views/PackedCellUpdate{,Controls}` | Actual typed persistent scalar writes preserve complete canonical finite packed views and the entire complementary raw map, with full reencoding and padding/static controls. |

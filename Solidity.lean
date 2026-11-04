@@ -3141,6 +3141,8 @@ import Solidity.Yul.Views.OwnershipSequenceControls
 import Solidity.Yul.Views.OwnershipTailControls
 import Solidity.Yul.Views.OwnershipTransport
 import Solidity.Yul.Views.PackedAggregates
+import Solidity.Yul.Views.PackedCellUpdate
+import Solidity.Yul.Views.PackedCellUpdateControls
 import Solidity.Yul.Views.PackedControls
 import Solidity.Yul.Views.PackedDynamicCompatibility
 import Solidity.Yul.Views.PackedDynamicControls
