@@ -117,3 +117,5 @@
 | `Yul/LocalCompareHorizon.lean`, `Yul/Checks/LocalCompareHorizon.lean` | Concrete checked-u8 comparison and Boolean branch terminal horizon composition, retaining raw states, panic and timeout controls. |
 
 | `Yul/LocalItemHorizon.lean`, `Yul/Checks/LocalItemHorizon.lean` | Exact final indexed raw-frame stability for completed Boolean declaration/expression lists, with multi-declaration and reached-context controls. |
+
+| `Yul/LocalDefaultHorizon.lean`, `Yul/Checks/LocalDefaultHorizon.lean` | Exact completed heterogeneous default-item and restored-block frame stability, with numeric-prefix/dirty-local controls. |

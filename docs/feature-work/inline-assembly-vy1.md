@@ -1391,3 +1391,29 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Eleven scoped axiom reports use only Lean standard
 axioms. Failed automation and recursive-simplification diagnostics are retained
 separately from passing checks; no checking/proof limits were increased.
+
+### Heterogeneous default item and block horizons
+
+`LocalDefaultHorizon.successor` and `extension` preserve the exact final
+indexed raw frame after actual normal completion of any existing default-item
+certificate. They use concrete `LocalItemHorizon.successor` for Boolean bodies
+and structural induction for real typed default prepends at the runner's
+original three-level execution threshold and residual horizon. No new defaults,
+allocation/layout contracts or assumed child law are introduced.
+`blockSuccessor` and `blockExtension` preserve the completed caller-context
+frame. Actual block normal completion implies an actual normal child run;
+stability fixes that child before the existing certified restoration is reused.
+Ten controls reuse inhabited uint8/uint256 default declarations beside a dirty
+Boolean: exact completed prefixes, arbitrary added fuel, exact block restoration,
+three reached-context timeout prefixes, timeout-to-completion change, persistent
+clean-projection refusal and unsupported comparison-statement refusal.
+Normal completion remains an explicit premise; timeout stability, arbitrary
+declarations/control, dirty readback, admission and general Source/compiler
+adequacy are not established. Source/ExtCall/evaluators, observations and budgets
+are unchanged. General P16/full VY1 and final gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Fourteen scoped axiom reports use only Lean standard
+axioms. Raw failed automation attempts remain distinct from passing checks;
+no checking/proof limits were increased.

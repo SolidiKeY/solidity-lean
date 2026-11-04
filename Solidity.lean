@@ -2439,6 +2439,7 @@ import Solidity.Yul.Checks.LocalCompareHorizon
 import Solidity.Yul.Checks.LocalDefaultBinding
 import Solidity.Yul.Checks.LocalDefaultControlRepresentation
 import Solidity.Yul.Checks.LocalDefaultDoWhile
+import Solidity.Yul.Checks.LocalDefaultHorizon
 import Solidity.Yul.Checks.LocalDefaultIfElse
 import Solidity.Yul.Checks.LocalDefaultItems
 import Solidity.Yul.Checks.LocalDefaultNoGuard
@@ -2672,6 +2673,7 @@ import Solidity.Yul.LocalCoordinates
 import Solidity.Yul.LocalDefaultBinding
 import Solidity.Yul.LocalDefaultControlRepresentation
 import Solidity.Yul.LocalDefaultDoWhile
+import Solidity.Yul.LocalDefaultHorizon
 import Solidity.Yul.LocalDefaultIfElse
 import Solidity.Yul.LocalDefaultItems
 import Solidity.Yul.LocalDefaultNoGuard
