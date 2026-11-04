@@ -297,3 +297,5 @@ VY1: exact-word congruence covers default-scope post iterations and existing omi
 VY1: exact-result congruence covers checked uint8 arithmetic, comparison and Boolean selection within each pipeline, retaining operand order and partial errors; see [lane handoff](inline-assembly-vy1.md#checked-uint8-and-comparison-congruence). General P16 remains open.
 
 VY1: checked-u8 terminal horizon stability and timeout controls; see [lane handoff](inline-assembly-vy1.md#checked-uint8-terminal-horizons). Full lane remains open.
+
+VY1: checked-u8 comparison terminal horizon stability and pipeline/timeout controls; see [lane handoff](inline-assembly-vy1.md#checked-uint8-comparison-horizons). Full lane remains open.

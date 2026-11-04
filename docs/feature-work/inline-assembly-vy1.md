@@ -1290,3 +1290,27 @@ Per-file MCP diagnostics report zero errors for both modules; scoped Lean,
 generated-root and layer checks pass. Ten scoped axiom reports use only
 Lean standard axioms. Raw failed automation/reduction attempts are retained
 separately from passing checks; no proof budgets were raised.
+
+### Checked uint8 comparison horizons
+
+`LocalU8CompareHorizon.successor` and `extension` prove exact full-run equality
+for the existing comparison runner after one or arbitrary additional fuel
+levels, provided the original result is not timeout. Both operand laws come
+from concrete `LocalU8Horizon.successor`; no child simulation premise is assumed.
+The statements retain all existing operation values, raw input frames and
+same-pipeline evaluation, with pair cost two and actual intermediate writes.
+Invalid comparison operators keep the existing stuck result and are not
+promoted to admission. Nine controls reuse inhabited side-effecting operands:
+legacy false versus via-IR true, full-run terminal stability, invalid-operation
+stuck stability, legacy untouched versus via-IR written timeout frames, and a
+timeout counterexample. The non-timeout premise remains essential.
+This adds no evaluator or Source/ExtCall edits, unchecked arithmetic, readback,
+admission, general divergence or compiler-adequacy claim. Existing Source
+checked-frame premises remain intact. General P16/full VY1 and final gates
+remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, layer and
+generated-root checks pass. Eleven scoped axiom reports use only Lean standard
+axioms. Failed automation/import/configuration/proof attempts remain raw evidence;
+the final proofs keep the original statements and budgets.
