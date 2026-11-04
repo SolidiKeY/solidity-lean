@@ -133,7 +133,7 @@ run and preserved word frame. Existing pinned `MemoryLoad.payload` and byte
 roundtrip proofs derive the native reader and complete ordered 32-byte
 serialization from the same initial image. Native serialization equals
 `Semantics.wordBytes` of the initial word; native numeric equality to that word
-is not established independently here. Neither an encoder inverse, concrete
+was not established by that first certificate. Neither an encoder inverse, concrete
 byte-load code realization nor Source/compiler origin is assumed implicitly.
 Native physical bytes are unchanged; post-active-word representation remains
 a separate obligation. Existing charged/failure certificates are unchanged.
@@ -148,7 +148,18 @@ and skeptic reviews found no semantic gap. The finder's reuse request was
 fixed by consuming `Producer.load_at` instead of repeating its proof.
 
 `ByteWorldNumericInterface.lean` adds a numeric consequence while retaining the
-original paired contract and all its input premises. Its implementation must
-prove the bridge between the existing word serializer and byte reader rather
-than assume an encoder inverse. Code realization, Source origin and post-active
+original paired contract and all its input premises. `ByteWorldNumeric` proves the existing serializer equals `Failure.digits`, then
+reuses `Failure.read_digits` to derive exact numeric equality for every finite
+word. Its stronger paired certificate reuses the first transport, without
+assuming an encoder inverse. The inhabited controls now exercise this numeric
+consequence for every word in either pipeline, retaining both saved tails. Code realization, Source origin and post-active
 representation remain open.
+
+Numeric checkpoint validation: per-file diagnostics reported zero errors; the
+selected Bridge closure passed 1223 jobs (4 seconds), and the core checkpoint
+library passed 3410 jobs (3 seconds). Trust, orphans, layers, generated roots
+and doc paths passed. The central axiom inventory still fails: 6553 standard-only
+pins, one removed duplicate wrapper and 45 unrecorded changes. Its refresh is
+proposed separately, outside lane ownership; no gate pass is claimed. Independent
+read-only finder and skeptic reviews passed with no findings. The full original
+queue and its producer, physical-store/copy and provenance obligations remain open.

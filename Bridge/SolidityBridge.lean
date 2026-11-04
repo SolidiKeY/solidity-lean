@@ -3,6 +3,8 @@
 import SolidityBridge.AccessBridge.ByteWorldInterface
 import SolidityBridge.AccessBridge.ByteWorldLoad
 import SolidityBridge.AccessBridge.ByteWorldLoadControls
+import SolidityBridge.AccessBridge.ByteWorldNumeric
+import SolidityBridge.AccessBridge.ByteWorldNumericInterface
 import SolidityBridge.AccessBridge.Calldata
 import SolidityBridge.AccessBridge.HostWriteControls
 import SolidityBridge.AccessBridge.Interface

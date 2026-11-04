@@ -109,3 +109,5 @@
 | `Bridge/SolidityBridge/AccessBridge/ByteWorldInterface.lean` | H26 paired-load consumer signature over exact P6 byte-world producer and initial native image; no concrete producer. |
 | `Bridge/SolidityBridge/AccessBridge/ByteWorldLoad.lean` | Conditional transport from initial word/byte images to intrinsic load, byte program and pinned MLOAD serialization. |
 | `Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean` | Inhabited all-word/pipeline images, saved-tail conditional use, literal refusal and resource-domain controls. |
+| `Bridge/SolidityBridge/AccessBridge/ByteWorldNumericInterface.lean` | Additive numeric paired-load signature retaining all H26 producer and initial-image premises. |
+| `Bridge/SolidityBridge/AccessBridge/ByteWorldNumeric.lean` | Existing word serializer/reader identity and exact numeric paired-load consequence, reusing the original transport. |

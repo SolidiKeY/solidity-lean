@@ -1,4 +1,4 @@
-import SolidityBridge.AccessBridge.ByteWorldLoad
+import SolidityBridge.AccessBridge.ByteWorldNumeric
 
 /-! Inhabited initial images for every numeric word and either pipeline, plus
 conditional H26 use with saved tails. The literal MLOAD refusal stays explicit;
@@ -73,6 +73,25 @@ theorem paired_case {code : Nat → Backend.Program}
   subst chosen
   exact ⟨byteRun,serialized,memory,intrinsic⟩
 
+theorem numeric_case {code : Nat → Backend.Program}
+    (producer : MemoryOps.Physical.ByteWorld.Producer code)
+    (pipeline : Pipeline) (value : Fin Evm.W) :
+    Environment.runSlice runtime (code 0)
+      ⟨tail,MemoryOps.Physical.frameBytes (frame pipeline value)⟩=
+      some ⟨lenU value.val value.isLt::tail,MemoryOps.Physical.frameBytes (frame pipeline value)⟩ ∧
+    ((native pipeline value).mload (.ofNat 0)).1.toNat=value.val ∧
+    ((native pipeline value).mload (.ofNat 0)).2.memory=(native pipeline value).memory ∧
+    Evm.run [.mloadAt] ((machine value).push (.val zeroCell))=
+      .ok ((machine value).push (.val value)) 0 := by
+  obtain ⟨chosen,word,intrinsic,byteRun,read,memory,post⟩ :=
+    ByteWorldNumeric.paired_numeric producer (frame pipeline value) (native pipeline value)
+      (native_image pipeline value) (machine value) (fun cell => cell=0)
+      (word_image pipeline value) runtime zeroCell (.ofNat 0) rfl rfl tail (by decide)
+  change Evm.Word.val value=Evm.Word.val chosen at word
+  have same : chosen=value := (Evm.Word.val.inj word).symm
+  subst chosen
+  exact ⟨byteRun,read,memory,intrinsic⟩
+
 theorem literal_mload_refused (input : Environment.Slice) :
     Environment.runSlice runtime [.op .MLOAD] input=none := by
   simp only [Environment.runSlice,MemoryOps.Physical.ByteWorld.current_mload_boundary,
@@ -100,4 +119,6 @@ theorem byte_overflow_domain : ¬(List.replicate 1024 (lenU 0 (by decide))).leng
 #guard_msgs (whitespace := lax) in #print axioms bad_active_refused
 /-- info: 'SolidityBridge.AccessBridge.ByteWorldLoadControls.byte_overflow_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms byte_overflow_domain
+/-- info: 'SolidityBridge.AccessBridge.ByteWorldLoadControls.numeric_case' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms numeric_case
 end SolidityBridge.AccessBridge.ByteWorldLoadControls
