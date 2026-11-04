@@ -62,3 +62,6 @@ Solidity.Frontend.StatementGrammarH28.BoolCompound	Boolean compound statement pa
 Solidity.Frontend.StatementGrammarH28.BalancePr	H31 local proof-only arbitrary syntax delimiter balance
 Solidity.Frontend.StatementGrammarH28.BalanceAtoms	H31 local proof-only arbitrary syntax delimiter balance
 Solidity.Frontend.StatementGrammarH28.SyntaxBalance	H31 local proof-only arbitrary syntax delimiter balance
+Solidity.Frontend.StatementGrammarH28.HeadPr	H31 universal expression/type/simple leading-token and root collision proofs
+Solidity.Frontend.StatementGrammarH28.SyntaxHead	H31 universal expression/type/simple leading-token and root collision proofs
+Solidity.Frontend.StatementGrammarH28.RootHead	H31 universal expression/type/simple leading-token and root collision proofs

@@ -51,8 +51,9 @@ validity and existing layout and precedence contracts are not weakened.
 2. Splitting/root/association: recursive block/control balance, mixed boundary
    splitting, intrinsic nearest position and non-simple token roots proved.
    Arbitrary statement/atom brace balance and arbitrary block-prefix splitting
-   are proved under H31. Simple roots and token-level association remain in
-   progress; the former Q-ATOM hold is resolved.
+   are proved under H31. Raw root-collision classification is proved; contextual simple/revert
+   discrimination under precedence and token-level association remain in progress.
+   The former Q-ATOM hold is resolved.
 3. Parse/yield: recursive block/control completeness and actual yield uniqueness
    proved; fixed-Boolean/empty-for compound coverage proved. Broad uniqueness/
    profile completeness are refuted by SG-CEX-01 and retained OPEN/REFUTED.
@@ -1149,3 +1150,103 @@ discrimination, token-level conditional uniqueness/association, general
 compound expression/header/body fuel, full repository gates and whole-scope
 reviews/acceptance remain. SG-CEX-01 stays OPEN/REFUTED. No goal is created,
 reset or marked complete by this checkpoint.
+
+
+## Checkpoint O: H31 leading tokens and complete raw root-collision cases
+
+HeadPr.lean and SyntaxHead.lean prove nonempty first-token invariants for
+all existing expression, type, parameter, variable-declaration, simple,
+call-argument and named-argument constructors. SafeStart contains an actual
+first token and excludes exactly the 11 fixed hard statement starts. The
+contextual identifier "revert" is deliberately not classified as hard.
+Successful literal chunks are proved nonempty even when fragment length is
+zero; empty bytes and absent tokens are different. No successful parse or
+expression-uniqueness premise is introduced.
+
+syntax_head_invariant has substantive SafeParts conclusions for precisely
+those seven categories; its explicit True fallback makes no head claim
+about other categories. expression_yield_safe_start, type_yield_safe_start
+and simple_yield_safe_start have unconditional substantive conclusions for
+every successful corresponding yield. The induction covers all 42 constructors
+in those categories. Arbitrary payloads/layouts and all operator cases are
+handled by local proofs over immutable producer equations, as H31 permits.
+No replacement AST, producer API or original theorem statement changes.
+
+RootHead.lean composes this with the proved fixed heads. For arbitrary
+contexts, layouts, residual layouts and suffixes, actual simple-statement
+yields cannot share a prefix with any of the 11 hard roots. The universal
+statement_root_collision_cases theorem enumerates the complete raw-yield
+possibilities: equal roots, simple/revert, or revert/simple. It has no root
+exclusion, expression premise or assumed parser success. It classifies roots,
+not subtrees. It deliberately does not claim the contextual pair impossible;
+discharging that pair under the existing precedence/path contract remains
+an original obligation.
+
+An inhabited raw control shows why unconditional raw root injectivity would
+be false: a revert with tuple target and a simple nested call both successfully
+yield revert(E)(); and have different roots. The revert candidate has prec=false,
+while the simple candidate has prec=true. The actual existing stmt parser,
+with sufficient fixed-tree fuel n+20 and arbitrary suffix/state, chooses the
+simple tree. This control demonstrates the necessity of the existing contract;
+it does not refute root discrimination under that contract or introduce a
+new exclusion. SG-CEX-01 remains independently OPEN/REFUTED.
+
+HeadConstructorControls checks actual successful yields with empty residual
+layout and a nonempty safe head for all 42 constructor witnesses, with exact
+Ctor inventories in seven typed collections. It separately checks all five
+literal variants, including zero-byte and fragmented literals. These are
+existing indexed Syn witnesses, not an untyped replacement representation.
+RootHeadControls supplies the raw collision, actual parser/precedence facts,
+universal arbitrary-simple versus return separation, empty-string positive
+and invalid empty-fragment-choice negative controls. These kernel yield/token
+controls are not new solc semantic-acceptance claims; the prior external
+fixtures remain separate.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/HeadPr.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793819782178386900 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/SyntaxHead.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793819941157239481 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.SyntaxHead | pass; 2.04s timed wall, RSS 427672 KiB | /workspace/h28-statement-grammar-evidence/run-1793820007085729837 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/RootHead.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820057021954810 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.RootHead | pass; 0.65s timed wall, RSS 403136 KiB | /workspace/h28-statement-grammar-evidence/run-1793820162923990875 |
+| runtime.py diag tests/h28-sol/statement-grammar/RootHeadControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820244280825550 |
+| runtime.py diag tests/h28-sol/statement-grammar/HeadConstructorControls.lean | pass, all42 constructors/all5 literal variants | /workspace/h28-statement-grammar-evidence/run-1793820435991614260 |
+| runtime.py diag tests/h28-sol/statement-grammar/HeadPublicAxioms.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820537960475507 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/HeadPr.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820591772134611 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/SyntaxHead.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820597336132004 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/RootHead.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820604521827993 |
+| runtime.py gate tests/h28-sol/statement-grammar/RootHeadControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820612379768659 |
+| runtime.py gate tests/h28-sol/statement-grammar/HeadConstructorControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793820618437329885 |
+| runtime.py gate tests/h28-sol/statement-grammar/HeadPublicAxioms.lean | pass, all19 public theorem signatures/axioms | /workspace/h28-statement-grammar-evidence/run-1793820624703387266 |
+
+All 19 public source theorem signatures and actual axiom sets are enumerated
+by HeadPublicAxioms and axioms-o.json: seven have no axioms and twelve use only
+propext and Quot.sound. Constructor/source identities are in inventory-o.json.
+No custom axiom, sorry/admit, unsafe/native_decide, budget raise, producer
+change or expression-uniqueness premise was introduced. The three modules
+are locally registered only. Separate read-only finder and skeptic pass
+source and all controls, without Lean/server/builds; reviews-o.json records
+both verdicts and the exact scope boundary.
+
+Retained failures: run-1793820207606655257 needed the existing BlockLeafCoverage
+import for locatedInput; it was imported and prebuilt serially.
+run-1793820407733515050 exposed a tuple-grouping error in a call-argument
+fixture; the corrected list has exactly two argument witnesses and the
+checked total count is 42. Both failed receipts remain retained, not PASS.
+
+Published update: origin/master was fetched and verified at
+89373e34cdfd6bb5db7054b1c204d01edffc5fa7, with pinned-base ancestry verified.
+The coordinator-reported integrated ElsePosition and NearestElse modules
+exactly match this branch. New ExecutableAst.Shared.Boundary/Translate APIs
+serve Json-to-RawExpr/RawStmt translation, not the checked Syn token parser,
+so they do not replace this token-boundary work. No merge/reset, producer
+duplication, goal reset or VM replacement occurred. Read-only API hashes and
+assessment are saved in published-89373e34.json. Other committed lane work is
+not claimed integrated by that publication.
+
+Remaining full scope: contextual simple/revert discrimination under the
+existing contract, general mixed statement splitting, token-level conditional
+uniqueness/association, general compound expression/header/body fuel, full
+repository gates and whole-scope reviews/acceptance. The original objective
+is not complete. H31 remains the only atom-proof authorization, and SOL-EU
+remains excluded.
