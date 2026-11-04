@@ -30,3 +30,6 @@
 | `Backend/Selection/LiteralSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/LiteralSelectionControls.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/ScalarSequenceFrameControls.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawUint/Controls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawUint/Execution.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
