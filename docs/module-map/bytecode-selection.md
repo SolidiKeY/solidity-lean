@@ -136,3 +136,6 @@
 | `Backend/AbiEntry/LengthCheckInterface.lean` | Loaded dynamic length admission and ordered lazy rejection signatures. |
 | `Backend/AbiEntry/LengthCheck.lean` | Existing numeric emitter at the exact semantic length limit, saved suffix/capacity and semantic failure classification. |
 | `Backend/AbiEntry/LengthCheckControls.lean` | Raw oversized length, exact boundary flags, lazy/eager distinction and short-head/fuel priority controls. |
+| `Bridge/SolidityBridge/AccessBridge/HeadSizeInterface.lean` | Fetched charged native calldata extent to numeric short-head consumer signature. |
+| `Bridge/SolidityBridge/AccessBridge/HeadSize.lean` | Published P10 fetched extent and whole-State/X transport consumed by the existing numeric head-check compiler. |
+| `Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean` | Inhabited charged native execution, protected state, short input and word-size wraparound limitation controls. |

@@ -376,3 +376,23 @@ that native allocation/entry correspondence is not claimed.
 consumer using published P10 input installation. Its all-input numeric result
 uses the actual modulo word size, with semantic length agreement kept separate.
 It does not claim a fetched native short-head branch or Source adequacy.
+
+`AccessBridge/HeadSize.lean` reuses published P10 `calldatasize_source_input`,
+without reproving its fetched opcode or charged execution. It derives the
+whole native state and X continuation, then consumes the actual pushed size
+in the existing numeric head compiler. For every installed byte input the
+numeric result compares its length modulo the word range. An explicit local
+representability fact yields the exact semantic short-head predicate; it is
+not silently adopted as a Source-input exclusion. An arithmetic wraparound
+control demonstrates why that fact cannot be removed. Semantic early revert
+retains original fuel ordering. Inhabited native controls preserve protected
+memory, saved tail, active words, PC and exact two-gas charge. These are separate
+native-size and numeric-head execution layers; a fetched native head-check
+branch, general Source authenticity/coverage and full entry composition remain
+open. Bridge MCP returned diagnostics_unavailable, so focused serial importing
+builds checked these modules instead; no simultaneous server/build or budget
+increase was used.
+Independent read-only finder and skeptic reviews passed with no findings.
+They confirmed the actual P10 pushed value is consumed, modulo conversion and
+local representability are explicit, protected-state controls are inhabited,
+and the two execution layers and remaining native/Source boundary are clear.
