@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceUintAliasReadReject
 import Solidity.Backend.MemoryOps.SourceUintAliasWriteRead
 import Solidity.Backend.MemoryOps.SourceUintAliasWriteDelete
 import Solidity.Backend.MemoryOps.SourceUintSliceCompoundRead
@@ -1765,5 +1766,150 @@ theorem dynamic_uint_alias_write_read_timeout (p : Roadmap.Pipeline) :
 #guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_read_boundary
 /-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_read_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_read_timeout
+
+/-- Four actual Source/native statements and the whole emitted append reject
+only after the material write and successful index-local store. Complete prefix
+observations are the unchanged dynamic_uint_alias_write_read_vectors. -/
+theorem dynamic_uint_alias_four_reject (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.execItems (G0 p) F0 (fuel+8) Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) (.stmt (.expr (sourceUintReadInto dr di di)) .nil)) :
+          Source.RItems E0 [] false .body Γ Γ) (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (readFinal self).1),(.nil,(readFinal self).2)) ∧
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintReadInto dr di si)).run (readFinal self)=
+      (.error (.revert (Source.panicData .index)),readFinal self) ∧
+    (Source.execItems (G0 p) F0 (fuel+8) Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) (.stmt (.expr (sourceUintReadInto dr di di))
+          (.stmt (.expr (sourceUintReadInto dr di si)) .nil))) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(readFinal self).2)) ∧
+    Prog.run (state false 1 42) (.cons (.rebindMem dt (.alias (.var (aliasTarget self) rfl)))
+      (.cons (.assignMem (.index .dyn (.var dt rfl) (.simple (.local it))) (.val (.simple (.local jt))))
+        (.cons (.assignLocal it (.readMem (.index .dyn (.var dt rfl) (.simple (.local it)))))
+          (.cons (.assignLocal jt (.readMem (.index .dyn (.var dt rfl) (.simple (.local it))))) .nil))))=.error .revert ∧
+    run (uintReadIntoCode (C := C) 1 dt it jt) (readTarget self)=.revert ∧
+    run (((aliasLocalCode 1 dt (aliasTarget self)++uintAliasWriteCode (C := C) 1 dt it jt)++uintReadIntoCode (C := C) 1 dt it it)++
+      uintReadIntoCode (C := C) 1 dt it jt) (machine false 1 42)=.revert ∧
+    Objects.StateRepr 1 1 8 (Frag.init Δ) (readState self) base (readTarget self) ∧
+    Objects.AllocatorRepr (mutationNative self) base 8 ⟨40,by decide⟩ (readTarget self) := by
+  first
+  | solve | simp only [] | omega
+  | have initial : SourceUintMemoryAt (sy false 1 42) (aliasAddress self) hp (aliasRef self) .dyn := by
+      cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+    have sr : (sy false 1 42).1.get (aliasSource self)=.memRef rfl (aliasAddress self) := by cases self <;> rfl
+    have tr : TEnv.get (aliasTarget self) (state false 1 42).env=some (aliasRef self) := by cases self <;> rfl
+    have bound : (u 1).1.toNat<hp.len (aliasRef self) .dyn := by
+      cases self <;> simp only [aliasRef,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide
+    have outside : hp.len (aliasRef self) .dyn≤(u 42).1.toNat := by
+      cases self <;> simp only [aliasRef,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide
+    obtain ⟨mid,changed,mm,target,first,second,third,prefixItems,fourth,items,prefixProg,failedProg,
+      pairCode,readCode,prefixCode,lastCode,whole,final,finalOK,repr,alloc,write,hit,rest⟩ :=
+      source_uint_alias_write_read_reject_word (G0 p) F0 fuel (sy false 1 42) dr (aliasSource self) di si si
+        (aliasAddress self) (u 1) (u 42) sr rfl rfl SH (memOK false 1 42)
+        (state false 1 42) dt (aliasTarget self) it jt jt (aliasRef self) tr rfl rfl initial bound outside
+        (initial_repr false 1 42) (allocator false 1 42) (by decide) rfl rfl
+    have knownWrite : hp.writeAddr (.index (aliasRef self) .dyn (u 1)) (u 42)=some (mutationNative self) := by
+      have hb : 1<(MObj.elems .dyn (hp.get (aliasRef self))).length := bound
+      simp only [Heap.writeAddr,Heap.setIndex,show (u 1).1.toNat=1 from by decide,if_pos hb,mutationNative]
+    have hm : mid=mutationNative self := Option.some.inj (write.symm.trans knownWrite)
+    subst mid
+    have hc : changed=mutationFinal self := congrArg Prod.snd (second.symm.trans (mutation_source p (fuel+2) self))
+    subst changed
+    have hmiddle : mm=mutationTarget self := (Out.ok.inj (pairCode.symm.trans (dynamic_uint_alias_write_concrete p fuel self).2.2.1)).1
+    subst mm
+    have ht : target=readTarget self := (Out.ok.inj (readCode.symm.trans (read_into_word self))).1
+    subst target
+    exact ⟨prefixItems,fourth,items,failedProg,lastCode,whole,repr,alloc⟩
+
+/-- One lower Source horizon times out after the actual three-statement
+prefix. It does not fabricate a successful fourth suffix or target timeout. -/
+theorem dynamic_uint_alias_four_timeout (p : Roadmap.Pipeline) (self : Bool) :
+    (Source.execItems (G0 p) F0 7 Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) (.stmt (.expr (sourceUintReadInto dr di di)) .nil)) :
+          Source.RItems E0 [] false .body Γ Γ) (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (readFinal self).1),(.nil,(readFinal self).2)) ∧
+    (Source.evalE (G0 p) F0 2 (sourceUintReadInto dr di si)).run (readFinal self)=
+      (.error .timeout,readFinal self) ∧
+    (Source.execItems (G0 p) F0 7 Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+        (.stmt (.expr (sourceUintIndexedAssign dr di si)) (.stmt (.expr (sourceUintReadInto dr di di))
+          (.stmt (.expr (sourceUintReadInto dr di si)) .nil))) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 1 42).1).run (.nil,(sy false 1 42).2)=(.error .timeout,(.nil,(readFinal self).2)) := by
+  first
+  | solve | simp only [] | omega
+  | have first := source_local_alias_run (G0 p) F0 3 (sy false 1 42) dr (aliasSource self)
+      (.memRef rfl (aliasAddress self)) (by cases self <;> rfl)
+    have second := mutation_source p 1 self
+    have readSource : (Source.evalE (G0 p) F0 2 (.indexArray (.local dr) (.local di) rfl)).run (mutationFinal self)=
+        (.ok (.val (sourceUint (u 42))),mutationFinal self) := by
+      have represented := (dynamic_uint_alias_write_concrete p 0 self).2.2.2.1
+      have contents : MObj.elems .dyn ((mutationNative self).get (aliasRef self))=
+          (MObj.elems .dyn (hp.get (aliasRef self))).set 1 (u 42) := by
+        change MObj.elems .dyn ((hp.set (aliasRef self) _).get (aliasRef self))=_
+        rw [Heap.get_set_same,MObj.elems_setElem]
+      have bound : (u 1).1.toNat<(mutationNative self).len (aliasRef self) .dyn := by
+        change (u 1).1.toNat<(MObj.elems .dyn ((mutationNative self).get (aliasRef self))).length
+        rw [contents,List.length_set]
+        cases self <;> rw [MObj.elems_dyn] <;> decide
+      have read := represented.eval_index (G0 p) F0 0 dr di (u 1) (by cases self <;> rfl) rfl bound
+      have value : (MObj.elems .dyn ((mutationNative self).get (aliasRef self)))[(u 1).1.toNat]'bound=u 42 :=
+        Option.some.inj ((List.getElem?_eq_getElem bound).symm.trans (written_read_some self))
+      rw [value] at read
+      exact read
+    have third := source_uint_read_into_of_run (G0 p) F0 0 (mutationFinal self) dr di di (u 42) readSource
+    have late : (Source.evalE (G0 p) F0 2 (sourceUintReadInto dr di si)).run (readFinal self)=
+        (.error .timeout,readFinal self) := by cases p <;> cases self <;> rfl
+    have firstStmt := source_expr_statement_run (G0 p) F0 5 Γ.length _ _ _ _ first
+    have secondStmt := source_expr_statement_run (G0 p) F0 4 Γ.length _ _ _ _ second
+    have thirdStmt := source_expr_statement_run (G0 p) F0 3 Γ.length _ _ _ _ third
+    have lastStmt := source_expr_statement_error (G0 p) F0 2 Γ.length _ _ _ _ late
+    have tail : (Source.execItems (G0 p) F0 4 Γ.length none (.stmt (.expr (sourceUintReadInto dr di si)) .nil :
+        Source.RItems E0 [] false .body Γ Γ) (readFinal self).1).run (.nil,(readFinal self).2)=
+        (.error .timeout,(.nil,(readFinal self).2)) := by
+      rw [Source.execItems,Source.Hoare.run_bind,lastStmt]
+    have lastTwo := source_items_cons_error (G0 p) F0 4 Γ.length _ _ (mutationFinal self) (readFinal self) (readFinal self) .timeout thirdStmt tail
+    have lastThree := source_items_cons_error (G0 p) F0 5 Γ.length _ _ (mutationMid self) (mutationFinal self) (readFinal self) .timeout secondStmt lastTwo
+    refine ⟨(dynamic_uint_alias_write_read_concrete p 0 self).1,late,?_⟩
+    exact source_items_cons_error (G0 p) F0 6 Γ.length _ _ (sy false 1 42) (mutationMid self) (readFinal self) .timeout firstStmt lastThree
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_four_reject' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_four_reject
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_four_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_four_timeout
+
+/-- Without the third index store, the would-be fourth assignment actually
+succeeds at index1. After the real store it panics at index42. The final error
+verdict alone does not establish the material write; prefix vectors retain it. -/
+theorem dynamic_uint_alias_four_skip_index (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintReadInto dr di si)).run (mutationFinal self)=
+      (.ok (.val (sourceUint (u 42))),mutationFinal self) ∧
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintReadInto dr di si)).run (readFinal self)=
+      (.error (.revert (Source.panicData .index)),readFinal self) ∧
+    words (readTarget self)≠words (mutationTarget self) ∧
+    (readFinal self).2=(mutationFinal self).2 := by
+  first
+  | solve | simp only [] | omega
+  | have represented := (dynamic_uint_alias_write_concrete p fuel self).2.2.2.1
+    have contents : MObj.elems .dyn ((mutationNative self).get (aliasRef self))=
+        (MObj.elems .dyn (hp.get (aliasRef self))).set 1 (u 42) := by
+      change MObj.elems .dyn ((hp.set (aliasRef self) _).get (aliasRef self))=_
+      rw [Heap.get_set_same,MObj.elems_setElem]
+    have bound : (u 1).1.toNat<(mutationNative self).len (aliasRef self) .dyn := by
+      change (u 1).1.toNat<(MObj.elems .dyn ((mutationNative self).get (aliasRef self))).length
+      rw [contents,List.length_set]
+      cases self <;> rw [MObj.elems_dyn] <;> decide
+    have read := represented.eval_index (G0 p) F0 fuel dr di (u 1) (by cases self <;> rfl) rfl bound
+    have value : (MObj.elems .dyn ((mutationNative self).get (aliasRef self)))[(u 1).1.toNat]'bound=u 42 :=
+      Option.some.inj ((List.getElem?_eq_getElem bound).symm.trans (written_read_some self))
+    rw [value] at read
+    have source := source_uint_read_into_of_run (G0 p) F0 fuel (mutationFinal self) dr di si (u 42) read
+    have locals : (mutationFinal self).1.set si (sourceUint (u 42))=(mutationFinal self).1 := by cases self <;> rfl
+    rw [locals] at source
+    exact ⟨source,(dynamic_uint_alias_four_reject p fuel self).2.1,by cases self <;> decide,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_four_skip_index' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_four_skip_index
 
 end Solidity.Backend.MemoryOps.UintReadAssignmentControls

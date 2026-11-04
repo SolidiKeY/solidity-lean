@@ -245,3 +245,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Solidity/Backend/MemoryOps/SourceUintAliasWriteRead.lean` | Contents-derived strong scalar read and actual alias/write/read-into-local Source Items/native Prog/full word append, including result/index aliasing. |
+
+| `Solidity/Backend/MemoryOps/SourceUintAliasReadReject.lean` | Actual four-statement alias/write/read/index-rejection composition with retained successful prefix. |
