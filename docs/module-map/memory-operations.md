@@ -241,3 +241,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimeGrowthInterface.lean` | Existing allocator-growth relation for actual emitted runtime-default statements, with represented fitting inputs. |
 | `Backend/MemoryCopies/RuntimeGrowth.lean` | Complete allocator cursor uniqueness, reached-to-growth proof, actual emitted runtime declaration/rebind growth and checked next-input transport. |
 | `Backend/MemoryCopies/RuntimeGrowthControls.lean` | Populated nested default growth, checked two-statement composition, empty/64 replacements and wrong-growth/room/skipped-code controls. |
+| `Backend/MemoryCopies/DefaultSelectionInterface.lean` | Actual existing statement-compiler selection for supported default roots, with availability and capacity kept separate. |

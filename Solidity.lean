@@ -277,6 +277,7 @@ import Solidity.Backend.MemoryCopies.CopyPathControls
 import Solidity.Backend.MemoryCopies.CopyPathInterface
 import Solidity.Backend.MemoryCopies.CopyPaths
 import Solidity.Backend.MemoryCopies.DeepCopyContents
+import Solidity.Backend.MemoryCopies.DefaultSelectionInterface
 import Solidity.Backend.MemoryCopies.HeapContents
 import Solidity.Backend.MemoryCopies.HeapContentsControls
 import Solidity.Backend.MemoryCopies.HeapContentsInterface

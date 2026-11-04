@@ -497,3 +497,7 @@ Populated controls construct actual selected nested reference defaults at cursor
 Independent read-only finder/skeptic passed, including final concrete Fin.val normalization, without Lean/server/builds or writes. Main direct proofs passed first attempt; controls needed explicit numeral cursor projections before omega in two budget goals. All three modules have zero MCP errors/warnings. Failed MCP inline-goal probes and passing standalone arithmetic alternatives are retained in checkpoint evidence; no proof budget increase or forbidden escape. Checkpoint gates and scoped axiom receipts remain required before acceptance.
 
 Coverage remains successful production-selected intrinsic nested-array construction under an explicit fitting represented input. This bridges the required allocator-growth relation; it does not discharge total compiler selection for all Source shapes, checked size failures, physical correspondence, full G33/G35 or five-location composition. Source/H16 and public interfaces/premises/exclusions/proof budgets/trust are unchanged. Remaining local work and VY5 H16/S03-PANIC41, V11 G34/G35.02/.03 and V10 G27.05 dependencies remain open; final lane-end run-lean is pending.
+
+## Default statement compiler selection
+
+`DefaultSelectionInterface.lean` ties selected default declarations to actual Construction.compileStmt results. The support statement consumes existing compileDefault availability and introduces no compiler/emitter branch, Source admission predicate or capacity premise for selection.
