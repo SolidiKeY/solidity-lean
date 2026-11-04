@@ -1794,3 +1794,33 @@ Both modules have zero per-file diagnostic errors; focused Lean, generated-root
 and layer checks pass. Fifteen scoped axiom reports use only Lean standard
 axioms. Raw failed standard automation remains distinct from passing concrete
 proofs and gates; no statements, outcomes or proof/checking limits changed.
+
+### Completed raw control-sequence horizons
+
+`RawControlSequenceHorizon.successor` and `blockSuccessor` preserve the
+exact completed flow/result and whole raw frame for the existing control
+sequence/block runners. `extension` and `blockExtension` extend that
+equality to every larger horizon. Actual body stability fixes the head first;
+only normal flow invokes the tail induction at that same captured frame.
+Break, continue and errors retain their original short-circuit behavior;
+leave remains impossible from the intrinsic control index. No coherence,
+projection or supplied child/adapter law is assumed.
+Eleven controls use break/continue heads followed by a deep sequence and a
+separate false-writing normal head. Break and continue propagate at fuel 3,
+retaining raw Boolean 2 and narrow word 257. The normal path reaches the tail:
+fuel 11 retains its partial false write, and 12 completes with true; block 13
+returns the identical result/frame. Completed break/continue/normal/block
+frames remain exactly equal at every larger horizon. Early timeout controls
+and separate all-fuel clean-start Source block agreement preserve the existing
+boundary.
+These same-context certified control sequences add no arbitrary statements,
+loop iteration/return semantics, dirty Source readback, admission or compiler
+adequacy. Source/ExtCall/evaluators/layouts, observations, expected outcomes
+and proof budgets are unchanged. Full VY1/general P16 and final gates remain
+open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; focused Lean, generated-root
+and layer checks pass. Fifteen scoped axiom reports use only Lean standard
+axioms. Raw failed standard automation remains separate from passing concrete
+proofs and gates; no statements, outcomes or proof/checking limits changed.

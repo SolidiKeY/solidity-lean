@@ -2544,6 +2544,7 @@ import Solidity.Yul.Checks.OpenRun
 import Solidity.Yul.Checks.Parsing
 import Solidity.Yul.Checks.Placement
 import Solidity.Yul.Checks.Powers
+import Solidity.Yul.Checks.RawControlSequenceHorizon
 import Solidity.Yul.Checks.RawDefaultDeclaration
 import Solidity.Yul.Checks.RawDefaultScope
 import Solidity.Yul.Checks.RawDivergence
@@ -2810,6 +2811,7 @@ import Solidity.Yul.RawBoundary
 import Solidity.Yul.RawCoherent
 import Solidity.Yul.RawCondition
 import Solidity.Yul.RawControlSequence
+import Solidity.Yul.RawControlSequenceHorizon
 import Solidity.Yul.RawControlledWhile
 import Solidity.Yul.RawDefaultDeclaration
 import Solidity.Yul.RawDefaultScope

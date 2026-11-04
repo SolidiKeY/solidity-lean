@@ -154,3 +154,5 @@
 | `Yul/RawSequenceHorizon.lean`, `Yul/Checks/RawSequenceHorizon.lean` | Concrete same-context raw sequence/block stability; partial-stage, dirty-cell witness and clean Source controls. |
 
 | `Yul/RawLoopBodyHorizon.lean`, `Yul/Checks/RawLoopBodyHorizon.lean` | Concrete raw condition/control-body stability; dirty truth, break/continue, selected/skipped body and clean Source controls. |
+
+| `Yul/RawControlSequenceHorizon.lean`, `Yul/Checks/RawControlSequenceHorizon.lean` | Concrete raw control-sequence/block stability; break/continue short-circuit, normal-tail partial effects and clean Source controls. |
