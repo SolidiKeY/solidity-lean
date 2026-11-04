@@ -312,3 +312,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedCapture.lean` | Actual checked typed-capture guards, allocator-derived bounds, success and refusal execution. |
 | `Backend/MemoryCopies/CheckedCaptureControls.lean` | Inhabited overlap/reference/dynamic execution and bounds refusal controls. |
 | `Backend/MemoryCopies/CheckedMemoryArrayInterface.lean` | Runtime capacity guard and total fresh primitive-array copy contract. |
+| `Backend/MemoryCopies/CheckedMemoryArray.lean` | Actual loaded-capacity guard and total fresh primitive-array copy execution. |
+| `Backend/MemoryCopies/CheckedMemoryArrayControls.lean` | Populated/empty/long copies, inhabited saturation refusals and last-fitting capacity controls. |
