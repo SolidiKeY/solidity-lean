@@ -34,6 +34,7 @@ if not compiler.is_file():
     import shutil
     compiler=pathlib.Path(shutil.which(emcc) or emcc).resolve()
 clang=pathlib.Path(os.environ.get('EMCC_CLANG',str(compiler.parent.parent/'bin/clang')))
+config_initial=hashlib.sha256(pathlib.Path(os.environ['EM_CONFIG']).read_bytes()).hexdigest()
 configured=json.loads(subprocess.check_output([sys.executable,'-c',
     "import sys,json; sys.path.insert(0,sys.argv[1]); from tools import config,shared; "
     "print(json.dumps(dict(clang=shared.CLANG_CC,ar=shared.LLVM_AR,nm=shared.LLVM_NM,ld=shared.WASM_LD,"
@@ -62,6 +63,7 @@ def provenance_paths():
             *sorted((stage/'lib/lean').glob('*.a')),
             stage/'libuv/src/libuv/libuv.a',stage.parent.parent/'gmp-wasm64/lib/libgmp.a']
 provenance=helper.snapshot_files(provenance_paths())
+if provenance[os.environ['EM_CONFIG']]!=config_initial:raise ValueError('Emscripten config changed during discovery')
 if any(provenance[p]!=digest for p,digest in compiler_identity.items()):raise ValueError('Compiler changed before snapshot')
 headers_check=hashlib.sha256()
 for header in sorted((prefix/'include/lean').rglob('*.h')):
@@ -93,7 +95,7 @@ if full:
     closure={'full':True}
     flags.append('-DSOLIDITY_DIRECT_FULL')
 else:
-    undefined=subprocess.check_output([str(clang.parent/'llvm-nm'),'--undefined-only','--format=posix',str(stage/'lib/lean/libleanrt.a')],text=True)
+    undefined=subprocess.check_output([configured['nm'],'--undefined-only','--format=posix',str(stage/'lib/lean/libleanrt.a')],text=True)
     native_roots=set(re.findall(r'^(\w+) U ',undefined,re.M))
     inputs,closure=helper.extract(root,stage,native_roots=native_roots)
     print('Pure generated-C closure: '+json.dumps(closure),flush=True)
