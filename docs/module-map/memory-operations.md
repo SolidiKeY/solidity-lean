@@ -296,3 +296,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/FixedStorageCopyInterface.lean` | Headerless fixed storage-to-memory runtime-copy certificate with complete allocator and explicit room. |
 | `Backend/MemoryCopies/FixedStorageCopy.lean` | Runtime inline storage reads, fixed-object allocator transport and all-value normalization. |
 | `Backend/MemoryCopies/FixedStorageCopyControls.lean` | Populated empty, pair and long fixed storage-copy witnesses and negative header/payload controls. |
+| `Backend/MemoryCopies/FixedStoragePathInterface.lean` | Actual fixed storage-path copying and Source declaration/rebinding contracts. |
