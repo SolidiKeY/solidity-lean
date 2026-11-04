@@ -29,6 +29,7 @@ const CORE = [
   /^Solidity\.Yul\.(LocalDoWhileHorizon|Checks\.LocalDoWhileHorizon)$/, // Body-first recursive do/while completed fuel stability.
   /^Solidity\.Yul\.(LocalForPostHorizon|Checks\.LocalForPostHorizon)$/, // Guard/body/post recursive completed fuel stability.
   /^Solidity\.Yul\.(LocalForInitHorizon|Checks\.LocalForInitHorizon)$/, // Concrete initializer/full-for completed horizon composition.
+  /^Solidity\.Yul\.(LocalForNoPostHorizon|Checks\.LocalForNoPostHorizon)$/, // Concrete initialized no-post for completed horizon composition.
   /^Solidity\.Yul\.(LocalDefaultPostRepresentation|Checks\.LocalDefaultPostRepresentation)$/, // Default-scope post and omitted-guard congruence.
   /^Solidity\.Yul\.(LocalDefaultControlRepresentation|Checks\.LocalDefaultControlRepresentation)$/, // Independently indexed default branches and loops.
   /^Solidity\.Yul\.(LocalDefaultRepresentation|Checks\.LocalDefaultRepresentation)$/, // Heterogeneous default and unchecked exact-word congruence.

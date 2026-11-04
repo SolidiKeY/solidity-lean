@@ -140,3 +140,5 @@
 | `Yul/LocalForPostHorizon.lean`, `Yul/Checks/LocalForPostHorizon.lean` | Exact guarded for/post completed horizon stability with concrete guard/body/post producers and retained post-effect controls. |
 
 | `Yul/LocalForInitHorizon.lean`, `Yul/Checks/LocalForInitHorizon.lean` | Exact Boolean/default scope and iteration agreement, concrete initializer stability and full present-guard/post for-statement completed horizons. |
+
+| `Yul/LocalForNoPostHorizon.lean`, `Yul/Checks/LocalForNoPostHorizon.lean` | Exact Boolean/default while agreement and concrete initialized no-post for completed horizons, with nested-scope caller-write controls. |
