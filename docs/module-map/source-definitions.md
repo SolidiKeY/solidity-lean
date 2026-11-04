@@ -116,3 +116,6 @@
 | `Source/MonetaryAuthoritySource.lean` | H25 authority journal write/undo and exact post-fee request-scope adapters; depends on owner-held H16/H19 core changes, not G01 settlement/session wiring. |
 
 | `Source/MonetaryExecution.lean` | Exact actual credit/debit execution, explicit current-and-saved range preservation and wide-money refusal/success controls; not whole-program reachability. |
+
+| `Source/MonetaryRollback.lean` | Actual mark/captured-credit/rollback full-state execution and explicit saved-account range transport; no generic heap rollback or transaction-finalization claim. |
+| `Source/MonetaryRollbackControls.lean` | Inhabited heap/log/journal prefix, wrong-mark, capture-only and zero-credit controls with actual full-byte continuation readback. |

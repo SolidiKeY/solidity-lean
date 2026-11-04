@@ -28886,12 +28886,107 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.credit_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.credit_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.debit_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.debit_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.wide_credit_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.wide_zero_debit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.credit_success_fits": [
   "propext"
  ],
  "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_fits": [],
  "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_without_range": [],
  "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.wide_zero_debit": [],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.attempt_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.creditRollback_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.mark_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.rollback_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.rollback_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.capture_is_not_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.continuation_reads_full_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.seed_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.seed_journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.successful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.wrong_mark_loses_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.zero_credit_still_journals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/MonetaryWorld.lean:Solidity.Source.Account.wide_balance": [],
  "Solidity/Source/MonetaryWorld.lean:Solidity.Source.CallFrame.rollback_balancesFit": [
   "propext"

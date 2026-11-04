@@ -237,3 +237,23 @@ whole-program reachable-balance theorem, H25 settlement/session wiring or
 original24-obligation/six-combination closure is claimed. Combined gates are
 not rerun for this focused increment; prior corrected checkpoint remains
 attributed to its tested tree.
+
+
+Monetary rollback increment (2026-11-04): actual mark, attempt(credit) and
+rollbackTo compose to restore arbitrary complete caller state and return the
+actual captured success/revert. This needs no assumed execution outcome.
+Rollback range transport requires current AND saved journal-account range.
+The heap is preserved because credit leaves it untouched; rollbackTo itself
+does not restore heap contents. Eight inhabited controls reuse the existing
+DEAD heap alias, event/log prefix, function locals and add a nonempty journal.
+They distinguish attempted-but-not-rolled-back credit, a wrong zero mark, zero
+credit journal changes and a real heapBytes continuation reading full DEAD.
+Five execution laws plus eight controls use only pinned standard axioms.
+Finder and skeptic independently reviewed read-only without Lean/build/tests;
+no findings. Initial proof normalization and incorrect heap-field diagnostics
+remain failed in /workspace/vy5-composition/monetary-rollback-20261104.
+No Source implementation or budget changed. No fresh native comparisons or
+full Source/EVM/reachability/session/transaction-finalization claim. H25 G01
+review and authority wiring, H16/P8a realization, immutable/funds release and
+original24 full obligations/six combinations remain open. Helper-reserved
+pure monetary arithmetic is unchanged.
