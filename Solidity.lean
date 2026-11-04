@@ -1538,6 +1538,7 @@ import Solidity.Frontend.Cli
 import Solidity.Frontend.CreationTryImport
 import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
 import Solidity.Frontend.OverrideValidation.Attributes
 import Solidity.Frontend.OverrideValidation.Graph
 import Solidity.Frontend.OverrideValidation.Identity
