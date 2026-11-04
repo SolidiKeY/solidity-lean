@@ -12,6 +12,14 @@ transactions, callbacks and credits (`srcContract`).  Contextual equivalence
 of two source programs is G01 refinement of their sessions against every
 allowed environment (`srcContract_ctxEquiv_iff`); equal sessions are
 equivalent (`srcContract_ctxEquiv_of_sessions`).
+
+`sourceLangEvents` has no resource failures (its bound is a horizon only),
+so this equivalence is termination-sensitive and finer than the one of a
+G01 `SourceSpec` with failure points.  A stuck transaction shows its events
+and no final observation, as a pending one does: at this observation a
+stuck run is not told from a divergent one with the same events (the
+distinction lives in `txFate`, `Solidity/Source/Session.lean`, not in
+`Prefix`).
 -/
 
 namespace Solidity.CtxEquiv
@@ -45,6 +53,9 @@ theorem srcContract_ctxEquiv_of_sessions {E₁ E₂ : Env} {P : SrcProg E₁} {Q
   exact ⟨fun s _ => by rw [hb s]; exact Behav.Below.refl _,
     fun s _ => by rw [hb s]; exact Behav.Below.refl _⟩
 
+theorem srcContract_faithful (P : SrcProg E) : (srcContract P).Faithful :=
+  ⟨fun _ hs => hs, id, fun _ => rfl⟩
+
 /-- Every source program is contextually equivalent to itself. -/
 theorem srcContract_refl (P : SrcProg E) : CtxEquiv (srcContract P) (srcContract P) :=
   CtxEquiv.refl _
@@ -59,3 +70,10 @@ theorem srcContract_completes {E₁ E₂ : Env} {P : SrcProg E₁} {Q : SrcProg 
   exact ⟨m, hm⟩
 
 end Solidity.CtxEquiv
+
+/-- info: 'Solidity.CtxEquiv.srcContract_ctxEquiv_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.CtxEquiv.srcContract_ctxEquiv_iff
+/-- info: 'Solidity.CtxEquiv.srcContract_ctxEquiv_of_sessions' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.CtxEquiv.srcContract_ctxEquiv_of_sessions
+/-- info: 'Solidity.CtxEquiv.srcContract_completes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.CtxEquiv.srcContract_completes

@@ -18,13 +18,21 @@ prefixes closed under taking prefixes transfers from `Y` to `X`
 (`Below.safety`).  `Below` is a preorder; G01's two-sided `Refines` is
 `Below` in both directions (`Solidity/Semantics/CtxEquiv/Unify.lean`).
 
-**Sequencing.**  `Behav.seq X K` runs `X` and, when it completes with `o`,
-continues with `K o`, the events concatenated; a completed `X` prefix is
-also shown as the boundary prefix with no continuation events yet.
-`Below` is a congruence for it (`Below.seq`): sequencing preserves
-refinement on both sides.  The definitions are generic in the event and
-observation types, so the log events X07 adds to `Event` are observed with
-no change here.
+**Sequencing.**  `Behav.seq X K` runs `X` and, when it completes with
+events `h` and outcome `o`, continues with `K h o` (the continuation reads
+the whole history, as the G50 adversary does), the events concatenated; a
+completed `X` prefix is also shown as the boundary prefix with no
+continuation events yet.  `Below` is a congruence for it (`Below.seq`).
+This is sequencing of *behaviours* (a bind on prefix sets): G01's `Lang`
+has no composition operator on programs, and the transactions after a
+deployment are already the adversary's (`SessionEnv.requests`), so the
+congruence is stated for whatever continuation a context runs after a
+completed part.
+
+The definitions are generic in the event and observation types.  G01's
+`Event` has no log constructor (logs are an excluded observation, G00), so
+logs are **not** observed today; when X07 adds them to `Event`, these
+definitions observe them unchanged.
 -/
 
 namespace Solidity.CtxEquiv
@@ -80,19 +88,19 @@ theorem Behav.Below.done {X Y : Behav E O} (h : X.Below Y) {evs : List E} {o : O
 
 /-! ## Sequencing -/
 
-/-- Run `X`, then on a completion with `o` continue with `K o`.  Shown:
-`X`'s unfinished prefixes, each completed prefix as a boundary (no
-continuation events yet), and each completed prefix followed by a prefix of
-its continuation. -/
-def Behav.seq (X : Behav E O) (K : O → Behav E O) : Behav E O := fun p =>
+/-- Run `X`, then on a completion with events `h` and outcome `o` continue
+with `K h o`.  Shown: `X`'s unfinished prefixes, each completed prefix as a
+boundary (no continuation events yet), and each completed prefix followed by
+a prefix of its continuation. -/
+def Behav.seq (X : Behav E O) (K : List E → O → Behav E O) : Behav E O := fun p =>
   (X p ∧ p.final = none) ∨
   (∃ a o, X a ∧ a.final = some o ∧ p = ⟨a.events, none⟩) ∨
-  (∃ a o k, X a ∧ a.final = some o ∧ K o k ∧ p = ⟨a.events ++ k.events, k.final⟩)
+  (∃ a o k, X a ∧ a.final = some o ∧ K a.events o k ∧ p = ⟨a.events ++ k.events, k.final⟩)
 
 /-- **Sequencing congruence**: refinement of the first part and of every
 continuation gives refinement of the sequence. -/
-theorem Behav.Below.seq {X X' : Behav E O} {K K' : O → Behav E O} (hX : X.Below X')
-    (hK : ∀ o, (K o).Below (K' o)) : (X.seq K).Below (X'.seq K') := by
+theorem Behav.Below.seq {X X' : Behav E O} {K K' : List E → O → Behav E O} (hX : X.Below X')
+    (hK : ∀ h o, (K h o).Below (K' h o)) : (X.seq K).Below (X'.seq K') := by
   intro p hp
   rcases hp with ⟨ha, hn⟩ | ⟨a, o, ha, hf, rfl⟩ | ⟨a, o, k, ha, hf, hk, rfl⟩
   · obtain ⟨b, hb, hab⟩ := hX p ha
@@ -102,7 +110,7 @@ theorem Behav.Below.seq {X X' : Behav E O} {K K' : O → Behav E O} (hX : X.Belo
   · have hb : X' a := hX.completes ha hf
     exact ⟨⟨a.events, none⟩, .inr (.inl ⟨a, o, hb, hf, rfl⟩), Prefix.Le.refl _⟩
   · have hb : X' a := hX.completes ha hf
-    obtain ⟨k', hk', hkk⟩ := hK o k hk
+    obtain ⟨k', hk', hkk⟩ := hK a.events o k hk
     refine ⟨⟨a.events ++ k'.events, k'.final⟩, .inr (.inr ⟨a, o, k', hb, hf, hk', rfl⟩), ?_, ?_⟩
     · exact (List.prefix_append_right_inj a.events).2 hkk.1
     · rcases hkk.2 with hn | he
@@ -110,13 +118,13 @@ theorem Behav.Below.seq {X X' : Behav E O} {K K' : O → Behav E O} (hX : X.Belo
       · exact .inr (by rw [he])
 
 /-- Sequencing is monotone in the first part alone. -/
-theorem Behav.Below.seq_left {X X' : Behav E O} (K : O → Behav E O) (hX : X.Below X') :
+theorem Behav.Below.seq_left {X X' : Behav E O} (K : List E → O → Behav E O) (hX : X.Below X') :
     (X.seq K).Below (X'.seq K) :=
-  hX.seq fun o => Behav.Below.refl (K o)
+  hX.seq fun h o => Behav.Below.refl (K h o)
 
 /-- Sequencing is monotone in the continuations alone. -/
-theorem Behav.Below.seq_right (X : Behav E O) {K K' : O → Behav E O}
-    (hK : ∀ o, (K o).Below (K' o)) : (X.seq K).Below (X.seq K') :=
+theorem Behav.Below.seq_right (X : Behav E O) {K K' : List E → O → Behav E O}
+    (hK : ∀ h o, (K h o).Below (K' h o)) : (X.seq K).Below (X.seq K') :=
   (Behav.Below.refl X).seq hK
 
 /-- The behaviour of one execution (a consistent family of prefixes) at the

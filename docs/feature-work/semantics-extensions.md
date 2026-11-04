@@ -74,4 +74,83 @@ their owner as requests. Register new modules with
 
 ## Handoffs
 
-None yet.
+### VS1 — contextual equivalence (2026-11-05)
+
+Branch `cloud/semantics-20261105/ctx-equiv`.  Modules: `Solidity/Semantics/CtxEquiv/{Behav,Basic,Unify,StorageObs,Source,Controls,AdversaryControls,RevertFml}.lean`,
+`Solidity/Calculus/SurfaceRevert.lean`, `Solidity/Examples/Tactics/RevertFormulas.lean`,
+and one printer case in `Solidity/Calculus/PrintStmt.lean`.
+
+**Step 0 (inventory).**
+- G49/G50 are statements only: `Roadmap/Contracts.lean` (G01) gives the
+  observation `Prefix Event Outcome`, languages `Lang`, two-sided `Refines`
+  and `RefinesUnder` (hash premise), pass certificates `Cert` with
+  `Cert.comp`, the G50 adversary `SessionEnv` (`requests` and `callee` read the
+  whole history, unbounded reentrancy, `Allowed`, `NoCallback`) and
+  `PublicCorrectness`/`SpecTransfer`.  `Roadmap/Controls.lean` (G07) has a toy
+  source, EVM and compiler meeting it; `Roadmap/V16/*` are fixture consumers,
+  no G50 theorem.  Reused, not redefined.
+- `Source/Session.lean`'s `sourceLangEvents` is a real G01 `Lang` over
+  `SessionEnv`; reused as `srcContract`.
+- O's D6 and T07 `Refines`/`solc_validated`: prose only
+  (`full-scope.md`); no `Solidity/Optimizer/**` or `Solidity/SolcValidation/**`
+  on master.  Stubs stated here (below).
+- `Semantics/RecursiveStorage/Observations.lean`: `Value.ObsEq` (path
+  observations), a state relation not read by any Source module.
+- VY3 assembly notes (`inline-assembly-vy3.md`): statement-level
+  Scalar/machine agreement (success and fault equivalences per block), no
+  session-level relation.  Nothing to unify yet; the route is a `Cert` of the
+  assembly pass (`Cert.ctxRefines_*`).
+- `Bridge/`, `Solidity/Tools/`: no contextual or observational relation.
+- Revert data: `THalt.revertWith`, `Stmt.revertData`, `RevertBytes.lean`
+  encodings; no formula reads it (`semantic-gaps.md`).
+
+**S1.1.**  `Behav` (prefix sets) with the simulation preorder `Below`
+(completion and safety transfer) and a history-reading sequencing
+`Behav.seq` with its congruence.  `Deployed A E O` (program, adversary
+reading, counted bounds), `CtxRefinesOn`/`CtxEquivOn`, the G50 instance
+`CtxRefines`/`CtxEquiv` over allowed `SessionEnv`s; preorder, equivalence,
+adversary weakening (`noCallback`), `Contract.Faithful`, vacuity made explicit
+(`CtxRefinesOn.of_empty`).  Controls on the toy (`Solidity/Semantics/CtxEquiv/Controls.lean`) and on a
+session-reading toy (`Solidity/Semantics/CtxEquiv/AdversaryControls.lean`: a request reads stored
+state, a callback separates a guard so the no-callback reading is strictly
+weaker, sequencing reads the history).
+
+**S1.2.**  Exact: `refines_iff`, `refinesUnder_iff`, `ctxEquivOn_iff_refines`,
+`artifactRefines_iff` (the public refinement shape is exactly backward plus
+forward contextual refinement), `preserves_iff`.  Implications:
+`Cert.ctxRefines_back/_forward/ctxEquiv`, `Cert.preserves`,
+`PublicCorrectness.ctxRefines_back/_forward`, `transfer'` (SpecTransfer from
+the two refinements and `envAbs_eq`), `ctx_succeeds` (guarded side not
+vacuous), `Validator.ctxRefines_back/_forward`, `obsEq_iff_ctxEquiv`
+(restatement over path adversaries), `srcContract_ctxEquiv_iff`.
+
+**S6.2.**  `RFml` with the revert-reading modality `dl!{ [ P ] φ ↯ ψ }`
+over `Prog.runFrames`, data predicates (`Error("m")`, `Panic(c)`, bytes,
+selectors, Boolean combinations), conservativity, `revert(bytes)` laws,
+notation and printers, `revert(hex"…")` printed back; the
+`semantic-gaps.md` open row is closed (the calculus has no taclet for it).
+
+**Interfaces requested.**
+- X01 (`Roadmap/Contracts.lean`): restate `PublicCorrectness.transfer` as
+  `transfer'` (old name a corollary); add `hashed_consistent` to `EvmSpec`
+  (the guarded EVM behaviour is otherwise not downward closed in the
+  horizon); `DecidableEq` for `CodeUnit`/`Artifact`; a log constructor in
+  `Event` (X07) — the relations then observe logs unchanged.
+- O01: implement `Preserves π p h` (D6 per pass under both premises), keep
+  `preserves_iff` and `Cert.preserves`; D1's artifact clause needs X01's
+  artifact parameter.
+- T07: implement `Validator` (computable `validate`, soundness to
+  `ArtifactRefines`), keep `Validator.ctxRefines_back/_forward`.
+
+**Review (finder and skeptic, read-only).**  Fixed: history-blind and
+overclaimed sequencing (now `List E → O → Behav`, documented as behaviour
+sequencing); no control exercised the adversary or events
+(`Solidity/Semantics/CtxEquiv/AdversaryControls.lean`); D6 stub's shape (now per pass, under both
+premises); noncomputable T07 witness (now a computable check plus
+`validator_rejects_altered`); unconstrained `env`/`Counts` (now
+`Contract.Faithful`, `CtxRefinesOn.of_empty`); docs: refinement direction,
+partial-correctness/may-equivalence reading (`failEmpty_ctxEquiv_loop`),
+logs unobserved, final-state limits (own balances and code hash not
+observed), `Cert.ctxEquiv` needs no forward restriction, `transfer'` uses
+`envAbs_eq`, StorageObs is a restatement, Source stuck/divergent prefixes
+coincide; missing axiom guards (Source, transfer lemmas).

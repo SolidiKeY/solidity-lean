@@ -14,24 +14,37 @@ contextual refinement or equivalence (`Solidity/Semantics/CtxEquiv/Basic.lean`):
 - A G01 pass certificate (`Cert`, the O01 pass framework's input) gives
   contextual refinement in both directions under the premises
   (`Cert.ctxRefines_forward`, `Cert.ctxRefines_back`), and equivalence when
-  the languages carry no premise (`Cert.ctxEquiv`).
+  the languages have no forward restriction and no premise
+  (`Cert.ctxEquiv`).
 - The public theorem (G49/G50, `PublicCorrectness`) gives, for every
-  admitted input and every artifact the compiler produces, contextual
-  refinement of the deployed bytes by the source meaning against every G50
-  adversary, for the bytes' runs meeting their hash premise
-  (`PublicCorrectness.ctxRefines_back`), and of the source's forward runs by
-  the bytes (`PublicCorrectness.ctxRefines_forward`); specification transfer
-  follows from these alone (`PublicCorrectness.transfer'`), which restates
-  `PublicCorrectness.transfer` through contextual refinement.
+  admitted input and every artifact the compiler produces, two one-sided
+  contextual refinements against every G50 adversary, each under its own
+  counting condition, not an equivalence: the deployed bytes refine the
+  source meaning, for the bytes' runs meeting their hash premise
+  (bytes ⊑ source, `PublicCorrectness.ctxRefines_back`), and the source's
+  forward runs (no resource failure, fewer than `hashBound` hashes, premise
+  met) refine the bytes (`PublicCorrectness.ctxRefines_forward`).  The
+  shape is exactly these two (`artifactRefines_iff`).  Specification
+  transfer follows from them and `envAbs_eq` (`PublicCorrectness.transfer'`,
+  the statement of `PublicCorrectness.transfer`; the original stays in
+  `Roadmap/Contracts.lean`, owned by X01).  The guarded side is not vacuous:
+  a non-vacuous source gives a success the guarded bytes show
+  (`PublicCorrectness.ctx_succeeds`).
 
 **Interface stubs.**  O01 (`Solidity/Optimizer/**`) and T07
-(`Solidity/SolcValidation/**`) are not on master.  `Preserves` states D6
-("every observation except gas values"; gas lives in the resource bound,
-not in a `Prefix`) and is `CtxEquivOn` over the language's own environments
-(`preserves_iff`); `Validator` states T07's `solc_validated` with the
-public theorem's refinement shape, and gives contextual refinement
-(`Validator.ctxRefines_back`).  The owning lanes replace these stubs with
-their definitions and keep the two lemmas' statements.
+(`Solidity/SolcValidation/**`) are not on master.  `Preserves π p h` states
+D6 for one pass and input: every observation is preserved under the hash
+premises of both sides, gas values aside (they are resource choices, not
+part of a `Prefix`); it is exactly the two contextual refinements
+(`preserves_iff`), follows from a certificate (`Cert.preserves`), and is an
+equivalence without premises (`Preserves.ctxEquiv`).  D1's clause (a
+program that reads gas is related to the artifact the optimizer produced)
+needs D1's artifact parameter, which X01 has not landed; it is not stated.
+`Validator` states T07's `solc_validated` with the public theorem's
+refinement shape and gives both refinements (`Validator.ctxRefines_back`,
+`_forward`); it asks for soundness only, so the always-`false` checker is a
+validator.  The owning lanes replace the stubs and keep these lemmas'
+statements.
 -/
 
 namespace Solidity.CtxEquiv
@@ -96,21 +109,6 @@ theorem ctxEquivOn_iff_refines {A : Type} (Adm : A → Prop) (L₁ L₂ : Lang E
     exact ⟨fun a ha => ((refines_iff _ _ _ _).1 (h a ha)).1,
       fun a ha => ((refines_iff _ _ _ _).1 (h a ha)).2⟩
 
-/-! ## O's D6 relation (stub) -/
-
-/-- **D6 (stub for O01).**  An optimized program preserves every observation
-of the original except gas values, in every allowed environment of the
-language: G01 refinement at admissible bounds.  Gas values are resource
-choices, not part of a `Prefix`, so they are not compared. -/
-def Preserves (L : Lang E O) (p q : L.Prog) : Prop :=
-  ∀ e, L.Allowed e → Refines L.Admissible L.Admissible (L.sem p e) (L.sem q e)
-
-/-- **D6 is contextual equivalence** over the language's own allowed
-environments. -/
-theorem preserves_iff (L : Lang E O) (p q : L.Prog) :
-    Preserves L p q ↔ CtxEquivOn L.Allowed (Deployed.mk' L p id) (Deployed.mk' L q id) :=
-  (ctxEquivOn_iff_refines L.Allowed L L p q id id).symm
-
 end Solidity.CtxEquiv
 
 namespace Solidity.Roadmap
@@ -173,18 +171,52 @@ theorem Cert.ctxEquiv (c : Cert π) (p : L₁.Prog) (h : π.Dom p) {Adm : A → 
 
 end Cert
 
-/-- A certified premise-free pass within one language satisfies D6. -/
-theorem Cert.preserves {L : Lang E O} {π : Pass L L} (c : Cert π) (p : L.Prog) (h : π.Dom p)
-    (hid : ∀ e, π.envAbs e = e)
-    (hS : ∀ e r, L.Admissible r → L.Forward p e r ∧ L.Guard p e r)
-    (hT : ∀ e r, L.Admissible r → L.Guard (π.run p h) e r) :
-    Preserves L p (π.run p h) := by
-  have hc := c.ctxEquiv p h (Adm := L.Allowed) id (fun _ h => h) hS hT
-  have he : (fun a => π.envAbs (id a)) = (id : L.Env → L.Env) := funext hid
-  have : π.src p (id : L.Env → L.Env) = Deployed.mk' L p id := by
-    simp only [Pass.src, he]
-  rw [this] at hc
-  exact (preserves_iff L p (π.run p h)).2 hc
+/-! ## O's D6 relation (stub) -/
+
+/-- **D6 (stub for O01)**: the pass preserves every observation of `p`, gas
+values aside, in every allowed target environment, under both sides'
+premises (G01's `RefinesUnder` at the target environment and its source
+reading). -/
+def _root_.Solidity.CtxEquiv.Preserves {L₁ L₂ : Lang E O} (π : Pass L₁ L₂) (p : L₁.Prog)
+    (h : π.Dom p) : Prop :=
+  ∀ e, L₂.Allowed e →
+    RefinesUnder L₁.Admissible L₂.Admissible (L₁.Forward p (π.envAbs e)) (L₁.Guard p (π.envAbs e))
+      (L₂.Guard (π.run p h) e) (L₁.sem p (π.envAbs e)) (L₂.sem (π.run p h) e)
+
+section D6
+variable {L₁ L₂ : Lang E O} {π : Pass L₁ L₂}
+
+/-- **D6 is two contextual refinements** over the target's allowed
+environments. -/
+theorem _root_.Solidity.CtxEquiv.preserves_iff (p : L₁.Prog) (h : π.Dom p) :
+    Preserves π p h ↔
+      CtxRefinesOn L₂.Allowed (π.srcForward p id) (π.tgt p h id) ∧
+        CtxRefinesOn L₂.Allowed (π.tgtGuarded p h id) (π.src p id) := by
+  constructor
+  · intro hp
+    exact ⟨fun e he => ((refinesUnder_iff _ _ _ _ _ _ _).1 (hp e he)).1,
+      fun e he => ((refinesUnder_iff _ _ _ _ _ _ _).1 (hp e he)).2⟩
+  · rintro ⟨hf, hb⟩ e he
+    exact (refinesUnder_iff _ _ _ _ _ _ _).2 ⟨hf e he, hb e he⟩
+
+/-- A certified pass satisfies D6 at every input in its domain. -/
+theorem Cert.preserves (c : Cert π) (p : L₁.Prog) (h : π.Dom p) : Preserves π p h :=
+  fun e he => c.refines p h e he
+
+/-- Without a forward restriction or premise, D6 is contextual equivalence. -/
+theorem _root_.Solidity.CtxEquiv.Preserves.ctxEquiv {p : L₁.Prog} {h : π.Dom p}
+    (hp : Preserves π p h)
+    (hS : ∀ e r, L₁.Admissible r → L₁.Forward p e r ∧ L₁.Guard p e r)
+    (hT : ∀ e r, L₂.Admissible r → L₂.Guard (π.run p h) e r) :
+    CtxEquivOn L₂.Allowed (π.src p id) (π.tgt p h id) := by
+  obtain ⟨hf, hb⟩ := (preserves_iff p h).1 hp
+  refine ⟨fun a ha => ?_, fun a ha => ?_⟩
+  · refine Behav.Below.trans ?_ (hf a ha)
+    exact Behav.Below.of_sub fun _ ⟨r, hr, he⟩ => ⟨r, ⟨hr, hS _ r hr⟩, he⟩
+  · refine Behav.Below.trans ?_ (hb a ha)
+    exact Behav.Below.of_sub fun _ ⟨r, hr, he⟩ => ⟨r, ⟨hr, hT _ r hr⟩, he⟩
+
+end D6
 
 /-! ## The public theorem (G49/G50) -/
 
@@ -210,6 +242,24 @@ def EvmSpec.contractGuarded (V : EvmSpec) (art : Artifact) : Contract :=
 theorem EvmSpec.allowed_ofSession (V : EvmSpec) {s : SessionEnv} (hs : s.Allowed) :
     V.lang.Allowed (V.ofSession s) :=
   (V.allowed_iff _).2 (by rw [V.session_of]; exact hs)
+
+theorem SourceSpec.allowed_ofSession (S : SourceSpec) {s : SessionEnv} (hs : s.Allowed) :
+    S.lang.Allowed (S.ofSession s) :=
+  (S.allowed_iff _).2 (by rw [S.session_of]; exact hs)
+
+theorem EvmSpec.contract_faithful (V : EvmSpec) (art : Artifact) : (V.contract art).Faithful :=
+  ⟨fun _ hs => V.allowed_ofSession hs, V.session, V.session_of⟩
+
+theorem EvmSpec.contractGuarded_faithful (V : EvmSpec) (art : Artifact) :
+    (V.contractGuarded art).Faithful :=
+  ⟨fun _ hs => V.allowed_ofSession hs, V.session, V.session_of⟩
+
+theorem SourceSpec.contract_faithful (S : SourceSpec) (p : S.lang.Prog) : (S.contract p).Faithful :=
+  ⟨fun _ hs => S.allowed_ofSession hs, S.session, S.session_of⟩
+
+theorem SourceSpec.contractForward_faithful (S : SourceSpec) (p : S.lang.Prog) :
+    (S.contractForward p).Faithful :=
+  ⟨fun _ hs => S.allowed_ofSession hs, S.session, S.session_of⟩
 
 end Solidity.Roadmap
 
@@ -298,6 +348,16 @@ theorem PublicCorrectness.ctxRefines_forward (h : PublicCorrectness S V compiler
     CtxRefines (S.contractForward (S.meaning r w p art)) (V.contract art) :=
   (h.artifactRefines adm w p hc).ctxRefines_forward
 
+/-- **The guarded side is not vacuous**: a non-vacuous source gives an
+admitted input whose bytes, at some allowed session, show a nonempty
+success among the runs meeting their premise. -/
+theorem PublicCorrectness.ctx_succeeds (h : PublicCorrectness S V compiler envAbs X)
+    (hv : S.NonVacuous) : ∃ i art s π d, compiler i = some art ∧ s.Allowed ∧
+      (V.contract art).behav s π ∧ π.final = some (.success d) ∧ d ≠ [] := by
+  obtain ⟨i, art, e, rt, d, hc, he, hrt, hd, ht⟩ := h.succeeds hv
+  refine ⟨i, art, V.session e, _, d, hc, (V.allowed_iff e).1 he, ⟨rt, hrt, ?_⟩, ht, hd⟩
+  simp only [EvmSpec.contract, Deployed.mk', V.of_session]
+
 /-- **Specification transfer through contextual refinement**: the statement of
 `PublicCorrectness.transfer`, derived from the two contextual refinements
 only. -/
@@ -337,7 +397,8 @@ structure Validator (S : SourceSpec) (V : EvmSpec) where
     (p : S.InProfile r), ArtifactRefines S V (S.meaning r w p art) art
 
 /-- **`solc_validated` as contextual refinement**: a validated solc artifact,
-against every G50 adversary, shows only what the source can show. -/
+against every G50 adversary, shows (meeting its premise) only what the
+source can show. -/
 theorem Validator.ctxRefines_back {S : SourceSpec} {V : EvmSpec} (T : Validator S V)
     {i : S.Input} {art : Artifact} (hv : T.validate i art = true) {r : S.Resolved}
     (adm : S.Admitted i r) (w : S.WellFormed r) (p : S.InProfile r) :

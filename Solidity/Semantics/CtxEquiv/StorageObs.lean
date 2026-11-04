@@ -7,13 +7,14 @@ import Solidity.Semantics.RecursiveStorage.Observations
 `Value.ObsEq` (`Solidity/Semantics/RecursiveStorage/Arrays.lean`, laws in
 `Solidity/Semantics/RecursiveStorage/Observations.lean`) equates two
 recursive storage values that agree on every path observation (failed reads,
-words, live lengths and retained extents).  It is contextual equivalence
-for one language: the stored value is the program, the adversary chooses a
-path, and the run completes with the observation there
-(`obsEq_iff_ctxEquiv`).  This places the storage relation in the same order
-as the ABI-boundary relation (`Solidity/Semantics/CtxEquiv/Basic.lean`);
-connecting it to transaction sessions needs a source semantics over these
-values, which no Source module reads yet.
+words, live lengths and retained extents).  It is restated here as
+contextual equivalence for one language, by construction: the stored value
+is the program, the adversary chooses one path (a single read, no writes),
+and the run completes with the observation there (`obsEq_iff_ctxEquiv`).
+This places the storage relation in the same order as the ABI-boundary
+relation (`Solidity/Semantics/CtxEquiv/Basic.lean`), but it is not a G50
+statement: ObsEq storages giving `CtxEquiv` sessions needs a source
+semantics over these values, which no Source module reads yet (open).
 -/
 
 namespace Solidity.CtxEquiv
@@ -55,8 +56,8 @@ theorem tag_injective {U : TypeGraph.Ty n} {x y : Option U.Head}
   · simp only [Option.map_some, Option.some.injEq, Sigma.mk.injEq, heq_eq_eq, true_and] at h
     rw [h]
 
-/-- **Storage observational equivalence is contextual equivalence** against
-path adversaries. -/
+/-- **Storage observational equivalence, restated** as contextual equivalence
+against single-read path adversaries. -/
 theorem obsEq_iff_ctxEquiv {G : TypeGraph.Schema n} {T : TypeGraph.Ty n} (v w : Value G T) :
     v.ObsEq w ↔ CtxEquivOn (fun _ => True) (storageContract v) (storageContract w) := by
   constructor

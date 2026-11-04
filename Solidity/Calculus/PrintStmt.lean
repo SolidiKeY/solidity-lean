@@ -371,6 +371,29 @@ def ppDeferredExprS (ns : List Expr) (code value : Expr) :
 def labelHead (s : Expr) : Lean.Name :=
   s.getAppFn.constName?.getD .anonymous
 
+/-- A `UInt8` or `Nat` numeral's value. -/
+def byteLit? (e : Expr) : Option Nat :=
+  if e.isAppOfArity ``OfNat.ofNat 3 then (e.getArg! 1).rawNatLit? else e.rawNatLit?
+
+/-- Two lowercase hex digits of a byte. -/
+def hexByte (b : UInt8) : String :=
+  let d := fun (n : Nat) => "0123456789abcdef".get ⟨n⟩
+  String.mk [d (b.toNat / 16), d (b.toNat % 16)]
+
+/-- `revert(d)` whose data is one literal `Error(string)` encoding, as the
+elaborator writes `revert(hex"…")`: the reason's `hex"…"`, so the statement
+reads back. -/
+def revertHexReason? (d : Expr) : MetaM (Option (TSyntax `sol_expr)) := do
+  let d ← instantiateMVars d
+  let some (_, [p]) := d.listLit? | return none
+  unless p.isAppOfArity ``RevPart.bytes 3 do return none
+  let some (_, bs) := (p.getArg! 2).listLit? | return none
+  let some ns := bs.mapM byteLit? | return none
+  let bytes := ns.map Nat.toUInt8
+  let some r := Semantics.decodeError bytes | return none
+  unless Semantics.encodeError r == bytes do return none
+  return some (← `(sol_expr| hex $(Syntax.mkStrLit (String.join (r.map hexByte))):str))
+
 /-- Whether the syntax `stx` has the identifier `x`. -/
 partial def hasIdent (x : Lean.Name) (stx : Syntax) : Bool :=
   (stx.isIdent && stx.getId == x) || stx.getArgs.any (hasIdent x)
@@ -498,6 +521,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   -- a revert with data (`revertDataBox`): the data, a schema variable or
   -- escaped
   | Stmt.revertData _ _ d =>
+    if let some r ← revertHexReason? d then return ← `(sol_stmt| revert($r:sol_expr))
     let some dn ← fvarName? d | escape
     `(sol_stmt| $(mkIdent `revert):ident ( $(nameIdent dn):ident ))
   -- a `catch` clause binding the data (`catchDataBox`): the binding, then the
