@@ -418,3 +418,5 @@ see [the lane record](inline-assembly-vy3.md).
 - VY3 target shape: actual execution/caller framing is derived from existing intrinsic CodeShape; exact shifted all-prefix capacity remains independent. Last-slot dirty update and underflow/peak-overflow controls are kernel target preparation, not native/G24 adequacy. See [lane handoff](inline-assembly-vy3.md#constructive-target-shape-and-caller-capacity).
 
 - VY3 pure-expression operand shapes: actual literal/local/binary emissions, original intrinsic subtraction visitor/source/target witness, shifted DUP16 and exact raw/caller/capacity controls. Explicit primitive-row and child-metadata premises remain; no full G24/native coverage. See [lane handoff](inline-assembly-vy3.md#actual-pure-expression-operand-certificates).
+
+- VY3 arithmetic visitor operand producer: actual successful original visitor/emission now derives recursive CodeShape without public child metadata or primitive-row premises. Nested original MUL/ADD/SUB source/target and peak-three/depth controls are kernel preparation, not full G24/native adequacy. See [lane handoff](inline-assembly-vy3.md#recursive-arithmetic-visitor-operand-producer).

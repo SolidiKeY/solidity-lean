@@ -2490,6 +2490,8 @@ import Solidity.Yul.Compilation.ArgumentLowering
 import Solidity.Yul.Compilation.ArgumentLoweringControls
 import Solidity.Yul.Compilation.ArithmeticMachine
 import Solidity.Yul.Compilation.ArithmeticMachineControls
+import Solidity.Yul.Compilation.ArithmeticVisitorShapes
+import Solidity.Yul.Compilation.ArithmeticVisitorShapesControls
 import Solidity.Yul.Compilation.BitExpressions
 import Solidity.Yul.Compilation.BitMachineExecution
 import Solidity.Yul.Compilation.BitMachineExecutionControls

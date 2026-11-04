@@ -115,3 +115,5 @@
 | `Yul/Compilation/ShapeCapacity{,Controls}.lean` | Constructive actual scalar execution from intrinsic CodeShape, generic caller framing and static height lifting, exact all-boundary shifted capacity; actual last-slot dirty update and underflow/peak-overflow separation. Target preparation, not native/G24 adequacy. |
 
 | `Yul/Compilation/ExpressionShapes{,Controls}.lean` | Actual literal/local/binary emitted-code operand certificates, with explicit primitive row and child metadata; original intrinsic SUB visitor/source/target, shifted DUP16, raw order/caller and capacity-versus-underflow controls. Not full native/G24/compiler coverage. |
+
+| `Yul/Compilation/ArithmeticVisitorShapes{,Controls}.lean` | Actual successful ProducerExpressions arithmetic visitor/emission derives recursive operand metadata without public child/primitive-row assumptions; nested original MUL/ADD/SUB source/target, shifted access and peak-three controls. Wider visitors/native/G24 remain separate. |
