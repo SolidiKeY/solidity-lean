@@ -407,3 +407,35 @@ addressed by retaining both outside-region certificates in the conclusion.
 General Source constructor lowering, source/account/world and fetched-CREATE
 correspondence remain open, as do G43/H19/H25, G36.03/V12 G37 and G18/VY5.
 G45 implementation ownership stays reassigned/master-owned.
+
+### Candidate-specific axiom inventory reconciliation (2026-11-04)
+
+The coordinator authorized inventory regeneration for the exact published-base
+candidate13ada1a9 after classifying its53 unrecorded entries as standard-only.
+The repository checker was run before writing and reproduced all53 notes with
+zero errors. The supplied per-entry classification matched exactly:42 standard
+triples,6 propext/Quot.sound pairs and5 axiom-free entries. Regeneration using
+`check-axiom-pins.mjs --write`, followed by a separate checker run, reports6396
+pins, zero errors and zero unrecorded changes. The JSON diff adds exactly those53
+keys/sets and preserves all existing records. No Lean source, theorem premise,
+trust inventory/policy, budgets or external dependency changed.
+
+This reconciliation belongs only to the published-base candidate. The older
+helpera76000c4 instead has1928 pins and57 unrecorded entries, including four older
+IntegerReadBoundaryWitness pins. Its core trust gate fails on the missing unsafe
+inventory record for the existing Frontend/Testing Meta.evalExpr site. That site
+is already inventoried on published master under H17; it is not a new exemption.
+Prior candidate build/trust results must not be read as helper-tree trust passes.
+The helper inventory is not copied into this tree, and this candidate inventory
+is not copied into the older helper. Historical failed receipts and seals remain
+unchanged. Current candidate trust/build checks are required independently.
+
+The constructor transport ssNew_body dependency remains with the active
+solidity-helpers-20261104 owner; this reconciliation does not duplicate or close
+that producer, general Source/artifact/account/world or full-lane obligations.
+
+Reconciled published-base delivery commit:6f773653a1ad7c9abfdc08e0cd23314076f6ecf1.
+Its exact-head checkpoint has all eight gates passing, including current-source
+trust and zero-drift pins. All four audit modules and eight standalone axiom
+files also pass current guard checks. These results apply to that candidate,
+not this older helper; only this receipt is copied here, never its inventory.
