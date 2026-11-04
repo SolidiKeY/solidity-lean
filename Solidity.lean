@@ -2476,6 +2476,8 @@ import Solidity.Yul.Adapters.RawPhysicalControls
 import Solidity.Yul.Adapters.RawPhysicalInventory
 import Solidity.Yul.Adapters.RawPhysicalInventoryControls
 import Solidity.Yul.Adapters.RawPhysicalProducer
+import Solidity.Yul.Adapters.RawPhysicalUpdate
+import Solidity.Yul.Adapters.RawPhysicalUpdateControls
 import Solidity.Yul.Adapters.RawPhysicalWriteback
 import Solidity.Yul.Adapters.RawPhysicalWritebackControls
 import Solidity.Yul.Adapters.SelectedPhysicalStore

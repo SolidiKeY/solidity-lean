@@ -1128,3 +1128,15 @@ Controls demonstrate equal decoded raw views with different residual bytes,
 reject reencoding from a zero residual, and retain dirty bool/u8 words. The
 identity is physical unchanged writeback, not arbitrary dirty Source readback,
 compiler layout provenance or target execution adequacy.
+
+
+`RawPhysicalUpdate` connects actual `RawFrame.write` with a word patch of a
+complete encoded inventory. Initial encoder reads and derived cell separation
+supply all updated reads, full-map reencoding and decoded raw-view agreement.
+Its `store` theorem uses the actual P6 store and published MSTORE slice, retaining
+the complete new image and logical carrier/invocation key. An actual WordSpan
+and agreement with the constructed cell coordinate remain explicit; there is
+no inferred compiler layout or general gas/expansion theorem. Controls store a
+full-width word in a uint8 cell, retain the bool and both function fields,
+preserve padding, reject wrong coordinates and retain latest repeated writes.
+Clean Source locals/world and explicit dirty-readback boundaries are unchanged.
