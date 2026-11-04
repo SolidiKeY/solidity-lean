@@ -244,8 +244,8 @@ No false target or semantic exclusion has been silently discharged.
 | Balanced block/list splitting | pending, including backfill strengthening |
 | Nearest-else association | existing local no-capture contract proved; unique attachment/token decomposition pending |
 | Simple/block/loop/control token-root discrimination | syntactic root discrimination proved; token-root discrimination pending |
-| Parse/yield uniqueness under precedence/layout | pending; SOL-EU excluded; no new expression-uniqueness premise asserted |
-| Concrete parser completeness with syntax-derived fuel | break/continue/empty return proved; all other constructors and dependencies pending |
+| Parse/yield uniqueness under precedence/layout | unrestricted intrinsic target refuted, even with InProfile; SG-CEX-01 retained open; other positive uniqueness obligations pending |
+| Concrete parser completeness with syntax-derived fuel | three control leaves proved; unrestricted intrinsic-profile completeness refuted by SG-CEX-01; other constructors/dependencies pending |
 | Constructor-complete kernel controls | narrow root, dangling-else and three leaf controls pass; full variants pending |
 | Positive/negative return-expression/unchecked/try variants | pending |
 | solc 0.8.38 grammar fixtures | pending; no external solc result claimed |
@@ -256,3 +256,74 @@ Next: balanced block/list token decomposition and token-boundary invariants,
 then recursive constructor parser fuel/completeness and remaining controls.
 All original constraints, frozen inputs and other owners remain binding. The
 persistent goal is not marked complete or replaced. No push, merge or PR.
+
+## Checkpoint D: SG-CEX-01 — inhabited flag representation counterexample
+
+The original unrestricted statement-yield uniqueness target is false under
+the existing precedence/layout contract, independently of SOL-EU. Existing
+assembly flag fields are String, but yield uses ascii, narrowing each Unicode
+scalar to UInt8. ASCII A and U+0141 Ł are distinct and both yield byte 65.
+FlagCounterexample.lean proves distinct trees, successful identical yields
+and prec=true for both. The canonical-rethrow variants also both satisfy the
+existing InProfile predicate: its exemption checks the Yul body, not flags.
+No Solidity expression subtree occurs in these witnesses.
+
+The exact universally quantified yield-uniqueness targets, with and without
+InProfile, are refuted in kernel-checked theorems. The actual stmt parser
+normalizes the empty-body token input to ASCII for every fuel n+2, preserving
+arbitrary suffix/layout state. A separate flag-prefix factor leaves Yul
+parsing opaque and proves that no fuel and no output state can recover the
+Unicode canonical-rethrow tree. The public
+not_profile_statement_parser_complete refutes even existential-fuel recovery
+of every existing InProfile/prec/successful-yield intrinsic tree. No assumed
+successful body parse is used.
+
+These exact intrinsic targets remain OPEN/REFUTED in the original ledger;
+no producer repair, new premise, exclusion or weakening was introduced.
+The existing non-ASCII SOURCE-token refusal is retained (frontend-parse.md,
+lines 318–321; Parser.strArg). It does not constrain arbitrary existing Syn
+String fields, prec or InProfile, and does not invalidate the counterexample.
+This is not a claim of ambiguous accepted source bytes, whole-source parse
+failure or solc semantic validity of unknown assembly flag A. InProfile is
+syntax exclusion, not type/semantic checking. The controls explicitly retain
+non-ASCII UTF-8 and empty-token refusals and positive ASCII decoding.
+
+Finder and skeptic independently reviewed the representation collision,
+profile witnesses, exact universal targets, opaque-body proof and controls,
+without Lean/server/build use. Both final narrow verdicts pass. The skeptic's
+wording correction was applied: only the flag prefix is asserted to decode
+to ASCII in any successful canonical-rethrow parse.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/FlagCounterexample.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799120982271358 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.FlagCounterexample | pass; 2.94s timed wall; peak RSS 488552 KiB | /workspace/h28-statement-grammar-evidence/run-1793799159296682838 |
+| runtime.py diag tests/h28-sol/statement-grammar/FlagCounterexampleControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793798950472579702 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/FlagCounterexample.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799223003714422 |
+| runtime.py gate tests/h28-sol/statement-grammar/FlagCounterexampleControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793799226244431944 |
+
+Exact axiom signatures: flag_prefix_factor depends on [Quot.sound];
+flag_profile_unicode_no_fuel and not_profile_statement_parser_complete depend
+on [propext, Quot.sound]. All twelve other printed counterexample theorems
+have no axioms. These are existing Lean foundations, not new axiom declarations.
+Exact public statements and input identities are saved in the module and
+run manifests. Source.Ctor replays two baseline unused-simp warnings, outside
+this lane; producer files were not edited.
+
+Retained failure: run-1793797683973857099 exhausted the unchanged 200000
+heartbeat budget while directly reducing the separate ASCII canonical-body
+success equation at fuel n+6. That success-bound proof remains unproved; it
+is not needed by the checked no-fuel result. Prefix proof attempts in
+run-1793797867568143994 and run-1793797951487495638 failed elaboration. The
+checked proof instead rewrites the existing stmt equation and keeps the Yul
+body parser opaque. No proof budget was raised and no failed run was relabeled.
+
+Coordinator update: origin/master was fetched and remote-verified at
+b419c3cf4f642ae519b66bebc26cdf2f7cf93574. This branch and its input versions
+remain based on 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5; no merge/reset occurred.
+The published new backend/Yul interfaces are unrelated to these statement
+proofs, so no duplicate producer or new dependency was introduced.
+
+The authorized balanced block/list and fuel backfill continues. Full queue
+acceptance, remaining constructor coverage/controls, fixtures and final gates
+are unfinished. The frozen persistent goal is not marked complete.
