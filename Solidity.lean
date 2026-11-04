@@ -2863,6 +2863,8 @@ import Solidity.Yul.Views.BytePlanHash
 import Solidity.Yul.Views.BytePlanHashAlias
 import Solidity.Yul.Views.BytePlanHashAliasControls
 import Solidity.Yul.Views.BytePlanHashControls
+import Solidity.Yul.Views.BytePlanHashFrames
+import Solidity.Yul.Views.BytePlanHashFramesControls
 import Solidity.Yul.Views.ByteWriteSequence
 import Solidity.Yul.Views.ByteWriteSequenceControls
 import Solidity.Yul.Views.Bytes

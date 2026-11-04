@@ -1047,3 +1047,16 @@ Controls use two valid aliases to a string object, mutations across byte/string
 roots, nonzero padding, a late non-byte write failure and restored caller locals.
 They establish kernel source/view behavior, not target opcode execution,
 external compiler observations or general expression/escape adequacy.
+
+
+`BytePlanHashFrames.transport` carries that same child write/hash computation
+through actual `Source.EM.sub`. Arbitrary valid caller locals are restored on
+success and halt, while the real child heap effects remain. The typed hash
+result and final child locals return on success. The theorem also derives
+caller MemOK for arbitrary original H, complete reached-map reconstruction,
+retained allocation history and unchanged whole Source writeback. Child locals
+need their actual incoming `LocalsOK`; neither locals context must be empty.
+Controls cover distinct caller/child aliases, a nested child with empty locals,
+returned hash, exact late error and a later revert retaining the source heap
+prefix. This is substitution transport, not general `callInternal`/`callAddr`
+coverage, automatic heap rollback, transaction adequacy or target execution.
