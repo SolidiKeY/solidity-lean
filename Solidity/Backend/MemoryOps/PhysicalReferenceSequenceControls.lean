@@ -1,5 +1,6 @@
 import Solidity.Backend.MemoryOps.PhysicalReferenceSequence
-import Solidity.Backend.MemoryOps.PhysicalPointerMaterialize
+import Solidity.Backend.MemoryOps.PhysicalPointerWorldUnwind
+import Solidity.Backend.MemoryOps.PhysicalWorldUnwindControls
 
 /-! Inhabited parent redirection/dynamic child-write controls. These word/byte
 programs do not assert a Source path compiler or external EVM execution. -/
@@ -519,4 +520,123 @@ theorem materialize_pointer_overlap :
 #guard_msgs (whitespace := lax) in #print axioms materialize_mixed_frames
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.materialize_pointer_overlap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms materialize_pointer_overlap
+private abbrev WE := Lowering.V08.SourceEnvironmentControls.E
+private def originalWorld := Lowering.V08.SourceEnvironmentControls.populated
+private def beforeWorld : Source.St WE := {originalWorld with ex := originalWorld.ex.run WorldControls.ops}
+private def dirtyOps : List (Source.Op WE.layout WE.lay WE.lay) :=
+  [.account Lowering.V08.SourceEnvironmentControls.sender (fun account => {account with balance := ⟨66,by decide⟩}),
+   .account Lowering.V08.SourceEnvironmentControls.self (fun account => {account with storage := account.storage.write Lowering.V08.SourceEnvironmentControls.saved (.bool true)}),
+   .transient Lowering.V08.SourceEnvironmentControls.self (fun store => store.write Lowering.V08.SourceEnvironmentControls.scratch (.bool true))]
+private def dirtyWorld : Source.St WE := {beforeWorld with ex := beforeWorld.ex.run dirtyOps}
+private def savedBytePrefix : Failure.Slice.Machine := ⟨[⟨77,by decide⟩,⟨88,by decide⟩],byteAfter⟩
+private def emittedBytes := Failure.Slice.putBytes byteAfter 544 (Source.errorData WorldControls.reason)
+
+/-- Complete existing Source observation projection across actual journal ops.
+The intermediate checkpoint materially differs from both initial and dirty. -/
+theorem checkpoint_world_vectors :
+    [WorldControls.view originalWorld,WorldControls.view beforeWorld,WorldControls.view dirtyWorld]=
+      [(93,7,some (.bool true),some (.bool true),3,1,
+        some ⟨.bytes .memory,.bytes [0,255]⟩,
+        [.call Lowering.V08.SourceEnvironmentControls.self ⟨7,by decide⟩ [0,255] false],
+        [(Lowering.V08.SourceEnvironmentControls.self,[171,0,255])],⟨[.bool],.cons (.bool true) .nil⟩),
+       (88,7,some (.bool false),some (.bool false),6,1,
+        some ⟨.bytes .memory,.bytes [0,255]⟩,
+        [.call Lowering.V08.SourceEnvironmentControls.self ⟨7,by decide⟩ [0,255] false],
+        [(Lowering.V08.SourceEnvironmentControls.self,[171,0,255])],⟨[.bool],.cons (.bool true) .nil⟩),
+       (66,7,some (.bool true),some (.bool true),9,1,
+        some ⟨.bytes .memory,.bytes [0,255]⟩,
+        [.call Lowering.V08.SourceEnvironmentControls.self ⟨7,by decide⟩ [0,255] false],
+        [(Lowering.V08.SourceEnvironmentControls.self,[171,0,255])],⟨[.bool],.cons (.bool true) .nil⟩)] := by
+  first | rfl | simp only [] | decide | omega
+
+/-- Actual byte prefix supplies the saved mixed frame. Actual Source remains
+at the dirty reason-error state; separate journal restore returns AFTER prefix.
+This pairs component executions, not a compiler/world-heap codec. -/
+theorem materialize_world_checkpoint (pipeline : Roadmap.Pipeline) (horizon : Nat) (suffix : Backend.Program) :
+    (Source.evalE (Lowering.V08.SourceEnvironmentControls.global pipeline) Lowering.V08.SourceEnvironmentControls.frame (horizon+5)
+      (Lowering.V08.SourceFailures.reason WorldControls.reason)).run (Lowering.V08.SourceEnvironmentControls.locals,dirtyWorld)=
+        (.error (.revert (Source.errorData WorldControls.reason)),(Lowering.V08.SourceEnvironmentControls.locals,dirtyWorld)) ∧
+    Failure.Slice.checkedRun (Environment.materialize 384 payloadBytes) ⟨savedBytePrefix.stack,bytes⟩=some (savedBytePrefix,none) ∧
+    (beforeWorld.ex.enter Lowering.V08.SourceEnvironmentControls.frame.this Lowering.V08.SourceEnvironmentControls.frame.sender
+      Lowering.V08.SourceEnvironmentControls.frame.value Lowering.V08.SourceEnvironmentControls.frame.cd
+      Lowering.V08.SourceEnvironmentControls.frame.static).rollback dirtyWorld.ex=beforeWorld.ex ∧
+    Failure.Slice.checkedRun (Failure.emit 544 (.reason WorldControls.reason)++suffix) savedBytePrefix=
+      some ({savedBytePrefix with memory := emittedBytes},some (.revert (Source.errorData WorldControls.reason))) ∧
+    ∃ output,Failure.Local.execute (Failure.Local.save (worldJournal beforeWorld.ex savedBytePrefix)) 544 (.reason WorldControls.reason)
+        (worldJournal dirtyWorld.ex savedBytePrefix)=some (output,.revert (Source.errorData WorldControls.reason)) ∧
+      ReferenceArrayAt hp root base machine output.machine.memory ∧
+      WordFrame machine output.machine.memory (fun c => (base right.id).val≤c ∧ c<(base right.id).val+1+hp.len right .dyn) ∧
+      output.machine=savedBytePrefix ∧ output.persistent=beforeWorld.ex.world ∧ output.transient=beforeWorld.ex.transient ∧
+      byteVector output.machine.memory=[1024,2,1,0,1,0,2,32,32,2,8,9].map Semantics.wordBytes ∧
+      Environment.readMemory output.machine.memory 384 3=payloadBytes ∧
+      Environment.readMemory emittedBytes 544 (Source.errorData WorldControls.reason).length=Source.errorData WorldControls.reason := by
+  first
+  | solve | simp only [] | omega
+  | have header : 384+payloadBytes.length≤32*(base root.id).val ∨ 32*(base root.id).val+32≤384 := by decide
+    have ptrs : ∀ c,ReferenceSlots hp root base c → 384+payloadBytes.length≤32*c ∨ 32*c+32≤384 := by
+      intro c hc
+      obtain ⟨i,hi,eq⟩ := hc
+      rw [parentLength] at hi
+      change c=16+1+i at eq
+      subst c
+      change 387≤32*(16+1+i) ∨ 32*(16+1+i)+32≤384
+      omega
+    have nums : ∀ c,(base right.id).val≤c ∧ c<(base right.id).val+1+hp.len right .dyn →
+        384+payloadBytes.length≤32*c ∨ 32*c+32≤384 := by
+      intro c hc
+      rw [rightLength] at hc
+      change 8≤c ∧ c<10 at hc
+      change 387≤32*c ∨ 32*c+32≤384
+      omega
+    obtain ⟨firstRun,rollback,emission,output,execute,parent,numeric,restored,persistent,transient⟩ :=
+      parentAt.materialize_world_unwind _ rightBytes originalWorld.ex WorldControls.ops dirtyOps
+        Lowering.V08.SourceEnvironmentControls.frame.this Lowering.V08.SourceEnvironmentControls.frame.sender
+        Lowering.V08.SourceEnvironmentControls.frame.value Lowering.V08.SourceEnvironmentControls.frame.cd
+        Lowering.V08.SourceEnvironmentControls.frame.static 7 [0,255] 384 savedBytePrefix.stack
+        (by decide) (by decide) header ptrs nums 544 WorldControls.reason suffix (by unfold Failure.Fits;decide)
+    refine ⟨Lowering.V08.SourceFailures.eval_reason _ _ horizon WorldControls.reason _ _,firstRun,rollback,emission,
+      output,execute,parent,numeric,restored,persistent,transient,?_,?_,?_⟩
+    · rw [restored]
+      exact byte_vectors_framed.trans initial_byte_vector
+    · rw [restored]
+      exact Environment.read_written payloadBytes 384 bytes
+    · rw [readMemory_eq_getBytes]
+      exact Failure.Slice.getBytes_putBytes byteAfter 544 (Source.errorData WorldControls.reason)
+
+/-- Saving the original instead would erase the real prefix. Both checkpoint
+executions are proved; their different returned worlds expose stale saving. -/
+theorem wrong_initial_checkpoint :
+    Failure.Local.execute (Failure.Local.save (worldJournal originalWorld.ex ⟨savedBytePrefix.stack,bytes⟩))
+      544 (.reason WorldControls.reason) (worldJournal dirtyWorld.ex savedBytePrefix)=
+      some (worldJournal originalWorld.ex ⟨savedBytePrefix.stack,bytes⟩,.revert (Source.errorData WorldControls.reason)) ∧
+    originalWorld.ex.world≠beforeWorld.ex.world ∧ bytes≠byteAfter := by
+  first
+  | solve | simp only [] | omega
+  | refine ⟨?_,?_,?_⟩
+    · rw [Lowering.V08.errorData_transport_total]
+      exact Failure.Local.execute_failure _ 544 (Semantics.encodeError WorldControls.reason) _
+        (by unfold Failure.Fits;decide) (by decide)
+    · intro same
+      have balances := congrArg (fun world => (world.accounts Lowering.V08.SourceEnvironmentControls.sender).balance.val) same
+      change 93=88 at balances
+      omega
+    · intro same
+      have observed := congrArg (fun memory => Environment.readMemory memory 384 3) same
+      have old : Environment.readMemory bytes 384 3=[0,0,0] := by
+        apply (readMemory_congr 384 3 bytes (fun _ => 0) ?_).trans
+        · rfl
+        · intro j hj
+          simp only [bytes,image,List.foldl_cons,List.foldl_nil]
+          repeat (rw [Environment.writeBytes_frame]; case outside => simp only [Environment.wordBytes_length];omega)
+      have new : Environment.readMemory byteAfter 384 3=payloadBytes := Environment.read_written payloadBytes 384 bytes
+      change Environment.readMemory bytes 384 3=Environment.readMemory byteAfter 384 3 at observed
+      rw [old,new] at observed
+      exact (by decide : ([0,0,0] : List UInt8)≠payloadBytes) observed
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.checkpoint_world_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms checkpoint_world_vectors
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.materialize_world_checkpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms materialize_world_checkpoint
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.wrong_initial_checkpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms wrong_initial_checkpoint
 end Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls

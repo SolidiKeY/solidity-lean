@@ -263,3 +263,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/PhysicalByteStackExact.lean` | Exact nonempty materializer transient/suffix guard and checked-run equations on reached byte memory, with universal caller-stack REVERT classification. |
 
 | `Solidity/Backend/MemoryOps/PhysicalPointerMaterialize.lean` | Actual byte materialization preserves independent scaled-pointer, typed-parent and numeric-word footprints under local interval separation. |
+
+| `Solidity/Backend/MemoryOps/PhysicalPointerWorldUnwind.lean` | Derives a mixed typed-pointer/numeric checkpoint after actual byte materialization, with reached Source world prefix, live ABI reason emission and separate explicit local restoration. |

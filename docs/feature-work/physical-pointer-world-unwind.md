@@ -1,0 +1,9 @@
+# Reached mixed-frame checkpoint and explicit unwind
+
+PhysicalPointerWorldUnwind.materialize_checked_complete derives actual checked byte materialization without a revert suffix. ReferenceArrayAt.materialize_world_unwind starts with independent typed reference-array and numeric word frames and local interval separation. It derives the saved mixed representation after that successful materializer, then composes actual reason emission and the existing explicit local restore. The saved Source checkpoint is state.run prefixOps; the dirty state is its actual run dirtyOps. No desired reached frame or successful suffix is supplied as a premise.
+
+The populated client retains the repeated-child parent, both children, neighbour, free pointer and caller stack. Complete twelve-word byte vectors and the Source world observation table distinguish initial, reached checkpoint and dirty states. Both Source pipelines retain the dirty state when evaluating the reason error. The emitted ABI bytes are observed before the separate local restore. Saving the original checkpoint instead demonstrably loses the successful prefix in both world balance and byte payload.
+
+The Source pipeline error, the byte-slice API exposing a revert machine, and the explicit local restoration are separate executions. These laws supply no automatic outer transaction rollback, Source heap/world codec, native compiler execution, arbitrary graph liveness or concrete whole ByteWorld producer.
+
+Focused kernel checks and all five exact standard-only axiom guards pass. The existing missing dependency closure compiled in 147.317 seconds (115 jobs); that is not new strict/TestSuite cold timing coverage. Earlier failed attempts remain in the evidence directory. Full checkpoint gates, committed-artifact reviews and sealed delivery remain pending.

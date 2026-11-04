@@ -316,6 +316,7 @@ import Solidity.Backend.MemoryOps.PhysicalMemoryControls
 import Solidity.Backend.MemoryOps.PhysicalPointerFrame
 import Solidity.Backend.MemoryOps.PhysicalPointerImage
 import Solidity.Backend.MemoryOps.PhysicalPointerMaterialize
+import Solidity.Backend.MemoryOps.PhysicalPointerWorldUnwind
 import Solidity.Backend.MemoryOps.PhysicalReferenceArray
 import Solidity.Backend.MemoryOps.PhysicalReferenceChild
 import Solidity.Backend.MemoryOps.PhysicalReferenceSequence
