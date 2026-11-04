@@ -645,3 +645,7 @@ Independent read-only finder and skeptic PASS with no findings, without Lean/ser
 Scope remains primitive-array copying at an already resolved slot under initial storage representation, complete allocator and fitting-room inputs. Shadow-aware source-path/declaration/rebinding wrappers, whole Construction selection, general nested/recursive/reference graph code, full default/allocation failure implementation, Source.EM/H25 authority/physical/gas adequacy and five-location closure remain open. Full G33/G35 and final lane-end run-lean remain unfinished. VY5 H16/S03-PANIC41, V11 G34/G35.02/.03 and V10 G27.05 dependencies, public fields/premises, Source semantics, exclusions, budgets and trust are unchanged.
 
 Final documentation reviews corrected the three new module-map keys to the existing Backend/MemoryCopies convention and separated earlier lane-owned primitive_array_source/runtime_storage_array_success from reused master lemmas in the handoff. No proof changed.
+
+## Live primitive-array path bindings
+
+RuntimeLiveArrayInterface states additive body/declaration/rebinding contracts for the actual typed primitive array returned by storage lookup. It retains existing runtimePathArray code and full source-copy, allocator, root, local/stack/frame, old-object and freshness obligations. Live length comes from the value, with checked room explicit. The signature-only checkpoint precedes proofs and inhabited controls; existing interfaces and premises remain unchanged.
