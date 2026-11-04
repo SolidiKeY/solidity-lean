@@ -640,3 +640,7 @@ Source flag authenticity, selector order, public selection/execution and the
 separate exact Source rejection endpoint. The skeptic's wording correction
 clarifies zero-value acceptance versus nonzero rejection; no code findings.
 Neither reviewer used a Lean server or build.
+
+`ShortRoutesInterface.lean` specifies a compiled length-local branch before
+ordinary selector routing, with explicit length and selector representation.
+The short continuation label does not execute receive/fallback bodies.
