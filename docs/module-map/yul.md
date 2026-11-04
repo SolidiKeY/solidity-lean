@@ -147,3 +147,5 @@
 | `Yul/Adapters/P6MultiRootByte{,Controls}` | Derives finite-frame Fits for multi-root source byte plans and constructs exact same-map P6 frames with complete source writeback, original-H safety and metadata preservation. |
 | `Yul/Views/MultiRootByteAppend` | Exact chronological concatenation of actual multi-root coupled plans, retaining stopped prefixes and skipped suffixes. |
 | `Yul/Adapters/P6MultiRootByteRefresh{,Controls}` | Derives next-plan source/frame preparation from actual first output and connects successful sequential physical plans to one concatenated execution, with stale-state and failure controls. |
+| `Yul/Adapters/RawPhysicalInventory{,Controls}` | Complete published raw-local cell enumeration in a constructed separated finite frame, preserving all raw bits, clean/world fields and residual bytes while distinguishing absent overlays. |
+| `Yul/Adapters/RawPhysicalProducer` | Consumer of the actual bounded P16 Adapter.correct field, transporting its exact reached Source representation through complete raw-local physical capture under the unchanged coherent-input premise. |

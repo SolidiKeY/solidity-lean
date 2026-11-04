@@ -1093,3 +1093,26 @@ is not permission to execute its suffix. Controls prove this composition for
 both pipelines and arbitrary original H, and distinguish stale Source reuse
 from the reached state. General call rollback, opcode execution and allocation
 refinement remain separate obligations.
+
+
+`RawPhysicalInventory` constructs a complete physical snapshot from VY1's
+existing `allWordCells` enumeration. Coordinates `base + 32 * cell.slot` use the
+published cell/slot bijection; separation and full coverage are derived,
+including both external-function fields. This is a constructed layout, not
+compiler provenance. All 256 raw bits survive encoding and capture; the clean
+Source locals/world remain unchanged. Capture records `Some` overlays, so view
+roundtrip must not be confused with whole RawFrame administrative identity.
+Every complementary byte is retained, including for an empty inventory.
+Finite-frame Fits follows from initial frame room; Word-address nonwrapping
+and emitted memory operations remain separate obligations.
+
+`RawPhysicalProducer.transport` consumes the actual published P16
+`RawSourceAdapter.Adapter.correct` field at its exact statement/context/control
+indices. It preserves the reached Source representation through the physical
+snapshot at every fuel, keeping the producer's coherent-input premise. It
+neither invents an arbitrary producer nor establishes general dirty-local
+Solidity readback. Controls cover four raw cells, dirty bool/u8 words, wide
+external-function fields, nonaligned coordinates, padding, empty inventory and
+absent overlays. Explicit existing return boundaries perform the bool/u8
+readback. A real skip producer witnesses success/timeout transport; dirty
+physical states remain incoherent, rather than being silently cleaned.

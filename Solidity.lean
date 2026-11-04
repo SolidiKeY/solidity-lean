@@ -2473,6 +2473,9 @@ import Solidity.Yul.Adapters.PhysicalSnapshotSlice
 import Solidity.Yul.Adapters.PhysicalSnapshotSliceControls
 import Solidity.Yul.Adapters.RawPhysical
 import Solidity.Yul.Adapters.RawPhysicalControls
+import Solidity.Yul.Adapters.RawPhysicalInventory
+import Solidity.Yul.Adapters.RawPhysicalInventoryControls
+import Solidity.Yul.Adapters.RawPhysicalProducer
 import Solidity.Yul.Adapters.SelectedPhysicalStore
 import Solidity.Yul.Adapters.SelectedPhysicalStoreControls
 import Solidity.Yul.Adapters.SourceSliceFrame
