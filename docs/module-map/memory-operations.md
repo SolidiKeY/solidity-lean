@@ -221,3 +221,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TraversalFootprint.lean` | Live intrinsic object measures and exact copy growth, parent-last, positive footprint and pair root-boundary proofs. |
 | `Backend/MemoryCopies/TraversalFootprintControls.lean` | Nested duplicate subtree identities/contents, old-object retention, shadows, empty and64-branch footprint controls. |
 | `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Production-selected runtime reference-array defaults over arbitrary supported roots and fixed wrappers, with whole-parent feasibility. |
+| `Backend/MemoryCopies/SelectedArrayDefaults.lean` | Lifts existing production selection through fixed wrappers and reuses runtime reference-array/scoped declaration correctness for supported roots. |
+| `Backend/MemoryCopies/SelectedArrayDefaultControls.lean` | Emitted arrays of structs/fixed structs at0/2/64, whole-parent feasibility, nested default identities and actual scoped declaration controls. |
