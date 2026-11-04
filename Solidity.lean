@@ -881,6 +881,8 @@ import Solidity.Backend.StorageOps.TargetSnapshotRepeatControls
 import Solidity.Backend.StorageOps.Touched
 import Solidity.Backend.StorageOps.Traversal
 import Solidity.Backend.StorageOps.TwoClearRepresentation
+import Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler
+import Solidity.Backend.StructuredFlow.AssignmentBlocksCompilerControls
 import Solidity.Backend.StructuredFlow.BranchControls
 import Solidity.Backend.StructuredFlow.BranchSelector
 import Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler

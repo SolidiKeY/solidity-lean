@@ -495,3 +495,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/G19/AssignmentBlocks.lean` | Arbitrary finite ordered Boolean-copy blocks with actual Source/typed runs and full V07 context-map transport. |
 | `Lowering/G19/AssignmentBlocksControls.lean` | Heterogeneous unsigned/Boolean frame, reached-read ordering, reversal, repetition and same-slot controls. |
+
+| `Backend/StructuredFlow/AssignmentBlocksCompiler.lean` | Actual ordered Boolean-block compiler with mapped entry, full fragment/capacity premises; extraction provenance remains NONPASS. |
+| `Backend/StructuredFlow/AssignmentBlocksCompilerControls.lean` | Full native cell/stack order, repetition and same-slot controls with factored exact execution. |
