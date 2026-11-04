@@ -130,3 +130,6 @@
 | `Backend/AbiEntry/HeadCheckInterface.lean` | Emitted ordinary short-head predicate contracts with explicit initial size-word representation and no success-admission claim. |
 | `Backend/AbiEntry/HeadCheck.lean` | Exact unbounded head-threshold emission, initial semantic rejection and non-vacuous Selection V2 capacity certificate. |
 | `Backend/AbiEntry/HeadCheckControls.lean` | Selector/head boundaries, static/dynamic and huge metadata, semantic fuel ordering, passed-head rejection and stack-height controls. |
+| `Backend/AbiEntry/OffsetChecksInterface.lean` | Signed modular tail and region emitted predicate contracts over four runtime words. |
+| `Backend/AbiEntry/OffsetChecks.lean` | Exact signed/modular arithmetic emission with preserved numeric suffix and non-vacuous V2 capacity frames. |
+| `Backend/AbiEntry/OffsetChecksControls.lean` | Boundary, wrapping, signed-offset, actual semantic-reference acceptance and stack-height controls. |

@@ -330,3 +330,21 @@ four runtime words with explicit stack order. Signed comparisons and modular
 arithmetic are retained; neither predicate alone is whole-reference or entry
 admission. Native argument loading, metadata-to-word correspondence and the
 separate length/fuel/entry checks remain open.
+
+`OffsetChecks.lean` implements both predicates through the existing Scalar
+instruction semantics, with zero-based SWAP indices. General proofs cover every
+four-word operand tuple and preserve the entire saved numeric suffix. Selection
+V2 frames have explicit input room and capacity proofs; their one-word peak is
+conservative for the region sequence. Signed comparisons, subtraction and
+multiplication wrap exactly as in the semantic predicates. Controls retain
+negative relative offsets, wrapped products, zero extents and boundary refusals.
+A concrete `tailRef` control accepts a wrapped negative relative offset from raw
+bytes; it uses decidable evaluation without any axioms. This guards against
+silently replacing the semantic predicate with a stronger unsigned span check.
+The other controls and general proofs use only standard Lean axioms. Runtime
+operand loading, metadata correspondence, length64/fuel/other guards, fetched
+native branching and whole-entry/Source coverage remain open.
+Independent read-only finder and skeptic reviews passed with no findings. Both
+checked operand order against actual Scalar semantics, exact signed/modular
+agreement, suffix preservation, concrete capacity and the distinction between
+semantic reference acceptance and full entry/native execution.
