@@ -101,3 +101,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ConstantDepth/Lookup.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Admission.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Linearization.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/ElsePosition.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/NearestElse.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
