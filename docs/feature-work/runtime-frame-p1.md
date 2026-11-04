@@ -1387,3 +1387,29 @@ premise of the failure theorem.
 This proves a represented callee-image endpoint, not public recursive call
 selection or target argument/export compilation. Error outputs provide no
 failed state, frontier, rollback, payload or absence-of-effects claim.
+
+
+### Checked continuation after mutating recursive return
+
+`MutatingContinuation.after_return` attaches a checked `Calls.Program` suffix
+to the actual `MutatingCompletion.endpoint`. It derives the reached suffix
+allocation input from initial summed capacity, the source-reached suffix cost
+bound and the prefix's genuine allocator growth. Both success and bare revert
+compose through the existing intrinsic block/program and target append laws.
+The real suffix fragment, need, cost and code remain explicit.
+
+`MutatingContinuation.Client` discharges these premises after the populated
+two-turn recursive return. A publicly selected suffix writes 37 to element zero
+of the restored old parameter alias, then allocates and drops a private boolean
+array of length three. Its native output and exact target endpoint have growth
+12, cursor 34, stack `[77]`, unchanged scalar two, and distinct old/private
+identities. The complete ordered 29-cell snapshot retains earlier private and
+saved-parent cells, includes the new object, and keeps sentinel 99. Alias,
+scalar, root, omitted-allocation and wrong-cost controls project that endpoint.
+
+The same target image matches every sufficient native quotation; shallow
+quotations exhaust and are explicitly rejected by `GrowingResult`. This is a
+specialized no-result recursive-image consumer. The old alias is retained by
+native return, not produced by `CallRet.mem`. General recursive compiler
+selection, approved-profile provenance, target caller argument/export transport
+and byte/world correspondence remain open. Earlier observations are unchanged.
