@@ -2,71 +2,85 @@
   {
     "id": "EU-01",
     "obligation": "exhaustive constructor and boundary inventory",
-    "status": "inventory-only"
+    "status": "proved-inventory",
+    "evidence": "All 29 constructors, token boundaries, root conditions and layout witnesses inventoried."
   },
   {
     "id": "EU-02",
     "obligation": "layout erasure and fragments reconstruction",
-    "status": "open"
+    "status": "partial",
+    "evidence": "Arbitrary string fragment payload reconstruction and all-family literal uniqueness proved; type attribute reconstruction remains open."
   },
   {
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
-    "status": "open"
+    "status": "partial",
+    "evidence": "Arbitrary token delimiter/context/splitting lemmas proved; not yet connected to every expression yield."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
-    "status": "open"
+    "status": "open",
+    "evidence": "Token-machine skip hypotheses are not derived from certified expressions. No root reconstruction theorem yet."
   },
   {
     "id": "EU-05",
     "obligation": "all operator associativity and precedence boundaries",
-    "status": "open"
+    "status": "partial",
+    "evidence": "All left/right associativity refusal classes proved for arbitrary subtrees and operator values; full precedence uniqueness remains open. External fixtures use representative binary operators."
   },
   {
     "id": "EU-06",
     "obligation": "primary/type/tuple/list/option/call argument uniqueness",
-    "status": "open"
+    "status": "partial",
+    "evidence": "Fixed primary yields and full literal-family uniqueness proved; recursive types, lists, options, grouping holes, calls and postfix reconstruction remain open."
   },
   {
     "id": "EU-07",
     "obligation": "certified expression yield uniqueness",
-    "status": "open"
+    "status": "open",
+    "evidence": "Original proposition is defined, not inhabited."
   },
   {
     "id": "EU-08",
     "obligation": "parseCat accepted-tree corollary",
-    "status": "open"
+    "status": "open",
+    "evidence": "Accepted-tree corollary awaits public uniqueness."
   },
   {
     "id": "EU-09",
     "obligation": "documented prefix/postfix/conditional assignment refusals reproduced",
-    "status": "pending"
+    "status": "pass",
+    "evidence": "Frozen four refusal examples, four additional postfix bases and grouped accepted variants rerun with kernel proofs."
   },
   {
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
-    "status": "open"
+    "status": "partial",
+    "evidence": "Unbounded negative-prefix, grouping precedence, mixed nesting and arbitrary-byte fragment controls; complete boundary families remain open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
-    "status": "pending"
+    "status": "pass",
+    "evidence": "Eight modules and 138 source declarations inventoried with exact kernel-reported standard-only axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
-    "status": "pending"
+    "status": "partial",
+    "evidence": "H26/runtime/KeySort/current proof/fixture gates pass. Global run-lean/orphans fail at eight frozen root registrations; central axiom inventory reports zero errors and 138 unrecorded pins. Full global confirmation remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
-    "status": "pending"
+    "status": "partial",
+    "evidence": "Final separate finder/skeptic accepted corrected partial proof checkpoint; F2/F3/F4 and S2/S3 resolved. Future proof checkpoints still require reviews."
   },
   {
     "id": "EU-14",
     "obligation": "sealed full proof handoff",
-    "status": "pending"
+    "status": "open",
+    "evidence": "Partial proof checkpoint packet only; full proof handoff remains open."
   }
 ]

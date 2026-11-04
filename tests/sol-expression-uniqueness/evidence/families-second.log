@@ -1,0 +1,2 @@
+diag: 0 errors
+{"command": ["bash", "-c", "set -eu; scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExpressionUniqueness/Families.lean; scripts/coord-tools/lean-mcp stop"], "exit": 0, "wall_seconds": 184.6331765739999, "child_peak_rss_kib": 12672, "sampled_cgroup_peak_bytes": 1237618688, "memory_max": 12884901888, "memory_swap_max": 0, "lean_num_threads": 1}

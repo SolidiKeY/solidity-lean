@@ -1,0 +1,3276 @@
+{
+  "pin": {
+    "version": "0.8.38+commit.1835d247.Emscripten.clang",
+    "file": "soljson-v0.8.38+commit.1835d247.js",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "settings": {
+    "stopAfter": "parsing",
+    "outputSelection": {
+      "*": {
+        "": [
+          "ast"
+        ]
+      }
+    }
+  },
+  "boundary": "External solc parsing observations only; no kernel proof or semantic compilation claim.",
+  "observations": [
+    {
+      "id": "association-||",
+      "expression": "a || b || c",
+      "expected": [
+        "||",
+        [
+          "||",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "||",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a || b || c; } }",
+      "sourceSha256": "fe088030b4f772d1e1a0030bc7639c0060a0bb5b462260c9fb97e8a3ee009fe8",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-&&-right",
+      "expression": "a || b && c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "&&",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "&&",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b && c; } }",
+      "sourceSha256": "70ab15e6b6ce5984b20401160a43b94aafb6074e8b54480fab41ccf22497f101",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-&&-left",
+      "expression": "a && b || c",
+      "expected": [
+        "||",
+        [
+          "&&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "&&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a && b || c; } }",
+      "sourceSha256": "5956d72a5838fa407edd4c1bb3b4d30c22313ca94ab2c038cf4a44c98faccc78",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-==-right",
+      "expression": "a || b == c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "==",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "==",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b == c; } }",
+      "sourceSha256": "a0234bfaa341d9d7eb8a6487d518b29512b1792ba7f7165577bf560b92a73ca9",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-==-left",
+      "expression": "a == b || c",
+      "expected": [
+        "||",
+        [
+          "==",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "==",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a == b || c; } }",
+      "sourceSha256": "ed4036641c58cd3b6e6642f3b86b0008444123a767378ae9951799901acfcdf5",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-<-right",
+      "expression": "a || b < c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b < c; } }",
+      "sourceSha256": "4518b3b77ea19dce843f4d5d8cc886c615e61ac6fcc40b36273d30cef98b5ed4",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-<-left",
+      "expression": "a < b || c",
+      "expected": [
+        "||",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a < b || c; } }",
+      "sourceSha256": "3c39b5ad165cc75bfd2949cad0350e145b1473a63ffd9a099d62e0c4cce1d26f",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-|-right",
+      "expression": "a || b | c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b | c; } }",
+      "sourceSha256": "f6a4b153e73853b166ce9bd4fa6832b5289af6f9603c8238d37bb7a9d1ca57e0",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-|-left",
+      "expression": "a | b || c",
+      "expected": [
+        "||",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a | b || c; } }",
+      "sourceSha256": "ceca63b4aca409bd50258322344237101e6fdde375a3adc40add1e908fb4bbed",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-^-right",
+      "expression": "a || b ^ c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b ^ c; } }",
+      "sourceSha256": "556d6a3e8ee5be7c34157de97951c417543a94cfc5a1485563f720917c6e79b0",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-^-left",
+      "expression": "a ^ b || c",
+      "expected": [
+        "||",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ^ b || c; } }",
+      "sourceSha256": "cdcd920566af7989e14abcf0b82e7c017041e77ab56c0230bb58630c72716503",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-&-right",
+      "expression": "a || b & c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b & c; } }",
+      "sourceSha256": "8c35da5a2be5ca98dc82a38fb04f75da578b753cfb06fd08d0aad4bb38c72c91",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-&-left",
+      "expression": "a & b || c",
+      "expected": [
+        "||",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a & b || c; } }",
+      "sourceSha256": "a923568fefeb19bfce19ba7f7e75b05bcc479c17610139dbcd567b5b6d921fa4",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-<<-right",
+      "expression": "a || b << c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b << c; } }",
+      "sourceSha256": "ed85397954cc577cbc1a580c6d4347fcda30933eed078f9f0a1f06ceb33c3dca",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-<<-left",
+      "expression": "a << b || c",
+      "expected": [
+        "||",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b || c; } }",
+      "sourceSha256": "4ca282a868bdaa28e4caea7a455e8bd786b72df81364c36a8eed01322aa728ee",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-+-right",
+      "expression": "a || b + c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b + c; } }",
+      "sourceSha256": "2471018681e4fca33a21e32d0e87cd739ccbd987a1c2ce114d6c5eee5b8f263a",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-+-left",
+      "expression": "a + b || c",
+      "expected": [
+        "||",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b || c; } }",
+      "sourceSha256": "8048dfbd9d1ed1f3801dd9f40b1647c23603866e6f4d1bc0430a3aae900319ff",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-*-right",
+      "expression": "a || b * c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b * c; } }",
+      "sourceSha256": "c54b8d9ef9b05bdf7cf6b39bb0d82261708f54650515bdd6502d1ff8331f1a48",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-*-left",
+      "expression": "a * b || c",
+      "expected": [
+        "||",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b || c; } }",
+      "sourceSha256": "1adbfb04747c3d5dd44c57aacf9a0caa4dd6765215000bebe34a3b3ffa796c35",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-**-right",
+      "expression": "a || b ** c",
+      "expected": [
+        "||",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "||",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a || b ** c; } }",
+      "sourceSha256": "f138231d7c76cacef2e5fd26b8af03d89e4a16da8cd7e747ebec38efef72a9a3",
+      "errors": []
+    },
+    {
+      "id": "precedence-||-**-left",
+      "expression": "a ** b || c",
+      "expected": [
+        "||",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "||",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b || c; } }",
+      "sourceSha256": "581ebf1c77d22d1d4145dfcc51c1367b66ea5ccbbc363091691780686fe1c48c",
+      "errors": []
+    },
+    {
+      "id": "association-&&",
+      "expression": "a && b && c",
+      "expected": [
+        "&&",
+        [
+          "&&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "&&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a && b && c; } }",
+      "sourceSha256": "d63f9420be522f1692d8b9af1cde1b5a89443992a7bc1f93a4c034321f7ed2c7",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-==-right",
+      "expression": "a && b == c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "==",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "==",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b == c; } }",
+      "sourceSha256": "44720249f4c236b2d14feaa80dab49b3b0a8e14be3388bcfd59b1e7748d8114f",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-==-left",
+      "expression": "a == b && c",
+      "expected": [
+        "&&",
+        [
+          "==",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "==",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a == b && c; } }",
+      "sourceSha256": "219af5193dd9936ae6620d99e30360df101a24502d036333257530b1fec712e1",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-<-right",
+      "expression": "a && b < c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b < c; } }",
+      "sourceSha256": "8bfe1c297153c8b4f826e2de3821b2acb916a943372ea758943a8a36bbf025cf",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-<-left",
+      "expression": "a < b && c",
+      "expected": [
+        "&&",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a < b && c; } }",
+      "sourceSha256": "ddc5aafbcf8166d8ac578aeeb33eedc3079a0e8be74f99c7184f840f2f51ea52",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-|-right",
+      "expression": "a && b | c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b | c; } }",
+      "sourceSha256": "d5a9a21993ae22497b473be066e57c1b395a3347037def60925c174376dd9622",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-|-left",
+      "expression": "a | b && c",
+      "expected": [
+        "&&",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a | b && c; } }",
+      "sourceSha256": "ab7a1083f16c32188ec857fa8bb3aff534554461ef068f295b538d0f701fb56c",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-^-right",
+      "expression": "a && b ^ c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b ^ c; } }",
+      "sourceSha256": "45d8c5a73fe75ff7a75c304992434b5e3b6b47006bb13e6d6792d1a432358838",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-^-left",
+      "expression": "a ^ b && c",
+      "expected": [
+        "&&",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ^ b && c; } }",
+      "sourceSha256": "48c53a2392de9a0bd59cf0bb8649ca9689a1102321d64a2f5134c4f279ed950b",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-&-right",
+      "expression": "a && b & c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b & c; } }",
+      "sourceSha256": "df440ed72b4698f5a555d5a6091da18625011b93fafabc47743265648818c23e",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-&-left",
+      "expression": "a & b && c",
+      "expected": [
+        "&&",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a & b && c; } }",
+      "sourceSha256": "8285f558b05aab6050c35505a5b01f0a5b1e055ad0509f8a389e0705bbcaa11f",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-<<-right",
+      "expression": "a && b << c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b << c; } }",
+      "sourceSha256": "425a4dff9377e1ff1fbd2c3348ae838a59c0b389acf264de7c104e55e07bd843",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-<<-left",
+      "expression": "a << b && c",
+      "expected": [
+        "&&",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b && c; } }",
+      "sourceSha256": "338bd7614a576d5f63269e8da30a1a15bcb02963e06c83f96ce15395244fcb96",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-+-right",
+      "expression": "a && b + c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b + c; } }",
+      "sourceSha256": "630d532482f9e6af984dc8f0e7ff24246d8116b43333118b19486f96e191f3eb",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-+-left",
+      "expression": "a + b && c",
+      "expected": [
+        "&&",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b && c; } }",
+      "sourceSha256": "1336614b262aef150e43974ee876b139903411cc28c0a916f0e4e50ad9f7538a",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-*-right",
+      "expression": "a && b * c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b * c; } }",
+      "sourceSha256": "443c583099215f227cd937486e66033c9a898a500e39b9e91558be867ef3ba1c",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-*-left",
+      "expression": "a * b && c",
+      "expected": [
+        "&&",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b && c; } }",
+      "sourceSha256": "60902fbd04f9534876f069b1f851ae13f254f5d0701fbb014009d76832580e28",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-**-right",
+      "expression": "a && b ** c",
+      "expected": [
+        "&&",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&&",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a && b ** c; } }",
+      "sourceSha256": "6e5056edc01245bb6bdf5a41d42d50701620bd9950c6fc42809894e4657a831f",
+      "errors": []
+    },
+    {
+      "id": "precedence-&&-**-left",
+      "expression": "a ** b && c",
+      "expected": [
+        "&&",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&&",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b && c; } }",
+      "sourceSha256": "b2328e88cce6d7c8edd5ffe9f944946b561b2b94a335503213077f89072e14e5",
+      "errors": []
+    },
+    {
+      "id": "association-==",
+      "expression": "a == b == c",
+      "expected": [
+        "==",
+        [
+          "==",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "==",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a == b == c; } }",
+      "sourceSha256": "252cacb416cf5b2c177e9a7cb8cd70e1840944e5c1a3c0085ef0c35dcac9701a",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-<-right",
+      "expression": "a == b < c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b < c; } }",
+      "sourceSha256": "94aa26f349270686055444a94ee4718c62b96e1a0cbfc25e7e52b5a4fad37b63",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-<-left",
+      "expression": "a < b == c",
+      "expected": [
+        "==",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a < b == c; } }",
+      "sourceSha256": "54dda70eb9450a06ddad315bdce566e4c79300d1e5dc48f7b64729a0226cd173",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-|-right",
+      "expression": "a == b | c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b | c; } }",
+      "sourceSha256": "f7d179dc76047e0efedb9faad2e1050f60e195e2d9bcd65799471c3c3d6f83c1",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-|-left",
+      "expression": "a | b == c",
+      "expected": [
+        "==",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a | b == c; } }",
+      "sourceSha256": "882ee93bf3bce17d53e3dcc8c91aa2db556efd9f7c0848eaeee9ea90ca9af1dd",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-^-right",
+      "expression": "a == b ^ c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b ^ c; } }",
+      "sourceSha256": "38534b97a5d0b2a2e531dfe4fd55522cfb5ea56620a06b1fa2fc0f5eadddb0dc",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-^-left",
+      "expression": "a ^ b == c",
+      "expected": [
+        "==",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ^ b == c; } }",
+      "sourceSha256": "cfa93c21c6126eadb5afb7f8055251e9324da5fbde70e5a522d253107944e6fe",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-&-right",
+      "expression": "a == b & c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b & c; } }",
+      "sourceSha256": "1fc207100aeb7ca643441ac45afd3b6b7c893cf472789963578751f0a797d732",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-&-left",
+      "expression": "a & b == c",
+      "expected": [
+        "==",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a & b == c; } }",
+      "sourceSha256": "2fa83dea67aef969609d574a6ae78fde7f3355b13e93eb5f0dec955ba17425b4",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-<<-right",
+      "expression": "a == b << c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b << c; } }",
+      "sourceSha256": "ec0ed6bb3dde2039271664c59073c0f764ac513dc58a2718f46713345e440841",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-<<-left",
+      "expression": "a << b == c",
+      "expected": [
+        "==",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b == c; } }",
+      "sourceSha256": "4a9fac3497fb29535a1f27952d7b5a47c3ef2340b2309d89df8d695a910c7c5a",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-+-right",
+      "expression": "a == b + c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b + c; } }",
+      "sourceSha256": "f017610a3dfa31d64c58ed492b0aa43a2269a181d609515951db048fefffbe59",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-+-left",
+      "expression": "a + b == c",
+      "expected": [
+        "==",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b == c; } }",
+      "sourceSha256": "c6a20723ae46a0dcbb03ea3e17c82d9f4a84420cc3da03f2da32435e0feb4b92",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-*-right",
+      "expression": "a == b * c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b * c; } }",
+      "sourceSha256": "166b887842de346ed6ae704d85c36149bbf2a6b080f53ee8018011bc1668f134",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-*-left",
+      "expression": "a * b == c",
+      "expected": [
+        "==",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b == c; } }",
+      "sourceSha256": "32682430681b4b611d1610af39fe8815d941d75329fc8d91ef69fdcc36e02728",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-**-right",
+      "expression": "a == b ** c",
+      "expected": [
+        "==",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "==",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a == b ** c; } }",
+      "sourceSha256": "23a05e5c42939a99b98aac8d7600f727dc011465531f85db8a278b7a46b18dfc",
+      "errors": []
+    },
+    {
+      "id": "precedence-==-**-left",
+      "expression": "a ** b == c",
+      "expected": [
+        "==",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "==",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b == c; } }",
+      "sourceSha256": "3e39dca6b03c90eadf0336767df0cd31977a0b7faea337c24360509f5053469e",
+      "errors": []
+    },
+    {
+      "id": "association-<",
+      "expression": "a < b < c",
+      "expected": [
+        "<",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a < b < c; } }",
+      "sourceSha256": "cbb3925a6553a8d60b9e55a48e9614f40111897f6131e7978d676097e92acdfd",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-|-right",
+      "expression": "a < b | c",
+      "expected": [
+        "<",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<",
+        "a",
+        [
+          "|",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a < b | c; } }",
+      "sourceSha256": "7590aae567a8569ed34e18320908264141ccae175fe6f0940db0a29579fbc924",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-|-left",
+      "expression": "a | b < c",
+      "expected": [
+        "<",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a | b < c; } }",
+      "sourceSha256": "f91cbc5a93a12b58fcff7b8403a35af90b5d7516dd92195392b38af89fb00f22",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-^-right",
+      "expression": "a < b ^ c",
+      "expected": [
+        "<",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a < b ^ c; } }",
+      "sourceSha256": "7b557690d5818bdd2fa2da0eb966452832e1e38372b80bf065ddaeed96273656",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-^-left",
+      "expression": "a ^ b < c",
+      "expected": [
+        "<",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ^ b < c; } }",
+      "sourceSha256": "48cd9dcbb0e6227ddeecba2e54cc0db54e7eee32d1143bf7f86e1468688fc84a",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-&-right",
+      "expression": "a < b & c",
+      "expected": [
+        "<",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a < b & c; } }",
+      "sourceSha256": "1d8739e8f02645c21f6c35d70bf375f006b7b1e9ed65eb73e621eaf131f935a2",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-&-left",
+      "expression": "a & b < c",
+      "expected": [
+        "<",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a & b < c; } }",
+      "sourceSha256": "00090ea0b1b1d61d7981e508af33f98a5dc274265d7c77e3ed7d073b56c756f7",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-<<-right",
+      "expression": "a < b << c",
+      "expected": [
+        "<",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a < b << c; } }",
+      "sourceSha256": "a6fdae8013b851a189211aa543924cfae0272bafd75cae56007bc6a075337ca8",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-<<-left",
+      "expression": "a << b < c",
+      "expected": [
+        "<",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b < c; } }",
+      "sourceSha256": "39494cb1df0f06d8d98f3fd329413a6d2f759f4c8bbaf777f8de7076b983c193",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-+-right",
+      "expression": "a < b + c",
+      "expected": [
+        "<",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a < b + c; } }",
+      "sourceSha256": "d9a129348b9f6dcbb6fb70682191211eb0184d424f4e50598f9db3fab155319e",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-+-left",
+      "expression": "a + b < c",
+      "expected": [
+        "<",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b < c; } }",
+      "sourceSha256": "aee612d9a8f51c8d81cec3507535ca4fd3352af31ed027abe18e481eb65941a7",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-*-right",
+      "expression": "a < b * c",
+      "expected": [
+        "<",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a < b * c; } }",
+      "sourceSha256": "4cb093b11f3434d69a4f0b06b0914d4b167558aff65a5b44b3fbe6b6f918ba97",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-*-left",
+      "expression": "a * b < c",
+      "expected": [
+        "<",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b < c; } }",
+      "sourceSha256": "aae5e91f2a78b55657f24380472b1b903c2c60119456acbe532374d312642f58",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-**-right",
+      "expression": "a < b ** c",
+      "expected": [
+        "<",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a < b ** c; } }",
+      "sourceSha256": "97392d0b40f8a47996b827866bd0386c125553f9e947efc0287ff1f53d452dcc",
+      "errors": []
+    },
+    {
+      "id": "precedence-<-**-left",
+      "expression": "a ** b < c",
+      "expected": [
+        "<",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b < c; } }",
+      "sourceSha256": "77800ded2817ff7d3b03c37543d28dce5fa97edda11ca379864eaf30c235b65c",
+      "errors": []
+    },
+    {
+      "id": "association-|",
+      "expression": "a | b | c",
+      "expected": [
+        "|",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "|",
+        [
+          "|",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a | b | c; } }",
+      "sourceSha256": "02b1d9df56ec8d54220957c6fe7b803cb2f488f7b40bf7134a6eeaf341b3919f",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-^-right",
+      "expression": "a | b ^ c",
+      "expected": [
+        "|",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "|",
+        "a",
+        [
+          "^",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a | b ^ c; } }",
+      "sourceSha256": "37e195b8f805f8164df9b53d48fbafa0f37311c0961801122854708878b33914",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-^-left",
+      "expression": "a ^ b | c",
+      "expected": [
+        "|",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "|",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ^ b | c; } }",
+      "sourceSha256": "6fad22f938a0aed5b28a0b25fd546a16f276d9e5c4a6a28b71c19aae32fbabc0",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-&-right",
+      "expression": "a | b & c",
+      "expected": [
+        "|",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "|",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a | b & c; } }",
+      "sourceSha256": "a4b44d6b9c9cbf661feee567e405e8b11034e1feb0e7f7b0823e6530fe08e12d",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-&-left",
+      "expression": "a & b | c",
+      "expected": [
+        "|",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "|",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a & b | c; } }",
+      "sourceSha256": "0d616eec2287216d402b336596faedd8714cf6622da9555cc3f1ac5d5c5e9be1",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-<<-right",
+      "expression": "a | b << c",
+      "expected": [
+        "|",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "|",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a | b << c; } }",
+      "sourceSha256": "4359ae5628e85a79f648d81e1b076883aa890deabb029d12a850b1e79496e4ac",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-<<-left",
+      "expression": "a << b | c",
+      "expected": [
+        "|",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "|",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b | c; } }",
+      "sourceSha256": "8efce0efee4519357ce73c656ca67efbf9d8797a9e55655c1bf3bca81fdcee7f",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-+-right",
+      "expression": "a | b + c",
+      "expected": [
+        "|",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "|",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a | b + c; } }",
+      "sourceSha256": "a4359542aff2549e4fe66a4f86e6682f69b16d529fecef86542f38a48a57b0d9",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-+-left",
+      "expression": "a + b | c",
+      "expected": [
+        "|",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "|",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b | c; } }",
+      "sourceSha256": "fdf9bcb5f88f081d3a1d280e38213ce2c5905d0531c722a967f75822d11dddd5",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-*-right",
+      "expression": "a | b * c",
+      "expected": [
+        "|",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "|",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a | b * c; } }",
+      "sourceSha256": "54fe6acd57c7a2ec77da23704c63a01e90ecb8d1df19214443ead7f68f44911f",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-*-left",
+      "expression": "a * b | c",
+      "expected": [
+        "|",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "|",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b | c; } }",
+      "sourceSha256": "31c0867a0ca1856f3a782b01cf48de914d4e8f883dcb2d7a6ac5098883ed5185",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-**-right",
+      "expression": "a | b ** c",
+      "expected": [
+        "|",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "|",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a | b ** c; } }",
+      "sourceSha256": "e27ae5683f919928acda01d6e4464dc7a111e393723041bd3d33bce5672278d9",
+      "errors": []
+    },
+    {
+      "id": "precedence-|-**-left",
+      "expression": "a ** b | c",
+      "expected": [
+        "|",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "|",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b | c; } }",
+      "sourceSha256": "c61045ede45d03df31d923652800cfc0fea45b40f13cd662fd8e0f5f0c0c36cb",
+      "errors": []
+    },
+    {
+      "id": "association-^",
+      "expression": "a ^ b ^ c",
+      "expected": [
+        "^",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "^",
+        [
+          "^",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ^ b ^ c; } }",
+      "sourceSha256": "13db15e05186b66b34dae15516f6215b51f6028264c84f54159e6212f8117b62",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-&-right",
+      "expression": "a ^ b & c",
+      "expected": [
+        "^",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "^",
+        "a",
+        [
+          "&",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a ^ b & c; } }",
+      "sourceSha256": "00aab2b0f6fffda1d299023ea6a56de765cb9964a950fd68fb5a04760ea2a6a0",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-&-left",
+      "expression": "a & b ^ c",
+      "expected": [
+        "^",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "^",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a & b ^ c; } }",
+      "sourceSha256": "639c018ac2e1ec8ea076d4c19fe0ef80751b4bf80d97123782dd0f5524fc6c65",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-<<-right",
+      "expression": "a ^ b << c",
+      "expected": [
+        "^",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "^",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a ^ b << c; } }",
+      "sourceSha256": "011e517b27e7ab1f8f5e9c6144cc12588a6adc217666366a5f37faf0b72124c8",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-<<-left",
+      "expression": "a << b ^ c",
+      "expected": [
+        "^",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "^",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b ^ c; } }",
+      "sourceSha256": "13bf5c3c24f8b4b02b64f10b02ead8fd11d3593b78b8945475ec4eeeaf763feb",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-+-right",
+      "expression": "a ^ b + c",
+      "expected": [
+        "^",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "^",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a ^ b + c; } }",
+      "sourceSha256": "42ed79ff25d6f466f63656a72972105813e2625fbb5993e7f02f4677757a9e49",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-+-left",
+      "expression": "a + b ^ c",
+      "expected": [
+        "^",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "^",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b ^ c; } }",
+      "sourceSha256": "1fc7daf3f8c178d0fac0727e590152a22d87b0d6bd7e59bede9da8e83cc6e53f",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-*-right",
+      "expression": "a ^ b * c",
+      "expected": [
+        "^",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "^",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a ^ b * c; } }",
+      "sourceSha256": "2d8df289875c4c149d3a924a86f74a23dae38fe857e44034aa4356cf627a6acb",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-*-left",
+      "expression": "a * b ^ c",
+      "expected": [
+        "^",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "^",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b ^ c; } }",
+      "sourceSha256": "fba240ce41f5f91bba494e995c7c5f80638186b5b6c10f64ef90e0ca1036cda2",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-**-right",
+      "expression": "a ^ b ** c",
+      "expected": [
+        "^",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "^",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a ^ b ** c; } }",
+      "sourceSha256": "5a21536e5eced731e87d7d53567aa85cc65031bddfbee8ba54c83d764f7a381f",
+      "errors": []
+    },
+    {
+      "id": "precedence-^-**-left",
+      "expression": "a ** b ^ c",
+      "expected": [
+        "^",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "^",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b ^ c; } }",
+      "sourceSha256": "20aca3e752eecd8da2ada3746fc942698a4c63c025251c4c6ab0223e3a9f340c",
+      "errors": []
+    },
+    {
+      "id": "association-&",
+      "expression": "a & b & c",
+      "expected": [
+        "&",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&",
+        [
+          "&",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a & b & c; } }",
+      "sourceSha256": "3d4bf1d92bb320e68a17df97814c70b9b1cf78d0a4371353fd6a7f3f1ac141a2",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-<<-right",
+      "expression": "a & b << c",
+      "expected": [
+        "&",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&",
+        "a",
+        [
+          "<<",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a & b << c; } }",
+      "sourceSha256": "8e20fe6155b346bc399860bef7794c2ae74a92948bc986bab5bfd2a36b970bf4",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-<<-left",
+      "expression": "a << b & c",
+      "expected": [
+        "&",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b & c; } }",
+      "sourceSha256": "45c9e7cd9695a566e0061e4debc60a323ea49787f8288c075f360cae162062c4",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-+-right",
+      "expression": "a & b + c",
+      "expected": [
+        "&",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a & b + c; } }",
+      "sourceSha256": "678f84e04e8c2a2c90dd7a6001d869ee9e63f266f91ff304dd6460cb0cdb911f",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-+-left",
+      "expression": "a + b & c",
+      "expected": [
+        "&",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b & c; } }",
+      "sourceSha256": "9f120d48c87e4802ecee4a19f2c0db3f43ffac9b3b6610fb030ea32689f48a36",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-*-right",
+      "expression": "a & b * c",
+      "expected": [
+        "&",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a & b * c; } }",
+      "sourceSha256": "3946327a294020da7bfc0cf199149eec0a1bc4c881ed00bd43a53301e27fc420",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-*-left",
+      "expression": "a * b & c",
+      "expected": [
+        "&",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b & c; } }",
+      "sourceSha256": "1b26d6a272e0373b85b01f442f0fcded141e2cbf47c55a276a3f469ed8b990a6",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-**-right",
+      "expression": "a & b ** c",
+      "expected": [
+        "&",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "&",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a & b ** c; } }",
+      "sourceSha256": "d5fa76dffb2690da305745ffa71e21e61b64a55fdc944a39f1d8727b68674ac8",
+      "errors": []
+    },
+    {
+      "id": "precedence-&-**-left",
+      "expression": "a ** b & c",
+      "expected": [
+        "&",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "&",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b & c; } }",
+      "sourceSha256": "79a8b79c8542817fc70fac8174f5059fa772ef1cac90d36d49d38028bb48c1a4",
+      "errors": []
+    },
+    {
+      "id": "association-<<",
+      "expression": "a << b << c",
+      "expected": [
+        "<<",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<<",
+        [
+          "<<",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a << b << c; } }",
+      "sourceSha256": "899aeed7f53b2c81098a01029e087daf32566fc72d11342b058af4a55c05a41a",
+      "errors": []
+    },
+    {
+      "id": "precedence-<<-+-right",
+      "expression": "a << b + c",
+      "expected": [
+        "<<",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<<",
+        "a",
+        [
+          "+",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a << b + c; } }",
+      "sourceSha256": "5ca9e60bbf5f4fd426b2d15b265ed188d1321f642529081f37948bb1f4257726",
+      "errors": []
+    },
+    {
+      "id": "precedence-<<-+-left",
+      "expression": "a + b << c",
+      "expected": [
+        "<<",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<<",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b << c; } }",
+      "sourceSha256": "c3cd2c2a1c004937c553be51a3392948ed5bf54ef783761803854b17ae5e0cba",
+      "errors": []
+    },
+    {
+      "id": "precedence-<<-*-right",
+      "expression": "a << b * c",
+      "expected": [
+        "<<",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<<",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a << b * c; } }",
+      "sourceSha256": "f2d91e62eaa8a3c1ba5a25f109c7bf046a734e25cd5135229003edb6dc94e2ab",
+      "errors": []
+    },
+    {
+      "id": "precedence-<<-*-left",
+      "expression": "a * b << c",
+      "expected": [
+        "<<",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<<",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b << c; } }",
+      "sourceSha256": "389d5cd0217d84e431fe98491d321be65a83534a4a682ae989d7944fbcde94e1",
+      "errors": []
+    },
+    {
+      "id": "precedence-<<-**-right",
+      "expression": "a << b ** c",
+      "expected": [
+        "<<",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "<<",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a << b ** c; } }",
+      "sourceSha256": "966025294d5f574b759b99856ab0d389aeb6f5e1db00ee100d2aacf2f249b832",
+      "errors": []
+    },
+    {
+      "id": "precedence-<<-**-left",
+      "expression": "a ** b << c",
+      "expected": [
+        "<<",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "<<",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b << c; } }",
+      "sourceSha256": "fe94df82152c29e141ca5ffa312309b601cda9e1fe038b385085cf7aadf61cac",
+      "errors": []
+    },
+    {
+      "id": "association-+",
+      "expression": "a + b + c",
+      "expected": [
+        "+",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "+",
+        [
+          "+",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a + b + c; } }",
+      "sourceSha256": "b1793a0f98fd5c48fb664862f43e22b98063b8e759346845daf21bde05771440",
+      "errors": []
+    },
+    {
+      "id": "precedence-+-*-right",
+      "expression": "a + b * c",
+      "expected": [
+        "+",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "+",
+        "a",
+        [
+          "*",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a + b * c; } }",
+      "sourceSha256": "3584c42812a1717cbd50581e61eb089100b2ab9ef72b677779b06fd9acbc4569",
+      "errors": []
+    },
+    {
+      "id": "precedence-+-*-left",
+      "expression": "a * b + c",
+      "expected": [
+        "+",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "+",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b + c; } }",
+      "sourceSha256": "2e862fec0cefcf2328ab0fcfc86762fa51fbece90d44482b24589c17a62b035f",
+      "errors": []
+    },
+    {
+      "id": "precedence-+-**-right",
+      "expression": "a + b ** c",
+      "expected": [
+        "+",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "+",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a + b ** c; } }",
+      "sourceSha256": "9fda3599c595c0067778bd5618753eddbbc66668ef5e4226104284ddbc5c7075",
+      "errors": []
+    },
+    {
+      "id": "precedence-+-**-left",
+      "expression": "a ** b + c",
+      "expected": [
+        "+",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "+",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b + c; } }",
+      "sourceSha256": "17ce07bc6d388674924ce3baf7bb21dcd714e2b8ff2fd7f3bcc661e437fbfb6e",
+      "errors": []
+    },
+    {
+      "id": "association-*",
+      "expression": "a * b * c",
+      "expected": [
+        "*",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "*",
+        [
+          "*",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a * b * c; } }",
+      "sourceSha256": "76991c84b6a49511f58868f2926b957e7b49d0416497bd8b95654fe89649b8ba",
+      "errors": []
+    },
+    {
+      "id": "precedence-*-**-right",
+      "expression": "a * b ** c",
+      "expected": [
+        "*",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "*",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a * b ** c; } }",
+      "sourceSha256": "4c8b6f4039788f1bba9b67e11921508abddadb528592ffa12d0a2ca52bd7c52f",
+      "errors": []
+    },
+    {
+      "id": "precedence-*-**-left",
+      "expression": "a ** b * c",
+      "expected": [
+        "*",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "actual": [
+        "*",
+        [
+          "**",
+          "a",
+          "b"
+        ],
+        "c"
+      ],
+      "source": "contract C { function f() public { a ** b * c; } }",
+      "sourceSha256": "c692043f3a40377b28e1b5b3b918b19362f103ec0050943c4311a46612414c21",
+      "errors": []
+    },
+    {
+      "id": "association-**",
+      "expression": "a ** b ** c",
+      "expected": [
+        "**",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "**",
+        "a",
+        [
+          "**",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a ** b ** c; } }",
+      "sourceSha256": "30c5e110d2fb730acb111afba1f5b036eb1ca5606c3e3e9898cab931c5547e82",
+      "errors": []
+    },
+    {
+      "id": "assignment-association",
+      "expression": "a = b = c",
+      "expected": [
+        "=",
+        "a",
+        [
+          "=",
+          "b",
+          "c"
+        ]
+      ],
+      "actual": [
+        "=",
+        "a",
+        [
+          "=",
+          "b",
+          "c"
+        ]
+      ],
+      "source": "contract C { function f() public { a = b = c; } }",
+      "sourceSha256": "354833b53efc4bf8377b131cdf53e1635fc161d6df9c6509bf7db2441c4f25b1",
+      "errors": []
+    },
+    {
+      "id": "conditional-association",
+      "expression": "a ? b : c ? d : e",
+      "expected": [
+        "?:",
+        "a",
+        "b",
+        [
+          "?:",
+          "c",
+          "d",
+          "e"
+        ]
+      ],
+      "actual": [
+        "?:",
+        "a",
+        "b",
+        [
+          "?:",
+          "c",
+          "d",
+          "e"
+        ]
+      ],
+      "source": "contract C { function f() public { a ? b : c ? d : e; } }",
+      "sourceSha256": "ecb0f96218fbe88e00ccb794ae67ee7c26f0431834a4e6447891ce14c536374c",
+      "errors": []
+    },
+    {
+      "id": "prefix-postfix-solc-reading",
+      "expression": "-a++",
+      "expected": [
+        "pre",
+        "-",
+        [
+          "post",
+          "++",
+          "a"
+        ]
+      ],
+      "actual": [
+        "pre",
+        "-",
+        [
+          "post",
+          "++",
+          "a"
+        ]
+      ],
+      "source": "contract C { function f() public { -a++; } }",
+      "sourceSha256": "80d3351402c05842858e5f8eb9b61fe005d4f1f7bffc1e800cae1df6c3be4e81",
+      "errors": []
+    },
+    {
+      "id": "conditional-assignment-solc-reading",
+      "expression": "a ? b : c = d",
+      "expected": [
+        "?:",
+        "a",
+        "b",
+        [
+          "=",
+          "c",
+          "d"
+        ]
+      ],
+      "actual": [
+        "?:",
+        "a",
+        "b",
+        [
+          "=",
+          "c",
+          "d"
+        ]
+      ],
+      "source": "contract C { function f() public { a ? b : c = d; } }",
+      "sourceSha256": "d3a39bd4dc928ec4b15a8995a378c954f34f72ed6b765bb5a54cff37fdf39976",
+      "errors": []
+    },
+    {
+      "id": "postfix-member-refused",
+      "expression": "a++.f",
+      "expected": null,
+      "actual": null,
+      "source": "contract C { function f() public { a++.f; } }",
+      "sourceSha256": "9802692b59e92c2527f4c421dc050e2f993657e4b417ae3075cc7705fb825a32",
+      "errors": [
+        {
+          "type": "ParserError",
+          "message": "Expected ';' but got '.'",
+          "errorCode": "2314"
+        }
+      ]
+    },
+    {
+      "id": "postfix-postfix-refused",
+      "expression": "a++ ++",
+      "expected": null,
+      "actual": null,
+      "source": "contract C { function f() public { a++ ++; } }",
+      "sourceSha256": "48f0b183263b02caf8f48f1141c811597228acccaa82362e479340a66ff49150",
+      "errors": [
+        {
+          "type": "ParserError",
+          "message": "Expected ';' but got '++'",
+          "errorCode": "2314"
+        }
+      ]
+    },
+    {
+      "id": "group-prefix-postfix",
+      "expression": "-(a++)",
+      "expected": [
+        "pre",
+        "-",
+        [
+          "tuple",
+          [
+            "post",
+            "++",
+            "a"
+          ]
+        ]
+      ],
+      "actual": [
+        "pre",
+        "-",
+        [
+          "tuple",
+          [
+            "post",
+            "++",
+            "a"
+          ]
+        ]
+      ],
+      "source": "contract C { function f() public { -(a++); } }",
+      "sourceSha256": "cef6229478c86ba271ec54cfc45b4cbf02c3155fb45ad3d65800479476d53de6",
+      "errors": []
+    },
+    {
+      "id": "group-conditional-assignment",
+      "expression": "a ? b : (c = d)",
+      "expected": [
+        "?:",
+        "a",
+        "b",
+        [
+          "tuple",
+          [
+            "=",
+            "c",
+            "d"
+          ]
+        ]
+      ],
+      "actual": [
+        "?:",
+        "a",
+        "b",
+        [
+          "tuple",
+          [
+            "=",
+            "c",
+            "d"
+          ]
+        ]
+      ],
+      "source": "contract C { function f() public { a ? b : (c = d); } }",
+      "sourceSha256": "2bdfd9c0f9a31d9ea1ec4dda8fc61aa4c8e2b735a73554af9863fd615011d5db",
+      "errors": []
+    },
+    {
+      "id": "group-postfix-member",
+      "expression": "(a++).f",
+      "expected": [
+        ".",
+        [
+          "tuple",
+          [
+            "post",
+            "++",
+            "a"
+          ]
+        ],
+        "f"
+      ],
+      "actual": [
+        ".",
+        [
+          "tuple",
+          [
+            "post",
+            "++",
+            "a"
+          ]
+        ],
+        "f"
+      ],
+      "source": "contract C { function f() public { (a++).f; } }",
+      "sourceSha256": "76e34a9f719dca3a0e48bdd95ea34911d2ed32a1f50b2f0f369b69e9f8650cdd",
+      "errors": []
+    }
+  ]
+}

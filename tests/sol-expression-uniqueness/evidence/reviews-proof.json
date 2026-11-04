@@ -1,0 +1,41 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted as a partial proof checkpoint; no remaining findings.",
+    "findings": [
+      {
+        "id": "F2",
+        "issue": "Documentation retained runtime-blocked/no-proofs claims.",
+        "resolution": "Rewritten for actual recovered runtime and proved/open boundaries."
+      },
+      {
+        "id": "F3",
+        "issue": "Inventory-only checker rejected new modules.",
+        "resolution": "Exhaustive module/declaration/signature/axiom/fixture/current-evidence audit."
+      },
+      {
+        "id": "F4",
+        "issue": "Constructor fixtures could reference unrelated theorems or wrong inputs.",
+        "resolution": "Exact constructor theorem/kind/input/root source signature required; remapping/duplicate/input corruption controls pass."
+      }
+    ],
+    "boundary": "Read-only; no Lean server or edits. Global root reconstruction, original certified uniqueness, corollary and full validation remain open."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Partial checkpoint accepted; S2 and S3 resolved; no remaining findings.",
+    "findings": [
+      {
+        "id": "S2",
+        "issue": "Signature command exit and gate success were not checked.",
+        "resolution": "Require inside/outer exit0, no resource stop, runtime/reserve values and expected kernel gate PASS; negative controls pass."
+      },
+      {
+        "id": "S3",
+        "issue": "Constructor fixtures were not bound to exact theorem inputs/root cases.",
+        "resolution": "Exact fixture-to-declaration signature linkage and corruption controls independently rerun."
+      }
+    ],
+    "boundary": "Read-only; no Lean server or edits. Independent controls and checkpoint audit reruns passed. Full assignment acceptance remains open."
+  }
+]

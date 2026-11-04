@@ -1,0 +1,14 @@
+{
+  "command": [
+    "bash",
+    "-c",
+    "set -eu; lake -v build +Solidity.Frontend.Checked.Prec:olean; scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExpressionUniqueness/Refusals.lean; scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExpressionUniqueness/TokenSplit.lean; scripts/coord-tools/lean-mcp stop"
+  ],
+  "exit": 0,
+  "wall_seconds": 9.508267235999938,
+  "child_peak_rss_kib": 339876,
+  "sampled_cgroup_peak_bytes": 746283008,
+  "memory_max": 12884901888,
+  "memory_swap_max": 0,
+  "lean_num_threads": 1
+}

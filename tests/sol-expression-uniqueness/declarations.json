@@ -1,0 +1,830 @@
+[
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negFamily",
+    "source_signature": "def negFamily : Nat \u2192 String \u2192 Syn .expr\n  | 0, name => .ident name\n  | n + 1, name => .unaryPrefix .neg (negFamily n name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negTokens",
+    "source_signature": "def negTokens : Nat \u2192 String \u2192 List Tok\n  | 0, name => [.ident name]\n  | n + 1, name => .punct .sub :: negTokens n name"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negFamily_prec",
+    "source_signature": "theorem negFamily_prec (n : Nat) (name : String) : (negFamily n name).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_yield",
+    "source_signature": "theorem prefix_yield (op : PrefixOp) (e : Syn .expr) (L rest : List Choice)\n    (items : List (List Tok)) (h : e.yield L = some (items, rest)) :\n    (Syn.unaryPrefix op e).yield L = some ([op.punct ++ items.flatten], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negFamily_yield",
+    "source_signature": "theorem negFamily_yield (n : Nat) (name : String) (rest : List Choice) :\n    (negFamily n name).yield rest = some ([negTokens n name], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negFamily_toks",
+    "source_signature": "theorem negFamily_toks (n : Nat) (name : String) :\n    (negFamily n name).toks [] = some (negTokens n name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negFamily_certified",
+    "source_signature": "theorem negFamily_certified (n : Nat) (name : String) :\n    (negFamily n name).Derives (negTokens n name) \u2227 (negFamily n name).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negTokens_length",
+    "source_signature": "theorem negTokens_length (n : Nat) (name : String) : (negTokens n name).length = n + 1"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.negFamily_injective",
+    "source_signature": "theorem negFamily_injective (name : String) {n m : Nat}\n    (h : negFamily n name = negFamily m name) : n = m"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.group",
+    "source_signature": "def group (e : Syn .expr) : Syn .expr"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.group_prec",
+    "source_signature": "theorem group_prec {e : Syn .expr} (h : e.prec = true) : (group e).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily",
+    "source_signature": "def groupFamily : Nat \u2192 Syn .expr \u2192 Syn .expr\n  | 0, e => e\n  | n + 1, e => group (groupFamily n e)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Families",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.groupFamily_prec",
+    "source_signature": "theorem groupFamily_prec (n : Nat) {e : Syn .expr} (h : e.prec = true) :\n    (groupFamily n e).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expressionError",
+    "source_signature": "def expressionError (s : String) : Option String"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.refusalMessage",
+    "source_signature": "def refusalMessage : String"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_postfix_fixture",
+    "source_signature": "theorem prefix_postfix_fixture : expressionError \"-a++\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_assignment_fixture",
+    "source_signature": "theorem conditional_assignment_fixture :\n    expressionError \"a ? b : c = d\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfix_member_fixture",
+    "source_signature": "theorem postfix_member_fixture : expressionError \"a++.f\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.double_postfix_fixture",
+    "source_signature": "theorem double_postfix_fixture : expressionError \"a++ ++\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.grouped_disagreements_accepted",
+    "source_signature": "theorem grouped_disagreements_accepted :\n    (expressionError \"-(a++)\").isNone &&\n    (expressionError \"a ? b : (c = d)\").isNone &&\n    (expressionError \"(a++).f\").isNone = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expressionCtor",
+    "source_signature": "def expressionCtor (s : String) : Option Ctor"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_index",
+    "source_signature": "theorem constructor_index : expressionCtor \"a[0]\" = some .index"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_slice",
+    "source_signature": "theorem constructor_slice : expressionCtor \"a[:]\" = some .slice"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_member",
+    "source_signature": "theorem constructor_member : expressionCtor \"a.b\" = some .member"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_callOptions",
+    "source_signature": "theorem constructor_callOptions : expressionCtor \"a{x:b}\" = some .callOptions"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_call",
+    "source_signature": "theorem constructor_call : expressionCtor \"a()\" = some .call"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_payableConv",
+    "source_signature": "theorem constructor_payableConv : expressionCtor \"payable(a)\" = some .payableConv"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_metaType",
+    "source_signature": "theorem constructor_metaType : expressionCtor \"type(T)\" = some .metaType"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_unaryPrefix",
+    "source_signature": "theorem constructor_unaryPrefix : expressionCtor \"-a\" = some .unaryPrefix"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_unarySuffix",
+    "source_signature": "theorem constructor_unarySuffix : expressionCtor \"a++\" = some .unarySuffix"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_exp",
+    "source_signature": "theorem constructor_exp : expressionCtor \"a**b\" = some .exp"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_mulDivMod",
+    "source_signature": "theorem constructor_mulDivMod : expressionCtor \"a*b\" = some .mulDivMod"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_addSub",
+    "source_signature": "theorem constructor_addSub : expressionCtor \"a+b\" = some .addSub"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_shift",
+    "source_signature": "theorem constructor_shift : expressionCtor \"a<<b\" = some .shift"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_bitAnd",
+    "source_signature": "theorem constructor_bitAnd : expressionCtor \"a&b\" = some .bitAnd"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_bitXor",
+    "source_signature": "theorem constructor_bitXor : expressionCtor \"a^b\" = some .bitXor"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_bitOr",
+    "source_signature": "theorem constructor_bitOr : expressionCtor \"a|b\" = some .bitOr"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_order",
+    "source_signature": "theorem constructor_order : expressionCtor \"a<b\" = some .order"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_equality",
+    "source_signature": "theorem constructor_equality : expressionCtor \"a==b\" = some .equality"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_and",
+    "source_signature": "theorem constructor_and : expressionCtor \"a&&b\" = some .and"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_or",
+    "source_signature": "theorem constructor_or : expressionCtor \"a||b\" = some .or"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_cond",
+    "source_signature": "theorem constructor_cond : expressionCtor \"a?b:c\" = some .cond"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_assign",
+    "source_signature": "theorem constructor_assign : expressionCtor \"a=b\" = some .assign"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_new",
+    "source_signature": "theorem constructor_new : expressionCtor \"new T\" = some .new"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_tuple",
+    "source_signature": "theorem constructor_tuple : expressionCtor \"()\" = some .tuple"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_inlineArray",
+    "source_signature": "theorem constructor_inlineArray : expressionCtor \"[a]\" = some .inlineArray"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_ident",
+    "source_signature": "theorem constructor_ident : expressionCtor \"a\" = some .ident"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_lit",
+    "source_signature": "theorem constructor_lit : expressionCtor \"\\\"a\\\" \\\"b\\\"\" = some .lit"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_litUnit",
+    "source_signature": "theorem constructor_litUnit : expressionCtor \"1 gwei\" = some .litUnit"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.constructor_elemType",
+    "source_signature": "theorem constructor_elemType : expressionCtor \"uint\" = some .elemType"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfix_index_fixture",
+    "source_signature": "theorem postfix_index_fixture : expressionError \"a++[0]\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfix_slice_fixture",
+    "source_signature": "theorem postfix_slice_fixture : expressionError \"a++[:]\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfix_options_fixture",
+    "source_signature": "theorem postfix_options_fixture : expressionError \"a++{x:b}\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fixtures",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfix_call_fixture",
+    "source_signature": "theorem postfix_call_fixture : expressionError \"a++()\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.chunks_spec",
+    "source_signature": "theorem chunks_spec (bs : Bytes) (ns : List Nat) (cs : List Bytes)\n    (h : chunks bs ns = some cs) : cs.flatten = bs \u2227 cs.length = ns.length"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_spec",
+    "source_signature": "theorem fragsP_spec (mk : Bytes \u2192 Tok) (bs : Bytes) (L rest : List Choice) (ts : List Tok)\n    (h : fragsP mk bs L = some (ts, rest)) :\n    \u2203 cs, cs.flatten = bs \u2227 ts = cs.map mk \u2227 cs \u2260 []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.stringPayload",
+    "source_signature": "def stringPayload : Tok \u2192 Bytes\n  | .str bs | .hexStr bs | .unicodeStr bs => bs\n  | _ => []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_reconstruct",
+    "source_signature": "theorem fragsP_reconstruct (mk : Bytes \u2192 Tok) (mkPayload : \u2200 bs, stringPayload (mk bs) = bs)\n    (bs : Bytes) (L rest : List Choice) (ts : List Tok)\n    (h : fragsP mk bs L = some (ts, rest)) : ts.flatMap stringPayload = bs"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_bytes_unique",
+    "source_signature": "theorem fragsP_bytes_unique (mk : Bytes \u2192 Tok)\n    (mkPayload : \u2200 bs, stringPayload (mk bs) = bs)\n    (a b : Bytes) (La Lb ra rb : List Choice) (ts : List Tok)\n    (ha : fragsP mk a La = some (ts, ra)) (hb : fragsP mk b Lb = some (ts, rb)) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.chunks_single",
+    "source_signature": "theorem chunks_single (bs : Bytes) : chunks bs [bs.length] = some [bs]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_single",
+    "source_signature": "theorem fragsP_single (mk : Bytes \u2192 Tok) (bs : Bytes) (rest : List Choice) :\n    fragsP mk bs (.frags [bs.length] :: rest) = some ([mk bs], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_leading_empty",
+    "source_signature": "theorem fragsP_leading_empty (mk : Bytes \u2192 Tok) (bs : Bytes) (rest : List Choice) :\n    fragsP mk bs (.frags [0, bs.length] :: rest) = some ([mk [], mk bs], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragment_layouts_distinct",
+    "source_signature": "theorem fragment_layouts_distinct (bs : Bytes) :\n    ([Choice.frags [bs.length]] : List Choice) \u2260 [.frags [0, bs.length]]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_pure_yield",
+    "source_signature": "theorem derives_pure_yield {c : Cat} (e : Syn c) (items : List (List Tok))\n    (h : \u2200 L, e.yield L = some (items, L)) (ts : List Tok) :\n    e.Derives ts \u2194 ts = items.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_ident",
+    "source_signature": "theorem derives_ident (name : String) (ts : List Tok) :\n    (Syn.ident name).Derives ts \u2194 ts = [.ident name]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_boolean",
+    "source_signature": "theorem derives_boolean (b : Bool) (ts : List Tok) :\n    (Syn.lit (.bool b)).Derives ts \u2194 ts = [.bool b]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_number",
+    "source_signature": "theorem derives_number (n : NumLit) (ts : List Tok) :\n    (Syn.lit (.num n)).Derives ts \u2194 ts = [.num n]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_unit",
+    "source_signature": "theorem derives_unit (n : NumLit) (u : Denom) (ts : List Tok) :\n    (Syn.litUnit n u).Derives ts \u2194 ts = [.num n, .denom u]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_elementary",
+    "source_signature": "theorem derives_elementary (e : Elem) (he : e \u2260 .addressPayable) (ts : List Tok) :\n    (Syn.elemType e he).Derives ts \u2194 ts = [.elem e]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ident_same_yield",
+    "source_signature": "theorem ident_same_yield (a b : String) (ts : List Tok)\n    (ha : (Syn.ident a).Derives ts) (hb : (Syn.ident b).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.boolean_same_yield",
+    "source_signature": "theorem boolean_same_yield (a b : Bool) (ts : List Tok)\n    (ha : (Syn.lit (.bool a)).Derives ts) (hb : (Syn.lit (.bool b)).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.number_same_yield",
+    "source_signature": "theorem number_same_yield (a b : NumLit) (ts : List Tok)\n    (ha : (Syn.lit (.num a)).Derives ts) (hb : (Syn.lit (.num b)).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_single_item",
+    "source_signature": "theorem derives_single_item {c : Cat} (e : Syn c) (pr : Pr (List Tok))\n    (hy : \u2200 L, e.yield L = (pr L).map (fun r => ([r.1], r.2)))\n    (ts : List Tok) (h : e.Derives ts) : \u2203 L, pr L = some (ts, [])"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.str_yield_map",
+    "source_signature": "theorem str_yield_map (bs : Bytes) (L : List Choice) :\n    (Syn.lit (.str bs)).yield L =\n      (fragsP Tok.str bs L).map (fun r => ([r.1], r.2))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.str_payload",
+    "source_signature": "theorem str_payload (bs : Bytes) (ts : List Tok)\n    (h : (Syn.lit (.str bs)).Derives ts) : ts.flatMap stringPayload = bs"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.str_same_yield",
+    "source_signature": "theorem str_same_yield (a b : Bytes) (ts : List Tok)\n    (ha : (Syn.lit (.str a)).Derives ts)\n    (hb : (Syn.lit (.str b)).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.hexStr_yield_map",
+    "source_signature": "theorem hexStr_yield_map (bs : Bytes) (L : List Choice) :\n    (Syn.lit (.hexStr bs)).yield L =\n      (fragsP Tok.hexStr bs L).map (fun r => ([r.1], r.2))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.hexStr_payload",
+    "source_signature": "theorem hexStr_payload (bs : Bytes) (ts : List Tok)\n    (h : (Syn.lit (.hexStr bs)).Derives ts) : ts.flatMap stringPayload = bs"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.hexStr_same_yield",
+    "source_signature": "theorem hexStr_same_yield (a b : Bytes) (ts : List Tok)\n    (ha : (Syn.lit (.hexStr a)).Derives ts)\n    (hb : (Syn.lit (.hexStr b)).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unicodeStr_yield_map",
+    "source_signature": "theorem unicodeStr_yield_map (bs : Bytes) (L : List Choice) :\n    (Syn.lit (.unicodeStr bs)).yield L =\n      (fragsP Tok.unicodeStr bs L).map (fun r => ([r.1], r.2))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unicodeStr_payload",
+    "source_signature": "theorem unicodeStr_payload (bs : Bytes) (ts : List Tok)\n    (h : (Syn.lit (.unicodeStr bs)).Derives ts) : ts.flatMap stringPayload = bs"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.unicodeStr_same_yield",
+    "source_signature": "theorem unicodeStr_same_yield (a b : Bytes) (ts : List Tok)\n    (ha : (Syn.lit (.unicodeStr a)).Derives ts)\n    (hb : (Syn.lit (.unicodeStr b)).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.literalKind",
+    "source_signature": "def literalKind : Lit \u2192 Nat\n  | .bool _ => 0\n  | .num _ => 1\n  | .str _ => 2\n  | .hexStr _ => 3\n  | .unicodeStr _ => 4"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenLiteralKind",
+    "source_signature": "def tokenLiteralKind : Tok \u2192 Option Nat\n  | .bool _ => some 0\n  | .num _ => some 1\n  | .str _ => some 2\n  | .hexStr _ => some 3\n  | .unicodeStr _ => some 4\n  | _ => none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.literal_head_kind",
+    "source_signature": "theorem literal_head_kind (l : Lit) (ts : List Tok) (h : (Syn.lit l).Derives ts) :\n    \u2203 t rest, ts = t :: rest \u2227 tokenLiteralKind t = some (literalKind l)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.literal_kind_determined",
+    "source_signature": "theorem literal_kind_determined (a b : Lit) (ts : List Tok)\n    (ha : (Syn.lit a).Derives ts) (hb : (Syn.lit b).Derives ts) :\n    literalKind a = literalKind b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Primary",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.literal_same_yield",
+    "source_signature": "theorem literal_same_yield (a b : Lit) (ts : List Tok)\n    (ha : (Syn.lit a).Derives ts) (hb : (Syn.lit b).Derives ts) : a = b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.refused_of_node_false",
+    "source_signature": "theorem refused_of_node_false {c : Cat} {e : Syn c} (h : e.precNode = false) :\n    e.prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.prefix_suffix_refused",
+    "source_signature": "theorem prefix_suffix_refused (o : PrefixOp) (q : SuffixOp) (a : Syn .expr) :\n    (Syn.unaryPrefix o (.unarySuffix q a)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.suffix_prefix_refused",
+    "source_signature": "theorem suffix_prefix_refused (o : PrefixOp) (q : SuffixOp) (a : Syn .expr) :\n    (Syn.unarySuffix q (.unaryPrefix o a)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_assignment_refused",
+    "source_signature": "theorem conditional_assignment_refused (o : AssignOp) (a b c d : Syn .expr) :\n    (Syn.cond a b (.assign o c d)).prec = false \u2227\n    (Syn.assign o (.cond a b c) d).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfix_bases_refused",
+    "source_signature": "theorem postfix_bases_refused (q r : SuffixOp) (a : Syn .expr)\n    (i j : Syn (.opt .expr)) (name : String) (arg : Syn .namedArg)\n    (args : Syn (.list .namedArg)) (callArgs : Syn .callArgs) :\n    (Syn.index (.unarySuffix q a) i).prec = false \u2227\n    (Syn.slice (.unarySuffix q a) i j).prec = false \u2227\n    (Syn.member (.unarySuffix q a) name).prec = false \u2227\n    (Syn.callOptions (.unarySuffix q a) arg args).prec = false \u2227\n    (Syn.call (.unarySuffix q a) callArgs).prec = false \u2227\n    (Syn.unarySuffix r (.unarySuffix q a)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.new_bases_refused",
+    "source_signature": "theorem new_bases_refused (t : Syn .typeName) (i j : Syn (.opt .expr)) (name : String) :\n    (Syn.index (.new t) i).prec = false \u2227\n    (Syn.slice (.new t) i j).prec = false \u2227\n    (Syn.member (.new t) name).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.or_right_nested_refused",
+    "source_signature": "theorem or_right_nested_refused (a b c : Syn .expr) :\n    (Syn.or a (.or b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.and_right_nested_refused",
+    "source_signature": "theorem and_right_nested_refused (a b c : Syn .expr) :\n    (Syn.and a (.and b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_right_nested_refused",
+    "source_signature": "theorem equality_right_nested_refused (o q : EqOp) (a b c : Syn .expr) :\n    (Syn.equality o a (.equality q b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_right_nested_refused",
+    "source_signature": "theorem order_right_nested_refused (o q : OrderOp) (a b c : Syn .expr) :\n    (Syn.order o a (.order q b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitOr_right_nested_refused",
+    "source_signature": "theorem bitOr_right_nested_refused (a b c : Syn .expr) :\n    (Syn.bitOr a (.bitOr b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitXor_right_nested_refused",
+    "source_signature": "theorem bitXor_right_nested_refused (a b c : Syn .expr) :\n    (Syn.bitXor a (.bitXor b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitAnd_right_nested_refused",
+    "source_signature": "theorem bitAnd_right_nested_refused (a b c : Syn .expr) :\n    (Syn.bitAnd a (.bitAnd b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_right_nested_refused",
+    "source_signature": "theorem shift_right_nested_refused (o q : ShiftOp) (a b c : Syn .expr) :\n    (Syn.shift o a (.shift q b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSub_right_nested_refused",
+    "source_signature": "theorem addSub_right_nested_refused (o q : AddOp) (a b c : Syn .expr) :\n    (Syn.addSub o a (.addSub q b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mulDivMod_right_nested_refused",
+    "source_signature": "theorem mulDivMod_right_nested_refused (o q : MulOp) (a b c : Syn .expr) :\n    (Syn.mulDivMod o a (.mulDivMod q b c)).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_left_nested_refused",
+    "source_signature": "theorem exp_left_nested_refused (a b c : Syn .expr) :\n    (Syn.exp (.exp a b) c).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_left_nested_refused",
+    "source_signature": "theorem conditional_left_nested_refused (a b c d e : Syn .expr) :\n    (Syn.cond (.cond a b c) d e).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Refusals",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.assignment_left_nested_refused",
+    "source_signature": "theorem assignment_left_nested_refused (o q : AssignOp) (a b c : Syn .expr) :\n    (Syn.assign o (.assign q a b) c).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.Statement",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique",
+    "source_signature": "def CertifiedYieldUnique : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "inductive",
+    "name": "Solidity.Frontend.ExpressionUniqueness.Bracket",
+    "source_signature": "inductive Bracket where\n  | round | square | curly\n  deriving DecidableEq, Repr"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.openTok",
+    "source_signature": "def openTok : Bracket \u2192 Tok\n  | .round => .punct .lparen\n  | .square => .punct .lbrack\n  | .curly => .punct .lbrace"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.closeTok",
+    "source_signature": "def closeTok : Bracket \u2192 Tok\n  | .round => .punct .rparen\n  | .square => .punct .rbrack\n  | .curly => .punct .rbrace\n\n/-- `true` opens a delimiter, `false` closes one. -/"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bracket",
+    "source_signature": "def bracket : Tok \u2192 Option (Bool \u00d7 Bracket)\n  | .punct .lparen => some (true, .round)\n  | .punct .lbrack => some (true, .square)\n  | .punct .lbrace => some (true, .curly)\n  | .punct .rparen => some (false, .round)\n  | .punct .rbrack => some (false, .square)\n  | .punct .rbrace => some (false, .curly)\n  | _ => none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.pop",
+    "source_signature": "def pop (k : Bracket) : List Bracket \u2192 Option (List Bracket)\n  | [] => none\n  | h :: s => if h = k then some s else none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.step",
+    "source_signature": "def step (s : List Bracket) (t : Tok) : Option (List Bracket)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.run",
+    "source_signature": "def run (s : List Bracket) : List Tok \u2192 Option (List Bracket)\n  | [] => some s\n  | t :: ts => (step s t).bind fun next => run next ts\n\n/-- Balanced in every surrounding delimiter context. -/"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.Balanced",
+    "source_signature": "def Balanced (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.open_close_disjoint",
+    "source_signature": "theorem open_close_disjoint (a b : Bracket) : openTok a \u2260 closeTok b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.step_suffix",
+    "source_signature": "theorem step_suffix (t : Tok) (s next tail : List Bracket)\n    (h : step s t = some next) : step (s ++ tail) t = some (next ++ tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.run_suffix",
+    "source_signature": "theorem run_suffix (ts : List Tok) (s next tail : List Bracket)\n    (h : run s ts = some next) : run (s ++ tail) ts = some (next ++ tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_iff_empty",
+    "source_signature": "theorem balanced_iff_empty (ts : List Tok) : Balanced ts \u2194 run [] ts = some []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.run_append",
+    "source_signature": "theorem run_append (xs ys : List Tok) (s : List Bracket) :\n    run s (xs ++ ys) = (run s xs).bind (fun next => run next ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_nil",
+    "source_signature": "theorem balanced_nil : Balanced []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_append",
+    "source_signature": "theorem balanced_append {xs ys : List Tok} (hx : Balanced xs) (hy : Balanced ys) :\n    Balanced (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_atom",
+    "source_signature": "theorem balanced_atom {t : Tok} (h : bracket t = none) : Balanced [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.step_open",
+    "source_signature": "theorem step_open (k : Bracket) (s : List Bracket) :\n    step s (openTok k) = some (k :: s)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.step_close",
+    "source_signature": "theorem step_close (k : Bracket) (s : List Bracket) :\n    step (k :: s) (closeTok k) = some s"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_enclose",
+    "source_signature": "theorem balanced_enclose (k : Bracket) {ts : List Tok} (h : Balanced ts) :\n    Balanced (openTok k :: (ts ++ [closeTok k]))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_not_close",
+    "source_signature": "theorem balanced_not_close (k : Bracket) (ts : List Tok) :\n    \u00ac Balanced (closeTok k :: ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip",
+    "source_signature": "def skip (p : Tok \u2192 Bool) (s : List Bracket) : List Tok \u2192 Option (List Bracket)\n  | [] => some s\n  | t :: ts =>\n    if s.isEmpty && p t then none\n    else (step s t).bind fun next => skip p next ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.offset",
+    "source_signature": "def offset (n : Nat) (r : Nat \u00d7 Tok) : Nat \u00d7 Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.firstTop",
+    "source_signature": "def firstTop (p : Tok \u2192 Bool) (s : List Bracket) : List Tok \u2192 Option (Nat \u00d7 Tok)\n  | [] => none\n  | t :: ts =>\n    if s.isEmpty && p t then some (0, t)\n    else (step s t).bind fun next =>\n      (firstTop p next ts).map (offset 1)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip_append",
+    "source_signature": "theorem skip_append (p : Tok \u2192 Bool) (xs ys : List Tok) (s : List Bracket) :\n    skip p s (xs ++ ys) = (skip p s xs).bind (fun next => skip p next ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip_inside",
+    "source_signature": "theorem skip_inside (p : Tok \u2192 Bool) (ts : List Tok) (s next tail : List Bracket)\n    (hne : tail \u2260 []) (h : run s ts = some next) :\n    skip p (s ++ tail) ts = some (next ++ tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.skip_enclose",
+    "source_signature": "theorem skip_enclose (p : Tok \u2192 Bool) (k : Bracket) {ts : List Tok}\n    (h : Balanced ts) (hop : p (openTok k) = false) :\n    skip p [] (openTok k :: (ts ++ [closeTok k])) = some []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.nest",
+    "source_signature": "def nest : List Bracket \u2192 List Tok \u2192 List Tok\n  | [], ts => ts\n  | k :: ks, ts => openTok k :: (nest ks ts ++ [closeTok k])"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_nest",
+    "source_signature": "theorem balanced_nest (ks : List Bracket) {ts : List Tok} (h : Balanced ts) :\n    Balanced (nest ks ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.firstTop_append_of_skip",
+    "source_signature": "theorem firstTop_append_of_skip (p : Tok \u2192 Bool) (xs ys : List Tok)\n    (s next : List Bracket) (h : skip p s xs = some next) :\n    firstTop p s (xs ++ ys) = (firstTop p next ys).map (offset xs.length)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.firstTop_marker",
+    "source_signature": "theorem firstTop_marker (p : Tok \u2192 Bool) (xs ys : List Tok) (t : Tok)\n    (h : skip p [] xs = some []) (hp : p t = true) :\n    firstTop p [] (xs ++ t :: ys) = some (xs.length, t)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TokenSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique",
+    "source_signature": "theorem firstTop_cut_unique (p : Tok \u2192 Bool) (xs ys xs' ys' : List Tok) (t t' : Tok)\n    (hx : skip p [] xs = some []) (hx' : skip p [] xs' = some [])\n    (ht : p t = true) (ht' : p t' = true)\n    (heq : xs ++ t :: ys = xs' ++ t' :: ys') :\n    xs = xs' \u2227 t = t' \u2227 ys = ys'"
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "command": [
+    "bash",
+    "-c",
+    "set -eu; scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExpressionUniqueness/Primary.lean; scripts/coord-tools/lean-mcp stop"
+  ],
+  "exit": 0,
+  "wall_seconds": 5.241547181999977,
+  "child_peak_rss_kib": 12544,
+  "sampled_cgroup_peak_bytes": 557547520,
+  "memory_max": 12884901888,
+  "memory_swap_max": 0,
+  "lean_num_threads": 1,
+  "source_hashes": {
+    "Solidity/Frontend/ExpressionUniqueness/Fixtures.lean": "8050132aff110cd0b22a9e7a4127b3805a236825424d690434858d7fb2f80dcc",
+    "Solidity/Frontend/ExpressionUniqueness/Statement.lean": "ec8fd72f6ee74de4a2499657e9a840fce700e751237492e87bfd04ca81b79685",
+    "Solidity/Frontend/ExpressionUniqueness/Fragments.lean": "60fdbeb739a7132fde18560b3bb32508c5820f202b32f2c3771e4442f201b0c2",
+    "Solidity/Frontend/ExpressionUniqueness/TokenSplit.lean": "7192f0a4c4bea786840d7f30f4ac568c89d5b696de8d2c5e977f5a3515e2470b",
+    "Solidity/Frontend/ExpressionUniqueness/Primary.lean": "feb5152dc130373e94d51e4626d2efd5ede8a05a05095236c6daea04459cc3ad",
+    "Solidity/Frontend/ExpressionUniqueness/Families.lean": "068e9531bac32c5de73ed3b3af915c194727dea504a9e568058994efce6db25e",
+    "Solidity/Frontend/ExpressionUniqueness/Refusals.lean": "342655f48ca24a403f6173abd61081df06ea00aaf9565f3ff507513a4d8708d1"
+  }
+}

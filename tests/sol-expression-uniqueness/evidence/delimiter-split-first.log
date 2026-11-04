@@ -1,0 +1,53 @@
+ERROR 132:31 Tactic `rfl` failed: The left-hand side
+  firstTop p s ([] ++ ys)
+is not definitionally equal to the right-hand side
+  Option.map (offset [].length) none
+
+case nil.refl.none
+p : Tok → Bool
+ys : List Tok
+s : List Bracket
+⊢ firstTop p s ([] ++ ys) = Option.map (offset [].length) none
+ERROR 132:31 Tactic `rfl` failed: The left-hand side
+  firstTop p s ([] ++ ys)
+is not definitionally equal to the right-hand side
+  Option.map (offset [].length) (some val✝)
+
+case nil.refl.some
+p : Tok → Bool
+ys : List Tok
+s : List Bracket
+val✝ : Nat × Tok
+⊢ firstTop p s ([] ++ ys) = Option.map (offset [].length) (some val✝)
+ERROR 135:12 unsolved goals
+case cons.true
+p : Tok → Bool
+ys : List Tok
+t : Tok
+ts : List Tok
+ih :
+  ∀ (s next : List Bracket),
+    skip p s ts = some next → firstTop p s (ts ++ ys) = Option.map (offset ts.length) (firstTop p next ys)
+s next : List Bracket
+hit : (s.isEmpty && p t) = true
+h : none = some next
+⊢ firstTop p s (t :: ts ++ ys) = Option.map (offset (t :: ts).length) (firstTop p next ys)
+ERROR 138:14 unsolved goals
+case cons.false.none
+p : Tok → Bool
+ys : List Tok
+t : Tok
+ts : List Tok
+ih :
+  ∀ (s next : List Bracket),
+    skip p s ts = some next → firstTop p s (ts ++ ys) = Option.map (offset ts.length) (firstTop p next ys)
+s next : List Bracket
+hit : (s.isEmpty && p t) = false
+hs : step s t = none
+h : none = some next
+⊢ firstTop p s (t :: ts ++ ys) = Option.map (offset (t :: ts).length) (firstTop p next ys)
+ERROR 123:67 Unknown constant `Bool.true_eq_true`
+ERROR 123:67 Unknown constant `Bool.true_eq_true`
+ERROR 145:9 No goals to be solved
+diag: 7 errors
+{"command": ["bash", "-c", "set -eu; scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExpressionUniqueness/TokenSplit.lean; scripts/coord-tools/lean-mcp stop"], "exit": 1, "wall_seconds": 3.40584557499983, "child_peak_rss_kib": 12672, "sampled_cgroup_peak_bytes": 461905920, "memory_max": 12884901888, "memory_swap_max": 0, "lean_num_threads": 1}

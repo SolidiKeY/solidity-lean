@@ -1,0 +1,323 @@
+Solidity.Frontend.ExpressionUniqueness.negFamily : Nat → String → Solidity.Source.Syn Solidity.Source.Cat.expr
+'Solidity.Frontend.ExpressionUniqueness.negFamily' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.negTokens : Nat → String → List Solidity.Frontend.Checked.Tok
+'Solidity.Frontend.ExpressionUniqueness.negTokens' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.negFamily_prec (n : Nat) (name : String) :
+  (Solidity.Frontend.ExpressionUniqueness.negFamily n name).prec = true
+'Solidity.Frontend.ExpressionUniqueness.negFamily_prec' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.prefix_yield (op : Solidity.Source.PrefixOp)
+  (e : Solidity.Source.Syn Solidity.Source.Cat.expr) (L rest : List Solidity.Frontend.Checked.Choice)
+  (items : List (List Solidity.Frontend.Checked.Tok)) (h : e.yield L = some (items, rest)) :
+  (Solidity.Source.Syn.unaryPrefix op e).yield L = some ([op.punct ++ items.flatten], rest)
+'Solidity.Frontend.ExpressionUniqueness.prefix_yield' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.negFamily_yield (n : Nat) (name : String)
+  (rest : List Solidity.Frontend.Checked.Choice) :
+  (Solidity.Frontend.ExpressionUniqueness.negFamily n name).yield rest =
+    some ([Solidity.Frontend.ExpressionUniqueness.negTokens n name], rest)
+'Solidity.Frontend.ExpressionUniqueness.negFamily_yield' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.negFamily_toks (n : Nat) (name : String) :
+  (Solidity.Frontend.ExpressionUniqueness.negFamily n name).toks [] =
+    some (Solidity.Frontend.ExpressionUniqueness.negTokens n name)
+'Solidity.Frontend.ExpressionUniqueness.negFamily_toks' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.negFamily_certified (n : Nat) (name : String) :
+  (Solidity.Frontend.ExpressionUniqueness.negFamily n name).Derives
+      (Solidity.Frontend.ExpressionUniqueness.negTokens n name) ∧
+    (Solidity.Frontend.ExpressionUniqueness.negFamily n name).prec = true
+'Solidity.Frontend.ExpressionUniqueness.negFamily_certified' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.negTokens_length (n : Nat) (name : String) :
+  (Solidity.Frontend.ExpressionUniqueness.negTokens n name).length = n + 1
+'Solidity.Frontend.ExpressionUniqueness.negTokens_length' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.negFamily_injective (name : String) {n m : Nat}
+  (h :
+    Solidity.Frontend.ExpressionUniqueness.negFamily n name = Solidity.Frontend.ExpressionUniqueness.negFamily m name) :
+  n = m
+'Solidity.Frontend.ExpressionUniqueness.negFamily_injective' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.group (e : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  Solidity.Source.Syn Solidity.Source.Cat.expr
+'Solidity.Frontend.ExpressionUniqueness.group' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.group_prec {e : Solidity.Source.Syn Solidity.Source.Cat.expr}
+  (h : e.prec = true) : (Solidity.Frontend.ExpressionUniqueness.group e).prec = true
+'Solidity.Frontend.ExpressionUniqueness.group_prec' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.groupFamily :
+  Nat → Solidity.Source.Syn Solidity.Source.Cat.expr → Solidity.Source.Syn Solidity.Source.Cat.expr
+'Solidity.Frontend.ExpressionUniqueness.groupFamily' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.groupFamily_prec (n : Nat) {e : Solidity.Source.Syn Solidity.Source.Cat.expr}
+  (h : e.prec = true) : (Solidity.Frontend.ExpressionUniqueness.groupFamily n e).prec = true
+'Solidity.Frontend.ExpressionUniqueness.groupFamily_prec' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.expressionError (s : String) : Option String
+'Solidity.Frontend.ExpressionUniqueness.expressionError' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.refusalMessage : String
+'Solidity.Frontend.ExpressionUniqueness.refusalMessage' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.prefix_postfix_fixture :
+  Solidity.Frontend.ExpressionUniqueness.expressionError "-a++" =
+    some Solidity.Frontend.ExpressionUniqueness.refusalMessage
+'Solidity.Frontend.ExpressionUniqueness.prefix_postfix_fixture' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.conditional_assignment_fixture :
+  Solidity.Frontend.ExpressionUniqueness.expressionError "a ? b : c = d" =
+    some Solidity.Frontend.ExpressionUniqueness.refusalMessage
+'Solidity.Frontend.ExpressionUniqueness.conditional_assignment_fixture' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.postfix_member_fixture :
+  Solidity.Frontend.ExpressionUniqueness.expressionError "a++.f" =
+    some Solidity.Frontend.ExpressionUniqueness.refusalMessage
+'Solidity.Frontend.ExpressionUniqueness.postfix_member_fixture' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.double_postfix_fixture :
+  Solidity.Frontend.ExpressionUniqueness.expressionError "a++ ++" =
+    some Solidity.Frontend.ExpressionUniqueness.refusalMessage
+'Solidity.Frontend.ExpressionUniqueness.double_postfix_fixture' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.grouped_disagreements_accepted :
+  ((Solidity.Frontend.ExpressionUniqueness.expressionError "-(a++)").isNone &&
+        (Solidity.Frontend.ExpressionUniqueness.expressionError "a ? b : (c = d)").isNone &&
+      decide ((Solidity.Frontend.ExpressionUniqueness.expressionError "(a++).f").isNone = true)) =
+    true
+'Solidity.Frontend.ExpressionUniqueness.grouped_disagreements_accepted' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.chunks_spec (bs : Solidity.Frontend.Checked.Bytes) (ns : List Nat)
+  (cs : List Solidity.Frontend.Checked.Bytes) (h : Solidity.Source.chunks bs ns = some cs) :
+  cs.flatten = bs ∧ cs.length = ns.length
+'Solidity.Frontend.ExpressionUniqueness.chunks_spec' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.fragsP_spec
+  (mk : Solidity.Frontend.Checked.Bytes → Solidity.Frontend.Checked.Tok) (bs : Solidity.Frontend.Checked.Bytes)
+  (L rest : List Solidity.Frontend.Checked.Choice) (ts : List Solidity.Frontend.Checked.Tok)
+  (h : Solidity.Source.fragsP mk bs L = some (ts, rest)) : ∃ cs, cs.flatten = bs ∧ ts = List.map mk cs ∧ cs ≠ []
+'Solidity.Frontend.ExpressionUniqueness.fragsP_spec' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.stringPayload : Solidity.Frontend.Checked.Tok → Solidity.Frontend.Checked.Bytes
+'Solidity.Frontend.ExpressionUniqueness.stringPayload' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.fragsP_reconstruct
+  (mk : Solidity.Frontend.Checked.Bytes → Solidity.Frontend.Checked.Tok)
+  (mkPayload :
+    ∀ (bs : Solidity.Frontend.Checked.Bytes), Solidity.Frontend.ExpressionUniqueness.stringPayload (mk bs) = bs)
+  (bs : Solidity.Frontend.Checked.Bytes) (L rest : List Solidity.Frontend.Checked.Choice)
+  (ts : List Solidity.Frontend.Checked.Tok) (h : Solidity.Source.fragsP mk bs L = some (ts, rest)) :
+  List.flatMap Solidity.Frontend.ExpressionUniqueness.stringPayload ts = bs
+'Solidity.Frontend.ExpressionUniqueness.fragsP_reconstruct' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.fragsP_bytes_unique
+  (mk : Solidity.Frontend.Checked.Bytes → Solidity.Frontend.Checked.Tok)
+  (mkPayload :
+    ∀ (bs : Solidity.Frontend.Checked.Bytes), Solidity.Frontend.ExpressionUniqueness.stringPayload (mk bs) = bs)
+  (a b : Solidity.Frontend.Checked.Bytes) (La Lb ra rb : List Solidity.Frontend.Checked.Choice)
+  (ts : List Solidity.Frontend.Checked.Tok) (ha : Solidity.Source.fragsP mk a La = some (ts, ra))
+  (hb : Solidity.Source.fragsP mk b Lb = some (ts, rb)) : a = b
+'Solidity.Frontend.ExpressionUniqueness.fragsP_bytes_unique' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.chunks_single (bs : Solidity.Frontend.Checked.Bytes) :
+  Solidity.Source.chunks bs [List.length bs] = some [bs]
+'Solidity.Frontend.ExpressionUniqueness.chunks_single' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.fragsP_single
+  (mk : Solidity.Frontend.Checked.Bytes → Solidity.Frontend.Checked.Tok) (bs : Solidity.Frontend.Checked.Bytes)
+  (rest : List Solidity.Frontend.Checked.Choice) :
+  Solidity.Source.fragsP mk bs (Solidity.Frontend.Checked.Choice.frags [List.length bs] :: rest) = some ([mk bs], rest)
+'Solidity.Frontend.ExpressionUniqueness.fragsP_single' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.fragsP_leading_empty
+  (mk : Solidity.Frontend.Checked.Bytes → Solidity.Frontend.Checked.Tok) (bs : Solidity.Frontend.Checked.Bytes)
+  (rest : List Solidity.Frontend.Checked.Choice) :
+  Solidity.Source.fragsP mk bs (Solidity.Frontend.Checked.Choice.frags [0, List.length bs] :: rest) =
+    some ([mk [], mk bs], rest)
+'Solidity.Frontend.ExpressionUniqueness.fragsP_leading_empty' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.fragment_layouts_distinct (bs : Solidity.Frontend.Checked.Bytes) :
+  [Solidity.Frontend.Checked.Choice.frags [List.length bs]] ≠
+    [Solidity.Frontend.Checked.Choice.frags [0, List.length bs]]
+'Solidity.Frontend.ExpressionUniqueness.fragment_layouts_distinct' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.refused_of_node_false {c : Solidity.Source.Cat} {e : Solidity.Source.Syn c}
+  (h : e.precNode = false) : e.prec = false
+'Solidity.Frontend.ExpressionUniqueness.refused_of_node_false' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.prefix_suffix_refused (o : Solidity.Source.PrefixOp)
+  (q : Solidity.Source.SuffixOp) (a : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.unaryPrefix o (Solidity.Source.Syn.unarySuffix q a)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.prefix_suffix_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.suffix_prefix_refused (o : Solidity.Source.PrefixOp)
+  (q : Solidity.Source.SuffixOp) (a : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.unarySuffix q (Solidity.Source.Syn.unaryPrefix o a)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.suffix_prefix_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.conditional_assignment_refused (o : Solidity.Source.AssignOp)
+  (a b c d : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (a.cond b (Solidity.Source.Syn.assign o c d)).prec = false ∧
+    (Solidity.Source.Syn.assign o (a.cond b c) d).prec = false
+'Solidity.Frontend.ExpressionUniqueness.conditional_assignment_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.postfix_bases_refused (q r : Solidity.Source.SuffixOp)
+  (a : Solidity.Source.Syn Solidity.Source.Cat.expr) (i j : Solidity.Source.Syn Solidity.Source.Cat.expr.opt)
+  (name : String) (arg : Solidity.Source.Syn Solidity.Source.Cat.namedArg)
+  (args : Solidity.Source.Syn Solidity.Source.Cat.namedArg.list)
+  (callArgs : Solidity.Source.Syn Solidity.Source.Cat.callArgs) :
+  ((Solidity.Source.Syn.unarySuffix q a).index i).prec = false ∧
+    ((Solidity.Source.Syn.unarySuffix q a).slice i j).prec = false ∧
+      ((Solidity.Source.Syn.unarySuffix q a).member name).prec = false ∧
+        ((Solidity.Source.Syn.unarySuffix q a).callOptions arg args).prec = false ∧
+          ((Solidity.Source.Syn.unarySuffix q a).call callArgs).prec = false ∧
+            (Solidity.Source.Syn.unarySuffix r (Solidity.Source.Syn.unarySuffix q a)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.postfix_bases_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.new_bases_refused (t : Solidity.Source.Syn Solidity.Source.Cat.typeName)
+  (i j : Solidity.Source.Syn Solidity.Source.Cat.expr.opt) (name : String) :
+  (t.new.index i).prec = false ∧ (t.new.slice i j).prec = false ∧ (t.new.member name).prec = false
+'Solidity.Frontend.ExpressionUniqueness.new_bases_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.or_right_nested_refused (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (a.or (b.or c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.or_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.and_right_nested_refused (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (a.and (b.and c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.and_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.equality_right_nested_refused (o q : Solidity.Source.EqOp)
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.equality o a (Solidity.Source.Syn.equality q b c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.equality_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.order_right_nested_refused (o q : Solidity.Source.OrderOp)
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.order o a (Solidity.Source.Syn.order q b c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.order_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.bitOr_right_nested_refused
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) : (a.bitOr (b.bitOr c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.bitOr_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.bitXor_right_nested_refused
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) : (a.bitXor (b.bitXor c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.bitXor_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.bitAnd_right_nested_refused
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) : (a.bitAnd (b.bitAnd c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.bitAnd_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.shift_right_nested_refused (o q : Solidity.Source.ShiftOp)
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.shift o a (Solidity.Source.Syn.shift q b c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.shift_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.addSub_right_nested_refused (o q : Solidity.Source.AddOp)
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.addSub o a (Solidity.Source.Syn.addSub q b c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.addSub_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.mulDivMod_right_nested_refused (o q : Solidity.Source.MulOp)
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.mulDivMod o a (Solidity.Source.Syn.mulDivMod q b c)).prec = false
+'Solidity.Frontend.ExpressionUniqueness.mulDivMod_right_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.exp_left_nested_refused (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  ((a.exp b).exp c).prec = false
+'Solidity.Frontend.ExpressionUniqueness.exp_left_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.conditional_left_nested_refused
+  (a b c d e : Solidity.Source.Syn Solidity.Source.Cat.expr) : ((a.cond b c).cond d e).prec = false
+'Solidity.Frontend.ExpressionUniqueness.conditional_left_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.assignment_left_nested_refused (o q : Solidity.Source.AssignOp)
+  (a b c : Solidity.Source.Syn Solidity.Source.Cat.expr) :
+  (Solidity.Source.Syn.assign o (Solidity.Source.Syn.assign q a b) c).prec = false
+'Solidity.Frontend.ExpressionUniqueness.assignment_left_nested_refused' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique : Prop
+'Solidity.Frontend.ExpressionUniqueness.CertifiedYieldUnique' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.Bracket : Type
+'Solidity.Frontend.ExpressionUniqueness.Bracket' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.openTok :
+  Solidity.Frontend.ExpressionUniqueness.Bracket → Solidity.Frontend.Checked.Tok
+'Solidity.Frontend.ExpressionUniqueness.openTok' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.closeTok :
+  Solidity.Frontend.ExpressionUniqueness.Bracket → Solidity.Frontend.Checked.Tok
+'Solidity.Frontend.ExpressionUniqueness.closeTok' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.bracket :
+  Solidity.Frontend.Checked.Tok → Option (Bool × Solidity.Frontend.ExpressionUniqueness.Bracket)
+'Solidity.Frontend.ExpressionUniqueness.bracket' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.pop (k : Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  List Solidity.Frontend.ExpressionUniqueness.Bracket → Option (List Solidity.Frontend.ExpressionUniqueness.Bracket)
+'Solidity.Frontend.ExpressionUniqueness.pop' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.step (s : List Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (t : Solidity.Frontend.Checked.Tok) : Option (List Solidity.Frontend.ExpressionUniqueness.Bracket)
+'Solidity.Frontend.ExpressionUniqueness.step' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.run (s : List Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  List Solidity.Frontend.Checked.Tok → Option (List Solidity.Frontend.ExpressionUniqueness.Bracket)
+'Solidity.Frontend.ExpressionUniqueness.run' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.Balanced (ts : List Solidity.Frontend.Checked.Tok) : Prop
+'Solidity.Frontend.ExpressionUniqueness.Balanced' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.open_close_disjoint (a b : Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  Solidity.Frontend.ExpressionUniqueness.openTok a ≠ Solidity.Frontend.ExpressionUniqueness.closeTok b
+'Solidity.Frontend.ExpressionUniqueness.open_close_disjoint' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.step_suffix (t : Solidity.Frontend.Checked.Tok)
+  (s next tail : List Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (h : Solidity.Frontend.ExpressionUniqueness.step s t = some next) :
+  Solidity.Frontend.ExpressionUniqueness.step (s ++ tail) t = some (next ++ tail)
+'Solidity.Frontend.ExpressionUniqueness.step_suffix' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.run_suffix (ts : List Solidity.Frontend.Checked.Tok)
+  (s next tail : List Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (h : Solidity.Frontend.ExpressionUniqueness.run s ts = some next) :
+  Solidity.Frontend.ExpressionUniqueness.run (s ++ tail) ts = some (next ++ tail)
+'Solidity.Frontend.ExpressionUniqueness.run_suffix' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.balanced_iff_empty (ts : List Solidity.Frontend.Checked.Tok) :
+  Solidity.Frontend.ExpressionUniqueness.Balanced ts ↔ Solidity.Frontend.ExpressionUniqueness.run [] ts = some []
+'Solidity.Frontend.ExpressionUniqueness.balanced_iff_empty' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.run_append (xs ys : List Solidity.Frontend.Checked.Tok)
+  (s : List Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  Solidity.Frontend.ExpressionUniqueness.run s (xs ++ ys) =
+    (Solidity.Frontend.ExpressionUniqueness.run s xs).bind fun next =>
+      Solidity.Frontend.ExpressionUniqueness.run next ys
+'Solidity.Frontend.ExpressionUniqueness.run_append' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.balanced_nil : Solidity.Frontend.ExpressionUniqueness.Balanced []
+'Solidity.Frontend.ExpressionUniqueness.balanced_nil' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.balanced_append {xs ys : List Solidity.Frontend.Checked.Tok}
+  (hx : Solidity.Frontend.ExpressionUniqueness.Balanced xs) (hy : Solidity.Frontend.ExpressionUniqueness.Balanced ys) :
+  Solidity.Frontend.ExpressionUniqueness.Balanced (xs ++ ys)
+'Solidity.Frontend.ExpressionUniqueness.balanced_append' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.balanced_atom {t : Solidity.Frontend.Checked.Tok}
+  (h : Solidity.Frontend.ExpressionUniqueness.bracket t = none) : Solidity.Frontend.ExpressionUniqueness.Balanced [t]
+'Solidity.Frontend.ExpressionUniqueness.balanced_atom' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.step_open (k : Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (s : List Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  Solidity.Frontend.ExpressionUniqueness.step s (Solidity.Frontend.ExpressionUniqueness.openTok k) = some (k :: s)
+'Solidity.Frontend.ExpressionUniqueness.step_open' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.step_close (k : Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (s : List Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  Solidity.Frontend.ExpressionUniqueness.step (k :: s) (Solidity.Frontend.ExpressionUniqueness.closeTok k) = some s
+'Solidity.Frontend.ExpressionUniqueness.step_close' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.balanced_enclose (k : Solidity.Frontend.ExpressionUniqueness.Bracket)
+  {ts : List Solidity.Frontend.Checked.Tok} (h : Solidity.Frontend.ExpressionUniqueness.Balanced ts) :
+  Solidity.Frontend.ExpressionUniqueness.Balanced
+    (Solidity.Frontend.ExpressionUniqueness.openTok k :: (ts ++ [Solidity.Frontend.ExpressionUniqueness.closeTok k]))
+'Solidity.Frontend.ExpressionUniqueness.balanced_enclose' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.balanced_not_close (k : Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (ts : List Solidity.Frontend.Checked.Tok) :
+  ¬Solidity.Frontend.ExpressionUniqueness.Balanced (Solidity.Frontend.ExpressionUniqueness.closeTok k :: ts)
+'Solidity.Frontend.ExpressionUniqueness.balanced_not_close' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.skip (p : Solidity.Frontend.Checked.Tok → Bool)
+  (s : List Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  List Solidity.Frontend.Checked.Tok → Option (List Solidity.Frontend.ExpressionUniqueness.Bracket)
+'Solidity.Frontend.ExpressionUniqueness.skip' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.offset (n : Nat) (r : Nat × Solidity.Frontend.Checked.Tok) :
+  Nat × Solidity.Frontend.Checked.Tok
+'Solidity.Frontend.ExpressionUniqueness.offset' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.firstTop (p : Solidity.Frontend.Checked.Tok → Bool)
+  (s : List Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  List Solidity.Frontend.Checked.Tok → Option (Nat × Solidity.Frontend.Checked.Tok)
+'Solidity.Frontend.ExpressionUniqueness.firstTop' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.skip_append (p : Solidity.Frontend.Checked.Tok → Bool)
+  (xs ys : List Solidity.Frontend.Checked.Tok) (s : List Solidity.Frontend.ExpressionUniqueness.Bracket) :
+  Solidity.Frontend.ExpressionUniqueness.skip p s (xs ++ ys) =
+    (Solidity.Frontend.ExpressionUniqueness.skip p s xs).bind fun next =>
+      Solidity.Frontend.ExpressionUniqueness.skip p next ys
+'Solidity.Frontend.ExpressionUniqueness.skip_append' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.skip_inside (p : Solidity.Frontend.Checked.Tok → Bool)
+  (ts : List Solidity.Frontend.Checked.Tok) (s next tail : List Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (hne : tail ≠ []) (h : Solidity.Frontend.ExpressionUniqueness.run s ts = some next) :
+  Solidity.Frontend.ExpressionUniqueness.skip p (s ++ tail) ts = some (next ++ tail)
+'Solidity.Frontend.ExpressionUniqueness.skip_inside' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.skip_enclose (p : Solidity.Frontend.Checked.Tok → Bool)
+  (k : Solidity.Frontend.ExpressionUniqueness.Bracket) {ts : List Solidity.Frontend.Checked.Tok}
+  (h : Solidity.Frontend.ExpressionUniqueness.Balanced ts)
+  (hop : p (Solidity.Frontend.ExpressionUniqueness.openTok k) = false) :
+  Solidity.Frontend.ExpressionUniqueness.skip p []
+      (Solidity.Frontend.ExpressionUniqueness.openTok k ::
+        (ts ++ [Solidity.Frontend.ExpressionUniqueness.closeTok k])) =
+    some []
+'Solidity.Frontend.ExpressionUniqueness.skip_enclose' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.nest :
+  List Solidity.Frontend.ExpressionUniqueness.Bracket →
+    List Solidity.Frontend.Checked.Tok → List Solidity.Frontend.Checked.Tok
+'Solidity.Frontend.ExpressionUniqueness.nest' does not depend on any axioms
+Solidity.Frontend.ExpressionUniqueness.balanced_nest (ks : List Solidity.Frontend.ExpressionUniqueness.Bracket)
+  {ts : List Solidity.Frontend.Checked.Tok} (h : Solidity.Frontend.ExpressionUniqueness.Balanced ts) :
+  Solidity.Frontend.ExpressionUniqueness.Balanced (Solidity.Frontend.ExpressionUniqueness.nest ks ts)
+'Solidity.Frontend.ExpressionUniqueness.balanced_nest' depends on axioms: [propext, Quot.sound]
+Solidity.Frontend.ExpressionUniqueness.firstTop_append_of_skip (p : Solidity.Frontend.Checked.Tok → Bool)
+  (xs ys : List Solidity.Frontend.Checked.Tok) (s next : List Solidity.Frontend.ExpressionUniqueness.Bracket)
+  (h : Solidity.Frontend.ExpressionUniqueness.skip p s xs = some next) :
+  Solidity.Frontend.ExpressionUniqueness.firstTop p s (xs ++ ys) =
+    Option.map (Solidity.Frontend.ExpressionUniqueness.offset xs.length)
+      (Solidity.Frontend.ExpressionUniqueness.firstTop p next ys)
+'Solidity.Frontend.ExpressionUniqueness.firstTop_append_of_skip' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.firstTop_marker (p : Solidity.Frontend.Checked.Tok → Bool)
+  (xs ys : List Solidity.Frontend.Checked.Tok) (t : Solidity.Frontend.Checked.Tok)
+  (h : Solidity.Frontend.ExpressionUniqueness.skip p [] xs = some []) (hp : p t = true) :
+  Solidity.Frontend.ExpressionUniqueness.firstTop p [] (xs ++ t :: ys) = some (xs.length, t)
+'Solidity.Frontend.ExpressionUniqueness.firstTop_marker' depends on axioms: [propext]
+Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique (p : Solidity.Frontend.Checked.Tok → Bool)
+  (xs ys xs' ys' : List Solidity.Frontend.Checked.Tok) (t t' : Solidity.Frontend.Checked.Tok)
+  (hx : Solidity.Frontend.ExpressionUniqueness.skip p [] xs = some [])
+  (hx' : Solidity.Frontend.ExpressionUniqueness.skip p [] xs' = some []) (ht : p t = true) (ht' : p t' = true)
+  (heq : xs ++ t :: ys = xs' ++ t' :: ys') : xs = xs' ∧ t = t' ∧ ys = ys'
+'Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique' depends on axioms: [propext]

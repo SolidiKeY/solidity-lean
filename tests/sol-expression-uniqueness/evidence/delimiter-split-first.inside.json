@@ -1,0 +1,14 @@
+{
+  "command": [
+    "bash",
+    "-c",
+    "set -eu; scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExpressionUniqueness/TokenSplit.lean; scripts/coord-tools/lean-mcp stop"
+  ],
+  "exit": 1,
+  "wall_seconds": 3.40584557499983,
+  "child_peak_rss_kib": 12672,
+  "sampled_cgroup_peak_bytes": 461905920,
+  "memory_max": 12884901888,
+  "memory_swap_max": 0,
+  "lean_num_threads": 1
+}
