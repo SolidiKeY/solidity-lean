@@ -42,9 +42,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 814 source declarations with source signatures;
+`declarations.json` enumerates all 917 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The forty-nine modules are proposed for coordinator registration, with module-map rows,
+The fifty-eight modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -129,7 +129,16 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `UnaryControls` | All prefix/grouped-suffix operators have arbitrary-depth inhabited exact yields and markers, retaining ungrouped nesting refusals. |
 | `LayoutBoundary` | Existing printer extension/trimming composition and complete expression-category closure; actual partial expression yields obtain fully consumed Derives witnesses. |
 | `RootLevels` | Original certified root levels agree whenever either is<=14, also for independent partial layouts. Postfix15 versus primary16 remains open. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 814 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `LastEnclosure` | Arbitrary trailing balanced enclosures reconstruct their payload and preceding word using the existing mirrored first-cut theorem. |
+| `PostfixYieldSplit` | Actual index/slice/call/options/namedArg executions invert into existing child states; callArgs gives its genuine balanced parentheses payload. |
+| `PostfixSpans` | Actual index/slice/call/options children reconstruct; index and slice roots are disjoint; options preserve the full tail word vector. |
+| `MemberSpans` | Member/namedArg names and child words reconstruct, including arbitrary strings and the special member address token. |
+| `StartAlgebra` | Balanced first-token invariant forbids only an initial opening brace, allowing arbitrary later braces. |
+| `ExpressionStart` | All29expression/type/param/argument closure derives that first-token invariant; callOptions uses its actual nonempty base. |
+| `ArgumentWords` | Actual expr/namedArg list components are nonempty; full comma-vector uniqueness permits empty lists and handles the generic empty-word collision. |
+| `ArgumentSpans` | Positional/named arguments are disjoint and reconstruct their actual component vectors, including empty lists. |
+| `PostfixControls` | Arbitrary mixedall5postfix tower has exact inhabited certificates and family identity; arbitrary optional holes refute false nonemptiness generalization. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 917 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -170,13 +179,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-unary-final.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-postfix-final.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-unary-final.inside.json`. It took 33.475511 seconds, child peak RSS
-259028 KiB, exact container peak 841744384 bytes, minimum parent headroom
-15565615104 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-postfix-final.inside.json`. It took 38.161475 seconds, child peak RSS
+260780 KiB, exact container peak 856805376 bytes, minimum parent headroom
+15530790912 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -188,10 +197,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these forty-nine modules lack central root imports. The orphan gate
-reported the same forty-nine. Source trust passed (3721 sources, zero findings), and
+check: exactly these fifty-eight modules lack central root imports. The orphan gate
+reported the same fifty-eight. Source trust passed (3730 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 814 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 917 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -486,3 +495,47 @@ The local49 registration count describes the original pinned checkout and
 includes Fragments already integrated on published master; the manifest records
 that integration separately so the coordinator can deduplicate registration.
 No remaining work is claimed integrated and no rebase/reset/merge occurred.
+
+
+## Postfix and argument child-word checkpoint
+
+Nine modules add103 declarations, giving58modules and917 declarations. Trailing
+balanced enclosures reconstruct arbitrary preceding words and balanced payloads
+by mirroring the existing first-cut theorem. Actual existing printer inversions
+supply child executions/states. Index, slice, member, options and call each
+recover their child words; slices recover both optional endpoints through the
+conditional-colon result. Index and slice roots are disjoint from actual yields,
+even before precedence checking. Member/namedArg names reconstruct at every
+string, including the special member address token. Options reconstruct their
+first argument word and entire tail word vector, retaining individual words.
+
+The complete29expression/type/parameter/argument closure cannot begin with an
+opening brace. This is strictly a first-token fact: later and enclosed braces
+remain allowed; callOptions uses its nonempty actual base. Actual expr/namedArg
+list components are nonempty while empty lists remain allowed. Derived comma
+freedom/nonemptiness reconstructs positional/named argument vectors without a
+split premise, and the two argument constructors are disjoint. Optional tuple
+holes are not subjected to that nonemptiness property: an arbitrary-hole family
+prints empty components and refutes any such extension.
+
+An arbitrary-depth mixed postfix tower includes all five postfix constructors
+per step, has an inhabited original certificate and exact14*n+1 token length,
+and has same-yield family-tree uniqueness. This is an intrinsic syntax control,
+not an additional external compiler or semantic claim. All130 previous exactpin
+external parsing observations remain separate. General postfix cross-root
+classification, postfix15 versus primary16, primary/new-type greedy boundaries
+and recursive type/list/argument/child-tree identities remain open, as do the
+public theorem and parseCat accepted-tree corollary. No original premise, scope,
+exclusion, refusal, source interface or budget changed.
+
+All nine modules pass diagnostics and exact actual kernel signature/axiom gates.
+The first broad control simplification exhausted the unchanged200000heartbeats;
+explicit original-node certificate assembly fixed it at the same budget.
+Initial indexed-induction, token normalization and overloaded-negation attempts
+remain retained. One unused mirror simp argument was removed; final kernel
+signature logs have no owned warning. Independent read-only finder/skeptic source
+reviews accepted this partial checkpoint without defects or Lean-server use;
+records are in `evidence/reviews-postfix.json`. Current-source acceptance and
+917 exact standard-only axiom pins pass. Fresh published-master verification
+hashes all8pinnedinputs and the integrated Fragments against this checkout;
+all match (`evidence/published-master-verification.json`).

@@ -15,13 +15,13 @@
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
     "status": "partial",
-    "evidence": "Raw delimiter, comma, operand-state and conditional-counter algebra proved at arbitrary lengths; all expression yields pair top-level question/colon punctuation while actual enclosures shield internal colons. High-root decomposition remains open."
+    "evidence": "Arbitrary balanced first/last enclosure, comma, operand-state and conditional-counter cuts proved and derived from actual yields. All5postfix child word spans reconstruct; maximal primary/new-type decomposition remains open."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "All binary/assignment/conditional/unary child token spans and operators reconstruct. Original certified root levels agree whenever either root is<=14, including arbitrary partial executions via fresh fully consumed witnesses. Postfix15 versus primary16 and recursive identity remain open."
+    "evidence": "Rootlevels agree whenever either<=14. All5postfix families recover actual child words/states; index/slice and positional/named roots separate. Complete postfix cross-root and15versus16 classification remain open."
   },
   {
     "id": "EU-05",
@@ -33,7 +33,7 @@
     "id": "EU-06",
     "obligation": "primary/type/tuple/list/option/call argument uniqueness",
     "status": "partial",
-    "evidence": "Literal families, optional absence/presence, grouping inversion and certified comma component token spans proved. Recursive type/list/call/postfix tree uniqueness and full yield-to-component inversion remain open."
+    "evidence": "Literal/optional/grouping results retained; all5postfix actual child spans, member/namedArg names and positional/named component vectors now reconstruct. Recursive type/list/argument/tree identity and primary/postfix cross-root classification remain open."
   },
   {
     "id": "EU-07",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "All6prefix operators and both grouped-suffix operators have arbitrary-depth inhabited exact-yield/prec/marker controls; ungrouped suffix nesting remains refused. Prior conditional/additive/delimiter controls retained. Full boundary acceptance remains open."
+    "evidence": "Arbitrary mixedpostfix tower uses all5constructors/step with inhabited exact originalcerts,14n+1length and familyuniqueness. Arbitrary optional-hole words refute a false extension of argument nonemptiness. Prior families retained; full boundary acceptance remains open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "49 modules/814 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
+    "evidence": "58 modules/917 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at49 frozen registrations; trust3721zero/layers559zero pass; central axiom inventory zero errors but814 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at58 pinned-local frozen registrations; trust3730zero/layers559zero pass; central axiom inventory zero errors but917 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted unary freedom/root/span/controls, layout extension/trimming and combined root-level reconstruction, without defects or Lean-server use. See evidence/reviews-unary.json."
+    "evidence": "Separate finder/skeptic accepted trailing cuts, all5postfix spans, address/name reconstruction, exhaustive first-token closure, argument vectors/disjointness and arbitrary mixed/hole controls. No defects or Lean-server use. See evidence/reviews-postfix.json."
   },
   {
     "id": "EU-14",

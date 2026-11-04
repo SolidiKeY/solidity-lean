@@ -223,6 +223,50 @@
     "propext",
     "Quot.sound"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.positional_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.named_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.ArgumentVectorSpans": [],
+  "Solidity.Frontend.ExpressionUniqueness.positional_argument_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.named_argument_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.positional_named_yields_disjoint": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.NonemptyWords": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_commaSep": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.commaSep_nonempty_word_head": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.commaSep_unique_nonempty_words": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.namedArg_yield_nonemptyWord": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.ArgumentVectorProperty": [],
+  "Solidity.Frontend.ExpressionUniqueness.argument_vector_property": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.expressionList_yield_nonemptyWords": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.namedArgList_yield_nonemptyWords": [
+    "propext",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.BalancedAttrs": [],
   "Solidity.Frontend.ExpressionUniqueness.balancedAttrs_append": [
     "propext"
@@ -1096,6 +1140,14 @@
     "propext",
     "Quot.sound"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_startFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.expr_yield_noInitialCurly": [
+    "propext",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.UnaryYieldProperty": [],
   "Solidity.Frontend.ExpressionUniqueness.expression_unary_property": [
     "propext",
@@ -1336,6 +1388,22 @@
     "propext",
     "Quot.sound"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.last_enclosed_cut_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.last_parens_cut_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.last_square_cut_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.last_braces_cut_unique": [
+    "propext",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.LayoutExtend": [],
   "Solidity.Frontend.ExpressionUniqueness.LayoutTrim": [],
   "Solidity.Frontend.ExpressionUniqueness.LayoutPrinter": [],
@@ -1535,6 +1603,22 @@
     "Classical.choice",
     "Quot.sound"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.memberToken": [],
+  "Solidity.Frontend.ExpressionUniqueness.member_word_single": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.memberToken_injective": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.member_yield_parts": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.member_child_spans": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.namedArg_child_spans": [
+    "propext"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.ModeState": [],
   "Solidity.Frontend.ExpressionUniqueness.modeToken": [],
   "Solidity.Frontend.ExpressionUniqueness.modeStep": [],
@@ -1675,6 +1759,76 @@
     "Quot.sound"
   ],
   "Solidity.Frontend.ExpressionUniqueness.attrsP_modeStable": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.pair_pure_success_join": [],
+  "Solidity.Frontend.ExpressionUniqueness.triple_pure_success_join": [],
+  "Solidity.Frontend.ExpressionUniqueness.postfixStep": [],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTail": [],
+  "Solidity.Frontend.ExpressionUniqueness.postfixStep_prec": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.postfixStep_yield": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTower": [],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTowerTokens": [],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTower_prec": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTower_yield": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTower_certified": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTowerTokens_length": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.postfixTower_same_yield_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.optionalHoles": [],
+  "Solidity.Frontend.ExpressionUniqueness.optionalHoles_yield": [],
+  "Solidity.Frontend.ExpressionUniqueness.optionalHoles_nonemptyWords_refuted": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.expressionList_empty_component_impossible": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.PairYieldSpans": [],
+  "Solidity.Frontend.ExpressionUniqueness.TripleYieldSpans": [],
+  "Solidity.Frontend.ExpressionUniqueness.index_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.slice_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.index_slice_yields_disjoint": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.call_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.options_child_spans": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.triple_pure_success_split": [],
+  "Solidity.Frontend.ExpressionUniqueness.index_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.slice_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.call_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.options_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.namedArg_yield_parts": [],
+  "Solidity.Frontend.ExpressionUniqueness.callArgs_yield_parens": [
     "propext",
     "Quot.sound"
   ],
@@ -1932,6 +2086,128 @@
     "Quot.sound"
   ],
   "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_same_yield_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.NoInitialCurly": [],
+  "Solidity.Frontend.ExpressionUniqueness.StartFree": [],
+  "Solidity.Frontend.ExpressionUniqueness.StartFreeItems": [],
+  "Solidity.Frontend.ExpressionUniqueness.curlyHead": [],
+  "Solidity.Frontend.ExpressionUniqueness.noInitialCurly_nil": [],
+  "Solidity.Frontend.ExpressionUniqueness.noInitialCurly_append_any": [],
+  "Solidity.Frontend.ExpressionUniqueness.noInitialCurly_append": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_nil": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_balanced": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFreeItems_balanced": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_append": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_append_any": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_atom": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFreeItems_nil": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFreeItems_cons": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFreeItems_single": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFreeItems_dropHead": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFreeItems_flatten": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_flatMap": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_of_atoms": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_parens": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_square": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_tk": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_idt": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_path": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_elem": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_visibility": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_mutability": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_dataLoc": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_optToks": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_prefix": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_suffix": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_mul": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_add": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_shift": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_order": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_equality": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_assign": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.fragsP_startFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.litP_startFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.StartFreeAttrs": [],
+  "Solidity.Frontend.ExpressionUniqueness.startFreeAttrs_append": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.startFree_single": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.arrange_startFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.attrsP_startFree": [
     "propext",
     "Quot.sound"
   ],

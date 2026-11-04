@@ -1,6 +1,6 @@
 {
-  "proof_stem": "checkpoint-proof-unary-final",
-  "proof_gate_dir": "checkpoint-gates-unary-final",
-  "signature_stem": "signature-audit-unary-final",
-  "signature_gate_dir": "signature-gates-unary-final"
+  "proof_stem": "checkpoint-proof-postfix-final",
+  "proof_gate_dir": "checkpoint-gates-postfix-final",
+  "signature_stem": "signature-audit-postfix-final",
+  "signature_gate_dir": "signature-gates-postfix-final"
 }
