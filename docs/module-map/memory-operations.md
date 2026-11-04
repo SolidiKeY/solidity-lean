@@ -238,3 +238,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceUintAlias.lean` | Dynamic uint contents-aware Source/native/word aliasing with strong Objects/allocator frames and reached different-capacity read rejection. |
 
 | `Solidity/Backend/MemoryOps/SourceUintAliasWrite.lean` | Reached dynamic uint alias-to-write Source Items/native Prog/whole strong word append, preserving Objects and allocator frames. |
+
+| `Solidity/Backend/MemoryOps/SourceUintAliasDelete.lean` | Actual reached dynamic uint alias/delete Source Items/native Prog/whole word success and bounds rejection, strong prefix/final frames. |

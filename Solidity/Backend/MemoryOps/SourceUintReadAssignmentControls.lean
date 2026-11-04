@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceUintAliasDelete
 import Solidity.Backend.MemoryOps.SourceUintAliasWrite
 import Solidity.Backend.MemoryOps.SourceUintAlias
 import Solidity.Backend.MemoryOps.SourceUintReadSequence
@@ -1080,5 +1081,232 @@ theorem dynamic_uint_alias_write_timeout (p : Roadmap.Pipeline) :
 #guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_negatives
 /-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_timeout
+
+private def deletionNative (self : Bool) : Heap H :=
+  hp.set (aliasRef self) (MObj.setElem .dyn (hp.get (aliasRef self)) 1 (u 0))
+private def deletionFinal (self : Bool) : Source.EMState E0 Γ :=
+  ((mutationMid self).1,{(mutationMid self).2 with heap := (mutationMid self).2.heap.write (aliasAddress self) (sourceUintMemory ((if self then old else next).set 1 (u 0))) (by cases self <;> rfl)})
+private def deletionTarget (self : Bool) : Machine :=
+  writeMachine (mutationPointer self) ((base (aliasRef self).id).val+2) w[0]
+
+private theorem deletion_source (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintIndexedDelete dr di)).run (mutationMid self)=
+      (.ok Source.RVal.unit,deletionFinal self) := by
+  first
+  | solve | simp only [] | omega
+  | have initial : SourceUintMemoryAt (mutationMid self) (aliasAddress self) hp (aliasRef self) .dyn := by
+      cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+    have contents : (mutationMid self).2.heap.get (aliasAddress self)=
+        some ⟨SA,sourceUintMemory (if self then old else next)⟩ := by cases self <;> rfl
+    obtain ⟨ht,write⟩ := source_uint_write (mutationMid self) (aliasAddress self) (if self then old else next)
+      contents 1 (by cases self <;> decide) (u 0)
+    have actual : (Source.deleteLoc F0 (fuel+2) (τ := .int .u256) (.mem (aliasAddress self) (u 1).1.toNat)).run
+        (mutationMid self)=(.ok (),deletionFinal self) := write
+    exact initial.eval_delete_of_run (G0 p) F0 fuel dr di (u 1)
+      (by cases self <;> rfl) rfl
+      (by cases self <;> simp only [aliasRef,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide) actual
+
+private theorem delete_one_run (m : Machine) (a : Fin W) (n : Nat) (hn : n<W) (hi : 1<n)
+    (space : a.val+2<W) (hp : m.mem 3=.val a) (hx : m.mem 6=w[1])
+    (hh : m.mem a.val=.val (wmod n)) :
+    run (uintAliasDeleteCode (C := C) 1 dt it) m=.ok (writeMachine m (a.val+2) w[0]) 0 := by
+  first
+  | solve | simp only [] | omega
+  | change run ([.push w[0]]++([.mload 3]++([.mload 6]++Objects.writeCode (.dyn : ArrTy A (.prim .uint))))) m=_
+    rw [run_append_ok (show run [.push w[0]] m=.ok (m.push w[0]) 0 from rfl)]
+    rw [run_append_ok (show run [.mload 3] (m.push w[0])=.ok ((m.push w[0]).push (.val a)) 0 from by
+      change Out.ok ((m.push w[0]).push (m.mem 3)) 0=_;rw [hp])]
+    rw [run_append_ok (show run [.mload 6] ((m.push w[0]).push (.val a))=
+        .ok (((m.push w[0]).push (.val a)).push w[1]) 0 from by
+      change Out.ok (((m.push w[0]).push (.val a)).push (m.mem 6)) 0=_;rw [hx])]
+    have addr := arrayAddrStack_run (m.push w[0]) a ⟨1,by decide⟩ n hn hh
+    rw [if_pos hi] at addr
+    change run (arrayAddrStackCode++[.mstoreAt]) (((m.push w[0]).push (.val a)).push w[1])=_
+    rw [run_append_ok addr]
+    simp only [run,Machine.push,exec_cons_zero,Instr.step,wmod_of_lt space,Out.ok_bind,exec_nil,writeMachine]
+
+private theorem deletion_word (self : Bool) :
+    run (uintAliasDeleteCode (C := C) 1 dt it) (mutationPointer self)=.ok (deletionTarget self) 0 := by
+  first
+  | solve | simp only [] | omega
+  | exact delete_one_run (mutationPointer self) (base (aliasRef self).id) (if self then 3 else 2)
+      (by cases self <;> decide) (by cases self <;> decide) (by cases self <;> decide)
+      (by cases self <;> rfl) (by cases self <;> rfl) (by cases self <;> rfl)
+
+/-- Both original pipelines execute the real alias/deletion Source program,
+native delete and complete existing word append, deriving the final identities. -/
+theorem dynamic_uint_alias_delete_concrete (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    (Source.execItems (G0 p) F0 (fuel+6) Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+        (.stmt (.expr (sourceUintIndexedDelete dr di)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (deletionFinal self).1),(.nil,(deletionFinal self).2)) ∧
+    Prog.run (state false 1 42) (.cons (.rebindMem dt (.alias (.var (aliasTarget self) rfl)))
+      (.cons (.deleteMem (.loc (.index .dyn (.var dt rfl) (.simple (.local it)))) rfl) .nil))=
+      .ok ⟨((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (deletionNative self),List.prefix_refl _⟩ ∧
+    run (aliasLocalCode 1 dt (aliasTarget self)++uintAliasDeleteCode (C := C) 1 dt it)
+      (machine false 1 42)=.ok (deletionTarget self) 0 ∧
+    SourceUintMemoryAt (deletionFinal self) (aliasAddress self) (deletionNative self) (aliasRef self) .dyn ∧
+    Source.MemOK E0 SH (deletionFinal self) ∧
+    Objects.StateRepr 1 1 8 (Frag.init Δ)
+      (((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (deletionNative self)) base (deletionTarget self) ∧
+    Objects.AllocatorRepr (deletionNative self) base 8 ⟨40,by decide⟩ (deletionTarget self) := by
+  first
+  | solve | simp only [] | omega
+  | have initial : SourceUintMemoryAt (sy false 1 42) (aliasAddress self) hp (aliasRef self) .dyn := by
+      cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+    have sourceRoot : (sy false 1 42).1.get (aliasSource self)=.memRef rfl (aliasAddress self) := by cases self <;> rfl
+    have targetRoot : TEnv.get (aliasTarget self) (state false 1 42).env=some (aliasRef self) := by cases self <;> rfl
+    have bound : (u 1).1.toNat<hp.len (aliasRef self) .dyn := by
+      cases self <;> simp only [aliasRef,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide
+    obtain ⟨out,z,target,first,second,items,aliasNative,native,prog,write,selected,new,mok,aliasCode,code,whole,repr,alloc,rest⟩ :=
+      source_uint_alias_delete_word (G0 p) F0 fuel (sy false 1 42) dr (aliasSource self) di
+        (aliasAddress self) (u 1) sourceRoot rfl SH (memOK false 1 42)
+        (state false 1 42) dt (aliasTarget self) it (aliasRef self) targetRoot rfl initial bound
+        (initial_repr false 1 42) (allocator false 1 42) (by decide) rfl
+    have knownWrite : hp.writeAddr (.index (aliasRef self) .dyn (u 1)) (PrimTy.dflt .uint)=some (deletionNative self) := by
+      have hb : 1<(MObj.elems .dyn (hp.get (aliasRef self))).length := bound
+      simp only [Heap.writeAddr,Heap.setIndex,show (u 1).1.toNat=1 from by decide,if_pos hb,deletionNative]
+      rfl
+    have he : out=deletionNative self := Option.some.inj (write.symm.trans knownWrite)
+    subst out
+    have hz : z=deletionFinal self := congrArg Prod.snd (second.symm.trans (deletion_source p fuel self))
+    subst z
+    have ht : target=deletionTarget self := (Out.ok.inj (code.symm.trans (deletion_word self))).1
+    subst target
+    exact ⟨items,prog,whole,new,mok,repr,alloc⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_concrete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_delete_concrete
+
+/-- Complete initial/alias-prefix/deletion observations of the actual
+executions above, including all represented words, objects and local frames. -/
+theorem dynamic_uint_alias_delete_vectors (self : Bool) :
+    words (machine false 1 42)=
+      [w[40],w[32],w[16],w[16],w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (mutationPointer self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (deletionTarget self)=
+      [w[40],w[32],w[16],(if self then w[16] else w[32]),w[24],w[42],w[1],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],(if self then w[9] else w[0])] ∧
+    objects hp=[old,rhs,next] ∧
+    objects (deletionNative self)=(if self then [old.set 1 (u 0),rhs,next] else [old,rhs,next.set 1 (u 0)]) ∧
+    sourceObjects (sy false 1 42)=
+      [some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    sourceObjects (mutationMid self)=sourceObjects (sy false 1 42) ∧
+    sourceObjects (deletionFinal self)=(if self then
+      [some ⟨SA,sourceUintMemory (old.set 1 (u 0))⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] else
+      [some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory (next.set 1 (u 0))⟩]) ∧
+    (mutationMid self).1=.cons (sourceUint (u 1)) (.cons (sourceUint (u 42)) (.cons (.memRef rfl 1)
+      (.cons (.memRef rfl (aliasAddress self)) (.cons (.memRef rfl 0) (.cons (.memRef rfl 2) .nil))))) ∧
+    (deletionFinal self).1=(mutationMid self).1 ∧
+    (((state false 1 42).setLocal dt (some (aliasRef self))).withHeap (deletionNative self)).env=
+      (u 1,u 42,some right,some (aliasRef self),some left,some neighbor,()) ∧
+    (deletionFinal self).2.ex=(sy false 1 42).2.ex ∧
+    (deletionFinal self).2.events=(sy false 1 42).2.events ∧
+    (deletionFinal self).2.logs=(sy false 1 42).2.logs ∧
+    (deletionFinal self).2.fnLocals=(sy false 1 42).2.fnLocals ∧
+    ({deletionTarget self with mem := (machine false 1 42).mem} : Machine)=machine false 1 42 ∧
+    (deletionTarget self).stack=[w[77],w[88]] ∧ (deletionTarget self).mem 0=w[40] := by
+  first
+  | solve | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,?_,?_,rfl,rfl,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+      · simp only [objects,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn]
+      · simp only [objects,deletionNative,aliasRef,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn,MObj.setElem_dyn]
+      · simp only [sourceObjects,deletionFinal,mutationMid,aliasAddress,Bool.false_eq_true,if_false,if_true,
+          Source.Heap.write_get,Source.Heap.write_other _ (show 0≠2 by decide),
+          Source.Heap.write_other _ (show 1≠2 by decide),Source.Heap.write_other _ (show 1≠0 by decide),
+          Source.Heap.write_other _ (show 2≠0 by decide)]
+        rfl
+
+/-- Actual selected deletion reads zero; omitted deletion reads nine.
+Deleting after self-rebinding and writing42 are discriminated by full words. -/
+theorem dynamic_uint_alias_delete_negatives (p : Roadmap.Pipeline) (fuel : Nat) :
+    words (deletionTarget false)≠words (mutationPointer false) ∧
+    words (deletionTarget false)≠words (deletionTarget true) ∧
+    words (deletionTarget false)≠words (mutationTarget false) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (deletionFinal false)=
+      (.ok (.val (sourceUint (u 0))),deletionFinal false) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (mutationMid false)=
+      (.ok (.val (sourceUint (u 9))),mutationMid false) := by
+  first
+  | solve | simp only [] | omega
+  | refine ⟨by decide,by decide,by decide,?_,(dynamic_uint_alias_write_negatives p fuel).2.2.2.1⟩
+    have represented := (dynamic_uint_alias_delete_concrete p fuel false).2.2.2.1
+    have contents : MObj.elems .dyn ((deletionNative false).get neighbor)=next.set 1 (u 0) := by
+      change MObj.elems .dyn ((hp.set neighbor (MObj.setElem .dyn (hp.get neighbor) 1 (u 0))).get neighbor)=_
+      rw [Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn]
+      rfl
+    have read := represented.eval_index (G0 p) F0 fuel dr di (u 1) rfl rfl
+      (by change (u 1).1.toNat<(MObj.elems .dyn ((deletionNative false).get neighbor)).length
+          rw [contents,List.length_set]
+          decide)
+    simpa only [show aliasRef false=neighbor from rfl,contents] using read
+
+/-- Short Source Items retains the actual alias prefix then times out before
+deleting; no error-local output, rollback or failed target machine is invented. -/
+theorem dynamic_uint_alias_delete_timeout (p : Roadmap.Pipeline) :
+    (Source.execS (G0 p) F0 3 Γ.length none
+      (.expr (sourceLocalAlias dr (aliasSource false)) : Source.RStmt E0 [] false .body Γ Γ)
+      (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.ok (.normal (mutationMid false).1),(.nil,(mutationMid false).2)) ∧
+    (Source.evalE (G0 p) F0 1 (sourceUintIndexedDelete dr di)).run (mutationMid false)=
+      (.error .timeout,mutationMid false) ∧
+    (Source.execItems (G0 p) F0 4 Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource false)))
+        (.stmt (.expr (sourceUintIndexedDelete dr di)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 1 42).1).run (.nil,(sy false 1 42).2)=
+      (.error .timeout,(.nil,(mutationMid false).2)) := by
+  first
+  | solve | simp only [] | omega | rfl
+  | have first := (dynamic_uint_alias_write_timeout p).1
+    have late : (Source.evalE (G0 p) F0 1 (sourceUintIndexedDelete dr di)).run (mutationMid false)=
+        (.error .timeout,mutationMid false) := by cases p <;> rfl
+    have second := source_expr_statement_error (G0 p) F0 1 Γ.length _ _ _ _ late
+    refine ⟨first,late,?_⟩
+    rw [Source.execItems,Source.Hoare.run_bind,first]
+    change ((Source.execItems (G0 p) F0 3 Γ.length none
+      (.stmt (.expr (sourceUintIndexedDelete dr di)) .nil : Source.RItems E0 [] false .body Γ Γ)
+      (mutationMid false).1) >>= fun o => Source.EM.lift (o.up Γ)).run (.nil,(mutationMid false).2)=_
+    rw [Source.Hoare.run_bind,Source.execItems,Source.Hoare.run_bind,second]
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_delete_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_negatives' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_delete_negatives
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_delete_timeout
+
+/-- Selected neighbour length2 rejects index2 after the actual alias, while
+retained LEFT length3 still returns max at the same index. Prefix vectors are
+the complete existing dynamic_uint_alias_vectors, preserved verbatim. -/
+theorem dynamic_uint_alias_delete_endpoint (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+3) (sourceUintIndexedDelete dr di)).run (aliasSourceState false)=
+      (.error (.revert (Source.panicData .index)),aliasSourceState false) ∧
+    (Source.execItems (G0 p) F0 (fuel+6) Γ.length none
+      (.stmt (.expr (sourceLocalAlias dr (aliasSource false)))
+        (.stmt (.expr (sourceUintIndexedDelete dr di)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+        (sy false 2 0).1).run (.nil,(sy false 2 0).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(aliasSourceState false).2)) ∧
+    Prog.run (state false 2 0) (.cons (.rebindMem dt (.alias (.var (aliasTarget false) rfl)))
+      (.cons (.deleteMem (.loc (.index .dyn (.var dt rfl) (.simple (.local it)))) rfl) .nil))=.error .revert ∧
+    run (uintAliasDeleteCode (C := C) 1 dt it) (aliasMachine false)=.revert ∧
+    run (aliasLocalCode 1 dt (aliasTarget false)++uintAliasDeleteCode (C := C) 1 dt it)
+      (machine false 2 0)=.revert ∧
+    (Source.evalE (G0 p) F0 (fuel+2)
+      (.indexArray (.local (.there (.there (.there (.there .here)))) : Source.RExpr E0 Γ SA) (.local di) rfl)).run (aliasSourceState false)=
+      (.ok (.val (sourceUint maximum)),aliasSourceState false) := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨first,alias,second,items,invalid,prog,code,whole,rest⟩ :=
+      source_uint_alias_delete_bounds_word (G0 p) F0 fuel (sy false 2 0) dr (aliasSource false) di 2 (u 2)
+        rfl rfl SH (memOK false 2 0) (state false 2 0) dt (aliasTarget false) it neighbor rfl rfl
+        (alias_at false) (by simp only [Heap.len,Heap.get,Objs.get,hp,neighbor,MObj.elems_dyn];decide)
+        (initial_repr false 2 0) (allocator false 2 0) (by decide)
+    exact ⟨second,items,prog,code,whole,(dynamic_uint_alias_bounds p fuel).2.2.2.2.2⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_delete_endpoint
 
 end Solidity.Backend.MemoryOps.UintReadAssignmentControls

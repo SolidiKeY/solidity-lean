@@ -398,6 +398,7 @@ import Solidity.Backend.MemoryOps.SourceStructDelete
 import Solidity.Backend.MemoryOps.SourceStructGrowth
 import Solidity.Backend.MemoryOps.SourceStructMemory
 import Solidity.Backend.MemoryOps.SourceUintAlias
+import Solidity.Backend.MemoryOps.SourceUintAliasDelete
 import Solidity.Backend.MemoryOps.SourceUintAliasWrite
 import Solidity.Backend.MemoryOps.SourceUintAssignment
 import Solidity.Backend.MemoryOps.SourceUintCompound
