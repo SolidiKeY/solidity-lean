@@ -54,6 +54,11 @@ theorem initializerCounterexample : ∀ (glob : Solidity.Source.Glob Solidity.Yu
 theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawPureInitTimeout.dirty = false := by
   exact Solidity.Yul.Checks.RawPureInitTimeout.Old.dirtyInput.1
 
+/-- Initializer stage only; the separate full-loop dirty-prefix goal remains open. -/
+theorem initializerPrefix : (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).1 = .ok () ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).2 Solidity.Yul.Checks.RawStatementHorizon.flag).val = 1 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).2 Solidity.Yul.Checks.RawStatementHorizon.small).val = 257 := by
+  exact ⟨rfl,rfl,rfl⟩
+
+#print axioms initializerPrefix
 #print axioms Solidity.Yul.RawPureInitTimeout.raw_post_timeout
 #print axioms Solidity.Yul.RawPureInitTimeout.raw_no_post_timeout
 #print axioms Solidity.Yul.RawPureInitTimeout.source_post_timeout
