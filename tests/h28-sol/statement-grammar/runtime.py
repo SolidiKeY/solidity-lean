@@ -25,8 +25,8 @@ def interrupted(signum,frame):
     raise RuntimeError('interrupted by signal '+str(signum))
 
 def main():
-    if len(sys.argv)!=3 or sys.argv[1] not in ('build','diag','gate'):
-        raise SystemExit('usage: runtime.py build MODULE | diag FILE | gate FILE')
+    if len(sys.argv)!=3 or sys.argv[1] not in ('build','diag','gate','solc'):
+        raise SystemExit('usage: runtime.py build MODULE | diag FILE | gate FILE | solc RUNNER')
     mode,target=sys.argv[1:]
     EVIDENCE.mkdir(exist_ok=True)
     out=EVIDENCE/('run-'+str(time.time_ns()));out.mkdir()
@@ -70,11 +70,13 @@ def main():
                 local=ROOT/(dep.replace('.','/')+'.lean')
                 if local.exists():
                     assert (ROOT/'.lake/build/lib/lean'/(dep.replace('.','/')+'.olean')).is_file(), 'prebuild import serially: '+dep
-        inputs=list(ROOT.glob('Solidity/Frontend/StatementGrammarH28/*'))+list(ROOT.glob('tests/h28-sol/statement-grammar/*'))+[ROOT/'Solidity/Source/Syntax.lean',ROOT/'docs/feature-work/h28-statement-grammar.md']+list(ROOT.glob('Solidity/Frontend/Checked/*.lean'))+list(ROOT.glob('tests/upstream/grammar-0.8.38/*.g4'))
+        inputs=list((ROOT/'Solidity/Frontend/StatementGrammarH28').rglob('*'))+list((ROOT/'tests/h28-sol/statement-grammar').rglob('*'))+[ROOT/'Solidity/Source/Syntax.lean',ROOT/'docs/feature-work/h28-statement-grammar.md']+list(ROOT.glob('Solidity/Frontend/Checked/*.lean'))+list(ROOT.glob('tests/upstream/grammar-0.8.38/*.g4'))
         (out/'inputs.json').write_text(json.dumps({str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs if p.is_file()},indent=2))
+        if mode=='solc':assert target=='tests/h28-sol/statement-grammar/solc-fixtures.mjs'
         if mode=='diag':cmd=['scripts/coord-tools/lean-mcp','diag',target]
         else:
             inner=['lake','-f',str(TOOLS/'lakefile.toml'),'build',target] if mode=='build' else ['bash','scripts/coord-tools/gate.sh','per-file',target]
+            if mode=='solc':inner=['/workspace/h28-tools/node','--max-old-space-size=1024',target,'/workspace/h28-tools/soljson-v0.8.38+commit.1835d247.js',str(out/'solc-results')]
             cmd=['docker','exec','--user','1000:1000','-e','PATH=/workspace/h28-tools/bin:/workspace/h28-tools/lean-4.24.0-linux/bin:/usr/bin:/bin','-e','GATE_LOGS='+str(out/'gates'),CONTAINER,'/usr/bin/time','-v']+inner
         record['command']=cmd
         env=dict(os.environ,LEAN_MCP_SERVER_CMD='docker exec -i --user 1000:1000 h28-statement-runtime /workspace/h28-tools/mcp-server')
@@ -83,9 +85,9 @@ def main():
             while proc.poll() is None:
                 assert available()>=RESERVE,'VM headroom guard'
                 assert time.monotonic()-start<600,'600 second wall guard'
-                top=command(['docker','top',CONTAINER,'-eo','pid,comm,args'],check=True).stdout
+                top=command(['docker','top',CONTAINER,'-eo','pid,stat,comm,args'],check=True).stdout
                 samples.append(top)
-                lean=[s for s in top.splitlines()[1:] if len(s.split())>1 and s.split()[1]=='lean']
+                lean=[s for s in top.splitlines()[1:] if len(s.split())>2 and s.split()[2]=='lean' and not s.split()[1].startswith('Z')]
                 assert all('-j1' in s for s in lean),'observed Lean without explicit -j1'
                 assert len([s for s in lean if '--server' not in s])<=1,'observed concurrent Lean workers'
                 time.sleep(.25)

@@ -1,5 +1,4 @@
 import Solidity.Frontend.Checked.Check
-import Solidity.Frontend.StatementGrammarH28.G0List
 
 /-! Finite kernel controls for every assigned statement/block constructor.
 Acceptance and constructor observations are checked, not AST equality or
@@ -13,67 +12,32 @@ structure StatementFixture where
   profile : Bool
   required : List Ctor
 
-/-- Bounded typed list observation. Only Nat and the parameter-only typed
-cell view are matched; the Syn eliminator generalises its category in G0List. -/
-def fixtureListCtors {c : Cat} (f : Syn c → List Ctor)
-    (fuel : Nat) (xs : Syn (.list c)) : List Ctor :=
-  match fuel with
-  | 0 => []
-  | n + 1 =>
-    match g0ListCell xs with
-    | none => []
-    | some (x, rest) => f x ++ fixtureListCtors f n rest
-
-private def optionalBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
-  apply Syn.casesOn (motive := fun _ _ => List Ctor) tree
-  case some => intro category body; exact body.nodes.map Node.ctor
-  all_goals intros; exact []
-
-private def functionBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
-  apply Syn.casesOn (motive := fun _ _ => List Ctor) tree
-  case function =>
-    intro topLevel name params vis mutability modifiers virtual overrides returns body
-    exact match name with
-      | .ident name => if name == "f" then optionalBodyCtorsAt body else []
-      | _ => []
-  all_goals intros; exact []
+/-- Bounded typed list observation for finite fixtures. Exhaustion returns
+no observed tags and cannot fabricate constructor coverage. -/
+def fixtureListCtors {c : Cat} (f : Syn c → List Ctor) : Nat → Syn (.list c) → List Ctor
+  | 0, _ => []
+  | n + 1, xs =>
+    match xs with
+    | .nil => []
+    | .cons x rest => f x ++ fixtureListCtors f n rest
 
 def functionBodyCtors (part : Syn (.part false)) : List Ctor :=
-  functionBodyCtorsAt part
+  match part with
+  | .function name _ _ _ _ _ _ _ body =>
+    match name with
+    | .ident name => if name == "f" then
+        match body with | .some b => b.nodes.map Node.ctor | .none => []
+      else []
+    | _ => []
+  | _ => []
 
-private def topBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
-  apply Syn.casesOn (motive := fun _ _ => List Ctor) tree
-  case contract =>
-    intro abstract name layout bases parts
-    exact fixtureListCtors functionBodyCtors 64 parts
-  all_goals intros; exact []
+def topBodyCtors (top : Syn .top) : List Ctor :=
+  match top with
+  | .contract _ _ _ _ parts => fixtureListCtors functionBodyCtors 64 parts
+  | _ => []
 
-def topBodyCtors (top : Syn .top) : List Ctor := topBodyCtorsAt top
-
-private def fixtureBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
-  apply Syn.casesOn (motive := fun _ _ => List Ctor) tree
-  case unit => intro tops; exact fixtureListCtors topBodyCtors 64 tops
-  all_goals intros; exact []
-
-def fixtureBodyCtors (u : Syn .unit) : List Ctor := fixtureBodyCtorsAt u
-
-theorem fixtureListCtors_zero {c : Cat} (f : Syn c → List Ctor) (xs : Syn (.list c)) :
-    fixtureListCtors f 0 xs = [] := rfl
-
-theorem fixtureListCtors_succ_nil {c : Cat} (f : Syn c → List Ctor) (n : Nat) :
-    fixtureListCtors f (n + 1) .nil = [] := rfl
-
-theorem fixtureListCtors_succ_cons {c : Cat} (f : Syn c → List Ctor)
-    (n : Nat) (x : Syn c) (xs : Syn (.list c)) :
-    fixtureListCtors f (n + 1) (.cons x xs) = f x ++ fixtureListCtors f n xs := rfl
-
-theorem fixtureBodyCtors_unit (tops : Syn (.list .top)) :
-    fixtureBodyCtors (.unit tops) = fixtureListCtors topBodyCtors 64 tops := rfl
-
-theorem topBodyCtors_contract (abstract : Bool) (name : String) (layout : Syn (.opt .expr))
-    (bases : Syn (.list .inherit)) (parts : Syn (.list (.part false))) :
-    topBodyCtors (.contract abstract name layout bases parts) =
-      fixtureListCtors functionBodyCtors 64 parts := rfl
+def fixtureBodyCtors (u : Syn .unit) : List Ctor :=
+  match u with | .unit tops => fixtureListCtors topBodyCtors 64 tops
 
 def statementFixtureCheck (c : StatementFixture) : Bool :=
   match parse (ascii c.source) with

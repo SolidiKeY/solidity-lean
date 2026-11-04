@@ -480,3 +480,107 @@ controls and these pinned external fixtures, then remaining boundary/root/
 attachment results and full gates/reviews. General compound completeness,
 mixed-list splitting, all-Syn balance and scope acceptance remain open.
 SG-CEX-01 is still OPEN/REFUTED and all original constraints remain binding.
+
+
+## Checkpoint G: constructor-complete finite parser controls
+
+FixtureData.lean, FixtureControls/Case00 through Case44 and
+ConstructorControls.lean certify 45 concrete checked-source cases using
+`decide +kernel`, with no native computation in the proof chain. The checked
+observer selects function f bodies, excluding helper g, and inspects existing
+intrinsic Syn nodes. Its structurally recursive list observer has fuel 64;
+exhaustion returns no tags and cannot fabricate coverage. This is a finite
+fixture observer, not a universal traversal completeness assertion.
+
+The manifest enumerates every fixture, its source hash, checked-parser
+acceptance/profile expectations, exact constructor obligations and solc
+expectations. The 40 required constructors include all statement roots,
+block/item/simple/catch alternatives, list/option alternatives and all Yul
+statement/block/expression forms. check-fixture-sync.py checks all 45 source
+strings against Lean, the exact case certificates/imports/list and unique
+40-constructor coverage. statement_fixture_constructor_inventory alone is
+metadata coverage; statement_constructor_fixture_witnesses connects it to
+the actual closed-case certificates: for every required Ctor, an accepted
+checked parser tree exists with that constructor in its observed f body.
+No successful parse premise remains in that final theorem. It does not
+assert AST equality, universal syntax coverage or expression uniqueness.
+
+There are 28 positive cases, 14 grammar/context refusals and three semantic
+refusals accepted by the checked parser but rejected by solc. The latter
+require exact TypeError codes 8863 (void valued return), 6777 (empty valued
+return) and 3542 (unknown catch name). Positive variants include nested
+blocks, declarations/initializers/tuple holes, expression statements, both
+if alternatives and nearest dangling else, empty/full for, while/do, both
+return alternatives, break/continue, unchecked, positional/named emit and
+revert, try without/with returns and plain/signature catches, generic and
+memory-safe assembly, canonical rethrow and comprehensive Yul forms.
+Negative controls include outside-loop controls, nested unchecked, direct
+unchecked if/for bodies, stray/double else, missing delimiters/catches,
+empty catch parameters, invalid Yul switch and unknown assembly dialect.
+All files and exact expectations are enumerated in fixtures/manifest.json;
+there are no ignored or sampled cases.
+
+The pinned external compiler is solc-js
+0.8.38+commit.1835d247.Emscripten.clang, SHA-256
+6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390,
+with Node v24.19.0. All 45 external expectations pass, including AST checks
+for tuple holes, inner-else association, catch signatures and all 15 required
+Yul AST node kinds. These compiler results are external tests, not Lean
+proofs. Generic assembly fixtures have profile=false; the canonical rethrow
+has profile=true. Existing profile refusals are preserved.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/ConstructorControls.lean | pass, final actual constructor witness theorem | /workspace/h28-statement-grammar-evidence/run-1793805946662140520 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.ConstructorControls | pass, imports all 45 kernel certificates | /workspace/h28-statement-grammar-evidence/run-1793806125552223750 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/ConstructorControls.lean | pass; no warnings | /workspace/h28-statement-grammar-evidence/run-1793806147002093821 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/FixtureData.lean | pass; no warnings | /workspace/h28-statement-grammar-evidence/run-1793806156523464168 |
+| runtime.py solc tests/h28-sol/statement-grammar/solc-fixtures.mjs | pass; all 45 expected outcomes | /workspace/h28-statement-grammar-evidence/run-1793805232591644267 |
+| check-fixture-sync.py | pass; all 45 cases and 40 obligations | saved checkpoint G inventory |
+
+Every individual certificate was built serially; the saved G inventory lists
+the passing run for each Case00..44 and all observed theorem axiom sets.
+The 45 closed-case certificates use propext (as recorded by actual
+#print axioms output); the constructor metadata inventory has no axioms.
+statement_fixtures_all_checked uses propext. checked_fixture_observes
+and statement_constructor_fixture_witnesses use propext and Quot.sound.
+There are no custom axioms, unsafe/native_decide or raised heartbeats.
+
+Retained failed experiments include the monolithic corpus headroom refusal
+(run-1793802814787171168), an indexed well-founded observer elaboration
+failure (run-1793803110925222515), Case00 checks before the observer was
+replaced by structural Nat recursion (run-1793803376063463918 and
+run-1793803849861886512), and the intermediate aggregate conjunction
+projection error (run-1793805858692001358). The monolithic source and its
+hash are retained. A diagnostic-only #eval was never used as a proof.
+Cache hints used read-only POSIX_FADV_DONTNEED, without deleting data.
+The Case13 runtime false refusal (run-1793804297065249712) observed a
+completed Lean zombie; the guard now excludes stat Z only, retains live
+-j1 checks and the original failed receipt, and Case13 was rerun successfully.
+No proof budget changed. Splitting the kernel corpus and structural observer
+keeps individual checks bounded; no speedup percentage is claimed.
+
+The solc runner now seals setup failures as well as case failures, copies
+its own source and hash, and is invoked inside the same 12 GiB/no-swap,
+single-CPU guarded runtime. Its deliberate wrong-compiler-hash control exits
+1 with status=fail and sealed results at
+/workspace/h28-statement-grammar-evidence/solc-negative-setup-1793805407280692935;
+the outer control records that rejection as expected, never relabeling the
+failed inner gate. Runtime input hashes include recursive fixture/module
+paths. Registration includes all 47 new modules locally; shared roots and
+module maps remain untouched under the assignment.
+
+Separate read-only finder and skeptic reviews pass the finite G increment,
+including actual existential parser witnesses, all-case synchronization,
+registration, failure sealing and resource guard behavior. Neither used
+Lean/server/builds. Their findings about missing local registration and
+unsealed solc setup failures were fixed; suggested exact list synchronization
+and semantic error codes were also added.
+
+This checkpoint completes finite constructor controls and pinned external
+fixtures only. Arbitrary syntax/atom balance, mixed-list splitting,
+nearest-else attachment-position and token-root/conditional uniqueness,
+remaining universal compound fuel coverage, full repository gates and
+whole-scope acceptance/reviews remain unfinished. SG-CEX-01 remains
+OPEN/REFUTED. The persistent original goal continues without a new premise,
+producer change, exclusion, VM or replacement goal.
