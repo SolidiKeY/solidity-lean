@@ -109,3 +109,9 @@ theorem transfer_history (state final : ExecState D L T) (src dst : Address)
     · cases execution
 
 end Solidity.Lowering.Readonly.StaticJournal
+
+/-- info: 'Solidity.Lowering.Readonly.StaticJournal.History.balance_word' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Lowering.Readonly.StaticJournal.History.balance_word
+
+/-- info: 'Solidity.Lowering.Readonly.StaticJournal.balance_storage_word' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Lowering.Readonly.StaticJournal.balance_storage_word
