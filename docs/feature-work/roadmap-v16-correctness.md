@@ -128,3 +128,25 @@ ABI/world/physical-store agreement, deployment or adversarial closure follows.
 The existing physical-writer mismatch and other owners' obligations are unchanged.
 Independent finder/skeptic review requested a direct returned-counter negative;
 `wrong_returned_counter` now exercises the new positive return specification.
+
+
+## Constructor-return byte postconditions
+
+[CreationReturnConsumer](../../Solidity/Roadmap/V16/CreationReturnConsumer.lean)
+consumes the published finite constructor-copy execution directly, without an
+instance of the pending creation-return producer. `outcome_exact` fixes its
+complete outcome; `returned_post` supplies an actual returned-output witness
+exactly when a predicate holds on the complete linked/immutable runtime image.
+`reject_post` and `not_reverted` retain the same artifact and execution.
+
+The inhabited published fixture has two library locations, two immutable words,
+nonempty arguments and a complete 105-byte returned image. Controls reject
+argument leakage, a shifted observation window and relabelled revert outcomes.
+Independent read-only finder and skeptic reviews found no semantic defect;
+the first-byte/window wording was clarified after review. Scoped axiom guards
+retain the standard axiom set.
+
+These are constructor-copy byte postconditions, not Source constructor
+specifications, account installation, physical EVM execution or gas adequacy.
+No pending producer field, source admission, G50 deployment or full G51
+specification obligation is discharged by this component.
