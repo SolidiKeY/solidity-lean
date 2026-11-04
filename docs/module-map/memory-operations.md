@@ -279,3 +279,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/PrimitiveArrayLive.lean` | Intrinsic live-array bound, copy/representation normalization and actual runtime-copy transport. |
 | `Backend/MemoryCopies/PrimitiveArrayLiveControls.lean` | Arbitrary shadows, empty/long certificates and retained-source-slot runtime controls. |
 | `Backend/MemoryCopies/RuntimeLiveArrayInterface.lean` | Actual-value path declaration/rebinding certificates for arbitrary primitive arrays and storage shadows. |
+| `Backend/MemoryCopies/RuntimeLiveArray.lean` | Actual-value source and runtime path declaration/rebinding proofs, preserving ownership and old aliases. |
+| `Backend/MemoryCopies/RuntimeLiveArrayControls.lean` | Shadow-bearing empty/pair/64 path bindings, retained storage, aliases, invalid paths and extra-tail controls. |
