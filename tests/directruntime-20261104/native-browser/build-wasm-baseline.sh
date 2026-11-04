@@ -21,7 +21,7 @@ fi
 if [[ ! -d "$work/gmp/.git" ]]; then git clone --depth 1 --branch v6.2.1 https://github.com/alisw/GMP.git "$work/gmp"; fi
 [[ $(git -C "$work/gmp" rev-parse HEAD) == 2bbd52703e5af82509773264bfbd20ff8464804f ]]
 docker build --secret id=system_ca,src=/etc/ssl/certs/ca-certificates.crt -f "$repository/tests/directruntime-20261104/native-browser/Wasm.Dockerfile" -t "$image" "$repository/tests/directruntime-20261104/native-browser"
-# Only the make job count changes in this owned adapter; producer inputs stay read-only.
+# Owned adapters change job count and cache location only; producer inputs stay read-only.
 python3 - <<'GMP'
 from pathlib import Path
 p=Path("web/tools/lean-wasm/build-gmp.sh")
@@ -36,7 +36,7 @@ assert s.count(activation)==1
 Path("tests/directruntime-20261104/native-browser/compact-runtime-cache.sh").write_text(s.replace(activation,activation+"\nexport EM_FROZEN_CACHE=0 EM_CACHE=/work/toolchain-cache"))
 GMP
 common=(--rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000
- -e LEAN_NUM_THREADS=1 -e EMCC_CORES=1 -e BINARYEN_CORES=1
+ -e LEAN_NUM_THREADS=1 -e EMCC_CORES=1 -e BINARYEN_CORES=1 -e LAKE_CACHE_DIR=
  -e EM_FROZEN_CACHE=0 -e EM_CACHE=/work/toolchain-cache
  -e GIT_CONFIG_GLOBAL=/work/native-browser.gitconfig
  -v "$repository:$repository" -v "$work:/work"
