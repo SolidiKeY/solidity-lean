@@ -206,5 +206,23 @@ reached state alongside the published panic emitter's byte-exact target slice.
 It reuses `Failure.emit` and V08 `panicInput`/`panic_checked`, without another
 encoder or compiler framework. `Panic41Premise` remains the explicit H16/S03
 boundary; size selection and allocation finalization are not inferred from it.
-The signature precedes proofs. Source oversized-length controls will use the
-existing independently derived length check, not assume the desired failure.
+The signature precedes proofs. `AllocationPanic.lean` constructs the certificate
+from the unchanged typed premise and the actual published `panic_checked`
+instruction theorem. The Source operation's complete reached state is retained;
+Source and target machines are not related by a new simulation invariant.
+
+Concrete oversized-length controls derive failure of actual `newArray` at
+2^64 from evaluation/conversion/size facts using `SourceSize`, rather than
+assuming the desired panic. The marked target has a nonempty stack/memory,
+emits at byte31 across word boundaries, and halts before any suffix. The exact
+packet length is36 and code length111. Memory outside the packet is framed.
+Wrong Panic(0x32), empty revert and unsupported-slice `none` differ from the
+observed Panic(0x41); source horizon0 and successful zero-length allocation
+cannot supply its premise. This is not a claim about out-of-gas, expansion
+charges, Source/target world simulation or runtime allocation-size selection.
+
+Independent read-only finder and skeptic found no semantic defect/circular
+premise or vacuous concrete control. Finder noted two untyped local `have`s
+under H14; these were eliminated, and finder confirmed the fix. Neither review
+used Lean/build/server/edits. Both new modules have zero MCP errors/warnings.
+Checkpoint gates and scoped axiom reports are required separately.
