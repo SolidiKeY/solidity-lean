@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalForFirstDone|Checks\.LocalForFirstDone)$/, // Concrete actual Source horizon-selector consequences.
   /^Solidity\.Yul\.(LocalForTimeout|Checks\.LocalForTimeout)$/, // Concrete full-for timeout classification and Source consequences.
   /^Solidity\.Yul\.(LocalForNoGuardFailure|Checks\.LocalForNoGuardFailure)$/, // Initialized omitted-guard finite noncompletion.
   /^Solidity\.Yul\.(LocalLoopReductions|Checks\.LocalLoopReductions)$/, // Exact constant-loop reductions and horizon results.

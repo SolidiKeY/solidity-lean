@@ -1668,3 +1668,32 @@ and layer checks pass. Sixteen scoped axiom reports use only Lean standard
 axioms. Failed standard automation and the initial reflexivity-branch correction
 remain raw evidence separate from passing checks. No checking/proof limits
 were increased.
+
+### Concrete Source horizon selection
+
+`LocalForFirstDone.post` and `no_post` connect the actual initialized
+omitted-guard Boolean Source executions to Source's existing `firstDone`.
+Every search bound returns `none`, using concrete every-fuel timeout outcomes
+and `Source.firstDone_none_iff`; callers supply no divergence, stability or
+simulation law. The intrinsic initializer/post/body certificate indices and
+clean Source-local boundary remain explicit.
+Nine controls use an inhabited body with scoped declarations and separate
+counter/caller writes. Omitted guards find no completion at any bound; a present
+guard first completes at fuel 9, finds nothing through 8, and retains that
+selection at every larger bound. Separate Source controls find a break at 3,
+leave continue unfinished through 8, find an invalid-initializer control result
+as a completed failure at 2, and stop on a false guard at 3.
+Break/continue and the invalid initializer are outside the Boolean certificates;
+they demonstrate why this result does not cover arbitrary control. The test
+search wrapper calls the existing interpreter and selector, with no new
+evaluator, state representation or expected-verdict change.
+Dirty Source readback, general assembly admission, arbitrary-loop adequacy,
+general Source/compiler composition and full VY1/P16 remain open. No Source,
+ExtCall, evaluator, layout, observation or proof-budget changes are introduced.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; focused Lean, generated-root
+and layer checks pass. Eleven scoped axiom reports use only Lean standard
+axioms. The initial missing Source.Semantics import and invalid-import tactic
+attempts remain raw failures, distinct from the corrected valid-import attempts
+and passing concrete proofs. No checking/proof limits were increased.
