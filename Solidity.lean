@@ -1509,6 +1509,9 @@ import Solidity.Frontend.QualifiedUnits.Relation
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Frontend.SolcJson.Body
+import Solidity.Frontend.SolcJson.CallMetadata
+import Solidity.Frontend.SolcJson.CallMetadataControls
+import Solidity.Frontend.SolcJson.CallMetadataData
 import Solidity.Frontend.SolcJson.Contract
 import Solidity.Frontend.SolcJson.Getters
 import Solidity.Frontend.SolcJson.TryPanicSourceCaller

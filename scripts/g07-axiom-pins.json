@@ -22316,6 +22316,94 @@
  "Solidity/Frontend/Checked/UnitExamples.lean:Solidity.Frontend.Checked.profileCtors_covered": [
   "propext"
  ],
+ "Solidity/Frontend/SolcJson/CallMetadata.lean:Solidity.Frontend.CallMetadata.inspect_declaration_member": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.actual_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.conflicting_nonpayable_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.duplicated_identity_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.extra_group_refused": [],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.ir_pure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.legacy_pure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.legacy_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.library_namespace_not_static_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.malformed_outer_type_refused": [],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.misplaced_qualifier_refused": [],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.negative_site_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.nested_mutability_cannot_spoof_outer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.nested_outer_qualifiers": [],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.nested_visibility_cannot_spoof_outer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.no_static_fallback_from_spoof": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.ordinary_mutating": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.purity_label_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.trailing_qualifier_refused": [],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.unvalidated_profile_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.wrong_arity_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataControls.lean:Solidity.Frontend.CallMetadata.Controls.wrong_identity_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Static/Certificates.lean:Solidity.Frontend.Static.inheritanceChecker_complete": [
   "Classical.choice",
   "Quot.sound",
