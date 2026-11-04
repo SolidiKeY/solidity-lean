@@ -49,6 +49,7 @@ structure FragXAt (X : StmtExt E) (A : Decl → Prop) (G : Glob E) (c : String) 
     b.items.OpsOK → BodyFrame b.ps.length b.rs b.locals → NS (runMods G F n b [] l)
   call : ∀ F, F.contract = c → CallNS A G F n
 
+/-- At horizon `0` everything times out. -/
 theorem fragXAt_zero (X : StmtExt E) (A : Decl → Prop) (G : Glob E) (c : String) : FragXAt X A G c 0 where
   expr m hm F _ := by
     rw [Nat.le_zero.1 hm]
@@ -68,6 +69,7 @@ theorem stmtNSAtX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ F
   forIter F hP nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr :=
     forIterX_step ih (hX n (Nat.le_refl n)) F hP nps ph c post body l hc hc' hp hp' hb hb' hfr
 
+/-- **A modifier-free body** of the extended fragment, one step up. -/
 theorem modsX_step (ih : FragXAt X A G c n) (F : Fr) (hc : F.contract = c) (b : RBody E)
     (l : Locals E.layout b.locals) (hf : IFrag X A b.items) (ho : b.items.OpsOK)
     (hfr : BodyFrame b.ps.length b.rs b.locals) : NS (runMods G F (n + 1) b [] l) := by
@@ -81,6 +83,7 @@ theorem modsX_step (ih : FragXAt X A G c n) (F : Fr) (hc : F.contract = c) (b : 
   | brk _ => exact nomatch ho'
   | cont _ => exact nomatch ho'
 
+/-- **An internal call** to an allowed function, one step up. -/
 theorem callX_step (hG : CallsOKX X A G c) (ih : FragXAt X A G c n) (F : Fr) (hc : F.contract = c) :
     CallNS A G F (n + 1) := by
   intro d ps rs hs hA vs

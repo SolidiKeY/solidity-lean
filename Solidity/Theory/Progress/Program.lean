@@ -1,4 +1,5 @@
 import Solidity.Theory.Progress.Calls
+import Solidity.Theory.Progress.Leaves
 import Solidity.Lowering.P9.FunctionCatalog
 
 /-!
@@ -19,15 +20,22 @@ data, or runs out of fuel (`Ends`, `Theory/Progress/Outcome.lean`).
   elaborated program whose complete function catalogue P9 checks
   (`WholeProgram.checkFunctions`), the premise is derived
   (`WholeProgram.functions_from_elaborate`, `CallsOK.toX`); the statement
-  itself may contain tuple declarations and admitted extension nodes.
+  itself may contain tuple declarations and admitted extension nodes;
+  the leaf extensions (`emit`, custom-error reverts, builtin statements)
+  are sound there (`elaborated_leafExt_sound`).
+* `SFrag.cast_out`, `StmtD.declTuple_frag`: the elaboration of an S01
+  tuple-declaration derivation is in the closure under the initializer and
+  slot conditions.
 
 The core run's progress is `Prog.run_ends`/`Prog.runF_ends`
 (by construction).
 
 **Not covered** (the fragment's boundary, recorded in
 `docs/feature-work/semantics-extensions.md`, "Handoffs"): memory and
-reference values, external calls, `try`, modifiers, the transaction layer
-(dispatch, ABI decoding, deployment, callbacks); gas is not charged (D2).
+reference values, external calls and payments, `try`, modifiers, the
+transaction layer
+(dispatch, ABI decoding, deployment, callbacks), `rethrow`, `abi.*`,
+`new` and calldata references; gas is not modelled (D2).
 -/
 
 namespace Solidity.Theory.Progress
@@ -84,6 +92,27 @@ theorem tuple_stmt_progress (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph
     (x : Locals E.layout [] × St E) : Ends ((execS G F n nps ph s l).run x).1 :=
   stmt_progress (c := F.contract) (callsOKX_none _ G F.contract) (StmtExt.none_sound G _ _) F rfl n nps ph s l hf ho hfr x
 
+/-! ## Elaborated tuple declarations -/
+
+/-- The closure does not see a cast of the output context. -/
+theorem SFrag.cast_out {X : StmtExt E} {A : Decl → Prop} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ₁ Γ₂ : RCtx}
+    (h : Γ₁ = Γ₂) (s : RStmt E R M k Γ Γ₁) (hs : SFrag X A s) :
+    SFrag X A (cast (congrArg (RStmt E R M k Γ) h) s) := by
+  subst h
+  exact hs
+
+/-- **Elaborated tuple declarations enter the closure**: the elaboration of
+an S01 derivation of `(, T x, , U y) = e;` is in `SFrag` when its
+initializer is (`TupleInit`) and its slots are (`SlotsOK`). -/
+theorem StmtD.declTuple_frag {C : Source.Ctx} {X : StmtExt C.env} {A : Decl → Prop} {k : SCtx} {L : List (String × STy)}
+    {h : Nat} {d : Syn .varDecl} {ds : Syn (.list (.opt .varDecl))} {e : Syn .expr}
+    {slots : List (Option (String × STy))} {σs : List STy}
+    (hs : C.tupleSlots h d ds = some slots) (de : Typed (C.at L) e (.tuple σs))
+    (hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true)
+    (hi : TupleInit A de.toR) (ho : SlotsOK (slots.map (Option.map Prod.snd)) σs) :
+    SFrag X A (StmtD.declTuple (k := k) hs de hf).toR :=
+  SFrag.cast_out (pushSlots_tys slots L).symm _ (.declTuple _ _ _ hi ho)
+
 section
 open Solidity.Lowering.P9
 
@@ -112,6 +141,13 @@ theorem elaborated_stmt_progress {X : StmtExt res.env} (ha : (Source.elaborate r
     (hf : SFrag X (fun d => d ∈ WholeProgram.functions res) s) (ho : s.OpsOK) (hfr : BodyFrame nps R Γ)
     (x : Locals res.env.layout [] × St res.env) : Ends ((execS G F n nps ph s l).run x).1 :=
   stmt_progress (CallsOK.toX (WholeProgram.functions_from_elaborate res ha G hg c hc) X) hS F hF n nps ph s l hf ho hfr x
+
+/-- **The leaf extensions are sound in checked elaborated programs**:
+expression progress at every horizon comes from `checked_fragments`. -/
+theorem elaborated_leafExt_sound (ha : (Source.elaborate res).isSome = true)
+    (hg : G.prog = Source.progOf res.env) (hc : WholeProgram.checkFunctions res G c = true) :
+    (leafExt (fun d => d ∈ WholeProgram.functions res)).Sound G (fun d => d ∈ WholeProgram.functions res) (· = c) :=
+  leafExt_sound fun n F hF => (checked_fragments ha hg hc n).1.expr F hF
 
 end
 

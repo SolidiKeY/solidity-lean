@@ -18,16 +18,20 @@ and leaves a hook for node kinds later lanes add:
 * `StmtExt.Sound X G A Q`: **the extension lemma shape**. An extension
   supplies, for its node predicate `X.P`, the one-node step: given the
   induction hypothesis at horizon `n` (`StmtNSAtX`, which covers every
-  sub-statement of the closure) and expression progress at every horizon
-  up to `n`, a node `X.P` admits is never `stuck` at `n + 1`, completes
+  statement and block of the closure, so also the node's sub-blocks `bs`)
+  and expression progress at every horizon up to `n`, a node `X.P` admits
+  is never `stuck` at `n + 1`, completes
   normally when it is a simple statement, and lets no `break`/`continue`
   escape outside a loop. A construct lane X adds proves exactly this and
   gets progress inside every block, loop and called body for free
-  (`fragXAt`). `StmtExt.none` (no extra nodes) is sound, and two sound
-  extensions combine (`StmtExt.or`, `StmtExt.Sound.or`).
-* `CallsOKX`: the program premise, `CallsOK` with bodies in `IFrag`; every
-  program `CallsOK` admits is admitted (`CallsOK.toX`), so the checked
-  elaborated programs of `Source/Progress/CheckedPrograms.lean` carry over.
+  (`fragXAt`); nodes with sub-blocks nest (a `try` inside a `try` block).
+  `StmtExt.none` (no extra nodes) is sound, and two sound extensions
+  combine (`StmtExt.or`, `StmtExt.Sound.or`). Expressions are not
+  extended: they stay `RExpr.ValFragC`, whose induction is the Source
+  lane's (`Source/ExprProgress.lean`).
+* The program premise with internal calls, `CallsOKX` (`CallsOK` with
+  bodies in `IFrag`), and the joint induction are in
+  `Theory/Progress/Calls.lean`.
 
 The structural cases repeat `execS_nsStep`'s proof over the larger
 predicate; a `base` node is discharged by `execS_nsStep` itself, through
@@ -40,15 +44,26 @@ open Solidity.Source Solidity.Source.Progress EM
 
 variable {E : Env}
 
-/-- **A statement extension**: the node kinds a later lane admits. -/
+/-- A block of a body (returns `R`, modifier flag `M`) at any statement
+context and locals: a sub-block an extension node hands to the closure. -/
+structure Blk (E : Env) (R : List STy) (M : Bool) where
+  k : SCtx
+  Γ : RCtx
+  Γ' : RCtx
+  b : RItems E R M k Γ Γ'
+
+/-- **A statement extension**: the node kinds a later lane admits. `P s bs`
+admits node `s` whose sub-blocks `bs` (a `try`'s success and catch blocks,
+say) must themselves be in the closure; a leaf node takes `bs = []` or
+ignores it. -/
 structure StmtExt (E : Env) where
-  P : ∀ {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}, RStmt E R M k Γ Γ' → Prop
+  P : ∀ {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}, RStmt E R M k Γ Γ' → List (Blk E R M) → Prop
 
 /-- No extra nodes. -/
-def StmtExt.none (E : Env) : StmtExt E := ⟨fun _ => False⟩
+def StmtExt.none (E : Env) : StmtExt E := ⟨fun _ _ => False⟩
 
 /-- The nodes either extension admits. -/
-def StmtExt.or (X Y : StmtExt E) : StmtExt E := ⟨fun s => X.P s ∨ Y.P s⟩
+def StmtExt.or (X Y : StmtExt E) : StmtExt E := ⟨fun s bs => X.P s bs ∨ Y.P s bs⟩
 
 mutual
 
@@ -56,7 +71,8 @@ mutual
 inductive SFrag (X : StmtExt E) (A : Decl → Prop) {R : List STy} {M : Bool} :
     {k : SCtx} → {Γ Γ' : RCtx} → RStmt E R M k Γ Γ' → Prop where
   | base {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') : RStmt.ValFragC A s → SFrag X A s
-  | ext {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') : X.P s → SFrag X A s
+  | ext {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)) :
+      X.P s bs → (∀ b ∈ bs, IFrag X A b.b) → SFrag X A s
   | declTuple {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs))
       (h : slotsFit E.isBase slots σs = true) : TupleInit A e → SlotsOK slots σs →
       SFrag X A (RStmt.declTuple (R := R) (M := M) (k := k) slots e h)
@@ -112,6 +128,7 @@ theorem StmtNSAtX.toBase {X : StmtExt E} {A : Decl → Prop} {Q : String → Pro
   forIter F hP nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr :=
     ih.forIter F hP nps ph c post body l hc hc' hp hp' (.base body hb) hb' hfr
 
+/-- At horizon `0` everything times out. -/
 theorem stmtNSAtX_zero (X : StmtExt E) (A : Decl → Prop) (Q : String → Prop) : StmtNSAtX G X A Q 0 where
   execS _ _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execS.eq_1]; exact NSP.halt' trivial
   execItems _ _ _ _ _ _ _ _ _ _ _ _ _ _ := by rw [execItems.eq_1]; exact NSP.halt' trivial
@@ -119,49 +136,72 @@ theorem stmtNSAtX_zero (X : StmtExt E) (A : Decl → Prop) (Q : String → Prop)
 
 end
 
-/-- **The extension lemma shape**: the one-node step an extension proves.
-From the induction hypothesis at `n` and expression progress at every
-horizon up to `n`, a node `X` admits is never `stuck` at `n + 1`, with the
-statement postcondition. -/
+/-- `X` admits no node `Z` does not. -/
+def StmtExt.Le (X Z : StmtExt E) : Prop :=
+  ∀ {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)),
+    X.P s bs → Z.P s bs
+
+/-- **The extension lemma shape**: the one-node step an extension proves,
+inside every closure `Z` that contains it (so that extensions proved
+separately combine, `StmtExt.Sound.or`). From the induction hypothesis
+over `Z` at `n` and expression progress at every horizon up to `n`, a node
+`X` admits, whose sub-blocks are in `Z`'s closure, is never `stuck` at
+`n + 1`, with the statement postcondition. -/
 def StmtExt.Sound (X : StmtExt E) (G : Glob E) (A : Decl → Prop) (Q : String → Prop) : Prop :=
-  ∀ n, StmtNSAtX G X A Q n → (∀ m, m ≤ n → ∀ F, Q F.contract → ExprNSAt A G F m) →
+  ∀ Z : StmtExt E, X.Le Z → ∀ n, StmtNSAtX G Z A Q n → (∀ m, m ≤ n → ∀ F, Q F.contract → ExprNSAt A G F m) →
     ∀ (F : Fr), Q F.contract → ∀ (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx}
-      {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ), X.P s → s.OpsOK → BodyFrame nps R Γ →
+      {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)) (l : Locals E.layout Γ), X.P s bs →
+      (∀ b ∈ bs, IFrag Z A b.b) → s.OpsOK → BodyFrame nps R Γ →
       NSP (execS G F (n + 1) nps ph s l)
         (fun o => (s.Simple → ∃ l', o = .normal l') ∧ (k.loop = false → o.esc = false))
 
 /-- No extra nodes: nothing to prove. -/
-theorem StmtExt.none_sound (G : Glob E) (A : Decl → Prop) (Q : String → Prop) : (StmtExt.none E).Sound G A Q :=
-  fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ h _ _ => h.elim
+theorem StmtExt.none_sound (G : Glob E) (A : Decl → Prop) (Q : String → Prop) : (StmtExt.none E).Sound G A Q := by
+  intro _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ h
+  exact False.elim h
 
-mutual
+/-- **The closure only grows with the extension** (statements). -/
+theorem SFrag.mono {X Y : StmtExt E} {A : Decl → Prop} (hXY : ∀ {R M k Γ Γ'} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)), X.P s bs → Y.P s bs) {R : List STy} {M : Bool}
+    {k : SCtx} {Γ Γ' : RCtx} {s : RStmt E R M k Γ Γ'} (h : SFrag X A s) : SFrag Y A s := by
+  refine SFrag.rec (motive_1 := fun s _ => SFrag Y A s) (motive_2 := fun b _ => IFrag Y A b)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ h
+  · intro _ _ _ s h; exact .base s h
+  · intro _ _ _ s bs h _ ih; exact .ext s bs (hXY s bs h) ih
+  · intro _ _ _ slots e h hi hs; exact .declTuple slots e h hi hs
+  · intro _ _ _ b _ ih; exact .block b ih
+  · intro _ _ _ c t hc _ ih; exact .ifThen c t hc ih
+  · intro _ _ _ _ c t f hc _ _ ih ih'; exact .ifElse c t f hc ih ih'
+  · intro _ _ _ _ c t hc _ ih; exact .whileLoop c t hc ih
+  · intro _ _ _ _ t c _ hc ih; exact .doWhile t c ih hc
+  · intro _ _ _ _ _ i c p t hsi _ hc hp _ ih ih'; exact .forLoop i c p t hsi ih hc hp ih'
+  · intro _ _ _ b h; exact .base b h
+  · intro _ _; exact .nil
+  · intro _ _ _ _ t rest _ _ ih ih'; exact .stmt t rest ih ih'
+  · intro _ _ _ _ b rest _ _ ih ih'; exact .unchecked b rest ih ih'
 
-/-- The closure only grows with the extension. -/
-theorem SFrag.mono {X Y : StmtExt E} {A : Decl → Prop} (hXY : ∀ {R M k Γ Γ'} (s : RStmt E R M k Γ Γ'), X.P s → Y.P s) :
-    ∀ {R M k Γ Γ'} {s : RStmt E R M k Γ Γ'}, SFrag X A s → SFrag Y A s
-  | _, _, _, _, _, _, .base s h => .base s h
-  | _, _, _, _, _, _, .ext s h => .ext s (hXY s h)
-  | _, _, _, _, _, _, .declTuple slots e h hi hs => .declTuple slots e h hi hs
-  | _, _, _, _, _, _, .block b hb => .block b (IFrag.mono hXY hb)
-  | _, _, _, _, _, _, .ifThen c s hc hs => .ifThen c s hc (SFrag.mono hXY hs)
-  | _, _, _, _, _, _, .ifElse c s t hc hs ht => .ifElse c s t hc (SFrag.mono hXY hs) (SFrag.mono hXY ht)
-  | _, _, _, _, _, _, .whileLoop c s hc hs => .whileLoop c s hc (SFrag.mono hXY hs)
-  | _, _, _, _, _, _, .doWhile s c hs hc => .doWhile s c (SFrag.mono hXY hs) hc
-  | _, _, _, _, _, _, .forLoop i c p s hi hi' hc hp hs =>
-    .forLoop i c p s hi (SFrag.mono hXY hi') hc hp (SFrag.mono hXY hs)
+/-- **The closure only grows with the extension** (blocks). -/
+theorem IFrag.mono {X Y : StmtExt E} {A : Decl → Prop} (hXY : ∀ {R M k Γ Γ'} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)), X.P s bs → Y.P s bs) {R : List STy} {M : Bool}
+    {k : SCtx} {Γ Γ' : RCtx} {b : RItems E R M k Γ Γ'} (h : IFrag X A b) : IFrag Y A b := by
+  refine IFrag.rec (motive_1 := fun s _ => SFrag Y A s) (motive_2 := fun b _ => IFrag Y A b)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ h
+  · intro _ _ _ s h; exact .base s h
+  · intro _ _ _ s bs h _ ih; exact .ext s bs (hXY s bs h) ih
+  · intro _ _ _ slots e h hi hs; exact .declTuple slots e h hi hs
+  · intro _ _ _ b _ ih; exact .block b ih
+  · intro _ _ _ c t hc _ ih; exact .ifThen c t hc ih
+  · intro _ _ _ _ c t f hc _ _ ih ih'; exact .ifElse c t f hc ih ih'
+  · intro _ _ _ _ c t hc _ ih; exact .whileLoop c t hc ih
+  · intro _ _ _ _ t c _ hc ih; exact .doWhile t c ih hc
+  · intro _ _ _ _ _ i c p t hsi _ hc hp _ ih ih'; exact .forLoop i c p t hsi ih hc hp ih'
+  · intro _ _ _ b h; exact .base b h
+  · intro _ _; exact .nil
+  · intro _ _ _ _ t rest _ _ ih ih'; exact .stmt t rest ih ih'
+  · intro _ _ _ _ b rest _ _ ih ih'; exact .unchecked b rest ih ih'
 
-theorem IFrag.mono {X Y : StmtExt E} {A : Decl → Prop} (hXY : ∀ {R M k Γ Γ'} (s : RStmt E R M k Γ Γ'), X.P s → Y.P s) :
-    ∀ {R M k Γ Γ'} {b : RItems E R M k Γ Γ'}, IFrag X A b → IFrag Y A b
-  | _, _, _, _, _, _, .base b h => .base b h
-  | _, _, _, _, _, _, .nil => .nil
-  | _, _, _, _, _, _, .stmt s rest hs hr => .stmt s rest (SFrag.mono hXY hs) (IFrag.mono hXY hr)
-  | _, _, _, _, _, _, .unchecked b rest hb hr => .unchecked b rest (IFrag.mono hXY hb) (IFrag.mono hXY hr)
-
-end
 
 /-- The hypothesis for a larger extension gives it for a smaller one. -/
 theorem StmtNSAtX.restrict {G : Glob E} {X Y : StmtExt E} {A : Decl → Prop} {Q : String → Prop} {n : Nat}
-    (hXY : ∀ {R M k Γ Γ'} (s : RStmt E R M k Γ Γ'), X.P s → Y.P s) (ih : StmtNSAtX G Y A Q n) :
+    (hXY : ∀ {R M k Γ Γ'} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)), X.P s bs → Y.P s bs) (ih : StmtNSAtX G Y A Q n) :
     StmtNSAtX G X A Q n where
   execS F hP nps ph _ _ _ _ _ s l hf ho hfr := ih.execS F hP nps ph s l (SFrag.mono hXY hf) ho hfr
   execItems F hP nps ph _ _ _ _ _ b l hf ho hfr := ih.execItems F hP nps ph b l (IFrag.mono hXY hf) ho hfr
@@ -172,16 +212,19 @@ theorem StmtNSAtX.restrict {G : Glob E} {X Y : StmtExt E} {A : Decl → Prop} {Q
 sound together. -/
 theorem StmtExt.Sound.or {G : Glob E} {X Y : StmtExt E} {A : Decl → Prop} {Q : String → Prop}
     (hX : X.Sound G A Q) (hY : Y.Sound G A Q) : (X.or Y).Sound G A Q := by
-  intro n ih hE F hP nps ph R M k Γ Γ' s l hs ho hfr
+  intro Z hZ n ih hE F hP nps ph R M k Γ Γ' s bs l hs hbs ho hfr
   rcases hs with hs | hs
-  · exact hX n (ih.restrict (fun _ h => Or.inl h)) hE F hP nps ph s l hs ho hfr
-  · exact hY n (ih.restrict (fun _ h => Or.inr h)) hE F hP nps ph s l hs ho hfr
+  · exact hX Z (fun s bs h => hZ s bs (Or.inl h)) n ih hE F hP nps ph s bs l hs hbs ho hfr
+  · exact hY Z (fun s bs h => hZ s bs (Or.inr h)) n ih hE F hP nps ph s bs l hs hbs ho hfr
 
 /-! ## The step -/
 
 section
 variable {X : StmtExt E} {A : Decl → Prop} {Q : String → Prop} {G : Glob E} {n : Nat}
 
+/-- **The statement step** over the extended fragment: a `base` node by
+`execS_nsStep`, an `ext` node by the extension's `Sound`, a tuple
+declaration by `declTuple_ns`, the structural nodes as `execS_nsStep`. -/
 theorem execSX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ F, Q F.contract → ExprNSAt A G F m)
     (hS : X.Sound G A Q) (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (hf : SFrag X A s) (ho : s.OpsOK)
@@ -201,7 +244,7 @@ theorem execSX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ F, Q
   have hf0 := hf
   cases hf with
   | base s h => exact execS_nsStep ih.toBase hXn F hP nps ph s l h ho hfr
-  | ext s h => exact hS n ih hX F hP nps ph s l h ho hfr
+  | ext s bs h hbs => exact hS X (fun _ _ h => h) n ih hX F hP nps ph s bs l h hbs ho hfr
   | declTuple slots e h hi hs =>
     exact NSP.weaken (declTuple_ns G F n (fun m hm => hX m hm F hP) nps ph slots e h l hi hs)
       fun o ⟨l', hl'⟩ => ⟨fun _ => ⟨l', hl'⟩, fun _ => by rw [hl']; rfl⟩
@@ -273,6 +316,7 @@ theorem execSX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ F, Q
     · exact NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun _ _ => NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
     · exact NSP.bind (NSP.lift_ok (Locals.restore_ok ys l2)) fun _ _ => NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
 
+/-- **The block step** over the extended fragment. -/
 theorem execItemsX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ F, Q F.contract → ExprNSAt A G F m)
     (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : IFrag X A b) (ho : b.OpsOK)
@@ -302,6 +346,8 @@ theorem execItemsX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ 
     | cont _ => exact NSP.pure' fun hk => h hk
     | ret _ => exact NSP.pure' fun _ => rfl
 
+/-- **The `for` iteration step** over the extended fragment (as
+`forIter_nsStep`, with the body in `SFrag`). -/
 theorem forIterX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ F, Q F.contract → ExprNSAt A G F n) (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool}
     {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂)
     (l : Locals E.layout Γ₁) (hc : ROptBool.ValFragC A c) (hc' : c.OpsOK) (hp : ROptExpr.ValFragC A post)

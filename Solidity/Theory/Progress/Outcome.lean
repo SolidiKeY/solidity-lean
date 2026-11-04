@@ -4,10 +4,11 @@ import Solidity.Semantics.RunFuel
 /-!
 # How a well-typed run ends (S4.1)
 
-Type soundness as progress: a well-typed program is never stuck, so every
-run **returns, reverts, panics, or runs out of fuel or resources**. The
-repository has two semantics, and the statement has a different weight in
-each.
+Type soundness as progress: a run that is never stuck **returns, reverts,
+panics, or runs out of fuel or resources**. The repository has two
+semantics, and the statement has a different weight in each: for the core
+every well-typed program progresses, for the source interpreter the
+theorems of `Theory/Progress/Program.lean` cover a fragment.
 
 * **The core run** (`Prog.run`, `Prog.runF`, `Solidity/Semantics/Run.lean`)
   is intrinsically typed: a program is a `Prog C Γ Γ'`, so every inhabitant
@@ -23,11 +24,14 @@ each.
   `Solidity/Source/ExprProgress.lean`) is exactly `∀ x, Ends (m.run x).1`
   (`ns_iff_ends`). The fragment theorems of `Theory/Progress/Fragment.lean`
   and `Theory/Progress/Program.lean` prove `NS`, so they are read through
-  this module as progress.
+  this module as progress. The interpreter also uses `stuck` for
+  features it does not model (dynamic ABI decoding, `new` of some types,
+  some getters, `Source/Eval.lean`), so well-typedness alone does not give
+  progress there: the fragment's predicates exclude those nodes.
 
-Gas: neither semantics charges gas today (D2 is lane X03's); running out of
-gas is subsumed by running out of fuel (`timeout`, `diverge`) and by
-`exhausted`.
+Gas: neither semantics models gas today (D2 is lane X03's), so no run
+ends by running out of gas; the resource ends are the fuel horizon
+(`timeout`), `diverge` and `exhausted`.
 -/
 
 namespace Solidity.Theory.Progress
@@ -37,8 +41,10 @@ open Solidity.Source
 /-! ## The source interpreter -/
 
 /-- **How a source run may end**: every result but `stuck`. A revert whose
-data is a `Panic(uint256)` encoding is a panic; any other revert data
-(`Error(string)`, a custom error, empty) is a revert. -/
+data is a `Panic(uint256)` encoding of a `PanicCode` is a panic; any other
+revert data (`Error(string)`, a custom error, empty) is a revert. The split
+reads the data only, as a caller does: user code can produce panic data
+(a rethrown `bytes` value, a user-declared `error Panic(uint256)`). -/
 inductive Ends {α : Type} : Except Halt α → Prop where
   | returns (a : α) : Ends (.ok a)
   | panics (c : PanicCode) : Ends (.error (.revert (panicData c)))
@@ -82,14 +88,14 @@ theorem not_ends_stuck {α : Type} (w : String) : ¬ Ends (.error (.stuck w) : E
 /-! ## The core run -/
 
 /-- **How a core run may end**: returned, reverted (with or without data),
-panicked, out of fuel (`diverge`: the loop bound of `Prog.runF`, or a loop
-`Prog.run` never leaves) or out of resources (`exhausted`). -/
+panicked, diverged (`diverge`: the loop bound of `Prog.runF` reached, or a
+loop `Prog.run` never leaves) or out of resources (`exhausted`). -/
 inductive CoreEnds {α : Type} : TRes α → Prop where
   | returns (a : α) : CoreEnds (.ok a)
   | reverts : CoreEnds (.error .revert)
   | revertsWith (d : List UInt8) : CoreEnds (.error (.revertWith d))
   | panics : CoreEnds (.error .panic)
-  | outOfFuel : CoreEnds (.error .diverge)
+  | diverges : CoreEnds (.error .diverge)
   | exhausted : CoreEnds (.error .exhausted)
 
 /-- Every core result ends: `THalt` has no `stuck`. -/
@@ -98,7 +104,7 @@ theorem coreEnds {α : Type} : (r : TRes α) → CoreEnds r
   | .error .revert => .reverts
   | .error (.revertWith d) => .revertsWith d
   | .error .panic => .panics
-  | .error .diverge => .outOfFuel
+  | .error .diverge => .diverges
   | .error .exhausted => .exhausted
 
 /-- **Progress of the core run**: a (necessarily well-typed) program run
