@@ -1521,3 +1521,37 @@ one-image target result; general recursive compiler selection, arbitrary
 source body transport, admission/profile provenance and a complete frozen V3
 producer remain open. No failed state, rollback, world relation or physical
 EVM execution is inferred.
+
+### Arbitrary-count scalar family and distinct export
+
+`RuntimeFrameV3ScalarDescent.reached` derives the actual zero child and saved
+parent pairs from the initial represented frame, runtime-pointer value and
+existing capacity bounds. Bottom initialization executes before descent.
+`RuntimeFrameV3ScalarReturn.endpoint` connects this witness to all-parent
+unwind and the finished source state for any count satisfying those bounds.
+Its runtime image has neither a count nor a quotation-index parameter. The
+source equation explicitly retains exhaustion at insufficient quotation
+indices; it is not an unconditional source/target result equivalence.
+
+`RuntimeFrameV3ScalarCallReturn.endpoint` starts from the source caller's
+representation, evaluates the actual native memory/scalar arguments, enters
+the private default result, executes that image and exports through the
+existing checked result-copy law. The private slot is physically distinct
+from the destination, with a separate proof of that distinction. The caller
+destination is also the input counter, so its final source update is
+value-preserving; this is not a changed-value destination client. Stack,
+reference identity, zero source-allocation growth, runtime cursor and the
+complete captured history are derived.
+
+The registered controls discharge every premise for counts zero through
+three using real initial allocator ownership and populated heap objects. The
+same fixed image yields complete ordered twenty-word snapshots, including
+active and inactive parent payload cells. Alias, private-result, allocator
+and runtime cursor, source-exhaustion and target halt controls retain their
+positive baselines. Older source, frame and horizon snapshots are unchanged.
+
+This implements the specific typed scalar countdown family. The image is
+manually assembled from checked components, not selected by a general public
+recursive compiler. General argument/return shapes, original approved-domain
+provenance, native partial-return traces and the complete V3 producer remain
+open. It supplies no failed state, byte/world rollback or physical EVM test.
