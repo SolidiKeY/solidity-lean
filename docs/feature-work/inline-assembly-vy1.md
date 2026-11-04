@@ -1883,3 +1883,30 @@ Per-file diagnostics report zero errors; focused Lean, affected core build,
 generated-root and layer checks pass. Eleven scoped axiom reports use only
 Lean standard axioms. Raw failed standard automation remains separate from
 passing concrete proofs; no statements, outcomes or checking limits changed.
+
+### Concrete P16 loop-adapter horizons
+
+`RawAdapterLoopHorizon.body_agrees` proves exact all-fuel driver equality
+between the actual `RawSourceAdapter.body` factory instance and
+`RawControlledWhile.run`, including errors and whole raw frames.
+`successor` and `extension` transport concrete completed-frame stability
+to the genuine typed `RawSourceAdapterLoop.loop` instance, preserving its
+existing normal-flow mapping. The real intrinsic body certificate and
+non-timeout premise remain explicit; no coherence, projection or caller-supplied
+driver equality is assumed. This does not infer raw stability for arbitrary
+adapters from their clean-Source `correct` field.
+Nine controls inhabit actual P16 adapter types and exercise break/continue/
+normal exits, raw 2/257 retention, larger-horizon whole-frame equality,
+all-fuel driver agreement, early timeout and a false guard skipping the body.
+The adapter's actual all-fuel Source correctness remains separately clean-start.
+The initial alias rewrite failure is retained; exposing the identical concrete
+adapter before rewriting fixes it without changing any statement/outcome/limit.
+No Source/ExtCall/evaluator/layout/observation changes, general admission,
+dirty Source readback or compiler adequacy are introduced.
+Full VY1/general P16 and final lane gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Per-file diagnostics report zero errors; focused Lean, affected core build,
+generated-root and layer checks pass. Twelve scoped axiom reports use only
+Lean standard axioms. Failed standard automation and the corrected concrete
+alias rewrite remain raw evidence; statements, outcomes and limits unchanged.

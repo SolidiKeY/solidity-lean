@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(RawAdapterLoopHorizon|Checks\.RawAdapterLoopHorizon)$/, // Concrete body-factory P16 loop agreement and full-frame horizons.
   /^Solidity\.Yul\.(RawSequenceWhileHorizon|Checks\.RawSequenceWhileHorizon)$/, // Concrete sequence-bodied while full-frame horizons.
   /^Solidity\.Yul\.(RawControlledWhileHorizon|RawReadOnlyViews|Checks\.RawControlledWhileHorizon)$/, // Concrete controlled-while full-frame horizons and read-view laws.
   /^Solidity\.Yul\.(RawControlSequenceHorizon|Checks\.RawControlSequenceHorizon)$/, // Concrete raw control-sequence/block whole-frame horizons.
