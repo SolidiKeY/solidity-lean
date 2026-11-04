@@ -26,7 +26,7 @@ run_cmd do
           withOptions (fun opts => (opts.setBool `pp.proofs true).setBool `pp.universes true) do
             return toString (← Lean.Meta.ppExpr info.type)
         let kind := match info with
-          | .axiomInfo _ => "axiom"
+          | .axiomInfo _ => r"axiom"
           | .defnInfo _ => "definition"
           | .thmInfo _ => "theorem"
           | .opaqueInfo _ => "opaque"

@@ -4,7 +4,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/Audit.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.Audit",
-      "sha256": "73b67838a5a68f93b2d2f0aa8e11bc1a6db80a512de15fc694c06ac87e7deb60",
+      "sha256": "e9418188183345927907f2ca3cae3c2d79816c481f14db0720664bc782061a9c",
       "imports": [
         "Lean",
         "Solidity.Frontend.NumericLiteralProofs.Controls",
@@ -4022,7 +4022,7 @@
     "tests/sol-numeric-literals/differential.py": "ef33debf53f06195584e311e8e81d4c25f0e78f098c4304e8646b7797695e6b7",
     "tests/sol-numeric-literals/runtime/check.py": "083c06857558f97d27478f623dda7970133f68e713bc2804b0a4092a574795f5",
     "tests/sol-numeric-literals/runtime/timed.py": "97b7287568f22268fcec1b77847bc088d9deca3307509bebefb35071eb1db665",
-    "tests/sol-numeric-literals/runtime/bin/lake": "4f46d9689ba72fc4e5b2660404d498c18020a05cac9db2cb18917cd43c9618aa",
+    "tests/sol-numeric-literals/runtime/bin/lake": "0181726d1b58265986df4c26a9b2c853a183736c4456b8f3c2255572bbab2394",
     "tests/sol-numeric-literals/runtime/lakefile.toml": "3060ca5e6636a012763981beeaa15bea5421bf1cbb99ed87d8ed2ccd3639b3cf"
   },
   "audit_boundary": "Every imported declaration in owned proof modules, including compiler-generated helpers; Audit has no persistent declarations (run_cmd uses withoutModifyingEnv).",

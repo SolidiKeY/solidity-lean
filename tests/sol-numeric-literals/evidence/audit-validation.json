@@ -1,6 +1,6 @@
 {
   "proof_sources": {
-    "Solidity/Frontend/NumericLiteralProofs/Audit.lean": "73b67838a5a68f93b2d2f0aa8e11bc1a6db80a512de15fc694c06ac87e7deb60",
+    "Solidity/Frontend/NumericLiteralProofs/Audit.lean": "e9418188183345927907f2ca3cae3c2d79816c481f14db0720664bc782061a9c",
     "Solidity/Frontend/NumericLiteralProofs/Backfill.lean": "6450b923ee3b63bce91093ce103696021a3ab4232ec85ad3b1b9204ae18bd2ae",
     "Solidity/Frontend/NumericLiteralProofs/Classification.lean": "d12b4ffda0a4f6479da55c81213ad17f6a613e88e6d8b19a8568b7890f297b33",
     "Solidity/Frontend/NumericLiteralProofs/Controls.lean": "b9280b8ca14d6432c9269dab3f9ea0afb30c01bc18af4125ef99fee00c7b551a",
@@ -50,9 +50,9 @@
     "Solidity/Frontend/NumericLiteralProofs/Audit.lean"
   ],
   "exit": 0,
-  "seconds": 0.59,
+  "seconds": 19.609,
   "container_memory_peak_bytes": 4108398592,
-  "minimum_parent_headroom_bytes": 15505997824,
+  "minimum_parent_headroom_bytes": 14938468352,
   "resource_stop": false,
   "log": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/audit-validation.log",
   "container": "sol-nl-proof-worker",
