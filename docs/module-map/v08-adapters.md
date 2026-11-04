@@ -280,6 +280,7 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAddControls.lean` | Direct combined-law clients, maximum-fit/overflow controls, exact panic bytes and ordered native observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiply.lean` | Actual Source word/BitVec encoding and unchecked uint256 multiplication observation against fetched MUL. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiplyControls.lean` | Direct Source/word/driver/X clients, modular overflow and negative encoding controls, complete ordered native states. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SourceWordBytes.lean` | Exact Source/backend32-byte observations, typed readback, pure pinned reader and emitted PUSH32 transport. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 
