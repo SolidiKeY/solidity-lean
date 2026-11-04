@@ -1242,3 +1242,28 @@ Independent read-only finder/skeptic reviews have no remaining findings; the
 existing literal-post citation was confirmed against its committed signature.
 Both modules have zero diagnostic errors; thirteen scoped axiom reports use
 only Lean standard axioms. Final lane validation remains open.
+
+
+### Checked uint8 and comparison congruence
+
+`LocalU8Representation.value_eq`, `expression`, `comparison`, and
+`conditional` prove congruence for the existing checked-u8 read/assign/add,
+comparison and Boolean-selection runners. Numeric results and errors are
+exactly equal within the same pipeline; the local-frame relation allows only
+complete-word-equal Boolean constructor differences and keeps all other values
+identical. Legacy right-first and via-IR left-first operand evaluation retain
+their actual pair-fuel offset, partial states and full world relation.
+Eleven mixed-frame controls cover related inputs, legacy 3 versus via-IR 4,
+pipeline-specific writes retained on timeout, checked arithmetic panic,
+conditional selection, distinct clean projections, unsupported subtraction
+certificates and retained raw Boolean flags. An intrinsic arithmetic certificate
+is inhabited. Fixed observations and proof budgets are unchanged; explicit
+step/residue reductions discharge the numeric controls.
+No unchecked or cross-pipeline equality is claimed. Existing Source agreement
+still requires its original checked-frame premise; Source/runtime/readback/
+admission are unchanged, and general P16/full-lane validation remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero diagnostic errors; fifteen scoped axiom reports use
+only Lean standard axioms. Failed reduction attempts are retained in checkpoint
+evidence; explicit step/residue proofs keep the original statements and budgets.

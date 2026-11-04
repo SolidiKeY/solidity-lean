@@ -2456,6 +2456,7 @@ import Solidity.Yul.Checks.LocalProjection
 import Solidity.Yul.Checks.LocalState
 import Solidity.Yul.Checks.LocalU8Compare
 import Solidity.Yul.Checks.LocalU8Expr
+import Solidity.Yul.Checks.LocalU8Representation
 import Solidity.Yul.Checks.LocalValues
 import Solidity.Yul.Checks.LocalWordView
 import Solidity.Yul.Checks.Occurrences
@@ -2685,6 +2686,7 @@ import Solidity.Yul.LocalState
 import Solidity.Yul.LocalU8Agreement
 import Solidity.Yul.LocalU8Compare
 import Solidity.Yul.LocalU8Expr
+import Solidity.Yul.LocalU8Representation
 import Solidity.Yul.LocalU8Source
 import Solidity.Yul.LocalValues
 import Solidity.Yul.LocalWordView

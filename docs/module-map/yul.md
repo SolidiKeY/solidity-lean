@@ -105,3 +105,5 @@
 | `Yul/LocalDefaultControlRepresentation.lean`, `Yul/Checks/LocalDefaultControlRepresentation.lean` | All-fuel independently indexed default branch/loop congruence with typed failure-prefix controls. |
 
 | `Yul/LocalDefaultPostRepresentation.lean`, `Yul/Checks/LocalDefaultPostRepresentation.lean` | All-fuel default-scope post and omitted-guard congruence with post-effect/continuation controls. |
+
+| `Yul/LocalU8Representation.lean`, `Yul/Checks/LocalU8Representation.lean` | Exact checked-u8 result/error congruence and comparison/Boolean composition, retaining per-pipeline operand order. |
