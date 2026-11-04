@@ -196,11 +196,11 @@ def execute(args):
             require(digest(source) == expected, 'input changed after collection')
         syntax = syntax_path.read_bytes()
         require(hashlib.sha256(syntax).hexdigest() == report['bytes']['syntaxSha256'], 'syntax copy changed')
-        json.loads(syntax, object_pairs_hook=unique_object, parse_constant=forbidden_constant)
+        json.loads(syntax.decode('utf-8'), object_pairs_hook=unique_object, parse_constant=forbidden_constant)
         del syntax
         raw = partial.read_bytes()
         require(hashlib.sha256(raw).hexdigest() == report['bytes']['compactSha256'], 'compact output changed')
-        json.loads(raw, object_pairs_hook=unique_object, parse_constant=forbidden_constant)
+        json.loads(raw.decode('utf-8'), object_pairs_hook=unique_object, parse_constant=forbidden_constant)
         del raw
         tool_after = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
         require(tool_before == tool_after, 'tool source changed during collection')

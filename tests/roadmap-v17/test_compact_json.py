@@ -73,6 +73,12 @@ class Controls(unittest.TestCase):
         self.run_record(b'[ 1.2300e+04 , -0 , 5E-2 ]')
         self.assertEqual((self.out / 'compact.json').read_bytes(), b'[1.2300e+04,-0,5E-2]')
 
+    def test_utf16_and_utf32_rejected(self):
+        for encoding in ['utf-16', 'utf-32']:
+            # Different output directories retain each failure independently.
+            self.out = self.root / encoding
+            self.assert_rejected('{}' .encode(encoding))
+
     def test_wrong_pin(self):
         self.assert_rejected(b'{"revision":"old"}', sha256='0' * 64)
 
