@@ -145,3 +145,5 @@
 | `Yul/Compilation/NumericExecution{,Controls}.lean` | General success transport for unchanged ten-operator NumericMachine selection plus stack operations; real lowerer/original closed-Yul compiler consumers discharge scalar-run premises, preserve symbolic caller/nonstack fields. Actual21-instruction/all-ten-operator and scoped-update controls; no native/byte/PC/gas/capacity/G24 closure. |
 
 | `Yul/Compilation/NormalNumericTransport{,Controls}.lean` | Whole numeric normal branch/sequence execution using existing compiler derivations and selector; same-horizon closed-Yul result, symbolic caller/newer-prefix preservation, high-bit/shifted-slot/refusal controls. Capacity, native execution and Source/G24 adequacy remain separate. |
+
+| `Yul/Compilation/WordExecution{,Controls}.lean` | General unchanged WordMachine success transport, six additional word-step laws and real expression/statement source/compiler consumers; combined dirty-word, dependent-write, symbolic-tail and DUP16 controls. Native/resource and Source/G24 adequacy remain separate. |

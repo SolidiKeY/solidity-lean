@@ -2654,6 +2654,8 @@ import Solidity.Yul.Compilation.UnaryBranchControls
 import Solidity.Yul.Compilation.UnaryMachine
 import Solidity.Yul.Compilation.UnaryMachineControls
 import Solidity.Yul.Compilation.WordControl
+import Solidity.Yul.Compilation.WordExecution
+import Solidity.Yul.Compilation.WordExecutionControls
 import Solidity.Yul.Compilation.WordExpressions
 import Solidity.Yul.Compilation.WordMachine
 import Solidity.Yul.Compilation.WordVisitorShapes
