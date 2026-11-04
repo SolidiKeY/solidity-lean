@@ -2,10 +2,11 @@
 """Run serial checks in the verified hard Docker envelope; retain exact outcomes."""
 import json, os, pathlib, subprocess, time
 root=pathlib.Path(__file__).resolve().parent
-out=root/'evidence'; out.mkdir(exist_ok=True)
+out=pathlib.Path(os.environ.get('GATE_OUTPUT', str(root/'evidence'))); out.mkdir(parents=True, exist_ok=True)
 producer='/workspace/monetary-producer-input'
 config='/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml'
 commands=[
+ ('h35-packet', 'lake build Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins; lake env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Laws.setup.json Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean; lake env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Controls.setup.json Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean; lake env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.setup.json Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean'),
  ('mcp-diagnostics', "export LEAN_MCP_SERVER_CMD='/workspace/solidity-lean/.venv/bin/python -m lean_lsp_mcp --lean-project-path /workspace/monetary-producer-input'; export LEAN_MCP_START_WAIT=45 LEAN_MCP_TIMEOUT=90 LEAN_LSP_MAX_OPEN_FILES=1; trap 'scripts/coord-tools/lean-mcp stop' EXIT; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean"),
  ('keysort-explicit-root', 'lake env lean --tstack=131072 -j1 --setup .lake/build/ir/SolkeyCheck.setup.json SolkeyCheck.lean; lake exe solkeycheck'),
  ('keysort-serial-rebuild', f'rm -f .lake/build/lib/lean/SolkeyCheck.trace .lake/build/lib/lean/SolkeyCheck.olean; lake --no-cache -v -f {config} build solkeycheck; lake -f {config} exe solkeycheck'),

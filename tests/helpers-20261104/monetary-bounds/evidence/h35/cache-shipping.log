@@ -1,0 +1,3 @@
+COMMAND: bash scripts/coord-tools/ship-cache.sh /workspace/monetary-producer-input
+EXIT: 2
+ship-cache: /workspace/monetary-producer-input is at 046292ee61fc, origin/master is 89373e34cdfd; ship master only (SHIP_ALLOW_HEAD=1 overrides)
