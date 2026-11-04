@@ -438,3 +438,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/G19/AssignmentWhileContinueControls.lean` | Inhabited continue/retest and donor-observation controls with reused compiled loop witnesses. |
 | `Backend/StructuredFlow/WhileContinueCompiler.lean` | Actual emitter and compiler connection for the existing V07-related continue/retest loop. |
 | `Backend/StructuredFlow/WhileContinueCompilerControls.lean` | Inhabited Source/compiler join, semantic guard mutation and corrupted-entry simulation controls. |
+| `Lowering/G19/AssignmentForContinue.lean` | Actual mapped for/continue/post proof; full structural value audit remains incomplete. |
+| `Lowering/G19/AssignmentForContinueControls.lean` | Inhabited post-after-continue and fixed-resource omitted-post Source controls. |
