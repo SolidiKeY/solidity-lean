@@ -100,3 +100,5 @@
 | `Lowering/V07/LessThanControls.lean` | Inhabited boundaries, alias/context/frame and operand-order controls. |
 | `Lowering/V07/NumericComparisons.lean` | All six numeric comparison clauses with actual Source transport, ordered captures and panic-pass identity. |
 | `Lowering/V07/NumericComparisonControls.lean` | Inhabited operators, signed/width boundaries, alias/context and ordered observation controls. |
+| `Lowering/V07/BooleanComparisons.lean` | Boolean equality/inequality transport with heterogeneous caller and capture-context frames. |
+| `Lowering/V07/BooleanComparisonControls.lean` | Inhabited mixed-reference, alias/context, effect-order and wrong-binding controls. |

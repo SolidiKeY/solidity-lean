@@ -2128,6 +2128,8 @@ import Solidity.Lowering.V07.AssignmentControls
 import Solidity.Lowering.V07.AssignmentOperands
 import Solidity.Lowering.V07.AssignmentOrder
 import Solidity.Lowering.V07.AssignmentSubtraction
+import Solidity.Lowering.V07.BooleanComparisonControls
+import Solidity.Lowering.V07.BooleanComparisons
 import Solidity.Lowering.V07.ConditionLoopControl
 import Solidity.Lowering.V07.ConditionalAssignments
 import Solidity.Lowering.V07.ConditionalControls
