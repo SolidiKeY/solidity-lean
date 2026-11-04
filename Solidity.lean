@@ -2471,6 +2471,8 @@ import Solidity.Yul.Adapters.P6ResidualSequence
 import Solidity.Yul.Adapters.P6ResidualSequenceControls
 import Solidity.Yul.Adapters.P6RetainedArrayHeader
 import Solidity.Yul.Adapters.P6RetainedArrayHeaderControls
+import Solidity.Yul.Adapters.P6RetainedByteHeader
+import Solidity.Yul.Adapters.P6RetainedByteHeaderControls
 import Solidity.Yul.Adapters.P6RetainedHeapWordStore
 import Solidity.Yul.Adapters.P6RetainedHeapWordStoreControls
 import Solidity.Yul.Adapters.P6RetainedRegionCopy

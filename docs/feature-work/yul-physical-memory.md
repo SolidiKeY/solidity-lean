@@ -1329,3 +1329,14 @@ of length `3` still reaches a frame, while Source-image preparation returns
 Source/Yul refusal nor a new high-level length-assignment syntax; target
 allocation execution, general dirty-owned adequacy and compiler closure remain
 separate.
+
+`P6RetainedByteHeader.transport` connects actual P6/MSTORE length-header writes
+to retained bytes/string preparation and Source `heapPut`. Packed payload is
+read from that same frame, retaining original capacity/history and deriving
+whole-map reconstruction, Source writeback, owner safety and reserved bytes.
+Separate control instances grow bytes to four and string to 64 bytes; the
+latter exposes 31 old padding bytes after 33 characters. The bounded frame's
+owned and reserved agreement is proved from real image bounds. Length `65`
+executes a physical store but exceeds the original string allocation and gives
+preparation `None`. No sequential combination, language length syntax, dirty
+cleaning policy or target allocator/compiler adequacy is inferred.
