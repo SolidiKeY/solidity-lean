@@ -3290,6 +3290,8 @@ import Solidity.Yul.Views.RecursiveStorageEquations
 import Solidity.Yul.Views.RecursiveStorageExtent
 import Solidity.Yul.Views.RecursiveStorageSpec
 import Solidity.Yul.Views.RecursiveStorageTrace
+import Solidity.Yul.Views.ReferenceDelete
+import Solidity.Yul.Views.ReferenceDeleteControls
 import Solidity.Yul.Views.Regions
 import Solidity.Yul.Views.RepeatedCellWrites
 import Solidity.Yul.Views.RepeatedCellWritesControls

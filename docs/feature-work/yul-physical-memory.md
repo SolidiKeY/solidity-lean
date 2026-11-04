@@ -941,3 +941,15 @@ history. Controls cover scalar/byte deletion, universal integer defaults,
 unchanged siblings/padding, timeout, type error and Panic0x32. A reference-field
 deletion is separately observed to allocate and redirect the pointer; the scalar
 adapter supplies no physical theorem for that allocating branch.
+
+`ReferenceDelete` supplies the allocating bytes/string branch for a struct field
+from a computed initial placement. Actual deletion first allocates the empty
+default, then writes its new reference. Existing typed images are forwarded to
+the allocated heap; the new pointer word and all post-write image reads derive
+from the same incremental allocation map. Public results include exact checked
+allocation preparation, old/new coordinates, free-pointer growth, complete map
+reconstruction and whole Source writeback against the allocated snapshot.
+Controls keep a sibling alias and old data/padding, and bind allocation before
+a later field-type error to its own complete map and Source writeback. Previously
+shrunk allocation-history extension, other allocating defaults and target
+allocator/compiler correspondence remain open.
