@@ -1,23 +1,11 @@
-# TF-gate isolated target controls
+# TF-gate real-script fixture
 
-Run `PYTHONDONTWRITEBYTECODE=1 python3 tests/terra-20261103/gate/test_targets.py`.
-The production gate and Git are real; Lake is a private recording executable.
-PATH contains only explicit utility links and private Lake/elan mocks. An elan
-poison marker must remain absent. No Lean process, toolchain download, host elan,
-host cache or network is used. Each populated repository has independent commits,
-source modules, importers, Scratch and example/corpus leaves, including paths with
-spaces. Assertions compare the complete ordered Lake argument vector and saved
-receipt, thread count, status and targets line; no target subset is accepted.
+Run `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/terra-20261103/gate -p test_cases.py -v` with Node on PATH. All 15 historical names are preserved exactly. `test_targets.py` retains eight additional target/isolation controls. Git, Bash, Node and audit scripts are real; only Lake is a private recording/failing backend. No Lean, host elan, host cache, network or downloads run. HOME/ELAN/XDG/config are private; inherited Git and shell-startup overrides are removed. Every gate row is checked against exact stdout, five-field TSV and complete mocked/wrapped invocation vectors.
 
-Cases: tracked and untracked Scratch-only; mixed production/Scratch with transitive
-importing consumers; deletion retaining real importers; untracked production;
-tracked ignored production; core-to-example policy; propagated backend failure.
-Original gate must fail Scratch controls; corrected gate must pass all eight.
-Set GATE_TOOL to an archived original gate for the RED control.
+The original usage, per-file paths, relative logs, HEAD, changed/reverse/deleted/renamed/diverged/root/untracked/Scratch/failure controls remain. Per-file checkout and relative-log paths exercise spaces. Integration checkouts deliberately contain no spaces: protected production JS URL/path defects are retained separately, not mistaken for audit results. Direct changed-root selection is preserved without adding the generated root to every module's importer closure; non-root closure remains H21's bounded policy.
 
-The coordinator's exact frozen fixture commit 9cc85b14fa3f611e183379c257b10b19e1aa5325
-is absent locally and origin rejects that SHA as not its ref. This new test file
-is additional focused evidence, NOT a replacement for its frozen accept.py.
-No frozen assertions or historical RED logs were modified. Original committed-item
-acceptance and repair of that exact fixture remain pending receipt of the packet.
-No generated roots or module-map edits are needed for these script-only changes.
+Checkpoint/full controls populate real trust inventory, roots/Lake libraries, a standard axiom pin, a one-function parameterized Solidity/AST/TestSuite catalogue and report, real generated parity/corpus files, and a genuine automatic proof-shaped audit input. Each real audit first passes its populated positive control. Layer, trust, orphan, root, documentation, pin inventory, TestSuite report and automatic-classification negatives then require their specific diagnostics; infrastructure exceptions are rejected. Corpus and default-build refusals are explicit mock-backend failures. No mocked build establishes kernel validity, corpus semantics or EVM execution. The TestSuite catalogue uses a parameter to avoid the separately recorded protected zero-argument generated-pin quotation mismatch; the pin audit still has a real positive and shrinking-inventory negative.
+
+Copied tool scripts are untracked fixture harness inputs; tracked populated Lean/catalogue/documentation inputs are deliberate audit subjects. No checker source, default, allowlist or expectation is patched in the disposable repositories. Optional TF_GATE_EVIDENCE writes full per-case audit/gate/receipt JSONL outside the checkout for review.
+
+Frozen accept.py is byte-identical to the transferred historical packet, whose archive SHA256 is d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba. Its historical source pin is incompatible with the corrected tool, so its exit 1 is retained; direct suite success is separate from committed-item acceptance pending a coordinator-reviewed regenerated contract (TF-CONTRACT-02). No source-pin assertion was removed or changed, and original RED/reviews remain outside this tree. The additional source test_targets.py is also explicitly part of the pending artifact-path review. Historical failureCount remains 2.
