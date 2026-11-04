@@ -1564,3 +1564,10 @@ open. It supplies no failed state, byte/world rollback or physical EVM test.
 `RuntimeFrameV3DisjointScalarEntry` executes the checked scalar argument and memory-reference entry into separate callee cells. `RuntimeFrameV3DisjointScalarReturn.endpoint` connects that entry, the countdown image and actual private-result export to the original native recursive source call. The caller destination is unrestricted initially. The populated control changes destination cell four from 77 to 3 by copying private cell seven, retaining both aliases, protected scalar two, old heap, allocator and stack in a complete 22-word observation. The actual public scalar-value selector is checked; general recursive compiler selection and approved-profile provenance remain open.
 
 The out-of-bounds argument control proves actual bare-revert prefix absorption, including source failure before depth-zero exhaustion. It supplies no failed state, rollback, payload or world-effect conclusion. These are scalar-family components, not a general recursive producer instance.
+
+
+### Executable scalar-family selection
+
+`RuntimeFrameV3ScalarEmitter.compile` selects the published value compiler and checks disjoint static caller/callee/control geometry. Its result contains only that checked value certificate and geometry, with no target-run premise. `selected_value` links every successful root selection to the exact public value-compiler result. Runtime cursor, actual source evaluation and payload capacity remain explicit in `RuntimeFrameV3ScalarEmitterSound.endpoint`, which derives the complete disjoint caller representation and actual execution. The original populated 22-word result and argument-failure prefix are witnessed through the selected code; overlapping layouts are refused.
+
+This is an executable emitter for the fixed scalar countdown family. It does not inspect arbitrary recursive source syntax, replace the general recursive compiler, establish approved-domain provenance or inhabit the complete frozen V3 contract.
