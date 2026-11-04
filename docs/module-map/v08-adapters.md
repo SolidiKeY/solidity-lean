@@ -506,3 +506,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/InitializedChain` | Finite initialized-return extensions and whole-unit call/composition proofs. |
 | `Source/Progress/InitializedChainControls` | Whole-unit initialized relay, caller/panic consumers and coverage refusals. |
 
+
+| `Backend/FailurePaths/FramedEmission.lean` | Actual checked payload emission preserves disjoint physical word frames; Source reason selection/readback consumer. |
+| `Backend/FailurePaths/FramedEmissionControls.lean` | Inhabited reason/Boolean return frames, adjacent byte boundaries and overlapping-emission refusal. |

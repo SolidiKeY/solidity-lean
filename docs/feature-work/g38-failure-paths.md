@@ -219,3 +219,39 @@ remain explicit boundaries. Neither weak `callback_load` nor the no-callback
 `callback_then_reset` law is used. Inhabited and refusal controls execute
 nonempty caller prefixes and both Source callback pipelines. Independent
 finder and skeptic reviews found no confirmed issue.
+
+
+## Framed payload emission
+
+`FramedEmission` consumes the published physical byte-store producer.
+`preserve_bytes` extends its untouched-word law to an entire actual payload
+write. Its explicit sufficient separation premise puts the emitted byte interval
+before or after every live complete word. It relates the reached bytes to the
+same numeric memory observations; it does not refine an overlapping abstract
+word store.
+
+`emitter` derives the checked emitted program's reached slice, exact terminal
+outcome, saved slice stack and word frame. No successful execution or final
+frame is supplied as a premise. `compiled_reason` joins this with existing
+public literal-statement selection, actual Source failure and decoder readback
+from that same reached slice. The exact Error packet is locally generalized
+with its defining equality retained to avoid eager byte-prefix normalization;
+the statement and default proof limits are unchanged.
+
+`FramedEmissionControls` inhabits a nonempty represented word and saved stack.
+Both Source pipelines execute the reason-failure consumer, including an
+allocated reference return slot. Writes immediately before and after the word
+preserve it. A checked overlapping emission still reverts but invalidates the
+old word frame, so separation is not silently waived. The Boolean-return client
+also uses the existing public selector, actual hidden-slot overwrite, `retVals`,
+`encodeVals`, successful checked emission and reached word frame. Printed axioms
+are standard only. Independent finder and skeptic reviews found no confirmed
+defect.
+
+These are component-local byte-emitter and frame results. `WordFrame` alone
+supplies no Source/world or stack correspondence. General runtime encoding,
+internal-frame payload/panic/exhaustion transport, P7 nonempty rollback, gas,
+allocation and full bytecode/EVM adequacy remain separate. The existing emitter,
+compiler selections, refusals and overlapping-store counterexamples are
+unchanged. Focused validation target:
+`Solidity.Backend.FailurePaths.FramedEmissionControls`.
