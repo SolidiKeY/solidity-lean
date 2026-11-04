@@ -1151,3 +1151,20 @@ is truncated to one byte. Controls distinguish high/low byte order, retain the
 other 31 bytes and sibling cells/padding, and reject byte32. Clean Source fields
 and dirty readback policy remain unchanged. The compatible writeback helper
 now reuses the existing byte-memory write/read identity proof.
+
+
+`RawPhysicalAnyImage.encode_decode` extends the raw-cell roundtrip to every
+byte map: decode all cells and reencode over that same map yields the identical
+whole map, without an initial canonical/encoded-image premise. Exact 32-byte
+codecs supply the inverse for each published raw Word cell. This is not a
+canonical Source-value decoder or a dirty-storage policy, and capture still
+populates overlays beside unchanged clean locals/world.
+
+`copy_transport` applies this result to any actual bounded P6 snapshot copy,
+including overlap and spans crossing cell boundaries. The reached inventory
+room is derived from actual copy high-water monotonicity; complete reached-frame
+identity and metadata are preserved by subsequent writeback. Empty spans retain
+the published zero-length behavior. Controls copy 33 bytes from offset 33 to 34 across the
+bool/u8 boundary, retain exact resulting raw words and padding, and distinguish
+snapshot reads from overwritten-source chronology. Native MCOPY/compiler,
+allocation and general dirty Source readback adequacy remain separate.
