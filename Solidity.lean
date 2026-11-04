@@ -2425,6 +2425,8 @@ import Solidity.Yul.Adapters.P6CopySource
 import Solidity.Yul.Adapters.P6CopySourceControls
 import Solidity.Yul.Adapters.P6HistoryHash
 import Solidity.Yul.Adapters.P6HistoryHashControls
+import Solidity.Yul.Adapters.P6HistoryHashRef
+import Solidity.Yul.Adapters.P6HistoryHashRefControls
 import Solidity.Yul.Adapters.P6InputControls
 import Solidity.Yul.Adapters.P6Inputs
 import Solidity.Yul.Adapters.P6Memory

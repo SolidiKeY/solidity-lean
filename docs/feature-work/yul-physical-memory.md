@@ -418,6 +418,17 @@ at an empty-history boundary and hash a failed nonempty history's retained
 ranges. Finite digest inequalities do not assert injectivity; the micro-step
 does not establish gas or whole-frame memory-expansion accounting.
 
+`P6HistoryHashRef` uses actual `Source.EM.sub` with a typed byte-reference local
+and the real hash expression. Success returns child locals and restores the
+entire caller state; the actual zero-horizon error restores caller locals too.
+The query's current-view premise is derived from preceding synchronization in
+`completed_hashAt`. A concrete nonempty owned-copy history reaches its exact
+changed Source state, hashes the unchanged byte sibling `[7,0,255]`, and retains
+the caller's changed nominal aliases. Kernel proofs construct the history result,
+query view, Source evaluation and target KECCAK step; no successful preparation
+or final-state law is an input. This does not claim that the hashed payload
+changed, nor prove reference formation, escape capture or callInternal adequacy.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
