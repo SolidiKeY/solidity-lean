@@ -1253,3 +1253,14 @@ The synthetic input-dependent control distinguishes those two snapshots.
 An independent empty-output fixture keeps output-only extent at six words while
 input access reaches eight. This is bounded physical accounting, not a claim
 about gas ordering, concrete invocation adequacy or allocation refinement.
+
+`HeapCallOutput.residual_unchanged` connects actual physical call-output/access
+operations to the computed complete ordinary Source heap inventory. Canonical
+owner preparation and unchanged object reads derive equality of the whole
+administrative Source state on writeback; the reached residual bytes are kept.
+Separation applies to the actual returned prefix, so an empty return may touch
+a requested output span covering objects without writing them. Controls use the
+existing six-object heap with shared children and preserve a nonzero unwritten
+tail. Placement/history, owner `MemOK`, profile support and physical bounds stay
+explicit. Object separation does not establish reserved-word safety, source
+operation admission, allocation provenance or concrete invocation adequacy.

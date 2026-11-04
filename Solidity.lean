@@ -2402,6 +2402,8 @@ import Solidity.Yul.Adapters.ComputedFrameHeap
 import Solidity.Yul.Adapters.ComputedFrameHeapControls
 import Solidity.Yul.Adapters.FrameHeap
 import Solidity.Yul.Adapters.FrameHeapControls
+import Solidity.Yul.Adapters.HeapCallOutput
+import Solidity.Yul.Adapters.HeapCallOutputControls
 import Solidity.Yul.Adapters.HeapWriteback
 import Solidity.Yul.Adapters.HeapWritebackControls
 import Solidity.Yul.Adapters.ImageIdentity
