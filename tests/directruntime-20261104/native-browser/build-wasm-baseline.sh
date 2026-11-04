@@ -32,11 +32,4 @@ common=(--rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000
  -v "$repository:$repository" -v "$work:/work"
  -v "$native:/native:ro" -v /workspace/.setup:/workspace/.setup:ro
  -v /sys/fs/cgroup:/task-outer-cgroup:ro -v /etc/ssl/certs/ca-certificates.crt:/run/system-ca.pem:ro -w "$repository")
-for step in gmp compact direct; do
- case "$step" in
- gmp) command=(bash tests/directruntime-20261104/native-browser/gmp-serial.sh);;
- compact) command=(bash web/tools/lean-wasm/build-compact-runtime.sh);;
- direct) command=(bash web/tools/lean-wasm/build-direct.sh);;
- esac
- docker run "${common[@]}" --name "native-browser-wasm-$step" -e "NATIVE_LEAN_PREFIX=$native" -e "LEAN_BROWSER_WORK=$work" -e LEAN_WASM_SOURCE=/work/lean4 "$image" python3 tests/directruntime-20261104/native-browser/bounded-command.py "docs/benchmarks/directruntime-2026-11-04/before/wasm-$attempt-$step-gate.json" "${command[@]}"
-done
+docker run "${common[@]}" --name "native-browser-wasm-$attempt" -e "NATIVE_BROWSER_WASM_ATTEMPT=$attempt" -e "NATIVE_LEAN_PREFIX=$native" -e "LEAN_BROWSER_WORK=$work" -e LEAN_WASM_SOURCE=/work/lean4 "$image" bash tests/directruntime-20261104/native-browser/wasm-inside.sh
