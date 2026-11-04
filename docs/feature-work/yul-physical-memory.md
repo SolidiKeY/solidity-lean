@@ -902,3 +902,12 @@ heterogeneous objects witness the changed pointer, unchanged sibling alias,
 other objects and nonzero padding. The result uses `retainInitial`; extension
 through arbitrary prior allocation history, target opcode execution and general
 dirty assembly transport remain open.
+
+`StructWordRetained` transports an arbitrary existing `RetainedAllocation`
+through the same-shape field write and derives complete map reconstruction and
+whole Source writeback against its original allocation placement. The supplied
+history is preserved, rather than replaced with `retainInitial`. Controls chain
+an actual child-pointer update and boolean update, preserving the sibling alias,
+other objects, caller locals, padding and the successful prefix on a later
+wrong-type write. This extends allocation provenance for these writes, not
+arbitrary shape-changing histories or general dirty/target execution transport.

@@ -3458,6 +3458,8 @@ import Solidity.Yul.Views.StructConstructorFields
 import Solidity.Yul.Views.StructConstructorRun
 import Solidity.Yul.Views.StructWordHeap
 import Solidity.Yul.Views.StructWordHeapControls
+import Solidity.Yul.Views.StructWordRetained
+import Solidity.Yul.Views.StructWordRetainedControls
 import Solidity.Yul.Views.StructWordStore
 import Solidity.Yul.Views.StructWordStoreControls
 import Solidity.Yul.Views.TransientCellUpdate
