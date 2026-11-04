@@ -3263,6 +3263,8 @@ import Solidity.Yul.Views.RetainedAliasSequence
 import Solidity.Yul.Views.RetainedAliasSequenceControls
 import Solidity.Yul.Views.RetainedAliasSub
 import Solidity.Yul.Views.RetainedAliasSubControls
+import Solidity.Yul.Views.RetainedAliasSubSafety
+import Solidity.Yul.Views.RetainedAliasSubSafetyControls
 import Solidity.Yul.Views.RetainedAliasTransaction
 import Solidity.Yul.Views.RetainedAliasTransactionControls
 import Solidity.Yul.Views.RetainedAllocation

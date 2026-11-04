@@ -626,3 +626,12 @@ child rollback use this same result. Controls preserve the saved child1 caller
 alias against a callee overwrite to child0 and preserve the first completed map
 on late static refusal. Arbitrary caller-local safety, complete suspended-alias
 capture and external-call admission do not follow from this local-context law.
+
+`RetainedAliasSubSafety` closes caller memory safety for this concrete substituted
+sequence. Each alias/storage program preserves the heap on success and static
+refusal; sequencing and actual substitution preserve it too. Restored caller
+locals then transport the caller's own `MemOK` at every original heap typing,
+without a callee-local validity or empty-caller assumption. Controls derive the
+restored dormant child's actual `RefOK`/`pathTy`, cover both static positions and
+a differently sized caller context. This does not prove historical formation,
+reachability, complete suspended-alias capture or arbitrary call adequacy.
