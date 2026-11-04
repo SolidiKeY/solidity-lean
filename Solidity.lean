@@ -1656,6 +1656,8 @@ import Solidity.Lowering.G19.ConditionalSequence
 import Solidity.Lowering.G19.ConditionalSequenceControls
 import Solidity.Lowering.G19.ConditionalStatement
 import Solidity.Lowering.G19.ConditionalStatementControls
+import Solidity.Lowering.G19.ReturnPair
+import Solidity.Lowering.G19.ReturnPairControls
 import Solidity.Lowering.G19.ReturnTail
 import Solidity.Lowering.G19.ReturnTailControls
 import Solidity.Lowering.G19.WhileReturn

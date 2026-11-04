@@ -468,3 +468,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/StructuredFlow/ReturnTailCompiler.lean` | Actual compiler of mapped captured-return selection and a conditionally suppressed primitive caller assignment. |
 | `Backend/StructuredFlow/ReturnTailCompilerControls.lean` | Inhabited true/false write controls, eager/omitted suffix negatives and caller-condition/private-selector alias observation. |
+
+| `Lowering/G19/ReturnPair.lean` | V07-related captured return across two suffix assignments, rereading the second donor from reached state. |
+| `Lowering/G19/ReturnPairControls.lean` | Inhabited return/fallthrough, visible second write, stale donor and omitted-second controls. |
