@@ -1320,3 +1320,47 @@ Sixteen standard-only axiom reports are enforced. The freshly published master
 was adopted while preserving the old checkpoint; generated roots remain the
 only registration path. Full Y08.01/02, frontend, remaining backfill and joint
 validation remain open. No new external solc/native-EVM evidence is claimed.
+
+
+### Branch-bearing FOR components
+
+`SolidityBridge.Yul.StructuredFor.prepare` uses the existing `NormalControl`
+compiler for prelude, body and postlude and the existing pure expression
+compiler for the condition. Its `Prepared` packet is indexed by those original
+intrinsic AST components. Emission preserves branch/sequence blocks instead
+of inventing scalar code for them. The target-loop proof derives body/post
+runs from the actual `StructuredSource.structured` theorem and composes the
+whole finite loop, prelude and selected mathematical-machine result.
+
+`ForSource.source_loop` factors the earlier original-evaluator induction. Its
+two normal-source laws are explicit real premises, discharged concretely by
+`NormalFor`'s `Compiled.source` and `StructuredFor`'s `Derivation.source`.
+The prior `NormalFor.source_loop` statement and all other old code/proofs stay
+unchanged apart from that proof and import; old controls and horizons7/3/2
+are unchanged. The refactor was warned about, with bounded before/after
+per-file timings retained. No representation or proof budget changed.
+
+The new source proof still uses exact horizons `base + count + 1` for the loop
+and `base + count + 2` for the original FOR. Actual component horizons must
+be bounded by base; every pre-body guard must be nonzero and the final guard
+zero after the prelude and repeated post-after-body update. These finite-exit
+premises do not establish general termination or source divergence. Model
+transport retains actual selected realization and numeric represented stack.
+
+The kernel witness has branches in all three statement components, a flag
+with only bit200 set, three locals and a dirty accumulator. Full-word truth
+must take the pre/body branches; the post tests the updated counter, yielding
+dirty+1 after two turns at sufficient source horizon8. Separate source6 and
+whole-target proofs cover a false prelude branch and zero iterations. Arbitrary
+numeric callers and newer prefixes are preserved. Other controls retain
+source/compiler exhaustion,13/14access boundaries, early-flow refusal,
+underflow, oversized model success and finite source exhaustion of an unending
+case; the unending target is never evaluated.
+
+Independent read-only finder/skeptic reviews found no confirmed findings.
+Twelve new standard-only axiom reports are enforced. This closes the finite
+branch-component slice, not general root FOR dispatch, logical Solidity
+Source/G24/views/readback/functions, early-flow/divergence, native/expansion
+capacity/world correspondence, frontend admission or full joint validation.
+The published native host-writer counterexample and earlier partial gates
+remain open. No new external solc/native-EVM evidence is claimed.

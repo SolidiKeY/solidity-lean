@@ -86,3 +86,6 @@
 | `Bridge/SolidityBridge/Yul/NormalFor{,Controls}.lean` | Original intrinsic closed Yul normal FOR component preparation/emission; finite original evalLoop/for_ horizon proofs and matching structured/model execution, with explicit guards. Body-before-post dirty-word witness; not logical Source/G24 or native adequacy. |
 
 | `Bridge/SolidityBridge/Yul/DirectMemory{,Controls}.lean` | Direct MSTORE versus VY2 byte view/materializer; real typed-image framing and canonical hash composition; exact all-prefix local capacity. Native host-writer/global MemOK/Source-G24 closure remains open. |
+
+| `Bridge/SolidityBridge/Yul/ForSource.lean` | Shared original finite-loop source law with explicit normal body/post laws; concretely discharged by NormalFor and StructuredFor. No new source syntax or state. |
+| `Bridge/SolidityBridge/Yul/StructuredFor{,Controls}.lean` | Branch/sequence-aware original FOR component compilation, finite closed-source/structured/model proofs; actual high-only-word branch and zero-exit witnesses. Full G24/native/admission/early-flow/divergence remains open. |

@@ -1516,6 +1516,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/ForSource.lean:SolidityBridge.Yul.ForSource.source_loop": [
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.empty": [
   "Classical.choice",
   "Quot.sound",
@@ -2276,6 +2280,57 @@
   "propext"
  ],
  "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredFor.lean:SolidityBridge.Yul.StructuredFor.loop_structured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredFor.lean:SolidityBridge.Yul.StructuredFor.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredFor.lean:SolidityBridge.Yul.StructuredFor.prepare": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredFor.lean:SolidityBridge.Yul.StructuredFor.source": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredFor.lean:SolidityBridge.Yul.StructuredFor.source_loop": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredFor.lean:SolidityBridge.Yul.StructuredFor.structured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.model_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.source_eight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.target_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.zero_target": [
   "Classical.choice",
   "Quot.sound",
   "propext"

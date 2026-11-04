@@ -336,6 +336,7 @@ import SolidityBridge.Yul.DirectMemory
 import SolidityBridge.Yul.DirectMemoryControls
 import SolidityBridge.Yul.ExpSelection
 import SolidityBridge.Yul.ExpSelectionControls
+import SolidityBridge.Yul.ForSource
 import SolidityBridge.Yul.FrameCertificatesV2
 import SolidityBridge.Yul.FrameCertificatesV2Controls
 import SolidityBridge.Yul.JsonCompilation
@@ -381,6 +382,8 @@ import SolidityBridge.Yul.SignextendPlacement
 import SolidityBridge.Yul.SignextendPlacementControls
 import SolidityBridge.Yul.StackSelection
 import SolidityBridge.Yul.StackSelectionControls
+import SolidityBridge.Yul.StructuredFor
+import SolidityBridge.Yul.StructuredForControls
 import SolidityBridge.Yul.StructuredJson
 import SolidityBridge.Yul.StructuredJsonControls
 import SolidityBridge.Yul.StructuredSource
