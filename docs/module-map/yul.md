@@ -89,3 +89,5 @@
 | `Yul/LocalBoolControlRepresentation.lean`, `Yul/Checks/LocalBoolControlRepresentation.lean` | All-fuel exact-word six-form control congruence; skipped writes, dirty observations and retained timeout updates. |
 
 | `Yul/LocalBoolItemRepresentation.lean`, `Yul/Checks/LocalBoolItemRepresentation.lean` | All-fuel Boolean initializer/item exact-word congruence, retaining reached contexts and halt reasons. |
+
+| `Yul/LocalBoolScopeRepresentation.lean`, `Yul/Checks/LocalBoolScopeRepresentation.lean` | Exact-word suffix restoration, scope closure and conditional congruence with retained halt contexts/guard writes. |

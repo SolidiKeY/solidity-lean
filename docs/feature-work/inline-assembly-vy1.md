@@ -1076,3 +1076,23 @@ equivalence, admission/readback or general P16 embedding.
 Independent read-only finder/skeptic reviews found no issues. Both new files
 have zero diagnostic errors and passing per-file checks. Ten scoped axiom
 reports contain only Lean standard axioms; final lane gates remain open.
+
+
+### Scope and conditional exact-word congruence
+
+`LocalBoolScopeRepresentation` proves six universal laws: indexed suffix
+`drop`, dependent `cast`, existing `restore`, `close`, all-fuel `scope`
+and all-fuel `conditional`. Normal scope completion restores the certified
+suffix; halted results retain their actual reached context and exact reason.
+Conditional execution preserves guard effects before selecting the same branch
+from equal complete words. Related full locals and equal worlds are retained.
+Eight controls exercise normal prefix removal, halted extended contexts,
+skipped/taken branches, guard writes retained on a skipped branch, dirty normal
+projection refusal and zero fuel, using an inhabited conditional/declaration
+combination. These proof-only laws change no runtime or Source definitions.
+They do not establish clean? equivalence, admission/readback, general P16 or
+full-lane completion.
+
+Independent read-only finder/skeptic reviews found no issues. Both per-file
+diagnostics report zero errors; fourteen scoped axiom reports contain only
+Lean standard axioms. Full-lane and external compiler/EVM checks remain open.
