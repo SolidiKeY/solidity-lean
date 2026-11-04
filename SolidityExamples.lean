@@ -51,6 +51,7 @@ import Solidity.Examples.DecisionHashThreeKinds
 import Solidity.Examples.DecisionHashUpdates
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionHashesChecks
+import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionMemory
 import Solidity.Examples.DecisionQuantLedger
