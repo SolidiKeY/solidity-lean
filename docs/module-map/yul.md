@@ -96,3 +96,5 @@
 
 | `Bridge/SolidityBridge/Yul/StructuredUnique.lean` | Determinism of the unchanged finite StructuredExec relation, including branches/loops; no new target evaluator. |
 | `Bridge/SolidityBridge/Yul/ForReflection{,Controls}.lean` | Recover guard/count/exact locals from actual finite FOR target evidence, then original source completion from structured/selected model success; full frame/pending-zero and noncompletion/capacity controls. Not native/G24 adequacy. |
+
+| `Yul/Compilation/P20InterfaceV1{,Controls}.lean` | H26 closed-normal success interface: reuses real closed compiler certificates; uninstantiated G24 source/link/represented-success laws with genuine success and represented/payment-free witness fields. Not full P20 adequacy. |

@@ -31186,5 +31186,20 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1.lean:Solidity.Yul.Compilation.P20.InterfaceV1.PendingG24": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1.lean:Solidity.Yul.Compilation.P20.InterfaceV1.PendingRepresentedSuccess": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }
