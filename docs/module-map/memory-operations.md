@@ -248,3 +248,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SingletonCopy.lean` | Populated resolved singleton array emission, actual source heap identity, complete allocator preservation and V2/root-gap certificate construction. |
 | `Backend/MemoryCopies/SingletonCopyControls.lean` | Nonzero uint/Boolean payloads, dynamic length, fresh repeated copies, reserved gaps, old-data framing and capacity/code negative controls. |
 | `Backend/MemoryCopies/LoadedSingletonInterface.lean` | Existing primitive-expression compiler load followed by populated singleton allocation, with explicit successful/refused source evaluations. |
+| `Backend/MemoryCopies/LoadedSingleton.lean` | Existing expression-load simulation feeds singleton copy, exact storage-copy RHS/declaration equations, emitted declaration and checked bounds refusal. |
+| `Backend/MemoryCopies/LoadedSingletonControls.lean` | Actual represented storage array, arbitrary uint payloads and identical code for11/23, emitted SLOAD, complete declaration observations and bounds-revert controls. |
