@@ -291,3 +291,7 @@ used Lean/build/server/edits. All three new files have zero MCP errors and
 warnings. Source graph admission, physical byte refinement, gas, whole-lane
 adequacy and runtime size-failure selection remain separate. Checkpoint gates
 and scoped axiom reports are required before accepting this increment.
+
+## Typed traversal sibling freshness
+
+`TraversalInterface.lean` states freshness and strict sibling identity order for the actual `SVec.copyStToM` fold on arbitrary intrinsic reference values. It introduces no traversal, graph admission or shape filter. Signature precedes implementation; compiled storage-layout refinement remains open.
